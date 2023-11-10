@@ -24,6 +24,7 @@ import {
   getRuleForAlertTesting,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 /**
  * Specific _id to use for some of the tests. If the archiver changes and you see errors
@@ -36,14 +37,19 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless Saved query type rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(path);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(path);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });

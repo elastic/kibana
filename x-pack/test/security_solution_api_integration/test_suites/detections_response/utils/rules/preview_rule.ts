@@ -44,6 +44,7 @@ export const previewRule = async ({
   const response = await supertest
     .post(DETECTION_ENGINE_RULES_PREVIEW)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send(previewRequest)
     .expect(200);
   return response.body;

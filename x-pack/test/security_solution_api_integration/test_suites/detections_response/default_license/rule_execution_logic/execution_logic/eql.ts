@@ -38,23 +38,30 @@ import {
   previewRule,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless EQL type rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(path);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(path);
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
@@ -144,7 +151,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         },
         [ALERT_REASON]:
-          'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
+          'configuration event on suricata-zeek-sensor-toronto created high alert Alert Testing Query.',
         [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -235,7 +242,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         },
         [ALERT_REASON]:
-          'configuration event on suricata-zeek-sensor-toronto created high alert Signal Testing Query.',
+          'configuration event on suricata-zeek-sensor-toronto created high alert Alert Testing Query.',
         [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_WORKFLOW_STATUS]: 'open',
@@ -408,7 +415,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         },
         [ALERT_REASON]:
-          'anomoly event with process bro, by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+          'anomoly event with process bro, by root on zeek-sensor-amsterdam created high alert Alert Testing Query.',
         [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_GROUP_ID]: fullAlert[ALERT_GROUP_ID],
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
@@ -479,7 +486,7 @@ export default ({ getService }: FtrProviderContext) => {
         [ALERT_DEPTH]: 2,
         [ALERT_GROUP_ID]: source[ALERT_GROUP_ID],
         [ALERT_REASON]:
-          'event by root on zeek-sensor-amsterdam created high alert Signal Testing Query.',
+          'event by root on zeek-sensor-amsterdam created high alert Alert Testing Query.',
         [ALERT_RULE_UUID]: source[ALERT_RULE_UUID],
         [ALERT_ANCESTORS]: [
           {

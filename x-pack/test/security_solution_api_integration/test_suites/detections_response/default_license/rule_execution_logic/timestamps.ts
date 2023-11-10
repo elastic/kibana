@@ -28,16 +28,21 @@ import {
   waitForRulePartialFailure,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
-
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
   /**
    * Tests around timestamps within alerts such as the copying of timestamps correctly into
-   * the "alert.original_time" field, ensuring that timestamp overrides operate, and ensuring that
+   * the "signal.original_time" field, ensuring that timestamp overrides operate, and ensuring that
    * partial errors happen correctly
    */
   describe('@ess @serverless timestamp tests', () => {
@@ -340,11 +345,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('alerts generated from events with timestamp override field and ensures search_after continues to work when documents are missing timestamp override field', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(path);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(path);
       });
 
       beforeEach(async () => {

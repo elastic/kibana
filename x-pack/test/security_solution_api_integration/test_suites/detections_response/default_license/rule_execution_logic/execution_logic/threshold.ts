@@ -30,20 +30,26 @@ import {
   previewRule,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless Threshold type rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(path);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(path);
     });
 
     // First test creates a real rule - remaining tests use preview API
@@ -76,7 +82,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_REASON]: 'event created high alert Signal Testing Query.',
+        [ALERT_REASON]: 'event created high alert Alert Testing Query.',
         [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_DEPTH]: 1,
@@ -219,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_REASON]: `event created high alert Signal Testing Query.`,
+        [ALERT_REASON]: `event created high alert Alert Testing Query.`,
         [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_DEPTH]: 1,
@@ -286,7 +292,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_REASON]: `event with process sshd, created high alert Signal Testing Query.`,
+        [ALERT_REASON]: `event with process sshd, created high alert Alert Testing Query.`,
         [ALERT_RULE_UUID]: fullAlert[ALERT_RULE_UUID],
         [ALERT_ORIGINAL_TIME]: fullAlert[ALERT_ORIGINAL_TIME],
         [ALERT_DEPTH]: 1,

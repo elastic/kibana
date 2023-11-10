@@ -45,6 +45,7 @@ import {
   createRule,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 const format = (value: unknown): string => JSON.stringify(value, null, 2);
 
@@ -109,8 +110,8 @@ const createThreatMatchRule = ({
   threat_index,
   threat_mapping,
   threat_filters: [],
-  threat_indicator_path,
   ...override,
+  threat_indicator_path,
 });
 
 function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
@@ -144,6 +145,13 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const es = getService('es');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const audibeatHostsPath = dataPathBuilder.getPath('auditbeat/hosts');
+  const threatIntelPath = dataPathBuilder.getPath('filebeat/threat_intel');
 
   /**
    * Specific api integration tests for threat matching rule type
@@ -151,11 +159,11 @@ export default ({ getService }: FtrProviderContext) => {
   // FLAKY: https://github.com/elastic/kibana/issues/155304
   describe('@ess @serverless Threat match type rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(audibeatHostsPath);
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(audibeatHostsPath);
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
@@ -295,7 +303,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           category: 'Indicator Match Rule',
           consumer: 'siem',
-          created_by: 'elastic',
+          created_by: ELASTICSEARCH_USERNAME,
           description: 'Detecting root and admin users',
           enabled: true,
           exceptions_list: [],
@@ -317,7 +325,7 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'threat_match',
           updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
-          updated_by: 'elastic',
+          updated_by: ELASTICSEARCH_USERNAME,
           uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
@@ -474,7 +482,7 @@ export default ({ getService }: FtrProviderContext) => {
           author: [],
           category: 'Indicator Match Rule',
           consumer: 'siem',
-          created_by: 'elastic',
+          created_by: ELASTICSEARCH_USERNAME,
           description: 'Detecting root and admin users',
           enabled: true,
           exceptions_list: [],
@@ -496,7 +504,7 @@ export default ({ getService }: FtrProviderContext) => {
           to: 'now',
           type: 'threat_match',
           updated_at: fullAlert[ALERT_RULE_UPDATED_AT],
-          updated_by: 'elastic',
+          updated_by: ELASTICSEARCH_USERNAME,
           uuid: fullAlert[ALERT_RULE_UUID],
           version: 1,
         }),
@@ -656,11 +664,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('indicator enrichment: threat-first search', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/threat_intel');
+        await esArchiver.load(threatIntelPath);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
+        await esArchiver.unload(threatIntelPath);
       });
 
       it('enriches alerts with the single indicator that matched', async () => {
@@ -1055,11 +1063,11 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('indicator enrichment: event-first search', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/filebeat/threat_intel');
+        await esArchiver.load(threatIntelPath);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/filebeat/threat_intel');
+        await esArchiver.unload(threatIntelPath);
       });
 
       it('enriches alerts with the single indicator that matched', async () => {

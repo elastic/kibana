@@ -43,14 +43,19 @@ import {
   previewRule,
   previewRuleWithExceptionEntries,
 } from '../../../utils';
-
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const es = getService('es');
   const log = getService('log');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
 
   const siemModule = 'security_linux_v3';
   const mlJobId = 'v3_linux_anomalous_network_activity';
@@ -70,13 +75,13 @@ export default ({ getService }: FtrProviderContext) => {
     before(async () => {
       // Order is critical here: auditbeat data must be loaded before attempting to start the ML job,
       // as the job looks for certain indices on start
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(path);
       await executeSetupModuleRequest({ module: siemModule, rspCode: 200, supertest });
       await forceStartDatafeeds({ jobId: mlJobId, rspCode: 200, supertest });
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/anomalies');
     });
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(path);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/anomalies');
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);

@@ -25,11 +25,11 @@ import {
   removeRandomValuedPropertiesFromAlert,
 } from '../../../utils';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
 const ruleExecutionStart = '2022-10-19T05:00:04.000Z';
-
-import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -41,7 +41,12 @@ export default ({ getService }: FtrProviderContext) => {
     index: 'new_terms',
     log,
   });
-
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const path = dataPathBuilder.getPath('auditbeat/hosts');
   /**
    * indexes 2 sets of documents:
    * - documents in historical window
@@ -73,12 +78,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless New terms type rules', () => {
     before(async () => {
-      await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.load(path);
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/new_terms');
     });
 
     after(async () => {
-      await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+      await esArchiver.unload(path);
       await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/new_terms');
       await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
@@ -195,7 +200,7 @@ export default ({ getService }: FtrProviderContext) => {
         },
         'kibana.alert.rule.actions': [],
         'kibana.alert.rule.author': [],
-        'kibana.alert.rule.created_by': 'elastic',
+        'kibana.alert.rule.created_by': ELASTICSEARCH_USERNAME,
         'kibana.alert.rule.description': 'Detecting root and admin users',
         'kibana.alert.rule.enabled': true,
         'kibana.alert.rule.exceptions_list': [],
@@ -213,7 +218,7 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.rule.threat': [],
         'kibana.alert.rule.to': 'now',
         'kibana.alert.rule.type': 'new_terms',
-        'kibana.alert.rule.updated_by': 'elastic',
+        'kibana.alert.rule.updated_by': ELASTICSEARCH_USERNAME,
         'kibana.alert.rule.version': 1,
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
