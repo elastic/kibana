@@ -170,3 +170,5 @@ In 7.x, the UI supports types defined as part of the mappings for legacy index t
   }
 }
 ```
+
+### TEST
