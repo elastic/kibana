@@ -39,8 +39,6 @@ describe('AnomalyResultsViewSelector', () => {
     expect(getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')).toBeInTheDocument();
     expect(
       getByTestId('mlAnomalyResultsViewSelectorSingleMetricViewer')
-        .querySelector('input')!
-        .hasAttribute('checked')
-    ).toBe(true);
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 });
