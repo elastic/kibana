@@ -5,35 +5,30 @@
  * 2.0.
  */
 
-import { HttpSetup } from '@kbn/core-http-browser';
-import { IToasts } from '@kbn/core-notifications-browser';
+import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
 import { BehaviorSubject } from 'rxjs';
 import { interpret } from 'xstate';
 import { DatasetSelectionPlain, hydrateDatasetSelection } from '../../common';
-import { DatasetsService, IDatasetsClient } from '../services/datasets';
+import { DatasetsService } from '../services/datasets';
 import {
   createLogExplorerControllerStateMachine,
   LogExplorerControllerContext,
-  LogExplorerControllerStateMachine,
-  LogExplorerControllerStateService,
   WithDisplayOptions,
   WithQueryState,
 } from '../state_machines/log_explorer_controller';
 import { DEFAULT_CONTEXT } from '../state_machines/log_explorer_controller/src/defaults';
+import { LogExplorerStartDeps } from '../types';
+import { createDataServiceProxy } from './custom_data_service';
+import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
+import { createMemoryUrlStateStorage } from './custom_url_state_storage';
+import { LogExplorerController, LogExplorerDiscoverServices } from './types';
 // import { mapContextFromStateStorageContainer } from '../state_machines/log_explorer_controller/src/services/discover_service';
 // import { createStateStorageContainer } from './create_state_storage';
 
 interface Dependencies {
-  http: HttpSetup;
-  toasts: IToasts;
-}
-
-export interface LogExplorerController {
-  stateMachine: LogExplorerControllerStateMachine;
-  service: LogExplorerControllerStateService;
-  datasetsClient: IDatasetsClient;
-  logExplorerState$: BehaviorSubject<LogExplorerControllerContext>;
+  core: CoreStart;
+  plugins: LogExplorerStartDeps;
 }
 
 type InitialState = Partial<
@@ -44,35 +39,26 @@ type InitialState = Partial<
 >;
 
 export const createLogExplorerControllerFactory =
-  (deps: Dependencies) =>
+  ({ core, plugins: { data } }: Dependencies) =>
   ({ initialState }: { initialState?: InitialState }): LogExplorerController => {
-    const { http, toasts } = deps;
-
     const datasetsClient = new DatasetsService().start({
-      http,
+      http: core.http,
     }).client;
+
+    const discoverServices: LogExplorerDiscoverServices = {
+      data: createDataServiceProxy(data),
+      uiSettings: createUiSettingsServiceProxy(core.uiSettings),
+      urlStateStorage: createMemoryUrlStateStorage(),
+    };
 
     const initialContext = createInitialContext(initialState);
 
-    // State storage container that allows the Log Explorer to act as state storage over the URL
-    // const stateStorageContainer = createStateStorageContainer({ initialState: initialContext });
-
-    const logExplorerState$ = new BehaviorSubject<LogExplorerControllerContext>({});
-
-    // const discoverStateStorageContainer$ = new ReplaySubject(1);
-
-    // combineLatest([stateStorageContainer.change$('_a'), stateStorageContainer.change$('_g')])
-    //   .pipe(
-    //     map(([applicationState, globalState]) => {
-    //       return mapContextFromStateStorageContainer(applicationState, globalState);
-    //     })
-    //   )
-    //   .subscribe({ next: (value) => discoverStateStorageContainer$.next(value) });
+    const logExplorerContext$ = new BehaviorSubject<LogExplorerControllerContext>(initialContext);
 
     const machine = createLogExplorerControllerStateMachine({
       initialContext,
       datasetsClient,
-      toasts,
+      toasts: core.notifications.toasts,
     });
 
     const service = interpret(machine, {
@@ -81,14 +67,15 @@ export const createLogExplorerControllerFactory =
 
     // Notify consumers of changes to the state machine's context
     service.subscribe((state) => {
-      logExplorerState$.next(state.context);
+      logExplorerContext$.next(state.context);
     });
 
     return {
-      stateMachine: machine,
-      service,
       datasetsClient,
-      logExplorerState$,
+      discoverServices,
+      service,
+      state$: logExplorerContext$.asObservable(),
+      stateMachine: machine,
     };
   };
 

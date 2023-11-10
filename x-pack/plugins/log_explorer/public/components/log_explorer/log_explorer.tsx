@@ -5,21 +5,15 @@
  * 2.0.
  */
 
-import { ScopedHistory } from '@kbn/core-application-browser';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { CoreStart } from '@kbn/core/public';
-import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { APP_STATE_URL_KEY, DiscoverAppState } from '@kbn/discover-plugin/public';
-import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
-import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import { createMemoryHistory } from 'history';
-import React, { useMemo, useState } from 'react';
-import type { BehaviorSubject } from 'rxjs';
-import { LogExplorerController } from '../../controller/create_controller';
+import type { ScopedHistory } from '@kbn/core-application-browser';
+import type { CoreStart } from '@kbn/core/public';
+import type { DiscoverAppState } from '@kbn/discover-plugin/public';
+import React, { useMemo } from 'react';
+import type { Observable } from 'rxjs';
+import type { LogExplorerController } from '../../controller';
 import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
-import { LogExplorerControllerContext } from '../../state_machines/log_explorer_controller';
-import { LogExplorerStartDeps } from '../../types';
-import { createPropertyGetProxy } from '../../utils/proxies';
+import type { LogExplorerControllerContext } from '../../state_machines/log_explorer_controller';
+import type { LogExplorerStartDeps } from '../../types';
 
 export interface CreateLogExplorerArgs {
   core: CoreStart;
@@ -33,97 +27,30 @@ export interface LogExplorerStateContainer {
 
 export interface LogExplorerProps {
   scopedHistory: ScopedHistory;
-  state$?: BehaviorSubject<LogExplorerStateContainer>;
+  state$?: Observable<LogExplorerStateContainer>;
   controller: LogExplorerController;
 }
 
 export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
   const {
-    data,
     discover: { DiscoverContainer },
   } = plugins;
 
-  const overrideServices = {
-    data: createDataServiceProxy(data),
-    uiSettings: createUiSettingsServiceProxy(core.uiSettings),
-  };
-
-  return ({ scopedHistory, state$, controller }: LogExplorerProps) => {
+  return ({ scopedHistory, controller }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, plugins, state$, controller })],
-      [state$, controller]
+      () => [createLogExplorerProfileCustomizations({ core, plugins, controller })],
+      [controller]
     );
 
-    // this is not used anywhere outside of the `DiscoverContainer`, but it
-    // prevents Discover from manipulating the URL
-    const [memoryUrlStateStorage] = useState(createMemoryUrlStateStorage);
+    const { urlStateStorage, ...overrideServices } = controller.discoverServices;
 
     return (
       <DiscoverContainer
         customizationCallbacks={logExplorerCustomizations}
         overrideServices={overrideServices}
         scopedHistory={scopedHistory}
-        stateStorageContainer={memoryUrlStateStorage}
+        stateStorageContainer={urlStateStorage}
       />
     );
   };
-};
-
-/**
- * Create proxy for the data service, in which session service enablement calls
- * are no-ops.
- */
-const createDataServiceProxy = (data: DataPublicPluginStart) => {
-  const noOpEnableStorage = () => {};
-
-  const sessionServiceProxy = createPropertyGetProxy(data.search.session, {
-    enableStorage: () => noOpEnableStorage,
-  });
-
-  const searchServiceProxy = createPropertyGetProxy(data.search, {
-    session: () => sessionServiceProxy,
-  });
-
-  return createPropertyGetProxy(data, {
-    search: () => searchServiceProxy,
-  });
-};
-
-/**
- * Create proxy for the uiSettings service, in which settings preferences are overwritten
- * with custom values
- */
-const createUiSettingsServiceProxy = (uiSettings: IUiSettingsClient) => {
-  const overrides: Record<string, any> = {
-    [HIDE_ANNOUNCEMENTS]: true,
-  };
-
-  return createPropertyGetProxy(uiSettings, {
-    get:
-      () =>
-      (key, ...args) => {
-        if (key in overrides) {
-          return overrides[key];
-        }
-
-        return uiSettings.get(key, ...args);
-      },
-  });
-};
-
-/**
- * Create a url state storage that's not connected to the real browser location
- * to isolate the Discover component from these side-effects.
- *
- * It is initialized with an application state object, because Discover
- * radically resets too much when the URL is "empty".
- */
-const createMemoryUrlStateStorage = () => {
-  return createKbnUrlStateStorage({
-    history: createMemoryHistory({
-      initialEntries: [{ search: `?${APP_STATE_URL_KEY}=()` }],
-    }),
-    useHash: false,
-    useHashQuery: false,
-  });
 };
