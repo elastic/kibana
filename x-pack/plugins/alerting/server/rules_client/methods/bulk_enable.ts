@@ -120,14 +120,10 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     } catch (e) {
       context.logger.warn(`Error validating bulk enabled rule domain object for id: ${id}, ${e}`);
     }
-    return ruleDomain;
+    return transformRuleDomainToRule(ruleDomain);
   });
-  // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
-  const enabledPublicRules = enabledRules.map((rule: RuleDomain<Params>) => {
-    return transformRuleDomainToRule<Params>(rule);
-  }) as Array<SanitizedRule<Params>>;
 
-  return { errors, rules: enabledPublicRules, total, taskIdsFailedToBeEnabled };
+  return { errors, rules: enabledRules, total, taskIdsFailedToBeEnabled };
 };
 
 const bulkEnableRulesWithOCC = async (
