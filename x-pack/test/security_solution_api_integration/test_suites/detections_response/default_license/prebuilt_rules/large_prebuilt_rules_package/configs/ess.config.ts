@@ -4,21 +4,27 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { FtrConfigProviderContext } from '@kbn/test';
 import path from 'path';
 
 export const BUNDLED_PACKAGE_DIR = path.join(
   path.dirname(__filename),
-  './fleet_bundled_packages/fixtures'
+  './../fleet_bundled_packages/fixtures'
 );
 
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../config.base.ts'));
+  const functionalConfig = await readConfigFile(
+    require.resolve('../../../../../../config/ess/config.base.trial')
+  );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('./install_large_prebuilt_rules_package.ts')],
+    testFiles: [require.resolve('..')],
+    junit: {
+      reportName:
+        'Detection Engine ESS / Large Prebuilt Rules Package Installation API Integration Tests',
+    },
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
       serverArgs: [
@@ -36,7 +42,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         /*  Limit the heap memory to the lowest amount with which Kibana doesn't crash with an out of memory error
          *  when installing the large package.
          */
-        NODE_OPTIONS: '--max-old-space-size=700',
+        NODE_OPTIONS: '--max-old-space-size=800',
       },
     },
   };

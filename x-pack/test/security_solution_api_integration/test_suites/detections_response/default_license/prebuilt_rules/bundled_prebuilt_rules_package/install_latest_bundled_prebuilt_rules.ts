@@ -6,18 +6,18 @@
  */
 import fs from 'fs/promises';
 import path from 'path';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
-import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
-import { installPrebuiltRulesPackageByVersion } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
-
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  deleteAllRules,
+  deleteAllPrebuiltRuleAssets,
+  getPrebuiltRulesStatus,
+  installPrebuiltRulesPackageByVersion,
+} from '../../../utils';
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext): void => {
   /* attempt to install it from the local file system. The API response from EPM provides
   /* us with the information of whether the package was installed from the registry or
   /* from a package that was bundled with Kibana */
-  describe('install_bundled_prebuilt_rules', () => {
+  describe('@ess @serverless @skipInQA install_bundled_prebuilt_rules', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es);

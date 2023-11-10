@@ -5,24 +5,23 @@
  * 2.0.
  */
 import expect from 'expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllRules,
-  deleteAllTimelines,
   getPrebuiltRulesAndTimelinesStatus,
-} from '../../utils';
-import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
-import { installPrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/install_prebuilt_rules_fleet_package';
-import { installPrebuiltRulesAndTimelines } from '../../utils/prebuilt_rules/install_prebuilt_rules_and_timelines';
-import { deletePrebuiltRulesFleetPackage } from '../../utils/prebuilt_rules/delete_prebuilt_rules_fleet_package';
+  installPrebuiltRulesAndTimelines,
+} from '../../../utils';
+import { deleteAllPrebuiltRuleAssets } from '../../../utils/rules/prebuilt_rules/delete_all_prebuilt_rule_assets';
+import { deleteAllTimelines } from '../../../utils/rules/prebuilt_rules/delete_all_timelines';
+import { deletePrebuiltRulesFleetPackage } from '../../../utils/rules/prebuilt_rules/delete_prebuilt_rules_fleet_package';
+import { installPrebuiltRulesFleetPackage } from '../../../utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('install_prebuilt_rules_from_real_package', () => {
+  describe('@ess @serverless @skipInQA install_prebuilt_rules_from_real_package', () => {
     beforeEach(async () => {
       await deletePrebuiltRulesFleetPackage(supertest);
       await deleteAllRules(supertest, log);

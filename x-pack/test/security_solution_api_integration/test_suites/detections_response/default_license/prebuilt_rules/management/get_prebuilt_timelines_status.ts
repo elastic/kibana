@@ -6,19 +6,18 @@
  */
 
 import expect from 'expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllTimelines,
   getPrebuiltRulesAndTimelinesStatus,
   installPrebuiltRulesAndTimelines,
-} from '../../utils';
+} from '../../../utils';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const es = getService('es');
 
-  describe('get_prebuilt_timelines_status', () => {
+  describe('@ess @serverless @skipInQA get_prebuilt_timelines_status', () => {
     beforeEach(async () => {
       await deleteAllTimelines(es);
     });

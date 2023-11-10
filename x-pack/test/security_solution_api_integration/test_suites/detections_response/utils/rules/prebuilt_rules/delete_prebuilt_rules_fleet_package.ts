@@ -18,10 +18,11 @@ export async function deletePrebuiltRulesFleetPackage(
 ) {
   const resp = await supertest
     .get(epmRouteService.getInfoPath('security_detection_engine'))
-    .send()
-    .expect(200);
+    .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
+    .send();
 
-  if (resp.body.response.status === 'installed') {
+  if (resp.status === 200 && resp.body.response.status === 'installed') {
     await supertest
       .delete(
         epmRouteService.getRemovePath('security_detection_engine', resp.body.response.version)

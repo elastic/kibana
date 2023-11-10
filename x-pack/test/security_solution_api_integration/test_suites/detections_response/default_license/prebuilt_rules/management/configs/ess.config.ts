@@ -7,12 +7,16 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 
-// eslint-disable-next-line import/no-default-export
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const functionalConfig = await readConfigFile(require.resolve('../config.base.ts'));
+  const functionalConfig = await readConfigFile(
+    require.resolve('../../../../../../config/ess/config.base.trial')
+  );
 
   return {
     ...functionalConfig.getAll(),
-    testFiles: [require.resolve('./update_prebuilt_rules_package.ts')],
+    testFiles: [require.resolve('..')],
+    junit: {
+      reportName: 'Detection Engine ESS / Prebuilt Rules Management API Integration Tests',
+    },
   };
 }

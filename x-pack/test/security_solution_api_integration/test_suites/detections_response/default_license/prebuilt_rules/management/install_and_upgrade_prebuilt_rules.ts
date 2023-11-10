@@ -4,34 +4,30 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
 import expect from 'expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllRules,
   deleteAllTimelines,
+  deleteAllPrebuiltRuleAssets,
+  createRuleAssetSavedObject,
+  createPrebuiltRuleAssetSavedObjects,
+  installPrebuiltRulesAndTimelines,
   deleteRule,
   getPrebuiltRulesAndTimelinesStatus,
-} from '../../utils';
-import {
   createHistoricalPrebuiltRuleAssetSavedObjects,
-  createPrebuiltRuleAssetSavedObjects,
-  createRuleAssetSavedObject,
-} from '../../utils/prebuilt_rules/create_prebuilt_rule_saved_objects';
-import { deleteAllPrebuiltRuleAssets } from '../../utils/prebuilt_rules/delete_all_prebuilt_rule_assets';
-import { installPrebuiltRulesAndTimelines } from '../../utils/prebuilt_rules/install_prebuilt_rules_and_timelines';
-import { installPrebuiltRules } from '../../utils/prebuilt_rules/install_prebuilt_rules';
-import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
-import { upgradePrebuiltRules } from '../../utils/prebuilt_rules/upgrade_prebuilt_rules';
-import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
+  getPrebuiltRulesStatus,
+  installPrebuiltRules,
+  getInstalledRules,
+  upgradePrebuiltRules,
+} from '../../../utils';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('install and upgrade prebuilt rules with mock rule assets', () => {
+  describe('@ess @serverless @skipInQA install and upgrade prebuilt rules with mock rule assets', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllTimelines(es);

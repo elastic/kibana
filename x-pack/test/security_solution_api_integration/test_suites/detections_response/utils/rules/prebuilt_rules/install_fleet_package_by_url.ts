@@ -8,6 +8,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 
 /**
  * Installs latest available non-prerelease prebuilt rules package `security_detection_engine`.
@@ -25,6 +26,7 @@ export const installPrebuiltRulesPackageViaFleetAPI = async (
   const fleetResponse = await supertest
     .post(`/api/fleet/epm/packages/security_detection_engine`)
     .set('kbn-xsrf', 'xxxx')
+    .set('elastic-api-version', '2023-10-31')
     .type('application/json')
     .send({ force: true })
     .expect(200);
@@ -63,8 +65,9 @@ export const installPrebuiltRulesPackageByVersion = async (
   version: string
 ): Promise<InstallPackageResponse> => {
   const fleetResponse = await supertest
-    .post(`/api/fleet/epm/packages/security_detection_engine/${version}`)
+    .post(epmRouteService.getInstallPath('security_detection_engine', version))
     .set('kbn-xsrf', 'xxxx')
+    .set('elastic-api-version', '2023-10-31')
     .type('application/json')
     .send({ force: true })
     .expect(200);

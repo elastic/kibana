@@ -5,14 +5,19 @@
  * 2.0.
  */
 import expect from 'expect';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { deleteAllPrebuiltRuleAssets, deleteAllRules } from '../../utils';
-import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
-import { getPrebuiltRulesStatus } from '../../utils/prebuilt_rules/get_prebuilt_rules_status';
-import { installPrebuiltRulesPackageViaFleetAPI } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
-import { installPrebuiltRules } from '../../utils/prebuilt_rules/install_prebuilt_rules';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import {
+  deleteAllPrebuiltRuleAssets,
+  deleteAllRules,
+  deletePrebuiltRulesFleetPackage,
+  getInstalledRules,
+  getPrebuiltRulesFleetPackage,
+  getPrebuiltRulesStatus,
+  installPrebuiltRules,
+  installPrebuiltRulesPackageViaFleetAPI,
+} from '../../../utils';
+
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -25,10 +30,11 @@ export default ({ getService }: FtrProviderContext): void => {
   /* (We use high mock version numbers to prevent clashes with real packages downloaded in other tests.)
   /* To do assertions on which packages have been installed, 99.0.0 has a single rule to install,
   /* while 99.0.1-beta.1 has 2 rules to install. Also, both packages have the version as part of the rule names. */
-  describe('prerelease_packages', () => {
+  describe('@ess @serverless @skipInQA prerelease_packages', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es);
+      await deletePrebuiltRulesFleetPackage(supertest);
     });
 
     it('should install latest stable version and ignore prerelease packages', async () => {
@@ -38,13 +44,27 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_install).toBe(0);
       expect(statusBeforePackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
-      await installPrebuiltRulesPackageViaFleetAPI(es, supertest);
+      // Install package without specifying version to check if latest stable version is installed
+      const fleetPackageInstallationResponse = await installPrebuiltRulesPackageViaFleetAPI(
+        es,
+        supertest
+      );
 
+      expect(fleetPackageInstallationResponse.items.length).toBe(1);
+      expect(fleetPackageInstallationResponse.items[0].id).toBe('rule_99.0.0'); // Name of the rule in package 99.0.0
+
+      // Get the installed package and check if the version is 99.0.0
+      const prebuiltRulesFleetPackage = await getPrebuiltRulesFleetPackage(supertest);
+      expect(prebuiltRulesFleetPackage.body.item.version).toBe('99.0.0');
+      expect(prebuiltRulesFleetPackage.status).toBe(200);
+
+      // Get status of our prebuilt rules (nothing should be instaled yet)
       const statusAfterPackageInstallation = await getPrebuiltRulesStatus(supertest);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_installed).toBe(0);
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_install).toBe(1); // 1 rule in package 99.0.0
       expect(statusAfterPackageInstallation.stats.num_prebuilt_rules_to_upgrade).toBe(0);
 
+      // Install prebuilt rules
       await installPrebuiltRules(es, supertest);
 
       // Verify that status is updated after package installation

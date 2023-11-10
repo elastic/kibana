@@ -8,25 +8,23 @@ import fs from 'fs/promises';
 import path from 'path';
 import getMajorVersion from 'semver/functions/major';
 import getMinorVersion from 'semver/functions/minor';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import JSON5 from 'json5';
 import expect from 'expect';
 import { PackageSpecManifest } from '@kbn/fleet-plugin/common';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {
   deleteAllPrebuiltRuleAssets,
   deleteAllRules,
+  getInstalledRules,
   getPrebuiltRulesStatus,
   installPrebuiltRules,
+  installPrebuiltRulesPackageByVersion,
   upgradePrebuiltRules,
-} from '../../utils';
-import { reviewPrebuiltRulesToInstall } from '../../utils/prebuilt_rules/review_install_prebuilt_rules';
-import { reviewPrebuiltRulesToUpgrade } from '../../utils/prebuilt_rules/review_upgrade_prebuilt_rules';
-import { installPrebuiltRulesPackageByVersion } from '../../utils/prebuilt_rules/install_fleet_package_by_url';
-import { getInstalledRules } from '../../utils/prebuilt_rules/get_installed_rules';
+  reviewPrebuiltRulesToInstall,
+  reviewPrebuiltRulesToUpgrade,
+} from '../../../utils';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -63,7 +61,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return getPackageResponse.body.item.version ?? '';
   };
 
-  describe('update_prebuilt_rules_package', () => {
+  describe('@ess @serverless @skipInQA update_prebuilt_rules_package', () => {
     before(async () => {
       const configFilePath = path.resolve(REPO_ROOT, 'fleet_packages.json');
       const fleetPackages = await fs.readFile(configFilePath, 'utf8');

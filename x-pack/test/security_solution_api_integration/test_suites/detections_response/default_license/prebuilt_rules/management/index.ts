@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('detection engine api security and spaces enabled - Prebuilt Rules', function () {
+  describe('Detection Engine API - Prebuilt Rules Management', function () {
     loadTestFile(require.resolve('./get_prebuilt_rules_status'));
     loadTestFile(require.resolve('./get_prebuilt_timelines_status'));
     loadTestFile(require.resolve('./install_and_upgrade_prebuilt_rules'));

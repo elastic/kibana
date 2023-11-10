@@ -6,45 +6,49 @@
  */
 
 import {
-  PERFORM_RULE_UPGRADE_URL,
+  PERFORM_RULE_INSTALLATION_URL,
   RuleVersionSpecifier,
-  PerformRuleUpgradeResponseBody,
+  PerformRuleInstallationResponseBody,
 } from '@kbn/security-solution-plugin/common/api/detection_engine/prebuilt_rules';
 import type { Client } from '@elastic/elasticsearch';
 import type SuperTest from 'supertest';
 import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 
 /**
- * Upgrades available prebuilt rules in Kibana.
+ * Installs available prebuilt rules in Kibana. Rules are
+ * installed from the security-rule saved objects.
  *
- * - Pass in an array of rule version specifiers to upgrade specific rules. Otherwise
- *   all available rules will be upgraded.
+ * - No rules will be installed if there are no security-rule assets (e.g., the
+ *   package is not installed or mocks are not created).
+ *
+ * - Pass in an array of rule version specifiers to install specific rules. Otherwise
+ *   all available rules will be installed.
  *
  * @param supertest SuperTest instance
- * @param rules Array of rule version specifiers to upgrade (optional)
- * @returns Upgrade prebuilt rules response
+ * @param rules Array of rule version specifiers to install (optional)
+ * @returns Install prebuilt rules response
  */
-export const upgradePrebuiltRules = async (
+export const installPrebuiltRules = async (
   es: Client,
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   rules?: RuleVersionSpecifier[]
-): Promise<PerformRuleUpgradeResponseBody> => {
+): Promise<PerformRuleInstallationResponseBody> => {
   let payload = {};
   if (rules) {
-    payload = { mode: 'SPECIFIC_RULES', rules, pick_version: 'TARGET' };
+    payload = { mode: 'SPECIFIC_RULES', rules };
   } else {
-    payload = { mode: 'ALL_RULES', pick_version: 'TARGET' };
+    payload = { mode: 'ALL_RULES' };
   }
   const response = await supertest
-    .post(PERFORM_RULE_UPGRADE_URL)
+    .post(PERFORM_RULE_INSTALLATION_URL)
     .set('kbn-xsrf', 'true')
     .set('elastic-api-version', '1')
+    .set('x-elastic-internal-origin', 'foo')
     .send(payload)
     .expect(200);
 
   // Before we proceed, we need to refresh saved object indices.
-  // At the previous step we upgraded the prebuilt rules, which, under the hoods, installs new versions
-  // of the prebuilt detection rules SO of type 'security-rule'.
+  // At the previous step we installed the prebuilt detection rules SO of type 'security-rule'.
   // The savedObjectsClient does this with a call with explicit `refresh: false`.
   // So, despite of the fact that the endpoint waits until the prebuilt rule will be
   // successfully indexed, it doesn't wait until they become "visible" for subsequent read
