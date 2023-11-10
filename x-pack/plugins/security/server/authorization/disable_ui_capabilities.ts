@@ -37,10 +37,8 @@ export function disableUICapabilitiesFactory(
   const elasticsearchFeatureMap = elasticsearchFeatures.reduce<
     Record<string, RecursiveReadonlyArray<FeatureElasticsearchPrivileges>>
   >((acc, esFeature) => {
-    return {
-      ...acc,
-      [esFeature.id]: esFeature.privileges,
-    };
+    acc[esFeature.id] = esFeature.privileges;
+    return acc;
   }, {});
 
   const allRequiredClusterPrivileges = Array.from(
@@ -59,11 +57,9 @@ export function disableUICapabilitiesFactory(
       return {
         ...acc,
         ...Object.entries(p.requiredIndexPrivileges!).reduce((acc2, [indexName, privileges]) => {
-          return {
-            ...acc2,
-            [indexName]: [...(acc[indexName] ?? []), ...privileges],
-          };
-        }, {}),
+          acc2[indexName] = [...(acc[indexName] ?? []), ...privileges];
+          return acc2;
+        }, {} as Record<string, string[]>),
       };
     }, {});
 
@@ -157,14 +153,16 @@ export function disableUICapabilitiesFactory(
     }
 
     const uiActions = Object.entries(uiCapabilities).reduce<string[]>(
-      (acc, [featureId, featureUICapabilities]) => [
-        ...acc,
-        ...flatten(
-          Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
-            return getActionsForFeatureCapability(featureId, uiCapability, value);
-          })
-        ),
-      ],
+      (acc, [featureId, featureUICapabilities]) => {
+        acc.push(
+          ...flatten(
+            Object.entries(featureUICapabilities).map(([uiCapability, value]) => {
+              return getActionsForFeatureCapability(featureId, uiCapability, value);
+            })
+          )
+        );
+        return acc;
+      },
       []
     );
 

@@ -406,12 +406,24 @@ export function ObservabilityLogExplorerPageObject({
 
 interface MockLogDoc {
   time: number;
-  logFilepath: string;
+  logFilepath?: string;
   serviceName?: string;
   namespace: string;
   datasetName: string;
   message?: string;
   logLevel?: string;
+  traceId?: string;
+  hostName?: string;
+  orchestratorClusterId?: string;
+  orchestratorClusterName?: string;
+  orchestratorResourceId?: string;
+  cloudProvider?: string;
+  cloudRegion?: string;
+  cloudAz?: string;
+  cloudProjectId?: string;
+  cloudInstanceId?: string;
+  agentName?: string;
+
   [key: string]: unknown;
 }
 
@@ -423,6 +435,17 @@ export function createLogDoc({
   datasetName,
   message,
   logLevel,
+  traceId,
+  hostName,
+  orchestratorClusterId,
+  orchestratorClusterName,
+  orchestratorResourceId,
+  cloudProvider,
+  cloudRegion,
+  cloudAz,
+  cloudProjectId,
+  cloudInstanceId,
+  agentName,
   ...extraFields
 }: MockLogDoc) {
   return {
@@ -452,6 +475,17 @@ export function createLogDoc({
       dataset: datasetName,
     },
     ...(logLevel && { 'log.level': logLevel }),
+    ...(traceId && { 'trace.id': traceId }),
+    ...(hostName && { 'host.name': hostName }),
+    ...(orchestratorClusterId && { 'orchestrator.cluster.id': orchestratorClusterId }),
+    ...(orchestratorClusterName && { 'orchestrator.cluster.name': orchestratorClusterName }),
+    ...(orchestratorResourceId && { 'orchestrator.resource.id': orchestratorResourceId }),
+    ...(cloudProvider && { 'cloud.provider': cloudProvider }),
+    ...(cloudRegion && { 'cloud.region': cloudRegion }),
+    ...(cloudAz && { 'cloud.availability_zone': cloudAz }),
+    ...(cloudProjectId && { 'cloud.project.id': cloudProjectId }),
+    ...(cloudInstanceId && { 'cloud.instance.id': cloudInstanceId }),
+    ...(agentName && { 'agent.name': agentName }),
     ...extraFields,
   };
 }

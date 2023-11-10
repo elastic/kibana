@@ -139,6 +139,7 @@ export class FilesPlugin implements Plugin<FilesSetup, FilesStart, FilesPluginSe
         share: { tags: DefaultImageKind.tags },
         update: { tags: DefaultImageKind.tags },
       },
+      hashes: ['sha256'],
     });
   }
 }

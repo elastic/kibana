@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { formatFieldValue } from '@kbn/discover-utils';
-import { LOG_LEVEL_FIELD, MESSAGE_FIELD, TIMESTAMP_FIELD } from '../../../common/constants';
+import he from 'he';
+import * as constants from '../../../common/constants';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 import { FlyoutDoc, FlyoutProps, LogDocument } from './types';
 
@@ -30,21 +31,59 @@ export function useDocDetail(
     );
   };
 
-  const level = formatField(LOG_LEVEL_FIELD)?.toLowerCase();
-  const timestamp = formatField(TIMESTAMP_FIELD);
-  const message = formatField(MESSAGE_FIELD);
+  // Flyout Headers
+  const level = formatField(constants.LOG_LEVEL_FIELD)?.toLowerCase();
+  const timestamp = formatField(constants.TIMESTAMP_FIELD);
+  const formattedMessage = formatField(constants.MESSAGE_FIELD);
+  const message = formattedMessage ? he.decode(formattedMessage) : undefined;
+
+  // Service Highlights
+  const serviceName = formatField(constants.SERVICE_NAME_FIELD);
+  const traceId = formatField(constants.TRACE_ID_FIELD);
+
+  // Infrastructure Highlights
+  const hostname = formatField(constants.HOST_NAME_FIELD);
+  const orchestratorClusterName = formatField(constants.ORCHESTRATOR_CLUSTER_NAME_FIELD);
+  const orchestratorResourceId = formatField(constants.ORCHESTRATOR_RESOURCE_ID_FIELD);
+
+  // Cloud Highlights
+  const cloudProvider = formatField(constants.CLOUD_PROVIDER_FIELD);
+  const cloudRegion = formatField(constants.CLOUD_REGION_FIELD);
+  const cloudAz = formatField(constants.CLOUD_AVAILABILITY_ZONE_FIELD);
+  const cloudProjectId = formatField(constants.CLOUD_PROJECT_ID_FIELD);
+  const cloudInstanceId = formatField(constants.CLOUD_INSTANCE_ID_FIELD);
+
+  // Other Highlights
+  const logFilePath = formatField(constants.LOG_FILE_PATH_FIELD);
+  const namespace = formatField(constants.DATASTREAM_NAMESPACE_FIELD);
+  const dataset = formatField(constants.DATASTREAM_DATASET_FIELD);
+  const agentName = formatField(constants.AGENT_NAME_FIELD);
 
   return {
-    [LOG_LEVEL_FIELD]: level,
-    [TIMESTAMP_FIELD]: timestamp,
-    [MESSAGE_FIELD]: message,
+    [constants.LOG_LEVEL_FIELD]: level,
+    [constants.TIMESTAMP_FIELD]: timestamp,
+    [constants.MESSAGE_FIELD]: message,
+    [constants.SERVICE_NAME_FIELD]: serviceName,
+    [constants.TRACE_ID_FIELD]: traceId,
+    [constants.HOST_NAME_FIELD]: hostname,
+    [constants.ORCHESTRATOR_CLUSTER_NAME_FIELD]: orchestratorClusterName,
+    [constants.ORCHESTRATOR_RESOURCE_ID_FIELD]: orchestratorResourceId,
+    [constants.CLOUD_PROVIDER_FIELD]: cloudProvider,
+    [constants.CLOUD_REGION_FIELD]: cloudRegion,
+    [constants.CLOUD_AVAILABILITY_ZONE_FIELD]: cloudAz,
+    [constants.CLOUD_PROJECT_ID_FIELD]: cloudProjectId,
+    [constants.CLOUD_INSTANCE_ID_FIELD]: cloudInstanceId,
+    [constants.LOG_FILE_PATH_FIELD]: logFilePath,
+    [constants.DATASTREAM_NAMESPACE_FIELD]: namespace,
+    [constants.DATASTREAM_DATASET_FIELD]: dataset,
+    [constants.AGENT_NAME_FIELD]: agentName,
   };
 }
 
-export const getDocDetailRenderFlags = (doc: FlyoutDoc) => {
-  const hasTimestamp = Boolean(doc['@timestamp']);
-  const hasLogLevel = Boolean(doc['log.level']);
-  const hasMessage = Boolean(doc.message);
+export const getDocDetailHeaderRenderFlags = (doc: FlyoutDoc) => {
+  const hasTimestamp = Boolean(doc[constants.TIMESTAMP_FIELD]);
+  const hasLogLevel = Boolean(doc[constants.LOG_LEVEL_FIELD]);
+  const hasMessage = Boolean(doc[constants.MESSAGE_FIELD]);
 
   const hasBadges = hasTimestamp || hasLogLevel;
 
