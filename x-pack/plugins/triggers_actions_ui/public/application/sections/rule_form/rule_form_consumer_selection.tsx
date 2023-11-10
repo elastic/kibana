@@ -14,7 +14,7 @@ import { IErrorObject, RuleCreationValidConsumer } from '../../../types';
 const SELECT_LABEL: string = i18n.translate(
   'xpack.triggersActionsUI.sections.ruleFormConsumerSelectionModal.selectLabel',
   {
-    defaultMessage: 'Select role visibility',
+    defaultMessage: 'Role visibility',
   }
 );
 

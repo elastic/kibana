@@ -32,10 +32,11 @@ import { mlApiServicesProvider } from './services/ml_api_service';
 import { HttpService } from './services/http_service';
 import type { PageDependencies } from './routing/router';
 import { EnabledFeaturesContextProvider } from './contexts/ml';
+import type { StartServices } from './contexts/kibana';
 
 export type MlDependencies = Omit<
   MlSetupDependencies,
-  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing'
+  'share' | 'fieldFormats' | 'maps' | 'cases' | 'licensing' | 'uiActions'
 > &
   MlStartDependencies;
 
@@ -78,7 +79,7 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
     setBreadcrumbs: coreStart.chrome!.setBreadcrumbs,
   };
 
-  const services = useMemo(() => {
+  const services: StartServices = useMemo(() => {
     return {
       cases: deps.cases,
       charts: deps.charts,
@@ -86,13 +87,13 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       dashboard: deps.dashboard,
       data: deps.data,
       dataViewEditor: deps.dataViewEditor,
+      dataViews: deps.data.dataViews,
       dataVisualizer: deps.dataVisualizer,
       embeddable: deps.embeddable,
       fieldFormats: deps.fieldFormats,
       kibanaVersion: deps.kibanaVersion,
       lens: deps.lens,
       licenseManagement: deps.licenseManagement,
-      licensing: deps.licensing,
       maps: deps.maps,
       presentationUtil: deps.presentationUtil,
       savedObjectsManagement: deps.savedObjectsManagement,
@@ -104,8 +105,8 @@ const App: FC<AppProps> = ({ coreStart, deps, appMountParams, isServerless, mlFe
       uiActions: deps.uiActions,
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
-      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
       ...coreStart,
+      mlServices: getMlGlobalServices(coreStart.http, deps.usageCollection),
     };
   }, [deps, coreStart]);
 
