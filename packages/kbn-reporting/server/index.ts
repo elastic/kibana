@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { buildKibanaPath } from './build_kibana_path';
 export { cryptoFactory } from './crypto';
 export { decryptJobHeaders } from './decrypt_job_headers';
 export { ExportType } from './export_type';
