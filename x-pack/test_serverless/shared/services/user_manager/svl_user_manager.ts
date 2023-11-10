@@ -31,23 +31,21 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const isServerless = config.get('serverless');
   const isCloud = !!process.env.TEST_CLOUD;
   const cloudRoleUsersFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
-  const roles = Object.keys(
+  const roles: string[] = Object.keys(
     loadYaml(fs.readFileSync('packages/kbn-es/src/serverless_resources/roles.yml', 'utf8'))
   );
-  let users: Map<string, User> = new Map();
+  let users: Map<string, User> = new Map<string, User>();
 
   if (!isServerless) {
     throw new Error(`'svlUserManager' service can't be used in non-serverless FTR context`);
   }
 
   if (!isCloud) {
-    log.warning(
-      `Roles testing is only available on Cloud at the moment.
-    We are working to enable it for the local development`
-    );
-    users.set('viewer', { username: 'elastic_viewer', password: 'changeme' });
+    roles.map((role) => {
+      users.set(role, { username: `elastic_${role}`, password: 'changeme' });
+    });
   } else {
-    // QAF should prepare the file on MKI pipelines
+    // QAF should prepare the '.ftr/role_users.json' file for MKI pipelines
     if (!fs.existsSync(cloudRoleUsersFilePath)) {
       throw new Error(
         `svlUserManager service requires user roles to be defined in ${cloudRoleUsersFilePath}`
@@ -92,6 +90,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       const kbnHost = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
+        port: isCloud ? undefined : config.get('servers.kibana.port'),
       });
       let session: Session;
 
@@ -107,7 +106,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
         });
       } else {
         log.debug(`new fake SAML authentication with '${role}' role`);
-        const email = username;
+        const email = `${username}@elastic.co`;
         const fullname = `test ${role}`;
 
         session = await createSessionWithFakeSAMLAuth({
