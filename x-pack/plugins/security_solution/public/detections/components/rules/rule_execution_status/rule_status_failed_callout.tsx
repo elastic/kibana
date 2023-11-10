@@ -18,18 +18,28 @@ import * as i18n from './translations';
 import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
 
 interface RuleStatusFailedCallOutProps {
+  ruleName: string | undefined;
+  dataSources: string[] | undefined;
   date: string;
   message: string;
   status?: RuleExecutionStatus | null;
 }
 
 const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> = ({
+  ruleName,
+  dataSources,
   date,
   message,
   status,
 }) => {
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
-  const getPromptContext = useCallback(async () => message, [message]);
+  const getPromptContext = useCallback(
+    async () =>
+      ruleName != null && dataSources != null
+        ? `Rule name: ${ruleName}\nData sources: ${dataSources}\nError message: ${message}`
+        : `Error message: ${message}`,
+    [message, ruleName, dataSources]
+  );
   if (!shouldBeDisplayed) {
     return null;
   }

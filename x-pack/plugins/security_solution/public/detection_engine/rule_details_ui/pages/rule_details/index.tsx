@@ -411,12 +411,22 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
       </EuiFlexItem>
     ) : (
       <RuleStatusFailedCallOut
+        ruleName={rule?.immutable ? rule?.name : undefined}
+        dataSources={rule?.immutable ? rule?.index : undefined}
         status={lastExecutionStatus}
         date={lastExecutionDate}
         message={lastExecutionMessage}
       />
     );
-  }, [lastExecutionStatus, lastExecutionDate, lastExecutionMessage, ruleLoading]);
+  }, [
+    lastExecutionStatus,
+    lastExecutionDate,
+    lastExecutionMessage,
+    ruleLoading,
+    rule?.immutable,
+    rule?.name,
+    rule?.index,
+  ]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
     ({ x }) => {
