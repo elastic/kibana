@@ -5,7 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiForm, EuiFormRow, EuiRadioGroup, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiForm,
+  EuiFormRow,
+  EuiRadioGroup,
+  EuiSpacer,
+  EuiSwitch,
+  EuiSwitchEvent,
+  EuiText,
+} from '@elastic/eui';
 import { ToastsSetup } from '@kbn/core-notifications-browser';
 import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
@@ -29,6 +38,7 @@ export interface ReportingModalProps {
   isDirty?: boolean;
   onClose?: () => void;
   theme: ThemeServiceSetup;
+  layoutOption?: 'print' | 'canvas';
 }
 
 export type Props = ReportingModalProps & { intl?: InjectedIntl };
@@ -76,7 +86,8 @@ const renderDescription = (objectType: string) => {
 };
 
 export const ReportingModalContentUI: FC<Props> = (props: Props) => {
-  const { apiClient, jobProviderOptions, intl, toasts, theme, onClose, objectId } = props;
+  const { apiClient, jobProviderOptions, intl, toasts, theme, onClose, objectId, layoutOption } =
+    props;
   const [, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [selectedRadio, setSelectedRadio] = useState<string>('printablePdfV2');
@@ -199,73 +210,67 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
       });
   };
 
-  // const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
-  //   setPrintLayout(evt.target.checked);
-  //   setCanvasLayout(false);
-  // };
+  const handlePrintLayoutChange = (evt: EuiSwitchEvent) => {
+    setPrintLayout(evt.target.checked);
+    setCanvasLayout(false);
+  };
 
-  // const handleCanvasLayoutChange = (evt: EuiSwitchEvent) => {
-  //   setPrintLayout(false);
-  //   setCanvasLayout(evt.target.checked);
-  // };
+  const handleCanvasLayoutChange = (evt: EuiSwitchEvent) => {
+    setPrintLayout(false);
+    setCanvasLayout(evt.target.checked);
+  };
 
-  // const renderOptions = (
-  //   layoutOption: 'canvas' | 'print',
-  //   usePrintLayout: boolean,
-  //   handlePrintLayoutChange: (evt: EuiSwitchEvent) => void,
-  //   useCanvasLayout: boolean,
-  //   handleCanvasLayoutChange: (evt: EuiSwitchEvent) => void
-  // ) => {
-  //   if (layoutOption === 'print') {
-  //     return (
-  //       <EuiFormRow
-  //         helpText={
-  //           <FormattedMessage
-  //             id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
-  //             defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
-  //           />
-  //         }
-  //       >
-  //         <EuiSwitch
-  //           label={
-  //             <FormattedMessage
-  //               id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
-  //               defaultMessage="Optimize for printing"
-  //             />
-  //           }
-  //           checked={usePrintLayout}
-  //           onChange={handlePrintLayoutChange}
-  //           data-test-subj="usePrintLayout"
-  //         />
-  //       </EuiFormRow>
-  //     );
-  //   } else if (layoutOption === 'canvas') {
-  //     return (
-  //       <EuiFormRow
-  //         helpText={
-  //           <FormattedMessage
-  //             id="xpack.reporting.screenCapturePanelContent.canvasLayoutHelpText"
-  //             defaultMessage="Remove borders and footer logo"
-  //           />
-  //         }
-  //       >
-  //         <EuiSwitch
-  //           label={
-  //             <FormattedMessage
-  //               id="xpack.reporting.screenCapturePanelContent.canvasLayoutLabel"
-  //               defaultMessage="Full page layout"
-  //             />
-  //           }
-  //           checked={useCanvasLayout}
-  //           onChange={handleCanvasLayoutChange}
-  //           data-test-subj="reportModeToggle"
-  //         />
-  //       </EuiFormRow>
-  //     );
-  //   }
-  //   return null;
-  // };
-  console.log({ objectId });
+  const renderOptions = () => {
+    if (layoutOption === 'print') {
+      return (
+        <EuiFormRow
+          helpText={
+            <FormattedMessage
+              id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingHelpText"
+              defaultMessage="Uses multiple pages, showing at most 2 visualizations per page"
+            />
+          }
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.optimizeForPrintingLabel"
+                defaultMessage="Optimize for printing"
+              />
+            }
+            checked={usePrintLayout}
+            onChange={handlePrintLayoutChange}
+            data-test-subj="usePrintLayout"
+          />
+        </EuiFormRow>
+      );
+    } else if (layoutOption === 'canvas') {
+      return (
+        <EuiFormRow
+          helpText={
+            <FormattedMessage
+              id="xpack.reporting.screenCapturePanelContent.canvasLayoutHelpText"
+              defaultMessage="Remove borders and footer logo"
+            />
+          }
+        >
+          <EuiSwitch
+            label={
+              <FormattedMessage
+                id="xpack.reporting.screenCapturePanelContent.canvasLayoutLabel"
+                defaultMessage="Full page layout"
+              />
+            }
+            checked={useCanvasLayout}
+            onChange={handleCanvasLayoutChange}
+            data-test-subj="reportModeToggle"
+          />
+        </EuiFormRow>
+      );
+    }
+    return null;
+  };
+
   const saveWarningMessageWithButton =
     objectId === undefined || objectId === '' ? (
       <EuiFormRow
@@ -323,6 +328,9 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         idSelected={selectedRadio}
       />
       {saveWarningMessageWithButton}
+
+      <EuiSpacer size="m" />
+      {layoutOption && renderOptions()}
     </EuiForm>
   );
 };

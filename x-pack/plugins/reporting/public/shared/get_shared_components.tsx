@@ -11,7 +11,7 @@ import { ReportingAPIClient } from '../lib/reporting_api_client';
 import {
   ReportingModalContent,
   ReportingModalProps,
-} from '../share_context_menu/reporting_modal_content';
+} from '../share_context_menu/image_exports_modal_content';
 
 /**
  * Properties for displaying a share menu with Reporting features.

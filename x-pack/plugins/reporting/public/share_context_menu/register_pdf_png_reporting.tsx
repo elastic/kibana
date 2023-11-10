@@ -107,6 +107,7 @@ export const reportingScreenshotShareProvider = ({
             onClose={onClose}
             theme={theme}
             jobProviderOptions={jobProviderOptions}
+            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
           />
         ),
       },

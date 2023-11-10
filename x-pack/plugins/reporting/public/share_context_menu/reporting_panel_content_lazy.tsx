@@ -9,7 +9,7 @@ import * as React from 'react';
 import { FC, lazy, Suspense } from 'react';
 import { PanelSpinner } from './panel_spinner';
 import type { Props } from './reporting_panel_content';
-import type { ReportingModalProps } from './reporting_modal_content';
+import type { ReportingModalProps } from './image_exports_modal_content';
 
 const LazyComponent = lazy(() =>
   import('./reporting_panel_content').then(({ ReportingPanelContent }) => ({
@@ -18,7 +18,7 @@ const LazyComponent = lazy(() =>
 );
 
 const LazyModalComponent = lazy(() =>
-  import('./reporting_modal_content').then(({ ReportingModalContent }) => ({
+  import('./image_exports_modal_content').then(({ ReportingModalContent }) => ({
     default: ReportingModalContent,
   }))
 );
