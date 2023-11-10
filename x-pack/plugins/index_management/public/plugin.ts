@@ -81,6 +81,10 @@ export class IndexMgmtUIPlugin {
     };
   }
 
-  public start() {}
+  public start() {
+    return {
+      extensionsService: this.extensionsService.setup(),
+    };
+  }
   public stop() {}
 }
