@@ -46,7 +46,7 @@ export const AgentEnrollmentConfirmationStep = ({
   agentCount,
   showLoading,
   poll = true,
-  isCsp = true,
+  isCsp = false,
 }: {
   selectedPolicyId?: string;
   troubleshootLink: string;
