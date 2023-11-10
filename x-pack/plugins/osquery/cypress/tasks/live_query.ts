@@ -25,10 +25,10 @@ export const selectAllAgents = () => {
 };
 
 export const clearInputQuery = () =>
-  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
+  cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.get(LIVE_QUERY_EDITOR).type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).type(query, options);
 
 export const inputQueryInFlyout = (
   query: string,
