@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
-import { first, get } from 'lodash';
 import {
   ActionGroup,
   ActionGroupIdsOf,
@@ -17,6 +16,7 @@ import {
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { first, get } from 'lodash';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
@@ -83,6 +83,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       spaceId,
       startedAt,
       rule: { id: ruleId, tags: ruleTags },
+      getTimeRange,
     }) => {
       const startTime = Date.now();
 
@@ -175,13 +176,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
 
       const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
+      const { dateEnd } = getTimeRange();
       const results = await Promise.all(
         criteria.map((condition) =>
           evaluateCondition({
             compositeSize,
             condition,
             esClient,
-            executionTimestamp: startedAt,
+            executionTimestamp: new Date(dateEnd),
             filterQuery,
             logger,
             logQueryFields,

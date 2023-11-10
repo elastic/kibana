@@ -16,6 +16,7 @@ disabled:
   - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
   - x-pack/test/security_solution_endpoint/config.base.ts
+  - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
   # QA suites that are run out-of-band
   - x-pack/test/stack_functional_integration/configs/config.stack_functional_integration_base.js
@@ -386,6 +387,7 @@ enabled_stateful:
   - x-pack/test/security_functional/user_profiles.config.ts
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/security_solution_endpoint_api_int/config.ts
+  - x-pack/test/security_solution_endpoint_api_int/serverless.config.ts
   - x-pack/test/security_solution_endpoint/endpoint.config.ts
   - x-pack/test/security_solution_endpoint/integrations.config.ts
   - x-pack/test/session_view/basic/config.ts
@@ -426,6 +428,7 @@ enabled_stateful:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/ess.config.ts
 
 enabled_serverless_search:
   - x-pack/test_serverless/api_integration/test_suites/search/config.ts
@@ -457,6 +460,7 @@ enabled_serverless_security:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/serverless.config.ts
 
 enabled_serverless_observability:
   - x-pack/test_serverless/api_integration/test_suites/observability/config.ts
