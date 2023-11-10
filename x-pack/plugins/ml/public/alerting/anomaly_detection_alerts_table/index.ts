@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { CollapsiblePanel } from './collapsible_panel';
-export { PanelHeaderItems } from './panel_header_items';
+export { registerAlertsTableConfiguration } from './register_alerts_table_configuration';
