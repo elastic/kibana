@@ -27,11 +27,13 @@ export const useDashboardMenuItems = ({
   isLabsShown,
   setIsLabsShown,
   showResetChange,
+  updateSpacesForReferences,
 }: {
   redirectTo: DashboardRedirect;
   isLabsShown: boolean;
   setIsLabsShown: Dispatch<SetStateAction<boolean>>;
   showResetChange?: boolean;
+  updateSpacesForReferences: () => void;
 }) => {
   const [isSaveInProgress, setIsSaveInProgress] = useState(false);
 
@@ -57,7 +59,9 @@ export const useDashboardMenuItems = ({
   const hasUnsavedChanges = dashboard.select((state) => state.componentState.hasUnsavedChanges);
   const hasOverlays = dashboard.select((state) => state.componentState.hasOverlays);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
+  const namespaces = dashboard.select((state) => state.componentState.namespaces);
   const dashboardTitle = dashboard.select((state) => state.explicitInput.title);
+  const dashboardId = dashboard.select((state) => state.explicitInput.id);
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
   const managed = dashboard.select((state) => state.componentState.managed);
   const disableTopNav = isSaveInProgress || hasOverlays;
@@ -98,17 +102,21 @@ export const useDashboardMenuItems = ({
    */
   const quickSaveDashboard = useCallback(() => {
     setIsSaveInProgress(true);
-    dashboard
-      .runQuickSave()
-      .then(() => setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE));
-  }, [dashboard]);
+    dashboard.runQuickSave().then(() => {
+      updateSpacesForReferences();
+      setTimeout(() => setIsSaveInProgress(false), CHANGE_CHECK_DEBOUNCE);
+    });
+  }, [dashboard, updateSpacesForReferences]);
 
   /**
    * Show the dashboard's save modal
    */
   const saveDashboardAs = useCallback(() => {
-    dashboard.runSaveAs().then((result) => maybeRedirect(result));
-  }, [maybeRedirect, dashboard]);
+    dashboard.runSaveAs().then((result) => {
+      updateSpacesForReferences();
+      maybeRedirect(result);
+    });
+  }, [dashboard, updateSpacesForReferences, maybeRedirect]);
 
   /**
    * Clone the dashboard
@@ -194,7 +202,9 @@ export const useDashboardMenuItems = ({
         isLoading: isSaveInProgress,
         testId: 'dashboardQuickSaveMenuItem',
         disableButton: disableTopNav || !(hasRunMigrations || hasUnsavedChanges),
-        run: () => quickSaveDashboard(),
+        run: () => {
+          quickSaveDashboard();
+        },
       } as TopNavMenuData,
 
       saveAs: {
@@ -205,7 +215,9 @@ export const useDashboardMenuItems = ({
         testId: 'dashboardSaveMenuItem',
         iconType: Boolean(lastSavedId) ? undefined : 'save',
         label: Boolean(lastSavedId) ? topNavStrings.saveAs.label : topNavStrings.quickSave.label,
-        run: () => saveDashboardAs(),
+        run: () => {
+          saveDashboardAs();
+        },
       } as TopNavMenuData,
 
       switchToViewMode: {
@@ -241,19 +253,19 @@ export const useDashboardMenuItems = ({
       } as TopNavMenuData,
     };
   }, [
-    quickSaveDashboard,
+    disableTopNav,
     isSaveInProgress,
     hasRunMigrations,
     hasUnsavedChanges,
-    dashboardBackup,
-    saveDashboardAs,
-    setIsLabsShown,
-    disableTopNav,
-    resetChanges,
-    isLabsShown,
     lastSavedId,
     showShare,
     dashboard,
+    setIsLabsShown,
+    isLabsShown,
+    dashboardBackup,
+    quickSaveDashboard,
+    saveDashboardAs,
+    resetChanges,
     clone,
   ]);
 

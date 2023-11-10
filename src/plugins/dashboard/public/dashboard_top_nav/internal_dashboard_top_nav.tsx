@@ -7,7 +7,7 @@
  */
 
 import UseUnmount from 'react-use/lib/useUnmount';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
 import {
   withSuspense,
@@ -82,7 +82,10 @@ export function InternalDashboardTopNav({
     embeddable: { getStateTransfer },
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
+    spaces: { spacesApi },
   } = pluginServices.getServices();
+  const spacesService = spacesApi?.ui.useSpaces();
+
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
 
@@ -97,6 +100,7 @@ export function InternalDashboardTopNav({
   const savedQueryId = dashboard.select((state) => state.componentState.savedQueryId);
   const lastSavedId = dashboard.select((state) => state.componentState.lastSavedId);
   const focusedPanelId = dashboard.select((state) => state.componentState.focusedPanelId);
+  const namespaces = dashboard.select((state) => state.componentState.namespaces);
   const managed = dashboard.select((state) => state.componentState.managed);
 
   const viewMode = dashboard.select((state) => state.explicitInput.viewMode);
@@ -266,11 +270,25 @@ export function InternalDashboardTopNav({
     viewMode,
   ]);
 
+  const updateSpacesForReferences = useCallback(async () => {
+    if (!spacesService || !lastSavedId || !namespaces?.length) return;
+
+    const { spacesManager } = spacesService;
+
+    const shareableReferences = await spacesManager.getShareableReferences([
+      { id: lastSavedId, type: 'dashboard' },
+    ]);
+    const objects = shareableReferences.objects.map(({ id, type }) => ({ id, type }));
+
+    spacesManager.updateSavedObjectsSpaces(objects, namespaces, []);
+  }, [lastSavedId, namespaces, spacesService]);
+
   const { viewModeTopNavConfig, editModeTopNavConfig } = useDashboardMenuItems({
     redirectTo,
     isLabsShown,
     setIsLabsShown,
     showResetChange,
+    updateSpacesForReferences,
   });
 
   UseUnmount(() => {
