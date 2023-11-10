@@ -65,12 +65,11 @@ export function EmbeddablePanelError({
   return (
     <EuiEmptyPrompt
       body={
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="errorMessageMarkdown">
           <md.Markdown
             readOnly
             markdownContent={error.message}
             openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
           />
         </EuiText>
       }
