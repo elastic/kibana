@@ -31,7 +31,7 @@ export function useValidateFieldRequest() {
       queryIn: QueryDslQueryContainer,
       headers?: HttpFetchOptions['headers']
     ) => {
-      const query = createCategorizeQuery(queryIn, timeField, timeRange.from, timeRange.to);
+      const query = createCategorizeQuery(queryIn, timeField, timeRange);
       const resp = await http.post<FieldValidationResults>(
         AIOPS_API_ENDPOINT.CATEGORIZATION_FIELD_VALIDATION,
         {

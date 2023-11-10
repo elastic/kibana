@@ -24,7 +24,7 @@ export function createCategoryRequest(
   intervalMs?: number,
   subTimeRange?: { from: number; to: number }
 ) {
-  const query = createCategorizeQuery(queryIn, timeField, timeRange?.from, timeRange?.to);
+  const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
     categories: {
       categorize_text: {
