@@ -350,11 +350,10 @@ export class ComboBoxService extends FtrService {
     const inputWrapper = $('[data-test-subj="comboBoxInput"]');
     const input = $('input[role="combobox"]');
 
-    const hasValidPlainTextValue = (
+    const hasValidPlainTextValue =
       inputWrapper.hasClass('euiComboBox__inputWrap--plainText') &&
       input.attr('aria-invalid') === 'false' &&
-      value.toLowerCase().trim() === input.val().toLowerCase().trim()
-    );
+      value.toLowerCase().trim() === input.val().toLowerCase().trim();
     if (hasValidPlainTextValue) {
       return true;
     }
