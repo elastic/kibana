@@ -17,7 +17,6 @@ import {
 import type { ReportingCore } from '../../..';
 import { INTERNAL_ROUTES } from '../../../../common/constants';
 import { PassThroughStream } from '../../../lib';
-import { ReportingRequestHandlerContext } from '../../../types';
 import { authorizedUserPreRouting, getCounters } from '../../common';
 
 const path = INTERNAL_ROUTES.DOWNLOAD_CSV;
@@ -85,7 +84,7 @@ export function registerGenerateCsvFromSavedObjectImmediate(
           eventLog.logExecutionStart();
 
           const taskPromise = csvSearchSourceImmediateExport
-            .runTask(null, req.body, context as ReportingRequestHandlerContext, stream, req)
+            .runTask(null, req.body, context, stream, req)
             .then((output) => {
               logger.info(`Job output size: ${stream.bytesWritten} bytes.`);
 
