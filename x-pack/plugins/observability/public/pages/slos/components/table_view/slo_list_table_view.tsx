@@ -44,6 +44,7 @@ import {
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
+import { SloRulesBadge } from '../badges/slo_rules_badge';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -208,29 +209,19 @@ export function SloListTableView({ sloList, loading, error }: Props) {
           )
         );
         return (
-          <EuiFlexGroup
-            direction="row"
-            responsive={false}
-            gutterSize="s"
-            alignItems="center"
-            justifyContent="flexEnd"
-          >
-            <EuiFlexItem grow>
-              <EuiText size="s">
-                {slo.summary ? (
-                  <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                    {slo.name}
-                  </a>
-                ) : (
-                  <span>{slo.name}</span>
-                )}
-              </EuiText>
-            </EuiFlexItem>
-            <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlertsBySlo.get(slo)} />
-          </EuiFlexGroup>
+          <EuiText size="s">
+            {slo.summary ? (
+              <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                {slo.name}
+              </a>
+            ) : (
+              <span>{slo.name}</span>
+            )}
+          </EuiText>
         );
       },
     },
+
     {
       field: 'instance',
       name: 'Instance',
@@ -322,6 +313,16 @@ export function SloListTableView({ sloList, loading, error }: Props) {
           />
         );
       },
+    },
+    {
+      field: 'alerts',
+      name: 'Alerts',
+      render: (_, slo: SLOWithSummaryResponse) => (
+        <>
+          <SloRulesBadge rules={rulesBySlo?.[slo.id]} onClick={() => setSloToAddRule(slo)} />
+          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlertsBySlo.get(slo)} />
+        </>
+      ),
     },
     {
       name: 'Actions',
