@@ -33,7 +33,6 @@ import {
   getFieldFormats,
   type BaseExportTypeSetupDeps,
   type BaseExportTypeStartDeps,
-  type ReportingRequestHandlerContext,
 } from '@kbn/reporting-server';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
@@ -69,7 +68,7 @@ export class CsvV2ExportType extends ExportType<
 
   public createJob = async (
     jobParams: JobParamsCsvFromSavedObject,
-    _context: ReportingRequestHandlerContext,
+    _context: unknown,
     req: KibanaRequest
   ) => {
     // 1. Validation of locatorParams
