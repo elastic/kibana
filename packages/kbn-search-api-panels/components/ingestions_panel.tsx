@@ -49,6 +49,7 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({ connectorPath, 
               defaultMessage: 'Set up a connector',
             }
           ),
+          external: false,
         },
         {
           href: 'https://github.com/elastic/connectors-python',
@@ -148,40 +149,43 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({ connectorPath, 
       ],
     },
   ];
-  return panels && panels.length > 0
-    ? panels.map(({ title, description, links }) => (
-        <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiTitle size="xxs">
-              <h6>{title}</h6>
-            </EuiTitle>
-            <EuiSpacer size="xxs" />
-            <EuiText>
-              <p>{description}</p>
-            </EuiText>
-          </EuiFlexItem>
-
-          {links && links.length > 0 ? (
-            <>
-              <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
-                {links.map(({ label, href, external, icon, onClickAppId }, index) => (
-                  <EuiFlexItem grow={false}>
-                    <EuiLink href={href} size="s" key={index} external={external}>
-                      {icon ? (
-                        <EuiButtonEmpty color="primary" iconType={icon} size="s">
-                          {label}
-                        </EuiButtonEmpty>
-                      ) : (
-                        label
-                      )}
-                    </EuiLink>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-              <EuiSpacer size="m" />
-            </>
-          ) : null}
-        </EuiFlexGroup>
-      ))
-    : null;
+  return (
+    <>
+      {panels && panels.length > 0
+        ? panels.map(({ title, description, links }) => (
+            <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">
+              <EuiFlexItem grow={false}>
+                <EuiTitle size="xxs">
+                  <h6>{title}</h6>
+                </EuiTitle>
+                <EuiSpacer size="xs" />
+                <EuiText>
+                  <p>{description}</p>
+                </EuiText>
+              </EuiFlexItem>
+              {links && links.length > 0 && (
+                <>
+                  <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
+                    {links.map(({ label, href, external, icon }, index) => (
+                      <EuiFlexItem grow={false}>
+                        <EuiLink href={href} key={index} external={external}>
+                          {icon ? (
+                            <EuiButtonEmpty color="primary" iconType={icon} size="s">
+                              {label}
+                            </EuiButtonEmpty>
+                          ) : (
+                            label
+                          )}
+                        </EuiLink>
+                      </EuiFlexItem>
+                    ))}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="m" />
+                </>
+              )}
+            </EuiFlexGroup>
+          ))
+        : null}
+    </>
+  );
 };

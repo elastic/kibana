@@ -12,11 +12,11 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
+import type { HttpStart } from '@kbn/core-http-browser';
 import { CodeBox } from './code_box';
 import { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
 import { IngestionsPanel } from './ingestions_panel';
-
 interface IngestDataProps {
   codeSnippet: string;
   selectedLanguage: LanguageDefinition;
