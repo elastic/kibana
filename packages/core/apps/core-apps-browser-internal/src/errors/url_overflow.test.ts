@@ -27,7 +27,7 @@ describe('url overflow detection', () => {
   let unlisten: any;
 
   beforeEach(() => {
-    basePath = new BasePath('/test-123');
+    basePath = new BasePath({ basePath: '/test-123' });
     history = createMemoryHistory();
     toasts = notificationServiceMock.createStartContract().toasts;
     uiSettings = uiSettingsServiceMock.createStartContract();
@@ -74,11 +74,11 @@ describe('url overflow detection', () => {
     const unmount = mountToast(element);
     expect(element).toMatchInlineSnapshot(`
       <div>
-        Either enable the 
+        Either enable the
         <code>
           state:storeInSessionStorage
         </code>
-         option in 
+         option in
         <a
           href="/test-123/app/management/kibana/settings"
         >
