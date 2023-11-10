@@ -22,8 +22,8 @@ describe(
     env: {
       ftrConfig: {
         productTypes: [
-          { product_line: 'security', product_tier: 'essentials' }
-          { product_line: 'endpoint', product_tier: 'essentials' },
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' }
         ],
       },
     },
