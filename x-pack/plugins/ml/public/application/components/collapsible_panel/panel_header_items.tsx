@@ -6,7 +6,7 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { css } from '@emotion/react/dist/emotion-react.cjs';
+import { css } from '@emotion/react';
 import React, { type FC } from 'react';
 import { useCurrentThemeVars } from '../../contexts/kibana';
 
