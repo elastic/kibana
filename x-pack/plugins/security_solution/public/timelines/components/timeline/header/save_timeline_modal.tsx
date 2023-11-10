@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiProgress,
   EuiCallOut,
-  // EuiSwitch,
+  EuiSwitch,
 } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -243,13 +243,13 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup direction="row" alignItems="center">
-                {/* {!isUnsaved ? (
+                {!isUnsaved ? (
                   <EuiSwitch
                     label={i18n.SAVE_AS_NEW}
                     checked={saveAsNewTimeline}
                     onChange={onSaveAsNewChanged}
                   />
-                ) : null} */}
+                ) : null}
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                   <EuiFlexItem grow={false} component="span">
                     <EuiButton
