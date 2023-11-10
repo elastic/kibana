@@ -20,12 +20,22 @@
 // then decrypted the migrated objects.                                                                             //
 //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-import { CoreSetup, IRouter, Plugin, RequestHandlerContext, SavedObjectsBulkResponse } from '@kbn/core/server';
+import {
+  CoreSetup,
+  IRouter,
+  Plugin,
+  RequestHandlerContext,
+  SavedObjectsBulkResponse,
+} from '@kbn/core/server';
 
 import {
-  EncryptedSavedObjectsPluginSetup, EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
 import { schema } from '@kbn/config-schema';
+
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import {
   EsoModelVersionExampleTypeRegistration,
   esoModelVersionExampleV1,
@@ -34,13 +44,10 @@ import {
   EXAMPLE_SAVED_OBJECT_TYPE,
 } from '.';
 
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
-
 const documentVersionConstants = [
   esoModelVersionExampleV1.ESO_MV_RAW_DOC,
   esoModelVersionExampleV2.ESO_MV_RAW_DOC,
-  esoModelVersionExampleV3.ESO_MV_RAW_DOC
+  esoModelVersionExampleV3.ESO_MV_RAW_DOC,
 ];
 
 export interface EsoModelVersionExamplePluginSetup {
@@ -52,13 +59,11 @@ export interface EsoModelVersionExamplePluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
-export class EsoModelVersionExample
-  implements Plugin<void, void>
-{
+export class EsoModelVersionExample implements Plugin<void, void> {
   public setup(
     core: CoreSetup<EsoModelVersionExamplePluginsStart>,
-    plugins: EsoModelVersionExamplePluginSetup) {
-
+    plugins: EsoModelVersionExamplePluginSetup
+  ) {
     // Register some endoints for the example plugin
     const router = core.http.createRouter();
     this.registerGenerateEndpoint(router); // This will create three objects - one for each model version definition.
@@ -67,9 +72,7 @@ export class EsoModelVersionExample
     this.registerGetDecryptedEndpoint(router, core, plugins); // This will decrypt the objects' secrets.
 
     // register type as ESO using the latest definition
-    plugins.encryptedSavedObjects.registerType(
-      EsoModelVersionExampleTypeRegistration
-    );
+    plugins.encryptedSavedObjects.registerType(EsoModelVersionExampleTypeRegistration);
 
     // Register the SO with model versions
     core.savedObjects.registerType({
@@ -102,29 +105,25 @@ export class EsoModelVersionExample
               },
             ],
             schemas: {
-              forwardCompatibility:
-                schema.object(
+              forwardCompatibility: schema.object(
                 {
-                    name: schema.string(),
-                    toBeRemoved: schema.string(),
-                    aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()) })),
-                    secrets: schema.any()
+                  name: schema.string(),
+                  toBeRemoved: schema.string(),
+                  aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()) })),
+                  secrets: schema.any(),
                 },
                 // ignore will strip any new unknown fields coming from new versions (a zero-downtime upgrade consideration)
                 // We want to do that unless we have a compelling reason not to, like if we know we want to add a new AAD field
                 // in the next version (see model version 2)
                 { unknowns: 'ignore' }
               ),
-              create:
-                schema.object(
-                {
-                    name: schema.string(),
-                    toBeRemoved: schema.string(),
-                    aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()) })),
-                    secrets: schema.any()
-                },
-              )
-            }
+              create: schema.object({
+                name: schema.string(),
+                toBeRemoved: schema.string(),
+                aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()) })),
+                secrets: schema.any(),
+              }),
+            },
           },
           inputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration, // Pass in the type registration for the specific version
           outputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration, // In this case both input an output are V1
@@ -144,21 +143,28 @@ export class EsoModelVersionExample
                   return {
                     attributes: {
                       aadField1: { ...aadField1, flag2: false },
-                      secrets: {...secrets, b: "model version 2 adds property 'b' to the secrets attribute"}
-                    }
+                      secrets: {
+                        ...secrets,
+                        b: "model version 2 adds property 'b' to the secrets attribute",
+                      },
+                    },
                   };
                 },
               },
             ],
             schemas: {
-              forwardCompatibility:
-                schema.object(
+              forwardCompatibility: schema.object(
                 {
                   name: schema.string(),
                   toBeRemoved: schema.string(),
-                  aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()), flag2: schema.maybe(schema.boolean()) })),
+                  aadField1: schema.maybe(
+                    schema.object({
+                      flag1: schema.maybe(schema.boolean()),
+                      flag2: schema.maybe(schema.boolean()),
+                    })
+                  ),
                   aadExcludedField: schema.maybe(schema.string()),
-                  secrets: schema.any()
+                  secrets: schema.any(),
                 },
                 // If we know that we will be adding a new AAD field in the next version, we will NOT strip new fields
                 // in the forward compatibility schema. This is a Zero-downtime upgrade consideration and ensures that
@@ -167,16 +173,19 @@ export class EsoModelVersionExample
                 // is not used yet.
                 { unknowns: 'allow' }
               ),
-              create: schema.object(
-                {
-                  name: schema.string(),
-                  toBeRemoved: schema.string(),
-                  aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()), flag2: schema.maybe(schema.boolean()) })),
-                  aadExcludedField: schema.maybe(schema.string()),
-                  secrets: schema.any()
-                }
-              )
-            }
+              create: schema.object({
+                name: schema.string(),
+                toBeRemoved: schema.string(),
+                aadField1: schema.maybe(
+                  schema.object({
+                    flag1: schema.maybe(schema.boolean()),
+                    flag2: schema.maybe(schema.boolean()),
+                  })
+                ),
+                aadExcludedField: schema.maybe(schema.string()),
+                secrets: schema.any(),
+              }),
+            },
           },
           inputType: esoModelVersionExampleV1.EsoModelVersionExampleTypeRegistration, // In this case we are expecting to transform from a V1 object
           outputType: esoModelVersionExampleV2.EsoModelVersionExampleTypeRegistration, // to a V2 object
@@ -190,37 +199,55 @@ export class EsoModelVersionExample
             changes: [
               {
                 type: 'data_removal',
-                removedAttributePaths: ['toBeRemoved']
+                removedAttributePaths: ['toBeRemoved'],
               },
             ],
             schemas: {
               forwardCompatibility: schema.object(
                 {
                   name: schema.string(),
-                  aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()), flag2: schema.maybe(schema.boolean()) })),
-                  aadField2: schema.maybe(schema.object({ foo: schema.maybe(schema.string()), bar: schema.maybe(schema.string()) })),
+                  aadField1: schema.maybe(
+                    schema.object({
+                      flag1: schema.maybe(schema.boolean()),
+                      flag2: schema.maybe(schema.boolean()),
+                    })
+                  ),
+                  aadField2: schema.maybe(
+                    schema.object({
+                      foo: schema.maybe(schema.string()),
+                      bar: schema.maybe(schema.string()),
+                    })
+                  ),
                   aadExcludedField: schema.maybe(schema.string()),
-                  secrets: schema.any()
+                  secrets: schema.any(),
                 },
                 // We will ignore any new fields of future versions again
                 { unknowns: 'ignore' }
               ),
-              create: schema.object(
-                {
-                  name: schema.string(),
-                  aadField1: schema.maybe(schema.object({ flag1: schema.maybe(schema.boolean()), flag2: schema.maybe(schema.boolean()) })),
-                  aadField2: schema.maybe(schema.object({ foo: schema.maybe(schema.string()), bar: schema.maybe(schema.string()) })),
-                  aadExcludedField: schema.maybe(schema.string()),
-                  secrets: schema.any()
-                },
-              )
-            }
+              create: schema.object({
+                name: schema.string(),
+                aadField1: schema.maybe(
+                  schema.object({
+                    flag1: schema.maybe(schema.boolean()),
+                    flag2: schema.maybe(schema.boolean()),
+                  })
+                ),
+                aadField2: schema.maybe(
+                  schema.object({
+                    foo: schema.maybe(schema.string()),
+                    bar: schema.maybe(schema.string()),
+                  })
+                ),
+                aadExcludedField: schema.maybe(schema.string()),
+                secrets: schema.any(),
+              }),
+            },
           },
           inputType: esoModelVersionExampleV2.EsoModelVersionExampleTypeRegistration, // In this case we are expecting to transform from V2 to V3. This happens to be the latest
           outputType: esoModelVersionExampleV3.EsoModelVersionExampleTypeRegistration, // version, but being explicit means we don't need to change this when we implement V4
           shouldTransformIfDecryptionFails: true,
-        })
-      }
+        }),
+      },
     });
   }
 
@@ -244,12 +271,11 @@ export class EsoModelVersionExample
             documentVersionConstants.map(async (obj) => {
               await elasticsearch.client.asInternalUser.delete({
                 id: obj.id,
-                index: obj.index
+                index: obj.index,
               });
             })
           );
-        }
-        catch (error) {
+        } catch (error) {
           // ignore errors - objects may not exist
         }
 
@@ -257,22 +283,22 @@ export class EsoModelVersionExample
         try {
           const objectsCreated = await Promise.all(
             documentVersionConstants.map(async (obj) => {
-              const createdDoc: WriteResponseBase = await elasticsearch.client.asInternalUser.create(obj);
-              const parts = createdDoc._id.split(":", 2);
-              return { type: parts[0], id: parts[1] }
+              const createdDoc: WriteResponseBase =
+                await elasticsearch.client.asInternalUser.create(obj);
+              const parts = createdDoc._id.split(':', 2);
+              return { type: parts[0], id: parts[1] };
             })
           );
 
           return response.ok({
             body: {
-              objectsCreated
+              objectsCreated,
             },
           });
-        }
-        catch (error) {
+        } catch (error) {
           return response.ok({
             body: {
-              error
+              error,
             },
           });
         }
@@ -291,26 +317,24 @@ export class EsoModelVersionExample
         // Read the raw documents so we can display the model versions prior to migration transformations
         const { elasticsearch } = await context.core;
         try {
-
           const rawDocuments = await Promise.all(
             documentVersionConstants.map(async (obj) => {
               return await elasticsearch.client.asInternalUser.get({
                 id: obj.id,
-                index: obj.index
+                index: obj.index,
               });
             })
           );
 
           return response.ok({
             body: {
-              rawDocuments
+              rawDocuments,
             },
           });
-        }
-        catch (error) {
+        } catch (error) {
           return response.ok({
             body: {
-              error
+              error,
             },
           });
         }
@@ -330,20 +354,20 @@ export class EsoModelVersionExample
         const { savedObjects } = await context.core;
         try {
           const bulkGetObjects = documentVersionConstants.map((obj) => {
-              const parts = obj.id.split(":", 2);
-              return { type: parts[0], id: parts[1] }
-            }
-          );
-
-          const result: SavedObjectsBulkResponse = await savedObjects.client.bulkGet(bulkGetObjects);
-          return response.ok({
-            body: result
+            const parts = obj.id.split(':', 2);
+            return { type: parts[0], id: parts[1] };
           });
-        }
-        catch (error) {
+
+          const result: SavedObjectsBulkResponse = await savedObjects.client.bulkGet(
+            bulkGetObjects
+          );
+          return response.ok({
+            body: result,
+          });
+        } catch (error) {
           return response.ok({
             body: {
-              error
+              error,
             },
           });
         }
@@ -355,7 +379,8 @@ export class EsoModelVersionExample
   private registerGetDecryptedEndpoint(
     router: IRouter<RequestHandlerContext>,
     core: CoreSetup<EsoModelVersionExamplePluginsStart>,
-    plugins: EsoModelVersionExamplePluginSetup) {
+    plugins: EsoModelVersionExamplePluginSetup
+  ) {
     router.get(
       {
         path: '/internal/eso_mv_example/get_decrypted',
@@ -373,19 +398,21 @@ export class EsoModelVersionExample
 
           const decrypted = await Promise.all(
             documentVersionConstants.map(async (obj) => {
-              const parts = obj.id.split(":", 2);
-              const dooder = await esoClient.getDecryptedAsInternalUser(parts[0], parts[1], { namespace });
+              const parts = obj.id.split(':', 2);
+              const dooder = await esoClient.getDecryptedAsInternalUser(parts[0], parts[1], {
+                namespace,
+              });
               return dooder;
             })
           );
 
           return response.ok({
-            body: decrypted
+            body: decrypted,
           });
         } catch (error) {
           return response.ok({
             body: {
-              error
+              error,
             },
           });
         }

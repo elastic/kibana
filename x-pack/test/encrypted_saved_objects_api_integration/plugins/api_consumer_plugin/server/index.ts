@@ -266,7 +266,7 @@ function defineModelVersionWithMigration(core: CoreSetup<PluginsStart>, deps: Pl
   const latestType = {
     type: SAVED_OBJECT_MV_TYPE,
     attributesToEncrypt: new Set(['encryptedAttribute', 'additionalEncryptedAttribute']),
-  }
+  };
   deps.encryptedSavedObjects.registerType(latestType);
 
   core.savedObjects.registerType({

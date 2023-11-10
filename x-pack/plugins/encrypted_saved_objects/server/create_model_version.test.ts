@@ -74,7 +74,7 @@ describe('create ESO model version', () => {
     expect(() =>
       mvCreator({
         modelVersion: {
-          changes: []
+          changes: [],
         },
         inputType,
         outputType,
@@ -85,9 +85,7 @@ describe('create ESO model version', () => {
   });
 
   it('merges all applicable transforms', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -133,7 +131,7 @@ describe('create ESO model version', () => {
         ],
       },
       inputType,
-      outputType
+      outputType,
     });
 
     const initialAttributes = {
@@ -194,9 +192,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on decryption failure if shouldTransformIfDecryptionFails is false', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -257,9 +253,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on decryption failure if shouldTransformIfDecryptionFails is true but error is not encryption error', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -321,9 +315,7 @@ describe('create ESO model version', () => {
   });
 
   it('executes transformation on decryption failure if shouldTransformIfDecryptionFails is true and error is encryption error', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -402,9 +394,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on transform failure', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -462,9 +452,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on transform failure even if shouldMigrateIfDecryptionFails is true', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -523,9 +511,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on encryption failure', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,
@@ -593,9 +579,7 @@ describe('create ESO model version', () => {
   });
 
   it('throws error on encryption failure even if shouldMigrateIfDecryptionFails is true', () => {
-    const instantiateServiceWithLegacyType = jest.fn(() =>
-      encryptionSavedObjectService
-    );
+    const instantiateServiceWithLegacyType = jest.fn(() => encryptionSavedObjectService);
 
     const mvCreator = getCreateEsoModelVersion(
       encryptionSavedObjectService,

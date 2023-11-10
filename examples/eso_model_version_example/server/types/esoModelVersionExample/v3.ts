@@ -1,21 +1,29 @@
-import { EncryptedSavedObjectTypeRegistration } from "@kbn/encrypted-saved-objects-plugin/server";
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import { EncryptedSavedObjectTypeRegistration } from '@kbn/encrypted-saved-objects-plugin/server';
 
 export const EXAMPLE_SAVED_OBJECT_TYPE = 'eso_model_version_example';
 
 export interface EsoModelVersionExampleOptions1 {
-  flag1?: boolean,
-  flag2?: boolean
+  flag1?: boolean;
+  flag2?: boolean;
 }
 
 // This is a new attribute added in V3
 export interface EsoModelVersionExampleOptions2 {
-  foo?: string,
-  bar?: string
+  foo?: string;
+  bar?: string;
 }
 
 export interface EsoModelVersionExampleSecretData {
-  a: string,
-  b?: string
+  a: string;
+  b?: string;
 }
 
 // These are the attributes of V3 of our saved object.
@@ -35,38 +43,36 @@ export const EsoModelVersionExampleTypeRegistration: EncryptedSavedObjectTypeReg
   type: EXAMPLE_SAVED_OBJECT_TYPE,
   attributesToEncrypt: new Set(['secrets']),
   attributesToExcludeFromAAD: new Set(['name', 'aadExcludedField']), // aadField1 is included in AAD, but not name, or aadExcludedField
-}
+};
 
 // This is just some static information used to generate a document
 // for this specific model version. Otherwise, creating a saved object
 // will always create the latest model version.
-export const ESO_MV_RAW_DOC =
-  {
-  index: ".kibana",
-  id: "eso_model_version_example:4b43a8b0-7dd7-11ee-8355-7d13444c2fd7",
+export const ESO_MV_RAW_DOC = {
+  index: '.kibana',
+  id: 'eso_model_version_example:4b43a8b0-7dd7-11ee-8355-7d13444c2fd7',
   document: {
     eso_model_version_example: {
-      name: "MV3 Test",
+      name: 'MV3 Test',
       aadField1: {
         flag1: false,
-        flag2: true
+        flag2: true,
       },
       aadField2: {
-        foo: "bar",
-        bar: "foo"
+        foo: 'bar',
+        bar: 'foo',
       },
-      aadExcludedField: "this is a field excluded from AAD",
-      secrets: "YYtHdisdq44Mvd9VdUui62hM8OowEgkuWSfidWq11lG4aXYR61tf+G+BlbwO6rqKPbFWK238Vn1tP+zceeiCofDqEZkViinT1nGDGjArEEsmIUlDtj5IdaY6boMGRzUJ+37viUrISFXMVV9n2qVMp7IYb2BGkAb3hyh4+ZO9SPTbrKhkcpKgpLs3CEvmfsgeW/Tkxh+F65uK2RShkgLoPy62JI35XUz1paop+zSQ90yPL9ysoQ=="
+      aadExcludedField: 'this is a field excluded from AAD',
+      secrets:
+        'YYtHdisdq44Mvd9VdUui62hM8OowEgkuWSfidWq11lG4aXYR61tf+G+BlbwO6rqKPbFWK238Vn1tP+zceeiCofDqEZkViinT1nGDGjArEEsmIUlDtj5IdaY6boMGRzUJ+37viUrISFXMVV9n2qVMp7IYb2BGkAb3hyh4+ZO9SPTbrKhkcpKgpLs3CEvmfsgeW/Tkxh+F65uK2RShkgLoPy62JI35XUz1paop+zSQ90yPL9ysoQ==',
     },
-    type: "eso_model_version_example",
+    type: 'eso_model_version_example',
     references: [],
     managed: false,
-    namespaces: [
-      "default"
-    ],
-    coreMigrationVersion: "8.8.0",
-    typeMigrationVersion: "10.3.0",
-    updated_at: "2023-11-08T01:36:52.923Z",
-    created_at: "2023-11-08T01:36:52.923Z"
-  }
-}
+    namespaces: ['default'],
+    coreMigrationVersion: '8.8.0',
+    typeMigrationVersion: '10.3.0',
+    updated_at: '2023-11-08T01:36:52.923Z',
+    created_at: '2023-11-08T01:36:52.923Z',
+  },
+};

@@ -63,12 +63,13 @@ export const getCreateEsoModelVersion =
     }
 
     const inputService = instantiateServiceWithLegacyType(inputType); // inputType
-      // ? instantiateServiceWithLegacyType(inputType)
-      // : encryptedSavedObjectsService;
+    // ? instantiateServiceWithLegacyType(inputType)
+    // : encryptedSavedObjectsService;
 
-    const outputService = inputType !== outputType? instantiateServiceWithLegacyType(outputType) : inputService;  // outputType
-      // ? instantiateServiceWithLegacyType(outputType)
-      // : encryptedSavedObjectsService;
+    const outputService =
+      inputType !== outputType ? instantiateServiceWithLegacyType(outputType) : inputService; // outputType
+    // ? instantiateServiceWithLegacyType(outputType)
+    // : encryptedSavedObjectsService;
 
     const transformFn = createMergedTransformFn(
       inputService,
@@ -128,10 +129,7 @@ function createMergedTransformFn(
 
     // encrypt
     const transformedDoc = mapAttributes(result.document, (transformedAttributes) => {
-      return outputService.encryptAttributesSync<any>(
-        encryptionDescriptor,
-        transformedAttributes
-      );
+      return outputService.encryptAttributesSync<any>(encryptionDescriptor, transformedAttributes);
     });
 
     // return encrypted doc
