@@ -70,6 +70,10 @@ export const getGenAiTokenTracking = async ({
     const data = result.data as unknown as {
       usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
     };
+    if (data.usage == null) {
+      logger.error('Response did not contain usage object');
+      return null;
+    }
     return {
       total_tokens: data.usage?.total_tokens ?? 0,
       prompt_tokens: data.usage?.prompt_tokens ?? 0,

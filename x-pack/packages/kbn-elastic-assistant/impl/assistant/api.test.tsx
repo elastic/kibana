@@ -84,7 +84,7 @@ describe('API tests', () => {
       );
     });
 
-    it('returns API_ERROR when the response status is error aned langchain is on', async () => {
+    it('returns API_ERROR when the response status is error and langchain is on', async () => {
       (mockHttp.fetch as jest.Mock).mockResolvedValue({ status: 'error' });
 
       const testProps: FetchConnectorExecuteAction = {

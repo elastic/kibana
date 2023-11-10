@@ -6,7 +6,6 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import { isEmpty, omitBy } from 'lodash';
 
 export interface InvokeBody {
   prompt: string;
@@ -29,16 +28,7 @@ export async function getTokenCountFromBedrockInvoke({
 
   const promptTokens = tokensFromMessages;
 
-  const completionTokens = encode(
-    JSON.stringify(
-      omitBy(
-        {
-          content: response,
-        },
-        isEmpty
-      )
-    )
-  ).length;
+  const completionTokens = encode(response).length;
 
   return {
     prompt: promptTokens,

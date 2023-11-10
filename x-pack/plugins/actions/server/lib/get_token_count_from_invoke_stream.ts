@@ -6,7 +6,6 @@
  */
 
 import { encode } from 'gpt-tokenizer';
-import { isEmpty, omitBy } from 'lodash';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 
@@ -30,13 +29,11 @@ export async function getTokenCountFromInvokeStream({
   const chatCompletionRequest = body;
 
   // per https://github.com/openai/openai-cookbook/blob/main/examples/How_to_count_tokens_with_tiktoken.ipynb
-  const tokensFromMessages = encode(
+  const promptTokens = encode(
     chatCompletionRequest.messages
       .map((msg) => `<|start|>${msg.role}\n${msg.content}<|end|>`)
       .join('\n')
   ).length;
-
-  const promptTokens = tokensFromMessages;
 
   let responseBody: string = '';
 
@@ -50,16 +47,7 @@ export async function getTokenCountFromInvokeStream({
     // no need to handle this explicitly
   }
 
-  const completionTokens = encode(
-    JSON.stringify(
-      omitBy(
-        {
-          content: responseBody,
-        },
-        isEmpty
-      )
-    )
-  ).length;
+  const completionTokens = encode(responseBody).length;
 
   return {
     prompt: promptTokens,
