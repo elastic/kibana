@@ -6,6 +6,8 @@
  */
 
 import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFilterButton,
   EuiFilterGroup,
   EuiFlexGroup,
@@ -81,6 +83,11 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
   );
   const selectedSort = sortOptions.find((option) => option.checked === 'on');
 
+  const [viewMode, setViewMode] = useState<EuiComboBoxOptionOption<string>>({
+    value: 'default',
+    label: 'Default',
+  });
+
   const handleToggleSortButton = () => setSortPopoverOpen(!isSortPopoverOpen);
   const handleChangeSort = (newOptions: Array<Item<SortField>>) => {
     setSortOptions(newOptions);
@@ -122,7 +129,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
         />
       </EuiFlexItem>
 
-      <EuiFlexItem grow={true} style={{ maxWidth: 280 }}>
+      <EuiFlexItem grow={false}>
         <EuiFilterGroup>
           <EuiPopover
             button={
@@ -143,7 +150,7 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
             panelPaddingSize="none"
             anchorPosition="downCenter"
           >
-            <div style={{ width: 300 }}>
+            <div style={{ width: 250 }}>
               <EuiPopoverTitle paddingSize="s">
                 {i18n.translate('xpack.observability.slo.list.sortBy', {
                   defaultMessage: 'Sort by',
@@ -160,6 +167,26 @@ export function SloListSearchBar({ loading, onChangeQuery, onChangeSort, initial
             </div>
           </EuiPopover>
         </EuiFilterGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiComboBox
+          aria-label={i18n.translate(
+            'xpack.observability.sloListSearchBar.euiComboBox.viewModeLabel',
+            { defaultMessage: 'View mode' }
+          )}
+          placeholder="Select a single option"
+          singleSelection={{ asPlainText: true }}
+          options={[
+            { value: 'default', label: 'Default' },
+            { value: 'table', label: 'Compact' },
+            { value: 'card', label: 'Card' },
+          ]}
+          isClearable={false}
+          selectedOptions={[viewMode]}
+          onChange={(selectedOptions: Array<EuiComboBoxOptionOption<string>>) =>
+            setViewMode(selectedOptions[0])
+          }
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
