@@ -131,4 +131,52 @@ describe('getAvailableVersions', () => {
     // Should sort, uniquify and filter out versions < 7.17
     expect(res).toEqual(['8.10.0', '8.9.2', '8.1.0', '8.0.0', '7.17.0']);
   });
+
+  it('should cache results', async () => {
+    mockKibanaVersion = '300.0.0';
+    mockedReadFile.mockResolvedValue(`["8.1.0", "8.0.0", "7.17.0", "7.16.0"]`);
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 8.1.0',
+              version_number: '8.1.0',
+            },
+            {
+              title: 'Elastic Agent 8.10.0',
+              version_number: '8.10.0',
+            },
+            {
+              title: 'Elastic Agent 8.9.2',
+              version_number: '8.9.2',
+            },
+            ,
+          ],
+        ])
+      ),
+    } as any);
+
+    await getAvailableVersions();
+
+    mockedFetch.mockResolvedValueOnce({
+      status: 200,
+      text: jest.fn().mockResolvedValue(
+        JSON.stringify([
+          [
+            {
+              title: 'Elastic Agent 300.0.0',
+              version_number: '300.0.0',
+            },
+          ],
+        ])
+      ),
+    } as any);
+
+    const res2 = await getAvailableVersions();
+
+    expect(mockedFetch).toBeCalledTimes(1);
+    expect(res2).not.toContain('300.0.0');
+  });
 });

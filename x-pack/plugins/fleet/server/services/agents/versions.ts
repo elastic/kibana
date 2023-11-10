@@ -100,8 +100,11 @@ export const getAvailableVersions = async ({
     availableVersions = [kibanaVersion];
   }
 
-  CACHED_AVAILABLE_VERSIONS = availableVersions;
-  LAST_FETCHED = Date.now();
+  // Don't prime the cache in tests
+  if (!ignoreCache) {
+    CACHED_AVAILABLE_VERSIONS = availableVersions;
+    LAST_FETCHED = Date.now();
+  }
 
   return availableVersions;
 };
