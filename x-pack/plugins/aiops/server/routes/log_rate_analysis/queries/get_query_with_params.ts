@@ -31,7 +31,7 @@ export const getQueryWithParams = ({
   return {
     bool: {
       filter: [
-        searchQuery,
+        ...(searchQuery.match_all === undefined ? [searchQuery] : []),
         ...getFilters(params),
         ...(Array.isArray(termFilters) ? termFilters.map(getTermsQuery) : []),
         ...(filter ? [filter] : []),

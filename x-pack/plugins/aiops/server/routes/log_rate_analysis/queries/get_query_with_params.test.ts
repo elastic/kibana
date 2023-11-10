@@ -84,4 +84,36 @@ describe('getQueryWithParams', () => {
       },
     });
   });
+
+  it("should not add `searchQuery` if it's just a match_all query", () => {
+    const query = getQueryWithParams({
+      params: {
+        index: 'the-index',
+        timeFieldName: 'the-time-field-name',
+        start: 1577836800000,
+        end: 1609459200000,
+        baselineMin: 10,
+        baselineMax: 20,
+        deviationMin: 30,
+        deviationMax: 40,
+        includeFrozen: false,
+        searchQuery: '{"match_all":{}}',
+      },
+    });
+    expect(query).toEqual({
+      bool: {
+        filter: [
+          {
+            range: {
+              'the-time-field-name': {
+                format: 'epoch_millis',
+                gte: 1577836800000,
+                lte: 1609459200000,
+              },
+            },
+          },
+        ],
+      },
+    });
+  });
 });
