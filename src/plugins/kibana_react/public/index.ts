@@ -75,7 +75,7 @@ export { toMountPoint } from './util';
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export {
   MarkdownButThisComponentIsDEPRECATED,
-  MarkdownSimpleButThisComponentIsDEPRECATED
+  MarkdownSimpleButThisComponentIsDEPRECATED,
 } from './markdown';
 
 export type { ToMountPointOptions } from './util';
