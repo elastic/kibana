@@ -30,7 +30,7 @@ describe('parseAppUrl', () => {
 
   beforeEach(() => {
     apps = new Map();
-    basePath = new BasePath('/base-path');
+    basePath = new BasePath({ basePath: '/base-path' });
 
     createApp({
       id: 'foo',

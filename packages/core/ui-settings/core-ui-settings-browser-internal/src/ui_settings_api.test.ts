@@ -11,6 +11,7 @@ import fetchMock from 'fetch-mock/es5/client';
 import * as Rx from 'rxjs';
 import { takeUntil, toArray } from 'rxjs/operators';
 
+import type { HttpSetup } from '@kbn/core-http-browser';
 import { setup as httpSetup } from '@kbn/core-test-helpers-http-setup-browser';
 import { UiSettingsApi } from './ui_settings_api';
 
@@ -19,7 +20,7 @@ function setup() {
     injectedMetadata.getBasePath.mockReturnValue('/foo/bar');
   });
 
-  const uiSettingsApi = new UiSettingsApi(http);
+  const uiSettingsApi = new UiSettingsApi(http as HttpSetup);
 
   return {
     http,

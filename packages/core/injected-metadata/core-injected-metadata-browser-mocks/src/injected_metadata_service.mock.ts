@@ -32,6 +32,9 @@ const createSetupContractMock = () => {
     getKibanaBuildNumber: jest.fn(),
     getCustomBranding: jest.fn(),
   };
+  setupContract.getBasePath.mockReturnValue('/base-path');
+  setupContract.getServerBasePath.mockReturnValue('/server-base-path');
+  setupContract.getAssetsHrefBase.mockReturnValue('/assets-base-path');
   setupContract.getCspConfig.mockReturnValue({ warnLegacyBrowsers: true });
   setupContract.getExternalUrlConfig.mockReturnValue({ policy: [] });
   setupContract.getKibanaVersion.mockReturnValue('kibanaVersion');
