@@ -5,7 +5,24 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-export const ELASTIC_AGENT_NAMES = [
+
+/**
+ * We cannot mark these arrays as const and derive their type
+ * because we need to be able to assign them as mutable entities for ES queries.
+ */
+export type ElasticAgentName =
+  | 'dotnet'
+  | 'go'
+  | 'iOS/swift'
+  | 'java'
+  | 'js-base'
+  | 'nodejs'
+  | 'php'
+  | 'python'
+  | 'ruby'
+  | 'rum-js'
+  | 'android/java';
+export const ELASTIC_AGENT_NAMES: ElasticAgentName[] = [
   'dotnet',
   'go',
   'iOS/swift',
@@ -17,9 +34,23 @@ export const ELASTIC_AGENT_NAMES = [
   'ruby',
   'rum-js',
   'android/java',
-] as const;
+];
 
-export const OPEN_TELEMETRY_AGENT_NAMES = [
+export type OpenTelemetryAgentName =
+  | 'otlp'
+  | 'opentelemetry/cpp'
+  | 'opentelemetry/dotnet'
+  | 'opentelemetry/erlang'
+  | 'opentelemetry/go'
+  | 'opentelemetry/java'
+  | 'opentelemetry/nodejs'
+  | 'opentelemetry/php'
+  | 'opentelemetry/python'
+  | 'opentelemetry/ruby'
+  | 'opentelemetry/rust'
+  | 'opentelemetry/swift'
+  | 'opentelemetry/webjs';
+export const OPEN_TELEMETRY_AGENT_NAMES: OpenTelemetryAgentName[] = [
   'otlp',
   'opentelemetry/cpp',
   'opentelemetry/dotnet',
@@ -33,22 +64,18 @@ export const OPEN_TELEMETRY_AGENT_NAMES = [
   'opentelemetry/rust',
   'opentelemetry/swift',
   'opentelemetry/webjs',
-] as const;
+];
 
-export const JAVA_AGENT_NAMES = ['java', 'opentelemetry/java'] as const;
+export type JavaAgentName = 'java' | 'opentelemetry/java';
+export const JAVA_AGENT_NAMES: JavaAgentName[] = ['java', 'opentelemetry/java'];
 
-export const RUM_AGENT_NAMES = ['js-base', 'rum-js', 'opentelemetry/webjs'] as const;
+export type RumAgentName = 'js-base' | 'rum-js' | 'opentelemetry/webjs';
+export const RUM_AGENT_NAMES: RumAgentName[] = ['js-base', 'rum-js', 'opentelemetry/webjs'];
 
-export const SERVERLESS_TYPE = ['aws.lambda', 'azure.functions'] as const;
-
-export type ElasticAgentName = typeof ELASTIC_AGENT_NAMES[number];
-export type OpenTelemetryAgentName = typeof OPEN_TELEMETRY_AGENT_NAMES[number];
-export type JavaAgentName = typeof JAVA_AGENT_NAMES[number];
-export type RumAgentName = typeof RUM_AGENT_NAMES[number];
-export type ServerlessType = typeof SERVERLESS_TYPE[number];
+export type ServerlessType = 'aws.lambda' | 'azure.functions';
+export const SERVERLESS_TYPE: ServerlessType[] = ['aws.lambda', 'azure.functions'];
 
 export type AgentName = ElasticAgentName | OpenTelemetryAgentName | JavaAgentName | RumAgentName;
-
 export const AGENT_NAMES: AgentName[] = [
   ...ELASTIC_AGENT_NAMES,
   ...OPEN_TELEMETRY_AGENT_NAMES,
