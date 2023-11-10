@@ -61,8 +61,7 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
 
-  const kqlQueryExpression =
-    isEmpty(dataProviders) && isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
+  const kqlQueryExpression = isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
 
   const kqlQuery = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),

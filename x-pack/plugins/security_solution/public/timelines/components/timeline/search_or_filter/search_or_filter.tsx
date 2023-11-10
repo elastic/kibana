@@ -113,6 +113,11 @@ export const SearchOrFilter = React.memo<Props>(
       return DATA_PROVIDER_HIDDEN_POPULATED;
     }, [isDataProviderEmpty, isDataProviderVisible]);
 
+    const buttonColor = useMemo(
+      () => (isDataProviderEmpty || isDataProviderVisible ? 'primary' : 'warning'),
+      [isDataProviderEmpty, isDataProviderVisible]
+    );
+
     return (
       <>
         <SearchOrFilterContainer>
@@ -153,9 +158,7 @@ export const SearchOrFilter = React.memo<Props>(
               >
                 <EuiToolTip content={dataProviderIconTooltipContent}>
                   <EuiButtonIcon
-                    color={
-                      dataProviders?.length > 0 && !isDataProviderVisible ? 'warning' : 'primary'
-                    }
+                    color={buttonColor}
                     isSelected={isDataProviderVisible}
                     iconType={'timeline'}
                     data-test-subj="toggle-data-provider"

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { shallow } from 'enzyme';
 import React from 'react';
 
 import { coreMock } from '@kbn/core/public/mocks';
@@ -50,15 +49,6 @@ describe('Header', () => {
   };
 
   describe('rendering', () => {
-    test('renders correctly against snapshot', () => {
-      const wrapper = shallow(
-        <TestProviders>
-          <TimelineHeader {...props} />
-        </TestProviders>
-      );
-      expect(wrapper).toMatchSnapshot();
-    });
-
     test('it renders the data providers when show is true', async () => {
       const testProps = { ...props, show: true };
       const wrapper = await getWrapper(

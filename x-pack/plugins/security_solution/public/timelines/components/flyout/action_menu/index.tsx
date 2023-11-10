@@ -7,6 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import type { TimelineTabs } from '../../../../../common/types';
 import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
@@ -28,6 +29,7 @@ export const TimelineActionMenu = ({
   activeTab,
   isInspectButtonDisabled,
 }: TimelineActionMenuProps) => {
+  const userCasesPermissions = useGetUserCasesPermissions();
   return (
     <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
       <EuiFlexItem data-test-subj="new-timeline-action">
@@ -36,9 +38,11 @@ export const TimelineActionMenu = ({
       <EuiFlexItem data-test-subj="open-timeline-action">
         <OpenTimelineAction />
       </EuiFlexItem>
-      <EuiFlexItem>
-        <AddToCaseButton timelineId={timelineId} />
-      </EuiFlexItem>
+      {userCasesPermissions.create && userCasesPermissions.read ? (
+        <EuiFlexItem>
+          <AddToCaseButton timelineId={timelineId} />
+        </EuiFlexItem>
+      ) : null}
       <EuiFlexItem data-test-subj="inspect-timeline-action">
         <InspectButton
           compact={mode === 'compact'}
