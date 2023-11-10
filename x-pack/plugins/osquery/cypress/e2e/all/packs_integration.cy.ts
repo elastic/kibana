@@ -162,7 +162,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').click();
         cy.contains('Run a set of queries in a pack.').click();
-        cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
         cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
         selectAllAgents();
         submitQuery();

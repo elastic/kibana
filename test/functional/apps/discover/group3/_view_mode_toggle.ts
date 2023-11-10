@@ -79,13 +79,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await queryBar.submitQuery();
           await PageObjects.header.waitUntilLoadingHasFinished();
 
-          await testSubjects.existOrFail('discoverMainError');
+          await PageObjects.discover.showsErrorCallout();
 
           await queryBar.clearQuery();
           await queryBar.submitQuery();
           await PageObjects.header.waitUntilLoadingHasFinished();
 
-          await testSubjects.missingOrFail('discoverMainError');
+          await testSubjects.missingOrFail('discoverErrorCalloutTitle');
         });
 
         it('should show Field Statistics tab', async () => {

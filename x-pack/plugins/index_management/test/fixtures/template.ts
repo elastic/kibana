@@ -7,6 +7,7 @@
 
 import { getRandomString, getRandomNumber } from '@kbn/test-jest-helpers';
 import { TemplateDeserialized, TemplateType, TemplateListItem } from '../../common';
+import { IndexSettings, Aliases, Mappings, DataStream } from '../../common/types';
 
 const objHasProperties = (obj?: Record<string, any>): boolean => {
   return obj === undefined || Object.keys(obj).length === 0 ? false : true;
@@ -17,7 +18,7 @@ export const getComposableTemplate = ({
   version = getRandomNumber(),
   priority = getRandomNumber(),
   indexPatterns = [],
-  template: { settings, aliases, mappings } = {},
+  template: { settings, aliases, mappings, lifecycle } = {},
   hasDatastream = false,
   isLegacy = false,
   type = 'default',
@@ -27,6 +28,12 @@ export const getComposableTemplate = ({
     isLegacy?: boolean;
     type?: TemplateType;
     hasDatastream: boolean;
+    template?: {
+      settings?: IndexSettings;
+      aliases?: Aliases;
+      mappings?: Mappings;
+      lifecycle?: DataStream['lifecycle'];
+    };
   }
 > = {}): TemplateDeserialized => {
   const indexTemplate = {
@@ -39,6 +46,7 @@ export const getComposableTemplate = ({
       aliases,
       mappings,
       settings,
+      lifecycle,
     },
     _kbnMeta: {
       type,
