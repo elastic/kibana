@@ -13,7 +13,6 @@ import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
 import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
@@ -60,7 +59,7 @@ describe(`POST ${PUBLIC_ROUTES.GENERATE_PREFIX}`, () => {
     httpSetup.registerRouteHandlerContext<ReportingRequestHandlerContext, 'reporting'>(
       reportingSymbol,
       'reporting',
-      () => reportingMock.createStart() as unknown as ReportingServerPluginSetup
+      () => reportingMock.createStart()
     );
 
     const mockSetupDeps = createMockPluginSetup({
