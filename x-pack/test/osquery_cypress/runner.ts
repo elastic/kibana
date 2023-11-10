@@ -18,7 +18,7 @@ import { createAgentPolicy } from './utils';
 
 async function setupFleetAgent({ getService }: FtrProviderContext) {
   // Un-comment line below to set tooling log levels to verbose. Useful when debugging
-  createToolingLogger.defaultLogLevel = 'verbose';
+  // createToolingLogger.defaultLogLevel = 'verbose';
 
   // const log = getService('log');
   const config = getService('config');
