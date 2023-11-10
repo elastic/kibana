@@ -19,9 +19,11 @@ import {
   EndpointDocGenerator,
   Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { targetTags } from '../../../security_solution_endpoint/target_tags';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { InsertedEvents, processEventsIndex } from '../../services/resolver';
 import { createAncestryArray, schemaWithAncestry } from './common';
+import { HEADERS } from '../../headers';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -34,7 +36,9 @@ export default function ({ getService }: FtrProviderContext) {
     }
   };
 
-  describe('Resolver handling of entity ids', () => {
+  describe('Resolver handling of entity ids', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     describe('entity api', () => {
       let origin: Event;
       let genData: InsertedEvents;
@@ -52,11 +56,14 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       it('excludes events that have an empty entity_id field', async () => {
-        const { body }: { body: ResolverEntityIndex } = await supertest.get(
-          // using the same indices value here twice to force the query parameter to be an array
-          // for some reason using supertest's query() function doesn't construct a parsable array
-          `/api/endpoint/resolver/entity?_id=${genData.eventsInfo[0]._id}&indices=${eventsIndexPattern}&indices=${eventsIndexPattern}`
-        );
+        const { body }: { body: ResolverEntityIndex } = await supertest
+          .get(
+            // using the same indices value here twice to force the query parameter to be an array
+            // for some reason using supertest's query() function doesn't construct a parsable array
+            `/api/endpoint/resolver/entity?_id=${genData.eventsInfo[0]._id}&indices=${eventsIndexPattern}&indices=${eventsIndexPattern}`
+          )
+          .set(HEADERS);
+
         expect(body).to.be.empty();
       });
     });
@@ -100,7 +107,7 @@ export default function ({ getService }: FtrProviderContext) {
       it('does not find children without a process entity_id', async () => {
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 100,
             ancestors: 0,
@@ -172,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
         };
         const { body }: { body: ResolverNode[] } = await supertest
           .post('/api/endpoint/resolver/tree')
-          .set('kbn-xsrf', 'xxx')
+          .set(HEADERS)
           .send({
             descendants: 0,
             ancestors: 10,

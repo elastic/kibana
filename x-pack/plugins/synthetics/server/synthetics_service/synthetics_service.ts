@@ -640,6 +640,7 @@ export class SyntheticsService {
         monitor: normalizeSecrets(monitor).attributes,
         configId: monitor.id,
         heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
+        spaceId: monitorSpace,
       };
     });
 
