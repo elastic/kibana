@@ -67,7 +67,7 @@ const CardItemComponent: React.FC<{
     [cardId, expandCard, onCardClicked]
   );
   const hasActiveSteps = activeStepIds != null && activeStepIds.length > 0;
-  return cardItem && hasActiveSteps ? (
+  return cardItem ? (
     <EuiPanel
       hasBorder
       paddingSize="none"
@@ -76,6 +76,7 @@ const CardItemComponent: React.FC<{
         padding: ${euiTheme.size.base} ${euiTheme.size.l} ${euiTheme.size.l};
         margin-bottom: ${euiTheme.size.xs};
         border-radius: ${euiTheme.size.xs};
+        border: 0;
       `}
       data-test-subj={`card-${cardItem.id}`}
       borderRadius="none"
@@ -124,9 +125,9 @@ const CardItemComponent: React.FC<{
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        {expandCard && hasActiveSteps && (
+        {expandCard && hasActiveSteps && !cardItem.hideSteps && (
           <EuiFlexItem>
-            {[...activeStepIds].map((stepId) => {
+            {activeStepIds.map((stepId) => {
               return (
                 <CardStep
                   activeProducts={activeProducts}

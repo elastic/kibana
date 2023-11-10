@@ -11,7 +11,7 @@ import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, useEuiShadow, useEuiTheme } 
 import { css } from '@emotion/react';
 
 import * as i18n from './translations';
-import { useSetUpSections } from './use_setup_cards';
+import { useSetUpSections } from './use_setup_sections';
 
 import type {
   ActiveSections,

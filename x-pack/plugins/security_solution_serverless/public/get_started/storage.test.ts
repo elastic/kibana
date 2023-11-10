@@ -6,7 +6,7 @@
  */
 
 import { defaultExpandedCards, getStartedStorage } from './storage';
-import { ConfigureSteps, GetSetUpCardId, IntroductionSteps, type StepId } from './types';
+import { ConfigureSteps, IntroductionSteps, type StepId } from './types';
 import { storage } from '../common/lib/storage';
 import type { MockStorage } from '../common/lib/__mocks__/storage';
 import { ProductLine } from '../../common/product';

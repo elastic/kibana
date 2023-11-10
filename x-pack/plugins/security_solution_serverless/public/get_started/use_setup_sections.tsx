@@ -6,7 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui';
-import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel, EuiTitle } from '@elastic/eui';
+import { EuiSpacer, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { css } from '@emotion/react';
 import type {
@@ -119,14 +119,20 @@ export const useSetUpSections = ({
               css={css`
                 margin: ${euiTheme.size.l} 0;
                 padding-top: 4px;
+                background-color: ${euiTheme.colors.lightestShade};
               `}
               key={currentSection.id}
               data-test-subj={`section-${currentSection.id}`}
             >
-              <EuiTitle size="xxs">
-                <span>{currentSection.title}</span>
-              </EuiTitle>
-              <EuiSpacer size="m" />
+              <span
+                css={css`
+                  font-size: ${euiTheme.base * 1.375}px;
+                  font-weight: ${euiTheme.font.weight.bold};
+                `}
+              >
+                {currentSection.title}
+              </span>
+              <EuiSpacer size="l" />
               <EuiFlexGroup
                 gutterSize="m"
                 direction="column"
@@ -141,7 +147,14 @@ export const useSetUpSections = ({
         }
         return acc;
       }, []),
-    [euiTheme.size.base, euiTheme.size.l, setUpCards]
+    [
+      euiTheme.base,
+      euiTheme.colors.lightestShade,
+      euiTheme.font.weight.bold,
+      euiTheme.size.base,
+      euiTheme.size.l,
+      setUpCards,
+    ]
   );
 
   return { setUpSections };

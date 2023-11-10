@@ -7,12 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const GET_STARTED_PAGE_TITLE = i18n.translate(
-  'xpack.securitySolutionServerless.getStarted.title',
-  {
-    defaultMessage: `Welcome!`,
-  }
-);
+export const GET_STARTED_PAGE_TITLE = (userName: string) =>
+  i18n.translate('xpack.securitySolutionServerless.getStarted.Title', {
+    defaultMessage: `Hi {userName}!`,
+    values: { userName },
+  });
 
 export const GET_STARTED_PAGE_SUBTITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.subTitle',
@@ -26,6 +25,11 @@ export const GET_STARTED_PAGE_DESCRIPTION = i18n.translate(
   {
     defaultMessage: `Set up your Elastic Security workspace.  Use the toggles below to curate a list of tasks that best fits your environment`,
   }
+);
+
+export const PROGRESS_TRACKER_LABEL = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.progressTracker.progressBar.label',
+  { defaultMessage: 'Progress' }
 );
 
 export const STEP_TIME_MIN = (min: number) =>
@@ -46,17 +50,52 @@ export const STEPS_LEFT = (steps: number) =>
     }
   );
 
-export const GET_SET_UP_TITLE = i18n.translate(
+export const QUICK_START_SECTION_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
   {
-    defaultMessage: 'Get set up',
+    defaultMessage: 'Quick start',
   }
 );
 
-export const INTRODUCTION_TITLE = i18n.translate(
+export const ADD_AND_VALIDATE_DATA_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
+  {
+    defaultMessage: 'Add and validate your data',
+  }
+);
+
+export const GET_STARTED_WITH_ALERTS_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
+  {
+    defaultMessage: 'Add and validate your data',
+  }
+);
+
+export const CREATE_PROJECT_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.title',
   {
-    defaultMessage: 'Introduction',
+    defaultMessage: 'Create your first project',
+  }
+);
+
+export const OVERVIEW_VIDEO_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.introduction.title',
+  {
+    defaultMessage: 'Watch the overview video',
+  }
+);
+
+export const ADD_INTEGRATION_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.addIntegration.title',
+  {
+    defaultMessage: 'Add integrations',
+  }
+);
+
+export const VIEW_DASHBOARD_TITLE = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.viewDashboard.title',
+  {
+    defaultMessage: 'View and analyze your data using dashboards',
   }
 );
 

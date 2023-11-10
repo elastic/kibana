@@ -22,7 +22,7 @@ export interface Badge {
   id: string;
 }
 
-export type StepId = IntroductionSteps | ConfigureSteps | ExploreSteps;
+export type StepId = CreateProjectSteps | OverviewSteps | AddIntegrationsSteps | ViewDashboardSteps;
 
 export interface Step {
   description?: Array<React.ReactNode | string>;
@@ -33,26 +33,40 @@ export interface Step {
   timeInMinutes?: number;
 }
 
-export type CardId = GetSetUpCardId;
+export type CardId =
+  | QuickStartSectionCardsId
+  | AddAndValidateYourDataCardsId
+  | GetStartedWithAlertsCardsId;
 
 export interface Card {
   icon?: EuiIconProps;
   id: CardId;
   steps?: Step[];
   title: string;
+  hideSteps?: boolean;
 }
 
 export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;
 
 export enum SectionId {
-  getSetUp = 'getSetUp',
-  getMoreFromElasticSecurity = 'getMoreFromElasticSecurity',
+  quickStart = 'quickStart',
+  addAndValidateYourData = 'addAndValidateYourData',
+  getStartedWithAlerts = 'getStartedWithAlerts',
 }
 
-export enum GetSetUpCardId {
-  configure = 'configure',
-  introduction = 'introduction',
-  explore = 'explore',
+export enum QuickStartSectionCardsId {
+  createFirstProject = 'createFirstProject',
+  watchTheOverviewVideo = 'watchTheOverviewVideo',
+}
+
+export enum AddAndValidateYourDataCardsId {
+  addIntegrations = 'addIntegrations',
+  viewDashboards = 'viewDashboards',
+}
+
+export enum GetStartedWithAlertsCardsId {
+  enablePrebuiltRules = 'enablePrebuiltRules',
+  viewAlerts = 'viewAlerts',
 }
 
 export enum BadgeId {
@@ -61,18 +75,20 @@ export enum BadgeId {
   edr = 'edr',
 }
 
-export enum IntroductionSteps {
+export enum CreateProjectSteps {
+  createFirstProject = 'createFirstProject',
+}
+
+export enum OverviewSteps {
   getToKnowElasticSecurity = 'getToKnowElasticSecurity',
 }
 
-export enum ConfigureSteps {
-  learnAbout = 'learnAbout',
-  deployElasticAgent = 'deployElasticAgent',
+export enum AddIntegrationsSteps {
   connectToDataSources = 'connectToDataSources',
   enablePrebuiltRules = 'enablePrebuiltRules',
 }
 
-export enum ExploreSteps {
+export enum ViewDashboardSteps {
   viewAlerts = 'viewAlerts',
   analyzeData = 'analyzeData',
 }

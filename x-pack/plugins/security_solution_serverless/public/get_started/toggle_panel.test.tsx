@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TogglePanel } from './toggle_panel';
-import { useSetUpSections } from './use_setup_cards';
+import { useSetUpSections } from './use_setup_sections';
 import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import { ProductLine } from '../../common/product';

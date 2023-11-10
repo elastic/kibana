@@ -7,17 +7,26 @@
 
 import type { ProductLine } from '../../common/product';
 import type { CardId, StepId } from './types';
-import { GetSetUpCardId } from './types';
-import { storage } from '../common/lib/storage';
+import {
+  QuickStartSectionCardsId,
+  AddAndValidateYourDataCardsId,
+  GetStartedWithAlertsCardsId,
+} from './types';
 
-export const ACTIVE_PRODUCTS_STORAGE_KEY = 'ACTIVE_PRODUCTS';
-export const FINISHED_STEPS_STORAGE_KEY = 'FINISHED_STEPS';
-export const EXPANDED_CARDS_STORAGE_KEY = 'EXPANDED_CARDS';
+import { storage } from '../common/lib/storage';
+import { defaultFinishedSteps, isDefaultFinishedCardStep } from './helpers';
+
+export const ACTIVE_PRODUCTS_STORAGE_KEY = 'securitySolution.getStarted.activeProducts';
+export const FINISHED_STEPS_STORAGE_KEY = 'securitySolution.getStarted.finishedSteps';
+export const EXPANDED_CARDS_STORAGE_KEY = 'securitySolution.getStarted.expandedCards';
 
 export const defaultExpandedCards = {
-  [GetSetUpCardId.configure]: { isExpanded: true, expandedSteps: [] },
-  [GetSetUpCardId.introduction]: { isExpanded: true, expandedSteps: [] },
-  [GetSetUpCardId.explore]: { isExpanded: true, expandedSteps: [] },
+  [QuickStartSectionCardsId.watchTheOverviewVideo]: { isExpanded: false, expandedSteps: [] },
+  [QuickStartSectionCardsId.createFirstProject]: { isExpanded: false, expandedSteps: [] },
+  [AddAndValidateYourDataCardsId.addIntegrations]: { isExpanded: false, expandedSteps: [] },
+  [AddAndValidateYourDataCardsId.viewDashboards]: { isExpanded: false, expandedSteps: [] },
+  [GetStartedWithAlertsCardsId.enablePrebuiltRules]: { isExpanded: false, expandedSteps: [] },
+  [GetStartedWithAlertsCardsId.viewAlerts]: { isExpanded: false, expandedSteps: [] },
 };
 
 export const getStartedStorage = {
@@ -42,13 +51,23 @@ export const getStartedStorage = {
     return card;
   },
   getAllFinishedStepsFromStorage: () => {
-    const allFinishedSteps: Record<CardId, StepId[]> =
-      storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-    return allFinishedSteps;
+    const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
+
+    if (allFinishedSteps == null) {
+      storage.set(FINISHED_STEPS_STORAGE_KEY, defaultFinishedSteps);
+    } else {
+      if (
+        allFinishedSteps[QuickStartSectionCardsId.createFirstProject] == null ||
+        allFinishedSteps[QuickStartSectionCardsId.createFirstProject].length === 0
+      ) {
+        storage.set(FINISHED_STEPS_STORAGE_KEY, { ...allFinishedSteps, ...defaultFinishedSteps });
+      }
+    }
+    return storage.get(FINISHED_STEPS_STORAGE_KEY);
   },
 
   addFinishedStepToStorage: (cardId: CardId, stepId: StepId) => {
-    const finishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+    const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();
     const card: StepId[] = finishedSteps[cardId] ?? [];
     if (card.indexOf(stepId) < 0) {
       card.push(stepId);
@@ -56,7 +75,10 @@ export const getStartedStorage = {
     }
   },
   removeFinishedStepFromStorage: (cardId: CardId, stepId: StepId) => {
-    const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
+    if (isDefaultFinishedCardStep(cardId, stepId)) {
+      return;
+    }
+    const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();
     const steps: StepId[] = finishedSteps[cardId] ?? [];
     const index = steps.indexOf(stepId);
     if (index >= 0) {

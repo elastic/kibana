@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import type { EuiThemeComputed } from '@elastic/eui';
-import { useSetUpSections } from './use_setup_cards';
+import { useSetUpSections } from './use_setup_sections';
 import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import { ProductLine } from '../../common/product';

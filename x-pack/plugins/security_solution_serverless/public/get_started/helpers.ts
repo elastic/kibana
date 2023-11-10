@@ -8,6 +8,16 @@
 import type { ProductLine } from '../../common/product';
 import { getSections } from './sections';
 import type { ActiveCard, ActiveSections, CardId, SectionId, Step, StepId } from './types';
+import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
+
+export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
+  [QuickStartSectionCardsId.createFirstProject]: [CreateProjectSteps.createFirstProject],
+};
+
+export const isDefaultFinishedCardStep = (cardId: CardId, stepId: StepId) => {
+  const isDefaultFinishedSteps = defaultFinishedSteps[cardId];
+  return isDefaultFinishedSteps != null && isDefaultFinishedSteps.indexOf(stepId) >= 0;
+};
 
 export const getCardTimeInMinutes = (activeSteps: Step[] | undefined, stepsDone: Set<StepId>) =>
   activeSteps?.reduce(

@@ -5,7 +5,14 @@
  * 2.0.
  */
 
-import { EuiTitle, useEuiTheme, useEuiShadow, EuiSpacer } from '@elastic/eui';
+import {
+  EuiTitle,
+  useEuiTheme,
+  useEuiShadow,
+  EuiSpacer,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
@@ -20,6 +27,9 @@ import type { SecurityProductTypes } from '../../common/config';
 import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
 import { ProductLine } from '../../common/product';
+import { useUserName } from '../common/hooks/use_user_name';
+import launch from './images/launch.png';
+import { Progress } from './progress_bar';
 
 const CONTENT_WIDTH = 1150;
 
@@ -30,7 +40,7 @@ export interface GetStartedProps {
 export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes }) => {
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('s');
-
+  const userName = useUserName();
   const {
     onProductSwitchChanged,
     onCardClicked,
@@ -65,61 +75,89 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         position: absolute;
       `}
     >
-      <KibanaPageTemplate.Header
+      <KibanaPageTemplate.Section
         restrictWidth={CONTENT_WIDTH}
         css={css`
           padding: 0 ${euiTheme.base * 2.25}px;
         `}
-        pageTitle={
-          <EuiTitle
-            size="l"
+      >
+        <EuiFlexGroup
+          css={css`
+            background-image: url(${launch});
+            background-size: 40%;
+            background-repeat: no-repeat;
+            background-position-x: right;
+            background-position-y: center;
+          `}
+        >
+          <EuiFlexItem
+            grow={false}
             css={css`
-              padding-left: ${euiTheme.size.xs};
-              padding-bottom: ${euiTheme.size.l};
+              width: ${CONTENT_WIDTH / 2}px;
             `}
           >
-            <span>{GET_STARTED_PAGE_TITLE}</span>
-          </EuiTitle>
-        }
-        description={
-          <>
-            <strong
+            <EuiTitle
+              size="l"
               css={css`
-                font-size: ${euiTheme.base * 1.37}px;
+                padding-left: ${euiTheme.size.xs};
+                padding-bottom: ${euiTheme.size.l};
+              `}
+            >
+              <>
+                {userName && (
+                  <span
+                    css={css`
+                      font-size: ${euiTheme.size.l};
+                      color: ${euiTheme.colors.darkShade};
+                      font-weight: ${euiTheme.font.weight.bold};
+                    `}
+                  >
+                    {GET_STARTED_PAGE_TITLE(userName)}
+                  </span>
+                )}
+                <EuiSpacer size="m" />
+              </>
+            </EuiTitle>
+            <span
+              css={css`
+                font-size: ${euiTheme.base * 2.125}px;
+                color: ${euiTheme.colors.title};
+                font-weight: ${euiTheme.font.weight.bold};
               `}
               className="eui-displayBlock"
             >
               {GET_STARTED_PAGE_SUBTITLE}
-            </strong>
+            </span>
             <EuiSpacer size="m" />
-            <span className="eui-displayBlock">{GET_STARTED_PAGE_DESCRIPTION}</span>
-          </>
-        }
-      >
-        <WelcomePanel
-          totalActiveSteps={totalActiveSteps}
-          totalStepsLeft={totalStepsLeft}
-          productTier={productTier}
-        />
-      </KibanaPageTemplate.Header>
+            <span
+              className="eui-displayBlock"
+              css={css`
+                font-size: ${euiTheme.base}px;
+                color: ${euiTheme.colors.darkShade};
+                line-height: ${euiTheme.size.l};
+              `}
+            >
+              {GET_STARTED_PAGE_DESCRIPTION}
+            </span>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </KibanaPageTemplate.Section>
       <KibanaPageTemplate.Section
-        bottomBorder={false}
-        grow={true}
         restrictWidth={CONTENT_WIDTH}
-        paddingSize="none"
         css={css`
-          ${shadow};
-          z-index: 1;
-          flex-grow: 0;
-          padding: 0 ${euiTheme.base * 2.25}px;
+          background-color: ${euiTheme.colors.lightestShade};
         `}
       >
-        <ProductSwitch
-          onProductSwitchChanged={onProductSwitchChanged}
-          activeProducts={activeProducts}
-          euiTheme={euiTheme}
-        />
+        <>
+          <EuiSpacer size="m" />
+          <Progress
+            totalActiveSteps={totalActiveSteps}
+            totalStepsLeft={totalStepsLeft}
+            productTier={productTier}
+          />
+        </>
       </KibanaPageTemplate.Section>
+
       <KibanaPageTemplate.Section
         bottomBorder="extended"
         grow={true}
@@ -127,6 +165,7 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
         paddingSize="none"
         css={css`
           padding: 0 ${euiTheme.base * 2.25}px;
+          background-color: ${euiTheme.colors.lightestShade};
         `}
       >
         <TogglePanel
