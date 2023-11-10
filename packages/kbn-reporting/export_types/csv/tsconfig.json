@@ -26,5 +26,6 @@
     "@kbn/reporting-export-types-csv-common",
     "@kbn/reporting-mocks-server",
     "@kbn/screenshotting-plugin",
+    "@kbn/core-http-request-handler-context-server",
   ]
 }
