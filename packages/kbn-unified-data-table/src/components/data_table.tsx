@@ -651,6 +651,15 @@ export const UnifiedDataTable = ({
     dataGridRef,
   });
 
+  const { rowHeight, rowHeightsOptions } = useRowHeightsOptions({
+    rowHeightState,
+    onUpdateRowHeight,
+    storage,
+    configRowHeight,
+    consumer,
+    rowLineHeight: rowLineHeightOverride,
+  });
+
   const euiGridColumns = useMemo(
     () =>
       getEuiGridColumns({
@@ -673,25 +682,27 @@ export const UnifiedDataTable = ({
         visibleCellActions,
         columnTypes,
         showColumnTokens,
+        rowHeight,
       }),
     [
-      onFilter,
-      visibleColumns,
-      columnsCellActions,
-      displayedRows,
-      dataView,
-      settings,
-      defaultColumns,
-      isSortEnabled,
-      isPlainRecord,
-      uiSettings,
-      toastNotifications,
-      dataViewFieldEditor,
-      valueToStringConverter,
-      editField,
-      visibleCellActions,
       columnTypes,
+      columnsCellActions,
+      dataView,
+      dataViewFieldEditor.userPermissions,
+      defaultColumns,
+      displayedRows.length,
+      editField,
+      isPlainRecord,
+      isSortEnabled,
+      onFilter,
+      rowHeight,
+      settings,
       showColumnTokens,
+      toastNotifications,
+      uiSettings,
+      valueToStringConverter,
+      visibleCellActions,
+      visibleColumns,
     ]
   );
 
@@ -813,15 +824,6 @@ export const UnifiedDataTable = ({
           },
     [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
   );
-
-  const rowHeightsOptions = useRowHeightsOptions({
-    rowHeightState,
-    onUpdateRowHeight,
-    storage,
-    configRowHeight,
-    consumer,
-    rowLineHeight: rowLineHeightOverride,
-  });
 
   const isRenderComplete = loadingState !== DataLoadingState.loading;
 

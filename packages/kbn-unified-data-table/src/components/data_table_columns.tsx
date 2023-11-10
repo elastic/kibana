@@ -85,6 +85,7 @@ function buildEuiGridColumn({
   visibleCellActions,
   columnTypes,
   showColumnTokens,
+  rowHeight,
 }: {
   columnName: string;
   columnWidth: number | undefined;
@@ -102,6 +103,7 @@ function buildEuiGridColumn({
   visibleCellActions?: number;
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
+  rowHeight: number | undefined;
 }) {
   const dataViewField = dataView.getFieldByName(columnName);
   const editFieldButton =
@@ -137,6 +139,7 @@ function buildEuiGridColumn({
         columnName={columnName}
         columnDisplayName={columnDisplayName}
         columnTypes={columnTypes}
+        rowHeight={rowHeight}
       />
     ) : undefined,
     displayAsText: columnDisplayName,
@@ -222,6 +225,7 @@ export function getEuiGridColumns({
   visibleCellActions,
   columnTypes,
   showColumnTokens,
+  rowHeight,
 }: {
   columns: string[];
   columnsCellActions?: EuiDataGridColumnCellAction[][];
@@ -242,6 +246,7 @@ export function getEuiGridColumns({
   visibleCellActions?: number;
   columnTypes?: DataTableColumnTypes;
   showColumnTokens?: boolean;
+  rowHeight: number | undefined;
 }) {
   const getColWidth = (column: string) => settings?.columns?.[column]?.width ?? 0;
 
@@ -263,6 +268,7 @@ export function getEuiGridColumns({
       visibleCellActions,
       columnTypes,
       showColumnTokens,
+      rowHeight,
     })
   );
 }

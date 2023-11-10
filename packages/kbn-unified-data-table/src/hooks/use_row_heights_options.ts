@@ -8,7 +8,7 @@
 
 import type { EuiDataGridRowHeightOption, EuiDataGridRowHeightsOptions } from '@elastic/eui';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
-import { useMemo } from 'react';
+import { useMemo, useState } from 'react';
 import { isValidRowHeight } from '../utils/validate_row_height';
 import {
   DataGridOptionsRecord,
@@ -62,7 +62,7 @@ export const useRowHeightsOptions = ({
   consumer,
   rowLineHeight = defaultRowLineHeight,
 }: UseRowHeightProps) => {
-  return useMemo((): EuiDataGridRowHeightsOptions => {
+  const defaultHeight = useMemo(() => {
     const rowHeightFromLS = getStoredRowHeight(storage, consumer);
 
     const configHasNotChanged = (
@@ -79,8 +79,12 @@ export const useRowHeightsOptions = ({
       rowHeight = configRowHeight;
     }
 
-    const defaultHeight = deserializeRowHeight(rowHeight);
+    return deserializeRowHeight(rowHeight);
+  }, [configRowHeight, consumer, rowHeightState, storage]);
 
+  const [rowHeight, setRowHeight] = useState(() => serializeRowHeight(defaultHeight));
+
+  const rowHeightsOptions = useMemo((): EuiDataGridRowHeightsOptions => {
     return {
       defaultHeight,
       lineHeight: rowLineHeight,
@@ -89,9 +93,12 @@ export const useRowHeightsOptions = ({
           // pressing "Reset to default" triggers onChange with the same value
           newRowHeight === defaultHeight ? configRowHeight : newRowHeight
         );
+        setRowHeight(newSerializedRowHeight);
         updateStoredRowHeight(newSerializedRowHeight, configRowHeight, storage, consumer);
         onUpdateRowHeight?.(newSerializedRowHeight);
       },
     };
-  }, [storage, consumer, rowHeightState, rowLineHeight, configRowHeight, onUpdateRowHeight]);
+  }, [defaultHeight, rowLineHeight, configRowHeight, storage, consumer, onUpdateRowHeight]);
+
+  return { rowHeight, rowHeightsOptions };
 };

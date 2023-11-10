@@ -7,11 +7,11 @@
  */
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CSSObject } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps } from '@kbn/field-utils';
 import { isNestedFieldParent } from '@kbn/discover-utils';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { DataTableColumnTypes } from '../types';
 
 interface DataTableColumnHeaderProps {
@@ -19,37 +19,59 @@ interface DataTableColumnHeaderProps {
   columnName: string | null;
   columnDisplayName: string;
   columnTypes?: DataTableColumnTypes;
+  rowHeight: number | undefined;
 }
 
 export const DataTableColumnHeader: React.FC<DataTableColumnHeaderProps> = (props) => {
-  const { columnDisplayName, columnName, columnTypes, dataView } = props;
+  const { columnDisplayName, columnName, columnTypes, dataView, rowHeight } = props;
   const columnToken = useMemo(
     () => getRenderedToken({ columnName, columnTypes, dataView }),
     [columnName, columnTypes, dataView]
   );
 
+  const multilineCss = useMemo(() => {
+    if (!rowHeight) {
+      return;
+    }
+
+    const baseCss: CSSObject = { whiteSpace: 'normal', wordBreak: 'break-all' };
+
+    if (rowHeight < 0) {
+      return baseCss;
+    }
+
+    if (rowHeight < 2) {
+      return;
+    }
+
+    return {
+      ...baseCss,
+      display: '-webkit-box',
+      '-webkit-box-orient': 'vertical',
+      '-webkit-line-clamp': rowHeight.toString(),
+    };
+  }, [rowHeight]);
+
   return (
-    <EuiFlexGroup
-      direction="row"
-      wrap={false}
-      responsive={false}
-      alignItems="center"
-      gutterSize="xs"
-      css={css`
-        .euiDataGridHeaderCell--numeric & {
-          justify-content: flex-end;
-        }
-      `}
+    <div
+      className={multilineCss ? undefined : 'eui-textTruncate'}
+      css={[
+        {
+          '.euiDataGridHeaderCell--numeric &': {
+            float: 'right',
+          },
+        },
+        multilineCss,
+      ]}
     >
-      {columnToken && <EuiFlexItem grow={false}>{columnToken}</EuiFlexItem>}
-      <EuiFlexItem
-        grow={false}
-        className="eui-displayInline eui-textTruncate"
+      {columnToken && <span css={{ verticalAlign: 'text-top' }}>{columnToken}</span>}
+      <span
+        css={columnToken && { marginLeft: euiThemeVars.euiSizeXS }}
         data-test-subj="unifiedDataTableColumnTitle"
       >
         {columnDisplayName}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+      </span>
+    </div>
   );
 };
 
