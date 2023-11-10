@@ -37,8 +37,8 @@ export function privilegesFactory(
         (feature) => !feature.excludeFromBasePrivileges
       );
 
-      const allActionsSet: Set<string> = new Set();
-      const readActionsSet: Set<string> = new Set();
+      const allActionsSet = new Set<string>();
+      const readActionsSet = new Set<string>();
 
       basePrivilegeFeatures.forEach((feature) => {
         for (const { privilegeId, privilege } of featuresService.featurePrivilegeIterator(feature, {
@@ -47,10 +47,12 @@ export function privilegesFactory(
           predicate: (pId, featurePrivilege) => !featurePrivilege.excludeFromBasePrivileges,
         })) {
           const privilegeActions = featurePrivilegeBuilder.getActions(privilege, feature);
-          privilegeActions.forEach((action) => allActionsSet.add(action));
-          if (privilegeId === 'read') {
-            privilegeActions.forEach((action) => readActionsSet.add(action));
-          }
+          privilegeActions.forEach((action) => {
+            allActionsSet.add(action);
+            if (privilegeId === 'read') {
+              readActionsSet.add(action);
+            }
+          });
         }
       });
 

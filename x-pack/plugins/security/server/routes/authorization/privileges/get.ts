@@ -41,7 +41,7 @@ export function defineGetPrivilegesRoutes({ router, authz }: RouteDefinitionPara
                 acc[featureId] = Object.keys(featurePrivileges);
                 return acc;
               },
-              {} as Record<string, unknown>
+              {} as Record<string, string[]>
             ),
             reserved: Object.keys(privileges.reserved),
           };
