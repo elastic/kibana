@@ -348,11 +348,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
             <EuiFlexGroup gutterSize="s" direction="column">
               {timelineFullScreen && setTimelineFullScreen != null && (
                 <EuiFlexItem>
-                  <EuiFlexGroup
-                    alignItems="center"
-                    gutterSize="s"
-                    data-test-subj="timeline-date-picker-container"
-                  >
+                  <EuiFlexGroup alignItems="center" gutterSize="s">
                     <ExitFullScreen
                       fullScreen={timelineFullScreen}
                       setFullScreen={setTimelineFullScreen}
@@ -360,7 +356,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   </EuiFlexGroup>
                 </EuiFlexItem>
               )}
-              <EuiFlexItem>
+              <EuiFlexItem data-test-subj="timeline-date-picker-container">
                 <TimelineHeaderContainer data-test-subj="timelineHeader">
                   <TimelineHeader
                     filterManager={filterManager}

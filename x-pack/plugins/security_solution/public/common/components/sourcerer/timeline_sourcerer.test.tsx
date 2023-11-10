@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-import { fireEvent, screen, waitFor } from '@testing-library/dom';
-import { render, cleanup } from '@testing-library/react';
+import { render, cleanup, fireEvent, screen, waitFor } from '@testing-library/react';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { Sourcerer } from '.';
 import { sourcererModel } from '../../store/sourcerer';

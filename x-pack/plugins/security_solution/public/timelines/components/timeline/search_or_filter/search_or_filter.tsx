@@ -171,7 +171,7 @@ export const SearchOrFilter = React.memo<Props>(
               <TimelineDatePickerLock />
             </EuiFlexItem>
 
-            <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false} data-test-subj="timeline-date-picker-container">
               <SuperDatePicker
                 width="auto"
                 id={InputsModelId.timeline}

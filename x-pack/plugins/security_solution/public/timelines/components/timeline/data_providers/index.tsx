@@ -55,12 +55,10 @@ const DropTargetDataProviders = styled.div`
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
-  padding-bottom: 8px;
-  padding-top: 28px;
   position: relative;
   border: 0.2rem dashed ${({ theme }) => theme.eui.euiColorMediumShade};
   border-radius: 5px;
-  /* padding: ${({ theme }) => theme.eui.euiSizeXS} 0; */
+  padding: ${({ theme }) => theme.eui.euiSizeS} 0;
   margin: 0px 0 0px 0;
   max-height: 33vh;
   min-height: 100px;

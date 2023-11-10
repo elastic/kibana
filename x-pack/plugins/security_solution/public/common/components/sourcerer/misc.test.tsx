@@ -21,13 +21,12 @@ import {
   TestProviders,
 } from '../../mock';
 import { createStore } from '../../store';
-import { fireEvent, screen, waitFor } from '@testing-library/dom';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useSignalHelpers } from '../../containers/sourcerer/use_signal_helpers';
 import { TimelineId } from '../../../../common/types/timeline';
 import { TimelineType } from '../../../../common/api/timeline';
 import { sortWithExcludesAtEnd } from '../../../../common/utils/sourcerer';
-import { render } from '@testing-library/react';
+import { render, fireEvent, screen, waitFor } from '@testing-library/react';
 
 const mockDispatch = jest.fn();
 
