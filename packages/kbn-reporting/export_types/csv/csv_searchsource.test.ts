@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 jest.mock('@kbn/generate-csv', () => ({
@@ -20,11 +21,11 @@ import nodeCrypto from '@elastic/node-crypto';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
-import { createMockConfigSchema } from '../../test_helpers';
-import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
+
+import { CsvSearchSourceExportType } from '.';
 
 const mockLogger = loggingSystemMock.createLogger();
 const encryptionKey = 'tetkey';

@@ -1,27 +1,26 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { of } from 'rxjs';
-import type { Writable } from 'stream';
+import { Writable } from 'stream';
 
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import type { LocatorParams } from '@kbn/reporting-common/types';
-import { PdfExportType } from '@kbn/reporting-export-types-pdf';
-import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
-import { cryptoFactory, generatePdfObservableV2 } from '@kbn/reporting-server';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import { cryptoFactory, generatePdfObservable } from '@kbn/reporting-server';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 
-import { createMockConfigSchema } from '../../test_helpers';
+import { PdfV1ExportType } from '.';
 
-jest.mock('@kbn/reporting-server/generate_pdf_v2');
+jest.mock('@kbn/reporting-server/generate_pdf');
 
 let content: string;
-let mockPdfExportType: PdfExportType;
+let mockPdfExportType: PdfV1ExportType;
 let stream: jest.Mocked<Writable>;
 
 const cancellationToken = {
@@ -36,22 +35,18 @@ const encryptHeaders = async (headers: Record<string, string>) => {
   return await crypto.encrypt(headers);
 };
 
-const getBasePayload = (baseObj: any) =>
-  ({
-    params: { forceNow: 'test' },
-    ...baseObj,
-  } as TaskPayloadPDFV2);
+const getBasePayload = (baseObj: any) => baseObj as TaskPayloadPDF;
 
 beforeEach(async () => {
   content = '';
   stream = { write: jest.fn((chunk) => (content += chunk)) } as unknown as typeof stream;
-
   const configType = createMockConfigSchema({ encryptionKey: mockEncryptionKey });
   const context = coreMock.createPluginInitializerContext(configType);
 
   const mockCoreSetup = coreMock.createSetup();
   const mockCoreStart = coreMock.createStart();
-  mockPdfExportType = new PdfExportType(mockCoreSetup, configType, mockLogger, context);
+
+  mockPdfExportType = new PdfV1ExportType(mockCoreSetup, configType, mockLogger, context);
 
   mockPdfExportType.setup({
     basePath: { set: jest.fn() },
@@ -64,31 +59,25 @@ beforeEach(async () => {
   });
 });
 
-afterEach(() => (generatePdfObservableV2 as jest.Mock).mockReset());
+afterEach(() => (generatePdfObservable as jest.Mock).mockReset());
 
 test(`passes browserTimezone to generatePdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
-  (generatePdfObservableV2 as jest.Mock).mockReturnValue(of(Buffer.from('')));
+  (generatePdfObservable as jest.Mock).mockReturnValue(of({ buffer: Buffer.from('') }));
 
   const browserTimezone = 'UTC';
   await mockPdfExportType.runTask(
     'pdfJobId',
     getBasePayload({
-      forceNow: 'test',
-      title: 'PDF Params Timezone Test',
-      locatorParams: [{ version: 'test', id: 'test' }] as LocatorParams[],
       browserTimezone,
       headers: encryptedHeaders,
+      objects: [{ relativeUrl: '/app/kibana#/something' }],
     }),
     cancellationToken,
     stream
   );
 
-  expect(generatePdfObservableV2).toHaveBeenCalledWith(
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
-    expect.anything(),
+  expect(generatePdfObservable).toHaveBeenCalledWith(
     expect.anything(),
     expect.objectContaining({ browserTimezone: 'UTC' })
   );
@@ -97,11 +86,11 @@ test(`passes browserTimezone to generatePdf`, async () => {
 test(`returns content_type of application/pdf`, async () => {
   const encryptedHeaders = await encryptHeaders({});
 
-  (generatePdfObservableV2 as jest.Mock).mockReturnValue(of({ buffer: Buffer.from('') }));
+  (generatePdfObservable as jest.Mock).mockReturnValue(of({ buffer: Buffer.from('') }));
 
   const { content_type: contentType } = await mockPdfExportType.runTask(
     'pdfJobId',
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
@@ -110,12 +99,12 @@ test(`returns content_type of application/pdf`, async () => {
 
 test(`returns content of generatePdf getBuffer base64 encoded`, async () => {
   const testContent = 'test content';
-  (generatePdfObservableV2 as jest.Mock).mockReturnValue(of({ buffer: Buffer.from(testContent) }));
+  (generatePdfObservable as jest.Mock).mockReturnValue(of({ buffer: Buffer.from(testContent) }));
 
   const encryptedHeaders = await encryptHeaders({});
   await mockPdfExportType.runTask(
     'pdfJobId',
-    getBasePayload({ locatorParams: [], headers: encryptedHeaders }),
+    getBasePayload({ objects: [], headers: encryptedHeaders }),
     cancellationToken,
     stream
   );
