@@ -17,7 +17,7 @@ import {
   formFieldInputSelector,
 } from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
-import { FLEET_AGENT_POLICIES, navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -69,7 +69,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(integration).click();
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
-        navigateToWithoutWaitForReact('app/osquery/packs');
+        navigateTo('app/osquery/packs');
         cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
         cy.get(formFieldInputSelector('name')).type(`${REMOVING_PACK}{downArrow}{enter}`);
         cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${AGENT_POLICY_NAME}{downArrow}{enter}`);
@@ -93,7 +93,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(/^Delete integration$/).click();
         closeModalIfVisible();
         cy.contains(/^Deleted integration 'osquery_manager-*/);
-        navigateToWithoutWaitForReact('app/osquery/packs');
+        navigateTo('app/osquery/packs');
         cy.contains(REMOVING_PACK).click();
         cy.contains(`${REMOVING_PACK} details`).should('exist');
         cy.wait(1000);
@@ -113,7 +113,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     describe('', () => {
       beforeEach(() => {
         cy.login(ServerlessRoleName.SOC_MANAGER);
-        navigateToWithoutWaitForReact('/app/osquery/packs');
+        navigateTo('/app/osquery/packs');
       });
       it('should load prebuilt packs', () => {
         cy.contains('Load Elastic prebuilt packs').click();
@@ -159,7 +159,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('should be able to run live prebuilt pack', () => {
-        navigateToWithoutWaitForReact('/app/osquery/live_queries');
+        navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').click();
         cy.contains('Run a set of queries in a pack.').click();
         cy.get(LIVE_QUERY_EDITOR).should('not.exist');
@@ -174,7 +174,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           cases: true,
           timeline: false,
         });
-        navigateToWithoutWaitForReact('/app/osquery');
+        navigateTo('/app/osquery');
         cy.contains('osquery-monitoring');
       });
     });
@@ -183,7 +183,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
-      navigateToWithoutWaitForReact('/app/osquery/packs');
+      navigateTo('/app/osquery/packs');
     });
 
     describe('add proper shard to policies packs config', () => {

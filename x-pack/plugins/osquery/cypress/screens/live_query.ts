@@ -15,9 +15,5 @@ export const SUBMIT_BUTTON = '#submit-button';
 export const RESULTS_TABLE = 'osqueryResultsTable';
 export const RESULTS_TABLE_BUTTON = 'dataGridFullScreenButton';
 export const RESULTS_TABLE_CELL_WRRAPER = 'EuiDataGridHeaderCellWrapper';
-export const getSavedQueriesDropdown = () =>
-  cy.react('EuiComboBox', {
-    props: { placeholder: 'Search for a query to run, or write a new query below' },
-  });
 
 export const getIdFormField = () => cy.get('input[name="id"]');

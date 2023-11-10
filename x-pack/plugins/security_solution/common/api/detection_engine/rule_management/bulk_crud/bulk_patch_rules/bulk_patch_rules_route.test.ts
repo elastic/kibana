@@ -70,6 +70,8 @@ describe('Bulk patch rules request schema', () => {
 
     const result = BulkPatchRulesRequestBody.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(`"1: Invalid input"`);
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"1.note: Expected string, received object, 1.note: Expected string, received object, 1.note: Expected string, received object, 1.note: Expected string, received object, 1.note: Expected string, received object, and 3 more"`
+    );
   });
 });
