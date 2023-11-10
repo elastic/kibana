@@ -16,7 +16,7 @@ import {
   EuiSpacer,
   EuiProgress,
   EuiCallOut,
-  EuiSwitch,
+  // EuiSwitch,
 } from '@elastic/eui';
 import type { EuiSwitchEvent } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
