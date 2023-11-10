@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
+  EuiCheckableCard,
   EuiCodeBlock,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,8 +17,8 @@ import {
   EuiFlyoutBody,
   EuiFlyoutFooter,
   EuiFlyoutHeader,
+  EuiFormFieldset,
   EuiIcon,
-  EuiRadioGroup,
   EuiSpacer,
   EuiSteps,
   EuiTab,
@@ -27,18 +27,19 @@ import {
   EuiTitle,
   EuiToolTip,
 } from '@elastic/eui';
-import React, { type FC, useMemo, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import React, { useMemo, useState, type FC } from 'react';
 import { useMlKibana } from '../contexts/kibana';
 import { ModelItem } from './models_list';
 
 export interface AddModelFlyoutProps {
   modelDownloads: ModelItem[];
   onClose: () => void;
-  onSumbit: (modelId: string) => void;
+  onSubmit: (modelId: string) => void;
 }
 
-export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, modelDownloads }) => {
+export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, modelDownloads }) => {
   const {
     services: { docLinks },
   } = useMlKibana();
@@ -60,51 +61,56 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
         ),
         content: (
           <>
-            <EuiRadioGroup
-              options={modelDownloads.map((model) => {
-                return {
-                  id: model.model_id,
-                  label: (
-                    <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-                      <EuiFlexItem grow={false}>
-                        <EuiIcon type="logoElastic" size="l" />
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
-                      {model.recommended ? (
-                        <EuiFlexItem grow={false}>
-                          <EuiToolTip
-                            content={
-                              <FormattedMessage
-                                id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                                defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                              />
-                            }
-                          >
-                            <FormattedMessage
-                              id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                              defaultMessage="(Recommended)"
-                            />
-                          </EuiToolTip>
-                        </EuiFlexItem>
-                      ) : null}
-                    </EuiFlexGroup>
-                  ),
-                };
-              })}
-              idSelected={selectedModelId}
-              onChange={setSelectedModelId}
-              name="modelSelector"
+            <EuiFormFieldset
               legend={{
                 children: (
-                  <span>
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.addModelFlyout.chooseModelLabel"
-                      defaultMessage="Choose a model"
-                    />
-                  </span>
+                  <FormattedMessage
+                    id="xpack.ml.trainedModels.addModelFlyout.chooseModelLabel"
+                    defaultMessage="Choose a model"
+                  />
                 ),
               }}
-            />
+            >
+              {modelDownloads.map((model) => {
+                return (
+                  <>
+                    <EuiCheckableCard
+                      id={model.model_id}
+                      label={
+                        <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                          <EuiFlexItem grow={false}>
+                            <EuiIcon type="logoElastic" size="l" />
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
+                          {model.recommended ? (
+                            <EuiFlexItem grow={false}>
+                              <EuiToolTip
+                                content={
+                                  <FormattedMessage
+                                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                                    defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                                  />
+                                }
+                              >
+                                <FormattedMessage
+                                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                                  defaultMessage="(Recommended)"
+                                />
+                              </EuiToolTip>
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
+                      }
+                      name={model.model_id}
+                      value={model.model_id}
+                      checked={model.model_id === selectedModelId}
+                      onChange={() => setSelectedModelId(model.model_id)}
+                    />
+                    <EuiSpacer size="m" />
+                  </>
+                );
+              })}
+            </EuiFormFieldset>
           </>
         ),
       },
@@ -272,10 +278,10 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
   }, [selectedTabId, tabs]);
 
   return (
-    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={'addTrainedModelFlytout'}>
+    <EuiFlyout ownFocus onClose={onClose} aria-labelledby={'addTrainedModelFlyout'}>
       <EuiFlyoutHeader hasBorder>
         <EuiTitle size="m">
-          <h2 id={'addTrainedModelFlytout'}>
+          <h2 id={'addTrainedModelFlyout'}>
             <FormattedMessage
               id="xpack.ml.trainedModels.addModelFlyout.title"
               defaultMessage="Add a trained model"
@@ -309,7 +315,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSumbit, mod
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiButton
-              onClick={onSumbit.bind(null, selectedModelId!)}
+              onClick={onSubmit.bind(null, selectedModelId!)}
               fill
               disabled={!selectedModelId}
             >
