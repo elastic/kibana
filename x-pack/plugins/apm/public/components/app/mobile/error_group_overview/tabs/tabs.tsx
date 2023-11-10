@@ -19,7 +19,7 @@ const tabs = [
     name: i18n.translate('xpack.apm.serviceDetails.metrics.errorsList.title', {
       defaultMessage: 'Errors',
     }),
-    'data-test-subj': 'ErrorsCrashes-tabs-errors',
+    'data-test-subj': 'apmMobileErrorsTabButton',
   },
   {
     id: MobileErrorTabIds.CRASHES,
