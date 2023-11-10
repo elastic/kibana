@@ -5,8 +5,18 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
+import { isString } from 'lodash';
+
 export const getCasesTextCustomField = () => ({
   isFilterable: false,
   isSortable: false,
   savedObjectMappingType: 'string',
+  validator: (values: Array<string | number | boolean | null>) => {
+    values.forEach((value) => {
+      if (value !== null && !isString(value)) {
+        throw Boom.badRequest(`The custom field type text doesn't have string value.`);
+      }
+    });
+  },
 });

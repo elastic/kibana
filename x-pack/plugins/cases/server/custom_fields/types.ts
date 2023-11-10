@@ -11,6 +11,7 @@ export interface ICasesCustomField {
   isFilterable: boolean;
   isSortable: boolean;
   savedObjectMappingType: string;
+  validator: (values: Array<string | number | boolean | null>) => void;
 }
 
 export interface CasesCustomFieldsMap {

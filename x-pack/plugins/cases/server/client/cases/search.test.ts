@@ -272,7 +272,7 @@ describe('search', () => {
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        ` Error: The second_key custom field have the wrong value type string in the request.`
+        ` Error: The custom field type toggle doesn't have boolean value.`
       );
     });
 

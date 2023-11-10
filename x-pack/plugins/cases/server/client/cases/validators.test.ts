@@ -552,7 +552,7 @@ describe('validators', () => {
           customFields: { second_key: ['foobar', true, 1234] },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The second_key custom field have the wrong value type string in the request."`
+        `"The custom field type toggle doesn't have boolean value."`
       );
     });
 

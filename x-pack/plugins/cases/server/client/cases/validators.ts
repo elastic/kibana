@@ -173,12 +173,6 @@ export const validateSearchCasesCustomFields = ({
       );
     }
 
-    value.forEach((item) => {
-      if (typeof item !== customFieldsMapping?.savedObjectMappingType && item !== null) {
-        throw Boom.badRequest(
-          `The ${key} custom field have the wrong value type ${typeof item} in the request.`
-        );
-      }
-    });
+    customFieldsMapping?.validator(value);
   });
 };
