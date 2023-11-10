@@ -25,9 +25,8 @@ const MarkdownVisComponent = ({
   useEffect(renderComplete); // renderComplete will be called after each render to signal, that we are done with rendering.
 
   return (
-    <div className="mkdVis" style={{ fontSize: `${fontSize}pt` }}>
+    <div className="mkdVis" style={{ fontSize: `${fontSize}pt` }} data-test-subj="markdownBody">
       <md.Markdown
-        data-test-subj="markdownBody"
         readOnly
         markdownContent={markdown}
         openLinksInNewTab={openLinksInNewTab}
