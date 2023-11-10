@@ -15,9 +15,8 @@ import React, { Component } from 'react';
 import { createTickFormatter } from './lib/tick_formatter';
 import { convertSeriesToVars } from './lib/convert_series_to_vars';
 import _ from 'lodash';
-import { MarkdownLang } from '@kbn/kibana-react-plugin/public';
 
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, MarkdownLang } from '@kbn/code-editor';
 
 import { EuiText, EuiCodeBlock, EuiSpacer, EuiTitle } from '@elastic/eui';
 

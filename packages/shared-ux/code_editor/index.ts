@@ -7,3 +7,4 @@
  */
 
 export { CodeEditor, type CodeEditorProps } from './code_editor';
+export * from './languages/constants';

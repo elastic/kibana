@@ -24,8 +24,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { CssLang } from '@kbn/kibana-react-plugin/public';
-import { CodeEditor } from '@kbn/code-editor';
+import { CodeEditor, CssLang } from '@kbn/code-editor';
 import { SeriesEditor } from '../series_editor';
 import { IndexPattern } from '../index_pattern';
 import { createSelectHandler } from '../lib/create_select_handler';

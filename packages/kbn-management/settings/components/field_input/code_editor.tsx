@@ -15,11 +15,11 @@
 
 import React, { useCallback } from 'react';
 import { monaco, XJsonLang } from '@kbn/monaco';
-import { MarkdownLang } from '@kbn/kibana-react-plugin/public';
 
 import {
   CodeEditor as KibanaReactCodeEditor,
   type CodeEditorProps as KibanaReactCodeEditorProps,
+  MarkdownLang,
 } from '@kbn/code-editor';
 
 type Props = Pick<KibanaReactCodeEditorProps, 'aria-label' | 'value' | 'onChange'>;
