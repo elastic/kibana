@@ -330,18 +330,24 @@ const startFleetServerWithDocker = async ({
         await waitForHostToEnroll(kbnClient, log, hostname, 120000);
       }
 
-      fleetServerVersionInfo = (
-        await execa('docker', [
-          'exec',
-          containerName,
-          '/bin/bash',
-          '-c',
-          '/usr/share/elastic-agent/elastic-agent version',
-        ]).catch((err) => {
-          log.verbose(`Failed to retrieve agent version information from running instance.`, err);
-          return { stdout: 'Unable to retrieve version information' };
-        })
-      ).stdout;
+      fleetServerVersionInfo = isServerless
+        ? // `/usr/bin/fleet-server` process does not seem to support a `--version` type of argument
+          'Running latest standalone fleet server'
+        : (
+            await execa('docker', [
+              'exec',
+              containerName,
+              '/bin/bash',
+              '-c',
+              '/usr/share/elastic-agent/elastic-agent version',
+            ]).catch((err) => {
+              log.verbose(
+                `Failed to retrieve agent version information from running instance.`,
+                err
+              );
+              return { stdout: 'Unable to retrieve version information' };
+            })
+          ).stdout;
     } catch (error) {
       log.error(dump(error));
       throw error;
