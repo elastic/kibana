@@ -72,10 +72,10 @@ export class FleetMetricsTask {
       return;
     }
     if (!this.esClient) {
-      appContextService.getLogger().info('esClient not set, skipping Fleet metrics task');
+      appContextService.getLogger().debug('esClient not set, skipping Fleet metrics task');
       return;
     }
-    appContextService.getLogger().info('Running Fleet metrics task');
+    appContextService.getLogger().debug('Running Fleet metrics task');
 
     try {
       const agentMetrics = await fetchAgentMetrics();

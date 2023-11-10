@@ -33,6 +33,8 @@
     "@kbn/securitysolution-ecs",
     "@kbn/securitysolution-rules",
     "@kbn/core-http-common",
-    "@kbn/securitysolution-ecs"
+    "@kbn/securitysolution-ecs",
+    "@kbn/fleet-plugin",
+    "@kbn/repo-info",
   ]
 }
