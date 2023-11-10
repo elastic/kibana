@@ -101,9 +101,13 @@ export const ResolverWithoutProviders = React.memo(
     const activeDescendantId = useSelector((state: State) =>
       selectors.ariaActiveDescendant(state.analyzer[resolverComponentInstanceID])
     );
-    const resolverTreeHasNodes = useSelector((state: State) =>
-      selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID])
-    );
+    const resolverTreeHasNodes = useSelector((state: State) => {
+      console.log({ state });
+      console.log({ resolverComponentInstanceID });
+      return selectors.resolverTreeHasNodes(state.analyzer[resolverComponentInstanceID]);
+    });
+
+    console.log({ resolverTreeHasNodes, hasError, activeDescendantId });
     const colorMap = useColors();
 
     return (

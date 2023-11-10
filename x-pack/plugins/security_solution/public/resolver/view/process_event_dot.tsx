@@ -351,6 +351,7 @@ const UnstyledProcessEventDot = React.memo(
       }
     }, [processEvent, nodeName]);
 
+    console.log({ processEvent, nodeName });
     /* eslint-disable jsx-a11y/click-events-have-key-events */
     return (
       <div

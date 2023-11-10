@@ -20,8 +20,15 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   const agentTypeIsEndpoint = agentType === 'endpoint';
   const agentTypeIsWinlogBeat = agentType === 'winlogbeat' && eventModule === 'sysmon';
   const agentTypeIsOsqueryBeat = agentType === 'osquerybeat' && eventModule === 'osquery_manager';
+  const agentTypeIsSentinelOneBeat =
+    agentType === 'filebeat' &&
+    (eventModule === 'sentinel_one_cloud_funnel' || eventModule === 'sentinel_one');
   const isEndpointOrSysmonFromWinlogBeat =
-    agentTypeIsEndpoint || agentTypeIsWinlogBeat || datasetIncludesSysmon || agentTypeIsOsqueryBeat;
+    agentTypeIsEndpoint ||
+    agentTypeIsWinlogBeat ||
+    datasetIncludesSysmon ||
+    agentTypeIsOsqueryBeat ||
+    agentTypeIsSentinelOneBeat;
   const hasProcessEntityId =
     processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
   return isEndpointOrSysmonFromWinlogBeat && hasProcessEntityId;

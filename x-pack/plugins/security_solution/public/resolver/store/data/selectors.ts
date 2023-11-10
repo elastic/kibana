@@ -83,6 +83,7 @@ const resolverTreeResponse = (state: DataState): NewResolverTree | undefined => 
 };
 
 export const resolverTreeHasNodes = (state: DataState): boolean => {
+  console.log({ State1: state });
   return state.tree?.lastResponse?.successful
     ? state.tree?.lastResponse?.result?.nodes.length > 0
     : false;

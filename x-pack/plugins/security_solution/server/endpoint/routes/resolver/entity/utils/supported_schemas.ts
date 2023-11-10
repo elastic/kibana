@@ -82,6 +82,42 @@ export const supportedSchemas: SupportedSchema[] = [
     },
   },
   {
+    name: 'sentinel_one_cloud_funnel',
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'filebeat',
+      },
+      {
+        field: 'event.dataset',
+        value: 'sentinel_one_cloud_funnel.event',
+      },
+    ],
+    schema: {
+      id: 'process.entity_id',
+      parent: 'process.parent.entity_id',
+      name: 'process.name',
+    },
+  },
+  {
+    name: 'sentinel_one',
+    constraints: [
+      {
+        field: 'agent.type',
+        value: 'filebeat',
+      },
+      {
+        field: 'event.dataset',
+        value: 'sentinel_one.alert',
+      },
+    ],
+    schema: {
+      id: 'process.entity_id',
+      parent: 'process.parent.entity_id',
+      name: 'process.name',
+    },
+  },
+  {
     name: 'sysmonViaFilebeat',
     constraints: [
       {
@@ -103,6 +139,7 @@ export const supportedSchemas: SupportedSchema[] = [
 
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
   const value = _.get(doc, field);
+  console.log({ field, value });
   if (value === undefined) {
     return undefined;
   }
