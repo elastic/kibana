@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import React, { ComponentType } from 'react';
 import styled from 'styled-components';
 import {
-  Markdown_DEPRECATED,
+  MarkdownButThisComponentIsDEPRECATED,
   useKibana,
 } from '@kbn/kibana-react-plugin/public';
 import {
@@ -77,7 +77,7 @@ function AccordionButtonContent({
 
 function InstructionsContent({ markdown }: { markdown: string }) {
   return (
-    <Markdown_DEPRECATED
+    <MarkdownButThisComponentIsDEPRECATED
       className="euiText"
       markdown={markdown}
       openLinksInNewTab={true}

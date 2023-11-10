@@ -73,7 +73,10 @@ export { createNotifications } from './notifications';
 export { toMountPoint } from './util';
 
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
-export { Markdown_DEPRECATED, MarkdownSimple_DEPRECATED } from './markdown';
+export {
+  MarkdownButThisComponentIsDEPRECATED,
+  MarkdownSimpleButThisComponentIsDEPRECATED
+} from './markdown';
 
 export type { ToMountPointOptions } from './util';
 
