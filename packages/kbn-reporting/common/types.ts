@@ -6,9 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { PerformanceMetrics as ScreenshotMetrics } from '@kbn/screenshotting-plugin/common/types';
-import type { ByteSizeValue } from '@kbn/config-schema';
+import type {
+  LayoutParams,
+  PerformanceMetrics as ScreenshotMetrics,
+} from '@kbn/screenshotting-plugin/common';
 import type { LocatorParams } from './url';
 
 export * from './url';
@@ -84,25 +85,6 @@ export interface BasePayloadV2 extends BaseParamsV2 {
   isDeprecated?: boolean;
 }
 
-export interface ReportingConfigType {
-  encryptionKey?: string;
-  kibanaServer: {
-    protocol?: string;
-    hostname?: string;
-    port?: number;
-  };
-  csv: {
-    checkForFormulas: boolean;
-    escapeFormulaValues: boolean;
-    useByteOrderMarkEncoding: boolean;
-    maxSizeBytes: number | ByteSizeValue;
-    scroll: {
-      duration: string;
-      size: number;
-    };
-  };
-}
-
 export interface ReportingServerInfo {
   basePath: string;
   protocol: string;
@@ -110,4 +92,10 @@ export interface ReportingServerInfo {
   port: number;
   name: string;
   uuid: string;
+}
+
+export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed-by-policy' | 'ok';
+
+export interface IlmPolicyStatusResponse {
+  status: IlmPolicyMigrationStatus;
 }

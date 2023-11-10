@@ -5,14 +5,13 @@
  * 2.0.
  */
 
-import type { CustomRequestHandlerContext, IRouter } from '@kbn/core/server';
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type { BaseParams, BasePayload, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
-import { CommonReportingSetup } from '@kbn/reporting-export-types-helpers-server';
+import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -30,6 +29,7 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+
 import { ReportApiJSON } from '../common/types';
 import type { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
@@ -74,6 +74,10 @@ export interface ReportingStartDeps {
   taskManager: TaskManagerStartContract;
 }
 
+export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
+  reporting: ReportingStart | null;
+}>;
+
 /**
  * Interface of a response to an HTTP request for our plugin to generate a report.
  * @public
@@ -91,12 +95,6 @@ export interface ReportingJobResponse {
   job: ReportApiJSON;
 }
 
-export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: CommonReportingSetup | null;
-}>;
-
-export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
-
 export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
@@ -104,5 +102,3 @@ export interface PdfScreenshotOptions extends Omit<BasePdfScreenshotOptions, 'ti
 export interface PngScreenshotOptions extends Omit<BasePngScreenshotOptions, 'timeouts' | 'urls'> {
   urls: UrlOrUrlLocatorTuple[];
 }
-
-export type { BaseParams, BasePayload };

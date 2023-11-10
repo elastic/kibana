@@ -7,31 +7,33 @@
  */
 
 import Boom from '@hapi/boom';
-import { KibanaRequest } from '@kbn/core/server';
-import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
-import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
-import { CsvGenerator } from '@kbn/generate-csv';
 import { Writable } from 'stream';
+
+import type { KibanaRequest } from '@kbn/core/server';
+import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import { CsvGenerator } from '@kbn/generate-csv';
 import {
-  CSV_REPORT_TYPE_V2,
-  LICENSE_TYPE_TRIAL,
+  CancellationToken,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_ENTERPRISE,
-  CancellationToken,
+  LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
 import {
-  BaseExportTypeSetupDeps,
-  BaseExportTypeStartDeps,
-  decryptJobHeaders,
-  ExportType,
-  getFieldFormats,
+  CSV_REPORT_TYPE_V2,
   JobParamsCsvFromSavedObject,
-  ReportingRequestHandlerContext,
   TaskPayloadCsvFromSavedObject,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-export-types-csv-common';
+import {
+  ExportType,
+  decryptJobHeaders,
+  getFieldFormats,
+  type BaseExportTypeSetupDeps,
+  type BaseExportTypeStartDeps,
+} from '@kbn/reporting-server';
 
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -66,7 +68,7 @@ export class CsvV2ExportType extends ExportType<
 
   public createJob = async (
     jobParams: JobParamsCsvFromSavedObject,
-    _context: ReportingRequestHandlerContext,
+    _context: unknown,
     req: KibanaRequest
   ) => {
     // 1. Validation of locatorParams

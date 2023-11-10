@@ -7,9 +7,10 @@
 
 import type { GetDeprecationsContext } from '@kbn/core/server';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import { ReportingCore } from '../core';
-import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
+import { createMockReportingCore } from '../test_helpers';
 
 import { getDeprecationsInfo } from './migrate_existing_indices_ilm_policy';
 

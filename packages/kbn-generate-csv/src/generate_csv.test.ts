@@ -24,8 +24,9 @@ import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_
 import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
-import { CsvConfig, JobParams } from '@kbn/generate-csv-types';
 import { CancellationToken } from '@kbn/reporting-common';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
+import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
@@ -33,16 +34,14 @@ import {
 } from './constants';
 import { CsvGenerator } from './generate_csv';
 
-const createMockJob = (baseObj: any = {}): JobParams => ({
+const createMockJob = (baseObj: any = {}): JobParamsCSV => ({
   ...baseObj,
 });
-
-const createMockCancellationToken = () => new CancellationToken();
 
 describe('CsvGenerator', () => {
   let mockEsClient: IScopedClusterClient;
   let mockDataClient: IScopedSearchClient;
-  let mockConfig: CsvConfig;
+  let mockConfig: ReportingConfigType['csv'];
   let mockLogger: jest.Mocked<Logger>;
   let uiSettingsClient: IUiSettingsClient;
   let stream: jest.Mocked<Writable>;
@@ -118,6 +117,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: 180000,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     searchSourceMock.getField = jest.fn((key: string) => {
@@ -153,7 +153,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -188,7 +188,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -227,7 +227,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -244,6 +244,7 @@ describe('CsvGenerator', () => {
       maxSizeBytes: TEST_MAX_SIZE,
       useByteOrderMarkEncoding: false,
       scroll: { size: 500, duration: '30s' },
+      enablePanelActionDownload: true,
     };
 
     mockDataClient.search = jest.fn().mockImplementation(() =>
@@ -275,7 +276,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -334,7 +335,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -404,7 +405,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -442,7 +443,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -489,7 +490,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -543,7 +544,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -585,7 +586,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -623,7 +624,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -661,7 +662,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -701,7 +702,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -739,7 +740,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -757,6 +758,7 @@ describe('CsvGenerator', () => {
         maxSizeBytes: 180000,
         useByteOrderMarkEncoding: false,
         scroll: { size: 500, duration: '30s' },
+        enablePanelActionDownload: true,
       };
       mockDataClient.search = jest.fn().mockImplementation(() =>
         Rx.of({
@@ -784,7 +786,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );
@@ -813,7 +815,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -871,7 +873,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -915,7 +917,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -964,7 +966,7 @@ describe('CsvGenerator', () => {
         searchSourceStart: mockSearchSourceService,
         fieldFormatsRegistry: mockFieldFormatsRegistry,
       },
-      createMockCancellationToken(),
+      new CancellationToken(),
       mockLogger,
       stream
     );
@@ -1023,7 +1025,7 @@ describe('CsvGenerator', () => {
           searchSourceStart: mockSearchSourceService,
           fieldFormatsRegistry: mockFieldFormatsRegistry,
         },
-        createMockCancellationToken(),
+        new CancellationToken(),
         mockLogger,
         stream
       );

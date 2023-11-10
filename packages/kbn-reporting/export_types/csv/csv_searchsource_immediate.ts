@@ -8,13 +8,13 @@
 
 import { Writable } from 'stream';
 
+import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import {
   CancellationToken,
-  CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -23,19 +23,26 @@ import {
   LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
+import {
+  CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
+  JobParamsDownloadCSV,
+} from '@kbn/reporting-export-types-csv-common';
 import type {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
-  JobParamsDownloadCSV,
-  ReportingRequestHandlerContext,
-} from '@kbn/reporting-export-types-helpers-server';
-import { ExportType, getFieldFormats } from '@kbn/reporting-export-types-helpers-server';
+  ReportingServerPluginSetup,
+} from '@kbn/reporting-server';
+import { ExportType, getFieldFormats } from '@kbn/reporting-server';
 
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
 }
+
+type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
+  reporting: ReportingServerPluginSetup | null;
+}>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was
@@ -129,7 +136,7 @@ export class CsvSearchSourceImmediateExportType extends ExportType<
 
     const { warnings } = result;
     if (warnings) {
-      warnings.forEach((warning: string | Error) => {
+      warnings.forEach((warning) => {
         this.logger.warn(warning);
       });
     }

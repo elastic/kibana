@@ -5,22 +5,24 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
+import { firstValueFrom, Observable } from 'rxjs';
+
 import type { CoreSetup, NotificationsSetup } from '@kbn/core/public';
 import { CoreStart } from '@kbn/core/public';
 import type { ISearchEmbeddable } from '@kbn/discover-plugin/public';
-import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { loadSharingDataHelpers, SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-plugin/public';
 import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { CSV_REPORTING_ACTION } from '@kbn/reporting-export-types-csv-common';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { UiActionsActionDefinition as ActionDefinition } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
-import { firstValueFrom, Observable } from 'rxjs';
+
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ReportingPublicPluginStartDendencies } from '../plugin';
 
-export const CSV_REPORTING_ACTION = 'downloadCsvReport';
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
 ): embeddable is ISearchEmbeddable {

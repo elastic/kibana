@@ -12,23 +12,25 @@ import {
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { getExportSettings } from './get_export_settings';
-import { CsvConfig } from '@kbn/generate-csv-types';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
+
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,
   UI_SETTINGS_CSV_SEPARATOR,
   UI_SETTINGS_DATEFORMAT_TZ,
   UI_SETTINGS_SEARCH_INCLUDE_FROZEN,
 } from './constants';
+import { getExportSettings } from './get_export_settings';
 
 describe('getExportSettings', () => {
   let uiSettingsClient: IUiSettingsClient;
-  const config: CsvConfig = {
+  const config: ReportingConfigType['csv'] = {
     checkForFormulas: true,
     escapeFormulaValues: false,
     maxSizeBytes: 180000,
     scroll: { size: 500, duration: '30s' },
     useByteOrderMarkEncoding: false,
+    enablePanelActionDownload: true,
   };
   const logger = loggingSystemMock.createLogger();
 

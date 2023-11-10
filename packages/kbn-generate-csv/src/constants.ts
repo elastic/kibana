@@ -6,9 +6,6 @@
  * Side Public License, v 1.
  */
 
-/**
- * These can not be imported from reporting-common due to potential for circular dependency
- */
 export const CSV_BOM_CHARS = '\ufeff';
 export const CONTENT_TYPE_CSV = 'text/csv';
 export const UI_SETTINGS_CSV_SEPARATOR = 'csv:separator';

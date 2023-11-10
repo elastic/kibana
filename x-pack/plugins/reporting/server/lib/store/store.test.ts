@@ -6,8 +6,9 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../..';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { createMockReportingCore } from '../../test_helpers';
 import { Report, ReportDocument, ReportingStore, SavedReport } from '.';
 
 describe('ReportingStore', () => {

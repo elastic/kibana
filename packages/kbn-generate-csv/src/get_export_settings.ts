@@ -9,7 +9,7 @@
 import { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
-import { CsvConfig } from '@kbn/generate-csv-types';
+import { ReportingConfigType } from '@kbn/reporting-config-server';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,
@@ -35,7 +35,7 @@ export interface CsvExportSettings {
 
 export const getExportSettings = async (
   client: IUiSettingsClient,
-  config: CsvConfig,
+  config: ReportingConfigType['csv'],
   timezone: string | undefined,
   logger: Logger
 ): Promise<CsvExportSettings> => {

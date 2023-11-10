@@ -22,6 +22,10 @@
     "@kbn/data-plugin",
     "@kbn/generate-csv",
     "@kbn/core-http-server",
-    "@kbn/reporting-export-types-helpers-server",
+    "@kbn/reporting-server",
+    "@kbn/reporting-export-types-csv-common",
+    "@kbn/reporting-mocks-server",
+    "@kbn/screenshotting-plugin",
+    "@kbn/core-http-request-handler-context-server",
   ]
 }

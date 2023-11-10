@@ -23,25 +23,27 @@ import { Writable } from 'stream';
 import type { LicenseType } from '@kbn/licensing-plugin/server';
 import {
   CancellationToken,
-  getFullRedirectAppUrl,
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  PNG_JOB_TYPE_V2,
-  PNG_REPORT_TYPE_V2,
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import type { LocatorParams, TaskRunResult } from '@kbn/reporting-common/types';
 import {
+  JobParamsPNGV2,
+  PNG_JOB_TYPE_V2,
+  PNG_REPORT_TYPE_V2,
+  TaskPayloadPNGV2,
+} from '@kbn/reporting-export-types-png-common';
+import {
   decryptJobHeaders,
+  getFullRedirectAppUrl,
   ExportType,
   generatePngObservable,
-  JobParamsPNGV2,
-  TaskPayloadPNGV2,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-server';
 import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';

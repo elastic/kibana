@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { PDF_JOB_TYPE, CSV_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-common';
 import { Readable } from 'stream';
+
+import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
 import { ReportApiJSON } from '../../../../common/types';
 import { ContentStream, getContentStream, statuses } from '../../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import { createMockReportingCore } from '../../../test_helpers';
 import { getDocumentPayloadFactory } from './get_document_payload';
 import { jobsQueryFactory } from './jobs_query';
 

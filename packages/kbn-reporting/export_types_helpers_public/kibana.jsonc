@@ -1,6 +1,0 @@
-{
-    "type": "shared-common",
-    "id": "@kbn/reporting-export-types-helpers-public",
-    "owner": "@elastic/appex-sharedux",
-  }
-  

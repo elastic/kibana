@@ -6,29 +6,33 @@
  * Side Public License, v 1.
  */
 
+import { Writable } from 'stream';
+
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
+import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import { CsvGenerator } from '@kbn/generate-csv';
 import {
-  CSV_JOB_TYPE,
-  LICENSE_TYPE_TRIAL,
+  CancellationToken,
   LICENSE_TYPE_BASIC,
   LICENSE_TYPE_CLOUD_STANDARD,
+  LICENSE_TYPE_ENTERPRISE,
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
-  LICENSE_TYPE_ENTERPRISE,
-  CancellationToken,
+  LICENSE_TYPE_TRIAL,
 } from '@kbn/reporting-common';
-import { Writable } from 'stream';
-import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
+import {
+  CSV_JOB_TYPE,
+  CSV_REPORT_TYPE,
+  JobParamsCSV,
+  TaskPayloadCSV,
+} from '@kbn/reporting-export-types-csv-common';
 import {
   BaseExportTypeSetupDeps,
   BaseExportTypeStartDeps,
   ExportType,
   decryptJobHeaders,
   getFieldFormats,
-  JobParamsCSV,
-  TaskPayloadCSV,
-} from '@kbn/reporting-export-types-helpers-server';
+} from '@kbn/reporting-server';
 
 type CsvSearchSourceExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceExportTypeStartDeps extends BaseExportTypeStartDeps {
@@ -42,7 +46,7 @@ export class CsvSearchSourceExportType extends ExportType<
   CsvSearchSourceExportTypeSetupDeps,
   CsvSearchSourceExportTypeStartDeps
 > {
-  id = 'csv_searchsource';
+  id = CSV_REPORT_TYPE;
   name = CSV_JOB_TYPE;
   jobType = CSV_JOB_TYPE;
   jobContentEncoding = 'base64' as const;

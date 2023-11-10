@@ -6,10 +6,10 @@
  */
 
 import { httpServerMock } from '@kbn/core/server/mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { ReportingCore } from '../../..';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
 import {
-  createMockConfigSchema,
   createMockPluginSetup,
   createMockPluginStart,
   createMockReportingCore,

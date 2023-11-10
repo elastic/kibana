@@ -63,6 +63,7 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/reporting-export-types-csv-common",
     "@kbn/reporting-common",
     "@kbn/reporting-export-types-helpers-server",
   ]

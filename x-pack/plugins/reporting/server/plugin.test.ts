@@ -4,31 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+import { Writable } from 'stream';
+
 import nodeCrypto from '@elastic/node-crypto';
 import type { CoreSetup, CoreStart, Logger } from '@kbn/core/server';
 import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { CancellationToken } from '@kbn/reporting-common';
-import { setFieldFormats } from '@kbn/reporting-export-types-helpers-server';
-import {
-  PNG_REPORT_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
-  PDF_REPORT_TYPE,
-  CSV_REPORT_TYPE,
-  CSV_REPORT_TYPE_V2,
-} from '@kbn/reporting-common/report_types';
+import { setFieldFormats } from '@kbn/reporting-server';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
+import { CSV_REPORT_TYPE, CSV_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-csv-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
 import { CsvSearchSourceExportType } from '@kbn/reporting-export-types-csv';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
-import { Writable } from 'stream';
 import type { ReportingCore, ReportingInternalStart } from './core';
 import { ExportTypesRegistry } from './lib/export_types_registry';
 import { ReportingPlugin } from './plugin';
-import {
-  createMockConfigSchema,
-  createMockPluginSetup,
-  createMockPluginStart,
-} from './test_helpers';
+import { createMockPluginSetup, createMockPluginStart } from './test_helpers';
 import type { ReportingSetupDeps } from './types';
 
 const sleep = (time: number) => new Promise((r) => setTimeout(r, time));

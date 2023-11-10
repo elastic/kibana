@@ -7,14 +7,15 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { KibanaShuttingDownError } from '@kbn/reporting-common';
-import type { ExportType } from '@kbn/reporting-export-types-helpers-server';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import type { ExportType } from '@kbn/reporting-server';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 
 import { ExecuteReportTask } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportingConfigType } from '../../config';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
+import { createMockReportingCore } from '../../test_helpers';
 import type { SavedReport } from '../store';
 
 const logger = loggingSystemMock.createLogger();

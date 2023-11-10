@@ -4,16 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
-import rison from '@kbn/rison';
-import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingCore } from '../../..';
-import { Report, ReportingStore } from '../../../lib/store';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
-import { RequestHandler } from './request_handler';
-import { JobParamsPDFDeprecated } from '@kbn/reporting-export-types-deprecated/printable_pdf';
-import { CommonReportingSetup, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-helpers-server';
 
 jest.mock(
   'puid',
@@ -25,7 +15,24 @@ jest.mock(
     }
 );
 
-jest.mock('@kbn/reporting-export-types-helpers-server/crypto', () => ({
+import rison from '@kbn/rison';
+
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
+import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
+import { ReportingCore } from '../../..';
+import { Report, ReportingStore } from '../../../lib/store';
+import { createMockReportingCore } from '../../../test_helpers';
+import {
+  ReportingJobResponse,
+  ReportingRequestHandlerContext,
+  ReportingSetup,
+} from '../../../types';
+import { RequestHandler } from './request_handler';
+
+jest.mock('@kbn/reporting-server/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),
@@ -90,7 +97,7 @@ describe('Handle request to generate', () => {
     (mockResponseFactory.badRequest as jest.Mock) = jest.fn((args: unknown) => args);
 
     mockContext = getMockContext();
-    mockContext.reporting = Promise.resolve({} as CommonReportingSetup);
+    mockContext.reporting = Promise.resolve({} as ReportingSetup);
 
     requestHandler = new RequestHandler(
       reportingCore,

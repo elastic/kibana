@@ -4552,10 +4552,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/generate-csv@link:packages/kbn-generate-csv":
   version "0.0.0"
   uid ""
@@ -5248,7 +5244,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-config-server@link:packages/kbn-reporting/config_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-csv-common@link:packages/kbn-reporting/export_types/csv_common":
   version "0.0.0"
   uid ""
 
@@ -5256,19 +5260,15 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-deprecated@link:packages/kbn-reporting/export_types/deprecated":
+"@kbn/reporting-export-types-pdf-common@link:packages/kbn-reporting/export_types/pdf_common":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-helpers-public@link:packages/kbn-reporting/export_types_helpers_public":
+"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/pdf":
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-export-types-helpers-server@link:packages/kbn-reporting/export_types_helpers_server":
-  version "0.0.0"
-  uid ""
-
-"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/printable_pdf_v2":
+"@kbn/reporting-export-types-png-common@link:packages/kbn-reporting/export_types/png_common":
   version "0.0.0"
   uid ""
 
@@ -5276,7 +5276,15 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-mocks-server@link:packages/kbn-reporting/mocks_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-server@link:packages/kbn-reporting/server":
   version "0.0.0"
   uid ""
 

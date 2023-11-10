@@ -7,7 +7,7 @@
 
 import type { FunctionComponent } from 'react';
 import React, { createContext, useContext } from 'react';
-import type { IlmPolicyStatusResponse } from '@kbn/reporting-export-types-helpers-public';
+import type { IlmPolicyStatusResponse } from '@kbn/reporting-common/types';
 
 import { useCheckIlmPolicyStatus } from './reporting_api_client';
 

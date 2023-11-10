@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/reporting-config-server",
+  "owner": "@elastic/appex-sharedux"
+}
