@@ -10,5 +10,4 @@ export * from './constants';
 export * from './errors';
 export * from './schema_utils';
 
-export { buildKibanaPath } from './build_kibana_path';
 export { CancellationToken } from './cancellation_token';
