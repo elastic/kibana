@@ -7,10 +7,11 @@
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import rison from '@kbn/rison';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ReportingRequestHandlerContext } from '@kbn/reporting-server/types';
 import { ReportingCore } from '../../..';
 import { Report, ReportingStore } from '../../../lib/store';
 import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
-import { ReportingJobResponse, ReportingRequestHandlerContext } from '../../../types';
+import { ReportingJobResponse } from '../../../types';
 import { RequestHandler } from './request_handler';
 import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { ReportingServerPluginSetup } from '@kbn/reporting-server';

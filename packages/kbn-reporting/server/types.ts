@@ -13,9 +13,6 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CancellationToken } from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, TaskRunResult } from '@kbn/reporting-common/types';
 
-/**
- * @internal
- */
 export interface ReportingServerPluginSetup {
   registerExportTypes: () => void;
   /**
@@ -28,9 +25,6 @@ export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
   reporting: ReportingServerPluginSetup | null;
 }>;
 
-/**
- * Internal Types
- */
 // standard type for create job function of any ExportType implementation
 export type CreateJobFn<JobParamsType = BaseParams, JobPayloadType = BasePayload> = (
   jobParams: JobParamsType,

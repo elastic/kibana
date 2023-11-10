@@ -5,18 +5,25 @@
  * 2.0.
  */
 
-jest.mock('../../../../lib/content_stream', () => ({
-  getContentStream: jest.fn(),
-}));
-import { estypes } from '@elastic/elasticsearch';
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import type { ReportingServerPluginSetup, ExportType } from '@kbn/reporting-server';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { BehaviorSubject } from 'rxjs';
 import { Readable } from 'stream';
 import supertest from 'supertest';
+
+jest.mock('../../../../lib/content_stream', () => ({
+  getContentStream: jest.fn(),
+}));
+
+import { estypes } from '@elastic/elasticsearch';
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
+import {
+  ExportType,
+  ReportingRequestHandlerContext,
+  ReportingServerPluginSetup,
+} from '@kbn/reporting-server';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
+
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
@@ -28,7 +35,6 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../../types';
 import { registerJobInfoRoutesInternal as registerJobInfoRoutes } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

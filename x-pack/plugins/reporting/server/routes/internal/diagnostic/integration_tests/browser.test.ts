@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { ReportingServerPluginSetup } from '@kbn/reporting-server';
-import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
-import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import * as Rx from 'rxjs';
 import supertest from 'supertest';
+
+import { setupServer } from '@kbn/core-test-helpers-test-utils';
+import { docLinksServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { ReportingRequestHandlerContext, ReportingServerPluginSetup } from '@kbn/reporting-server';
+import { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
+import { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import { ReportingCore } from '../../../..';
 import { INTERNAL_ROUTES } from '../../../../../common/constants';
 import { reportingMock } from '../../../../mocks';
@@ -20,7 +21,6 @@ import {
   createMockPluginSetup,
   createMockReportingCore,
 } from '../../../../test_helpers';
-import type { ReportingRequestHandlerContext } from '../../../../types';
 import { registerDiagnoseBrowser } from '../browser';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;

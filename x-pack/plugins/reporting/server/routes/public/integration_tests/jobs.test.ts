@@ -19,7 +19,11 @@ import supertest from 'supertest';
 import { ReportingCore } from '../../..';
 import { PUBLIC_ROUTES } from '../../../../common/constants';
 import { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import type { ReportingServerPluginSetup, ExportType } from '@kbn/reporting-server';
+import type {
+  ReportingServerPluginSetup,
+  ReportingRequestHandlerContext,
+  ExportType,
+} from '@kbn/reporting-server';
 import { ContentStream, ExportTypesRegistry, getContentStream } from '../../../lib';
 import { reportingMock } from '../../../mocks';
 import {
@@ -28,7 +32,6 @@ import {
   createMockPluginStart,
   createMockReportingCore,
 } from '../../../test_helpers';
-import { ReportingRequestHandlerContext } from '../../../types';
 import { registerJobInfoRoutesPublic } from '../jobs';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
