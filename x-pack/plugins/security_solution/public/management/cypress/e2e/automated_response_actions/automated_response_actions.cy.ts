@@ -76,7 +76,7 @@ describe.skip(
       disableExpandableFlyoutAdvancedSettings();
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/168427
+    // FLAKY: https://github.com/elastic/kibana/issues/169828
     describe.skip('From alerts', () => {
       let ruleId: string;
       let ruleName: string;
