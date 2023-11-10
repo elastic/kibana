@@ -150,7 +150,8 @@ export class UsageCollectionPlugin
     if (
       this.config.uiCounters.enabled &&
       !isUnauthenticated(http) &&
-      !screenshotMode.isScreenshotMode()
+      !screenshotMode.isScreenshotMode() &&
+      !window.navigator.userAgent.includes('Elastic/Synthetics')
     ) {
       this.reporter.start();
       this.applicationUsageTracker.start();

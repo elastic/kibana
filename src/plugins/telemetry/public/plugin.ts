@@ -159,7 +159,7 @@ export class TelemetryPlugin
     const currentKibanaVersion = this.currentKibanaVersion;
     this.telemetryService = new TelemetryService({
       config,
-      isScreenshotMode: screenshotMode.isScreenshotMode(),
+      isScreenshotMode: this.shouldSkipTelemetry(screenshotMode),
       http,
       notifications,
       currentKibanaVersion,
@@ -200,7 +200,9 @@ export class TelemetryPlugin
     this.telemetrySender = new TelemetrySender(this.telemetryService, async () => {
       await this.refreshConfig(http);
       analytics.optIn({
-        global: { enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode() },
+        global: {
+          enabled: this.telemetryService!.isOptedIn && !this.shouldSkipTelemetry(screenshotMode),
+        },
       });
     });
 
@@ -249,12 +251,18 @@ export class TelemetryPlugin
     application.currentAppId$
       .pipe(
         switchMap(async () => {
+          // Disable telemetry and terminate early if Kibana is running in a special "skip" mode
+          if (this.shouldSkipTelemetry(screenshotMode)) {
+            analytics.optIn({ global: { enabled: false } });
+            return;
+          }
+
           // Refresh and get telemetry config
           const updatedConfig = await this.refreshConfig(http);
 
           analytics.optIn({
             global: {
-              enabled: this.telemetryService!.isOptedIn && !screenshotMode.isScreenshotMode(),
+              enabled: this.telemetryService!.isOptedIn,
             },
           });
 
@@ -284,6 +292,18 @@ export class TelemetryPlugin
 
   public stop() {
     this.telemetrySender?.stop();
+  }
+
+  /**
+   * Kibana should skip telemetry collection if reporting is taking a screenshot
+   * or Synthetics monitoring is navigating Kibana.
+   * @param screenshotMode {@link ScreenshotModePluginSetup}
+   * @private
+   */
+  private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
+    return (
+      screenshotMode.isScreenshotMode() || window.navigator.userAgent.includes('Elastic/Synthetics')
+    );
   }
 
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {
