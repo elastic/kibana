@@ -20,19 +20,19 @@ export const getNumOfCoveredSubtechniques = (
   activity?: CoverageOverviewRuleActivity[]
 ): number => {
   const coveredSubtechniques = new Set();
-  if (!activity || activity.includes(CoverageOverviewRuleActivity.Enabled)) {
-    for (const subtechnique of technique.subtechniques) {
-      if (subtechnique.enabledRules.length) {
-        coveredSubtechniques.add(subtechnique.id);
-      }
+  for (const subtechnique of technique.subtechniques) {
+    if (
+      (!activity || activity.includes(CoverageOverviewRuleActivity.Enabled)) &&
+      subtechnique.enabledRules.length
+    ) {
+      coveredSubtechniques.add(subtechnique.id);
     }
-  }
 
-  if (!activity || activity.includes(CoverageOverviewRuleActivity.Disabled)) {
-    for (const subtechnique of technique.subtechniques) {
-      if (subtechnique.disabledRules.length) {
-        coveredSubtechniques.add(subtechnique.id);
-      }
+    if (
+      (!activity || activity.includes(CoverageOverviewRuleActivity.Disabled)) &&
+      subtechnique.disabledRules.length
+    ) {
+      coveredSubtechniques.add(subtechnique.id);
     }
   }
   return coveredSubtechniques.size;
