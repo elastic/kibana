@@ -7,7 +7,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { HttpSetup } from '@kbn/core-http-browser';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 import type { UiSettingsState } from '@kbn/core-ui-settings-browser';
 import { UiSettingsScope } from '@kbn/core-ui-settings-common';
@@ -37,7 +37,7 @@ export class UiSettingsApi {
 
   private readonly loadingCount$ = new BehaviorSubject(0);
 
-  constructor(private readonly http: HttpSetup) {}
+  constructor(private readonly http: InternalHttpSetup) {}
 
   /**
    * Adds a key+value that will be sent to the server ASAP. If a request is
