@@ -12,7 +12,8 @@ import { loadPage } from '../../tasks/common';
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
 import { performUserActions } from '../../tasks/perform_user_actions';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import type { ReturnTypeFromChainable } from '../../types';
 
 const loginWithWriteAccess = (url: string) => {
   login(ROLE.endpoint_policy_manager);
@@ -31,16 +32,21 @@ const loginWithoutAccess = (url: string) => {
 };
 
 describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
+  let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+
   before(() => {
-    login();
-    loadEndpointDataForEventFiltersIfNeeded();
-    // Clean artifacts data
+    indexEndpointHosts().then((indexEndpoints) => {
+      endpointData = indexEndpoints;
+    });
+
     removeAllArtifacts();
   });
 
   after(() => {
-    // Clean artifacts data
     removeAllArtifacts();
+
+    endpointData?.cleanup();
+    endpointData = undefined;
   });
 
   for (const testData of getArtifactsListTestsData()) {

@@ -16,9 +16,10 @@ import {
   removeExceptionsList,
   yieldFirstPolicyID,
 } from '../../tasks/artifacts';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
 import { login, ROLE } from '../../tasks/login';
 import { performUserActions } from '../../tasks/perform_user_actions';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import type { ReturnTypeFromChainable } from '../../types';
 
 const loginWithPrivilegeAll = () => {
   login(ROLE.endpoint_policy_manager);
@@ -59,14 +60,19 @@ const visitArtifactTab = (tabId: string) => {
 };
 
 describe('Artifact tabs in Policy Details page', { tags: ['@ess', '@serverless'] }, () => {
+  let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+
   before(() => {
-    login();
-    loadEndpointDataForEventFiltersIfNeeded();
+    indexEndpointHosts().then((indexEndpoints) => {
+      endpointData = indexEndpoints;
+    });
   });
 
   after(() => {
-    login();
     removeAllArtifacts();
+
+    endpointData?.cleanup();
+    endpointData = undefined;
   });
 
   for (const testData of getArtifactsListTestsData()) {
