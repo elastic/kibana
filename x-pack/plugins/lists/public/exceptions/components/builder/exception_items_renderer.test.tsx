@@ -386,24 +386,24 @@ describe('ExceptionBuilderComponent', () => {
     expect(
       wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').props().value
     ).toEqual('ip');
-    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value).toEqual(
-      'is one of'
-    );
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+    ).toEqual('is one of');
     expect(wrapper.find('[data-test-subj="valuesAutocompleteMatchAny"]').at(0).text()).toEqual(
       'some ip'
     );
 
     wrapper.find('[data-test-subj="firstRowBuilderDeleteButton"] button').simulate('click');
 
-    expect(wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props().placeholder).toEqual(
-      'Search'
-    );
-    expect(wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value).toEqual(
-      'is'
-    );
-    expect(wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().placeholder).toEqual(
-      'Please select a field first...'
-    );
+    expect(
+      wrapper.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props().placeholder
+    ).toEqual('Search');
+    expect(
+      wrapper.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+    ).toEqual('is');
+    expect(
+      wrapper.find('[data-test-subj="valuesAutocompleteMatch"] input').at(0).props().placeholder
+    ).toEqual('Please select a field first...');
   });
 
   test('it displays "and" badge if at least one exception item includes more than one entry', () => {
@@ -513,14 +513,16 @@ describe('ExceptionBuilderComponent', () => {
           .find('EuiFlexGroup[data-test-subj="exceptionItemEntryContainer"]')
           .at(1);
 
-        expect(entry2.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props().placeholder).toEqual(
-          'Search nested field'
-        );
-        expect(entry2.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value).toEqual(
-          'is'
-        );
         expect(
-          entry2.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').at(0).props().placeholder
+          entry2.find('[data-test-subj="exceptionBuilderEntryField"] input').at(0).props()
+            .placeholder
+        ).toEqual('Search nested field');
+        expect(
+          entry2.find('[data-test-subj="operatorAutocompleteComboBox"] input').at(0).props().value
+        ).toEqual('is');
+        expect(
+          entry2.find('[data-test-subj="exceptionBuilderEntryFieldExists"] input').at(0).props()
+            .placeholder
         ).toEqual(getEmptyValue());
       });
     });
