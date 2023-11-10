@@ -37,6 +37,38 @@ export function Tabs({
   mobileErrorTabId: MobileErrorTabIds;
 }) {
   const [selectedTabId, setSelectedTabId] = useTabId(mobileErrorTabId);
+  const tabEntries = tabs.map((tab, index) => (
+    <EuiTab
+      {...tab}
+      key={tab.id}
+      onClick={() => {
+        setSelectedTabId(tab.id);
+      }}
+      isSelected={tab.id === selectedTabId}
+      append={tab.append}
+    >
+      {tab.name}
+    </EuiTab>
+  ));
+
+  return (
+    <>
+      <EuiTabs>{tabEntries}</EuiTabs>
+      <EuiSpacer />
+      {selectedTabId === MobileErrorTabIds.ERRORS && (
+        <MobileErrorGroupOverview />
+      )}
+      {selectedTabId === MobileErrorTabIds.CRASHES && (
+        <MobileCrashGroupOverview />
+      )}
+    </>
+  );
+}
+  mobileErrorTabId,
+}: {
+  mobileErrorTabId: MobileErrorTabIds;
+}) {
+  const [selectedTabId, setSelectedTabId] = useTabId(mobileErrorTabId);
   const renderedTabsSet = useLazyRef(() => new Set([selectedTabId]));
   const tabEntries = tabs.map((tab, index) => (
     <EuiTab
