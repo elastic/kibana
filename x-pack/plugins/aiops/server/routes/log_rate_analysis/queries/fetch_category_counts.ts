@@ -33,24 +33,18 @@ export const getCategoryCountRequest = (
 ): estypes.SearchRequest => {
   const { index } = params;
 
-  const query = getQueryWithParams({
-    params,
-  });
-
   const categoryQuery = getCategoryQuery(fieldName, [category]);
 
-  if (Array.isArray(query.bool?.filter)) {
-    query.bool?.filter?.push(categoryQuery);
-    query.bool?.filter?.push({
-      range: {
-        [params.timeFieldName]: {
-          gte: from,
-          lte: to,
-          format: 'epoch_millis',
-        },
-      },
-    });
-  }
+  const query = getQueryWithParams({
+    // This will override the original start/end params if
+    // the optional from/to args are provided.
+    params: {
+      ...params,
+      ...(from ? { start: from } : {}),
+      ...(to ? { end: to } : {}),
+    },
+    filter: categoryQuery,
+  });
 
   return {
     index,
