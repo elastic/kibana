@@ -588,6 +588,7 @@ packages/kbn-repo-path @elastic/kibana-operations
 packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
+packages/kbn-reporting/config_server @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
 packages/kbn-reporting/export_types/csv_common @elastic/appex-sharedux
