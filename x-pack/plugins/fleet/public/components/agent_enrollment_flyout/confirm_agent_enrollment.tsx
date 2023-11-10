@@ -136,31 +136,24 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   if (showLoading && !agentCount) {
     return (
       <>
-        {isCsp ? (
-          <EuiCallOut
-            size="m"
-            color="primary"
-            iconType={EuiLoadingSpinner}
-            title={
+        <EuiCallOut
+          size="m"
+          color="primary"
+          iconType={EuiLoadingSpinner}
+          title={
+            isCsp ? (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.loading.listeningcsp"
                 defaultMessage="Listening for agent... this can take several minutes"
               />
-            }
-          />
-        ) : (
-          <EuiCallOut
-            size="m"
-            color="primary"
-            iconType={EuiLoadingSpinner}
-            title={
+            ) : (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.loading.listening"
                 defaultMessage="Listening for agent"
               />
-            }
-          />
-        )}
+            )
+          }
+        />
         <EuiSpacer size="m" />
         <EuiText>
           <FormattedMessage
