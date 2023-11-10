@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ascending, bisector } from 'd3-array';
 import * as rt from 'io-ts';
 import moment from 'moment';
 import { pipe } from 'fp-ts/lib/pipeable';
@@ -52,56 +51,3 @@ export type TimeKey = rt.TypeOf<typeof timeKeyRT>;
 export interface UniqueTimeKey extends TimeKey {
   gid: string;
 }
-
-type Comparator = (firstValue: any, secondValue: any) => number;
-
-function compareTimeKeys(
-  firstKey: TimeKey,
-  secondKey: TimeKey,
-  compareValues: Comparator = ascending
-): number {
-  const timeComparison = compareValues(firstKey.time, secondKey.time);
-
-  if (timeComparison === 0) {
-    const tiebreakerComparison = compareValues(firstKey.tiebreaker, secondKey.tiebreaker);
-
-    if (
-      tiebreakerComparison === 0 &&
-      typeof firstKey.gid !== 'undefined' &&
-      typeof secondKey.gid !== 'undefined'
-    ) {
-      return compareValues(firstKey.gid, secondKey.gid);
-    }
-
-    return tiebreakerComparison;
-  }
-
-  return timeComparison;
-}
-
-export const compareToTimeKey =
-  <Value>(keyAccessor: (value: Value) => TimeKey, compareValues?: Comparator) =>
-  (value: Value, key: TimeKey) =>
-    compareTimeKeys(keyAccessor(value), key, compareValues);
-
-export const getIndexAtTimeKey = <Value>(
-  keyAccessor: (value: Value) => TimeKey,
-  compareValues?: Comparator
-) => {
-  const comparator = compareToTimeKey(keyAccessor, compareValues);
-  const collectionBisector = bisector(comparator);
-
-  return (collection: Value[], key: TimeKey): number | null => {
-    const index = collectionBisector.left(collection, key);
-
-    if (index >= collection.length) {
-      return null;
-    }
-
-    if (comparator(collection[index], key) !== 0) {
-      return null;
-    }
-
-    return index;
-  };
-};

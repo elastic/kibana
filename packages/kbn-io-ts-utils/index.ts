@@ -39,6 +39,4 @@ export {
   type MinimalTimeKey,
   type TimeKey,
   type UniqueTimeKey,
-  compareToTimeKey,
-  getIndexAtTimeKey,
 } from './src/time_key_rt';

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { compareToTimeKey, TimeKey } from '@kbn/io-ts-utils';
+import type { TimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
 import { LogEntry } from '../../../../common/log_entry';
+import { compareToTimeKey } from '../../../../common/time';
 
 export type StreamItem = LogEntryStreamItem;
 
