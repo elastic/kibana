@@ -243,13 +243,13 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiFlexGroup direction="row" alignItems="center">
-                {!isUnsaved ? (
+                {/* {!isUnsaved ? (
                   <EuiSwitch
                     label={i18n.SAVE_AS_NEW}
                     checked={saveAsNewTimeline}
                     onChange={onSaveAsNewChanged}
                   />
-                ) : null}
+                ) : null} */}
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
                   <EuiFlexItem grow={false} component="span">
                     <EuiButton
