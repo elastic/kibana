@@ -42,7 +42,7 @@ describe('elasticsearch clients errors', () => {
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
       expect(JSON.stringify(e)).toMatchInlineSnapshot(
-        `"{\\"name\\":\\"ResponseError\\",\\"message\\":\\"parsing_exception\\\\n\\\\tCaused by:\\\\n\\\\t\\\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\\\n\\\\tRoot causes:\\\\n\\\\t\\\\tparsing_exception: unknown query [someInvalidQuery]\\"}"`
+        `"{\\"name\\":\\"ResponseError\\",\\"message\\":\\"illegal_argument_exception: [illegal_argument_exception] Reason: request [/.kibana/_search] contains unrecognized parameter: [query]\\"}"`
       );
     }
   });
@@ -58,13 +58,9 @@ describe('elasticsearch clients errors', () => {
       });
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
-      expect(String(e)).toMatchInlineSnapshot(`
-        "ResponseError: parsing_exception
-        	Caused by:
-        		named_object_not_found_exception: [1:30] unknown field [someInvalidQuery]
-        	Root causes:
-        		parsing_exception: unknown query [someInvalidQuery]"
-      `);
+      expect(String(e)).toMatchInlineSnapshot(
+        `{"error":{"root_cause":[{"type":"illegal_argument_exception","reason":"request [/.kibana/_search] contains unrecognized parameter: [query]"}],"type":"illegal_argument_exception","reason":"request [/.kibana/_search] contains unrecognized parameter: [query]"},"status":400}`
+      );
     }
   });
 });
