@@ -36,6 +36,7 @@ describe('Http server', () => {
         allowFromAnyIp: true,
         ipAllowlist: [],
       },
+      cdn: {},
       cors: {
         enabled: false,
       },
