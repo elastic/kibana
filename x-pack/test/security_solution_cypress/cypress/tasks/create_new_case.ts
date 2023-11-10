@@ -80,7 +80,7 @@ export const attachTimeline = (newCase: TestCase) => {
     },
     { interval: 500, timeout: 12000 }
   );
-  cy.get(TIMELINE).eq(1).click();
+  cy.get(TIMELINE).first().click();
 };
 
 export const createCase = () => {
