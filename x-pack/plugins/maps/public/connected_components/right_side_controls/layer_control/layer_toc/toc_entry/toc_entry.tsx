@@ -317,10 +317,10 @@ export class TOCEntry extends Component<Props, State> {
         data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
       >
         {errors.length
-          ? errors.map(({ title, error }, index) => (
+          ? errors.map(({ title, body }, index) => (
               <div key={index}>
                 <EuiCallOut color="danger" size="s" title={title}>
-                  {error}
+                  {body}
                 </EuiCallOut>
                 <EuiSpacer size="m" />
               </div>

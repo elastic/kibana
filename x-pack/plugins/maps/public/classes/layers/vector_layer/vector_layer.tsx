@@ -50,7 +50,7 @@ import {
   VectorStyleRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorSource } from '../../sources/vector_source';
-import { LayerIcon, ILayer, LayerError } from '../layer';
+import { LayerIcon, ILayer, LayerMessage } from '../layer';
 import { InnerJoin } from '../../joins/inner_join';
 import { isSpatialJoin } from '../../joins/is_spatial_join';
 import { IField } from '../../fields/field';
@@ -274,7 +274,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
   }
 
-  getErrors(): LayerError[] {
+  getErrors(): LayerMessage[] {
     const errors = super.getErrors();
 
     this.getValidJoins().forEach((join) => {
@@ -285,7 +285,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
           title: i18n.translate('xpack.maps.vectorLayer.joinFetchErrorTitle', {
             defaultMessage: `An error occurred when loading join metrics`,
           }),
-          error,
+          body: error,
         });
       }
     });

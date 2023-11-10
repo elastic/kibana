@@ -41,9 +41,9 @@ import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
 
-export interface LayerError {
+export interface LayerMessage {
   title: string;
-  error: ReactNode;
+  body: ReactNode;
 }
 
 export interface ILayer {
@@ -77,7 +77,7 @@ export interface ILayer {
   isLayerLoading(zoom: number): boolean;
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
-  getErrors(): LayerError[];
+  getErrors(): LayerMessage[];
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -405,14 +405,14 @@ export class AbstractLayer implements ILayer {
     });
   }
 
-  getErrors(): LayerError[] {
-    const errors: LayerError[] = [];
+  getErrors(): LayerMessage[] {
+    const errors: LayerMessage[] = [];
 
     const sourceError = this.getSourceDataRequest()?.getError();
     if (sourceError) {
       errors.push({
         title: this._getSourceErrorTitle(),
-        error: sourceError,
+        body: sourceError,
       });
     }
 
@@ -421,7 +421,7 @@ export class AbstractLayer implements ILayer {
         title: i18n.translate('xpack.maps.layer.tileErrorTitle', {
           defaultMessage: `An error occurred when loading layer tiles`,
         }),
-        error: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
+        body: <TileErrorsList tileErrors={this._descriptor.__tileErrors} />,
       });
     }
 
