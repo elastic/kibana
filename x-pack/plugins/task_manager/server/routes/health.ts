@@ -14,7 +14,7 @@ import {
 } from '@kbn/core/server';
 import { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
 import { Observable, Subject } from 'rxjs';
-import { tap, map } from 'rxjs/operators';
+import { tap, map, filter } from 'rxjs/operators';
 import { throttleTime } from 'rxjs/operators';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { Logger, ServiceStatus, ServiceStatusLevels } from '@kbn/core/server';
@@ -31,6 +31,7 @@ import { calculateHealthStatus } from '../lib/calculate_health_status';
 export type MonitoredHealth = RawMonitoringStats & {
   id: string;
   reason?: string;
+  isEmpty?: boolean;
   status: HealthStatus;
   timestamp: string;
 };
@@ -88,7 +89,7 @@ export function healthRoute(params: HealthRouteParams): {
 
   function getHealthStatus(monitoredStats: MonitoringStats) {
     const summarizedStats = summarizeMonitoringStats(logger, monitoredStats, config);
-    const { status, reason } = calculateHealthStatus(
+    const { status, reason, isEmpty } = calculateHealthStatus(
       summarizedStats,
       config,
       shouldRunTasks,
@@ -96,7 +97,7 @@ export function healthRoute(params: HealthRouteParams): {
     );
     const now = Date.now();
     const timestamp = new Date(now).toISOString();
-    return { id: taskManagerId, timestamp, status, reason, ...summarizedStats };
+    return { id: taskManagerId, timestamp, status, reason, isEmpty, ...summarizedStats };
   }
 
   const serviceStatus$: Subject<TaskManagerServiceStatus> = new Subject<TaskManagerServiceStatus>();
@@ -114,7 +115,8 @@ export function healthRoute(params: HealthRouteParams): {
       }),
       // Only calculate the summarized stats (calculates all running averages and evaluates state)
       // when needed by throttling down to the requiredHotStatsFreshness
-      map((stats) => withServiceStatus(getHealthStatus(stats)))
+      map((stats) => withServiceStatus(getHealthStatus(stats))),
+      filter(([monitoredHealth]) => !monitoredHealth.isEmpty)
     )
     .subscribe(([monitoredHealth, serviceStatus]) => {
       serviceStatus$.next(serviceStatus);
