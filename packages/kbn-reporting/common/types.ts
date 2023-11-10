@@ -8,8 +8,10 @@
 
 import moment from 'moment';
 
-import { LayoutParams } from '@kbn/screenshotting-plugin/common';
-import type { PerformanceMetrics as ScreenshotMetrics } from '@kbn/screenshotting-plugin/common/types';
+import type {
+  LayoutParams,
+  PerformanceMetrics as ScreenshotMetrics,
+} from '@kbn/screenshotting-plugin/common';
 import type { ByteSizeValue } from '@kbn/config-schema';
 import type { LocatorParams } from './url';
 
