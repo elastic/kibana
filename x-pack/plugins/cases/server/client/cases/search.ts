@@ -45,7 +45,9 @@ export const search = async (
     const paramArgs = decodeWithExcessOrThrow(CasesSearchRequestRt)(params);
     const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
     const configurations = await casesClient.configure.get(configArgs);
-    let customFieldsConfiguration: CustomFieldsConfiguration = [];
+    const customFieldsConfiguration: CustomFieldsConfiguration = configurations
+      .map((config) => config.customFields)
+      .flat();
 
     /**
      * Assign users to a case is only available to Platinum+
@@ -67,12 +69,6 @@ export const search = async (
      * Validate custom fields
      */
     if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
-      if (configurations.length) {
-        customFieldsConfiguration = paramArgs.owner
-          ? configurations[0].customFields
-          : configurations.map((config) => config.customFields).flat();
-      }
-
       validateSearchCasesCustomFields({
         customFieldsConfiguration,
         customFields: paramArgs.customFields,

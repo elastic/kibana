@@ -8,7 +8,8 @@
 import { v1 as uuidv1 } from 'uuid';
 
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
-import { toElasticsearchQuery } from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
+import { toElasticsearchQuery, toKqlExpression } from '@kbn/es-query';
 
 import { createSavedObjectsSerializerMock } from './mocks';
 import {
@@ -676,7 +677,7 @@ describe('utils', () => {
       `);
     });
 
-    it('creates a filter with single customField', () => {
+    describe('customFields', () => {
       const customFieldsConfiguration: CustomFieldsConfiguration = [
         {
           key: 'first_key',
@@ -697,390 +698,83 @@ describe('utils', () => {
           required: false,
         },
       ];
-      expect(
-        constructQueryOptions({
-          customFields: { second_key: [true] },
-          customFieldsConfiguration,
-        }).filter
-      ).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "isQuoted": false,
-              "type": "literal",
-              "value": "cases.attributes.customFields",
-            },
-            Object {
-              "arguments": Array [
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "key",
-                    },
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "second_key",
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "value.boolean",
-                    },
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": true,
-                    },
-                  ],
-                  "function": "is",
-                  "type": "function",
-                },
-              ],
-              "function": "and",
-              "type": "function",
-            },
-          ],
-          "function": "nested",
-          "type": "function",
-        }
-      `);
-    });
 
-    it('creates a filter with multiple customFields', () => {
-      const customFieldsConfiguration: CustomFieldsConfiguration = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          label: 'Text field',
-          required: true,
-        },
-        {
-          key: 'second_key',
-          type: CustomFieldTypes.TOGGLE,
-          label: 'Toggle field',
-          required: true,
-        },
-        {
-          key: 'third_key',
-          type: CustomFieldTypes.TOGGLE,
-          label: 'another toggle field',
-          required: false,
-        },
-      ];
-      expect(
-        constructQueryOptions({
-          customFields: { second_key: [true], third_key: [false] },
-          customFieldsConfiguration,
-        }).filter
-      ).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "arguments": Array [
-                Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases.attributes.customFields",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "key",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "second_key",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "value.boolean",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": true,
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                  ],
-                  "function": "and",
-                  "type": "function",
-                },
-              ],
-              "function": "nested",
-              "type": "function",
-            },
-            Object {
-              "arguments": Array [
-                Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases.attributes.customFields",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "key",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "third_key",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "value.boolean",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": false,
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                  ],
-                  "function": "and",
-                  "type": "function",
-                },
-              ],
-              "function": "nested",
-              "type": "function",
-            },
-          ],
-          "function": "and",
-          "type": "function",
-        }
-      `);
-    });
+      it('creates a filter with toggle customField', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [true] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
 
-    it('creates a filter with multiple customFields values', () => {
-      const customFieldsConfiguration: CustomFieldsConfiguration = [
-        {
-          key: 'first_key',
-          type: CustomFieldTypes.TEXT,
-          label: 'Text field',
-          required: true,
-        },
-        {
-          key: 'second_key',
-          type: CustomFieldTypes.TOGGLE,
-          label: 'Toggle field',
-          required: true,
-        },
-        {
-          key: 'third_key',
-          type: CustomFieldTypes.TOGGLE,
-          label: 'another toggle field',
-          required: false,
-        },
-      ];
-      expect(
-        constructQueryOptions({
-          customFields: { second_key: [true, null], third_key: [false] },
-          customFieldsConfiguration,
-        }).filter
-      ).toMatchInlineSnapshot(`
-        Object {
-          "arguments": Array [
-            Object {
-              "arguments": Array [
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "cases.attributes.customFields",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "arguments": Array [
-                            Object {
-                              "isQuoted": false,
-                              "type": "literal",
-                              "value": "key",
-                            },
-                            Object {
-                              "isQuoted": false,
-                              "type": "literal",
-                              "value": "second_key",
-                            },
-                          ],
-                          "function": "is",
-                          "type": "function",
-                        },
-                        Object {
-                          "arguments": Array [
-                            Object {
-                              "isQuoted": false,
-                              "type": "literal",
-                              "value": "value.boolean",
-                            },
-                            Object {
-                              "isQuoted": false,
-                              "type": "literal",
-                              "value": true,
-                            },
-                          ],
-                          "function": "is",
-                          "type": "function",
-                        },
-                      ],
-                      "function": "and",
-                      "type": "function",
-                    },
-                  ],
-                  "function": "nested",
-                  "type": "function",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "isQuoted": false,
-                      "type": "literal",
-                      "value": "cases.attributes.customFields",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "arguments": Array [
-                            Object {
-                              "isQuoted": false,
-                              "type": "literal",
-                              "value": "key",
-                            },
-                            Object {
-                              "isQuoted": false,
-                              "type": "literal",
-                              "value": "second_key",
-                            },
-                          ],
-                          "function": "is",
-                          "type": "function",
-                        },
-                        Object {
-                          "arguments": Array [
-                            Object {
-                              "arguments": Array [
-                                Object {
-                                  "isQuoted": false,
-                                  "type": "literal",
-                                  "value": "value",
-                                },
-                                Object {
-                                  "type": "wildcard",
-                                  "value": "@kuery-wildcard@",
-                                },
-                              ],
-                              "function": "is",
-                              "type": "function",
-                            },
-                          ],
-                          "function": "not",
-                          "type": "function",
-                        },
-                      ],
-                      "function": "and",
-                      "type": "function",
-                    },
-                  ],
-                  "function": "nested",
-                  "type": "function",
-                },
-              ],
-              "function": "or",
-              "type": "function",
-            },
-            Object {
-              "arguments": Array [
-                Object {
-                  "isQuoted": false,
-                  "type": "literal",
-                  "value": "cases.attributes.customFields",
-                },
-                Object {
-                  "arguments": Array [
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "key",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "third_key",
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                    Object {
-                      "arguments": Array [
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": "value.boolean",
-                        },
-                        Object {
-                          "isQuoted": false,
-                          "type": "literal",
-                          "value": false,
-                        },
-                      ],
-                      "function": "is",
-                      "type": "function",
-                    },
-                  ],
-                  "function": "and",
-                  "type": "function",
-                },
-              ],
-              "function": "nested",
-              "type": "function",
-            },
-          ],
-          "function": "and",
-          "type": "function",
-        }
-      `);
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"cases.attributes.customFields: { (key: second_key AND value.boolean: true) }"`
+        );
+      });
+
+      it('creates a filter with text customField', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { first_key: ['hello'] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"cases.attributes.customFields: { (key: first_key AND value.string: hello) }"`
+        );
+      });
+
+      it('creates a filter with null customField value', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { first_key: [null] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"cases.attributes.customFields: { (key: first_key AND NOT value: *) }"`
+        );
+      });
+
+      it('creates a filter with multiple customFields', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [true], third_key: [false] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"(cases.attributes.customFields: { (key: second_key AND value.boolean: true) } AND cases.attributes.customFields: { (key: third_key AND value.boolean: false) })"`
+        );
+      });
+
+      it('creates a filter with multiple customFields values', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [true, null], third_key: [false] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"((cases.attributes.customFields: { (key: second_key AND value.boolean: true) } OR cases.attributes.customFields: { (key: second_key AND NOT value: *) }) AND cases.attributes.customFields: { (key: third_key AND value.boolean: false) })"`
+        );
+      });
+
+      it('creates a filter with only key when value is empty', () => {
+        const kqlFilter = toKqlExpression(
+          constructQueryOptions({
+            customFields: { second_key: [], third_key: [] },
+            customFieldsConfiguration,
+          }).filter as KueryNode
+        );
+
+        expect(kqlFilter).toMatchInlineSnapshot(
+          `"(cases.attributes.customFields: { key: second_key } AND cases.attributes.customFields: { key: third_key })"`
+        );
+      });
     });
   });
 

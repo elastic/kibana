@@ -155,30 +155,30 @@ export const validateSearchCasesCustomFields = ({
   }
 
   if (Object.keys(customFields).length > MAX_CUSTOM_FIELDS_PER_CASE) {
-    throw Boom.forbidden(`Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed.`);
+    throw Boom.badRequest(`Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed.`);
   }
 
   Object.entries(customFields).forEach(([key, value]) => {
     const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
 
-    if (customFieldConfig) {
-      customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
-
-      if (!customFieldsMapping?.isFilterable) {
-        throw Boom.forbidden(
-          `Filtering by custom field of type ${customFieldConfig.type} is not allowed.`
-        );
-      }
-
-      value.forEach((item) => {
-        if (typeof item !== customFieldsMapping?.savedObjectMappingType && item !== null) {
-          throw Boom.forbidden(
-            `The ${key} custom field have the wrong value type ${typeof item} in the request.`
-          );
-        }
-      });
-    } else {
+    if (!customFieldConfig) {
       throw Boom.badRequest(`Invalid custom field key: ${key}.`);
     }
+
+    customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
+
+    if (!customFieldsMapping?.isFilterable) {
+      throw Boom.badRequest(
+        `Filtering by custom field of type ${customFieldConfig.type} is not allowed.`
+      );
+    }
+
+    value.forEach((item) => {
+      if (typeof item !== customFieldsMapping?.savedObjectMappingType && item !== null) {
+        throw Boom.badRequest(
+          `The ${key} custom field have the wrong value type ${typeof item} in the request.`
+        );
+      }
+    });
   });
 };

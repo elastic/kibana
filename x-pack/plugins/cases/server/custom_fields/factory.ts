@@ -10,7 +10,7 @@ import type { ICasesCustomField, CasesCustomFieldsMap } from './types';
 import { getCasesTextCustomField } from './text';
 import { getCasesToggleCustomField } from './toggle';
 
-const mapping: Record<CustomFieldTypes, ICasesCustomField | null> = {
+const mapping: Record<CustomFieldTypes, ICasesCustomField> = {
   [CustomFieldTypes.TEXT]: getCasesTextCustomField(),
   [CustomFieldTypes.TOGGLE]: getCasesToggleCustomField(),
 };

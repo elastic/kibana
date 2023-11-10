@@ -361,6 +361,10 @@ export const buildCustomFieldsFilter = ({
       customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
     }
 
+    if (!Object.values(value).length) {
+      return fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key}}`);
+    }
+
     return nodeBuilder.or(
       Object.values(value).map((filterValue) => {
         if (filterValue === null) {
