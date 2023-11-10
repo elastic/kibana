@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { getCategoryCountRequest } from './fetch_category_counts';
+import { getCategoryCountRequest, getCategoryCountMSearchRequest } from './fetch_category_counts';
+
+const params = {
+  index: 'the-index',
+  timeFieldName: 'the-time-field-name',
+  start: 0,
+  end: 50,
+  baselineMin: 10,
+  baselineMax: 20,
+  deviationMin: 30,
+  deviationMax: 40,
+  includeFrozen: false,
+  searchQuery: '{ "match_all": {} }',
+};
 
 describe('getCategoryCountRequest', () => {
   it('returns the category count request', () => {
-    const params = {
-      index: 'the-index',
-      timeFieldName: 'the-time-field-name',
-      start: 0,
-      end: 50,
-      baselineMin: 10,
-      baselineMax: 20,
-      deviationMin: 30,
-      deviationMax: 40,
-      includeFrozen: false,
-      searchQuery: '{ "match_all": {} }',
-    };
-
     const category = {
       key: 'runTask ended no files to process',
       count: 667,
@@ -66,5 +66,85 @@ describe('getCategoryCountRequest', () => {
         track_total_hits: true,
       },
     });
+  });
+});
+
+describe('getCategoryCountMSearchRequest', () => {
+  it('returns the request body for the msearch request', () => {
+    const categories = [
+      {
+        key: 'SLO summary transforms installed and started',
+        count: 500,
+        examples: ['SLO summary transforms installed and started'],
+      },
+      { key: 'Trusted Apps', count: 500, examples: ['Trusted Apps: '] },
+    ];
+
+    const query = getCategoryCountMSearchRequest(
+      params,
+      'the-field-name',
+      categories,
+      params.baselineMin,
+      params.baselineMax
+    );
+
+    expect(query).toEqual([
+      { index: 'the-index' },
+      {
+        query: {
+          bool: {
+            filter: [
+              { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'the-field-name': {
+                          auto_generate_synonyms_phrase_query: false,
+                          fuzziness: 0,
+                          operator: 'and',
+                          query: 'SLO summary transforms installed and started',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        track_total_hits: true,
+      },
+      { index: 'the-index' },
+      {
+        query: {
+          bool: {
+            filter: [
+              { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
+              {
+                bool: {
+                  should: [
+                    {
+                      match: {
+                        'the-field-name': {
+                          auto_generate_synonyms_phrase_query: false,
+                          fuzziness: 0,
+                          operator: 'and',
+                          query: 'Trusted Apps',
+                        },
+                      },
+                    },
+                  ],
+                },
+              },
+            ],
+          },
+        },
+        size: 0,
+        track_total_hits: true,
+      },
+    ]);
   });
 });

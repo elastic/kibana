@@ -56,6 +56,19 @@ export const getCategoryCountRequest = (
   };
 };
 
+export const getCategoryCountMSearchRequest = (
+  params: AiopsLogRateAnalysisSchema,
+  fieldName: string,
+  categories: FetchCategoriesResponse['categories'],
+  from: number | undefined,
+  to: number | undefined
+): estypes.MsearchRequestItem[] =>
+  categories.flatMap((category) => [
+    { index: params.index },
+    getCategoryCountRequest(params, fieldName, category, from, to)
+      .body as estypes.MsearchMultisearchBody,
+  ]);
+
 export const fetchCategoryCounts = async (
   esClient: ElasticsearchClient,
   params: AiopsLogRateAnalysisSchema,
@@ -69,11 +82,13 @@ export const fetchCategoryCounts = async (
 ): Promise<FetchCategoriesResponse> => {
   const updatedCategories = cloneDeep(categories);
 
-  const searches = categories.categories.flatMap((category) => [
-    { index: params.index },
-    getCategoryCountRequest(params, fieldName, category, from, to)
-      .body as estypes.MsearchMultisearchBody,
-  ]);
+  const searches = getCategoryCountMSearchRequest(
+    params,
+    fieldName,
+    categories.categories,
+    from,
+    to
+  );
 
   let mSearchresponse;
 
