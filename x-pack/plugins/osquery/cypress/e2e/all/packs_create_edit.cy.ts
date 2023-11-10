@@ -33,7 +33,7 @@ import {
   interceptPackId,
 } from '../../tasks/integrations';
 import { DEFAULT_POLICY } from '../../screens/fleet';
-import { getIdFormField } from '../../screens/live_query';
+import { getIdFormField, LIVE_QUERY_EDITOR } from '../../screens/live_query';
 import { loadSavedQuery, cleanupSavedQuery, cleanupPack, loadPack } from '../../tasks/api_fixtures';
 import { request } from '../../tasks/common';
 import { ServerlessRoleName } from '../../support/roles';
@@ -254,6 +254,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
       cy.getBySel(ADD_QUERY_BUTTON).click();
 
       cy.contains('Attach next query');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
       cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
       cy.getBySel('osquery-interval-field').click().clear().type('5');
       cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
@@ -367,6 +369,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
         cy.contains('Attach next query');
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
         cy.contains('ID must be unique').should('not.exist');
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
         cy.getBySel(FLYOUT_SAVED_QUERY_SAVE_BUTTON).click();
@@ -671,6 +675,8 @@ describe('Packs - Create and Edit', { tags: ['@ess', '@serverless'] }, () => {
 
         cy.getBySel(ADD_QUERY_BUTTON).click();
 
+        cy.getBySel('globalLoadingIndicator').should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
         cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(
           `${multipleMappingsSavedQueryName} {downArrow} {enter}`
         );
