@@ -117,7 +117,7 @@ export const logisticsFormSchema: FormSchema = {
             };
           }
 
-          if (value % 1 != 0) {
+          if (value % 1 !== 0) {
             return {
               message: i18n.translate(
                 'xpack.idxMgmt.dataStreamsDetailsPanel.stepLogistics.dataRetentionFieldDecimalError',
