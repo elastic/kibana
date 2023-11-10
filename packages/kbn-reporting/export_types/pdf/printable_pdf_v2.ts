@@ -7,7 +7,8 @@
  */
 
 import apm from 'elastic-apm-node';
-import Rx, { catchError, map, mergeMap, Observable, of, takeUntil, tap } from 'rxjs';
+import * as Rx from 'rxjs';
+import { catchError, map, mergeMap, Observable, of, takeUntil, tap } from 'rxjs';
 import { Writable } from 'stream';
 
 import { Headers } from '@kbn/core/server';
