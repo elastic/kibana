@@ -180,11 +180,10 @@ export const useDiscoverInTimelineActions = (
       savedSearch.timeRange =
         savedSearch.timeRange ?? discoverDataService.query.timefilter.timefilter.getTime();
       savedSearch.tags = ['security-solution-default'];
-      console.log('update saved search');
+
+      // If there is already a saved search, only update the local state
       if (savedSearchId) {
         savedSearch.id = savedSearchId;
-        // distinguish between setInitialSavedSearch and updateSavedSearch
-        // to avoud setting the timeline as changed
         dispatch(
           timelineActions.updateSavedSearch({
             id: TimelineId.active,
@@ -192,6 +191,7 @@ export const useDiscoverInTimelineActions = (
           })
         );
       } else {
+        // If no saved search exists. Create a new saved search instance and associate it with the timeline.
         try {
           dispatch(
             timelineActions.startTimelineSaving({
