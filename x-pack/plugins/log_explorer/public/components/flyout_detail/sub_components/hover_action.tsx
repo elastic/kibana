@@ -13,6 +13,7 @@ import {
   EuiButtonIcon,
   useEuiTheme,
   EuiTextTruncate,
+  EuiText,
 } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 
@@ -32,6 +33,7 @@ interface HoverActionProps {
 
 export const HoverAction = ({ displayText, actions, width }: HoverActionProps) => {
   const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexGroup
       responsive={false}
@@ -47,7 +49,14 @@ export const HoverAction = ({ displayText, actions, width }: HoverActionProps) =
         },
       }}
     >
-      <EuiTextTruncate text={displayText} truncation="end" width={width} />
+      <EuiTextTruncate text={displayText} truncation="end" width={width}>
+        {(truncatedText: string) => (
+          <EuiText
+            // Value returned from formatFieldValue is always sanitized
+            dangerouslySetInnerHTML={{ __html: truncatedText }}
+          />
+        )}
+      </EuiTextTruncate>
       <EuiFlexGroup
         className="visibleOnHoverFocus"
         css={{

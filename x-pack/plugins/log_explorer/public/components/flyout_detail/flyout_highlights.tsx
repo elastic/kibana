@@ -4,9 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useRef } from 'react';
+import React from 'react';
 import { FlyoutContentActions } from '@kbn/discover-plugin/public';
 import { DataTableRecord } from '@kbn/discover-utils/src/types';
+import { useMeasure } from 'react-use/lib';
 import { FlyoutDoc } from './types';
 import * as constants from '../../../common/constants';
 import { HighlightField } from './sub_components/highlight_field';
@@ -33,7 +34,6 @@ import {
 import { HighlightSection } from './sub_components/highlight_section';
 import { DiscoverActionsProvider } from '../../hooks/use_discover_action';
 import { HighlightContainer } from './sub_components/highlight_container';
-import { useDimension } from '../../hooks/use_dimensions';
 import { useFlyoutColumnWidth } from '../../hooks/use_flyouot_column_width';
 
 export function FlyoutHighlights({
@@ -45,8 +45,7 @@ export function FlyoutHighlights({
   flattenedDoc: DataTableRecord['flattened'];
   actions: FlyoutContentActions;
 }) {
-  const elementRef = useRef<HTMLDivElement>(null);
-  const [ref, dimensions] = useDimension<HTMLDivElement>(elementRef);
+  const [ref, dimensions] = useMeasure<HTMLDivElement>();
   const { columns, fieldWidth } = useFlyoutColumnWidth(dimensions.width);
   return (
     <DiscoverActionsProvider value={actions}>
