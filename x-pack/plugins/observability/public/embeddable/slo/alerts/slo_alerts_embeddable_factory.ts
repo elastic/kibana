@@ -14,11 +14,14 @@ import {
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { SLOAlertsEmbeddable, SLO_ALERTS_EMBEDDABLE } from './slo_alerts_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 
 export type SloAlertsEmbeddableFactory = EmbeddableFactory;
-export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
+export class SloAlertsEmbeddableFactoryDefinition
+  implements EmbeddableFactoryDefinition, IProvidesPanelPlacementSettings<SloEmbeddableInput>
+{
   public readonly type = SLO_ALERTS_EMBEDDABLE;
 
   public readonly grouping = [
@@ -38,6 +41,15 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
   public async isEditable() {
     return true;
   }
+
+  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+    SloEmbeddableInput,
+    unknown
+  >['getPanelPlacementSettings'] = () => {
+    const width = 8;
+    const height = 7;
+    return { width, height };
+  };
 
   public async getExplicitInput(): Promise<Partial<SloEmbeddableInput>> {
     const [coreStart, pluginStart] = await this.getStartServices();
