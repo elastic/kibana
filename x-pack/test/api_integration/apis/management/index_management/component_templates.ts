@@ -147,6 +147,10 @@ export default function ({ getService }: FtrProviderContext) {
                   },
                 },
               },
+              lifecycle: {
+                enabled: true,
+                data_retention: '2d',
+              },
             },
             _meta: {
               description: 'set number of shards to one',
