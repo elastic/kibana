@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import React from 'react';
 import { css } from '@emotion/css';
+import { Global } from '@emotion/react';
 import { useEuiTheme, euiAnimFadeIn, transparentize, euiBackgroundColor } from '@elastic/eui';
 
 export const usePaneStyles = () => {
@@ -47,4 +48,8 @@ export const usePaneStyles = () => {
       padding: 0 ${euiTheme.size.s};
     }
   `;
+};
+
+export const OverflowHiddenGlobalStyles = () => {
+  return <Global styles={'body { overflow: hidden }'} />;
 };

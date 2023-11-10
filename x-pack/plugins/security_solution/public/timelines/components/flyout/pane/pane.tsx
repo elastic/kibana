@@ -15,7 +15,7 @@ import { DefaultCellRenderer } from '../../timeline/cell_rendering/default_cell_
 import { EuiPortal } from './custom_portal';
 import { useShallowEqualSelector } from '../../../../common/hooks/use_selector';
 import { inputsSelectors } from '../../../../common/store/selectors';
-import { usePaneStyles } from './pane.styles';
+import { usePaneStyles, OverflowHiddenGlobalStyles } from './pane.styles';
 
 interface FlyoutPaneComponentProps {
   timelineId: TimelineId;
@@ -49,6 +49,7 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
               rowRenderers={defaultRowRenderers}
               timelineId={timelineId}
             />
+            {visible && <OverflowHiddenGlobalStyles />}
           </div>
         </div>
       </EuiPortal>
