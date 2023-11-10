@@ -44,7 +44,9 @@ describe('Pane', () => {
       </TestProviders>
     );
 
-    expect(wrapper.getByTestId('timeline-wrapper')).not.toHaveClass('timeline-wrapper--full-screen');
+    expect(wrapper.getByTestId('timeline-wrapper')).not.toHaveClass(
+      'timeline-wrapper--full-screen'
+    );
   });
 
   it('should render with fullscreen className', async () => {

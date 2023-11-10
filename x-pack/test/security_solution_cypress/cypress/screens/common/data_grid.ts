@@ -46,5 +46,3 @@ export const COLUMN_ORDER_POPUP = {
   TIMESTAMP: '[data-test-subj="dataGridColumnSelectorColumnItem-@timestamp"]',
   REASON: '[data-test-subj="dataGridColumnSelectorColumnItem-kibana.alert.reason"]',
 };
-
-export const DATA_GRID_EMPTY_STATE = '[data-test-subj="tGridEmptyState"]';

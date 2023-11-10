@@ -35,7 +35,7 @@ import { kqlSearch } from '../../../tasks/security_header';
 
 import { hostsUrl } from '../../../urls/navigation';
 import { resetFields } from '../../../tasks/timeline';
-import { DATA_GRID_EMPTY_STATE } from '../../../screens/common/data_grid';
+import { DATA_GRID_EMPTY_STATE } from '../../../screens/events_viewer';
 
 const defaultHeadersInDefaultEcsCategory = [
   { id: '@timestamp' },
