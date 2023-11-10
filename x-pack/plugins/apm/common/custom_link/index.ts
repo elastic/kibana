@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
+import Mustache from 'mustache';
+import { Transaction } from '../../typings/es_schemas/ui/transaction';
 
 export const INVALID_LICENSE = i18n.translate(
   'xpack.apm.settings.customLink.license.text',
@@ -22,3 +26,28 @@ export const NO_PERMISSION_LABEL = i18n.translate(
       "Your user role doesn't have permissions to create custom links",
   }
 );
+
+export const extractTemplateVariableNames = (url: string): string[] =>
+  Mustache.parse(url)
+    .filter((v: any[]) => v[0] === 'name')
+    .map((v: any[]) => v[1]);
+
+export function getEncodedCustomLinkUrl(
+  url: string,
+  transaction?: Transaction
+) {
+  try {
+    const templateVariables = extractTemplateVariableNames(url);
+    const view = {};
+    templateVariables.forEach((name) => {
+      const value = get(transaction, name);
+      if (value) {
+        const encodedValue = encodeURIComponent(value);
+        set(view, name, encodedValue);
+      }
+    });
+    return Mustache.render(url, view);
+  } catch (e) {
+    return url;
+  }
+}
