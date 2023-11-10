@@ -7,24 +7,12 @@
 
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
+import { paramsMock } from './__mocks__/params_match_all';
 import { getBaselineOrDeviationFilter, getCategoryRequest } from './fetch_categories';
 
 describe('getBaselineOrDeviationFilter', () => {
   it('returns a filter that matches both baseline and deviation time range', () => {
-    const params = {
-      index: 'the-index',
-      timeFieldName: 'the-time-field-name',
-      start: 0,
-      end: 50,
-      baselineMin: 10,
-      baselineMax: 20,
-      deviationMin: 30,
-      deviationMax: 40,
-      includeFrozen: false,
-      searchQuery: '{ "match_all": {} }',
-    };
-
-    const baselineOrDeviationFilter = getBaselineOrDeviationFilter(params);
+    const baselineOrDeviationFilter = getBaselineOrDeviationFilter(paramsMock);
 
     expect(baselineOrDeviationFilter).toEqual({
       bool: {
@@ -47,25 +35,12 @@ describe('getBaselineOrDeviationFilter', () => {
 
 describe('getCategoryRequest', () => {
   it('returns the category request', () => {
-    const params = {
-      index: 'the-index',
-      timeFieldName: 'the-time-field-name',
-      start: 0,
-      end: 50,
-      baselineMin: 10,
-      baselineMax: 20,
-      deviationMin: 30,
-      deviationMax: 40,
-      includeFrozen: false,
-      searchQuery: '{ "match_all": {} }',
-    };
-
     const randomSamplerWrapper = createRandomSamplerWrapper({
       probability: 0.1,
       seed: 1234,
     });
 
-    const query = getCategoryRequest(params, 'the-field-name', randomSamplerWrapper);
+    const query = getCategoryRequest(paramsMock, 'the-field-name', randomSamplerWrapper);
 
     // Because the time range filter is covered by the should clauses that cover both
     // baseline (10,20) and deviation (30,40), we expect that there is no other

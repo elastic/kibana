@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-import { getCategoryCountRequest, getCategoryCountMSearchRequest } from './fetch_category_counts';
+import { paramsMock } from './__mocks__/params_match_all';
 
-const params = {
-  index: 'the-index',
-  timeFieldName: 'the-time-field-name',
-  start: 0,
-  end: 50,
-  baselineMin: 10,
-  baselineMax: 20,
-  deviationMin: 30,
-  deviationMax: 40,
-  includeFrozen: false,
-  searchQuery: '{ "match_all": {} }',
-};
+import { getCategoryCountRequest, getCategoryCountMSearchRequest } from './fetch_category_counts';
 
 describe('getCategoryCountRequest', () => {
   it('returns the category count request', () => {
@@ -29,11 +18,11 @@ describe('getCategoryCountRequest', () => {
     };
 
     const query = getCategoryCountRequest(
-      params,
+      paramsMock,
       'the-field-name',
       category,
-      params.baselineMin,
-      params.baselineMax
+      paramsMock.baselineMin,
+      paramsMock.baselineMax
     );
 
     expect(query).toEqual({
@@ -81,11 +70,11 @@ describe('getCategoryCountMSearchRequest', () => {
     ];
 
     const query = getCategoryCountMSearchRequest(
-      params,
+      paramsMock,
       'the-field-name',
       categories,
-      params.baselineMin,
-      params.baselineMax
+      paramsMock.baselineMin,
+      paramsMock.baselineMax
     );
 
     expect(query).toEqual([
