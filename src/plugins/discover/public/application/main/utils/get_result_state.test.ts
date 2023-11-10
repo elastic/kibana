@@ -9,33 +9,38 @@ import { getResultState, resultStatuses } from './get_result_state';
 import { FetchStatus } from '../../types';
 
 describe('getResultState', () => {
-  test('fetching uninitialized', () => {
+  test(`should return 'uninitialized' when fetching uninitialized`, () => {
     const actual = getResultState(FetchStatus.UNINITIALIZED, false);
     expect(actual).toBe(resultStatuses.UNINITIALIZED);
   });
 
-  test('fetching complete with no records', () => {
-    const actual = getResultState(FetchStatus.COMPLETE, false);
-    expect(actual).toBe(resultStatuses.NO_RESULTS);
-  });
-
-  test('fetching ongoing aka loading', () => {
+  test(`should return 'loading' when fetching is loading`, () => {
     const actual = getResultState(FetchStatus.LOADING, false);
     expect(actual).toBe(resultStatuses.LOADING);
   });
 
-  test('fetching ready', () => {
+  test(`should return 'none' when fetching is complete with no records`, () => {
+    const actual = getResultState(FetchStatus.COMPLETE, false);
+    expect(actual).toBe(resultStatuses.NO_RESULTS);
+  });
+
+  test(`should return 'none' after a fetch error`, () => {
+    const actual = getResultState(FetchStatus.ERROR, false);
+    expect(actual).toBe(resultStatuses.NO_RESULTS);
+  });
+
+  test(`should return 'ready' when fetching completes with records`, () => {
     const actual = getResultState(FetchStatus.COMPLETE, true);
     expect(actual).toBe(resultStatuses.READY);
   });
 
-  test('re-fetching after already data is available', () => {
+  test(`should reurn 'ready' when re-fetching after already data is available`, () => {
     const actual = getResultState(FetchStatus.LOADING, true);
     expect(actual).toBe(resultStatuses.READY);
   });
 
-  test('after a fetch error when data was successfully fetched before ', () => {
+  test(`should return 'none' after a fetch error when data was successfully fetched before`, () => {
     const actual = getResultState(FetchStatus.ERROR, true);
-    expect(actual).toBe(resultStatuses.READY);
+    expect(actual).toBe(resultStatuses.NO_RESULTS);
   });
 });
