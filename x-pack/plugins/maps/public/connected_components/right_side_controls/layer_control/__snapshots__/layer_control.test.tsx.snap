@@ -119,12 +119,8 @@ exports[`LayerControl isLayerTOCOpen Should render expand button 1`] = `
   display="inlineBlock"
   position="left"
 >
-  <EuiButtonIcon
-    aria-label="Expand layers panel"
-    className="mapLayerControl__openLayerTOCButton"
-    color="text"
-    data-test-subj="mapExpandLayerControlButton"
-    iconType="menuLeft"
+  <ExpandButton
+    hasErrors={false}
     isLoading={false}
     onClick={[Function]}
   />
@@ -138,12 +134,8 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with error icon
   display="inlineBlock"
   position="left"
 >
-  <EuiButtonIcon
-    aria-label="Expand layers panel"
-    className="mapLayerControl__openLayerTOCButton"
-    color="text"
-    data-test-subj="mapExpandLayerControlButton"
-    iconType="warning"
+  <ExpandButton
+    hasErrors={true}
     isLoading={false}
     onClick={[Function]}
   />
@@ -157,12 +149,8 @@ exports[`LayerControl isLayerTOCOpen Should render expand button with loading ic
   display="inlineBlock"
   position="left"
 >
-  <EuiButtonIcon
-    aria-label="Expand layers panel"
-    className="mapLayerControl__openLayerTOCButton"
-    color="text"
-    data-test-subj="mapExpandLayerControlButton"
-    iconType="menuLeft"
+  <ExpandButton
+    hasErrors={false}
     isLoading={true}
     onClick={[Function]}
   />
