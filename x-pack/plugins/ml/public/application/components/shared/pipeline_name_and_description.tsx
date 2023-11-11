@@ -16,7 +16,6 @@ import React, { FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFieldText, EuiFormRow, EuiText, EuiTextArea } from '@elastic/eui';
 
-// MlInferenceState
 interface Props {
   handlePipelineConfigUpdate: (configUpdate: Partial<any>) => void;
   pipelineNameError: string | undefined;

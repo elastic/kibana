@@ -123,6 +123,7 @@ export const AddInferencePipelineFlyout: FC<AddInferencePipelineFlyoutProps> = (
           isDetailsStepValid={pipelineNameError === undefined && targetFieldError === undefined}
           isConfigureProcessorStepValid={hasUnsavedChanges === false}
           hasProcessorStep
+          pipelineCreated={formState.pipelineCreated}
         />
         <EuiSpacer size="m" />
         {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (

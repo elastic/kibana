@@ -8,7 +8,7 @@
 import React, { FC, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
+import { EuiStepsHorizontal, type EuiStepsHorizontalProps } from '@elastic/eui';
 import type { AddInferencePipelineSteps } from '../ml_inference/types';
 import { ADD_INFERENCE_PIPELINE_STEPS } from '../ml_inference/constants';
 
@@ -20,16 +20,32 @@ interface Props {
   isDetailsStepValid: boolean;
   isConfigureProcessorStepValid?: boolean;
   hasProcessorStep: boolean;
+  pipelineCreated: boolean;
 }
 
+const DISABLED = 'disabled';
+const COMPLETE = 'complete';
+const INCOMPLETE = 'incomplete';
+
 export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
-  ({ step, setStep, isDetailsStepValid, isConfigureProcessorStepValid, hasProcessorStep }) => {
+  ({
+    step,
+    setStep,
+    isDetailsStepValid,
+    isConfigureProcessorStepValid,
+    hasProcessorStep,
+    pipelineCreated,
+  }) => {
     const currentStepIndex = steps.findIndex((s) => s === step);
+
     const navSteps: EuiStepsHorizontalProps['steps'] = [
       {
         // Details
-        onClick: () => setStep(ADD_INFERENCE_PIPELINE_STEPS.DETAILS),
-        status: isDetailsStepValid ? 'complete' : 'incomplete',
+        onClick: () => {
+          if (pipelineCreated) return;
+          setStep(ADD_INFERENCE_PIPELINE_STEPS.DETAILS);
+        },
+        status: isDetailsStepValid ? COMPLETE : INCOMPLETE,
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.details.title',
           {
@@ -40,10 +56,10 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // Handle failures
         onClick: () => {
-          if (!isDetailsStepValid) return;
+          if (!isDetailsStepValid || pipelineCreated) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.ON_FAILURE);
         },
-        status: currentStepIndex > 2 ? 'complete' : 'incomplete',
+        status: currentStepIndex > 2 ? COMPLETE : INCOMPLETE,
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.handleFailures.title',
           {
@@ -54,10 +70,10 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // Test
         onClick: () => {
-          if (!isConfigureProcessorStepValid || !isDetailsStepValid) return;
+          if (!isConfigureProcessorStepValid || !isDetailsStepValid || pipelineCreated) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.TEST);
         },
-        status: currentStepIndex > 3 ? 'complete' : 'incomplete',
+        status: currentStepIndex > 3 ? COMPLETE : INCOMPLETE,
         title: i18n.translate(
           'xpack.ml.trainedModels.content.indices.transforms.addInferencePipelineModal.steps.test.title',
           {
@@ -68,10 +84,10 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       {
         // Review and Create
         onClick: () => {
-          if (!isConfigureProcessorStepValid) return;
+          if (!isConfigureProcessorStepValid || pipelineCreated) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.CREATE);
         },
-        status: isDetailsStepValid && isConfigureProcessorStepValid ? 'incomplete' : 'disabled',
+        status: isDetailsStepValid && isConfigureProcessorStepValid ? INCOMPLETE : DISABLED,
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.create.title',
           {
@@ -85,13 +101,13 @@ export const AddInferencePipelineHorizontalSteps: FC<Props> = memo(
       navSteps.splice(1, 0, {
         // Processor configuration
         onClick: () => {
-          if (!isDetailsStepValid) return;
+          if (!isDetailsStepValid || pipelineCreated) return;
           setStep(ADD_INFERENCE_PIPELINE_STEPS.CONFIGURE_PROCESSOR);
         },
         status:
           isDetailsStepValid && isConfigureProcessorStepValid && currentStepIndex > 1
-            ? 'complete'
-            : 'incomplete',
+            ? COMPLETE
+            : INCOMPLETE,
         title: i18n.translate(
           'xpack.ml.inferencePipeline.content.indices.transforms.addInferencePipelineModal.steps.configureProcessor.title',
           {

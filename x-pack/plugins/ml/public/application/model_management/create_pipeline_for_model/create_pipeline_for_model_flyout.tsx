@@ -134,6 +134,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
           isDetailsStepValid={pipelineNameError === undefined}
           isConfigureProcessorStepValid={hasUnsavedChanges === false}
           hasProcessorStep={false}
+          pipelineCreated={formState.pipelineCreated}
         />
         <EuiSpacer size="m" />
         {step === ADD_INFERENCE_PIPELINE_STEPS.DETAILS && (
