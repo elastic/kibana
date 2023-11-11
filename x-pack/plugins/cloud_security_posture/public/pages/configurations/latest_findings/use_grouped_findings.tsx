@@ -36,7 +36,13 @@ export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
   size: 0,
 });
 
-export const useGroupedFindings = ({ query, enabled = true }: any) => {
+export const useGroupedFindings = ({
+  query,
+  enabled = true,
+}: {
+  query: GroupingQuery;
+  enabled: boolean;
+}) => {
   const {
     data,
     notifications: { toasts },

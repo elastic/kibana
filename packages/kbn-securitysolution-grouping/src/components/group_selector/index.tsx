@@ -56,7 +56,8 @@ const GroupSelectorComponent = ({
     return [
       {
         id: 'firstPanel',
-        title: i18n.SELECT_FIELD(maxGroupingLevels),
+        title:
+          maxGroupingLevels === 1 ? i18n.SELECT_SINGLE_FIELD : i18n.SELECT_FIELD(maxGroupingLevels),
         items: [
           {
             'data-test-subj': 'panel-none',

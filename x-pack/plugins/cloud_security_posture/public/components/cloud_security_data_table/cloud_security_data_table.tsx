@@ -73,7 +73,7 @@ interface CloudSecurityDataGridProps {
    * This is the component that will be rendered in the group selector.
    * This component will receive the current group and a function to change the group.
    */
-  groupSelector?: JSX.Element;
+  groupSelectorComponent?: JSX.Element;
   /**
    * Height override for the data grid.
    */
@@ -91,7 +91,7 @@ export const CloudSecurityDataTable = ({
   loadMore,
   title,
   customCellRenderer,
-  groupSelector,
+  groupSelectorComponent,
   height,
   ...rest
 }: CloudSecurityDataGridProps) => {
@@ -220,7 +220,7 @@ export const CloudSecurityDataTable = ({
       columns={currentColumns}
       onAddColumn={onAddColumn}
       onRemoveColumn={onRemoveColumn}
-      groupSelector={groupSelector}
+      groupSelectorComponent={groupSelectorComponent}
     />
   );
 

@@ -16,6 +16,16 @@ const formatNumber = (value: number) => {
   return value < 1000 ? value : numeral(value).format('0.0a');
 };
 
+const GroupSelectorWrapper: React.FC = ({ children }) => {
+  const styles = useStyles();
+
+  return (
+    <EuiFlexItem grow={false} className={styles.groupBySelector}>
+      {children}
+    </EuiFlexItem>
+  );
+};
+
 export const AdditionalControls = ({
   total,
   title,
@@ -23,7 +33,7 @@ export const AdditionalControls = ({
   columns,
   onAddColumn,
   onRemoveColumn,
-  groupSelector,
+  groupSelectorComponent,
 }: {
   total: number;
   title: string;
@@ -31,26 +41,12 @@ export const AdditionalControls = ({
   columns: string[];
   onAddColumn: (column: string) => void;
   onRemoveColumn: (column: string) => void;
-  groupSelector?: JSX.Element;
+  groupSelectorComponent?: JSX.Element;
 }) => {
-  const styles = useStyles();
-
   const [isFieldSelectorModalVisible, setIsFieldSelectorModalVisible] = useState(false);
 
   const closeModal = () => setIsFieldSelectorModalVisible(false);
   const showModal = () => setIsFieldSelectorModalVisible(true);
-
-  const GroupSelector = () => {
-    if (groupSelector) {
-      return (
-        <EuiFlexItem grow={false} className={styles.groupBySelector}>
-          {groupSelector}
-        </EuiFlexItem>
-      );
-    }
-
-    return null;
-  };
 
   return (
     <>
@@ -79,7 +75,9 @@ export const AdditionalControls = ({
           })}
         </EuiButtonEmpty>
       </EuiFlexItem>
-      <GroupSelector />
+      {groupSelectorComponent && (
+        <GroupSelectorWrapper>{groupSelectorComponent}</GroupSelectorWrapper>
+      )}
     </>
   );
 };

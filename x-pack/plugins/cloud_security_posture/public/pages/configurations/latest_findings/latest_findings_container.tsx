@@ -13,6 +13,7 @@ import { isNoneGroup, useGrouping, getGroupingQuery } from '@kbn/securitysolutio
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
 import * as uuid from 'uuid';
 import { css } from '@emotion/react';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import {
   useBaseEsQuery,
@@ -154,11 +155,16 @@ const groupingTitle = i18n.translate('xpack.csp.findings.latestFindings.groupBy'
   defaultMessage: 'Group findings by',
 });
 
+const DEFAULT_PAGE_SIZE = 10;
+const DEFAULT_TABLE_HEIGHT = 512;
+const GROUPING_ID = 'cspLatestFindings';
+const MAX_GROUPING_LEVELS = 1;
+
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [activePage, setActivePage] = useState(0);
-  const [pageSize, setPageSize] = useState(10);
+  const [activePageIndex, setActivePageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
   const { query } = useBaseEsQuery({
     dataView,
@@ -171,7 +177,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
    * This is needed because the active page is not automatically reset when the filters or query change
    */
   useEffect(() => {
-    setActivePage(0);
+    setActivePageIndex(0);
   }, [urlQuery.filters, urlQuery.query]);
 
   const grouping = useGrouping({
@@ -180,11 +186,11 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     },
     defaultGroupingOptions,
     fields: dataView.fields,
-    groupingId: 'cspLatestFindings',
-    maxGroupingLevels: 1,
+    groupingId: GROUPING_ID,
+    maxGroupingLevels: MAX_GROUPING_LEVELS,
     title: groupingTitle,
     onGroupChange: () => {
-      setActivePage(0);
+      setActivePageIndex(0);
     },
   });
 
@@ -197,9 +203,9 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     additionalFilters: [query],
     groupByField: selectedGroup,
     uniqueValue,
-    from: 'now-1y',
+    from: `now-${LATEST_FINDINGS_RETENTION_POLICY}`,
     to: 'now',
-    pageNumber: activePage * pageSize,
+    pageNumber: activePageIndex * pageSize,
     size: pageSize,
     sort: [{ _key: { order: 'asc' } }],
   });
@@ -218,7 +224,10 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     return (
       <>
         <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-        <LatestFindingsContainerTable dataView={dataView} groupSelector={grouping.groupSelector} />
+        <LatestFindingsContainerTable
+          dataView={dataView}
+          groupSelectorComponent={grouping.groupSelector}
+        />
       </>
     );
   }
@@ -233,7 +242,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     >
       <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
       {grouping.getGrouping({
-        activePage,
+        activePage: activePageIndex,
         data: aggs,
         groupingLevel: 0,
         inspectButton: undefined,
@@ -243,14 +252,14 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
           setPageSize(size);
         },
         onChangeGroupsPage: (index) => {
-          setActivePage(index);
+          setActivePageIndex(index);
         },
         renderChildComponent: (groupFilter) => {
           return (
             <LatestFindingsContainerTable
               dataView={dataView}
               additionalFilters={groupFilter}
-              height={512}
+              height={DEFAULT_TABLE_HEIGHT}
               showDistributionBar={false}
             />
           );
@@ -314,7 +323,7 @@ export const LatestFindingsTable = ({
             loadMore={fetchNextPage}
             title={title}
             customCellRenderer={customCellRenderer}
-            height={512}
+            height={DEFAULT_TABLE_HEIGHT}
           />
         </>
       )}
@@ -324,12 +333,12 @@ export const LatestFindingsTable = ({
 
 export const LatestFindingsContainerTable = ({
   dataView,
-  groupSelector,
+  groupSelectorComponent,
   height,
   showDistributionBar = true,
   additionalFilters,
 }: FindingsBaseProps & {
-  groupSelector?: JSX.Element;
+  groupSelectorComponent?: JSX.Element;
   height?: number;
   showDistributionBar?: boolean;
   additionalFilters?: Filter[];
@@ -408,7 +417,7 @@ export const LatestFindingsContainerTable = ({
             loadMore={fetchNextPage}
             title={title}
             customCellRenderer={customCellRenderer}
-            groupSelector={groupSelector}
+            groupSelectorComponent={groupSelectorComponent}
             height={height}
           />
         </>

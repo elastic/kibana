@@ -112,20 +112,20 @@ export const useGetGroupSelector = ({
 
   const onChange = useCallback(
     (groupSelection: string) => {
-      if (selectedGroups.find((selected) => selected === groupSelection)) {
-        const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
-        if (groups.length === 0) {
-          setSelectedGroups(['none']);
-        } else {
-          setSelectedGroups(groups);
-        }
-        return;
-      }
-
       // Simulate a toggle behavior when maxGroupingLevels is 1
       if (maxGroupingLevels === 1) {
         setSelectedGroups([groupSelection]);
       } else {
+        if (selectedGroups.find((selected) => selected === groupSelection)) {
+          const groups = selectedGroups.filter((selectedGroup) => selectedGroup !== groupSelection);
+          if (groups.length === 0) {
+            setSelectedGroups(['none']);
+          } else {
+            setSelectedGroups(groups);
+          }
+          return;
+        }
+
         const newSelectedGroups = isNoneGroup([groupSelection])
           ? [groupSelection]
           : [...selectedGroups.filter((selectedGroup) => selectedGroup !== 'none'), groupSelection];

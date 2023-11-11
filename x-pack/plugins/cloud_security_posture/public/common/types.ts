@@ -15,8 +15,7 @@ export interface FindingsBaseURLQuery {
   query: Query;
   filters: Filter[];
   /**
-   * Filters that are part of the query
-   * but not persisted in the URL or in the Filter Manager
+   * Filters that are part of the query but not persisted in the URL or in the Filter Manager
    */
   additionalFilters?: Filter[];
 }
