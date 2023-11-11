@@ -14,7 +14,7 @@ export const DownloadCloudDependencies: Task = {
   description: 'Downloading cloud dependencies',
 
   async run(config, log, build) {
-    const subdomain = 'artifacts'
+    const subdomain = 'artifacts';
 
     const downloadBeat = async (beat: string) => {
       const version = config.getBuildVersion();
