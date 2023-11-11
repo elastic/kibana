@@ -52,7 +52,10 @@ export const MyPluginComponent: React.FC = () => {
       >
         <EuiText>
           1. This will create three objects - one for each model version definition (see
-          <EuiTextColor color="accent">examples/eso_model_version_example/server/types</EuiTextColor>).
+          <EuiTextColor color="accent">
+            examples/eso_model_version_example/server/types
+          </EuiTextColor>
+          ).
         </EuiText>
         <EuiButton
           onClick={() => {
@@ -75,7 +78,8 @@ export const MyPluginComponent: React.FC = () => {
       <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
         <EuiText>
           2. This will read the objects' raw documents with an Elasticsearch client. Note that the
-          <EuiTextColor color="accent">typeMigrationVersion</EuiTextColor> (10.n.0) will correspond to the model version (n).
+          <EuiTextColor color="accent">typeMigrationVersion</EuiTextColor> (10.n.0) will correspond
+          to the model version (n).
         </EuiText>
         <EuiButton
           onClick={() => {
