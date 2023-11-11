@@ -16,7 +16,6 @@ import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { DataViewsService } from '../common';
 
 export type GetUserId = (request: KibanaRequest) => Promise<string | undefined>;
@@ -101,6 +100,4 @@ export interface DataViewsServerPluginStartDependencies {
    * Logger
    */
   logger: Logger;
-
-  security: SecurityPluginStart;
 }
