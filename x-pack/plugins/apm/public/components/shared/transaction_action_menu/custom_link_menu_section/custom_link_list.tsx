@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Mustache from 'mustache';
 import React from 'react';
 import {
   SectionLink,
@@ -14,9 +13,7 @@ import {
 import { CustomLink } from '../../../../../common/custom_link/custom_link_types';
 import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { unit } from '../../../../utils/style';
-
-// override the mustache.js escape function to not escape special characters
-Mustache.escape = (text) => text;
+import { encodeMustacheRenderWithoutEscaping } from '../../../app/settings/custom_link/create_edit_custom_link_flyout/helper';
 
 export function CustomLinkList({
   customLinks,
@@ -47,7 +44,7 @@ export function getParsedCustomLinkUrl(
   transaction?: Transaction
 ) {
   try {
-    return encodeURI(Mustache.render(link.url, transaction));
+    return encodeMustacheRenderWithoutEscaping(link.url, transaction);
   } catch (e) {
     return link.url;
   }

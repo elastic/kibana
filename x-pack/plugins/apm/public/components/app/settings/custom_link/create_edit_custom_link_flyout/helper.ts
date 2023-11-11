@@ -105,7 +105,10 @@ export const replaceTemplateVariables = (
 ) => {
   const error = validateUrl(url, transaction);
   try {
-    return { formattedUrl: Mustache.render(url, transaction), error };
+    return {
+      formattedUrl: encodeMustacheRenderWithoutEscaping(url, transaction),
+      error,
+    };
   } catch (e) {
     // errors will be caught on validateUrl function
     return { formattedUrl: url, error };
@@ -120,3 +123,18 @@ export const convertFiltersToQuery = (filters: Filter[]) => {
     return acc;
   }, {});
 };
+
+export function encodeMustacheRenderWithoutEscaping(
+  url: string,
+  transaction?: Transaction
+) {
+  const defaultEscapeFunction = Mustache.escape;
+  // override the mustache.js escape function to not escape special characters
+  Mustache.escape = (text) => text;
+
+  const renderedUrl = encodeURI(Mustache.render(url, transaction));
+  // reset the default escape function to enable escaping again
+  Mustache.escape = defaultEscapeFunction;
+
+  return renderedUrl;
+}
