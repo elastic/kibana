@@ -16,6 +16,7 @@ export type {
   DataViewsServerPluginStart,
   DataViewsServerPluginSetupDependencies,
   DataViewsServerPluginStartDependencies,
+  GetUserId,
 } from './types';
 
 import { PluginInitializerContext } from '@kbn/core/server';

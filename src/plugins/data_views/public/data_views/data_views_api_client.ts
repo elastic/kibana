@@ -53,7 +53,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
           ...cacheOptions,
           asResponse,
           rawResponse,
-          headers: { 'user-hash': userId, Vary: 'user-hash' },
+          headers: { 'user-hash': userId },
         });
 
     return request.catch((resp) => {

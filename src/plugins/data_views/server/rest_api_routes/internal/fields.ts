@@ -9,7 +9,7 @@
 import { createHash } from 'crypto';
 import { estypes } from '@elastic/elasticsearch';
 import { schema } from '@kbn/config-schema';
-import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
+import { IRouter, RequestHandler, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
 // import { FullValidationConfig } from '@kbn/core-http-server';
 import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
@@ -118,8 +118,11 @@ function calculateHash(srcBuffer: Buffer) {
   return hash.digest('hex');
 }
 
-const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
-  (isRollupsEnabled) => async (context, request, response) => {
+const handler: (
+  isRollupsEnabled: () => boolean,
+  getUserId: () => (kibanaRequest: KibanaRequest) => Promise<string | undefined>
+) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled, getUserId) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
@@ -162,7 +165,12 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
       const etag = calculateHash(Buffer.from(JSON.stringify(body)));
 
-      const headers: Record<string, string> = { 'content-type': 'application/json', etag };
+      const headers: Record<string, string> = {
+        'content-type': 'application/json',
+        etag,
+        vary: 'accept-encoding, user-hash',
+        'user-hash': (await getUserId()(request)) || '',
+      };
 
       // todo examine how long this takes
       const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
@@ -214,7 +222,8 @@ export const registerFields = async (
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
-  isRollupsEnabled: () => boolean
+  isRollupsEnabled: () => boolean,
+  getUserId: () => (request: KibanaRequest) => Promise<string | undefined>
 ) => {
-  router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled));
+  router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled, getUserId));
 };
