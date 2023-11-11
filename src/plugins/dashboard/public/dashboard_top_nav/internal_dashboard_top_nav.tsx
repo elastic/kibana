@@ -17,9 +17,24 @@ import {
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { TopNavMenuProps } from '@kbn/navigation-plugin/public';
-import { EuiHorizontalRule, EuiIcon, EuiToolTipProps } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiText,
+  EuiTitle,
+  EuiToolTipProps,
+} from '@elastic/eui';
 import { EuiBreadcrumbProps } from '@elastic/eui/src/components/breadcrumbs/breadcrumb';
 import { MountPoint } from '@kbn/core/public';
+import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { SpacesContextProps } from '@kbn/spaces-plugin/public';
 import {
   getDashboardTitle,
   leaveConfirmStrings,
@@ -37,6 +52,8 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { getFullEditPath, LEGACY_DASHBOARD_APP_ID } from '../dashboard_constants';
 import './_dashboard_top_nav.scss';
 import { DashboardRedirect } from '../dashboard_container/types';
+
+const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumbProps[];
@@ -75,6 +92,7 @@ export function InternalDashboardTopNav({
       setIsVisible: setChromeVisibility,
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
+      theme: { theme$ },
     },
     serverless,
     settings: { uiSettings },
@@ -83,8 +101,11 @@ export function InternalDashboardTopNav({
     initializerContext: { allowByValueEmbeddables },
     dashboardCapabilities: { saveQuery: allowSaveQuery, showWriteControls },
     spaces: { spacesApi },
+    overlays: { openModal },
   } = pluginServices.getServices();
   const spacesService = spacesApi?.ui.useSpaces();
+  const SpacesContextWrapper =
+    spacesApi?.ui.components.getSpacesContextProvider ?? getEmptyFunctionComponent;
 
   const isLabsEnabled = uiSettings.get(UI_SETTINGS.ENABLE_LABS_UI);
   const { setHeaderActionMenu, onAppLeave } = useDashboardMountContext();
@@ -270,8 +291,101 @@ export function InternalDashboardTopNav({
     viewMode,
   ]);
 
+  const confirmSaveForSharedDashboard = useCallback(
+    async ({
+      onSave,
+      onClone,
+      onCancel,
+    }: {
+      onSave: () => void;
+      onClone: () => void;
+      onCancel?: () => void;
+    }) => {
+      if (!spacesApi || !lastSavedId || !namespaces || namespaces.length < 2) return;
+
+      const { spacesManager } = spacesService;
+      // const spacesPermissions = await spacesManager.getSpaces({
+      //   purpose: 'shareSavedObjectsIntoSpace',
+      //   includeAuthorizedPurposes: true,
+      // });
+      // console.log({ spacesPermissions });
+
+      const insufficientPermissions = namespaces.includes('?');
+
+      const session = openModal(
+        toMountPoint(
+          <SpacesContextWrapper>
+            <EuiModal onClose={() => session.close()}>
+              <EuiModalHeader>
+                <EuiTitle>
+                  <h1>Save changes?</h1>
+                </EuiTitle>
+              </EuiModalHeader>
+              <EuiModalBody>
+                <EuiText>
+                  <p>You are attempting to save changes to a dashboard shared in these spaces:</p>
+                </EuiText>
+                {spacesApi?.ui.components.getSpaceList({ namespaces })}
+              </EuiModalBody>
+              <EuiModalFooter>
+                <EuiFlexGroup>
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="danger"
+                      onClick={() => {
+                        if (onCancel) onCancel();
+                        session.close();
+                      }}
+                    >
+                      Cancel
+                    </EuiButton>
+                  </EuiFlexItem>
+                  <EuiFlexItem />
+                  <EuiFlexItem grow={false}>
+                    <EuiButton
+                      color="primary"
+                      fill={insufficientPermissions}
+                      onClick={() => {
+                        onClone();
+                        session.close();
+                      }}
+                    >
+                      Clone & Save
+                    </EuiButton>
+                  </EuiFlexItem>
+                  {!insufficientPermissions ? (
+                    <EuiFlexItem grow={false}>
+                      <EuiButton
+                        color="primary"
+                        fill
+                        onClick={() => {
+                          onSave();
+                          session.close();
+                        }}
+                      >
+                        Share & Save
+                      </EuiButton>
+                    </EuiFlexItem>
+                  ) : null}
+                </EuiFlexGroup>
+              </EuiModalFooter>
+            </EuiModal>
+          </SpacesContextWrapper>,
+          {
+            theme$,
+          }
+        ),
+        {
+          maxWidth: 400,
+          'data-test-subj': 'copyToDashboardPanel',
+        }
+      );
+    },
+    [SpacesContextWrapper, lastSavedId, namespaces, openModal, spacesApi, spacesService, theme$]
+  );
+
   const updateSpacesForReferences = useCallback(async () => {
-    if (!spacesService || !lastSavedId || !namespaces?.length) return;
+    if (!spacesService || !lastSavedId || !namespaces || namespaces.length < 2) return;
 
     const { spacesManager } = spacesService;
 
@@ -280,6 +394,9 @@ export function InternalDashboardTopNav({
     ]);
     const objects = shareableReferences.objects.map(({ id, type }) => ({ id, type }));
 
+    if (namespaces?.includes('?')) {
+      // User doesn't have any access to one of the shared spaces
+    }
     spacesManager.updateSavedObjectsSpaces(objects, namespaces, []);
   }, [lastSavedId, namespaces, spacesService]);
 
@@ -289,6 +406,7 @@ export function InternalDashboardTopNav({
     setIsLabsShown,
     showResetChange,
     updateSpacesForReferences,
+    confirmSaveForSharedDashboard,
   });
 
   UseUnmount(() => {
