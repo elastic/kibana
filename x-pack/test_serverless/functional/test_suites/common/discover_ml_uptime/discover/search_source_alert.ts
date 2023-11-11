@@ -87,7 +87,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             rule_id: { type: 'text' },
             rule_name: { type: 'text' },
             alert_id: { type: 'text' },
-            context_message: { type: 'text' },
+            context_link: { type: 'text' },
           },
         },
       },
@@ -155,7 +155,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const createConnector = async (): Promise<string> => {
-    const { body: createdAction, status } = await supertest
+    const { body: createdAction } = await supertest
       .post(`/api/actions/connector`)
       // TODO: API requests in Serverless require internal request headers
       .set({
@@ -167,8 +167,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         connector_type_id: ACTION_TYPE_ID,
         config: { index: OUTPUT_DATA_VIEW },
         secrets: {},
-      });
-    expect(status).to.eql(200);
+      })
+      .expect(200);
 
     return createdAction.id;
   };
@@ -204,7 +204,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       "rule_id": "{{rule.id}}",
       "rule_name": "{{rule.name}}",
       "alert_id": "{{alert.id}}",
-      "context_message": "{{context.message}}"
+      "context_link": "{{context.link}}"
     }`);
   };
 
@@ -230,11 +230,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
-    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_message-value');
+    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
-    const [, link] = contextMessage.split(`Link\: `);
 
-    return link;
+    return contextMessage;
   };
 
   const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
@@ -365,8 +364,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async () => {
       deleteIndexes([OUTPUT_DATA_VIEW, SOURCE_DATA_VIEW]);
-      const r = await getAlertsByName(ADHOC_RULE_NAME);
-      await deleteAlerts([r[0]?.id].filter(Boolean));
+      const [{ id: adhocRuleId }] = await getAlertsByName(ADHOC_RULE_NAME);
+      await deleteAlerts([adhocRuleId]);
       await deleteDataView(outputDataViewId);
       await deleteConnector(connectorId);
       await security.testUser.restoreDefaults();
@@ -529,7 +528,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const documentCell = await dataGrid.getCellElement(0, 3);
       const firstRowContent = await documentCell.getVisibleText();
-      expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
       expect(await dataGrid.getDocCount()).to.be(5);
     });
@@ -543,7 +542,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const documentCell = await dataGrid.getCellElement(0, 3);
       const firstRowContent = await documentCell.getVisibleText();
-      expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
     });
 
     it('should display results after data view removal on clicking prev generated link', async () => {

@@ -80,8 +80,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // TODO: This functionality is broken in Serverless: https://github.com/elastic/kibana/issues/163488
-    it.skip('should go back via breadcrumbs with preserved state', async function () {
+    it('should go back via breadcrumbs with preserved state', async function () {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
@@ -102,8 +101,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // TODO: This functionality is broken in Serverless: https://github.com/elastic/kibana/issues/163488
-    it.skip('should go back via breadcrumbs with preserved state after a page refresh', async function () {
+    it('should go back via breadcrumbs with preserved state after a page refresh', async function () {
       await retry.waitFor(
         'user navigating to context and returning to discover via breadcrumbs',
         async () => {
@@ -125,8 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
     });
 
-    // TODO: This functionality is broken in Serverless: https://github.com/elastic/kibana/issues/163488
-    it.skip('should go back via breadcrumbs with updated state after a goBack browser', async function () {
+    it('should go back via breadcrumbs with updated state after a goBack browser', async function () {
       await dataGrid.clickRowToggle({ rowIndex: 0 });
       const rowActions = await dataGrid.getRowActions({ rowIndex: 0 });
       await rowActions[1].click();

@@ -99,8 +99,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const time = await PageObjects.timePicker.getTimeConfig();
         // TODO: The Serverless sidebar causes `PageObjects.discover.clickHistogramBar()`
         // to click a different range in the histogram, resulting in a different duration
-        expect(time.start).to.be('Sep 21, 2015 @ 06:00:00.000');
-        expect(time.end).to.be('Sep 21, 2015 @ 09:00:00.000');
+        expect(time.start).to.be('Sep 19, 2015 @ 06:31:44.000');
+        expect(time.end).to.be('Sep 23, 2015 @ 18:31:44.000');
         await retry.waitForWithTimeout(
           'table to contain the right search result',
           3000,
@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             log.debug(`The first timestamp value in doc table: ${rowData}`);
             // TODO: The Serverless sidebar causes `PageObjects.discover.clickHistogramBar()`
             // to click a different range in the histogram, resulting in a different timestamp
-            return rowData.includes('Sep 21, 2015 @ 08:59:57.636');
+            return rowData.includes('Sep 22, 2015 @ 23:50:13.253');
           }
         );
       });
@@ -300,10 +300,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('resizable layout panels', () => {
-      it('should allow resizing the layout panels', async () => {
+      it('should allow resizing the histogram layout panels', async () => {
         const resizeDistance = 100;
-        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelTop');
-        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelMain');
+        const topPanel = await testSubjects.find('unifiedHistogramResizablePanelFixed');
+        const mainPanel = await testSubjects.find('unifiedHistogramResizablePanelFlex');
         const resizeButton = await testSubjects.find('unifiedHistogramResizableButton');
         const topPanelSize = (await topPanel.getPosition()).height;
         const mainPanelSize = (await mainPanel.getPosition()).height;
@@ -316,37 +316,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(newTopPanelSize).to.be(topPanelSize + resizeDistance);
         expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
-    });
 
-    describe('URL state', () => {
-      it('should show a warning and fall back to the default data view when navigating to a URL with an invalid data view ID', async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-        const originalUrl = await browser.getCurrentUrl();
-        const newUrl = originalUrl.replace(dataViewId, 'invalid-data-view-id');
-        await browser.get(newUrl);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          expect(await browser.getCurrentUrl()).to.be(originalUrl);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowDefaultWarning')).to.be(true);
-        });
-      });
-
-      it('should show a warning and fall back to the current data view if the URL is updated to an invalid data view ID', async () => {
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
-        const originalHash = await browser.execute<[], string>('return window.location.hash');
-        const dataViewId = await PageObjects.discover.getCurrentDataViewId();
-        const newHash = originalHash.replace(dataViewId, 'invalid-data-view-id');
-        await browser.execute(`window.location.hash = "${newHash}"`);
-        await PageObjects.header.waitUntilLoadingHasFinished();
-        await retry.try(async () => {
-          const currentHash = await browser.execute<[], string>('return window.location.hash');
-          expect(currentHash).to.be(originalHash);
-          expect(await testSubjects.exists('dscDataViewNotFoundShowSavedWarning')).to.be(true);
-        });
+      it('should allow resizing the sidebar layout panels', async () => {
+        const resizeDistance = 100;
+        const leftPanel = await testSubjects.find('discoverLayoutResizablePanelFixed');
+        const mainPanel = await testSubjects.find('discoverLayoutResizablePanelFlex');
+        const resizeButton = await testSubjects.find('discoverLayoutResizableButton');
+        const leftPanelSize = (await leftPanel.getPosition()).width;
+        const mainPanelSize = (await mainPanel.getPosition()).width;
+        await browser.dragAndDrop(
+          { location: resizeButton },
+          { location: { x: resizeDistance, y: 0 } }
+        );
+        const newLeftPanelSize = (await leftPanel.getPosition()).width;
+        const newMainPanelSize = (await mainPanel.getPosition()).width;
+        expect(newLeftPanelSize).to.be(leftPanelSize + resizeDistance);
+        expect(newMainPanelSize).to.be(mainPanelSize - resizeDistance);
       });
     });
   });

@@ -7,13 +7,16 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default function ({ getService, loadTestFile }: FtrProviderContext) {
+export default function ({ getService, loadTestFile, getPageObject }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
+  const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('discover/group2', function () {
     before(async function () {
       await browser.setWindowSize(1600, 1200);
+      // TODO: Serverless tests require login first
+      await svlCommonPage.login();
     });
 
     after(async function unloadMakelogs() {

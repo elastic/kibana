@@ -106,6 +106,19 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
           });
         }
       },
+      async findLink(by: { deepLinkId: AppDeepLinkId } | { navId: string } | { text: string }) {
+        await this.expectLinkExists(by);
+        if ('deepLinkId' in by) {
+          return testSubjects.find(`~nav-item-deepLinkId-${by.deepLinkId}`);
+        } else if ('navId' in by) {
+          return testSubjects.find(`~nav-item-id-${by.navId}`);
+        } else {
+          return retry.try(async () => {
+            const link = await getByVisibleText('~nav-item', by.text);
+            return link;
+          });
+        }
+      },
       async expectSectionExists(sectionId: NavigationId) {
         log.debug('ServerlessCommonNavigation.sidenav.expectSectionExists', sectionId);
         await testSubjects.existOrFail(getSectionIdTestSubj(sectionId));

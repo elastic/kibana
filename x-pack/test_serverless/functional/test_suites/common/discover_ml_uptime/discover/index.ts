@@ -6,8 +6,15 @@
  */
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ loadTestFile, getService }: FtrProviderContext) => {
+export default ({ loadTestFile, getPageObject }: FtrProviderContext) => {
+  const svlCommonPage = getPageObject('svlCommonPage');
+
   describe('Discover alerting', function () {
+    before(async function () {
+      // TODO: Serverless tests require login first
+      await svlCommonPage.login();
+    });
+
     loadTestFile(require.resolve('./search_source_alert'));
   });
 };

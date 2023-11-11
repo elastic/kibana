@@ -89,7 +89,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const newDurationHours = await PageObjects.timePicker.getTimeDurationInHours();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different duration
-      expect(Math.round(newDurationHours)).to.be(33);
+      expect(Math.round(newDurationHours)).to.be(31);
 
       await retry.waitFor('doc table containing the documents of the brushed range', async () => {
         const rowData = await PageObjects.discover.getDocTableField(1);
@@ -111,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       // TODO: The Serverless sidebar causes `PageObjects.discover.brushHistogram()`
       // to brush a different range in the histogram, resulting in a different count
-      expect(await PageObjects.discover.getHitCount()).to.be('14');
+      expect(await PageObjects.discover.getHitCount()).to.be('12');
     });
 
     it('should update the histogram timerange when the query is resubmitted', async function () {
@@ -285,8 +285,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      // check the error state
-      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
+      await PageObjects.discover.showsErrorCallout();
 
       // now remove the query
       await queryBar.clearQuery();

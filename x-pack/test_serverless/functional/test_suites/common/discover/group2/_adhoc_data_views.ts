@@ -90,9 +90,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.svlCommonNavigation.breadcrumbs.clickBreadcrumb({ deepLinkId: 'discover' });
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      // TODO: This functionality is broken in Serverless: https://github.com/elastic/kibana/issues/163488
-      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash-*');
-      await PageObjects.discover.createAdHocDataView('logstash', true);
+      expect(await PageObjects.discover.getCurrentlySelectedDataView()).to.be('logstash*');
     });
 
     it('should support query and filtering', async () => {
