@@ -47,7 +47,7 @@ export const TestTrainedModel: FC<ContentProps> = ({ model }) => {
           <p>
             <FormattedMessage
               id="xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.advanced.testTrainedModelDescription"
-              defaultMessage="Test the model against new data by either providing some input text or use a field of an existing index. Alternatively, you can use the infer trained model API. {inferTrainedModelApiLink}."
+              defaultMessage="Test the model against new data by either providing input text or using a field of an existing index. Alternatively, you can use the infer trained model API. {inferTrainedModelApiLink}."
               values={{
                 inferTrainedModelApiLink: (
                   <EuiLink external target="_blank" href={links.apis.inferTrainedModel}>

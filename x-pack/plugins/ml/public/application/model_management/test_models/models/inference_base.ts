@@ -290,7 +290,11 @@ export abstract class InferenceBase<TInferResponse> {
     try {
       this.setRunning();
       const inputText = this.inputText$.getValue()[0];
-      const inferenceConfig = getInferenceConfig();
+      const pipelineForCreation = this.getPipelineForCreation();
+      let inferenceConfig = getInferenceConfig();
+      if (pipelineForCreation?.processors && pipelineForCreation.processors.length) {
+        inferenceConfig = pipelineForCreation.processors[0].inference?.inference_config;
+      }
 
       const resp = (await this.trainedModelsApi.inferTrainedModel(
         this.model.model_id,

@@ -81,13 +81,16 @@ export class TextExpansionInference extends InferenceBase<TextExpansionResponse>
   }
 
   protected async inferIndex() {
-    const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(this.getPipeline(), [
-      {
-        _source: {
-          text_field: this.getQueryText(),
+    const { docs } = await this.trainedModelsApi.trainedModelPipelineSimulate(
+      this.getPipelineForCreation() ?? this.getPipeline(),
+      [
+        {
+          _source: {
+            text_field: this.getQueryText(),
+          },
         },
-      },
-    ]);
+      ]
+    );
 
     if (docs.length === 0) {
       throw new Error(

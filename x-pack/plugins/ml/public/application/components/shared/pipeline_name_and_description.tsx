@@ -89,7 +89,7 @@ export const PipelineNameAndDescription: FC<Props> = ({
             {i18n.translate(
               'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.description.helpText',
               {
-                defaultMessage: 'A description of what this pipeline does.',
+                defaultMessage: 'A description of the pipeline.',
               }
             )}
           </EuiText>
@@ -102,7 +102,7 @@ export const PipelineNameAndDescription: FC<Props> = ({
           placeholder={i18n.translate(
             'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.descriptionPlaceholder',
             {
-              defaultMessage: 'Add a description of what this pipeline does.',
+              defaultMessage: 'Add a pipeline description.',
             }
           )}
           value={pipelineDescription}
