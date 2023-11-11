@@ -13,6 +13,7 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiText,
+  EuiTextColor,
   EuiTitle,
 } from '@elastic/eui';
 import React, { useState } from 'react';
@@ -40,7 +41,7 @@ export const MyPluginComponent: React.FC = () => {
         </EuiTitle>
         <EuiText>
           This is a demonstration to show the results of the implementation found in
-          'examples/eso_model_version_example'
+          <EuiTextColor color="accent">examples/eso_model_version_example</EuiTextColor>
         </EuiText>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
@@ -51,7 +52,7 @@ export const MyPluginComponent: React.FC = () => {
       >
         <EuiText>
           1. This will create three objects - one for each model version definition (see
-          'examples/eso_model_version_example/server/types').
+          <EuiTextColor color="accent">examples/eso_model_version_example/server/types</EuiTextColor>).
         </EuiText>
         <EuiButton
           onClick={() => {
@@ -74,7 +75,7 @@ export const MyPluginComponent: React.FC = () => {
       <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
         <EuiText>
           2. This will read the objects' raw documents with an Elasticsearch client. Note that the
-          'typeMigrationVersion' (10.n.0) will correspond to the model version (n).
+          <EuiTextColor color="accent">typeMigrationVersion</EuiTextColor> (10.n.0) will correspond to the model version (n).
         </EuiText>
         <EuiButton
           onClick={() => {
@@ -119,7 +120,7 @@ export const MyPluginComponent: React.FC = () => {
         </EuiAccordion>
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
-        <EuiText>4. This will decrypt the saved objects' secrets.</EuiText>
+        <EuiText>4. This will decrypt the saved objects.</EuiText>
         <EuiButton
           onClick={() => {
             handler('/internal/eso_mv_example/get_decrypted', setDecrypted);
