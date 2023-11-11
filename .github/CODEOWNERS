@@ -314,6 +314,7 @@ src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
+x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
@@ -1299,6 +1300,7 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/detection_response/rule_details @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/prebuilt_rules @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/docs/testing/test_plans/detection_response/rule_management @elastic/security-detection-rule-management
+/x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules @elastic/security-detection-rule-management
 
 /x-pack/plugins/security_solution/public/common/components/health_truncate_text @elastic/security-detection-rule-management
 /x-pack/plugins/security_solution/public/common/components/links_to_docs @elastic/security-detection-rule-management
