@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/dom';
+import { screen } from '@testing-library/react';
 import { render, mockAppDataView } from './rtl_helpers';
 import { ExploratoryView } from './exploratory_view';
 import * as obsvDataViews from '../../../utils/observability_data_views/observability_data_views';

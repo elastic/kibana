@@ -462,7 +462,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getUserMessages: (
     state: T,
     deps: {
-      frame: FrameDatasourceAPI;
+      frame: FramePublicAPI;
       setState: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
@@ -517,7 +517,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
 export interface DatasourceFixAction<T> {
   label: string;
-  newState: (frame: FrameDatasourceAPI) => Promise<T>;
+  newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
 /**
@@ -931,6 +931,8 @@ export interface VisualizationSuggestion<T = unknown> {
 export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
+  query: Query;
+  filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
   /**
@@ -940,11 +942,6 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
-}
-
-export interface FrameDatasourceAPI extends FramePublicAPI {
-  query: Query;
-  filters: Filter[];
 }
 
 /**

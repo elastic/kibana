@@ -15,6 +15,9 @@ enterpriseSearch.enabled: false
 monitoring.ui.enabled: false
 xpack.fleet.enabled: false
 
+## Cloud settings
+xpack.cloud.serverless.project_type: search
+
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
 

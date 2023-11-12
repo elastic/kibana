@@ -177,6 +177,6 @@
     "@kbn/react-kibana-mount",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/zod-helpers"
+    "@kbn/zod-helpers",
   ]
 }

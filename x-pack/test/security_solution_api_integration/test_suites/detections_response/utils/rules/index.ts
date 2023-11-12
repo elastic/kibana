@@ -32,5 +32,10 @@ export * from './get_rule_with_web_hook_action';
 export * from './get_simple_rule_output_with_web_hook_action';
 export * from './rule_to_update_schema';
 export * from './update_rule';
+export * from './get_threat_match_rule_for_alert_testing';
+export * from './get_saved_query_rule_for_alert_testing';
+export * from './get_rule_so_by_id';
+export * from './create_rule_saved_object';
+export * from './get_rule_with_legacy_investigation_fields';
 
 export * from './prebuilt_rules';

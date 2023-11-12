@@ -1,0 +1,67 @@
+steps:
+  - label: Running exception_workflows:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless
+    key: exception_workflows:runner:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 2
+
+  - label: Running exception_operators_date_numeric_types:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_date_numeric_types:qa:serverless
+    key: exception_operators_date_numeric_types:runner:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120  
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 2
+
+  - label: Running exception_operators_keyword_text_long:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_keyword_text_long:qa:serverless
+    key: exception_operators_keyword_text_long:runner:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 2
+
+  - label: Running exception_operators_ips_text_array:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_ips_text_array:qa:serverless
+    key: exception_operators_ips_text_array:runner:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+
+  - label: Running rule_creation:runner:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_creation:qa:serverless
+    key: rule_creation:runner:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+          
+  - label: Running actions:qa:serverless
+    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh actions:qa:serverless
+    key: actions:qa:serverless
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 120
+    retry:
+      automatic:
+        - exit_status: '1'
+          limit: 2
+  

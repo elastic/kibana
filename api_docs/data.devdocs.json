@@ -7809,7 +7809,7 @@
             "section": "def-common.IEsSearchRequest",
             "text": "IEsSearchRequest"
           },
-          " extends ",
+          "<T> extends ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -7817,15 +7817,7 @@
             "section": "def-common.IKibanaSearchRequest",
             "text": "IKibanaSearchRequest"
           },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchRequestParams",
-            "text": "ISearchRequestParams"
-          },
-          ">"
+          "<T>"
         ],
         "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
         "deprecated": false,
@@ -10365,7 +10357,15 @@
             "section": "def-common.IEsSearchRequest",
             "text": "IEsSearchRequest"
           },
-          ", SearchStrategyResponse extends ",
+          "<",
+          {
+            "pluginId": "data",
+            "scope": "common",
+            "docId": "kibDataSearchPluginApi",
+            "section": "def-common.ISearchRequestParams",
+            "text": "ISearchRequestParams"
+          },
+          ">, SearchStrategyResponse extends ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -12961,7 +12961,15 @@
                 "section": "def-common.IEsSearchRequest",
                 "text": "IEsSearchRequest"
               },
-              ", ",
+              "<",
+              {
+                "pluginId": "data",
+                "scope": "common",
+                "docId": "kibDataSearchPluginApi",
+                "section": "def-common.ISearchRequestParams",
+                "text": "ISearchRequestParams"
+              },
+              ">, ",
               {
                 "pluginId": "data",
                 "scope": "common",
@@ -17615,7 +17623,7 @@
             "section": "def-common.IEsSearchRequest",
             "text": "IEsSearchRequest"
           },
-          " extends ",
+          "<T> extends ",
           {
             "pluginId": "data",
             "scope": "common",
@@ -17623,15 +17631,7 @@
             "section": "def-common.IKibanaSearchRequest",
             "text": "IKibanaSearchRequest"
           },
-          "<",
-          {
-            "pluginId": "data",
-            "scope": "common",
-            "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchRequestParams",
-            "text": "ISearchRequestParams"
-          },
-          ">"
+          "<T>"
         ],
         "path": "src/plugins/data/common/search/strategies/es_search/types.ts",
         "deprecated": false,
@@ -18337,7 +18337,15 @@
               "section": "def-common.IEsSearchRequest",
               "text": "IEsSearchRequest"
             },
-            ", ",
+            "<",
+            {
+              "pluginId": "data",
+              "scope": "common",
+              "docId": "kibDataSearchPluginApi",
+              "section": "def-common.ISearchRequestParams",
+              "text": "ISearchRequestParams"
+            },
+            ">, ",
             {
               "pluginId": "data",
               "scope": "common",
