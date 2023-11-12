@@ -18,12 +18,6 @@ interface Footnote {
   message?: string | null;
 }
 
-interface IconAndTooltipContent {
-  icon?: ReactNode;
-  tooltipContent?: ReactNode;
-  footnotes: Footnote[];
-}
-
 export interface ReduxStateProps {
   isUsingSearch: boolean;
   zoom: number;
@@ -69,7 +63,12 @@ export class TOCEntryButton extends Component<Props, State> {
     }
   }
 
-  getIconAndTooltipContent(): IconAndTooltipContent {
+  getIconAndTooltipContent(): {
+    icon?: ReactNode;
+    tooltipContent?: ReactNode;
+    footnotes: Footnote[];
+    postScript?: string;
+  } {
     if (this.props.layer.hasErrors()) {
       return {
         icon: (
@@ -119,7 +118,8 @@ export class TOCEntryButton extends Component<Props, State> {
     }
 
     const { icon: layerIcon, tooltipContent } = this.props.layer.getLayerIcon(true);
-    const icon = this.props.layer.hasWarnings()
+    const hasWarnings = this.props.layer.hasWarnings();
+    const icon = hasWarnings
       ? <EuiIcon
           size="m"
           type="warning"
@@ -129,7 +129,16 @@ export class TOCEntryButton extends Component<Props, State> {
       : layerIcon;
 
     if (isLayerGroup(this.props.layer)) {
-      return { icon, tooltipContent, footnotes: [] };
+      return {
+        icon,
+        tooltipContent,
+        footnotes: [],
+        postScript: hasWarnings
+          ? i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerGroupWarning', {
+            defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
+          })
+          : undefined,
+      };
     }
 
     const footnotes = [];
@@ -166,11 +175,16 @@ export class TOCEntryButton extends Component<Props, State> {
       icon,
       tooltipContent,
       footnotes,
+      postScript: hasWarnings
+        ? i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerWarning', {
+          defaultMessage: `Layer had issues returning data and results might be incomplete.`,
+        })
+        : undefined,
     };
   }
 
   render() {
-    const { icon, tooltipContent, footnotes } = this.getIconAndTooltipContent();
+    const { icon, tooltipContent, footnotes, postScript } = this.getIconAndTooltipContent();
 
     const footnoteIcons = footnotes.map((footnote, index) => {
       return (
@@ -197,6 +211,10 @@ export class TOCEntryButton extends Component<Props, State> {
           <Fragment>
             {tooltipContent}
             {footnoteTooltipContent}
+            {postScript
+              ? <p style={{ fontStyle: 'italic', marginTop: '16px' }}>{postScript}</p>
+              : null
+            }
           </Fragment>
         }
         data-test-subj="layerTocTooltip"
