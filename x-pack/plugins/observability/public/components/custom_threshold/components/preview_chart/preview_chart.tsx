@@ -102,7 +102,7 @@ function PreviewChart({
             format: {
               id: 'number',
               params: {
-                decimals: 1,
+                decimals: 2,
               },
             },
           },
@@ -117,7 +117,7 @@ function PreviewChart({
             format: {
               id: 'number',
               params: {
-                decimals: 1,
+                decimals: 2,
               },
             },
           },
@@ -139,7 +139,7 @@ function PreviewChart({
             format: {
               id: 'number',
               params: {
-                decimals: 1,
+                decimals: 2,
               },
             },
           },
@@ -211,7 +211,7 @@ function PreviewChart({
       format: {
         id: 'number',
         params: {
-          decimals: 0,
+          decimals: 2,
         },
       },
       filter: {
