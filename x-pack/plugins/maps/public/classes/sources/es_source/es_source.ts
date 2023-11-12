@@ -204,7 +204,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
           requestsAdapter,
           requestName,
           requestId
-        ).forEach(warning => onWarning);
+        ).forEach(onWarning);
       }
 
       return resp;

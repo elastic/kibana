@@ -436,6 +436,7 @@ export class AbstractLayer implements ILayer {
       const dataRequestMeta = dataRequest.getMeta();
       return dataRequestMeta?.warnings?.length;
     });
+    
     if (hasDataRequestWarnings) {
       return true;
     }

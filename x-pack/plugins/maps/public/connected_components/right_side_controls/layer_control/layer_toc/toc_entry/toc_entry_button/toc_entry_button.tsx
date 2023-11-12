@@ -118,7 +118,15 @@ export class TOCEntryButton extends Component<Props, State> {
       };
     }
 
-    const { icon, tooltipContent } = this.props.layer.getLayerIcon(true);
+    const { icon: layerIcon, tooltipContent } = this.props.layer.getLayerIcon(true);
+    const icon = this.props.layer.hasWarnings()
+      ? <EuiIcon
+          size="m"
+          type="warning"
+          color="warning"
+          data-test-subj={`layerTocWarningIcon${this.props.escapedDisplayName}`}
+        />
+      : layerIcon;
 
     if (isLayerGroup(this.props.layer)) {
       return { icon, tooltipContent, footnotes: [] };
