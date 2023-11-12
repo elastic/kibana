@@ -30,11 +30,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when the log explorer loads', () => {
       it("should initialize the table columns to logs' default selection", async () => {
-        // did this work?
-        // PageObjects.settings.refreshDataViewFieldList('All logs');
         await PageObjects.observabilityLogExplorer.navigateTo();
 
         await retry.try(async () => {
+          // did this work?
+          await PageObjects.discover.refreshFieldList();
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
         });
       });
