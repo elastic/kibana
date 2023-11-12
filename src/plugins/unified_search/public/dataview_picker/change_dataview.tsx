@@ -217,6 +217,23 @@ export function ChangeDataView({
         ) : (
           <React.Fragment />
         ),
+        <EuiContextMenuItem
+          key="refresh"
+          icon="refresh"
+          data-test-subj="data-view-refresh-fields"
+          onClick={async () => {
+            const dataView = await dataViews.get(currentDataViewId!);
+            await dataViews.refreshFields(dataView, undefined, true);
+            if (onEditDataView) {
+              onEditDataView(dataView);
+            }
+            setPopoverIsOpen(false);
+          }}
+        >
+          {i18n.translate('unifiedSearch.query.queryBar.indexPattern.refreshFieldButton', {
+            defaultMessage: 'Refresh field list',
+          })}
+        </EuiContextMenuItem>,
         <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
     }
