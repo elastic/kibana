@@ -6245,6 +6245,22 @@
             "path": "src/plugins/files/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "files",
+            "id": "def-common.FileKind.hashes",
+            "type": "Array",
+            "tags": [],
+            "label": "hashes",
+            "description": [
+              "\nA list of hashes to compute for this file kind. The hashes will be computed\nduring the file upload process and stored in the file metadata."
+            ],
+            "signature": [
+              "(\"sha256\" | \"md5\" | \"sha1\" | \"sha512\")[] | undefined"
+            ],
+            "path": "src/plugins/files/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
