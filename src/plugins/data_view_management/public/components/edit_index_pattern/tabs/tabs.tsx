@@ -265,7 +265,7 @@ export const Tabs: React.FC<TabsProps> = ({
   const refreshFilters = useCallback(() => {
     const tempIndexedFieldTypes: string[] = [];
     const tempScriptedFieldLanguages: string[] = [];
-    indexPattern.fields.getAll().forEach((field) => {
+    fields.forEach((field) => {
       if (field.scripted) {
         if (field.lang) {
           tempScriptedFieldLanguages.push(field.lang);
@@ -284,7 +284,7 @@ export const Tabs: React.FC<TabsProps> = ({
 
     setIndexedFieldTypes(convertToEuiFilterOptions(tempIndexedFieldTypes));
     setScriptedFieldLanguages(convertToEuiFilterOptions(tempScriptedFieldLanguages));
-  }, [indexPattern]);
+  }, [fields]);
 
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {

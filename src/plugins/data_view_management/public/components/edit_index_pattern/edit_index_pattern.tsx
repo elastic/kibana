@@ -250,6 +250,7 @@ export const EditIndexPattern = withRouter(
           refreshIndexPatternClick={async () => {
             setIsRefreshing(true);
             await dataViews.refreshFields(indexPattern, false, true);
+            setFields(indexPattern.getNonScriptedFields());
             setRefreshCount(refreshCount + 1); // rerender field list
             setIsRefreshing(false);
           }}
