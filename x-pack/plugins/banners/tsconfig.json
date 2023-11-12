@@ -11,6 +11,7 @@
     "@kbn/licensing-plugin",
     "@kbn/config-schema",
     "@kbn/i18n",
+    "@kbn/shared-ux-markdown",
   ],
   "exclude": [
     "target/**/*",

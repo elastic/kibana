@@ -12,7 +12,7 @@ import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 
 import type { MaybePromise } from '@kbn/utility-types';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
+import * as md from '@kbn/shared-ux-markdown';
 import { ErrorLike } from '@kbn/expressions-plugin/common';
 
 import { EditPanelAction } from './panel_actions';
@@ -65,12 +65,8 @@ export function EmbeddablePanelError({
   return (
     <EuiEmptyPrompt
       body={
-        <EuiText size="s">
-          <Markdown
-            markdown={error.message}
-            openLinksInNewTab={true}
-            data-test-subj="errorMessageMarkdown"
-          />
+        <EuiText size="s" data-test-subj="errorMessageMarkdown">
+          <md.Markdown readOnly markdownContent={error.message} openLinksInNewTab={true} />
         </EuiText>
       }
       data-test-subj="embeddableStackError"

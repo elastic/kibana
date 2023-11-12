@@ -11,8 +11,7 @@ import React from 'react';
 import classNames from 'classnames';
 import { get } from 'lodash';
 import { ClassNames } from '@emotion/react';
-import { Markdown } from '@kbn/kibana-react-plugin/public';
-
+import { MarkdownButThisComponentIsDEPRECATED } from '@kbn/kibana-react-plugin/public';
 import { ErrorComponent } from '../../error';
 import { replaceVars } from '../../lib/replace_vars';
 import { convertSeriesToVars } from '../../lib/convert_series_to_vars';
@@ -77,7 +76,7 @@ function MarkdownVisualization(props) {
             >
               <div>
                 {!markdownError && (
-                  <Markdown
+                  <MarkdownButThisComponentIsDEPRECATED
                     onRender={initialRender}
                     markdown={markdownSource}
                     openLinksInNewTab={model.markdown_openLinksInNewTab}
