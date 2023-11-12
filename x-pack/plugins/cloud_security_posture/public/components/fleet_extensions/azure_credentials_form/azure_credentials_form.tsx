@@ -355,9 +355,6 @@ export const AzureCredentialsForm = ({
       {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {/* {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && (*/}
-      {/*  <ManualSetup integrationLink={integrationLink} />*/}
-      {/* )}*/}
       {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && (
         <>
           <AzureCredentialTypeSelector
@@ -370,17 +367,36 @@ export const AzureCredentialsForm = ({
               );
             }}
           />
-          {/* <EuiSpacer size="m" />*/}
-          {/* {group.info}*/}
-          {/* <EuiSpacer size="m" />*/}
-          {/* <ReadDocumentation url={integrationLink} />*/}
-          <EuiSpacer size="l" />
+          <EuiSpacer size="m" />
           <AzureInputVarFields
             fields={fields}
             onChange={(key, value) => {
               updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
             }}
           />
+          <EuiSpacer size="m" />
+          {group.info}
+          <EuiSpacer size="m" />
+          <EuiText color="subdued" size="s">
+            <FormattedMessage
+              id="xpack.csp.azureIntegration.manualCredentialType.documentaion"
+              defaultMessage="Read the {documentation} for more details"
+              values={{
+                documentation: (
+                  <EuiLink
+                    href={ARM_TEMPLATE_EXTERNAL_DOC_URL}
+                    target="_blank"
+                    rel="noopener nofollow noreferrer"
+                    data-test-subj="externalLink"
+                  >
+                    {i18n.translate('xpack.csp.azureIntegration.documentationLinkText', {
+                      defaultMessage: 'documentation',
+                    })}
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
         </>
       )}
       <EuiSpacer />

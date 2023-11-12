@@ -36,7 +36,17 @@ export const getAzureCredentialsFormManualOptions = (): Array<{
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCredentialsFields) =>
   // Object.entries(input.streams[0].vars || {})
-  Object.entries({ 'azure.credentials.client_id': { value: '' } } || {})
+  Object.entries(
+    {
+      'azure.credentials.tenant_id': { value: '' },
+      'azure.credentials.client_id': { value: '' },
+      'azure.credentials.client_secret': { value: '' },
+      'azure.credentials.client_certificate_path': { value: '' },
+      'azure.credentials.client_certificate_password': { value: '' },
+      'azure.credentials.client_username': { value: '' },
+      'azure.credentials.client_password': { value: '' },
+    } || {}
+  )
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
       const field = fields[id];
@@ -50,14 +60,12 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
 
 export const DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE = 'service_principal_with_client_secret';
 
-const TemporaryKeysDescription = (
+const ManagedIdentityDescription = (
   <div>
     <EuiText color={'subdued'} size="s">
       <FormattedMessage
-        id="xpack.csp.awsIntegration.temporaryKeysDescription"
-        defaultMessage="You can configure temporary security credentials in AWS to last for a specified duration. They
-      consist of an access key ID, a secret access key, and a security token, which is typically
-      found using GetSessionToken."
+        id="xpack.csp.azureIntegration.managedIdentityDescription"
+        defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual). No explicit credentials need to be provided; Azure handles the authentication."
       />
     </EuiText>
   </div>
@@ -70,7 +78,6 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {},
   },
   service_principal_with_client_secret: {
-    info: TemporaryKeysDescription,
     label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Service principal with Client Secret',
     }),
@@ -86,7 +93,6 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     },
   },
   service_principal_with_client_certificate: {
-    info: TemporaryKeysDescription,
     label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Service principal with Client Certificate',
     }),
@@ -107,7 +113,6 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     },
   },
   service_principal_with_client_username_and_password: {
-    info: TemporaryKeysDescription,
     label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
       defaultMessage: 'Service principal with Client Username and Password',
     }),
