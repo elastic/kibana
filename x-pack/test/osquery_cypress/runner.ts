@@ -30,13 +30,6 @@ async function setupFleetAgent({ getService }: FtrProviderContext) {
   await maybeCreateDockerNetwork(log);
   await new FleetManager(kbnClient, log, config.get('servers.fleetserver.port')).setup();
 
-  // const unique = Math.random().toString(32).substring(2, 6);
-  // const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, `Default policy (${unique})`);
-  // const policyEnrollmentKeyTwo = await createAgentPolicy(
-  //   kbnClient,
-  //   log,
-  //   `Osquery policy (${unique})`
-  // );
   const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, `Default policy`);
   const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, `Osquery policy`);
 
