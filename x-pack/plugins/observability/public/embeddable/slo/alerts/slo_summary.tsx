@@ -28,12 +28,11 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
   });
   console.log(activeAlerts, '!!activeAlerts');
   console.log(slos.map(Object.values));
-  const y = slos.map(Object.values);
-  // useEffect(() => {
-  //   refetch();
-  // }, [lastReloadRequestTime, refetch]);
+
   let numOfAlerts = 0;
   slos.forEach((slo) => {
+    console.log(slo, '!!slo');
+    console.log(activeAlerts.get(slo), '!!activeAlerts.get(slo)');
     if (activeAlerts.get(slo)) {
       numOfAlerts = numOfAlerts + activeAlerts.get(slo);
     }
@@ -41,8 +40,8 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
   return (
     <EuiPanel color="danger" hasShadow={false}>
       <EuiFlexGroup justifyContent="spaceBetween" direction="column" style={{ minHeight: '100%' }}>
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem>
+        <EuiFlexGroup direction="column" justifyContent="flexStart" gutterSize="xs">
+          <EuiFlexItem grow={false}>
             <EuiText color="default" size="m">
               <h3>
                 {i18n.translate('xpack.observability.sloSummary.h5.activeAlertsLabel', {
@@ -51,11 +50,19 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
               </h3>
             </EuiText>
           </EuiFlexItem>
-
-          <EuiFlexItem>
-            <EuiBadge color="danger">{sloNames[0]}</EuiBadge>
-            <EuiBadge color="danger">{`+${more} more`}</EuiBadge>
-          </EuiFlexItem>
+          <EuiFlexGroup
+            direction="row"
+            gutterSize="xs"
+            justifyContent="flexStart"
+            responsive={false}
+          >
+            <EuiFlexItem grow={false} style={{ maxWidth: '150px' }}>
+              <EuiBadge color="danger">{sloNames[0]}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="danger">{`+${more} more`}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexGroup>
 
         <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="flexEnd">
@@ -66,7 +73,7 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
               titleSize="l"
               textAlign="right"
               isLoading={false}
-              data-test-subj="sloDetailsBurnRateStat"
+              data-test-subj="sloAlertsSummaryStat"
               description=""
             />
           </EuiFlexItem>
