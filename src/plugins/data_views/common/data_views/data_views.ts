@@ -554,7 +554,7 @@ export class DataViewsService {
     console.log(
       'getFieldsAndIndicesForDataView result',
       dataView.getIndexPattern(),
-      JSON.stringify(result.fields, 0, 2)
+      JSON.stringify(result.fields, undefined, 2)
     );
     return result;
   };
