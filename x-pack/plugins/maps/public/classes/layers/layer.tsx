@@ -10,6 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
+import { getWarningsDescription, getWarningsTitle, type SearchResponseWarning, ViewDetailsPopover } from '@kbn/search-response-warnings';
 import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -78,6 +79,8 @@ export interface ILayer {
   isFilteredByGlobalTime(): Promise<boolean>;
   hasErrors(): boolean;
   getErrors(): LayerMessage[];
+  hasWarnings(): boolean;
+  getWarnings(): LayerMessage[];
 
   /*
    * ILayer.getMbLayerIds returns a list of all mapbox layers assoicated with this layer.
@@ -426,6 +429,50 @@ export class AbstractLayer implements ILayer {
     }
 
     return errors;
+  }
+
+  hasWarnings(): boolean {
+    const hasDataRequestWarnings = this._dataRequests.some((dataRequest) => {
+      const dataRequestMeta = dataRequest.getMeta();
+      return dataRequestMeta?.warnings?.length;
+    });
+    if (hasDataRequestWarnings) {
+      return true;
+    }
+
+    // TODO check for warnings in tile meta features
+
+    return false;
+  }
+
+  getWarnings(): LayerMessage[] {
+    const warningMessages: LayerMessage[] = [];
+
+    const dataRequestWarnings: SearchResponseWarning[] = [];
+    this._dataRequests.forEach((dataRequest) => {
+      const dataRequestMeta = dataRequest.getMeta();
+      if (dataRequestMeta?.warnings?.length) {
+        dataRequestWarnings.push(...dataRequestMeta.warnings);
+      }
+    });
+
+    if (dataRequestWarnings.length) {
+      warningMessages.push({
+        title: getWarningsTitle(dataRequestWarnings),
+        body: (
+          <>
+            <p>
+              {getWarningsDescription(dataRequestWarnings)}
+            </p>
+            <ViewDetailsPopover warnings={dataRequestWarnings}/>
+          </>
+        ),
+      });
+    }
+
+    // TODO get warnings from tile meta features
+
+    return warningMessages;
   }
 
   async syncData(syncContext: DataRequestContext) {

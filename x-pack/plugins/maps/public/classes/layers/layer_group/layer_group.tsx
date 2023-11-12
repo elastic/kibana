@@ -312,6 +312,17 @@ export class LayerGroup implements ILayer {
       : [];
   }
 
+  hasWarnings(): boolean {
+    return this._children.some((child) => {
+      return child.hasWarnings();
+    });
+  }
+
+  getWarnings(): LayerMessage[] {
+    // Nested layers display warnings
+    return [];
+  }
+
   async syncData(syncContext: DataRequestContext) {
     // layer group does not render to map so there is never sync data request
   }
