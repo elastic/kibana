@@ -31,7 +31,7 @@ export const overallHistogramHandlerFactory =
     logger,
     pushError,
     sampleProbability,
-    shouldStop,
+    stateHandler,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   async () => {
     const histogramFields: [NumericHistogramField] = [
@@ -68,7 +68,7 @@ export const overallHistogramHandlerFactory =
       // Still continue the analysis even if loading the overall histogram fails.
     }
 
-    if (shouldStop()) {
+    if (stateHandler.shouldStop()) {
       logDebugMessage('shouldStop after fetching overall histogram.');
       end();
       return;

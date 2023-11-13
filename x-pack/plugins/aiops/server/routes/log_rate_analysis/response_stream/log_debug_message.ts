@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/logging';
+
 export type LogDebugMessage = (msg: string) => void;
 
-export interface StreamState {
-  isRunning: boolean;
-  loaded: number;
-  shouldStop: boolean;
-}
+export const logDebugMessageFactory = (logger: Logger): LogDebugMessage => {
+  let logMessageCounter = 0;
+
+  return (msg: string) => {
+    logMessageCounter++;
+    logger.debug(`Log Rate Analysis #${logMessageCounter}: ${msg}`);
+  };
+};

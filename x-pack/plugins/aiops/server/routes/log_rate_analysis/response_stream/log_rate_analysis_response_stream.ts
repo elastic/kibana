@@ -5,41 +5,30 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import { streamFactory, type StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 
-import {
-  addErrorAction,
-  pingAction,
-  updateLoadingStateAction,
-  AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
+import { type AiopsLogRateAnalysisApiAction } from '../../../../common/api/log_rate_analysis/actions';
 
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '../../../../common/api/log_rate_analysis/schema';
 
-import { loadedFactory, type StreamLoaded } from './loaded';
+import { stateHandlerFactory, type StateHandler } from './state_handler';
 import { indexInfoHandlerFactory } from './index_info_handler';
 import { groupingHandlerFactory } from './grouping_handler';
 import { histogramHandlerFactory } from './histogram_handler';
+import { logDebugMessageFactory, type LogDebugMessage } from './log_debug_message';
 import { overridesHandlerFactory } from './overrides_handler';
 import { overallHistogramHandlerFactory } from './overall_histogram_handler';
+import { streamEndFactory } from './stream_end';
+import { streamEndWithUpdatedLoadingStateFactory } from './stream_end_with_updated_loading_state';
+import { streamPushErrorFactory } from './stream_push_error';
+import { streamPushPingWithTimeoutFactory } from './stream_push_ping_with_timeout';
 import { significantItemsHandlerFactory } from './significant_items_handler';
-import type { LogDebugMessage, StreamState } from './types';
-
-// 10s ping frequency to keep the stream alive.
-const PING_FREQUENCY = 10000;
-
-const getDefaultStreamState = (): StreamState => ({
-  isRunning: false,
-  loaded: 0,
-  shouldStop: false,
-});
 
 export interface LogRateAnalysisResponseStreamOptions<T extends ApiVersion> {
   version: T;
@@ -59,9 +48,8 @@ export interface LogRateAnalysisResponseStreamFetchOptions<T extends ApiVersion>
   push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'];
   pushPingWithTimeout: () => void;
   pushError: (msg: string) => void;
-  loaded: StreamLoaded;
+  stateHandler: StateHandler;
   sampleProbability: number;
-  shouldStop: (d?: boolean) => boolean | undefined;
 }
 
 export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
@@ -69,28 +57,21 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
 ) => {
   const { events, headers, logger, requestBody } = options;
 
+  const logDebugMessage = logDebugMessageFactory(logger);
+  const state = stateHandlerFactory();
+  const groupingEnabled = !!requestBody.grouping;
   const sampleProbability = requestBody.sampleProbability ?? 1;
-
-  let logMessageCounter = 0;
-
-  const logDebugMessage: LogDebugMessage = (msg: string) => {
-    logMessageCounter++;
-    logger.debug(`Log Rate Analysis #${logMessageCounter}: ${msg}`);
-  };
-
   const controller = new AbortController();
   const abortSignal = controller.signal;
 
-  const state = getDefaultStreamState();
-
   events.aborted$.subscribe(() => {
     logDebugMessage('aborted$ subscription trigger.');
-    state.shouldStop = true;
+    state.shouldStop(true);
     controller.abort();
   });
   events.completed$.subscribe(() => {
     logDebugMessage('completed$ subscription trigger.');
-    state.shouldStop = true;
+    state.shouldStop(true);
     controller.abort();
   });
 
@@ -105,62 +86,10 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     requestBody.flushFix
   );
 
-  function pushPingWithTimeout() {
-    setTimeout(() => {
-      if (state.isRunning) {
-        logDebugMessage('Ping message.');
-        push(pingAction());
-        pushPingWithTimeout();
-      }
-    }, PING_FREQUENCY);
-  }
-
-  function end() {
-    if (state.isRunning) {
-      state.isRunning = false;
-      logDebugMessage('Ending analysis.');
-      streamEnd();
-    } else {
-      logDebugMessage('end() was called again with isRunning already being false.');
-    }
-  }
-
-  function endWithUpdatedLoadingState() {
-    push(
-      updateLoadingStateAction({
-        ccsWarning: false,
-        loaded: 1,
-        loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.doneMessage', {
-          defaultMessage: 'Done.',
-        }),
-      })
-    );
-
-    end();
-  }
-
-  function pushError(m: string) {
-    logDebugMessage('Push error.');
-    push(addErrorAction(m));
-  }
-
-  function isRunning(d?: boolean) {
-    if (typeof d === 'boolean') {
-      state.isRunning = d;
-    } else {
-      return state.isRunning;
-    }
-  }
-
-  function shouldStop(d?: boolean) {
-    if (typeof d === 'boolean') {
-      state.shouldStop = d;
-    } else {
-      return state.shouldStop;
-    }
-  }
-
-  const loaded = loadedFactory(state);
+  const pushPingWithTimeout = streamPushPingWithTimeoutFactory<T>(state, push, logDebugMessage);
+  const end = streamEndFactory(state, streamEnd, logDebugMessage);
+  const endWithUpdatedLoadingState = streamEndWithUpdatedLoadingStateFactory(end, push);
+  const pushError = streamPushErrorFactory(push, logDebugMessage);
 
   const streamFetchOptions: LogRateAnalysisResponseStreamFetchOptions<T> = {
     ...options,
@@ -169,11 +98,10 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     end,
     endWithUpdatedLoadingState,
     push,
-    pushPingWithTimeout,
     pushError,
-    loaded,
+    pushPingWithTimeout,
+    stateHandler: state,
     sampleProbability,
-    shouldStop,
   };
 
   const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
@@ -186,7 +114,7 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   return {
     ...streamFetchOptions,
     indexInfoHandler,
-    isRunning,
+    groupingEnabled,
     groupingHandler,
     histogramHandler,
     overallHistogramHandler,

@@ -46,11 +46,10 @@ export const groupingHandlerFactory =
     requestBody,
     logDebugMessage,
     logger,
-    loaded,
     push,
     pushError,
     sampleProbability,
-    shouldStop,
+    stateHandler,
     version,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   async (
@@ -64,7 +63,7 @@ export const groupingHandlerFactory =
       push(
         updateLoadingStateAction({
           ccsWarning: false,
-          loaded: loaded(),
+          loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
             'xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData',
             {
@@ -78,7 +77,7 @@ export const groupingHandlerFactory =
     push(
       updateLoadingStateAction({
         ccsWarning: false,
-        loaded: loaded(),
+        loaded: stateHandler.loaded(),
         loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.groupingResults', {
           defaultMessage: 'Transforming significant field/value pairs into groups.',
         }),
@@ -121,7 +120,7 @@ export const groupingHandlerFactory =
         itemSets.push(...significantCategoriesItemSets);
       }
 
-      if (shouldStop()) {
+      if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop after fetching frequent_item_sets.');
         end();
         return;
@@ -142,10 +141,10 @@ export const groupingHandlerFactory =
           push(addSignificantItemsGroupAction(significantItemGroups, version));
         }
 
-        loaded(PROGRESS_STEP_GROUPING, false);
+        stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
         pushHistogramDataLoadingState();
 
-        if (shouldStop()) {
+        if (stateHandler.shouldStop()) {
           logDebugMessage('shouldStop after grouping.');
           end();
           return;
@@ -154,7 +153,7 @@ export const groupingHandlerFactory =
         logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
 
         const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
-          if (shouldStop()) {
+          if (stateHandler.shouldStop()) {
             logDebugMessage('shouldStop abort fetching group histograms.');
             groupHistogramQueue.kill();
             end();

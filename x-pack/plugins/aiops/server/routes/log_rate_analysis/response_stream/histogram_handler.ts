@@ -35,13 +35,12 @@ export const histogramHandlerFactory =
     client,
     end,
     logDebugMessage,
-    loaded,
     logger,
     push,
     pushError,
     requestBody,
     sampleProbability,
-    shouldStop,
+    stateHandler,
     version,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   async (
@@ -54,7 +53,7 @@ export const histogramHandlerFactory =
       push(
         updateLoadingStateAction({
           ccsWarning: false,
-          loaded: loaded(),
+          loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
             'xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData',
             {
@@ -74,7 +73,7 @@ export const histogramHandlerFactory =
       !requestBody.overrides?.regroupOnly
     ) {
       const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
-        if (shouldStop()) {
+        if (stateHandler.shouldStop()) {
           logDebugMessage('shouldStop abort fetching field/value histograms.');
           fieldValueHistogramQueue.kill();
           end();
@@ -152,7 +151,7 @@ export const histogramHandlerFactory =
 
           const { fieldName, fieldValue } = cp;
 
-          loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
+          stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
           pushHistogramDataLoadingState();
           push(
             addSignificantItemsHistogramAction(
@@ -257,7 +256,7 @@ export const histogramHandlerFactory =
 
         const { fieldName, fieldValue } = cp;
 
-        loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
+        stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
         pushHistogramDataLoadingState();
         push(
           addSignificantItemsHistogramAction(

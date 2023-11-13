@@ -38,14 +38,13 @@ export const significantItemsHandlerFactory =
     client,
     end,
     endWithUpdatedLoadingState,
-    loaded,
     logDebugMessage,
     logger,
     push,
     pushError,
     requestBody,
     sampleProbability,
-    shouldStop,
+    stateHandler,
     version,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   async ({
@@ -135,7 +134,7 @@ export const significantItemsHandlerFactory =
     logDebugMessage('Fetch p-values.');
 
     const pValuesQueue = queue(async function (fieldCandidate: string) {
-      loaded((1 / fieldCandidatesCount) * loadingStepSizePValues, false);
+      stateHandler.loaded((1 / fieldCandidatesCount) * loadingStepSizePValues, false);
 
       let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
 
@@ -171,7 +170,7 @@ export const significantItemsHandlerFactory =
       push(
         updateLoadingStateAction({
           ccsWarning: false,
-          loaded: loaded(),
+          loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
             'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs',
             {
@@ -193,7 +192,7 @@ export const significantItemsHandlerFactory =
         pushError(`Failed to fetch p-values.`);
         pValuesQueue.kill();
         end();
-      } else if (shouldStop()) {
+      } else if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop fetching p-values.');
         pValuesQueue.kill();
         end();

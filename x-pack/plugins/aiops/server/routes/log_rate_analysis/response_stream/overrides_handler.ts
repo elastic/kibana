@@ -18,7 +18,7 @@ export const overridesHandlerFactory =
   <T extends ApiVersion>({
     requestBody,
     logDebugMessage,
-    loaded,
+    stateHandler,
     push,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   () => {
@@ -37,6 +37,6 @@ export const overridesHandlerFactory =
 
     if (requestBody.overrides?.loaded) {
       logDebugMessage(`Set 'loaded' override to '${requestBody.overrides?.loaded}'.`);
-      loaded(requestBody.overrides?.loaded);
+      stateHandler.loaded(requestBody.overrides?.loaded);
     }
   };

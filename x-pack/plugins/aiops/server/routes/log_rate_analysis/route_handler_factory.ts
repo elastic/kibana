@@ -60,16 +60,13 @@ export function routeHandlerFactory<T extends ApiVersion>(
     const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
-      const groupingEnabled = !!request.body.grouping;
-
       const {
         end,
         endWithUpdatedLoadingState,
         indexInfoHandler,
-        isRunning,
+        groupingEnabled,
         groupingHandler,
         histogramHandler,
-        loaded,
         logDebugMessage,
         overallHistogramHandler,
         overridesHandler,
@@ -77,6 +74,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
         pushPingWithTimeout,
         responseWithHeaders,
         sampleProbability,
+        stateHandler,
         significantItemsHandler,
       } = logRateAnalysisResponseStreamFactory<T>({
         version,
@@ -92,7 +90,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
           logDebugMessage('Starting analysis.');
           logDebugMessage(`Sample probability: ${sampleProbability}`);
 
-          isRunning(true);
+          stateHandler.isRunning(true);
           overridesHandler();
           pushPingWithTimeout();
 
@@ -121,7 +119,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
             await groupingHandler(significantCategories, significantTerms, overallTimeSeries);
           }
 
-          loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
+          stateHandler.loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
 
           // Step 5: Histograms
           await histogramHandler(

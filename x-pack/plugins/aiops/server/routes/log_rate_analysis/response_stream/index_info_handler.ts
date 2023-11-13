@@ -25,14 +25,13 @@ export const indexInfoHandlerFactory =
       client,
       end,
       endWithUpdatedLoadingState,
-      loaded,
       logDebugMessage,
       logger,
       push,
       pushError,
       pushPingWithTimeout,
       requestBody,
-      shouldStop,
+      stateHandler,
     } = options;
 
     const fieldCandidates: string[] = [];
@@ -47,7 +46,7 @@ export const indexInfoHandlerFactory =
       push(
         updateLoadingStateAction({
           ccsWarning: false,
-          loaded: loaded(),
+          loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
             'xpack.aiops.logRateAnalysis.loadingState.loadingIndexInformation',
             {
@@ -80,14 +79,14 @@ export const indexInfoHandlerFactory =
 
       logDebugMessage(`Total document count: ${totalDocCount}`);
 
-      loaded(LOADED_FIELD_CANDIDATES, false);
+      stateHandler.loaded(LOADED_FIELD_CANDIDATES, false);
 
       pushPingWithTimeout();
 
       push(
         updateLoadingStateAction({
           ccsWarning: false,
-          loaded: loaded(),
+          loaded: stateHandler.loaded(),
           loadingState: i18n.translate(
             'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldCandidates',
             {
@@ -103,7 +102,7 @@ export const indexInfoHandlerFactory =
 
       if (fieldCandidatesCount === 0) {
         endWithUpdatedLoadingState();
-      } else if (shouldStop()) {
+      } else if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop after fetching field candidates.');
         end();
         return;
