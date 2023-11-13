@@ -11,6 +11,7 @@ import { PACKAGE_POLICY_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { filter, map, mapKeys, uniq } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/server/types';
 import { satisfies } from 'semver';
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import { processAggregations } from '../../../common/utils/aggregations';
 import { getInternalSavedObjectsClient } from '../utils';
 import { getAgentsRequestQuerySchema } from '../../../common/api';
@@ -41,7 +42,12 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       },
       async (context, request, response) => {
         let esAgents;
-        const query = request.query as ListWithKuery & { showInactive: boolean };
+        const query = request.query as ListWithKuery & {
+          showInactive: boolean;
+          searchAfter?: SortResults;
+          pitId?: string;
+          getStatusSummary?: boolean;
+        };
         try {
           esAgents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
             page: query.page,
@@ -49,6 +55,9 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
             sortField: query.sortField,
             sortOrder: query.sortOrder,
             showUpgradeable: query.showUpgradeable,
+            getStatusSummary: query.getStatusSummary,
+            pitId: query.pitId,
+            searchAfter: query.searchAfter,
             kuery: query.kuery,
             showInactive: query.showInactive,
             aggregations: {

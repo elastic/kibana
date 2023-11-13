@@ -17,6 +17,8 @@ import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/li
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
+import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
+
 import type { AgentStatus, ListWithKuery } from '../../types';
 import type { Agent, GetAgentStatusResponse } from '../../../common/types';
 
@@ -77,6 +79,9 @@ export interface AgentClient {
     options: ListWithKuery & {
       showInactive: boolean;
       aggregations?: Record<string, AggregationsAggregationContainer>;
+      searchAfter?: SortResults;
+      pitId?: string;
+      getStatusSummary?: boolean;
     }
   ): Promise<{
     agents: Agent[];
