@@ -14,6 +14,7 @@ import type { StartDependencies } from '../plugin';
 interface ContextValue extends StartDependencies {
   http: HttpSetup;
   navigateToApp: CoreStart['application']['navigateToApp'];
+  notifications: CoreStart['notifications'];
   setBreadcrumbs: (crumbs: ChromeBreadcrumb[]) => void;
 }
 

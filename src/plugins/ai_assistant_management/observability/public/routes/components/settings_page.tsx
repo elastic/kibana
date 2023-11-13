@@ -21,7 +21,7 @@ export function SettingsPage() {
       serverless.setBreadcrumbs([
         {
           text: i18n.translate(
-            'aiAssistantManagmentObservability.breadcrumb.serverless.observability',
+            'aiAssistantManagementObservability.breadcrumb.serverless.observability',
             {
               defaultMessage: 'AI Assistant for Observability Settings',
             }
@@ -31,7 +31,7 @@ export function SettingsPage() {
     } else {
       setBreadcrumbs([
         {
-          text: i18n.translate('aiAssistantManagmentObservability.breadcrumb.index', {
+          text: i18n.translate('aiAssistantManagementObservability.breadcrumb.index', {
             defaultMessage: 'AI Assistants',
           }),
           onClick: (e) => {
@@ -40,7 +40,7 @@ export function SettingsPage() {
           },
         },
         {
-          text: i18n.translate('aiAssistantManagmentObservability.breadcrumb.observability', {
+          text: i18n.translate('aiAssistantManagementObservability.breadcrumb.observability', {
             defaultMessage: 'Observability',
           }),
         },
@@ -51,14 +51,14 @@ export function SettingsPage() {
   const tabs = [
     {
       id: 'settings',
-      name: i18n.translate('aiAssistantManagement.settingsPage.settingsLabel', {
+      name: i18n.translate('aiAssistantManagementObservability.settingsPage.settingsLabel', {
         defaultMessage: 'Settings',
       }),
       content: <SettingsTab />,
     },
     {
       id: 'kb',
-      name: i18n.translate('aiAssistantManagement.settingsPage.knowledgeBaseLabel', {
+      name: i18n.translate('aiAssistantManagementObservability.settingsPage.knowledgeBaseLabel', {
         defaultMessage: 'Knowledge base',
       }),
       content: <KnowledgeBaseTab />,
@@ -77,7 +77,7 @@ export function SettingsPage() {
     <>
       <EuiTitle size="l">
         <h2>
-          {i18n.translate('aiAssistantManagement.settingsPage.h2.settingsLabel', {
+          {i18n.translate('aiAssistantManagementObservability.settingsPage.h2.settingsLabel', {
             defaultMessage: 'Settings',
           })}
         </h2>

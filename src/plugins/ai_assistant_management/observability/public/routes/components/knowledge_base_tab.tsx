@@ -18,37 +18,42 @@ import {
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
   EuiScreenReaderOnly,
   EuiTableSortingType,
-  EuiTitle,
 } from '@elastic/eui';
-import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
 import { capitalize } from 'lodash';
-import {
-  KnowledgeBaseEntryCategory,
-  useGetKnowledgeBaseEntriesPerCategory,
-} from '../../hooks/use_get_knowledge_base_entries_per_category';
+import type { KnowledgeBaseEntry } from '../../../common/types';
+import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
+import { KnowledgeBaseNewManualEntryFlyout } from './knowledge_base_new_manual_entry_flyout';
+import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
 
-const columnsEntries: Array<EuiBasicTableColumn<KnowledgeBaseEntry>> = [
-  {
-    field: '@timestamp',
-    name: 'Date created',
-    sortable: true,
-  },
-  {
-    field: 'id',
-    name: 'ID',
-    sortable: true,
-  },
-];
+interface KnowledgeBaseEntryCategory {
+  categoryName: string;
+  entries: KnowledgeBaseEntry[];
+}
 
 export function KnowledgeBaseTab() {
-  const { categories = [] } = useGetKnowledgeBaseEntriesPerCategory();
+  const { entries = [] } = useGetKnowledgeBaseEntries();
 
-  const [selectedCategory, setSelectedCategory] = useState<KnowledgeBaseEntryCategory | null>(null);
+  const categories = entries.reduce((acc, entry) => {
+    const categoryName = entry.labels.category ?? 'other';
+
+    const index = acc.findIndex((item) => item.categoryName === categoryName);
+
+    if (index > -1) {
+      acc[index].entries.push(entry);
+      return acc;
+    } else {
+      return acc.concat({ categoryName, entries: [entry] });
+    }
+  }, [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[] }>);
+
+  const [selectedCategory, setSelectedCategory] = useState<string>('');
+  const [newEntryFlyoutOpen, setNewEntryFlyoutOpen] = useState(false);
+
+  const handleClickNewEntry = () => {
+    setNewEntryFlyoutOpen(true);
+  };
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
     {
@@ -58,7 +63,7 @@ export function KnowledgeBaseTab() {
       name: (
         <EuiScreenReaderOnly>
           <span>
-            {i18n.translate('aiAssistantManagement.span.expandRowsLabel', {
+            {i18n.translate('aiAssistantManagementObservability.span.expandRowsLabel', {
               defaultMessage: 'Expand rows',
             })}
           </span>
@@ -67,13 +72,9 @@ export function KnowledgeBaseTab() {
       render: (category: KnowledgeBaseEntryCategory) => {
         return (
           <EuiButtonIcon
-            onClick={() => setSelectedCategory(category)}
-            aria-label={
-              category.categoryName === selectedCategory?.categoryName ? 'Collapse' : 'Expand'
-            }
-            iconType={
-              category.categoryName === selectedCategory?.categoryName ? 'minimize' : 'expand'
-            }
+            onClick={() => setSelectedCategory(category.categoryName)}
+            aria-label={category.categoryName === selectedCategory ? 'Collapse' : 'Expand'}
+            iconType={category.categoryName === selectedCategory ? 'minimize' : 'expand'}
           />
         );
       },
@@ -82,24 +83,27 @@ export function KnowledgeBaseTab() {
       field: 'categoryName',
       name: 'Category',
       sortable: true,
+      render: (categoryName: KnowledgeBaseEntryCategory['categoryName']) => (
+        <strong>{capitalize(categoryName)}</strong>
+      ),
     },
     {
       field: 'entries',
       name: 'Number of entries',
       sortable: true,
-      render: (entries: KnowledgeBaseEntryCategory['entries']) => (
-        <EuiBadge>{entries.length}</EuiBadge>
+      render: (categoryEntries: KnowledgeBaseEntryCategory['entries']) => (
+        <EuiBadge>{categoryEntries.length}</EuiBadge>
       ),
     },
     {
       name: 'Type',
       render: (category: KnowledgeBaseEntryCategory) => {
         return (
-          <div>
-            {i18n.translate('aiAssistantManagement.columns.div.helloLabel', {
-              defaultMessage: 'hello',
+          <EuiBadge color="hollow">
+            {i18n.translate('aiAssistantManagementObservability.columns.systemBadgeLabel', {
+              defaultMessage: 'System',
             })}
-          </div>
+          </EuiBadge>
         );
       },
     },
@@ -149,23 +153,26 @@ export function KnowledgeBaseTab() {
               <EuiFieldSearch
                 fullWidth
                 placeholder={i18n.translate(
-                  'aiAssistantManagement.knowledgeBaseTab.euiFieldSearch.searchThisLabel',
+                  'aiAssistantManagementObservability.knowledgeBaseTab.euiFieldSearch.searchThisLabel',
                   { defaultMessage: 'Search this' }
                 )}
                 value={''}
                 onChange={(e) => {}}
                 isClearable
                 aria-label={i18n.translate(
-                  'aiAssistantManagement.knowledgeBaseTab.euiFieldSearch.useAriaLabelsWhenLabel',
-                  { defaultMessage: 'Use aria labels when no actual label is in use' }
+                  'aiAssistantManagementObservability.knowledgeBaseTab.euiFieldSearch.searchEntriesLabel',
+                  { defaultMessage: 'Search entries' }
                 )}
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton>
-                {i18n.translate('aiAssistantManagement.knowledgeBaseTab.newEntryButtonLabel', {
-                  defaultMessage: 'New entry',
-                })}
+              <EuiButton onClick={handleClickNewEntry}>
+                {i18n.translate(
+                  'aiAssistantManagementObservability.knowledgeBaseTab.newEntryButtonLabel',
+                  {
+                    defaultMessage: 'New entry',
+                  }
+                )}
               </EuiButton>
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -177,7 +184,7 @@ export function KnowledgeBaseTab() {
             items={pageOfItems}
             pagination={pagination}
             rowProps={(row) => ({
-              onClick: () => setSelectedCategory(row),
+              onClick: () => setSelectedCategory(row.categoryName),
             })}
             sorting={sorting}
             onChange={onTableChange}
@@ -186,19 +193,15 @@ export function KnowledgeBaseTab() {
       </EuiFlexGroup>
 
       {selectedCategory ? (
-        <EuiFlyout onClose={() => setSelectedCategory(null)}>
-          <EuiFlyoutHeader>
-            <EuiTitle>
-              <h2>{capitalize(selectedCategory?.categoryName)}</h2>
-            </EuiTitle>
-          </EuiFlyoutHeader>
-          <EuiFlyoutBody>
-            <EuiBasicTable<KnowledgeBaseEntry>
-              items={selectedCategory?.entries ?? []}
-              columns={columnsEntries}
-            />
-          </EuiFlyoutBody>
-        </EuiFlyout>
+        <KnowledgeBaseCategoryFlyout
+          category={selectedCategory}
+          entries={categories.find((obj) => obj.categoryName === selectedCategory)?.entries || []}
+          onClose={() => setSelectedCategory('')}
+        />
+      ) : null}
+
+      {newEntryFlyoutOpen ? (
+        <KnowledgeBaseNewManualEntryFlyout onClose={() => setNewEntryFlyoutOpen(false)} />
       ) : null}
     </>
   );

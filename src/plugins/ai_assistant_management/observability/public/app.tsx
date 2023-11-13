@@ -46,6 +46,7 @@ export const mountManagementSection = async ({ core, mountParams }: MountParams)
             value={{
               http: coreStart.http,
               navigateToApp: coreStart.application.navigateToApp,
+              notifications: coreStart.notifications,
               setBreadcrumbs,
               ...startDeps,
             }}

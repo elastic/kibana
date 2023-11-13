@@ -59,16 +59,19 @@ export function SettingsTab() {
             fullWidth
             title={
               <h3>
-                {i18n.translate('aiAssistantManagement.settingsPage.showAIAssistantButtonLabel', {
-                  defaultMessage:
-                    'Show AI Assistant button and Contextual Insights in Observability apps',
-                })}
+                {i18n.translate(
+                  'aiAssistantManagementObservability.settingsPage.showAIAssistantButtonLabel',
+                  {
+                    defaultMessage:
+                      'Show AI Assistant button and Contextual Insights in Observability apps',
+                  }
+                )}
               </h3>
             }
             description={
               <p>
                 {i18n.translate(
-                  'aiAssistantManagement.settingsPage.showAIAssistantDescriptionLabel',
+                  'aiAssistantManagementObservability.settingsPage.showAIAssistantDescriptionLabel',
                   {
                     defaultMessage:
                       'Toggle the AI Assistant button and Contextual Insights on or off in Observability apps by checking or unchecking the AI Assistant feature in Spaces > <your space> > Features.',
@@ -81,7 +84,7 @@ export function SettingsTab() {
               <div css={{ textAlign: 'right' }}>
                 <EuiButton onClick={handleNavigateToSpacesConfiguration}>
                   {i18n.translate(
-                    'aiAssistantManagement.settingsPage.goToFeatureControlsButtonLabel',
+                    'aiAssistantManagementObservability.settingsPage.goToFeatureControlsButtonLabel',
                     { defaultMessage: 'Go to Spaces' }
                   )}
                 </EuiButton>
@@ -99,13 +102,16 @@ export function SettingsTab() {
             fullWidth
             title={
               <h3>
-                {i18n.translate('aiAssistantManagement.settingsPage.connectorSettingsLabel', {
-                  defaultMessage: 'Connector settings',
-                })}
+                {i18n.translate(
+                  'aiAssistantManagementObservability.settingsPage.connectorSettingsLabel',
+                  {
+                    defaultMessage: 'Connector settings',
+                  }
+                )}
               </h3>
             }
             description={i18n.translate(
-              'aiAssistantManagement.settingsPage.euiDescribedFormGroup.inOrderToUseLabel',
+              'aiAssistantManagementObservability.settingsPage.euiDescribedFormGroup.inOrderToUseLabel',
               {
                 defaultMessage:
                   'In order to use the Observability AI Assistant you must set up a Generative AI connector.',
@@ -115,9 +121,12 @@ export function SettingsTab() {
             <EuiFormRow fullWidth>
               <div css={{ textAlign: 'right' }}>
                 <EuiButton onClick={handleNavigateToConnectors}>
-                  {i18n.translate('aiAssistantManagement.settingsPage.goToConnectorsButtonLabel', {
-                    defaultMessage: 'Go to connectors',
-                  })}
+                  {i18n.translate(
+                    'aiAssistantManagementObservability.settingsPage.goToConnectorsButtonLabel',
+                    {
+                      defaultMessage: 'Go to connectors',
+                    }
+                  )}
                 </EuiButton>
               </div>
             </EuiFormRow>
@@ -128,13 +137,13 @@ export function SettingsTab() {
             title={
               <h3>
                 {i18n.translate(
-                  'aiAssistantManagement.settingsPage.h4.selectDefaultConnectorLabel',
+                  'aiAssistantManagementObservability.settingsPage.h4.selectDefaultConnectorLabel',
                   { defaultMessage: 'Default connector' }
                 )}
               </h3>
             }
             description={i18n.translate(
-              'aiAssistantManagement.settingsPage.connectYourElasticAITextLabel',
+              'aiAssistantManagementObservability.settingsPage.connectYourElasticAITextLabel',
               {
                 defaultMessage:
                   'Select the Generative AI connector you want to use as the default for the Observability AI Assistant.',
@@ -143,9 +152,12 @@ export function SettingsTab() {
           >
             <EuiFormRow
               fullWidth
-              label={i18n.translate('aiAssistantManagement.settingsPage.selectConnectorLabel', {
-                defaultMessage: 'Select connector',
-              })}
+              label={i18n.translate(
+                'aiAssistantManagementObservability.settingsPage.selectConnectorLabel',
+                {
+                  defaultMessage: 'Select connector',
+                }
+              )}
             >
               <EuiSelect
                 id={'generativeAIProvider'}
@@ -155,7 +167,7 @@ export function SettingsTab() {
                   setSelectedConnector(e.target.value);
                 }}
                 aria-label={i18n.translate(
-                  'aiAssistantManagement.settingsPage.euiSelect.generativeAIProviderLabel',
+                  'aiAssistantManagementObservability.settingsPage.euiSelect.generativeAIProviderLabel',
                   { defaultMessage: 'Generative AI provider' }
                 )}
               />
