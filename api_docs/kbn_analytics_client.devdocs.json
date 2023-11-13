@@ -796,15 +796,15 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -872,19 +872,19 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.test.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/tasks/risk_scoring_task.test.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/tasks/risk_scoring_task.test.ts"
               },
               {
                 "plugin": "@kbn/core-analytics-browser-mocks",

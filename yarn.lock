@@ -4148,6 +4148,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dataset-quality-plugin@link:x-pack/plugins/dataset_quality":
+  version "0.0.0"
+  uid ""
+
 "@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""
@@ -6041,6 +6045,10 @@
   uid ""
 
 "@kbn/unified-search-plugin@link:src/plugins/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
   version "0.0.0"
   uid ""
 
