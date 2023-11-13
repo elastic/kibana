@@ -9,7 +9,7 @@ import React, { Component, Fragment, ReactNode } from 'react';
 
 import { EuiButtonEmpty, EuiIcon, EuiToolTip, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ILayer } from '../../../../../../classes/layers/layer';
+import { type ILayer, INCOMPLETE_RESULTS_WARNING } from '../../../../../../classes/layers/layer';
 import { IVectorSource } from '../../../../../../classes/sources/vector_source';
 import { isLayerGroup } from '../../../../../../classes/layers/layer_group';
 
@@ -176,9 +176,7 @@ export class TOCEntryButton extends Component<Props, State> {
       tooltipContent,
       footnotes,
       postScript: hasWarnings
-        ? i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerWarning', {
-          defaultMessage: `Layer had issues returning data and results might be incomplete.`,
-        })
+        ? INCOMPLETE_RESULTS_WARNING
         : undefined,
     };
   }

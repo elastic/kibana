@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { Map as MbMap } from '@kbn/mapbox-gl';
 import type { Query } from '@kbn/es-query';
-import { getWarningsDescription, getWarningsTitle, type SearchResponseWarning, ViewDetailsPopover } from '@kbn/search-response-warnings';
+import { getWarningsTitle, type SearchResponseWarning, ViewDetailsPopover } from '@kbn/search-response-warnings';
 import _ from 'lodash';
 import React, { ReactElement, ReactNode } from 'react';
 import { EuiIcon } from '@elastic/eui';
@@ -41,6 +41,10 @@ import { IStyle } from '../styles/style';
 import { LICENSED_FEATURES } from '../../licensed_features';
 import { IESSource } from '../sources/es_source';
 import { TileErrorsList } from './tile_errors_list';
+
+export const INCOMPLETE_RESULTS_WARNING = i18n.translate('xpack.maps.layer.incompleteResultsWarning', {
+  defaultMessage: `Layer had issues returning data and results might be incomplete.`,
+});
 
 export interface LayerMessage {
   title: string;
@@ -462,9 +466,7 @@ export class AbstractLayer implements ILayer {
         title: getWarningsTitle(dataRequestWarnings),
         body: (
           <>
-            {i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerWarning', {
-              defaultMessage: `Layer had issues returning data and results might be incomplete.`,
-            })}
+            {INCOMPLETE_RESULTS_WARNING}
             {' '}
             <ViewDetailsPopover displayAsLink={true} warnings={dataRequestWarnings}/>
           </>
