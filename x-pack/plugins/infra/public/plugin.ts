@@ -56,6 +56,7 @@ export class Plugin implements InfraClientPluginClass {
   private telemetry: TelemetryService;
   private locators?: InfraLocators;
   private kibanaVersion: string;
+  private isServerlessEnv: boolean;
   private readonly appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({}));
 
   constructor(context: PluginInitializerContext<InfraPublicConfig>) {
@@ -67,6 +68,7 @@ export class Plugin implements InfraClientPluginClass {
       : undefined;
     this.telemetry = new TelemetryService();
     this.kibanaVersion = context.env.packageInfo.version;
+    this.isServerlessEnv = context.env.packageInfo.buildFlavor === 'serverless';
   }
 
   setup(core: InfraClientCoreSetup, pluginsSetup: InfraClientSetupDeps) {
@@ -222,42 +224,58 @@ export class Plugin implements InfraClientPluginClass {
     });
 
     // !! Need to be kept in sync with the routes in x-pack/plugins/infra/public/pages/metrics/index.tsx
-    const infraDeepLinks: AppDeepLink[] = [
-      {
-        id: 'inventory',
-        title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
-          defaultMessage: 'Inventory',
-        }),
-        path: '/inventory',
-        navLinkStatus: AppNavLinkStatus.visible,
-      },
-      {
-        id: 'hosts',
-        title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
-          defaultMessage: 'Hosts',
-        }),
-        path: '/hosts',
-        navLinkStatus: AppNavLinkStatus.visible,
-      },
-      ...(this.config.featureFlags.metricsExplorerEnabled
-        ? [
-            {
-              id: 'metrics-explorer',
-              title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
-                defaultMessage: 'Metrics Explorer',
-              }),
-              path: '/explorer',
-            },
-          ]
-        : []),
-      {
-        id: 'settings',
-        title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
-          defaultMessage: 'Settings',
-        }),
-        path: '/settings',
-      },
-    ];
+    const getInfraDeepLinks = ({
+      hostsEnabled,
+      metricsExplorerEnabled,
+    }: {
+      hostsEnabled: boolean;
+      metricsExplorerEnabled: boolean;
+    }): AppDeepLink[] => {
+      const serverlessNavLinkStatus = this.isServerlessEnv
+        ? AppNavLinkStatus.visible
+        : AppNavLinkStatus.hidden;
+
+      return [
+        {
+          id: 'inventory',
+          title: i18n.translate('xpack.infra.homePage.inventoryTabTitle', {
+            defaultMessage: 'Inventory',
+          }),
+          path: '/inventory',
+          navLinkStatus: serverlessNavLinkStatus,
+        },
+        ...(hostsEnabled
+          ? [
+              {
+                id: 'hosts',
+                title: i18n.translate('xpack.infra.homePage.metricsHostsTabTitle', {
+                  defaultMessage: 'Hosts',
+                }),
+                path: '/hosts',
+                navLinkStatus: serverlessNavLinkStatus,
+              },
+            ]
+          : []),
+        ...(metricsExplorerEnabled
+          ? [
+              {
+                id: 'metrics-explorer',
+                title: i18n.translate('xpack.infra.homePage.metricsExplorerTabTitle', {
+                  defaultMessage: 'Metrics Explorer',
+                }),
+                path: '/explorer',
+              },
+            ]
+          : []),
+        {
+          id: 'settings',
+          title: i18n.translate('xpack.infra.homePage.settingsTabTitle', {
+            defaultMessage: 'Settings',
+          }),
+          path: '/settings',
+        },
+      ];
+    };
 
     core.application.register({
       id: 'metrics',
@@ -269,7 +287,10 @@ export class Plugin implements InfraClientPluginClass {
       appRoute: '/app/metrics',
       category: DEFAULT_APP_CATEGORIES.observability,
       updater$: this.appUpdater$,
-      deepLinks: infraDeepLinks,
+      deepLinks: getInfraDeepLinks({
+        hostsEnabled: core.settings.client.get<boolean>(enableInfrastructureHostsView),
+        metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+      }),
       mount: async (params: AppMountParameters) => {
         // mount callback should not use setup dependencies, get start dependencies instead
         const [coreStart, plugins, pluginStart] = await core.getStartServices();
@@ -288,7 +309,10 @@ export class Plugin implements InfraClientPluginClass {
     startDep$AndHostViewFlag$.subscribe(
       ([_startServices]: [[CoreStart, InfraClientStartDeps, InfraClientStartExports], boolean]) => {
         this.appUpdater$.next(() => ({
-          deepLinks: infraDeepLinks,
+          deepLinks: getInfraDeepLinks({
+            hostsEnabled: core.settings.client.get<boolean>(enableInfrastructureHostsView),
+            metricsExplorerEnabled: this.config.featureFlags.metricsExplorerEnabled,
+          }),
         }));
       }
     );
