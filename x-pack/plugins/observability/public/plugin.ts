@@ -8,6 +8,7 @@
 import { CasesDeepLinkId, CasesUiStart, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
+import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import {
   AppDeepLink,
@@ -143,6 +144,7 @@ export interface ObservabilityPublicPluginsStart {
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
+  uiSettings: IUiSettingsClient;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;

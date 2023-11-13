@@ -8,15 +8,21 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiText, EuiFlexItem, EuiPanel, EuiStat, EuiBadge } from '@elastic/eui';
+import { euiLightVars } from '@kbn/ui-theme';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 
 import { EmbeddableSloProps } from './types';
+type SloIdAndInstanceId = [string, string];
 
 export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) {
-  const sloNames = slos.map((slo) => `${slo.name}(${slo.instanceId})`);
+  const sloNames = slos.map((slo) => `${slo.name}(${slo.instanceId})`); // TODO remove * if no partition
   const more = sloNames.length - 1;
+  const slosWithoutName = slos.map((slo) => ({
+    id: slo.id,
+    instanceId: slo.instanceId,
+  }));
   const { data: activeAlerts } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: slos.map(Object.values),
+    sloIdsAndInstanceIds: slosWithoutName.map(Object.values) as SloIdAndInstanceId[],
   });
   const totalActiveAlerts = slos.reduce((total, slo) => {
     if (activeAlerts.get(slo)) {
@@ -44,10 +50,10 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
             responsive={false}
           >
             <EuiFlexItem grow={false} style={{ maxWidth: '150px' }}>
-              <EuiBadge color="danger">{sloNames[0]}</EuiBadge>
+              <EuiBadge color={euiLightVars.euiColorDisabled}>{sloNames[0]}</EuiBadge>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiBadge color="danger">{`+${more} more`}</EuiBadge>
+              <EuiBadge color={euiLightVars.euiColorDisabled}>{`+${more} more`}</EuiBadge>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexGroup>

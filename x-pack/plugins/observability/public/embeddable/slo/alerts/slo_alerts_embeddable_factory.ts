@@ -42,14 +42,14 @@ export class SloAlertsEmbeddableFactoryDefinition
     return true;
   }
 
-  public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
-    SloEmbeddableInput,
-    unknown
-  >['getPanelPlacementSettings'] = () => {
-    const width = 8;
-    const height = 7;
-    return { width, height };
-  };
+  // public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
+  //   SloEmbeddableInput,
+  //   unknown
+  // >['getPanelPlacementSettings'] = () => {
+  //   const width = 8;
+  //   const height = 7;
+  //   return { width, height };
+  // };
 
   public async getExplicitInput(): Promise<Partial<SloEmbeddableInput>> {
     const [coreStart, pluginStart] = await this.getStartServices();
@@ -63,10 +63,14 @@ export class SloAlertsEmbeddableFactoryDefinition
 
   public async create(initialInput: EmbeddableInput, parent?: IContainer) {
     try {
+      const [coreStart, pluginsStart] = await this.getStartServices();
+      console.log(coreStart, pluginsStart, '!!coreStart');
+
       const [
-        { uiSettings, application, http, i18n: i18nService, notifications },
-        { triggersActionsUi, cases, data },
+        { uiSettings, application, http, i18n: i18nService, notifications, settings },
+        { triggersActionsUi, cases, data, security },
       ] = await this.getStartServices();
+      // const [coreStart, pluginsStart] = await this.getStartServices();
       return new SLOAlertsEmbeddable(
         {
           uiSettings,
@@ -77,6 +81,8 @@ export class SloAlertsEmbeddableFactoryDefinition
           notifications,
           cases,
           data,
+          settings,
+          security,
         },
         initialInput,
         parent

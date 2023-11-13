@@ -5,6 +5,8 @@
  * 2.0.
  */
 import React from 'react';
+import { AlertConsumers } from '@kbn/rule-data-utils';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import ReactDOM from 'react-dom';
 import { Subscription } from 'rxjs';
@@ -13,7 +15,9 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { createBrowserHistory } from 'history';
 
+const history = createBrowserHistory();
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
@@ -24,6 +28,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { Router } from '@kbn/shared-ux-router';
 import { SloSummary } from './slo_summary';
 
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
@@ -85,28 +90,36 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>
-          <QueryClientProvider client={queryClient}>
-            {/* <AlertsStateTable
-              query={{
-                bool: {
-                  filter: [
-                    // { term: { 'slo.id': sloId } },
-                    // { term: { 'slo.instanceId': sloInstanceId ?? ALL_VALUE } },
-                    { term: { 'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974' } }, // TEMP hardcode it, until I implement explicit input
-                    { term: { 'slo.instanceId': 'blast-mail.co' } },
-                  ],
-                },
-              }}
-              alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-              configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={[AlertConsumers.SLO]}
-              hideLazyLoader
-              id={ALERTS_TABLE_ID}
-              pageSize={ALERTS_PER_PAGE}
-              showAlertStatusWithFlapping
-            /> */}
-            <SloSummary slos={slos} />
-          </QueryClientProvider>
+          <Router history={history}>
+            <QueryClientProvider client={queryClient}>
+              <EuiFlexGroup direction="column">
+                {/* <EuiFlexItem>
+                <SloSummary slos={slos} />
+              </EuiFlexItem> */}
+                <EuiFlexItem>
+                  <AlertsStateTable
+                    query={{
+                      bool: {
+                        filter: [
+                          // { term: { 'slo.id': sloId } },
+                          // { term: { 'slo.instanceId': sloInstanceId ?? ALL_VALUE } },
+                          { term: { 'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974' } }, // TEMP hardcode it, until I implement explicit input
+                          { term: { 'slo.instanceId': 'blast-mail.co' } },
+                        ],
+                      },
+                    }}
+                    alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
+                    configurationId={AlertConsumers.OBSERVABILITY}
+                    featureIds={[AlertConsumers.SLO]}
+                    hideLazyLoader
+                    id={ALERTS_TABLE_ID}
+                    pageSize={ALERTS_PER_PAGE}
+                    showAlertStatusWithFlapping
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </QueryClientProvider>
+          </Router>
         </KibanaContextProvider>
       </I18nContext>,
       node
