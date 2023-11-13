@@ -177,9 +177,11 @@ export const ChartGridEmbeddableWrapper: FC<
       },
     });
 
-    mergedQuery.bool!.filter.push(
-      ...(relatedEventsFilter?.filter((item) => item !== null) as RelatedEventsFilter[])
-    );
+    if (relatedEventsFilter) {
+      mergedQuery.bool!.filter.push(
+        ...(relatedEventsFilter.filter((item) => item !== null) as RelatedEventsFilter[])
+      );
+    }
 
     if (partitions && fieldConfig.splitField) {
       mergedQuery.bool?.filter.push({
