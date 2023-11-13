@@ -136,7 +136,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
     if (!this.hasCompleteConfig()) {
       return {
         joinMetrics: new Map<string, BucketProperties>(),
-        warnings: []
+        warnings: [],
       };
     }
 
@@ -168,7 +168,7 @@ export class ESTermSource extends AbstractESAggSource implements ITermJoinSource
       requestsAdapter: inspectorAdapters.requests,
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
-      }
+      },
     });
 
     const countPropertyName = this.getAggKey(AGG_TYPE.COUNT);

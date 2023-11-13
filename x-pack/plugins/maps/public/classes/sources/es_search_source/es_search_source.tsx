@@ -451,10 +451,11 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         layerName,
         requestMetaWithoutTimeslice,
         registerCancelCallback,
-        inspectorAdapters, 
+        inspectorAdapters,
         (warning) => {
           warnings.push(warning);
-        }));
+        }
+      ));
 
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(
@@ -582,7 +583,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           layerName,
           requestMeta,
           registerCancelCallback,
-          inspectorAdapters,
+          inspectorAdapters
         );
 
     const unusedMetaFields = indexPattern.metaFields.filter((metaField) => {
@@ -990,7 +991,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     requestMeta: VectorSourceRequestMeta,
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters,
-    onWarning: (warning: SearchResponseWarning) => void,
+    onWarning: (warning: SearchResponseWarning) => void
   ) {
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(requestMeta, 0);

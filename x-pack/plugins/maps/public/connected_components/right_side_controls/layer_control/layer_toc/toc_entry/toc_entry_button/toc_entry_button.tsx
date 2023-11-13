@@ -119,14 +119,16 @@ export class TOCEntryButton extends Component<Props, State> {
 
     const { icon: layerIcon, tooltipContent } = this.props.layer.getLayerIcon(true);
     const hasWarnings = this.props.layer.hasWarnings();
-    const icon = hasWarnings
-      ? <EuiIcon
-          size="m"
-          type="warning"
-          color="warning"
-          data-test-subj={`layerTocWarningIcon${this.props.escapedDisplayName}`}
-        />
-      : layerIcon;
+    const icon = hasWarnings ? (
+      <EuiIcon
+        size="m"
+        type="warning"
+        color="warning"
+        data-test-subj={`layerTocWarningIcon${this.props.escapedDisplayName}`}
+      />
+    ) : (
+      layerIcon
+    );
 
     if (isLayerGroup(this.props.layer)) {
       return {
@@ -135,8 +137,8 @@ export class TOCEntryButton extends Component<Props, State> {
         footnotes: [],
         postScript: hasWarnings
           ? i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerGroupWarning', {
-            defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
-          })
+              defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
+            })
           : undefined,
       };
     }
@@ -175,9 +177,7 @@ export class TOCEntryButton extends Component<Props, State> {
       icon,
       tooltipContent,
       footnotes,
-      postScript: hasWarnings
-        ? INCOMPLETE_RESULTS_WARNING
-        : undefined,
+      postScript: hasWarnings ? INCOMPLETE_RESULTS_WARNING : undefined,
     };
   }
 
@@ -209,10 +209,9 @@ export class TOCEntryButton extends Component<Props, State> {
           <Fragment>
             {tooltipContent}
             {footnoteTooltipContent}
-            {postScript
-              ? <p style={{ fontStyle: 'italic', marginTop: '16px' }}>{postScript}</p>
-              : null
-            }
+            {postScript ? (
+              <p style={{ fontStyle: 'italic', marginTop: '16px' }}>{postScript}</p>
+            ) : null}
           </Fragment>
         }
         data-test-subj="layerTocTooltip"

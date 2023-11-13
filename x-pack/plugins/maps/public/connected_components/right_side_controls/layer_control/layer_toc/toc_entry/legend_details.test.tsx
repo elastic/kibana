@@ -1,9 +1,8 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
  */
 
 import React from 'react';
@@ -17,20 +16,20 @@ describe('LegendDetails', () => {
       return [
         {
           title: 'simulated error',
-          body: <div data-test-subj="layer-error"></div>
-        }
+          body: <div data-test-subj="layer-error" />,
+        },
       ];
     },
     getWarnings: () => {
       return [
         {
           title: 'simulated warning',
-          body: <div data-test-subj="layer-warning"></div>
-        }
+          body: <div data-test-subj="layer-warning" />,
+        },
       ];
     },
     renderLegendDetails: () => {
-      return <div data-test-subj="layer-legend"></div>;
+      return <div data-test-subj="layer-legend" />;
     },
   } as unknown as ILayer;
 
@@ -46,12 +45,16 @@ describe('LegendDetails', () => {
   });
 
   test('Should render warnings and legend when layer contains warnings', () => {
-    render(<LegendDetails layer={{
-      ...mockLayer,
-      getErrors: () => {
-        return [];
-      },
-    }} />);
+    render(
+      <LegendDetails
+        layer={{
+          ...mockLayer,
+          getErrors: () => {
+            return [];
+          },
+        }}
+      />
+    );
     const error = screen.queryByTestId('layer-error');
     expect(error).toBeNull();
     const warning = screen.queryByTestId('layer-warning');

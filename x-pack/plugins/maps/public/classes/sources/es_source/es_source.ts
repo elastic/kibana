@@ -81,7 +81,7 @@ export interface IESSource extends IVectorSource {
     searchSessionId?: string;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
-  }): Promise<{ styleMeta: StyleMetaData, warnings: SearchResponseWarning[] }>;
+  }): Promise<{ styleMeta: StyleMetaData; warnings: SearchResponseWarning[] }>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -199,13 +199,9 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       );
 
       if (disableWarningToasts) {
-        extractWarnings(
-          resp,
-          getInspector(),
-          requestsAdapter,
-          requestName,
-          requestId
-        ).forEach(onWarning);
+        extractWarnings(resp, getInspector(), requestsAdapter, requestName, requestId).forEach(
+          onWarning
+        );
       }
 
       return resp;

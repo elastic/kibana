@@ -11,5 +11,5 @@ export const getJoinMetricsRequestName = (layerName: string) => {
   return i18n.translate('xpack.maps.joinSource.joinMetricsRequestName', {
     defaultMessage: 'load join metrics ({layerName})',
     values: { layerName },
-  })
-}
+  });
+};

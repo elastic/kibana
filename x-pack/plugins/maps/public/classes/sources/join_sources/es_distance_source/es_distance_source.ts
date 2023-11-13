@@ -153,7 +153,7 @@ export class ESDistanceSource extends AbstractESAggSource implements IJoinSource
       requestsAdapter: inspectorAdapters.requests,
       onWarning: (warning: SearchResponseWarning) => {
         warnings.push(warning);
-      }
+      },
     });
 
     return {

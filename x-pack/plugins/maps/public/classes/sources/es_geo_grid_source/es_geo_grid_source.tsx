@@ -44,7 +44,12 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource, getLayerFeaturesRequestName } from '../vector_source';
+import {
+  GetFeatureActionsArgs,
+  GeoJsonWithMeta,
+  IMvtVectorSource,
+  getLayerFeaturesRequestName,
+} from '../vector_source';
 import {
   DataFilters,
   ESGeoGridSourceDescriptor,
@@ -492,7 +497,7 @@ export class ESGeoGridSource extends AbstractESAggSource implements IMvtVectorSo
     const warnings: SearchResponseWarning[] = [];
     const onWarning = (warning: SearchResponseWarning) => {
       warnings.push(warning);
-    }
+    };
     const features: Feature[] =
       supportsCompositeAgg && tooManyBuckets
         ? await this._compositeAggRequest({

@@ -6,7 +6,12 @@
  */
 
 import { TileMetaFeature } from '../../../common/descriptor_types';
-import { getAggsMeta, getAggRange, getHitsMeta, hasIncompleteResults } from './tile_meta_feature_utils';
+import {
+  getAggsMeta,
+  getAggRange,
+  getHitsMeta,
+  hasIncompleteResults,
+} from './tile_meta_feature_utils';
 
 describe('getAggsMeta', () => {
   test('should extract doc_count = 0 from meta features when there are no matches', () => {
@@ -388,7 +393,7 @@ describe('hasIncompleteResults', () => {
       '_clusters.skipped': 0,
       '_clusters.partial': 0,
       '_shards.failed': 0,
-      'timed_out': false,
+      timed_out: false,
       'hits.total.relation': 'eq',
       'hits.total.value': 28,
     },
@@ -399,42 +404,50 @@ describe('hasIncompleteResults', () => {
   });
 
   test('should return true when local cluster has time out', () => {
-    expect(hasIncompleteResults({
-      ...metaFeature,
-      properties: {
-        ...metaFeature.properties,
-        'timed_out': true,
-      }
-    })).toBe(true);
+    expect(
+      hasIncompleteResults({
+        ...metaFeature,
+        properties: {
+          ...metaFeature.properties,
+          timed_out: true,
+        },
+      })
+    ).toBe(true);
   });
 
   test('should return true when local cluster has shard failure', () => {
-    expect(hasIncompleteResults({
-      ...metaFeature,
-      properties: {
-        ...metaFeature.properties,
-        '_shards.failed': 1,
-      }
-    })).toBe(true);
+    expect(
+      hasIncompleteResults({
+        ...metaFeature,
+        properties: {
+          ...metaFeature.properties,
+          '_shards.failed': 1,
+        },
+      })
+    ).toBe(true);
   });
 
   test('should return true when remote cluster is skipped', () => {
-    expect(hasIncompleteResults({
-      ...metaFeature,
-      properties: {
-        ...metaFeature.properties,
-        '_clusters.skipped': 1,
-      }
-    })).toBe(true);
+    expect(
+      hasIncompleteResults({
+        ...metaFeature,
+        properties: {
+          ...metaFeature.properties,
+          '_clusters.skipped': 1,
+        },
+      })
+    ).toBe(true);
   });
 
   test('should return true when remote cluster has shard failure', () => {
-    expect(hasIncompleteResults({
-      ...metaFeature,
-      properties: {
-        ...metaFeature.properties,
-        '_clusters.partial': 1,
-      }
-    })).toBe(true);
+    expect(
+      hasIncompleteResults({
+        ...metaFeature,
+        properties: {
+          ...metaFeature.properties,
+          '_clusters.partial': 1,
+        },
+      })
+    ).toBe(true);
   });
 });

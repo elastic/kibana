@@ -87,7 +87,7 @@ export class TableSource extends AbstractVectorSource implements ITermJoinSource
 
     return {
       joinMetrics: propertiesMap,
-      warnings: []
+      warnings: [],
     };
   }
 

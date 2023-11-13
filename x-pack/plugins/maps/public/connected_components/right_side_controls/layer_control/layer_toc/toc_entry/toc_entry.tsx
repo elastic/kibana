@@ -9,12 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiIcon,
-  EuiButtonIcon,
-  EuiConfirmModal,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
@@ -110,11 +105,9 @@ export class TOCEntry extends Component<Props, State> {
 
   async _loadHasLegendDetails() {
     const hasLegendDetails =
-      (
-        (await this.props.layer.hasLegendDetails()) ||
+      ((await this.props.layer.hasLegendDetails()) ||
         this.props.layer.hasErrors() ||
-        this.props.layer.hasWarnings()
-      ) &&
+        this.props.layer.hasWarnings()) &&
       this.props.layer.isVisible() &&
       this.props.layer.showAtZoomLevel(this.props.zoom);
     if (this._isMounted && hasLegendDetails !== this.state.hasLegendDetails) {
@@ -337,15 +330,16 @@ export class TOCEntry extends Component<Props, State> {
       >
         {this._renderLayerHeader()}
 
-        {this.props.isLegendDetailsOpen && this.state.hasLegendDetails && !isLayerGroup(this.props.layer)
-          ? <div
-              className="mapTocEntry__layerDetails"
-              data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
-            >
-              <LegendDetails layer={this.props.layer} />
-            </div>
-          : null
-        }
+        {this.props.isLegendDetailsOpen &&
+        this.state.hasLegendDetails &&
+        !isLayerGroup(this.props.layer) ? (
+          <div
+            className="mapTocEntry__layerDetails"
+            data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
+          >
+            <LegendDetails layer={this.props.layer} />
+          </div>
+        ) : null}
 
         {this._renderDetailsToggle()}
 

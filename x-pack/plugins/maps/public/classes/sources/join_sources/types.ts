@@ -27,7 +27,7 @@ export interface IJoinSource extends ISource {
     featureCollection?: FeatureCollection
   ): Promise<{
     joinMetrics: PropertiesMap;
-    warnings: SearchResponseWarning[]
+    warnings: SearchResponseWarning[];
   }>;
 
   /*

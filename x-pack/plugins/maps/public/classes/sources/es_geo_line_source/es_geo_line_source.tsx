@@ -293,7 +293,7 @@ export class ESGeoLineSource extends AbstractESAggSource {
         numTrimmedTracks: 0, // geo_line by time series never truncates tracks and instead simplifies tracks
         totalEntities: resp?.aggregations?.totalEntities?.value ?? 0,
         warnings,
-      }
+      },
     };
   }
 

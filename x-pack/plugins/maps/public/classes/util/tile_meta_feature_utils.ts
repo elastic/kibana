@@ -70,23 +70,31 @@ export function getAggRange(
 }
 
 export function hasIncompleteResults(tileMetaFeature: TileMetaFeature) {
-  if (typeof tileMetaFeature.properties?.['timed_out'] === 'boolean' && 
-    tileMetaFeature.properties['timed_out']) {
+  if (
+    typeof tileMetaFeature.properties?.timed_out === 'boolean' &&
+    tileMetaFeature.properties.timed_out
+  ) {
     return true;
   }
 
-  if (typeof tileMetaFeature.properties?.['_shards.failed'] === 'number' && 
-    tileMetaFeature.properties['_shards.failed'] > 0) {
+  if (
+    typeof tileMetaFeature.properties?.['_shards.failed'] === 'number' &&
+    tileMetaFeature.properties['_shards.failed'] > 0
+  ) {
     return true;
   }
 
-  if (typeof tileMetaFeature.properties?.['_clusters.skipped'] === 'number' && 
-    tileMetaFeature.properties['_clusters.skipped'] > 0) {
+  if (
+    typeof tileMetaFeature.properties?.['_clusters.skipped'] === 'number' &&
+    tileMetaFeature.properties['_clusters.skipped'] > 0
+  ) {
     return true;
   }
 
-  if (typeof tileMetaFeature.properties?.['_clusters.partial'] === 'number' && 
-    tileMetaFeature.properties['_clusters.partial'] > 0) {
+  if (
+    typeof tileMetaFeature.properties?.['_clusters.partial'] === 'number' &&
+    tileMetaFeature.properties['_clusters.partial'] > 0
+  ) {
     return true;
   }
 

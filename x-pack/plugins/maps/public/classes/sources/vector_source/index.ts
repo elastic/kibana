@@ -13,5 +13,5 @@ export const getLayerFeaturesRequestName = (layerName: string) => {
   return i18n.translate('xpack.maps.vectorSource.featuresRequestName', {
     defaultMessage: 'load layer features ({layerName})',
     values: { layerName },
-  })
-}
+  });
+};

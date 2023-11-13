@@ -31,19 +31,19 @@ export function LegendDetails({ layer }: Props) {
   }
 
   const warnings = layer.getWarnings();
-  return warnings.length 
-    ? <>
-        {
-          warnings.map(({ title, body }, index) => (
-            <div key={index}>
-              <EuiCallOut color="warning" size="s">
-                {body}
-              </EuiCallOut>
-              <EuiSpacer size="m" />
-            </div>
-          ))
-        }
-        {layer.renderLegendDetails()}
-      </>
-    : layer.renderLegendDetails();
+  return warnings.length ? (
+    <>
+      {warnings.map(({ title, body }, index) => (
+        <div key={index}>
+          <EuiCallOut color="warning" size="s">
+            {body}
+          </EuiCallOut>
+          <EuiSpacer size="m" />
+        </div>
+      ))}
+      {layer.renderLegendDetails()}
+    </>
+  ) : (
+    layer.renderLegendDetails()
+  );
 }
