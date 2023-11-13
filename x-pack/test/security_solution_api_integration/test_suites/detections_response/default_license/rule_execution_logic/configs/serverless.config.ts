@@ -11,4 +11,10 @@ export default createTestConfig({
   junit: {
     reportName: 'Detection Engine API Integration Tests - Serverless - Rule Execution Logic',
   },
+  kbnTestServerArgs: [
+    `--xpack.securitySolution.alertIgnoreFields=${JSON.stringify([
+      'testing_ignored.constant',
+      '/testing_regex*/',
+    ])}`, // See tests within the file "ignore_fields.ts" which use these values in "alertIgnoreFields"
+  ],
 });
