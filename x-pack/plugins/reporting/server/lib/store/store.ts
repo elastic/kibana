@@ -8,9 +8,9 @@
 import { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { ILM_POLICY_NAME, JOB_STATUS, REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
-import { ReportOutput, ReportSource } from '@kbn/reporting-common/types';
+import { ReportDocument, ReportOutput, ReportSource } from '@kbn/reporting-common/types';
 import moment from 'moment';
-import type { IReport, Report, ReportDocument } from '.';
+import type { IReport, Report } from '.';
 import { SavedReport } from '.';
 import type { ReportingCore } from '../..';
 import type { ReportTaskParams } from '../tasks';
