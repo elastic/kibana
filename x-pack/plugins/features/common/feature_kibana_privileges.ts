@@ -205,11 +205,11 @@ export interface FeatureKibanaPrivileges {
      */
     delete?: readonly string[];
     /**
-     * List of case owners which users should have delete access to when granted this privilege.
+     * List of case owners which users should have configure access to when granted this privilege.
      * @example
      * ```ts
      *  {
-     *    delete: ['securitySolution']
+     *    configure: ['securitySolution']
      *  }
      * ```
      */
