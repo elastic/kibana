@@ -96,15 +96,18 @@ describe('update()', () => {
     const alertTableConfigRegistry = new AlertTableConfigRegistry();
     alertTableConfigRegistry.register(getTestAlertTableConfig());
     const toggleColumn = (columnId: string) => {};
-    const updateObj = alertTableConfigRegistry.update('test-alert-table-config', {
-      ...getTestAlertTableConfig(),
-      actions: {
-        toggleColumn,
-      },
+    const getAlerts = () => [];
+    const openAlertFlyout = () => {};
+    const updateObj = alertTableConfigRegistry.updateActions('test-alert-table-config', {
+      toggleColumn,
+      getAlerts,
+      openAlertFlyout,
     });
     expect(updateObj).toMatchInlineSnapshot(`
       Object {
         "actions": Object {
+          "getAlerts": [Function],
+          "openAlertFlyout": [Function],
           "toggleColumn": [Function],
         },
         "columns": Array [],
@@ -114,17 +117,24 @@ describe('update()', () => {
     expect(alertTableConfigRegistry.getActions('test-alert-table-config').toggleColumn).toEqual(
       toggleColumn
     );
+    expect(alertTableConfigRegistry.getActions('test-alert-table-config').getAlerts).toEqual(
+      getAlerts
+    );
+    expect(alertTableConfigRegistry.getActions('test-alert-table-config').openAlertFlyout).toEqual(
+      openAlertFlyout
+    );
   });
 
   test('throw an error in alert table config is not registred', () => {
     const alertTableConfigRegistry = new AlertTableConfigRegistry();
     const toggleColumn = (columnId: string) => {};
+    const getAlerts = () => [];
+    const openAlertFlyout = () => {};
     expect(() =>
-      alertTableConfigRegistry.update('test-alert-table-config', {
-        ...getTestAlertTableConfig(),
-        actions: {
-          toggleColumn,
-        },
+      alertTableConfigRegistry.updateActions('test-alert-table-config', {
+        toggleColumn,
+        getAlerts,
+        openAlertFlyout,
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"Object type \\"test-alert-table-config\\" is not registered."`

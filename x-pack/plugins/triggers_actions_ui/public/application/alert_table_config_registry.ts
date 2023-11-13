@@ -77,7 +77,10 @@ export class AlertTableConfigRegistry {
   /**
    * Returns an object type, throw error if not registered
    */
-  public update(id: string, objectType: AlertsTableConfigurationRegistryWithActions) {
+  public updateActions(
+    id: string,
+    actions: AlertsTableConfigurationRegistryWithActions['actions']
+  ) {
     if (!this.has(id)) {
       throw new Error(
         i18n.translate('xpack.triggersActionsUI.typeRegistry.get.missingActionTypeErrorMessage', {
@@ -88,7 +91,9 @@ export class AlertTableConfigRegistry {
         })
       );
     }
+    const objectType = this.objectTypes.get(id) as AlertsTableConfigurationRegistryWithActions;
+    objectType.actions = actions;
     this.objectTypes.set(id, objectType);
-    return this.objectTypes.get(id)!;
+    return objectType;
   }
 }

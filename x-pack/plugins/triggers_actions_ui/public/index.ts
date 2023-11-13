@@ -44,6 +44,7 @@ export type {
   AlertSummaryTimeRange,
   NotifyWhenSelectOptions,
   RuleCreationValidConsumer,
+  AlertsTableStateActions,
 } from './types';
 
 export type {
