@@ -28,7 +28,6 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import type { LocatorParams, TaskRunResult } from '@kbn/reporting-common/types';
@@ -44,7 +43,6 @@ import {
   ExportType,
   generatePngObservable,
 } from '@kbn/reporting-server';
-import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';
 
@@ -65,16 +63,6 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('png-export-v2');
-  }
-
-  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
-    if (!this.startDeps.screenshotting) throw new Error('Screenshotting plugin is not initialized');
-    return this.startDeps.screenshotting.getScreenshots({
-      ...options,
-      urls: options?.urls?.map((url) =>
-        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ),
-    });
   }
 
   /**
@@ -126,13 +114,17 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
         return generatePngObservable(
-          () =>
-            this.getScreenshots({
+          () => {
+            if (!this.startDeps.screenshotting)
+              throw new Error('Screenshotting plugin is not initialized');
+
+            return this.startDeps.screenshotting.getScreenshots({
               format: 'png',
               headers,
               layout: { ...payload.layout, id: 'preserve_layout' },
               urls: [[url, locatorParams]],
-            }),
+            });
+          },
           jobLogger,
           {
             headers,

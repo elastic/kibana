@@ -174,6 +174,8 @@ export class Screenshots {
   getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult>;
   getScreenshots(options: ScreenshotOptions): Observable<ScreenshotResult> {
+    console.log('urls', JSON.stringify({ urls: options.urls}));
+
     if (this.systemHasInsufficientMemory()) {
       return throwError(() => new errors.InsufficientMemoryAvailableOnCloudError());
     }

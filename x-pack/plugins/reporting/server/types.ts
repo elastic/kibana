@@ -33,7 +33,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { ReportingCore } from './core';
 import { ExportTypesRegistry } from './lib';
 
 /**
@@ -41,7 +40,6 @@ import { ExportTypesRegistry } from './lib';
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getScreenshots?: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
