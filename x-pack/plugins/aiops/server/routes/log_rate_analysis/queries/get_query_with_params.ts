@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { FieldValuePair } from '@kbn/ml-agg-utils';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 import { getFilters } from './get_filters';
 
@@ -18,7 +18,7 @@ export const getTermsQuery = ({ fieldName, fieldValue }: FieldValuePair) => {
 };
 
 interface QueryParams {
-  params: AiopsLogRateAnalysisSchema;
+  params: AiopsLogRateAnalysisSchema<'2'>;
   termFilters?: FieldValuePair[];
   filter?: estypes.QueryDslQueryContainer;
 }
