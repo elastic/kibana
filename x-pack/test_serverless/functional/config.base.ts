@@ -75,6 +75,9 @@ export function createTestConfig(options: CreateTestConfigOptions) {
         connectors: {
           pathname: '/app/management/insightsAndAlerting/triggersActionsConnectors/',
         },
+        triggersActions: {
+          pathname: '/app/management/insightsAndAlerting/triggersActions',
+        },
         settings: {
           pathname: '/app/management/kibana/settings',
         },

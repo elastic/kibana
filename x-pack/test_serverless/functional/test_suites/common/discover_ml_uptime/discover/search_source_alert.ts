@@ -217,7 +217,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.common.navigateToApp('management');
     await PageObjects.header.waitUntilLoadingHasFinished();
     // TODO: Navigation to Rule Management is different in Serverless
-    await testSubjects.click('app-card-triggersActions');
+    await PageObjects.common.navigateToApp('triggersActions');
     await PageObjects.header.waitUntilLoadingHasFinished();
     await testSubjects.click('createFirstRuleButton');
     await PageObjects.header.waitUntilLoadingHasFinished();
@@ -270,7 +270,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // TODO: Navigation to Rule Management is different in Serverless
-    await testSubjects.click('app-card-triggersActions');
+    await PageObjects.common.navigateToApp('triggersActions');
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     const rulesList = await testSubjects.find('rulesList');
@@ -377,7 +377,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // should not have data view selected by default
       const dataViewSelector = await testSubjects.find('selectDataViewExpression');
-      expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
+      // TODO: Serverless Security has an existing data view by default
+      const dataViewSelectorText = await dataViewSelector.getVisibleText();
+      if (!dataViewSelectorText.includes('.alerts-security')) {
+        expect(await dataViewSelector.getVisibleText()).to.eql('DATA VIEW\nSelect a data view');
+      }
 
       log.debug('create data views');
       const sourceDataViewResponse = await createDataView(SOURCE_DATA_VIEW);
@@ -584,7 +588,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       // TODO: Navigation to Rule Management is different in Serverless
-      await testSubjects.click('app-card-triggersActions');
+      await PageObjects.common.navigateToApp('triggersActions');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await testSubjects.click('createRuleButton');

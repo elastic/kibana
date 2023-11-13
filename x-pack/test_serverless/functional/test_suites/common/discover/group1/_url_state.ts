@@ -76,47 +76,52 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    it('should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover', async () => {
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.common.navigateToApp('lens');
-      // TODO: Sidebar links works differently in Serverless
-      let discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
-        deepLinkId: 'discover',
+    describe('Side nav', function () {
+      // Discover does not exist in Serverless O11y side nav (Log Explorer instead)
+      this.tags('skipSvlOblt');
+
+      it('should sync Lens global state to Discover sidebar link and carry over the state when navigating to Discover', async () => {
+        await PageObjects.common.navigateToApp('discover');
+        await PageObjects.common.navigateToApp('lens');
+        // TODO: Sidebar links works differently in Serverless
+        let discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
+          deepLinkId: 'discover',
+        });
+        expect(await discoverLink?.getAttribute('href')).to.contain(
+          '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
+            "&_a=(columns:!(),filters:!(),index:'logstash-*',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+        );
+        await PageObjects.timePicker.setDefaultAbsoluteRange();
+        await filterBar.addFilter({
+          field: 'extension.raw',
+          operation: 'is one of',
+          value: ['jpg', 'css'],
+        });
+        await filterBar.toggleFilterPinned('extension.raw');
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
+          deepLinkId: 'discover',
+        });
+        expect(await discoverLink?.getAttribute('href')).to.contain(
+          "/app/discover#/?_g=(filters:!(('$state':(store:globalState)," +
+            "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
+            'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
+            'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
+            "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
+            "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
+            "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-*'," +
+            "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
+        );
+        await PageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
+        await PageObjects.header.waitUntilLoadingHasFinished();
+        expect(await filterBar.hasFilter('extension.raw', '', undefined, true)).to.be(true);
+        expect(await filterBar.isFilterPinned('extension.raw')).to.be(true);
+        expect(await PageObjects.timePicker.getTimeConfig()).to.eql({
+          start: 'Sep 19, 2015 @ 06:31:44.000',
+          end: 'Sep 23, 2015 @ 18:31:44.000',
+        });
+        expect(await PageObjects.discover.getHitCount()).to.be('11,268');
       });
-      expect(await discoverLink?.getAttribute('href')).to.contain(
-        '/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-15m,to:now))' +
-          "&_a=(columns:!(),filters:!(),index:'logstash-*',interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
-      );
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
-      await filterBar.addFilter({
-        field: 'extension.raw',
-        operation: 'is one of',
-        value: ['jpg', 'css'],
-      });
-      await filterBar.toggleFilterPinned('extension.raw');
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      discoverLink = await PageObjects.svlCommonNavigation.sidenav.findLink({
-        deepLinkId: 'discover',
-      });
-      expect(await discoverLink?.getAttribute('href')).to.contain(
-        "/app/discover#/?_g=(filters:!(('$state':(store:globalState)," +
-          "meta:(alias:!n,disabled:!f,field:extension.raw,index:'logstash-*'," +
-          'key:extension.raw,negate:!f,params:!(jpg,css),type:phrases,value:!(jpg,css)),' +
-          'query:(bool:(minimum_should_match:1,should:!((match_phrase:(extension.raw:jpg)),' +
-          "(match_phrase:(extension.raw:css))))))),query:(language:kuery,query:'')," +
-          "refreshInterval:(pause:!t,value:60000),time:(from:'2015-09-19T06:31:44.000Z'," +
-          "to:'2015-09-23T18:31:44.000Z'))&_a=(columns:!(),filters:!(),index:'logstash-*'," +
-          "interval:auto,query:(language:kuery,query:''),sort:!(!('@timestamp',desc)))"
-      );
-      await PageObjects.svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'discover' });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      expect(await filterBar.hasFilter('extension.raw', '', undefined, true)).to.be(true);
-      expect(await filterBar.isFilterPinned('extension.raw')).to.be(true);
-      expect(await PageObjects.timePicker.getTimeConfig()).to.eql({
-        start: 'Sep 19, 2015 @ 06:31:44.000',
-        end: 'Sep 23, 2015 @ 18:31:44.000',
-      });
-      expect(await PageObjects.discover.getHitCount()).to.be('11,268');
     });
   });
 }
