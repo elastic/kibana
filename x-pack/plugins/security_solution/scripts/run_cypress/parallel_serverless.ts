@@ -125,6 +125,7 @@ async function deleteSecurityProject(
   apiKey: string
 ): Promise<void> {
   try {
+    log.info(`Deleting the project`);
     await axios.delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
@@ -327,7 +328,7 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
 export const cli = () => {
   run(
-    async () => {
+    async (context) => {
       log = new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
@@ -473,6 +474,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
+
+            context.addCleanupTask(async () => {
+              await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY).then(() => {
+                log.info('Clean up done');
+              });
+            });
 
             // Reset credentials for elastic user
             const credentials = await resetCredentials(project.id, id, API_KEY);
