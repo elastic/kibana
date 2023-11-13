@@ -408,7 +408,7 @@ export default ({ getService }: FtrProviderContext) => {
           await deleteUserAndRole(getService, role);
         });
 
-        it('does NOT create a rule', async () => {
+        it('should NOT be able to create a rule', async () => {
           await supertestWithoutAuth
             .post(DETECTION_ENGINE_RULES_URL)
             .auth(role, 'changeme')
