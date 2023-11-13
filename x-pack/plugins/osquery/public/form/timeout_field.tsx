@@ -8,7 +8,14 @@ import React, { useCallback, useMemo } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { useController } from 'react-hook-form';
 import type { EuiFieldNumberProps } from '@elastic/eui';
-import { EuiFieldNumber, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiFieldNumber,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiIconTip,
+  EuiText,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -57,9 +64,20 @@ const TimeoutFieldComponent = ({ euiFieldProps }: TimeoutFieldProps) => {
 
   return (
     <EuiFormRow
-      label={i18n.translate('xpack.osquery.liveQuery.timeout', {
-        defaultMessage: 'Timeout',
-      })}
+      label={
+        <EuiFlexGroup gutterSize="xs" alignItems="flexEnd">
+          <EuiFlexItem grow={false}>
+            <FormattedMessage id="xpack.osquery.liveQuery.timeout" defaultMessage="Timeout" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiIconTip
+              content={i18n.translate('xpack.osquery.liveQuery.timeoutHint', {
+                defaultMessage: 'Maximum time to wait for query results, default is 60 seconds.',
+              })}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      }
       fullWidth
       error={error?.message}
       isInvalid={hasError}
