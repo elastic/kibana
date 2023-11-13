@@ -19,7 +19,6 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
-  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import { TaskRunResult } from '@kbn/reporting-common/types';
@@ -36,7 +35,6 @@ import {
   getFullUrls,
   validateUrls,
 } from '@kbn/reporting-server';
-import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 
 /**
  * @deprecated
@@ -58,16 +56,6 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('png-export-v1');
-  }
-
-  public getScreenshots(options: PdfScreenshotOptions): Observable<PdfScreenshotResult> {
-    if (!this.startDeps.screenshotting) throw new Error('Screenshotting plugin is not initialized');
-    return this.startDeps.screenshotting.getScreenshots({
-      ...options,
-      urls: options?.urls?.map((url) =>
-        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ),
-    });
   }
 
   public createJob = async (
@@ -110,8 +98,10 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
         //  make a new function that will call reporting.getScreenshots
-        const snapshotFn = () =>
-          this.getScreenshots({
+        const snapshotFn = () => {
+          if (!this.startDeps.screenshotting)
+            throw new Error('Screenshotting plugin is not initialized');
+          return this.startDeps.screenshotting.getScreenshots({
             format: 'pdf',
             title,
             logo,
@@ -120,6 +110,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             headers,
             layout,
           });
+        };
         return generatePdfObservable(snapshotFn, {
           format: 'pdf',
           title,
