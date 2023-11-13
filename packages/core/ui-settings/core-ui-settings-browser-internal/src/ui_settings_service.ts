@@ -21,7 +21,7 @@ export interface UiSettingsServiceDeps {
 }
 
 /**
- * @InternalInjectedMetadataSetup
+ * @Internal
  * @Deprecated
  **/
 export class UiSettingsService {
