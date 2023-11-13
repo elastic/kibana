@@ -12,7 +12,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../../common/api/log_categorization/types';
 
