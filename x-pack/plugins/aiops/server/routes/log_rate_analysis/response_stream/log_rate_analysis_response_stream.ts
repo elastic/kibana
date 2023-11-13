@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { streamFactory } from '@kbn/ml-response-stream/server';
+import { streamFactory, type StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
@@ -23,7 +23,7 @@ import type {
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '../../../../common/api/log_rate_analysis/schema';
 
-import { loadedFactory } from './loaded';
+import { loadedFactory, type StreamLoaded } from './loaded';
 import { indexInfoHandlerFactory } from './index_info_handler';
 import { overridesHandlerFactory } from './overrides_handler';
 import type { LogDebugMessage, StreamState } from './types';
@@ -37,7 +37,7 @@ const getDefaultStreamState = (): StreamState => ({
   shouldStop: false,
 });
 
-export interface LogRateAnalysisResponseStreamParams<T extends ApiVersion> {
+export interface LogRateAnalysisResponseStreamOptions<T extends ApiVersion> {
   client: ElasticsearchClient;
   requestBody: AiopsLogRateAnalysisSchema<T>;
   events: KibanaRequestEvents;
@@ -45,8 +45,21 @@ export interface LogRateAnalysisResponseStreamParams<T extends ApiVersion> {
   logger: Logger;
 }
 
+export interface LogRateAnalysisResponseStreamFetchOptions<T extends ApiVersion>
+  extends LogRateAnalysisResponseStreamOptions<T> {
+  abortSignal: AbortSignal;
+  logDebugMessage: LogDebugMessage;
+  end: () => void;
+  endWithUpdatedLoadingState: () => void;
+  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'];
+  pushPingWithTimeout: () => void;
+  pushError: (msg: string) => void;
+  loaded: StreamLoaded;
+  shouldStop: (d?: boolean) => boolean | undefined;
+}
+
 export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
-  options: LogRateAnalysisResponseStreamParams<T>
+  options: LogRateAnalysisResponseStreamOptions<T>
 ) => {
   const { client, events, headers, logger, requestBody } = options;
 
@@ -141,11 +154,9 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
 
   const loaded = loadedFactory(state);
 
-  const indexInfoHandler = indexInfoHandlerFactory(
-    client,
+  const streamFetchOptions: LogRateAnalysisResponseStreamFetchOptions<T> = {
+    ...options,
     abortSignal,
-    requestBody,
-    logger,
     logDebugMessage,
     end,
     endWithUpdatedLoadingState,
@@ -153,10 +164,12 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     pushPingWithTimeout,
     pushError,
     loaded,
-    shouldStop
-  );
+    shouldStop,
+  };
 
-  const overridesHandler = overridesHandlerFactory(requestBody, logDebugMessage, push, loaded);
+  const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
+
+  const overridesHandler = overridesHandlerFactory(streamFetchOptions);
 
   return {
     abortSignal,

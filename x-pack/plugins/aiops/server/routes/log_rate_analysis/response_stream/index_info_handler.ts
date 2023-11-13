@@ -6,43 +6,35 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ElasticsearchClient } from '@kbn/core/server';
-import type { Logger } from '@kbn/logging';
-import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
 
-import {
-  updateLoadingStateAction,
-  type AiopsLogRateAnalysisApiAction,
-} from '../../../../common/api/log_rate_analysis/actions';
-import type {
-  AiopsLogRateAnalysisSchema,
-  AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+import { updateLoadingStateAction } from '../../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
 import { fetchIndexInfo } from '../queries/fetch_index_info';
+import type { LogRateAnalysisResponseStreamFetchOptions } from './log_rate_analysis_response_stream';
 
 import { LOADED_FIELD_CANDIDATES } from './constants';
-import type { StreamLoaded } from './loaded';
-import type { LogDebugMessage } from './types';
 
 export const indexInfoHandlerFactory =
-  <T extends ApiVersion>(
-    client: ElasticsearchClient,
-    abortSignal: AbortSignal,
-    params: AiopsLogRateAnalysisSchema,
-    logger: Logger,
-    logDebugMessage: LogDebugMessage,
-    end: () => void,
-    endWithUpdatedLoadingState: () => void,
-    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
-    pushPingWithTimeout: () => void,
-    pushError: (msg: string) => void,
-    loaded: StreamLoaded,
-    shouldStop: (d?: boolean) => boolean | undefined
-  ) =>
+  <T extends ApiVersion>(options: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   async () => {
+    const {
+      abortSignal,
+      client,
+      end,
+      endWithUpdatedLoadingState,
+      loaded,
+      logDebugMessage,
+      logger,
+      push,
+      pushError,
+      pushPingWithTimeout,
+      requestBody,
+      shouldStop,
+    } = options;
+
     const fieldCandidates: string[] = [];
     let fieldCandidatesCount = fieldCandidates.length;
 
@@ -50,7 +42,7 @@ export const indexInfoHandlerFactory =
 
     let totalDocCount = 0;
 
-    if (!params.overrides?.remainingFieldCandidates) {
+    if (!requestBody.overrides?.remainingFieldCandidates) {
       logDebugMessage('Fetch index information.');
       push(
         updateLoadingStateAction({
@@ -68,7 +60,7 @@ export const indexInfoHandlerFactory =
       try {
         const indexInfo = await fetchIndexInfo(
           client,
-          params,
+          requestBody,
           ['message', 'error.message'],
           abortSignal
         );

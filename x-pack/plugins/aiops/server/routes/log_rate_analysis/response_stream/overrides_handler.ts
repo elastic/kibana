@@ -5,31 +5,21 @@
  * 2.0.
  */
 
-import type { StreamFactoryReturnType } from '@kbn/ml-response-stream/server';
-
 import {
   resetAllAction,
   resetErrorsAction,
   resetGroupsAction,
-  type AiopsLogRateAnalysisApiAction,
 } from '../../../../common/api/log_rate_analysis/actions';
-import type {
-  AiopsLogRateAnalysisSchema,
-  AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
-import type { StreamLoaded } from './loaded';
-import type { LogDebugMessage } from './types';
+import type { LogRateAnalysisResponseStreamFetchOptions } from './log_rate_analysis_response_stream';
 
 export const overridesHandlerFactory =
-  <T extends ApiVersion>(
-    params: AiopsLogRateAnalysisSchema,
-    logDebugMessage: LogDebugMessage,
-    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
-    loaded: StreamLoaded
-  ) =>
+  <T extends ApiVersion>(options: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   () => {
-    if (!params.overrides) {
+    const { requestBody, logDebugMessage, loaded, push } = options;
+
+    if (!requestBody.overrides) {
       logDebugMessage('Full Reset.');
       push(resetAllAction());
     } else {
@@ -37,13 +27,13 @@ export const overridesHandlerFactory =
       push(resetErrorsAction());
     }
 
-    if (params.overrides?.regroupOnly) {
+    if (requestBody.overrides?.regroupOnly) {
       logDebugMessage('Reset Groups.');
       push(resetGroupsAction());
     }
 
-    if (params.overrides?.loaded) {
-      logDebugMessage(`Set 'loaded' override to '${params.overrides?.loaded}'.`);
-      loaded(params.overrides?.loaded);
+    if (requestBody.overrides?.loaded) {
+      logDebugMessage(`Set 'loaded' override to '${requestBody.overrides?.loaded}'.`);
+      loaded(requestBody.overrides?.loaded);
     }
   };
