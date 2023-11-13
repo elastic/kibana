@@ -39,7 +39,7 @@ export async function runDockerGenerator(
   }
 ) {
   let baseOSImage = '';
-  if (flags.ubuntu) baseOSImage = 'ubuntu:22.04';
+  if (flags.ubuntu) baseOSImage = 'ubuntu:20.04';
   if (flags.ubi8) baseOSImage = 'docker.elastic.co/ubi8/ubi-minimal:latest';
   if (flags.ubi9) baseOSImage = 'docker.elastic.co/ubi9/ubi-minimal:latest';
 
