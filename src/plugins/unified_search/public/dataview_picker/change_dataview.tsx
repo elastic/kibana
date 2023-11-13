@@ -225,7 +225,7 @@ export function ChangeDataView({
         <EuiContextMenuItem
           key="refresh"
           icon="refresh"
-          data-test-subj="indexPattern-refresh-fields"
+          data-test-subj="dataview-refresh-fields"
           onClick={async () => {
             setPopoverIsOpen(false);
             const dataView = await dataViews.get(currentDataViewId!, false, true);

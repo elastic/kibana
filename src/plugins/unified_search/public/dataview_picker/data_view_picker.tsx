@@ -89,6 +89,11 @@ export interface DataViewPickerProps {
    * Makes the picker disabled by disabling the popover trigger
    */
   isDisabled?: boolean;
+  /**
+   * Callback enabling the user to refresh the fields of the current data view
+   * When set the refresh fields menu is shown
+   * @param dataView
+   */
   onRefreshFields?: (dataView: DataView) => void;
 }
 

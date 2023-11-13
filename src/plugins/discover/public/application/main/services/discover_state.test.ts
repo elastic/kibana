@@ -651,6 +651,21 @@ describe('Test discover state actions', () => {
     unsubscribe();
   });
 
+  test('onDataViewRefreshed - persisted data view', async () => {
+    const { state } = await getState('/', { savedSearch: savedSearchMock });
+    await state.actions.loadSavedSearch({ savedSearchId: savedSearchMock.id });
+    const selectedDataView = state.internalState.getState().dataView;
+    await state.actions.onRefreshDataViewFields(dataViewMock);
+    expect(state.internalState.getState().dataView).not.toBe(selectedDataView);
+  });
+  test('onDataViewRefreshed - ad-hoc data view', async () => {
+    const { state } = await getState('/', { savedSearch: savedSearchMock });
+    await state.actions.onDataViewCreated(dataViewAdHoc);
+    const previousId = dataViewAdHoc.id;
+    await state.actions.onRefreshDataViewFields(dataViewAdHoc);
+    expect(state.internalState.getState().dataView?.id).not.toBe(previousId);
+  });
+
   test('onOpenSavedSearch - same target id', async () => {
     const { state } = await getState('/', { savedSearch: savedSearchMock });
     const unsubscribe = state.actions.initializeAndSync();

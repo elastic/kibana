@@ -148,7 +148,6 @@ export interface DiscoverStateContainer {
      * @param pattern
      */
     createAndAppendAdHocDataView: (dataViewSpec: DataViewSpec) => Promise<DataView>;
-    onRefreshDataViewFields: (dataView: DataView) => Promise<void>;
     /**
      * Triggered when a new data view is created
      * @param dataView
@@ -173,6 +172,11 @@ export interface DiscoverStateContainer {
       payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
       isUpdate?: boolean
     ) => void;
+    /**
+     * Triggered when a data view fields should be refreshed (because e.g. new fields might have been ingested)
+     * @param dataView
+     */
+    onRefreshDataViewFields: (dataView: DataView) => Promise<void>;
     /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
