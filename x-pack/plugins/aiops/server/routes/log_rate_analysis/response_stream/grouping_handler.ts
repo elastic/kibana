@@ -1,0 +1,249 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { queue } from 'async';
+
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
+import { i18n } from '@kbn/i18n';
+import {
+  fetchHistogramsForFields,
+  type SignificantItem,
+  type SignificantItemGroup,
+  type SignificantItemHistogramItem,
+  type NumericChartData,
+} from '@kbn/ml-agg-utils';
+
+import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
+import {
+  addSignificantItemsGroupAction,
+  addSignificantItemsGroupHistogramAction,
+  updateLoadingStateAction,
+} from '../../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+
+import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
+
+import { fetchFrequentItemSets } from '../queries/fetch_frequent_item_sets';
+import { fetchTerms2CategoriesCounts } from '../queries/fetch_terms_2_categories_counts';
+import { getGroupFilter } from '../queries/get_group_filter';
+import { getHistogramQuery } from '../queries/get_histogram_query';
+import { getSignificantItemGroups } from '../queries/get_significant_item_groups';
+
+import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from './constants';
+import type { LogRateAnalysisResponseStreamFetchOptions } from './log_rate_analysis_response_stream';
+
+export const groupingHandlerFactory =
+  <T extends ApiVersion>({
+    abortSignal,
+    client,
+    end,
+    requestBody,
+    logDebugMessage,
+    logger,
+    loaded,
+    push,
+    pushError,
+    sampleProbability,
+    shouldStop,
+    version,
+  }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
+  async (
+    significantCategories: SignificantItem[],
+    significantTerms: SignificantItem[],
+    overallTimeSeries?: NumericChartData
+  ) => {
+    logDebugMessage('Group results.');
+
+    function pushHistogramDataLoadingState() {
+      push(
+        updateLoadingStateAction({
+          ccsWarning: false,
+          loaded: loaded(),
+          loadingState: i18n.translate(
+            'xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData',
+            {
+              defaultMessage: 'Loading histogram data.',
+            }
+          ),
+        })
+      );
+    }
+
+    push(
+      updateLoadingStateAction({
+        ccsWarning: false,
+        loaded: loaded(),
+        loadingState: i18n.translate('xpack.aiops.logRateAnalysis.loadingState.groupingResults', {
+          defaultMessage: 'Transforming significant field/value pairs into groups.',
+        }),
+        groupsMissing: true,
+      })
+    );
+
+    try {
+      const { fields, itemSets } = await fetchFrequentItemSets(
+        client,
+        requestBody.index,
+        JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
+        significantTerms,
+        requestBody.timeFieldName,
+        requestBody.deviationMin,
+        requestBody.deviationMax,
+        logger,
+        sampleProbability,
+        pushError,
+        abortSignal
+      );
+
+      if (significantCategories.length > 0 && significantTerms.length > 0) {
+        const { fields: significantCategoriesFields, itemSets: significantCategoriesItemSets } =
+          await fetchTerms2CategoriesCounts(
+            client,
+            requestBody,
+            JSON.parse(requestBody.searchQuery) as estypes.QueryDslQueryContainer,
+            significantTerms,
+            itemSets,
+            significantCategories,
+            requestBody.deviationMin,
+            requestBody.deviationMax,
+            logger,
+            pushError,
+            abortSignal
+          );
+
+        fields.push(...significantCategoriesFields);
+        itemSets.push(...significantCategoriesItemSets);
+      }
+
+      if (shouldStop()) {
+        logDebugMessage('shouldStop after fetching frequent_item_sets.');
+        end();
+        return;
+      }
+
+      if (fields.length > 0 && itemSets.length > 0) {
+        const significantItemGroups = getSignificantItemGroups(
+          itemSets,
+          [...significantTerms, ...significantCategories],
+          fields
+        );
+
+        // We'll find out if there's at least one group with at least two items,
+        // only then will we return the groups to the clients and make the grouping option available.
+        const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
+
+        if (maxItems > 1) {
+          push(addSignificantItemsGroupAction(significantItemGroups, version));
+        }
+
+        loaded(PROGRESS_STEP_GROUPING, false);
+        pushHistogramDataLoadingState();
+
+        if (shouldStop()) {
+          logDebugMessage('shouldStop after grouping.');
+          end();
+          return;
+        }
+
+        logDebugMessage(`Fetch ${significantItemGroups.length} group histograms.`);
+
+        const groupHistogramQueue = queue(async function (cpg: SignificantItemGroup) {
+          if (shouldStop()) {
+            logDebugMessage('shouldStop abort fetching group histograms.');
+            groupHistogramQueue.kill();
+            end();
+            return;
+          }
+
+          if (overallTimeSeries !== undefined) {
+            const histogramQuery = getHistogramQuery(requestBody, getGroupFilter(cpg));
+
+            let cpgTimeSeries: NumericChartData;
+            try {
+              cpgTimeSeries = (
+                (await fetchHistogramsForFields(
+                  client,
+                  requestBody.index,
+                  histogramQuery,
+                  // fields
+                  [
+                    {
+                      fieldName: requestBody.timeFieldName,
+                      type: KBN_FIELD_TYPES.DATE,
+                      interval: overallTimeSeries.interval,
+                      min: overallTimeSeries.stats[0],
+                      max: overallTimeSeries.stats[1],
+                    },
+                  ],
+                  // samplerShardSize
+                  -1,
+                  undefined,
+                  abortSignal,
+                  sampleProbability,
+                  RANDOM_SAMPLER_SEED
+                )) as [NumericChartData]
+              )[0];
+            } catch (e) {
+              if (!isRequestAbortedError(e)) {
+                logger.error(
+                  `Failed to fetch the histogram data for group #${cpg.id}, got: \n${e.toString()}`
+                );
+                pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+              }
+              return;
+            }
+            const histogram: SignificantItemHistogramItem[] =
+              overallTimeSeries.data.map((o) => {
+                const current = cpgTimeSeries.data.find(
+                  (d1) => d1.key_as_string === o.key_as_string
+                ) ?? {
+                  doc_count: 0,
+                };
+
+                if (version === '1') {
+                  return {
+                    key: o.key,
+                    key_as_string: o.key_as_string ?? '',
+                    doc_count_significant_term: current.doc_count,
+                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                  };
+                }
+
+                return {
+                  key: o.key,
+                  key_as_string: o.key_as_string ?? '',
+                  doc_count_significant_item: current.doc_count,
+                  doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                };
+              }) ?? [];
+
+            push(
+              addSignificantItemsGroupHistogramAction(
+                [
+                  {
+                    id: cpg.id,
+                    histogram,
+                  },
+                ],
+                version
+              )
+            );
+          }
+        }, MAX_CONCURRENT_QUERIES);
+
+        groupHistogramQueue.push(significantItemGroups);
+        await groupHistogramQueue.drain();
+      }
+    } catch (e) {
+      if (!isRequestAbortedError(e)) {
+        logger.error(`Failed to transform field/value pairs into groups, got: \n${e.toString()}`);
+        pushError(`Failed to transform field/value pairs into groups.`);
+      }
+    }
+  };
