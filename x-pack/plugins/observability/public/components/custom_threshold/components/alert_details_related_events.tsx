@@ -130,7 +130,7 @@ export default function AlertDetailsRelatedEvents({
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       .map((cpItem) => cpItem.metricField);
 
-    setRelatedMetrics(sortedMetrics);
+    if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
   };
 
   const sortByPValue = () => {
@@ -138,7 +138,7 @@ export default function AlertDetailsRelatedEvents({
       .sort((a, b) => a.p_value - b.p_value)
       .map((cpItem) => cpItem.metricField);
 
-    setRelatedMetrics(sortedMetrics);
+    if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
   };
 
   const onChangeSort = (type: SortField | undefined) => {
