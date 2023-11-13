@@ -21,6 +21,7 @@ import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
@@ -129,13 +130,15 @@ export const HeaderTitle: FC = memo(() => {
         <EuiFlexItem grow={false}>
           <RiskScore />
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <Assignees
-            eventId={eventId}
-            assignedUserIds={alertAssignees}
-            onAssigneesUpdated={onAssigneesUpdated}
-          />
-        </EuiFlexItem>
+        {scopeId !== TableId.rulePreview && (
+          <EuiFlexItem grow={false}>
+            <Assignees
+              eventId={eventId}
+              assignedUserIds={alertAssignees}
+              onAssigneesUpdated={onAssigneesUpdated}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     </>
   );

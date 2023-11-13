@@ -23,6 +23,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
 import type { GetFieldsData } from '../../../../common/hooks/use_get_fields_data';
 import { Assignees } from '../../../../flyout/document_details/right/components/assignees';
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
@@ -174,13 +175,15 @@ export const ExpandableEventTitle = React.memo<ExpandableEventTitleProps>(
                 )}
               </EuiFlexGroup>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <Assignees
-                eventId={eventId}
-                assignedUserIds={alertAssignees}
-                onAssigneesUpdated={onAssigneesUpdated}
-              />
-            </EuiFlexItem>
+            {scopeId !== TableId.rulePreview && (
+              <EuiFlexItem grow={false}>
+                <Assignees
+                  eventId={eventId}
+                  assignedUserIds={alertAssignees}
+                  onAssigneesUpdated={onAssigneesUpdated}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
       </StyledEuiFlexGroup>
