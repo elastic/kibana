@@ -34,7 +34,12 @@ import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
 import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
-import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
+import {
+  Datatable,
+  DefaultInspectorAdapters,
+  ErrorLike,
+  RenderMode,
+} from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
 import fastIsEqual from 'fast-deep-equal';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
@@ -79,6 +84,7 @@ import {
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
+import { ValueBasedPersistedState } from '../datasources/value_based/types';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -1075,6 +1081,19 @@ export class Embeddable
 
     const input = this.getInput();
 
+    const getInternalTables = (states: Record<string, unknown>) => {
+      const result: Record<string, Datatable> = {};
+      if ('valueBased' in states) {
+        const layers = (states.valueBased as ValueBasedPersistedState).layers;
+        for (const layer in layers) {
+          if (layers[layer]) {
+            result[layer] = layers[layer].table;
+          }
+        }
+      }
+      return result;
+    };
+
     if (this.expression && !blockingErrors.length) {
       render(
         <>
@@ -1088,6 +1107,7 @@ export class Embeddable
                 embeddableTitle: this.getTitle(),
                 ...(input.palette ? { theme: { palette: input.palette } } : {}),
                 ...('overrides' in input ? { overrides: input.overrides } : {}),
+                ...getInternalTables(this.savedVis.state.datasourceStates),
               }}
               searchSessionId={this.getInput().searchSessionId}
               handleEvent={this.handleEvent}
