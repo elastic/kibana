@@ -11,19 +11,33 @@ import React from 'react';
 import { sloList } from '../../../data/slo/slo';
 import { render } from '../../../utils/test_helper';
 import { SloSummary } from './slo_summary';
-import { ActiveAlerts, useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
+import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
+type SLO = Pick<SLOResponse, 'id' | 'instanceId'>;
 
 jest.mock('../../../hooks/slo/use_fetch_active_alerts');
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 
-const mockActiveAlertsGet = (activeAlerts) => {
-  jest
-    .spyOn(ActiveAlerts.prototype, 'get')
-    .mockImplementation((slo) => activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`));
-};
+class ActiveAlertsMock {
+  private data: Map<string, number> = new Map();
+
+  constructor(initialData?: Record<string, number>) {
+    if (initialData) {
+      Object.keys(initialData).forEach((key) => this.data.set(key, initialData[key]));
+    }
+  }
+
+  get(slo: SLO) {
+    return this.data.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
+  }
+
+  clear() {
+    return this.data.clear();
+  }
+}
+
 describe('SLO Alert Summary', () => {
-  const activeAlerts = new Map();
+  const activeAlerts = new ActiveAlertsMock();
   afterEach(() => {
     jest.clearAllMocks();
     activeAlerts.clear();
@@ -44,7 +58,7 @@ describe('SLO Alert Summary', () => {
 
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
-        data: new ActiveAlerts(),
+        data: new ActiveAlertsMock(),
       });
 
       render(<SloSummary slos={slos} />);
@@ -62,14 +76,10 @@ describe('SLO Alert Summary', () => {
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
         };
-        Object.keys(activeAlertsData).forEach((key) =>
-          activeAlerts.set(key, activeAlertsData[key])
-        );
-        mockActiveAlertsGet(activeAlerts);
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
-          data: new ActiveAlerts(activeAlertsData),
+          data: new ActiveAlertsMock(activeAlertsData),
         });
 
         render(<SloSummary slos={slos} />);
@@ -89,13 +99,10 @@ describe('SLO Alert Summary', () => {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
           'c0f8d669-9177-4706-9098-f397a88173a6|*': 1,
         };
-        Object.keys(activeAlertsData).forEach((key) =>
-          activeAlerts.set(key, activeAlertsData[key])
-        );
-        mockActiveAlertsGet(activeAlerts);
+
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
-          data: new ActiveAlerts(activeAlertsData),
+          data: new ActiveAlertsMock(activeAlertsData),
         });
 
         render(<SloSummary slos={slos} />);
@@ -113,14 +120,10 @@ describe('SLO Alert Summary', () => {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 3,
           'c0f8d669-9177-4706-9098-f397a88173a6|*': 2,
         };
-        Object.keys(activeAlertsData).forEach((key) =>
-          activeAlerts.set(key, activeAlertsData[key])
-        );
-        mockActiveAlertsGet(activeAlerts);
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
-          data: new ActiveAlerts(activeAlertsData),
+          data: new ActiveAlertsMock(activeAlertsData),
         });
 
         render(<SloSummary slos={slos} />);
@@ -138,10 +141,10 @@ describe('SLO Alert Summary', () => {
         name: slo.name,
       }));
       const selectedSlo = [slos[0]];
-      mockActiveAlertsGet(activeAlerts);
+
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
-        data: new ActiveAlerts(),
+        data: new ActiveAlertsMock(),
       });
 
       render(<SloSummary slos={selectedSlo} />);
@@ -159,11 +162,9 @@ describe('SLO Alert Summary', () => {
       const activeAlertsData = {
         '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
       };
-      Object.keys(activeAlertsData).forEach((key) => activeAlerts.set(key, activeAlertsData[key]));
-      mockActiveAlertsGet(activeAlerts);
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
-        data: new ActiveAlerts(activeAlertsData),
+        data: new ActiveAlertsMock(activeAlertsData),
       });
       render(<SloSummary slos={selectedSlo} />);
 
