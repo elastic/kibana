@@ -430,7 +430,9 @@ describe('Trusted apps form', () => {
       expect(renderResult.getByTestId('policy-id-0-checkbox')).toBeChecked();
     });
     it("allows the user to set the trusted app entry to 'Global' in the edit option", () => {
-      const globalButtonInput = renderResult.getByTestId('globalPolicy') as HTMLButtonElement;
+      const globalButtonInput = renderResult.getByTestId(
+        'trustedApps-form-effectedPolicies-global'
+      ) as HTMLButtonElement;
       act(() => {
         fireEvent.click(globalButtonInput);
       });
