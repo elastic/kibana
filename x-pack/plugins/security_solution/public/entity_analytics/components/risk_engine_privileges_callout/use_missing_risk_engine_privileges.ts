@@ -1,0 +1,93 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { useMemo } from 'react';
+import { useRiskEnginePrivileges } from '../../api/hooks/use_risk_engine_privileges';
+import type { RiskEnginePrivilegesResponse } from '../../../../server/lib/risk_engine/types';
+import {
+  RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
+  RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
+  RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES,
+} from '../../../../common/risk_engine';
+
+const getMissingIndexPrivileges = (
+  privileges: RiskEnginePrivilegesResponse['privileges']['elasticsearch']['index']
+): MissingIndexPrivileges => {
+  const missingIndexPrivileges: MissingIndexPrivileges = [];
+
+  for (const [indexName, requiredPrivileges] of Object.entries(
+    RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES
+  )) {
+    const missingPrivileges = requiredPrivileges.filter(
+      (privilege) => !privileges[indexName][privilege]
+    );
+
+    if (missingPrivileges.length) {
+      missingIndexPrivileges.push([indexName, missingPrivileges]);
+    }
+  }
+
+  return missingIndexPrivileges;
+};
+
+export type MissingClusterPrivileges = string[];
+export type MissingKibanaPrivileges = string[];
+export type MissingIndexPrivileges = Array<[indexName: string, privileges: string[]]>;
+
+export interface MissingPrivileges {
+  clusterPrivileges: MissingClusterPrivileges;
+  indexPrivileges: MissingIndexPrivileges;
+  kibanaPrivileges: MissingKibanaPrivileges;
+}
+
+export const useMissingPrivileges = (): MissingPrivileges => {
+  const { data: privilegesRes, isLoading } = useRiskEnginePrivileges();
+
+  return useMemo<MissingPrivileges>(() => {
+    const indexPrivileges: MissingIndexPrivileges = [];
+    const clusterPrivileges: MissingClusterPrivileges = [];
+    const kibanaPrivileges: MissingKibanaPrivileges = [];
+
+    if (isLoading || !privilegesRes || privilegesRes?.has_all_required) {
+      return {
+        clusterPrivileges,
+        indexPrivileges,
+        kibanaPrivileges,
+      };
+    }
+
+    const { privileges } = privilegesRes;
+
+    const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
+      (privilege) => !privileges.elasticsearch.cluster[privilege]
+    );
+
+    if (missingClusterPrivileges.length) {
+      clusterPrivileges.push(...missingClusterPrivileges);
+    }
+
+    const missingIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
+
+    if (missingIndexPrivileges.length) {
+      indexPrivileges.push(...missingIndexPrivileges);
+    }
+
+    const missingKibanaPrivileges = RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES.filter(
+      (privilege) => !privileges.kibana[privilege]
+    );
+
+    if (missingKibanaPrivileges.length) {
+      kibanaPrivileges.push(...missingKibanaPrivileges);
+    }
+
+    return {
+      clusterPrivileges,
+      indexPrivileges,
+      kibanaPrivileges,
+    };
+  }, [isLoading, privilegesRes]);
+};
