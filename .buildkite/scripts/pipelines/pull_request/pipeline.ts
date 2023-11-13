@@ -137,8 +137,8 @@ const uploadPipeline = (pipelineContent: string | object) => {
     }
 
     if (
-      GITHUB_PR_LABELS.includes('ci:project-deploy-es') ||
-      GITHUB_PR_LABELS.includes('ci:project-deploy-oblt') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-elasticsearch') ||
+      GITHUB_PR_LABELS.includes('ci:project-deploy-observability') ||
       GITHUB_PR_LABELS.includes('ci:project-deploy-security')
     ) {
       pipeline.push(getPipeline('.buildkite/pipelines/pull_request/deploy_project.yml'));

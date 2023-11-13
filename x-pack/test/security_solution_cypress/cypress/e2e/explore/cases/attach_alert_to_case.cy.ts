@@ -10,7 +10,6 @@ import { getNewRule } from '../../../objects/rule';
 
 import { expandFirstAlertActions } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
@@ -28,7 +27,6 @@ const loadDetectionsPage = (role: SecurityRoleName) => {
 describe('Alerts timeline', { tags: ['@ess'] }, () => {
   before(() => {
     // First we login as a privileged user to create alerts.
-    cleanKibana();
     login();
     createRule(getNewRule());
     visit(ALERTS_URL);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SAVED_QUERY_DROPDOWN_SELECT } from '../../screens/packs';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -15,12 +16,7 @@ import {
   typeInECSFieldInput,
   typeInOsqueryFieldInput,
 } from '../../tasks/live_query';
-import {
-  LIVE_QUERY_EDITOR,
-  RESULTS_TABLE,
-  RESULTS_TABLE_BUTTON,
-  RESULTS_TABLE_CELL_WRRAPER,
-} from '../../screens/live_query';
+import { LIVE_QUERY_EDITOR, RESULTS_TABLE, RESULTS_TABLE_BUTTON } from '../../screens/live_query';
 import { getAdvancedButton } from '../../screens/integrations';
 import { loadSavedQuery, cleanupSavedQuery } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
@@ -36,7 +32,7 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
       ecs_mapping: {},
     }).then((savedQuery) => {
       savedQueryId = savedQuery.saved_object_id;
-      savedQueryName = savedQuery.name;
+      savedQueryName = savedQuery.id;
     });
   });
 
@@ -64,12 +60,12 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
       cases: true,
       timeline: false,
     });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.hours.number', index: 2 },
-    }).should('exist');
+    cy.get(
+      '[data-gridcell-column-index="1"][data-test-subj="dataGridHeaderCell-osquery.days.number"]'
+    ).should('exist');
+    cy.get(
+      '[data-gridcell-column-index="2"][data-test-subj="dataGridHeaderCell-osquery.hours.number"]'
+    ).should('exist');
 
     getAdvancedButton().click();
     typeInECSFieldInput('message{downArrow}{enter}');
@@ -80,37 +76,34 @@ describe('ALL - Live Query run custom and saved', { tags: ['@ess', '@serverless'
     cy.getBySel(RESULTS_TABLE).within(() => {
       cy.getBySel(RESULTS_TABLE_BUTTON).should('exist');
     });
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'message', index: 1 },
-    }).should('exist');
-    cy.react(RESULTS_TABLE_CELL_WRRAPER, {
-      props: { id: 'osquery.days.number', index: 2 },
-    })
-      .react('EuiIconTip', { props: { type: 'indexMapping' } })
-      .should('exist');
+    cy.get('[data-gridcell-column-index="1"][data-test-subj="dataGridHeaderCell-message"]').should(
+      'exist'
+    );
+    cy.get(
+      '[data-gridcell-column-index="2"][data-test-subj="dataGridHeaderCell-osquery.days.number"]'
+    )
+      .should('exist')
+      .within(() => {
+        cy.get(`.euiToolTipAnchor`);
+      });
   });
 
   it('should run customized saved query', () => {
     cy.contains('New live query').click();
     selectAllAgents();
-    cy.react('SavedQueriesDropdown').type(`${savedQueryName}{downArrow}{enter}`);
+    cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).type(`${savedQueryName}{downArrow}{enter}`);
     inputQuery('{selectall}{backspace}select * from users;');
     cy.wait(1000);
     submitQuery();
     checkResults();
     navigateTo('/app/osquery');
-    cy.react('EuiButtonIcon', { props: { iconType: 'play' } })
-      .eq(0)
-      .should('be.visible')
-      .click();
+    cy.get('[aria-label="Run query"]').first().should('be.visible').click();
 
-    cy.get(LIVE_QUERY_EDITOR).contains('select * from users;');
+    cy.getBySel(LIVE_QUERY_EDITOR).contains('select * from users;');
   });
 
   it('should open query details by clicking the details icon', () => {
-    cy.react('EuiButtonIcon', { props: { iconType: 'visTable' } })
-      .first()
-      .click();
+    cy.get('[aria-label="Details"]').first().should('be.visible').click();
     cy.contains('Live query details');
     cy.contains('select * from users;');
   });

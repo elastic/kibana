@@ -8,7 +8,7 @@
 import { login } from '../../../tasks/login';
 import { visitHostDetailsPage } from '../../../tasks/navigation';
 
-import { cleanKibana, waitForTableToLoad } from '../../../tasks/common';
+import { waitForTableToLoad } from '../../../tasks/common';
 import { TABLE_CELL, TABLE_ROWS } from '../../../screens/alerts_details';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { openRiskInformationFlyout, enableRiskEngine } from '../../../tasks/entity_analytics';
@@ -21,7 +21,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   // FLAKY: https://github.com/elastic/kibana/issues/169034
   describe.skip('with legacy risk score', () => {
     before(() => {
-      cleanKibana();
       // illegal_argument_exception: unknown setting [index.lifecycle.rollover_alias]
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
     });
@@ -60,7 +59,6 @@ describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
 
   describe('with new risk score', () => {
     before(() => {
-      cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       cy.task('esArchiverLoad', { archiveName: 'query_alert', useCreate: true, docsOnly: true });
       login();
