@@ -36,7 +36,7 @@ import { RiskScoreEntity, RiskSeverity } from '../../../../../common/search_stra
 import { RiskScoreDocLink } from '../risk_score_onboarding/risk_score_doc_link';
 import { BETA } from '../risk_score_onboarding/translations';
 
-const getTableColumns = (riskEntity: RiskScoreEntity): Array<EuiBasicTableColumn<TableItem>> => [
+const getTableColumns = (riskEntity?: RiskScoreEntity): Array<EuiBasicTableColumn<TableItem>> => [
   {
     field: 'level',
     name: i18n.INFORMATION_LEVEL_HEADER,
@@ -107,18 +107,19 @@ export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskSco
   );
 };
 
-const RiskInformationFlyout = ({
+export const RiskInformationFlyout = ({
   handleOnClose,
   riskEntity,
 }: {
   handleOnClose: () => void;
-  riskEntity: RiskScoreEntity;
+  riskEntity?: RiskScoreEntity;
 }) => {
   const { euiTheme } = useEuiTheme();
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RiskInformation',
   });
 
+  const riskEntityText = riskEntity ?? 'entity';
   return (
     <EuiFlyout
       ownFocus
@@ -157,15 +158,15 @@ const RiskInformationFlyout = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreFieldText"
-              defaultMessage="The {riskScoreField} field represents the normalized risk of the {riskEntity} as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
+              defaultMessage="The {riskScoreField} field represents the normalized risk of the {riskEntityText} as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
               values={{
-                riskEntity,
+                riskEntityText,
                 riskScoreField: (
                   <b>
                     <FormattedMessage
                       id="xpack.securitySolution.riskInformation.riskScoreFieldLabel"
-                      defaultMessage="{riskEntity} risk score"
-                      values={{ riskEntity }}
+                      defaultMessage="{riskEntityText} risk score"
+                      values={{ riskEntityText }}
                     />
                   </b>
                 ),
@@ -176,15 +177,15 @@ const RiskInformationFlyout = ({
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreLevelText"
               defaultMessage="The {riskLevelField} field represents one of the six risk level of
-              the {riskEntity} based on a predefined risk metrics."
+              the {riskEntityText} based on a predefined risk metrics."
               values={{
-                riskEntity,
+                riskEntityText,
                 riskLevelField: (
                   <b>
                     <FormattedMessage
                       id="xpack.securitySolution.riskInformation.riskScoreLevelLabel"
-                      defaultMessage="{riskEntity} risk level"
-                      values={{ riskEntity }}
+                      defaultMessage="{riskEntityText} risk level"
+                      values={{ riskEntityText }}
                     />
                   </b>
                 ),

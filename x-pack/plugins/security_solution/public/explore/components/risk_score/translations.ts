@@ -24,6 +24,14 @@ export const USERS = i18n.translate('xpack.securitySolution.riskScore.overview.u
   defaultMessage: 'Users',
 });
 
+export const ENTITY = i18n.translate('xpack.securitySolution.riskScore.overview.entityTitle', {
+  defaultMessage: 'Entity',
+});
+
+export const ENTITIES = i18n.translate('xpack.securitySolution.riskScore.overview.entities', {
+  defaultMessage: 'Entities',
+});
+
 export const RISK_SCORE_TITLE = (riskEntity: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.riskScore.overview.riskScoreTitle', {
     defaultMessage: '{riskEntity} Risk Score',
@@ -41,22 +49,24 @@ export const ENTITY_RISK_LEVEL = (riskEntity: RiskScoreEntity) =>
   });
 
 export const getRiskEntityTranslation = (
-  riskEntity: RiskScoreEntity,
+  riskEntity?: RiskScoreEntity,
   lowercase = false,
   plural = false
 ) => {
-  if (lowercase) {
-    if (plural) {
-      return (riskEntity === RiskScoreEntity.host ? HOSTS : USERS).toLowerCase();
-    }
+  const text = ((e) => {
+    if (!e && plural) return ENTITIES;
+    if (!e) return ENTITY;
 
-    return (riskEntity === RiskScoreEntity.host ? HOST : USER).toLowerCase();
-  }
-  if (plural) {
-    return riskEntity === RiskScoreEntity.host ? HOSTS : USERS;
-  }
+    if (e === RiskScoreEntity.host && plural) return HOSTS;
+    if (e === RiskScoreEntity.host) return HOST;
 
-  return riskEntity === RiskScoreEntity.host ? HOST : USER;
+    if (e === RiskScoreEntity.user && plural) return USERS;
+    if (e === RiskScoreEntity.user) return USER;
+
+    return '';
+  })(riskEntity);
+
+  return lowercase ? text.toLowerCase() : text;
 };
 
 export const ALERTS = i18n.translate('xpack.securitySolution.riskScore.overview.alerts', {

@@ -91,6 +91,13 @@ export const EA_DOCS_RISK_USERS = i18n.translate(
   }
 );
 
+export const EA_DOCS_ENTITY_RISK_SCORE = i18n.translate(
+  'xpack.securitySolution.riskScore.riskScorePreview.eaDocsEntities',
+  {
+    defaultMessage: 'Entity risk score',
+  }
+);
+
 export const PREVIEW = i18n.translate('xpack.securitySolution.riskScore.riskScorePreview.preview', {
   defaultMessage: 'Preview',
 });
