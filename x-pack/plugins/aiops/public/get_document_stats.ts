@@ -10,7 +10,7 @@ import { each, get } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 import type { Query } from '@kbn/es-query';
 import type { RandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
@@ -34,8 +34,8 @@ export interface DocumentStatsSearchStrategyParams {
   timeFieldName?: string;
   runtimeFieldMap?: estypes.MappingRuntimeFields;
   fieldsToFetch?: string[];
-  selectedSignificantTerm?: SignificantTerm;
-  includeSelectedSignificantTerm?: boolean;
+  selectedSignificantItem?: SignificantItem;
+  includeSelectedSignificantItem?: boolean;
   selectedGroup?: GroupTableItem | null;
   trackTotalHits?: boolean;
 }
@@ -54,8 +54,8 @@ export const getDocumentCountStatsRequest = (
     searchQuery,
     intervalMs,
     fieldsToFetch,
-    selectedSignificantTerm,
-    includeSelectedSignificantTerm,
+    selectedSignificantItem,
+    includeSelectedSignificantItem,
     selectedGroup,
     trackTotalHits,
   } = params;
@@ -66,8 +66,8 @@ export const getDocumentCountStatsRequest = (
     earliestMs,
     latestMs,
     searchQuery,
-    selectedSignificantTerm,
-    includeSelectedSignificantTerm,
+    selectedSignificantItem,
+    includeSelectedSignificantItem,
     selectedGroup
   );
 
