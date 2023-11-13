@@ -413,7 +413,7 @@ describe('TransactionActionMenu component', () => {
               .getByTestId(`${key}.value`)
               .querySelector(
                 '[data-test-subj="comboBoxSearchInput"]'
-              ) as HTMLSpanElement
+              ) as HTMLInputElement
           ).value,
         };
       };
