@@ -7,9 +7,9 @@
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadFieldsFromYaml } from '../../fields/field';
-import type { RegistryDataStream } from '../../../../types';
+import type { ArchivePackage, RegistryDataStream } from '../../../../types';
 
-import { prepareTemplate } from './install';
+import { prepareTemplate, prepareToInstallTemplates } from './install';
 
 jest.mock('../../fields/field', () => ({
   ...jest.requireActual('../../fields/field'),
@@ -454,5 +454,29 @@ describe('EPM index template install', () => {
     const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
 
     expect(packageTemplate).not.toHaveProperty('lifecycle');
+  });
+
+  test('test prepareToInstallTemplates does not include stack component templates in tracked assets', () => {
+    const dataStreamDatasetIsPrefixUnset = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+    } as RegistryDataStream;
+
+    const { assetsToAdd } = prepareToInstallTemplates(
+      {
+        name: 'package',
+        version: '0.0.1',
+        data_streams: [dataStreamDatasetIsPrefixUnset],
+      } as ArchivePackage,
+      [],
+      []
+    );
+
+    expect(assetsToAdd).not.toContainEqual({ id: 'logs@settings', type: 'component_template' });
   });
 });

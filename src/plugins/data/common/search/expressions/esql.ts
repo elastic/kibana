@@ -220,7 +220,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
               return throwError(() => error);
             }),
             tap({
-              next({ rawResponse }) {
+              next({ rawResponse, requestParams }) {
                 logInspectorRequest()
                   .stats({
                     hits: {
@@ -234,12 +234,14 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
                     },
                   })
                   .json(params)
-                  .ok({ json: rawResponse });
+                  .ok({ json: rawResponse, requestParams });
               },
               error(error) {
-                logInspectorRequest().error({
-                  json: 'attributes' in error ? error.attributes : { message: error.message },
-                });
+                logInspectorRequest()
+                  .json(params)
+                  .error({
+                    json: 'attributes' in error ? error.attributes : { message: error.message },
+                  });
               },
             })
           );

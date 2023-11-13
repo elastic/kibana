@@ -58,6 +58,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -126,7 +127,7 @@ export interface ObservabilityPublicPluginsStart {
   discover: DiscoverStart;
   embeddable: EmbeddableStart;
   exploratoryView: ExploratoryViewPublicStart;
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
   observabilityShared: ObservabilitySharedPluginStart;
@@ -141,6 +142,7 @@ export interface ObservabilityPublicPluginsStart {
   home?: HomePublicPluginStart;
   cloud?: CloudStart;
   aiops: AiopsPluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -253,6 +255,7 @@ export class Plugin
         ObservabilityPageTemplate: pluginsStart.observabilityShared.navigation.PageTemplate,
         plugins: { ...pluginsStart, ruleTypeRegistry, actionTypeRegistry },
         usageCollection: pluginsSetup.usageCollection,
+        isServerless: !!pluginsStart.serverless,
       });
     };
 

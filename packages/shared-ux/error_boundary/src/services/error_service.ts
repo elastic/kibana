@@ -7,7 +7,9 @@
  */
 
 import React from 'react';
-import { ThrowIfError } from '../..';
+import { REACT_FATAL_ERROR_EVENT_TYPE } from '../../lib/telemetry_events';
+import { KibanaErrorBoundaryProviderDeps } from '../../types';
+import { ThrowIfError } from '../ui/throw_if_error';
 
 const MATCH_CHUNK_LOADERROR = /ChunkLoadError/;
 
@@ -18,12 +20,22 @@ interface ErrorServiceError {
   isFatal: boolean;
 }
 
+interface Deps {
+  analytics?: KibanaErrorBoundaryProviderDeps['analytics'];
+}
+
 /**
  * Kibana Error Boundary Services: Error Service
  * Each Error Boundary tracks an instance of this class
  * @internal
  */
 export class KibanaErrorService {
+  private analytics?: Deps['analytics'];
+
+  constructor(deps: Deps) {
+    this.analytics = deps.analytics;
+  }
+
   /**
    * Determines if the error fallback UI should appear as an apologetic but promising "Refresh" button,
    * or treated with "danger" coloring and include a detailed error message.
@@ -62,7 +74,6 @@ export class KibanaErrorService {
 
   /**
    * Creates a decorated error object
-   * TODO: capture telemetry
    */
   public registerError(
     error: Error,
@@ -70,6 +81,18 @@ export class KibanaErrorService {
   ): ErrorServiceError {
     const isFatal = this.getIsFatal(error);
     const name = this.getErrorComponentName(errorInfo);
+
+    try {
+      if (isFatal) {
+        this.analytics?.reportEvent(REACT_FATAL_ERROR_EVENT_TYPE, {
+          component_name: name,
+          error_message: error.toString(),
+        });
+      }
+    } catch (e) {
+      // eslint-disable-next-line no-console
+      console.error(e);
+    }
 
     return {
       error,

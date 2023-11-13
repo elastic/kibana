@@ -19,6 +19,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiErrorBoundary,
+  EuiCallOut,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -29,7 +30,7 @@ import {
 
 import { useCancelAddPackagePolicy } from '../hooks';
 
-import { splitPkgKey } from '../../../../../../../common/services';
+import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
 import type { NewAgentPolicy } from '../../../../types';
 import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
 import {
@@ -447,6 +448,26 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             integration={integrationInfo?.name}
           />
         )}
+        {packageInfo && isRootPrivilegesRequired(packageInfo) ? (
+          <>
+            <EuiCallOut
+              size="s"
+              color="warning"
+              title={
+                <FormattedMessage
+                  id="xpack.fleet.createPackagePolicy.requireRootCalloutTitle"
+                  defaultMessage="Requires root privileges"
+                />
+              }
+            >
+              <FormattedMessage
+                id="xpack.fleet.createPackagePolicy.requireRootCalloutDescription"
+                defaultMessage="Elastic Agent needs to be run with root/administrator privileges for this integration."
+              />
+            </EuiCallOut>
+            <EuiSpacer size="m" />
+          </>
+        ) : null}
         {numTransformAssets > 0 ? (
           <>
             <TransformInstallWithCurrentUserPermissionCallout count={numTransformAssets} />

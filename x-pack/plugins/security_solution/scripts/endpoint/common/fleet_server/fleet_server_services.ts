@@ -290,7 +290,7 @@ const startFleetServerWithDocker = async ({
       await updateFleetElasticsearchOutputHostNames(kbnClient, log);
 
       if (isServerless) {
-        log.info(`Waiting for server to register with Elasticsearch`);
+        log.info(`Waiting for server [${hostname}] to register with Elasticsearch`);
 
         await waitForFleetServerToRegisterWithElasticsearch(kbnClient, hostname, 120000);
       } else {
@@ -684,7 +684,7 @@ const waitForFleetServerToRegisterWithElasticsearch = async (
         .then((response) => response.data)
         .catch(catchAxiosErrorFormatAndThrow);
 
-      return (fleetServerRecord.hits.total as estypes.SearchTotalHits).value === 1;
+      return ((fleetServerRecord?.hits?.total as estypes.SearchTotalHits)?.value ?? 0) === 1;
     }, RETRYABLE_TRANSIENT_ERRORS);
 
     if (!found) {

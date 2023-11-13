@@ -20,8 +20,6 @@ import {
 import { MODAL_CONFIRMATION_BTN } from '../../../screens/alerts_detection_rules';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana } from '../../../tasks/common';
-
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import {
@@ -38,7 +36,6 @@ const link = 'https://www.elastic.co/';
 
 describe.skip('Timeline notes tab', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     login();
     visit(TIMELINES_URL);
 

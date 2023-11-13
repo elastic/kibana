@@ -14,7 +14,10 @@ import {
   KibanaRenderContextProviderProps,
 } from '@kbn/react-kibana-context-render';
 
-export type ToMountPointParams = Pick<KibanaRenderContextProviderProps, 'i18n' | 'theme'>;
+export type ToMountPointParams = Pick<
+  KibanaRenderContextProviderProps,
+  'analytics' | 'i18n' | 'theme'
+>;
 
 /**
  * MountPoint converter for react nodes.

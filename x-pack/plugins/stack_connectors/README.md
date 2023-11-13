@@ -6,6 +6,7 @@ The `stack_connectors` plugin provides connector types shipped with Kibana, buil
 
 Table of Contents
 
+- [Stack Connectors](#stack-connectors)
 - [Connector Types](#connector-types)
   - [ServiceNow ITSM](#servicenow-itsm)
     - [`params`](#params)
@@ -41,13 +42,17 @@ Table of Contents
   - [Swimlane](#swimlane)
     - [`params`](#params-5)
   - [| severity    | The severity of the incident.    | string _(optional)_ |](#-severity-----the-severity-of-the-incident-----string-optional-)
+  - [Ospgenie](#ospgenie)
+    - [`params`](#params-6)
+  - [PagerDuty](#pagerduty)
+    - [`params`](#params-7)
 - [Developing New Connector Types](#developing-new-connector-types)
-  - [licensing](#licensing)
-  - [plugin location](#plugin-location)
-  - [documentation](#documentation)
-  - [tests](#tests)
-  - [connector type config and secrets](#connector-type-config-and-secrets)
-  - [user interface](#user-interface)
+  - [Licensing](#licensing)
+  - [Plugin location](#plugin-location)
+  - [Documentation](#documentation)
+  - [Tests](#tests)
+  - [Connector type config and secrets](#connector-type-config-and-secrets)
+  - [User interface](#user-interface)
 
 # Connector Types
 
@@ -346,15 +351,37 @@ for the full list of properties.
 
 `subActionParams (createAlert)`
 
-| Property | Description                                                                                                   | Type                  |
-| -------- | ------------------------------------------------------------------------------------------------------------- | --------------------- |
-| message  | The alert message.                                                                                            | string                |
+| Property | Description        | Type   |
+| -------- | ------------------ | ------ |
+| message  | The alert message. | string |
 
 The optional parameters `alias`, `description`, `responders`, `visibleTo`, `actions`, `tags`, `details`, `entity`, `source`, `priority`, `user`, and `note` are supported. See the [Opsgenie API documentation](https://docs.opsgenie.com/docs/alert-api#create-alert) for more information on their types.
 
 `subActionParams (closeAlert)`
 
 No parameters are required. For the definition of the optional parameters see the [Opsgenie API documentation](https://docs.opsgenie.com/docs/alert-api#close-alert).
+
+---
+
+## PagerDuty 
+
+The [PagerDuty user documentation `params`](https://www.elastic.co/guide/en/kibana/master/pagerduty-action-type.html) lists configuration properties for the `params`. For more details on these properties, see [PagerDuty v2 event parameters](https://developer.pagerduty.com/docs/ZG9jOjExMDI5NTgx-send-an-alert-event) .
+
+### `params`
+
+| Property      | Description                                                                                                                                                                  | Type                                               |
+| ------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------- |
+| eventAction   | The type of event.                                                                                                                                                           | `trigger` \| `resolve` \| `acknowledge`            |
+| dedupKey      | All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution. The maximum length is 255 characters. | string                                             |
+| summary       | An optional text summary of the event. The maximum length is 1024 characters.                                                                                                | string _(optional)_                                |
+| source        | An optional value indicating the affected system, preferably a hostname or fully qualified domain name. Defaults to the Kibana saved object id of the action.                | string _(optional)_                                |
+| severity      | The perceived severity of on the affected system. Default: `info`.                                                                                                           | `critical` \| `error` \| `warning` \| `info`       |
+| timestamp     | An optional ISO-8601 format date-time, indicating the time the event was detected or generated.                                                                              | date _(optional)_                                  |
+| component     | An optional value indicating the component of the source machine that is responsible for the event, for example `mysql` or `eth0`.                                           | string _(optional)_                                |
+| group         | An optional value indicating the logical grouping of components of a service, for example `app-stack`.                                                                       | string _(optional)_                                |
+| class         | An optional value indicating the class/type of the event, for example `ping failure` or `cpu load`.                                                                          | string _(optional)_                                |
+| links         | List of links to add to the event                                                                                                                                            | Array<{ href: string; text: string }> _(optional)_ |
+| customDetails | Additional details to add to the event.                                                                                                                                      | object                                             |
 
 ---
 
