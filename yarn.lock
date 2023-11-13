@@ -5288,6 +5288,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-public@link:packages/kbn-reporting/public":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-server@link:packages/kbn-reporting/server":
   version "0.0.0"
   uid ""
