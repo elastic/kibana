@@ -149,7 +149,7 @@ export const useLogEntryAnomaliesResults = ({
   endTime: number;
   startTime: number;
   logViewReference: PersistedLogViewReference;
-  idFormats: IdFormatByJobType;
+  idFormats: IdFormatByJobType | null;
   defaultSortOptions: AnomaliesSort;
   defaultPaginationOptions: Pick<Pagination, 'pageSize'>;
   onGetLogEntryAnomaliesDatasetsError?: (error: Error) => void;
@@ -178,6 +178,10 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormats) {
+          throw new Error('idFormats is undefined');
+        }
+
         const {
           timeRange: { start: queryStartTime, end: queryEndTime },
           sortOptions,
@@ -299,6 +303,10 @@ export const useLogEntryAnomaliesResults = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormats) {
+          throw new Error('idFormats is undefined');
+        }
+
         return await callGetLogEntryAnomaliesDatasetsAPI(
           { logViewReference, idFormats, startTime, endTime },
           services.http.fetch

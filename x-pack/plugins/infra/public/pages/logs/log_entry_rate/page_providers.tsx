@@ -41,7 +41,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
     return null;
   } else if (!isPersistedLogView) {
     return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
-  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats) {
+  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats || !idFormats) {
     return <SourceLoadingPage />;
   } else if (hasFailedLoading || hasFailedLoadingLogAnalysisIdFormats) {
     return <ConnectedLogViewErrorPage />;
@@ -55,7 +55,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
           indexPattern={resolvedLogView.indices}
           logViewId={logViewReference.logViewId}
           spaceId={space.id}
-          idFormat={idFormats![logEntryRateJobType]}
+          idFormat={idFormats[logEntryRateJobType]}
           timestampField={resolvedLogView.timestampField}
           runtimeMappings={resolvedLogView.runtimeMappings}
         >
@@ -63,7 +63,7 @@ export const LogEntryRatePageProviders: React.FunctionComponent = ({ children })
             indexPattern={resolvedLogView.indices}
             logViewId={logViewReference.logViewId}
             spaceId={space.id}
-            idFormat={idFormats![logEntryCategoriesJobType]}
+            idFormat={idFormats[logEntryCategoriesJobType]}
             timestampField={resolvedLogView.timestampField}
             runtimeMappings={resolvedLogView.runtimeMappings}
           >

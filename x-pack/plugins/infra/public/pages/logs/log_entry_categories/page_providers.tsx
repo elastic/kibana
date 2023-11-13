@@ -39,7 +39,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
     return <InlineLogViewSplashPage revertToDefaultLogView={revertToDefaultLogView} />;
   } else if (hasFailedLoading || hasFailedLoadingLogAnalysisIdFormats) {
     return <ConnectedLogViewErrorPage />;
-  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats) {
+  } else if (isLoading || isUninitialized || isLoadingLogAnalysisIdFormats || !idFormats) {
     return <SourceLoadingPage />;
   } else if (resolvedLogView != null) {
     if (logViewReference.type === 'log-view-inline') {
@@ -50,7 +50,7 @@ export const LogEntryCategoriesPageProviders: React.FunctionComponent = ({ child
         indexPattern={resolvedLogView.indices}
         logViewId={logViewReference.logViewId}
         spaceId={space.id}
-        idFormat={idFormats![logEntryCategoriesJobType]}
+        idFormat={idFormats[logEntryCategoriesJobType]}
         timestampField={resolvedLogView.timestampField}
         runtimeMappings={resolvedLogView.runtimeMappings}
       >

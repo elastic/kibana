@@ -27,7 +27,7 @@ export const useLogEntryExamples = ({
   endTime: number;
   exampleCount: number;
   logViewReference: PersistedLogViewReference;
-  idFormat: IdFormat;
+  idFormat?: IdFormat;
   startTime: number;
   categoryId?: string;
 }) => {
@@ -38,6 +38,10 @@ export const useLogEntryExamples = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormat) {
+          throw new Error('idFormat is undefined');
+        }
+
         return await callGetLogEntryExamplesAPI(
           {
             logViewReference,

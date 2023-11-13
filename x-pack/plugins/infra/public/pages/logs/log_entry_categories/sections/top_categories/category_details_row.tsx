@@ -33,7 +33,7 @@ export const CategoryDetailsRow: React.FunctionComponent<{
     endTime: timeRange.endTime,
     exampleCount,
     logViewReference,
-    idFormat: idFormats![logEntryCategoriesJobType],
+    idFormat: idFormats?.[logEntryCategoriesJobType],
     startTime: timeRange.startTime,
   });
 

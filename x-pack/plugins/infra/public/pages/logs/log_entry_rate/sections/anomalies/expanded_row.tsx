@@ -50,7 +50,7 @@ export const AnomaliesTableExpandedRow: React.FunctionComponent<{
     endTime: anomaly.startTime + anomaly.duration,
     exampleCount: EXAMPLE_COUNT,
     logViewReference,
-    idFormat: idFormats![logEntryRateJobType],
+    idFormat: idFormats?.[logEntryRateJobType],
     startTime: anomaly.startTime,
     categoryId: isCategoryAnomaly(anomaly) ? anomaly.categoryId : undefined,
   });

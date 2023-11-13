@@ -137,7 +137,7 @@ export const LogEntryRatePageContent = memo(() => {
   ) {
     return (
       <>
-        <LogEntryRateResultsContent idFormats={idFormats!} pageTitle={anomaliesTitle} />
+        <LogEntryRateResultsContent idFormats={idFormats} pageTitle={anomaliesTitle} />
         <LogAnalysisSetupFlyout />
       </>
     );

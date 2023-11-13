@@ -26,7 +26,7 @@ export const useLogEntryCategoryExamples = ({
   endTime: number;
   exampleCount: number;
   logViewReference: PersistedLogViewReference;
-  idFormat: IdFormat;
+  idFormat?: IdFormat;
   startTime: number;
 }) => {
   const { services } = useKibanaContextForPlugin();
@@ -39,6 +39,10 @@ export const useLogEntryCategoryExamples = ({
     {
       cancelPreviousOn: 'creation',
       createPromise: async () => {
+        if (!idFormat) {
+          throw new Error('idFormat is undefined');
+        }
+
         return await callGetLogEntryCategoryExamplesAPI(
           {
             logViewReference,
