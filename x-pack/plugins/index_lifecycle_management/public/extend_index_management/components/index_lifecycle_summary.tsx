@@ -9,8 +9,8 @@ import React, { FunctionComponent } from 'react';
 import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { css } from '@emotion/react';
 import {
-  EuiFlexGrid,
   EuiCodeBlock,
   EuiLink,
   EuiFlexItem,
@@ -22,7 +22,6 @@ import {
   EuiBadgeProps,
   EuiBadge,
   EuiCode,
-  useIsWithinBreakpoints,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
@@ -124,15 +123,19 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
       description: <EuiCode>{ilm.step}</EuiCode>,
     });
   }
-  const isLarge = useIsWithinBreakpoints(['l', 'xl']);
   return (
     <>
-      <EuiFlexGrid columns={isLarge ? 2 : 1}>
-        <EuiFlexItem data-test-subj="policyPropertiesPanel">
-          <EuiPanel>
+      <EuiFlexGroup wrap>
+        <EuiFlexItem
+          grow={1}
+          css={css`
+            min-width: 400px;
+          `}
+        >
+          <EuiPanel hasBorder={true} grow={false} data-test-subj="policyPropertiesPanel">
             <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
               <EuiFlexItem grow={false}>
-                <EuiText>
+                <EuiText size="xs">
                   <h3>
                     <FormattedMessage
                       defaultMessage="Lifecycle policy"
@@ -166,52 +169,64 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
             />
           </EuiPanel>
         </EuiFlexItem>
-        {ilm.step_info && ilm.step !== 'ERROR' && (
-          // ILM is waiting for the step to complete
-          <EuiFlexItem data-test-subj="policyStepPanel">
-            <EuiPanel>
-              <EuiText>
-                <h3>
-                  <FormattedMessage
-                    defaultMessage="Current step info"
-                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
-                  />
-                </h3>
-                <EuiSpacer />
-                <EuiCodeBlock language="json" isCopyable>
-                  {JSON.stringify(ilm.step_info, null, 2)}
-                </EuiCodeBlock>
-              </EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
-        {ilm.step_info && ilm.step === 'ERROR' && (
-          // there is an error
-          <EuiFlexItem data-test-subj="policyErrorPanel">
-            <EuiPanel color="danger">
-              <EuiText>
-                <h3>
-                  <FormattedMessage
-                    defaultMessage="Lifecycle error"
-                    id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
-                  />
-                </h3>
-                <EuiSpacer />
-                <EuiCodeBlock language="json" isCopyable>
-                  {JSON.stringify(
-                    { failed_step: ilm.failed_step, step_info: ilm.step_info },
-                    null,
-                    2
-                  )}
-                </EuiCodeBlock>
-              </EuiText>
-            </EuiPanel>
-          </EuiFlexItem>
-        )}
-        {ilm.phase_execution && (
-          <EuiFlexItem data-test-subj="phaseDefinitionPanel">
-            <EuiPanel>
-              <EuiText>
+        <EuiFlexItem
+          grow={3}
+          css={css`
+            min-width: 600px;
+          `}
+        >
+          {ilm.step_info && ilm.step === 'ERROR' && (
+            // there is an error
+            <>
+              <EuiPanel
+                color="danger"
+                hasBorder={true}
+                grow={false}
+                data-test-subj="policyErrorPanel"
+              >
+                <EuiText size="xs">
+                  <h3>
+                    <FormattedMessage
+                      defaultMessage="Lifecycle error"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.lifecycleErrorTitle"
+                    />
+                  </h3>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="json" isCopyable>
+                    {JSON.stringify(
+                      { failed_step: ilm.failed_step, step_info: ilm.step_info },
+                      null,
+                      2
+                    )}
+                  </EuiCodeBlock>
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+          {ilm.step_info && ilm.step !== 'ERROR' && (
+            // ILM is waiting for the step to complete
+            <>
+              <EuiPanel hasBorder={true} grow={false} data-test-subj="policyStepPanel">
+                <EuiText size="xs">
+                  <h3>
+                    <FormattedMessage
+                      defaultMessage="Current step info"
+                      id="xpack.indexLifecycleMgmt.indexLifecycleMgmtSummary.stepInfoTitle"
+                    />
+                  </h3>
+                  <EuiSpacer />
+                  <EuiCodeBlock language="json" isCopyable>
+                    {JSON.stringify(ilm.step_info, null, 2)}
+                  </EuiCodeBlock>
+                </EuiText>
+              </EuiPanel>
+              <EuiSpacer />
+            </>
+          )}
+          {ilm.phase_execution && (
+            <EuiPanel hasBorder={true} grow={false} data-test-subj="phaseDefinitionPanel">
+              <EuiText size="xs">
                 <h3>
                   <FormattedMessage
                     defaultMessage="Current phase definition"
@@ -224,9 +239,9 @@ export const IndexLifecycleSummary: FunctionComponent<Props> = ({ index, getUrlF
                 {JSON.stringify(ilm.phase_execution, null, 2)}
               </EuiCodeBlock>
             </EuiPanel>
-          </EuiFlexItem>
-        )}
-      </EuiFlexGrid>
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     </>
   );
 };
