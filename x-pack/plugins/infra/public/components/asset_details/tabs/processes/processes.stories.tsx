@@ -18,8 +18,8 @@ const stories: Meta = {
   title: 'infra/Asset Details View/Components/Processes',
   decorators: [
     decorateWithGlobalStorybookThemeProviders,
-    DecorateWithKibanaContext,
     DecorateWithAssetDetailsStateContext,
+    DecorateWithKibanaContext,
   ],
   component: Processes,
 };
