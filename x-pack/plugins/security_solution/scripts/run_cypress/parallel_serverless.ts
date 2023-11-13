@@ -24,6 +24,7 @@ import pRetry from 'p-retry';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { exec } from 'child_process';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
@@ -475,10 +476,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
               return process.exit(1);
             }
 
-            context.addCleanupTask(async () => {
-              await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY).then(() => {
-                log.info('Clean up done');
-              });
+            context.addCleanupTask(() => {
+              const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+              exec(command);
             });
 
             // Reset credentials for elastic user
