@@ -17,18 +17,18 @@ import type {
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '../../../../common/api/log_rate_analysis/schema';
 
-import { stateHandlerFactory, type StateHandler } from './state_handler';
-import { indexInfoHandlerFactory } from './index_info_handler';
-import { groupingHandlerFactory } from './grouping_handler';
-import { histogramHandlerFactory } from './histogram_handler';
+import { indexInfoHandlerFactory } from './analysis_handlers/index_info_handler';
+import { groupingHandlerFactory } from './analysis_handlers/grouping_handler';
+import { histogramHandlerFactory } from './analysis_handlers/histogram_handler';
+import { overridesHandlerFactory } from './analysis_handlers/overrides_handler';
+import { significantItemsHandlerFactory } from './analysis_handlers/significant_items_handler';
+import { overallHistogramHandlerFactory } from './analysis_handlers/overall_histogram_handler';
 import { logDebugMessageFactory, type LogDebugMessage } from './log_debug_message';
-import { overridesHandlerFactory } from './overrides_handler';
-import { overallHistogramHandlerFactory } from './overall_histogram_handler';
+import { stateHandlerFactory, type StateHandler } from './state_handler';
 import { streamEndFactory } from './stream_end';
 import { streamEndWithUpdatedLoadingStateFactory } from './stream_end_with_updated_loading_state';
 import { streamPushErrorFactory } from './stream_push_error';
 import { streamPushPingWithTimeoutFactory } from './stream_push_ping_with_timeout';
-import { significantItemsHandlerFactory } from './significant_items_handler';
 
 export interface LogRateAnalysisResponseStreamOptions<T extends ApiVersion> {
   version: T;
@@ -107,22 +107,15 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     stateHandler: state,
   };
 
-  const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
-  const groupingHandler = groupingHandlerFactory(streamFetchOptions);
-  const histogramHandler = histogramHandlerFactory(streamFetchOptions);
-  const overridesHandler = overridesHandlerFactory(streamFetchOptions);
-  const overallHistogramHandler = overallHistogramHandlerFactory(streamFetchOptions);
-  const significantItemsHandler = significantItemsHandlerFactory(streamFetchOptions);
-
   return {
     ...streamFetchOptions,
     analysis: {
-      indexInfoHandler,
-      groupingHandler,
-      histogramHandler,
-      overallHistogramHandler,
-      overridesHandler,
-      significantItemsHandler,
+      indexInfoHandler: indexInfoHandlerFactory(streamFetchOptions),
+      groupingHandler: groupingHandlerFactory(streamFetchOptions),
+      histogramHandler: histogramHandlerFactory(streamFetchOptions),
+      overallHistogramHandler: overallHistogramHandlerFactory(streamFetchOptions),
+      overridesHandler: overridesHandlerFactory(streamFetchOptions),
+      significantItemsHandler: significantItemsHandlerFactory(streamFetchOptions),
     },
     responseWithHeaders,
   };

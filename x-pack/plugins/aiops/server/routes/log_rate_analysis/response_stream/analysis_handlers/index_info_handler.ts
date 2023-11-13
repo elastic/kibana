@@ -7,15 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 
-import { updateLoadingStateAction } from '../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+import { updateLoadingStateAction } from '../../../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../../common/api/log_rate_analysis/schema';
 
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
+import { isRequestAbortedError } from '../../../../lib/is_request_aborted_error';
 
-import { fetchIndexInfo } from '../queries/fetch_index_info';
-import type { LogRateAnalysisResponseStreamFetchOptions } from './log_rate_analysis_response_stream';
+import { fetchIndexInfo } from '../../queries/fetch_index_info';
 
-import { LOADED_FIELD_CANDIDATES } from './constants';
+import type { LogRateAnalysisResponseStreamFetchOptions } from '../log_rate_analysis_response_stream';
+import { LOADED_FIELD_CANDIDATES } from '../constants';
 
 export const indexInfoHandlerFactory =
   <T extends ApiVersion>(options: LogRateAnalysisResponseStreamFetchOptions<T>) =>

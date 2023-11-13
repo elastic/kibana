@@ -12,14 +12,14 @@ import {
   type NumericHistogramField,
 } from '@kbn/ml-agg-utils';
 
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
-import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../../common/api/log_rate_analysis/schema';
+import { RANDOM_SAMPLER_SEED } from '../../../../../common/constants';
 
-import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
+import { isRequestAbortedError } from '../../../../lib/is_request_aborted_error';
 
-import { getHistogramQuery } from '../queries/get_histogram_query';
+import { getHistogramQuery } from '../../queries/get_histogram_query';
 
-import type { LogRateAnalysisResponseStreamFetchOptions } from './log_rate_analysis_response_stream';
+import type { LogRateAnalysisResponseStreamFetchOptions } from '../log_rate_analysis_response_stream';
 
 export const overallHistogramHandlerFactory =
   <T extends ApiVersion>({
