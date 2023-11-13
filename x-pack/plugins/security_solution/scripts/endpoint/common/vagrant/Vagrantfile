@@ -1,3 +1,7 @@
+# ------------------------------------------------------------------------------------
+# Vagrant setup for running Elastic agent on the created VM.0
+# This setup is mostly used for CI runs, since multipass is not used in that env.
+# ------------------------------------------------------------------------------------
 hostname = ENV["VMNAME"] || 'ubuntu'
 cachedAgentSource = ENV["CACHED_AGENT_SOURCE"] || ''
 cachedAgentFilename = ENV["CACHED_AGENT_FILENAME"] || ''
