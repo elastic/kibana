@@ -65,10 +65,12 @@ describe('Investigate in timeline', { tags: ['@ess', '@serverless'] }, () => {
 
       // Click on the last button that lets us investigate in timeline.
       // We expect this to be the `process.args` row.
+      cy.get(ALERT_FLYOUT).find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON).eq(5).scrollIntoView();
       cy.get(ALERT_FLYOUT)
         .find(SUMMARY_VIEW_INVESTIGATE_IN_TIMELINE_BUTTON)
-        .last()
-        .should('have.text', alertCount)
+        .eq(5)
+        .should('be.visible')
+        .and('have.text', alertCount)
         .click();
 
       // Make sure a new timeline is created and opened

@@ -114,8 +114,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
 
   const isPlainRecord = useMemo(() => getRawRecordType(query) === RecordRawType.PLAIN, [query]);
   const resultState = useMemo(
-    () => getResultState(dataState.fetchStatus, dataState.foundDocuments!, isPlainRecord),
-    [dataState.fetchStatus, dataState.foundDocuments, isPlainRecord]
+    () => getResultState(dataState.fetchStatus, dataState.foundDocuments ?? false),
+    [dataState.fetchStatus, dataState.foundDocuments]
   );
 
   const onOpenInspector = useInspector({
@@ -338,7 +338,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                         }
                       )}
                       error={dataState.error}
-                      data-test-subj="discoverNoResultsError"
                     />
                   ) : (
                     <DiscoverNoResults
