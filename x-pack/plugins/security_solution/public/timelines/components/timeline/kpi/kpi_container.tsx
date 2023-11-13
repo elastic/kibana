@@ -58,8 +58,8 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   );
 
   const getKqlQueryTimeline = useMemo(() => timelineSelectors.getKqlFilterQuerySelector(), []);
-  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId)!);
+
+  const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId));
 
   const kqlQueryExpression = isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
 
