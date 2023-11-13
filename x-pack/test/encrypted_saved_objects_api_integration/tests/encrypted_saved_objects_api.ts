@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import type { SavedObject } from '@kbn/core/server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { descriptorToArray, SavedObjectDescriptor } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
+import {
+  descriptorToArray,
+  SavedObjectDescriptor,
+} from '@kbn/encrypted-saved-objects-plugin/server/crypto';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -66,8 +69,8 @@ export default function ({ getService }: FtrProviderContext) {
       expectedDescriptor = {
         namespace: expectedDescriptorNamespace,
         type: encryptedSavedObjectType,
-        id: savedObject.id
-      }
+        id: savedObject.id,
+      };
     });
 
     it('#create encrypts attributes and strips them from response', async () => {
@@ -240,10 +243,9 @@ export default function ({ getService }: FtrProviderContext) {
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
       expect(response.error).to.eql({
-        message:
-          `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${
-            descriptorToArray(expectedDescriptor)
-          }"`,
+        message: `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${descriptorToArray(
+          expectedDescriptor
+        )}"`,
       });
     });
 
@@ -287,10 +289,9 @@ export default function ({ getService }: FtrProviderContext) {
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
       expect(savedObjects[0].error).to.eql({
-        message:
-          `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${
-            descriptorToArray(expectedDescriptor)
-          }"`,
+        message: `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${descriptorToArray(
+          expectedDescriptor
+        )}"`,
       });
     });
 
@@ -338,10 +339,9 @@ export default function ({ getService }: FtrProviderContext) {
         publicPropertyExcludedFromAAD: savedObjectOriginalAttributes.publicPropertyExcludedFromAAD,
       });
       expect(savedObjects[0].error).to.eql({
-        message:
-          `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${
-            descriptorToArray(expectedDescriptor)
-          }"`,
+        message: `Unable to decrypt attribute "publicPropertyStoredEncrypted" of saved object "${descriptorToArray(
+          expectedDescriptor
+        )}"`,
       });
     });
 
@@ -473,9 +473,9 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(decryptedResponse.saved_objects[0].error.message).to.be(
-        `Unable to decrypt attribute "privateProperty" of saved object "${
-          descriptorToArray(expectedDescriptor)
-        }"`
+        `Unable to decrypt attribute "privateProperty" of saved object "${descriptorToArray(
+          expectedDescriptor
+        )}"`
       );
 
       expect(decryptedResponse.saved_objects[0].attributes).to.eql({
