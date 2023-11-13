@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -37,7 +37,7 @@ export interface EmbeddableChangePointChartProps {
   /**
    * Component to render if there are no change points found
    */
-  emptyState?: () => React.ReactElement;
+  emptyState?: React.ReactElement;
   /**
    * Outputs the most recent change point data
    */

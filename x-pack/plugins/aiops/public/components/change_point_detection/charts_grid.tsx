@@ -5,15 +5,7 @@
  * 2.0.
  */
 
-import React, {
-  type FC,
-  useMemo,
-  useState,
-  useEffect,
-  useRef,
-  useCallback,
-  CSSProperties,
-} from 'react';
+import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -89,7 +81,7 @@ export const ChartsGrid: FC<{
           v.timestamp
         }_${v.p_value}`;
         return (
-          <EuiFlexItem key={key} style={style}>
+          <EuiFlexItem key={key}>
             <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
               <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
                 <EuiFlexItem grow={false}>
