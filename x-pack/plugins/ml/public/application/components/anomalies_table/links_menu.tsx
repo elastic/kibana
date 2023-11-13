@@ -816,6 +816,10 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
               dataView: messageField.dataView,
               field: messageField.field,
               originatingApp: PLUGIN_ID,
+              additionalTimeRange: {
+                from: anomaly.source.timestamp,
+                to: anomaly.source.timestamp + anomaly.source.bucket_span * 1000,
+              },
             });
           }}
           data-test-subj="mlAnomaliesListRowActionPatternAnalysisButton"

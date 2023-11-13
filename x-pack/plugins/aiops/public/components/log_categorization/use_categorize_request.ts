@@ -14,11 +14,7 @@ import { useStorage } from '@kbn/ml-local-storage';
 
 import { createCategoryRequest } from '../../../common/api/log_categorization/create_category_request';
 import { processCategoryResults } from '../../../common/api/log_categorization/process_category_results';
-import type {
-  Category,
-  CatResponse,
-  SparkLinesPerCategory,
-} from '../../../common/api/log_categorization/types';
+import type { Category, CatResponse } from '../../../common/api/log_categorization/types';
 
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import {
@@ -70,14 +66,24 @@ export function useCategorizeRequest() {
       timeField: string,
       timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
-      intervalMs?: number
-    ): Promise<{ categories: Category[]; sparkLinesPerCategory: SparkLinesPerCategory }> => {
+      intervalMs?: number,
+      subTimeRange?: { from: number; to: number }
+    ): Promise<{ categories: Category[] }> => {
       const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
       return new Promise((resolve, reject) => {
         data.search
           .search<ReturnType<typeof createCategoryRequest>, CatResponse>(
-            createCategoryRequest(index, field, timeField, timeRange, query, wrap, intervalMs),
+            createCategoryRequest(
+              index,
+              field,
+              timeField,
+              timeRange,
+              query,
+              wrap,
+              intervalMs,
+              subTimeRange
+            ),
             { abortSignal: abortController.current.signal }
           )
           .subscribe({
@@ -92,7 +98,7 @@ export function useCategorizeRequest() {
             },
             error: (error) => {
               if (error.name === 'AbortError') {
-                return resolve({ categories: [], sparkLinesPerCategory: {} });
+                return resolve({ categories: [] });
               }
               reject(error);
             },

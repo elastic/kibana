@@ -28,6 +28,10 @@ export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
   originatingApp: string;
+  additionalTimeRange?: {
+    from: number;
+    to: number;
+  };
 }
 
 export const ACTION_VISUALIZE_FIELD = 'ACTION_VISUALIZE_FIELD';

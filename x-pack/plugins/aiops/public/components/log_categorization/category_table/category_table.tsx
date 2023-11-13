@@ -24,10 +24,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
-import type {
-  Category,
-  SparkLinesPerCategory,
-} from '../../../../common/api/log_categorization/types';
+import type { Category } from '../../../../common/api/log_categorization/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
 import type { LogCategorizationAppState } from '../../../application/utils/url_state';
@@ -42,7 +39,6 @@ import { TableHeader } from './table_header';
 
 interface Props {
   categories: Category[];
-  sparkLines: SparkLinesPerCategory;
   eventRate: EventRate;
   dataViewId: string;
   selectedField: DataViewField | string | undefined;
@@ -59,7 +55,6 @@ interface Props {
 
 export const CategoryTable: FC<Props> = ({
   categories,
-  sparkLines,
   eventRate,
   dataViewId,
   selectedField,
@@ -83,6 +78,10 @@ export const CategoryTable: FC<Props> = ({
     () => getLabels(onAddFilter !== undefined && onClose !== undefined),
     [onAddFilter, onClose]
   );
+
+  const showSubTimeCount = useMemo(() => {
+    return categories.some((category) => category.subTimeRangeCount !== undefined);
+  }, [categories]);
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
     if (
@@ -130,13 +129,12 @@ export const CategoryTable: FC<Props> = ({
       }),
       sortable: false,
       width: '100px',
-      render: (_, { key }) => {
-        const sparkLine = sparkLines[key];
-        if (sparkLine === undefined) {
+      render: (_, { sparkline }) => {
+        if (sparkline === undefined) {
           return null;
         }
         const histogram = eventRate.map(({ key: catKey, docCount }) => {
-          const term = sparkLine[catKey] ?? 0;
+          const term = sparkline[catKey] ?? 0;
           const newTerm = term > docCount ? docCount : term;
           const adjustedDocCount = docCount - newTerm;
 
@@ -201,6 +199,17 @@ export const CategoryTable: FC<Props> = ({
       ],
     },
   ] as Array<EuiBasicTableColumn<Category>>;
+
+  if (showSubTimeCount) {
+    columns.splice(1, 0, {
+      field: 'subTimeRangeCount',
+      name: i18n.translate('xpack.aiops.logCategorization.column.count', {
+        defaultMessage: 'Count2',
+      }),
+      sortable: true,
+      width: '80px',
+    });
+  }
 
   const selectionValue: EuiTableSelectionType<Category> | undefined = {
     selectable: () => true,

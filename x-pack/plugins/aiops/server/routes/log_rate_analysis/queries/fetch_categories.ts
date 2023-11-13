@@ -18,11 +18,7 @@ import {
 import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 import { createCategoryRequest } from '../../../../common/api/log_categorization/create_category_request';
-import type {
-  Category,
-  CategoriesAgg,
-  SparkLinesPerCategory,
-} from '../../../../common/api/log_categorization/types';
+import type { Category, CategoriesAgg } from '../../../../common/api/log_categorization/types';
 
 import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
@@ -55,7 +51,6 @@ export const getCategoryRequest = (
 
 export interface FetchCategoriesResponse {
   categories: Category[];
-  sparkLinesPerCategory: SparkLinesPerCategory;
 }
 
 export const fetchCategories = async (
@@ -124,7 +119,6 @@ export const fetchCategories = async (
       continue;
     }
 
-    const sparkLinesPerCategory: SparkLinesPerCategory = {};
     const {
       categories: { buckets },
     } = randomSamplerWrapper.unwrap(
@@ -132,7 +126,7 @@ export const fetchCategories = async (
     ) as CategoriesAgg;
 
     const categories: Category[] = buckets.map((b) => {
-      sparkLinesPerCategory[b.key] =
+      const sparkline =
         b.sparkline === undefined
           ? {}
           : b.sparkline.buckets.reduce<Record<number, number>>((acc2, cur2) => {
@@ -144,11 +138,11 @@ export const fetchCategories = async (
         key: b.key,
         count: b.doc_count,
         examples: b.hit.hits.hits.map((h) => get(h._source, fieldName)),
+        sparkline,
       };
     });
     result.push({
       categories,
-      sparkLinesPerCategory,
     });
   }
 

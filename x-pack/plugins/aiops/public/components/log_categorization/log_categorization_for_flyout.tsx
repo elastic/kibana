@@ -24,7 +24,7 @@ import { usePageUrlState } from '@kbn/ml-url-state';
 import type { FieldValidationResults } from '@kbn/ml-category-validator';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 
-import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+import type { Category } from '../../../common/api/log_categorization/types';
 
 import {
   type LogCategorizationPageUrlState,
@@ -52,6 +52,7 @@ export interface LogCategorizationPageProps {
   onClose: () => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
+  additionalTimeRange?: { from: number; to: number };
 }
 
 const BAR_TARGET = 20;
@@ -62,6 +63,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   selectedField,
   onClose,
   embeddingOrigin,
+  additionalTimeRange,
 }) => {
   const {
     notifications: { toasts },
@@ -95,7 +97,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
-    sparkLines: SparkLinesPerCategory;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
@@ -168,7 +169,8 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeField,
           timeRange,
           searchQuery,
-          intervalMs
+          intervalMs,
+          additionalTimeRange
         ),
       ]);
 
@@ -176,7 +178,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         setFieldValidationResult(validationResult);
         setData({
           categories: categorizationResult.categories,
-          sparkLines: categorizationResult.sparkLinesPerCategory,
         });
       }
     } catch (error) {
@@ -193,15 +194,16 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   }, [
     dataView,
     selectedField,
-    cancelRequest,
-    runValidateFieldRequest,
     earliest,
     latest,
+    cancelRequest,
+    runValidateFieldRequest,
     searchQuery,
+    embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
+    additionalTimeRange,
     toasts,
-    embeddingOrigin,
   ]);
 
   const onAddFilter = useCallback(
@@ -281,7 +283,6 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
             aiopsListState={stateFromUrl}
             dataViewId={dataView.id!}
             eventRate={eventRate}
-            sparkLines={data.sparkLines}
             selectedField={selectedField}
             pinnedCategory={pinnedCategory}
             setPinnedCategory={setPinnedCategory}

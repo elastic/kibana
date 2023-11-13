@@ -10,8 +10,9 @@ import { estypes } from '@elastic/elasticsearch';
 export interface Category {
   key: string;
   count: number;
+  subTimeRangeCount?: number;
   examples: string[];
-  sparkline?: Array<{ doc_count: number; key: number; key_as_string: string }>;
+  sparkline?: Record<number, number>;
 }
 
 export interface CategoriesAgg {
@@ -22,6 +23,16 @@ export interface CategoriesAgg {
       hit: { hits: { hits: Array<{ _source: { message: string } }> } };
       sparkline: {
         buckets: Array<{ key_as_string: string; key: number; doc_count: number }>;
+      };
+      sub_time_range?: {
+        buckets: Array<{
+          key: number;
+          doc_count: number;
+          to: number;
+          to_as_string: string;
+          from: number;
+          from_as_string: string;
+        }>;
       };
     }>;
   };
@@ -34,5 +45,3 @@ interface CategoriesSampleAgg {
 export interface CatResponse {
   rawResponse: estypes.SearchResponseBody<unknown, CategoriesAgg | CategoriesSampleAgg>;
 }
-
-export type SparkLinesPerCategory = Record<string, Record<number, number>>;

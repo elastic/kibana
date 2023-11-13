@@ -30,7 +30,8 @@ export async function showCategorizeFlyout(
   dataView: DataView,
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
-  originatingApp: string
+  originatingApp: string,
+  additionalTimeRange?: { from: number; to: number }
 ): Promise<void> {
   const { http, theme, overlays, application, notifications, uiSettings, i18n } = coreStart;
 
@@ -72,6 +73,7 @@ export async function showCategorizeFlyout(
                     selectedField={field}
                     onClose={onFlyoutClose}
                     embeddingOrigin={originatingApp}
+                    additionalTimeRange={additionalTimeRange}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>
