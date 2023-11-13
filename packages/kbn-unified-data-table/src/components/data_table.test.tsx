@@ -359,7 +359,7 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -385,7 +385,7 @@ describe('UnifiedDataTable', () => {
         onUpdateRowHeight: jest.fn(),
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
@@ -406,7 +406,7 @@ describe('UnifiedDataTable', () => {
         onUpdateSampleSize: undefined,
       });
 
-      expect(component.find(EuiDataGrid).prop('toolbarVisibility')).toMatchInlineSnapshot(`
+      expect(component.find(EuiDataGrid).first().prop('toolbarVisibility')).toMatchInlineSnapshot(`
         Object {
           "additionalControls": null,
           "showColumnSelector": false,
