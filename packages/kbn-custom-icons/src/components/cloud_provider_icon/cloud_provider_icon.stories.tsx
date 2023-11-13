@@ -26,7 +26,7 @@ export const List: Story = () => {
         return (
           <EuiFlexItem key={cloudProvider} grow={false}>
             <EuiCard
-              title={cloudProvider}
+              title={cloudProvider as string}
               description={
                 <EuiToolTip position="bottom" content="Icon rendered with `CloudProviderIcon`">
                   <CloudProviderIcon cloudProvider={cloudProvider} size="xxl" />

@@ -12,12 +12,12 @@ const CLOUD_PROVIDER_ICONS = {
   unknownProvider: 'cloudSunny',
 } as const;
 
-export type CloudProvider = keyof typeof CLOUD_PROVIDER_ICONS;
+export type CloudProvider = keyof typeof CLOUD_PROVIDER_ICONS | null | undefined;
 
-export function getCloudProviderIcon(cloudProvider?: string | null) {
+export function getCloudProviderIcon(cloudProvider?: CloudProvider) {
   if (cloudProvider === undefined || cloudProvider === null) {
     return CLOUD_PROVIDER_ICONS.unknownProvider;
   }
 
-  return CLOUD_PROVIDER_ICONS[cloudProvider as CloudProvider];
+  return CLOUD_PROVIDER_ICONS[cloudProvider];
 }

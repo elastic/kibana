@@ -6,7 +6,11 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiSkeletonText } from '@elastic/eui';
-import { getAgentIcon, getCloudProviderIcon } from '@kbn/custom-icons';
+import {
+  CloudProvider,
+  getAgentIcon,
+  getCloudProviderIcon,
+} from '@kbn/custom-icons';
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import React from 'react';
@@ -175,7 +179,7 @@ export function InstanceDetails({
             'xpack.apm.serviceOverview.instanceTable.details.cloudTitle',
             { defaultMessage: 'Cloud' }
           )}
-          icon={getCloudProviderIcon(data.cloud?.provider)}
+          icon={getCloudProviderIcon(data.cloud?.provider as CloudProvider)}
           keyValueList={cloudDetailsKeyValuePairs}
           onClickFilter={addKueryBarFilter}
         />

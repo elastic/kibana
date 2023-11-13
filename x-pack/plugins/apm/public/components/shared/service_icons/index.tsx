@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
+  CloudProvider,
   getAgentIcon,
   getCloudProviderIcon,
   getServerlessIcon,
@@ -187,7 +188,7 @@ export function ServiceIcons({ start, end, serviceName, environment }: Props) {
     {
       key: 'cloud',
       icon: {
-        type: getCloudProviderIcon(icons?.cloudProvider),
+        type: getCloudProviderIcon(icons?.cloudProvider as CloudProvider),
       },
       isVisible: !!icons?.cloudProvider,
       title: i18n.translate('xpack.apm.serviceIcons.cloud', {
