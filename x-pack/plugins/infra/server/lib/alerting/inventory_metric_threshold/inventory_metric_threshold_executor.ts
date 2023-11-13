@@ -83,6 +83,7 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
       spaceId,
       startedAt,
       rule: { id: ruleId, tags: ruleTags },
+      getTimeRange,
     }) => {
       const startTime = Date.now();
 
@@ -175,13 +176,14 @@ export const createInventoryMetricThresholdExecutor = (libs: InfraBackendLibs) =
         );
 
       const compositeSize = libs.configuration.alerting.inventory_threshold.group_by_page_size;
+      const { dateEnd } = getTimeRange();
       const results = await Promise.all(
         criteria.map((condition) =>
           evaluateCondition({
             compositeSize,
             condition,
             esClient,
-            executionTimestamp: startedAt,
+            executionTimestamp: new Date(dateEnd),
             filterQuery,
             logger,
             logQueryFields,
