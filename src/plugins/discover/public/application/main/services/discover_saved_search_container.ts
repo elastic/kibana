@@ -8,6 +8,7 @@
 
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual } from 'lodash';
@@ -245,19 +246,61 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   const keys = new Set([
     ...Object.keys(prevSavedSearch),
     ...Object.keys(nextSavedSearchWithoutSearchSource),
-  ]);
-  const savedSearchDiff = [...keys].filter((key: string) => {
-    // @ts-expect-error
-    return !isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+  ] as Array<keyof Omit<SavedSearch, 'searchSource'>>);
+
+  // at least one change in saved search attributes
+  const hasChangesInSavedSearch = [...keys].some((key) => {
+    if (
+      ['usesAdHocDataView', 'hideChart'].includes(key) &&
+      typeof prevSavedSearch[key] === 'undefined' &&
+      nextSavedSearchWithoutSearchSource[key] === false
+    ) {
+      return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
+    }
+
+    const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+
+    if (!isSame) {
+      addLog('[savedSearch] difference between initial and changed version', {
+        key,
+        before: prevSavedSearch[key],
+        after: nextSavedSearchWithoutSearchSource[key],
+      });
+    }
+
+    return !isSame;
   });
 
-  const searchSourceDiff =
-    !isEqual(prevSearchSource.getField('filter'), nextSearchSource.getField('filter')) ||
-    !isEqual(prevSearchSource.getField('query'), nextSearchSource.getField('query')) ||
-    !isEqual(prevSearchSource.getField('index'), nextSearchSource.getField('index'));
-  const hasChanged = Boolean(savedSearchDiff.length || searchSourceDiff);
-  if (hasChanged) {
-    addLog('[savedSearch] difference between initial and changed version', searchSourceDiff);
+  if (hasChangesInSavedSearch) {
+    return false;
   }
-  return !hasChanged;
+
+  // at least one change in search source fields
+  const hasChangesInSearchSource = (
+    ['filter', 'query', 'index'] as Array<keyof SearchSourceFields>
+  ).some((key) => {
+    const prevValue =
+      key === 'index' ? prevSearchSource.getField(key)?.id : prevSearchSource.getField(key);
+    const nextValue =
+      key === 'index' ? nextSearchSource.getField(key)?.id : nextSearchSource.getField(key);
+    const isSame = isEqual(prevValue, nextValue);
+
+    if (!isSame) {
+      addLog('[savedSearch] difference between initial and changed version', {
+        key,
+        before: prevValue,
+        after: nextValue,
+      });
+    }
+
+    return !isSame;
+  });
+
+  if (hasChangesInSearchSource) {
+    return false;
+  }
+
+  addLog('[savedSearch] no difference between initial and changed version');
+
+  return true;
 }
