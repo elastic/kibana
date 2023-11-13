@@ -22,6 +22,8 @@ import path from 'path';
 import os from 'os';
 import pRetry from 'p-retry';
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { renderSummaryTable } from './print_run';
 import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
@@ -55,6 +57,15 @@ const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
 let log: ToolingLog;
+const API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress-creds',
+  'x-elastic-internal-origin': 'security-solution',
+  [ELASTIC_HTTP_VERSION_HEADER]: [INITIAL_REST_VERSION],
+});
+const PROVIDERS = Object.freeze({
+  providerType: 'basic',
+  providerName: 'cloud-basic',
+});
 
 const delay = async (timeout: number) => {
   await new Promise((r) => setTimeout(r, timeout));
@@ -284,6 +295,40 @@ function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise
   return pRetry(fetchEsAccessAttempt, retryOptions);
 }
 
+// Wait until application is ready
+function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<void> {
+  const body = {
+    ...PROVIDERS,
+    currentURL: '/',
+    params: credentials,
+  };
+
+  const fetchLoginStatusAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if login can be performed.`);
+    const response = await axios.post(`${kbUrl}/internal/security/login`, body, {
+      headers: API_HEADERS,
+    });
+    if (response.status !== 200) {
+      throw new Error('Cannot login. Retrying in 20s...');
+    } else {
+      log.info('Login can be performed successfully');
+    }
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info('Project is not reachable. Retrying login in 20s...');
+      } else {
+        log.info(error);
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+  return pRetry(fetchLoginStatusAttempt, retryOptions);
+}
+
 export const cli = () => {
   run(
     async () => {
@@ -459,6 +504,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             // Wait for Elasticsearch to be accessible
             await waitForEsAccess(project.es_url, auth, id);
+
+            // Wait until application is ready
+            await waitForKibanaLogin(project.kb_url, credentials);
 
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
