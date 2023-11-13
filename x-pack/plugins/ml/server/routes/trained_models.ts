@@ -90,7 +90,6 @@ export function trainedModelsRoutes(
           const {
             with_pipelines: withPipelines,
             with_indices: withIndicesRaw,
-            with_origin_job_check: withOriginJobCheck,
             ...getTrainedModelsRequestParams
           } = request.query;
 
@@ -191,24 +190,38 @@ export function trainedModelsRoutes(
             // we don't need to fill kibana's log with these messages.
             mlLog.debug(e);
           }
-
+          const enabledFeatures = getEnabledFeatures();
           try {
-            if (withOriginJobCheck) {
-              for (const model of result) {
-                if (typeof model.metadata?.analytics_config?.id === 'string') {
-                  const jobExistsResult = await mlClient.getDataFrameAnalytics({
-                    id: model.metadata?.analytics_config?.id,
-                    size: 1,
-                  });
-                  model.origin_job_exists = jobExistsResult.count === 1;
+            if (enabledFeatures.dfa) {
+              const jobIds = result.map((model) => {
+                let id = model.metadata?.analytics_config?.id;
+                if (id) {
+                  id = `${id}*`;
                 }
-              }
+                return id;
+              });
+              const filteredJobIds = jobIds.filter((id) => id !== undefined);
+
+              const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
+                id: filteredJobIds.join(','),
+                allow_no_match: true,
+              });
+
+              jobs.forEach(({ id }) => {
+                const model = result.find(
+                  (modelWithJob) => id === modelWithJob.metadata?.analytics_config?.id
+                );
+
+                if (model) {
+                  model.origin_job_exists = true;
+                }
+              });
             }
           } catch (e) {
             // Swallow error to prevent blocking trained models result
           }
 
-          const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
+          const filteredModels = filterForEnabledFeatureModels(result, enabledFeatures);
 
           return response.ok({
             body: filteredModels,

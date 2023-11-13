@@ -49,7 +49,6 @@ export const getInferenceQuerySchema = schema.object({
   size: schema.maybe(schema.string()),
   with_pipelines: schema.maybe(schema.string()),
   with_indices: schema.maybe(schema.oneOf([schema.string(), schema.boolean()])),
-  with_origin_job_check: schema.maybe(schema.oneOf([schema.string(), schema.boolean()])),
   include: schema.maybe(schema.string()),
 });
 

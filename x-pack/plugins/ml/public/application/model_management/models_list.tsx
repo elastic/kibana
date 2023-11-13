@@ -215,7 +215,6 @@ export const ModelsList: FC<Props> = ({
       const response = await trainedModelsApiService.getTrainedModels(undefined, {
         with_pipelines: true,
         with_indices: true,
-        with_origin_job_check: true,
       });
 
       const newItems: ModelItem[] = [];

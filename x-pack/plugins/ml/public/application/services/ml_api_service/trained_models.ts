@@ -33,7 +33,6 @@ export interface InferenceQueryParams {
   // Custom kibana endpoint query params
   with_pipelines?: boolean;
   with_indices?: boolean;
-  with_origin_job_check?: boolean;
   include?: 'total_feature_importance' | 'feature_importance_baseline' | string;
 }
 
