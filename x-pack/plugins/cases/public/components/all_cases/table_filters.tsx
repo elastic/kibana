@@ -167,7 +167,7 @@ const CasesTableFiltersComponent = ({
           {availableSolutions.length > 1 && (
             <SolutionFilter
               onChange={onChange}
-              selectedOptions={filterOptions?.owner}
+              selectedOptionKeys={filterOptions?.owner}
               availableSolutions={availableSolutions}
             />
           )}
