@@ -107,11 +107,11 @@ export const ChartsGrid: FC<{
                 <EuiFlexItem grow={false}>
                   <EuiText color={'subdued'} size={'s'}>
                     {v.fn}
-                    {i18n.translate('app_not_found_in_i18nrc.chartsGrid.TextLabel', {
+                    {i18n.translate('chartsGrid.TextLabelLeft', {
                       defaultMessage: '(',
                     })}
                     {v.metricField}
-                    {i18n.translate('app_not_found_in_i18nrc.chartsGrid.TextLabel', {
+                    {i18n.translate('chartsGrid.TextLabelRight', {
                       defaultMessage: ')',
                     })}
                   </EuiText>
