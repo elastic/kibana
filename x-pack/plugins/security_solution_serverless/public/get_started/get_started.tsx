@@ -16,7 +16,6 @@ import {
 import React from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { css } from '@emotion/react';
-import { WelcomePanel } from './welcome_panel';
 import { TogglePanel } from './toggle_panel';
 import {
   GET_STARTED_PAGE_DESCRIPTION,
@@ -24,7 +23,6 @@ import {
   GET_STARTED_PAGE_TITLE,
 } from './translations';
 import type { SecurityProductTypes } from '../../common/config';
-import { ProductSwitch } from './product_switch';
 import { useTogglePanel } from './use_toggle_panel';
 import { ProductLine } from '../../common/product';
 import { useUserName } from '../common/hooks/use_user_name';
