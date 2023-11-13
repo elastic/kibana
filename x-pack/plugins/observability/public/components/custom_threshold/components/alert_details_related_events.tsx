@@ -135,7 +135,7 @@ export default function AlertDetailsRelatedEvents({
 
   const sortByPValue = () => {
     const sortedMetrics = changePointDataAll
-      .sort((a, b) => a.p_value - b.p_value)
+      .sort((a, b) => Number(a.p_value) - Number(b.p_value))
       .map((cpItem) => cpItem.metricField);
 
     if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
