@@ -430,6 +430,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters
   ) {
+    const warnings: SearchResponseWarning[] = [];
     const indexPattern = await this.getIndexPattern();
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
@@ -446,7 +447,14 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     delete requestMetaWithoutTimeslice.timeslice;
     const useRequestMetaWithoutTimeslice =
       requestMeta.timeslice !== undefined &&
-      (await this.canLoadAllDocuments(requestMetaWithoutTimeslice, registerCancelCallback));
+      (await this.canLoadAllDocuments(
+        layerName,
+        requestMetaWithoutTimeslice,
+        registerCancelCallback,
+        inspectorAdapters, 
+        (warning) => {
+          warnings.push(warning);
+        }));
 
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(
@@ -466,7 +474,6 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       searchSource.setField('sort', this._buildEsSort());
     }
 
-    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: this.getId(),
       requestName: getLayerFeaturesRequestName(layerName),
@@ -979,25 +986,31 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async canLoadAllDocuments(
+    layerName: string,
     requestMeta: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters,
+    onWarning: (warning: SearchResponseWarning) => void,
   ) {
-    const abortController = new AbortController();
-    registerCancelCallback(() => abortController.abort());
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    const { rawResponse: resp } = await lastValueFrom(
-      searchSource.fetch$({
-        abortSignal: abortController.signal,
-        sessionId: requestMeta.searchSessionId,
-        legacyHitsTotal: false,
-        executionContext: mergeExecutionContext(
-          { description: 'es_search_source:all_doc_counts' },
-          requestMeta.executionContext
-        ),
-      })
-    );
+    const resp = await this._runEsQuery({
+      requestId: this.getId() + 'features_count',
+      requestName: i18n.translate('xpack.maps.vectorSource.featuresCountRequestName', {
+        defaultMessage: 'load features count ({layerName})',
+        values: { layerName },
+      }),
+      searchSource,
+      registerCancelCallback,
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_search_source:all_doc_counts' },
+        requestMeta.executionContext
+      ),
+      requestsAdapter: inspectorAdapters.requests,
+      onWarning,
+    });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 
