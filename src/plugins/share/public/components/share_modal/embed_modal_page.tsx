@@ -81,16 +81,65 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
       shortUrlLabel
     );
 
-    const makeUrlEmbeddable = (url: string): string => {
-      const embedParam = '?embed=true';
-      const urlHasQueryString = url.indexOf('?') !== -1;
-  
-      if (urlHasQueryString) {
-        return url.replace('?', `${embedParam}&`);
+  const makeUrlEmbeddable = (url: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = url.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return url.replace('?', `${embedParam}&`);
+    }
+
+    return `${url}${embedParam}`;
+  };
+
+  const getUrlParamExtensions = (url: string): string => {
+    return urlParams
+      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+          const urlParam = urlParams[key];
+          return urlParam
+            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                const isQueryParamEnabled = urlParam[queryParam];
+                return isQueryParamEnabled
+                  ? queryAccumulator + `&${queryParam}=true`
+                  : queryAccumulator;
+              }, urlAccumulator)
+            : urlAccumulator;
+        }, url)
+      : url;
+  };
+
+  const updateUrlParams = (url: string) => {
+    url = isEmbedded ? makeUrlEmbeddable(url) : url;
+    url = urlParams ? getUrlParamExtensions(url) : url;
+
+    return url;
+  };
+
+  const getSnapshotUrl = (forSavedObject?: boolean) => {
+    let url = '';
+    if (forSavedObject && shareableUrlForSavedObject) {
+      url = shareableUrlForSavedObject;
+    }
+    if (!url) {
+      url = shareableUrl || window.location.href;
+    }
+    return updateUrlParams(url);
+  };
+
+  const createShortUrl = async () => {
+    setShortUrl(true);
+    setShortUrlErrorMsg(undefined);
+
+    try {
+      if (shareableUrlLocatorParams) {
+        const shortUrls = urlService.shortUrls.get(null);
+        const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+        const shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+      } else {
+        const snapshotUrl = getSnapshotUrl();
+        const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
+        const shortUrlCache = shortUrl.url;
       }
-  
-      return `${url}${embedParam}`;
-    }; 
 
     const getUrlParamExtensions = (url: string): string => {
       return urlParams
@@ -120,11 +169,6 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
       if (forSavedObject && shareableUrlForSavedObject) {
         url = shareableUrlForSavedObject;
       }
-      if (!url) {
-        url = shareableUrl || window.location.href;
-      }
-      return updateUrlParams(url);
-    };
 
     const isNotSaved = () => {
       return objectId === undefined || objectId === '';
