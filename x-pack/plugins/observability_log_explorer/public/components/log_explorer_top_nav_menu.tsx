@@ -40,21 +40,14 @@ import {
 import { ObservabilityLogExplorerService } from '../state_machines/observability_log_explorer/src/state_machine';
 import { ObservabilityLogExplorerAppMountParameters } from '../types';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
-import { PluginKibanaContextValue } from '../utils/use_kibana';
+import { PluginKibanaContextValue, useKibanaContextForPlugin } from '../utils/use_kibana';
 
-interface LogExplorerTopNavMenuProps {
-  pageStateService: ObservabilityLogExplorerService;
-  services: KibanaReactContextValue<PluginKibanaContextValue>['services'];
-  setHeaderActionMenu: ObservabilityLogExplorerAppMountParameters['setHeaderActionMenu'];
-  theme$: ObservabilityLogExplorerAppMountParameters['theme$'];
-}
-
-export const LogExplorerTopNavMenu = ({
-  pageStateService,
-  services,
-  setHeaderActionMenu,
-  theme$,
-}: LogExplorerTopNavMenuProps) => {
+export const LogExplorerTopNavMenu = ({ services }: LogExplorerTopNavMenuProps) => {
+  const {
+    services: {
+      appParams: { setHeaderActionMenu, theme$ },
+    },
+  } = useKibanaContextForPlugin();
   const { serverless } = services;
 
   return Boolean(serverless) ? (

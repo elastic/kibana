@@ -4,109 +4,88 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart } from '@kbn/core/public';
-import { LogExplorerController, LogExplorerPluginStart } from '@kbn/log-explorer-plugin/public';
+import type {
+  LogExplorerController,
+  LogExplorerPluginStart,
+} from '@kbn/log-explorer-plugin/public';
+import { useActor } from '@xstate/react';
 import React from 'react';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
-import { ObservabilityLogExplorerPageStateProvider } from '../../state_machines/observability_log_explorer/src';
-import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
 import {
-  ObservabilityLogExplorerAppMountParameters,
-  ObservabilityLogExplorerHistory,
-} from '../../types';
+  ObservabilityLogExplorerPageStateProvider,
+  useObservabilityLogExplorerPageStateContext,
+} from '../../state_machines/observability_log_explorer/src';
+import { LazyOriginInterpreter } from '../../state_machines/origin_interpreter/src/lazy_component';
+import { ObservabilityLogExplorerHistory } from '../../types';
 import { noBreadcrumbs, useBreadcrumbs } from '../../utils/breadcrumbs';
 import { useKbnUrlStateStorageFromRouterContext } from '../../utils/kbn_url_state_context';
 import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 
-export interface ObservablityLogExplorerMainRouteProps {
-  appParams: ObservabilityLogExplorerAppMountParameters;
-  core: CoreStart;
-}
-
-export const ObservablityLogExplorerMainRoute = ({
-  appParams,
-  core,
-}: ObservablityLogExplorerMainRouteProps) => {
+export const ObservablityLogExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
-  const { logExplorer, observabilityShared, serverless } = services;
-  useBreadcrumbs(noBreadcrumbs, core.chrome, serverless);
-
+  const { logExplorer, serverless, chrome, notifications, appParams } = services;
   const { history, setHeaderActionMenu, theme$ } = appParams;
+
+  useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
 
   return (
     <ObservabilityLogExplorerPageStateProvider
       createLogExplorerController={logExplorer.createLogExplorerController}
-      toasts={core.notifications.toasts}
+      toasts={notifications.toasts}
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
     >
       <LogExplorerTopNavMenu
         setHeaderActionMenu={setHeaderActionMenu}
         services={services}
-        pageStateService={observabilityLogExplorerService}
         theme$={theme$}
       />
-      <LazyOriginInterpreter history={history} toasts={core.notifications.toasts} />
-      <ObservabilityLogExplorerMainRouteContent logExplorer={logExplorer} history={history} />
+      <LazyOriginInterpreter history={history} toasts={notifications.toasts} />
+      <ConnectedContent />
     </ObservabilityLogExplorerPageStateProvider>
   );
-  // const observabilityLogExplorerService = useInterpret(
-  //   () =>
-  //     createObservabilityLogExplorerStateMachine({
-  //       toasts: core.notifications.toasts,
-  //       urlStateStorageContainer,
-  //       createLogExplorerController: logExplorer.createLogExplorerController,
-  //       timeFilterService: services.data.query.timefilter.timefilter,
-  //     }),
-  //   { devTools: getDevToolsOptions() }
-  // );
+};
 
-  // const isInitialized = useSelector(observabilityLogExplorerService, (state) =>
-  //   state.matches('initialized')
-  // );
+const ConnectedContent = React.memo(() => {
+  const {
+    services: {
+      appParams: { history },
+      logExplorer,
+    },
+  } = useKibanaContextForPlugin();
 
-  // const controller = useSelector(observabilityLogExplorerService, (state) => {
-  //   return 'controller' in state.context ? state.context.controller : undefined;
-  // });
+  const [state] = useActor(useObservabilityLogExplorerPageStateContext());
 
-  return (
-    <>
-      <LogExplorerTopNavMenu
-        setHeaderActionMenu={setHeaderActionMenu}
-        services={services}
-        pageStateService={observabilityLogExplorerService}
-        theme$={theme$}
+  if (state.matches('uninitialized')) {
+    return <ObservabilityLogExplorerPageTemplate />;
+  } else if (state.matches('initialized')) {
+    return (
+      <InitializedContent
+        logExplorerController={state.context.controller}
+        history={history}
+        logExplorer={logExplorer}
       />
-      <LazyOriginInterpreter history={history} toasts={core.notifications.toasts} />
-      <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
-        {!isInitialized && 'Loading...'}
-        {isInitialized && controller && (
-          <ObservabilityLogExplorerMainRouteContent
-            logExplorer={logExplorer}
-            history={history}
-            controller={controller}
-          />
-        )}
-      </ObservabilityLogExplorerPageTemplate>
-    </>
-  );
-};
+    );
+  } else {
+    return null;
+  }
+});
 
-const ObservabilityLogExplorerMainRouteContent = ({
-  logExplorer,
-  history,
-  controller,
-}: {
-  logExplorer: LogExplorerPluginStart;
-  history: ObservabilityLogExplorerHistory;
-  controller: LogExplorerController;
-}) => {
-  return (
-    <ObservabilityLogExplorerPageTemplate observabilityShared={observabilityShared}>
-      <logExplorer.LogExplorer scopedHistory={history} controller={controller} />;
+const InitializedContent = React.memo(
+  ({
+    history,
+    logExplorer,
+    logExplorerController,
+  }: {
+    history: ObservabilityLogExplorerHistory;
+    logExplorer: LogExplorerPluginStart;
+    logExplorerController: LogExplorerController;
+  }) => (
+    <ObservabilityLogExplorerPageTemplate>
+      <logExplorer.LogExplorer scopedHistory={history} controller={logExplorerController} />;
     </ObservabilityLogExplorerPageTemplate>
-  );
-};
+  )
+);
