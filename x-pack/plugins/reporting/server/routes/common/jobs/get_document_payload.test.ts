@@ -7,11 +7,11 @@
 
 import { Readable } from 'stream';
 
+import { ReportApiJSON } from '@kbn/reporting-common/types';
 import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
-import { ReportApiJSON } from '../../../../common/types';
 import { ContentStream, getContentStream, statuses } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
 import { getDocumentPayloadFactory } from './get_document_payload';

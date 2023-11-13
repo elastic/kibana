@@ -38,3 +38,8 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;
+
+export interface TimeRangeParams {
+  min?: Date | string | number | null;
+  max?: Date | string | number | null;
+}

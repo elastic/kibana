@@ -99,3 +99,100 @@ export type IlmPolicyMigrationStatus = 'policy-not-found' | 'indices-not-managed
 export interface IlmPolicyStatusResponse {
   status: IlmPolicyMigrationStatus;
 }
+
+export interface ReportDocumentHead {
+  _id: string;
+  _index: string;
+  _seq_no: number;
+  _primary_term: number;
+}
+
+export interface ReportFields {
+  queue_time_ms?: number[]; // runtime field: started_at - created_at
+  execution_time_ms?: number[]; // runtime field: completed_at - started_at
+}
+
+export interface ReportSource {
+  /*
+   * Required fields: populated in RequestHandler.enqueueJob when the request comes in to
+   * generate the report
+   */
+  jobtype: string; // refers to `ExportTypeDefinition.jobType`
+  created_by: string | false; // username or `false` if security is disabled. Used for ensuring users can only access the reports they've created.
+  payload: BasePayload;
+  meta: {
+    // for telemetry
+    objectType: string;
+    layout?: string;
+    isDeprecated?: boolean;
+  };
+  migration_version: string; // for reminding the user to update their POST URL
+  attempts: number; // initially populated as 0
+  created_at: string; // timestamp in UTC
+  status: JobStatus;
+
+  /*
+   * `output` is only populated if the report job is completed or failed.
+   */
+  output: ReportOutput | null;
+
+  /*
+   * Optional fields: populated when the job is claimed to execute, and after
+   * execution has finished
+   */
+  kibana_name?: string; // for troubleshooting
+  kibana_id?: string; // for troubleshooting
+  timeout?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.queue.timeout
+  max_attempts?: number; // for troubleshooting: the actual comparison uses the config setting xpack.reporting.capture.maxAttempts
+  started_at?: string; // timestamp in UTC
+  completed_at?: string; // timestamp in UTC
+  process_expiration?: string | null; // timestamp in UTC - is overwritten with `null` when the job needs a retry
+  metrics?: TaskRunMetrics;
+}
+
+/*
+ * The document created by Reporting to store in the .reporting index
+ */
+export interface ReportDocument extends ReportDocumentHead {
+  _source: ReportSource;
+}
+
+/*
+ * JobStatus:
+ *  - Begins as 'pending'
+ *  - Changes to 'processing` when the job is claimed
+ *  - Then 'completed' | 'failed' when execution is done
+ * If the job needs a retry, it reverts back to 'pending'.
+ */
+export type JobStatus =
+  | 'completed' // Report was successful
+  | 'completed_with_warnings' // The download available for troubleshooting - it **should** show a meaningful error
+  | 'pending' // Report job is waiting to be claimed
+  | 'processing' // Report job has been claimed and is executing
+  | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
+
+/*
+ * Info API response: to avoid unnecessary large payloads on a network, the
+ * report query results do not include `payload.headers` or `output.content`,
+ * which can be long strings of meaningless text
+ */
+interface ReportSimple extends Omit<ReportSource, 'payload' | 'output'> {
+  payload: Omit<ReportSource['payload'], 'headers'>;
+  output?: Omit<ReportOutput, 'content'>; // is undefined for report jobs that are not completed
+  queue_time_ms?: number;
+  execution_time_ms?: number;
+}
+
+/*
+ * The response format for all of the report job APIs
+ */
+export interface ReportApiJSON extends ReportSimple {
+  id: string;
+  index: string;
+}
+
+export interface LicenseCheckResults {
+  enableLinks: boolean;
+  showLinks: boolean;
+  message: string;
+}

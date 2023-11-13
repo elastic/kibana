@@ -8,18 +8,16 @@
 import { omit } from 'lodash';
 import moment from 'moment';
 import Puid from 'puid';
-import { JOB_STATUSES } from '../../../common/constants';
+
+import { JOB_STATUSES } from '@kbn/reporting-common';
 import {
   ReportApiJSON,
-  ReportDocument,
   ReportDocumentHead,
   ReportFields,
   ReportSource,
-} from '../../../common/types';
-import type { ReportTaskParams } from '../tasks';
+} from '@kbn/reporting-common/types';
 
-export type { ReportDocument };
-export type { ReportApiJSON, ReportSource };
+import type { ReportTaskParams } from '../tasks';
 
 const puid = new Puid();
 export const MIGRATION_VERSION = '7.14.0';

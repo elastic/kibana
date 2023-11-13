@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { estypes, errors, TransportResult } from '@elastic/elasticsearch';
+import { TransportResult, errors, estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import { REPORTING_SYSTEM_INDEX } from '@kbn/reporting-common';
+import { ReportApiJSON, ReportSource } from '@kbn/reporting-common/types';
 import type { ReportingCore } from '../../..';
-import { REPORTING_SYSTEM_INDEX } from '../../../../common/constants';
-import type { ReportApiJSON, ReportSource } from '../../../../common/types';
 import { statuses } from '../../../lib/statuses';
 import { Report } from '../../../lib/store';
 import { runtimeFieldKeys, runtimeFields } from '../../../lib/store/runtime_fields';

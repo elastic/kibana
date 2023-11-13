@@ -10,10 +10,17 @@ import React from 'react';
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { BaseParamsV2, ReportOutput, TaskRunResult } from '@kbn/reporting-common/types';
-
-import { JobId, JobTypes, JOB_STATUSES } from '../../common/constants';
-import type { ReportApiJSON, ReportFields, ReportSource } from '../../common/types';
+import { JOB_STATUSES } from '@kbn/reporting-common';
+import type {
+  BaseParamsV2,
+  JobId,
+  ReportApiJSON,
+  ReportFields,
+  ReportOutput,
+  ReportSource,
+  TaskRunResult,
+} from '@kbn/reporting-common/types';
+import { JobTypes } from '../../common/constants';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUSES;
 

@@ -9,6 +9,7 @@
 export const PLUGIN_ID = 'reporting';
 
 export const REPORTING_TRANSACTION_TYPE = PLUGIN_ID;
+
 export const REPORTING_REDIRECT_LOCATOR_STORE_KEY = '__REPORTING_REDIRECT_LOCATOR_STORE_KEY__';
 
 export const UI_SETTINGS_SEARCH_INCLUDE_FROZEN = 'search:includeFrozen';
@@ -23,6 +24,11 @@ export const LICENSE_TYPE_GOLD = 'gold' as const;
 export const LICENSE_TYPE_PLATINUM = 'platinum' as const;
 export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 
+export const REPORTING_SYSTEM_INDEX = '.reporting';
+
+export const JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY =
+  'xpack.reporting.jobCompletionNotifications';
+
 /**
  * A way to get the client side route for the reporting redirect app.
  *
@@ -32,3 +38,26 @@ export const LICENSE_TYPE_ENTERPRISE = 'enterprise' as const;
 export const getRedirectAppPath = () => {
   return '/app/reportingRedirect';
 };
+
+export const ILM_POLICY_NAME = 'kibana-reporting';
+
+// Usage counter types
+export const API_USAGE_COUNTER_TYPE = 'reportingApi';
+export const API_USAGE_ERROR_TYPE = 'reportingApiError';
+
+// Management UI route
+export const REPORTING_MANAGEMENT_HOME = '/app/management/insightsAndAlerting/reporting';
+
+// Statuses
+export enum JOB_STATUSES {
+  PENDING = 'pending',
+  PROCESSING = 'processing',
+  COMPLETED = 'completed',
+  FAILED = 'failed',
+  WARNINGS = 'completed_with_warnings',
+}
+
+// Job params require a `version` field as of 7.15.0. For older jobs set with
+// automation that have no version value in the job params, we assume the
+// intended version is 7.14.0
+export const UNVERSIONED_VERSION = '7.14.0';
