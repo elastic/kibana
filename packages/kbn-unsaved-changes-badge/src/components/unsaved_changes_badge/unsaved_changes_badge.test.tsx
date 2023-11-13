@@ -7,8 +7,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/dom';
-import { render, act } from '@testing-library/react';
+import { render, act, screen, waitFor } from '@testing-library/react';
 import { UnsavedChangesBadge } from './unsaved_changes_badge';
 
 describe('<UnsavedChangesBadge />', () => {

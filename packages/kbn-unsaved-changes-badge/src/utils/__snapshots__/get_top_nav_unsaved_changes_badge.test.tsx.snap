@@ -37,29 +37,25 @@ exports[`getTopNavUnsavedChangesBadge() should work correctly 1`] = `
 
 exports[`getTopNavUnsavedChangesBadge() should work correctly 2`] = `
 <div
-  class="euiContextMenuPanel"
+  class="euiContextMenuPanel emotion-euiContextMenuPanel"
   data-test-subj="unsavedChangesBadgeMenuPanel"
   tabindex="-1"
 >
   <div>
     <button
-      class="euiContextMenuItem euiContextMenuItem--small"
+      class="euiContextMenuItem emotion-euiContextMenuItem-s-center"
       data-test-subj="revertUnsavedChangesButton"
       type="button"
     >
       <span
-        class="euiContextMenu__itemLayout"
+        class="euiContextMenu__icon emotion-euiContextMenu__icon"
+        color="inherit"
+        data-euiicon-type="editorUndo"
+      />
+      <span
+        class="euiContextMenuItem__text emotion-euiContextMenuItem__text-s"
       >
-        <span
-          class="euiContextMenu__icon"
-          color="inherit"
-          data-euiicon-type="editorUndo"
-        />
-        <span
-          class="euiContextMenuItem__text"
-        >
-          Revert changes
-        </span>
+        Revert changes
       </span>
     </button>
   </div>

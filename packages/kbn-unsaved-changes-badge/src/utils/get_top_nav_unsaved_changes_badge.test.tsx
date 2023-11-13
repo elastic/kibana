@@ -6,8 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { render } from '@testing-library/react';
-import { waitFor, screen } from '@testing-library/dom';
+import { render, waitFor, screen } from '@testing-library/react';
 import { getTopNavUnsavedChangesBadge } from './get_top_nav_unsaved_changes_badge';
 
 describe('getTopNavUnsavedChangesBadge()', () => {
