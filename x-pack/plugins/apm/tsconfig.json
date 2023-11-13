@@ -108,7 +108,8 @@
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/observability-get-padded-alert-time-range-util",
     "@kbn/core-lifecycle-server",
-    "@kbn/core-ui-settings-browser"
+    "@kbn/core-ui-settings-browser",
+    "@kbn/code-editor",
   ],
   "exclude": ["target/**/*"]
 }

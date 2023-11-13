@@ -7,4 +7,5 @@
  */
 
 export { CodeEditor, type CodeEditorProps } from './code_editor';
+export { CodeEditorField } from './code_editor_field';
 export * from './languages/constants';
