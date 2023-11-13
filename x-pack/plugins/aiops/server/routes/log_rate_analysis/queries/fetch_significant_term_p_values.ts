@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ElasticsearchClient } from '@kbn/core/server';
 
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import {
   createRandomSamplerWrapper,
   type RandomSamplerWrapper,
@@ -111,13 +111,13 @@ export const fetchSignificantTermPValues = async (
   sampleProbability: number = 1,
   emitError: (m: string) => void,
   abortSignal?: AbortSignal
-): Promise<SignificantTerm[]> => {
+): Promise<SignificantItem[]> => {
   const randomSamplerWrapper = createRandomSamplerWrapper({
     probability: sampleProbability,
     seed: RANDOM_SAMPLER_SEED,
   });
 
-  const result: SignificantTerm[] = [];
+  const result: SignificantItem[] = [];
 
   const settledPromises = await Promise.allSettled(
     fieldNames.map((fieldName) =>
@@ -168,7 +168,7 @@ export const fetchSignificantTermPValues = async (
       if (typeof pValue === 'number' && pValue < LOG_RATE_ANALYSIS_SETTINGS.P_VALUE_THRESHOLD) {
         result.push({
           key: `${fieldName}:${String(bucket.key)}`,
-          type: SIGNIFICANT_TERM_TYPE.KEYWORD,
+          type: SIGNIFICANT_ITEM_TYPE.KEYWORD,
           fieldName,
           fieldValue: String(bucket.key),
           doc_count: bucket.doc_count,
