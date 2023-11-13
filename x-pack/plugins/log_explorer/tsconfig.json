@@ -33,7 +33,8 @@
     "@kbn/deeplinks-observability",
     "@kbn/field-formats-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/xstate-utils"
+    "@kbn/xstate-utils",
+    "@kbn/core-http-browser"
   ],
   "exclude": [
     "target/**/*"
