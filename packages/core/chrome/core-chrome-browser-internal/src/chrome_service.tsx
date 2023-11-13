@@ -223,7 +223,12 @@ export class ChromeService {
 
     const navControls = this.navControls.start();
     const navLinks = this.navLinks.start({ application, http });
-    const projectNavigation = this.projectNavigation.start({ application, navLinks, http });
+    const projectNavigation = this.projectNavigation.start({
+      application,
+      navLinks,
+      http,
+      chromeBreadcrumbs$: breadcrumbs$,
+    });
     const recentlyAccessed = await this.recentlyAccessed.start({ http });
     const docTitle = this.docTitle.start();
     const { customBranding$ } = customBranding;
@@ -288,6 +293,11 @@ export class ChromeService {
     const setProjectName = (projectName: string) => {
       validateChromeStyle();
       projectNavigation.setProjectName(projectName);
+    };
+
+    const setProjectUrl = (projectUrl: string) => {
+      validateChromeStyle();
+      projectNavigation.setProjectUrl(projectUrl);
     };
 
     const isIE = () => {
@@ -382,8 +392,6 @@ export class ChromeService {
                 loadingCount$={http.getLoadingCount$()}
                 headerBanner$={headerBanner$.pipe(takeUntil(this.stop$))}
                 homeHref$={projectNavigation.getProjectHome$()}
-                projectsUrl$={projectNavigation.getProjectsUrl$()}
-                projectName$={projectNavigation.getProjectName$()}
                 docLinks={docLinks}
                 kibanaVersion={injectedMetadata.getKibanaVersion()}
                 prependBasePath={http.basePath.prepend}
@@ -516,6 +524,7 @@ export class ChromeService {
       project: {
         setHome: setProjectHome,
         setProjectsUrl,
+        setProjectUrl,
         setProjectName,
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,

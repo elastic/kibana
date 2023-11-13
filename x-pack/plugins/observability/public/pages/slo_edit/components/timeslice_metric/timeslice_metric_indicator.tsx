@@ -18,6 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
 import { CreateSLOForm } from '../../types';
 import { DataPreviewChart } from '../common/data_preview_chart';
@@ -130,6 +131,7 @@ export function TimesliceMetricIndicatorTypeForm() {
         <IndexFieldSelector
           indexFields={partitionByFields}
           name="groupBy"
+          defaultValue={ALL_VALUE}
           label={
             <span>
               {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {

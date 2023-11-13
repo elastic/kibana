@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/dom';
-import { cleanup } from '@testing-library/react';
+import { fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
@@ -110,7 +109,7 @@ const mockKibana = () => {
       triggersActionsUi: {
         getAddRuleFlyout: jest
           .fn()
-          // eslint-disable-next-line @kbn/i18n/strings_should_be_translated_with_i18n, @kbn/i18n/strings_should_be_translated_with_formatted_message
+
           .mockReturnValue(<div data-test-subj="add-rule-flyout">Add Rule Flyout</div>),
       },
       uiSettings: {

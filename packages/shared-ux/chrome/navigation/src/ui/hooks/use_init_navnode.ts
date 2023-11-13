@@ -59,7 +59,7 @@ function getNodeStatus(
     if (!hasUserAccessToCloudLink()) return 'remove';
   }
 
-  if (deepLink && deepLink.hidden) return 'remove';
+  if (deepLink && deepLink.hidden) return 'hidden';
 
   return sideNavStatus ?? 'visible';
 }
@@ -118,6 +118,11 @@ function validateNodeProps<
   if (renderAs === 'panelOpener' && !link) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. If renderAs is set to "panelOpener", a "link" must also be provided.`
+    );
+  }
+  if (renderAs === 'item' && !link) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" must also be provided.`
     );
   }
   if (appendHorizontalRule && !isGroup) {
@@ -279,6 +284,10 @@ export const useInitNavNode = <
 
   const registerChildNode = useCallback<RegisterFunction>(
     (childNode) => {
+      if (orderChildrenRef.current[childNode.id] === undefined) {
+        orderChildrenRef.current[childNode.id] = idx.current++;
+      }
+
       const childPath = nodePath ? [...nodePath, childNode.id] : [];
 
       setChildrenNodes((prev) => {
@@ -290,10 +299,6 @@ export const useInitNavNode = <
           },
         };
       });
-
-      if (orderChildrenRef.current[childNode.id] === undefined) {
-        orderChildrenRef.current[childNode.id] = idx.current++;
-      }
 
       return {
         unregister: (childId: string) => {

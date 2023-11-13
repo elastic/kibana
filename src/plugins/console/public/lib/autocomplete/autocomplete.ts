@@ -26,6 +26,7 @@ import * as utils from '../utils';
 import { populateContext } from './engine';
 import type { AutoCompleteContext, DataAutoCompleteRulesOneOf, ResultTerm } from './types';
 import { URL_PATH_END_MARKER, ConstantComponent } from './components';
+import { looksLikeTypingIn } from './looks_like_typing_in';
 
 let lastEvaluatedToken: Token | null = null;
 
@@ -1137,44 +1138,8 @@ export default function ({
       return; // wait for the next typing.
     }
 
-    if (
-      lastEvaluatedToken.position.column + 1 === currentToken.position.column &&
-      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      (lastEvaluatedToken.type === 'url.slash' || lastEvaluatedToken.type === 'url.comma') &&
-      currentToken.type === 'url.part' &&
-      currentToken.value.length === 1
-    ) {
-      // do not suppress autocomplete for a single character immediately following a slash or comma in URL
-    } else if (
-      lastEvaluatedToken.position.column < currentToken.position.column &&
-      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      lastEvaluatedToken.type === 'method' &&
-      currentToken.type === 'url.part' &&
-      currentToken.value.length === 1
-    ) {
-      // do not suppress autocomplete for a single character following method in URL
-    } else if (
-      lastEvaluatedToken.position.column < currentToken.position.column &&
-      lastEvaluatedToken.position.lineNumber === currentToken.position.lineNumber &&
-      !lastEvaluatedToken.type &&
-      currentToken.type === 'method' &&
-      currentToken.value.length === 1
-    ) {
-      // do not suppress autocompletion for the first character of method
-    } else if (
-      // if the column or the line number have changed for the last token or
-      // user did not provided a new value, then we should not show autocomplete
-      // this guards against triggering autocomplete when clicking around the editor
-      lastEvaluatedToken.position.column !== currentToken.position.column ||
-      lastEvaluatedToken.position.lineNumber !== currentToken.position.lineNumber ||
-      lastEvaluatedToken.value === currentToken.value
-    ) {
-      tracer(
-        'not starting autocomplete since the change looks like a click',
-        lastEvaluatedToken,
-        '->',
-        currentToken
-      );
+    if (!looksLikeTypingIn(lastEvaluatedToken, currentToken, editor)) {
+      tracer('not starting autocomplete', lastEvaluatedToken, '->', currentToken);
       // not on the same place or nothing changed, cache and wait for the next time
       lastEvaluatedToken = currentToken;
       return;

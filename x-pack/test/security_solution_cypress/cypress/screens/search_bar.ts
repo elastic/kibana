@@ -26,9 +26,6 @@ export const ADD_FILTER_FORM_FIELD_OPTION = (value: string) =>
 export const ADD_FILTER_FORM_OPERATOR_FIELD =
   '[data-test-subj="filterOperatorList"] input[data-test-subj="comboBoxSearchInput"]';
 
-export const ADD_FILTER_FORM_OPERATOR_OPTION_IS =
-  '[data-test-subj="comboBoxOptionsList filterOperatorList-optionsList"] button[title="is"]';
-
 export const ADD_FILTER_FORM_FILTER_VALUE_INPUT = '[data-test-subj="filterParams"] input';
 
 export const ADD_FILTER_FORM_SAVE_BUTTON = '[data-test-subj="saveFilter"]';

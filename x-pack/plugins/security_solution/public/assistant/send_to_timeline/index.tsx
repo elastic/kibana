@@ -26,9 +26,11 @@ import {
   applyKqlFilterQuery,
   setActiveTabTimeline,
   setFilters,
+  showTimeline,
   updateDataView,
   updateEqlOptions,
 } from '../../timelines/store/timeline/actions';
+import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -50,6 +52,8 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
 }) => {
   const dispatch = useDispatch();
 
+  const { discoverStateContainer } = useDiscoverInTimelineContext();
+
   const getDataViewsSelector = useMemo(
     () => sourcererSelectors.getSourcererDataViewsSelector(),
     []
@@ -68,6 +72,30 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
 
   const configureAndOpenTimeline = useCallback(() => {
     if (dataProviders || filters) {
+      // If esql, don't reset filters or mess with dataview & time range
+      if (dataProviders?.[0]?.queryType === 'esql' || dataProviders?.[0]?.queryType === 'sql') {
+        discoverStateContainer.current?.appState.update({
+          query: {
+            query: dataProviders[0].kqlQuery,
+            language: 'esql',
+          },
+        });
+
+        dispatch(
+          setActiveTabTimeline({
+            id: TimelineId.active,
+            activeTab: TimelineTabs.esql,
+          })
+        );
+        dispatch(
+          showTimeline({
+            id: TimelineId.active,
+            show: true,
+          })
+        );
+        return;
+      }
+
       // Reset the current timeline
       if (timeRange) {
         clearTimeline({
@@ -147,6 +175,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
             break;
         }
       }
+
       // Use filters if more than a certain amount of ids for dom performance.
       if (filters) {
         dispatch(
@@ -172,13 +201,14 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     }
   }, [
     dataProviders,
-    clearTimeline,
-    dispatch,
-    defaultDataView.id,
-    signalIndexName,
     filters,
     timeRange,
     keepDataView,
+    dispatch,
+    clearTimeline,
+    discoverStateContainer,
+    defaultDataView.id,
+    signalIndexName,
   ]);
 
   return asEmptyButton ? (

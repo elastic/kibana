@@ -19,7 +19,14 @@ import { disableExpandableFlyoutAdvancedSettings, loadPage } from '../../tasks/c
 describe(
   'Policy Details',
   {
-    tags: ['@ess', '@serverless', '@brokenInServerless'],
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless!
+      // The `disableExpandableFlyoutAdvancedSettings()` fails because the API
+      // `internal/kibana/settings` is not accessible in serverless
+      '@brokenInServerless',
+    ],
     env: { ftrConfig: { enableExperimental: ['protectionUpdatesEnabled'] } },
   },
   () => {
@@ -32,8 +39,8 @@ describe(
       describe('Renders and saves protection updates', () => {
         let indexedPolicy: IndexedFleetEndpointPolicyResponse;
         let policy: PolicyData;
-        const today = moment.utc();
-        const formattedToday = today.format('MMMM DD, YYYY');
+        const defaultDate = moment.utc().subtract(1, 'days');
+        const formattedDefaultDate = defaultDate.format('MMMM DD, YYYY');
 
         beforeEach(() => {
           login();
@@ -66,7 +73,7 @@ describe(
           cy.getByTestSubj('protection-updates-deployed-version').contains('latest');
           cy.getByTestSubj('protection-updates-manifest-name-version-to-deploy-title');
           cy.getByTestSubj('protection-updates-version-to-deploy-picker').within(() => {
-            cy.get('input').should('have.value', formattedToday);
+            cy.get('input').should('have.value', formattedDefaultDate);
           });
           cy.getByTestSubj('protection-updates-manifest-name-note-title');
           cy.getByTestSubj('protection-updates-manifest-note');
@@ -84,7 +91,7 @@ describe(
           cy.getByTestSubj('protectionUpdatesSaveButton').click();
           cy.wait('@policy').then(({ request, response }) => {
             expect(request.body.inputs[0].config.policy.value.global_manifest_version).to.equal(
-              today.format('YYYY-MM-DD')
+              defaultDate.format('YYYY-MM-DD')
             );
             expect(response?.statusCode).to.equal(200);
           });
@@ -95,7 +102,7 @@ describe(
           });
 
           cy.getByTestSubj('protectionUpdatesSuccessfulMessage');
-          cy.getByTestSubj('protection-updates-deployed-version').contains(formattedToday);
+          cy.getByTestSubj('protection-updates-deployed-version').contains(formattedDefaultDate);
           cy.getByTestSubj('protection-updates-manifest-note').contains(testNote);
           cy.getByTestSubj('protectionUpdatesSaveButton').should('be.disabled');
         });
@@ -203,7 +210,7 @@ describe(
           const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
           beforeEach(() => {
-            login(ROLE.endpoint_security_policy_management_read);
+            login(ROLE.t3_analyst);
             disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {
@@ -251,7 +258,7 @@ describe(
           const oneWeekAgo = moment.utc().subtract(1, 'weeks');
 
           beforeEach(() => {
-            login(ROLE.endpoint_security_policy_management_read);
+            login(ROLE.t3_analyst);
             disableExpandableFlyoutAdvancedSettings();
             getEndpointIntegrationVersion().then((version) => {
               createAgentPolicyTask(version).then((data) => {

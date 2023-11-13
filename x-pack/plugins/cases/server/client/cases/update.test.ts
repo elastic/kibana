@@ -920,7 +920,7 @@ describe('update', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
@@ -1156,7 +1156,7 @@ describe('update', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: first_key"`
+        `"Failed to update case, ids: [{\\"id\\":\\"mock-id-1\\",\\"version\\":\\"WzAsMV0=\\"}]: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 

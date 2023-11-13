@@ -6,26 +6,17 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { SecurityPageName, type NavigationLink } from '@kbn/security-solution-navigation';
+import { type NavigationLink } from '@kbn/security-solution-navigation';
 import { useGetLinkProps } from '@kbn/security-solution-navigation/links';
 import { SolutionSideNavItemPosition } from '@kbn/security-solution-side-nav';
 import { useNavLinks } from '../../common/hooks/use_nav_links';
-import { ExternalPageName } from '../links/constants';
 import type { ProjectSideNavItem } from './types';
-import type { ProjectPageName } from '../links/types';
+import type { ProjectNavigationLink, ProjectPageName } from '../links/types';
+import { isBottomNavItemId } from '../links/util';
 
 type GetLinkProps = (link: NavigationLink) => {
   href: string & Partial<ProjectSideNavItem>;
 };
-
-const isBottomNavItem = (id: string) =>
-  id === SecurityPageName.landing ||
-  id === ExternalPageName.devTools ||
-  id === ExternalPageName.management ||
-  id === ExternalPageName.integrationsSecurity ||
-  id === ExternalPageName.cloudUsersAndRoles ||
-  id === ExternalPageName.cloudPerformance ||
-  id === ExternalPageName.cloudBilling;
 
 /**
  * Formats generic navigation links into the shape expected by the `SolutionSideNav`
@@ -52,7 +43,7 @@ const formatLink = (
     id: navLink.id,
     label: navLink.title,
     iconType: navLink.sideNavIcon,
-    position: isBottomNavItem(navLink.id)
+    position: isBottomNavItemId(navLink.id)
       ? SolutionSideNavItemPosition.bottom
       : SolutionSideNavItemPosition.top,
     ...getLinkProps(navLink),
@@ -66,6 +57,15 @@ const formatLink = (
  */
 export const useSideNavItems = (): ProjectSideNavItem[] => {
   const navLinks = useNavLinks();
+  return useFormattedSideNavItems(navLinks);
+};
+
+/**
+ * Returns all the formatted SideNavItems, including external links
+ */
+export const useFormattedSideNavItems = (
+  navLinks: ProjectNavigationLink[]
+): ProjectSideNavItem[] => {
   const getKibanaLinkProps = useGetLinkProps();
 
   const getLinkProps = useCallback<GetLinkProps>(

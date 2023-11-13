@@ -8,7 +8,6 @@
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
-
 export { SecurityPageName } from '@kbn/security-solution-navigation';
 
 /**
@@ -60,7 +59,6 @@ export const DEFAULT_INTERVAL_TYPE = 'manual' as const;
 export const DEFAULT_INTERVAL_VALUE = 300000 as const; // ms
 export const DEFAULT_TIMEPICKER_QUICK_RANGES = 'timepicker:quickRanges' as const;
 export const SCROLLING_DISABLED_CLASS_NAME = 'scrolling-disabled' as const;
-export const FULL_SCREEN_TOGGLED_CLASS_NAME = 'fullScreenToggled' as const;
 export const NO_ALERT_INDEX = 'no-alert-index-049FC71A-4C2C-446F-9901-37XMC5024C51' as const;
 export const ENDPOINT_METADATA_INDEX = 'metrics-endpoint.metadata-*' as const;
 export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
@@ -507,3 +505,8 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+/**
+ * Max length for the comments within security solution
+ */
+export const MAX_COMMENT_LENGTH = 30000 as const;

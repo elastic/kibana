@@ -75,6 +75,10 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   }
 
   isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
     const isSourceLoading = super.isLayerLoading(zoom);
     return isSourceLoading ? true : this._isLoadingJoins();
   }
@@ -139,7 +143,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     // TODO ES MVT specific - move to es_tiled_vector_layer implementation
     //
     if (this.getSource().getType() === SOURCE_TYPES.ES_GEO_GRID) {
-      const { docCount } = getAggsMeta(this._getMetaFromTiles());
+      const { docCount } = getAggsMeta(this._getTileMetaFeatures());
       return docCount === 0
         ? NO_RESULTS_ICON_AND_TOOLTIPCONTENT
         : {
@@ -159,7 +163,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
     }
 
     const { totalFeaturesCount, tilesWithFeatures, tilesWithTrimmedResults } = getHitsMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       maxResultWindow
     );
 
@@ -540,7 +544,7 @@ export class MvtVectorLayer extends AbstractVectorLayer {
   async getStyleMetaDescriptorFromLocalFeatures(): Promise<StyleMetaDescriptor | null> {
     const { joinPropertiesMap } = this._getJoinResults();
     return await pluckStyleMeta(
-      this._getMetaFromTiles(),
+      this._getTileMetaFeatures(),
       joinPropertiesMap,
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()

@@ -8,8 +8,9 @@
 
 import { from } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
-import { getKbnServerError, KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { getKbnSearchError, KbnSearchError } from '../../report_search_error';
 import type { ISearchStrategy } from '../../types';
+import { sanitizeRequestParams } from '../../sanitize_request_params';
 
 const ES_TIMEOUT_IN_MS = 120000;
 
@@ -21,7 +22,7 @@ export const esqlSearchStrategyProvider = (
    * @param request
    * @param options
    * @param deps
-   * @throws `KbnServerError`
+   * @throws `KbnSearchError`
    * @returns `Observable<IEsSearchResponse<any>>`
    */
   search: (request, { abortSignal, ...options }, { esClient, uiSettingsClient }) => {
@@ -39,13 +40,13 @@ export const esqlSearchStrategyProvider = (
     // Only default index pattern type is supported here.
     // See ese for other type support.
     if (request.indexType) {
-      throw new KbnServerError(`Unsupported index pattern type ${request.indexType}`, 400);
+      throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
     const search = async () => {
       try {
         const { terminateAfter, ...requestParams } = request.params ?? {};
-        const { headers, body } = await esClient.asCurrentUser.transport.request(
+        const { headers, body, meta } = await esClient.asCurrentUser.transport.request(
           {
             method: 'POST',
             path: '/_query',
@@ -64,10 +65,13 @@ export const esqlSearchStrategyProvider = (
           rawResponse: body,
           isPartial: false,
           isRunning: false,
+          ...(meta?.request?.params
+            ? { requestParams: sanitizeRequestParams(meta?.request?.params) }
+            : {}),
           warning: headers?.warning,
         };
       } catch (e) {
-        throw getKbnServerError(e);
+        throw getKbnSearchError(e);
       }
     };
 

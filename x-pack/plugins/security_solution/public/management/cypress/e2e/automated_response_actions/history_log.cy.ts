@@ -14,7 +14,14 @@ import { login, ROLE } from '../../tasks/login';
 
 describe(
   'Response actions history page',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless! Currently using a custom role that is not available in serverless
+      '@brokenInServerless',
+    ],
+  },
   () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let endpointDataWithAutomated: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;

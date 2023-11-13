@@ -782,7 +782,8 @@
                 "docId": "kibGuidedOnboardingPluginApi",
                 "section": "def-public.GuidedOnboardingPluginStart",
                 "text": "GuidedOnboardingPluginStart"
-              }
+              },
+              " | undefined"
             ],
             "path": "x-pack/plugins/fleet/public/plugin.ts",
             "deprecated": false,
@@ -22508,6 +22509,20 @@
           },
           {
             "parentPluginId": "fleet",
+            "id": "def-common.PackageSpecManifest.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "agent",
+            "description": [],
+            "signature": [
+              "{ privileges?: { root?: boolean | undefined; } | undefined; } | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/package_spec.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
             "id": "def-common.PackageSpecManifest.asset_tags",
             "type": "Array",
             "tags": [],
@@ -22857,6 +22872,36 @@
             "description": [],
             "signature": [
               "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.lifecycle]",
+            "description": [],
+            "signature": [
+              "RegistryDataStreamLifecycle",
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "fleet",
+            "id": "def-common.RegistryDataStream.RegistryDataStreamKeys.agent",
+            "type": "Object",
+            "tags": [],
+            "label": "[RegistryDataStreamKeys.agent]",
+            "description": [],
+            "signature": [
+              "RegistryAgent",
               " | undefined"
             ],
             "path": "x-pack/plugins/fleet/common/types/models/epm.ts",
@@ -24998,6 +25043,8 @@
         "description": [],
         "signature": [
           "NewElasticsearchOutput",
+          " | ",
+          "NewRemoteElasticsearchOutput",
           " | ",
           "NewLogstashOutput",
           " | ",

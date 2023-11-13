@@ -93,6 +93,8 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
         },
         body,
         path,
+        // Despite AWS docs, this value does not always get inferred. We need to always send it
+        service: 'bedrock',
       },
       {
         secretAccessKey: this.secrets.secret,

@@ -235,11 +235,11 @@ export const RiskScoreEnableSection = () => {
   let initRiskEngineErrors: string[] = [];
 
   if (initRiskEngineMutation.isError) {
-    const errorBody = initRiskEngineMutation.error.body.message;
+    const errorBody = initRiskEngineMutation.error.body;
     if (errorBody?.full_error?.errors) {
       initRiskEngineErrors = errorBody.full_error?.errors;
     } else {
-      initRiskEngineErrors = [errorBody];
+      initRiskEngineErrors = [errorBody.message];
     }
   }
 
@@ -266,10 +266,10 @@ export const RiskScoreEnableSection = () => {
         </EuiTitle>
         {initRiskEngineMutation.isError && <RiskScoreErrorPanel errors={initRiskEngineErrors} />}
         {disableRiskEngineMutation.isError && (
-          <RiskScoreErrorPanel errors={[disableRiskEngineMutation.error.body.message.message]} />
+          <RiskScoreErrorPanel errors={[disableRiskEngineMutation.error.body.message]} />
         )}
         {enableRiskEngineMutation.isError && (
-          <RiskScoreErrorPanel errors={[enableRiskEngineMutation.error.body.message.message]} />
+          <RiskScoreErrorPanel errors={[enableRiskEngineMutation.error.body.message]} />
         )}
 
         <EuiSpacer size="m" />

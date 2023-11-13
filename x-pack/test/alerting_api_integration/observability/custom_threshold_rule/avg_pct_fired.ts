@@ -11,7 +11,7 @@ import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
@@ -37,6 +37,7 @@ export default function ({ getService }: FtrProviderContext) {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_NAME = 'data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
     let infraDataIndex: string;
     let actionId: string;
@@ -48,7 +49,7 @@ export default function ({ getService }: FtrProviderContext) {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
       await createDataView({
         supertest,
-        name: DATE_VIEW,
+        name: DATE_VIEW_NAME,
         id: DATA_VIEW_ID,
         title: DATE_VIEW,
       });
@@ -213,9 +214,9 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 2.5 in the last 5 mins. Alert when > 0.5.'
+          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('2.5');
+        expect(resp.hits.hits[0]._source?.value).eql('250%');
       });
     });
   });

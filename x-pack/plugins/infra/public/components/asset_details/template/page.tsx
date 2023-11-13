@@ -15,7 +15,7 @@ import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
-import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { ContentTemplateProps } from '../types';
@@ -23,7 +23,7 @@ import { getIntegrationsAvailable } from '../utils';
 
 export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
-  const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
+  const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
   const { asset } = useAssetDetailsRenderPropsContext();
   const { actionMenuHeight } = useKibanaHeader();

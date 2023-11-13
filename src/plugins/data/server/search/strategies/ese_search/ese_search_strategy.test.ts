@@ -8,6 +8,7 @@
 
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import { KbnServerError } from '@kbn/kibana-utils-plugin/server';
+import { KbnSearchError } from '../../report_search_error';
 import { errors } from '@elastic/elasticsearch';
 import * as indexNotFoundException from '../../../../common/search/test_data/index_not_found_exception.json';
 import * as xContentParseException from '../../../../common/search/test_data/x_content_parse_exception.json';
@@ -133,6 +134,30 @@ describe('ES search strategy', () => {
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
         expect(request).toHaveProperty('keep_alive', '60000ms');
+      });
+
+      it('allows overriding keep_alive and wait_for_completion_timeout', async () => {
+        mockGetCaller.mockResolvedValueOnce(mockAsyncResponse);
+
+        const params = {
+          index: 'logstash-*',
+          body: { query: {} },
+          wait_for_completion_timeout: '10s',
+          keep_alive: '5m',
+        };
+        const esSearch = await enhancedEsSearchStrategyProvider(
+          mockLegacyConfig$,
+          mockSearchConfig,
+          mockLogger
+        );
+
+        await esSearch.search({ id: 'foo', params }, {}, mockDeps).toPromise();
+
+        expect(mockGetCaller).toBeCalled();
+        const request = mockGetCaller.mock.calls[0][0];
+        expect(request.id).toEqual('foo');
+        expect(request).toHaveProperty('wait_for_completion_timeout', '10s');
+        expect(request).toHaveProperty('keep_alive', '5m');
       });
 
       it('sets transport options on POST requests', async () => {
@@ -456,14 +481,14 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSubmitCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(404);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(indexNotFoundException);
@@ -481,14 +506,14 @@ describe('ES search strategy', () => {
         mockLogger
       );
 
-      let err: KbnServerError | undefined;
+      let err: KbnSearchError | undefined;
       try {
         await esSearch.search({ params }, {}, mockDeps).toPromise();
       } catch (e) {
         err = e;
       }
       expect(mockSubmitCaller).toBeCalled();
-      expect(err).toBeInstanceOf(KbnServerError);
+      expect(err).toBeInstanceOf(KbnSearchError);
       expect(err?.statusCode).toBe(500);
       expect(err?.message).toBe(errResponse.message);
       expect(err?.errBody).toBe(undefined);

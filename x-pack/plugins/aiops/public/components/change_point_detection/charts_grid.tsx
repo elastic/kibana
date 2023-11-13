@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import React, { type FC, useMemo, useState, useEffect, useRef, useCallback } from 'react';
+import React, {
+  type FC,
+  useMemo,
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  CSSProperties,
+} from 'react';
 import {
   EuiBadge,
   EuiDescriptionList,
@@ -53,7 +61,11 @@ export const ChartsGrid: FC<{
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
   );
 
-  const onLoadCallback = useCallback(
+  /**
+   * Callback to track render of each chart component
+   * to report when all charts are ready.
+   */
+  const onChartRenderCompleteCallback = useCallback(
     (chartId: number, isLoading: boolean) => {
       if (!onRenderComplete) return;
       loadCounter.current[chartId] = isLoading;
@@ -77,7 +89,7 @@ export const ChartsGrid: FC<{
           v.timestamp
         }_${v.p_value}`;
         return (
-          <EuiFlexItem key={key}>
+          <EuiFlexItem key={key} style={style}>
             <EuiPanel paddingSize="s" hasBorder hasShadow={false}>
               <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize={'s'}>
                 <EuiFlexItem grow={false}>
@@ -149,7 +161,12 @@ export const ChartsGrid: FC<{
                 annotation={v}
                 interval={interval}
                 onLoading={(isLoading) => {
-                  onLoadCallback(index, isLoading);
+                  if (isLoading) {
+                    onChartRenderCompleteCallback(index, true);
+                  }
+                }}
+                onRenderComplete={() => {
+                  onChartRenderCompleteCallback(index, false);
                 }}
               />
             </EuiPanel>

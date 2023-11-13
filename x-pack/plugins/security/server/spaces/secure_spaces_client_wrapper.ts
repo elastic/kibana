@@ -81,10 +81,13 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
 
     // Collect all privileges which need to be checked
     const allPrivileges = Object.entries(PURPOSE_PRIVILEGE_MAP).reduce(
-      (acc, [getSpacesPurpose, privilegeFactory]) =>
-        !includeAuthorizedPurposes && getSpacesPurpose !== purpose
-          ? acc
-          : { ...acc, [getSpacesPurpose]: privilegeFactory(this.authorization) },
+      (acc, [getSpacesPurpose, privilegeFactory]) => {
+        if (!includeAuthorizedPurposes && getSpacesPurpose !== purpose) {
+          return acc;
+        }
+        acc[getSpacesPurpose as GetAllSpacesPurpose] = privilegeFactory(this.authorization);
+        return acc;
+      },
       {} as Record<GetAllSpacesPurpose, string[]>
     );
 
@@ -117,7 +120,8 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
             const requiredActions = privilegeFactory(this.authorization);
             const hasAllRequired = checkHasAllRequired(space, requiredActions);
             hasAnyAuthorization = hasAnyAuthorization || hasAllRequired;
-            return { ...acc, [purposeKey]: hasAllRequired };
+            acc[purposeKey as GetAllSpacesPurpose] = hasAllRequired;
+            return acc;
           },
           {} as Record<GetAllSpacesPurpose, boolean>
         );

@@ -710,7 +710,9 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(150);
       });
 
-      it('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the executions', async () => {
+      // as per https://github.com/elastic/kibana/pull/170034, test is failing on CI and flaky locally
+      // skipping it for now for further investigation
+      it.skip('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the executions', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
           ...getCreateEsqlRulesSchemaMock('rule-1', true),

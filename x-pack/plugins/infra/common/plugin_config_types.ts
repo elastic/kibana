@@ -33,6 +33,7 @@ export interface InfraConfig {
     inventoryThresholdAlertRuleEnabled: boolean;
     metricThresholdAlertRuleEnabled: boolean;
     logThresholdAlertRuleEnabled: boolean;
+    alertsAndRulesDropdownEnabled: boolean;
   };
 }
 

@@ -4,7 +4,6 @@ exports[`ManageSpacesButton doesn't render if user profile forbids managing spac
 
 exports[`ManageSpacesButton renders as expected 1`] = `
 <EuiButton
-  color="primary"
   data-test-subj="manageSpaces"
   onClick={[Function]}
   size="s"

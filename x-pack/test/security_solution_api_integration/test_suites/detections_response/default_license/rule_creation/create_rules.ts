@@ -467,7 +467,8 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "undefined" supplied to "threshold"',
+            message:
+              '[request body]: type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", type: Invalid literal value, expected "query", type: Invalid literal value, expected "saved_query", saved_id: Required, and 14 more',
             statusCode: 400,
           });
         });
@@ -510,7 +511,7 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).to.eql({
             error: 'Bad Request',
-            message: '[request body]: Invalid value "0" supplied to "threshold,value"',
+            message: '[request body]: threshold.value: Number must be greater than or equal to 1',
             statusCode: 400,
           });
         });
@@ -539,6 +540,44 @@ export default ({ getService }: FtrProviderContext) => {
             message: ['Cardinality of a field that is being aggregated on is always 1'],
             status_code: 400,
           });
+        });
+      });
+
+      describe('investigation_fields', () => {
+        it('should create a rule with investigation_fields', async () => {
+          const rule = {
+            ...getSimpleRule(),
+            investigation_fields: {
+              field_names: ['host.name'],
+            },
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(rule)
+            .expect(200);
+
+          expect(body.investigation_fields).to.eql({
+            field_names: ['host.name'],
+          });
+        });
+
+        it('should NOT create a rule with legacy investigation_fields', async () => {
+          const rule = {
+            ...getSimpleRule(),
+            investigation_fields: ['host.name'],
+          };
+          const { body } = await supertest
+            .post(DETECTION_ENGINE_RULES_URL)
+            .set('kbn-xsrf', 'true')
+            .set('elastic-api-version', '2023-10-31')
+            .send(rule)
+            .expect(400);
+
+          expect(body.message).to.eql(
+            '[request body]: investigation_fields: Expected object, received array, type: Invalid literal value, expected "eql", language: Invalid literal value, expected "eql", investigation_fields: Expected object, received array, investigation_fields: Expected object, received array, and 22 more'
+          );
         });
       });
     });

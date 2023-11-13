@@ -9,7 +9,13 @@
 import React, { memo } from 'react';
 import { Redirect } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
-import { AppMountParameters, ChromeBreadcrumb, ScopedHistory } from '@kbn/core/public';
+import {
+  AnalyticsServiceStart,
+  AppMountParameters,
+  ChromeBreadcrumb,
+  ScopedHistory,
+} from '@kbn/core/public';
+import { KibanaErrorBoundary, KibanaErrorBoundaryProvider } from '@kbn/shared-ux-error-boundary';
 import { ManagementAppWrapper } from '../management_app_wrapper';
 import { ManagementLandingPage } from '../landing';
 import { ManagementSection } from '../../utils';
@@ -20,46 +26,61 @@ interface ManagementRouterProps {
   setBreadcrumbs: (crumbs?: ChromeBreadcrumb[], appHistory?: ScopedHistory) => void;
   onAppMounted: (id: string) => void;
   sections: ManagementSection[];
+  analytics: AnalyticsServiceStart;
 }
 
 export const ManagementRouter = memo(
-  ({ history, setBreadcrumbs, onAppMounted, sections, theme$ }: ManagementRouterProps) => {
+  ({
+    history,
+    setBreadcrumbs,
+    onAppMounted,
+    sections,
+    theme$,
+    analytics,
+  }: ManagementRouterProps) => {
     return (
-      <Router history={history}>
-        <Routes>
-          {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .map((app) => (
-                <Route
-                  path={`${app.basePath}`}
-                  component={() => (
-                    <ManagementAppWrapper
-                      app={app}
-                      setBreadcrumbs={setBreadcrumbs}
-                      onAppMounted={onAppMounted}
-                      history={history}
-                      theme$={theme$}
+      <KibanaErrorBoundaryProvider analytics={analytics}>
+        <KibanaErrorBoundary>
+          <Router history={history}>
+            <Routes>
+              {sections.map((section) =>
+                section
+                  .getAppsEnabled()
+                  .map((app) => (
+                    <Route
+                      path={`${app.basePath}`}
+                      component={() => (
+                        <ManagementAppWrapper
+                          app={app}
+                          setBreadcrumbs={setBreadcrumbs}
+                          onAppMounted={onAppMounted}
+                          history={history}
+                          theme$={theme$}
+                        />
+                      )}
                     />
-                  )}
-                />
-              ))
-          )}
-          {sections.map((section) =>
-            section
-              .getAppsEnabled()
-              .filter((app) => app.redirectFrom)
-              .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
-          )}
+                  ))
+              )}
+              {sections.map((section) =>
+                section
+                  .getAppsEnabled()
+                  .filter((app) => app.redirectFrom)
+                  .map((app) => <Redirect path={`/${app.redirectFrom}*`} to={`${app.basePath}*`} />)
+              )}
 
-          <Route
-            path={'/'}
-            component={() => (
-              <ManagementLandingPage setBreadcrumbs={setBreadcrumbs} onAppMounted={onAppMounted} />
-            )}
-          />
-        </Routes>
-      </Router>
+              <Route
+                path={'/'}
+                component={() => (
+                  <ManagementLandingPage
+                    setBreadcrumbs={setBreadcrumbs}
+                    onAppMounted={onAppMounted}
+                  />
+                )}
+              />
+            </Routes>
+          </Router>
+        </KibanaErrorBoundary>
+      </KibanaErrorBoundaryProvider>
     );
   }
 );

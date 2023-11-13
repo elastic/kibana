@@ -48,7 +48,7 @@ const configSchema = schema.object({
     }),
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
         traditional: schema.boolean({ defaultValue: true }),
       }),
     }),
@@ -57,6 +57,7 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {

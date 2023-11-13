@@ -57,7 +57,7 @@ export const configSchema = schema.object({
       },
     })
   ),
-  password: schema.maybe(schema.string()),
+  password: schema.maybe(schema.string({ coerceFromNumber: true })),
   serviceAccountToken: schema.maybe(
     schema.conditional(
       schema.siblingRef('username'),

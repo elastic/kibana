@@ -167,7 +167,6 @@ export type {
   SerializedSearchSourceFields,
   // errors
   IEsError,
-  Reason,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
 

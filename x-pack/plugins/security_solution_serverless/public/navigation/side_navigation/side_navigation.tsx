@@ -20,7 +20,7 @@ import { useObservable } from 'react-use';
 import { css } from '@emotion/react';
 import { partition } from 'lodash/fp';
 import { useSideNavItems } from './use_side_nav_items';
-import { CATEGORIES } from './categories';
+import { CATEGORIES, FOOTER_CATEGORIES } from '../categories';
 import { getProjectPageNameFromNavLinkId } from '../links/util';
 import { useKibana } from '../../common/services';
 import { SideNavigationFooter } from './side_navigation_footer';
@@ -39,12 +39,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
   const { chrome } = useKibana().services;
   const { euiTheme } = useEuiTheme();
   const hasHeaderBanner = useObservable(chrome.hasHeaderBanner$());
-
-  /**
-   * TODO: Uncomment this when we have the getIsSideNavCollapsed API available
-   * const isCollapsed = useObservable(chrome.getIsSideNavCollapsed$());
-   */
-  const isCollapsed = false;
+  const isCollapsed = useObservable(chrome.getIsSideNavCollapsed$());
 
   const items = useSideNavItems();
 
@@ -70,7 +65,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
     padding-right: ${euiTheme.size.s};
   `;
 
-  const collapsedNavItems = useMemo(() => {
+  const collapsedBodyItems = useMemo(() => {
     return CATEGORIES.reduce<EuiCollapsibleNavItemProps[]>((links, category) => {
       const categoryLinks = items.filter((item) => category.linkIds.includes(item.id));
       links.push(...categoryLinks.map((link) => getEuiNavItemFromSideNavItem(link, selectedId)));
@@ -93,7 +88,7 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
           icon="logoSecurity"
           iconProps={{ size: 'm' }}
           data-test-subj="securitySolutionNavHeading"
-          items={isCollapsed ? collapsedNavItems : undefined}
+          items={isCollapsed ? collapsedBodyItems : undefined}
         />
         {!isCollapsed && (
           <div css={bodyStyle}>
@@ -107,7 +102,11 @@ export const SecuritySideNavigation: SideNavComponent = React.memo(function Secu
         )}
       </EuiCollapsibleNavBeta.Body>
       <EuiCollapsibleNavBeta.Footer>
-        <SideNavigationFooter activeNodeId={activeNodeId} items={footerItems} />
+        <SideNavigationFooter
+          activeNodeId={activeNodeId}
+          items={footerItems}
+          categories={FOOTER_CATEGORIES}
+        />
       </EuiCollapsibleNavBeta.Footer>
     </>
   );
