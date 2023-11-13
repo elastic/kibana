@@ -6,31 +6,63 @@
  * Side Public License, v 1.
  */
 
-import {SavedObjectReference} from "@kbn/core-saved-objects-common/src/server_types";
-import {DataViewSpec, DataView, DataViewsPublicPluginStart} from "@kbn/data-views-plugin/public";
+import { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_types';
+import { DataViewSpec, DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import {GenericIndexPatternColumn, PersistedIndexPatternLayer} from "@kbn/lens-plugin/public";
+import { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
+import {
+  ValueBasedLayerColumn,
+  ValueBasedPersistedState,
+} from '@kbn/lens-plugin/public/datasources/value_based/types';
+import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import { AggregateQuery } from '@kbn/es-query';
+import {
+  LensAttributes,
+  LensBaseConfig,
+  LensDataset,
+  // LensDatatableDataset,
+  LensESQLDataset,
+} from './types';
 
 export const getDefaultReferences = (
-    index: string,
-    dataLayerId: string
+  index: string,
+  dataLayerId: string
 ): SavedObjectReference[] => {
-    return [
-        {
-            type: 'index-pattern',
-            id: index,
-            name: `indexpattern-datasource-layer-${dataLayerId}`,
-        },
-    ];
+  return [
+    {
+      type: 'index-pattern',
+      id: index,
+      name: `indexpattern-datasource-layer-${dataLayerId}`,
+    },
+  ];
 };
 
 export const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
-    return {
-        [dataView.id ?? uuidv4()]: {
-            ...dataView.toSpec(),
-        },
-    };
+  return {
+    [dataView.id ?? uuidv4()]: {
+      ...dataView.toSpec(),
+    },
+  };
 };
+
+export const getAdhocDataviews = (dataviews: Record<string, DataView>) => {
+  let adHocDataViews = {};
+  [...new Set(Object.values(dataviews))].forEach((d) => {
+    adHocDataViews = {
+      ...adHocDataViews,
+      ...getAdhocDataView(d),
+    };
+  });
+
+  return adHocDataViews;
+};
+
+export function isFormulaDataset(dataset?: LensDataset) {
+  if (dataset && 'index' in dataset) {
+    return true;
+  }
+  return false;
+}
 
 /**
  * it loads dataview by id or creates an ad-hoc dataview if index pattern is provided
@@ -38,7 +70,11 @@ export const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpe
  * @param dataViewsAPI
  * @param timeField
  */
-export async function getDataView(index: string, dataViewsAPI: DataViewsPublicPluginStart, timeField?: string) {
+export async function getDataView(
+  index: string,
+  dataViewsAPI: DataViewsPublicPluginStart,
+  timeField?: string
+) {
   let dataView: DataView;
 
   try {
@@ -46,36 +82,171 @@ export async function getDataView(index: string, dataViewsAPI: DataViewsPublicPl
   } catch {
     dataView = await dataViewsAPI.create({
       title: index,
-      timeFieldName: timeField || '@timestamp'
+      timeFieldName: timeField || '@timestamp',
     });
   }
 
   return dataView;
 }
 
-export const addLayerColumn = (layer: PersistedIndexPatternLayer, columnName: string, config: GenericIndexPatternColumn, first = false) => {
+export function getDatasetIndex(dataset?: LensDataset) {
+  if (!dataset) return undefined;
+
+  let index: string;
+  let timeFieldName: string = '@timestamp';
+
+  if ('index' in dataset) {
+    index = dataset.index;
+    timeFieldName = dataset.timeFieldName!;
+  } else if ('query' in dataset) {
+    index = 'kibana_sample_data_e*'; // parseIndexFromQuery(config.dataset.query);
+  } else {
+    return undefined;
+  }
+
+  return { index, timeFieldName };
+}
+
+export function buildDatasourceStatesLayer(
+  layer: any,
+  i: number,
+  dataset: any,
+  dataView: DataView | undefined,
+  buildFormulaLayers: (
+    config: unknown,
+    i: number,
+    dataView: DataView
+  ) => PersistedIndexPatternLayer | undefined,
+  getValueColumns: (config: any, i: number) => ValueBasedLayerColumn[]
+): [
+  'textBased' | 'formBased', // | 'valueBased' ,
+  (
+    | PersistedIndexPatternLayer
+    | ValueBasedPersistedState['layers'][0]
+    | TextBasedPersistedState['layers'][0]
+  )
+] {
+  // function buildValueLayer(config: any & LensBaseConfig): ValueBasedPersistedState['layers'][0] {
+  //   const newLayer = {
+  //     table: (config.dataset || layer.dataset) as LensDatatableDataset,
+  //     columns: getValueColumns(layer, i),
+  //   };
+  //
+  //   return newLayer;
+  // }
+
+  function buildESQLLayer(config: any & LensBaseConfig): TextBasedPersistedState['layers'][0] {
+    const columns = getValueColumns(layer, i);
+
+    const newLayer = {
+      index: dataView!.id!,
+      query: { esql: (config.dataset as LensESQLDataset).query } as AggregateQuery,
+      columns,
+      allColumns: columns,
+    };
+
+    return newLayer;
+  }
+
+  if ('query' in dataset) {
+    return ['textBased', buildESQLLayer(layer)];
+  } /* else if ('type' in dataset) {
+    return ['valueBased', buildValueLayer(layer)];
+  } */
+  return ['formBased', buildFormulaLayers(layer, i, dataView!)];
+}
+
+export function buildReferences(dataviews: Record<string, DataView>) {
+  const references = [];
+  for (const layerid in dataviews) {
+    if (dataviews[layerid]) {
+      references.push(...getDefaultReferences(dataviews[layerid].id!, layerid));
+    }
+  }
+  return references.flat();
+}
+export const buildDatasourceStates = async (
+  config: any,
+  dataviews: Record<string, DataView>,
+  buildFormulaLayers: (
+    config: unknown,
+    i: number,
+    dataView: DataView
+  ) => PersistedIndexPatternLayer | undefined,
+  getValueColumns: (config: any, i: number) => ValueBasedLayerColumn[],
+  dataViewsAPI: DataViewsPublicPluginStart
+) => {
+  const layers: LensAttributes['state']['datasourceStates'] = {
+    textBased: { layers: {} },
+    // valueBased: { layers: {} },
+    formBased: { layers: {} },
+  };
+
+  const mainDataset = config.dataset;
+  for (let i = 0; i < config.layers.length; i++) {
+    const layer = config.layers[i];
+    const layerId = `layer_${i}`;
+    const dataset = layer.dataset || mainDataset;
+
+    let dataView: DataView | undefined;
+    if (dataset) {
+      const index = getDatasetIndex(dataset);
+      dataView = index
+        ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
+        : undefined;
+    }
+
+    if (dataView) {
+      dataviews[layerId] = dataView;
+    }
+
+    const [type, layerConfig] = buildDatasourceStatesLayer(
+      layer,
+      i,
+      dataset,
+      dataView,
+      buildFormulaLayers,
+      getValueColumns
+    );
+    if (layerConfig) {
+      layers[type]!.layers[layerId] = layerConfig;
+    }
+  }
+
+  return layers;
+};
+export const addLayerColumn = (
+  layer: PersistedIndexPatternLayer,
+  columnName: string,
+  config: GenericIndexPatternColumn,
+  first = false
+) => {
   layer.columns = {
     ...layer.columns,
     [columnName]: config,
-  }
+  };
   if (first) {
     layer.columnOrder.unshift(columnName);
   } else {
     layer.columnOrder.push(columnName);
   }
-}
+};
 
-export const addLayerFormulaColumns = (layer: PersistedIndexPatternLayer, columns: PersistedIndexPatternLayer, postfix = '') => {
+export const addLayerFormulaColumns = (
+  layer: PersistedIndexPatternLayer,
+  columns: PersistedIndexPatternLayer,
+  postfix = ''
+) => {
   const altObj = Object.fromEntries(
     Object.entries(columns.columns).map(([key, value]) =>
       // Modify key here
       [`${key}${postfix}`, value]
     )
-  )
+  );
 
   layer.columns = {
     ...layer.columns,
     ...altObj,
   };
   layer.columnOrder.push(...columns.columnOrder.map((c) => `${c}${postfix}`));
-}
+};

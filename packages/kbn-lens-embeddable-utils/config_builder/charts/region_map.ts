@@ -6,104 +6,117 @@
  * Side Public License, v 1.
  */
 
-import {BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensBaseConfig, LensRegionMapConfig} from "../types";
+import { FormBasedPersistedState, FormulaPublicApi } from '@kbn/lens-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import { ChoroplethChartState } from '@kbn/maps-plugin/public/lens/choropleth_chart/types';
 import {
-  FormBasedPersistedState,
-  FormulaPublicApi,
-} from "@kbn/lens-plugin/public";
-import {addLayerColumn, getAdhocDataView, getDataView, getDefaultReferences} from "../utils";
-import {getBreakdownColumn, getFormulaColumn} from "../columns";
-import {DataView} from "@kbn/data-views-plugin/public";
-import {ChoroplethChartState} from "@kbn/maps-plugin/public/lens/choropleth_chart/types";
+  BuildDependencies,
+  DEFAULT_LAYER_ID,
+  LensAttributes,
+  LensBaseConfig,
+  LensRegionMapConfig,
+  LensTagCloudConfig,
+} from '../types';
+import {
+  addLayerColumn,
+  buildDatasourceStates,
+  buildReferences,
+  getAdhocDataviews,
+} from '../utils';
+import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(config: LensRegionMapConfig & LensBaseConfig): ChoroplethChartState & { layerType: 'data' } {
-    if (config.layers.length !== 1) throw('region map must define a single layer');
+function buildVisualizationState(
+  config: LensRegionMapConfig & LensBaseConfig
+): ChoroplethChartState & { layerType: 'data' } {
+  if (config.layers.length !== 1) {
+    throw new Error('region map must define a single layer');
+  }
 
-    const layer = config.layers[0];
+  const layer = config.layers[0];
 
-    return {
-        layerId: DEFAULT_LAYER_ID,
-        layerType: 'data',
-        valueAccessor: ACCESSOR,
-        ...(layer.breakdown ? {
+  return {
+    layerId: DEFAULT_LAYER_ID,
+    layerType: 'data',
+    valueAccessor: ACCESSOR,
+    ...(layer.breakdown
+      ? {
           regionAccessor: `${ACCESSOR}_breakdown`,
-        } : {}),
-    };
+        }
+      : {}),
+  };
 }
 
-function buildReferences(config: LensRegionMapConfig, dataview: DataView) {
-    const references = getDefaultReferences(dataview.id!, DEFAULT_LAYER_ID);
-    return references.flat();
-}
-
-function buildLayers(config: LensRegionMapConfig & LensBaseConfig, dataView: DataView, formulaAPI: FormulaPublicApi): FormBasedPersistedState['layers'] {
-    const layer = config.layers[0];
-
-    const layers = {
-        [DEFAULT_LAYER_ID]: {
-          ...getFormulaColumn(
-            ACCESSOR, {
-              value: layer.query,
-            },
-            dataView, formulaAPI
-          ),
+function buildFormulaLayer(
+  layer: LensRegionMapConfig['layers'][0],
+  i: number,
+  dataView: DataView,
+  formulaAPI: FormulaPublicApi
+): FormBasedPersistedState['layers'][0] {
+  const layers = {
+    [DEFAULT_LAYER_ID]: {
+      ...getFormulaColumn(
+        ACCESSOR,
+        {
+          value: layer.query,
         },
-    };
+        dataView,
+        formulaAPI
+      ),
+    },
+  };
 
-    const defaultLayer = layers[DEFAULT_LAYER_ID];
+  const defaultLayer = layers[DEFAULT_LAYER_ID];
 
-    if (layer.breakdown) {
-      const columnName = `${ACCESSOR}_breakdown`;
-      const breakdownColumn = getBreakdownColumn({
-        options: layer.breakdown,
-        dataView
-      });
-      addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
-    } else {
-      throw ('breakdown must be defined!');
-    }
+  if (layer.breakdown) {
+    const columnName = `${ACCESSOR}_breakdown`;
+    const breakdownColumn = getBreakdownColumn({
+      options: layer.breakdown,
+      dataView,
+    });
+    addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
+  } else {
+    throw new Error('breakdown must be defined for regionmap!');
+  }
 
-    return layers;
+  return defaultLayer;
 }
 
-export async function buildRegionMap(config: LensRegionMapConfig & LensBaseConfig, {
-    dataViewsAPI, formulaAPI
-}: BuildDependencies): Promise<LensAttributes> {
+function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
+  return [
+    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string),
+  ];
+}
 
-    let dataView: DataView | undefined = undefined;
-    if (config.index) {
-      dataView = await getDataView(config.index, dataViewsAPI, config.timeFieldName);
-    }
-    if (config.layers[0].index) {
-      dataView = await getDataView(config.layers[0].index, dataViewsAPI, config.layers[0].timeFieldName);
-    }
+export async function buildRegionMap(
+  config: LensRegionMapConfig & LensBaseConfig,
+  { dataViewsAPI, formulaAPI }: BuildDependencies
+): Promise<LensAttributes> {
+  const dataviews: Record<string, DataView> = {};
+  const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
+    buildFormulaLayer(cfg as LensRegionMapConfig['layers'][0], i, dataView, formulaAPI);
+  const datasourceStates = await buildDatasourceStates(
+    config,
+    dataviews,
+    _buildFormulaLayer,
+    getValueColumns,
+    dataViewsAPI
+  );
 
-    if (!dataView) {
-      throw `index pattern must be provided for formula queries either at config.index or config.layer[0].index `;
-    }
-
-    const references = buildReferences(config, dataView);
-
-    return {
-        title: config.title,
-        visualizationType: 'lnsChoropleth',
-        references,
-        state: {
-            datasourceStates: {
-                formBased: {
-                    layers: buildLayers(config, dataView, formulaAPI),
-                },
-            },
-            internalReferences: [],
-            filters: [],
-            query: { language: 'kuery', query: '' },
-            visualization: buildVisualizationState(config),
-            // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-            adHocDataViews: {
-              ...getAdhocDataView(dataView),
-            },
-        },
-    };
+  return {
+    title: config.title,
+    visualizationType: 'lnsChoropleth',
+    references: buildReferences(dataviews),
+    state: {
+      datasourceStates,
+      internalReferences: [],
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: buildVisualizationState(config),
+      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
+      adHocDataViews: getAdhocDataviews(dataviews),
+    },
+  };
 }

@@ -6,139 +6,170 @@
  * Side Public License, v 1.
  */
 
-import {BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensBaseConfig, LensGaugeConfig} from "../types";
 import {
   FormBasedPersistedState,
   FormulaPublicApi,
   GaugeVisualizationState,
-} from "@kbn/lens-plugin/public";
-import {addLayerFormulaColumns, getAdhocDataView, getDataView, getDefaultReferences} from "../utils";
-import {getFormulaColumn} from "../columns";
-import {DataView} from "@kbn/data-views-plugin/public";
+} from '@kbn/lens-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import {
+  BuildDependencies,
+  DEFAULT_LAYER_ID,
+  LensAttributes,
+  LensBaseConfig,
+  LensGaugeConfig,
+} from '../types';
+import {
+  addLayerFormulaColumns,
+  buildDatasourceStates,
+  buildReferences,
+  getAdhocDataviews,
+} from '../utils';
+import { getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(config: LensGaugeConfig & LensBaseConfig): GaugeVisualizationState {
-    if (config.layers.length !== 1) throw('metric must define a single layer');
+function buildVisualizationState(
+  config: LensGaugeConfig & LensBaseConfig
+): GaugeVisualizationState {
+  if (config.layers.length !== 1) {
+    throw new Error('metric must define a single layer');
+  }
 
-    const layer = config.layers[0];
+  const layer = config.layers[0];
 
-    return {
-        layerId: DEFAULT_LAYER_ID,
-        layerType: 'data',
-        showBar: false,
-        ticksPosition: 'auto',
-        shape: layer.shape || 'horizontalBullet',
-        labelMajorMode: 'auto',
-        metricAccessor: ACCESSOR,
-        ...(layer.queryGoalValue ? {
+  return {
+    layerId: DEFAULT_LAYER_ID,
+    layerType: 'data',
+    showBar: false,
+    ticksPosition: 'auto',
+    shape: layer.shape || 'horizontalBullet',
+    labelMajorMode: 'auto',
+    metricAccessor: ACCESSOR,
+    ...(layer.queryGoalValue
+      ? {
           goalAccessor: `${ACCESSOR}_goal`,
-        } : {}),
+        }
+      : {}),
 
-        ...(layer.queryMaxValue ? {
+    ...(layer.queryMaxValue
+      ? {
           maxAccessor: `${ACCESSOR}_max`,
           showBar: true,
-        } : {}),
+        }
+      : {}),
 
-        ...(layer.queryMinValue ? {
+    ...(layer.queryMinValue
+      ? {
           minAccessor: `${ACCESSOR}_min`,
-        } : {}),
-    };
+        }
+      : {}),
+  };
 }
 
-function buildReferences(config: LensGaugeConfig, dataview: DataView) {
-    const references = getDefaultReferences(dataview.id!, DEFAULT_LAYER_ID);
-    return references.flat();
-}
-
-function buildLayers(config: LensGaugeConfig & LensBaseConfig, dataView: DataView, formulaAPI: FormulaPublicApi): FormBasedPersistedState['layers'] {
-    const layer = config.layers[0];
-
-    const layers = {
-        [DEFAULT_LAYER_ID]: {
-          ...getFormulaColumn(
-            ACCESSOR, {
-              value: layer.query,
-            },
-            dataView, formulaAPI
-          ),
+function buildFormulaLayer(
+  layer: LensGaugeConfig['layers'][0],
+  i: number,
+  dataView: DataView,
+  formulaAPI: FormulaPublicApi
+): FormBasedPersistedState['layers'][0] {
+  const layers = {
+    [DEFAULT_LAYER_ID]: {
+      ...getFormulaColumn(
+        ACCESSOR,
+        {
+          value: layer.query,
         },
-    };
+        dataView,
+        formulaAPI
+      ),
+    },
+  };
 
-    const defaultLayer = layers[DEFAULT_LAYER_ID];
+  const defaultLayer = layers[DEFAULT_LAYER_ID];
 
-    if (layer.queryGoalValue) {
-      const columnName = `${ACCESSOR}_goal`;
-      const formulaColumn = getFormulaColumn(
-        columnName, {
-          value: layer.queryGoalValue
-        }, dataView, formulaAPI
-      );
+  if (layer.queryGoalValue) {
+    const columnName = `${ACCESSOR}_goal`;
+    const formulaColumn = getFormulaColumn(
+      columnName,
+      {
+        value: layer.queryGoalValue,
+      },
+      dataView,
+      formulaAPI
+    );
 
-      addLayerFormulaColumns(defaultLayer, formulaColumn);
-    }
+    addLayerFormulaColumns(defaultLayer, formulaColumn);
+  }
 
-    if (layer.queryMinValue) {
-      const columnName = `${ACCESSOR}_min`;
-      const formulaColumn = getFormulaColumn(
-        columnName, {
-          value: layer.queryMinValue
-        }, dataView, formulaAPI
-      );
+  if (layer.queryMinValue) {
+    const columnName = `${ACCESSOR}_min`;
+    const formulaColumn = getFormulaColumn(
+      columnName,
+      {
+        value: layer.queryMinValue,
+      },
+      dataView,
+      formulaAPI
+    );
 
-      addLayerFormulaColumns(defaultLayer, formulaColumn);
-    }
+    addLayerFormulaColumns(defaultLayer, formulaColumn);
+  }
 
-    if (layer.queryMaxValue) {
-      const columnName = `${ACCESSOR}_max`;
-      const formulaColumn = getFormulaColumn(
-        columnName, {
-          value: layer.queryMaxValue
-        }, dataView, formulaAPI
-      );
+  if (layer.queryMaxValue) {
+    const columnName = `${ACCESSOR}_max`;
+    const formulaColumn = getFormulaColumn(
+      columnName,
+      {
+        value: layer.queryMaxValue,
+      },
+      dataView,
+      formulaAPI
+    );
 
-      addLayerFormulaColumns(defaultLayer, formulaColumn);
-    }
+    addLayerFormulaColumns(defaultLayer, formulaColumn);
+  }
 
-    return layers;
+  return defaultLayer;
 }
 
-export async function buildGauge(config: LensGaugeConfig & LensBaseConfig, {
-    dataViewsAPI, formulaAPI
-}: BuildDependencies): Promise<LensAttributes> {
+function getValueColumns(layer: LensGaugeConfig['layers'][0]) {
+  return [
+    getValueColumn(ACCESSOR, layer.query),
+    ...(layer.queryMaxValue ? [getValueColumn(`${ACCESSOR}_max`, layer.queryMaxValue)] : []),
+    ...(layer.queryMinValue ? [getValueColumn(`${ACCESSOR}_secondary`, layer.queryMinValue)] : []),
+    ...(layer.queryGoalValue
+      ? [getValueColumn(`${ACCESSOR}_secondary`, layer.queryGoalValue)]
+      : []),
+  ];
+}
 
-    let dataView: DataView | undefined = undefined;
-    if (config.index) {
-      dataView = await getDataView(config.index, dataViewsAPI, config.timeFieldName);
-    }
-    if (config.layers[0].index) {
-      dataView = await getDataView(config.layers[0].index, dataViewsAPI, config.layers[0].timeFieldName);
-    }
-
-    if (!dataView) {
-      throw `index pattern must be provided for formula queries either at config.index or config.layer[0].index `;
-    }
-
-    const references = buildReferences(config, dataView);
-
-    return {
-        title: config.title,
-        visualizationType: 'lnsGauge',
-        references,
-        state: {
-            datasourceStates: {
-                formBased: {
-                    layers: buildLayers(config, dataView, formulaAPI),
-                },
-            },
-            internalReferences: [],
-            filters: [],
-            query: { language: 'kuery', query: '' },
-            visualization: buildVisualizationState(config),
-            // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-            adHocDataViews: {
-              ...getAdhocDataView(dataView),
-            },
-        },
-    };
+export async function buildGauge(
+  config: LensGaugeConfig & LensBaseConfig,
+  { dataViewsAPI, formulaAPI }: BuildDependencies
+): Promise<LensAttributes> {
+  const dataviews: Record<string, DataView> = {};
+  const _buildFormulaLayer = (cfg: unknown, i: number, dataView: DataView) =>
+    buildFormulaLayer(cfg as LensGaugeConfig['layers'][0], i, dataView, formulaAPI);
+  const datasourceStates = await buildDatasourceStates(
+    config,
+    dataviews,
+    _buildFormulaLayer,
+    getValueColumns,
+    dataViewsAPI
+  );
+  return {
+    title: config.title,
+    visualizationType: 'lnsGauge',
+    references: buildReferences(dataviews),
+    state: {
+      datasourceStates,
+      internalReferences: [],
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: buildVisualizationState(config),
+      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
+      adHocDataViews: getAdhocDataviews(dataviews),
+    },
+  };
 }

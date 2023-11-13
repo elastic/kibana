@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
-export * from './date_histogram';
-export * from './formula';
-export * from './static';
-export * from './top_values';
-export * from './filters';
-export * from './intervals';
-export * from './breakdown';
-export * from './value';
+import {ValueBasedLayerColumn} from "@kbn/lens-plugin/public/datasources/value_based/types";
+
+export function getValueColumn(id: string, fieldName?: string): ValueBasedLayerColumn {
+  return {
+    columnId: id,
+    fieldName: fieldName || id,
+  };
+}

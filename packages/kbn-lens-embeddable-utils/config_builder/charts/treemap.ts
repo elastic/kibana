@@ -7,134 +7,147 @@
  */
 
 import {
-    BuildDependencies,
-    DEFAULT_LAYER_ID,
-    LensAttributes,
-    LensBaseConfig,
-    LensPieConfig,
-    LensTreeMapConfig,
-    LensMosaicConfig,
-    LensLegendConfig
-} from "../types";
-import {
   FormBasedPersistedState,
   FormulaPublicApi,
   PieVisualizationState,
-} from "@kbn/lens-plugin/public";
-import {addLayerColumn, getAdhocDataView, getDataView, getDefaultReferences} from "../utils";
-import {getBreakdownColumn, getFormulaColumn} from "../columns";
-import {DataView} from "@kbn/data-views-plugin/public";
+} from '@kbn/lens-plugin/public';
+import { DataView } from '@kbn/data-views-plugin/public';
+import {
+  BuildDependencies,
+  DEFAULT_LAYER_ID,
+  LensAttributes,
+  LensBaseConfig,
+  LensPieConfig,
+  LensTreeMapConfig,
+  LensMosaicConfig,
+  LensLegendConfig,
+} from '../types';
+import {
+  addLayerColumn,
+  buildDatasourceStates,
+  buildReferences,
+  getAdhocDataviews,
+} from '../utils';
+import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(config: (LensTreeMapConfig | LensPieConfig | LensMosaicConfig) & LensBaseConfig): PieVisualizationState {
-    if (config.layers.length !== 1) throw('tag cloud must define a single layer');
+function buildVisualizationState(
+  config: (LensTreeMapConfig | LensPieConfig | LensMosaicConfig) & LensBaseConfig
+): PieVisualizationState {
+  if (config.layers.length !== 1) {
+    throw new Error('single layer must be defined!');
+  }
 
-    const layer = config.layers[0];
+  const layer = config.layers[0];
 
+  const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
+
+  let legendDisplay: 'default' | 'hide' | 'show' = 'default';
+  let legendPosition: LensLegendConfig['position'] = 'right';
+
+  if ('legend' in config && config.legend) {
+    if ('show' in config.legend) {
+      legendDisplay = config.legend ? 'show' : 'hide';
+    }
+    legendPosition = config.legend.position || 'right';
+  }
+  return {
+    shape: config.chartType,
+    layers: [
+      {
+        layerId: DEFAULT_LAYER_ID,
+        layerType: 'data',
+        metrics: [`ACCESSOR`],
+        allowMultipleMetrics: false,
+        numberDisplay: 'percent',
+        categoryDisplay: 'default',
+        legendDisplay,
+        legendPosition,
+        primaryGroups: layerBreakdown.map((breakdown, i) => `${ACCESSOR}_breakdown_${i}`),
+      },
+    ],
+  };
+}
+
+function buildFormulaLayer(
+  layer:
+    | LensTreeMapConfig['layers'][0]
+    | LensPieConfig['layers'][0]
+    | LensMosaicConfig['layers'][0],
+  layerNr: number,
+  dataView: DataView,
+  formulaAPI: FormulaPublicApi
+): FormBasedPersistedState['layers'][0] {
+  const layers = {
+    [DEFAULT_LAYER_ID]: {
+      ...getFormulaColumn(
+        ACCESSOR,
+        {
+          value: layer.query,
+        },
+        dataView,
+        formulaAPI
+      ),
+    },
+  };
+
+  const defaultLayer = layers[DEFAULT_LAYER_ID];
+
+  if (layer.breakdown) {
     const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
+    layerBreakdown.reverse().forEach((breakdown, i) => {
+      const columnName = `${ACCESSOR}_breakdown_${i}`;
+      const breakdownColumn = getBreakdownColumn({
+        options: breakdown,
+        dataView,
+      });
+      addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
+    });
+  } else {
+    throw new Error('breakdown must be defined!');
+  }
 
-    let legendDisplay: 'default' | 'hide' | 'show' = 'default';
-    let legendPosition: LensLegendConfig['position'] = 'right';
-
-    if ('legend' in config && config.legend) {
-        if ('show' in config.legend) {
-            legendDisplay = config.legend ? 'show' : 'hide';
-        }
-        legendPosition = config.legend.position || 'right';
-    }
-    return {
-        shape: config.chartType,
-        layers: [{
-          layerId: DEFAULT_LAYER_ID,
-          layerType: 'data',
-          metrics: [ACCESSOR],
-          allowMultipleMetrics: false,
-          numberDisplay: 'percent',
-          categoryDisplay: 'default',
-          legendDisplay,
-          legendPosition,
-          primaryGroups: layerBreakdown.map((breakdown, i) => `${ACCESSOR}_breakdown_${i}`),
-        }],
-
-    };
+  return defaultLayer;
 }
 
-function buildReferences(config: (LensTreeMapConfig | LensPieConfig | LensMosaicConfig), dataview: DataView) {
-    const references = getDefaultReferences(dataview.id!, DEFAULT_LAYER_ID);
-    return references.flat();
+function getValueColumns(layer: LensTreeMapConfig['layers'][0]) {
+  return [
+    ...(layer.breakdown
+      ? layer.breakdown.map((b, i) => {
+          return getValueColumn(`${ACCESSOR}_breakdown_${i}`, b as string);
+        })
+      : []),
+    getValueColumn(ACCESSOR, layer.query),
+  ];
 }
 
-function buildLayers(config: (LensTreeMapConfig | LensPieConfig | LensMosaicConfig) & LensBaseConfig, dataView: DataView, formulaAPI: FormulaPublicApi): FormBasedPersistedState['layers'] {
-    const layer = config.layers[0];
-
-    const layers = {
-        [DEFAULT_LAYER_ID]: {
-          ...getFormulaColumn(
-            ACCESSOR, {
-              value: layer.query,
-            },
-            dataView, formulaAPI
-          ),
-        },
-    };
-
-    const defaultLayer = layers[DEFAULT_LAYER_ID];
-
-    if (layer.breakdown) {
-      const layerBreakdown = Array.isArray(layer.breakdown) ? layer.breakdown : [layer.breakdown];
-      layerBreakdown.reverse().forEach((breakdown, i) => {
-        const columnName = `${ACCESSOR}_breakdown_${i}`;
-        const breakdownColumn = getBreakdownColumn({
-          options: breakdown,
-          dataView
-        });
-        addLayerColumn(defaultLayer, columnName, breakdownColumn, true);
-      })
-
-    } else {
-      throw ('breakdown must be defined!');
-    }
-
-    return layers;
-}
-
-export async function buildTreeMap(config: (LensTreeMapConfig | LensPieConfig) & LensBaseConfig, {
-    dataViewsAPI, formulaAPI
-}: BuildDependencies): Promise<LensAttributes> {
-
-    let dataView: DataView | undefined = undefined;
-    if (config.index) {
-      dataView = await getDataView(config.index, dataViewsAPI, config.timeFieldName);
-    }
-    if (config.layers[0].index) {
-      dataView = await getDataView(config.layers[0].index, dataViewsAPI, config.layers[0].timeFieldName);
-    }
-
-    if (!dataView) {
-      throw `index pattern must be provided for formula queries either at config.index or config.layer[0].index `;
-    }
-
-    const references = buildReferences(config, dataView);
-
-    return {
-        title: config.title,
-        visualizationType: 'lnsPie',
-        references,
-        state: {
-            datasourceStates: {
-                formBased: {
-                    layers: buildLayers(config, dataView, formulaAPI),
-                },
-            },
-            internalReferences: [],
-            filters: [],
-            query: { language: 'kuery', query: '' },
-            visualization: buildVisualizationState(config),
-            // Getting the spec from a data view is a heavy operation, that's why the result is cached.
-            adHocDataViews: {
-              ...getAdhocDataView(dataView),
-            },
-        },
-    };
+export async function buildTreeMap(
+  config: (LensTreeMapConfig | LensPieConfig) & LensBaseConfig,
+  { dataViewsAPI, formulaAPI }: BuildDependencies
+): Promise<LensAttributes> {
+  const dataviews: Record<string, DataView> = {};
+  const _buildFormulaLayer = (cfg: any, i: number, dataView: DataView) =>
+    buildFormulaLayer(cfg, i, dataView, formulaAPI);
+  const datasourceStates = await buildDatasourceStates(
+    config,
+    dataviews,
+    _buildFormulaLayer,
+    getValueColumns,
+    dataViewsAPI
+  );
+  return {
+    title: config.title,
+    visualizationType: 'lnsPie',
+    references: buildReferences(dataviews),
+    state: {
+      datasourceStates,
+      internalReferences: [],
+      filters: [],
+      query: { language: 'kuery', query: '' },
+      visualization: buildVisualizationState(config),
+      // Getting the spec from a data view is a heavy operation, that's why the result is cached.
+      adHocDataViews: getAdhocDataviews(dataviews),
+    },
+  };
 }
