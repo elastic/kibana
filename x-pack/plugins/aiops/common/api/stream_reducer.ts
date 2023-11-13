@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import type { SignificantTerm, SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItem, SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import { API_ACTION_NAME, AiopsLogRateAnalysisApiAction } from './log_rate_analysis/actions';
 
 interface StreamState {
   ccsWarning: boolean;
-  significantItems: SignificantTerm[];
-  significantItemsGroups: SignificantTermGroup[];
+  significantItems: SignificantItem[];
+  significantItemsGroups: SignificantItemGroup[];
   errors: string[];
   loaded: number;
   loadingState: string;
