@@ -7,7 +7,6 @@
  */
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-// import userEvent from '@testing-library/user-event';
 import { TableActions } from './table_cell_actions';
 import { DataViewField } from '@kbn/data-views-plugin/common';
 
