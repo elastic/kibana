@@ -29,6 +29,7 @@ const defaultParams: OnlyEsqlQueryRuleParams = {
   aggType: 'count',
   groupBy: 'all',
   timeField: 'time',
+  sourceFields: [],
 };
 
 describe('fetchEsqlQuery', () => {

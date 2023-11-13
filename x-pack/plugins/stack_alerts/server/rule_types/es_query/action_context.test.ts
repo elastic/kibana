@@ -27,6 +27,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -34,6 +35,7 @@ describe('addMessages', () => {
       conditions: 'count greater than 4',
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',
@@ -60,6 +62,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -67,6 +70,7 @@ describe('addMessages', () => {
       conditions: 'count not greater than 4',
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',
@@ -94,6 +98,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -101,6 +106,7 @@ describe('addMessages', () => {
       conditions: 'count between 4 and 5',
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',
@@ -129,6 +135,7 @@ describe('addMessages', () => {
       groupBy: 'top',
       termField: 'host.name',
       termSize: 5,
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -136,6 +143,7 @@ describe('addMessages', () => {
       conditions: `count for group "host-1" not greater than 4`,
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',
@@ -165,6 +173,7 @@ describe('addMessages', () => {
       searchType: 'esQuery',
       aggType: 'count',
       groupBy: 'all',
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -172,6 +181,7 @@ describe('addMessages', () => {
       conditions: 'count greater than 4',
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',
@@ -198,6 +208,7 @@ describe('addMessages', () => {
       aggType: 'count',
       groupBy: 'all',
       timeField: 'time',
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -205,6 +216,7 @@ describe('addMessages', () => {
       conditions: 'count greater than 4',
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',
@@ -231,6 +243,7 @@ describe('addMessages', () => {
       aggType: 'count',
       groupBy: 'all',
       timeField: 'time',
+      sourceFields: [],
     }) as EsQueryRuleParams;
     const base: EsQueryRuleActionContext = {
       date: '2020-01-01T00:00:00.000Z',
@@ -238,6 +251,7 @@ describe('addMessages', () => {
       conditions: 'count greater than 4',
       hits: [],
       link: 'link-mock',
+      sourceFields: [],
     };
     const context = addMessages({
       ruleName: '[rule-name]',

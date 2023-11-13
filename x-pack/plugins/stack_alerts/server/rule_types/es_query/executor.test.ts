@@ -93,6 +93,7 @@ describe('es_query executor', () => {
     groupBy: 'all',
     searchConfiguration: {},
     esqlQuery: { esql: 'test-query' },
+    sourceFields: [],
   };
 
   describe('executor', () => {
@@ -582,6 +583,7 @@ describe('es_query executor', () => {
           message: 'Document count is 0 in the last 5m. Alert when greater than or equal to 500.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -641,6 +643,7 @@ describe('es_query executor', () => {
             'Document count is 0 in the last 5m for host-1. Alert when greater than or equal to 200.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -664,6 +667,7 @@ describe('es_query executor', () => {
             'Document count is 0 in the last 5m for host-2. Alert when greater than or equal to 200.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions':
@@ -717,6 +721,7 @@ describe('es_query executor', () => {
           message: 'Document count is 0 in the last 5m. Alert when greater than 0.',
           title: "rule 'test-rule-name' recovered",
           value: 0,
+          sourceFields: [],
         },
         payload: {
           'kibana.alert.evaluation.conditions': 'Query did NOT match documents',

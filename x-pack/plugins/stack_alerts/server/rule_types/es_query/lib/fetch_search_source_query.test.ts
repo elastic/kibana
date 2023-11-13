@@ -52,6 +52,7 @@ const defaultParams: OnlySearchSourceRuleParams = {
   aggType: 'count',
   groupBy: 'all',
   timeField: 'time',
+  sourceFields: [],
 };
 
 describe('fetchSearchSourceQuery', () => {
