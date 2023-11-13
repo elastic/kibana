@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile, getService }) {
+export default function ({ loadTestFile, getService, getPageObjects }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
   const supertest = getService('supertest');
+  const PageObjects = getPageObjects(['discover', 'common']);
 
   describe('maps app', function () {
     this.tags(['skipFirefox']);
@@ -49,6 +50,9 @@ export default function ({ loadTestFile, getService }) {
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await browser.setWindowSize(1600, 1000);
+
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.refreshFieldList(); // refreshes field list cache from previous tests
     });
 
     after(async () => {
