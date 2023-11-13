@@ -81,10 +81,14 @@ describe('TutorialConfigAgent', () => {
         />
       );
 
-      const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
+      const policySelectorWrapper = await screen.findByTestId(
+        'policySelector_onPrem'
+      );
       expect(policySelectorWrapper).toBeInTheDocument();
 
-      const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+      const input = within(policySelectorWrapper).getByTestId(
+        'comboBoxSearchInput'
+      );
       expect(input).toHaveValue('Default Standalone configuration');
 
       let commands = component.getByTestId('commands').innerHTML;
@@ -133,10 +137,14 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_onPrem'
+        );
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -170,10 +178,14 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_onPrem'
+        );
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -213,10 +225,14 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId('policySelector_cloud');
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_cloud'
+        );
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -253,10 +269,14 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId('policySelector_policy-elastic-agent-on-cloud');
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_policy-elastic-agent-on-cloud'
+        );
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
         expect(input).toHaveValue('Elastic Cloud agent policy');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -289,10 +309,14 @@ describe('TutorialConfigAgent', () => {
           />
         );
 
-        const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
+        const policySelectorWrapper = await screen.findByTestId(
+          'policySelector_onPrem'
+        );
         expect(policySelectorWrapper).toBeInTheDocument();
 
-        const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+        const input = within(policySelectorWrapper).getByTestId(
+          'comboBoxSearchInput'
+        );
         expect(input).toHaveValue('Default Standalone configuration');
 
         const commands = component.getByTestId('commands').innerHTML;
@@ -353,10 +377,14 @@ describe('TutorialConfigAgent', () => {
         />
       );
 
-      const policySelectorWrapper = await screen.findByTestId('policySelector_onPrem');
+      const policySelectorWrapper = await screen.findByTestId(
+        'policySelector_onPrem'
+      );
       expect(policySelectorWrapper).toBeInTheDocument();
 
-      const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+      const input = within(policySelectorWrapper).getByTestId(
+        'comboBoxSearchInput'
+      );
       expect(input).toHaveValue('Default Standalone configuration');
 
       const commands = component.getByTestId('commands').innerHTML;
@@ -392,10 +420,14 @@ describe('TutorialConfigAgent', () => {
           kibanaVersion="8.0.0"
         />
       );
-      const policySelectorWrapper = await screen.findByTestId('policySelector_cloud');
+      const policySelectorWrapper = await screen.findByTestId(
+        'policySelector_cloud'
+      );
       expect(policySelectorWrapper).toBeInTheDocument();
 
-      const input = within(policySelectorWrapper).getByTestId('comboBoxSearchInput');
+      const input = within(policySelectorWrapper).getByTestId(
+        'comboBoxSearchInput'
+      );
       expect(input).toHaveValue('Default Standalone configuration');
 
       const commands = component.getByTestId('commands').innerHTML;

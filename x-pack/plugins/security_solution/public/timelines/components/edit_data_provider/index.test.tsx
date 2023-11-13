@@ -104,7 +104,6 @@ describe('StatefulEditDataProvider', () => {
       </TestProviders>
     );
 
-
     const fieldWrapper = screen.getByTestId('operator');
     expect(within(fieldWrapper).getByTestId('comboBoxSearchInput')).toHaveValue('is not');
   });
