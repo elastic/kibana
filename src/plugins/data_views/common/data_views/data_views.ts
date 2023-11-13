@@ -542,7 +542,7 @@ export class DataViewsService {
     forceRefresh: boolean = false
   ) => {
     const metaFields = await this.config.get<string[]>(META_FIELDS);
-    const result = await this.apiClient.getFieldsForWildcard({
+    return await this.apiClient.getFieldsForWildcard({
       type: dataView.type,
       rollupIndex: dataView?.typeMeta?.params?.rollup_index,
       allowNoIndex: true,
@@ -550,14 +550,6 @@ export class DataViewsService {
       metaFields,
       forceRefresh,
     });
-
-    // todo
-    console.log(
-      'getFieldsAndIndicesForDataView result',
-      dataView.getIndexPattern(),
-      JSON.stringify(result.fields, undefined, 2)
-    );
-    return result;
   };
 
   private getFieldsAndIndicesForWildcard = async (options: GetFieldsOptions) => {

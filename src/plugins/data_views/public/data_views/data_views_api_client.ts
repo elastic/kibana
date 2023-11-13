@@ -56,8 +56,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
           headers: { 'user-hash': userId },
         });
 
-    console.log('User id:', userId);
-
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
