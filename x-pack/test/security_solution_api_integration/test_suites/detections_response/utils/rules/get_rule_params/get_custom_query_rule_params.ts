@@ -10,7 +10,7 @@ import { CreateRulePropsRewrites } from './types';
 
 /**
  * Returns custom query rule params that is easy for most basic testing of output of alerts.
- * It starts out in an disabled. The 'from' is set very far back to test the basics of signal
+ * It starts out in an disabled state. The 'from' is set very far back to test the basics of signal
  * creation and testing by getting all the signals at once.
  *
  * @param rewrites rule params rewrites, see QueryRuleCreateProps for possible fields
