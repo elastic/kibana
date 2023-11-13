@@ -46,13 +46,11 @@ export type InternalEnvironmentServiceSetup = InternalEnvironmentServicePreboot;
 /** @internal */
 export class EnvironmentService {
   private readonly log: Logger;
-  private readonly processLogger: Logger;
   private readonly configService: IConfigService;
   private uuid: string = '';
 
   constructor(core: CoreContext) {
     this.log = core.logger.get('environment');
-    this.processLogger = core.logger.get('process');
     this.configService = core.configService;
   }
 
