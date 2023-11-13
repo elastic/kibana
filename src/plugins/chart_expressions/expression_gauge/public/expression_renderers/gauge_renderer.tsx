@@ -13,7 +13,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  DimensionsEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 import { ExpressionGaugePluginStart } from '../plugin';
 import { EXPRESSION_GAUGE_NAME, GaugeExpressionProps, GaugeShapes } from '../../common';
 import { getFormatService, getPaletteService } from '../services';
@@ -65,6 +69,19 @@ export const gaugeRenderer: (
 
       handlers.done();
     };
+
+    const dimensionsEvent: DimensionsEvent = {
+      name: 'dimensions',
+      data: {
+        maxDimensions: {
+          x: 100,
+          y: 100,
+          unit: 'percentage',
+        },
+      },
+    };
+
+    handlers.event(dimensionsEvent);
 
     const { GaugeComponent } = await import('../components/gauge_component');
     render(

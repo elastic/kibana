@@ -18,6 +18,7 @@ import type {
   IInterpreterRenderHandlers,
 } from '@kbn/expressions-plugin/common';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { DimensionsEvent } from '@kbn/chart-expressions-common';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { DatatableComponent } from './components/table_basic';
 
@@ -102,6 +103,19 @@ export const getDatatableRenderer = (dependencies: {
       trackUiCounterEvents('table', handlers.getExecutionContext());
       handlers.done();
     };
+
+    const dimensionsEvent: DimensionsEvent = {
+      name: 'dimensions',
+      data: {
+        maxDimensions: {
+          x: 100,
+          y: 100,
+          unit: 'percentage',
+        },
+      },
+    };
+
+    handlers.event(dimensionsEvent);
 
     // An entry for each table row, whether it has any actions attached to
     // ROW_CLICK_TRIGGER trigger.

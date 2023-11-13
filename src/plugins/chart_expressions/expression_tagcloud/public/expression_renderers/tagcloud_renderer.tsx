@@ -15,7 +15,11 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import { ExpressionRenderDefinition } from '@kbn/expressions-plugin/common/expression_renderers';
 import { METRIC_TYPE } from '@kbn/analytics';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  DimensionsEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 
 import { ExpressionTagcloudRendererDependencies } from '../plugin';
 import { TagcloudRendererConfig } from '../../common/types';
@@ -65,6 +69,19 @@ export const tagcloudRenderer: (
 
       handlers.done();
     };
+
+    const dimensionsEvent: DimensionsEvent = {
+      name: 'dimensions',
+      data: {
+        maxDimensions: {
+          x: 100,
+          y: 100,
+          unit: 'percentage',
+        },
+      },
+    };
+
+    handlers.event(dimensionsEvent);
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
     let isDarkMode = false;

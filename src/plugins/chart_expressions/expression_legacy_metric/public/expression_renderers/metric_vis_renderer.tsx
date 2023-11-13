@@ -21,7 +21,11 @@ import {
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { Datatable } from '@kbn/expressions-plugin/common';
 import { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
+import {
+  DimensionsEvent,
+  extractContainerType,
+  extractVisualizationType,
+} from '@kbn/chart-expressions-common';
 import { ExpressionLegacyMetricPluginStart } from '../plugin';
 import { EXPRESSION_METRIC_NAME, MetricVisRenderConfig, VisParams } from '../../common';
 
@@ -91,6 +95,19 @@ export const getMetricVisRenderer: (
 
       handlers.done();
     };
+
+    const dimensionsEvent: DimensionsEvent = {
+      name: 'dimensions',
+      data: {
+        maxDimensions: {
+          x: 100,
+          y: 100,
+          unit: 'percentage',
+        },
+      },
+    };
+
+    handlers.event(dimensionsEvent);
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>

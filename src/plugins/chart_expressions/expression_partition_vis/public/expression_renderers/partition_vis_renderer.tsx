@@ -22,6 +22,7 @@ import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import {
+  DimensionsEvent,
   extractContainerType,
   extractVisualizationType,
   isOnAggBasedEditor,
@@ -115,6 +116,19 @@ export const getPartitionVisRenderer: (
     ]);
 
     const hasOpenedOnAggBasedEditor = isOnAggBasedEditor(handlers.getExecutionContext());
+
+    const dimensionsEvent: DimensionsEvent = {
+      name: 'dimensions',
+      data: {
+        maxDimensions: {
+          x: 100,
+          y: 100,
+          unit: 'percentage',
+        },
+      },
+    };
+
+    handlers.event(dimensionsEvent);
 
     render(
       <I18nProvider>

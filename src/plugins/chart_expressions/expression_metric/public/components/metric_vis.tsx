@@ -172,9 +172,10 @@ export const MetricVis = ({
     const event: DimensionsEvent = {
       name: 'dimensions',
       data: {
-        maxDimensionsPX: {
+        maxDimensions: {
           y: grid.current.length * maxTileSideLength,
           x: grid.current[0]?.length * maxTileSideLength,
+          unit: 'pixels',
         },
       },
     };

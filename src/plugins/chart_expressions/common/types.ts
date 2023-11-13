@@ -33,18 +33,21 @@ export interface DimensionsEvent extends ExpressionRendererEvent {
   data: ChartDimensionOptions;
 }
 
+export type ChartDimensionUnit = 'pixels' | 'percentage';
+
 export type ChartDimensionOptions =
   | {
       // if maxDimensions are provided, the aspect ratio will be computed from them
-      maxDimensionsPX?: {
+      maxDimensions?: {
         x: number;
         y: number;
+        unit: ChartDimensionUnit;
       };
       aspectRatio?: never;
     }
   | {
       aspectRatio?: { x: number; y: number };
-      maxDimensionsPX?: never;
+      maxDimensions?: never;
     };
 
 export function isDimensionsEvent(event: ExpressionRendererEvent): event is DimensionsEvent {

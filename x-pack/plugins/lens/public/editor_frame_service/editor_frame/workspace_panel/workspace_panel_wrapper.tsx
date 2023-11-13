@@ -12,6 +12,7 @@ import { EuiPageTemplate, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/
 import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ChartDimensionOptions } from '@kbn/chart-expressions-common';
+import { ChartDimensionUnit } from '@kbn/chart-expressions-common/types';
 import {
   DatasourceMap,
   FramePublicAPI,
@@ -108,7 +109,12 @@ export function WorkspacePanelWrapper({
   const userMessages = getUserMessages('toolbar');
 
   const aspectRatio = displayOptions?.aspectRatio;
-  const maxDimensionsPX = displayOptions?.maxDimensionsPX;
+  const maxDimensions = displayOptions?.maxDimensions;
+
+  const unitToCSSUnit: Record<ChartDimensionUnit, string> = {
+    pixels: 'px',
+    percentage: '%',
+  };
 
   const visDimensionsCSS = aspectRatio
     ? {
@@ -123,12 +129,11 @@ export function WorkspacePanelWrapper({
               width: '100%',
             }),
       }
-    : maxDimensionsPX
+    : maxDimensions
     ? {
-        maxWidth: maxDimensionsPX && `${maxDimensionsPX.x}px`,
-        maxHeight: maxDimensionsPX && `${maxDimensionsPX.y}px`,
-        aspectRatio:
-          maxDimensionsPX.x && maxDimensionsPX.y && `${maxDimensionsPX.x}/${maxDimensionsPX.y}`,
+        maxWidth: maxDimensions && `${maxDimensions.x}${unitToCSSUnit[maxDimensions.unit]}`,
+        maxHeight: maxDimensions && `${maxDimensions.y}${unitToCSSUnit[maxDimensions.unit]}`,
+        aspectRatio: maxDimensions.x && maxDimensions.y && `${maxDimensions.x}/${maxDimensions.y}`,
       }
     : {};
 
