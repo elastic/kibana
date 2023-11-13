@@ -31,7 +31,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('when the log explorer loads', () => {
       it("should initialize the table columns to logs' default selection", async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
-        await new Promise((r) => setTimeout(r, 1000 * 60 * 10));
 
         await retry.try(async () => {
           // did this work?
