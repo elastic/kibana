@@ -126,7 +126,6 @@ export function MetricRowWithAgg({
                   'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                   { defaultMessage: 'Aggregation {name}', values: { name } }
                 )}
-                isInvalid={aggType !== Aggregators.COUNT && !field}
               >
                 <EuiExpression
                   data-test-subj="aggregationName"
@@ -139,6 +138,7 @@ export function MetricRowWithAgg({
                   onClick={() => {
                     setAggTypePopoverOpen(true);
                   }}
+                  isInvalid={aggType !== Aggregators.COUNT && !field}
                 />
               </EuiFormRow>
             }
@@ -167,7 +167,6 @@ export function MetricRowWithAgg({
                       'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationType',
                       { defaultMessage: 'Aggregation type' }
                     )}
-                    isInvalid={isAggInvalid}
                   >
                     <EuiSelect
                       data-test-subj="aggregationTypeSelect"
@@ -183,6 +182,7 @@ export function MetricRowWithAgg({
                           value,
                         };
                       })}
+                      isInvalid={isAggInvalid}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -208,7 +208,6 @@ export function MetricRowWithAgg({
                         'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
                         { defaultMessage: 'Field name' }
                       )}
-                      isInvalid={isFieldInvalid}
                     >
                       <EuiComboBox
                         fullWidth

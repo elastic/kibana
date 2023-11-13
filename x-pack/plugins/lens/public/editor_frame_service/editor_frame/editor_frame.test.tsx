@@ -38,6 +38,7 @@ import {
   DatasourceMock,
   createExpressionRendererMock,
   mockStoreDeps,
+  renderWithReduxStore,
 } from '../../mocks';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
@@ -283,7 +284,7 @@ describe('editor_frame', () => {
       const props = {
         ...getDefaultProps(),
         visualizationMap: {
-          testVis: mockVisualization,
+          testVis: { ...mockVisualization, toExpression: () => null },
         },
         datasourceMap: {
           testDatasource: mockDatasource,
@@ -291,18 +292,23 @@ describe('editor_frame', () => {
 
         ExpressionRenderer: expressionRendererMock,
       };
-      await mountWithProvider(<EditorFrame {...props} />, {
-        preloadedState: {
-          activeDatasourceId: 'testDatasource',
-          visualization: { activeId: mockVisualization.id, state: {} },
-          datasourceStates: {
-            testDatasource: {
-              isLoading: false,
-              state: '',
+      renderWithReduxStore(
+        <EditorFrame {...props} />,
+        {},
+        {
+          preloadedState: {
+            activeDatasourceId: 'testDatasource',
+            visualization: { activeId: mockVisualization.id, state: {} },
+            datasourceStates: {
+              testDatasource: {
+                isLoading: false,
+                state: '',
+              },
             },
           },
-        },
-      });
+        }
+      );
+
       const updatedState = {};
       const setDatasourceState = (mockDatasource.DataPanelComponent as jest.Mock).mock.calls[0][0]
         .setState;
