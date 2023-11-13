@@ -2,30 +2,26 @@
 
 exports[`DownNoExpressionSelect component should renders against props 1`] = `
 <div
-  class="euiPopover emotion-euiPopover"
+  class="euiPopover emotion-euiPopover-inline-block"
   id="ping-count"
 >
-  <div
-    class="euiPopover__anchor css-16vtueo-render"
+  <span
+    aria-label="Open the popover for down count input"
+    class="euiExpression emotion-euiExpression-success"
+    data-test-subj="xpack.synthetics.alerts.monitorStatus.numTimesExpression"
   >
     <span
-      aria-label="Open the popover for down count input"
-      class="euiExpression emotion-euiExpression-success"
-      data-test-subj="xpack.synthetics.alerts.monitorStatus.numTimesExpression"
+      class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
     >
-      <span
-        class="euiExpression__description emotion-euiExpression__description-success-isUppercase"
-      >
-        matching monitors are down &gt;=
-      </span>
-       
-      <span
-        class="euiExpression__value emotion-euiExpression__value"
-      >
-        5 times
-      </span>
+      matching monitors are down &gt;=
     </span>
-  </div>
+     
+    <span
+      class="euiExpression__value emotion-euiExpression__value"
+    >
+      5 times
+    </span>
+  </span>
 </div>
 `;
 
