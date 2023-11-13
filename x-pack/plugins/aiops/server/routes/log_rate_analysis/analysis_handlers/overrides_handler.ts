@@ -9,10 +9,10 @@ import {
   resetAllAction,
   resetErrorsAction,
   resetGroupsAction,
-} from '../../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../../common/api/log_rate_analysis/schema';
+} from '../../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
-import type { LogRateAnalysisResponseStreamFetchOptions } from '../log_rate_analysis_response_stream';
+import type { ResponseStreamFetchOptions } from '../response_stream';
 
 export const overridesHandlerFactory =
   <T extends ApiVersion>({
@@ -20,7 +20,7 @@ export const overridesHandlerFactory =
     logDebugMessage,
     responseStream,
     stateHandler,
-  }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
+  }: ResponseStreamFetchOptions<T>) =>
   () => {
     if (!requestBody.overrides) {
       logDebugMessage('Full Reset.');

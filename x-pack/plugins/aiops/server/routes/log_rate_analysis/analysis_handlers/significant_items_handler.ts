@@ -13,24 +13,24 @@ import { i18n } from '@kbn/i18n';
 import {
   addSignificantItemsAction,
   updateLoadingStateAction,
-} from '../../../../../common/api/log_rate_analysis/actions';
+} from '../../../../common/api/log_rate_analysis/actions';
 
-import { isRequestAbortedError } from '../../../../lib/is_request_aborted_error';
+import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
-import { fetchSignificantCategories } from '../../queries/fetch_significant_categories';
-import { fetchSignificantTermPValues } from '../../queries/fetch_significant_term_p_values';
+import { fetchSignificantCategories } from '../queries/fetch_significant_categories';
+import { fetchSignificantTermPValues } from '../queries/fetch_significant_term_p_values';
 
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../../common/api/log_rate_analysis/schema';
+} from '../../../../common/api/log_rate_analysis/schema';
 
 import {
   LOADED_FIELD_CANDIDATES,
   MAX_CONCURRENT_QUERIES,
   PROGRESS_STEP_P_VALUES,
-} from '../constants';
-import type { LogRateAnalysisResponseStreamFetchOptions } from '../log_rate_analysis_response_stream';
+} from '../response_stream_utils/constants';
+import type { ResponseStreamFetchOptions } from '../response_stream';
 
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
@@ -42,7 +42,7 @@ export const significantItemsHandlerFactory =
     responseStream,
     stateHandler,
     version,
-  }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
+  }: ResponseStreamFetchOptions<T>) =>
   async ({
     fieldCandidates,
     textFieldCandidates,

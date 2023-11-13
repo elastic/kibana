@@ -16,18 +16,21 @@ import type {
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 
-import { RANDOM_SAMPLER_SEED } from '../../../../../common/constants';
+import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import {
   addSignificantItemsHistogramAction,
   updateLoadingStateAction,
-} from '../../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../../common/api/log_rate_analysis/schema';
-import { getCategoryQuery } from '../../../../../common/api/log_categorization/get_category_query';
+} from '../../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
+import { getCategoryQuery } from '../../../../common/api/log_categorization/get_category_query';
 
-import { getHistogramQuery } from '../../queries/get_histogram_query';
+import { getHistogramQuery } from '../queries/get_histogram_query';
 
-import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_HISTOGRAMS } from '../constants';
-import type { LogRateAnalysisResponseStreamFetchOptions } from '../log_rate_analysis_response_stream';
+import {
+  MAX_CONCURRENT_QUERIES,
+  PROGRESS_STEP_HISTOGRAMS,
+} from '../response_stream_utils/constants';
+import type { ResponseStreamFetchOptions } from '../response_stream';
 
 export const histogramHandlerFactory =
   <T extends ApiVersion>({
@@ -39,7 +42,7 @@ export const histogramHandlerFactory =
     responseStream,
     stateHandler,
     version,
-  }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
+  }: ResponseStreamFetchOptions<T>) =>
   async (
     fieldValuePairsCount: number,
     significantCategories: SignificantItem[],

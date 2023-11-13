@@ -29,11 +29,11 @@ import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
-import { logRateAnalysisResponseStreamFactory } from './response_stream/log_rate_analysis_response_stream';
-import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream/constants';
+import { responseStreamFactory } from './response_stream';
+import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream_utils/constants';
 
 /**
- * The log rate analysis route handler sets up `logRateAnalysisResponseStreamFactory`
+ * The log rate analysis route handler sets up `responseStreamFactory`
  * to create the response stream and then walks through the steps of the analysis.
  */
 export function routeHandlerFactory<T extends ApiVersion>(
@@ -65,7 +65,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
     return await coreStart.executionContext.withContext(executionContext, () => {
       const { analysis, logDebugMessage, stateHandler, responseStream, responseWithHeaders } =
-        logRateAnalysisResponseStreamFactory<T>({
+        responseStreamFactory<T>({
           version,
           client,
           requestBody: request.body,

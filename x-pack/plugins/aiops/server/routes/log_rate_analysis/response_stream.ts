@@ -10,12 +10,12 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Headers, KibanaRequestEvents } from '@kbn/core-http-server';
 import type { Logger } from '@kbn/logging';
 
-import { type AiopsLogRateAnalysisApiAction } from '../../../../common/api/log_rate_analysis/actions';
+import { type AiopsLogRateAnalysisApiAction } from '../../../common/api/log_rate_analysis/actions';
 
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '../../../../common/api/log_rate_analysis/schema';
+} from '../../../common/api/log_rate_analysis/schema';
 
 import { indexInfoHandlerFactory } from './analysis_handlers/index_info_handler';
 import { groupingHandlerFactory } from './analysis_handlers/grouping_handler';
@@ -23,14 +23,17 @@ import { histogramHandlerFactory } from './analysis_handlers/histogram_handler';
 import { overridesHandlerFactory } from './analysis_handlers/overrides_handler';
 import { significantItemsHandlerFactory } from './analysis_handlers/significant_items_handler';
 import { overallHistogramHandlerFactory } from './analysis_handlers/overall_histogram_handler';
-import { logDebugMessageFactory, type LogDebugMessage } from './log_debug_message';
-import { stateHandlerFactory, type StateHandler } from './state_handler';
-import { streamEndFactory } from './stream_end';
-import { streamEndWithUpdatedLoadingStateFactory } from './stream_end_with_updated_loading_state';
-import { streamPushErrorFactory } from './stream_push_error';
-import { streamPushPingWithTimeoutFactory } from './stream_push_ping_with_timeout';
+import {
+  logDebugMessageFactory,
+  type LogDebugMessage,
+} from './response_stream_utils/log_debug_message';
+import { stateHandlerFactory, type StateHandler } from './response_stream_utils/state_handler';
+import { streamEndFactory } from './response_stream_utils/stream_end';
+import { streamEndWithUpdatedLoadingStateFactory } from './response_stream_utils/stream_end_with_updated_loading_state';
+import { streamPushErrorFactory } from './response_stream_utils/stream_push_error';
+import { streamPushPingWithTimeoutFactory } from './response_stream_utils/stream_push_ping_with_timeout';
 
-export interface LogRateAnalysisResponseStreamOptions<T extends ApiVersion> {
+export interface ResponseStreamOptions<T extends ApiVersion> {
   version: T;
   client: ElasticsearchClient;
   requestBody: AiopsLogRateAnalysisSchema<T>;
@@ -39,8 +42,7 @@ export interface LogRateAnalysisResponseStreamOptions<T extends ApiVersion> {
   logger: Logger;
 }
 
-export interface LogRateAnalysisResponseStreamFetchOptions<T extends ApiVersion>
-  extends LogRateAnalysisResponseStreamOptions<T> {
+export interface ResponseStreamFetchOptions<T extends ApiVersion> extends ResponseStreamOptions<T> {
   abortSignal: AbortSignal;
   logDebugMessage: LogDebugMessage;
   responseStream: {
@@ -53,9 +55,7 @@ export interface LogRateAnalysisResponseStreamFetchOptions<T extends ApiVersion>
   stateHandler: StateHandler;
 }
 
-export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
-  options: LogRateAnalysisResponseStreamOptions<T>
-) => {
+export const responseStreamFactory = <T extends ApiVersion>(options: ResponseStreamOptions<T>) => {
   const { events, headers, logger, requestBody } = options;
 
   const logDebugMessage = logDebugMessageFactory(logger);
@@ -93,7 +93,7 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   const endWithUpdatedLoadingState = streamEndWithUpdatedLoadingStateFactory(end, push);
   const pushError = streamPushErrorFactory(push, logDebugMessage);
 
-  const streamFetchOptions: LogRateAnalysisResponseStreamFetchOptions<T> = {
+  const streamFetchOptions: ResponseStreamFetchOptions<T> = {
     ...options,
     abortSignal,
     logDebugMessage,

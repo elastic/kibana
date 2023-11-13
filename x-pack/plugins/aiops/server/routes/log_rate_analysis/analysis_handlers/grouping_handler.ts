@@ -19,24 +19,24 @@ import {
   type NumericChartData,
 } from '@kbn/ml-agg-utils';
 
-import { RANDOM_SAMPLER_SEED } from '../../../../../common/constants';
+import { RANDOM_SAMPLER_SEED } from '../../../../common/constants';
 import {
   addSignificantItemsGroupAction,
   addSignificantItemsGroupHistogramAction,
   updateLoadingStateAction,
-} from '../../../../../common/api/log_rate_analysis/actions';
-import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../../common/api/log_rate_analysis/schema';
+} from '../../../../common/api/log_rate_analysis/actions';
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
-import { isRequestAbortedError } from '../../../../lib/is_request_aborted_error';
+import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
-import { fetchFrequentItemSets } from '../../queries/fetch_frequent_item_sets';
-import { fetchTerms2CategoriesCounts } from '../../queries/fetch_terms_2_categories_counts';
-import { getGroupFilter } from '../../queries/get_group_filter';
-import { getHistogramQuery } from '../../queries/get_histogram_query';
-import { getSignificantItemGroups } from '../../queries/get_significant_item_groups';
+import { fetchFrequentItemSets } from '../queries/fetch_frequent_item_sets';
+import { fetchTerms2CategoriesCounts } from '../queries/fetch_terms_2_categories_counts';
+import { getGroupFilter } from '../queries/get_group_filter';
+import { getHistogramQuery } from '../queries/get_histogram_query';
+import { getSignificantItemGroups } from '../queries/get_significant_item_groups';
 
-import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../constants';
-import type { LogRateAnalysisResponseStreamFetchOptions } from '../log_rate_analysis_response_stream';
+import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
+import type { ResponseStreamFetchOptions } from '../response_stream';
 
 export const groupingHandlerFactory =
   <T extends ApiVersion>({
@@ -48,7 +48,7 @@ export const groupingHandlerFactory =
     logger,
     stateHandler,
     version,
-  }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
+  }: ResponseStreamFetchOptions<T>) =>
   async (
     significantCategories: SignificantItem[],
     significantTerms: SignificantItem[],
