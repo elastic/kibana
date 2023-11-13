@@ -6,13 +6,12 @@
  * Side Public License, v 1.
  */
 
-import {
+import { JAVA_AGENT_NAMES, OPEN_TELEMETRY_AGENT_NAMES, RUM_AGENT_NAMES } from './agent_names';
+
+import type {
   JavaAgentName,
-  JAVA_AGENT_NAMES,
   OpenTelemetryAgentName,
-  OPEN_TELEMETRY_AGENT_NAMES,
   RumAgentName,
-  RUM_AGENT_NAMES,
   ServerlessType,
 } from './agent_names';
 

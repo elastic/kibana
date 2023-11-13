@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { AgentName } from '@kbn/elastic-agent-utils';
+import type { AgentName } from '@kbn/elastic-agent-utils';
 
 export type {
   ElasticAgentName,
