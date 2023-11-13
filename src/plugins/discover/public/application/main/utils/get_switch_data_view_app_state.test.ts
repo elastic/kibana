@@ -41,6 +41,17 @@ const currentDataView = getDataView('curr', '', ['category', 'name']);
 const nextDataView = getDataView('next', '', ['category', 'user_default_column']);
 
 describe('Discover getDataViewAppState', () => {
+  test('removing fields that are not part of the next data view, keeping unknown fields ', async () => {
+    const result = getDataViewAppState(
+      currentDataView,
+      nextDataView,
+      emptyDefaultColumns,
+      ['category', 'name', 'unknown'],
+      [['category', 'desc']]
+    );
+    expect(result.columns).toEqual(['category', 'unknown']);
+    expect(result.sort).toEqual([['category', 'desc']]);
+  });
   test('removing fields that are not part of the next data view and adding default columns', async () => {
     const result = getDataViewAppState(
       currentDataView,

@@ -35,7 +35,7 @@ describe('changeDataView', () => {
     await changeDataView(dataViewWithDefaultColumnMock.id!, params);
     expect(params.appState.update).toHaveBeenCalledWith({
       columns: ['default_column'], // default_column would be added as dataViewWithDefaultColumn has it as a mapped field
-      index: 'data-view-with-various-field-types-and-default-column-id',
+      index: 'data-view-with-user-default-column-id',
       sort: [['@timestamp', 'desc']],
     });
   });

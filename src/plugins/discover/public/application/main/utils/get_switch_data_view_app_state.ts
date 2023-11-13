@@ -28,8 +28,13 @@ export function getDataViewAppState(
   let columns = currentColumns || [];
 
   if (modifyColumns) {
+    const currentUnknownColumns = columns.filter(
+      (column) => !currentDataView.fields.getByName(column) && !defaultColumns.includes(column)
+    );
     const currentColumnsRefreshed = uniq([...columns, ...defaultColumns]);
-    columns = currentColumnsRefreshed.filter((column) => nextDataView.fields.getByName(column));
+    columns = currentColumnsRefreshed.filter(
+      (column) => nextDataView.fields.getByName(column) || currentUnknownColumns.includes(column)
+    );
   }
 
   if (query && isOfAggregateQueryType(query)) {
