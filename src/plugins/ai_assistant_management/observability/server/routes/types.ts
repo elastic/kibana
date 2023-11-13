@@ -9,7 +9,6 @@
 import type { CustomRequestHandlerContext, KibanaRequest } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import type { RacApiRequestHandlerContext } from '@kbn/rule-registry-plugin/server';
-import type { AIAssistantManagementObservabilityService } from '../service';
 import type {
   AiAssistantManagementObservabilityPluginSetupDependencies,
   AiAssistantManagementObservabilityPluginStartDependencies,
@@ -23,7 +22,6 @@ export interface AIAssistantManagementObservabilityRouteHandlerResources {
   request: KibanaRequest;
   context: AIAssistantManagementObservabilityRequestHandlerContext;
   logger: Logger;
-  service: AIAssistantManagementObservabilityService;
   plugins: {
     [key in keyof AiAssistantManagementObservabilityPluginSetupDependencies]: {
       setup: Required<AiAssistantManagementObservabilityPluginSetupDependencies>[key];

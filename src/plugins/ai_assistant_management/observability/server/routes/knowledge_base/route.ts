@@ -6,11 +6,14 @@
  * Side Public License, v 1.
  */
 
+import * as t from 'io-ts';
 import { notImplemented } from '@hapi/boom';
+import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
+import { KnowledgeBaseEntry } from '../../../common/types';
 import { createAIAssistantManagementObservabilityServerRoute } from '../create_ai_assistant_management_observability_server_route';
 
 const getKnowledgeBaseStatus = createAIAssistantManagementObservabilityServerRoute({
-  endpoint: 'GET /internal/management/ai_assistant_management_observability/kb_status',
+  endpoint: 'GET /internal/management/ai_assistant_management/observability/kb/status',
   options: {
     tags: ['access:ai_assistant'],
   },
@@ -22,38 +25,133 @@ const getKnowledgeBaseStatus = createAIAssistantManagementObservabilityServerRou
     deployment_state?: string;
     allocation_state?: string;
   }> => {
-    const client = await resources.service.getClient({ request: resources.request });
+    const observabilityAIAssistantPlugin =
+      await resources.plugins.observabilityAIAssistant?.start();
 
-    if (!client) {
+    if (!observabilityAIAssistantPlugin) {
       throw notImplemented();
     }
 
-    return await client.getKnowledgeBaseStatus();
+    const client = await observabilityAIAssistantPlugin.service.getClient({
+      request: resources.request,
+    });
+
+    return client.getKnowledgeBaseStatus();
   },
 });
 
 const setupKnowledgeBase = createAIAssistantManagementObservabilityServerRoute({
-  endpoint: 'POST /internal/management/ai_assistant_management_observability/setup_kb',
+  endpoint: 'POST /internal/management/ai_assistant_management/observability/setup',
   options: {
     tags: ['access:ai_assistant'],
     timeout: {
       idleSocket: 20 * 60 * 1000, // 20 minutes
     },
   },
-  handler: async (resources): Promise<{}> => {
-    const client = await resources.service.getClient({ request: resources.request });
+  handler: async (resources): Promise<void> => {
+    const observabilityAIAssistantPlugin =
+      await resources.plugins.observabilityAIAssistant?.start();
 
-    if (!client) {
+    if (!observabilityAIAssistantPlugin) {
       throw notImplemented();
     }
 
-    await client.setupKnowledgeBase();
+    const client = await observabilityAIAssistantPlugin.service.getClient({
+      request: resources.request,
+    });
 
-    return {};
+    return client.setupKnowledgeBase();
+  },
+});
+
+const getKnowledgeBaseEntries = createAIAssistantManagementObservabilityServerRoute({
+  endpoint: 'GET /internal/management/ai_assistant/observability/kb/entries',
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    entries: KnowledgeBaseEntry[];
+  }> => {
+    const observabilityAIAssistantPlugin =
+      await resources.plugins.observabilityAIAssistant?.start();
+
+    if (!observabilityAIAssistantPlugin) {
+      throw notImplemented();
+    }
+
+    const client = await observabilityAIAssistantPlugin.service.getClient({
+      request: resources.request,
+    });
+
+    return client.getKnowledgeBaseEntries();
+  },
+});
+
+const saveKnowledgeBaseEntry = createAIAssistantManagementObservabilityServerRoute({
+  endpoint: 'POST /internal/management/ai_assistant/observability/kb/entries/save',
+  params: t.type({
+    body: t.type({
+      id: t.string,
+      text: nonEmptyStringRt,
+      confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
+      is_correction: toBooleanRt,
+      public: toBooleanRt,
+      labels: t.record(t.string, t.string),
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const observabilityAIAssistantPlugin =
+      await resources.plugins.observabilityAIAssistant?.start();
+
+    if (!observabilityAIAssistantPlugin) {
+      throw notImplemented();
+    }
+
+    const client = await observabilityAIAssistantPlugin.service.getClient({
+      request: resources.request,
+    });
+
+    return client.createKnowledgeBaseEntry({
+      entry: resources.params.body,
+    });
+  },
+});
+
+const deleteKnowledgeBaseEntry = createAIAssistantManagementObservabilityServerRoute({
+  endpoint: 'DELETE /internal/management/ai_assistant/observability/kb/entries/{entryId}',
+  params: t.type({
+    path: t.type({
+      entryId: t.string,
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const observabilityAIAssistantPlugin =
+      await resources.plugins.observabilityAIAssistant?.start();
+
+    if (!observabilityAIAssistantPlugin) {
+      throw notImplemented();
+    }
+
+    const client = await observabilityAIAssistantPlugin.service.getClient({
+      request: resources.request,
+    });
+
+    return client.deleteKnowledgeBaseEntry(resources.params.path.entryId);
   },
 });
 
 export const knowledgeBaseRoutes = {
   ...setupKnowledgeBase,
   ...getKnowledgeBaseStatus,
+  ...getKnowledgeBaseEntries,
+  ...saveKnowledgeBaseEntry,
+  ...deleteKnowledgeBaseEntry,
 };

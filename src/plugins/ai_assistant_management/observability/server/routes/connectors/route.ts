@@ -10,7 +10,7 @@ import { FindActionResult } from '@kbn/actions-plugin/server';
 import { createAIAssistantManagementObservabilityServerRoute } from '../create_ai_assistant_management_observability_server_route';
 
 const listConnectorsRoute = createAIAssistantManagementObservabilityServerRoute({
-  endpoint: 'GET /internal/management/ai_assistant_management_observability/connectors',
+  endpoint: 'GET /internal/management/ai_assistant/observability/connectors',
   options: {
     tags: ['access:ai_assistant'],
   },

@@ -7,7 +7,10 @@
 
 import { merge } from 'lodash';
 import type { KnowledgeBaseEntry } from '../../../common/types';
-import { type KnowledgeBaseEntryOperation, KnowledgeBaseEntryOperationType } from '../kb_service';
+import {
+  type KnowledgeBaseEntryOperation,
+  KnowledgeBaseEntryOperationType,
+} from '../knowledge_base_service';
 
 export function splitKbText({
   id,

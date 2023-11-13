@@ -16,7 +16,7 @@ import {
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import type { RecalledEntry } from '../../service/kb_service';
+import type { RecalledEntry } from '../../service/knowledge_base_service';
 
 const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
@@ -219,7 +219,7 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
       labels,
     } = resources.params.body;
 
-    return client.summarize({
+    return client.createKnowledgeBaseEntry({
       entry: {
         confidence,
         id,
@@ -229,50 +229,6 @@ const functionSummariseRoute = createObservabilityAIAssistantServerRoute({
         labels,
       },
     });
-  },
-});
-
-const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({
-  endpoint: 'GET /internal/observability_ai_assistant/functions/kb_status',
-  options: {
-    tags: ['access:ai_assistant'],
-  },
-  handler: async (
-    resources
-  ): Promise<{
-    ready: boolean;
-    error?: any;
-    deployment_state?: string;
-    allocation_state?: string;
-  }> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    return await client.getKnowledgeBaseStatus();
-  },
-});
-
-const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
-  endpoint: 'POST /internal/observability_ai_assistant/functions/setup_kb',
-  options: {
-    tags: ['access:ai_assistant'],
-    timeout: {
-      idleSocket: 20 * 60 * 1000, // 20 minutes
-    },
-  },
-  handler: async (resources): Promise<{}> => {
-    const client = await resources.service.getClient({ request: resources.request });
-
-    if (!client) {
-      throw notImplemented();
-    }
-
-    await client.setupKnowledgeBase();
-
-    return {};
   },
 });
 
@@ -352,8 +308,6 @@ export const functionRoutes = {
   ...functionElasticsearchRoute,
   ...functionRecallRoute,
   ...functionSummariseRoute,
-  ...setupKnowledgeBaseRoute,
-  ...getKnowledgeBaseStatus,
   ...functionAlertsRoute,
   ...functionGetDatasetInfoRoute,
 };

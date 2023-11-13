@@ -10,36 +10,38 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type {
   PluginStartContract as FeaturesPluginStart,
   PluginSetupContract as FeaturesPluginSetup,
 } from '@kbn/features-plugin/server';
 import { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import {
-  TaskManagerSetupContract,
-  TaskManagerStartContract,
+  TaskManagerSetupContract as TaskManagerPluginSetup,
+  TaskManagerStartContract as TaskManagerPluginStart,
 } from '@kbn/task-manager-plugin/server';
+import type {
+  ObservabilityAIAssistantPluginSetup,
+  ObservabilityAIAssistantPluginStart,
+} from '@kbn/observability-ai-assistant-plugin/server';
 
-export interface AiAssistantManagementObservabilityPluginSetup {
-  taskManager: TaskManagerSetupContract;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AiAssistantManagementObservabilityPluginSetup {}
 
-export interface AiAssistantManagementObservabilityPluginStart {
-  taskManager: TaskManagerSetupContract;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+export interface AiAssistantManagementObservabilityPluginStart {}
 
 export interface AiAssistantManagementObservabilityPluginSetupDependencies {
-  actions: ActionsPluginSetup;
+  actions?: ActionsPluginSetup;
+  features?: FeaturesPluginSetup;
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginSetup;
   security: SecurityPluginSetup;
-  features: FeaturesPluginSetup;
-  taskManager: TaskManagerSetupContract;
+  taskManager?: TaskManagerPluginSetup;
 }
 
 export interface AiAssistantManagementObservabilityPluginStartDependencies {
-  actions: ActionsPluginStart;
+  actions?: ActionsPluginStart;
+  features?: FeaturesPluginStart;
+  observabilityAIAssistant?: ObservabilityAIAssistantPluginStart;
   security: SecurityPluginStart;
-  features: FeaturesPluginStart;
-  taskManager: TaskManagerStartContract;
-  dataViews: DataViewsServerPluginStart;
+  taskManager?: TaskManagerPluginStart;
 }

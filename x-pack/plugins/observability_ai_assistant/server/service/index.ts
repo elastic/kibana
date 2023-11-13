@@ -11,12 +11,13 @@ import { createConcreteWriteIndex, getDataStreamAdapter } from '@kbn/alerting-pl
 import type { CoreSetup, CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getSpaceIdFromPath } from '@kbn/spaces-plugin/common';
+import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { once } from 'lodash';
 import type { ObservabilityAIAssistantPluginStartDependencies } from '../types';
 import { ObservabilityAIAssistantClient } from './client';
 import { conversationComponentTemplate } from './conversation_component_template';
 import { kbComponentTemplate } from './kb_component_template';
-import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './kb_service';
+import { KnowledgeBaseEntryOperationType, KnowledgeBaseService } from './knowledge_base_service';
 import type { ObservabilityAIAssistantResourceNames } from './types';
 import { splitKbText } from './util/split_kb_text';
 
@@ -69,12 +70,33 @@ export class ObservabilityAIAssistantService {
   constructor({
     logger,
     core,
+    taskManager,
   }: {
     logger: Logger;
     core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
+    taskManager: TaskManagerSetupContract;
   }) {
     this.core = core;
     this.logger = logger;
+
+    taskManager.registerTaskDefinitions({
+      [INDEX_QUEUED_DOCUMENTS_TASK_TYPE]: {
+        title: 'Index queued KB articles',
+        description:
+          'Indexes previously registered entries into the knowledge base when it is ready',
+        timeout: '30m',
+        maxAttempts: 2,
+        createTaskRunner: (context) => {
+          return {
+            run: async () => {
+              if (this.kbService) {
+                await this.kbService.processQueue();
+              }
+            },
+          };
+        },
+      },
+    });
   }
 
   init = once(async () => {

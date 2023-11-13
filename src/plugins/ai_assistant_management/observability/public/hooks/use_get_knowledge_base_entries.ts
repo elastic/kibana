@@ -7,38 +7,31 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
-import type { FindActionResult } from '@kbn/actions-plugin/server';
 import { REACT_QUERY_KEYS } from '../constants';
 import { useAppContext } from '../context/app_context';
+import { KnowledgeBaseEntry } from '../../common/types';
 
-export interface UseGetAiConnectorsResponse {
+export interface UseGetKnowledgeBaseEntriesResponse {
   isLoading: boolean;
   isRefetching: boolean;
   isSuccess: boolean;
   isError: boolean;
-  connectors: FindActionResult[] | undefined;
+  entries: KnowledgeBaseEntry[] | undefined;
 }
 
-export function useGetAiConnectors(): UseGetAiConnectorsResponse {
+export function useGetKnowledgeBaseEntries(): UseGetKnowledgeBaseEntriesResponse {
   const { http } = useAppContext();
 
-  const {
-    isLoading,
-    isError,
-    isSuccess,
-    isRefetching,
-    data: connectors,
-  } = useQuery({
-    queryKey: [REACT_QUERY_KEYS.GET_GENAI_CONNECTORS],
+  const { isLoading, isError, isSuccess, isRefetching, data } = useQuery({
+    queryKey: [REACT_QUERY_KEYS.GET_KB_ENTRIES],
     queryFn: async ({ signal }) => {
-      const response = await http.get<FindActionResult[]>(
-        `/internal/management/ai_assistant/observability/connectors`,
+      const response = await http.get<{ entries: KnowledgeBaseEntry[] }>(
+        `/internal/management/ai_assistant/observability/kb/entries`,
         {
           query: {},
           signal,
         }
       );
-
       return response;
     },
     keepPreviousData: true,
@@ -46,7 +39,7 @@ export function useGetAiConnectors(): UseGetAiConnectorsResponse {
   });
 
   return {
-    connectors,
+    entries: data?.entries,
     isLoading,
     isRefetching,
     isSuccess,
