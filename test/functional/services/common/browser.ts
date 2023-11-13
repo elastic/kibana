@@ -246,6 +246,14 @@ class BrowserService extends FtrService {
     return await this.driver.get(url);
   }
 
+  /**
+   * Adds a cookie to the current browsing context. You need to be on the domain that the cookie will be valid for.
+   * https://www.selenium.dev/documentation/webdriver/interactions/cookies/#add-cookie
+   *
+   * @param {string} name
+   * @param {string} value
+   * @return {Promise<void>}
+   */
   public async setCookie(name: string, value: string) {
     await this.driver.manage().addCookie({ name, value });
   }
