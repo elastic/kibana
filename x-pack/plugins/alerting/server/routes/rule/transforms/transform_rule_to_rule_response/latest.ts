@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { transformRuleToRuleResponse } from './v1';
+export { transformRuleToRuleResponse, transformRuleActions } from './v1';

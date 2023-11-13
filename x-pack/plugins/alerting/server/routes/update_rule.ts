@@ -6,18 +6,17 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { IRouter } from '@kbn/core/server';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
   RewriteResponseCase,
-  RewriteRequestCase,
   handleDisabledApiKeysError,
-  rewriteActionsReq,
-  rewriteActionsRes,
   actionsSchema,
   rewriteRuleLastRun,
+  rewriteActionsReqWithSystemActions,
 } from './lib';
 import {
   RuleTypeParams,
@@ -26,6 +25,8 @@ import {
   validateNotifyWhenType,
   PartialRule,
 } from '../types';
+import { transformRuleActions } from './rule/transforms';
+import { RulePartialResponse } from '../../common/routes/rule/response';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -54,14 +55,20 @@ const bodySchema = schema.object({
   ),
 });
 
-const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (result) => {
+const rewriteBodyReq = (
+  result: {
+    id: string;
+    data: TypeOf<typeof bodySchema>;
+  },
+  isSystemAction: (connectorId: string) => boolean
+): UpdateOptions<RuleTypeParams> => {
   const { notify_when: notifyWhen, actions, ...rest } = result.data;
   return {
     ...result,
     data: {
       ...rest,
       notifyWhen,
-      actions: rewriteActionsReq(actions),
+      actions: rewriteActionsReqWithSystemActions(actions, isSystemAction),
     },
   };
 };
@@ -84,7 +91,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   lastRun,
   nextRun,
   ...rest
-}) => ({
+}: PartialRule<RuleTypeParams>): RulePartialResponse<RuleTypeParams> => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
@@ -109,7 +116,7 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
     : {}),
   ...(actions
     ? {
-        actions: rewriteActionsRes(actions),
+        actions: transformRuleActions(actions),
       }
     : {}),
   ...(lastRun ? { last_run: rewriteRuleLastRun(lastRun) } : {}),
@@ -133,10 +140,16 @@ export const updateRuleRoute = (
       router.handleLegacyErrors(
         verifyAccessAndContext(licenseState, async function (context, req, res) {
           const rulesClient = (await context.alerting).getRulesClient();
+          const actionsClient = (await context.actions).getActionsClient();
+
           const { id } = req.params;
           const rule = req.body;
           try {
-            const alertRes = await rulesClient.update(rewriteBodyReq({ id, data: rule }));
+            const alertRes = await rulesClient.update(
+              rewriteBodyReq({ id, data: rule }, (connectorId: string) =>
+                actionsClient.isSystemAction(connectorId)
+              )
+            );
             return res.ok({
               body: rewriteBodyRes(alertRes),
             });

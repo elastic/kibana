@@ -45,4 +45,5 @@ export type {
   RuleSnoozeSchedule as RuleSnoozeScheduleV1,
   RuleLastRun as RuleLastRunV1,
   Monitoring as MonitoringV1,
+  RulePartialResponse,
 } from './types/v1';
