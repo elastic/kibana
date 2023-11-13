@@ -23,6 +23,7 @@ import type {
 } from '@kbn/screenshot-mode-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 
 import { BehaviorSubject, map, switchMap, tap } from 'rxjs';
 import type { TelemetryConfigLabels } from '../server/config';
@@ -301,9 +302,7 @@ export class TelemetryPlugin
    * @private
    */
   private shouldSkipTelemetry(screenshotMode: ScreenshotModePluginSetup): boolean {
-    return (
-      screenshotMode.isScreenshotMode() || window.navigator.userAgent.includes('Elastic/Synthetics')
-    );
+    return screenshotMode.isScreenshotMode() || isSyntheticsMonitor();
   }
 
   private getTelemetryServicePublicApis(): TelemetryServicePublicApis {

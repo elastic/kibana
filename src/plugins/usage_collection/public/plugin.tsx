@@ -18,6 +18,7 @@ import type {
   HttpSetup,
 } from '@kbn/core/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
+import { isSyntheticsMonitor } from '@kbn/analytics-collection-utils';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import { createReporter, trackApplicationUsageChange } from './services';
 import { ApplicationUsageContext } from './components/track_application_view';
@@ -151,7 +152,7 @@ export class UsageCollectionPlugin
       this.config.uiCounters.enabled &&
       !isUnauthenticated(http) &&
       !screenshotMode.isScreenshotMode() &&
-      !window.navigator.userAgent.includes('Elastic/Synthetics')
+      !isSyntheticsMonitor()
     ) {
       this.reporter.start();
       this.applicationUsageTracker.start();

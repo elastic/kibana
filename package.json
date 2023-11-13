@@ -147,6 +147,7 @@
     "@kbn/alerts-ui-shared": "link:packages/kbn-alerts-ui-shared",
     "@kbn/analytics": "link:packages/kbn-analytics",
     "@kbn/analytics-client": "link:packages/analytics/client",
+    "@kbn/analytics-collection-utils": "link:packages/analytics/utils/analytics-collection-utils",
     "@kbn/analytics-ftr-helpers-plugin": "link:test/analytics/plugins/analytics_ftr_helpers",
     "@kbn/analytics-plugin-a-plugin": "link:test/analytics/plugins/analytics_plugin_a",
     "@kbn/analytics-shippers-elastic-v3-browser": "link:packages/analytics/shippers/elastic_v3/browser",

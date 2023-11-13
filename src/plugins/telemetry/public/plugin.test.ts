@@ -6,14 +6,15 @@
  * Side Public License, v 1.
  */
 
+import { of } from 'rxjs';
 import { ElasticV3BrowserShipper } from '@kbn/analytics-shippers-elastic-v3-browser';
 import { coreMock } from '@kbn/core/public/mocks';
 import { homePluginMock } from '@kbn/home-plugin/public/mocks';
 import { screenshotModePluginMock } from '@kbn/screenshot-mode-plugin/public/mocks';
 import { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { isSyntheticsMonitorMock } from './plugin.test.mock';
 import { TelemetryPlugin } from './plugin';
-import { of } from 'rxjs';
 
 describe('TelemetryPlugin', () => {
   let screenshotMode: ScreenshotModePluginSetup;
@@ -22,6 +23,7 @@ describe('TelemetryPlugin', () => {
   beforeEach(() => {
     screenshotMode = screenshotModePluginMock.createSetupContract();
     home = homePluginMock.createSetupContract();
+    isSyntheticsMonitorMock.mockReturnValue(false);
   });
 
   describe('setup', () => {
@@ -115,9 +117,7 @@ describe('TelemetryPlugin', () => {
 
       const coreStartMock = coreMock.createStart();
       coreStartMock.application = { ...coreStartMock.application, currentAppId$: of('some-app') };
-      jest
-        .spyOn(window.navigator, 'userAgent', 'get')
-        .mockReturnValue(window.navigator.userAgent + 'Elastic/Synthetics');
+      isSyntheticsMonitorMock.mockReturnValueOnce(true);
       const optInSpy = jest.spyOn(coreStartMock.analytics, 'optIn');
       plugin.start(coreStartMock, { screenshotMode });
       expect(isScreenshotModeSpy).toBeCalledTimes(2);
