@@ -6,48 +6,44 @@
  */
 
 import React, { useState, useEffect } from 'react';
-import { difference, differenceWith, intersectionWith, isEqual, unionWith } from 'lodash';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import { MultiSelectFilter } from './multi_select_filter';
-import type { SystemFilterConfig } from './use_system_filter_config';
-
-type CustomFieldFilterConfig = SystemFilterConfig;
+import type { FilterConfig } from './use_system_filter_config';
 
 const MoreFiltersSelectable = ({
-  filterConfigOptions,
-  selectedFilterConfigOptions,
-  onFilterConfigChange,
+  options,
+  activeFilters,
+  onChange,
 }: {
-  filterConfigOptions: string[];
-  selectedFilterConfigOptions: string[];
-  onFilterConfigChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
+  options: string[];
+  activeFilters: string[];
+  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
 }) => {
   return (
     <MultiSelectFilter
       id="filters"
       buttonLabel={'more +'} // FIXME: Translation and + icon
-      options={filterConfigOptions}
-      selectedOptions={selectedFilterConfigOptions}
+      options={options}
+      selectedOptions={activeFilters}
       limit={10} // FIXME: We should set a limit
-      onChange={onFilterConfigChange}
+      onChange={onChange}
       hideActiveOptionsNumber
     />
   );
 };
-
 MoreFiltersSelectable.displayName = 'MoreFiltersSelectable';
 
 const useCustomFieldsFilterConfig = () => {
-  const [filterConfig, setFilterConfig] = useState<CustomFieldFilterConfig[]>([]); // FIXME: type
+  const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
 
   const {
     data: { customFields },
   } = useGetCaseConfiguration();
 
   useEffect(() => {
-    const customFieldsFilterConfig: CustomFieldFilterConfig[] = [];
+    const customFieldsFilterConfig: FilterConfig[] = [];
     for (const { key, type, label } of customFields ?? []) {
       if (customFieldsBuilder[type]) {
         const customField = customFieldsBuilder[type]();
@@ -76,110 +72,73 @@ const useCustomFieldsFilterConfig = () => {
 
   return { customFieldsFilterConfig: filterConfig };
 };
-let loop = 0;
-export const useFilterConfig = ({
-  systemFilterConfig,
-}: {
-  systemFilterConfig: SystemFilterConfig[];
-}) => {
+
+export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: FilterConfig[] }) => {
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig();
-  const [config, setConfig] = useState(() => [...systemFilterConfig, ...customFieldsFilterConfig]);
+  const [config, setConfig] = useState<Map<string, FilterConfig>>(() => {
+    return new Map(
+      [...systemFilterConfig, ...customFieldsFilterConfig].map((filter) => [filter.key, filter])
+    );
+  });
 
   useEffect(() => {
-    if (loop++ > 100) throw new Error('loop');
     setConfig((prevConfig) => {
-      const newConfig: SystemFilterConfig[] = [];
-      for (const prevFilter of prevConfig) {
-        const systemFilter = systemFilterConfig.find((filter) => filter.key === prevFilter.key);
-        if (systemFilter) {
-          newConfig.push({
-            ...systemFilter,
-            isActive: prevFilter.isActive,
-          });
-        } else {
-          newConfig.push(prevFilter);
-        }
-      }
-      return newConfig;
-    });
-  }, [systemFilterConfig]);
+      const _config = new Map(prevConfig);
+      const updatedConfig = new Map(
+        [...systemFilterConfig, ...customFieldsFilterConfig].map((filter) => [filter.key, filter])
+      );
 
-  useEffect(() => {
-    if (loop++ > 100) throw new Error('loop 2');
+      updatedConfig.forEach((filter) => {
+        if (_config.has(filter.key)) {
+          const outputFilter = _config.get(filter.key);
+          if (outputFilter) {
+            _config.set(filter.key, { ...filter, isActive: outputFilter.isActive });
+          }
+        } else {
+          _config.set(filter.key, filter);
+        }
+      });
+
+      return _config;
+    });
+  }, [systemFilterConfig, customFieldsFilterConfig]);
+
+  const onFilterConfigChange = ({
+    filterId,
+    options: activatedOptions,
+  }: {
+    filterId: string;
+    options: string[];
+  }) => {
     setConfig((prevConfig) => {
-      const newConfig = [];
-      for (const prevFilter of prevConfig) {
-        const customFieldsFilter = customFieldsFilterConfig.find(
-          (filter) => filter.key === prevFilter.key
-        );
-        if (customFieldsFilter) {
-          newConfig.push({
-            ...customFieldsFilter,
-            isActive: prevFilter.isActive,
-          });
+      const _config = new Map(prevConfig);
+
+      prevConfig.forEach((filter) => {
+        if (activatedOptions.includes(filter.label)) {
+          if (!filter.isActive) {
+            // new activated options are inserted at the end of the list
+            _config.delete(filter.key);
+            _config.set(filter.key, { ...filter, isActive: true });
+          }
         } else {
-          newConfig.push(prevFilter);
+          _config.set(filter.key, { ...filter, isActive: false });
         }
-      }
+      });
 
-      for (const customFieldsFilter of customFieldsFilterConfig) {
-        const prevFilter = prevConfig.find((filter) => filter.key === customFieldsFilter.key);
-        if (!prevFilter) {
-          newConfig.push(customFieldsFilter);
-        }
-      }
-      console.log({ newConfig });
-      return newConfig;
+      return _config;
     });
-  }, [customFieldsFilterConfig]);
-
-  const filterConfigOptions = config
-    .filter((filter) => filter.isAvailable)
-    .map((filter) => filter.label);
-
-  const selectedFilterConfigOptions = config
-    .filter((filter) => filter.isAvailable && filter.isActive)
-    .filter(Boolean)
-    .map((filter) => filter.label);
-
-  const onFilterConfigChange = ({ filterId, options }: { filterId: string; options: string[] }) => {
-    const addedOption = difference(options, selectedFilterConfigOptions)[0];
-    const removedOption = difference(selectedFilterConfigOptions, options)[0];
-
-    let newConfig: SystemFilterConfig[] = [];
-    if (addedOption) {
-      const addedFilter = config.find((filter) => filter.label === addedOption);
-      newConfig = config.filter((filter) => filter.label !== addedOption);
-      console.log({
-        addedOption: {
-          ...addedFilter,
-          isActive: true,
-        },
-      });
-      newConfig.push({
-        ...addedFilter,
-        isActive: true,
-      } as CustomFieldFilterConfig);
-    } else if (removedOption) {
-      newConfig = config.map((filter) => {
-        if (filter.label === removedOption) {
-          return {
-            ...filter,
-            isActive: false,
-          };
-        }
-        return filter;
-      });
-    }
-    console.log({ newConfig });
-    setConfig(newConfig);
   };
 
+  const configArray = Array.from(config.values()).filter((filter) => filter.isAvailable);
+  const filterLabels = configArray.map((filter) => filter.label);
+  const activeFilters = configArray.filter((filter) => filter.isActive).map((filter) => filter);
+  const activeFilterLabels = activeFilters.map((filter) => filter.label);
+
   return {
-    config,
-    filterConfigOptions: filterConfigOptions.sort(),
+    config: activeFilters,
+    filterConfigOptions: filterLabels.sort(),
     onFilterConfigChange,
-    selectedFilterConfigOptions,
+    activeFilters: activeFilterLabels,
     moreFiltersSelectableComponent: MoreFiltersSelectable,
   };
 };

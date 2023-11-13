@@ -19,7 +19,7 @@ import type { CurrentUserProfile } from '../types';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import type { FilterOptions } from '../../containers/types';
 
-interface UseSystemFilterConfigProps {
+interface UseFilterConfigProps {
   availableSolutions: string[];
   caseAssignmentAuthorized: boolean;
   categories: string[];
@@ -35,7 +35,7 @@ interface UseSystemFilterConfigProps {
   tags: string[];
 }
 
-export interface SystemFilterConfig {
+export interface FilterConfig {
   key: string;
   label: string;
   isActive: boolean;
@@ -63,7 +63,7 @@ export const getSystemFilterConfig = ({
   isSelectorView,
   selectedAssignees,
   tags,
-}: UseSystemFilterConfigProps): SystemFilterConfig[] => {
+}: UseFilterConfigProps): FilterConfig[] => {
   return [
     {
       key: 'severity',
@@ -151,7 +151,7 @@ export const getSystemFilterConfig = ({
         />
       ),
     },
-  ].filter((filter) => filter.isAvailable);
+  ];
 };
 
 export const useSystemFilterConfig = ({
@@ -168,8 +168,8 @@ export const useSystemFilterConfig = ({
   isSelectorView,
   selectedAssignees,
   tags,
-}: UseSystemFilterConfigProps) => {
-  const [filterConfig, setFilterConfig] = useState<SystemFilterConfig[]>(() =>
+}: UseFilterConfigProps) => {
+  const [filterConfig, setFilterConfig] = useState<FilterConfig[]>(() =>
     getSystemFilterConfig({
       availableSolutions,
       caseAssignmentAuthorized,
