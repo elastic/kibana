@@ -45,9 +45,14 @@ export const createLogExplorerControllerFactory =
       http: core.http,
     }).client;
 
+    const customUiSettings = createUiSettingsServiceProxy(core.uiSettings);
     const discoverServices: LogExplorerDiscoverServices = {
-      data: createDataServiceProxy(data),
-      uiSettings: createUiSettingsServiceProxy(core.uiSettings),
+      data: createDataServiceProxy({
+        data,
+        http: core.http,
+        uiSettings: customUiSettings,
+      }),
+      uiSettings: customUiSettings,
       urlStateStorage: createMemoryUrlStateStorage(),
     };
 
@@ -56,8 +61,9 @@ export const createLogExplorerControllerFactory =
     const logExplorerContext$ = new BehaviorSubject<LogExplorerControllerContext>(initialContext);
 
     const machine = createLogExplorerControllerStateMachine({
-      initialContext,
       datasetsClient,
+      initialContext,
+      query: discoverServices.data.query,
       toasts: core.notifications.toasts,
     });
 

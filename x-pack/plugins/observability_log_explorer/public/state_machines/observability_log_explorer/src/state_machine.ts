@@ -75,7 +75,7 @@ export const createPureObservabilityLogExplorerStateMachine = (
         },
         initialized: {
           invoke: {
-            src: 'listenForLogExplorerStateChanges',
+            src: 'subscribeToLogExplorerState',
           },
           on: {
             LOG_EXPLORER_STATE_CHANGED: {
@@ -142,15 +142,14 @@ export const createObservabilityLogExplorerStateMachine = ({
       initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
       createController: createController({ createLogExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
-      listenForLogExplorerStateChanges: (context, event) => {
-        return 'controller' in context
+      subscribeToLogExplorerState: (context, event) =>
+        'controller' in context
           ? context.controller?.state$.pipe(
               map((value) => ({ type: 'LOG_EXPLORER_STATE_CHANGED', state: value }))
             )
           : throwError(
               () => new Error('Failed to subscribe to controller: no controller in context')
-            );
-      },
+            ),
     },
   });
 

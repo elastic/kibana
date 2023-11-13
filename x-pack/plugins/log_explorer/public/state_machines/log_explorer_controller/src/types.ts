@@ -152,6 +152,10 @@ export type LogExplorerControllerEvent =
       type: 'RECEIVE_DISCOVER_APP_STATE';
       appState: DiscoverAppState;
     }
+  | {
+      type: 'RECEIVE_QUERY_STATE';
+      queryState: QueryState;
+    }
   | DoneInvokeEvent<DatasetSelection>
   | DoneInvokeEvent<ControlPanels>
   | DoneInvokeEvent<ControlGroupAPI>
