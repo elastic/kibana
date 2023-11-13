@@ -20,7 +20,6 @@ import {
   ObservabilityOnboardingLocatorParams,
   OBSERVABILITY_ONBOARDING_LOCATOR,
 } from '@kbn/deeplinks-observability/locators';
-import { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
 import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
@@ -37,10 +36,8 @@ import {
   feedbackLinkTitle,
   onboardingLinkTitle,
 } from '../../common/translations';
-import { ObservabilityLogExplorerService } from '../state_machines/observability_log_explorer/src/state_machine';
-import { ObservabilityLogExplorerAppMountParameters } from '../types';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
-import { PluginKibanaContextValue, useKibanaContextForPlugin } from '../utils/use_kibana';
+import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const LogExplorerTopNavMenu = ({ services }: LogExplorerTopNavMenuProps) => {
   const {
