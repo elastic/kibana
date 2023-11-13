@@ -24,7 +24,6 @@ import { CancellationToken } from '@kbn/reporting-common';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 
 import { CsvSearchSourceExportType } from '.';
 
@@ -69,7 +68,6 @@ beforeAll(async () => {
     uiSettings: mockCoreStart.uiSettings,
     discover: discoverPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
-    screenshotting: createMockScreenshottingStart(),
   });
 });
 
