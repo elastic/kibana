@@ -321,10 +321,13 @@ x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
+packages/deeplinks/fleet @elastic/fleet
 packages/deeplinks/management @elastic/platform-deployment-management
 packages/deeplinks/ml @elastic/ml-ui
 packages/deeplinks/observability @elastic/obs-ux-logs-team
 packages/deeplinks/search @elastic/enterprise-search-frontend
+packages/deeplinks/security @elastic/security-solution
+packages/deeplinks/shared @elastic/appex-sharedux
 packages/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/default-nav/devtools @elastic/platform-deployment-management
 packages/default-nav/management @elastic/platform-deployment-management
