@@ -6,6 +6,7 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
@@ -77,6 +78,8 @@ export interface ReportingStartDeps {
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
   reporting: ReportingStart | null;
 }>;
+
+export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
 /**
  * Interface of a response to an HTTP request for our plugin to generate a report.

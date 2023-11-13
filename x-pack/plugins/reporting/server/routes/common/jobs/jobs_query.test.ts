@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { set } from '@kbn/safer-lodash-set';
+
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
-import { set } from '@kbn/safer-lodash-set';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import { statuses } from '../../../lib';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import { createMockReportingCore } from '../../../test_helpers';
 import { jobsQueryFactory } from './jobs_query';
 
 describe('jobsQuery', () => {
