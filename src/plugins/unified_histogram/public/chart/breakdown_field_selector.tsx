@@ -56,6 +56,9 @@ export const BreakdownFieldSelector = ({
   const breakdownCss = css`
     width: 100%;
     max-width: ${euiTheme.base * 22}px;
+    &:focus-within {
+      max-width: ${euiTheme.base * 30}px;
+    }
   `;
 
   return (
@@ -79,6 +82,7 @@ export const BreakdownFieldSelector = ({
         options={fieldOptions}
         selectedOptions={selectedFields}
         onChange={onFieldChange}
+        truncationProps={{ truncation: 'middle' }}
         compressed
         fullWidth={true}
         onFocus={disableFieldPopover}
