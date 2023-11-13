@@ -43,13 +43,14 @@ export interface LogRateAnalysisResponseStreamFetchOptions<T extends ApiVersion>
   extends LogRateAnalysisResponseStreamOptions<T> {
   abortSignal: AbortSignal;
   logDebugMessage: LogDebugMessage;
-  end: () => void;
-  endWithUpdatedLoadingState: () => void;
-  push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'];
-  pushPingWithTimeout: () => void;
-  pushError: (msg: string) => void;
+  responseStream: {
+    end: () => void;
+    endWithUpdatedLoadingState: () => void;
+    push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'];
+    pushPingWithTimeout: () => void;
+    pushError: (msg: string) => void;
+  };
   stateHandler: StateHandler;
-  sampleProbability: number;
 }
 
 export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
@@ -58,9 +59,10 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   const { events, headers, logger, requestBody } = options;
 
   const logDebugMessage = logDebugMessageFactory(logger);
-  const state = stateHandlerFactory();
-  const groupingEnabled = !!requestBody.grouping;
-  const sampleProbability = requestBody.sampleProbability ?? 1;
+  const state = stateHandlerFactory({
+    groupingEnabled: !!requestBody.grouping,
+    sampleProbability: requestBody.sampleProbability ?? 1,
+  });
   const controller = new AbortController();
   const abortSignal = controller.signal;
 
@@ -95,13 +97,14 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     ...options,
     abortSignal,
     logDebugMessage,
-    end,
-    endWithUpdatedLoadingState,
-    push,
-    pushError,
-    pushPingWithTimeout,
+    responseStream: {
+      end,
+      endWithUpdatedLoadingState,
+      push,
+      pushError,
+      pushPingWithTimeout,
+    },
     stateHandler: state,
-    sampleProbability,
   };
 
   const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
@@ -113,13 +116,14 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
 
   return {
     ...streamFetchOptions,
-    indexInfoHandler,
-    groupingEnabled,
-    groupingHandler,
-    histogramHandler,
-    overallHistogramHandler,
-    overridesHandler,
+    analysis: {
+      indexInfoHandler,
+      groupingHandler,
+      histogramHandler,
+      overallHistogramHandler,
+      overridesHandler,
+      significantItemsHandler,
+    },
     responseWithHeaders,
-    significantItemsHandler,
   };
 };

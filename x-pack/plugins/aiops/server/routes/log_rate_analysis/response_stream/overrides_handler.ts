@@ -18,21 +18,21 @@ export const overridesHandlerFactory =
   <T extends ApiVersion>({
     requestBody,
     logDebugMessage,
+    responseStream,
     stateHandler,
-    push,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   () => {
     if (!requestBody.overrides) {
       logDebugMessage('Full Reset.');
-      push(resetAllAction());
+      responseStream.push(resetAllAction());
     } else {
       logDebugMessage('Reset Errors.');
-      push(resetErrorsAction());
+      responseStream.push(resetErrorsAction());
     }
 
     if (requestBody.overrides?.regroupOnly) {
       logDebugMessage('Reset Groups.');
-      push(resetGroupsAction());
+      responseStream.push(resetGroupsAction());
     }
 
     if (requestBody.overrides?.loaded) {

@@ -7,18 +7,30 @@
 
 export interface StreamState {
   isRunning: boolean;
+  groupingEnabled: boolean;
   loaded: number;
+  sampleProbability: number;
   shouldStop: boolean;
 }
 
-const getDefaultStreamState = (): StreamState => ({
-  isRunning: false,
-  loaded: 0,
-  shouldStop: false,
+const getDefaultStreamState = (overrides: Partial<StreamState>): StreamState => ({
+  isRunning: !!overrides.isRunning,
+  groupingEnabled: !!overrides.groupingEnabled,
+  loaded: overrides.loaded ?? 0,
+  sampleProbability: overrides.sampleProbability ?? 1,
+  shouldStop: !!overrides.shouldStop,
 });
 
-export const stateHandlerFactory = () => {
-  const state = getDefaultStreamState();
+export const stateHandlerFactory = (overrides: Partial<StreamState>) => {
+  const state = getDefaultStreamState(overrides);
+
+  function groupingEnabled(d?: boolean) {
+    if (typeof d === 'boolean') {
+      state.groupingEnabled = d;
+    } else {
+      return state.groupingEnabled;
+    }
+  }
 
   function loaded(): number;
   function loaded(d: number, replace?: boolean): undefined;
@@ -42,6 +54,14 @@ export const stateHandlerFactory = () => {
     }
   }
 
+  function sampleProbability(d?: number) {
+    if (typeof d === 'number') {
+      state.sampleProbability = d;
+    } else {
+      return state.sampleProbability;
+    }
+  }
+
   function shouldStop(d?: boolean) {
     if (typeof d === 'boolean') {
       state.shouldStop = d;
@@ -50,7 +70,7 @@ export const stateHandlerFactory = () => {
     }
   }
 
-  return { isRunning, loaded, shouldStop };
+  return { groupingEnabled, isRunning, loaded, sampleProbability, shouldStop };
 };
 
 export type StateHandler = ReturnType<typeof stateHandlerFactory>;

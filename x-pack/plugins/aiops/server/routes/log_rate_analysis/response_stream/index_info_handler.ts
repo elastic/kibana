@@ -23,14 +23,10 @@ export const indexInfoHandlerFactory =
     const {
       abortSignal,
       client,
-      end,
-      endWithUpdatedLoadingState,
       logDebugMessage,
       logger,
-      push,
-      pushError,
-      pushPingWithTimeout,
       requestBody,
+      responseStream,
       stateHandler,
     } = options;
 
@@ -43,7 +39,7 @@ export const indexInfoHandlerFactory =
 
     if (!requestBody.overrides?.remainingFieldCandidates) {
       logDebugMessage('Fetch index information.');
-      push(
+      responseStream.push(
         updateLoadingStateAction({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
@@ -71,9 +67,9 @@ export const indexInfoHandlerFactory =
       } catch (e) {
         if (!isRequestAbortedError(e)) {
           logger.error(`Failed to fetch index information, got: \n${e.toString()}`);
-          pushError(`Failed to fetch index information.`);
+          responseStream.pushError(`Failed to fetch index information.`);
         }
-        end();
+        responseStream.end();
         return;
       }
 
@@ -81,9 +77,9 @@ export const indexInfoHandlerFactory =
 
       stateHandler.loaded(LOADED_FIELD_CANDIDATES, false);
 
-      pushPingWithTimeout();
+      responseStream.pushPingWithTimeout();
 
-      push(
+      responseStream.push(
         updateLoadingStateAction({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
@@ -101,10 +97,10 @@ export const indexInfoHandlerFactory =
       );
 
       if (fieldCandidatesCount === 0) {
-        endWithUpdatedLoadingState();
+        responseStream.endWithUpdatedLoadingState();
       } else if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop after fetching field candidates.');
-        end();
+        responseStream.end();
         return;
       }
     }

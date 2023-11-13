@@ -32,6 +32,10 @@ import type { AiopsLicense } from '../../types';
 import { logRateAnalysisResponseStreamFactory } from './response_stream/log_rate_analysis_response_stream';
 import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream/constants';
 
+/**
+ * The log rate analysis route handler sets up `logRateAnalysisResponseStreamFactory`
+ * to create the response stream and then walks through the steps of the analysis.
+ */
 export function routeHandlerFactory<T extends ApiVersion>(
   version: T,
   license: AiopsLicense,
@@ -60,49 +64,34 @@ export function routeHandlerFactory<T extends ApiVersion>(
     const executionContext = createExecutionContext(coreStart, PLUGIN_ID, request.route.path);
 
     return await coreStart.executionContext.withContext(executionContext, () => {
-      const {
-        end,
-        endWithUpdatedLoadingState,
-        indexInfoHandler,
-        groupingEnabled,
-        groupingHandler,
-        histogramHandler,
-        logDebugMessage,
-        overallHistogramHandler,
-        overridesHandler,
-        pushError,
-        pushPingWithTimeout,
-        responseWithHeaders,
-        sampleProbability,
-        stateHandler,
-        significantItemsHandler,
-      } = logRateAnalysisResponseStreamFactory<T>({
-        version,
-        client,
-        requestBody: request.body,
-        events: request.events,
-        headers: request.headers,
-        logger,
-      });
+      const { analysis, logDebugMessage, stateHandler, responseStream, responseWithHeaders } =
+        logRateAnalysisResponseStreamFactory<T>({
+          version,
+          client,
+          requestBody: request.body,
+          events: request.events,
+          headers: request.headers,
+          logger,
+        });
 
       async function runAnalysis() {
         try {
           logDebugMessage('Starting analysis.');
-          logDebugMessage(`Sample probability: ${sampleProbability}`);
+          logDebugMessage(`Sample probability: ${stateHandler.sampleProbability()}`);
 
           stateHandler.isRunning(true);
-          overridesHandler();
-          pushPingWithTimeout();
+          analysis.overridesHandler();
+          responseStream.pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
-          const indexInfo = await indexInfoHandler();
+          const indexInfo = await analysis.indexInfoHandler();
 
           if (!indexInfo) {
             return;
           }
 
           // Step 2: Significant categories and terms
-          const significantItemsObj = await significantItemsHandler(indexInfo);
+          const significantItemsObj = await analysis.significantItemsHandler(indexInfo);
 
           if (!significantItemsObj) {
             return;
@@ -112,30 +101,34 @@ export function routeHandlerFactory<T extends ApiVersion>(
             significantItemsObj;
 
           // Step 3: Fetch overall histogram
-          const overallTimeSeries = await overallHistogramHandler();
+          const overallTimeSeries = await analysis.overallHistogramHandler();
 
           // Step 4: Smart gropuing
-          if (groupingEnabled) {
-            await groupingHandler(significantCategories, significantTerms, overallTimeSeries);
+          if (stateHandler.groupingEnabled()) {
+            await analysis.groupingHandler(
+              significantCategories,
+              significantTerms,
+              overallTimeSeries
+            );
           }
 
           stateHandler.loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
 
           // Step 5: Histograms
-          await histogramHandler(
+          await analysis.histogramHandler(
             fieldValuePairsCount,
             significantCategories,
             significantTerms,
             overallTimeSeries
           );
 
-          endWithUpdatedLoadingState();
+          responseStream.endWithUpdatedLoadingState();
         } catch (e) {
           if (!isRequestAbortedError(e)) {
             logger.error(`Log Rate Analysis failed to finish, got: \n${e.toString()}`);
-            pushError(`Log Rate Analysis failed to finish.`);
+            responseStream.pushError(`Log Rate Analysis failed to finish.`);
           }
-          end();
+          responseStream.end();
         }
       }
 

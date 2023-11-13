@@ -36,14 +36,10 @@ export const significantItemsHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
     client,
-    end,
-    endWithUpdatedLoadingState,
     logDebugMessage,
     logger,
-    push,
-    pushError,
     requestBody,
-    sampleProbability,
+    responseStream,
     stateHandler,
     version,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
@@ -85,14 +81,14 @@ export const significantItemsHandlerFactory =
           requestBody,
           textFieldCandidates,
           logger,
-          sampleProbability,
-          pushError,
+          stateHandler.sampleProbability(),
+          responseStream.pushError,
           abortSignal
         ))
       );
 
       if (significantCategories.length > 0) {
-        push(addSignificantItemsAction(significantCategories, version));
+        responseStream.push(addSignificantItemsAction(significantCategories, version));
       }
     }
 
@@ -144,14 +140,14 @@ export const significantItemsHandlerFactory =
           requestBody,
           [fieldCandidate],
           logger,
-          sampleProbability,
-          pushError,
+          stateHandler.sampleProbability(),
+          responseStream.pushError,
           abortSignal
         );
       } catch (e) {
         if (!isRequestAbortedError(e)) {
           logger.error(`Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`);
-          pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
+          responseStream.pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
         }
         return;
       }
@@ -164,10 +160,10 @@ export const significantItemsHandlerFactory =
         });
         significantTerms.push(...pValues);
 
-        push(addSignificantItemsAction(pValues, version));
+        responseStream.push(addSignificantItemsAction(pValues, version));
       }
 
-      push(
+      responseStream.push(
         updateLoadingStateAction({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
@@ -189,13 +185,13 @@ export const significantItemsHandlerFactory =
     pValuesQueue.push(fieldCandidates, (err) => {
       if (err) {
         logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
-        pushError(`Failed to fetch p-values.`);
+        responseStream.pushError(`Failed to fetch p-values.`);
         pValuesQueue.kill();
-        end();
+        responseStream.end();
       } else if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop fetching p-values.');
         pValuesQueue.kill();
-        end();
+        responseStream.end();
       }
     });
     await pValuesQueue.drain();
@@ -204,7 +200,7 @@ export const significantItemsHandlerFactory =
 
     if (fieldValuePairsCount === 0) {
       logDebugMessage('Stopping analysis, did not find significant terms.');
-      endWithUpdatedLoadingState();
+      responseStream.endWithUpdatedLoadingState();
       return;
     }
 

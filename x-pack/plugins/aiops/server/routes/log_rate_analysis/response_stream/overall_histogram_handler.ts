@@ -25,12 +25,10 @@ export const overallHistogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
     client,
-    end,
     requestBody,
     logDebugMessage,
     logger,
-    pushError,
-    sampleProbability,
+    responseStream,
     stateHandler,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   async () => {
@@ -56,21 +54,21 @@ export const overallHistogramHandlerFactory =
           -1,
           undefined,
           abortSignal,
-          sampleProbability,
+          stateHandler.sampleProbability(),
           RANDOM_SAMPLER_SEED
         )) as [NumericChartData]
       )[0];
     } catch (e) {
       if (!isRequestAbortedError(e)) {
         logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
-        pushError(`Failed to fetch overall histogram data.`);
+        responseStream.pushError(`Failed to fetch overall histogram data.`);
       }
       // Still continue the analysis even if loading the overall histogram fails.
     }
 
     if (stateHandler.shouldStop()) {
       logDebugMessage('shouldStop after fetching overall histogram.');
-      end();
+      responseStream.end();
       return;
     }
 

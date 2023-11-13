@@ -33,13 +33,10 @@ export const histogramHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
     client,
-    end,
     logDebugMessage,
     logger,
-    push,
-    pushError,
     requestBody,
-    sampleProbability,
+    responseStream,
     stateHandler,
     version,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
@@ -50,7 +47,7 @@ export const histogramHandlerFactory =
     overallTimeSeries?: NumericChartData
   ) => {
     function pushHistogramDataLoadingState() {
-      push(
+      responseStream.push(
         updateLoadingStateAction({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
@@ -76,7 +73,7 @@ export const histogramHandlerFactory =
         if (stateHandler.shouldStop()) {
           logDebugMessage('shouldStop abort fetching field/value histograms.');
           fieldValueHistogramQueue.kill();
-          end();
+          responseStream.end();
           return;
         }
 
@@ -109,7 +106,7 @@ export const histogramHandlerFactory =
                 -1,
                 undefined,
                 abortSignal,
-                sampleProbability,
+                stateHandler.sampleProbability(),
                 RANDOM_SAMPLER_SEED
               )) as [NumericChartData]
             )[0];
@@ -119,7 +116,7 @@ export const histogramHandlerFactory =
                 cp.fieldValue
               }", got: \n${e.toString()}`
             );
-            pushError(
+            responseStream.pushError(
               `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
             );
             return;
@@ -153,7 +150,7 @@ export const histogramHandlerFactory =
 
           stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
           pushHistogramDataLoadingState();
-          push(
+          responseStream.push(
             addSignificantItemsHistogramAction(
               [
                 {
@@ -213,7 +210,7 @@ export const histogramHandlerFactory =
               -1,
               undefined,
               abortSignal,
-              sampleProbability,
+              stateHandler.sampleProbability(),
               RANDOM_SAMPLER_SEED
             )) as [NumericChartData]
           )[0];
@@ -223,7 +220,7 @@ export const histogramHandlerFactory =
               cp.fieldValue
             }", got: \n${e.toString()}`
           );
-          pushError(
+          responseStream.pushError(
             `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
           );
           return;
@@ -258,7 +255,7 @@ export const histogramHandlerFactory =
 
         stateHandler.loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
         pushHistogramDataLoadingState();
-        push(
+        responseStream.push(
           addSignificantItemsHistogramAction(
             [
               {

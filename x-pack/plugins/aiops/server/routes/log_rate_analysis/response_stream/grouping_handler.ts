@@ -42,13 +42,10 @@ export const groupingHandlerFactory =
   <T extends ApiVersion>({
     abortSignal,
     client,
-    end,
     requestBody,
+    responseStream,
     logDebugMessage,
     logger,
-    push,
-    pushError,
-    sampleProbability,
     stateHandler,
     version,
   }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
@@ -60,7 +57,7 @@ export const groupingHandlerFactory =
     logDebugMessage('Group results.');
 
     function pushHistogramDataLoadingState() {
-      push(
+      responseStream.push(
         updateLoadingStateAction({
           ccsWarning: false,
           loaded: stateHandler.loaded(),
@@ -74,7 +71,7 @@ export const groupingHandlerFactory =
       );
     }
 
-    push(
+    responseStream.push(
       updateLoadingStateAction({
         ccsWarning: false,
         loaded: stateHandler.loaded(),
@@ -95,8 +92,8 @@ export const groupingHandlerFactory =
         requestBody.deviationMin,
         requestBody.deviationMax,
         logger,
-        sampleProbability,
-        pushError,
+        stateHandler.sampleProbability(),
+        responseStream.pushError,
         abortSignal
       );
 
@@ -112,7 +109,7 @@ export const groupingHandlerFactory =
             requestBody.deviationMin,
             requestBody.deviationMax,
             logger,
-            pushError,
+            responseStream.pushError,
             abortSignal
           );
 
@@ -122,7 +119,7 @@ export const groupingHandlerFactory =
 
       if (stateHandler.shouldStop()) {
         logDebugMessage('shouldStop after fetching frequent_item_sets.');
-        end();
+        responseStream.end();
         return;
       }
 
@@ -138,7 +135,7 @@ export const groupingHandlerFactory =
         const maxItems = Math.max(...significantItemGroups.map((g) => g.group.length));
 
         if (maxItems > 1) {
-          push(addSignificantItemsGroupAction(significantItemGroups, version));
+          responseStream.push(addSignificantItemsGroupAction(significantItemGroups, version));
         }
 
         stateHandler.loaded(PROGRESS_STEP_GROUPING, false);
@@ -146,7 +143,7 @@ export const groupingHandlerFactory =
 
         if (stateHandler.shouldStop()) {
           logDebugMessage('shouldStop after grouping.');
-          end();
+          responseStream.end();
           return;
         }
 
@@ -156,7 +153,7 @@ export const groupingHandlerFactory =
           if (stateHandler.shouldStop()) {
             logDebugMessage('shouldStop abort fetching group histograms.');
             groupHistogramQueue.kill();
-            end();
+            responseStream.end();
             return;
           }
 
@@ -184,7 +181,7 @@ export const groupingHandlerFactory =
                   -1,
                   undefined,
                   abortSignal,
-                  sampleProbability,
+                  stateHandler.sampleProbability(),
                   RANDOM_SAMPLER_SEED
                 )) as [NumericChartData]
               )[0];
@@ -193,7 +190,9 @@ export const groupingHandlerFactory =
                 logger.error(
                   `Failed to fetch the histogram data for group #${cpg.id}, got: \n${e.toString()}`
                 );
-                pushError(`Failed to fetch the histogram data for group #${cpg.id}.`);
+                responseStream.pushError(
+                  `Failed to fetch the histogram data for group #${cpg.id}.`
+                );
               }
               return;
             }
@@ -222,7 +221,7 @@ export const groupingHandlerFactory =
                 };
               }) ?? [];
 
-            push(
+            responseStream.push(
               addSignificantItemsGroupHistogramAction(
                 [
                   {
@@ -242,7 +241,7 @@ export const groupingHandlerFactory =
     } catch (e) {
       if (!isRequestAbortedError(e)) {
         logger.error(`Failed to transform field/value pairs into groups, got: \n${e.toString()}`);
-        pushError(`Failed to transform field/value pairs into groups.`);
+        responseStream.pushError(`Failed to transform field/value pairs into groups.`);
       }
     }
   };
