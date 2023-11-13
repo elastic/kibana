@@ -107,7 +107,7 @@ import {
 } from '../common/endpoint/constants';
 
 import { AppFeaturesService } from './lib/app_features_service/app_features_service';
-import { registerRiskScoringTask } from './lib/risk_engine/tasks/risk_scoring_task';
+import { registerRiskScoringTask } from './lib/entity_analytics/risk_engine/tasks/risk_scoring_task';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import { latestRiskScoreIndexPattern, allRiskScoreIndexPattern } from '../common/risk_engine';
 import { isEndpointPackageV2 } from '../common/endpoint/utils/package_v2';

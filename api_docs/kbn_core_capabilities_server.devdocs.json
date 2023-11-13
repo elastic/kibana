@@ -99,6 +99,14 @@
                 "section": "def-common.CapabilitiesSwitcher",
                 "text": "CapabilitiesSwitcher"
               },
+              ", options: ",
+              {
+                "pluginId": "@kbn/core-capabilities-server",
+                "scope": "common",
+                "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                "section": "def-common.CapabilitiesSwitcherOptions",
+                "text": "CapabilitiesSwitcherOptions"
+              },
               ") => void"
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
@@ -119,6 +127,27 @@
                     "docId": "kibKbnCoreCapabilitiesServerPluginApi",
                     "section": "def-common.CapabilitiesSwitcher",
                     "text": "CapabilitiesSwitcher"
+                  }
+                ],
+                "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-capabilities-server",
+                "id": "def-common.CapabilitiesSetup.registerSwitcher.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "options",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/core-capabilities-server",
+                    "scope": "common",
+                    "docId": "kibKbnCoreCapabilitiesServerPluginApi",
+                    "section": "def-common.CapabilitiesSwitcherOptions",
+                    "text": "CapabilitiesSwitcherOptions"
                   }
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
@@ -152,7 +181,7 @@
             "tags": [],
             "label": "resolveCapabilities",
             "description": [
-              "\nResolve the {@link Capabilities} to be used for given request"
+              "\nResolve the {@link Capabilities} to be used for given request\n"
             ],
             "signature": [
               "(request: ",
@@ -163,7 +192,7 @@
                 "section": "def-common.KibanaRequest",
                 "text": "KibanaRequest"
               },
-              "<unknown, unknown, unknown, any>, options?: ",
+              "<unknown, unknown, unknown, any>, options: ",
               {
                 "pluginId": "@kbn/core-capabilities-server",
                 "scope": "common",
@@ -171,7 +200,7 @@
                 "section": "def-common.ResolveCapabilitiesOptions",
                 "text": "ResolveCapabilitiesOptions"
               },
-              " | undefined) => Promise<",
+              ") => Promise<",
               {
                 "pluginId": "@kbn/core-capabilities-common",
                 "scope": "common",
@@ -191,7 +220,9 @@
                 "type": "Object",
                 "tags": [],
                 "label": "request",
-                "description": [],
+                "description": [
+                  "The request to resolve capabilities for"
+                ],
                 "signature": [
                   {
                     "pluginId": "@kbn/core-http-server",
@@ -221,16 +252,47 @@
                     "docId": "kibKbnCoreCapabilitiesServerPluginApi",
                     "section": "def-common.ResolveCapabilitiesOptions",
                     "text": "ResolveCapabilitiesOptions"
-                  },
-                  " | undefined"
+                  }
                 ],
                 "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "isRequired": true
               }
             ],
             "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-capabilities-server",
+        "id": "def-common.CapabilitiesSwitcherOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CapabilitiesSwitcherOptions",
+        "description": [
+          "\nOptions for the {@link CapabilitiesSetup.registerSwitcher} API.\n"
+        ],
+        "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.CapabilitiesSwitcherOptions.capabilityPath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilityPath",
+            "description": [
+              "\nThe path(s) of capabilities the switcher may alter. The '*' wildcard is supported as a suffix only.\n\nE.g. capabilityPath: \"myPlugin.*\" or capabilityPath: \"myPlugin.myKey\""
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -242,7 +304,7 @@
         "tags": [],
         "label": "ResolveCapabilitiesOptions",
         "description": [
-          "\nDefines a set of additional options for the `resolveCapabilities` method of {@link CapabilitiesStart}.\n"
+          "\nOptions for {@link CapabilitiesStart.resolveCapabilities}.\n"
         ],
         "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
         "deprecated": false,
@@ -250,12 +312,31 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-capabilities-server",
+            "id": "def-common.ResolveCapabilitiesOptions.capabilityPath",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "capabilityPath",
+            "description": [
+              "\nThe path(s) of capabilities that the API consumer is interested in. The '*' wildcard is supported as a suffix only.\n\nE.g. capabilityPath: \"*\" or capabilityPath: \"myPlugin.*\" or capabilityPath: \"myPlugin.myKey\"\n"
+            ],
+            "signature": [
+              "string | string[]"
+            ],
+            "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-capabilities-server",
             "id": "def-common.ResolveCapabilitiesOptions.useDefaultCapabilities",
-            "type": "boolean",
+            "type": "CompoundType",
             "tags": [],
             "label": "useDefaultCapabilities",
             "description": [
-              "\nIndicates if capability switchers are supposed to return a default set of capabilities."
+              "\nIndicates if capability switchers are supposed to return a default set of capabilities.\n\nDefaults to `false`"
+            ],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "packages/core/capabilities/core-capabilities-server/src/contracts.ts",
             "deprecated": false,
