@@ -96,8 +96,7 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
-      if (!isServerless)
-        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
@@ -107,11 +106,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(auditbeatPath);
-      // ASK what could be the alertnative solution here
-      if (!isServerless)
-        await esArchiver.unload(
-          'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
-        );
+      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
@@ -2288,7 +2283,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('@brokenInServerless legacy investigation_fields', () => {
+    describe('legacy investigation_fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
 
       beforeEach(async () => {
