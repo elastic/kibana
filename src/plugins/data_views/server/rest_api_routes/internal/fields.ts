@@ -7,10 +7,7 @@
  */
 
 import { createHash } from 'crypto';
-import { estypes } from '@elastic/elasticsearch';
-import { schema } from '@kbn/config-schema';
 import { IRouter, RequestHandler, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
-// import { FullValidationConfig } from '@kbn/core-http-server';
 import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
@@ -19,98 +16,7 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
-
-/**
- * Accepts one of the following:
- * 1. An array of field names
- * 2. A JSON-stringified array of field names
- * 3. A single field name (not comma-separated)
- * @returns an array of field names
- * @param fields
- */
-export const parseFields = (fields: string | string[]): string[] => {
-  if (Array.isArray(fields)) return fields;
-  try {
-    return JSON.parse(fields);
-  } catch (e) {
-    if (!fields.includes(',')) return [fields];
-    throw new Error(
-      'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
-    );
-  }
-};
-
-type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
-interface IQuery {
-  pattern: string;
-  meta_fields: string | string[];
-  type?: string;
-  rollup_index?: string;
-  allow_no_index?: boolean;
-  include_unmapped?: boolean;
-  fields?: string[];
-}
-
-const querySchema = schema.object({
-  pattern: schema.string(),
-  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-    defaultValue: [],
-  }),
-  type: schema.maybe(schema.string()),
-  rollup_index: schema.maybe(schema.string()),
-  allow_no_index: schema.maybe(schema.boolean()),
-  include_unmapped: schema.maybe(schema.boolean()),
-  fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-});
-
-/**
-const fieldSubTypeSchema = schema.object({
-  multi: schema.maybe(schema.object({ parent: schema.string() })),
-  nested: schema.maybe(schema.object({ path: schema.string() })),
-});
-
-/*
-const FieldDescriptorSchema = schema.object({
-  aggregatable: schema.boolean(),
-  name: schema.string(),
-  readFromDocValues: schema.boolean(),
-  searchable: schema.boolean(),
-  type: schema.string(),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
-  subType: fieldSubTypeSchema,
-  metadata_field: schema.maybe(schema.boolean()),
-  fixedInterval: schema.maybe(schema.arrayOf(schema.string())),
-  timeZone: schema.maybe(schema.arrayOf(schema.string())),
-  timeSeriesMetric: schema.maybe(
-    schema.oneOf([
-      schema.literal('histogram'),
-      schema.literal('summary'),
-      schema.literal('counter'),
-      schema.literal('gauge'),
-      schema.literal('position'),
-    ])
-  ),
-  timeSeriesDimension: schema.maybe(schema.boolean()),
-  conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
-  ),
-});
-
-/*
-const validate: FullValidationConfig<any, any, any> = {
-  request: {
-    query: querySchema,
-  },
-  response: {
-    200: {
-      body: schema.object({
-        fields: schema.arrayOf(FieldDescriptorSchema),
-        indices: schema.arrayOf(schema.string()),
-      }),
-    },
-  },
-};
-*/
+import { parseFields, IBody, IQuery, querySchema } from './fields_for';
 
 function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1');

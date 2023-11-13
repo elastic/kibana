@@ -13,7 +13,6 @@ const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message']
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const browser = getService('browser');
   const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'settings']);
 
   describe('Columns selection initialization and update', () => {
@@ -21,6 +20,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
+
+      await PageObjects.settings.navigateTo();
+      await PageObjects.settings.createIndexPattern('logs-*-*', '@timestamp');
+      await PageObjects.settings.refreshDataViewFieldList();
     });
 
     after(async () => {
@@ -32,13 +35,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('when the log explorer loads', () => {
       it("should initialize the table columns to logs' default selection", async () => {
         await PageObjects.observabilityLogExplorer.navigateTo();
-        await browser.refresh();
 
         await retry.try(async () => {
-          // did this work?
-          // no, different ids
-          // await PageObjects.discover.refreshFieldList();
-
           expect(await PageObjects.discover.getColumnHeaders()).to.eql(defaultLogColumns);
         });
       });
