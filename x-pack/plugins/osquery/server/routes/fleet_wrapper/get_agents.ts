@@ -35,9 +35,16 @@ export const getAgentsRoute = (router: IRouter, osqueryContext: OsqueryAppContex
       },
       async (context, request, response) => {
         let agents;
+        const query = request.query as ListWithKuery & { showInactive: boolean };
         try {
           agents = await osqueryContext.service.getAgentService()?.asInternalUser.listAgents({
-            ...(request.query as ListWithKuery & { showInactive: boolean }),
+            page: query.page,
+            perPage: query.perPage,
+            sortField: query.sortField,
+            sortOrder: query.sortOrder,
+            showUpgradeable: query.showUpgradeable,
+            kuery: query.kuery,
+            showInactive: query.showInactive,
             aggregations: {
               platforms: {
                 terms: {
