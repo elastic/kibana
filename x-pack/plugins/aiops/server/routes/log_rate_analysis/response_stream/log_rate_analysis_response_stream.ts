@@ -37,13 +37,19 @@ const getDefaultStreamState = (): StreamState => ({
   shouldStop: false,
 });
 
+export interface LogRateAnalysisResponseStreamParams<T extends ApiVersion> {
+  client: ElasticsearchClient;
+  requestBody: AiopsLogRateAnalysisSchema<T>;
+  events: KibanaRequestEvents;
+  headers: Headers;
+  logger: Logger;
+}
+
 export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
-  client: ElasticsearchClient,
-  params: AiopsLogRateAnalysisSchema<T>,
-  events: KibanaRequestEvents,
-  headers: Headers,
-  logger: Logger
+  options: LogRateAnalysisResponseStreamParams<T>
 ) => {
+  const { client, events, headers, logger, requestBody } = options;
+
   let logMessageCounter = 0;
 
   const logDebugMessage: LogDebugMessage = (msg: string) => {
@@ -74,8 +80,8 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   } = streamFactory<AiopsLogRateAnalysisApiAction<T>>(
     headers,
     logger,
-    params.compressResponse,
-    params.flushFix
+    requestBody.compressResponse,
+    requestBody.flushFix
   );
 
   function pushPingWithTimeout() {
@@ -138,7 +144,7 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   const indexInfoHandler = indexInfoHandlerFactory(
     client,
     abortSignal,
-    params,
+    requestBody,
     logger,
     logDebugMessage,
     end,
@@ -150,7 +156,7 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     shouldStop
   );
 
-  const overridesHandler = overridesHandlerFactory(params, logDebugMessage, push, loaded);
+  const overridesHandler = overridesHandlerFactory(requestBody, logDebugMessage, push, loaded);
 
   return {
     abortSignal,

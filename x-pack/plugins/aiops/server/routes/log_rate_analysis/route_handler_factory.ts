@@ -113,13 +113,13 @@ export function routeHandlerFactory<T extends ApiVersion>(
         pushPingWithTimeout,
         responseWithHeaders,
         shouldStop,
-      } = logRateAnalysisResponseStreamFactory<T>(
+      } = logRateAnalysisResponseStreamFactory<T>({
         client,
-        request.body,
-        request.events,
-        request.headers,
-        logger
-      );
+        requestBody: request.body,
+        events: request.events,
+        headers: request.headers,
+        logger,
+      });
 
       async function runAnalysis() {
         try {
