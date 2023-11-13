@@ -20,7 +20,7 @@ export interface SAMLSessionParams {
 export interface FakeSAMLSessionParams {
   username: string;
   email: string;
-  fullname: string;
+  fullName: string;
   role: string;
   kbnHost: string;
 }
@@ -76,7 +76,13 @@ const createCloudSession = async (hostname: string, email: string, password: str
     validateStatus: () => true,
     maxRedirects: 0,
   });
-  return sessionResponse.data.token;
+  const firstName = sessionResponse?.data?.first_name ?? '';
+  const lastName = sessionResponse?.data?.last_name ?? '';
+  const fullName = `${firstName} ${lastName}`.trim();
+  return {
+    token: sessionResponse?.data?.token,
+    fullName,
+  };
 };
 
 const createSAMLRequest = async (kbnUrl: string, kbnVersion: string) => {
@@ -139,22 +145,22 @@ const finishSAMLHandshake = async (
 export const createNewSAMLSession = async (params: SAMLSessionParams) => {
   const { username, password, kbnHost, kbnVersion } = params;
   const hostName = getCloudHostName();
-  const ecSession = await createCloudSession(hostName, username, password);
+  const { token, fullName } = await createCloudSession(hostName, username, password);
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
-  const samlResponse = await createSAMLResponse(location, ecSession);
+  const samlResponse = await createSAMLResponse(location, token);
   const cookie = await finishSAMLHandshake(kbnHost, samlResponse, sid);
-  return { username, cookie };
+  return { username, fullName, cookie };
 };
 
 export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParams) => {
-  // const { username, email, fullname, role, kbnHost } = params;
+  // const { username, email, fullName, role, kbnHost } = params;
   // const samlResponse = await createFakeSAMLResponse({
   //   username
   //   email,
-  //   fullname,
+  //   fullName,
   //   [role],
   // });
   // const cookie = await finishSAMLHandshake(kbnHost, samlResponse);
-  // return { username , cookie };
+  // return { username, fullName, cookie };
   throw new Error('WIP: uncomment when #170852 is merged');
 };

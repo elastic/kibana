@@ -22,6 +22,7 @@ export type Role = string;
 export interface Session {
   cookie: string;
   username: string;
+  fullName: string;
 }
 
 export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
@@ -31,9 +32,11 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
   const isServerless = config.get('serverless');
   const isCloud = !!process.env.TEST_CLOUD;
   const cloudRoleUsersFilePath = resolve(REPO_ROOT, '.ftr', 'role_users.json');
-  const roles: string[] = Object.keys(
-    loadYaml(fs.readFileSync('packages/kbn-es/src/serverless_resources/roles.yml', 'utf8'))
+  const rolesDefinitionFilePath = resolve(
+    REPO_ROOT,
+    'packages/kbn-es/src/serverless_resources/roles.yml'
   );
+  const roles: string[] = Object.keys(loadYaml(fs.readFileSync(rolesDefinitionFilePath, 'utf8')));
   let users: Map<string, User> = new Map<string, User>();
 
   if (!isServerless) {
@@ -107,12 +110,12 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       } else {
         log.debug(`new fake SAML authentication with '${role}' role`);
         const email = `${username}@elastic.co`;
-        const fullname = `test ${role}`;
+        const fullName = `test ${role}`;
 
         session = await createSessionWithFakeSAMLAuth({
           username,
           email,
-          fullname,
+          fullName,
           role,
           kbnHost,
         });
