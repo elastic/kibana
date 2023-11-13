@@ -106,26 +106,20 @@ const getTabs = (props: ShareModalProps) => {
         defaultMessage: 'Embed',
       }),
       content: (
-        <>
-          <EmbedModalPage
-            shareableUrlForSavedObject={shareableUrlForSavedObject}
-            allowShortUrl={allowShortUrl}
-          />
-          {/* <TabContent
-            
-            isEmbedded
-            objectId={objectId}
-            objectType={objectType}
-            urlService={urlService}
-            shareableUrl={shareableUrl}
-            shareableUrlForSavedObject={shareableUrlForSavedObject}
-            shareableUrlLocatorParams={shareableUrlLocatorParams}
-            urlParamExtensions={embedUrlParamExtensions}
-            anonymousAccess={anonymousAccess}
-            showPublicUrlSwitch={showPublicUrlSwitch}
-            snapshotShareWarning={snapshotShareWarning}
-          /> */}
-        </>
+        <EmbedModalPage
+          allowShortUrl={allowShortUrl}
+          isEmbedded
+          objectId={objectId}
+          objectType={objectType}
+          shareableUrl={shareableUrl}
+          shareableUrlForSavedObject={shareableUrlForSavedObject}
+          shareableUrlLocatorParams={shareableUrlLocatorParams}
+          urlParamExtensions={embedUrlParamExtensions}
+          anonymousAccess={anonymousAccess}
+          showPublicUrlSwitch={showPublicUrlSwitch}
+          urlService={urlService}
+          snapshotShareWarning={snapshotShareWarning}
+        />
       ),
     };
     tabs.push(embedPanel);

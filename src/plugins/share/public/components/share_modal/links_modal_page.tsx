@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiForm, EuiFormRow, EuiSpacer } from '@elastic/eui';
+import { EuiCodeBlock, EuiForm, EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { FC } from 'react';
+import React, { FC, useState } from 'react';
 
 interface LinksModalPageProps {
   isEmbedded: boolean;
@@ -17,7 +17,7 @@ interface LinksModalPageProps {
 }
 
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
-  // logic about saved state of the dashboard needed
+  const [selectedRadio, setSelectedRadio] = useState<string>('0');
   const { objectId } = props;
   const isNotSaved = () => {
     return objectId === undefined || objectId === '';
@@ -44,6 +44,15 @@ export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPagePro
   );
   return (
     <EuiForm className="kbnShareContextMenu__finalPanel">
+      <EuiRadioGroup
+        options={[
+          { id: '0', label: 'Saved object' },
+          { id: '1', label: 'Snapshot' },
+        ]}
+        onChange={(id) => setSelectedRadio(id)}
+        name="embed radio group"
+        idSelected={selectedRadio}
+      />
       <EuiSpacer />
       {saveNeeded}
     </EuiForm>
