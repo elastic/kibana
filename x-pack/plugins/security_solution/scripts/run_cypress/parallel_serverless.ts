@@ -67,10 +67,6 @@ const PROVIDERS = Object.freeze({
   providerName: 'cloud-basic',
 });
 
-const delay = async (timeout: number) => {
-  await new Promise((r) => setTimeout(r, timeout));
-};
-
 const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
   const userHomeDir = os.homedir();
   try {
@@ -489,9 +485,6 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             // Wait for project to be initialized
             await waitForProjectInitialized(project.id, API_KEY);
-
-            // Wait for 8 minutes in order for the project to be ready
-            delay(480000);
 
             // Base64 encode the credentials in order to invoke ES and KB APIs
             const auth = btoa(`${credentials.username}:${credentials.password}`);
