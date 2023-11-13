@@ -292,7 +292,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     text: i18n.translate(
       'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.count',
       {
-        defaultMessage: 'Document count',
+        defaultMessage: 'Count',
       }
     ),
     fieldRequired: false,
