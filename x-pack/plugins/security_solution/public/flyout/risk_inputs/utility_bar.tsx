@@ -80,7 +80,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                     riskInputs: (
                       <b>
                         <FormattedMessage
-                          id="xpack.securitySolution.flyout.riskInputs.utilityBar.riskInput"
+                          id="xpack.securitySolution.flyout.riskInputs.utilityBar.riskInputs"
                           defaultMessage="Risk inputs"
                         />
                       </b>
