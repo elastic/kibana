@@ -81,11 +81,13 @@ const handler: (
       // todo examine how long this takes
       const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
 
-      if (cacheMaxAge) {
+      if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
         headers[
           'cache-control'
         ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
+      } else {
+        headers['cache-control'] = 'private, no-cache';
       }
 
       const ifNoneMatch = request.headers['if-none-match'];
