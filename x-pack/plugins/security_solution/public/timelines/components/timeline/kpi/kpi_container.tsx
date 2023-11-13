@@ -61,7 +61,7 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
 
   const kqlQueryTimeline = useSelector((state: State) => getKqlQueryTimeline(state, timelineId));
 
-  const kqlQueryExpression = isEmpty(kqlQueryTimeline) ? ' ' : kqlQueryTimeline;
+  const kqlQueryExpression = kqlQueryTimeline ?? ' ';
 
   const kqlQuery = useMemo(
     () => ({ query: kqlQueryExpression, language: 'kuery' }),
