@@ -7,12 +7,16 @@
  */
 
 import * as t from 'io-ts';
-import { NonEmptyString, operatorIncluded } from '@kbn/securitysolution-io-ts-types';
+import {
+  NonEmptyString,
+  operatorExcluded,
+  operatorIncluded,
+} from '@kbn/securitysolution-io-ts-types';
 
 export const endpointEntryMatchWildcard = t.exact(
   t.type({
     field: NonEmptyString,
-    operator: operatorIncluded,
+    operator: t.union([operatorIncluded, operatorExcluded]),
     type: t.keyof({ wildcard: null }),
     value: NonEmptyString,
   })
