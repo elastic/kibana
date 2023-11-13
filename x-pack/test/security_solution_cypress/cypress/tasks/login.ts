@@ -62,9 +62,7 @@ export interface User {
 }
 
 export const loginWithUser = (user: User): void => {
-  cy.session(user, () => {
-    loginWithUsernameAndPassword(user.username, user.password);
-  });
+  loginWithUsernameAndPassword(user.username, user.password);
 };
 
 /**
@@ -129,9 +127,7 @@ const loginWithRole = (role: SecurityRoleName): void => {
   const password = 'changeme';
 
   cy.log(`origin: ${Cypress.config().baseUrl}`);
-  cy.session(role, () => {
-    loginWithUsernameAndPassword(role, password);
-  });
+  loginWithUsernameAndPassword(role, password);
 };
 
 /**
@@ -154,10 +150,7 @@ const loginViaEnvironmentCredentials = (): void => {
 
   const username = Cypress.env(ELASTICSEARCH_USERNAME);
   const password = Cypress.env(ELASTICSEARCH_PASSWORD);
-
-  cy.session([username, password], () => {
-    loginWithUsernameAndPassword(username, password);
-  });
+  loginWithUsernameAndPassword(username, password);
 };
 
 /**
