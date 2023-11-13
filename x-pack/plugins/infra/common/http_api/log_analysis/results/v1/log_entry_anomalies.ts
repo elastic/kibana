@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
-import { idFormatByJobTypeRT } from '../../v1/id_formats';
+import { idFormatByJobTypeRT } from '../../id_formats/v1/id_formats';
 import { timeRangeRT, routeTimingMetadataRT } from '../../../shared';
 import {
   logEntryAnomalyRT,

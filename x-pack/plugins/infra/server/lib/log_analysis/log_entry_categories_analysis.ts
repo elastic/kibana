@@ -12,7 +12,7 @@ import {
   PersistedLogViewReference,
   ResolvedLogView,
 } from '@kbn/logs-shared-plugin/common';
-import { IdFormat } from '../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat } from '../../../common/http_api/latest';
 import {
   CategoriesSort,
   compareDatasetsByMaximumAnomalyScore,

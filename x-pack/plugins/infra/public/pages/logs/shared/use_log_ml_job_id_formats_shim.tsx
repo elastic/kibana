@@ -8,7 +8,7 @@
 import createContainer from 'constate';
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import { IdFormatByJobType, JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormatByJobType, JobType } from '../../../../common/http_api/latest';
 import { useActiveKibanaSpace } from '../../../hooks/use_kibana_space';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
 

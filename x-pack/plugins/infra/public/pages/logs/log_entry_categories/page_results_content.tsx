@@ -34,7 +34,7 @@ import {
   StringTimeRange,
   useLogEntryCategoriesResultsUrlState,
 } from './use_log_entry_categories_results_url_state';
-import { IdFormat } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat } from '../../../../common/http_api/latest';
 
 const JOB_STATUS_POLLING_INTERVAL = 30000;
 

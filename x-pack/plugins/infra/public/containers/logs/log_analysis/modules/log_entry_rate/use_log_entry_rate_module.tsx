@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import createContainer from 'constate';
 import { useMemo } from 'react';
-import { IdFormat } from '../../../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat } from '../../../../../../common/http_api/latest';
 import { ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { useLogAnalysisModule } from '../../log_analysis_module';
 import { useLogAnalysisModuleConfiguration } from '../../log_analysis_module_configuration';

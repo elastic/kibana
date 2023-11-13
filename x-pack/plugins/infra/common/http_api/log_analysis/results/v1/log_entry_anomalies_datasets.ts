@@ -14,7 +14,7 @@ import {
   timeRangeRT,
   routeTimingMetadataRT,
 } from '../../../shared';
-import { idFormatByJobTypeRT } from '../../v1/id_formats';
+import { idFormatByJobTypeRT } from '../../id_formats/v1/id_formats';
 
 export const LOG_ANALYSIS_GET_LOG_ENTRY_ANOMALIES_DATASETS_PATH =
   '/api/infra/log_analysis/results/log_entry_anomalies_datasets';

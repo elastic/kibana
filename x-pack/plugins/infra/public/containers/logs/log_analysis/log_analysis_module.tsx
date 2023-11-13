@@ -8,8 +8,7 @@
 import { useCallback, useMemo } from 'react';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { useLogMlJobIdFormatsShimContext } from '../../../pages/logs/shared/use_log_ml_job_id_formats_shim';
-import { JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
-import { IdFormat } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';

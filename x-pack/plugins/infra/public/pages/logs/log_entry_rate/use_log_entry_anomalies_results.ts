@@ -8,7 +8,7 @@
 import { useMemo, useState, useCallback, useEffect, useReducer } from 'react';
 import useMount from 'react-use/lib/useMount';
 import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import { IdFormatByJobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormatByJobType } from '../../../../common/http_api/latest';
 import { useTrackedPromise, CanceledPromiseError } from '../../../utils/use_tracked_promise';
 import { callGetLogEntryAnomaliesAPI } from './service_calls/get_log_entry_anomalies';
 import { callGetLogEntryAnomaliesDatasetsAPI } from './service_calls/get_log_entry_anomalies_datasets';

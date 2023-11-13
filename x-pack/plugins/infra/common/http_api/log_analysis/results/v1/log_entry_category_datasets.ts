@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 
 import { persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
-import { idFormatRT } from '../../v1/id_formats';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,

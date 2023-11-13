@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { HttpHandler } from '@kbn/core/public';
-import { IdFormat } from '../../../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat } from '../../../../../../common/http_api/latest';
 import {
   bucketSpan,
   categoriesMessageField,

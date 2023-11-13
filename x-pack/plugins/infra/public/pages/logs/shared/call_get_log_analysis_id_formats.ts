@@ -11,7 +11,7 @@ import {
   getLogAnalysisIdFormatsRequestPayloadRT,
   getLogAnalysisIdFormatsSuccessResponsePayloadRT,
   LOG_ANALYSIS_GET_ID_FORMATS,
-} from '../../../../common/http_api/log_analysis/v1/id_formats';
+} from '../../../../common/http_api/latest';
 
 interface RequestArgs {
   spaceId: string;

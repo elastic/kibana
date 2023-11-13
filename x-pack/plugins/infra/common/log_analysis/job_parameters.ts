@@ -7,7 +7,7 @@
 
 import * as rt from 'io-ts';
 import { v5 } from 'uuid';
-import { IdFormat, JobType } from '../http_api/log_analysis/v1/id_formats';
+import { IdFormat, JobType } from '../http_api/latest';
 
 export const bucketSpan = 900000;
 

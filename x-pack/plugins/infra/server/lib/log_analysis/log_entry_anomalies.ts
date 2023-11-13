@@ -7,7 +7,7 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { PersistedLogViewReference, ResolvedLogView } from '@kbn/logs-shared-plugin/common';
-import { IdFormat, IdFormatByJobType } from '../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, IdFormatByJobType } from '../../../common/http_api/latest';
 import {
   AnomaliesSort,
   getJobId,

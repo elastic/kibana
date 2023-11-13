@@ -8,7 +8,7 @@
 import * as rt from 'io-ts';
 import type { HttpHandler } from '@kbn/core/public';
 
-import { IdFormat, JobType } from '../../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, JobType } from '../../../../../common/http_api/latest';
 import { getJobId, jobCustomSettingsRT } from '../../../../../common/log_analysis';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 

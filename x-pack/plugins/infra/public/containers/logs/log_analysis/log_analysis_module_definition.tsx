@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo, useState } from 'react';
-import { IdFormat, JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import { getJobId } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';

@@ -7,7 +7,11 @@
 
 import Boom from '@hapi/boom';
 import { createValidationFunction } from '@kbn/logs-shared-plugin/common/runtime_types';
-import * as logAnalysisIdFormatsV1 from '../../../common/http_api/log_analysis/v1/id_formats';
+import {
+  LOG_ANALYSIS_GET_ID_FORMATS,
+  getLogAnalysisIdFormatsRequestPayloadRT,
+  getLogAnalysisIdFormatsSuccessResponsePayloadRT,
+} from '../../../common/http_api/latest';
 import { InfraBackendLibs } from '../../lib/infra_types';
 import { isMlPrivilegesError } from '../../lib/log_analysis';
 import { resolveIdFormats } from '../../lib/log_analysis/resolve_id_formats';
@@ -18,16 +22,14 @@ export const initGetLogAnalysisIdFormatsRoute = ({ framework }: InfraBackendLibs
     .registerVersionedRoute({
       access: 'internal',
       method: 'post',
-      path: logAnalysisIdFormatsV1.LOG_ANALYSIS_GET_ID_FORMATS,
+      path: LOG_ANALYSIS_GET_ID_FORMATS,
     })
     .addVersion(
       {
         version: '1',
         validate: {
           request: {
-            body: createValidationFunction(
-              logAnalysisIdFormatsV1.getLogAnalysisIdFormatsRequestPayloadRT
-            ),
+            body: createValidationFunction(getLogAnalysisIdFormatsRequestPayloadRT),
           },
         },
       },
@@ -43,7 +45,7 @@ export const initGetLogAnalysisIdFormatsRoute = ({ framework }: InfraBackendLibs
           const idFormatByJobType = await resolveIdFormats(logViewId, spaceId, mlAnomalyDetectors);
 
           return response.ok({
-            body: logAnalysisIdFormatsV1.getLogAnalysisIdFormatsSuccessResponsePayloadRT.encode({
+            body: getLogAnalysisIdFormatsSuccessResponsePayloadRT.encode({
               data: idFormatByJobType,
             }),
           });

@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import equal from 'fast-deep-equal';
-import { JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { JobType } from '../../../../common/http_api/latest';
 import { JobSummary } from './api/ml_get_jobs_summary_api';
 import { ModuleDescriptor, ModuleSourceConfiguration } from './log_analysis_module_types';
 

@@ -7,7 +7,7 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IdFormat, JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import {
   ValidateLogEntryDatasetsResponsePayload,
   ValidationIndicesResponsePayload,

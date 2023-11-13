@@ -15,7 +15,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { MLJobsAwaitingNodeWarning } from '@kbn/ml-plugin/public';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
 import { useLogViewContext, LogEntryFlyout } from '@kbn/logs-shared-plugin/public';
-import { IdFormatByJobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormatByJobType } from '../../../../common/http_api/latest';
 import {
   isJobStatusWithResults,
   logEntryCategoriesJobType,

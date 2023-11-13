@@ -6,11 +6,7 @@
  */
 
 import { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
-import {
-  IdFormat,
-  IdFormatByJobType,
-  JobType,
-} from '../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, IdFormatByJobType, JobType } from '../../../common/http_api/latest';
 import {
   getJobId,
   logEntryCategoriesJobType,

@@ -8,7 +8,7 @@
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import usePrevious from 'react-use/lib/usePrevious';
-import { JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { JobType } from '../../../../common/http_api/latest';
 import {
   combineDatasetFilters,
   DatasetFilter,

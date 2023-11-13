@@ -7,7 +7,7 @@
 
 import { useReducer } from 'react';
 
-import { IdFormat, JobType } from '../../../../common/http_api/log_analysis/v1/id_formats';
+import { IdFormat, JobType } from '../../../../common/http_api/latest';
 import {
   JobStatus,
   getDatafeedId,
