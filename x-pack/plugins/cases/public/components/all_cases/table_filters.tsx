@@ -12,7 +12,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } 
 import type { CaseStatuses } from '../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import type { FilterOptions } from '../../containers/types';
-import { MultiSelectFilter } from './multi_select_filter';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import { SolutionFilter } from './solution_filter';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
@@ -59,14 +59,14 @@ const CasesTableFiltersComponent = ({
 
   const onChange = ({
     filterId,
-    options,
+    selectedOptionKeys,
   }: {
-    filterId: keyof FilterOptions;
-    options: string[];
+    filterId: string;
+    selectedOptionKeys: string[];
   }) => {
     const newFilters = {
       ...filterOptions,
-      [filterId]: options,
+      [filterId]: selectedOptionKeys,
     };
 
     if (!isEqual(newFilters, filterOptions)) {
@@ -129,9 +129,9 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          <SeverityFilter selectedOptions={filterOptions.severity} onChange={onChange} />
+          <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
           <StatusFilter
-            selectedOptions={filterOptions?.status}
+            selectedOptionKeys={filterOptions?.status}
             onChange={onChange}
             hiddenStatuses={hiddenStatuses}
             countClosedCases={countClosedCases}
@@ -152,8 +152,8 @@ const CasesTableFiltersComponent = ({
             limit={MAX_TAGS_FILTER_LENGTH}
             limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
             onChange={onChange}
-            options={tags}
-            selectedOptions={filterOptions?.tags}
+            options={mapToMultiSelectOption(tags)}
+            selectedOptionKeys={filterOptions?.tags}
           />
           <MultiSelectFilter
             buttonLabel={i18n.CATEGORIES}
@@ -161,8 +161,8 @@ const CasesTableFiltersComponent = ({
             limit={MAX_CATEGORY_FILTER_LENGTH}
             limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
             onChange={onChange}
-            options={categories}
-            selectedOptions={filterOptions?.category}
+            options={mapToMultiSelectOption(categories)}
+            selectedOptionKeys={filterOptions?.category}
           />
           {availableSolutions.length > 1 && (
             <SolutionFilter

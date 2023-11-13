@@ -10,21 +10,23 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Status } from '@kbn/cases-components/src/status/status';
 import { CaseStatuses } from '../../../common/types/domain';
 import { statuses } from '../status';
-import type { FilterOptions } from '../../../common/ui/types';
-import { MultiSelectFilter } from './multi_select_filter';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import * as i18n from './translations';
-
-interface StatusOption {
-  label: CaseStatuses;
-}
 
 interface Props {
   countClosedCases: number | null;
   countInProgressCases: number | null;
   countOpenCases: number | null;
   hiddenStatuses?: CaseStatuses[];
-  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
-  selectedOptions: string[];
+  onChange: ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => void;
+  selectedOptionKeys: string[];
 }
 
 const caseStatuses = Object.keys(statuses) as CaseStatuses[];
@@ -35,7 +37,7 @@ export const StatusFilterComponent = ({
   countOpenCases,
   hiddenStatuses = [],
   onChange,
-  selectedOptions,
+  selectedOptionKeys,
 }: Props) => {
   const stats = useMemo(
     () => ({
@@ -45,11 +47,14 @@ export const StatusFilterComponent = ({
     }),
     [countClosedCases, countInProgressCases, countOpenCases]
   );
-  const options: CaseStatuses[] = useMemo(
-    () => [...caseStatuses].filter((status) => !hiddenStatuses.includes(status)),
+  const options = useMemo(
+    () =>
+      mapToMultiSelectOption(
+        [...caseStatuses].filter((status) => !hiddenStatuses.includes(status))
+      ),
     [hiddenStatuses]
   );
-  const renderOption = (option: StatusOption) => {
+  const renderOption = (option: MultiSelectFilterOption<CaseStatuses>) => {
     const selectedStatus = option.label;
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
@@ -63,13 +68,13 @@ export const StatusFilterComponent = ({
     );
   };
   return (
-    <MultiSelectFilter<StatusOption>
+    <MultiSelectFilter<CaseStatuses>
       buttonLabel={i18n.STATUS}
       id={'status'}
       onChange={onChange}
       options={options}
       renderOption={renderOption}
-      selectedOptions={selectedOptions}
+      selectedOptionKeys={selectedOptionKeys}
     />
   );
 };
