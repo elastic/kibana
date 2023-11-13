@@ -26,6 +26,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./log_entry_categories_tab'));
       loadTestFile(require.resolve('./log_entry_rate_tab'));
       loadTestFile(require.resolve('./logs_source_configuration'));
+      loadTestFile(require.resolve('./log_stream_date_nano'));
       loadTestFile(require.resolve('./link_to'));
       loadTestFile(require.resolve('./log_stream'));
     });

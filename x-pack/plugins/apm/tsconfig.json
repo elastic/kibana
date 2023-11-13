@@ -104,6 +104,7 @@
     "@kbn/shared-svg",
     "@kbn/deeplinks-observability",
     "@kbn/infra-plugin"
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": ["target/**/*"]
 }

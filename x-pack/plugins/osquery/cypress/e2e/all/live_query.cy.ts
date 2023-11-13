@@ -67,22 +67,22 @@ describe('ALL - Live Query', { tags: ['@ess', '@serverless'] }, () => {
       "where pos.remote_port !='0' {shift+enter}" +
       'limit 1000;';
     cy.contains('New live query').click();
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
-    cy.get(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').and('be.gt', 99).and('be.lt', 110);
+    cy.getBySel(LIVE_QUERY_EDITOR).click().invoke('val', multilineQuery);
 
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     selectAllAgents();
     submitQuery();
     cy.getBySel('osqueryResultsPanel');
 
     // check if it get's bigger when we add more lines
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 220).and('be.lt', 300);
     inputQuery(multilineQuery);
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 350).and('be.lt', 600);
 
     inputQuery('{selectall}{backspace}{selectall}{backspace}');
     // not sure if this is how it used to work when I implemented the functionality, but let's leave it like this for now
-    cy.get(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 400);
+    cy.getBySel(LIVE_QUERY_EDITOR).invoke('height').should('be.gt', 200).and('be.lt', 400);
   });
 });

@@ -36,5 +36,6 @@
     "@kbn/search-connectors",
     "@kbn/shared-ux-router",
     "@kbn/kibana-utils-plugin",
+    "@kbn/index-management-plugin",
   ]
 }
