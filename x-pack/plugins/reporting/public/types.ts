@@ -6,19 +6,13 @@
  */
 
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
-
-import type {
-  JobId,
-  JobStatus,
-  ReportOutput,
-  ReportSource,
-  TaskRunResult,
-} from '@kbn/reporting-common/types';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import type { JobId, ReportOutput, ReportSource, TaskRunResult } from '@kbn/reporting-common/types';
 
 /* Notifier Toasts */
 export interface JobSummary {
   id: JobId;
-  status: JobStatus;
+  status: JOB_STATUS;
   jobtype: ReportSource['jobtype'];
   title: ReportSource['payload']['title'];
   errorCode?: ReportOutput['error_code'];

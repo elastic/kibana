@@ -28,12 +28,12 @@ import {
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
 import type { ReportingConfigType } from '@kbn/reporting-server';
-import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 
 import { CONTENT_TYPE_CSV } from './constants';
 import { CsvExportSettings, getExportSettings } from './get_export_settings';
 import { i18nTexts } from './i18n_texts';
 import { MaxSizeStringBuilder } from './max_size_string_builder';
+import { JobParamsCSV } from '../types';
 
 interface Clients {
   es: IScopedClusterClient;

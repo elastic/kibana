@@ -16,9 +16,9 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { USES_HEADLESS_JOB_TYPES } from '@kbn/reporting-common';
 import { VisualReportingSoftDisabledError } from '@kbn/reporting-common/errors';
 
+import { USES_HEADLESS_JOB_TYPES } from '../../../common/constants';
 import type { Job } from '../../lib/job';
 import { sharedI18nTexts } from '../../shared_i18n_texts';
 import { useKibana } from '../../shared_imports';

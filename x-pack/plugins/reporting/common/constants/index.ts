@@ -6,6 +6,7 @@
  */
 
 export * from './routes';
+export * from './export_types';
 
 // Test Subjects
 export const REPORT_TABLE_ID = 'reportJobListing';

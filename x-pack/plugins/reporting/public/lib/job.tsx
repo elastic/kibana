@@ -10,7 +10,7 @@ import React from 'react';
 
 import { EuiText, EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JOB_STATUS, JobTypes } from '@kbn/reporting-common';
+import { JOB_STATUS } from '@kbn/reporting-common';
 import type {
   BaseParamsV2,
   JobId,
@@ -20,6 +20,8 @@ import type {
   ReportSource,
   TaskRunResult,
 } from '@kbn/reporting-common/types';
+
+import { JobTypes } from '../../common/types';
 
 const { COMPLETED, FAILED, PENDING, PROCESSING, WARNINGS } = JOB_STATUS;
 
