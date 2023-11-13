@@ -879,21 +879,6 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
-        "id": "def-common.LABS_DASHBOARD_CONTROLS_ID",
-        "type": "string",
-        "tags": [],
-        "label": "LABS_DASHBOARD_CONTROLS_ID",
-        "description": [],
-        "signature": [
-          "\"labs:dashboard:dashboardControls\""
-        ],
-        "path": "packages/kbn-management/settings/setting_ids/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.LABS_DASHBOARD_DEFER_BELOW_FOLD_ID",
         "type": "string",
         "tags": [],
@@ -1494,6 +1479,21 @@
       },
       {
         "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY",
+        "description": [],
+        "signature": [
+          "\"securitySolution:alertTags\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
         "id": "def-common.SECURITY_SOLUTION_DEFAULT_ANOMALY_SCORE_ID",
         "type": "string",
         "tags": [],
@@ -1546,6 +1546,23 @@
         "description": [],
         "signature": [
           "\"securitySolution:enableCcsWarning\""
+        ],
+        "path": "packages/kbn-management/settings/setting_ids/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-settings-ids",
+        "id": "def-common.SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING",
+        "description": [
+          "This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout"
+        ],
+        "signature": [
+          "\"securitySolution:enableExpandableFlyout\""
         ],
         "path": "packages/kbn-management/settings/setting_ids/index.ts",
         "deprecated": false,

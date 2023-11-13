@@ -10,10 +10,8 @@ import { Observable } from 'rxjs';
 import { ScopedHistory, Capabilities } from '@kbn/core/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ChromeBreadcrumb, CoreTheme } from '@kbn/core/public';
-import type { AppId } from '@kbn/management-cards-navigation';
+import type { CardsNavigationComponentProps } from '@kbn/management-cards-navigation';
 import { AppNavLinkStatus } from '@kbn/core/public';
-import type { ApplicationStart } from '@kbn/core-application-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { ManagementSection, RegisterManagementSectionArgs } from './utils';
 import type { ManagementAppLocatorParams } from '../common/locator';
 
@@ -33,8 +31,11 @@ export interface DefinedSections {
 
 export interface ManagementStart {
   setIsSidebarEnabled: (enabled: boolean) => void;
-  setLandingPageRedirect: (landingPageRedirect: string) => void;
-  setupCardsNavigation: ({ enabled, hideLinksTo }: NavigationCardsSubject) => void;
+  setupCardsNavigation: ({
+    enabled,
+    hideLinksTo,
+    extendCardNavDefinitions,
+  }: NavigationCardsSubject) => void;
 }
 
 export interface ManagementSectionsStartPrivate {
@@ -85,9 +86,9 @@ export interface CreateManagementItemArgs {
   redirectFrom?: string; // redirects from an old app id to the current app id
 }
 
-export interface NavigationCardsSubject {
+export interface NavigationCardsSubject extends Pick<CardsNavigationComponentProps, 'hideLinksTo'> {
   enabled: boolean;
-  hideLinksTo?: AppId[];
+  extendCardNavDefinitions?: CardsNavigationComponentProps['extendedCardNavigationDefinitions'];
 }
 
 export interface AppDependencies {
@@ -95,9 +96,6 @@ export interface AppDependencies {
   kibanaVersion: string;
   sections: ManagementSection[];
   cardsNavigationConfig?: NavigationCardsSubject;
-  landingPageRedirect: string | undefined;
-  navigateToUrl: ApplicationStart['navigateToUrl'];
-  basePath: HttpStart['basePath'];
 }
 
 export interface ConfigSchema {

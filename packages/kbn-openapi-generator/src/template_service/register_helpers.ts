@@ -35,6 +35,12 @@ export function registerHelpers(handlebarsInstance: typeof Handlebars) {
   handlebarsInstance.registerHelper('defined', (val) => {
     return val !== undefined;
   });
+  handlebarsInstance.registerHelper('first', (val) => {
+    return Array.isArray(val) ? val[0] : val;
+  });
+  handlebarsInstance.registerHelper('isSingle', (val) => {
+    return Array.isArray(val) && val.length === 1;
+  });
   /**
    * Check if the OpenAPI schema is unknown
    */

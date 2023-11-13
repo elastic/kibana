@@ -32,6 +32,14 @@ const createDataView = () => {
   });
 };
 
+const getTimeRange = () => {
+  const date = Date.now();
+  const dateStart = new Date(date - 300000).toISOString();
+  const dateEnd = new Date(date).toISOString();
+
+  return { dateStart, dateEnd };
+};
+
 const defaultParams: OnlySearchSourceRuleParams = {
   size: 100,
   timeWindowSize: 5,
@@ -65,11 +73,14 @@ describe('fetchSearchSourceQuery', () => {
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
-      const { searchSource, dateStart, dateEnd } = updateSearchSource(
+      const { dateStart, dateEnd } = getTimeRange();
+      const searchSource = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
-        undefined
+        undefined,
+        dateStart,
+        dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
@@ -94,8 +105,6 @@ describe('fetchSearchSourceQuery', () => {
         }
       `);
       expect(searchRequest.aggs).toMatchInlineSnapshot(`Object {}`);
-      expect(dateStart).toMatch('2020-02-09T23:10:41.941Z');
-      expect(dateEnd).toMatch('2020-02-09T23:15:41.941Z');
     });
 
     it('with latest timestamp in between the given time range ', async () => {
@@ -103,11 +112,14 @@ describe('fetchSearchSourceQuery', () => {
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
-      const { searchSource } = updateSearchSource(
+      const { dateStart, dateEnd } = getTimeRange();
+      const searchSource = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
-        '2020-02-09T23:12:41.941Z'
+        '2020-02-09T23:12:41.941Z',
+        dateStart,
+        dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
@@ -147,11 +159,14 @@ describe('fetchSearchSourceQuery', () => {
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
-      const { searchSource } = updateSearchSource(
+      const { dateStart, dateEnd } = getTimeRange();
+      const searchSource = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
-        '2020-01-09T22:12:41.941Z'
+        '2020-01-09T22:12:41.941Z',
+        dateStart,
+        dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
@@ -183,11 +198,14 @@ describe('fetchSearchSourceQuery', () => {
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
-      const { searchSource } = updateSearchSource(
+      const { dateStart, dateEnd } = getTimeRange();
+      const searchSource = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
-        '2020-02-09T23:12:41.941Z'
+        '2020-02-09T23:12:41.941Z',
+        dateStart,
+        dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.size).toMatchInlineSnapshot(`100`);
@@ -225,11 +243,14 @@ describe('fetchSearchSourceQuery', () => {
 
       const searchSourceInstance = createSearchSourceMock({ index: dataViewMock });
 
-      const { searchSource } = updateSearchSource(
+      const { dateStart, dateEnd } = getTimeRange();
+      const searchSource = updateSearchSource(
         searchSourceInstance,
         dataViewMock,
         params,
-        '2020-02-09T23:12:41.941Z'
+        '2020-02-09T23:12:41.941Z',
+        dateStart,
+        dateEnd
       );
       const searchRequest = searchSource.getSearchRequestBody();
       expect(searchRequest.size).toMatchInlineSnapshot(`0`);

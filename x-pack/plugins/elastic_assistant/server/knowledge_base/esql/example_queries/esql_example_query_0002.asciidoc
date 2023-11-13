@@ -1,0 +1,11 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+from logs-*
+| grok dns.question.name "%{DATA}\\.%{GREEDYDATA:dns.question.registered_domain:string}"
+| stats unique_queries = count_distinct(dns.question.name) by dns.question.registered_domain, process.name
+| where unique_queries > 5
+| sort unique_queries desc
+```

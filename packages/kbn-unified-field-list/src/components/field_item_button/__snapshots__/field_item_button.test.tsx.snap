@@ -166,7 +166,20 @@ exports[`UnifiedFieldList <FieldItemButton /> renders properly when a conflict f
       type="conflict"
     />
   }
-  fieldInfoIcon={<FieldConflictInfoIcon />}
+  fieldInfoIcon={
+    <FieldConflictInfoIcon
+      conflictDescriptions={
+        Object {
+          "keyword": Array [
+            "index_a",
+          ],
+          "long": Array [
+            "index_b",
+          ],
+        }
+      }
+    />
+  }
   fieldName={
     <EuiHighlight
       data-test-subj="field-custom_user_field"

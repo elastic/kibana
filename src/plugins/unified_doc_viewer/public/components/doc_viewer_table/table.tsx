@@ -38,6 +38,7 @@ import {
   isNestedFieldParent,
   usePager,
 } from '@kbn/discover-utils';
+import { fieldNameWildcardMatcher, getFieldSearchMatchingHighlight } from '@kbn/field-utils';
 import type { DocViewRenderProps, FieldRecordLegacy } from '@kbn/unified-doc-viewer/types';
 import { FieldName } from '@kbn/unified-doc-viewer';
 import { useUnifiedDocViewerServices } from '../../hooks';
@@ -246,8 +247,13 @@ export const DocViewerTable = ({
           acc.pinnedItems.push(fieldToItem(curFieldName));
         } else {
           const fieldMapping = mapping(curFieldName);
-          const displayName = fieldMapping?.displayName ?? curFieldName;
-          if (displayName.toLowerCase().includes(searchText.toLowerCase())) {
+          if (
+            !searchText?.trim() ||
+            fieldNameWildcardMatcher(
+              { name: curFieldName, displayName: fieldMapping?.displayName },
+              searchText
+            )
+          ) {
             // filter only unpinned fields
             acc.restItems.push(fieldToItem(curFieldName));
           }
@@ -318,7 +324,6 @@ export const DocViewerTable = ({
 
   const renderRows = useCallback(
     (items: FieldRecord[]) => {
-      const highlight = searchText?.toLowerCase();
       return items.map(
         ({
           action: { flattenedField, onFilter },
@@ -362,7 +367,10 @@ export const DocViewerTable = ({
                   fieldType={fieldType}
                   fieldMapping={fieldMapping}
                   scripted={scripted}
-                  highlight={highlight}
+                  highlight={getFieldSearchMatchingHighlight(
+                    fieldMapping?.displayName ?? field,
+                    searchText
+                  )}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell
@@ -405,6 +413,7 @@ export const DocViewerTable = ({
           onChange={handleOnChange}
           placeholder={searchPlaceholder}
           value={searchText}
+          data-test-subj="unifiedDocViewerFieldsSearchInput"
         />
       </EuiFlexItem>
 

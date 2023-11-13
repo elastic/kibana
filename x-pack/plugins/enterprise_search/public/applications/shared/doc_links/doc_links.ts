@@ -92,7 +92,6 @@ class DocLinks {
   public connectorsSlack: string;
   public connectorsTeams: string;
   public connectorsZoom: string;
-  public connectorsWorkplaceSearch: string;
   public consoleGuide: string;
   public crawlerExtractionRules: string;
   public crawlerManaging: string;
@@ -152,6 +151,10 @@ class DocLinks {
   public workplaceSearchDropbox: string;
   public workplaceSearchExternalIdentities: string;
   public workplaceSearchExternalSharePointOnline: string;
+  public workplaceSearchGatedFormBlog: string;
+  public workplaceSearchGatedFormDataUse: string;
+  public workplaceSearchGatedFormPrivacyStatement: string;
+  public workplaceSearchGatedFormTermsOfService: string;
   public workplaceSearchGettingStarted: string;
   public workplaceSearchGitHub: string;
   public workplaceSearchGmail: string;
@@ -260,7 +263,6 @@ class DocLinks {
     this.connectorsSlack = '';
     this.connectorsTeams = '';
     this.connectorsZoom = '';
-    this.connectorsWorkplaceSearch = '';
     this.consoleGuide = '';
     this.crawlerExtractionRules = '';
     this.crawlerManaging = '';
@@ -320,6 +322,10 @@ class DocLinks {
     this.workplaceSearchDropbox = '';
     this.workplaceSearchExternalSharePointOnline = '';
     this.workplaceSearchExternalIdentities = '';
+    this.workplaceSearchGatedFormBlog = '';
+    this.workplaceSearchGatedFormDataUse = '';
+    this.workplaceSearchGatedFormPrivacyStatement = '';
+    this.workplaceSearchGatedFormTermsOfService = '';
     this.workplaceSearchGettingStarted = '';
     this.workplaceSearchGitHub = '';
     this.workplaceSearchGmail = '';
@@ -418,6 +424,7 @@ class DocLinks {
     this.connectorsMySQL = docLinks.links.enterpriseSearch.connectorsMySQL;
     this.connectorsNative = docLinks.links.enterpriseSearch.connectorsNative;
     this.connectorsNetworkDrive = docLinks.links.enterpriseSearch.connectorsNetworkDrive;
+    this.connectorsOneDrive = docLinks.links.enterpriseSearch.connectorsOneDrive;
     this.connectorsOracle = docLinks.links.enterpriseSearch.connectorsOracle;
     this.connectorsOutlook = docLinks.links.enterpriseSearch.connectorsOutlook;
     this.connectorsPostgreSQL = docLinks.links.enterpriseSearch.connectorsPostgreSQL;
@@ -429,7 +436,6 @@ class DocLinks {
     this.connectorsSlack = docLinks.links.enterpriseSearch.connectorsSlack;
     this.connectorsTeams = docLinks.links.enterpriseSearch.connectorsTeams;
     this.connectorsZoom = docLinks.links.enterpriseSearch.connectorsZoom;
-    this.connectorsWorkplaceSearch = docLinks.links.enterpriseSearch.connectorsWorkplaceSearch;
     this.consoleGuide = docLinks.links.console.guide;
     this.crawlerExtractionRules = docLinks.links.enterpriseSearch.crawlerExtractionRules;
     this.crawlerManaging = docLinks.links.enterpriseSearch.crawlerManaging;
@@ -477,6 +483,7 @@ class DocLinks {
     this.syncRules = docLinks.links.enterpriseSearch.syncRules;
     this.trainedModels = docLinks.links.enterpriseSearch.trainedModels;
     this.textEmbedding = docLinks.links.enterpriseSearch.textEmbedding;
+    this.workplaceSearchGatedFormBlog = docLinks.links.workplaceSearch.gatedFormBlog;
     this.workplaceSearchApiKeys = docLinks.links.workplaceSearch.apiKeys;
     this.workplaceSearchBox = docLinks.links.workplaceSearch.box;
     this.workplaceSearchConfluenceCloud = docLinks.links.workplaceSearch.confluenceCloud;
@@ -494,6 +501,9 @@ class DocLinks {
     this.workplaceSearchExternalSharePointOnline =
       docLinks.links.workplaceSearch.externalSharePointOnline;
     this.workplaceSearchExternalIdentities = docLinks.links.workplaceSearch.externalIdentities;
+    this.workplaceSearchGatedFormDataUse = docLinks.links.legal.dataUse;
+    this.workplaceSearchGatedFormPrivacyStatement = docLinks.links.legal.generalPrivacyStatement;
+    this.workplaceSearchGatedFormTermsOfService = docLinks.links.legal.termsOfService;
     this.workplaceSearchGettingStarted = docLinks.links.workplaceSearch.gettingStarted;
     this.workplaceSearchGitHub = docLinks.links.workplaceSearch.gitHub;
     this.workplaceSearchGmail = docLinks.links.workplaceSearch.gmail;

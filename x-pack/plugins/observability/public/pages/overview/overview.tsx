@@ -193,7 +193,6 @@ export function OverviewPage() {
               id={ALERTS_TABLE_ID}
               pageSize={ALERTS_PER_PAGE}
               query={esQuery}
-              showExpandToDetails={false}
               showAlertStatusWithFlapping
             />
           </SectionContainer>

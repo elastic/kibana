@@ -73,7 +73,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
     const [manifestVersion, setManifestVersion] = useState(deployedVersion);
 
     const today = moment.utc();
-    const [selectedDate, setSelectedDate] = useState<Moment>(today);
+    const defaultDate = today.clone().subtract(1, 'days');
+
+    const [selectedDate, setSelectedDate] = useState<Moment>(defaultDate);
 
     const { data: fetchedNote, isLoading: getNoteInProgress } = useGetProtectionUpdatesNote({
       packagePolicyId: _policy.id,
@@ -181,14 +183,24 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
         if (checked && !automaticUpdatesEnabled) {
           setManifestVersion('latest');
           // Clear selected date on user enabling automatic updates
-          if (selectedDate !== today) {
-            setSelectedDate(today);
+          if (selectedDate !== defaultDate) {
+            setSelectedDate(defaultDate);
           }
         } else {
           setManifestVersion(selectedDate.format(internalDateFormat));
         }
       },
-      [automaticUpdatesEnabled, selectedDate, today]
+      [automaticUpdatesEnabled, selectedDate, defaultDate]
+    );
+
+    const updateDatepickerSelectedDate = useCallback(
+      (date: Moment | null) => {
+        if (date?.isAfter(cutoffDate) && date?.isSameOrBefore(defaultDate)) {
+          setSelectedDate(date || defaultDate);
+          setManifestVersion(date?.format(internalDateFormat) || 'latest');
+        }
+      },
+      [cutoffDate, defaultDate]
     );
 
     const renderVersionToDeployPicker = () => {
@@ -214,12 +226,9 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
                 popoverPlacement={'downCenter'}
                 dateFormat={displayDateFormat}
                 selected={selectedDate}
-                maxDate={today}
+                maxDate={defaultDate}
                 minDate={cutoffDate}
-                onChange={(date) => {
-                  setSelectedDate(date || today);
-                  setManifestVersion(date?.format(internalDateFormat) || 'latest');
-                }}
+                onChange={updateDatepickerSelectedDate}
               />
             </div>
           ) : (
@@ -330,46 +339,54 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
 
           <EuiSpacer size="l" />
           {renderVersionToDeployPicker()}
-
-          <EuiSpacer size="m" />
-          <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
-            <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
-              <h5>
-                {i18n.translate('xpack.securitySolution.endpoint.protectionUpdates.note.label', {
-                  defaultMessage: 'Note',
-                })}
-              </h5>
-            </EuiTitle>
-            <EuiIconTip
-              position="right"
-              content={
-                <>
-                  <FormattedMessage
-                    id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
-                    defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
-                  />
-                </>
-              }
-            />
-          </EuiFlexGroup>
-          <EuiSpacer size="m" />
-          {canWritePolicyManagement ? (
-            <EuiTextArea
-              value={note}
-              disabled={getNoteInProgress || createNoteInProgress}
-              onChange={(e) => setNote(e.target.value)}
-              fullWidth
-              rows={3}
-              placeholder={i18n.translate(
-                'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
-                {
-                  defaultMessage: 'Add relevant information about update here',
-                }
+          {(canWritePolicyManagement || note) && (
+            <>
+              <EuiSpacer size="m" />
+              <EuiFlexGroup direction="row" gutterSize="none" alignItems="center">
+                <EuiTitle size="xxs" data-test-subj={'protection-updates-manifest-name-note-title'}>
+                  <h5>
+                    {i18n.translate(
+                      'xpack.securitySolution.endpoint.protectionUpdates.note.label',
+                      {
+                        defaultMessage: 'Note',
+                      }
+                    )}
+                  </h5>
+                </EuiTitle>
+                <EuiIconTip
+                  position="right"
+                  content={
+                    <>
+                      <FormattedMessage
+                        id="xpack.securitySolution.endpoint.protectionUpdates.note.tooltip"
+                        defaultMessage="You can add an optional note to explain the reason for selecting a particular policy version."
+                      />
+                    </>
+                  }
+                />
+              </EuiFlexGroup>
+              <EuiSpacer size="m" />
+              {canWritePolicyManagement ? (
+                <EuiTextArea
+                  value={note}
+                  disabled={getNoteInProgress || createNoteInProgress}
+                  onChange={(e) => setNote(e.target.value)}
+                  fullWidth
+                  rows={3}
+                  placeholder={i18n.translate(
+                    'xpack.securitySolution.endpoint.protectionUpdates.note.placeholder',
+                    {
+                      defaultMessage: 'Add relevant information about update here',
+                    }
+                  )}
+                  data-test-subj={'protection-updates-manifest-note'}
+                />
+              ) : (
+                <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>
+                  {note}
+                </EuiText>
               )}
-              data-test-subj={'protection-updates-manifest-note'}
-            />
-          ) : (
-            <EuiText data-test-subj={'protection-updates-manifest-note-view-mode'}>{note}</EuiText>
+            </>
           )}
         </>
       );

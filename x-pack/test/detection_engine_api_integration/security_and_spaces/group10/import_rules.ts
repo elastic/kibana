@@ -7,7 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import {
+  InvestigationFields,
+  QueryRuleCreateProps,
+  RuleCreateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { EXCEPTION_LIST_ITEM_URL, EXCEPTION_LIST_URL } from '@kbn/securitysolution-list-constants';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
@@ -34,6 +38,8 @@ import {
   createLegacyRuleAction,
   getLegacyActionSO,
   createRule,
+  getRule,
+  getRuleSOById,
 } from '../../utils';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
@@ -175,6 +181,18 @@ const getImportRuleWithConnectorsBuffer = (connectorId: string) => {
   const connectorString = JSON.stringify(connector);
   const buffer = Buffer.from(`${rule1String}\n${connectorString}`);
   return buffer;
+};
+
+export const getSimpleRuleAsNdjsonWithLegacyInvestigationField = (
+  ruleIds: string[],
+  enabled = false,
+  overwrites: Partial<QueryRuleCreateProps>
+): Buffer => {
+  const stringOfRules = ruleIds.map((ruleId) => {
+    const simpleRule = { ...getSimpleRule(ruleId, enabled), ...overwrites };
+    return JSON.stringify(simpleRule);
+  });
+  return Buffer.from(stringOfRules.join('\n'));
 };
 
 // eslint-disable-next-line import/no-default-export
@@ -1883,6 +1901,120 @@ export default ({ getService }: FtrProviderContext): void => {
           )
           .expect('Content-Type', 'application/json; charset=utf-8')
           .expect(200);
+      });
+    });
+
+    describe('legacy investigation fields', () => {
+      beforeEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+        await createSignalsIndex(supertest, log);
+      });
+
+      afterEach(async () => {
+        await deleteAllAlerts(supertest, log, es);
+        await deleteAllRules(supertest, log);
+      });
+
+      it('imports rule with investigation fields as array', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
+              // mimicking what an 8.10 rule would look like
+              // we don't want to support this type in our APIs any longer, but do
+              // want to allow users to import rules from 8.10
+              investigation_fields: ['foo', 'bar'] as unknown as InvestigationFields,
+            }),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        const rule = await getRule(supertest, log, 'rule-1');
+        expect(rule.investigation_fields).to.eql({ field_names: ['foo', 'bar'] });
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['foo', 'bar'] });
+      });
+
+      it('imports rule with investigation fields as empty array', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
+              // mimicking what an 8.10 rule would look like
+              // we don't want to support this type in our APIs any longer, but do
+              // want to allow users to import rules from 8.10
+              investigation_fields: [] as unknown as InvestigationFields,
+            }),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        const rule = await getRule(supertest, log, 'rule-1');
+        expect(rule.investigation_fields).to.eql(undefined);
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql(undefined);
+      });
+
+      it('imports rule with investigation fields as intended object type', async () => {
+        await supertest
+          .post(`${DETECTION_ENGINE_RULES_URL}/_import`)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .attach(
+            'file',
+            getSimpleRuleAsNdjsonWithLegacyInvestigationField(['rule-1'], false, {
+              investigation_fields: {
+                field_names: ['foo'],
+              },
+            }),
+            'rules.ndjson'
+          )
+          .expect('Content-Type', 'application/json; charset=utf-8')
+          .expect(200);
+
+        const rule = await getRule(supertest, log, 'rule-1');
+        expect(rule.investigation_fields).to.eql({ field_names: ['foo'] });
+        /**
+         * Confirm type on SO so that it's clear in the tests whether it's expected that
+         * the SO itself is migrated to the inteded object type, or if the transformation is
+         * happening just on the response. In this case, change should
+         * include a migration on SO.
+         */
+        const {
+          hits: {
+            hits: [{ _source: ruleSO }],
+          },
+        } = await getRuleSOById(es, rule.id);
+        expect(ruleSO?.alert?.params?.investigationFields).to.eql({ field_names: ['foo'] });
       });
     });
   });

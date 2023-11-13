@@ -5,21 +5,14 @@
  * 2.0.
  */
 
-import {
-  CompositeSLOIdConflict,
-  CompositeSLONotFound,
-  ObservabilityError,
-  SecurityException,
-  SLOIdConflict,
-  SLONotFound,
-} from './errors';
+import { ObservabilityError, SecurityException, SLOIdConflict, SLONotFound } from './errors';
 
 export function getHTTPResponseCode(error: ObservabilityError): number {
-  if (error instanceof SLONotFound || error instanceof CompositeSLONotFound) {
+  if (error instanceof SLONotFound) {
     return 404;
   }
 
-  if (error instanceof SLOIdConflict || error instanceof CompositeSLOIdConflict) {
+  if (error instanceof SLOIdConflict) {
     return 409;
   }
 

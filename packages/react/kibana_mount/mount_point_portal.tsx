@@ -13,7 +13,7 @@ import { MountPoint } from '@kbn/core/public';
 import { useIfMounted } from './utils';
 
 export interface MountPointPortalProps {
-  setMountPoint: (mountPoint: MountPoint<HTMLElement>) => void;
+  setMountPoint: (mountPoint: MountPoint<HTMLElement> | undefined) => void;
 }
 
 /**
@@ -47,6 +47,7 @@ export const MountPointPortal: React.FC<MountPointPortalProps> = ({ children, se
         setShouldRender(false);
         el.current = undefined;
       });
+      setMountPoint(undefined);
     };
   }, [setMountPoint, ifMounted]);
 

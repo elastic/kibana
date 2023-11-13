@@ -32,7 +32,9 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/xstate-utils",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/ui-theme",
+    "@kbn/logs-shared-plugin"
   ],
   "exclude": [
     "target/**/*"

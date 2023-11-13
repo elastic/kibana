@@ -17,6 +17,7 @@ import { RiskScoreLevel } from '../../../../explore/components/risk_score/severi
 import { CELL_ACTIONS_TELEMETRY } from '../../../../explore/components/risk_score/constants';
 import type {
   HostRiskScore,
+  Maybe,
   RiskSeverity,
   UserRiskScore,
 } from '../../../../../common/search_strategy';
@@ -29,6 +30,7 @@ import {
   SecurityCellActionsTrigger,
   SecurityCellActionType,
 } from '../../../../common/components/cell_actions';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 
 type HostRiskScoreColumns = Array<EuiBasicTableColumn<HostRiskScore & UserRiskScore>>;
 
@@ -91,6 +93,21 @@ export const getRiskScoreColumns = (
       return getEmptyTagValue();
     },
   },
+
+  {
+    field: RiskScoreFields.timestamp,
+    name: i18n.LAST_UPDATED,
+    truncateText: false,
+    mobileOptions: { show: true },
+    sortable: true,
+    width: '20%',
+    render: (lastSeen: Maybe<string>) => {
+      if (lastSeen != null) {
+        return <FormattedRelativePreferenceDate value={lastSeen} />;
+      }
+      return getEmptyTagValue();
+    },
+  },
   {
     field:
       riskEntity === RiskScoreEntity.host
@@ -114,7 +131,7 @@ export const getRiskScoreColumns = (
   {
     field:
       riskEntity === RiskScoreEntity.host ? RiskScoreFields.hostRisk : RiskScoreFields.userRisk,
-    width: '30%',
+    width: '25%',
     name: i18n.ENTITY_RISK_LEVEL(riskEntity),
     truncateText: false,
     mobileOptions: { show: true },

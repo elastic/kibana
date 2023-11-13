@@ -33,7 +33,7 @@ export const bedrockConfig: ConfigFieldSchema[] = [
     defaultValue: DEFAULT_BEDROCK_URL,
     helpText: (
       <FormattedMessage
-        defaultMessage="The AWS Bedrock API endpoint URL. For more information on the URL, refer to the {bedrockAPIUrlDocs}."
+        defaultMessage="The Amazon Bedrock API endpoint URL. For more information on the URL, refer to the {bedrockAPIUrlDocs}."
         id="xpack.stackConnectors.components.bedrock.bedrockDocumentation"
         values={{
           bedrockAPIUrlDocs: (

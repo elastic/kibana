@@ -82,9 +82,9 @@ export const ConnectorsOverview = () => {
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
                   <EuiText size="s">
-                    <EuiLink target="_blank" href="https://github.com/elastic/connectors-python">
+                    <EuiLink target="_blank" href="https://github.com/elastic/connectors">
                       {i18n.translate('xpack.serverlessSearch.connectorsPythonLink', {
-                        defaultMessage: 'connectors-python',
+                        defaultMessage: 'elastic/connectors',
                       })}
                     </EuiLink>
                   </EuiText>

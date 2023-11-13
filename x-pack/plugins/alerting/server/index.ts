@@ -66,6 +66,7 @@ export {
   createConcreteWriteIndex,
   installWithTimeout,
   isValidAlertIndexName,
+  InstallShutdownError,
 } from './alerts_service';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 

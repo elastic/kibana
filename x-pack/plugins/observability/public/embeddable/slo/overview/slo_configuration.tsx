@@ -20,7 +20,6 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from './slo_selector';
-
 import type { EmbeddableSloProps } from './types';
 
 interface SloConfigurationProps {

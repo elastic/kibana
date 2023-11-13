@@ -164,7 +164,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('Table Sort', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/152913
+    describe.skip('Table Sort', () => {
       type SortingMethod = (a: string, b: string) => number;
       type SortDirection = 'asc' | 'desc';
       // Sort by lexical order will sort by the first character of the string (case-sensitive)

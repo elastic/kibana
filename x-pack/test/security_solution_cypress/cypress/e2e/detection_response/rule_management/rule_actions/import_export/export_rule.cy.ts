@@ -29,12 +29,7 @@ import {
 } from '../../../../../tasks/api_calls/exceptions';
 import { getExceptionList } from '../../../../../objects/exception';
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-  reload,
-} from '../../../../../tasks/common';
+import { resetRulesTableState, deleteAlertsAndRules } from '../../../../../tasks/common';
 import { login } from '../../../../../tasks/login';
 import { visit } from '../../../../../tasks/navigation';
 
@@ -56,13 +51,8 @@ const prebuiltRules = Array.from(Array(7)).map((_, i) => {
   });
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Export rules', { tags: ['@ess', '@serverless'] }, () => {
   const downloadsFolder = Cypress.config('downloadsFolder');
-
-  before(() => {
-    cleanKibana();
-  });
 
   beforeEach(() => {
     login();
@@ -102,22 +92,26 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
     expectManagementTableRules(['Enabled rule to export']);
   });
 
-  it('shows a modal saying that no rules can be exported if all the selected rules are prebuilt', function () {
-    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+  it(
+    'shows a modal saying that no rules can be exported if all the selected rules are prebuilt',
+    { tags: ['@brokenInServerlessQA'] },
+    function () {
+      createAndInstallMockedPrebuiltRules(prebuiltRules);
 
-    filterByElasticRules();
-    selectAllRules();
-    bulkExportRules();
+      filterByElasticRules();
+      selectAllRules();
+      bulkExportRules();
 
-    cy.get(MODAL_CONFIRMATION_BODY).contains(
-      `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
-    );
-  });
+      cy.get(MODAL_CONFIRMATION_BODY).contains(
+        `${prebuiltRules.length} prebuilt Elastic rules (exporting prebuilt rules is not supported)`
+      );
+    }
+  );
 
-  it('exports only custom rules', function () {
+  it('exports only custom rules', { tags: ['@brokenInServerlessQA'] }, function () {
     const expectedNumberCustomRulesToBeExported = 1;
 
-    createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
+    createAndInstallMockedPrebuiltRules(prebuiltRules);
 
     selectAllRules();
     bulkExportRules();
@@ -143,7 +137,7 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
     });
   });
 
-  context('rules with exceptions', () => {
+  context('rules with exceptions', { tags: ['@brokenInServerlessQA'] }, () => {
     beforeEach(() => {
       deleteExceptionList(exceptionList.list_id, exceptionList.namespace_type);
       // create rule with exceptions
@@ -170,8 +164,8 @@ describe('Export rules', { tags: ['@ess', '@serverless', '@brokenInServerless'] 
       // one rule with exception, one without it
       const expectedNumberCustomRulesToBeExported = 2;
 
-      createAndInstallMockedPrebuiltRules({ rules: prebuiltRules });
-      reload();
+      createAndInstallMockedPrebuiltRules(prebuiltRules);
+      cy.reload();
       selectAllRules();
       bulkExportRules();
 

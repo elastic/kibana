@@ -38,6 +38,7 @@ import {
   FLEET_COMPONENT_TEMPLATES,
   PACKAGE_TEMPLATE_SUFFIX,
   USER_SETTINGS_TEMPLATE_SUFFIX,
+  STACK_COMPONENT_TEMPLATES,
 } from '../../../../constants';
 
 import { getESAssetMetadata } from '../meta';
@@ -530,7 +531,7 @@ export function prepareTemplate({
 
   const isIndexModeTimeSeries =
     dataStream.elasticsearch?.index_mode === 'time_series' ||
-    experimentalDataStreamFeature?.features.tsdb;
+    !!experimentalDataStreamFeature?.features.tsdb;
 
   const validFields = processFields(fields);
 
@@ -572,6 +573,7 @@ export function prepareTemplate({
     registryElasticsearch: dataStream.elasticsearch,
     mappings,
     isIndexModeTimeSeries,
+    type: dataStream.type,
   });
 
   return {
@@ -616,6 +618,8 @@ export function getAllTemplateRefs(installedTemplates: IndexTemplateEntry[]) {
       .filter(
         (componentTemplateId) => !FLEET_COMPONENT_TEMPLATE_NAMES.includes(componentTemplateId)
       )
+      // Filter stack component templates shared between integrations
+      .filter((componentTemplateId) => !STACK_COMPONENT_TEMPLATES.includes(componentTemplateId))
       .map((componentTemplateId) => ({
         id: componentTemplateId,
         type: ElasticsearchAssetType.componentTemplate,

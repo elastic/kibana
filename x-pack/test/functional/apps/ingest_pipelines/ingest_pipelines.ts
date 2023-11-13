@@ -48,6 +48,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     it('Displays the test pipeline in the list of pipelines', async () => {
+      await pageObjects.ingestPipelines.increasePipelineListPageSize();
       const pipelines = await pageObjects.ingestPipelines.getPipelinesList();
       expect(pipelines).to.contain(TEST_PIPELINE_NAME);
     });
@@ -56,6 +57,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       it('Creates a pipeline', async () => {
         await pageObjects.ingestPipelines.createNewPipeline(PIPELINE);
 
+        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
+        await pageObjects.ingestPipelines.increasePipelineListPageSize();
         const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
@@ -73,6 +76,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.ingestPipelines.createPipelineFromCsv(PIPELINE_CSV);
 
+        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
+        await pageObjects.ingestPipelines.increasePipelineListPageSize();
         const pipelinesList = await pageObjects.ingestPipelines.getPipelinesList();
         const newPipelineExists = Boolean(
           pipelinesList.find((pipelineName) => pipelineName === PIPELINE.name)
@@ -82,8 +87,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        // Close details flyout
-        await pageObjects.ingestPipelines.closePipelineDetailsFlyout();
         // Delete the pipeline that was created
         await es.ingest.deletePipeline({ id: PIPELINE.name });
         await security.testUser.restoreDefaults();

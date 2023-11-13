@@ -8,6 +8,7 @@
 import type { SuperTest, Test } from 'supertest';
 import { Client } from '@elastic/elasticsearch';
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { IndexDetails } from '@kbn/cloud-security-posture-plugin/common/types';
 import { SecurityService } from '../../../../../test/common/services/security/security';
 
@@ -72,6 +73,7 @@ export async function createPackagePolicy(
 
   const { body: postPackageResponse } = await supertest
     .post(`/api/fleet/package_policies`)
+    .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
     .set('kbn-xsrf', 'xxxx')
     .send({
       force: true,

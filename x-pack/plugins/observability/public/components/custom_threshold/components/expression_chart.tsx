@@ -23,6 +23,7 @@ import { DataViewBase } from '@kbn/es-query';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { first, last } from 'lodash';
 import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
 import {
   MetricsExplorerAggregation,
@@ -205,6 +206,7 @@ export function ExpressionChart({
               tooltip: { visible: true },
             }}
             theme={getChartTheme(isDarkMode)}
+            locale={i18n.getLocale()}
           />
         </Chart>
       </ChartContainer>

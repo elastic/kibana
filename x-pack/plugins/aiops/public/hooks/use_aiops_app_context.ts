@@ -32,6 +32,7 @@ import type { TimeRange as TimeRangeMs } from '@kbn/ml-date-picker';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { CasesUiStart } from '@kbn/cases-plugin/public';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 
 /**
  * AIOps App Dependencies to be provided via React context.
@@ -85,6 +86,10 @@ export interface AiopsAppDependencies {
    */
   unifiedSearch: UnifiedSearchPublicPluginStart;
   /**
+   * Usage collection.
+   */
+  usageCollection?: UsageCollectionSetup;
+  /**
    * Used to create deep links to other plugins.
    */
   share: SharePluginStart;
@@ -115,6 +120,8 @@ export interface AiopsAppDependencies {
   embeddable?: EmbeddableStart;
   cases?: CasesUiStart;
   isServerless?: boolean;
+  /** Identifier to indicate the plugin utilizing the component */
+  embeddingOrigin?: string;
 }
 
 /**

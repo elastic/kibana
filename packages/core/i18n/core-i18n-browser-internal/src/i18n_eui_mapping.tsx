@@ -170,13 +170,21 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiCollapsibleNavBeta.ariaLabel': i18n.translate('core.euiCollapsibleNavBeta.ariaLabel', {
       defaultMessage: 'Site menu',
     }),
+    'euiCollapsibleNavButton.ariaLabelExpand': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelExpand',
+      { defaultMessage: 'Expand navigation' }
+    ),
+    'euiCollapsibleNavButton.ariaLabelCollapse': i18n.translate(
+      'core.euiCollapsibleNavButton.ariaLabelCollapse',
+      { defaultMessage: 'Collapse navigation' }
+    ),
     'euiCollapsibleNavButton.ariaLabelClose': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelClose',
-      { defaultMessage: 'Toggle navigation closed' }
+      { defaultMessage: 'Close navigation' }
     ),
     'euiCollapsibleNavButton.ariaLabelOpen': i18n.translate(
       'core.euiCollapsibleNavButton.ariaLabelOpen',
-      { defaultMessage: 'Toggle navigation open' }
+      { defaultMessage: 'Open navigation' }
     ),
     'euiColorPicker.alphaLabel': i18n.translate('core.euiColorPicker.alphaLabel', {
       defaultMessage: 'Alpha channel (opacity) value',
@@ -202,44 +210,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
     'euiColorPicker.popoverLabel': i18n.translate('core.euiColorPicker.popoverLabel', {
       defaultMessage: 'Color selection dialog',
     }),
-    'euiColorStopThumb.removeLabel': i18n.translate('core.euiColorStopThumb.removeLabel', {
-      defaultMessage: 'Remove this stop',
-      description: 'Label accompanying a button whose action will remove the color stop',
-    }),
-    'euiColorStopThumb.screenReaderAnnouncement': i18n.translate(
-      'core.euiColorStopThumb.screenReaderAnnouncement',
-      {
-        defaultMessage:
-          'A popup with a color stop edit form opened. Tab forward to cycle through form controls or press escape to close this popup.',
-        description:
-          'Message when the color picker popover has opened for an individual color stop thumb.',
-      }
-    ),
-    'euiColorStopThumb.buttonAriaLabel': i18n.translate('core.euiColorStopThumb.buttonAriaLabel', {
-      defaultMessage: 'Press the Enter key to modify this stop. Press Escape to focus the group',
-      description: 'Screen reader text to describe picker interaction',
-    }),
-    'euiColorStopThumb.buttonTitle': i18n.translate('core.euiColorStopThumb.buttonTitle', {
-      defaultMessage: 'Click to edit, drag to reposition',
-      description: 'Screen reader text to describe button interaction',
-    }),
-    'euiColorStopThumb.stopLabel': i18n.translate('core.euiColorStopThumb.stopLabel', {
-      defaultMessage: 'Stop value',
-    }),
-    'euiColorStopThumb.stopErrorMessage': i18n.translate(
-      'core.euiColorStopThumb.stopErrorMessage',
-      {
-        defaultMessage: 'Value is out of range',
-      }
-    ),
-    'euiColorStops.screenReaderAnnouncement': ({ label, readOnly, disabled }: EuiValues) =>
-      i18n.translate('core.euiColorStops.screenReaderAnnouncement', {
-        defaultMessage:
-          '{label}: {readOnly} {disabled} Color stop picker. Each stop consists of a number and corresponding color value. Use the Down and Up arrow keys to select individual stops. Press the Enter key to create a new stop.',
-        values: { label, readOnly, disabled },
-        description:
-          'Screen reader text to describe the composite behavior of the color stops component.',
-      }),
     'euiColorPickerSwatch.ariaLabel': ({ color }: EuiValues) =>
       i18n.translate('core.euiColorPickerSwatch.ariaLabel', {
         defaultMessage: 'Select {color} as the color',
@@ -1711,28 +1681,6 @@ export const getEuiContextMapping = (): EuiTokensObject => {
         defaultMessage: 'Step {number} is loading',
         values: { number },
       }),
-    'euiSuggest.stateSavedTooltip': i18n.translate('core.euiSuggest.stateSavedTooltip', {
-      defaultMessage: 'Saved.',
-    }),
-
-    'euiSuggest.stateUnsavedTooltip': i18n.translate('core.euiSuggest.stateUnsavedTooltip', {
-      defaultMessage: 'Changes have not been saved.',
-    }),
-
-    'euiSuggest.stateLoading': i18n.translate('core.euiSuggest.stateLoading', {
-      defaultMessage: 'State: loading.',
-    }),
-
-    'euiSuggest.stateSaved': i18n.translate('core.euiSuggest.stateSaved', {
-      defaultMessage: 'State: saved.',
-    }),
-
-    'euiSuggest.stateUnsaved': i18n.translate('core.euiSuggest.stateUnsaved', {
-      defaultMessage: 'State: unsaved.',
-    }),
-    'euiSuggest.stateUnchanged': i18n.translate('core.euiSuggest.stateUnchanged', {
-      defaultMessage: 'State: unchanged.',
-    }),
     'euiSuperSelect.screenReaderAnnouncement': i18n.translate(
       'core.euiSuperSelect.screenReaderAnnouncement',
       {

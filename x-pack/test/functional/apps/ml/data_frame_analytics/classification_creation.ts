@@ -89,6 +89,11 @@ export default function ({ getService }: FtrProviderContext) {
             isDependentVariableInput: true,
           },
         ],
+        advancedEditorContent: [
+          '{',
+          `  "description": "Classification job based on 'ft_bank_marketing' dataset with dependentVariable 'y' and trainingPercent '20'",`,
+          '  "source": {',
+        ],
         expected: {
           rocCurveColorState: [
             // tick/grid/axis
@@ -320,6 +325,14 @@ export default function ({ getService }: FtrProviderContext) {
           // - ✓ Top classes
           // - ⚠ Analysis fields
           await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(4);
+
+          // switch to json editor and back
+          await ml.testExecution.logTestStep('switches to advanced editor then back to form');
+          await ml.dataFrameAnalyticsCreation.openAdvancedEditor();
+          await ml.dataFrameAnalyticsCreation.assertAdvancedEditorCodeEditorContent(
+            testData.advancedEditorContent
+          );
+          await ml.dataFrameAnalyticsCreation.closeAdvancedEditor();
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();

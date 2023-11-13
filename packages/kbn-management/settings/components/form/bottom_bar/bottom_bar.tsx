@@ -61,7 +61,7 @@ export const BottomBar = ({
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
             css={cssFormButton}
-            color="ghost"
+            color="text"
             size="s"
             iconType="cross"
             onClick={onClearAllUnsaved}

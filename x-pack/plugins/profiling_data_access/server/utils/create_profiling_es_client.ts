@@ -60,14 +60,16 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise) as Promise<StackTraceResponse>;
     },
-    profilingStatus() {
+    profilingStatus({ waitForResourcesCreated = false } = {}) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/status', () => {
         return esClient.transport.request(
           {
             method: 'GET',
-            path: encodeURI('/_profiling/status'),
+            path: encodeURI(
+              `/_profiling/status?wait_for_resources_created=${waitForResourcesCreated}`
+            ),
           },
           {
             signal: controller.signal,

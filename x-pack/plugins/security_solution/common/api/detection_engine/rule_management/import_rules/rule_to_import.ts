@@ -8,6 +8,8 @@
 import * as t from 'io-ts';
 import { OnlyFalseAllowed } from '@kbn/securitysolution-io-ts-types';
 
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -16,12 +18,8 @@ import {
   SetupGuide,
   BaseCreateProps,
   TypeSpecificCreateProps,
-  created_at,
-  updated_at,
-  created_by,
-  updated_by,
-  revision,
-} from '../../model';
+} from '../../model/rule_schema_legacy';
+import { created_at, updated_at, created_by, updated_by, revision } from '../../model';
 
 /**
  * Differences from this and the createRulesSchema are

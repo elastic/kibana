@@ -11,7 +11,7 @@ import {
   INSIGHTS_ENTITIES_TEST_ID,
   PREVALENCE_TEST_ID,
   INSIGHTS_THREAT_INTELLIGENCE_TEST_ID,
-} from '@kbn/security-solution-plugin/public/flyout/right/components/test_ids';
+} from '@kbn/security-solution-plugin/public/flyout/document_details/right/components/test_ids';
 import {
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_ABOUT_SECTION_HEADER,
   DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB_VISUALIZATIONS_SECTION_HEADER,

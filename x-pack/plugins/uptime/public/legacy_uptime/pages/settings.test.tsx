@@ -8,7 +8,7 @@ import React from 'react';
 
 import { isValidCertVal, SettingsPage } from './settings';
 import { render } from '../lib/helper/rtl_helpers';
-import { fireEvent, waitFor } from '@testing-library/dom';
+import { fireEvent, waitFor } from '@testing-library/react';
 import * as alertApi from '../state/api/alerts';
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../common/constants';
 

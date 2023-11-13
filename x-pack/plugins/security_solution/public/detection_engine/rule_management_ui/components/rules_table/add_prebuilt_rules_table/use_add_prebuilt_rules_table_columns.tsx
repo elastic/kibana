@@ -42,6 +42,7 @@ const RuleName = ({ name, ruleId }: RuleNameProps) => {
       onClick={() => {
         openRulePreview(ruleId);
       }}
+      data-test-subj="ruleName"
     >
       {name}
     </EuiLink>
@@ -121,7 +122,14 @@ const createInstallButtonColumn = (
         onClick={() => installOneRule(ruleId)}
         data-test-subj={`installSinglePrebuiltRuleButton-${ruleId}`}
       >
-        {isRuleInstalling ? <EuiLoadingSpinner size="s" /> : i18n.INSTALL_RULE_BUTTON}
+        {isRuleInstalling ? (
+          <EuiLoadingSpinner
+            size="s"
+            data-test-subj={`installSinglePrebuiltRuleButton-loadingSpinner-${ruleId}`}
+          />
+        ) : (
+          i18n.INSTALL_RULE_BUTTON
+        )}
       </EuiButtonEmpty>
     );
   },

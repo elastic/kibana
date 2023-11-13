@@ -6,13 +6,10 @@
  */
 
 import moment from 'moment';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';
 import { SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import { findInventoryModel } from '../../../../../common/inventory_models';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../common/inventory_models/types';
 import { isRate } from './is_rate';
 
 export const calculateFromBasedOnMetric = (

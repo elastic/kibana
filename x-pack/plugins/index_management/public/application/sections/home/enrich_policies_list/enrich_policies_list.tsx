@@ -17,6 +17,10 @@ import type { SerializedEnrichPolicy } from '../../../../../common';
 import { useAppContext } from '../../../app_context';
 import { useRedirectPath } from '../../../hooks/redirect_path';
 
+import {
+  EnrichPoliciesAuthProvider,
+  EnrichPoliciesWithPrivileges,
+} from '../../../components/enrich_policies';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../services/breadcrumbs';
 import { documentationService } from '../../../services/documentation';
 import { useLoadEnrichPolicies } from '../../../services/api';
@@ -30,10 +34,7 @@ const getEnrichPolicyNameFromLocation = (location: Location) => {
   return policy;
 };
 
-export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = ({
-  history,
-  location,
-}) => {
+const ListView: React.FunctionComponent<RouteComponentProps> = ({ history, location }) => {
   const {
     core: { executionContext },
   } = useAppContext();
@@ -150,3 +151,11 @@ export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = 
     </div>
   );
 };
+
+export const EnrichPoliciesList: React.FunctionComponent<RouteComponentProps> = (props) => (
+  <EnrichPoliciesAuthProvider>
+    <EnrichPoliciesWithPrivileges>
+      <ListView {...props} />
+    </EnrichPoliciesWithPrivileges>
+  </EnrichPoliciesAuthProvider>
+);

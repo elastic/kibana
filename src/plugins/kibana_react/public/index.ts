@@ -21,9 +21,6 @@ export {
 export type { UrlTemplateEditorVariable, UrlTemplateEditorProps } from './url_template_editor';
 export { UrlTemplateEditor } from './url_template_editor';
 
-export type { ExitFullScreenButtonProps } from './exit_full_screen_button';
-export { ExitFullScreenButton } from './exit_full_screen_button';
-
 export type { KibanaReactContext, KibanaReactContextValue, KibanaServices } from './context';
 export {
   context,
@@ -76,11 +73,8 @@ export { createNotifications } from './notifications';
 /** @deprecated use `Markdown` from `@kbn/shared-ux-markdown` */
 export { Markdown, MarkdownSimple } from './markdown';
 
-export { toMountPoint, MountPointPortal } from './util';
+export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
-
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
-export { RedirectAppLinks } from './app_links';
 
 /** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
 export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';

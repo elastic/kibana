@@ -15,17 +15,17 @@ import { InfraLoadingPanel } from '../../loading';
 import { ASSET_DETAILS_PAGE_COMPONENT_NAME } from '../constants';
 import { Content } from '../content/content';
 import { useAssetDetailsRenderPropsContext } from '../hooks/use_asset_details_render_props';
-import { useMetadataStateProviderContext } from '../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../hooks/use_metadata_state';
 import { usePageHeader } from '../hooks/use_page_header';
 import { useTabSwitcherContext } from '../hooks/use_tab_switcher';
 import { ContentTemplateProps } from '../types';
 import { getIntegrationsAvailable } from '../utils';
 
-export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps) => {
+export const Page = ({ tabs = [], links = [] }: ContentTemplateProps) => {
   const { loading } = useAssetDetailsRenderPropsContext();
-  const { metadata, loading: metadataLoading } = useMetadataStateProviderContext();
+  const { metadata, loading: metadataLoading } = useMetadataStateContext();
   const { rightSideItems, tabEntries, breadcrumbs } = usePageHeader(tabs, links);
-  const { asset, assetType } = useAssetDetailsRenderPropsContext();
+  const { asset } = useAssetDetailsRenderPropsContext();
   const { actionMenuHeight } = useKibanaHeader();
   const trackOnlyOnce = React.useRef(false);
 
@@ -42,7 +42,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       const integrations = getIntegrationsAvailable(metadata);
       const telemetryParams = {
         componentName: ASSET_DETAILS_PAGE_COMPONENT_NAME,
-        assetType,
+        assetType: asset.type,
         tabId: activeTabId,
       };
 
@@ -56,7 +56,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
       );
       trackOnlyOnce.current = true;
     }
-  }, [activeTabId, assetType, metadata, metadataLoading, telemetry]);
+  }, [activeTabId, asset.type, metadata, metadataLoading, telemetry]);
 
   const heightWithOffset = useMemo(
     () => `calc(100vh - var(--euiFixedHeadersOffset, 0) - ${actionMenuHeight}px)`,
@@ -88,7 +88,7 @@ export const Page = ({ header: { tabs = [], links = [] } }: ContentTemplateProps
         minBlockSize: heightWithOffset,
       }}
       data-component-name={ASSET_DETAILS_PAGE_COMPONENT_NAME}
-      data-asset-type={assetType}
+      data-asset-type={asset.type}
     >
       <EuiPageTemplate.Section paddingSize="none">
         <EuiPageTemplate.Header

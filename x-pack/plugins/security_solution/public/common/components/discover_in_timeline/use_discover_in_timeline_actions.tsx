@@ -207,6 +207,8 @@ export const useDiscoverInTimelineActions = (
               savedSearchId: response.id,
             })
           );
+          // Also save the timeline, this will only happen once, in case there is no saved search id yet
+          dispatch(timelineActions.saveTimeline({ id: TimelineId.active }));
         }
       } catch (err) {
         addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {

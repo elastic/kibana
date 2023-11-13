@@ -135,6 +135,8 @@ export type {
   GetBulkAssetsRequest,
   GetBulkAssetsResponse,
   KibanaSavedObjectType,
+  GetInputsTemplatesRequest,
+  GetInputsTemplatesResponse,
 } from '../../common/types';
 export {
   entries,
