@@ -12,41 +12,12 @@ import { sloList } from '../../../data/slo/slo';
 import { render } from '../../../utils/test_helper';
 import { SloSummary } from './slo_summary';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { ALL_VALUE, SLOResponse } from '@kbn/slo-schema';
-type SLO = Pick<SLOResponse, 'id' | 'instanceId'>;
+import { ActiveAlerts } from '../../../hooks/slo/active_alerts';
 
 jest.mock('../../../hooks/slo/use_fetch_active_alerts');
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 
-class ActiveAlertsMock {
-  private data: Map<string, number> = new Map();
-
-  constructor(initialData?: Record<string, number>) {
-    if (initialData) {
-      Object.keys(initialData).forEach((key) => this.data.set(key, initialData[key]));
-    }
-  }
-
-  get(slo: SLO) {
-    return this.data.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`);
-  }
-
-  clear() {
-    return this.data.clear();
-  }
-}
-
 describe('SLO Alert Summary', () => {
-  const activeAlerts = new ActiveAlertsMock();
-  afterEach(() => {
-    jest.clearAllMocks();
-    activeAlerts.clear();
-  });
-  afterAll(() => {
-    jest.clearAllMocks();
-    activeAlerts.clear();
-  });
-
   describe('Multiple selected SLOs', () => {
     it('displays 0 alerts when there are no active alerts', async () => {
       const { results } = sloList;
@@ -58,7 +29,7 @@ describe('SLO Alert Summary', () => {
 
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
-        data: new ActiveAlertsMock(),
+        data: new ActiveAlerts(),
       });
 
       render(<SloSummary slos={slos} />);
@@ -79,7 +50,7 @@ describe('SLO Alert Summary', () => {
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
-          data: new ActiveAlertsMock(activeAlertsData),
+          data: new ActiveAlerts(activeAlertsData),
         });
 
         render(<SloSummary slos={slos} />);
@@ -102,7 +73,7 @@ describe('SLO Alert Summary', () => {
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
-          data: new ActiveAlertsMock(activeAlertsData),
+          data: new ActiveAlerts(activeAlertsData),
         });
 
         render(<SloSummary slos={slos} />);
@@ -123,7 +94,7 @@ describe('SLO Alert Summary', () => {
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
-          data: new ActiveAlertsMock(activeAlertsData),
+          data: new ActiveAlerts(activeAlertsData),
         });
 
         render(<SloSummary slos={slos} />);
@@ -144,7 +115,7 @@ describe('SLO Alert Summary', () => {
 
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
-        data: new ActiveAlertsMock(),
+        data: new ActiveAlerts(),
       });
 
       render(<SloSummary slos={selectedSlo} />);
@@ -164,8 +135,9 @@ describe('SLO Alert Summary', () => {
       };
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
-        data: new ActiveAlertsMock(activeAlertsData),
+        data: new ActiveAlerts(activeAlertsData),
       });
+
       render(<SloSummary slos={selectedSlo} />);
 
       expect(screen.queryByTestId('sloAlertsSummaryStat')).toHaveTextContent('1');
