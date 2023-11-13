@@ -7,7 +7,7 @@
 
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { Asset } from '../../../../common/types_api';
-import { GetContainersOptionsPublic } from '../../../../common/types_client';
+import { GetPodsOptionsPublic } from '../../../../common/types_client';
 import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
@@ -16,7 +16,7 @@ import { parseEan } from '../../parse_ean';
 import { collectPods } from '../../collectors/pods';
 import { validateStringDateRange } from '../../validators/validate_date_range';
 
-export type GetPodsOptions = GetContainersOptionsPublic & AssetClientDependencies;
+export type GetPodsOptions = GetPodsOptionsPublic & AssetClientDependencies;
 export type GetPodsOptionsInjected = AssetClientOptionsWithInjectedValues<GetPodsOptions>;
 
 export async function getPods(options: GetPodsOptionsInjected): Promise<{ pods: Asset[] }> {
@@ -32,7 +32,7 @@ export async function getPods(options: GetPodsOptionsInjected): Promise<{ pods: 
     const ean = Array.isArray(options.filters.ean) ? options.filters.ean[0] : options.filters.ean;
     const { kind, id } = parseEan(ean);
 
-    // if EAN filter isn't targeting a container asset, we don't need to do this query
+    // if EAN filter isn't targeting a pod asset, we don't need to do this query
     if (kind !== 'pod') {
       return {
         pods: [],
