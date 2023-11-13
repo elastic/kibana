@@ -6,18 +6,23 @@
  * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
 import { cloneDeepWith, isString } from 'lodash';
-import { Key, Origin, WebDriver } from 'selenium-webdriver';
+import { Key, Origin, type WebDriver } from 'selenium-webdriver';
 import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { modifyUrl } from '@kbn/std';
 
 import sharp from 'sharp';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
+import { type FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
-import { NetworkOptions, NetworkProfile, NETWORK_PROFILES } from '../remote/network_profiles';
+import {
+  type NetworkOptions,
+  type NetworkProfile,
+  NETWORK_PROFILES,
+} from '../remote/network_profiles';
 
 export type Browser = BrowserService;
 
@@ -164,17 +169,53 @@ class BrowserService extends FtrService {
   /**
    * Gets the URL that is loaded in the focused window/frame.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getCurrentUrl
-   *
+   * @param relativeUrl (optional) set to true to return the relative URL (without the hostname and protocol)
    * @return {Promise<string>}
    */
-  public async getCurrentUrl() {
+  public async getCurrentUrl(relativeUrl: boolean = false): Promise<string> {
     // strip _t=Date query param when url is read
     const current = await this.driver.getCurrentUrl();
     const currentWithoutTime = modifyUrl(current, (parsed) => {
       delete (parsed.query as any)._t;
       return void 0;
     });
-    return currentWithoutTime;
+
+    if (relativeUrl) {
+      const { path } = Url.parse(currentWithoutTime);
+      return path!; // this property includes query params and anchors
+    } else {
+      return currentWithoutTime;
+    }
+  }
+
+  /**
+   * Uses the 'retry' service and waits for the current browser URL to match the provided path.
+   * NB the provided path can contain query params as well as hash anchors.
+   * Using retry logic makes URL assertions less flaky
+   * @param expectedPath The relative path that we are expecting the browser to be on
+   * @returns a Promise that will reject if the browser URL does not match the expected one
+   */
+  public async waitForUrlToBe(expectedPath: string) {
+    const retry = await this.ctx.getService('retry');
+    const log = this.ctx.getService('log');
+
+    await retry.waitForWithTimeout(`URL to be ${expectedPath}`, 5000, async () => {
+      const currentPath = await this.getCurrentUrl(true);
+
+      if (currentPath !== expectedPath) {
+        log.debug(`Expected URL to be ${expectedPath}, got ${currentPath}`);
+      }
+      return currentPath === expectedPath;
+    });
+
+    // wait some time before checking the URL again
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // ensure the URL stays the same and we did not go through any redirects
+    const currentPath = await this.getCurrentUrl(true);
+    if (currentPath !== expectedPath) {
+      throw new Error(`Expected URL to continue to be ${expectedPath}, got ${currentPath}`);
+    }
   }
 
   /**
