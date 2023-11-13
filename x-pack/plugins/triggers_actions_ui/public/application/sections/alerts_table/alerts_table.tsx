@@ -6,7 +6,16 @@
  */
 
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import React, { useState, Suspense, lazy, useCallback, useMemo, useEffect, useRef } from 'react';
+import React, {
+  useState,
+  Suspense,
+  lazy,
+  useCallback,
+  useMemo,
+  useEffect,
+  useRef,
+  memo,
+} from 'react';
 import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -78,43 +87,45 @@ type CustomGridBodyProps = Pick<
   stripes?: boolean;
 };
 
-const CustomGridBody = ({
-  alertsData,
-  isLoading,
-  pagination,
-  actualGridStyle,
-  visibleColumns,
-  Cell,
-  stripes,
-}: CustomGridBodyProps) => {
-  return (
-    <>
-      {alertsData
-        .concat(isLoading ? Array.from({ length: pagination.pageSize - alertsData.length }) : [])
-        .map((_row, rowIndex) => (
-          <Row
-            role="row"
-            key={`${rowIndex},${pagination.pageIndex}`}
-            // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
-            // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
-            // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
-            // shouldHighlightRow is correct
-            className={`euiDataGridRow ${
-              stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
-            } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
-          >
-            {visibleColumns.map((_col, colIndex) => (
-              <Cell
-                colIndex={colIndex}
-                visibleRowIndex={rowIndex}
-                key={`${rowIndex},${colIndex}`}
-              />
-            ))}
-          </Row>
-        ))}
-    </>
-  );
-};
+const CustomGridBody = memo(
+  ({
+    alertsData,
+    isLoading,
+    pagination,
+    actualGridStyle,
+    visibleColumns,
+    Cell,
+    stripes,
+  }: CustomGridBodyProps) => {
+    return (
+      <>
+        {alertsData
+          .concat(isLoading ? Array.from({ length: pagination.pageSize - alertsData.length }) : [])
+          .map((_row, rowIndex) => (
+            <Row
+              role="row"
+              key={`${rowIndex},${pagination.pageIndex}`}
+              // manually add stripes if props.gridStyle.stripes is true because presence of rowClasses
+              // overrides the props.gridStyle.stripes option. And rowClasses will always be there.
+              // Adding stripes only on even rows. It will be replaced by alertsTableHighlightedRow if
+              // shouldHighlightRow is correct
+              className={`euiDataGridRow ${
+                stripes && rowIndex % 2 !== 0 ? 'euiDataGridRow--striped' : ''
+              } ${actualGridStyle.rowClasses?.[rowIndex] ?? ''}`}
+            >
+              {visibleColumns.map((_col, colIndex) => (
+                <Cell
+                  colIndex={colIndex}
+                  visibleRowIndex={rowIndex}
+                  key={`${rowIndex},${colIndex}`}
+                />
+              ))}
+            </Row>
+          ))}
+      </>
+    );
+  }
+);
 
 const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTableProps) => {
   const dataGridRef = useRef<EuiDataGridRefProps>(null);
