@@ -912,6 +912,16 @@ describe('Create Lifecycle', () => {
       ).toThrowErrorMatchingInlineSnapshot(`"Fail"`);
     });
   });
+
+  describe('getLatestRuleVersion', () => {
+    test('should return the latest rule version', async () => {
+      const ruleTypeRegistry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        latestRuleVersion: 5,
+      });
+      expect(ruleTypeRegistry.getLatestRuleVersion()).toBe(5);
+    });
+  });
 });
 
 function ruleTypeWithVariables<ActionGroupIds extends string>(
