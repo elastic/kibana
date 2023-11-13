@@ -118,7 +118,6 @@ export const DocViewerTable = ({
   const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
-  const disablesFilter = !filter;
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -344,11 +343,10 @@ export const DocViewerTable = ({
                   pinned={pinned}
                   fieldMapping={fieldMapping}
                   flattenedField={flattenedField}
-                  onFilter={onFilter!}
+                  onFilter={onFilter}
                   onToggleColumn={onToggleColumn}
                   ignoredValue={!!ignored}
                   onTogglePinned={onTogglePinned}
-                  disablesFilter={disablesFilter}
                 />
               </EuiTableRowCell>
               <EuiTableRowCell
@@ -389,7 +387,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, disablesFilter, showActionsInsideTableCell, searchText]
+    [onToggleColumn, onTogglePinned, showActionsInsideTableCell, searchText]
   );
 
   const rowElements = [
