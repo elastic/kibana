@@ -9,46 +9,45 @@ import { ElasticsearchClient, type Logger } from '@kbn/core/server';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { IndexStatus, PostureTypes } from '../../common/types';
 
+export interface PostureTypeAndRetention {
+  postureType?: PostureTypes;
+  retentionTime?: string;
+}
+
 export const checkIndexStatus = async (
   esClient: ElasticsearchClient,
   index: string,
   logger: Logger,
-  postureType?: PostureTypes,
-  retentionTime?: number
+  PostureTypeAndRetention?: PostureTypeAndRetention
 ): Promise<IndexStatus> => {
-  const query =
-    !postureType || postureType === 'all' || postureType === 'vuln_mgmt'
-      ? {
-          bool: {
-            must: {
-              range: {
-                '@timestamp': {
-                  gte: `now-${retentionTime}h/h`,
-                  lte: 'now/h',
-                },
-              },
-            },
-          },
-        }
-      : {
-          bool: {
-            filter: [
+  const isNotKspmOrCspm =
+    !PostureTypeAndRetention?.postureType ||
+    PostureTypeAndRetention?.postureType === 'all' ||
+    PostureTypeAndRetention?.postureType === 'vuln_mgmt';
+
+  const query = {
+    bool: {
+      filter: [
+        ...(isNotKspmOrCspm
+          ? []
+          : [
               {
                 term: {
-                  safe_posture_type: postureType,
+                  safe_posture_type: PostureTypeAndRetention?.postureType,
                 },
               },
-              {
-                range: {
-                  '@timestamp': {
-                    gte: `now-${retentionTime}h/h`,
-                    lte: 'now/h',
-                  },
-                },
-              },
-            ],
+            ]),
+        {
+          range: {
+            '@timestamp': {
+              gte: `now-${PostureTypeAndRetention?.retentionTime}/h`,
+              lte: 'now/h',
+            },
           },
-        };
+        },
+      ],
+    },
+  };
   try {
     const queryResult = await esClient.search({
       index,
