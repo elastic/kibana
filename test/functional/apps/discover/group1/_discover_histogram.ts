@@ -289,8 +289,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       // type an invalid search query, hit refresh
       await queryBar.setQuery('this is > not valid');
       await queryBar.submitQuery();
-      // check the error state
-      expect(await testSubjects.exists('embeddable-lens-failure')).to.be(true);
+
+      await PageObjects.discover.showsErrorCallout();
 
       // now remove the query
       await queryBar.clearQuery();
@@ -320,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.clickResetSavedSearchButton();
+      await PageObjects.discover.revertUnsavedChanges();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
       expect(JSON.parse(requestData)).to.eql({
