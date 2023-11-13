@@ -7,9 +7,10 @@
 
 import { Action } from '@elastic/eui/src/components/basic_table/action_types';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-import { EuiToolTip } from '@elastic/eui';
-import React, { useCallback, useMemo, useEffect, useState } from 'react';
+import { EuiIcon, EuiLink, EuiText, EuiToolTip } from '@elastic/eui';
+import React, { FC, useCallback, useMemo, useEffect, useState } from 'react';
 import {
   BUILT_IN_MODEL_TAG,
   DEPLOYMENT_STATE,
@@ -33,6 +34,80 @@ import { isTestable, isDfaTrainedModel } from './test_models';
 import { ModelItem } from './models_list';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 
+const ViewTrainingDataAction: FC<{
+  item: ModelItem;
+}> = ({ item }) => {
+  const urlLocator = useMlLocator()!;
+  const {
+    services: {
+      application: { navigateToUrl },
+    },
+  } = useMlKibana();
+
+  const handleClick = async () => {
+    if (item.metadata?.analytics_config === undefined) return;
+
+    const analysisType = getAnalysisType(
+      item.metadata?.analytics_config.analysis
+    ) as DataFrameAnalysisConfigType;
+
+    const url = await urlLocator.getUrl({
+      page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
+      pageState: {
+        jobId: item.metadata?.analytics_config.id as string,
+        analysisType,
+        ...(analysisType === 'classification' || analysisType === 'regression'
+          ? {
+              queryText: `${item.metadata?.analytics_config.dest.results_field}.is_training : true`,
+            }
+          : {}),
+      },
+    });
+
+    await navigateToUrl(url);
+  };
+
+  const buttonContent = (
+    <>
+      <EuiIcon type={'visTable'} css={{ marginRight: '8px' }} />
+      {i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
+        defaultMessage: 'View training data',
+      })}
+    </>
+  );
+
+  const isEnabled = item.origin_job_exists;
+  const button = isEnabled ? (
+    <EuiLink onClick={handleClick} color={'text'}>
+      <EuiText size="s" color={'text'}>
+        {buttonContent}
+      </EuiText>
+    </EuiLink>
+  ) : (
+    <EuiText size="s" color={'subdued'} css={{ fontWeight: 300 }}>
+      {buttonContent}
+    </EuiText>
+  );
+
+  if (isEnabled) {
+    return button;
+  } else {
+    return (
+      <EuiToolTip
+        position="top"
+        content={
+          <FormattedMessage
+            id="xpack.ml.trainedModels.modelsList.viewTrainingDataActionTooltip"
+            defaultMessage="Related data frame analytics job was not found."
+          />
+        }
+      >
+        {button}
+      </EuiToolTip>
+    );
+  }
+};
+
 export function useModelActions({
   onDfaTestAction,
   onTestAction,
@@ -54,7 +129,6 @@ export function useModelActions({
 }): Array<Action<ModelItem>> {
   const {
     services: {
-      application: { navigateToUrl },
       overlays,
       theme,
       i18n: i18nStart,
@@ -130,41 +204,11 @@ export function useModelActions({
   return useMemo(
     () => [
       {
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
-          defaultMessage: 'View training data',
-        }),
-        description: i18n.translate(
-          'xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel',
-          {
-            defaultMessage: 'View training data',
-          }
-        ),
-        icon: 'visTable',
-        type: 'icon',
+        render: (item) => {
+          return <ViewTrainingDataAction item={item} />;
+        },
         available: (item) => !!item.metadata?.analytics_config?.id,
         enabled: (item) => item.origin_job_exists === true,
-        onClick: async (item) => {
-          if (item.metadata?.analytics_config === undefined) return;
-
-          const analysisType = getAnalysisType(
-            item.metadata?.analytics_config.analysis
-          ) as DataFrameAnalysisConfigType;
-
-          const url = await urlLocator.getUrl({
-            page: ML_PAGES.DATA_FRAME_ANALYTICS_EXPLORATION,
-            pageState: {
-              jobId: item.metadata?.analytics_config.id as string,
-              analysisType,
-              ...(analysisType === 'classification' || analysisType === 'regression'
-                ? {
-                    queryText: `${item.metadata?.analytics_config.dest.results_field}.is_training : true`,
-                  }
-                : {}),
-            },
-          });
-
-          await navigateToUrl(url);
-        },
         isPrimary: true,
       },
       {
@@ -607,7 +651,6 @@ export function useModelActions({
       isLoading,
       modelAndDeploymentIds,
       navigateToPath,
-      navigateToUrl,
       onDfaTestAction,
       onLoading,
       onModelDeployRequest,
