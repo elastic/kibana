@@ -43,10 +43,7 @@ import {
   esoModelVersionExampleV3,
 } from './types';
 
-import {
-  EsoModelVersionExampleTypeRegistration,
-  EXAMPLE_SAVED_OBJECT_TYPE,
-} from './types/latest';
+import { EsoModelVersionExampleTypeRegistration, EXAMPLE_SAVED_OBJECT_TYPE } from './types/latest';
 
 const documentVersionConstants = [
   esoModelVersionExampleV1.ESO_MV_RAW_DOC,
