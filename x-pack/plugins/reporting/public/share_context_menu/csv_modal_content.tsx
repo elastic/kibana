@@ -12,10 +12,11 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { FC, useRef, useState } from 'react';
+import React, { FC, useState } from 'react';
 import { BaseParams } from '../../common';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
+import useMountedState from 'react-use/lib/useMountedState';
 
 export interface CsvModalProps {
   apiClient: ReportingAPIClient;
@@ -40,10 +41,10 @@ const renderDescription = (objectType: string): string => {
 
 export const CsvModalContentUI: FC<Props> = (props: Props) => {
   const { apiClient, getJobParams, intl, toasts, theme, onClose } = props;
+  const isMounted = useMountedState();
   const [, setIsStale] = useState(false);
   const [createReportingJob, setCreatingReportJob] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
-  const mounted = useRef<boolean>();
   const [objectType] = useState('discover');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
@@ -56,7 +57,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const setAbsoluteReportGenerationUrl = () => {
-    if (!mounted || !getAbsoluteReportGenerationUrl()) {
+    if (!isMounted || !getAbsoluteReportGenerationUrl()) {
       return;
     } else {
       setAbsoluteUrl(getAbsoluteReportGenerationUrl());
@@ -64,7 +65,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const markAsStale = () => {
-    if (!mounted) return;
+    if (!isMounted) return;
     setIsStale(true);
   };
 
@@ -105,7 +106,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
         if (onClose) {
           onClose();
         }
-        if (mounted) {
+        if (isMounted()) {
           setCreatingReportJob(false);
         }
       })
@@ -120,7 +121,7 @@ export const CsvModalContentUI: FC<Props> = (props: Props) => {
             <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
           ) as unknown as string,
         });
-        if (mounted) {
+        if (isMounted()) {
           setCreatingReportJob(false);
         }
       });

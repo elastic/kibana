@@ -23,13 +23,14 @@ import { IUiSettingsClient } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import React, { FC, useEffect, useRef, useState } from 'react';
+import React, { FC, useEffect, useState } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common/layout';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { JobParamsProviderOptions } from '.';
 import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
+import useMountedState from 'react-use/lib/useMountedState';
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
@@ -100,7 +101,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   const [usePrintLayout, setPrintLayout] = useState(false);
   const [useCanvasLayout, setCanvasLayout] = useState(false);
   const [absoluteUrl, setAbsoluteUrl] = useState('');
-  const mounted = useRef<boolean>();
+  const isMounted = useMountedState();
   const [objectType] = useState<string>('dashboard');
   const exceedsMaxLength = absoluteUrl.length >= getMaxUrlLength();
 
@@ -115,7 +116,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const setAbsoluteReportGenerationUrl = () => {
-    if (!mounted || !getAbsoluteReportGenerationUrl()) {
+    if (!isMounted || !getAbsoluteReportGenerationUrl()) {
       return;
     } else {
       setAbsoluteUrl(getAbsoluteReportGenerationUrl()!);
@@ -123,7 +124,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
   };
 
   const markAsStale = () => {
-    if (!mounted) return;
+    if (!isMounted) return;
     setIsStale(true);
   };
 
@@ -196,7 +197,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
         if (onClose) {
           onClose();
         }
-        if (mounted) {
+        if (isMounted()) {
           setCreatingReportJob(false);
         }
       })
@@ -211,7 +212,7 @@ export const ReportingModalContentUI: FC<Props> = (props: Props) => {
             <span dangerouslySetInnerHTML={{ __html: error.body.message }} />
           ) as unknown as string,
         });
-        if (mounted) {
+        if (isMounted()) {
           setCreatingReportJob(false);
         }
       });
