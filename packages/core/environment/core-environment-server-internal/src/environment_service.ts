@@ -71,14 +71,6 @@ export class EnvironmentService {
       this.log.warn(`Detected an unhandled Promise rejection: ${message}`);
     });
 
-    process.on('warning', (warning) => {
-      // deprecation warnings do no reflect a current problem for the user and should be filtered out.
-      if (warning.name === 'DeprecationWarning') {
-        return;
-      }
-      this.processLogger.warn(warning);
-    });
-
     await createDataFolder({ pathConfig, logger: this.log });
     await writePidFile({ pidConfig, logger: this.log });
 
