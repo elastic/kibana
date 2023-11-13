@@ -18,7 +18,7 @@ export const getWorkspaceSwitcherBreadCrumb = ({
   workflows: Workflows;
 }): ChromeProjectBreadcrumb => {
   return {
-    text: i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
+    text: i18n.translate('core.ui.primaryNav.cloud.workflowLabel', {
       defaultMessage: 'Workflow',
     }),
     popoverContent: (
