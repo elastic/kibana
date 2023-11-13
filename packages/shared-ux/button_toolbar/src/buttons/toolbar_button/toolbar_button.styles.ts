@@ -8,6 +8,11 @@
 
 import { UseEuiTheme } from '@elastic/eui';
 
+export const fontWeightDefinitions = (euiTheme: UseEuiTheme['euiTheme']) => ({
+  bold: euiTheme.font.weight.bold,
+  normal: euiTheme.font.weight.regular,
+});
+
 export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
   return {
     default: {
@@ -21,10 +26,6 @@ export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
       backgroundColor: euiTheme.colors.emptyShade,
       border: `${euiTheme.border.thin}`,
       color: `${euiTheme.colors.text}`,
-    },
-    fontWeight: {
-      bold: euiTheme.font.weight.bold,
-      normal: euiTheme.font.weight.regular,
     },
     buttonPositions: {
       left: {
