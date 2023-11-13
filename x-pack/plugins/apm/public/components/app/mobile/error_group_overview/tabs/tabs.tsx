@@ -8,9 +8,13 @@
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MobileErrorTabIds, useTabId } from '../hooks/use_tab_id';
 import { MobileErrorGroupOverview } from '../error_groups';
 import { MobileCrashGroupOverview } from '../crash_groups';
+
+export enum MobileErrorTabIds {
+  ERRORS = 'errors',
+  CRASHES = 'crashes',
+}
 
 const tabs = [
   {
@@ -32,16 +36,18 @@ const tabs = [
 
 export function Tabs({
   mobileErrorTabId,
+  onTabClick,
 }: {
   mobileErrorTabId: MobileErrorTabIds;
+  onTabClick: (nextTab: MobileErrorTabIds) => void;
 }) {
-  const [selectedTabId, setSelectedTabId] = useTabId(mobileErrorTabId);
+  const selectedTabId = mobileErrorTabId;
   const tabEntries = tabs.map((tab, index) => (
     <EuiTab
       {...tab}
       key={tab.id}
       onClick={() => {
-        setSelectedTabId(tab.id);
+        onTabClick(tab.id);
       }}
       isSelected={tab.id === selectedTabId}
       append={tab.append}

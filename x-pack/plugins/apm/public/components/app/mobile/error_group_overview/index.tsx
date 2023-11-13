@@ -6,24 +6,29 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { Tabs } from './tabs/tabs';
-import { MobileErrorTabIds } from './hooks/use_tab_id';
+import { useHistory } from 'react-router-dom';
+import { Tabs, MobileErrorTabIds } from './tabs/tabs';
 import { useApmParams } from '../../../../hooks/use_apm_params';
+import { push } from '../../../shared/links/url_helpers';
 
 export function MobileErrorCrashesOverview() {
   const {
     query: { mobileErrorTabId = MobileErrorTabIds.ERRORS },
   } = useApmParams('/mobile-services/{serviceName}/errors');
+  const history = useHistory();
   return (
     <EuiFlexGroup direction="column" gutterSize="m">
       <EuiSpacer size="m" />
       <EuiFlexItem grow={false}>
         <Tabs
-          mobileErrorTabId={
-            MobileErrorTabIds[
-              mobileErrorTabId as keyof typeof MobileErrorTabIds
-            ]
-          }
+          onTabClick={(nextTab) => {
+            push(history, {
+              query: {
+                mobileErrorTabId: nextTab,
+              },
+            });
+          }}
+          mobileErrorTabId={mobileErrorTabId as MobileErrorTabIds}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
