@@ -9,6 +9,7 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 interface SloItem {
   id: string | undefined;
   instanceId: string | undefined;
+  name: string;
 }
 
 export interface EmbeddableSloProps {

@@ -13,30 +13,17 @@ import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts
 import { EmbeddableSloProps } from './types';
 
 export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) {
-  // const { data: activeAlerts } = useFetchActiveAlerts({
-  //   sloIdsAndInstanceIds: [
-  //     // ['2f3f52a0-7b60-11ee-8f2d-95d71754a584', '*'],
-  //     // ['4776bb30-7bb3-11ee-8f2d-95d71754a584', '*'],
-  //     ['9270f550-7b5f-11ee-8f2d-95d71754a584', '*'],
-  //   ],
-  // });
-  const sloNames = slos.map((slo) => `${slo.name}(${slo.instanceId})`); // TODO hide *
-  console.log(sloNames, '!!names');
+  const sloNames = slos.map((slo) => `${slo.name}(${slo.instanceId})`);
   const more = sloNames.length - 1;
   const { data: activeAlerts } = useFetchActiveAlerts({
     sloIdsAndInstanceIds: slos.map(Object.values),
   });
-  console.log(activeAlerts, '!!activeAlerts');
-  console.log(slos.map(Object.values));
-
-  let numOfAlerts = 0;
-  slos.forEach((slo) => {
-    console.log(slo, '!!slo');
-    console.log(activeAlerts.get(slo), '!!activeAlerts.get(slo)');
+  const totalActiveAlerts = slos.reduce((total, slo) => {
     if (activeAlerts.get(slo)) {
-      numOfAlerts = numOfAlerts + activeAlerts.get(slo);
+      total += activeAlerts.get(slo);
     }
-  });
+    return total;
+  }, 0);
   return (
     <EuiPanel color="danger" hasShadow={false}>
       <EuiFlexGroup justifyContent="spaceBetween" direction="column" style={{ minHeight: '100%' }}>
@@ -68,7 +55,7 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
         <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="flexEnd">
           <EuiFlexItem grow={false}>
             <EuiStat
-              title={numOfAlerts}
+              title={totalActiveAlerts}
               titleColor="default"
               titleSize="l"
               textAlign="right"

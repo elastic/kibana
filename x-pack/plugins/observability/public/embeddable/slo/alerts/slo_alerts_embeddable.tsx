@@ -82,7 +82,6 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
       },
     } = this.deps;
     const { slos } = this.getInput(); // TODO fix types
-    console.log(slos, '!!slos');
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>

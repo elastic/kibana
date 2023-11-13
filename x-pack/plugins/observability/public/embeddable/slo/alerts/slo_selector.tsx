@@ -53,7 +53,6 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
   }, [isLoading, sloList]);
 
   const onChange = (opts: Array<EuiComboBoxOptionOption<string>>) => {
-    console.log(opts, '!!opts');
     setSelectedOptions(opts);
     const selectedSlos =
       opts.length >= 1
@@ -61,7 +60,6 @@ export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
             opts.find((opt) => opt.value === `${slo.id}-${slo.instanceId}`)
           )
         : undefined;
-    console.log(selectedSlos, '!!selectdSlo');
     onSelected(selectedSlos);
   };
 
