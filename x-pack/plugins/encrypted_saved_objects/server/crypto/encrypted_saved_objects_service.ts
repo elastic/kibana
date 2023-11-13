@@ -544,11 +544,15 @@ export class EncryptedSavedObjectsService {
         decryptedAttributes[attributeName] = (yield [attributeValue, encryptionAADs])!;
       } catch (err) {
         this.options.logger.error(
-          `Failed to decrypt "${attributeName}" attribute: ${err.message || err}`
+          `Failed to decrypt attribute "${attributeName}" of saved object " ${descriptorToArray(
+            descriptor
+          )}": ${err.message || err}`
         );
 
         throw new EncryptionError(
-          `Unable to decrypt attribute "${attributeName}"`,
+          `Unable to decrypt attribute "${attributeName}" of saved object "${descriptorToArray(
+            descriptor
+          )}"`,
           attributeName,
           EncryptionErrorOperation.Decryption,
           err
