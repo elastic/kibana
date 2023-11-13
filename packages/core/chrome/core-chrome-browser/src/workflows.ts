@@ -7,7 +7,7 @@
  */
 
 import type { IconType } from '@elastic/eui';
-import { SideNavComponent as ISideNavComponent } from './project_navigation';
+import type { AppDeepLinkId, SideNavComponent as ISideNavComponent } from './project_navigation';
 import type { ChromeStyle } from './types';
 
 export interface Workflow {
@@ -17,6 +17,7 @@ export interface Workflow {
   isDefault?: boolean;
   icon?: IconType;
   navigation?: ISideNavComponent;
+  homePage?: AppDeepLinkId;
 }
 
 export interface Workflows {

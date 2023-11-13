@@ -206,6 +206,9 @@ export class ChromeService {
 
     const workflows$ = new BehaviorSubject<Workflows>({});
     const activeWorkflowId$ = new BehaviorSubject<string>(localStorage.getItem(WORKFLOW_KEY) ?? '');
+    const navControls = this.navControls.start();
+    const navLinks = this.navLinks.start({ application, http });
+
     let workflowInitiated = false;
 
     const onWorkflowChange = (id: string) => {
@@ -221,6 +224,11 @@ export class ChromeService {
       chromeStyle$.next(workflow.style);
       activeWorkflowId$.next(id);
       localStorage.setItem(WORKFLOW_KEY, id);
+
+      const link = navLinks.get(workflow.homePage ?? 'home');
+      if (link) {
+        application.navigateToUrl(link.href);
+      }
     };
 
     const updateWorkflows = (workflows: Workflows, replace: boolean = false) => {
@@ -268,8 +276,6 @@ export class ChromeService {
       })
     );
 
-    const navControls = this.navControls.start();
-    const navLinks = this.navLinks.start({ application, http });
     projectNavigation = this.projectNavigation.start({
       application,
       navLinks,

@@ -122,7 +122,7 @@ const navigationTree: NavigationTreeDefinition = {
         defaultMessage: 'Get started',
       }),
       icon: 'launch',
-      link: 'serverlessElasticsearch',
+      link: 'home',
     },
     {
       type: 'navGroup',

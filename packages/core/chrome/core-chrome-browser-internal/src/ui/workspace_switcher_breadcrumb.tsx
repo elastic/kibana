@@ -37,6 +37,6 @@ export const getWorkspaceSwitcherBreadCrumb = ({
         ))}
       />
     ),
-    popoverProps: { panelPaddingSize: 'none' },
+    popoverProps: { panelPaddingSize: 'none', zIndex: 6000 },
   };
 };

@@ -312,6 +312,7 @@ export const getWorkflow = (deps: WorkflowDeps): Workflow => {
     title: 'Observability',
     style: 'project',
     icon: 'logoObservability',
+    homePage: 'observabilityOnboarding',
     navigation: createSideNavComponent(deps),
   };
 };

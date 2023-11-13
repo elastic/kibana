@@ -701,6 +701,7 @@ export const getWorkflow = (deps: WorkflowDeps): Workflow => {
     title: 'Security',
     style: 'project',
     icon: 'logoSecurity',
+    homePage: 'securitySolutionUI:get_started',
     navigation: createSideNavComponent(deps),
   };
 };
