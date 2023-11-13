@@ -203,7 +203,7 @@ export default function AlertDetailsRelatedEvents({
                   metricField={relatedMetric}
                   emptyState={emptyState}
                   onChange={onChangePointDataChange}
-                  style={{ marginTop: 10 }}
+                  relatedEventsStyle={{ 'margin-top': '10px' }}
                   lastReloadRequestTime={lastReloadRequestTime}
                   relatedEventsFilter={relatedEventsFilter}
                 />

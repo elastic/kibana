@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -46,11 +46,8 @@ export interface EmbeddableChangePointChartProps {
    * Last reload request time, can be used for manual reload
    */
   lastReloadRequestTime?: number;
-  /*
-   * Style the chart embeddable
-   */
-  style?: CSSProperties;
   relatedEventsFilter?: Array<RelatedEventsFilter | null>;
+  relatedEventsStyle?: Record<string, string>;
 }
 
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {

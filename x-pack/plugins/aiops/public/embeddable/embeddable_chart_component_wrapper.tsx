@@ -101,8 +101,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               onError={onError}
               onChange={input.onChange}
               emptyState={input.emptyState}
-              style={input.style}
               relatedEventsFilter={input.relatedEventsFilter}
+              relatedEventsStyle={input.relatedEventsStyle}
             />
           </FilterQueryContextProvider>
         </ChangePointDetectionControlsContextProvider>
@@ -139,8 +139,8 @@ export const ChartGridEmbeddableWrapper: FC<
   onRenderComplete,
   onChange,
   emptyState,
-  style,
   relatedEventsFilter,
+  relatedEventsStyle,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -248,7 +248,7 @@ export const ChartGridEmbeddableWrapper: FC<
     >
       {changePoints.length > 0 ? (
         <ChartsGrid
-          style={style}
+          relatedEventsStyle={relatedEventsStyle}
           changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
           interval={requestParams.interval}
           onRenderComplete={onRenderComplete}
