@@ -315,7 +315,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       try {
         syncContext.startLoading(dataRequestId, requestToken, requestMeta);
         const warnings: SearchResponseWarning[] = [];
-        const isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
+        isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
           await this.getDisplayName(),
           requestMeta,
           syncContext.registerCancelCallback.bind(null, requestToken),
