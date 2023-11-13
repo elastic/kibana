@@ -72,7 +72,6 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_TRUSTED_APPLICATION
           );
-          tlog(logger, `Trusted Apps: ${trustedAppsJson}`);
           count += trustedAppsJson.length;
 
           const batches = batchTelemetryRecords(trustedAppsJson, maxTelemetryBatch);
