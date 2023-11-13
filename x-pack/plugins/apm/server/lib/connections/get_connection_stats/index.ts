@@ -9,6 +9,8 @@ import { ValuesType } from 'utility-types';
 import { merge } from 'lodash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { joinByKey } from '../../../../common/utils/join_by_key';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { getStats } from './get_stats';
 import { getDestinationMap } from './get_destination_map';
 import { calculateThroughputWithRange } from '../../helpers/calculate_throughput';
@@ -23,6 +25,8 @@ export function getConnectionStats({
   filter,
   collapseBy,
   offset,
+  documentType,
+  rollupInterval,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -31,6 +35,8 @@ export function getConnectionStats({
   filter: QueryDslQueryContainer[];
   collapseBy: 'upstream' | 'downstream';
   offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
 }) {
   return withApmSpan('get_connection_stats_and_map', async () => {
     const [allMetrics, destinationMap] = await Promise.all([
@@ -41,6 +47,8 @@ export function getConnectionStats({
         filter,
         numBuckets,
         offset,
+        documentType,
+        rollupInterval,
       }),
       getDestinationMap({
         apmEventClient,

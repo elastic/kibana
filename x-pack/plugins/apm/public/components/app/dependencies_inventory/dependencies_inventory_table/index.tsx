@@ -16,6 +16,8 @@ import { useFetcher } from '../../../../hooks/use_fetcher';
 import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
+import { ApmDocumentType } from '../../../../../common/document_type';
+import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 
 export function DependenciesInventoryTable() {
   const {
@@ -33,9 +35,17 @@ export function DependenciesInventoryTable() {
 
   const trackEvent = useUiTracker();
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.ServiceTransactionMetric,
+    numBuckets: 20,
+  });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end) {
+      if (!start || !end || !preferred) {
         return;
       }
 
@@ -51,11 +61,13 @@ export function DependenciesInventoryTable() {
                 ? offset
                 : undefined,
             kuery,
+            documentType: preferred.source.documentType,
+            rollupInterval: preferred.source.rollupInterval,
           },
         },
       });
     },
-    [start, end, environment, offset, kuery, comparisonEnabled]
+    [start, end, environment, offset, kuery, comparisonEnabled, preferred]
   );
 
   const dependencies =

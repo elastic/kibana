@@ -9,7 +9,6 @@ import { sum } from 'lodash';
 import objectHash from 'object-hash';
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
@@ -28,6 +27,8 @@ import {
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { EventOutcome } from '../../../../common/event_outcome';
 import { NodeType } from '../../../../common/connections';
+import { ApmServiceTransactionDocumentType } from '../../../../common/document_type';
+import { RollupInterval } from '../../../../common/rollup';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
 import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
@@ -39,6 +40,8 @@ export const getStats = async ({
   filter,
   numBuckets,
   offset,
+  documentType,
+  rollupInterval,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -46,6 +49,8 @@ export const getStats = async ({
   filter: QueryDslQueryContainer[];
   numBuckets: number;
   offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
 }) => {
   const { offsetInMs, startWithOffset, endWithOffset } = getOffsetInMs({
     start,
@@ -55,7 +60,12 @@ export const getStats = async ({
 
   const response = await apmEventClient.search('get_connection_stats', {
     apm: {
-      events: [ProcessorEvent.metric],
+      sources: [
+        {
+          documentType,
+          rollupInterval,
+        },
+      ],
     },
     body: {
       track_total_hits: true,

@@ -5,11 +5,13 @@
  * 2.0.
  */
 import React from 'react';
+import { ApmDocumentType } from '../../../../common/document_type';
 import { getVizColorForIndex } from '../../../../common/viz_colors';
 import { Coordinate, TimeSeries } from '../../../../typings/timeseries';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useFetcher } from '../../../hooks/use_fetcher';
+import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { BreakdownChart } from '../../shared/charts/breakdown_chart';
 
@@ -26,26 +28,38 @@ export function ServiceDependenciesBreakdownChart({
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
+  const preferred = usePreferredDataSourceAndBucketSize({
+    start,
+    end,
+    kuery,
+    type: ApmDocumentType.ServiceTransactionMetric,
+    numBuckets: 20,
+  });
+
   const { data, status } = useFetcher(
     (callApmApi) => {
-      return callApmApi(
-        'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
-        {
-          params: {
-            path: {
-              serviceName,
+      if (preferred) {
+        return callApmApi(
+          'GET /internal/apm/services/{serviceName}/dependencies/breakdown',
+          {
+            params: {
+              path: {
+                serviceName,
+              },
+              query: {
+                start,
+                end,
+                kuery,
+                environment,
+                documentType: preferred.source.documentType,
+                rollupInterval: preferred.source.rollupInterval,
+              },
             },
-            query: {
-              start,
-              end,
-              kuery,
-              environment,
-            },
-          },
-        }
-      );
+          }
+        );
+      }
     },
-    [serviceName, start, end, kuery, environment]
+    [serviceName, start, end, kuery, environment, preferred]
   );
 
   const timeseries: Array<TimeSeries<Coordinate>> =

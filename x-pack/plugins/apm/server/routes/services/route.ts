@@ -806,6 +806,7 @@ export const serviceDependenciesRoute = createApmServerRoute({
       environmentRt,
       rangeRt,
       offsetRt,
+      serviceTransactionDataSourceRt,
     ]),
   }),
   options: {
@@ -817,7 +818,15 @@ export const serviceDependenciesRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, numBuckets, start, end, offset } = params.query;
+    const {
+      environment,
+      numBuckets,
+      start,
+      end,
+      offset,
+      documentType,
+      rollupInterval,
+    } = params.query;
 
     return {
       serviceDependencies: await getServiceDependencies({
@@ -828,6 +837,8 @@ export const serviceDependenciesRoute = createApmServerRoute({
         environment,
         numBuckets,
         offset,
+        documentType,
+        rollupInterval,
       }),
     };
   },
@@ -839,7 +850,12 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
     path: t.type({
       serviceName: t.string,
     }),
-    query: t.intersection([environmentRt, rangeRt, kueryRt]),
+    query: t.intersection([
+      environmentRt,
+      rangeRt,
+      kueryRt,
+      serviceTransactionDataSourceRt,
+    ]),
   }),
   options: {
     tags: ['access:apm'],
@@ -852,7 +868,8 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
     const apmEventClient = await getApmEventClient(resources);
     const { params } = resources;
     const { serviceName } = params.path;
-    const { environment, start, end, kuery } = params.query;
+    const { environment, start, end, kuery, documentType, rollupInterval } =
+      params.query;
 
     const breakdown = await getServiceDependenciesBreakdown({
       apmEventClient,
@@ -861,6 +878,8 @@ export const serviceDependenciesBreakdownRoute = createApmServerRoute({
       serviceName,
       environment,
       kuery,
+      documentType,
+      rollupInterval,
     });
 
     return {

@@ -7,7 +7,9 @@
 
 import { kqlQuery } from '@kbn/observability-plugin/server';
 import { ConnectionStats, Node } from '../../../common/connections';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
 import { SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../common/es_fields/apm';
+import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
@@ -22,6 +24,8 @@ interface Options {
   kuery: string;
   environment: string;
   offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
 }
 
 async function getUpstreamServicesForDependencyForTimeRange({
@@ -33,6 +37,8 @@ async function getUpstreamServicesForDependencyForTimeRange({
   kuery,
   environment,
   offset,
+  documentType,
+  rollupInterval,
 }: Options) {
   const statsItems = await getConnectionStats({
     apmEventClient,
@@ -46,6 +52,8 @@ async function getUpstreamServicesForDependencyForTimeRange({
     collapseBy: 'upstream',
     numBuckets,
     offset,
+    documentType,
+    rollupInterval,
   });
 
   return getConnectionStatsItemsWithRelativeImpact(statsItems);

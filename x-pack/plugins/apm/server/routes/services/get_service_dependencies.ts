@@ -8,6 +8,8 @@
 import { ConnectionStatsItemWithImpact } from '../../../common/connections';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
+import { RollupInterval } from '../../../common/rollup';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
@@ -20,6 +22,8 @@ interface Options {
   numBuckets: number;
   environment: string;
   offset?: string;
+  documentType: ApmServiceTransactionDocumentType;
+  rollupInterval: RollupInterval;
 }
 
 async function getServiceDependenciesForTimeRange({
@@ -30,6 +34,8 @@ async function getServiceDependenciesForTimeRange({
   numBuckets,
   environment,
   offset,
+  documentType,
+  rollupInterval,
 }: Options) {
   const statsItems = await getConnectionStats({
     apmEventClient,
@@ -42,6 +48,8 @@ async function getServiceDependenciesForTimeRange({
     ],
     offset,
     collapseBy: 'downstream',
+    documentType,
+    rollupInterval,
   });
 
   return getConnectionStatsItemsWithRelativeImpact(statsItems);
