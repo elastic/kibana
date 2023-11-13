@@ -145,7 +145,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body?.execution_summary?.last_execution?.status).toBe('succeeded');
       });
 
-      it('expects an updated rule with a webhook action and meta field runs successfully', async () => {
+      it('@skipInQA expects an updated rule with a webhook action and meta field runs successfully', async () => {
         const webhookAction = await createWebHookRuleAction(supertest);
 
         await supertest
