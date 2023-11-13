@@ -309,7 +309,7 @@ export function XYChart({
   };
 
   const [showVeil, setShowVeil] = useState(false);
-  const currentDimensions = useRef(dimensions);
+  const currentDimensions = useRef<typeof dimensions>();
 
   if (!fastIsEqual(dimensions, currentDimensions.current)) {
     // If the dimensions have changed we request new dimensions from the client
