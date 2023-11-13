@@ -7,7 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 import { ALERT_REASON, ALERT_ACTION_GROUP, ALERT_EVALUATION_VALUES } from '@kbn/rule-data-utils';
-import { first, get } from 'lodash';
 import {
   ActionGroup,
   ActionGroupIdsOf,
@@ -17,6 +16,7 @@ import {
 import { Alert, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { first, get } from 'lodash';
 import { getOriginalActionGroup } from '../../../utils/get_original_action_group';
 import { AlertStates, InventoryMetricThresholdParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';

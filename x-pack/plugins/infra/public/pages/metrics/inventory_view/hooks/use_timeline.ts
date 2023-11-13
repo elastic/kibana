@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { first } from 'lodash';
 import { useEffect, useMemo } from 'react';
 import type { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { first } from 'lodash';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import { useSnapshot } from './use_snaphot';

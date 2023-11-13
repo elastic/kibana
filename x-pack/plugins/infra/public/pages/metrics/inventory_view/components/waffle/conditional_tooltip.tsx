@@ -7,13 +7,13 @@
 
 import React, { useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, useEuiTheme } from '@elastic/eui';
-import { first } from 'lodash';
 import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import {
   InventoryItemType,
   SnapshotMetricType,
   SnapshotMetricTypeRT,
 } from '@kbn/metrics-data-access-plugin/common';
+import { first } from 'lodash';
 import { getCustomMetricLabel } from '../../../../../../common/formatters/get_custom_metric_label';
 import { SnapshotCustomMetricInput } from '../../../../../../common/http_api';
 import { useSourceContext } from '../../../../../containers/metrics_source';

@@ -112,42 +112,57 @@ function getEnabledFtrConfigs(patterns?: string[]) {
     if (!isObj(configs)) {
       throw new Error('expected yaml file to parse to an object');
     }
-    if (!configs.enabled) {
-      throw new Error('expected yaml file to have an "enabled" key');
-    }
-    if (
-      !Array.isArray(configs.enabled) ||
-      !configs.enabled.every(
-        (p): p is string | { [configPath: string]: { queue: string } } =>
-          typeof p === 'string' ||
-          (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
-      )
-    ) {
-      throw new Error(`expected "enabled" value to be an array of strings or objects shaped as:\n
-  - {configPath}:
-      queue: {queueName}`);
-    }
+
     if (typeof configs.defaultQueue !== 'string') {
       throw new Error('expected yaml file to have a string "defaultQueue" key');
     }
-
     const defaultQueue = configs.defaultQueue;
     const ftrConfigsByQueue = new Map<string, string[]>();
-    for (const enabled of configs.enabled) {
-      const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
-      const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
 
-      if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
-        continue;
+    const enabledKeys = [
+      'enabled_stateful',
+      'enabled_serverless_search',
+      'enabled_serverless_security',
+      'enabled_serverless_observability',
+    ];
+    enabledKeys.forEach((key) => {
+      const enabledEntries = configs[key];
+      if (!enabledEntries) {
+        throw new Error(`expected yaml file to have an ${key} key`);
+      }
+      if (
+        !Array.isArray(enabledEntries) ||
+        !enabledEntries.every(
+          (p): p is string | { [configPath: string]: { queue: string } } =>
+            typeof p === 'string' ||
+            (isObj(p) && Object.values(p).every((v) => isObj(v) && typeof v.queue === 'string'))
+        )
+      ) {
+        throw new Error(`expected ${key} value to be an array of strings or objects shaped as:\n
+    - {configPath}:
+        queue: {queueName}`);
       }
 
-      const group = ftrConfigsByQueue.get(queue);
-      if (group) {
-        group.push(path);
-      } else {
-        ftrConfigsByQueue.set(queue, [path]);
+      if (typeof configs.defaultQueue !== 'string') {
+        throw new Error('expected yaml file to have a string "defaultQueue" key');
       }
-    }
+
+      for (const enabled of enabledEntries) {
+        const path = typeof enabled === 'string' ? enabled : Object.keys(enabled)[0];
+        const queue = isObj(enabled) ? enabled[path].queue : defaultQueue;
+
+        if (patterns && !patterns.some((pattern) => minimatch(path, pattern))) {
+          continue;
+        }
+
+        const group = ftrConfigsByQueue.get(queue);
+        if (group) {
+          group.push(path);
+        } else {
+          ftrConfigsByQueue.set(queue, [path]);
+        }
+      }
+    });
 
     return { defaultQueue, ftrConfigsByQueue };
   } catch (_) {
