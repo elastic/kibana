@@ -462,10 +462,11 @@ export class AbstractLayer implements ILayer {
         title: getWarningsTitle(dataRequestWarnings),
         body: (
           <>
-            <p>
-              {getWarningsDescription(dataRequestWarnings)}
-            </p>
-            <ViewDetailsPopover warnings={dataRequestWarnings}/>
+            {i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerWarning', {
+              defaultMessage: `Layer had issues returning data and results might be incomplete.`,
+            })}
+            {' '}
+            <ViewDetailsPopover displayAsLink={true} warnings={dataRequestWarnings}/>
           </>
         ),
       });
