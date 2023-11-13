@@ -23,6 +23,7 @@ import { streamFactory } from '@kbn/ml-response-stream/server';
 import type {
   SignificantTerm,
   SignificantTermGroup,
+  SignificantTermHistogramItem,
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
@@ -44,8 +45,11 @@ import {
   resetGroupsAction,
   updateLoadingStateAction,
   AiopsLogRateAnalysisApiAction,
-  type AiopsLogRateAnalysisSchema,
-} from '../../../common/api/log_rate_analysis';
+} from '../../../common/api/log_rate_analysis/actions';
+import type {
+  AiopsLogRateAnalysisSchema,
+  AiopsLogRateAnalysisApiVersion as ApiVersion,
+} from '../../../common/api/log_rate_analysis/schema';
 import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
@@ -74,16 +78,16 @@ const PROGRESS_STEP_GROUPING = 0.1;
 const PROGRESS_STEP_HISTOGRAMS = 0.1;
 const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
 
-export const routeHandlerFactory: (
+export function routeHandlerFactory<T extends ApiVersion>(
+  version: T,
   license: AiopsLicense,
   logger: Logger,
   coreStart: CoreStart,
   usageCounter?: UsageCounter
-) => RequestHandler<unknown, unknown, AiopsLogRateAnalysisSchema> =
-  (license, logger, coreStart, usageCounter) =>
-  async (
+): RequestHandler<unknown, unknown, AiopsLogRateAnalysisSchema<T>> {
+  return async (
     context: RequestHandlerContext,
-    request: KibanaRequest<unknown, unknown, AiopsLogRateAnalysisSchema>,
+    request: KibanaRequest<unknown, unknown, AiopsLogRateAnalysisSchema<T>>,
     response: KibanaResponseFactory
   ) => {
     const { headers } = request;
@@ -135,7 +139,7 @@ export const routeHandlerFactory: (
         end: streamEnd,
         push,
         responseWithHeaders,
-      } = streamFactory<AiopsLogRateAnalysisApiAction>(
+      } = streamFactory<AiopsLogRateAnalysisApiAction<T>>(
         request.headers,
         logger,
         request.body.compressResponse,
@@ -288,11 +292,27 @@ export const routeHandlerFactory: (
           // This will store the combined count of detected significant log patterns and keywords
           let fieldValuePairsCount = 0;
 
-          const significantCategories: SignificantTerm[] = request.body.overrides?.significantTerms
-            ? request.body.overrides?.significantTerms.filter(
+          const significantCategories: SignificantTerm[] = [];
+
+          if (version === '1') {
+            significantCategories.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'1'>
+              ).overrides?.significantTerms?.filter(
                 (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
-              )
-            : [];
+              ) ?? [])
+            );
+          }
+
+          if (version === '2') {
+            significantCategories.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'2'>
+              ).overrides?.significantItems?.filter(
+                (d) => d.type === SIGNIFICANT_TERM_TYPE.LOG_PATTERN
+              ) ?? [])
+            );
+          }
 
           // Get significant categories of text fields
           if (textFieldCandidates.length > 0) {
@@ -309,15 +329,31 @@ export const routeHandlerFactory: (
             );
 
             if (significantCategories.length > 0) {
-              push(addSignificantTermsAction(significantCategories));
+              push(addSignificantTermsAction(significantCategories, version));
             }
           }
 
-          const significantTerms: SignificantTerm[] = request.body.overrides?.significantTerms
-            ? request.body.overrides?.significantTerms.filter(
+          const significantTerms: SignificantTerm[] = [];
+
+          if (version === '1') {
+            significantTerms.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'1'>
+              ).overrides?.significantTerms?.filter(
                 (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
-              )
-            : [];
+              ) ?? [])
+            );
+          }
+
+          if (version === '2') {
+            significantTerms.push(
+              ...((
+                request.body as AiopsLogRateAnalysisSchema<'2'>
+              ).overrides?.significantItems?.filter(
+                (d) => d.type === SIGNIFICANT_TERM_TYPE.KEYWORD
+              ) ?? [])
+            );
+          }
 
           const fieldsToSample = new Set<string>();
 
@@ -375,7 +411,7 @@ export const routeHandlerFactory: (
               });
               significantTerms.push(...pValues);
 
-              push(addSignificantTermsAction(pValues));
+              push(addSignificantTermsAction(pValues, version));
             }
 
             push(
@@ -546,7 +582,7 @@ export const routeHandlerFactory: (
                 const maxItems = Math.max(...significantTermGroups.map((g) => g.group.length));
 
                 if (maxItems > 1) {
-                  push(addSignificantTermsGroupAction(significantTermGroups));
+                  push(addSignificantTermsGroupAction(significantTermGroups, version));
                 }
 
                 loaded += PROGRESS_STEP_GROUPING;
@@ -608,28 +644,41 @@ export const routeHandlerFactory: (
                       }
                       return;
                     }
-                    const histogram =
+                    const histogram: SignificantTermHistogramItem[] =
                       overallTimeSeries.data.map((o) => {
                         const current = cpgTimeSeries.data.find(
                           (d1) => d1.key_as_string === o.key_as_string
                         ) ?? {
                           doc_count: 0,
                         };
+
+                        if (version === '1') {
+                          return {
+                            key: o.key,
+                            key_as_string: o.key_as_string ?? '',
+                            doc_count_significant_term: current.doc_count,
+                            doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                          };
+                        }
+
                         return {
                           key: o.key,
                           key_as_string: o.key_as_string ?? '',
-                          doc_count_significant_term: current.doc_count,
+                          doc_count_significant_item: current.doc_count,
                           doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                         };
                       }) ?? [];
 
                     push(
-                      addSignificantTermsGroupHistogramAction([
-                        {
-                          id: cpg.id,
-                          histogram,
-                        },
-                      ])
+                      addSignificantTermsGroupHistogramAction(
+                        [
+                          {
+                            id: cpg.id,
+                            histogram,
+                          },
+                        ],
+                        version
+                      )
                     );
                   }
                 }, MAX_CONCURRENT_QUERIES);
@@ -710,17 +759,26 @@ export const routeHandlerFactory: (
                   return;
                 }
 
-                const histogram =
+                const histogram: SignificantTermHistogramItem[] =
                   overallTimeSeries.data.map((o) => {
                     const current = cpTimeSeries.data.find(
                       (d1) => d1.key_as_string === o.key_as_string
                     ) ?? {
                       doc_count: 0,
                     };
+                    if (version === '1') {
+                      return {
+                        key: o.key,
+                        key_as_string: o.key_as_string ?? '',
+                        doc_count_significant_term: current.doc_count,
+                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                      };
+                    }
+
                     return {
                       key: o.key,
                       key_as_string: o.key_as_string ?? '',
-                      doc_count_significant_term: current.doc_count,
+                      doc_count_significant_item: current.doc_count,
                       doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                     };
                   }) ?? [];
@@ -730,13 +788,16 @@ export const routeHandlerFactory: (
                 loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
                 pushHistogramDataLoadingState();
                 push(
-                  addSignificantTermsHistogramAction([
-                    {
-                      fieldName,
-                      fieldValue,
-                      histogram,
-                    },
-                  ])
+                  addSignificantTermsHistogramAction(
+                    [
+                      {
+                        fieldName,
+                        fieldValue,
+                        histogram,
+                      },
+                    ],
+                    version
+                  )
                 );
               }
             }, MAX_CONCURRENT_QUERIES);
@@ -802,17 +863,27 @@ export const routeHandlerFactory: (
                 return;
               }
 
-              const histogram =
+              const histogram: SignificantTermHistogramItem[] =
                 overallTimeSeries.data.map((o) => {
                   const current = catTimeSeries.data.find(
                     (d1) => d1.key_as_string === o.key_as_string
                   ) ?? {
                     doc_count: 0,
                   };
+
+                  if (version === '1') {
+                    return {
+                      key: o.key,
+                      key_as_string: o.key_as_string ?? '',
+                      doc_count_significant_term: current.doc_count,
+                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
+                    };
+                  }
+
                   return {
                     key: o.key,
                     key_as_string: o.key_as_string ?? '',
-                    doc_count_significant_term: current.doc_count,
+                    doc_count_significant_item: current.doc_count,
                     doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
                   };
                 }) ?? [];
@@ -822,13 +893,16 @@ export const routeHandlerFactory: (
               loaded += (1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS;
               pushHistogramDataLoadingState();
               push(
-                addSignificantTermsHistogramAction([
-                  {
-                    fieldName,
-                    fieldValue,
-                    histogram,
-                  },
-                ])
+                addSignificantTermsHistogramAction(
+                  [
+                    {
+                      fieldName,
+                      fieldValue,
+                      histogram,
+                    },
+                  ],
+                  version
+                )
               );
             }
           }
@@ -849,3 +923,4 @@ export const routeHandlerFactory: (
       return response.ok(responseWithHeaders);
     });
   };
+}

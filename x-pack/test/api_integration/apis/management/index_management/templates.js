@@ -25,7 +25,8 @@ export default function ({ getService }) {
     cleanUpTemplates,
   } = registerHelpers({ supertest });
 
-  describe('index templates', () => {
+  // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/170980
+  describe.skip('index templates', () => {
     after(() => Promise.all([cleanUpEsResources(), cleanUpTemplates()]));
 
     describe('get all', () => {

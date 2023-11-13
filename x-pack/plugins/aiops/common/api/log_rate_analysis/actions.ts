@@ -12,10 +12,24 @@ import type {
   SignificantTermGroupHistogram,
 } from '@kbn/ml-agg-utils';
 
+import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from './schema';
+
 export const API_ACTION_NAME = {
+  /** @since API v2 */
+  ADD_SIGNIFICANT_ITEMS: 'add_significant_items',
+  /** @since API v2 */
+  ADD_SIGNIFICANT_ITEMS_HISTOGRAM: 'add_significant_items_histogram',
+  /** @since API v2 */
+  ADD_SIGNIFICANT_ITEMS_GROUP: 'add_significant_items_group',
+  /** @since API v2 */
+  ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM: 'add_significant_items_group_histogram',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS: 'add_significant_terms',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS_HISTOGRAM: 'add_significant_terms_histogram',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS_GROUP: 'add_significant_terms_group',
+  /** @deprecated since API v2 */
   ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM: 'add_significant_terms_group_histogram',
   ADD_ERROR: 'add_error',
   PING: 'ping',
@@ -26,60 +40,108 @@ export const API_ACTION_NAME = {
 } as const;
 export type ApiActionName = typeof API_ACTION_NAME[keyof typeof API_ACTION_NAME];
 
-interface ApiActionAddSignificantTerms {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS;
+interface ApiActionAddSignificantTerms<T extends ApiVersion> {
+  type: T extends '1'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS
+    : T extends '2'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS
+    : never;
   payload: SignificantTerm[];
 }
 
-export function addSignificantTermsAction(
-  payload: ApiActionAddSignificantTerms['payload']
-): ApiActionAddSignificantTerms {
+export function addSignificantTermsAction<T extends ApiVersion>(
+  payload: ApiActionAddSignificantTerms<T>['payload'],
+  version: T
+): ApiActionAddSignificantTerms<T> {
+  if (version === '1') {
+    return {
+      type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS,
+      payload,
+    } as ApiActionAddSignificantTerms<T>;
+  }
+
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS,
     payload,
-  };
+  } as ApiActionAddSignificantTerms<T>;
 }
 
-interface ApiActionAddSignificantTermsHistogram {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM;
+interface ApiActionAddSignificantTermsHistogram<T extends ApiVersion> {
+  type: T extends '1'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM
+    : T extends '2'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM
+    : never;
   payload: SignificantTermHistogram[];
 }
 
-export function addSignificantTermsHistogramAction(
-  payload: ApiActionAddSignificantTermsHistogram['payload']
-): ApiActionAddSignificantTermsHistogram {
+export function addSignificantTermsHistogramAction<T extends ApiVersion>(
+  payload: ApiActionAddSignificantTermsHistogram<T>['payload'],
+  version: T
+): ApiActionAddSignificantTermsHistogram<T> {
+  if (version === '1') {
+    return {
+      type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM,
+      payload,
+    } as ApiActionAddSignificantTermsHistogram<T>;
+  }
+
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_HISTOGRAM,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_HISTOGRAM,
     payload,
-  };
+  } as ApiActionAddSignificantTermsHistogram<T>;
 }
 
-interface ApiActionAddSignificantTermsGroup {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP;
+interface ApiActionAddSignificantTermsGroup<T extends ApiVersion> {
+  type: T extends '1'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP
+    : T extends '2'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP
+    : never;
   payload: SignificantTermGroup[];
 }
 
-export function addSignificantTermsGroupAction(
-  payload: ApiActionAddSignificantTermsGroup['payload']
-) {
+export function addSignificantTermsGroupAction<T extends ApiVersion>(
+  payload: ApiActionAddSignificantTermsGroup<T>['payload'],
+  version: T
+): ApiActionAddSignificantTermsGroup<T> {
+  if (version === '1') {
+    return {
+      type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP,
+      payload,
+    } as ApiActionAddSignificantTermsGroup<T>;
+  }
+
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP,
     payload,
-  };
+  } as ApiActionAddSignificantTermsGroup<T>;
 }
 
-interface ApiActionAddSignificantTermsGroupHistogram {
-  type: typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM;
+interface ApiActionAddSignificantTermsGroupHistogram<T extends ApiVersion> {
+  type: T extends '1'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM
+    : T extends '2'
+    ? typeof API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM
+    : never;
   payload: SignificantTermGroupHistogram[];
 }
 
-export function addSignificantTermsGroupHistogramAction(
-  payload: ApiActionAddSignificantTermsGroupHistogram['payload']
-): ApiActionAddSignificantTermsGroupHistogram {
+export function addSignificantTermsGroupHistogramAction<T extends ApiVersion>(
+  payload: ApiActionAddSignificantTermsGroupHistogram<T>['payload'],
+  version: T
+): ApiActionAddSignificantTermsGroupHistogram<T> {
+  if (version === '1') {
+    return {
+      type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM,
+      payload,
+    } as ApiActionAddSignificantTermsGroupHistogram<T>;
+  }
+
   return {
-    type: API_ACTION_NAME.ADD_SIGNIFICANT_TERMS_GROUP_HISTOGRAM,
+    type: API_ACTION_NAME.ADD_SIGNIFICANT_ITEMS_GROUP_HISTOGRAM,
     payload,
-  };
+  } as ApiActionAddSignificantTermsGroupHistogram<T>;
 }
 
 interface ApiActionAddError {
@@ -148,11 +210,11 @@ export function updateLoadingStateAction(
   };
 }
 
-export type AiopsLogRateAnalysisApiAction =
-  | ApiActionAddSignificantTerms
-  | ApiActionAddSignificantTermsGroup
-  | ApiActionAddSignificantTermsHistogram
-  | ApiActionAddSignificantTermsGroupHistogram
+export type AiopsLogRateAnalysisApiAction<T extends ApiVersion> =
+  | ApiActionAddSignificantTerms<T>
+  | ApiActionAddSignificantTermsGroup<T>
+  | ApiActionAddSignificantTermsHistogram<T>
+  | ApiActionAddSignificantTermsGroupHistogram<T>
   | ApiActionAddError
   | ApiActionPing
   | ApiActionResetAll
