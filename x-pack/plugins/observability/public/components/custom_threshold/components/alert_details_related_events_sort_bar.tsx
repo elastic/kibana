@@ -79,7 +79,7 @@ export function RelatedEventsSortBar({ loading, onChangeSort }: RelatedEventsSor
         panelPaddingSize="none"
         anchorPosition="downCenter"
       >
-        <div style={{ width: 150 }}>
+        <div style={{ width: 180 }}>
           <EuiPopoverTitle paddingSize="s">
             {i18n.translate('xpack.observability.related.events.sortBy', {
               defaultMessage: 'Sort by',

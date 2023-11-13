@@ -172,7 +172,7 @@ export default function AlertDetailsRelatedEvents({
       <>
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
-          <EuiFlexItem grow={true} style={{ maxWidth: 150 }}>
+          <EuiFlexItem grow={true} style={{ maxWidth: 180 }}>
             <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
           </EuiFlexItem>
           <EuiButton
