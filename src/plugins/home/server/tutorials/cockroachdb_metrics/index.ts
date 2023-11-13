@@ -57,7 +57,9 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: context.staticAssets.getPluginAssetHref('/cockroachdb_metrics/screenshot.webp'),
+    previewImagePath: context.staticAssets.getPluginAssetHref(
+      '/cockroachdb_metrics/screenshot.webp'
+    ),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
