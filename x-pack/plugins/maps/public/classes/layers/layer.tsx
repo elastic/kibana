@@ -17,6 +17,7 @@ import { EuiIcon } from '@elastic/eui';
 import { v4 as uuidv4 } from 'uuid';
 import { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
+import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
 import {
   LAYER_TYPE,
   MAX_ZOOM,
@@ -445,9 +446,9 @@ export class AbstractLayer implements ILayer {
       return true;
     }
 
-    // TODO check for warnings in tile meta features
-
-    return false;
+    return this._isTiled()
+      ? this._getTileMetaFeatures().some(hasIncompleteResults)
+      : false;
   }
 
   getWarnings(): LayerMessage[] {
@@ -474,7 +475,12 @@ export class AbstractLayer implements ILayer {
       });
     }
 
-    // TODO get warnings from tile meta features
+    if (this._isTiled() && this._getTileMetaFeatures().some(hasIncompleteResults)) {
+      warningMessages.push({
+        title: '',
+        body: INCOMPLETE_RESULTS_WARNING,
+      });
+    }
 
     return warningMessages;
   }
