@@ -41,7 +41,6 @@ import { OVERVIEW_CASE_DESCRIPTION, OVERVIEW_CASE_NAME } from '../../../screens/
 import { goToCaseDetails, goToCreateNewCase } from '../../../tasks/all_cases';
 import { createTimeline } from '../../../tasks/api_calls/timelines';
 import { openCaseTimeline } from '../../../tasks/case_details';
-import { cleanKibana } from '../../../tasks/common';
 import {
   attachTimeline,
   backToCases,
@@ -58,7 +57,6 @@ import { ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
     createTimeline(getCase1().timeline).then((response) =>
       cy
         .wrap({

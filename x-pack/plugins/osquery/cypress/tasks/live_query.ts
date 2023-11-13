@@ -25,10 +25,10 @@ export const selectAllAgents = () => {
 };
 
 export const clearInputQuery = () =>
-  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
+  cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.get(LIVE_QUERY_EDITOR).type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).type(query, options);
 
 export const inputQueryInFlyout = (
   query: string,
@@ -57,7 +57,7 @@ export const typeInECSFieldInput = (text: string, index = 0) =>
   cy.getBySel('ECS-field-input').eq(index).type(text);
 export const typeInOsqueryFieldInput = (text: string, index = 0) =>
   cy
-    .react('OsqueryColumnFieldComponent')
+    .getBySel('osqueryColumnValueSelect')
     .eq(index)
     .within(() => {
       cy.getBySel('comboBoxInput').type(text);
@@ -74,10 +74,6 @@ export const getOsqueryFieldTypes = (value: 'Osquery value' | 'Static value', in
   }
 };
 
-export const findFormFieldByRowsLabelAndType = (label: string, text: string) => {
-  cy.react('EuiFormRow', { props: { label } }).type(`${text}{downArrow}{enter}`);
-};
-
 export const deleteAndConfirm = (type: string) => {
   cy.get('span').contains(`Delete ${type}`).click();
   cy.contains(`Are you sure you want to delete this ${type}?`);
@@ -86,10 +82,6 @@ export const deleteAndConfirm = (type: string) => {
     .first()
     .contains('Successfully deleted')
     .contains(type);
-};
-
-export const findAndClickButton = (text: string) => {
-  cy.react('EuiButton').contains(text).click();
 };
 
 export const toggleRuleOffAndOn = (ruleName: string) => {
@@ -120,8 +112,8 @@ export const addToCase = (caseId: string) => {
 };
 
 export const addLiveQueryToCase = (actionId: string, caseId: string) => {
-  cy.react('ActionsTableComponent').within(() => {
-    cy.getBySel(`row-${actionId}`).react('ActionTableResultsButton').click();
+  cy.getBySel(`row-${actionId}`).within(() => {
+    cy.get('[aria-label="Details"]').click();
   });
   cy.contains('Live query details');
   addToCase(caseId);

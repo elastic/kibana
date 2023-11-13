@@ -19,7 +19,15 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; title: string; } & React.RefAttributes<{}>>"
+          "[]; title: string; } & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/index.ts",
         "deprecated": false,
@@ -51,7 +59,15 @@
         "label": "ObservabilityAIAssistantActionMenuItem",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/index.ts",
         "deprecated": false,
