@@ -8,10 +8,10 @@
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { StartServicesAccessor } from '@kbn/core/server';
-import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../common/constants';
+import { RISK_ENGINE_PRIVILEGES_URL, APP_ID } from '../../../../../common/constants';
 
-import type { StartPlugins } from '../../../plugin';
-import type { SecuritySolutionPluginRouter } from '../../../types';
+import type { StartPlugins } from '../../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { getUserRiskEnginePrivileges } from '../get_user_risk_engine_privileges';
 
 export const riskEnginePrivilegesRoute = (

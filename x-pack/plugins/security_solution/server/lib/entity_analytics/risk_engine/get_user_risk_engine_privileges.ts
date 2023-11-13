@@ -12,7 +12,7 @@ import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
   RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES,
-} from '../../../common/risk_engine';
+} from '../../../../common/risk_engine';
 
 const groupByPrivilege = (
   privileges: Array<{

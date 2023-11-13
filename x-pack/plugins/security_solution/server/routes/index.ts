@@ -80,6 +80,7 @@ import {
   riskEngineInitRoute,
   riskEngineEnableRoute,
   riskEngineStatusRoute,
+  riskEnginePrivilegesRoute,
 } from '../lib/entity_analytics/risk_engine/routes';
 import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
 
