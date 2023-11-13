@@ -154,11 +154,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
 
           await PageObjects.annotationEditor.saveGroup();
-          await listingTable.clearSearchFilter();
         });
       });
 
       describe('data view switching', () => {
+        before(async () => {
+          await listingTable.clearSearchFilter();
+        });
+
         it('recovers from missing data view', async () => {
           await listingTable.clickItemLink('eventAnnotation', 'missing data view');
 
