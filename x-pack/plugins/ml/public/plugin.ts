@@ -83,7 +83,7 @@ export interface MlStartDependencies {
   dataVisualizer: DataVisualizerPluginStart;
   embeddable: EmbeddableStart;
   fieldFormats: FieldFormatsRegistry;
-  lens?: LensPublicStart;
+  lens: LensPublicStart;
   licensing: LicensingPluginStart;
   maps?: MapsStartApi;
   presentationUtil: PresentationUtilPluginStart;
@@ -262,7 +262,11 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
                     mlCapabilities.canUseMlAlerts &&
                     mlCapabilities.canGetJobs
                   ) {
-                    registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+                    registerMlAlerts(
+                      pluginsSetup.triggersActionsUi,
+                      core.getStartServices,
+                      pluginsSetup.alerting
+                    );
                   }
 
                   if (pluginsSetup.maps) {
