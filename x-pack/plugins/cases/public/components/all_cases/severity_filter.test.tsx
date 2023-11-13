@@ -18,7 +18,7 @@ describe('Severity form field', () => {
   const onChange = jest.fn();
   let appMockRender: AppMockRenderer;
   const props = {
-    selectedOptions: [],
+    selectedOptionKeys: [],
     onChange,
   };
 

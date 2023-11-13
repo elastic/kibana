@@ -24,7 +24,7 @@ interface FilterPopoverProps {
     filterId: string;
     selectedOptionKeys: string[];
   }) => void;
-  selectedOptions: string[];
+  selectedOptionKeys: string[];
   availableSolutions: string[];
 }
 
@@ -41,7 +41,7 @@ const mapToReadableSolutionName = (solution: string): Solution => {
 
 export const SolutionFilterComponent = ({
   onChange,
-  selectedOptions,
+  selectedOptionKeys,
   availableSolutions,
 }: FilterPopoverProps) => {
   const { owner } = useCasesContext();
@@ -78,7 +78,7 @@ export const SolutionFilterComponent = ({
   };
 
   const selectedOptionsInFilter =
-    selectedOptions.length === availableSolutions.length ? [] : selectedOptions;
+    selectedOptionKeys.length === availableSolutions.length ? [] : selectedOptionKeys;
 
   const renderOption = (option: EuiSelectableOption) => {
     const solution = solutions.find((solutionData) => solutionData.id === option.label) as Solution;

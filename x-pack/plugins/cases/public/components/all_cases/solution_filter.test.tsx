@@ -28,7 +28,7 @@ describe('SolutionFilter ', () => {
 
   it('renders button correctly', () => {
     const { getByTestId } = appMockRender.render(
-      <SolutionFilter onChange={onChange} selectedOptions={[]} availableSolutions={solutions} />
+      <SolutionFilter onChange={onChange} selectedOptionKeys={[]} availableSolutions={solutions} />
     );
 
     expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
@@ -43,7 +43,11 @@ describe('SolutionFilter ', () => {
 
     it('renders options correctly', async () => {
       appMockRender.render(
-        <SolutionFilter onChange={onChange} selectedOptions={[]} availableSolutions={solutions} />
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
       );
 
       expect(screen.getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
@@ -60,7 +64,11 @@ describe('SolutionFilter ', () => {
 
     it('should call onChange with selected solution id when no option selected yet', async () => {
       const { getByTestId } = appMockRender.render(
-        <SolutionFilter onChange={onChange} selectedOptions={[]} availableSolutions={solutions} />
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
       );
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
@@ -79,7 +87,7 @@ describe('SolutionFilter ', () => {
       const { getByTestId } = appMockRender.render(
         <SolutionFilter
           onChange={onChange}
-          selectedOptions={[solutions[0]]}
+          selectedOptionKeys={[solutions[0]]}
           availableSolutions={solutions}
         />
       );
@@ -105,7 +113,11 @@ describe('SolutionFilter ', () => {
 
     it('renders options correctly', async () => {
       const { getByTestId } = appMockRender.render(
-        <SolutionFilter onChange={onChange} selectedOptions={[]} availableSolutions={solutions} />
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
       );
 
       expect(getByTestId('options-filter-popover-button-owner')).toBeInTheDocument();
@@ -120,7 +132,11 @@ describe('SolutionFilter ', () => {
 
     it('should call onChange with selected solution id when no option selected yet', async () => {
       const { getByTestId } = appMockRender.render(
-        <SolutionFilter onChange={onChange} selectedOptions={[]} availableSolutions={solutions} />
+        <SolutionFilter
+          onChange={onChange}
+          selectedOptionKeys={[]}
+          availableSolutions={solutions}
+        />
       );
 
       userEvent.click(getByTestId('options-filter-popover-button-owner'));
@@ -139,7 +155,7 @@ describe('SolutionFilter ', () => {
       const { getByTestId } = appMockRender.render(
         <SolutionFilter
           onChange={onChange}
-          selectedOptions={[solutions[0]]}
+          selectedOptionKeys={[solutions[0]]}
           availableSolutions={solutions}
         />
       );
