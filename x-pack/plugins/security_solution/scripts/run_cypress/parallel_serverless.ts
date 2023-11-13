@@ -251,6 +251,39 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
   return pRetry(fetchKibanaStatusAttempt, retryOptions);
 }
 
+// Wait for Elasticsearch to be accessible
+function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise<void> {
+  const fetchEsAccessAttempt = async (attemptNum: number) => {
+    log.info(`Retry number ${attemptNum} to check if can be accessed.`);
+
+    const response = await axios.get(`${esUrl}`, {
+      headers: {
+        Authorization: `Basic ${auth}`,
+      },
+    });
+
+    if (response.status !== 200) {
+      throw new Error('Cannot access. Retrying in 20s...');
+    } else {
+      log.info('Access performed successfully');
+    }
+  };
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info(
+          `${runnerId}: The elasticsearch url is not yet reachable. A retry will be triggered soon...`
+        );
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchEsAccessAttempt, retryOptions);
+}
+
 export const cli = () => {
   run(
     async () => {
@@ -423,6 +456,9 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             // Wait until Kibana is available
             await waitForKibanaAvailable(project.kb_url, auth, id);
+
+            // Wait for Elasticsearch to be accessible
+            await waitForEsAccess(project.es_url, auth, id);
 
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
