@@ -1574,10 +1574,10 @@
     "@elastic/transport" "^8.3.3"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.5.0":
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.0.tgz#5e3988ab01dee54bace9f8c2f9e71470b26a1bfa"
-  integrity sha512-uEI8teyS3gWErlEL4mEYh0MDHms9Rp3eEHKnMMSdMtAkaa3xs60SOm3Vd0ld9sIPsyarQHrAybAw30GXVXXRjw==
+"@elastic/ems-client@8.5.1":
+  version "8.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.1.tgz#60c179e53ad81f5e26680e7e1c6cbffe4fb64aed"
+  integrity sha512-lc65i/cW6fGuRMt3pUte35sL8HxXM7TbYJwx1bHWcWn4aN3zv8i5RhPKFz+Wr/1ubfFOTrIoFYCP4h1uq2O/dQ==
   dependencies:
     "@types/geojson" "^7946.0.10"
     "@types/lru-cache" "^5.1.0"
@@ -4148,6 +4148,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dataset-quality-plugin@link:x-pack/plugins/dataset_quality":
+  version "0.0.0"
+  uid ""
+
 "@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""
@@ -4301,6 +4305,10 @@
   uid ""
 
 "@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/error-boundary-example-plugin@link:examples/error_boundary":
   version "0.0.0"
   uid ""
 
@@ -8251,7 +8259,7 @@
   resolved "https://registry.yarnpkg.com/@testim/chrome-version/-/chrome-version-1.1.3.tgz#fbb68696899d7b8c1b9b891eded9c04fe2cd5529"
   integrity sha512-g697J3WxV/Zytemz8aTuKjTGYtta9+02kva3C1xc7KXB8GdbfE1akGJIsZLyY/FSh2QrnE+fiB7vmWU3XNcb6A==
 
-"@testing-library/dom@^8.0.0", "@testing-library/dom@^8.19.0":
+"@testing-library/dom@^8.0.0":
   version "8.19.0"
   resolved "https://registry.yarnpkg.com/@testing-library/dom/-/dom-8.19.0.tgz#bd3f83c217ebac16694329e413d9ad5fdcfd785f"
   integrity sha512-6YWYPPpxG3e/xOo6HIWwB/58HukkwIVTOaZ0VwdMVjhRUX/01E4FtQbck9GazOOj7MXHc5RBzMrU86iBJHbI+A==
@@ -20473,10 +20481,10 @@ kdbush@^4.0.2:
   resolved "https://registry.yarnpkg.com/kdbush/-/kdbush-4.0.2.tgz#2f7b7246328b4657dd122b6c7f025fbc2c868e39"
   integrity sha512-WbCVYJ27Sz8zi9Q7Q0xHC+05iwkm3Znipc2XTlrnJbsHMYktW4hPhXUE8Ys1engBrvffoSCqbil1JQAa7clRpA==
 
-kea@^2.4.2:
-  version "2.4.2"
-  resolved "https://registry.yarnpkg.com/kea/-/kea-2.4.2.tgz#53af42702f2c8962422e456e5dd943391bad26e9"
-  integrity sha512-cdGds/gsJsbo/KbVAMk5/tTr229eDibVT1wmPPxPO/10zYb8GFoP3udBIQb+Hop5qGEu2wIHVdXwJvXqSS8JAg==
+kea@^2.6.0:
+  version "2.6.0"
+  resolved "https://registry.yarnpkg.com/kea/-/kea-2.6.0.tgz#774a82188e0fb52cdb18b72843a875ee857f3807"
+  integrity sha512-+yaLyZx8h2v96aL01XIRZjqA8Qk4fIUziznSKnkjDItUU8YnH75xER6+vMHT5EHC3MJeSScxIx5UuqZl30DBdg==
 
 keyv@^3.0.0:
   version "3.0.0"

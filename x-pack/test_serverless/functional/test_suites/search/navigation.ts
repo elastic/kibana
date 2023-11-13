@@ -72,20 +72,16 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
 
     it("management apps from the sidenav hide the 'stack management' root from the breadcrumbs", async () => {
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:triggersActions' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Explore', 'Alerts', 'Rules']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Alerts', 'Rules']);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:index_management' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts([
-        'Content',
-        'Index Management',
-        'Indices',
-      ]);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Index Management', 'Indices']);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:ingest_pipelines' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Content', 'Ingest Pipelines']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Ingest Pipelines']);
 
       await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'management:api_keys' });
-      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['Security', 'API keys']);
+      await svlCommonNavigation.breadcrumbs.expectBreadcrumbTexts(['API keys']);
     });
 
     it('navigate management', async () => {
