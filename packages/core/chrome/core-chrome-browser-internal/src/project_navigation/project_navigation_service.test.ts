@@ -10,7 +10,12 @@ import { createMemoryHistory } from 'history';
 import { firstValueFrom, lastValueFrom, take, BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import type { ChromeNavLinks, ChromeBreadcrumb, AppDeepLinkId } from '@kbn/core-chrome-browser';
+import type {
+  ChromeNavLinks,
+  ChromeBreadcrumb,
+  AppDeepLinkId,
+  Workflows,
+} from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
 const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
@@ -27,6 +32,8 @@ const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) =
     navLinks: {} as unknown as ChromeNavLinks,
     http: httpServiceMock.createStartContract(),
     chromeBreadcrumbs$,
+    workflows$: new BehaviorSubject<Workflows>({}),
+    onWorkflowChange: () => undefined,
   });
 
   return { projectNavigation, history, chromeBreadcrumbs$ };

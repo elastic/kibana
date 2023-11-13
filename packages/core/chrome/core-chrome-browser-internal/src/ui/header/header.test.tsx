@@ -13,7 +13,7 @@ import { StubBrowserStorage, mountWithIntl } from '@kbn/test-jest-helpers';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';
+import type { ChromeBreadcrumbsAppendExtension, Workflows } from '@kbn/core-chrome-browser';
 import { Header } from './header';
 
 function mockProps() {
@@ -76,6 +76,7 @@ describe('Header', () => {
     const breadcrumbsAppendExtension$ = new BehaviorSubject<
       undefined | ChromeBreadcrumbsAppendExtension
     >(undefined);
+    const workflows$ = new BehaviorSubject<Workflows>({});
     const component = mountWithIntl(
       <Header
         {...mockProps()}
@@ -87,6 +88,8 @@ describe('Header', () => {
         breadcrumbsAppendExtension$={breadcrumbsAppendExtension$}
         headerBanner$={headerBanner$}
         helpMenuLinks$={of([])}
+        workflows$={workflows$}
+        onWorkflowChange={() => undefined}
       />
     );
     expect(component.find('EuiHeader').exists()).toBeTruthy();

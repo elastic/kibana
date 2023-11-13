@@ -6,17 +6,26 @@
  * Side Public License, v 1.
  */
 
+import type { Workflows } from '@kbn/core-chrome-browser/src';
 import '@testing-library/jest-dom';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 import { BehaviorSubject, of } from 'rxjs';
 import { HeaderBreadcrumbs } from './header_breadcrumbs';
 
+const workflows$ = new BehaviorSubject<Workflows>({});
+
 describe('HeaderBreadcrumbs', () => {
   it('renders updates to the breadcrumbs$ observable', async () => {
     const breadcrumbs$ = new BehaviorSubject([{ text: 'First' }]);
 
-    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
+    render(
+      <HeaderBreadcrumbs
+        breadcrumbs$={breadcrumbs$}
+        workflows$={workflows$}
+        onWorkflowChange={() => undefined}
+      />
+    );
 
     expect(await screen.findByLabelText('Breadcrumbs')).toHaveTextContent('First');
 
@@ -35,7 +44,13 @@ describe('HeaderBreadcrumbs', () => {
       { text: 'Last', href: '/something', onClick: jest.fn() },
     ]);
 
-    render(<HeaderBreadcrumbs breadcrumbs$={breadcrumbs$} />);
+    render(
+      <HeaderBreadcrumbs
+        breadcrumbs$={breadcrumbs$}
+        workflows$={workflows$}
+        onWorkflowChange={() => undefined}
+      />
+    );
 
     const lastBreadcrumb = await screen.findByTitle('Last');
 
