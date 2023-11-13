@@ -11,6 +11,7 @@ export default function ({ loadTestFile, getService, getPageObjects }) {
   const browser = getService('browser');
   const log = getService('log');
   const supertest = getService('supertest');
+  const security = getService('security');
   const PageObjects = getPageObjects(['discover', 'common']);
 
   describe('maps app', function () {
@@ -51,6 +52,7 @@ export default function ({ loadTestFile, getService, getPageObjects }) {
       });
       await browser.setWindowSize(1600, 1000);
 
+      await security.testUser.setRoles(['kibana_admin']); // necessary to refresh field list
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.refreshFieldList(); // refreshes field list cache from previous tests
     });

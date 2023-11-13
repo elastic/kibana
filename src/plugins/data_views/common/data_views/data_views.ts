@@ -551,6 +551,7 @@ export class DataViewsService {
       forceRefresh,
     });
 
+    // todo
     console.log(
       'getFieldsAndIndicesForDataView result',
       dataView.getIndexPattern(),

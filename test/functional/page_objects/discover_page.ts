@@ -412,8 +412,6 @@ export class DiscoverPageObject extends FtrService {
   public async refreshFieldList() {
     await this.clickIndexPatternActions();
     await this.testSubjects.click('data-view-refresh-fields');
-    // trying to wait for pop over to be closed
-    // await this.testSubjects.waitForHidden('changeDataViewPopover');
   }
 
   public async clickAddNewField() {

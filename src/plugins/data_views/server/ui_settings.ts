@@ -17,7 +17,7 @@ export const cacheMaxAge = {
     value: 300,
     description: i18n.translate('dataViews.advancedSettings.cacheMaxAgeText', {
       defaultMessage:
-        "Sets the 'max-age' cache header value for data view fields API requests. A value of 0 will disable caching.",
+        "Sets the 'max-age' cache header value for data view fields API requests. A value of 0 will disable caching. A hard reload of Kibana may be necessary for your browser to pick up the new setting.",
     }),
     schema: schema.number(),
   },
