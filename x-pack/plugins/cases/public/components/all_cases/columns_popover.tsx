@@ -208,6 +208,7 @@ export const ColumnsPopover: React.FC<Props> = ({
               flush="left"
               onClick={showAll}
               data-test-subj="column-selection-popover-show-all-button"
+              disabled={!isDragEnabled}
             >
               {i18n.SHOW_ALL}
             </EuiButtonEmpty>
@@ -218,6 +219,7 @@ export const ColumnsPopover: React.FC<Props> = ({
               flush="right"
               onClick={hideAll}
               data-test-subj="column-selection-popover-hide-all-button"
+              disabled={!isDragEnabled}
             >
               {i18n.HIDE_ALL}
             </EuiButtonEmpty>
