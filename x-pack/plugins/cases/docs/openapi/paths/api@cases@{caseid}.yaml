@@ -18,8 +18,10 @@ get:
           schema:
             $ref: '../components/schemas/case_response_properties.yaml'
           examples:
-            getCaseResponse:
+            getDefaultCaseResponse:
               $ref: '../components/examples/get_case_response.yaml'
+            getDefaultObservabilityCaseReponse:
+              $ref: '../components/examples/get_case_observability_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
