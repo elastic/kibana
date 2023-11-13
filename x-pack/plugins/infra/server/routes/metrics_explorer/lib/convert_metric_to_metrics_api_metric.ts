@@ -6,7 +6,7 @@
  */
 
 import { isEmpty } from 'lodash';
-import { networkTraffic } from '../../../../common/inventory_models/shared/metrics/snapshot/network_traffic';
+import { networkTraffic } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAPIMetric, MetricsExplorerMetric } from '../../../../common/http_api';
 import { createCustomMetricsAggregations } from '../../../lib/create_custom_metrics_aggregations';
 

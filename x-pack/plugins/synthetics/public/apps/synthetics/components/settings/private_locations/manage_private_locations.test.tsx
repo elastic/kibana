@@ -121,7 +121,6 @@ describe('<ManagePrivateLocations />', () => {
             id: 'lkjlere',
             agentPolicyId: 'lkjelrje',
             isServiceManaged: false,
-            concurrentMonitors: 2,
           },
         ],
         onDelete: jest.fn(),

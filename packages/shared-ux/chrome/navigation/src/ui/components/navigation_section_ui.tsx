@@ -60,6 +60,15 @@ const getRenderAs = (navNode: ChromeProjectNavigationNode): RenderAs => {
   return 'block';
 };
 
+const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): string => {
+  const { id, deepLink } = navNode;
+  return classnames(`nav-item`, `nav-item-${id}`, {
+    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+    [`nav-item-id-${id}`]: id,
+    [`nav-item-isActive`]: isActive,
+  });
+};
+
 const filterChildren = (
   children?: ChromeProjectNavigationNode[]
 ): ChromeProjectNavigationNode[] | undefined => {
@@ -94,15 +103,18 @@ const isEuiCollapsibleNavItemProps = (
 };
 
 const renderBlockTitle: (
-  { title }: ChromeProjectNavigationNode,
+  navNode: ChromeProjectNavigationNode,
   { spaceBefore }: { spaceBefore: EuiThemeSize | null }
 ) => Required<EuiCollapsibleNavSubItemProps>['renderItem'] =
-  ({ title }, { spaceBefore }) =>
-  () =>
-    (
+  (navNode, { spaceBefore }) =>
+  () => {
+    const { title } = navNode;
+    const dataTestSubj = getTestSubj(navNode);
+    return (
       <EuiTitle
         size="xxxs"
         className="eui-textTruncate"
+        data-test-subj={dataTestSubj}
         css={({ euiTheme }: any) => {
           return {
             marginTop: spaceBefore ? euiTheme.size[spaceBefore] : undefined,
@@ -114,6 +126,7 @@ const renderBlockTitle: (
         <div>{title}</div>
       </EuiTitle>
     );
+  };
 
 const renderGroup = (
   navGroup: ChromeProjectNavigationNode,
@@ -165,27 +178,14 @@ const nodeToEuiCollapsibleNavProps = (
 } => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
 
-  const {
-    id,
-    title,
-    href,
-    icon,
-    renderAs,
-    isActive,
-    deepLink,
-    spaceBefore: _spaceBefore,
-  } = navNode;
+  const { id, title, href, icon, renderAs, isActive, spaceBefore: _spaceBefore } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
   const isAccordionExpanded = (itemsState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
   const isSelected = isAccordion && isAccordionExpanded ? false : isActive;
 
-  const dataTestSubj = classnames(`nav-item`, `nav-item-${id}`, {
-    [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
-    [`nav-item-id-${id}`]: id,
-    [`nav-item-isActive`]: isSelected,
-  });
+  const dataTestSubj = getTestSubj(navNode, isSelected);
 
   let spaceBefore = _spaceBefore;
   if (spaceBefore === undefined && treeDepth === 1 && hasChildren) {
@@ -290,6 +290,18 @@ const nodeToEuiCollapsibleNavProps = (
 
   return { items, isVisible };
 };
+
+// Temporary solution to prevent showing the outline when the page load when the
+// accordion is auto-expanded if one of its children is active
+// Once https://github.com/elastic/eui/pull/7314 is released in Kibana we can
+// safely remove this CSS class.
+const className = css`
+  .euiAccordion__childWrapper,
+  .euiAccordion__children,
+  .euiCollapsibleNavAccordion__children {
+    outline: none;
+  }
+`;
 
 interface AccordionItemsState {
   [navNodeId: string]: {
@@ -453,15 +465,7 @@ export const NavigationSectionUI: FC<Props> = ({ navNode }) => {
   return (
     <EuiCollapsibleNavItem
       {...props}
-      // We add this css to prevent showing the outline when the page load when the
-      // accordion is auto-expanded if one of its children is active
-      className={css`
-        .euiAccordion__childWrapper,
-        .euiAccordion__children,
-        .euiCollapsibleNavAccordion__children {
-          outline: none;
-        }
-      `}
+      className={className}
       items={subItems}
       accordionProps={setAccordionProps(navNode.id)}
     />

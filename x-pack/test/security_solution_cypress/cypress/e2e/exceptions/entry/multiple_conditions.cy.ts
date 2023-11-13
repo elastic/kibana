@@ -32,7 +32,6 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cy.task('esArchiverResetKibana');
       login();
       deleteAlertsAndRules();
       // At least create Rule with exceptions_list to be able to view created exceptions

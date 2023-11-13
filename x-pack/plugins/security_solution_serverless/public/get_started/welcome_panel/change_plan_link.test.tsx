@@ -39,7 +39,7 @@ describe('ChangePlanLink', () => {
     expect(badge).toBeInTheDocument();
     expect(link).toBeInTheDocument();
     expect(link.getAttribute('href')).toEqual(
-      'https://cloud.elastic.co/projects/security/test-project-id'
+      'https://cloud.elastic.co/projects/security/test-project-id?open=securityProjectFeatures'
     );
   });
 

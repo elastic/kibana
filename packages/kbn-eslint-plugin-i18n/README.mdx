@@ -20,3 +20,15 @@ It kicks in on JSXText elements and specific JSXAttributes (`label` and `aria-la
 
 This rule warns engineers to translate their strings by using `<FormattedMessage>` from the '@kbn/i18n-react' package. It provides an autofix that takes into account the context of the translatable string in the JSX tree and to generate a translation ID.
 It kicks in on JSXText elements and specific JSXAttributes (`label` and `aria-label`) which expect a translated value.
+
+## Exemptions and exceptions
+
+A JSXText element or JSXAttribute `label` or `aria-label` of which the value is:
+
+- wrapped in a `EuiCode` or `EuiBetaBadge` component,
+- made up of non alpha characters such as `!@#$%^&*(){}` or numbers,
+- wrapped in three backticks,
+
+are exempt from this rule.
+
+If this rule kicks in on a string value that you don't like, you can escape it by wrapping the string inside a JSXExpression: `{'my escaped value'}`.

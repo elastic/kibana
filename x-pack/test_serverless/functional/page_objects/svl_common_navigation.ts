@@ -153,9 +153,6 @@ export function SvlCommonNavigationProvider(ctx: FtrProviderContext) {
       async expectExists() {
         await testSubjects.existOrFail('breadcrumbs');
       },
-      async clickHome() {
-        await testSubjects.click('~breadcrumb-home');
-      },
       async expectBreadcrumbExists(by: { deepLinkId: AppDeepLinkId } | { text: string }) {
         log.debug(
           'ServerlessCommonNavigation.breadcrumbs.expectBreadcrumbExists',

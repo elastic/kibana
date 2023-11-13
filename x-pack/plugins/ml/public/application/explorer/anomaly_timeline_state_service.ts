@@ -49,6 +49,12 @@ interface SwimLanePagination {
   viewByPerPage: number;
 }
 
+export interface TimeDomain {
+  min: number;
+  max: number;
+  minInterval: number;
+}
+
 /**
  * Service for managing anomaly timeline state.
  */
@@ -86,6 +92,18 @@ export class AnomalyTimelineStateService extends StateService {
 
   private _timeBounds$: Observable<TimeRangeBounds>;
   private _refreshSubject$: Observable<Refresh>;
+
+  /** Time domain of the currently active swim lane */
+  public readonly timeDomain$: Observable<TimeDomain | null> = this._overallSwimLaneData$.pipe(
+    map((data) => {
+      if (!data) return null;
+      return {
+        min: data.earliest * 1000,
+        max: data.latest * 1000,
+        minInterval: data.interval * 1000,
+      };
+    })
+  );
 
   constructor(
     private anomalyExplorerUrlStateService: AnomalyExplorerUrlStateService,
@@ -644,6 +662,42 @@ export class AnomalyTimelineStateService extends StateService {
 
   public getViewBySwimLaneOptions$(): Observable<string[]> {
     return this._viewBySwimLaneOptions$.asObservable();
+  }
+
+  /**
+   * Currently selected jobs on the swim lane
+   */
+  public getSwimLaneJobs$(): Observable<ExplorerJob[]> {
+    return combineLatest([
+      this.anomalyExplorerCommonStateService.getSelectedJobs$(),
+      this.getViewBySwimlaneFieldName$(),
+      this._viewBySwimLaneData$,
+      this._selectedCells$,
+    ]).pipe(
+      map(([selectedJobs, swimLaneFieldName, viewBySwimLaneData, selectedCells]) => {
+        // If there are selected lanes on the view by swim lane, use those to filter the jobs.
+        if (
+          selectedCells?.type === SWIMLANE_TYPE.VIEW_BY &&
+          selectedCells?.viewByFieldName === VIEW_BY_JOB_LABEL
+        ) {
+          return selectedJobs.filter((job) => {
+            return selectedCells.lanes.includes(job.id);
+          });
+        }
+
+        if (
+          selectedCells?.type === SWIMLANE_TYPE.OVERALL &&
+          selectedCells?.viewByFieldName === VIEW_BY_JOB_LABEL &&
+          viewBySwimLaneData
+        ) {
+          return selectedJobs.filter((job) => {
+            return viewBySwimLaneData.laneLabels.includes(job.id);
+          });
+        }
+
+        return selectedJobs;
+      })
+    );
   }
 
   public getViewBySwimLaneOptions(): string[] {

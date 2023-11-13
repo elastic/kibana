@@ -5,7 +5,7 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { BehaviorSubject, filter, map, Observable, share, Subject, tap } from 'rxjs';
+import { BehaviorSubject, filter, map, mergeMap, Observable, share, Subject, tap } from 'rxjs';
 import type { AutoRefreshDoneFn } from '@kbn/data-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
@@ -219,60 +219,64 @@ export function getDataStateContainer({
   let abortControllerFetchMore: AbortController;
 
   function subscribe() {
-    const subscription = fetch$.subscribe(async ({ options, searchSessionId }) => {
-      const commonFetchDeps = {
-        initialFetchStatus: getInitialFetchStatus(),
-        inspectorAdapters,
-        searchSessionId,
-        services,
-        getAppState,
-        getInternalState,
-        savedSearch: getSavedSearch(),
-        useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
-      };
+    const subscription = fetch$
+      .pipe(
+        mergeMap(async ({ options, searchSessionId }) => {
+          const commonFetchDeps = {
+            initialFetchStatus: getInitialFetchStatus(),
+            inspectorAdapters,
+            searchSessionId,
+            services,
+            getAppState,
+            getInternalState,
+            savedSearch: getSavedSearch(),
+            useNewFieldsApi: !uiSettings.get(SEARCH_FIELDS_FROM_SOURCE),
+          };
 
-      abortController?.abort();
-      abortControllerFetchMore?.abort();
+          abortController?.abort();
+          abortControllerFetchMore?.abort();
 
-      if (options.fetchMore) {
-        abortControllerFetchMore = new AbortController();
+          if (options.fetchMore) {
+            abortControllerFetchMore = new AbortController();
 
-        const fetchMoreStartTime = window.performance.now();
-        await fetchMoreDocuments(dataSubjects, {
-          abortController: abortControllerFetchMore,
-          ...commonFetchDeps,
-        });
-        const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
-        reportPerformanceMetricEvent(services.analytics, {
-          eventName: 'discoverFetchMore',
-          duration: fetchMoreDuration,
-        });
-        return;
-      }
+            const fetchMoreStartTime = window.performance.now();
+            await fetchMoreDocuments(dataSubjects, {
+              abortController: abortControllerFetchMore,
+              ...commonFetchDeps,
+            });
+            const fetchMoreDuration = window.performance.now() - fetchMoreStartTime;
+            reportPerformanceMetricEvent(services.analytics, {
+              eventName: 'discoverFetchMore',
+              duration: fetchMoreDuration,
+            });
+            return;
+          }
 
-      abortController = new AbortController();
-      const prevAutoRefreshDone = autoRefreshDone;
+          abortController = new AbortController();
+          const prevAutoRefreshDone = autoRefreshDone;
 
-      const fetchAllStartTime = window.performance.now();
-      await fetchAll(dataSubjects, options.reset, {
-        abortController,
-        ...commonFetchDeps,
-      });
-      const fetchAllDuration = window.performance.now() - fetchAllStartTime;
-      reportPerformanceMetricEvent(services.analytics, {
-        eventName: 'discoverFetchAll',
-        duration: fetchAllDuration,
-      });
+          const fetchAllStartTime = window.performance.now();
+          await fetchAll(dataSubjects, options.reset, {
+            abortController,
+            ...commonFetchDeps,
+          });
+          const fetchAllDuration = window.performance.now() - fetchAllStartTime;
+          reportPerformanceMetricEvent(services.analytics, {
+            eventName: 'discoverFetchAll',
+            duration: fetchAllDuration,
+          });
 
-      // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
-      // replacing this current one, call it to make sure we tell that the auto refresh is done
-      // and a new one can be scheduled.
-      if (autoRefreshDone === prevAutoRefreshDone) {
-        // if this function was set and is executed, another refresh fetch can be triggered
-        autoRefreshDone?.();
-        autoRefreshDone = undefined;
-      }
-    });
+          // If the autoRefreshCallback is still the same as when we started i.e. there was no newer call
+          // replacing this current one, call it to make sure we tell that the auto refresh is done
+          // and a new one can be scheduled.
+          if (autoRefreshDone === prevAutoRefreshDone) {
+            // if this function was set and is executed, another refresh fetch can be triggered
+            autoRefreshDone?.();
+            autoRefreshDone = undefined;
+          }
+        })
+      )
+      .subscribe();
 
     return () => {
       abortController?.abort();

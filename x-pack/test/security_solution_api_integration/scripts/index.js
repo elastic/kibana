@@ -7,17 +7,7 @@
 
 const { spawn } = require('child_process');
 
-const [
-  ,
-  ,
-  type,
-  folder,
-  projectType,
-  environment,
-  area = 'detections_response',
-  licenseFolder = 'default_license',
-  ...args
-] = process.argv;
+const [, , type, area, licenseFolder, folder, projectType, environment, ...args] = process.argv;
 
 const configPath = `./test_suites/${area}/${licenseFolder}/${folder}/configs/${projectType}.config.ts`;
 
@@ -31,15 +21,15 @@ let grepArgs = [];
 if (type !== 'server') {
   switch (environment) {
     case 'serverlessEnv':
-      grepArgs = ['--grep', '@serverless', '--grep', '@brokenInServerless', '--invert'];
+      grepArgs = ['--grep', '/^(?!.*@brokenInServerless).*@serverless.*/'];
       break;
 
     case 'essEnv':
-      grepArgs = ['--grep', '@ess'];
+      grepArgs = ['--grep', '/^(?!.*@brokenInEss).*@ess.*/'];
       break;
 
     case 'qaEnv':
-      grepArgs = ['--grep', '@serverless', '--grep', '@brokenInServerless|@skipInQA', '--invert'];
+      grepArgs = ['--grep', '/^(?!.*@brokenInServerless|.*@skipInQA).*@serverless.*/'];
       break;
 
     default:

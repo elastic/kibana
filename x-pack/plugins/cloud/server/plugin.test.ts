@@ -134,6 +134,17 @@ describe('Cloud Plugin', () => {
         });
         expect(setup.serverless.projectName).toBe('My Awesome Project');
       });
+
+      it('exposes `serverless.projectType`', () => {
+        const { setup } = setupPlugin({
+          serverless: {
+            project_id: 'my-awesome-project',
+            project_name: 'My Awesome Project',
+            project_type: 'security',
+          },
+        });
+        expect(setup.serverless.projectType).toBe('security');
+      });
     });
   });
 

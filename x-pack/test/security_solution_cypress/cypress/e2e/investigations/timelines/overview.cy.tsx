@@ -17,8 +17,6 @@ import {
   sharedTimelineTitleFragment,
 } from '../../../objects/timeline';
 
-import { cleanKibana } from '../../../tasks/common';
-
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
@@ -27,8 +25,6 @@ import { TIMELINES_URL } from '../../../urls/navigation';
 
 describe('timeline overview search', { tags: ['@ess', 'serverless'] }, () => {
   before(() => {
-    cleanKibana();
-
     createTimeline(getFavoritedTimeline())
       .then((response) => response.body.data.persistTimeline.timeline.savedObjectId)
       .then((timelineId) => favoriteTimeline({ timelineId, timelineType: 'default' }));
