@@ -8,10 +8,10 @@
 import type { FC } from 'react';
 import React, { memo, useEffect, useRef, useState } from 'react';
 import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
-import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonEmpty, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { CopyToClipboard } from '../../../shared/components/copy_to_clipboard';
+import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
 import { JSON_TAB_CONTENT_TEST_ID, JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID } from './test_ids';
 import { useRightPanelContext } from '../context';
 
@@ -55,26 +55,28 @@ export const JsonTab: FC = memo(() => {
       <EuiFlexItem>
         <EuiFlexGroup justifyContent={'flexEnd'}>
           <EuiFlexItem grow={false}>
-            <CopyToClipboard
-              rawValue={jsonValue}
-              data-test-subj={JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
-            >
-              <EuiButtonEmpty
-                iconType={'copyClipboard'}
-                size={'xs'}
-                aria-label={i18n.translate(
-                  'xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel',
-                  {
-                    defaultMessage: 'Copy to clipboard',
-                  }
-                )}
-              >
-                <FormattedMessage
-                  id="xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel"
-                  defaultMessage="Copy to clipboard"
-                />
-              </EuiButtonEmpty>
-            </CopyToClipboard>
+            <EuiCopy textToCopy={jsonValue}>
+              {(copy) => (
+                <EuiButtonEmpty
+                  iconType={'copyClipboard'}
+                  size={'xs'}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonAriaLabel',
+                    {
+                      defaultMessage: 'Copy to clipboard',
+                    }
+                  )}
+                  data-test-subj={JSON_TAB_COPY_TO_CLIPBOARD_BUTTON_TEST_ID}
+                  onClick={() => copyFunction(copy, jsonValue)}
+                  onKeyDown={() => copyFunction(copy, jsonValue)}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.flyout.right.jsonTab.copyToClipboardButtonLabel"
+                    defaultMessage="Copy to clipboard"
+                  />
+                </EuiButtonEmpty>
+              )}
+            </EuiCopy>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
