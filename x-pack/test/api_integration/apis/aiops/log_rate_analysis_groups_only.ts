@@ -41,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
           overrides = {
             loaded: 0,
             remainingFieldCandidates: [],
-            significantTerms: testData.expected.significantTerms,
+            significantTerms: testData.expected.significantItems,
             regroupOnly: true,
           } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
         }
@@ -51,7 +51,7 @@ export default ({ getService }: FtrProviderContext) => {
             loaded: 0,
             remainingFieldCandidates: [],
             significantItems: testData.expected
-              .significantTerms as AiopsLogRateAnalysisSchemaSignificantItem[],
+              .significantItems as AiopsLogRateAnalysisSchemaSignificantItem[],
             regroupOnly: true,
           } as AiopsLogRateAnalysisSchema<typeof apiVersion>['overrides'];
         }
