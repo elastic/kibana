@@ -274,9 +274,14 @@ export const setIsDiscoverSavedSearchLoaded = actionCreator<{
   isDiscoverSavedSearchLoaded: boolean;
 }>('SET_IS_DISCOVER_SAVED_SEARCH_LOADED');
 
+export const initializeSavedSearch = actionCreator<{
+  id: string;
+  savedSearch: SavedSearch;
+}>('INITIALIZE_SAVED_SEARCH');
+
 export const updateSavedSearch = actionCreator<{
   id: string;
   savedSearch: SavedSearch;
-}>('SET_SAVED_SEARCH');
+}>('UPDATE_SAVED_SEARCH');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');

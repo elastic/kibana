@@ -7,8 +7,8 @@
 
 import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import type { SaveSavedSearchOptions } from '@kbn/saved-search-plugin/public';
+import { useMemo, useCallback, useRef } from 'react';
 import type { RefObject } from 'react';
-import { useMemo, useCallback } from 'react';
 import { useDispatch } from 'react-redux';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
 import type { DiscoverAppState } from '@kbn/discover-plugin/public/application/main/services/discover_app_state_container';
@@ -55,6 +55,10 @@ export const useDiscoverInTimelineActions = (
     (state) => getTimeline(state, TimelineId.active) ?? timelineDefaults
   );
   const { savedSearchId } = timeline;
+
+  // We're using a ref here to prevent a cyclic hook-dependency chain of updateSavedSearch
+  const timelineRef = useRef(timeline);
+  timelineRef.current = timeline;
 
   const queryClient = useQueryClient();
 
@@ -184,12 +188,21 @@ export const useDiscoverInTimelineActions = (
       // If there is already a saved search, only update the local state
       if (savedSearchId) {
         savedSearch.id = savedSearchId;
-        dispatch(
-          timelineActions.updateSavedSearch({
-            id: TimelineId.active,
-            savedSearch,
-          })
-        );
+        if (!timelineRef.current.savedSearch) {
+          dispatch(
+            timelineActions.initializeSavedSearch({
+              id: TimelineId.active,
+              savedSearch,
+            })
+          );
+        } else {
+          dispatch(
+            timelineActions.updateSavedSearch({
+              id: TimelineId.active,
+              savedSearch,
+            })
+          );
+        }
       } else {
         // If no saved search exists. Create a new saved search instance and associate it with the timeline.
         try {
@@ -234,11 +247,24 @@ export const useDiscoverInTimelineActions = (
     [persistSavedSearch, savedSearchId, addError, dispatch, discoverDataService]
   );
 
+  const initializeLocalSavedSearch = useCallback(
+    async (savedSearch: SavedSearch, timelineId: string) => {
+      dispatch(
+        timelineActions.initializeSavedSearch({
+          id: TimelineId.active,
+          savedSearch,
+        })
+      );
+    },
+    [dispatch]
+  );
+
   const actions = useMemo(
     () => ({
       resetDiscoverAppState,
       restoreDiscoverAppStateFromSavedSearch,
       updateSavedSearch,
+      initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
       getDefaultDiscoverAppState,
     }),
@@ -246,6 +272,7 @@ export const useDiscoverInTimelineActions = (
       resetDiscoverAppState,
       restoreDiscoverAppStateFromSavedSearch,
       updateSavedSearch,
+      initializeLocalSavedSearch,
       getAppStateFromSavedSearch,
       getDefaultDiscoverAppState,
     ]

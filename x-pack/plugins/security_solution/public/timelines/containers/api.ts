@@ -146,7 +146,10 @@ const patchTimeline = async ({
   try {
     if (timeline.savedSearchId && savedSearch) {
       const { savedSearch: savedSearchService } = KibanaServices.get();
-      await savedSearchService.save(savedSearch);
+      await savedSearchService.save(savedSearch, {
+        onTitleDuplicate: () => ({}),
+        copyOnSave: false,
+      });
     }
   } catch (e) {
     return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));
@@ -186,8 +189,10 @@ export const copyTimeline = async ({
       const savedSearchCopy = { ...savedSearch };
       // delete the id and change the title to make sure we can copy the saved search
       delete savedSearchCopy.id;
-      savedSearchCopy.title = `Copy - ${savedSearchCopy.title}`;
-      newSavedSearchId = await savedSearchService.save(savedSearchCopy);
+      newSavedSearchId = await savedSearchService.save(savedSearchCopy, {
+        onTitleDuplicate: () => ({}),
+        copyOnSave: false,
+      });
     }
   } catch (e) {
     return Promise.reject(new Error(`Failed to copy saved search: ${timeline.savedSearchId}`));

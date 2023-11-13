@@ -65,7 +65,6 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import type { ActionTimeline, TimelineById, TimelineEpicDependencies } from './types';
 import type { TimelineInput } from '../../../../common/search_strategy';
-import { formatTimelineResultToModel } from '../../components/open_timeline/helpers';
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
   timelineId && timelineId.toLowerCase().startsWith('timeline');
@@ -405,6 +404,7 @@ function saveAsNewEpic<State>(
       return handleTimelineErrors(result, action, allTimelineQuery, kibana, (response) => {
         // TODO:
         // - save savedSearch ID and create new one in saveAsNew flow
+        //   - why is the state shown as changed? (check the diff)
         // - Add acceptance tests
         // - generate endpoint documentation and mark it as private
         // - Unit test the endpoint
@@ -421,7 +421,7 @@ function saveAsNewEpic<State>(
             id: action.payload.id,
             timeline: {
               ...recentTimeline[action.payload.id],
-              ...formatTimelineResultToModel(copiedTimeline).timeline,
+              ...copiedTimeline,
             },
           }),
           setChanged({
