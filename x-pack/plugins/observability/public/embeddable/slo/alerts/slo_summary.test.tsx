@@ -16,14 +16,24 @@ import { ALL_VALUE } from '@kbn/slo-schema';
 
 jest.mock('../../../hooks/slo/use_fetch_active_alerts');
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
+
+const mockActiveAlertsGet = (activeAlerts) => {
+  jest
+    .spyOn(ActiveAlerts.prototype, 'get')
+    .mockImplementation((slo) => activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`));
+};
 describe('SLO Alert Summary', () => {
+  const activeAlerts = new Map();
+  afterEach(() => {
+    jest.clearAllMocks();
+    activeAlerts.clear();
+  });
+  afterAll(() => {
+    jest.clearAllMocks();
+    activeAlerts.clear();
+  });
+
   describe('Multiple selected SLOs', () => {
-    afterEach(() => {
-      jest.clearAllMocks();
-    });
-    afterAll(() => {
-      jest.clearAllMocks();
-    });
     it('displays 0 alerts when there are no active alerts', async () => {
       const { results } = sloList;
       const slos = results.map((slo) => ({
@@ -49,18 +59,13 @@ describe('SLO Alert Summary', () => {
           instanceId: slo.instanceId,
           name: slo.name,
         }));
-        const activeAlerts = new Map();
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
         };
         Object.keys(activeAlertsData).forEach((key) =>
           activeAlerts.set(key, activeAlertsData[key])
         );
-        jest
-          .spyOn(ActiveAlerts.prototype, 'get')
-          .mockImplementation((slo) =>
-            activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`)
-          );
+        mockActiveAlertsGet(activeAlerts);
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
@@ -80,7 +85,6 @@ describe('SLO Alert Summary', () => {
           instanceId: slo.instanceId,
           name: slo.name,
         }));
-        const activeAlerts = new Map();
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
           'c0f8d669-9177-4706-9098-f397a88173a6|*': 1,
@@ -88,12 +92,7 @@ describe('SLO Alert Summary', () => {
         Object.keys(activeAlertsData).forEach((key) =>
           activeAlerts.set(key, activeAlertsData[key])
         );
-        jest
-          .spyOn(ActiveAlerts.prototype, 'get')
-          .mockImplementation((slo) =>
-            activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`)
-          );
-
+        mockActiveAlertsGet(activeAlerts);
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
           data: new ActiveAlerts(activeAlertsData),
@@ -110,7 +109,6 @@ describe('SLO Alert Summary', () => {
           instanceId: slo.instanceId,
           name: slo.name,
         }));
-        const activeAlerts = new Map();
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 3,
           'c0f8d669-9177-4706-9098-f397a88173a6|*': 2,
@@ -118,11 +116,7 @@ describe('SLO Alert Summary', () => {
         Object.keys(activeAlertsData).forEach((key) =>
           activeAlerts.set(key, activeAlertsData[key])
         );
-        jest
-          .spyOn(ActiveAlerts.prototype, 'get')
-          .mockImplementation((slo) =>
-            activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`)
-          );
+        mockActiveAlertsGet(activeAlerts);
 
         useFetchActiveAlertsMock.mockReturnValue({
           isLoading: false,
@@ -144,10 +138,7 @@ describe('SLO Alert Summary', () => {
         name: slo.name,
       }));
       const selectedSlo = [slos[0]];
-      const activeAlerts = new Map();
-      jest
-        .spyOn(ActiveAlerts.prototype, 'get')
-        .mockImplementation((slo) => activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`));
+      mockActiveAlertsGet(activeAlerts);
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
         data: new ActiveAlerts(),
@@ -165,14 +156,11 @@ describe('SLO Alert Summary', () => {
         name: slo.name,
       }));
       const selectedSlo = [slos[0]];
-      const activeAlerts = new Map();
       const activeAlertsData = {
         '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
       };
       Object.keys(activeAlertsData).forEach((key) => activeAlerts.set(key, activeAlertsData[key]));
-      jest
-        .spyOn(ActiveAlerts.prototype, 'get')
-        .mockImplementation((slo) => activeAlerts.get(`${slo.id}|${slo.instanceId ?? ALL_VALUE}`));
+      mockActiveAlertsGet(activeAlerts);
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
         data: new ActiveAlerts(activeAlertsData),
