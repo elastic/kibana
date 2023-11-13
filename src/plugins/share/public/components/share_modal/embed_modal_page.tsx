@@ -42,9 +42,15 @@ interface EmbedModalPageProps {
 }
 
 export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) => {
-  const { allowShortUrl, isEmbedded, shareableUrl, shareableUrlForSavedObject, shareableUrlLocatorParams, urlService } =
-    props;
-  const [ urlParams, setUrlParams] = useState<undefined | string>(undefined)
+  const {
+    allowShortUrl,
+    isEmbedded,
+    shareableUrl,
+    shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
+    urlService,
+  } = props;
+  const [urlParams, setUrlParams] = useState<undefined | string>(undefined);
   const [shortUrl, setShortUrl] = useState('');
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState();
   const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['0']: true });
@@ -61,101 +67,98 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
       shortUrlLabel
     );
 
-    const makeUrlEmbeddable = (url: string): string => {
-      const embedParam = '?embed=true';
-      const urlHasQueryString = url.indexOf('?') !== -1;
-  
-      if (urlHasQueryString) {
-        return url.replace('?', `${embedParam}&`);
+  const makeUrlEmbeddable = (url: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = url.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return url.replace('?', `${embedParam}&`);
+    }
+
+    return `${url}${embedParam}`;
+  };
+
+  const getUrlParamExtensions = (url: string): string => {
+    return urlParams
+      ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
+          const urlParam = urlParams[key];
+          return urlParam
+            ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
+                const isQueryParamEnabled = urlParam[queryParam];
+                return isQueryParamEnabled
+                  ? queryAccumulator + `&${queryParam}=true`
+                  : queryAccumulator;
+              }, urlAccumulator)
+            : urlAccumulator;
+        }, url)
+      : url;
+  };
+
+  const updateUrlParams = (url: string) => {
+    url = isEmbedded ? makeUrlEmbeddable(url) : url;
+    url = urlParams ? getUrlParamExtensions(url) : url;
+
+    return url;
+  };
+
+  const getSnapshotUrl = (forSavedObject?: boolean) => {
+    let url = '';
+    if (forSavedObject && shareableUrlForSavedObject) {
+      url = shareableUrlForSavedObject;
+    }
+    if (!url) {
+      url = shareableUrl || window.location.href;
+    }
+    return updateUrlParams(url);
+  };
+
+  const createShortUrl = async () => {
+    setShortUrl(true);
+    setShortUrlErrorMsg(undefined);
+
+    try {
+      if (shareableUrlLocatorParams) {
+        const shortUrls = urlService.shortUrls.get(null);
+        const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
+        const shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
+      } else {
+        const snapshotUrl = getSnapshotUrl();
+        const shortUrl = await urlService.shortUrls.get(null).createFromLongUrl(snapshotUrl);
+        const shortUrlCache = shortUrl.url;
       }
-  
-      return `${url}${embedParam}`;
-    }; 
 
-    const getUrlParamExtensions = (url: string): string => {
-      return urlParams
-        ? Object.keys(urlParams).reduce((urlAccumulator, key) => {
-            const urlParam = urlParams[key];
-            return urlParam
-              ? Object.keys(urlParam).reduce((queryAccumulator, queryParam) => {
-                  const isQueryParamEnabled = urlParam[queryParam];
-                  return isQueryParamEnabled
-                    ? queryAccumulator + `&${queryParam}=true`
-                    : queryAccumulator;
-                }, urlAccumulator)
-              : urlAccumulator;
-          }, url)
-        : url;
-    }; 
-
-    const updateUrlParams = (url: string) => {
-      url = isEmbedded ? makeUrlEmbeddable(url) : url;
-      url = urlParams ? getUrlParamExtensions(url) : url;
-  
-      return url;
-    };
-
-    const getSnapshotUrl = (forSavedObject?: boolean) => {
-      let url = '';
-      if (forSavedObject && shareableUrlForSavedObject) {
-        url = shareableUrlForSavedObject;
+      if (!mounted) {
+        return;
       }
-      if (!url) {
-        url = shareableUrl || window.location.href;
-      }
-      return updateUrlParams(url);
-    };
 
-    const createShortUrl = async () => {
-
-        setShortUrl(true)
-        setShortUrlErrorMsg(undefined)
-  
-      try {
-        if (shareableUrlLocatorParams) {
-          const shortUrls = urlService.shortUrls.get(null);
-          const shortUrl = await shortUrls.createWithLocator(shareableUrlLocatorParams);
-          const shortUrlCache = await shortUrl.locator.getUrl(shortUrl.params, { absolute: true });
-        } else {
-          const snapshotUrl = getSnapshotUrl();
-          const shortUrl = await urlService.shortUrls
-            .get(null)
-            .createFromLongUrl(snapshotUrl);
-          const shortUrlCache = shortUrl.url;
-        }
-  
-        if (!mounted) {
-          return;
-        }
-  
-        this.setState(
-          {
-            isCreatingShortUrl: false,
-            useShortUrl: true,
-          },
-          this.setUrl
-        );
-      } catch (fetchError) {
-        if (!mounted) {
-          return;
-        }
-  
-        shortUrlCache = undefined;
-        this.setState(
-          {
-            useShortUrl: false,
-            isCreatingShortUrl: false,
-            shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
-              defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
-              values: {
-                errorMessage: fetchError.message,
-              },
-            }),
-          },
-          this.setUrl
-        );
+      this.setState(
+        {
+          isCreatingShortUrl: false,
+          useShortUrl: true,
+        },
+        this.setUrl
+      );
+    } catch (fetchError) {
+      if (!mounted) {
+        return;
       }
-    };
+
+      shortUrlCache = undefined;
+      this.setState(
+        {
+          useShortUrl: false,
+          isCreatingShortUrl: false,
+          shortUrlErrorMsg: i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
+            defaultMessage: 'Unable to create short URL. Error: {errorMessage}',
+            values: {
+              errorMessage: fetchError.message,
+            },
+          }),
+        },
+        this.setUrl
+      );
+    }
+  };
 
   const checkboxOnChangeHandler = (id: string): void => {
     const newCheckboxMap = {
