@@ -54,10 +54,7 @@ export const useLatestFindingsGrouping = ({ dataView }: { dataView: DataView }) 
     [data, selectedGroup, uniqueValue]
   );
 
-  const canRenderGrouping = !isNoneSelected;
-
   return {
-    canRenderGrouping,
     groupData,
     grouping,
     isFetching,
@@ -67,5 +64,7 @@ export const useLatestFindingsGrouping = ({ dataView }: { dataView: DataView }) 
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
     setUrlQuery,
+    isGroupSelect: !isNoneSelected,
+    isGroupLoading: !data,
   };
 };

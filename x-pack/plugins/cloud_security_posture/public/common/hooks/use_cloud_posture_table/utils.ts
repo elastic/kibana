@@ -54,9 +54,9 @@ export const getPaginationQuery = ({
 
 export const useBaseEsQuery = ({
   dataView,
-  filters,
+  filters = [],
   query,
-  additionalFilters,
+  nonPersistedFilters,
 }: FindingsBaseURLQuery & FindingsBaseProps) => {
   const {
     notifications: { toasts },
@@ -71,11 +71,11 @@ export const useBaseEsQuery = ({
     () =>
       getBaseQuery({
         dataView,
-        filters: filters.concat(additionalFilters ?? []).flat(),
+        filters: filters.concat(nonPersistedFilters ?? []).flat(),
         query,
         config,
       }),
-    [dataView, filters, additionalFilters, query, config]
+    [dataView, filters, nonPersistedFilters, query, config]
   );
 
   /**

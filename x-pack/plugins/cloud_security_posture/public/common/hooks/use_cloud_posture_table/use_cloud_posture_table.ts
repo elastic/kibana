@@ -13,28 +13,25 @@ import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
+import { FindingsBaseURLQuery } from '../../types';
+
+type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
 export interface CloudPostureTableResult {
-  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
-  setUrlQuery: (query: any) => void;
-  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
-  sort: any;
-  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
-  filters: any[];
+  setUrlQuery: (query: Record<string, any>) => void;
+  sort: string[][];
+  filters: Filter[];
   query: { bool: BoolQuery };
   queryError?: Error;
   pageIndex: number;
-  // TODO: remove any, urlQuery is an object with query fields but we also add custom fields to it, need to assert usages
-  urlQuery: any;
+  urlQuery: URLQuery;
   setTableOptions: (options: CriteriaWithPagination<object>) => void;
-  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
-  handleUpdateQuery: (query: any) => void;
+  handleUpdateQuery: (query: URLQuery) => void;
   pageSize: number;
   setPageSize: Dispatch<SetStateAction<number | undefined>>;
   onChangeItemsPerPage: (newPageSize: number) => void;
   onChangePage: (newPageIndex: number) => void;
-  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
-  onSort: (sort: any) => void;
+  onSort: (sort: string[]) => void;
   onResetFilters: () => void;
   columnsLocalStorageKey: string;
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
@@ -48,17 +45,16 @@ export const useCloudPostureTable = ({
   dataView,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
-  additionalFilters,
+  nonPersistedFilters,
 }: {
-  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
-  defaultQuery?: (params: any) => any;
+  defaultQuery?: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
-  additionalFilters?: Filter[];
+  nonPersistedFilters?: Filter[];
 }): CloudPostureTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
 
   const onChangeItemsPerPage = useCallback(
@@ -119,7 +115,7 @@ export const useCloudPostureTable = ({
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
-    ...(additionalFilters ? { additionalFilters } : {}),
+    ...(nonPersistedFilters ? { nonPersistedFilters } : {}),
   });
 
   const handleUpdateQuery = useCallback(

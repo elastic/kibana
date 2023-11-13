@@ -6,6 +6,7 @@
  */
 import React, { useCallback } from 'react';
 import { Filter } from '@kbn/es-query';
+import { defaultLoadingRenderer } from '../../../components/cloud_posture_page';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import type { FindingsBaseProps } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
@@ -19,7 +20,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
       return (
         <LatestFindingsTable
           dataView={dataView}
-          additionalFilters={groupFilters}
+          nonPersistedFilters={groupFilters}
           height={DEFAULT_TABLE_HEIGHT}
           showDistributionBar={false}
         />
@@ -29,7 +30,7 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   );
 
   const {
-    canRenderGrouping,
+    isGroupSelect,
     groupData,
     grouping,
     isFetching,
@@ -39,10 +40,13 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     onChangeGroupsItemsPerPage,
     onChangeGroupsPage,
     setUrlQuery,
+    isGroupLoading,
   } = useLatestFindingsGrouping({ dataView });
 
-  if (canRenderGrouping) {
-    return (
+  if (isGroupSelect) {
+    return isGroupLoading ? (
+      defaultLoadingRenderer()
+    ) : (
       <div>
         <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
         <CloudSecurityGrouping

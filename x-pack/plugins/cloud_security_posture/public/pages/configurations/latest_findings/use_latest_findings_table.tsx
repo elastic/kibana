@@ -20,12 +20,12 @@ const columnsLocalStorageKey = 'cloudPosture:latestFindings:columns';
 export const useLatestFindingsTable = ({
   dataView,
   getDefaultQuery,
-  additionalFilters,
+  nonPersistedFilters,
   showDistributionBar,
 }: {
   dataView: DataView;
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
-  additionalFilters?: Filter[];
+  nonPersistedFilters?: Filter[];
   showDistributionBar?: boolean;
 }) => {
   const cloudPostureTable = useCloudPostureTable({
@@ -33,7 +33,7 @@ export const useLatestFindingsTable = ({
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
     defaultQuery: getDefaultQuery,
-    additionalFilters,
+    nonPersistedFilters,
   });
 
   const { query, sort, queryError, setUrlQuery, filters, getRowsFromPages } = cloudPostureTable;

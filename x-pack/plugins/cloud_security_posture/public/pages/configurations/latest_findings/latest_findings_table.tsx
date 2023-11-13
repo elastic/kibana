@@ -26,7 +26,7 @@ type LatestFindingsTableProps = FindingsBaseProps & {
   groupSelectorComponent?: JSX.Element;
   height?: number;
   showDistributionBar?: boolean;
-  additionalFilters?: Filter[];
+  nonPersistedFilters?: Filter[];
 };
 
 /**
@@ -86,7 +86,7 @@ export const LatestFindingsTable = ({
   groupSelectorComponent,
   height,
   showDistributionBar = true,
-  additionalFilters,
+  nonPersistedFilters,
 }: LatestFindingsTableProps) => {
   const {
     cloudPostureTable,
@@ -102,7 +102,7 @@ export const LatestFindingsTable = ({
   } = useLatestFindingsTable({
     dataView,
     getDefaultQuery,
-    additionalFilters,
+    nonPersistedFilters,
     showDistributionBar,
   });
 
