@@ -35,7 +35,7 @@ export function createCategoryRequest(
         hit: {
           top_hits: {
             size: EXAMPLE_LIMIT,
-            // sort: [timeField],
+            sort: [timeField],
             _source: field,
           },
         },
