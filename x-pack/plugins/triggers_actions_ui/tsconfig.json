@@ -55,6 +55,7 @@
     "@kbn/dashboard-plugin",
     "@kbn/licensing-plugin",
     "@kbn/expressions-plugin",
+    "@kbn/serverless",
   ],
   "exclude": ["target/**/*"]
 }

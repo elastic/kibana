@@ -15,7 +15,9 @@
 import type { CoreSetup, CoreStart, Plugin as PluginClass } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
+import { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { LogAIAssistantComponent } from './components/log_ai_assistant';
 // import type { OsqueryPluginStart } from '../../osquery/public';
 import { LogViewsServiceSetup, LogViewsServiceStart } from './services/log_views';
 
@@ -26,6 +28,7 @@ export interface LogsSharedClientSetupExports {
 
 export interface LogsSharedClientStartExports {
   logViews: LogViewsServiceStart;
+  LogAIAssistant: LogAIAssistantComponent;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -34,6 +37,7 @@ export interface LogsSharedClientSetupDeps {}
 export interface LogsSharedClientStartDeps {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
   uiActions: UiActionsStart;
 }
 

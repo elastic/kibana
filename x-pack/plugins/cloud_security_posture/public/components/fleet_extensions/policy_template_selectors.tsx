@@ -114,6 +114,7 @@ export const PolicyTemplateInfo = ({ postureType }: PolicyTemplateInfoProps) => 
         <EuiCallOut
           iconType="iInCircle"
           color="primary"
+          data-test-subj="additionalChargeCalloutTestSubj"
           title={
             <FormattedMessage
               id="xpack.csp.fleetIntegration.cnvm.additionalChargesCalloutTitle"

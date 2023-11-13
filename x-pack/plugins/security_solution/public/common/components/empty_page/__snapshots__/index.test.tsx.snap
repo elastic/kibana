@@ -18,11 +18,9 @@ exports[`EmptyPage component renders actions with descriptions 1`] = `
           description="My Description"
           footer={
             <EuiButton
-              color="primary"
               data-test-subj="empty-page-actions-action"
               fill={true}
               href="my/url/from/nowwhere"
-              size="m"
             >
               Do Something
             </EuiButton>
@@ -58,10 +56,8 @@ exports[`EmptyPage component renders actions without descriptions 1`] = `
         }
       >
         <EuiButton
-          color="primary"
           data-test-subj="empty-page-actions-action"
           href="my/url/from/nowwhere"
-          size="m"
         >
           Do Something
         </EuiButton>

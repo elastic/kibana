@@ -17,7 +17,7 @@ import type { HttpSetup, HttpStart } from '@kbn/core-http-browser';
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import type { OverlayStart } from '@kbn/core-overlays-browser';
-import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type { AnalyticsServiceSetup, AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type {
   App,
   AppDeepLink,
@@ -55,6 +55,7 @@ export interface SetupDeps {
 
 export interface StartDeps {
   http: HttpStart;
+  analytics: AnalyticsServiceStart;
   theme: ThemeServiceStart;
   overlays: OverlayStart;
   customBranding: CustomBrandingStart;
@@ -225,6 +226,7 @@ export class ApplicationService {
   }
 
   public async start({
+    analytics,
     http,
     overlays,
     theme,
@@ -364,6 +366,7 @@ export class ApplicationService {
         }
         return (
           <AppRouter
+            analytics={analytics}
             history={this.history}
             theme$={theme.theme$}
             mounters={availableMounters}

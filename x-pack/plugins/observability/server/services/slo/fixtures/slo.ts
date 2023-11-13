@@ -14,7 +14,7 @@ import {
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import {
   APMTransactionDurationIndicator,
   APMTransactionErrorRateIndicator,
@@ -186,7 +186,7 @@ export const createSLO = (params: Partial<SLO> = {}): SLO => {
   const now = new Date();
   return cloneDeep({
     ...defaultSLO,
-    id: uuidv1(),
+    id: uuidv4(),
     revision: 1,
     createdAt: now,
     updatedAt: now,

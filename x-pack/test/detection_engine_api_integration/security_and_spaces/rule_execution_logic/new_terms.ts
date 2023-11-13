@@ -11,10 +11,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { NewTermsRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { orderBy } from 'lodash';
 import { getCreateNewTermsRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
-import {
-  getNewTermsRuntimeMappings,
-  AGG_FIELD_NAME,
-} from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/new_terms/utils';
+
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
   createRule,
@@ -23,14 +20,12 @@ import {
   getOpenSignals,
   getPreviewAlerts,
   previewRule,
-  performSearchQuery,
 } from '../../utils';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_exception_entries';
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { dataGeneratorFactory } from '../../utils/data_generator';
 
-import { largeArraysBuckets } from './mocks/new_terms';
 import { removeRandomValuedProperties } from './utils';
 
 const historicalWindowStart = '2022-10-13T05:00:04.000Z';
@@ -468,7 +463,7 @@ export default ({ getService }: FtrProviderContext) => {
       const previewAlerts = await getPreviewAlerts({ es, previewId });
 
       expect(previewAlerts.length).eql(1);
-      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', 'false']);
+      expect(previewAlerts[0]._source?.['kibana.alert.new_terms']).eql(['user-0', false]);
     });
 
     it('should generate alerts for every term when history window is small', async () => {
@@ -621,6 +616,293 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts.length).eql(100);
       });
+
+      it('should not miss alerts if rule execution value combinations number is greater than 100', async () => {
+        // historical window documents
+        // 100 combinations for 127.0.0.1 x host-0, host-1, ..., host-100
+        const historicalDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              ip: ['127.0.0.1'],
+            },
+          },
+        ];
+
+        // rule execution documents
+        // 100 old combinations for 127.0.0.1 x host-0, host-1, ..., host-99
+        // 10 new combinations 127.0.0.1 x a-0, a-1, ..., a-9
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: [
+                ...Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+                ...Array.from(Array(10)).map((_, i) => `a-${i}`),
+              ],
+              ip: ['127.0.0.1'],
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.ip'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        // 10 alerts (with host.names a-[0-9]) should be generated
+        expect(previewAlerts.length).eql(10);
+      });
+
+      it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size', async () => {
+        // historical window documents
+        // number of combinations is 50,000
+        const historicalDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // number of combinations is 50,000 + new one
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+          {
+            host: {
+              name: 'host-140',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain', 'user.name'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        // only 1 alert should be generated
+        expect(previewAlerts.length).eql(1);
+      });
+
+      it('should not miss alerts for high cardinality values in arrays, over 10.000 composite page size spread over multiple pages', async () => {
+        // historical window documents
+        // number of combinations is 50,000
+        const historicalDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // number of combinations is 50,000 + 4 new ones
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: Array.from(Array(100)).map((_, i) => `host-${100 + i}`),
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+            user: {
+              name: Array.from(Array(5)).map((_, i) => `user-${100 + i}`),
+            },
+          },
+          {
+            host: {
+              name: 'host-102',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+          {
+            host: {
+              name: 'host-140',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+          {
+            host: {
+              name: 'host-133',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+          {
+            host: {
+              name: 'host-132',
+              domain: 'domain-9999',
+            },
+            user: {
+              name: 'user-9999',
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain', 'user.name'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        // only 4 alerts should be generated
+        expect(previewAlerts.length).eql(4);
+      });
+
+      it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have more than 100', async () => {
+        // historical window documents
+        // number of combinations 400: [a, b] x domain-100, domain-101, ..., domain-299
+        const historicalDocuments = [
+          {
+            host: {
+              name: ['a', 'b'],
+              domain: Array.from(Array(200)).map((_, i) => `domain-${100 + i}`),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // number of combinations 101: [a] x domain-100, domain-101, ..., domain-199 + b x domain-201
+        // no new combination of values emitted
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: 'a',
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+          },
+          {
+            host: {
+              name: 'b',
+              domain: 'domain-201',
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        expect(previewAlerts.length).eql(0);
+      });
+
+      it('should not generate false positive alerts if rule historical window combinations overlap execution ones, which have precisely 100', async () => {
+        // historical window documents
+        // number of combinations 400: [a, b] x domain-100, domain-101, ..., domain-299
+        const historicalDocuments = [
+          {
+            host: {
+              name: ['a', 'b'],
+              domain: Array.from(Array(200)).map((_, i) => `domain-${100 + i}`),
+            },
+          },
+        ];
+
+        // rule execution documents
+        // number of combinations 100: [a] x domain-100, domain-101, ..., domain-199
+        // no new combination of values emitted
+        const ruleExecutionDocuments = [
+          {
+            host: {
+              name: 'a',
+              domain: Array.from(Array(100)).map((_, i) => `domain-${100 + i}`),
+            },
+          },
+        ];
+
+        const testId = await newTermsTestExecutionSetup({
+          historicalDocuments,
+          ruleExecutionDocuments,
+        });
+
+        const rule: NewTermsRuleCreateProps = {
+          ...getCreateNewTermsRulesSchemaMock('rule-1', true),
+          index: ['new_terms'],
+          new_terms_fields: ['host.name', 'host.domain'],
+          from: ruleExecutionStart,
+          history_window_start: historicalWindowStart,
+          query: `id: "${testId}"`,
+        };
+
+        const { previewId } = await previewRule({ supertest, rule });
+        const previewAlerts = await getPreviewAlerts({ es, previewId, size: 200 });
+
+        expect(previewAlerts.length).eql(0);
+      });
     });
 
     describe('timestamp override and fallback', () => {
@@ -751,300 +1033,6 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_level).to.eql('Low');
         expect(previewAlerts[0]?._source?.host?.risk?.calculated_score_norm).to.eql(23);
-      });
-    });
-
-    describe('runtime field', () => {
-      it('should return runtime field created from 2 single values', async () => {
-        // encoded base64 values of "host-0" and  "127.0.0.1" joined with underscore
-        const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x'];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'first_doc' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['host.name', 'host.ip'],
-            [
-              {
-                key: {
-                  'host.name': 'host-0',
-                  'host.ip': '127.0.0.1',
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should not return runtime field created from 2 single values if its value is not in buckets', async () => {
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'first_doc' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['host.name', 'host.ip'],
-            [
-              {
-                key: {
-                  'host.name': 'host-0',
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.be(undefined);
-      });
-
-      it('should return runtime field created from 2 single values, including number value', async () => {
-        // encoded base64 values of "user-0" and  0 joined with underscore
-        const expectedEncodedValues = ['dXNlci0w_MA=='];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'first_doc' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['user.name', 'user.id'],
-            [
-              {
-                key: {
-                  'user.name': 'user-0',
-                  'user.id': 0,
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should return runtime field created from 2 single values, including boolean value', async () => {
-        // encoded base64 values of "user-0" and  true joined with underscore
-        const expectedEncodedValues = ['dXNlci0w_dHJ1ZQ=='];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'first_doc' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['user.name', 'user.enabled'],
-            [
-              {
-                key: {
-                  'user.name': 'user-0',
-                  'user.enabled': true,
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should return runtime field created from 3 single values', async () => {
-        // encoded base64 values of "host-0" and  "127.0.0.1" and "user-0" joined with underscore
-        const expectedEncodedValues = ['aG9zdC0w_MTI3LjAuMC4x_dXNlci0w'];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'first_doc' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['host.name', 'host.ip', 'user.name'],
-            [
-              {
-                key: {
-                  'host.name': 'host-0',
-                  'host.ip': '127.0.0.1',
-                  'user.name': 'user-0',
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should return runtime field created from fields of arrays', async () => {
-        // encoded base64 values of all combinations of ["192.168.1.1", "192.168.1.2"]
-        // and ["tag-new-1", "tag-2", "tag-new-3"] joined with underscore
-        const expectedEncodedValues = [
-          'MTkyLjE2OC4xLjE=_dGFnLTI=',
-          'MTkyLjE2OC4xLjE=_dGFnLW5ldy0x',
-          'MTkyLjE2OC4xLjE=_dGFnLW5ldy0z',
-          'MTkyLjE2OC4xLjI=_dGFnLTI=',
-          'MTkyLjE2OC4xLjI=_dGFnLW5ldy0x',
-          'MTkyLjE2OC4xLjI=_dGFnLW5ldy0z',
-        ];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'doc_with_source_ip_as_array' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['source.ip', 'tags'],
-            [
-              {
-                key: {
-                  tags: 'tag-new-1',
-                  'source.ip': '192.168.1.1',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-2',
-                  'source.ip': '192.168.1.1',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-new-3',
-                  'source.ip': '192.168.1.1',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-new-1',
-                  'source.ip': '192.168.1.2',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-2',
-                  'source.ip': '192.168.1.2',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-new-3',
-                  'source.ip': '192.168.1.2',
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should return runtime field without duplicated values', async () => {
-        // encoded base64 values of "host-0" and ["tag-1", "tag-2", "tag-2", "tag-1", "tag-1"]
-        // joined with underscore, without duplicates in tags
-        const expectedEncodedValues = ['aG9zdC0w_dGFnLTE=', 'aG9zdC0w_dGFnLTI='];
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'doc_with_duplicated_tags' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['host.name', 'tags'],
-            [
-              {
-                key: {
-                  tags: 'tag-1',
-                  'host.name': 'host-0',
-                },
-                doc_count: 1,
-              },
-              {
-                key: {
-                  tags: 'tag-2',
-                  'host.name': 'host-0',
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.eql(expectedEncodedValues);
-      });
-
-      it('should not return runtime field if one of fields is null', async () => {
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'doc_with_null_field' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME, 'possibly_null_field', 'host.name'],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['host.name', 'possibly_null_field'],
-            [
-              {
-                key: {
-                  'host.name': 'host-0',
-                  possibly_null_field: null,
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits.length).to.be(1);
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME]).to.be(undefined);
-        expect(hits.hits[0].fields?.possibly_null_field).to.be(undefined);
-        expect(hits.hits[0].fields?.['host.name']).to.eql(['host-0']);
-      });
-
-      it('should not return runtime field if one of fields is not defined in a document', async () => {
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'doc_without_large_arrays' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['host.name', 'large_array_5'],
-            [
-              {
-                key: {
-                  'host.name': 'host-0',
-                },
-                doc_count: 1,
-              },
-            ]
-          ),
-        });
-
-        expect(hits.hits.length).to.be(1);
-        expect(hits.hits[0].fields).to.be(undefined);
-      });
-
-      // There is a limit in ES for a number of emitted values in runtime field (100)
-      // This test makes sure runtime script doesn't cause query failure and returns first 100 results
-      it('should return runtime field if number of emitted values greater than 100', async () => {
-        const { hits } = await performSearchQuery({
-          es,
-          query: { match: { id: 'first_doc' } },
-          index: 'new_terms',
-          fields: [AGG_FIELD_NAME],
-          runtimeMappings: getNewTermsRuntimeMappings(
-            ['large_array_20', 'large_array_10'],
-            largeArraysBuckets
-          ),
-        });
-
-        // runtime field should have 100 values, as large_array_20 and large_array_10
-        // give in total 200 combinations
-        expect(hits.hits[0].fields?.[AGG_FIELD_NAME].length).to.be(100);
       });
     });
   });

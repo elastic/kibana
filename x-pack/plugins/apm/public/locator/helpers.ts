@@ -14,9 +14,15 @@ import type { TimePickerTimeDefaults } from '../components/shared/date_picker/ty
 export const APMLocatorPayloadValidator = t.union([
   t.type({ serviceName: t.undefined }),
   t.intersection([
+    t.type({ serviceName: t.string }),
+    t.type({ dashboardId: t.string }),
+    t.type({ query: environmentRt }),
+  ]),
+  t.intersection([
     t.type({
       serviceName: t.string,
     }),
+    t.partial({ dashboardId: t.undefined }),
     t.partial({
       serviceOverviewTab: t.keyof({
         traces: null,
@@ -65,24 +71,40 @@ export function getPathForServiceDetail(
     });
   }
 
-  const mapObj = {
-    logs: '/services/{serviceName}/logs',
-    metrics: '/services/{serviceName}/metrics',
-    traces: '/services/{serviceName}/transactions',
-    errors: '/services/{serviceName}/errors',
-    default: '/services/{serviceName}/overview',
-  } as const;
-  const apmPath = mapObj[payload.serviceOverviewTab || 'default'];
+  let path;
+  if (payload.dashboardId !== undefined) {
+    const apmPath = '/services/{serviceName}/dashboards';
+    path = apmRouter.link(apmPath, {
+      path: {
+        serviceName: payload.serviceName,
+      },
+      query: {
+        ...defaultQueryParams,
+        ...payload.query,
+        dashboardId: payload.dashboardId,
+      },
+    });
+    return path;
+  } else {
+    const mapObj = {
+      logs: '/services/{serviceName}/logs',
+      metrics: '/services/{serviceName}/metrics',
+      traces: '/services/{serviceName}/transactions',
+      errors: '/services/{serviceName}/errors',
+      default: '/services/{serviceName}/overview',
+    } as const;
+    const apmPath = mapObj[payload.serviceOverviewTab || 'default'];
 
-  const query = {
-    ...defaultQueryParams,
-    ...payload.query,
-  };
+    const query = {
+      ...defaultQueryParams,
+      ...payload.query,
+    };
 
-  const path = apmRouter.link(apmPath, {
-    path: { serviceName: payload.serviceName },
-    query,
-  });
+    path = apmRouter.link(apmPath, {
+      path: { serviceName: payload.serviceName },
+      query,
+    });
+  }
 
   return path;
 }

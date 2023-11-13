@@ -163,7 +163,12 @@ const QueriesFieldComponent: React.FC<QueriesFieldProps> = ({ euiFieldProps }) =
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>
               {!tableSelectedItems.length ? (
-                <EuiButton fill onClick={handleShowAddFlyout} iconType="plusInCircle">
+                <EuiButton
+                  data-test-subj="add-query-button"
+                  fill
+                  onClick={handleShowAddFlyout}
+                  iconType="plusInCircle"
+                >
                   <FormattedMessage
                     id="xpack.osquery.pack.queriesForm.addQueryButtonLabel"
                     defaultMessage="Add query"

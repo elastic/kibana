@@ -22,10 +22,8 @@ exports[`render 1`] = `
     grow={false}
   >
     <EuiButton
-      color="primary"
       fill={true}
       href="/app/myapp"
-      size="m"
     >
       launch myapp
     </EuiButton>

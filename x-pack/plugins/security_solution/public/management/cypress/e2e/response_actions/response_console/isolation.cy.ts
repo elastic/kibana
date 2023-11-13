@@ -19,6 +19,7 @@ import { createAgentPolicyTask, getEndpointIntegrationVersion } from '../../../t
 import {
   checkEndpointListForOnlyIsolatedHosts,
   checkEndpointListForOnlyUnIsolatedHosts,
+  isolateHostFromEndpointList,
 } from '../../../tasks/isolate';
 
 import { login } from '../../../tasks/login';
@@ -26,12 +27,13 @@ import { enableAllPolicyProtections } from '../../../tasks/endpoint_policy';
 import { createEndpointHost } from '../../../tasks/create_endpoint_host';
 import { deleteAllLoadedEndpointData } from '../../../tasks/delete_all_endpoint_data';
 
-describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
+// Failing: See https://github.com/elastic/kibana/issues/170470
+describe.skip('Response console', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
   });
 
-  describe('Host Isolation: isolate and release an endpoint', () => {
+  describe('Host Isolation:', () => {
     let indexedPolicy: IndexedFleetEndpointPolicyResponse;
     let policy: PolicyData;
     let createdHost: CreateAndEnrollEndpointHostResponse;
@@ -66,7 +68,21 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       }
     });
 
-    it('should isolate host from response console', () => {
+    it('should release an isolated host from response console', () => {
+      const command = 'release';
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      // isolate the host first
+      isolateHostFromEndpointList();
+      checkEndpointListForOnlyIsolatedHosts();
+      openResponseConsoleFromEndpointList();
+      performCommandInputChecks(command);
+      submitCommand();
+      waitForCommandToBeExecuted(command);
+      waitForEndpointListPageToBeLoaded(createdHost.hostname);
+      checkEndpointListForOnlyUnIsolatedHosts();
+    });
+
+    it('should isolate a host from response console', () => {
       const command = 'isolate';
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyUnIsolatedHosts();
@@ -76,18 +92,6 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       waitForCommandToBeExecuted(command);
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       checkEndpointListForOnlyIsolatedHosts();
-    });
-
-    it('should release host from response console', () => {
-      const command = 'release';
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      checkEndpointListForOnlyIsolatedHosts();
-      openResponseConsoleFromEndpointList();
-      performCommandInputChecks(command);
-      submitCommand();
-      waitForCommandToBeExecuted(command);
-      waitForEndpointListPageToBeLoaded(createdHost.hostname);
-      checkEndpointListForOnlyUnIsolatedHosts();
     });
   });
 });
