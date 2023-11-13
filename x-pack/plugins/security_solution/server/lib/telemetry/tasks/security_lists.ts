@@ -90,7 +90,6 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_ENDPOINT_EXCEPTION
           );
-          tlog(logger, `EP Exceptions: ${epExceptionsJson}`);
           count += epExceptionsJson.length;
 
           const batches = batchTelemetryRecords(epExceptionsJson, maxTelemetryBatch);
@@ -109,7 +108,6 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
             licenseInfo,
             LIST_ENDPOINT_EVENT_FILTER
           );
-          tlog(logger, `EP Event Filters: ${epFiltersJson}`);
           count += epFiltersJson.length;
 
           const batches = batchTelemetryRecords(epFiltersJson, maxTelemetryBatch);
@@ -127,7 +125,6 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           clusterInfo,
           licenseInfo
         );
-        tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
