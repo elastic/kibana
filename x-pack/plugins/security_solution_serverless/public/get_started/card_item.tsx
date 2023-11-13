@@ -22,6 +22,7 @@ import * as i18n from './translations';
 import { CardStep } from './card_step';
 import { getCard } from './helpers';
 import type { ProductLine } from '../../common/product';
+import { AllDoneText } from './all_done_text';
 
 const CardItemComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -66,6 +67,8 @@ const CardItemComponent: React.FC<{
     },
     [cardId, expandCard, onCardClicked]
   );
+  const allStepsDone =
+    (timeInMins == null || timeInMins === 0) && (stepsLeft == null || stepsLeft === 0);
   const hasActiveSteps = activeStepIds != null && activeStepIds.length > 0;
   return cardItem ? (
     <EuiPanel
@@ -86,7 +89,7 @@ const CardItemComponent: React.FC<{
           <EuiFlexGroup
             onClick={toggleCard}
             css={css`
-              cursor: pointer;
+              cursor: ${cardItem.hideSteps ? 'default' : 'pointer'};
             `}
             gutterSize="m"
           >
@@ -105,24 +108,25 @@ const CardItemComponent: React.FC<{
                 <h4>{cardItem.title}</h4>
               </EuiTitle>
             </EuiFlexItem>
-            {(timeInMins != null || stepsLeft != null) && (
-              <EuiFlexItem
-                css={css`
-                  align-items: end;
-                `}
-              >
+
+            <EuiFlexItem
+              css={css`
+                align-items: end;
+                align-self: center;
+              `}
+            >
+              {allStepsDone && <AllDoneText />}
+              {!allStepsDone && (
                 <EuiText
                   size="s"
                   css={css`
                     line-height: ${euiTheme.base * 2}px;
                   `}
                 >
-                  {stepsLeft != null && stepsLeft > 0 && (
-                    <strong>{i18n.STEPS_LEFT(stepsLeft)}</strong>
-                  )}
+                  {stepsLeft != null && stepsLeft > 0 && <span>{i18n.TASKS_LEFT(stepsLeft)}</span>}
                 </EuiText>
-              </EuiFlexItem>
-            )}
+              )}
+            </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         {expandCard && hasActiveSteps && !cardItem.hideSteps && (

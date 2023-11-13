@@ -41,12 +41,12 @@ export const STEP_TIME_MIN = (min: number) =>
     }
   );
 
-export const STEPS_LEFT = (steps: number) =>
+export const TASKS_LEFT = (tasks: number) =>
   i18n.translate(
     'xpack.securitySolutionServerless.getStarted.togglePanel.progressTracker.stepsLeft',
     {
-      defaultMessage: '{steps} {steps, plural, =1 {step} other {steps}} left',
-      values: { steps },
+      defaultMessage: '{tasks} {tasks, plural, =1 {task} other {tasks}} left',
+      values: { tasks },
     }
   );
 
@@ -425,5 +425,12 @@ export const TOGGLE_PANEL_EMPTY_DESCRIPTION = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.empty.description',
   {
     defaultMessage: `Switch on a toggle to continue your curated "Get Started" experience`,
+  }
+);
+
+export const ALL_DONE_TEXT = i18n.translate(
+  'xpack.securitySolutionServerless.getStarted.togglePanel.done.title',
+  {
+    defaultMessage: 'All done here!',
   }
 );
