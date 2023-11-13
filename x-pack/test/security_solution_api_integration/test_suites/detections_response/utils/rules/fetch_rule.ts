@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
@@ -14,25 +13,19 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 /**
  * Helper to cut down on the noise in some of the tests. This gets
  * a particular rule.
+ *
  * @param supertest The supertest deps
  * @param rule The rule to create
  */
-export const getRule = async (
+export const fetchRule = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
-  log: ToolingLog,
-  ruleId: string
-): Promise<RuleResponse> => {
-  const response = await supertest
-    .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
-    .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31');
-
-  if (response.status !== 200) {
-    log.error(
-      `Did not get an expected 200 "ok" when getting a rule (getRule). CI issues could happen. Suspect this line if you are seeing CI issues. body: ${JSON.stringify(
-        response.body
-      )}, status: ${JSON.stringify(response.status)}`
-    );
-  }
-  return response.body;
-};
+  idOrRuleId: { id: string; ruleId?: never } | { id?: never; ruleId: string }
+): Promise<RuleResponse> =>
+  (
+    await supertest
+      .get(DETECTION_ENGINE_RULES_URL)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .query({ id: idOrRuleId.id, rule_id: idOrRuleId.ruleId })
+      .expect(200)
+  ).body;
