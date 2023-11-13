@@ -27,7 +27,7 @@ import {
   byteSizeValueToNumber,
 } from '@kbn/reporting-common';
 import type { TaskRunResult } from '@kbn/reporting-common/types';
-import { ReportingConfigType } from '@kbn/reporting-config-server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 
 import { CONTENT_TYPE_CSV } from './constants';

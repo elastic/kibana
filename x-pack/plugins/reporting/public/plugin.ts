@@ -27,10 +27,10 @@ import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public'
 import { ClientConfigType } from '@kbn/reporting-public';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
 
-import { ReportingSetup, ReportingStart } from '.';
-import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JobId } from '../common/constants';
-import { durationToNumber } from '../common/schema_utils';
-import { JobSummarySet } from '../common/types';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, durationToNumber } from '@kbn/reporting-common';
+import type { JobId } from '@kbn/reporting-common/types';
+
+import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
@@ -45,7 +45,7 @@ import type {
   UiActionsStart,
 } from './shared_imports';
 import { AppNavLinkStatus } from './shared_imports';
-
+import type { JobSummarySet } from './types';
 function getStored(): JobId[] {
   const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];

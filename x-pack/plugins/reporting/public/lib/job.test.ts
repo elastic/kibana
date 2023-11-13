@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { jobTypes } from '../../common/constants';
+import { jobTypes } from '@kbn/reporting-common';
+
 import { mockJobs } from '../../common/test';
 import { Job } from './job';
 

@@ -22,13 +22,13 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
 import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { Logger } from '@kbn/logging';
-import { ReportingServerInfo } from '@kbn/reporting-common/types';
-import { ReportingConfigType } from '@kbn/reporting-config-server';
+import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 
-import { CreateJobFn, RunTaskFn } from './types';
+import type { CreateJobFn, RunTaskFn } from './types';
+import type { ReportingConfigType } from '.';
 
 export interface BaseExportTypeSetupDeps {
   basePath: Pick<IBasePath, 'set'>;

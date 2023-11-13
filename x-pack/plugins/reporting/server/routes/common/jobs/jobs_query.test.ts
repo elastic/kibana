@@ -9,8 +9,8 @@ import { set } from '@kbn/safer-lodash-set';
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { JOB_STATUS } from '@kbn/reporting-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { statuses } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
 import { jobsQueryFactory } from './jobs_query';
 
@@ -186,7 +186,7 @@ describe('jobsQuery', () => {
               _id: 'id1',
               jobtype: 'pdf',
               output: { content: 'Some error' },
-              status: statuses.JOB_STATUS_FAILED,
+              status: JOB_STATUS.FAILED,
             },
           },
         ])
@@ -220,7 +220,7 @@ describe('jobsQuery', () => {
             _source: {
               _id: 'id1',
               jobtype: 'pdf',
-              status: statuses.JOB_STATUS_PENDING,
+              status: JOB_STATUS.PENDING,
             },
           },
         ])

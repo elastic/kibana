@@ -10,6 +10,7 @@ import type {
   LayoutParams,
   PerformanceMetrics as ScreenshotMetrics,
 } from '@kbn/screenshotting-plugin/common';
+import { JOB_STATUS } from './constants';
 import type { LocatorParams } from './url';
 
 export * from './url';
@@ -129,7 +130,7 @@ export interface ReportSource {
   migration_version: string; // for reminding the user to update their POST URL
   attempts: number; // initially populated as 0
   created_at: string; // timestamp in UTC
-  status: JobStatus;
+  status: JOB_STATUS;
 
   /*
    * `output` is only populated if the report job is completed or failed.
@@ -156,20 +157,6 @@ export interface ReportSource {
 export interface ReportDocument extends ReportDocumentHead {
   _source: ReportSource;
 }
-
-/*
- * JobStatus:
- *  - Begins as 'pending'
- *  - Changes to 'processing` when the job is claimed
- *  - Then 'completed' | 'failed' when execution is done
- * If the job needs a retry, it reverts back to 'pending'.
- */
-export type JobStatus =
-  | 'completed' // Report was successful
-  | 'completed_with_warnings' // The download available for troubleshooting - it **should** show a meaningful error
-  | 'pending' // Report job is waiting to be claimed
-  | 'processing' // Report job has been claimed and is executing
-  | 'failed'; // Report was not successful, and all retries are done. Nothing to download.
 
 /*
  * Info API response: to avoid unnecessary large payloads on a network, the

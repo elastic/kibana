@@ -9,10 +9,10 @@ import { promisify } from 'util';
 
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
+import { ALLOWED_JOB_CONTENT_TYPES } from '@kbn/reporting-common';
 
 import { getCounters } from '..';
 import { ReportingCore } from '../../..';
-import { ALLOWED_JOB_CONTENT_TYPES } from '../../../../common/constants';
 import { getContentStream } from '../../../lib';
 import { ReportingRequestHandlerContext, ReportingUser } from '../../../types';
 import { handleUnavailable } from '../generate';

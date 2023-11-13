@@ -34,6 +34,5 @@
     "@kbn/core-http-router-server-internal",
     "@kbn/core-http-request-handler-context-server",
     "@kbn/reporting-export-types-pdf-common",
-    "@kbn/reporting-config-server",
   ]
 }
