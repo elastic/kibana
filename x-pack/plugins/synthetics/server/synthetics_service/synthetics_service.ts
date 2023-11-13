@@ -423,6 +423,9 @@ export class SyntheticsService {
     };
 
     for await (const result of finder.find()) {
+      if (result.saved_objects.length === 0) {
+        return;
+      }
       try {
         if (!output) {
           output = await this.getOutput();
