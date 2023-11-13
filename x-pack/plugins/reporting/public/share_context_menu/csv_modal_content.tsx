@@ -13,10 +13,10 @@ import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useState } from 'react';
+import useMountedState from 'react-use/lib/useMountedState';
 import { BaseParams } from '../../common';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
-import useMountedState from 'react-use/lib/useMountedState';
 
 export interface CsvModalProps {
   apiClient: ReportingAPIClient;

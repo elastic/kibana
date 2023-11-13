@@ -25,12 +25,12 @@ import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import React, { FC, useEffect, useState } from 'react';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common/layout';
+import useMountedState from 'react-use/lib/useMountedState';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 import { JobParamsProviderOptions } from '.';
 import { AppParams } from '../lib/reporting_api_client/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './reporting_panel_content/components';
 import { getMaxUrlLength } from './reporting_panel_content/constants';
-import useMountedState from 'react-use/lib/useMountedState';
 
 export interface ReportingModalProps {
   apiClient: ReportingAPIClient;
