@@ -164,8 +164,10 @@ enabled:
   - x-pack/test/alerting_api_integration/security_and_spaces/group1/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group3/config.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group4/config.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group3/config_with_schedule_circuit_breaker.ts
   - x-pack/test/alerting_api_integration/security_and_spaces/group2/config_non_dedicated_task_runner.ts
+  - x-pack/test/alerting_api_integration/security_and_spaces/group4/config_non_dedicated_task_runner.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group1/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group2/config.ts
   - x-pack/test/alerting_api_integration/spaces_only/tests/alerting/group3/config.ts
@@ -445,7 +447,6 @@ enabled:
   - x-pack/performance/journeys/apm_service_inventory.ts
   - x-pack/test/custom_branding/config.ts
   - x-pack/test/profiling_api_integration/cloud/config.ts
-
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/serverless.config.ts
