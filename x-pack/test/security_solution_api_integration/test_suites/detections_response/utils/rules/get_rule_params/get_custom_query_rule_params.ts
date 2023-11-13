@@ -15,19 +15,21 @@ import { CreateRulePropsRewrites } from './types';
  *
  * @param rewrites rule params rewrites, see QueryRuleCreateProps for possible fields
  */
-export const getCustomQueryRuleParams = (
+export function getCustomQueryRuleParams(
   rewrites?: CreateRulePropsRewrites<QueryRuleCreateProps>
-): QueryRuleCreateProps => ({
-  type: 'query',
-  query: '*:*',
-  name: 'Custom query rule',
-  description: 'Custom query rule description',
-  risk_score: 1,
-  rule_id: 'rule-1',
-  severity: 'high',
-  index: ['logs-*'],
-  interval: '100m',
-  from: 'now-6m',
-  enabled: false,
-  ...rewrites,
-});
+): QueryRuleCreateProps {
+  return {
+    type: 'query',
+    query: '*:*',
+    name: 'Custom query rule',
+    description: 'Custom query rule description',
+    risk_score: 1,
+    rule_id: 'rule-1',
+    severity: 'high',
+    index: ['logs-*'],
+    interval: '100m',
+    from: 'now-6m',
+    enabled: false,
+    ...rewrites,
+  };
+}

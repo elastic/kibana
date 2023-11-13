@@ -8,18 +8,20 @@
 import type { SavedQueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { CreateRulePropsRewrites } from './types';
 
-export const getSavedQueryRuleParams = (
+export function getSavedQueryRuleParams(
   rewrites?: CreateRulePropsRewrites<SavedQueryRuleCreateProps>
-): SavedQueryRuleCreateProps => ({
-  type: 'saved_query',
-  saved_id: 'some-id',
-  query: 'host.name: *',
-  name: 'Saved query rule',
-  description: 'Saved query rule description',
-  index: ['logs-*'],
-  interval: '100m',
-  from: 'now-50000h',
-  severity: 'low',
-  risk_score: 21,
-  ...rewrites,
-});
+): SavedQueryRuleCreateProps {
+  return {
+    type: 'saved_query',
+    saved_id: 'some-id',
+    query: 'host.name: *',
+    name: 'Saved query rule',
+    description: 'Saved query rule description',
+    index: ['logs-*'],
+    interval: '100m',
+    from: 'now-50000h',
+    severity: 'low',
+    risk_score: 21,
+    ...rewrites,
+  };
+}

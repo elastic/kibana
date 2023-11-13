@@ -8,21 +8,23 @@
 import type { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { CreateRulePropsRewrites } from './types';
 
-export const getThresholdRuleParams = (
+export function getThresholdRuleParams(
   rewrites?: CreateRulePropsRewrites<ThresholdRuleCreateProps>
-): ThresholdRuleCreateProps => ({
-  type: 'threshold',
-  query: '*:*',
-  threshold: {
-    field: [],
-    value: 1,
-  },
-  name: 'Threshold Rule',
-  description: 'Threshold Rule description',
-  severity: 'high',
-  risk_score: 17,
-  index: ['logs-*'],
-  interval: '100m',
-  from: 'now-50000h',
-  ...rewrites,
-});
+): ThresholdRuleCreateProps {
+  return {
+    type: 'threshold',
+    query: '*:*',
+    threshold: {
+      field: [],
+      value: 1,
+    },
+    name: 'Threshold Rule',
+    description: 'Threshold Rule description',
+    severity: 'high',
+    risk_score: 17,
+    index: ['logs-*'],
+    interval: '100m',
+    from: 'now-50000h',
+    ...rewrites,
+  };
+}
