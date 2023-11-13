@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-export default function ({ loadTestFile, getService, getPageObjects }) {
+export default function ({ loadTestFile, getService }) {
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const browser = getService('browser');
   const log = getService('log');
   const supertest = getService('supertest');
-  const security = getService('security');
-  const PageObjects = getPageObjects(['discover', 'common']);
+  // const security = getService('security');
+  // const PageObjects = getPageObjects(['discover', 'common']);
 
   describe('maps app', function () {
     this.tags(['skipFirefox']);
@@ -52,6 +52,7 @@ export default function ({ loadTestFile, getService, getPageObjects }) {
       });
       await browser.setWindowSize(1600, 1000);
 
+      /*
       await security.testUser.setRoles([
         'kibana_admin',
         'test_logstash_reader',
@@ -59,6 +60,7 @@ export default function ({ loadTestFile, getService, getPageObjects }) {
       ]); // necessary to refresh field list
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.refreshFieldList(); // refreshes field list cache from previous tests
+      */
     });
 
     after(async () => {

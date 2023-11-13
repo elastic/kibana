@@ -21,9 +21,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
 
+      /*
       await PageObjects.settings.navigateTo();
       await PageObjects.settings.createIndexPattern('logs-*-*', '@timestamp');
       await PageObjects.settings.refreshDataViewFieldList();
+      */
     });
 
     after(async () => {
