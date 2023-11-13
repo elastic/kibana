@@ -26,6 +26,7 @@ import type {
   ESQLSource,
   ESQLColumn,
   ESQLCommandOption,
+  ESQLAstItem,
 } from './types';
 
 export function nonNullable<T>(v: T): v is NonNullable<T> {
@@ -123,6 +124,40 @@ export function createFunction(
     args: [],
     incomplete: Boolean(ctx.exception),
   };
+}
+
+function walkFunctionStructure(
+  args: ESQLAstItem[],
+  initialLocation: ESQLLocation,
+  prop: 'min' | 'max',
+  getNextItemIndex: (arg: ESQLAstItem[]) => number
+) {
+  let nextArg: ESQLAstItem | undefined = args[getNextItemIndex(args)];
+  const location = { ...initialLocation };
+  while (Array.isArray(nextArg) || nextArg) {
+    if (Array.isArray(nextArg)) {
+      nextArg = nextArg[getNextItemIndex(nextArg)];
+    } else {
+      location[prop] = Math[prop](location[prop], nextArg.location[prop]);
+      if (nextArg.type === 'function') {
+        nextArg = nextArg.args[getNextItemIndex(nextArg.args)];
+      } else {
+        nextArg = undefined;
+      }
+    }
+  }
+  return location[prop];
+}
+
+export function computeLocationExtends(fn: ESQLFunction) {
+  const location = fn.location;
+  if (fn.args) {
+    // get min location navigating in depth keeping the left/first arg
+    location.min = walkFunctionStructure(fn.args, location, 'min', () => 0);
+    // get max location navigating in depth keeping the right/last arg
+    location.max = walkFunctionStructure(fn.args, location, 'max', (args) => args.length - 1);
+  }
+  return location;
 }
 
 function getQuotedText(ctx: ParserRuleContext) {

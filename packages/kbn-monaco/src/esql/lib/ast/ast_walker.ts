@@ -69,6 +69,7 @@ import {
   createList,
   createNumericLiteral,
   sanifyIdentifierString,
+  computeLocationExtends,
 } from './ast_helpers';
 import type {
   ESQLLiteral,
@@ -204,6 +205,10 @@ function visitValueExpression(ctx: ValueExpressionContext) {
       visitOperatorExpression(ctx._left)!,
       visitOperatorExpression(ctx._right)!
     );
+    // update the location of the comparisonFn based on arguments
+    const argsLocationExtends = computeLocationExtends(comparisonFn);
+    comparisonFn.location = argsLocationExtends;
+
     return comparisonFn;
   }
 }
@@ -401,6 +406,9 @@ export function visitField(ctx: FieldContext) {
       createColumn(ctx.qualifiedName()!),
       collectBooleanExpression(ctx.booleanExpression())
     );
+    // update the location of the assign based on arguments
+    const argsLocationExtends = computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
     return [fn];
   }
   return collectBooleanExpression(ctx.booleanExpression());
@@ -427,7 +435,9 @@ export function visitByOption(ctx: StatsCommandContext) {
   }
   const option = createOption(ctx.BY()!.text, ctx);
   for (const qnCtx of ctx.grouping()?.qualifiedName() || []) {
-    option.args.push(createColumn(qnCtx));
+    if (qnCtx?.text?.length) {
+      option.args.push(createColumn(qnCtx));
+    }
   }
   return [option];
 }
