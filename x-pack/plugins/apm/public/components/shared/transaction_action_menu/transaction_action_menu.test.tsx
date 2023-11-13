@@ -412,9 +412,9 @@ describe('TransactionActionMenu component', () => {
             component
               .getByTestId(`${key}.value`)
               .querySelector(
-                '[data-test-subj="comboBoxInput"] span'
+                '[data-test-subj="comboBoxSearchInput"]'
               ) as HTMLSpanElement
-          ).textContent,
+          ).value,
         };
       };
       expect(getFilterKeyValue('service.name')).toEqual({
