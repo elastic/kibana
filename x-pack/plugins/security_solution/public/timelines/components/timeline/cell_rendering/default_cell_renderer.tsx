@@ -50,7 +50,7 @@ export const DefaultCellRenderer: React.FC<CellValueElementProps> = ({
     : 'eui-displayInlineBlock eui-textTruncate';
   return (
     <StyledContent className={styledContentClassName} $isDetails={isDetails}>
-      {getColumnRenderer(header.id, columnRenderers, data).renderColumn({
+      {getColumnRenderer(header.id, columnRenderers, data, context).renderColumn({
         asPlainText: asPlainText ?? asPlainTextDefault, // we want to render value with links as plain text but keep other formatters like badge. Except rule name for non preview tables
         columnName: header.id,
         ecsData,

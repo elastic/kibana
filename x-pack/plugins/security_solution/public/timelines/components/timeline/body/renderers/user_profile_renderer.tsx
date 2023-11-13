@@ -16,7 +16,7 @@ import { profileUidColumns } from '../../../../../detections/configurations/secu
 import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 
 export const userProfileColumnRenderer: ColumnRenderer = {
-  isInstance: (columnName) => profileUidColumns.includes(columnName),
+  isInstance: (columnName, _, context) => profileUidColumns.includes(columnName) && !!context,
   renderColumn: ({
     columnName,
     ecsData,

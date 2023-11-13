@@ -14,7 +14,11 @@ import type { TimelineNonEcsData } from '../../../../../../common/search_strateg
 import type { RenderCellValueContext } from '../../../../../detections/configurations/security_solution_detections/fetch_page_context';
 
 export interface ColumnRenderer {
-  isInstance: (columnName: string, data: TimelineNonEcsData[]) => boolean;
+  isInstance: (
+    columnName: string,
+    data: TimelineNonEcsData[],
+    context?: RenderCellValueContext
+  ) => boolean;
   renderColumn: ({
     className,
     columnName,
