@@ -26,6 +26,7 @@ import type {
 import { loadedFactory, type StreamLoaded } from './loaded';
 import { indexInfoHandlerFactory } from './index_info_handler';
 import { overridesHandlerFactory } from './overrides_handler';
+import { overallHistogramHandlerFactory } from './overall_histogram_handler';
 import { significantItemsHandlerFactory } from './significant_items_handler';
 import type { LogDebugMessage, StreamState } from './types';
 
@@ -175,12 +176,14 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
 
   const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
   const overridesHandler = overridesHandlerFactory(streamFetchOptions);
+  const overallHistogramHandler = overallHistogramHandlerFactory(streamFetchOptions);
   const significantItemsHandler = significantItemsHandlerFactory(streamFetchOptions);
 
   return {
     ...streamFetchOptions,
     indexInfoHandler,
     isRunning,
+    overallHistogramHandler,
     overridesHandler,
     responseWithHeaders,
     significantItemsHandler,

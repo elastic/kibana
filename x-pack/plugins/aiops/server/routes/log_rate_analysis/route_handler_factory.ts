@@ -24,7 +24,6 @@ import type {
   SignificantItemGroup,
   SignificantItemHistogramItem,
   NumericChartData,
-  NumericHistogramField,
 } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
@@ -101,6 +100,7 @@ export function routeHandlerFactory<T extends ApiVersion>(
         isRunning,
         loaded,
         logDebugMessage,
+        overallHistogramHandler,
         overridesHandler,
         push,
         pushError,
@@ -142,39 +142,8 @@ export function routeHandlerFactory<T extends ApiVersion>(
           const { fieldValuePairsCount, significantCategories, significantTerms } =
             significantItemsObj;
 
-          const histogramFields: [NumericHistogramField] = [
-            { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
-          ];
-
-          logDebugMessage('Fetch overall histogram.');
-
-          let overallTimeSeries: NumericChartData | undefined;
-
-          const overallHistogramQuery = getHistogramQuery(request.body);
-
-          try {
-            overallTimeSeries = (
-              (await fetchHistogramsForFields(
-                client,
-                request.body.index,
-                overallHistogramQuery,
-                // fields
-                histogramFields,
-                // samplerShardSize
-                -1,
-                undefined,
-                abortSignal,
-                sampleProbability,
-                RANDOM_SAMPLER_SEED
-              )) as [NumericChartData]
-            )[0];
-          } catch (e) {
-            if (!isRequestAbortedError(e)) {
-              logger.error(`Failed to fetch the overall histogram data, got: \n${e.toString()}`);
-              pushError(`Failed to fetch overall histogram data.`);
-            }
-            // Still continue the analysis even if loading the overall histogram fails.
-          }
+          // Step 3: Fetch overall histogram
+          const overallTimeSeries = await overallHistogramHandler();
 
           function pushHistogramDataLoadingState() {
             push(
@@ -189,12 +158,6 @@ export function routeHandlerFactory<T extends ApiVersion>(
                 ),
               })
             );
-          }
-
-          if (shouldStop()) {
-            logDebugMessage('shouldStop after fetching overall histogram.');
-            end();
-            return;
           }
 
           if (groupingEnabled) {
