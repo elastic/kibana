@@ -21,32 +21,28 @@ Array [
         class="euiFlexItem emotion-euiFlexItem-growZero"
       >
         <div
-          class="euiPopover emotion-euiPopover"
+          class="euiPopover emotion-euiPopover-inline-block"
           id="inspectorViewChooser"
         >
-          <div
-            class="euiPopover__anchor css-16vtueo-render"
+          <button
+            class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
+            data-test-subj="inspectorViewChooser"
+            type="button"
           >
-            <button
-              class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary"
-              data-test-subj="inspectorViewChooser"
-              type="button"
+            <span
+              class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
             >
               <span
-                class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+                class="eui-textTruncate euiButtonEmpty__text"
               >
-                <span
-                  class="eui-textTruncate euiButtonEmpty__text"
-                >
-                  View: View 1
-                </span>
-                <span
-                  color="inherit"
-                  data-euiicon-type="arrowDown"
-                />
+                View: View 1
               </span>
-            </button>
-          </div>
+              <span
+                color="inherit"
+                data-euiicon-type="arrowDown"
+              />
+            </span>
+          </button>
         </div>
       </div>
     </div>
