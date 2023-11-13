@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 import type { SavedObject } from '@kbn/core/server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type { FtrProviderContext } from '../ftr_provider_context';
 import { descriptorToArray, SavedObjectDescriptor } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
+import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const es = getService('es');
