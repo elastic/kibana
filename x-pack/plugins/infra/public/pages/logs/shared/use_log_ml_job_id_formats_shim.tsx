@@ -53,25 +53,21 @@ const useLogMlJobIdFormatsShim = () => {
     getLogAnalysisIdFormats();
   }, [getLogAnalysisIdFormats]);
 
-  const isLoadingLogAnalysisIdFormats = useMemo(
-    () => getLogAnalysisIdFormatsRequest.state === 'pending',
-    [getLogAnalysisIdFormatsRequest.state]
-  );
+  const isLoadingLogAnalysisIdFormats = getLogAnalysisIdFormatsRequest.state === 'pending';
+  const hasFailedLoadingLogAnalysisIdFormats = getLogAnalysisIdFormatsRequest.state === 'rejected';
 
-  const hasFailedLoadingLogAnalysisIdFormats = useMemo(
-    () => getLogAnalysisIdFormatsRequest.state === 'rejected',
-    [getLogAnalysisIdFormatsRequest.state]
-  );
+  const migrateIdFormat = useCallback((jobType: JobType) => {
+    setIdFormats((previousValue) => {
+      if (!previousValue) {
+        return null;
+      }
 
-  const migrateIdFormat = useCallback(
-    (jobType: JobType) => {
-      setIdFormats({
-        ...idFormats!,
+      return {
+        ...previousValue,
         [jobType]: 'hashed',
-      });
-    },
-    [idFormats]
-  );
+      };
+    });
+  }, []);
 
   return {
     idFormats,
