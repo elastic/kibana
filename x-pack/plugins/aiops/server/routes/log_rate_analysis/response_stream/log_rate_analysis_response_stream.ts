@@ -26,6 +26,7 @@ import type {
 import { loadedFactory, type StreamLoaded } from './loaded';
 import { indexInfoHandlerFactory } from './index_info_handler';
 import { groupingHandlerFactory } from './grouping_handler';
+import { histogramHandlerFactory } from './histogram_handler';
 import { overridesHandlerFactory } from './overrides_handler';
 import { overallHistogramHandlerFactory } from './overall_histogram_handler';
 import { significantItemsHandlerFactory } from './significant_items_handler';
@@ -176,16 +177,18 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   };
 
   const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
+  const groupingHandler = groupingHandlerFactory(streamFetchOptions);
+  const histogramHandler = histogramHandlerFactory(streamFetchOptions);
   const overridesHandler = overridesHandlerFactory(streamFetchOptions);
   const overallHistogramHandler = overallHistogramHandlerFactory(streamFetchOptions);
   const significantItemsHandler = significantItemsHandlerFactory(streamFetchOptions);
-  const groupingHandler = groupingHandlerFactory(streamFetchOptions);
 
   return {
     ...streamFetchOptions,
     indexInfoHandler,
     isRunning,
     groupingHandler,
+    histogramHandler,
     overallHistogramHandler,
     overridesHandler,
     responseWithHeaders,

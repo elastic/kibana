@@ -15,10 +15,13 @@ import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../c
 import type { LogRateAnalysisResponseStreamFetchOptions } from './log_rate_analysis_response_stream';
 
 export const overridesHandlerFactory =
-  <T extends ApiVersion>(options: LogRateAnalysisResponseStreamFetchOptions<T>) =>
+  <T extends ApiVersion>({
+    requestBody,
+    logDebugMessage,
+    loaded,
+    push,
+  }: LogRateAnalysisResponseStreamFetchOptions<T>) =>
   () => {
-    const { requestBody, logDebugMessage, loaded, push } = options;
-
     if (!requestBody.overrides) {
       logDebugMessage('Full Reset.');
       push(resetAllAction());

@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { queue } from 'async';
-
 import type {
   CoreStart,
   KibanaRequest,
@@ -15,27 +13,14 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import { i18n } from '@kbn/i18n';
-import { KBN_FIELD_TYPES } from '@kbn/field-types';
-import type {
-  SignificantItem,
-  SignificantItemHistogramItem,
-  NumericChartData,
-} from '@kbn/ml-agg-utils';
-import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../../common/constants';
-import {
-  addSignificantItemsHistogramAction,
-  updateLoadingStateAction,
-} from '../../../common/api/log_rate_analysis/actions';
+import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
 } from '../../../common/api/log_rate_analysis/schema';
-import { getCategoryQuery } from '../../../common/api/log_categorization/get_category_query';
 import { AIOPS_API_ENDPOINT } from '../../../common/api';
 
 import { PLUGIN_ID } from '../../../common';
@@ -44,13 +29,8 @@ import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
-import { getHistogramQuery } from './queries/get_histogram_query';
 import { logRateAnalysisResponseStreamFactory } from './response_stream/log_rate_analysis_response_stream';
-import {
-  MAX_CONCURRENT_QUERIES,
-  PROGRESS_STEP_HISTOGRAMS,
-  PROGRESS_STEP_HISTOGRAMS_GROUPS,
-} from './response_stream/constants';
+import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream/constants';
 
 export function routeHandlerFactory<T extends ApiVersion>(
   version: T,
@@ -83,23 +63,21 @@ export function routeHandlerFactory<T extends ApiVersion>(
       const groupingEnabled = !!request.body.grouping;
 
       const {
-        abortSignal,
         end,
         endWithUpdatedLoadingState,
         indexInfoHandler,
         isRunning,
         groupingHandler,
+        histogramHandler,
         loaded,
         logDebugMessage,
         overallHistogramHandler,
         overridesHandler,
-        push,
         pushError,
         pushPingWithTimeout,
         responseWithHeaders,
         sampleProbability,
         significantItemsHandler,
-        shouldStop,
       } = logRateAnalysisResponseStreamFactory<T>({
         version,
         client,
@@ -143,231 +121,15 @@ export function routeHandlerFactory<T extends ApiVersion>(
             await groupingHandler(significantCategories, significantTerms, overallTimeSeries);
           }
 
-          function pushHistogramDataLoadingState() {
-            push(
-              updateLoadingStateAction({
-                ccsWarning: false,
-                loaded: loaded(),
-                loadingState: i18n.translate(
-                  'xpack.aiops.logRateAnalysis.loadingState.loadingHistogramData',
-                  {
-                    defaultMessage: 'Loading histogram data.',
-                  }
-                ),
-              })
-            );
-          }
-
           loaded(PROGRESS_STEP_HISTOGRAMS_GROUPS, false);
 
-          logDebugMessage(`Fetch ${significantTerms.length} field/value histograms.`);
-
-          // time series filtered by fields
-          if (
-            significantTerms.length > 0 &&
-            overallTimeSeries !== undefined &&
-            !request.body.overrides?.regroupOnly
-          ) {
-            const fieldValueHistogramQueue = queue(async function (cp: SignificantItem) {
-              if (shouldStop()) {
-                logDebugMessage('shouldStop abort fetching field/value histograms.');
-                fieldValueHistogramQueue.kill();
-                end();
-                return;
-              }
-
-              if (overallTimeSeries !== undefined) {
-                const histogramQuery = getHistogramQuery(request.body, [
-                  {
-                    term: { [cp.fieldName]: cp.fieldValue },
-                  },
-                ]);
-
-                let cpTimeSeries: NumericChartData;
-
-                try {
-                  cpTimeSeries = (
-                    (await fetchHistogramsForFields(
-                      client,
-                      request.body.index,
-                      histogramQuery,
-                      // fields
-                      [
-                        {
-                          fieldName: request.body.timeFieldName,
-                          type: KBN_FIELD_TYPES.DATE,
-                          interval: overallTimeSeries.interval,
-                          min: overallTimeSeries.stats[0],
-                          max: overallTimeSeries.stats[1],
-                        },
-                      ],
-                      // samplerShardSize
-                      -1,
-                      undefined,
-                      abortSignal,
-                      sampleProbability,
-                      RANDOM_SAMPLER_SEED
-                    )) as [NumericChartData]
-                  )[0];
-                } catch (e) {
-                  logger.error(
-                    `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-                      cp.fieldValue
-                    }", got: \n${e.toString()}`
-                  );
-                  pushError(
-                    `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-                  );
-                  return;
-                }
-
-                const histogram: SignificantItemHistogramItem[] =
-                  overallTimeSeries.data.map((o) => {
-                    const current = cpTimeSeries.data.find(
-                      (d1) => d1.key_as_string === o.key_as_string
-                    ) ?? {
-                      doc_count: 0,
-                    };
-                    if (version === '1') {
-                      return {
-                        key: o.key,
-                        key_as_string: o.key_as_string ?? '',
-                        doc_count_significant_term: current.doc_count,
-                        doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                      };
-                    }
-
-                    return {
-                      key: o.key,
-                      key_as_string: o.key_as_string ?? '',
-                      doc_count_significant_item: current.doc_count,
-                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                    };
-                  }) ?? [];
-
-                const { fieldName, fieldValue } = cp;
-
-                loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
-                pushHistogramDataLoadingState();
-                push(
-                  addSignificantItemsHistogramAction(
-                    [
-                      {
-                        fieldName,
-                        fieldValue,
-                        histogram,
-                      },
-                    ],
-                    version
-                  )
-                );
-              }
-            }, MAX_CONCURRENT_QUERIES);
-
-            fieldValueHistogramQueue.push(significantTerms);
-            await fieldValueHistogramQueue.drain();
-          }
-
-          // histograms for text field patterns
-          if (
-            overallTimeSeries !== undefined &&
-            significantCategories.length > 0 &&
-            !request.body.overrides?.regroupOnly
-          ) {
-            const significantCategoriesHistogramQueries = significantCategories.map((d) => {
-              const histogramQuery = getHistogramQuery(request.body);
-              const categoryQuery = getCategoryQuery(d.fieldName, [
-                { key: `${d.key}`, count: d.doc_count, examples: [] },
-              ]);
-              if (Array.isArray(histogramQuery.bool?.filter)) {
-                histogramQuery.bool?.filter?.push(categoryQuery);
-              }
-              return histogramQuery;
-            });
-
-            for (const [i, histogramQuery] of significantCategoriesHistogramQueries.entries()) {
-              const cp = significantCategories[i];
-              let catTimeSeries: NumericChartData;
-
-              try {
-                catTimeSeries = (
-                  (await fetchHistogramsForFields(
-                    client,
-                    request.body.index,
-                    histogramQuery,
-                    // fields
-                    [
-                      {
-                        fieldName: request.body.timeFieldName,
-                        type: KBN_FIELD_TYPES.DATE,
-                        interval: overallTimeSeries.interval,
-                        min: overallTimeSeries.stats[0],
-                        max: overallTimeSeries.stats[1],
-                      },
-                    ],
-                    // samplerShardSize
-                    -1,
-                    undefined,
-                    abortSignal,
-                    sampleProbability,
-                    RANDOM_SAMPLER_SEED
-                  )) as [NumericChartData]
-                )[0];
-              } catch (e) {
-                logger.error(
-                  `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${
-                    cp.fieldValue
-                  }", got: \n${e.toString()}`
-                );
-                pushError(
-                  `Failed to fetch the histogram data for field/value pair "${cp.fieldName}:${cp.fieldValue}".`
-                );
-                return;
-              }
-
-              const histogram: SignificantItemHistogramItem[] =
-                overallTimeSeries.data.map((o) => {
-                  const current = catTimeSeries.data.find(
-                    (d1) => d1.key_as_string === o.key_as_string
-                  ) ?? {
-                    doc_count: 0,
-                  };
-
-                  if (version === '1') {
-                    return {
-                      key: o.key,
-                      key_as_string: o.key_as_string ?? '',
-                      doc_count_significant_term: current.doc_count,
-                      doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                    };
-                  }
-
-                  return {
-                    key: o.key,
-                    key_as_string: o.key_as_string ?? '',
-                    doc_count_significant_item: current.doc_count,
-                    doc_count_overall: Math.max(0, o.doc_count - current.doc_count),
-                  };
-                }) ?? [];
-
-              const { fieldName, fieldValue } = cp;
-
-              loaded((1 / fieldValuePairsCount) * PROGRESS_STEP_HISTOGRAMS, false);
-              pushHistogramDataLoadingState();
-              push(
-                addSignificantItemsHistogramAction(
-                  [
-                    {
-                      fieldName,
-                      fieldValue,
-                      histogram,
-                    },
-                  ],
-                  version
-                )
-              );
-            }
-          }
+          // Step 5: Histograms
+          await histogramHandler(
+            fieldValuePairsCount,
+            significantCategories,
+            significantTerms,
+            overallTimeSeries
+          );
 
           endWithUpdatedLoadingState();
         } catch (e) {
