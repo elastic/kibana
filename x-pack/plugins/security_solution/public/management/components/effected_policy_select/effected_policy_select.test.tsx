@@ -142,8 +142,8 @@ describe('when using EffectedPolicySelect component', () => {
     });
 
     it('should maintain policies selection even if global was checked, and user switched back to per policy', () => {
-      const {debug}=render();
-      debug(undefined,999999);
+      const { debug } = render();
+      debug(undefined, 999999);
 
       selectPerPolicy();
       clickOnPolicy();
