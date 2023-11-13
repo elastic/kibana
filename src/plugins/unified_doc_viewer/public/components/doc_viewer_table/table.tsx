@@ -118,7 +118,7 @@ export const DocViewerTable = ({
   const { fieldFormats, storage, uiSettings } = useUnifiedDocViewerServices();
   const showMultiFields = uiSettings.get(SHOW_MULTIFIELDS);
   const currentDataViewId = dataView.id!;
-  const isSingleDocView = !filter;
+  const disablesFilter = !filter;
 
   const [searchText, setSearchText] = useState(getSearchText(storage));
   const [pinnedFields, setPinnedFields] = useState<string[]>(
@@ -283,23 +283,21 @@ export const DocViewerTable = ({
   );
 
   const headers = [
-    !isSingleDocView && (
-      <EuiTableHeaderCell
-        key="header-cell-actions"
-        align="left"
-        width={showActionsInsideTableCell ? 150 : 62}
-        isSorted={false}
-      >
-        <EuiText size="xs">
-          <strong>
-            <FormattedMessage
-              id="unifiedDocViewer.fieldChooser.discoverField.actions"
-              defaultMessage="Actions"
-            />
-          </strong>
-        </EuiText>
-      </EuiTableHeaderCell>
-    ),
+    <EuiTableHeaderCell
+      key="header-cell-actions"
+      align="left"
+      width={showActionsInsideTableCell ? 150 : 62}
+      isSorted={false}
+    >
+      <EuiText size="xs">
+        <strong>
+          <FormattedMessage
+            id="unifiedDocViewer.fieldChooser.discoverField.actions"
+            defaultMessage="Actions"
+          />
+        </strong>
+      </EuiText>
+    </EuiTableHeaderCell>,
     <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
@@ -332,28 +330,27 @@ export const DocViewerTable = ({
         }: FieldRecord) => {
           return (
             <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              {!isSingleDocView && (
-                <EuiTableRowCell
-                  key={field + '-actions'}
-                  align={showActionsInsideTableCell ? 'left' : 'center'}
-                  width={showActionsInsideTableCell ? undefined : 62}
-                  className="kbnDocViewer__tableActionsCell"
-                  textOnly={false}
-                  mobileOptions={MOBILE_OPTIONS}
-                >
-                  <TableActions
-                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
-                    field={field}
-                    pinned={pinned}
-                    fieldMapping={fieldMapping}
-                    flattenedField={flattenedField}
-                    onFilter={onFilter!}
-                    onToggleColumn={onToggleColumn}
-                    ignoredValue={!!ignored}
-                    onTogglePinned={onTogglePinned}
-                  />
-                </EuiTableRowCell>
-              )}
+              <EuiTableRowCell
+                key={field + '-actions'}
+                align={showActionsInsideTableCell ? 'left' : 'center'}
+                width={showActionsInsideTableCell ? undefined : 62}
+                className="kbnDocViewer__tableActionsCell"
+                textOnly={false}
+                mobileOptions={MOBILE_OPTIONS}
+              >
+                <TableActions
+                  mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
+                  field={field}
+                  pinned={pinned}
+                  fieldMapping={fieldMapping}
+                  flattenedField={flattenedField}
+                  onFilter={onFilter!}
+                  onToggleColumn={onToggleColumn}
+                  ignoredValue={!!ignored}
+                  onTogglePinned={onTogglePinned}
+                  disablesFilter={disablesFilter}
+                />
+              </EuiTableRowCell>
               <EuiTableRowCell
                 key={field + '-field-name'}
                 align="left"
@@ -392,7 +389,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, isSingleDocView, showActionsInsideTableCell, searchText]
+    [onToggleColumn, onTogglePinned, disablesFilter, showActionsInsideTableCell, searchText]
   );
 
   const rowElements = [
