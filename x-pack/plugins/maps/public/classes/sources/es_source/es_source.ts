@@ -36,6 +36,7 @@ import {
   AbstractSourceDescriptor,
   DynamicStylePropertyOptions,
   MapExtent,
+  StyleMetaData,
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { IVectorStyle } from '../../styles/vector/vector_style';
@@ -80,7 +81,7 @@ export interface IESSource extends IVectorSource {
     searchSessionId?: string;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
-  }): Promise<object>;
+  }): Promise<{ styleMeta: StyleMetaData, warnings: SearchResponseWarning[] }>;
 }
 
 export class AbstractESSource extends AbstractVectorSource implements IESSource {
@@ -482,7 +483,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
     searchSessionId?: string;
     inspectorAdapters: Adapters;
     executionContext: KibanaExecutionContext;
-  }): Promise<object> {
+  }) {
     const promises = dynamicStyleProps.map((dynamicStyleProp) => {
       return dynamicStyleProp.getFieldMetaRequest();
     });
@@ -515,6 +516,7 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
       }
     }
 
+    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: `${this.getId()}_styleMeta`,
       requestName: i18n.translate('xpack.maps.source.esSource.stylePropsMetaRequestName', {
@@ -529,9 +531,15 @@ export class AbstractESSource extends AbstractVectorSource implements IESSource 
         executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
-    return resp.aggregations;
+    return {
+      styleMeta: resp.aggregations,
+      warnings,
+    };
   }
 
   getValueSuggestions = async (field: IField, query: string): Promise<string[]> => {

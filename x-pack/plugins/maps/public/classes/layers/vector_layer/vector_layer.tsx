@@ -469,7 +469,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       startLoading(dataRequestId, requestToken, nextMeta);
       const layerName = await this.getDisplayName(source);
 
-      const styleMeta = await (source as IESSource).loadStylePropsMeta({
+      const { styleMeta, warnings } = await (source as IESSource).loadStylePropsMeta({
         layerName,
         style,
         dynamicStyleProps,
@@ -481,7 +481,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
         executionContext: dataFilters.executionContext,
       });
 
-      stopLoading(dataRequestId, requestToken, styleMeta, nextMeta);
+      stopLoading(dataRequestId, requestToken, styleMeta, { ...nextMeta, warnings });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
         onLoadError(dataRequestId, requestToken, error.message);
