@@ -36,6 +36,7 @@
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
     "@kbn/ui-theme",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [
     "target/**/*",
