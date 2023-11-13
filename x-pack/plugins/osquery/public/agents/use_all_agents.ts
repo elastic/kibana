@@ -8,10 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 
-import type { ListResult, Agent } from '@kbn/fleet-plugin/common';
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { useAgentPolicies } from './use_agent_policies';
-import { processAggregations } from './helpers';
+import type { Agent } from '@kbn/fleet-plugin/common';
+import type { processAggregations } from '../../common/utils/aggregations';
 import { API_VERSIONS } from '../../common/constants';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 import { useKibana } from '../common/lib/kibana';
@@ -30,17 +28,11 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
 
   const { data: osqueryPolicies, isFetched } = useOsqueryPolicies();
 
-  const { agentPoliciesLoading, agentPolicyById } = useAgentPolicies(osqueryPolicies);
-
-  return useQuery<
-    Omit<ListResult<{}>, 'items'> & {
-      agents: Agent[];
-      aggregations: Record<string, estypes.AggregationsAggregate>;
-      total: number;
-    },
-    unknown,
-    { agents: Agent[]; groups: ReturnType<typeof processAggregations>; total: number }
-  >(
+  return useQuery<{
+    agents: Agent[];
+    groups: ReturnType<typeof processAggregations>;
+    total: number;
+  }>(
     ['agents', osqueryPolicies, searchValue, perPage],
     () => {
       let kuery = '';
@@ -64,27 +56,7 @@ export const useAllAgents = (searchValue = '', opts: RequestOptions = { perPage:
       });
     },
     {
-      select: (response) => {
-        const { platforms, overlap, policies } = processAggregations(response.aggregations);
-
-        return {
-          total: response.total ?? 0,
-          groups: {
-            platforms,
-            overlap,
-            policies: policies.map((p) => {
-              const name = agentPolicyById[p.id]?.name ?? p.name;
-
-              return {
-                ...p,
-                name,
-              };
-            }),
-          },
-          agents: response.agents,
-        };
-      },
-      enabled: isFetched && !!osqueryPolicies?.length && !agentPoliciesLoading,
+      enabled: isFetched && !!osqueryPolicies?.length,
       onSuccess: () => setErrorToast(),
       onError: (error) =>
         // @ts-expect-error update types
