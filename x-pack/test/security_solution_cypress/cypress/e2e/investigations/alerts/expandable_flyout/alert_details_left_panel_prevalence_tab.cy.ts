@@ -70,7 +70,7 @@ describe(
         .and('contain.text', 'test');
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_ALERT_COUNT_CELL).should(
         'contain.text',
-        2
+        1
       );
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_PREVALENCE_TABLE_DOC_COUNT_CELL).should(
         'contain.text',

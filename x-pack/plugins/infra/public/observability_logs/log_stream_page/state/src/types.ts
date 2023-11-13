@@ -109,7 +109,7 @@ export type LogStreamPageContext = LogStreamPageTypestate['context'];
 export interface LogStreamPageCallbacks {
   updateTimeRange: (timeRange: Partial<TimeRange>) => void;
   jumpToTargetPosition: (targetPosition: TimeKey | null) => void;
-  jumpToTargetPositionTime: (time: number) => void;
+  jumpToTargetPositionTime: (time: string) => void;
   reportVisiblePositions: (visiblePositions: VisiblePositions) => void;
   startLiveStreaming: () => void;
   stopLiveStreaming: () => void;
