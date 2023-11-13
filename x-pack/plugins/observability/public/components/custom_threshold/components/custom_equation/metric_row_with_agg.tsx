@@ -6,26 +6,26 @@
  */
 
 import {
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSelect,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiPopover,
   EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
+  EuiSelect,
 } from '@elastic/eui';
-import React, { useMemo, useCallback, useState } from 'react';
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { get } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
 import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
-import { MetricRowControls } from './metric_row_controls';
-import { NormalizedFields, MetricRowBaseProps } from './types';
-import { ClosablePopoverTitle } from '../closable_popover_title';
 import { RuleFlyoutKueryBar } from '../../../rule_kql_filter/kuery_bar';
+import { ClosablePopoverTitle } from '../closable_popover_title';
+import { MetricRowControls } from './metric_row_controls';
+import { MetricRowBaseProps, NormalizedFields } from './types';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
   aggType?: Aggregators;
@@ -90,7 +90,7 @@ export function MetricRowWithAgg({
     (customAggType: string) => {
       onChange({
         name,
-        field,
+        field: customAggType === Aggregators.COUNT ? undefined : field,
         aggType: customAggType as Aggregators,
       });
     },

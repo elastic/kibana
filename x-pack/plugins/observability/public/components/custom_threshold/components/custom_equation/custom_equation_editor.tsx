@@ -158,6 +158,7 @@ export function CustomEquationEditor({
         <EuiPopover
           button={
             <EuiFormRow
+              data-test-subj="equationAndThreshold"
               fullWidth
               label={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
