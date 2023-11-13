@@ -114,6 +114,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: sanitizedBody,
+      // give up to 2 minutes for response
+      timeout: 120000,
       ...axiosOptions,
     });
     return response.data;

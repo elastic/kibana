@@ -13,9 +13,6 @@ import {
 } from './setup';
 
 const createDataState = (available: boolean): PartialSetupState => ({ data: { available } });
-const createPermissionState = (configured: boolean): PartialSetupState => ({
-  permissions: { configured },
-});
 
 function createResourceState({
   enabled,
@@ -49,7 +46,6 @@ describe('Merging partial state operations', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [createDataState(true)]);
     expect(mergedState.data.available).toEqual(true);
     expect(mergedState.settings.configured).toEqual(false);
-    expect(mergedState.permissions.configured).toEqual(false);
     expect(mergedState.resources.created).toEqual(false);
   });
 
@@ -62,21 +58,10 @@ describe('Merging partial state operations', () => {
     expect(mergedState.resources.created).toEqual(true);
   });
 
-  it('returns false when permission is not configured', () => {
-    const mergedState = mergePartialSetupStates(defaultSetupState, [
-      createResourceState({ enabled: true, created: true }),
-      createSettingsState(true),
-      createPermissionState(false),
-    ]);
-
-    expect(areResourcesSetup(mergedState)).toBeFalsy();
-  });
-
   it('returns false when resource management is not enabled', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: false, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
@@ -86,7 +71,6 @@ describe('Merging partial state operations', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: false }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
@@ -96,7 +80,6 @@ describe('Merging partial state operations', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: true }),
       createSettingsState(false),
-      createPermissionState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeFalsy();
@@ -106,7 +89,6 @@ describe('Merging partial state operations', () => {
     const mergedState = mergePartialSetupStates(defaultSetupState, [
       createResourceState({ enabled: true, created: true }),
       createSettingsState(true),
-      createPermissionState(true),
     ]);
 
     expect(areResourcesSetup(mergedState)).toBeTruthy();

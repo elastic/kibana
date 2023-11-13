@@ -105,9 +105,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.AddVersionOpts",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "AddVersionOpts",
         "description": [
           "\nOptions for a versioned route. Probably needs a lot more options like sunsetting\nof an endpoint etc."
@@ -130,9 +128,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.AddVersionOpts.version",
             "type": "string",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "version",
             "description": [
               "\nVersion to assign to this route"
@@ -145,9 +141,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.AddVersionOpts.validate",
             "type": "CompoundType",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "validate",
             "description": [
               "\nValidation for this version of a route"
@@ -1003,9 +997,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.FullValidationConfig",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "FullValidationConfig",
         "description": [
           "\nVersioned route validation"
@@ -1028,9 +1020,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.FullValidationConfig.request",
             "type": "CompoundType",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "request",
             "description": [
               "\nValidation to run against route inputs: params, query and body"
@@ -1054,8 +1044,7 @@
             "id": "def-common.FullValidationConfig.response",
             "type": "Object",
             "tags": [
-              "note",
-              "experimental"
+              "note"
             ],
             "label": "response",
             "description": [
@@ -3569,7 +3558,7 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/resolve_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -3668,20 +3657,20 @@
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/find_tags.ts"
               },
               {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/routes/metric_indices/index.ts"
+              },
+              {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/ping.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
-              },
-              {
-                "plugin": "assetManager",
-                "path": "x-pack/plugins/asset_manager/server/routes/assets/index.ts"
               },
               {
                 "plugin": "assetManager",
@@ -3694,6 +3683,10 @@
               {
                 "plugin": "assetManager",
                 "path": "x-pack/plugins/asset_manager/server/routes/assets/services.ts"
+              },
+              {
+                "plugin": "assetManager",
+                "path": "x-pack/plugins/asset_manager/server/routes/assets/containers.ts"
               },
               {
                 "plugin": "banners",
@@ -3790,6 +3783,10 @@
               {
                 "plugin": "indexManagement",
                 "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_list_route.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.ts"
               },
               {
                 "plugin": "remoteClusters",
@@ -4238,10 +4235,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/snapshot_repositories/register_fetch_route.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/fields.ts"
               },
               {
                 "plugin": "infra",
@@ -4837,18 +4830,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/resolve_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/resolve_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/resolve_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule_types.test.ts"
               },
               {
@@ -5236,6 +5217,14 @@
                 "path": "x-pack/plugins/index_management/server/routes/api/component_templates/register_privileges_route.test.ts"
               },
               {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.test.ts"
+              },
+              {
+                "plugin": "indexManagement",
+                "path": "x-pack/plugins/index_management/server/routes/api/enrich_policies/register_privileges_route.test.ts"
+              },
+              {
                 "plugin": "spaces",
                 "path": "x-pack/plugins/spaces/server/routes/api/external/get.test.ts"
               },
@@ -5302,6 +5291,18 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/get_schedule_frequency/get_schedule_frequency_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/resolve/resolve_rule_route.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -6051,11 +6052,11 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/snooze_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.ts"
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unsnooze_rule.ts"
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.ts"
               },
               {
                 "plugin": "alerting",
@@ -6160,6 +6161,14 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/internal/bulk_delete.ts"
+              },
+              {
+                "plugin": "visTypeTimeseries",
+                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "assetManager",
@@ -6644,10 +6653,6 @@
               {
                 "plugin": "indexLifecycleManagement",
                 "path": "x-pack/plugins/index_lifecycle_management/server/routes/api/templates/register_add_policy_route.ts"
-              },
-              {
-                "plugin": "visTypeTimeseries",
-                "path": "src/plugins/vis_types/timeseries/server/routes/vis.ts"
               },
               {
                 "plugin": "infra",
@@ -7139,18 +7144,6 @@
               },
               {
                 "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/snooze_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/snooze_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/snooze_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/unmute_alert.test.ts"
               },
               {
@@ -7164,14 +7157,6 @@
               {
                 "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/unmute_all_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unsnooze_rule.test.ts"
-              },
-              {
-                "plugin": "alerting",
-                "path": "x-pack/plugins/alerting/server/routes/unsnooze_rule.test.ts"
               },
               {
                 "plugin": "alerting",
@@ -7571,6 +7556,26 @@
               },
               {
                 "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/snooze/snooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
+                "path": "x-pack/plugins/alerting/server/routes/rule/apis/unsnooze/unsnooze_rule_route.test.ts"
+              },
+              {
+                "plugin": "alerting",
                 "path": "x-pack/plugins/alerting/server/routes/rules_settings/apis/update/update_query_delay_settings.test.ts"
               },
               {
@@ -7938,6 +7943,10 @@
               {
                 "plugin": "guidedOnboarding",
                 "path": "src/plugins/guided_onboarding/server/routes/plugin_state_routes.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "reporting",
@@ -8594,6 +8603,10 @@
                 "path": "x-pack/plugins/alerting/server/routes/rule/apis/bulk_disable/bulk_disable_rules_route.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "enterpriseSearch",
                 "path": "x-pack/plugins/enterprise_search/server/routes/workplace_search/security.ts"
               },
@@ -8938,6 +8951,10 @@
               {
                 "plugin": "savedObjectsTagging",
                 "path": "x-pack/plugins/saved_objects_tagging/server/routes/tags/delete_tag.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "assetManager",
@@ -12661,9 +12678,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRoute",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRoute",
         "description": [
           "\nA versioned route"
@@ -12686,9 +12701,7 @@
             "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.VersionedRoute.addVersion",
             "type": "Function",
-            "tags": [
-              "experimental"
-            ],
+            "tags": [],
             "label": "addVersion",
             "description": [
               "\nAdd a new version of this route"
@@ -12831,9 +12844,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouter",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouter",
         "description": [
           "\nA router, very similar to {@link IRouter} that will return an {@link VersionedRoute}\ninstead.\n"
@@ -12857,7 +12868,6 @@
             "id": "def-common.VersionedRouter.get",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "get",
@@ -13188,6 +13198,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "canvas",
@@ -13527,7 +13541,7 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_status_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_status_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -13600,6 +13614,10 @@
               {
                 "plugin": "sessionView",
                 "path": "x-pack/plugins/session_view/server/routes/get_total_io_bytes_route.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -13801,7 +13819,6 @@
             "id": "def-common.VersionedRouter.put",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "put",
@@ -13914,6 +13931,10 @@
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/update.ts"
               },
@@ -13988,6 +14009,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/lib/tags/routes/create_tag.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -14065,7 +14090,6 @@
             "id": "def-common.VersionedRouter.post",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "post",
@@ -14183,11 +14207,11 @@
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis.ts"
+                "path": "x-pack/plugins/aiops/server/routes/log_rate_analysis/define_route.ts"
               },
               {
                 "plugin": "aiops",
-                "path": "x-pack/plugins/aiops/server/routes/log_categorization.ts"
+                "path": "x-pack/plugins/aiops/server/routes/categorization_field_validation/define_route.ts"
               },
               {
                 "plugin": "ml",
@@ -14204,6 +14228,10 @@
               {
                 "plugin": "ml",
                 "path": "x-pack/plugins/ml/server/routes/datafeeds.ts"
+              },
+              {
+                "plugin": "ml",
+                "path": "x-pack/plugins/ml/server/routes/trained_models.ts"
               },
               {
                 "plugin": "ml",
@@ -14502,6 +14530,10 @@
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/create.ts"
               },
@@ -14767,23 +14799,23 @@
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_preview_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_score_preview_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_init_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_init_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_enable_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_enable_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_engine_disable_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_engine_disable_route.ts"
               },
               {
                 "plugin": "securitySolution",
-                "path": "x-pack/plugins/security_solution/server/lib/risk_engine/routes/risk_score_calculation_route.ts"
+                "path": "x-pack/plugins/security_solution/server/lib/entity_analytics/risk_engine/routes/risk_score_calculation_route.ts"
               },
               {
                 "plugin": "securitySolution",
@@ -14832,6 +14864,10 @@
               {
                 "plugin": "securitySolution",
                 "path": "x-pack/plugins/security_solution/server/endpoint/routes/protection_updates_note/index.ts"
+              },
+              {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
               },
               {
                 "plugin": "transform",
@@ -14969,7 +15005,6 @@
             "id": "def-common.VersionedRouter.patch",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "patch",
@@ -15004,6 +15039,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
               },
               {
                 "plugin": "logsShared",
@@ -15093,7 +15132,6 @@
             "id": "def-common.VersionedRouter.delete",
             "type": "Function",
             "tags": [
-              "experimental",
               "track-adoption"
             ],
             "label": "delete",
@@ -15190,6 +15228,10 @@
                 "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "metricsDataAccess",
+                "path": "x-pack/plugins/metrics_data_access/server/lib/adapters/framework/kibana_framework_adapter.ts"
+              },
+              {
                 "plugin": "canvas",
                 "path": "x-pack/plugins/canvas/server/routes/custom_elements/delete.ts"
               },
@@ -15270,6 +15312,10 @@
                 "path": "x-pack/plugins/security_solution/server/lib/risk_score/stored_scripts/delete_script_route.ts"
               },
               {
+                "plugin": "synthetics",
+                "path": "x-pack/plugins/synthetics/server/server.ts"
+              },
+              {
                 "plugin": "@kbn/core-http-router-server-internal",
                 "path": "packages/core/http/core-http-router-server-internal/src/versioned_router/core_versioned_router.ts"
               },
@@ -15331,9 +15377,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteResponseValidation",
         "type": "Interface",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteResponseValidation",
         "description": [],
         "path": "packages/core/http/core-http-server/src/versioning/types.ts",
@@ -17776,9 +17820,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteConfig",
         "type": "Type",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteConfig",
         "description": [
           "\nConfiguration for a versioned route"
@@ -17811,9 +17853,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteRegistrar",
         "type": "Type",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteRegistrar",
         "description": [
           "\nCreate an {@link VersionedRoute | versioned route}.\n"
@@ -17883,9 +17923,7 @@
         "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.VersionedRouteRequestValidation",
         "type": "Type",
-        "tags": [
-          "experimental"
-        ],
+        "tags": [],
         "label": "VersionedRouteRequestValidation",
         "description": [],
         "signature": [

@@ -82,6 +82,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   mute_all: rule.muteAll,
   ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
+  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   execution_status: {
     status: rule.executionStatus.status,
     ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),

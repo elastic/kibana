@@ -31,6 +31,7 @@ export default async function ({ readConfigFile }) {
       require.resolve('./content_management'),
       require.resolve('./unified_field_list_examples'),
       require.resolve('./discover_customization_examples'),
+      require.resolve('./error_boundary'),
     ],
     services: {
       ...functionalConfig.get('services'),

@@ -28,8 +28,6 @@ describe('Header', () => {
     helpSupportUrl$: Rx.of('app/help'),
     helpMenuLinks$: Rx.of([]),
     homeHref$: Rx.of('app/home'),
-    projectsUrl$: Rx.of('/projects/'),
-    projectName$: Rx.of('My Project'),
     kibanaVersion: '8.9',
     loadingCount$: Rx.of(0),
     navControlsLeft$: Rx.of([]),
@@ -48,17 +46,5 @@ describe('Header', () => {
 
     expect(await screen.findByTestId('euiCollapsibleNavButton')).toBeVisible();
     expect(await screen.findByText('Hello, world!')).toBeVisible();
-  });
-
-  it('displays the link to projects', async () => {
-    render(
-      <ProjectHeader {...mockProps}>
-        <EuiHeader>Hello, world!</EuiHeader>
-      </ProjectHeader>
-    );
-
-    const projectsLink = screen.getByTestId('projectsLink');
-    expect(projectsLink).toHaveAttribute('href', '/projects/');
-    expect(projectsLink).toHaveTextContent('My Project');
   });
 });

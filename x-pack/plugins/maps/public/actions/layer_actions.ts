@@ -55,6 +55,7 @@ import {
   JoinDescriptor,
   LayerDescriptor,
   StyleDescriptor,
+  TileError,
   TileMetaFeature,
   VectorLayerDescriptor,
   VectorStyleDescriptor,
@@ -796,17 +797,13 @@ export function setHiddenLayers(hiddenLayerIds: string[]) {
   };
 }
 
-export function setAreTilesLoaded(layerId: string, areTilesLoaded: boolean) {
-  return {
-    type: UPDATE_LAYER_PROP,
-    id: layerId,
-    propName: '__areTilesLoaded',
-    newValue: areTilesLoaded,
-  };
-}
-
-export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFeature[]) {
-  return async (
+export function setTileState(
+  layerId: string,
+  areTilesLoaded: boolean,
+  tileMetaFeatures?: TileMetaFeature[],
+  tileErrors?: TileError[]
+) {
+  return (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
   ) => {
@@ -818,10 +815,28 @@ export function updateMetaFromTiles(layerId: string, mbMetaFeatures: TileMetaFea
     dispatch({
       type: UPDATE_LAYER_PROP,
       id: layerId,
-      propName: '__metaFromTiles',
-      newValue: mbMetaFeatures,
+      propName: '__areTilesLoaded',
+      newValue: areTilesLoaded,
     });
-    await dispatch(updateStyleMeta(layerId));
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__tileErrors',
+      newValue: tileErrors,
+    });
+
+    if (!tileMetaFeatures && !layer.getDescriptor().__tileMetaFeatures) {
+      return;
+    }
+
+    dispatch({
+      type: UPDATE_LAYER_PROP,
+      id: layerId,
+      propName: '__tileMetaFeatures',
+      newValue: tileMetaFeatures,
+    });
+    dispatch(updateStyleMeta(layerId));
   };
 }
 

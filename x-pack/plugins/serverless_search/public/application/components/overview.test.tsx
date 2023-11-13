@@ -5,8 +5,14 @@
  * 2.0.
  */
 import React from 'react';
+import { useLocation } from 'react-router-dom';
 import { render, core } from '../../test/test_utils';
 import { ElasticsearchOverview as Overview } from './overview';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useLocation: jest.fn(),
+}));
 
 describe('<Overview />', () => {
   beforeEach(() => {
@@ -29,6 +35,10 @@ describe('<Overview />', () => {
         }
       });
     });
+    const pathname = '/app/elasticsearch';
+    (useLocation as jest.Mock).mockImplementationOnce(() => ({
+      pathname,
+    }));
   });
 
   test('renders without throwing an error', () => {

@@ -46,8 +46,8 @@ import {
   GroupByOptions,
 } from '../../../../detections/pages/detection_engine/rules/types';
 import type { RuleCreateProps } from '../../../../../common/api/detection_engine/model/rule_schema';
-import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { stepActionsDefaultValue } from '../../../../detections/components/rules/step_rule_actions';
+import { DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY } from '../../../../../common/detection_engine/constants';
 
 export const getTimeTypeValue = (time: string): { unit: Unit; value: number } => {
   const timeObj: { unit: Unit; value: number } = {
@@ -609,7 +609,7 @@ export const formatActionsStepData = (actionsStepData: ActionsStepRule): Actions
   const { actions = [], responseActions, enabled, kibanaSiemAppUrl } = actionsStepData;
 
   return {
-    actions: actions.map(transformAlertToRuleAction),
+    actions: actions.map((action) => transformAlertToRuleAction(action)),
     response_actions: responseActions?.map(transformAlertToRuleResponseAction),
     enabled,
     meta: {

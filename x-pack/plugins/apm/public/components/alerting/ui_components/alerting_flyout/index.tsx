@@ -7,10 +7,8 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  ApmRuleType,
-  APM_SERVER_FEATURE_ID,
-} from '../../../../../common/rules/apm_rule_types';
+import { ApmRuleType } from '@kbn/rule-data-utils';
+import { APM_SERVER_FEATURE_ID } from '../../../../../common/rules/apm_rule_types';
 import { getInitialAlertValues } from '../../utils/get_initial_alert_values';
 import { ApmPluginStartDeps } from '../../../../plugin';
 import { useServiceName } from '../../../../hooks/use_service_name';
@@ -70,6 +68,7 @@ export function AlertingFlyout(props: Props) {
           start,
           end,
         } as AlertMetadata,
+        useRuleProducer: true,
       }),
     /* eslint-disable-next-line react-hooks/exhaustive-deps */
     [

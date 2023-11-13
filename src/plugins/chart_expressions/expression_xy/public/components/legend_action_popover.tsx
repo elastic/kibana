@@ -6,11 +6,18 @@
  * Side Public License, v 1.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiContextMenuPanelDescriptor, EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
+import {
+  EuiContextMenuPanelDescriptor,
+  EuiIcon,
+  EuiPopover,
+  EuiContextMenu,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { useLegendAction } from '@elastic/charts';
 import type { CellValueAction } from '../types';
+import { shouldShowLegendActionDefault } from '../../common/helpers/visualization';
 
 export type LegendCellValueActions = Array<
   Omit<CellValueAction, 'execute'> & { execute: () => void }
@@ -29,57 +36,70 @@ export interface LegendActionPopoverProps {
    * Compatible actions to be added to the popover actions
    */
   legendCellValueActions?: LegendCellValueActions;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export const LegendActionPopover: React.FunctionComponent<LegendActionPopoverProps> = ({
   label,
   onFilter,
   legendCellValueActions = [],
+  shouldShowLegendAction = shouldShowLegendActionDefault,
 }) => {
   const [popoverOpen, setPopoverOpen] = useState(false);
   const [ref, onClose] = useLegendAction<HTMLDivElement>();
 
-  const legendCellValueActionPanelItems = legendCellValueActions.map((action) => ({
-    name: action.displayName,
-    'data-test-subj': `legend-${label}-${action.id}`,
-    icon: <EuiIcon type={action.iconType} size="m" />,
-    onClick: () => {
-      action.execute();
-      setPopoverOpen(false);
-    },
-  }));
+  const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
+    const defaultActions = [
+      {
+        id: 'filterIn',
+        displayName: i18n.translate('expressionXY.legend.filterForValueButtonAriaLabel', {
+          defaultMessage: 'Filter for',
+        }),
+        'data-test-subj': `legend-${label}-filterIn`,
+        iconType: 'plusInCircle',
+        execute: () => {
+          setPopoverOpen(false);
+          onFilter();
+        },
+      },
+      {
+        id: 'filterOut',
+        displayName: i18n.translate('expressionXY.legend.filterOutValueButtonAriaLabel', {
+          defaultMessage: 'Filter out',
+        }),
+        'data-test-subj': `legend-${label}-filterOut`,
+        iconType: 'minusInCircle',
+        execute: () => {
+          setPopoverOpen(false);
+          onFilter({ negate: true });
+        },
+      },
+    ];
 
-  const panels: EuiContextMenuPanelDescriptor[] = [
-    {
-      id: 'main',
-      title: label,
-      items: [
-        {
-          name: i18n.translate('expressionXY.legend.filterForValueButtonAriaLabel', {
-            defaultMessage: 'Filter for',
-          }),
-          'data-test-subj': `legend-${label}-filterIn`,
-          icon: <EuiIcon type="plusInCircle" size="m" />,
+    const legendCellValueActionPanelItems = [...defaultActions, ...legendCellValueActions].reduce<
+      EuiContextMenuPanelItemDescriptor[]
+    >((acc, action) => {
+      if (shouldShowLegendAction(action.id)) {
+        acc.push({
+          name: action.displayName,
+          'data-test-subj': `legend-${label}-${action.id}`,
+          icon: <EuiIcon type={action.iconType} size="m" />,
           onClick: () => {
+            action.execute();
             setPopoverOpen(false);
-            onFilter();
           },
-        },
-        {
-          name: i18n.translate('expressionXY.legend.filterOutValueButtonAriaLabel', {
-            defaultMessage: 'Filter out',
-          }),
-          'data-test-subj': `legend-${label}-filterOut`,
-          icon: <EuiIcon type="minusInCircle" size="m" />,
-          onClick: () => {
-            setPopoverOpen(false);
-            onFilter({ negate: true });
-          },
-        },
-        ...legendCellValueActionPanelItems,
-      ],
-    },
-  ];
+        });
+      }
+      return acc;
+    }, []);
+    return [
+      {
+        id: 'main',
+        title: label,
+        items: legendCellValueActionPanelItems,
+      },
+    ];
+  }, [label, legendCellValueActions, onFilter, shouldShowLegendAction]);
 
   const Button = (
     <div

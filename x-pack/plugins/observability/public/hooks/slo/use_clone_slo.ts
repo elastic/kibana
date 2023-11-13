@@ -9,7 +9,7 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { CreateSLOInput, CreateSLOResponse, FindSLOResponse } from '@kbn/slo-schema';
 import { QueryKey, useMutation, useQueryClient } from '@tanstack/react-query';
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 
@@ -50,7 +50,7 @@ export function useCloneSlo() {
           total: previousData?.total ? previousData.total + 1 : 1,
           results: [
             ...(previousData?.results ?? []),
-            { ...originalSlo, name: slo.name, id: uuidv1(), summary: undefined },
+            { ...originalSlo, name: slo.name, id: uuidv4(), summary: undefined },
           ],
         };
 

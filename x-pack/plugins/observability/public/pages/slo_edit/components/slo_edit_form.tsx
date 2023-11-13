@@ -264,6 +264,7 @@ export function SloEditForm({ slo }: Props) {
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onClose={handleCloseRuleFlyout}
           onSave={handleCloseRuleFlyout}
+          useRuleProducer
         />
       ) : null}
     </>

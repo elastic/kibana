@@ -20,14 +20,14 @@ import {
 import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { HttpStart } from '@kbn/core/public';
 
-import type { Rule } from '../../rule_management/logic/types';
 import { fetchRuleById, patchRule } from '../../rule_management/api/api';
+import type { RuleResponse } from '../../../../common/api/detection_engine';
 
 export type ReturnUseFetchOrCreateRuleExceptionList = [boolean, ExceptionListSchema | null];
 
 export interface UseFetchOrCreateRuleExceptionListProps {
   http: HttpStart;
-  ruleId: Rule['id'];
+  ruleId: RuleResponse['id'];
   exceptionListType: ExceptionListSchema['type'];
   onError: (arg: Error, code: number | null, message: string | null) => void;
   onSuccess?: (ruleWasChanged: boolean) => void;
@@ -56,7 +56,7 @@ export const useFetchOrCreateRuleExceptionList = ({
     let isSubscribed = true;
     const abortCtrl = new AbortController();
 
-    async function createExceptionList(ruleResponse: Rule): Promise<ExceptionListSchema> {
+    async function createExceptionList(ruleResponse: RuleResponse): Promise<ExceptionListSchema> {
       let newExceptionList: ExceptionListSchema;
       if (exceptionListType === 'endpoint') {
         const possibleEndpointExceptionList = await addEndpointExceptionList({
@@ -94,7 +94,7 @@ export const useFetchOrCreateRuleExceptionList = ({
     }
 
     async function createAndAssociateExceptionList(
-      ruleResponse: Rule
+      ruleResponse: RuleResponse
     ): Promise<ExceptionListSchema> {
       const newExceptionList = await createExceptionList(ruleResponse);
 
@@ -120,14 +120,16 @@ export const useFetchOrCreateRuleExceptionList = ({
       return Promise.resolve(newExceptionList);
     }
 
-    async function fetchRule(): Promise<Rule> {
+    async function fetchRule(): Promise<RuleResponse> {
       return fetchRuleById({
         id: ruleId,
         signal: abortCtrl.signal,
       });
     }
 
-    async function fetchRuleExceptionLists(ruleResponse: Rule): Promise<ExceptionListSchema[]> {
+    async function fetchRuleExceptionLists(
+      ruleResponse: RuleResponse
+    ): Promise<ExceptionListSchema[]> {
       const exceptionListReferences = ruleResponse.exceptions_list;
       if (exceptionListReferences && exceptionListReferences.length > 0) {
         const exceptionListPromises = exceptionListReferences.map(

@@ -8,7 +8,6 @@
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import type { AddOptionsListControlProps } from '@kbn/controls-plugin/public';
 import * as i18n from './translations';
-
 export { SecurityPageName } from '@kbn/security-solution-navigation';
 
 /**
@@ -506,3 +505,8 @@ export const DEFAULT_ALERT_TAGS_VALUE = [
   i18n.FALSE_POSITIVE,
   i18n.FURTHER_INVESTIGATION_REQUIRED,
 ] as const;
+
+/**
+ * Max length for the comments within security solution
+ */
+export const MAX_COMMENT_LENGTH = 30000 as const;

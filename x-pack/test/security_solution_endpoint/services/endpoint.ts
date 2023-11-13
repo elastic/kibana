@@ -25,7 +25,7 @@ import {
   indexHostsAndAlerts,
 } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import { getEndpointPackageInfo } from '@kbn/security-solution-plugin/common/endpoint/utils/package';
-import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/transforms';
+import { isEndpointPackageV2 } from '@kbn/security-solution-plugin/common/endpoint/utils/package_v2';
 import { installOrUpgradeEndpointFleetPackage } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/setup_fleet_for_endpoint';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { STARTED_TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
