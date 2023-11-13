@@ -42,7 +42,7 @@ import {
   esoModelVersionExampleV2,
   esoModelVersionExampleV3,
   EXAMPLE_SAVED_OBJECT_TYPE,
-} from '.';
+} from '../common';
 
 const documentVersionConstants = [
   esoModelVersionExampleV1.ESO_MV_RAW_DOC,

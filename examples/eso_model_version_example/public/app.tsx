@@ -77,9 +77,9 @@ export const MyPluginComponent: React.FC = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
         <EuiText>
-          2. This will read the objects' raw documents with an Elasticsearch client. Note that the
-          <EuiTextColor color="accent">typeMigrationVersion</EuiTextColor> (10.n.0) will correspond
-          to the model version (n).
+          2. This will read the raw documents of the objects with an Elasticsearch client. Note
+          that the <EuiTextColor color="accent">typeMigrationVersion</EuiTextColor> (10.n.0)
+          will correspond to the model version (n).
         </EuiText>
         <EuiButton
           onClick={() => {

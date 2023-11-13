@@ -8,17 +8,4 @@
 import { PluginInitializer } from '@kbn/core/server';
 import { EsoModelVersionExample } from './plugin';
 
-export {
-  EXAMPLE_SAVED_OBJECT_TYPE,
-  EsoModelVersionExampleTypeRegistration,
-  type EsoModelVersionExample,
-  type EsoModelVersionExampleOptions1,
-  type EsoModelVersionExampleOptions2,
-  type EsoModelVersionExampleSecretData,
-} from './types/latest';
-
-export { esoModelVersionExampleV1 } from './types';
-export { esoModelVersionExampleV2 } from './types';
-export { esoModelVersionExampleV3 } from './types';
-
 export const plugin: PluginInitializer<void, void> = () => new EsoModelVersionExample();

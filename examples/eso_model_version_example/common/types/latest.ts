@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './esoModelVersionExample/v3';
+export * from './example_type/v3';

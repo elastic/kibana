@@ -7,3 +7,18 @@
  */
 
 export const PLUGIN_ID = 'esoModelVersionExample';
+
+export {
+  EXAMPLE_SAVED_OBJECT_TYPE,
+  EsoModelVersionExampleTypeRegistration,
+  type EsoModelVersionExample,
+  type EsoModelVersionExampleOptions1,
+  type EsoModelVersionExampleOptions2,
+  type EsoModelVersionExampleSecretData,
+} from './types/latest';
+
+export {
+  esoModelVersionExampleV1,
+  esoModelVersionExampleV2,
+  esoModelVersionExampleV3
+} from './types';

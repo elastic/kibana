@@ -6,6 +6,6 @@
  * Side Public License, v 1.
  */
 
-export * as esoModelVersionExampleV1 from './esoModelVersionExample/v1';
-export * as esoModelVersionExampleV2 from './esoModelVersionExample/v2';
-export * as esoModelVersionExampleV3 from './esoModelVersionExample/v3';
+export * as esoModelVersionExampleV1 from './example_type/v1';
+export * as esoModelVersionExampleV2 from './example_type/v2';
+export * as esoModelVersionExampleV3 from './example_type/v3';
