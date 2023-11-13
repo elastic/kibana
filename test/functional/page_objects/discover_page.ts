@@ -453,12 +453,8 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public noResultsErrorVisible() {
-    return this.testSubjects.exists('discoverNoResultsError');
-  }
-
-  public mainErrorVisible() {
-    return this.testSubjects.exists('discoverMainError');
+  public showsErrorCallout() {
+    return this.testSubjects.existOrFail('discoverErrorCalloutTitle');
   }
 
   public getDiscoverErrorMessage() {
