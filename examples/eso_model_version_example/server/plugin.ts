@@ -36,13 +36,17 @@ import { schema } from '@kbn/config-schema';
 
 import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
 import { WriteResponseBase } from '@elastic/elasticsearch/lib/api/types';
+
 import {
-  EsoModelVersionExampleTypeRegistration,
   esoModelVersionExampleV1,
   esoModelVersionExampleV2,
   esoModelVersionExampleV3,
+} from './types';
+
+import {
+  EsoModelVersionExampleTypeRegistration,
   EXAMPLE_SAVED_OBJECT_TYPE,
-} from '../common';
+} from './types/latest';
 
 const documentVersionConstants = [
   esoModelVersionExampleV1.ESO_MV_RAW_DOC,

@@ -40,7 +40,7 @@ export const MyPluginComponent: React.FC = () => {
           <h1>Encrypted Saved Object Model Version Example</h1>
         </EuiTitle>
         <EuiText>
-          This is a demonstration to show the results of the implementation found in
+          This is a demonstration to show the results of the implementation found in&nbsp;
           <EuiTextColor color="accent">examples/eso_model_version_example</EuiTextColor>
         </EuiText>
       </EuiPageTemplate.Section>
@@ -51,7 +51,7 @@ export const MyPluginComponent: React.FC = () => {
         title="Create Objects"
       >
         <EuiText>
-          1. This will create three objects - one for each model version definition (see
+          1. This will create three objects - one for each model version definition (see&nbsp;
           <EuiTextColor color="accent">
             examples/eso_model_version_example/server/types
           </EuiTextColor>
@@ -77,9 +77,10 @@ export const MyPluginComponent: React.FC = () => {
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section grow={false} color="subdued" bottomBorder="extended">
         <EuiText>
-          2. This will read the raw documents of the objects with an Elasticsearch client. Note
-          that the <EuiTextColor color="accent">typeMigrationVersion</EuiTextColor> (10.n.0)
-          will correspond to the model version (n).
+          2. This will read the raw documents of the objects with an Elasticsearch client. Note that
+          the&nbsp;
+          <EuiTextColor color="accent">typeMigrationVersion&nbsp;</EuiTextColor>
+          (10.n.0) will correspond to the model version (n).
         </EuiText>
         <EuiButton
           onClick={() => {
