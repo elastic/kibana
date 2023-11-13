@@ -4,25 +4,22 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiDataGridCellValueElementProps, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { DataTableRecord } from '@kbn/discover-utils/types';
-import { Filter, Query } from '@kbn/es-query';
-import { isNoneGroup, useGrouping, getGroupingQuery } from '@kbn/securitysolution-grouping';
+import { Filter } from '@kbn/es-query';
+import { getGroupingQuery } from '@kbn/securitysolution-grouping';
 import { parseGroupingQuery } from '@kbn/securitysolution-grouping/src';
-import * as uuid from 'uuid';
-import { css } from '@emotion/react';
-import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
-import { useUrlQuery } from '../../../common/hooks/use_url_query';
 import {
-  useBaseEsQuery,
-  usePersistedQuery,
-} from '../../../common/hooks/use_cloud_posture_table/utils';
+  CloudSecurityGrouping,
+  useCloudSecurityGrouping,
+} from '../../../components/cloud_security_grouping';
+import { LATEST_FINDINGS_RETENTION_POLICY } from '../../../../common/constants';
 import { TimestampTableCell } from '../../../components/timestamp_table_cell';
 import { CspEvaluationBadge } from '../../../components/csp_evaluation_badge';
 import type { Evaluation } from '../../../../common/types';
-import type { FindingsBaseProps, FindingsBaseURLQuery } from '../../../common/types';
+import type { FindingsBaseProps } from '../../../common/types';
 import { FindingsSearchBar } from '../layout/findings_search_bar';
 import * as TEST_SUBJECTS from '../test_subjects';
 import { useLatestFindings } from './use_latest_findings';
@@ -32,37 +29,17 @@ import { ErrorCallout } from '../layout/error_callout';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
 import { CspFinding } from '../../../../common/schemas/csp_finding';
 import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
-import {
-  CloudSecurityDataTable,
-  CloudSecurityDefaultColumn,
-} from '../../../components/cloud_security_data_table';
+import { CloudSecurityDataTable } from '../../../components/cloud_security_data_table';
 import { FindingsRuleFlyout } from '../findings_flyout/findings_flyout';
 import { useGroupedFindings } from './use_grouped_findings';
-
-const getDefaultQuery = ({
-  query,
-  filters,
-}: {
-  query: Query;
-  filters: Filter[];
-}): FindingsBaseURLQuery & {
-  sort: string[][];
-} => ({
-  query,
-  filters,
-  sort: [['@timestamp', 'desc']],
-});
-
-const defaultColumns: CloudSecurityDefaultColumn[] = [
-  { id: 'result.evaluation', width: 80 },
-  { id: 'resource.id' },
-  { id: 'resource.name' },
-  { id: 'resource.sub_type' },
-  { id: 'rule.benchmark.rule_number' },
-  { id: 'rule.name' },
-  { id: 'rule.section' },
-  { id: '@timestamp' },
-];
+import {
+  FINDINGS_UNIT,
+  groupingTitle,
+  defaultGroupingOptions,
+  getDefaultQuery,
+  DEFAULT_TABLE_HEIGHT,
+  defaultColumns,
+} from './constants';
 
 /**
  * Type Guard for checking if the given source is a CspFinding
@@ -118,86 +95,25 @@ const customCellRenderer = (rows: DataTableRecord[]) => ({
   ),
 });
 
-export const FINDINGS_UNIT = (totalCount: number) =>
-  i18n.translate('xpack.csp.findings.unit', {
-    values: { totalCount },
-    defaultMessage: `{totalCount, plural, =1 {finding} other {findings}}`,
-  });
-
-const defaultGroupingOptions = [
-  {
-    label: i18n.translate('xpack.csp.findings.latestFindings.groupByResource', {
-      defaultMessage: 'Resource',
-    }),
-    key: 'resource.name',
-  },
-  {
-    label: i18n.translate('xpack.csp.findings.latestFindings.groupByRuleName', {
-      defaultMessage: 'Rule name',
-    }),
-    key: 'rule.name',
-  },
-  {
-    label: i18n.translate('xpack.csp.findings.latestFindings.groupByCloudAccount', {
-      defaultMessage: 'Cloud account',
-    }),
-    key: 'cloud.account.name',
-  },
-  {
-    label: i18n.translate('xpack.csp.findings.latestFindings.groupByKubernetesCluster', {
-      defaultMessage: 'Kubernetes cluster',
-    }),
-    key: 'orchestrator.cluster.name',
-  },
-];
-
-const groupingTitle = i18n.translate('xpack.csp.findings.latestFindings.groupBy', {
-  defaultMessage: 'Group findings by',
-});
-
-const DEFAULT_PAGE_SIZE = 10;
-const DEFAULT_TABLE_HEIGHT = 512;
-const GROUPING_ID = 'cspLatestFindings';
-const MAX_GROUPING_LEVELS = 1;
-
 export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
-  const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
-  const [activePageIndex, setActivePageIndex] = useState(0);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
-
-  const { query } = useBaseEsQuery({
+  const {
+    activePageIndex,
+    grouping,
+    pageSize,
+    query,
+    selectedGroup,
+    onChangeGroupsItemsPerPage,
+    onChangeGroupsPage,
+    setUrlQuery,
+    uniqueValue,
+    isNoneSelected,
+  } = useCloudSecurityGrouping({
     dataView,
-    filters: urlQuery.filters,
-    query: urlQuery.query,
-  });
-
-  /**
-   * Reset the active page when the filters or query change
-   * This is needed because the active page is not automatically reset when the filters or query change
-   */
-  useEffect(() => {
-    setActivePageIndex(0);
-  }, [urlQuery.filters, urlQuery.query]);
-
-  const grouping = useGrouping({
-    componentProps: {
-      unit: FINDINGS_UNIT,
-    },
+    groupingTitle,
     defaultGroupingOptions,
-    fields: dataView.fields,
-    groupingId: GROUPING_ID,
-    maxGroupingLevels: MAX_GROUPING_LEVELS,
-    title: groupingTitle,
-    onGroupChange: () => {
-      setActivePageIndex(0);
-    },
+    getDefaultQuery,
+    unit: FINDINGS_UNIT,
   });
-
-  const selectedGroup = grouping.selectedGroups[0];
-  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
-
-  const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
 
   const groupingQuery = getGroupingQuery({
     additionalFilters: [query],
@@ -215,9 +131,23 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
     enabled: !isNoneSelected,
   });
 
-  const aggs = useMemo(
+  const groupData = useMemo(
     () => parseGroupingQuery(selectedGroup, uniqueValue, data),
     [data, selectedGroup, uniqueValue]
+  );
+
+  const renderChildComponent = useCallback(
+    (groupFilters: Filter[]) => {
+      return (
+        <LatestFindingsContainerTable
+          dataView={dataView}
+          additionalFilters={groupFilters}
+          height={DEFAULT_TABLE_HEIGHT}
+          showDistributionBar={false}
+        />
+      );
+    },
+    [dataView]
   );
 
   if (isNoneSelected) {
@@ -233,41 +163,19 @@ export const LatestFindingsContainer = ({ dataView }: FindingsBaseProps) => {
   }
 
   return (
-    <div
-      css={css`
-        && .euiAccordion__optionalAction {
-          display: none;
-        }
-      `}
-    >
+    <div>
       <FindingsSearchBar dataView={dataView} setQuery={setUrlQuery} loading={isFetching} />
-      {grouping.getGrouping({
-        activePage: activePageIndex,
-        data: aggs,
-        groupingLevel: 0,
-        inspectButton: undefined,
-        isLoading: isFetching,
-        itemsPerPage: pageSize,
-        onChangeGroupsItemsPerPage: (size) => {
-          setPageSize(size);
-        },
-        onChangeGroupsPage: (index) => {
-          setActivePageIndex(index);
-        },
-        renderChildComponent: (groupFilter) => {
-          return (
-            <LatestFindingsContainerTable
-              dataView={dataView}
-              additionalFilters={groupFilter}
-              height={DEFAULT_TABLE_HEIGHT}
-              showDistributionBar={false}
-            />
-          );
-        },
-        onGroupClose: () => {},
-        selectedGroup,
-        takeActionItems: () => [],
-      })}
+      <CloudSecurityGrouping
+        data={groupData}
+        grouping={grouping}
+        renderChildComponent={renderChildComponent}
+        onChangeGroupsItemsPerPage={onChangeGroupsItemsPerPage}
+        onChangeGroupsPage={onChangeGroupsPage}
+        activePageIndex={activePageIndex}
+        isFetching={isFetching}
+        pageSize={pageSize}
+        selectedGroup={selectedGroup}
+      />
     </div>
   );
 };
@@ -307,8 +215,9 @@ export const LatestFindingsTable = ({
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
       <EuiSpacer size="m" />
-      {error && <ErrorCallout error={error} />}
-      {!error && (
+      {error ? (
+        <ErrorCallout error={error} />
+      ) : (
         <>
           <EuiSpacer size="xs" />
           <CloudSecurityDataTable
@@ -372,7 +281,7 @@ export const LatestFindingsContainerTable = ({
   const failed = data?.pages[0].count.failed || 0;
   const total = data?.pages[0].total || 0;
 
-  const handleDistributionClick = (evaluation: Evaluation) => {
+  const onDistributionBarClick = (evaluation: Evaluation) => {
     setUrlQuery({
       filters: getFilters({
         filters,
@@ -384,21 +293,22 @@ export const LatestFindingsContainerTable = ({
     });
   };
 
+  const canShowDistributionBar = showDistributionBar && total > 0;
+
   return (
     <EuiFlexItem data-test-subj={TEST_SUBJECTS.LATEST_FINDINGS_CONTAINER}>
-      {error && (
+      {error ? (
         <>
           <EuiSpacer size="m" />
           <ErrorCallout error={error} />
         </>
-      )}
-      {!error && (
+      ) : (
         <>
-          {showDistributionBar && total > 0 && (
+          {canShowDistributionBar && (
             <>
               <EuiSpacer size="m" />
               <FindingsDistributionBar
-                distributionOnClick={handleDistributionClick}
+                distributionOnClick={onDistributionBarClick}
                 passed={passed}
                 failed={failed}
               />
