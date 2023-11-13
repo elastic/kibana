@@ -308,6 +308,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search source Alert', () => {
     before(async () => {
+      // todo try removing this
       await kibanaServer.uiSettings.replace({
         'data_views:fields_max_cache': '0',
       });

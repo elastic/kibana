@@ -835,7 +835,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await transform.testExecution.logTestStep('should navigate to discover');
           await transform.table.clickTransformRowAction(testData.transformId, 'Discover');
           await pageObjects.discover.waitUntilSearchingHasFinished();
-          // did this work?
           await pageObjects.discover.refreshFieldList();
 
           if (testData.discoverAdjustSuperDatePicker) {

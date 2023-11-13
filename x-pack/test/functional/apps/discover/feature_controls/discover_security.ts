@@ -31,7 +31,6 @@ export default function (ctx: FtrProviderContext) {
     'spaceSelector',
     'header',
     'unifiedFieldList',
-    'settings',
   ]);
   const testSubjects = getService('testSubjects');
   const appsMenu = getService('appsMenu');
@@ -447,10 +446,6 @@ export default function (ctx: FtrProviderContext) {
 
       it('allows to access only via a permitted index alias', async () => {
         await globalNav.badgeExistsOrFail('Read only');
-
-        // this doesn't work since the user doesn't have access
-        // await PageObjects.settings.refreshDataViewFieldList('logstash-*');
-        // await PageObjects.common.navigateToApp('discover');
 
         // can't access logstash index directly
         await PageObjects.discover.selectIndexPattern('logstash-*');

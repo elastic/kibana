@@ -78,7 +78,6 @@ const handler: (
         'user-hash': (await getUserId()(request)) || '',
       };
 
-      // todo examine how long this takes
       const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
 
       if (cacheMaxAge && fields.length) {

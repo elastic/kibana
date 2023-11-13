@@ -495,8 +495,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 10000 * 60));
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '0 available fields. 0 empty fields. 0 meta fields.'
         );
@@ -531,10 +529,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await browser.refresh();
-        // here
-        await PageObjects.settings.refreshDataViewFieldList('with-timefield');
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.refreshFieldList();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
@@ -555,12 +550,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 1000 * 300));
-        // todo - comapre to main. This looks correct in this branch
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '0 available fields. 7 empty fields. 3 meta fields.'
-          // '0 available fields. 13 empty fields. 0 empty fields. 3 meta fields.'
         );
         await testSubjects.existOrFail(
           `${PageObjects.unifiedFieldList.getSidebarSectionSelector(
@@ -584,8 +575,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 1000 * 30));
       });
 
       it('should work when filters change', async () => {
@@ -766,8 +755,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 1000 * 30));
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '0 available fields. 7 empty fields. 3 meta fields.'
         );
