@@ -193,13 +193,15 @@ export class CaseCommentModel {
     const { id, version, ...queryRestAttributes } = updateRequest;
 
     await this.params.services.userActionService.creator.createUserAction({
-      type: UserActionTypes.comment,
-      action: UserActionActions.update,
-      caseId: this.caseInfo.id,
-      attachmentId: comment.id,
-      payload: { attachment: queryRestAttributes },
-      user: this.params.user,
-      owner,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.update,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: { attachment: queryRestAttributes },
+        user: this.params.user,
+        owner,
+      },
     });
   }
 
@@ -403,15 +405,17 @@ export class CaseCommentModel {
     req: AttachmentRequest
   ) {
     await this.params.services.userActionService.creator.createUserAction({
-      type: UserActionTypes.comment,
-      action: UserActionActions.create,
-      caseId: this.caseInfo.id,
-      attachmentId: comment.id,
-      payload: {
-        attachment: req,
+      userAction: {
+        type: UserActionTypes.comment,
+        action: UserActionActions.create,
+        caseId: this.caseInfo.id,
+        attachmentId: comment.id,
+        payload: {
+          attachment: req,
+        },
+        user: this.params.user,
+        owner: comment.attributes.owner,
       },
-      user: this.params.user,
-      owner: comment.attributes.owner,
     });
   }
 

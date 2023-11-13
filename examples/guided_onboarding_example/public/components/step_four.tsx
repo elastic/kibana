@@ -16,24 +16,22 @@ import { EuiPageHeader, EuiPageSection, EuiCode } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 
 interface StepFourProps {
-  guidedOnboarding: GuidedOnboardingPluginStart;
+  guidedOnboarding?: GuidedOnboardingPluginStart;
 }
 
-export const StepFour: React.FC<StepFourProps> = ({
-  guidedOnboarding: { guidedOnboardingApi },
-}) => {
+export const StepFour: React.FC<StepFourProps> = ({ guidedOnboarding }) => {
   const { indexName } = useParams<{ indexName: string }>();
 
   const [, setIsTourStepOpen] = useState<boolean>(false);
 
   useEffect(() => {
-    const subscription = guidedOnboardingApi
+    const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('testGuide', 'step4')
       .subscribe((isStepActive) => {
         setIsTourStepOpen(isStepActive);
       });
     return () => subscription?.unsubscribe();
-  }, [guidedOnboardingApi]);
+  }, [guidedOnboarding]);
 
   return (
     <>
@@ -65,7 +63,7 @@ export const StepFour: React.FC<StepFourProps> = ({
 
         <EuiButton
           onClick={async () => {
-            await guidedOnboardingApi?.completeGuideStep('testGuide', 'step4');
+            await guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('testGuide', 'step4');
           }}
         >
           Complete step 4

@@ -124,7 +124,17 @@
           "section": "def-common.LocatorPublic",
           "text": "LocatorPublic"
         },
-        "<{ serviceName: undefined; } | ({ serviceName: string; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+        "<{ serviceName: undefined; } | ({ serviceName: string; } & { dashboardId: string; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
+        "Branded",
+        "<string, ",
+        {
+          "pluginId": "@kbn/io-ts-utils",
+          "scope": "common",
+          "docId": "kibKbnIoTsUtilsPluginApi",
+          "section": "def-common.NonEmptyStringBrand",
+          "text": "NonEmptyStringBrand"
+        },
+        ">; }; }) | ({ serviceName: string; } & { dashboardId?: undefined; } & { serviceOverviewTab?: \"errors\" | \"metrics\" | \"traces\" | \"logs\" | undefined; } & { query: { environment: \"ENVIRONMENT_NOT_DEFINED\" | \"ENVIRONMENT_ALL\" | ",
         "Branded",
         "<string, ",
         {

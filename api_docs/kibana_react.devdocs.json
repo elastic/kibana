@@ -203,7 +203,13 @@
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "Props",
+          {
+            "pluginId": "@kbn/code-editor",
+            "scope": "common",
+            "docId": "kibKbnCodeEditorPluginApi",
+            "section": "def-common.CodeEditorProps",
+            "text": "CodeEditorProps"
+          },
           ">) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
@@ -219,7 +225,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "Props",
+              {
+                "pluginId": "@kbn/code-editor",
+                "scope": "common",
+                "docId": "kibKbnCodeEditorPluginApi",
+                "section": "def-common.CodeEditorProps",
+                "text": "CodeEditorProps"
+              },
               ">"
             ],
             "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
@@ -242,7 +254,13 @@
         ],
         "signature": [
           "(props: React.PropsWithChildren<",
-          "Props",
+          {
+            "pluginId": "@kbn/code-editor",
+            "scope": "common",
+            "docId": "kibKbnCodeEditorPluginApi",
+            "section": "def-common.CodeEditorProps",
+            "text": "CodeEditorProps"
+          },
           ">) => JSX.Element"
         ],
         "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
@@ -258,7 +276,13 @@
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
-              "Props",
+              {
+                "pluginId": "@kbn/code-editor",
+                "scope": "common",
+                "docId": "kibKbnCodeEditorPluginApi",
+                "section": "def-common.CodeEditorProps",
+                "text": "CodeEditorProps"
+              },
               ">"
             ],
             "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
@@ -1224,6 +1248,18 @@
             "path": "x-pack/plugins/fleet/public/applications/fleet/app.tsx"
           },
           {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "metricsDataAccess",
+            "path": "x-pack/plugins/metrics_data_access/public/apps/common_providers.tsx"
+          },
+          {
             "plugin": "licenseManagement",
             "path": "x-pack/plugins/license_management/public/shared_imports.ts"
           },
@@ -1358,18 +1394,6 @@
           {
             "plugin": "ml",
             "path": "x-pack/plugins/ml/public/application/management/jobs_list/components/jobs_list_page/jobs_list_page.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
-          },
-          {
-            "plugin": "infra",
-            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "profiling",
@@ -1562,6 +1586,18 @@
           {
             "plugin": "indexLifecycleManagement",
             "path": "x-pack/plugins/index_lifecycle_management/public/application/index.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
+          },
+          {
+            "plugin": "infra",
+            "path": "x-pack/plugins/infra/public/apps/common_providers.tsx"
           },
           {
             "plugin": "ingestPipelines",
@@ -2849,7 +2885,7 @@
         "label": "toMountPoint",
         "description": [],
         "signature": [
-          "(node: React.ReactNode, { theme$ }?: ",
+          "(node: React.ReactNode, { analytics, theme$ }?: ",
           {
             "pluginId": "kibanaReact",
             "scope": "public",
@@ -3837,7 +3873,7 @@
             "id": "def-public.toMountPoint.$2",
             "type": "Object",
             "tags": [],
-            "label": "{ theme$ }",
+            "label": "{ analytics, theme$ }",
             "description": [],
             "signature": [
               {
@@ -4377,75 +4413,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ExitFullScreenButtonProps",
-        "type": "Interface",
-        "tags": [],
-        "label": "ExitFullScreenButtonProps",
-        "description": [],
-        "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ExitFullScreenButtonProps.onExitFullScreenMode",
-            "type": "Function",
-            "tags": [],
-            "label": "onExitFullScreenMode",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ExitFullScreenButtonProps.chrome",
-            "type": "Object",
-            "tags": [],
-            "label": "chrome",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-chrome-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreChromeBrowserPluginApi",
-                "section": "def-common.ChromeStart",
-                "text": "ChromeStart"
-              }
-            ],
-            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ExitFullScreenButtonProps.toggleChrome",
-            "type": "CompoundType",
-            "tags": [
-              "note",
-              "default"
-            ],
-            "label": "toggleChrome",
-            "description": [
-              "\nOptional argument that determines whether we toggle the chrome bar\nthe button unmounts.\n"
-            ],
-            "signature": [
-              "boolean | undefined"
-            ],
-            "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "kibanaReact",
         "id": "def-public.KibanaReactContext",
@@ -5087,6 +5054,27 @@
         "children": [
           {
             "parentPluginId": "kibanaReact",
+            "id": "def-public.ToMountPointOptions.analytics",
+            "type": "Object",
+            "tags": [],
+            "label": "analytics",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-analytics-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
+                "section": "def-common.AnalyticsServiceStart",
+                "text": "AnalyticsServiceStart"
+              },
+              " | undefined"
+            ],
+            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "kibanaReact",
             "id": "def-public.ToMountPointOptions.theme$",
             "type": "Object",
             "tags": [],
@@ -5242,7 +5230,13 @@
             "description": [],
             "signature": [
               "React.ComponentType<",
-              "Props",
+              {
+                "pluginId": "@kbn/code-editor",
+                "scope": "common",
+                "docId": "kibKbnCodeEditorPluginApi",
+                "section": "def-common.CodeEditorProps",
+                "text": "CodeEditorProps"
+              },
               "> | undefined"
             ],
             "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
@@ -5344,9 +5338,6 @@
         "tags": [],
         "label": "CodeEditorProps",
         "description": [],
-        "signature": [
-          "Props"
-        ],
         "path": "src/plugins/kibana_react/public/code_editor/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
@@ -5568,7 +5559,7 @@
         "signature": [
           "\"css\""
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/css/constants.ts",
+        "path": "packages/shared-ux/code_editor/languages/css/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5583,7 +5574,7 @@
         "signature": [
           "\"markdown\""
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/markdown/constants.ts",
+        "path": "packages/shared-ux/code_editor/languages/markdown/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5598,7 +5589,7 @@
         "signature": [
           "\"yaml\""
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/yaml/constants.ts",
+        "path": "packages/shared-ux/code_editor/languages/yaml/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5613,7 +5604,7 @@
         "signature": [
           "\"handlebars\""
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/handlebars/constants.ts",
+        "path": "packages/shared-ux/code_editor/languages/handlebars/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5628,7 +5619,7 @@
         "signature": [
           "\"hjson\""
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/hjson/constants.ts",
+        "path": "packages/shared-ux/code_editor/languages/hjson/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5643,7 +5634,7 @@
         "signature": [
           "\"grok\""
         ],
-        "path": "src/plugins/kibana_react/public/code_editor/languages/grok/constants.ts",
+        "path": "packages/shared-ux/code_editor/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -5822,24 +5813,6 @@
         "path": "src/plugins/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ExitFullScreenButton",
-        "type": "Object",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "ExitFullScreenButton",
-        "description": [],
-        "signature": [
-          "typeof ExitFullScreenButtonUi"
-        ],
-        "path": "src/plugins/kibana_react/public/exit_full_screen_button/exit_full_screen_button.tsx",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [],
         "initialIsOpen": false
       }
     ]

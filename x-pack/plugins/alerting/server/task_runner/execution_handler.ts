@@ -255,6 +255,7 @@ export class ExecutionHandler<
             params: injectActionParams({
               actionTypeId,
               ruleUrl,
+              ruleName: this.rule.name,
               actionParams: transformSummaryActionParams({
                 alerts: summarizedAlerts,
                 rule: this.rule,
@@ -295,6 +296,7 @@ export class ExecutionHandler<
             params: injectActionParams({
               actionTypeId,
               ruleUrl,
+              ruleName: this.rule.name,
               actionParams: transformActionParams({
                 actionsPlugin,
                 alertId: ruleId,

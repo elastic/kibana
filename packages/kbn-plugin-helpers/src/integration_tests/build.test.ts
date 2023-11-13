@@ -81,6 +81,7 @@ it('builds a generated plugin into a viable archive', async () => {
      info running @kbn/optimizer
      │ succ browser bundle created at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public
      │ info stopping @kbn/optimizer
+     info compressing js and css bundles found at plugins/foo_test_plugin/build/kibana/fooTestPlugin/target/public to brotli
      info copying assets from \`public/assets\` to build
      info copying server source into the build and converting with babel
      info running yarn to install dependencies

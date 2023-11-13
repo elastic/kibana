@@ -205,7 +205,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
         expect(await rulePageDescription.getVisibleText()).to.be(data[0].rule.rationale);
 
-        const severity = await testSubjects.find('severity');
+        const severity = await testSubjects.find('severityPropertyValue');
         expect(await severity.getVisibleText()).to.be('Low');
 
         const referenceUrls = await testSubjects.find('urlsDescriptionReferenceLinkItem');

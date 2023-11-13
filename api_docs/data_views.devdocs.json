@@ -324,12 +324,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
@@ -6713,12 +6713,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",
@@ -12141,12 +12141,12 @@
             "trackAdoption": false,
             "references": [
               {
-                "plugin": "graph",
-                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
-              },
-              {
                 "plugin": "visTypeTimeseries",
                 "path": "src/plugins/vis_types/timeseries/server/lib/search_strategies/strategies/abstract_search_strategy.ts"
+              },
+              {
+                "plugin": "graph",
+                "path": "x-pack/plugins/graph/public/services/persistence/deserialize.ts"
               },
               {
                 "plugin": "graph",

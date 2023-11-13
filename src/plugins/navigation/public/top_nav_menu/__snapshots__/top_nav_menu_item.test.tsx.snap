@@ -2,7 +2,6 @@
 
 exports[`TopNavMenu Should render emphasized item which should be clickable 1`] = `
 <EuiButton
-  color="primary"
   fill={true}
   iconSide="right"
   iconType="beaker"

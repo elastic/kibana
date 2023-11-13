@@ -17,6 +17,8 @@ post:
         schema:
           $ref: '../components/schemas/run_connector_request.yaml'
         examples:
+          runEmailConnectorRequest:
+            $ref: '../components/examples/run_email_connector_request.yaml'
           runIndexConnectorRequest:
             $ref: '../components/examples/run_index_connector_request.yaml'
           runJiraConnectorRequest:
@@ -57,6 +59,8 @@ post:
                   - error
                   - ok
           examples:
+            runEmailConnectorResponse:
+              $ref: '../components/examples/run_email_connector_response.yaml'
             runIndexConnectorResponse:
               $ref: '../components/examples/run_index_connector_response.yaml'
             runJiraConnectorResponse:
@@ -69,7 +73,3 @@ post:
               $ref: '../components/examples/run_swimlane_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

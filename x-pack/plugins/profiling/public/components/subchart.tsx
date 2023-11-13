@@ -20,9 +20,11 @@ import {
 } from '@elastic/charts';
 import {
   EuiAccordion,
+  EuiAccordionProps,
   EuiBadge,
   EuiButton,
   EuiFlexGroup,
+  EuiFlexGroupProps,
   EuiFlexItem,
   EuiHorizontalRule,
   EuiIcon,
@@ -35,7 +37,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { StackFrameMetadata } from '@kbn/profiling-utils';
 import { groupBy } from 'lodash';
-import React, { Fragment } from 'react';
+import React, { Fragment, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { CountPerTime, OTHER_BUCKET_LABEL, TopNSample } from '../../common/topn';
 import { useKibanaTimeZoneSetting } from '../hooks/use_kibana_timezone_setting';
@@ -58,8 +60,8 @@ export interface SubChartProps {
   data: CountPerTime[];
   showAxes: boolean;
   metadata: StackFrameMetadata[];
-  onShowMoreClick: (() => void) | null;
-  style?: React.ComponentProps<typeof EuiFlexGroup>['style'];
+  onShowMoreClick?: () => void;
+  style?: EuiFlexGroupProps['style'];
   showFrames: boolean;
   padTitle: boolean;
   sample: TopNSample | null;
@@ -98,6 +100,9 @@ export function SubChart({
   sample,
 }: SubChartProps) {
   const theme = useEuiTheme();
+  const [accordionState, setAccordionState] = useState<
+    Record<string, EuiAccordionProps['forceState']>
+  >({});
 
   const profilingRouter = useProfilingRouter();
 
@@ -114,14 +119,20 @@ export function SubChart({
 
   const compact = !!onShowMoreClick;
 
-  const groupedMetadata = groupBy(metadata, 'AddressOrLine');
-  const parentsMetadata = Object.values(groupedMetadata)
-    .map((items) => items.shift())
-    .filter((_) => _) as StackFrameMetadata[];
-
+  const parentsMetadata = metadata.filter((item) => item.Inline === false);
   const displayedFrames = compact
     ? parentsMetadata.concat().reverse().slice(0, NUM_DISPLAYED_FRAMES)
     : parentsMetadata.concat().reverse();
+
+  const childrenMetadata = useMemo(() => {
+    const groupedMetadata = groupBy(metadata, 'AddressOrLine');
+    return Object.keys(groupedMetadata).reduce<Record<string, StackFrameMetadata[]>>((acc, key) => {
+      // Removes the first item as it will always be the parent item.
+      const [_, ...children] = groupedMetadata[key];
+      acc[key] = children;
+      return acc;
+    }, {});
+  }, [metadata]);
 
   const hasMoreFrames = displayedFrames.length < metadata.length;
 
@@ -139,12 +150,23 @@ export function SubChart({
           <EuiFlexGroup direction="column" gutterSize="none">
             {displayedFrames.map((frame, frameIndex) => {
               const parentIndex = parentsMetadata.indexOf(frame) + 1;
-              const children = groupedMetadata[frame.AddressOrLine].concat().reverse();
-
+              const children = childrenMetadata[frame.AddressOrLine].concat().reverse();
+              const key = [frameIndex, frame.FrameID].join('|');
+              const currentAccordionState = accordionState[key];
               return (
-                <>
+                <Fragment key={key}>
                   {children.length > 0 ? (
                     <EuiAccordion
+                      // taking over the control of the EuiAccordion state
+                      // to avoid rendering the children items when the accordion is closed.
+                      // This renders the page way faster as it avoids unnecessary render of items that might never be visible
+                      forceState={currentAccordionState || 'closed'}
+                      onToggle={(isOpen) => {
+                        setAccordionState((state) => ({
+                          ...state,
+                          [key]: isOpen ? 'open' : 'closed',
+                        }));
+                      }}
                       css={css`
                         display: flex;
                         flex-direction: column-reverse;
@@ -171,22 +193,24 @@ export function SubChart({
                         </EuiToolTip>
                       }
                     >
-                      <EuiFlexGroup
-                        direction="column"
-                        gutterSize="s"
-                        style={{ marginLeft: '12px' }}
-                      >
-                        {children.map((child, childIndex) => {
-                          return (
-                            <Fragment key={child.FrameID}>
-                              {renderFrameItem(
-                                child,
-                                `${parentIndex}.${children.length - childIndex} ->`
-                              )}
-                            </Fragment>
-                          );
-                        })}
-                      </EuiFlexGroup>
+                      {currentAccordionState === 'open' ? (
+                        <EuiFlexGroup
+                          direction="column"
+                          gutterSize="s"
+                          style={{ marginLeft: '12px' }}
+                        >
+                          {children.map((child, childIndex) => {
+                            return (
+                              <Fragment key={[key, childIndex].join('|')}>
+                                {renderFrameItem(
+                                  child,
+                                  `${parentIndex}.${children.length - childIndex} ->`
+                                )}
+                              </Fragment>
+                            );
+                          })}
+                        </EuiFlexGroup>
+                      ) : null}
                     </EuiAccordion>
                   ) : (
                     renderFrameItem(frame, parentIndex)
@@ -196,7 +220,7 @@ export function SubChart({
                       <EuiHorizontalRule size="full" margin="s" />
                     </EuiFlexItem>
                   ) : null}
-                </>
+                </Fragment>
               );
             })}
           </EuiFlexGroup>

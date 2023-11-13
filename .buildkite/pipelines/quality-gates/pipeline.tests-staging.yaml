@@ -23,7 +23,9 @@ steps:
 
   - wait: ~
 
-  - label: ":judge::seedling: Trigger Manual Tests Phase"
-    command: "make -C /agent trigger-manual-verification-phase"
-    agents:
-      image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.4"
+  - group: "Kibana Release Manager"
+    steps:
+      - label: ":judge::seedling: Trigger Manual Tests Phase"
+        command: "make -C /agent trigger-manual-verification-phase"
+        agents:
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

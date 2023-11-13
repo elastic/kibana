@@ -84,7 +84,6 @@ export function StackedBarChart({
             height={128}
             width={MAX_TOOLTIP_WIDTH}
             showAxes={false}
-            onShowMoreClick={null}
             padTitle={false}
           />
         </EuiPanel>

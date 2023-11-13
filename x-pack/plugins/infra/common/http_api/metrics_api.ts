@@ -7,7 +7,7 @@
 
 import { createLiteralValueFromUndefinedRT } from '@kbn/io-ts-utils';
 import * as rt from 'io-ts';
-import { MetricsUIAggregationRT } from '../inventory_models/types';
+import { MetricsUIAggregationRT } from '@kbn/metrics-data-access-plugin/common';
 import { afterKeyObjectRT } from './metrics_explorer';
 
 export const MetricsAPITimerangeRT = rt.intersection([

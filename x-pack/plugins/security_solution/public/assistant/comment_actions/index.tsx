@@ -41,17 +41,19 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     [dispatch]
   );
 
+  const content = message.content ?? '';
+
   const onAddNoteToTimeline = useCallback(() => {
     updateAndAssociateNode({
       associateNote,
-      newNote: message.content,
+      newNote: content,
       updateNewNote: () => {},
       updateNote,
       user: '', // TODO: attribute assistant messages
     });
 
     toasts.addSuccess(i18n.ADDED_NOTE_TO_TIMELINE);
-  }, [associateNote, message.content, toasts, updateNote]);
+  }, [associateNote, content, toasts, updateNote]);
 
   // Attach to case support
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({
@@ -65,13 +67,13 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
     selectCaseModal.open({
       getAttachments: () => [
         {
-          comment: message.content,
+          comment: content,
           type: AttachmentType.user,
           owner: i18n.ELASTIC_AI_ASSISTANT,
         },
       ],
     });
-  }, [message.content, selectCaseModal, showAssistantOverlay]);
+  }, [content, selectCaseModal, showAssistantOverlay]);
 
   return (
     <EuiFlexGroup alignItems="center" gutterSize="none">
@@ -99,7 +101,7 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
 
       <EuiFlexItem grow={false}>
         <EuiToolTip position="top" content={i18n.COPY_TO_CLIPBOARD}>
-          <EuiCopy textToCopy={message.content}>
+          <EuiCopy textToCopy={content}>
             {(copy) => (
               <EuiButtonIcon
                 aria-label={i18n.COPY_TO_CLIPBOARD}
