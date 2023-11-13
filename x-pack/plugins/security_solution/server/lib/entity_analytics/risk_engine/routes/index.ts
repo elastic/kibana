@@ -10,3 +10,4 @@ export { riskEngineInitRoute } from './risk_engine_init_route';
 export { riskEngineEnableRoute } from './risk_engine_enable_route';
 export { riskEngineDisableRoute } from './risk_engine_disable_route';
 export { riskEngineStatusRoute } from './risk_engine_status_route';
+export { riskEnginePrivilegesRoute } from './risk_engine_privileges_route';
