@@ -84,6 +84,7 @@ const getTabs = (props: ShareModalProps) => {
         isEmbedded={props.allowEmbed}
         allowShortUrl={props.allowShortUrl}
         objectId={props.objectId}
+        onClose={props.onClose}
       />
     ),
   };
@@ -119,6 +120,7 @@ const getTabs = (props: ShareModalProps) => {
           showPublicUrlSwitch={showPublicUrlSwitch}
           urlService={urlService}
           snapshotShareWarning={snapshotShareWarning}
+          onClose={props.onClose}
         />
       ),
     };
@@ -190,8 +192,8 @@ const getTabs = (props: ShareModalProps) => {
 };
 
 export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
-  const [_, setIsModalVisible] = useState(false);
-  const closeModal = () => setIsModalVisible(false);
+  // const [_, setIsModalVisible] = useState(false);
+  // const closeModal = () => setIsModalVisible(false);
 
   const { tabs, initialTabTitle } = getTabs(props);
   const formattedTabs: any = [];
@@ -215,7 +217,7 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
   return (
     <I18nProvider>
       <EuiOverlayMask>
-        <EuiModal onClose={closeModal} data-test-subject="shareContextModal" maxWidth>
+        <EuiModal onClose={props.onClose} data-test-subject="shareContextModal" maxWidth>
           <EuiModalHeader>
             <EuiModalHeaderTitle>{initialTabTitle}</EuiModalHeaderTitle>
           </EuiModalHeader>

@@ -6,7 +6,15 @@
  * Side Public License, v 1.
  */
 
-import { EuiCodeBlock, EuiForm, EuiFormRow, EuiRadioGroup, EuiSpacer } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCodeBlock,
+  EuiFlexGroup,
+  EuiForm,
+  EuiFormRow,
+  EuiRadioGroup,
+  EuiSpacer,
+} from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { FC, useState } from 'react';
 
@@ -14,11 +22,12 @@ interface LinksModalPageProps {
   isEmbedded: boolean;
   allowShortUrl: boolean;
   objectId?: string;
+  onClose: () => void;
 }
 
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
   const [selectedRadio, setSelectedRadio] = useState<string>('0');
-  const { objectId } = props;
+  const { objectId, onClose } = props;
   const isNotSaved = () => {
     return objectId === undefined || objectId === '';
   };
@@ -53,8 +62,14 @@ export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPagePro
         name="embed radio group"
         idSelected={selectedRadio}
       />
-      <EuiSpacer />
+      <EuiSpacer size="m" />
       {saveNeeded}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup direction="row" justifyContent="flexEnd">
+        <EuiButton fill onSubmit={onClose}>
+          <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
+        </EuiButton>
+      </EuiFlexGroup>
     </EuiForm>
   );
 };
