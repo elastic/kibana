@@ -191,7 +191,7 @@ export function getClockSkew(
     case 'error':
     case 'span':
       return parentItem.skew;
-    // transaction is the inital entry in a service. Calculate skew for this, and it will be propogated to all child spans
+    // transaction is the initial entry in a service. Calculate skew for this, and it will be propagated to all child spans
     case 'transaction': {
       const parentStart = parentItem.doc.timestamp.us + parentItem.skew;
 

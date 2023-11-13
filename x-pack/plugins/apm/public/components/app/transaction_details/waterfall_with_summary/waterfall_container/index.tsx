@@ -17,6 +17,7 @@ import {
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from './waterfall_legends';
+import { MissingTransactionWarning } from './waterfall/missing_transaction_warning';
 
 interface Props {
   waterfallItemId?: string;
@@ -82,6 +83,9 @@ export function WaterfallContainer({
     return { ...legend, value: !legend.value ? serviceName : legend.value };
   });
 
+  const spans = items.filter((item) => item.docType === 'span');
+  const shouldShowWarning = spans.some((item) => !item?.parent?.id);
+
   return (
     <EuiFlexGroup direction="column">
       {isCriticalPathFeatureEnabled ? (
@@ -108,7 +112,19 @@ export function WaterfallContainer({
         </EuiFlexItem>
       ) : null}
       <EuiFlexItem>
-        <WaterfallLegends legends={legendsWithFallbackLabel} type={colorBy} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <WaterfallLegends
+              legends={legendsWithFallbackLabel}
+              type={colorBy}
+            />
+          </EuiFlexItem>
+          {shouldShowWarning ? (
+            <EuiFlexItem grow={false}>
+              <MissingTransactionWarning />
+            </EuiFlexItem>
+          ) : null}
+        </EuiFlexGroup>
       </EuiFlexItem>
       <EuiFlexItem>
         <Waterfall
