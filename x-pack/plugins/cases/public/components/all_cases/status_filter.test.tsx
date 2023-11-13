@@ -15,7 +15,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 describe('StatusFilter', () => {
   const onChange = jest.fn();
   const defaultProps = {
-    selectedOptions: [],
+    selectedOptionKeys: [],
     countClosedCases: 7,
     countInProgressCases: 5,
     countOpenCases: 2,
@@ -49,7 +49,10 @@ describe('StatusFilter', () => {
     userEvent.click(screen.getByRole('option', { name: CaseStatuses.open }));
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({ filterId: 'status', options: [CaseStatuses.open] });
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'status',
+        selectedOptionKeys: [CaseStatuses.open],
+      });
     });
   });
 

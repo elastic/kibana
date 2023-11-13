@@ -69,7 +69,10 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
-      expect(onChange).toHaveBeenCalledWith({ filterId: 'owner', options: [solutions[0]] });
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [solutions[0]],
+      });
     });
 
     it('should call onChange with [owner] when the last solution option selected is deselected', async () => {
@@ -87,7 +90,10 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
-      expect(onChange).toHaveBeenCalledWith({ filterId: 'owner', options: [solutions[0]] });
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [solutions[0]],
+      });
     });
   });
 
@@ -123,7 +129,10 @@ describe('SolutionFilter ', () => {
 
       userEvent.click(getByTestId(`options-filter-popover-item-${solutions[0]}`));
 
-      expect(onChange).toHaveBeenCalledWith({ filterId: 'owner', options: [solutions[0]] });
+      expect(onChange).toHaveBeenCalledWith({
+        filterId: 'owner',
+        selectedOptionKeys: [solutions[0]],
+      });
     });
 
     it('should call onChange with [all solutions] when the last solution option selected is deselected', async () => {
@@ -143,7 +152,7 @@ describe('SolutionFilter ', () => {
 
       expect(onChange).toHaveBeenCalledWith({
         filterId: 'owner',
-        options: [solutions[0], solutions[1]],
+        selectedOptionKeys: [solutions[0], solutions[1]],
       });
     });
   });
