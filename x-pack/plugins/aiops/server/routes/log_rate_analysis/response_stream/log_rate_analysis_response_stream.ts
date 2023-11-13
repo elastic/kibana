@@ -26,6 +26,7 @@ import type {
 import { loadedFactory, type StreamLoaded } from './loaded';
 import { indexInfoHandlerFactory } from './index_info_handler';
 import { overridesHandlerFactory } from './overrides_handler';
+import { significantItemsHandlerFactory } from './significant_items_handler';
 import type { LogDebugMessage, StreamState } from './types';
 
 // 10s ping frequency to keep the stream alive.
@@ -38,6 +39,7 @@ const getDefaultStreamState = (): StreamState => ({
 });
 
 export interface LogRateAnalysisResponseStreamOptions<T extends ApiVersion> {
+  version: T;
   client: ElasticsearchClient;
   requestBody: AiopsLogRateAnalysisSchema<T>;
   events: KibanaRequestEvents;
@@ -55,13 +57,16 @@ export interface LogRateAnalysisResponseStreamFetchOptions<T extends ApiVersion>
   pushPingWithTimeout: () => void;
   pushError: (msg: string) => void;
   loaded: StreamLoaded;
+  sampleProbability: number;
   shouldStop: (d?: boolean) => boolean | undefined;
 }
 
 export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
   options: LogRateAnalysisResponseStreamOptions<T>
 ) => {
-  const { client, events, headers, logger, requestBody } = options;
+  const { events, headers, logger, requestBody } = options;
+
+  const sampleProbability = requestBody.sampleProbability ?? 1;
 
   let logMessageCounter = 0;
 
@@ -164,26 +169,20 @@ export const logRateAnalysisResponseStreamFactory = <T extends ApiVersion>(
     pushPingWithTimeout,
     pushError,
     loaded,
+    sampleProbability,
     shouldStop,
   };
 
   const indexInfoHandler = indexInfoHandlerFactory(streamFetchOptions);
-
   const overridesHandler = overridesHandlerFactory(streamFetchOptions);
+  const significantItemsHandler = significantItemsHandlerFactory(streamFetchOptions);
 
   return {
-    abortSignal,
-    end,
-    endWithUpdatedLoadingState,
+    ...streamFetchOptions,
     indexInfoHandler,
     isRunning,
-    loaded,
-    logDebugMessage,
     overridesHandler,
-    push,
-    pushError,
-    pushPingWithTimeout,
     responseWithHeaders,
-    shouldStop,
+    significantItemsHandler,
   };
 };

@@ -11,3 +11,7 @@ export const PROGRESS_STEP_P_VALUES = 0.5;
 export const PROGRESS_STEP_GROUPING = 0.1;
 export const PROGRESS_STEP_HISTOGRAMS = 0.1;
 export const PROGRESS_STEP_HISTOGRAMS_GROUPS = 0.1;
+
+// Don't use more than 10 here otherwise Kibana will emit an error
+// regarding a limit of abort signal listeners of more than 10.
+export const MAX_CONCURRENT_QUERIES = 10;

@@ -26,14 +26,12 @@ import type {
   NumericChartData,
   NumericHistogramField,
 } from '@kbn/ml-agg-utils';
-import { SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 import { fetchHistogramsForFields } from '@kbn/ml-agg-utils';
 import { createExecutionContext } from '@kbn/ml-route-utils';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import { RANDOM_SAMPLER_SEED, AIOPS_TELEMETRY_ID } from '../../../common/constants';
 import {
-  addSignificantItemsAction,
   addSignificantItemsGroupAction,
   addSignificantItemsGroupHistogramAction,
   addSignificantItemsHistogramAction,
@@ -52,8 +50,6 @@ import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
-import { fetchSignificantCategories } from './queries/fetch_significant_categories';
-import { fetchSignificantTermPValues } from './queries/fetch_significant_term_p_values';
 import { fetchFrequentItemSets } from './queries/fetch_frequent_item_sets';
 import { fetchTerms2CategoriesCounts } from './queries/fetch_terms_2_categories_counts';
 import { getHistogramQuery } from './queries/get_histogram_query';
@@ -61,8 +57,7 @@ import { getGroupFilter } from './queries/get_group_filter';
 import { getSignificantItemGroups } from './queries/get_significant_item_groups';
 import { logRateAnalysisResponseStreamFactory } from './response_stream/log_rate_analysis_response_stream';
 import {
-  LOADED_FIELD_CANDIDATES,
-  PROGRESS_STEP_P_VALUES,
+  MAX_CONCURRENT_QUERIES,
   PROGRESS_STEP_GROUPING,
   PROGRESS_STEP_HISTOGRAMS,
   PROGRESS_STEP_HISTOGRAMS_GROUPS,
@@ -97,7 +92,6 @@ export function routeHandlerFactory<T extends ApiVersion>(
 
     return await coreStart.executionContext.withContext(executionContext, () => {
       const groupingEnabled = !!request.body.grouping;
-      const sampleProbability = request.body.sampleProbability ?? 1;
 
       const {
         abortSignal,
@@ -112,8 +106,11 @@ export function routeHandlerFactory<T extends ApiVersion>(
         pushError,
         pushPingWithTimeout,
         responseWithHeaders,
+        sampleProbability,
+        significantItemsHandler,
         shouldStop,
       } = logRateAnalysisResponseStreamFactory<T>({
+        version,
         client,
         requestBody: request.body,
         events: request.events,
@@ -131,183 +128,19 @@ export function routeHandlerFactory<T extends ApiVersion>(
           pushPingWithTimeout();
 
           // Step 1: Index Info: Field candidates, total doc count, sample probability
-
           const indexInfo = await indexInfoHandler();
-
           if (!indexInfo) {
             return;
           }
 
-          const { fieldCandidates, textFieldCandidates } = indexInfo;
-          let fieldCandidatesCount = fieldCandidates.length;
-
-          // Step 2: Significant Categories and Items
-
-          // This will store the combined count of detected significant log patterns and keywords
-          let fieldValuePairsCount = 0;
-
-          const significantCategories: SignificantItem[] = [];
-
-          if (version === '1') {
-            significantCategories.push(
-              ...((
-                request.body as AiopsLogRateAnalysisSchema<'1'>
-              ).overrides?.significantTerms?.filter(
-                (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-              ) ?? [])
-            );
-          }
-
-          if (version === '2') {
-            significantCategories.push(
-              ...((
-                request.body as AiopsLogRateAnalysisSchema<'2'>
-              ).overrides?.significantItems?.filter(
-                (d) => d.type === SIGNIFICANT_ITEM_TYPE.LOG_PATTERN
-              ) ?? [])
-            );
-          }
-
-          // Get significant categories of text fields
-          if (textFieldCandidates.length > 0) {
-            significantCategories.push(
-              ...(await fetchSignificantCategories(
-                client,
-                request.body,
-                textFieldCandidates,
-                logger,
-                sampleProbability,
-                pushError,
-                abortSignal
-              ))
-            );
-
-            if (significantCategories.length > 0) {
-              push(addSignificantItemsAction(significantCategories, version));
-            }
-          }
-
-          const significantTerms: SignificantItem[] = [];
-
-          if (version === '1') {
-            significantTerms.push(
-              ...((
-                request.body as AiopsLogRateAnalysisSchema<'1'>
-              ).overrides?.significantTerms?.filter(
-                (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-              ) ?? [])
-            );
-          }
-
-          if (version === '2') {
-            significantTerms.push(
-              ...((
-                request.body as AiopsLogRateAnalysisSchema<'2'>
-              ).overrides?.significantItems?.filter(
-                (d) => d.type === SIGNIFICANT_ITEM_TYPE.KEYWORD
-              ) ?? [])
-            );
-          }
-
-          const fieldsToSample = new Set<string>();
-
-          // Don't use more than 10 here otherwise Kibana will emit an error
-          // regarding a limit of abort signal listeners of more than 10.
-          const MAX_CONCURRENT_QUERIES = 10;
-
-          let remainingFieldCandidates: string[];
-          let loadingStepSizePValues = PROGRESS_STEP_P_VALUES;
-
-          if (request.body.overrides?.remainingFieldCandidates) {
-            fieldCandidates.push(...request.body.overrides?.remainingFieldCandidates);
-            remainingFieldCandidates = request.body.overrides?.remainingFieldCandidates;
-            fieldCandidatesCount = fieldCandidates.length;
-            loadingStepSizePValues =
-              LOADED_FIELD_CANDIDATES +
-              PROGRESS_STEP_P_VALUES -
-              (request.body.overrides?.loaded ?? PROGRESS_STEP_P_VALUES);
-          } else {
-            remainingFieldCandidates = fieldCandidates;
-          }
-
-          logDebugMessage('Fetch p-values.');
-
-          const pValuesQueue = queue(async function (fieldCandidate: string) {
-            loaded((1 / fieldCandidatesCount) * loadingStepSizePValues, false);
-
-            let pValues: Awaited<ReturnType<typeof fetchSignificantTermPValues>>;
-
-            try {
-              pValues = await fetchSignificantTermPValues(
-                client,
-                request.body,
-                [fieldCandidate],
-                logger,
-                sampleProbability,
-                pushError,
-                abortSignal
-              );
-            } catch (e) {
-              if (!isRequestAbortedError(e)) {
-                logger.error(
-                  `Failed to fetch p-values for '${fieldCandidate}', got: \n${e.toString()}`
-                );
-                pushError(`Failed to fetch p-values for '${fieldCandidate}'.`);
-              }
-              return;
-            }
-
-            remainingFieldCandidates = remainingFieldCandidates.filter((d) => d !== fieldCandidate);
-
-            if (pValues.length > 0) {
-              pValues.forEach((d) => {
-                fieldsToSample.add(d.fieldName);
-              });
-              significantTerms.push(...pValues);
-
-              push(addSignificantItemsAction(pValues, version));
-            }
-
-            push(
-              updateLoadingStateAction({
-                ccsWarning: false,
-                loaded: loaded(),
-                loadingState: i18n.translate(
-                  'xpack.aiops.logRateAnalysis.loadingState.identifiedFieldValuePairs',
-                  {
-                    defaultMessage:
-                      'Identified {fieldValuePairsCount, plural, one {# significant field/value pair} other {# significant field/value pairs}}.',
-                    values: {
-                      fieldValuePairsCount,
-                    },
-                  }
-                ),
-                remainingFieldCandidates,
-              })
-            );
-          }, MAX_CONCURRENT_QUERIES);
-
-          pValuesQueue.push(fieldCandidates, (err) => {
-            if (err) {
-              logger.error(`Failed to fetch p-values.', got: \n${err.toString()}`);
-              pushError(`Failed to fetch p-values.`);
-              pValuesQueue.kill();
-              end();
-            } else if (shouldStop()) {
-              logDebugMessage('shouldStop fetching p-values.');
-              pValuesQueue.kill();
-              end();
-            }
-          });
-          await pValuesQueue.drain();
-
-          fieldValuePairsCount = significantCategories.length + significantTerms.length;
-
-          if (fieldValuePairsCount === 0) {
-            logDebugMessage('Stopping analysis, did not find significant terms.');
-            endWithUpdatedLoadingState();
+          // Step 2: Significant categories and terms
+          const significantItemsObj = await significantItemsHandler(indexInfo);
+          if (!significantItemsObj) {
             return;
           }
+
+          const { fieldValuePairsCount, significantCategories, significantTerms } =
+            significantItemsObj;
 
           const histogramFields: [NumericHistogramField] = [
             { fieldName: request.body.timeFieldName, type: KBN_FIELD_TYPES.DATE },
