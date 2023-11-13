@@ -107,11 +107,11 @@ export const ChartsGrid: FC<{
                 <EuiFlexItem grow={false}>
                   <EuiText color={'subdued'} size={'s'}>
                     {v.fn}
-                    {i18n.translate('chartsGrid.TextLabelLeft', {
+                    {i18n.translate('xpack.aiops.chartsGrid.TextLabelLeft', {
                       defaultMessage: '(',
                     })}
                     {v.metricField}
-                    {i18n.translate('chartsGrid.TextLabelRight', {
+                    {i18n.translate('xpack.aiops.chartsGrid.TextLabelRight', {
                       defaultMessage: ')',
                     })}
                   </EuiText>
