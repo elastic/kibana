@@ -388,6 +388,34 @@
           }
         ],
         "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-public.IndexManagementPluginStart",
+        "type": "Interface",
+        "tags": [],
+        "label": "IndexManagementPluginStart",
+        "description": [],
+        "path": "x-pack/plugins/index_management/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-public.IndexManagementPluginStart.extensionsService",
+            "type": "Object",
+            "tags": [],
+            "label": "extensionsService",
+            "description": [],
+            "signature": [
+              "ExtensionsSetup"
+            ],
+            "path": "x-pack/plugins/index_management/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
       }
     ],
     "enums": [],
@@ -1298,7 +1326,9 @@
                 "section": "def-common.Mappings",
                 "text": "Mappings"
               },
-              " | undefined; }"
+              " | undefined; lifecycle?: (",
+              "IndicesDataLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; }) | undefined; }"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
             "deprecated": false,
@@ -1329,6 +1359,94 @@
               "{ [key: string]: any; } | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.ComponentTemplateSerialized.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "lifecycle",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.DataRetention",
+                "text": "DataRetention"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/component_templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "indexManagement",
+        "id": "def-common.DataRetention",
+        "type": "Interface",
+        "tags": [],
+        "label": "DataRetention",
+        "description": [],
+        "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataRetention.enabled",
+            "type": "boolean",
+            "tags": [],
+            "label": "enabled",
+            "description": [],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataRetention.infiniteDataRetention",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "infiniteDataRetention",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataRetention.value",
+            "type": "number",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
+            "id": "def-common.DataRetention.unit",
+            "type": "string",
+            "tags": [],
+            "label": "unit",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/data_streams.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2545,6 +2663,27 @@
           },
           {
             "parentPluginId": "indexManagement",
+            "id": "def-common.TemplateDeserialized.lifecycle",
+            "type": "Object",
+            "tags": [],
+            "label": "lifecycle",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "indexManagement",
+                "scope": "common",
+                "docId": "kibIndexManagementPluginApi",
+                "section": "def-common.DataRetention",
+                "text": "DataRetention"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/index_management/common/types/templates.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "indexManagement",
             "id": "def-common.TemplateDeserialized.composedOf",
             "type": "Array",
             "tags": [],
@@ -2936,7 +3075,9 @@
                 "section": "def-common.Mappings",
                 "text": "Mappings"
               },
-              " | undefined; } | undefined"
+              " | undefined; lifecycle?: (",
+              "IndicesDataLifecycleWithRollover",
+              " & { enabled?: boolean | undefined; }) | undefined; } | undefined"
             ],
             "path": "x-pack/plugins/index_management/common/types/templates.ts",
             "deprecated": false,
