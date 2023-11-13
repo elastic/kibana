@@ -16,7 +16,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
   transform_id: 'cloud_security_posture.findings_latest-default-8.8.0',
   description: 'Defines findings transformation to view only the latest finding per resource',
   source: {
-    index: FINDINGS_INDEX_PATTERN,
+    index: "foo",
   },
   dest: {
     index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -38,6 +38,7 @@ export const latestFindingsTransform: TransformPutTransformRequest = {
     sort: '@timestamp',
     unique_key: ['resource.id', 'rule.id'],
   },
+  settings: {unattended: true},
   _meta: {
     package: {
       name: CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
