@@ -175,6 +175,47 @@ export default function pagerdutyTest({ getService }: FtrProviderContext) {
       });
     });
 
+    it('should execute successfully with links and customDetails', async () => {
+      const { body: result } = await supertest
+        .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {
+            summary: 'just a test',
+            customDetails: {
+              myString: 'foo',
+              myNumber: 10,
+              myArray: ['foo', 'baz'],
+              myBoolean: true,
+              myObject: {
+                myNestedObject: 'foo',
+              },
+            },
+            links: [
+              {
+                href: 'http://example.com',
+                text: 'a link',
+              },
+              {
+                href: 'http://example.com',
+                text: 'a second link',
+              },
+            ],
+          },
+        })
+        .expect(200);
+
+      expect(proxyHaveBeenCalled).to.equal(true);
+      expect(result).to.eql({
+        status: 'ok',
+        connector_id: simulatedActionId,
+        data: {
+          message: 'Event processed',
+          status: 'success',
+        },
+      });
+    });
+
     it('should handle a 40x pagerduty error', async () => {
       const { body: result } = await supertest
         .post(`/api/actions/connector/${simulatedActionId}/_execute`)

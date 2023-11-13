@@ -12,6 +12,8 @@ import {
   type Message,
   ObservabilityAIAssistantPluginStart,
   MessageRole,
+  ObservabilityAIAssistantProvider,
+  useObservabilityAIAssistant,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { LogEntryField } from '../../../common';
 import { explainLogMessageTitle, similarLogMessagesTitle } from './translations';
@@ -21,11 +23,16 @@ export interface LogAIAssistantDocument {
 }
 
 export interface LogAIAssistantProps {
-  aiAssistant: ObservabilityAIAssistantPluginStart;
   doc: LogAIAssistantDocument | undefined;
 }
 
-export function LogAIAssistant({ aiAssistant, doc }: LogAIAssistantProps) {
+export interface LogAIAssistantDeps extends LogAIAssistantProps {
+  observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+}
+
+export const LogAIAssistant = withProviders(({ doc }: LogAIAssistantProps) => {
+  const aiAssistant = useObservabilityAIAssistant();
+
   const explainLogMessageMessages = useMemo<Message[] | undefined>(() => {
     if (!doc) {
       return undefined;
@@ -80,7 +87,20 @@ export function LogAIAssistant({ aiAssistant, doc }: LogAIAssistantProps) {
       ) : null}
     </EuiFlexGroup>
   );
-}
+});
 
 // eslint-disable-next-line import/no-default-export
 export default LogAIAssistant;
+
+function withProviders(Component: React.FunctionComponent<LogAIAssistantProps>) {
+  return function ComponentWithProviders({
+    observabilityAIAssistant,
+    ...props
+  }: LogAIAssistantDeps) {
+    return (
+      <ObservabilityAIAssistantProvider value={observabilityAIAssistant}>
+        <Component {...props} />
+      </ObservabilityAIAssistantProvider>
+    );
+  };
+}

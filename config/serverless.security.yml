@@ -48,11 +48,15 @@ xpack.fleet.internal.registry.excludePackages: [
     'apm',
     'synthetics',
     'synthetics_dashboards',
+
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
     'symantec',
     'cyberark',
+
+    # ML integrations
+    'dga',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:
