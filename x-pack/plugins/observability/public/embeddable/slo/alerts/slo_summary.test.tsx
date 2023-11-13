@@ -17,6 +17,12 @@ import { ActiveAlerts } from '../../../hooks/slo/active_alerts';
 jest.mock('../../../hooks/slo/use_fetch_active_alerts');
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 
+// TODO write a few more scenarios that cover
+/**
+ * a) display title
+ * b) color of the panel
+ * c) use group by SLOs and verify number of alerts is correct
+ */
 describe('SLO Alert Summary', () => {
   describe('Multiple selected SLOs', () => {
     it('displays 0 alerts when there are no active alerts', async () => {
