@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const defaultIndex = isCcsTest ? 'ftr-remote:logstash-*' : 'logstash-*';
 
-  describe.only('discover search errors', () => {
+  describe('discover search errors', () => {
     before(async () => {
       await kibanaServer.importExport.load(archiveDirectory);
       await esNode.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
