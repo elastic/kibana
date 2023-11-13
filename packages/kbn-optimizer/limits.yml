@@ -28,6 +28,7 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
+  datasetQuality: 35000
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5100
@@ -88,7 +89,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logExplorer: 39045
+  logExplorer: 54342
   logsShared: 281060
   logstash: 53548
   management: 46112
