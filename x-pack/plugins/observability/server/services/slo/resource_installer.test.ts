@@ -91,7 +91,14 @@ describe('resourceInstaller', () => {
       policies: [
         {
           config: {
-            match: { ...getSLOSummaryEnrichPolicy().match, name: SLO_SUMMARY_ENRICH_POLICY_NAME },
+            // Sigh.... the Elasticsarch type for an enrich policy has defined the
+            // query as a string which is completely wrong, it's a QueryDSLContainer!
+            //
+            // See: https://github.com/elastic/elasticsearch-js/issues/2074
+            match: {
+              ...getSLOSummaryEnrichPolicy().match,
+              name: SLO_SUMMARY_ENRICH_POLICY_NAME,
+            } as any,
           },
         },
       ],
