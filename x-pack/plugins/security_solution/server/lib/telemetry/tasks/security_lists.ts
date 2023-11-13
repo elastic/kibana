@@ -21,7 +21,6 @@ import type { ESClusterInfo, ESLicense } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
-  tlog,
   createTaskMetric,
   formatValueListMetaData,
 } from '../helpers';
