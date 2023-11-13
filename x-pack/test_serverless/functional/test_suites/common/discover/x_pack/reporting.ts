@@ -29,6 +29,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const getReport = async () => {
+    // close any open notification toasts
+    await PageObjects.reporting.clearToastNotifications();
+
     await PageObjects.reporting.openCsvReportingPanel();
     await PageObjects.reporting.clickGenerateReportButton();
 
@@ -163,7 +166,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.saveSearch('my search - with data - expectReportCanBeCreated');
 
         const res = await getReport();
-
         expect(res.status).to.equal(200);
         expect(res.contentType).to.equal('text/csv; charset=utf-8');
 

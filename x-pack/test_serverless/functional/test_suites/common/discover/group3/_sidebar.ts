@@ -93,16 +93,32 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      // TODO: SQL tests removed since SQL isn't supported in Serverless
+      // TODO: ES|QL tests removed since ES|QL isn't supported in Serverless
+    });
 
-      it('should be able to search by string', async function () {
+    describe('search', function () {
+      beforeEach(async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
         );
+      });
 
+      afterEach(async () => {
+        const fieldSearch = await testSubjects.find('clearSearchButton');
+        await fieldSearch.click();
+
+        await retry.waitFor('reset', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            INITIAL_FIELD_LIST_SUMMARY
+          );
+        });
+      });
+
+      it('should be able to search by string', async function () {
         await PageObjects.unifiedFieldList.findFieldByName('i');
 
         await retry.waitFor('first updates', async () => {
@@ -121,15 +137,54 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           );
         });
 
-        const fieldSearch = await testSubjects.find('clearSearchButton');
-        await fieldSearch.click();
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be('clientip, ip, relatedContent.og:description, relatedContent.twitter:description');
+      });
 
-        await retry.waitFor('reset', async () => {
+      it('should be able to search by wildcard', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('relatedContent*image');
+
+        await retry.waitFor('updates', async () => {
           return (
             (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
-            INITIAL_FIELD_LIST_SUMMARY
+            '2 available fields. 0 empty fields. 0 meta fields.'
           );
         });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be('relatedContent.og:image, relatedContent.twitter:image');
+      });
+
+      it('should be able to search with spaces as wildcard', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('relatedContent image');
+
+        await retry.waitFor('updates', async () => {
+          return (
+            (await PageObjects.unifiedFieldList.getSidebarAriaDescription()) ===
+            '4 available fields. 0 empty fields. 0 meta fields.'
+          );
+        });
+
+        expect(
+          (await PageObjects.unifiedFieldList.getSidebarSectionFieldNames('available')).join(', ')
+        ).to.be(
+          'relatedContent.og:image, relatedContent.og:image:height, relatedContent.og:image:width, relatedContent.twitter:image'
+        );
+      });
+
+      it('should ignore empty search', async function () {
+        await PageObjects.unifiedFieldList.findFieldByName('   '); // only spaces
+
+        await retry.waitFor('the clear button', async () => {
+          return await testSubjects.exists('clearSearchButton');
+        });
+
+        // expect no changes in the list
+        expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
+          INITIAL_FIELD_LIST_SUMMARY
+        );
       });
     });
 
@@ -337,7 +392,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      // TODO: SQL tests removed since SQL isn't supported in Serverless
+      // TODO: ES|QL tests removed since ES|QL isn't supported in Serverless
 
       it('should work correctly for a data view for a missing index', async function () {
         // but we are skipping importing the index itself
@@ -545,7 +600,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         allFields = await PageObjects.unifiedFieldList.getAllFieldNames();
         expect(allFields.includes('_bytes-runtimefield2')).to.be(true);
         expect(allFields.includes('_bytes-runtimefield')).to.be(false);
-
         await PageObjects.discover.removeField('_bytes-runtimefield');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();

@@ -36,7 +36,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
         'bfetch:disable': true,
-        // TODO: Removed SQL setting since SQL isn't supported in Serverless
+        // TODO: Removed ES|QL setting since ES|QL isn't supported in Serverless
       });
       await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
     });
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
     });
 
-    const getSearchCount = async (type: 'ese' | 'sql') => {
+    const getSearchCount = async (type: 'ese' | 'esql') => {
       const requests = await browser.execute(() =>
         performance
           .getEntries()
@@ -67,7 +67,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await elasticChart.canvasExists();
     };
 
-    const expectSearches = async (type: 'ese' | 'sql', expected: number, cb: Function) => {
+    const expectSearches = async (type: 'ese' | 'esql', expected: number, cb: Function) => {
       await browser.execute(async () => {
         performance.clearResourceTimings();
       });
@@ -84,12 +84,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       savedSearch,
       query1,
       query2,
+      savedSearchesRequests,
       setQuery,
     }: {
-      type: 'ese' | 'sql';
+      type: 'ese' | 'esql';
       savedSearch: string;
       query1: string;
       query2: string;
+      savedSearchesRequests?: number;
       setQuery: (query: string) => Promise<void>;
     }) => {
       it('should send 2 search requests (documents + chart) on page load', async () => {
@@ -141,8 +143,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'Sep 23, 2015 @ 00:00:00.000'
         );
         await waitForLoadingToFinish();
+        // TODO: Check why the request happens 4 times in case of opening a saved search
+        // https://github.com/elastic/kibana/issues/165192
         // creating the saved search
-        await expectSearches(type, 2, async () => {
+        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
           await PageObjects.discover.saveSearch(savedSearch);
         });
         // resetting the saved search
@@ -158,7 +162,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await waitForLoadingToFinish();
         });
         // loading the saved search
-        await expectSearches(type, 2, async () => {
+        // TODO: https://github.com/elastic/kibana/issues/165192
+        await expectSearches(type, savedSearchesRequests ?? 2, async () => {
           await PageObjects.discover.loadSavedSearch(savedSearch);
         });
       });
@@ -216,6 +221,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // TODO: SQL tests removed since SQL isn't supported in Serverless
+    // TODO: ES|QL tests removed since ES|QL isn't supported in Serverless
   });
 }

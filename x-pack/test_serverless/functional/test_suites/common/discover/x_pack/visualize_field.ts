@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'unifiedFieldList',
   ]);
 
-  // TODO: SQL setting removed since SQL isn't supported in Serverless
+  // TODO: ES|QL setting removed since ES|QL isn't supported in Serverless
 
   async function setDiscoverTimeRange() {
     await PageObjects.timePicker.setDefaultAbsoluteRange();
@@ -125,6 +125,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    // TODO: SQL tests removed since SQL isn't supported in Serverless
+    // TODO: ES|QL tests removed since ES|QL isn't supported in Serverless
   });
 }
