@@ -33,9 +33,10 @@ import {
   CsvSearchSourceImmediateExportType,
   CsvV2ExportType,
 } from '@kbn/reporting-export-types-csv';
-import { ExportType } from '@kbn/reporting-server';
-import { PdfV1ExportType, PdfExportType } from '@kbn/reporting-export-types-pdf';
+import { PdfExportType, PdfV1ExportType } from '@kbn/reporting-export-types-pdf';
 import { PngExportType } from '@kbn/reporting-export-types-png';
+import type { ReportingConfigType } from '@kbn/reporting-server';
+import { ExportType } from '@kbn/reporting-server';
 import {
   PdfScreenshotResult,
   PngScreenshotResult,
@@ -52,7 +53,7 @@ import type {
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
 import type { ReportingSetup } from '.';
-import { ReportingConfigType, createConfig } from './config';
+import { createConfig } from './config';
 import { ExportTypesRegistry, checkLicense } from './lib';
 import { reportingEventLoggerFactory } from './lib/event_logger/logger';
 import type { IReport, ReportingStore } from './lib/store';

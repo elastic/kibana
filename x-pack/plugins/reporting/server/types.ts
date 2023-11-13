@@ -13,7 +13,8 @@ import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-p
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
-import { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -32,7 +33,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import type { ReportingConfigType } from './config';
 import { ReportingCore } from './core';
 import { ExportTypesRegistry } from './lib';
 

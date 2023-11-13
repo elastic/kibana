@@ -21,6 +21,6 @@ export { getFieldFormats, setFieldFormats } from './services';
 export { validateUrls } from './validate_urls';
 
 export type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from './export_type';
-export * from './types';
+export { ConfigSchema } from './config_schema';
 
-export { ConfigSchema, ReportingConfigType } from './config';
+export * from './types';

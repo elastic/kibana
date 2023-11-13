@@ -23,6 +23,7 @@ import {
   numberToDuration,
 } from '@kbn/reporting-common';
 import type { ReportOutput, TaskRunResult } from '@kbn/reporting-common/types';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import type {
   RunContext,
   TaskManagerStartContract,
@@ -33,7 +34,6 @@ import { REPORTING_EXECUTE_TYPE, ReportTaskParams, ReportingTask, ReportingTaskS
 import { ExportTypesRegistry, getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import { mapToReportingError } from '../../../common/errors/map_to_reporting_error';
-import type { ReportingConfigType } from '../../config';
 import type { ReportDocument, ReportingStore } from '../store';
 import { Report, SavedReport } from '../store';
 import type { ReportFailedFields, ReportProcessingFields } from '../store/store';

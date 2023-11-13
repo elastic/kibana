@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue, offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
+import { ByteSizeValue, offeringBasedSchema, schema } from '@kbn/config-schema';
 import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
 import moment from 'moment';
@@ -148,5 +148,3 @@ export const ConfigSchema = schema.object({
   export_types: ExportTypeSchema,
   statefulSettings: SettingsSchema,
 });
-
-export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

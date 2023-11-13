@@ -24,13 +24,13 @@ import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { setFieldFormats } from '@kbn/reporting-server';
 import { createMockScreenshottingStart } from '@kbn/screenshotting-plugin/server/mock';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-
 import { ReportingCore } from '..';
-import { ReportingConfigType } from '../config';
+
 import { ReportingInternalSetup, ReportingInternalStart } from '../core';
 import { ReportingStore } from '../lib';
 

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
 import type { ReportingConfigType } from '@kbn/reporting-server';

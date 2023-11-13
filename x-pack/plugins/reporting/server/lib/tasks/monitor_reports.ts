@@ -7,11 +7,14 @@
 
 import type { Logger } from '@kbn/core/server';
 import moment from 'moment';
-import { TaskManagerStartContract, TaskRunCreatorFunction } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerStartContract,
+  TaskRunCreatorFunction,
+} from '@kbn/task-manager-plugin/server';
 import { JOB_STATUS, numberToDuration } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { ReportingStore } from '..';
 import { ReportingCore } from '../..';
-import { ReportingConfigType } from '../../config';
 import { SavedReport } from '../store';
 import { ReportingTask, ReportingTaskStatus, REPORTING_MONITOR_TYPE, ReportTaskParams } from '.';
 
