@@ -61,6 +61,10 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
   }
 
   isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
     const isSourceLoading = super.isLayerLoading(zoom);
     if (isSourceLoading) {
       return true;

@@ -3,7 +3,7 @@
   "id": "@kbn/rule-registry-plugin",
   "owner": [
     "@elastic/response-ops",
-    "@elastic/actionable-observability"
+    "@elastic/obs-ux-management-team"
   ],
   "plugin": {
     "id": "ruleRegistry",

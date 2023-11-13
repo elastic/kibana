@@ -57,9 +57,9 @@ import {
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { enableRiskEngine } from '../../../tasks/entity_analytics';
 
-const TEST_USER_ALERTS = 2;
+const TEST_USER_ALERTS = 1;
 const TEST_USER_NAME = 'test';
-const SIEM_KIBANA_HOST_ALERTS = 2;
+const SIEM_KIBANA_HOST_ALERTS = 1;
 const SIEM_KIBANA_HOST_NAME = 'siem-kibana';
 const DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';
 const DATE_BEFORE_ALERT_CREATION = moment().format(DATE_FORMAT);
@@ -67,8 +67,13 @@ const OLDEST_DATE = moment('2019-01-19T16:22:56.217Z').format(DATE_FORMAT);
 
 describe('Entity Analytics Dashboard', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
     login();
     deleteRiskEngineConfiguration();
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
   });
 
   describe('legacy risk score', () => {
