@@ -172,8 +172,9 @@ export function setupSavedObjects({
               },
               { concurrency: 50 }
             );
-
-            yield { ...res, saved_objects: encryptedSavedObjects };
+            if (res.saved_objects.length > 0) {
+              yield { ...res, saved_objects: encryptedSavedObjects };
+            }
           }
         }
 
