@@ -184,7 +184,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
     return layerDescriptor;
   }
 
-  private readonly _isClustered: boolean;
+  private _isClustered: boolean;
   private readonly _clusterSource: ESGeoGridSource;
   private readonly _clusterStyle: VectorStyle;
   private readonly _documentSource: ESSearchSource;
@@ -316,7 +316,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
         syncContext.startLoading(dataRequestId, requestToken, requestMeta);
         const warnings: SearchResponseWarning[] = [];
         isSyncClustered = !(await this._documentSource.canLoadAllDocuments(
-          await this.getDisplayName(),
+          await this.getDisplayName(this._documentSource),
           requestMeta,
           syncContext.registerCancelCallback.bind(null, requestToken),
           syncContext.inspectorAdapters,
@@ -337,9 +337,11 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
         return;
       }
       if (isSyncClustered) {
+        this._isClustered = true;
         activeSource = this._clusterSource;
         activeStyle = this._clusterStyle;
       } else {
+        this._isClustered = false;
         activeSource = this._documentSource;
         activeStyle = this._documentStyle;
       }
