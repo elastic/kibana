@@ -144,13 +144,11 @@ export function checkPrivilegesFactory(
       const indexPrivileges = Object.entries(hasPrivilegesResponse.index ?? {}).reduce<
         CheckPrivilegesResponse['privileges']['elasticsearch']['index']
       >((acc, [index, indexResponse]) => {
-        return {
-          ...acc,
-          [index]: Object.entries(indexResponse).map(([privilege, authorized]) => ({
-            privilege,
-            authorized,
-          })),
-        };
+        acc[index] = Object.entries(indexResponse).map(([privilege, authorized]) => ({
+          privilege,
+          authorized,
+        }));
+        return acc;
       }, {});
 
       // we need to filter out the non requested privileges from the response

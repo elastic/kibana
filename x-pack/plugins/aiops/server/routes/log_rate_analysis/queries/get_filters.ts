@@ -9,7 +9,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ESFilter } from '@kbn/es-types';
 
-import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis';
+import type { AiopsLogRateAnalysisSchema } from '../../../../common/api/log_rate_analysis/schema';
 
 export function rangeQuery(
   start?: number,

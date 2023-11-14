@@ -21,7 +21,6 @@ import type { ESClusterInfo, ESLicense } from '../types';
 import {
   batchTelemetryRecords,
   templateExceptionList,
-  tlog,
   createTaskMetric,
   formatValueListMetaData,
   createUsageCounterLabel,
@@ -153,7 +152,6 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
           clusterInfo,
           licenseInfo
         );
-        tlog(logger, `Value List Meta Data: ${JSON.stringify(valueListMetaData)}`);
         if (valueListMetaData?.total_list_count) {
           await sender.sendOnDemand(TELEMETRY_CHANNEL_LISTS, [valueListMetaData]);
         }
