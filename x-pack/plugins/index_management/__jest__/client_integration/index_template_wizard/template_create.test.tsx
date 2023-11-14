@@ -117,7 +117,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    test('should set the correct page title', () => {
+    test('should set the correct page title', async () => {
       const { exists, find } = testBed;
 
       expect(exists('pageTitle')).toBe(true);
@@ -151,7 +151,7 @@ describe('<TemplateCreate />', () => {
       });
     });
 
-    test('should set the correct page title', () => {
+    test('should set the correct page title', async () => {
       const { exists, find } = testBed;
 
       expect(exists('pageTitle')).toBe(true);
@@ -186,12 +186,12 @@ describe('<TemplateCreate />', () => {
         expect(find('stepTitle').text()).toEqual('Component templates (optional)');
       });
 
-      it(`doesn't render the deprecated legacy index template warning`, () => {
+      it(`doesn't render the deprecated legacy index template warning`, async () => {
         const { exists } = testBed;
         expect(exists('legacyIndexTemplateDeprecationWarning')).toBe(false);
       });
 
-      it('should list the available component templates', () => {
+      it('should list the available component templates', async () => {
         const {
           actions: {
             componentTemplates: { getComponentTemplatesInList },
@@ -329,7 +329,7 @@ describe('<TemplateCreate />', () => {
         await navigateToMappingsStep();
       });
 
-      it('should set the correct page title', () => {
+      it('should set the correct page title', async () => {
         const { exists, find } = testBed;
 
         expect(exists('stepMappings')).toBe(true);
@@ -412,7 +412,7 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepFour();
       });
 
-      it('should set the correct page title', () => {
+      it('should set the correct page title', async () => {
         const { exists, find } = testBed;
 
         expect(exists('stepAliases')).toBe(true);
@@ -453,14 +453,14 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepFive(JSON.stringify(ALIASES));
     });
 
-    it('should set the correct step title', () => {
+    it('should set the correct step title', async () => {
       const { find, exists } = testBed;
       expect(exists('stepSummary')).toBe(true);
       expect(find('stepTitle').text()).toEqual(`Review details for '${TEMPLATE_NAME}'`);
     });
 
     describe('tabs', () => {
-      test('should have 3 tabs', () => {
+      test('should have 3 tabs', async () => {
         const { find } = testBed;
 
         expect(find('summaryTabContent').find('button.euiTab').length).toBe(3);
