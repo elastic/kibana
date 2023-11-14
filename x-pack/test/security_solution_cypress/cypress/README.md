@@ -206,6 +206,37 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
 
+#### PLIs
+When running serverless Cypress tests, the following PLIs are set by default:
+
+```
+      { product_line: 'security', product_tier: 'complete' },
+      { product_line: 'endpoint', product_tier: 'complete' },
+      { product_line: 'cloud', product_tier: 'complete' },
+```
+
+With the above configuration we'll be able to cover most of the scenarios, but there are some cases were we might want to use a different configuration. In that case, we just need to pass to the header of the test, which is the configuration we want for it.
+
+```typescript
+describe(
+  'Entity Analytics Dashboard in Serverless',
+  {
+    tags: '@serverless',
+    env: {
+      ftrConfig: {
+        productTypes: [
+          { product_line: 'security', product_tier: 'essentials' },
+          { product_line: 'endpoint', product_tier: 'essentials' },
+        ],
+      },
+    },
+  },
+```
+
+Per the way we set the environment during the execution process on CI, the above configuration is going to be valid when the test is executed on headless mode.
+
+For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
+
 
 ### Running serverless tests locally pointing to a MKI project created in QA environment (Second Quality Gate)
 
@@ -244,17 +275,12 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-#### Known limitations on headless mode
+#### Known limitations 
 - Currently RBAC cannot be tested.
 
-#### Known limitations on visual mode
-- Currently RBAC cannot be tested.
-- The project is created as `complete` by default, if you want to execute a test on a `essentials` project do the following:
+#### PLIs
 
-
-### PLIs
-When running serverless Cypress tests, the following PLIs are set by default:
-
+When running serverless Cypress tests on QA environment, the following PLIs are set by default:
 ```
       { product_line: 'security', product_tier: 'complete' },
       { product_line: 'endpoint', product_tier: 'complete' },
@@ -279,9 +305,28 @@ describe(
   },
 ```
 
-Per the way we set the environment during the execution process on CI, the above configuration is going to be valid when the test is executed on headless mode.
+For test developing or test debugging purposes on QA, you have avaialable the following options:
 
-For test developing or test debugging purposes, you need to modify the configuration but without committing and pushing the changes in `x-pack/test/security_solution_cypress/serverless_config.ts`.
+```
+yarn cypress:open:qa:serverless --tier <essentials|complete>
+```
+
+The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment with the passed tier essentials or complete. If no flag is passed, the project will be cretaed as complete.
+
+```
+yarn cypress:open:qa:serverless --ignoreEndpoint
+```
+
+The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment without the endpoint add-on.
+
+```
+yarn cypress:open:qa:serverless --ignoreCloud
+```
+
+The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment without the cloud add-on.
+
+Note that all the above flags can be combined.
+
 
 ## Development Best Practices
 
