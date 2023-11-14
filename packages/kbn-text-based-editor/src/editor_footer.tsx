@@ -62,14 +62,14 @@ export function ErrorsWarningsPopover({
   type,
   setIsPopoverOpen,
   onErrorClick,
-  hasSmallerSpace,
+  isSpaceReduced,
 }: {
   isPopoverOpen: boolean;
   items: MonacoError[];
   type: 'error' | 'warning';
   setIsPopoverOpen: (flag: boolean) => void;
   onErrorClick: (error: MonacoError) => void;
-  hasSmallerSpace?: boolean;
+  isSpaceReduced?: boolean;
 }) {
   const strings = getConstsByType(type, items.length);
   return (
@@ -94,7 +94,7 @@ export function ErrorsWarningsPopover({
                   setIsPopoverOpen(!isPopoverOpen);
                 }}
               >
-                <p>{hasSmallerSpace ? items.length : strings.message}</p>
+                <p>{isSpaceReduced ? items.length : strings.message}</p>
               </EuiText>
             }
             ownFocus={false}
@@ -159,7 +159,7 @@ interface EditorFooterProps {
   hideRunQueryText?: boolean;
   disableSubmitAction?: boolean;
   editorIsInline?: boolean;
-  hasSmallerSpace?: boolean;
+  isSpaceReduced?: boolean;
 }
 
 export const EditorFooter = memo(function EditorFooter({
@@ -173,7 +173,7 @@ export const EditorFooter = memo(function EditorFooter({
   hideRunQueryText,
   disableSubmitAction,
   editorIsInline,
-  hasSmallerSpace,
+  isSpaceReduced,
 }: EditorFooterProps) {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
@@ -206,7 +206,7 @@ export const EditorFooter = memo(function EditorFooter({
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
                   <p>
-                    {hasSmallerSpace
+                    {isSpaceReduced
                       ? '@timestamp'
                       : detectTimestamp
                       ? i18n.translate(
@@ -233,7 +233,7 @@ export const EditorFooter = memo(function EditorFooter({
               type="error"
               setIsPopoverOpen={setIsPopoverOpen}
               onErrorClick={onErrorClick}
-              hasSmallerSpace={hasSmallerSpace}
+              isSpaceReduced={isSpaceReduced}
             />
           )}
           {warning && warning.length > 0 && (
@@ -243,7 +243,7 @@ export const EditorFooter = memo(function EditorFooter({
               type="warning"
               setIsPopoverOpen={setIsPopoverOpen}
               onErrorClick={onErrorClick}
-              hasSmallerSpace={hasSmallerSpace}
+              isSpaceReduced={isSpaceReduced}
             />
           )}
         </EuiFlexGroup>
@@ -280,7 +280,7 @@ export const EditorFooter = memo(function EditorFooter({
             onClick={runQuery}
             isDisabled={Boolean(disableSubmitAction)}
             data-test-subj="TextBasedLangEditor-run-query-button"
-            minWidth={hasSmallerSpace ? false : undefined}
+            minWidth={isSpaceReduced ? false : undefined}
           >
             <EuiFlexGroup
               gutterSize="xs"
@@ -289,7 +289,7 @@ export const EditorFooter = memo(function EditorFooter({
               justifyContent="spaceBetween"
             >
               <EuiFlexItem grow={false}>
-                {hasSmallerSpace
+                {isSpaceReduced
                   ? i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.run', {
                       defaultMessage: 'Run',
                     })

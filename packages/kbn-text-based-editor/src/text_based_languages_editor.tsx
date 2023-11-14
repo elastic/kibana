@@ -166,7 +166,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   const [editorHeight, setEditorHeight] = useState(
     isCodeEditorExpanded ? EDITOR_INITIAL_HEIGHT_EXPANDED : EDITOR_INITIAL_HEIGHT
   );
-  const [hasSmallerSpace, setHasSmallerSpace] = useState(false);
+  const [isSpaceReduced, setIsSpaceReduced] = useState(false);
   const [showLineNumbers, setShowLineNumbers] = useState(isCodeEditorExpanded);
   const [isCompactFocused, setIsCompactFocused] = useState(isCodeEditorExpanded);
   const [isCodeEditorExpandedFocused, setIsCodeEditorExpandedFocused] = useState(false);
@@ -391,7 +391,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
   }, [code, isCodeEditorExpanded, isWordWrapped]);
 
   const onResize = ({ width }: { width: number }) => {
-    setHasSmallerSpace(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
+    setIsSpaceReduced(Boolean(editorIsInline && width < BREAKPOINT_WIDTH));
     calculateVisibleCode(width);
     if (editor1.current) {
       editor1.current.layout({ width, height: editorHeight });
@@ -771,7 +771,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         editorIsInline={editorIsInline}
                         disableSubmitAction={disableSubmitAction}
                         hideRunQueryText={hideRunQueryText}
-                        hasSmallerSpace={hasSmallerSpace}
+                        isSpaceReduced={isSpaceReduced}
                       />
                     )}
                   </div>
@@ -861,7 +861,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
           hideRunQueryText={hideRunQueryText}
           editorIsInline={editorIsInline}
           disableSubmitAction={disableSubmitAction}
-          hasSmallerSpace={hasSmallerSpace}
+          isSpaceReduced={isSpaceReduced}
         />
       )}
       {isCodeEditorExpanded && (
