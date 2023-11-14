@@ -9,7 +9,7 @@ import React, { useState, useEffect } from 'react';
 
 import type { CaseStatuses } from '../../../common/types/domain';
 import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
-import { MultiSelectFilter } from './multi_select_filter';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import { SolutionFilter } from './solution_filter';
 import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
@@ -45,7 +45,7 @@ export interface FilterConfig {
     onChange,
   }: {
     filterOptions: FilterOptions;
-    onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
+    onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
   }) => React.ReactNode;
 }
 
@@ -71,7 +71,7 @@ export const getSystemFilterConfig = ({
       isActive: true,
       isAvailable: true,
       render: ({ filterOptions, onChange }) => (
-        <SeverityFilter selectedOptions={filterOptions.severity} onChange={onChange} />
+        <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
       ),
     },
     {
@@ -81,7 +81,7 @@ export const getSystemFilterConfig = ({
       isAvailable: true,
       render: ({ filterOptions, onChange }) => (
         <StatusFilter
-          selectedOptions={filterOptions?.status}
+          selectedOptionKeys={filterOptions?.status}
           onChange={onChange}
           hiddenStatuses={hiddenStatuses}
           countClosedCases={countClosedCases}
@@ -116,8 +116,8 @@ export const getSystemFilterConfig = ({
           limit={MAX_TAGS_FILTER_LENGTH}
           limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
           onChange={onChange}
-          options={tags}
-          selectedOptions={filterOptions?.tags}
+          options={mapToMultiSelectOption(tags)}
+          selectedOptionKeys={filterOptions?.tags}
         />
       ),
     },
@@ -133,8 +133,8 @@ export const getSystemFilterConfig = ({
           limit={MAX_CATEGORY_FILTER_LENGTH}
           limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
           onChange={onChange}
-          options={categories}
-          selectedOptions={filterOptions?.category}
+          options={mapToMultiSelectOption(categories)}
+          selectedOptionKeys={filterOptions?.category}
         />
       ),
     },
@@ -146,7 +146,7 @@ export const getSystemFilterConfig = ({
       render: ({ filterOptions, onChange }) => (
         <SolutionFilter
           onChange={onChange}
-          selectedOptions={filterOptions?.owner}
+          selectedOptionKeys={filterOptions?.owner}
           availableSolutions={availableSolutions}
         />
       ),

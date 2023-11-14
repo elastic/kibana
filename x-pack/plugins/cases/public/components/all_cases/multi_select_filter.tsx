@@ -67,13 +67,7 @@ interface UseFilterParams<T extends string> {
   id: string;
   limit?: number;
   limitReachedMessage?: string;
-  onChange: ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => void;
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
   options: Array<FilterOption<T>>;
   selectedOptionKeys?: string[];
   renderOption?: (option: FilterOption<T>) => React.ReactNode;
@@ -92,12 +86,12 @@ export const MultiSelectFilter = <T extends string>({
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
+  const showActiveOptionsNumber = !hideActiveOptionsNumber;
   const isInvalid = Boolean(limit && limitReachedMessage && selectedOptionKeys.length >= limit);
   const options: Array<FilterOption<T>> = fromRawOptionsToEuiSelectableOptions(
     rawOptions,
     selectedOptionKeys
   );
-  const showActiveOptionsNumber = !hideActiveOptionsNumber;
 
   useEffect(() => {
     const newSelectedOptions = selectedOptionKeys.filter((selectedOptionKey) =>
@@ -132,7 +126,7 @@ export const MultiSelectFilter = <T extends string>({
           iconType="arrowDown"
           onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
-          numFilters={showActiveOptionsNumber ? options.length : undefined} // FIXME: add tests to check that the number is not shown
+          numFilters={showActiveOptionsNumber ? options.length : undefined} // FIXME: add tests
           hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
           numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
           aria-label={buttonLabel}

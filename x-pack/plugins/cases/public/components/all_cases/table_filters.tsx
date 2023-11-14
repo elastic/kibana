@@ -108,10 +108,16 @@ const CasesTableFiltersComponent = ({
     onFilterConfigChange,
   } = useFilterConfig({ systemFilterConfig });
 
-  const onFilterOptionChange = ({ filterId, options }: { filterId: string; options: string[] }) => {
+  const onFilterOptionChange = ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => {
     const newFilters = {
       ...filterOptions,
-      [filterId]: options,
+      [filterId]: selectedOptionKeys,
     };
 
     if (!isEqual(newFilters, filterOptions)) {

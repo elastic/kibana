@@ -19,13 +19,7 @@ interface Props {
   countInProgressCases: number | null;
   countOpenCases: number | null;
   hiddenStatuses?: CaseStatuses[];
-  onChange: ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => void;
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
   selectedOptionKeys: string[];
 }
 

@@ -9,7 +9,8 @@ import React, { useState, useEffect } from 'react';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import { MultiSelectFilter } from './multi_select_filter';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import type { FilterConfig } from './use_system_filter_config';
 
 const MoreFiltersSelectable = ({
@@ -17,16 +18,16 @@ const MoreFiltersSelectable = ({
   activeFilters,
   onChange,
 }: {
-  options: string[];
+  options: Array<MultiSelectFilterOption<string>>;
   activeFilters: string[];
-  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
 }) => {
   return (
     <MultiSelectFilter
       id="filters"
       buttonLabel={'more +'} // FIXME: Translation and + icon
       options={options}
-      selectedOptions={activeFilters}
+      selectedOptionKeys={activeFilters}
       limit={10} // FIXME: We should set a limit
       onChange={onChange}
       hideActiveOptionsNumber
@@ -58,8 +59,8 @@ const useCustomFieldsFilterConfig = () => {
                 buttonLabel={label}
                 id={key}
                 onChange={onChange}
-                options={customField.filterOptions || []}
-                selectedOptions={filterOptions[key]}
+                options={mapToMultiSelectOption(customField.filterOptions || [])}
+                selectedOptionKeys={filterOptions[key]}
               />
             );
           },
@@ -99,22 +100,28 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
         }
       });
 
+      _config.forEach((filter) => {
+        if (!updatedConfig.has(filter.key)) {
+          _config.delete(filter.key);
+        }
+      });
+
       return _config;
     });
   }, [systemFilterConfig, customFieldsFilterConfig]);
 
   const onFilterConfigChange = ({
     filterId,
-    options: activatedOptions,
+    selectedOptionKeys,
   }: {
     filterId: string;
-    options: string[];
+    selectedOptionKeys: string[];
   }) => {
     setConfig((prevConfig) => {
       const _config = new Map(prevConfig);
 
       prevConfig.forEach((filter) => {
-        if (activatedOptions.includes(filter.label)) {
+        if (selectedOptionKeys.includes(filter.key)) {
           if (!filter.isActive) {
             // new activated options are inserted at the end of the list
             _config.delete(filter.key);
@@ -130,15 +137,23 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
   };
 
   const configArray = Array.from(config.values()).filter((filter) => filter.isAvailable);
-  const filterLabels = configArray.map((filter) => filter.label);
+  const filterSelectableOptions = configArray
+    .map(({ key, label }) => ({
+      key,
+      label,
+    }))
+    .sort((a, b) => {
+      const compare = a.label.localeCompare(b.label);
+      return compare === 0 ? a.key.localeCompare(b.key) : compare;
+    });
   const activeFilters = configArray.filter((filter) => filter.isActive).map((filter) => filter);
-  const activeFilterLabels = activeFilters.map((filter) => filter.label);
+  const activeFilterKeys = activeFilters.map((filter) => filter.key);
 
   return {
     config: activeFilters,
-    filterConfigOptions: filterLabels.sort(),
+    filterConfigOptions: filterSelectableOptions,
     onFilterConfigChange,
-    activeFilters: activeFilterLabels,
+    activeFilters: activeFilterKeys,
     moreFiltersSelectableComponent: MoreFiltersSelectable,
   };
 };
