@@ -159,7 +159,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
       })),
       '!!aaaa'
     );
-
+    const deps = this.deps;
     ReactDOM.render(
       <I18nContext>
         <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>
@@ -170,13 +170,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
                 <SloSummary slos={slos} />
               </EuiFlexItem> */}
                 <EuiFlexItem>
-                  <AlertSummaryWidget
-                    featureIds={observabilityAlertFeatureIds}
-                    filter={esQuery}
-                    timeRange={alertSummaryTimeRange}
-                    chartProps={chartProps}
-                  />
-                  {/* <AlertSummary slos={slos} deps={deps} /> */}
+                  <AlertSummary slos={slos} deps={deps} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <AlertsStateTable
