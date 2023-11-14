@@ -14,6 +14,5 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./runtime'));
     loadTestFile(require.resolve('./execution_logic'));
     loadTestFile(require.resolve('./timestamps'));
-    // The execution logic is run last, as it encompasses the "query" test, resetting the alerts and resulting in failures in the following tests.
   });
 }
