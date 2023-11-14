@@ -56,15 +56,14 @@ async function getMobileHttpErrorsTimeseries({
     end: endWithOffset,
     minBucketSize: 60,
   });
-  //
-  // `{HTTP_RESPONSE_STATUS_CODE}`: {
-  //   gte: 400,
-  // },a
+
   const aggs = {
     httpErrors: {
       filter: {
         range: {
-          ...rangeQuery(400, 599, HTTP_RESPONSE_STATUS_CODE),
+          [HTTP_RESPONSE_STATUS_CODE]: {
+            gte: 400,
+          },
         },
       },
     },
