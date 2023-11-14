@@ -94,7 +94,7 @@ function MobileCrashGroupList({
         name: i18n.translate(
           'xpack.apm.crashTable.crashMessageAndCulpritColumnLabel',
           {
-            defaultMessage: 'crash message',
+            defaultMessage: 'Crash message',
           }
         ),
         field: 'message',
