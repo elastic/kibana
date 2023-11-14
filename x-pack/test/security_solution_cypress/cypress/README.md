@@ -208,6 +208,19 @@ Please note that all the headless mode commands do not open the Cypress UI and a
 
 
 ### Running serverless tests locally pointing to a MKI project created in QA environment (Second Quality Gate)
+
+Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
+
+| Script Name | Description |
+| ----------- | ----------- |
+| cypress:open:qa:serverless | Opens the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment. The kibana instance will reload when you make code changes. This is the recommended way to debug tests in QA. Follow the readme in order to learn about the known limitations. |
+| cypress:run:qa:serverless | Runs all tests tagged as SERVERLESS placed in the `e2e` directory excluding `investigations` and `explore` directories in headless mode using the QA environment and real MKI projects.|
+| cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
+| cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
+
+Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
+
+
 #### Setup required
 
 Setup a valid Elastic Cloud API key for QA environment:
@@ -231,7 +244,13 @@ Store the saved key on `~/.elastic/cloud.json` using the following format:
 }
 ```
 
-#### Known limitations
+#### Known limitations on headless mode
+- Currently RBAC cannot be tested.
+
+#### Known limitations on visual mode
+- Currently RBAC cannot be tested.
+- The project is created as `complete` by default, if you want to execute a test on a `essentials` project do the following:
+
 
 ### PLIs
 When running serverless Cypress tests, the following PLIs are set by default:
