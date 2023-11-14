@@ -546,11 +546,8 @@ export const HeatmapComponent: FC<HeatmapRenderProps> = memo(
         grid: {
           stroke: {
             width:
-              args.gridConfig.strokeWidth ??
-              chartBaseTheme.axes.gridLine.horizontal.strokeWidth,
-            color:
-              args.gridConfig.strokeColor ??
-              chartBaseTheme.axes.gridLine.horizontal.stroke,
+              args.gridConfig.strokeWidth ?? chartBaseTheme.axes.gridLine.horizontal.strokeWidth,
+            color: args.gridConfig.strokeColor ?? chartBaseTheme.axes.gridLine.horizontal.stroke,
           },
         },
         cell: {

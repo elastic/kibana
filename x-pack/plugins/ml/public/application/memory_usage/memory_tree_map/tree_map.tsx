@@ -64,10 +64,7 @@ export const JobMemoryTreeMap: FC<Props> = ({ node, type, height }) => {
   } = useMlKibana();
   const isDarkTheme = useIsDarkTheme(themeService);
 
-  const baseTheme = useMemo(
-    () => isDarkTheme ? DARK_THEME : LIGHT_THEME,
-    [isDarkTheme]
-  );
+  const baseTheme = useMemo(() => (isDarkTheme ? DARK_THEME : LIGHT_THEME), [isDarkTheme]);
 
   const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
 

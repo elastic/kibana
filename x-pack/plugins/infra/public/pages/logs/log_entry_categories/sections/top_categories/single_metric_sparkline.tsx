@@ -6,10 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
-import { Chart, Settings, AreaSeries, ScaleType, TooltipType, Tooltip, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import {
-  EUI_SPARKLINE_THEME_PARTIAL,
-} from '@elastic/eui/dist/eui_charts_theme';
+  Chart,
+  Settings,
+  AreaSeries,
+  ScaleType,
+  TooltipType,
+  Tooltip,
+  LIGHT_THEME,
+  DARK_THEME,
+} from '@elastic/charts';
+import { EUI_SPARKLINE_THEME_PARTIAL } from '@elastic/eui/dist/eui_charts_theme';
 import { i18n } from '@kbn/i18n';
 import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
 import { useKibanaTimeZoneSetting } from '../../../../../hooks/use_kibana_time_zone_setting';

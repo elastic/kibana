@@ -25,7 +25,9 @@ describe('TSVB theme', () => {
     expect(getBaseTheme(LEGACY_LIGHT_THEME, 'red').axes.axisTitle.fill).toEqual('rgb(23,23,23)');
 
     // violet increased the text color to full white for higer contrast
-    expect(getBaseTheme(LEGACY_LIGHT_THEME, '#ba26ff').axes.axisTitle.fill).toEqual('rgb(255,255,255)');
+    expect(getBaseTheme(LEGACY_LIGHT_THEME, '#ba26ff').axes.axisTitle.fill).toEqual(
+      'rgb(255,255,255)'
+    );
 
     // light yellow, prefer the LEGACY_LIGHT_THEME fill color because already with a good contrast
     expect(getBaseTheme(LEGACY_LIGHT_THEME, '#fff49f').axes.axisTitle.fill).toEqual('#333');

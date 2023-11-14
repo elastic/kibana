@@ -381,7 +381,14 @@ const PartitionVisComponent = (props: PartitionVisComponentProps) => {
         rescaleFactor,
         hasOpenedOnAggBasedEditor
       ),
-    [visType, visParams, chartBaseTheme, containerDimensions, rescaleFactor, hasOpenedOnAggBasedEditor]
+    [
+      visType,
+      visParams,
+      chartBaseTheme,
+      containerDimensions,
+      rescaleFactor,
+      hasOpenedOnAggBasedEditor,
+    ]
   );
 
   const fixedViewPort = document.getElementById('app-fixed-viewport');
