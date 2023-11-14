@@ -1200,6 +1200,7 @@ export default function ruleTests({ getService }: FtrProviderContext) {
             aggField: params.aggField,
             termField: params.termField,
             termSize: params.termSize,
+            sourceFields: [],
             ...(params.excludeHitsFromPreviousRun !== undefined && {
               excludeHitsFromPreviousRun: params.excludeHitsFromPreviousRun,
             }),

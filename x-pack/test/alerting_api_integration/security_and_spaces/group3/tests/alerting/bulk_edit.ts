@@ -625,6 +625,7 @@ export default function createUpdateTests({ getService }: FtrProviderContext) {
                 groupBy: 'all',
                 termSize: 5,
                 excludeHitsFromPreviousRun: true,
+                sourceFields: [],
               },
               consumer: 'alerts',
               schedule: { interval: '1m' },

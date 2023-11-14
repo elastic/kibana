@@ -87,6 +87,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             esQuery: `{\n  \"query\":{\n    \"match_all\" : {}\n  }\n}`,
             timeField: 'date',
             index: [ES_TEST_INDEX_NAME],
+            sourceFields: [],
           },
         });
 
