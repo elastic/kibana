@@ -62,7 +62,8 @@ export const SelectConnector: React.FC = () => {
   );
   const useNativeFilter = selectedConnectorFilter === 'native';
   const useClientsFilter = selectedConnectorFilter === 'connector_clients';
-  const [useNonGAFilter, setUseNonGAFilter] = useState(true);
+  const [showTechPreview, setShowTechPreview] = useState(true);
+  const [showBeta, setShowBeta] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const filteredConnectors = useMemo(() => {
     const nativeConnectors = hasNativeAccess
@@ -77,14 +78,13 @@ export const SelectConnector: React.FC = () => {
       : CONNECTORS.sort((a, b) => a.name.localeCompare(b.name));
     const connectors = [...nativeConnectors, ...nonNativeConnectors];
     return connectors
-      .filter((connector) =>
-        useNonGAFilter ? true : !connector.isBeta && !connector.isTechPreview
-      )
+      .filter((connector) => (showBeta ? true : !connector.isBeta))
+      .filter((connector) => (showTechPreview ? true : !connector.isTechPreview))
       .filter((connector) => (useNativeFilter ? connector.isNative : true))
       .filter((connector) =>
         searchTerm ? connector.name.toLowerCase().includes(searchTerm.toLowerCase()) : true
       );
-  }, [useNonGAFilter, useNativeFilter, searchTerm]);
+  }, [showBeta, showTechPreview, useNativeFilter, searchTerm]);
   const [selectedConnector, setSelectedConnector] = useState<string | null>(
     Array.isArray(serviceType) ? serviceType[0] : serviceType ?? null
   );
@@ -168,12 +168,20 @@ export const SelectConnector: React.FC = () => {
                   <EuiHorizontalRule margin="s" />
                   <EuiPanel paddingSize="s" hasShadow={false}>
                     <EuiSwitch
-                      checked={useNonGAFilter}
+                      checked={showBeta}
                       label={i18n.translate(
-                        'xpack.enterpriseSearch.content.indices.selectConnector.showNonGALabel',
-                        { defaultMessage: 'Display Beta and Tech Preview connectors' }
+                        'xpack.enterpriseSearch.content.indices.selectConnector.showBetaLabel',
+                        { defaultMessage: 'Display Beta connectors' }
                       )}
-                      onChange={(e) => setUseNonGAFilter(e.target.checked)}
+                      onChange={(e) => setShowBeta(e.target.checked)}
+                    />
+                    <EuiSwitch
+                      checked={showTechPreview}
+                      label={i18n.translate(
+                        'xpack.enterpriseSearch.content.indices.selectConnector.showTechPreviewLabel',
+                        { defaultMessage: 'Display Tech Preview connectors' }
+                      )}
+                      onChange={(e) => setShowTechPreview(e.target.checked)}
                     />
                   </EuiPanel>
                   <EuiSpacer size="s" />
