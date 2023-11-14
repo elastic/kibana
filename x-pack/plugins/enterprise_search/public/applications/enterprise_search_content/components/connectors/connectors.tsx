@@ -9,7 +9,14 @@ import React, { useEffect, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSearchBar, EuiTitle } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSearchBar,
+  EuiSpacer,
+  EuiTitle,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -57,7 +64,7 @@ export const Connectors: React.FC = () => {
           pageViewTelemetry="Connectors"
           isLoading={isLoading}
           pageHeader={{
-            pageTitle: 'Elasticsearch Connectors',
+            pageTitle: 'Elasticsearch connectors',
             rightSideGroupProps: {
               gutterSize: 's',
             },
@@ -105,6 +112,7 @@ export const Connectors: React.FC = () => {
           }}
         >
           <ConnectorStats />
+          <EuiSpacer />
 
           <EuiFlexGroup direction="column">
             <EuiFlexItem>

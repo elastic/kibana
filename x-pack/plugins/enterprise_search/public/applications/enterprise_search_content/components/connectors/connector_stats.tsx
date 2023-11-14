@@ -36,7 +36,7 @@ export const ConnectorStats: React.FC = () => {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
-        <EuiSplitPanel.Outer hasShadow={false}>
+        <EuiSplitPanel.Outer hasShadow={false} hasBorder>
           <EuiSplitPanel.Inner>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
@@ -84,7 +84,7 @@ export const ConnectorStats: React.FC = () => {
         </EuiSplitPanel.Outer>
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiSplitPanel.Outer hasShadow={false}>
+        <EuiSplitPanel.Outer hasShadow={false} hasBorder>
           <EuiSplitPanel.Inner>
             <EuiFlexGroup direction="column">
               <EuiFlexItem>
