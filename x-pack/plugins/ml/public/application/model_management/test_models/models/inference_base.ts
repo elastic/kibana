@@ -290,7 +290,11 @@ export abstract class InferenceBase<TInferResponse> {
       const inputText = this.inputText$.getValue()[0];
       const pipelineForCreation = this.getPipelineForCreation();
       let inferenceConfig = getInferenceConfig();
-      if (pipelineForCreation?.processors && pipelineForCreation.processors.length) {
+      if (
+        pipelineForCreation?.processors &&
+        pipelineForCreation.processors.length &&
+        pipelineForCreation.processors[0].inference?.inference_config
+      ) {
         inferenceConfig = pipelineForCreation.processors[0].inference?.inference_config;
       }
 
