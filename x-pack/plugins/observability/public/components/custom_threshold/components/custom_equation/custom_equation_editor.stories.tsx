@@ -12,14 +12,15 @@ import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_util
 import {
   Aggregators,
   Comparator,
-  MetricExpressionParams,
+  CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
+import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
 import { TimeUnitChar } from '../../../../../common';
 
 import { CustomEquationEditor, CustomEquationEditorProps } from './custom_equation_editor';
 import { aggregationType } from '../expression_row';
 import { MetricExpression } from '../../types';
-import { validateMetricThreshold } from '../validation';
+import { validateCustomThreshold } from '../validation';
 
 export default {
   title: 'app/Alerts/CustomEquationEditor',
@@ -67,8 +68,8 @@ const CustomEquationEditorTemplate: Story<CustomEquationEditorProps> = (args) =>
   );
 
   useEffect(() => {
-    const validationObject = validateMetricThreshold({
-      criteria: [expression as MetricExpressionParams],
+    const validationObject = validateCustomThreshold({
+      criteria: [expression as CustomMetricExpressionParams],
       searchConfiguration: {},
     });
     setErrors(validationObject.errors[0]);
@@ -89,9 +90,15 @@ export const CustomEquationEditorDefault = CustomEquationEditorTemplate.bind({})
 export const CustomEquationEditorWithEquationErrors = CustomEquationEditorTemplate.bind({});
 export const CustomEquationEditorWithFieldError = CustomEquationEditorTemplate.bind({});
 
-const BASE_ARGS = {
+const BASE_ARGS: Partial<CustomEquationEditorProps> = {
   expression: {
-    aggType: Aggregators.CUSTOM,
+    aggType: CUSTOM_AGGREGATOR,
+    metrics: [
+      {
+        name: 'A',
+        aggType: Aggregators.COUNT,
+      },
+    ],
     timeSize: 1,
     timeUnit: 'm' as TimeUnitChar,
     threshold: [1],
@@ -113,12 +120,16 @@ CustomEquationEditorDefault.args = {
 CustomEquationEditorWithEquationErrors.args = {
   ...BASE_ARGS,
   expression: {
-    ...BASE_ARGS.expression,
+    aggType: CUSTOM_AGGREGATOR,
     equation: 'Math.round(A / B)',
     metrics: [
       { name: 'A', aggType: Aggregators.AVERAGE, field: 'system.cpu.user.pct' },
       { name: 'B', aggType: Aggregators.MAX, field: 'system.cpu.cores' },
     ],
+    timeSize: 1,
+    timeUnit: 'm' as TimeUnitChar,
+    threshold: [1],
+    comparator: Comparator.GT,
   },
   errors: {
     equation:

@@ -460,7 +460,7 @@
         "label": "SelectClientPanel",
         "description": [],
         "signature": [
-          "({ docLinks, children, http, isPanelLeft, overviewPanelProps, }: React.PropsWithChildren<",
+          "({ docLinks, children, http, isPanelLeft, overviewPanelProps, callout, }: React.PropsWithChildren<",
           {
             "pluginId": "@kbn/search-api-panels",
             "scope": "common",
@@ -479,7 +479,7 @@
             "id": "def-common.SelectClientPanel.$1",
             "type": "CompoundType",
             "tags": [],
-            "label": "{\n  docLinks,\n  children,\n  http,\n  isPanelLeft = true,\n  overviewPanelProps,\n}",
+            "label": "{\n  docLinks,\n  children,\n  http,\n  isPanelLeft = true,\n  overviewPanelProps,\n  callout,\n}",
             "description": [],
             "signature": [
               "React.PropsWithChildren<",
@@ -1038,6 +1038,20 @@
               "> & ",
               "_EuiPanelButtonlike",
               ")> | undefined"
+            ],
+            "path": "packages/kbn-search-api-panels/components/select_client.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/search-api-panels",
+            "id": "def-common.SelectClientPanelProps.callout",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "callout",
+            "description": [],
+            "signature": [
+              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
             ],
             "path": "packages/kbn-search-api-panels/components/select_client.tsx",
             "deprecated": false,
