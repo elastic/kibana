@@ -35,7 +35,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       // to use the yml setting, e.g. cloud
       await browser.setLocalStorageItem('home:welcome:show', 'false');
       if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
-        log.debug('userMenuButton is found, logged in passed');
+        log.debug('userMenuButton found, login passed');
       } else {
         throw new Error(`Failed to login with cookie for '${role}' role`);
       }
