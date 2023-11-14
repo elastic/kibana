@@ -34,6 +34,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const toasts = getService('toasts');
   const kibanaServer = getService('kibanaServer');
+  const comboBox = getService('comboBox');
 
   const SOURCE_DATA_VIEW = 'search-source-alert';
   const OUTPUT_DATA_VIEW = 'search-source-alert-output';
@@ -615,6 +616,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         `[title="search-source*"]`
       );
       await sourceDataViewOption.click();
+
+      // TODO: Serverless O11y has a required "Role visibility" selector
+      // https://github.com/elastic/kibana/issues/168034
+      if (await testSubjects.exists('ruleFormConsumerSelect')) {
+        await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
+      }
 
       await testSubjects.click('saveRuleButton');
 

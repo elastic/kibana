@@ -25,5 +25,6 @@ export default function ({ getService, loadTestFile, getPageObject }: FtrProvide
 
     loadTestFile(require.resolve('./_sidebar'));
     loadTestFile(require.resolve('./_request_counts'));
+    loadTestFile(require.resolve('./_unsaved_changes_badge'));
   });
 }
