@@ -25,7 +25,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   } = scenarioOpts ?? {};
 
   return {
-    bootstrap: async ({ apmEsClient, client: { apmEsClient } }) => {
+    bootstrap: async ({ apmEsClient }) => {
       await apmEsClient.updateComponentTemplate(
         ComponentTemplateName.MetricsInternal,
         (template) => {
@@ -41,7 +41,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         }
       );
     },
-    generate: ({ range }) => {
+    generate: ({ range, client: { apmEsClient } }) => {
       const TRANSACTION_TYPES = ['request', 'custom'];
 
       const MIN_DURATION = 10;
