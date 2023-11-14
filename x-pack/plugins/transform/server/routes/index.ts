@@ -13,6 +13,9 @@ import { registerRoute as registerTransformsNodesRoute } from './api/transforms_
 import { registerRoute as registerTransformsAllRoute } from './api/transforms_all/register_route';
 import { registerRoute as registerTransformsSingleRoute } from './api/transforms_single/register_route';
 import { registerRoute as registerTransformsStatsAllRoute } from './api/transforms_stats_all/register_route';
+import { registerRoute as registerTransformsStatsSingleRoute } from './api/transforms_stats_single/register_route';
+import { registerRoute as registerTransformsCreate } from './api/transforms_create/register_route';
+import { registerRoute as registerTransformsUpdate } from './api/transforms_update/register_route';
 
 export function registerRoutes(dependencies: RouteDependencies) {
   registerFieldHistogramsRoute(dependencies);
@@ -21,4 +24,7 @@ export function registerRoutes(dependencies: RouteDependencies) {
   registerTransformsAllRoute(dependencies);
   registerTransformsSingleRoute(dependencies);
   registerTransformsStatsAllRoute(dependencies);
+  registerTransformsStatsSingleRoute(dependencies);
+  registerTransformsCreate(dependencies);
+  registerTransformsUpdate(dependencies);
 }
