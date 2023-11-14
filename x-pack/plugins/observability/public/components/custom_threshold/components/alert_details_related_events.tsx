@@ -17,7 +17,7 @@ import { useKibana } from '../../../utils/kibana_react';
 
 import { AlertParams, MetricExpression } from '../types';
 import { RelatedEventsSortBar, SortField } from './alert_details_related_events_sort_bar';
-import { MetricThresholdAlert, MetricThresholdRule } from './alert_details_app_section';
+import { CustomThresholdAlert, CustomThresholdRule } from './alert_details_app_section';
 
 const cpuMetricPrefix = 'system.cpu';
 const memoryMetricPrefix = 'system.memory';
@@ -32,8 +32,8 @@ const predefinedMetrics = [
 const fnList = ['avg', 'sum', 'min', 'max'];
 
 interface AlertDetailsRelatedEventsProps {
-  alert: MetricThresholdAlert;
-  rule: MetricThresholdRule;
+  alert: CustomThresholdAlert;
+  rule: CustomThresholdRule;
   dataView?: DataView;
 }
 
