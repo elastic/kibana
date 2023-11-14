@@ -78,8 +78,8 @@ const createCloudSession = async (hostname: string, email: string, password: str
     validateStatus: () => true,
     maxRedirects: 0,
   });
-  const firstName = sessionResponse?.data?.first_name ?? '';
-  const lastName = sessionResponse?.data?.last_name ?? '';
+  const firstName = sessionResponse?.data?.user?.data?.first_name ?? '';
+  const lastName = sessionResponse?.data?.user?.data?.last_name ?? '';
   const fullName = `${firstName} ${lastName}`.trim();
   return {
     token: sessionResponse?.data?.token as string,
