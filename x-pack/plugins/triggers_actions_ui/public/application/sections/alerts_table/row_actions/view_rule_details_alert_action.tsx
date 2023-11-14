@@ -9,14 +9,21 @@ import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import styled from '@emotion/styled';
 import { useKibana } from '../../../../common/lib/kibana';
-import { DefaultRowActionsProps } from './types';
+import { AlertActionsProps } from './types';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
+
+const MenuItem = styled(EuiContextMenuItem)`
+  &:hover {
+    text-decoration: underline;
+  }
+`;
 
 /**
  * Alerts table row action to open the rule to which the selected alert is associated
  */
-export const ViewRuleDetailsAlertAction = memo(({ alert }: DefaultRowActionsProps) => {
+export const ViewRuleDetailsAlertAction = memo(({ alert }: AlertActionsProps) => {
   const {
     http: {
       basePath: { prepend },
@@ -32,15 +39,10 @@ export const ViewRuleDetailsAlertAction = memo(({ alert }: DefaultRowActionsProp
   }
 
   return (
-    <EuiContextMenuItem
-      data-test-subj="viewRuleDetails"
-      key="viewRuleDetails"
-      href={linkToRule}
-      size="s"
-    >
+    <MenuItem data-test-subj="viewRuleDetails" key="viewRuleDetails" href={linkToRule} size="s">
       {i18n.translate('xpack.triggersActionsUi.alertsTable.viewRuleDetails', {
         defaultMessage: 'View rule details',
       })}
-    </EuiContextMenuItem>
+    </MenuItem>
   );
 });

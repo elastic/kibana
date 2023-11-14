@@ -9,7 +9,7 @@ import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { DefaultRowActionsProps } from './types';
+import { AlertActionsProps } from './types';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { useKibana } from '../../../../common/lib/kibana';
 
@@ -17,7 +17,7 @@ import { useKibana } from '../../../../common/lib/kibana';
  * Alerts table row action to open the selected alert detail page
  */
 export const ViewAlertDetailsAlertAction = memo(
-  ({ alert, setFlyoutAlert, onActionExecuted, isAlertDetailsEnabled }: DefaultRowActionsProps) => {
+  ({ alert, setFlyoutAlert, onActionExecuted, isAlertDetailsEnabled }: AlertActionsProps) => {
     const {
       http: {
         basePath: { prepend },

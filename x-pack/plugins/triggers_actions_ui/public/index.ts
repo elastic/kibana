@@ -154,9 +154,3 @@ export { transformRule } from './application/lib/rule_api/common_transformations
 export { validateActionFilterQuery } from './application/lib/value_validators';
 
 export { useBulkUntrackAlerts } from './application/sections/alerts_table/hooks/use_bulk_untrack_alerts';
-
-export { DefaultRowActions } from './application/sections/alerts_table/row_actions';
-export { ViewRuleDetailsAlertAction } from './application/sections/alerts_table/row_actions/view_rule_details_alert_action';
-export { ViewAlertDetailsAlertAction } from './application/sections/alerts_table/row_actions/view_alert_details_alert_action';
-export { ToggleAlertAction } from './application/sections/alerts_table/row_actions/toggle_alert_action';
-export { MarkAsUntrackedAlertAction } from './application/sections/alerts_table/row_actions/mark_as_untracked_alert_action';

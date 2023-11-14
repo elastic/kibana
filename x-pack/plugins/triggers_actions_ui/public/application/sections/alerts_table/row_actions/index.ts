@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { RenderCustomActionsRowArgs } from '../../../../types';
+import { lazy } from 'react';
+import { suspendedComponentWithProps } from '../../../lib/suspended_component_with_props';
 
-export interface AlertActionsProps extends RenderCustomActionsRowArgs {
-  onActionExecuted?: () => void;
-  isAlertDetailsEnabled?: boolean;
-}
+export const DefaultAlertActions = suspendedComponentWithProps(
+  lazy(() => import('./default_alert_actions'))
+);

@@ -29,6 +29,7 @@ import type {
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { QueryClientProvider } from '@tanstack/react-query';
+import { useGetMutedAlerts } from './hooks/alert_mute/use_get_muted_alerts';
 import { useFetchAlerts } from './hooks/use_fetch_alerts';
 import { AlertsTable } from './alerts_table';
 import { EmptyState } from './empty_state';
@@ -49,7 +50,6 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
-import { useGetMutedAlerts } from './hooks/alert_toggling/use_get_muted_alerts';
 import { AlertsTableContext, AlertTableQueryContext } from './contexts/alerts_table_context';
 
 const DefaultPagination = {

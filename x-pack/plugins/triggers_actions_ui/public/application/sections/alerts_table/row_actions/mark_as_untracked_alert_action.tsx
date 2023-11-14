@@ -9,38 +9,41 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
-import { DefaultRowActionsProps } from './types';
+import { AlertActionsProps } from './types';
 import { useBulkUntrackAlerts } from '../../../..';
 
 /**
  * Alerts table row action to mark the selected alert as untracked
  */
-export const MarkAsUntrackedAlertAction = memo(({ alert, refresh }: DefaultRowActionsProps) => {
-  const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
-  const isActiveAlert = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
+export const MarkAsUntrackedAlertAction = memo(
+  ({ alert, refresh, onActionExecuted }: AlertActionsProps) => {
+    const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+    const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 
-  const handleUntrackAlert = useCallback(async () => {
-    await untrackAlerts({
-      indices: [alert._index ?? ''],
-      alertUuids: [alert._id],
-    });
-    refresh();
-  }, [untrackAlerts, alert._index, alert._id, refresh]);
+    const handleUntrackAlert = useCallback(async () => {
+      await untrackAlerts({
+        indices: [alert._index ?? ''],
+        alertUuids: [alert._id],
+      });
+      onActionExecuted?.();
+      refresh();
+    }, [untrackAlerts, alert._index, alert._id, onActionExecuted, refresh]);
 
-  if (!isActiveAlert) {
-    return null;
+    if (!isAlertActive) {
+      return null;
+    }
+
+    return (
+      <EuiContextMenuItem
+        data-test-subj="untrackAlert"
+        key="untrackAlert"
+        size="s"
+        onClick={handleUntrackAlert}
+      >
+        {i18n.translate('xpack.triggersActionsUi.alertsTable.actions.untrack', {
+          defaultMessage: 'Mark as untracked',
+        })}
+      </EuiContextMenuItem>
+    );
   }
-
-  return (
-    <EuiContextMenuItem
-      data-test-subj="untrackAlert"
-      key="untrackAlert"
-      size="s"
-      onClick={handleUntrackAlert}
-    >
-      {i18n.translate('xpack.triggersActionsUi.alertsTable.actions.untrack', {
-        defaultMessage: 'Mark as untracked',
-      })}
-    </EuiContextMenuItem>
-  );
-});
+);

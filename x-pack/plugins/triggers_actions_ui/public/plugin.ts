@@ -28,6 +28,8 @@ import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import { getAlertsTableDefaultAlertActionsLazy } from './common/get_alerts_table_default_row_actions';
+import { AlertActionsProps } from './application/sections/alerts_table/row_actions/types';
 import type { AlertsSearchBarProps } from './application/sections/alerts_search_bar';
 import { TypeRegistry } from './application/type_registry';
 
@@ -118,6 +120,7 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
+  getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => ReactElement<AlertActionsProps>;
   getAlertsStateTable: (
     props: AlertsTableStateProps & LazyLoadProps
   ) => ReactElement<AlertsTableStateProps>;
@@ -410,6 +413,9 @@ export class Plugin
       },
       getAlertsTable: (props: AlertsTableProps) => {
         return getAlertsTableLazy(props);
+      },
+      getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => {
+        return getAlertsTableDefaultAlertActionsLazy(props);
       },
       getFieldBrowser: (props: FieldBrowserProps) => {
         return getFieldBrowserLazy(props);
