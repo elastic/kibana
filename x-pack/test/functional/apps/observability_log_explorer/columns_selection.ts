@@ -13,19 +13,13 @@ const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message']
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'settings']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
 
   describe('Columns selection initialization and update', () => {
     before(async () => {
       await esArchiver.load(
         'x-pack/test/functional/es_archives/observability_log_explorer/data_streams'
       );
-
-      /*
-      await PageObjects.settings.navigateTo();
-      await PageObjects.settings.createIndexPattern('logs-*-*', '@timestamp');
-      await PageObjects.settings.refreshDataViewFieldList();
-      */
     });
 
     after(async () => {

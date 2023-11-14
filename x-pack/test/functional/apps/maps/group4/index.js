@@ -11,8 +11,6 @@ export default function ({ loadTestFile, getService }) {
   const browser = getService('browser');
   const log = getService('log');
   const supertest = getService('supertest');
-  // const security = getService('security');
-  // const PageObjects = getPageObjects(['discover', 'common']);
 
   describe('maps app', function () {
     this.tags(['skipFirefox']);
@@ -51,16 +49,6 @@ export default function ({ loadTestFile, getService }) {
         defaultIndex: 'c698b940-e149-11e8-a35a-370a8516603a',
       });
       await browser.setWindowSize(1600, 1000);
-
-      /*
-      await security.testUser.setRoles([
-        'kibana_admin',
-        'test_logstash_reader',
-        'kibana_sample_admin',
-      ]); // necessary to refresh field list
-      await PageObjects.common.navigateToApp('discover');
-      await PageObjects.discover.refreshFieldList(); // refreshes field list cache from previous tests
-      */
     });
 
     after(async () => {
