@@ -62,17 +62,17 @@ describe('OpenLensButton', () => {
     expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
   });
 
-  it('returns null if the visualization is an ESQL', () => {
+  it('does not show the button if the query is an ESQL', () => {
     const esqlProps = {
       attachmentId: 'test',
       ...lensVisualization,
     };
 
-    set(esqlProps, 'state.query', { type: 'esql' });
+    set(esqlProps, 'attributes.state.query', { esql: '' });
 
     // @ts-expect-error: props are correct
     appMockRender.render(<OpenLensButton {...esqlProps} />);
 
-    expect(screen.queryByText('Open visualization')).toBeInTheDocument();
+    expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
   });
 });
