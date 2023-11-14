@@ -27,6 +27,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Plugin as NavigationPublicPlugin } from '@kbn/navigation-plugin/public';
 import { SearchBar, UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { SavedQuery } from '@kbn/data-plugin/public';
+import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 const NavigationPlugin = new NavigationPublicPlugin({} as PluginInitializerContext);
 
@@ -145,6 +146,7 @@ export const services = {
     unifiedSearch: {
       ui: { SearchBar, AggregateQuerySearchBar: SearchBar },
     } as unknown as UnifiedSearchPublicPluginStart,
+    cloud: cloudMock.createStart(),
   }),
   theme,
   capabilities: {
