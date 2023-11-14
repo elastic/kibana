@@ -26,7 +26,6 @@ import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
 import { exec } from 'child_process';
 import { renderSummaryTable } from './print_run';
-import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
 interface ProductType {
@@ -83,18 +82,13 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
 async function createSecurityProject(
   projectName: string,
   apiKey: string,
-  ftrConfig: SecuritySolutionDescribeBlockFtrConfig
+  productTypes: ProductType[]
 ): Promise<Project | undefined> {
   const body: CreateProjectRequestBody = {
     name: projectName,
     region_id: DEFAULT_REGION,
+    product_types: productTypes,
   };
-
-  const productTypes: ProductType[] = [];
-  ftrConfig?.productTypes?.forEach((t) => {
-    productTypes.push(t as ProductType);
-  });
-  if (productTypes.length > 0) body.product_types = productTypes;
 
   try {
     const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
@@ -326,6 +320,28 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
   return pRetry(fetchLoginStatusAttempt, retryOptions);
 }
 
+const getProductTypes = (
+  filePath: string,
+  tier?: string,
+  ignoreEndpointLine?: boolean,
+  ignoreCloudLine?: boolean
+): ProductType[] => {
+  let productTypes = parseTestFileConfig(filePath).productTypes as ProductType[];
+  if (tier) {
+    productTypes = productTypes.map((product) => ({
+      ...product,
+      product_tier: tier,
+    }));
+  }
+  if (ignoreEndpointLine) {
+    productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
+  }
+  if (ignoreCloudLine) {
+    productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
+  }
+  return productTypes;
+};
+
 export const cli = () => {
   run(
     async (context) => {
@@ -388,6 +404,10 @@ ${JSON.stringify(argv, null, 2)}
 
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
+
+      const projectTier = argv.tier as string;
+      const ignoreEndpoint = argv.ignoreEndpoint as boolean;
+      const ignoreCloud = argv.ignoreCloud as boolean;
 
       log.info(`
 ----------------------------------------------
@@ -457,7 +477,12 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           await withProcRunner(log, async (procs) => {
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
-            const specFileFTRConfig = parseTestFileConfig(filePath);
+            const productTypes = getProductTypes(
+              filePath,
+              projectTier,
+              ignoreEndpoint,
+              ignoreCloud
+            );
 
             if (!API_KEY) {
               log.info('API KEY to create project could not be retrieved.');
@@ -467,7 +492,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             log.info(`${id}: Creating project ${PROJECT_NAME}...`);
             // Creating project for the test to run
-            const project = await createSecurityProject(PROJECT_NAME, API_KEY, specFileFTRConfig);
+            const project = await createSecurityProject(PROJECT_NAME, API_KEY, productTypes);
 
             if (!project) {
               log.info('Failed to create project.');
