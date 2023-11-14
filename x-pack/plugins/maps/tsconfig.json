@@ -74,6 +74,7 @@
     "@kbn/content-management-table-list-view",
     "@kbn/serverless",
     "@kbn/logging",
+    "@kbn/chart-expressions-common",
   ],
   "exclude": [
     "target/**/*",
