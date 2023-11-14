@@ -11,25 +11,17 @@ import { i18n } from '@kbn/i18n';
 import { ValidationResult } from '@kbn/triggers-actions-ui-plugin/public';
 import { isEmpty } from 'lodash';
 import {
-  Aggregators,
   Comparator,
   CustomMetricExpressionParams,
-  MetricExpressionParams,
 } from '../../../../common/custom_threshold_rule/types';
 
 export const EQUATION_REGEX = /[^A-Z|+|\-|\s|\d+|\.|\(|\)|\/|\*|>|<|=|\?|\:|&|\!|\|]+/g;
 
-const isCustomMetricExpressionParams = (
-  subject: MetricExpressionParams
-): subject is CustomMetricExpressionParams => {
-  return subject.aggType === Aggregators.CUSTOM;
-};
-
-export function validateMetricThreshold({
+export function validateCustomThreshold({
   criteria,
   searchConfiguration,
 }: {
-  criteria: MetricExpressionParams[];
+  criteria: CustomMetricExpressionParams[];
   searchConfiguration: SerializedSearchSourceFields;
 }): ValidationResult {
   const validationResult = { errors: {} };
@@ -46,7 +38,6 @@ export function validateMetricThreshold({
         threshold0: string[];
         threshold1: string[];
       };
-      metric: string[];
       metricsError?: string;
       metrics: Record<string, { aggType?: string; field?: string; filter?: string }>;
       equation?: string;
@@ -187,66 +178,53 @@ export function validateMetricThreshold({
       );
     }
 
-    if (c.aggType !== 'count' && c.aggType !== 'custom' && !c.metric) {
-      errors[id].metric.push(
-        i18n.translate(
-          'xpack.observability.customThreshold.rule.alertFlyout.error.metricRequired',
-          {
-            defaultMessage: 'Metric is required.',
-          }
-        )
+    if (!c.metrics || (c.metrics && c.metrics.length < 1)) {
+      errors[id].metricsError = i18n.translate(
+        'xpack.observability.customThreshold.rule.alertFlyout.error.metricsError',
+        {
+          defaultMessage: 'You must define at least 1 custom metric',
+        }
       );
+    } else {
+      c.metrics.forEach((metric) => {
+        const customMetricErrors: { aggType?: string; field?: string; filter?: string } = {};
+        if (!metric.aggType) {
+          customMetricErrors.aggType = i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.metrics.aggTypeRequired',
+            {
+              defaultMessage: 'Aggregation is required',
+            }
+          );
+        }
+        if (metric.aggType !== 'count' && !metric.field) {
+          customMetricErrors.field = i18n.translate(
+            'xpack.observability.customThreshold.rule.alertFlyout.error.metrics.fieldRequired',
+            {
+              defaultMessage: 'Field is required',
+            }
+          );
+        }
+        if (metric.aggType === 'count' && metric.filter) {
+          try {
+            fromKueryExpression(metric.filter);
+          } catch (e) {
+            customMetricErrors.filter = e.message;
+          }
+        }
+        if (!isEmpty(customMetricErrors)) {
+          errors[id].metrics[metric.name] = customMetricErrors;
+        }
+      });
     }
 
-    if (isCustomMetricExpressionParams(c)) {
-      if (!c.metrics || (c.metrics && c.metrics.length < 1)) {
-        errors[id].metricsError = i18n.translate(
-          'xpack.observability.customThreshold.rule.alertFlyout.error.metricsError',
-          {
-            defaultMessage: 'You must define at least 1 custom metric',
-          }
-        );
-      } else {
-        c.metrics.forEach((metric) => {
-          const customMetricErrors: { aggType?: string; field?: string; filter?: string } = {};
-          if (!metric.aggType) {
-            customMetricErrors.aggType = i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.error.metrics.aggTypeRequired',
-              {
-                defaultMessage: 'Aggregation is required',
-              }
-            );
-          }
-          if (metric.aggType !== 'count' && !metric.field) {
-            customMetricErrors.field = i18n.translate(
-              'xpack.observability.customThreshold.rule.alertFlyout.error.metrics.fieldRequired',
-              {
-                defaultMessage: 'Field is required',
-              }
-            );
-          }
-          if (metric.aggType === 'count' && metric.filter) {
-            try {
-              fromKueryExpression(metric.filter);
-            } catch (e) {
-              customMetricErrors.filter = e.message;
-            }
-          }
-          if (!isEmpty(customMetricErrors)) {
-            errors[id].metrics[metric.name] = customMetricErrors;
-          }
-        });
-      }
-
-      if (c.equation && c.equation.match(EQUATION_REGEX)) {
-        errors[id].equation = i18n.translate(
-          'xpack.observability.customThreshold.rule.alertFlyout.error.equation.invalidCharacters',
-          {
-            defaultMessage:
-              'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
-          }
-        );
-      }
+    if (c.equation && c.equation.match(EQUATION_REGEX)) {
+      errors[id].equation = i18n.translate(
+        'xpack.observability.customThreshold.rule.alertFlyout.error.equation.invalidCharacters',
+        {
+          defaultMessage:
+            'The equation field only supports the following characters: A-Z, +, -, /, *, (, ), ?, !, &, :, |, >, <, =',
+        }
+      );
     }
   });
 
