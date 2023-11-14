@@ -126,7 +126,6 @@ async function deleteSecurityProject(
   apiKey: string
 ): Promise<void> {
   try {
-    log.info(`Deleting the project`);
     await axios.delete(`${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}`, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
