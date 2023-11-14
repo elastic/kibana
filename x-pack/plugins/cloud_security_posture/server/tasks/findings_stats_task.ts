@@ -177,6 +177,39 @@ const getScoreQuery = (): SearchRequest => ({
             },
           },
         },
+        score_by_benchmark_id: {
+          terms: {
+            field: 'rule.benchmark.id',
+          },
+          aggregations: {
+            benchmark_versions: {
+              terms: {
+                field: 'rule.benchmark.version',
+              },
+              aggs: {
+                total_findings: {
+                  value_count: {
+                    field: 'result.evaluation',
+                  },
+                },
+                passed_findings: {
+                  filter: {
+                    term: {
+                      'result.evaluation': 'passed',
+                    },
+                  },
+                },
+                failed_findings: {
+                  filter: {
+                    term: {
+                      'result.evaluation': 'failed',
+                    },
+                  },
+                },
+              },
+            },
+          },
+        },
       },
     },
   },
@@ -255,6 +288,27 @@ const getFindingsScoresDocIndexingPromises = (
         ];
       })
     );
+    // creating score per benchmark id and version
+    const benchmarkStats = Object.fromEntries(
+      policyTemplateTrend.score_by_benchmark_id.buckets.map((benchmarkIdBucket) => {
+        const benchmarkId = benchmarkIdBucket.key;
+        const benchmarkVersions = Object.fromEntries(
+          benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
+            const benchmarkVersion = benchmarkVersionBucket.key.split('.').join('_');
+            return [
+              benchmarkVersion,
+              {
+                total_findings: benchmarkVersionBucket.total_findings.value,
+                passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
+                failed_findings: benchmarkVersionBucket.failed_findings.doc_count,
+              },
+            ];
+          })
+        );
+
+        return [benchmarkId, benchmarkVersions];
+      })
+    );
 
     // each document contains the policy template and its scores
     return esClient.index({
@@ -265,6 +319,7 @@ const getFindingsScoresDocIndexingPromises = (
         failed_findings: policyTemplateTrend.failed_findings.doc_count,
         total_findings: policyTemplateTrend.total_findings.value,
         score_by_cluster_id: clustersStats,
+        score_by_benchmark_id: benchmarkStats,
       },
     });
   });
