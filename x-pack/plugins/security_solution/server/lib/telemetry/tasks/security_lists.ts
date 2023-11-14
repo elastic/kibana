@@ -6,10 +6,7 @@
  */
 
 import type { Logger } from '@kbn/core/server';
-import {
-  ENDPOINT_LIST_ID,
-  ENDPOINT_EVENT_FILTERS_LIST_ID,
-} from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_LIST_ID, ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   LIST_ENDPOINT_EXCEPTION,
   LIST_ENDPOINT_EVENT_FILTER,
@@ -24,6 +21,7 @@ import {
   createTaskMetric,
   formatValueListMetaData,
   createUsageCounterLabel,
+  tlog,
 } from '../helpers';
 import type { ITelemetryEventsSender } from '../sender';
 import type { ITelemetryReceiver } from '../receiver';
@@ -120,7 +118,7 @@ export function createTelemetrySecurityListTaskConfig(maxTelemetryBatch: number)
 
         // Lists Telemetry: Endpoint Event Filters
 
-        const epFilters = await receiver.fetchEndpointList(ENDPOINT_EVENT_FILTERS_LIST_ID);
+        const epFilters = await receiver.fetchEndpointList(ENDPOINT_ARTIFACT_LISTS.eventFilters.id);
         if (epFilters?.data) {
           const epFiltersJson = templateExceptionList(
             epFilters.data,

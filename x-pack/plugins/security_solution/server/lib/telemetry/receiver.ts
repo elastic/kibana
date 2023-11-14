@@ -18,7 +18,7 @@ import type {
   SearchRequest,
   SearchResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ENDPOINT_TRUSTED_APPS_LIST_ID } from '@kbn/securitysolution-list-constants';
+import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import {
   EQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
@@ -440,14 +440,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
+    const timeFrom = moment.utc().subtract(1, 'day').valueOf();
     const results = await this.exceptionListClient.findExceptionListItem({
-      listId: ENDPOINT_TRUSTED_APPS_LIST_ID,
+      listId: ENDPOINT_ARTIFACT_LISTS.trustedApps.id,
       page: 1,
       perPage: 10_000,
-      filter: `exception-list-agnostic.attributes.created_at >= ${moment
-        .utc()
-        .subtract(24, 'hours')
-        .valueOf()}`,
+      filter: `exception-list-agnostic.attributes.created_at >= ${timeFrom}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -469,14 +467,12 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createEndpointList();
 
+    const timeFrom = moment.utc().subtract(1, 'day').valueOf();
     const results = await this.exceptionListClient.findExceptionListItem({
       listId,
       page: 1,
       perPage: this.maxRecords,
-      filter: `exception-list-agnostic.attributes.created_at >= ${moment
-        .utc()
-        .subtract(24, 'hours')
-        .valueOf()}`,
+      filter: `exception-list-agnostic.attributes.created_at >= ${timeFrom}`,
       namespaceType: 'agnostic',
       sortField: 'name',
       sortOrder: 'asc',
@@ -552,14 +548,14 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // Ensure list is created if it does not exist
     await this.exceptionListClient.createTrustedAppsList();
 
-    const filter = `exception-list-single.attributes.created_at >= ${moment
+    const timeFrom = `exception-list-single.attributes.created_at >= ${moment
       .utc()
       .subtract(24, 'hours')
       .valueOf()}`;
 
     const results = await this.exceptionListClient?.findExceptionListsItem({
       listId: [listId],
-      filter: [filter],
+      filter: [timeFrom],
       perPage: this.maxRecords,
       page: 1,
       sortField: 'exception-list.created_at',
