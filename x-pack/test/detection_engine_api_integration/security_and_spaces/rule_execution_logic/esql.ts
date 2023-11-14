@@ -715,7 +715,7 @@ export default ({ getService }: FtrProviderContext) => {
       // we use actual rule executions, not preview, because for preview API alerts index refresh=false for non suppressed alerts
       // first rule execution catches 130 documents and generates 100 alerts
       // second rule execution catches 150 docs, 120 of which were captured during the first execution and generates only 60 alerts. Because rest are deduplicated
-      // so in total we 160 alerts should be generated
+      // so in total 160 alerts should be generated
       it('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the real executions', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
