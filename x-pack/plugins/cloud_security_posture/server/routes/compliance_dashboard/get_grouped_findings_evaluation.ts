@@ -20,6 +20,28 @@ export interface FailedFindingsQueryResult {
   aggs_by_resource_type: Aggregation<FailedFindingsBucket>;
 }
 
+export interface BenchmarkVersionQueryResult extends KeyDocCount, FailedFindingsQueryResult {
+  failed_findings: {
+    doc_count: number;
+  };
+  passed_findings: {
+    doc_count: number;
+  };
+  asset_count: {
+    value: number;
+  };
+  aggs_by_benchmark_name: Aggregation<KeyDocCount>;
+}
+export interface FailedFindingsBucket extends KeyDocCount {
+  failed_findings: {
+    doc_count: number;
+  };
+  passed_findings: {
+    doc_count: number;
+  };
+  score: { value: number };
+}
+
 export interface FailedFindingsBucket extends KeyDocCount {
   failed_findings: {
     doc_count: number;

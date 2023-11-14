@@ -23,12 +23,24 @@ export interface ScoreTrendDoc {
       failed_findings: number;
     }
   >;
+  score_by_benchmark_id: Record<
+    string,
+    Record<
+      string,
+      {
+        total_findings: number;
+        passed_findings: number;
+        failed_findings: number;
+      }
+    >
+  >;
 }
 
 export type Trends = Array<{
   timestamp: string;
   summary: Stats;
   clusters: Record<string, Stats>;
+  benchmarks: Record<string, Stats>;
 }>;
 
 export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
@@ -51,27 +63,51 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   },
 });
 
-export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trends =>
-  scoreTrendDocs.map((data) => ({
-    timestamp: data['@timestamp'],
-    summary: {
-      totalFindings: data.total_findings,
-      totalFailed: data.failed_findings,
-      totalPassed: data.passed_findings,
-      postureScore: calculatePostureScore(data.passed_findings, data.failed_findings),
-    },
-    clusters: Object.fromEntries(
-      Object.entries(data.score_by_cluster_id).map(([clusterId, cluster]) => [
-        clusterId,
-        {
-          totalFindings: cluster.total_findings,
-          totalFailed: cluster.failed_findings,
-          totalPassed: cluster.passed_findings,
-          postureScore: calculatePostureScore(cluster.passed_findings, cluster.failed_findings),
-        },
-      ])
-    ),
-  }));
+export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
+  return scoreTrendDocs.map((data) => {
+    return {
+      timestamp: data['@timestamp'],
+      summary: {
+        totalFindings: data.total_findings,
+        totalFailed: data.failed_findings,
+        totalPassed: data.passed_findings,
+        postureScore: calculatePostureScore(data.passed_findings, data.failed_findings),
+      },
+      clusters: Object.fromEntries(
+        Object.entries(data.score_by_cluster_id).map(([clusterId, cluster]) => [
+          clusterId,
+          {
+            totalFindings: cluster.total_findings,
+            totalFailed: cluster.failed_findings,
+            totalPassed: cluster.passed_findings,
+            postureScore: calculatePostureScore(cluster.passed_findings, cluster.failed_findings),
+          },
+        ])
+      ),
+      benchmarks: data.score_by_benchmark_id
+        ? Object.fromEntries(
+            Object.entries(data.score_by_benchmark_id).flatMap(([benchmarkId, benchmark]) =>
+              Object.entries(benchmark).map(([benchmarkVersion, benchmarkStats]) => {
+                const benchmarkVersionFieldFormat = benchmarkVersion.split('_').join('.');
+                return [
+                  `${benchmarkId}_${benchmarkVersionFieldFormat}`,
+                  {
+                    totalFindings: benchmarkStats.total_findings,
+                    totalFailed: benchmarkStats.failed_findings,
+                    totalPassed: benchmarkStats.passed_findings,
+                    postureScore: calculatePostureScore(
+                      benchmarkStats.passed_findings,
+                      benchmarkStats.failed_findings
+                    ),
+                  },
+                ];
+              })
+            )
+          )
+        : {},
+    };
+  });
+};
 
 export const getTrends = async (
   esClient: ElasticsearchClient,
