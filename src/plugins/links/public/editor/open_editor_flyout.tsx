@@ -7,6 +7,7 @@
  */
 
 import React from 'react';
+import { skip, take } from 'rxjs/operators';
 
 import { EuiLoadingSpinner, EuiPanel } from '@elastic/eui';
 import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
@@ -64,6 +65,14 @@ export async function openEditorFlyout(
         editorFlyout.close();
       }
     };
+
+    /**
+     * Close the flyout whenever the app changes - this handles cases for when the flyout is open outside of the
+     * Dashboard app (`overlayTracker` is not available)
+     */
+    coreServices.application.currentAppId$.pipe(skip(1), take(1)).subscribe(() => {
+      if (!overlayTracker) editorFlyout.close();
+    });
 
     const onSaveToLibrary = async (newLinks: Link[], newLayout: LinksLayoutType) => {
       const newAttributes = {
@@ -135,6 +144,8 @@ export async function openEditorFlyout(
       }
     );
 
-    if (overlayTracker) overlayTracker.openOverlay(editorFlyout);
+    if (overlayTracker) {
+      overlayTracker.openOverlay(editorFlyout);
+    }
   });
 }
