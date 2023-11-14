@@ -76,7 +76,8 @@
     "@kbn/resizable-layout",
     "@kbn/unsaved-changes-badge",
     "@kbn/core-chrome-browser",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/cloud-plugin"
   ],
   "exclude": [
     "target/**/*"
