@@ -15,6 +15,8 @@ import {
   EuiPopoverTitle,
   useEuiTheme,
   EuiIconTip,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
@@ -235,11 +237,17 @@ const DataLayerHeaderTrigger = function ({
       onClick={onClick}
       fullWidth
       size="s"
-      iconType={currentVisType.icon}
       label={
-        <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
-          {currentVisType.fullLabel || currentVisType.label}
-        </EuiText>
+        <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon type={currentVisType.icon} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s" className="lnsLayerPanelChartSwitch_title">
+              {currentVisType.fullLabel || currentVisType.label}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       }
     />
   );

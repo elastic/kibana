@@ -35,7 +35,7 @@ export const ToolbarButtonStyles = ({ euiTheme }: UseEuiTheme) => {
       right: {
         borderTopLeftRadius: 0,
         borderBottomLeftRadius: 0,
-        borderLeft: 0,
+        borderLeft: 'none',
       },
       center: {
         borderRadius: 0,
