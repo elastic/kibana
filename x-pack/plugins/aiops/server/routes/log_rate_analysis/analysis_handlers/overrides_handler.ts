@@ -12,7 +12,7 @@ import {
 } from '../../../../common/api/log_rate_analysis/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
-import type { ResponseStreamFetchOptions } from '../response_stream';
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const overridesHandlerFactory =
   <T extends ApiVersion>({

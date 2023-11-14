@@ -19,7 +19,7 @@ import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
 import { getHistogramQuery } from '../queries/get_histogram_query';
 
-import type { ResponseStreamFetchOptions } from '../response_stream';
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const overallHistogramHandlerFactory =
   <T extends ApiVersion>({

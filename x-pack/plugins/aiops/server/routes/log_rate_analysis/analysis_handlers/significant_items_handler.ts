@@ -30,7 +30,7 @@ import {
   MAX_CONCURRENT_QUERIES,
   PROGRESS_STEP_P_VALUES,
 } from '../response_stream_utils/constants';
-import type { ResponseStreamFetchOptions } from '../response_stream';
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const significantItemsHandlerFactory =
   <T extends ApiVersion>({

@@ -36,7 +36,7 @@ import { getHistogramQuery } from '../queries/get_histogram_query';
 import { getSignificantItemGroups } from '../queries/get_significant_item_groups';
 
 import { MAX_CONCURRENT_QUERIES, PROGRESS_STEP_GROUPING } from '../response_stream_utils/constants';
-import type { ResponseStreamFetchOptions } from '../response_stream';
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 
 export const groupingHandlerFactory =
   <T extends ApiVersion>({
