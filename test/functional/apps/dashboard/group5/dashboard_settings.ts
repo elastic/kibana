@@ -18,7 +18,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardSettings = getService('dashboardSettings');
   const PageObjects = getPageObjects(['common', 'dashboard']);
 
-  describe.only('dashboard settings', () => {
+  describe('dashboard settings', () => {
     let originalTitles: string[] = [];
 
     const checkDashboardTitle = async (expectedTitle: string) => {
