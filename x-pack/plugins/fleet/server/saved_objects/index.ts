@@ -25,6 +25,8 @@ import {
   UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
 } from '../constants';
 
+import { migrateSyntheticsPackagePolicyToV8120 } from './migrations/synthetics/to_v8_12_0';
+
 import {
   migratePackagePolicyEvictionsFromV8110,
   migratePackagePolicyToV8110,
@@ -391,6 +393,14 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           {
             type: 'data_backfill',
             backfillFn: migrateCspPackagePolicyToV8110,
+          },
+        ],
+      },
+      '5': {
+        changes: [
+          {
+            type: 'data_backfill',
+            backfillFn: migrateSyntheticsPackagePolicyToV8120,
           },
         ],
       },

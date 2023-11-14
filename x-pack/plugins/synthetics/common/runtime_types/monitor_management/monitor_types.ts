@@ -321,21 +321,26 @@ export const SyntheticsMonitorWithIdCodec = t.intersection([
   t.interface({ id: t.string }),
 ]);
 
+const HeartbeatFieldsCodec = t.intersection([
+  t.interface({
+    config_id: t.string,
+  }),
+  t.partial({
+    run_once: t.boolean,
+    test_run_id: t.string,
+    'monitor.project.name': t.string,
+    'monitor.id': t.string,
+    'monitor.project.id': t.string,
+    'monitor.fleet_managed': t.boolean,
+    meta: t.record(t.string, t.string),
+  }),
+]);
+
 export const HeartbeatConfigCodec = t.intersection([
   SyntheticsMonitorWithIdCodec,
   t.partial({
     fields_under_root: t.boolean,
-    fields: t.intersection([
-      t.interface({
-        config_id: t.string,
-      }),
-      t.partial({
-        run_once: t.boolean,
-        test_run_id: t.string,
-        'monitor.project.name': t.string,
-        'monitor.project.id': t.string,
-      }),
-    ]),
+    fields: HeartbeatFieldsCodec,
   }),
 ]);
 
@@ -400,6 +405,7 @@ export type BrowserFields = t.TypeOf<typeof BrowserFieldsCodec>;
 export type BrowserSimpleFields = t.TypeOf<typeof BrowserSimpleFieldsCodec>;
 export type BrowserAdvancedFields = t.TypeOf<typeof BrowserAdvancedFieldsCodec>;
 export type MonitorFields = t.TypeOf<typeof MonitorFieldsCodec>;
+export type HeartbeatFields = t.TypeOf<typeof HeartbeatFieldsCodec>;
 export type SyntheticsMonitor = t.TypeOf<typeof SyntheticsMonitorCodec>;
 export type SyntheticsMonitorWithId = t.TypeOf<typeof SyntheticsMonitorWithIdCodec>;
 export type EncryptedSyntheticsSavedMonitor = t.TypeOf<typeof EncryptedSyntheticsSavedMonitorCodec>;

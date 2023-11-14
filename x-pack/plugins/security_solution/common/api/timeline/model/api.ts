@@ -21,7 +21,7 @@ import {
   SavedObjectResolveAliasTargetId,
   SavedObjectResolveOutcome,
 } from '../../detection_engine/model/rule_schema_legacy';
-import { ErrorSchema, success, success_count as successCount } from '../../detection_engine';
+import { ErrorSchema } from './error_schema';
 
 export const BareNoteSchema = runtimeTypes.intersection([
   runtimeTypes.type({
@@ -497,8 +497,8 @@ export interface ExportTimelineNotFoundError {
 
 export const importTimelineResultSchema = runtimeTypes.exact(
   runtimeTypes.type({
-    success,
-    success_count: successCount,
+    success: runtimeTypes.boolean,
+    success_count: PositiveInteger,
     timelines_installed: PositiveInteger,
     timelines_updated: PositiveInteger,
     errors: runtimeTypes.array(ErrorSchema),
