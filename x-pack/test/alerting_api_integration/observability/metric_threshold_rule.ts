@@ -8,7 +8,12 @@
 import moment from 'moment';
 import expect from '@kbn/expect';
 import { cleanup, generate } from '@kbn/infra-forge';
-import { Aggregators, Comparator, InfraRuleType } from '@kbn/infra-plugin/common/alerting/metrics';
+import {
+  Aggregators,
+  Comparator,
+  InfraRuleType,
+  MetricThresholdParams,
+} from '@kbn/infra-plugin/common/alerting/metrics';
 import {
   waitForDocumentInIndex,
   waitForAlertInIndex,
@@ -48,7 +53,7 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'Index Connector: Metric threshold API test',
           indexName: ALERT_ACTION_INDEX,
         });
-        const createdRule = await createRule({
+        const createdRule = await createRule<MetricThresholdParams>({
           supertest,
           ruleTypeId: InfraRuleType.MetricThreshold,
           consumer: 'infrastructure',
