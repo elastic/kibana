@@ -8,6 +8,12 @@
 import type { LogDebugMessage } from './log_debug_message';
 import type { StateHandler } from './state_handler';
 
+/**
+ * Helper function that will check if the actual stream is still running
+ * and only then will call the callback to end the raw stream and update its state.
+ * This is implemented as a factory that receives the necessary dependencies
+ * which then returns the actual helper function.
+ */
 export const streamEndFactory = (
   stateHandler: StateHandler,
   streamEndCallback: () => void,

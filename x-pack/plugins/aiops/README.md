@@ -10,7 +10,7 @@ Here's some notes on the structure of the code for the API endpoint `/internal/a
 
 `define_route.ts:defineRoute()` is the outer most wrapper that's used to define the route and its versions. It calls `route_handler_factory:routeHandlerFactory()` for each version.
 
-The route handler sets up `response_stream:responseStreamFactory()` to create the response stream and then walks through the steps of the analysis.
+The route handler sets up `response_stream_factory:responseStreamFactory()` to create the response stream and then walks through the steps of the analysis.
 
 The response stream factory acts as a wrapper to set up the stream itself, the stream state (for example to set if it's running etc.), some custom actions on the stream as well as analysis handlers that fetch data from ES and pass it on to the stream.
 

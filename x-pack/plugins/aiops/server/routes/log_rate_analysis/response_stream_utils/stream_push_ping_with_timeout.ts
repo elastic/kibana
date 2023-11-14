@@ -19,6 +19,11 @@ import type { StateHandler } from './state_handler';
 // 10s ping frequency to keep the stream alive.
 const PING_FREQUENCY = 10000;
 
+/**
+ * Helper function that will push a ping message every 10s until the stream finishes.
+ * This is implemented as a factory that receives the necessary dependencies
+ * which then returns the actual helper function.
+ */
 export const streamPushPingWithTimeoutFactory = <T extends ApiVersion>(
   stateHandler: StateHandler,
   push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],

@@ -29,12 +29,13 @@ import { isRequestAbortedError } from '../../lib/is_request_aborted_error';
 import { trackAIOpsRouteUsage } from '../../lib/track_route_usage';
 import type { AiopsLicense } from '../../types';
 
-import { responseStreamFactory } from './response_stream';
+import { responseStreamFactory } from './response_stream_factory';
 import { PROGRESS_STEP_HISTOGRAMS_GROUPS } from './response_stream_utils/constants';
 
 /**
  * The log rate analysis route handler sets up `responseStreamFactory`
- * to create the response stream and then walks through the steps of the analysis.
+ * to create the response stream and then uses its handlers to
+ * walk through the steps of the analysis.
  */
 export function routeHandlerFactory<T extends ApiVersion>(
   version: T,

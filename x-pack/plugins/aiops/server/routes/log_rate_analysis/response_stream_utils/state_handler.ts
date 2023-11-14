@@ -21,6 +21,12 @@ const getDefaultStreamState = (overrides: Partial<StreamState>): StreamState => 
   shouldStop: !!overrides.shouldStop,
 });
 
+/**
+ * `stateHandlerFactory` takes care of handling the inner state of the stream,
+ * for example how much of the stream has been completed, if the stream is running etc.
+ * It exposes the state as getter/setter functions, for example `loaded()` will
+ * retrieve the current loading state, `loaded(0.5)` will update it.
+ */
 export const stateHandlerFactory = (overrides: Partial<StreamState>) => {
   const state = getDefaultStreamState(overrides);
 

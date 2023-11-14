@@ -15,6 +15,12 @@ import {
 } from '../../../../common/api/log_rate_analysis/actions';
 import type { AiopsLogRateAnalysisApiVersion as ApiVersion } from '../../../../common/api/log_rate_analysis/schema';
 
+/**
+ * Helper function that will push a message to the stream that it's done and
+ * then run a callback to end the actual stream.
+ * This is implemented as a factory that receives the necessary dependencies
+ * which then returns the actual helper function.
+ */
 export const streamEndWithUpdatedLoadingStateFactory = <T extends ApiVersion>(
   streamEndCallback: () => void,
   push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push']

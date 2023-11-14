@@ -16,6 +16,11 @@ import {
   type AiopsLogRateAnalysisApiAction,
 } from '../../../../common/api/log_rate_analysis/actions';
 
+/**
+ * Helper function that will push an error message to the stream.
+ * This is implemented as a factory that receives the necessary dependencies
+ * which then returns the actual helper function.
+ */
 export const streamPushErrorFactory = <T extends ApiVersion>(
   push: StreamFactoryReturnType<AiopsLogRateAnalysisApiAction<T>>['push'],
   logDebugMessage: LogDebugMessage

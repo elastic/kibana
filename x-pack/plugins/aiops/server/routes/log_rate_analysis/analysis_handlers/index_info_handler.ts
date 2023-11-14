@@ -14,7 +14,7 @@ import { isRequestAbortedError } from '../../../lib/is_request_aborted_error';
 
 import { fetchIndexInfo } from '../queries/fetch_index_info';
 
-import type { ResponseStreamFetchOptions } from '../response_stream';
+import type { ResponseStreamFetchOptions } from '../response_stream_factory';
 import { LOADED_FIELD_CANDIDATES } from '../response_stream_utils/constants';
 
 export const indexInfoHandlerFactory =

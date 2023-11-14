@@ -33,6 +33,9 @@ import { streamEndWithUpdatedLoadingStateFactory } from './response_stream_utils
 import { streamPushErrorFactory } from './response_stream_utils/stream_push_error';
 import { streamPushPingWithTimeoutFactory } from './response_stream_utils/stream_push_ping_with_timeout';
 
+/**
+ * The options to be passed in to `responseStreamFactory`.
+ */
 export interface ResponseStreamOptions<T extends ApiVersion> {
   version: T;
   client: ElasticsearchClient;
@@ -42,6 +45,10 @@ export interface ResponseStreamOptions<T extends ApiVersion> {
   logger: Logger;
 }
 
+/**
+ * The full options object that will be passed on to analysis handlers
+ * so they're able to access all necessary runtime dependencies.
+ */
 export interface ResponseStreamFetchOptions<T extends ApiVersion> extends ResponseStreamOptions<T> {
   abortSignal: AbortSignal;
   logDebugMessage: LogDebugMessage;
@@ -55,6 +62,14 @@ export interface ResponseStreamFetchOptions<T extends ApiVersion> extends Respon
   stateHandler: StateHandler;
 }
 
+/**
+ * `responseStreamFactory` sets up the response stream, the stream's state (for example
+ * if it's running, how far the stream progressed etc.), some custom actions for the stream
+ * as well as analysis handlers that fetch data from ES and pass it on to the stream.
+ * This factory should avoid to include any logic, it's purpose is to take care of setting up
+ * and passing around dependencies for the various other parts involved
+ * running the analysis.
+ */
 export const responseStreamFactory = <T extends ApiVersion>(options: ResponseStreamOptions<T>) => {
   const { events, headers, logger, requestBody } = options;
 
