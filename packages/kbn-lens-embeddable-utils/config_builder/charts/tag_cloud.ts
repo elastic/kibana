@@ -84,6 +84,10 @@ function buildFormulaLayer(
 }
 
 function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
+  if (layer.breakdown && typeof layer.breakdown !== 'string') {
+    throw new Error('breakdown must be a field name when not using index source');
+  }
+
   return [
     getValueColumn(ACCESSOR, layer.query),
     getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string),

@@ -109,6 +109,12 @@ function buildFormulaLayer(
 }
 
 function getValueColumns(layer: LensHeatmapConfig['layers'][0]) {
+  if (layer.breakdown && typeof layer.breakdown !== 'string') {
+    throw new Error('breakdown must be a field name when not using index source');
+  }
+  if (typeof layer.xAxis !== 'string') {
+    throw new Error('xAxis must be a field name when not using index source');
+  }
   return [
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string)]

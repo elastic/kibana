@@ -134,27 +134,21 @@ function buildVisualizationState(config: LensXYConfig & LensBaseConfig): XYState
 }
 
 function getValueColumns(layer: LensSeriesLayer, i: number) {
+  if (layer.breakdown && typeof layer.breakdown !== 'string') {
+    throw new Error('breakdown must be a field name when not using index source');
+  }
+  if (typeof layer.xAxis !== 'string') {
+    throw new Error('xAxis must be a field name when not using index source');
+  }
   return [
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
-    ...(layer.xAxis ? [getValueColumn(`${ACCESSOR}${i}_x`, layer.xAxis as string)] : []),
+    getValueColumn(`${ACCESSOR}${i}_x`, layer.xAxis as string),
     getValueColumn(`${ACCESSOR}${i}`, layer.query),
   ];
 }
 
-/** -------
-
- xy: layers: each layer that requires data can be text/data/form
- walk over layers, check if it has dataset (not required for annotation layer)
- build the layer:
- -> if its non XY call build function with getformula layer (which is specific to each chart) and getvalues (for other layer types)
- - if its XY, we need getformulalayer which is takes into account the layer type (series/annotation/reference)
- - if its XY we need getvalues which takes into acount layer type
-
-
-
-  */
 function buildFormulaLayer(
   layer: LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer,
   i: number,

@@ -28,7 +28,6 @@ import {
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
-
 function buildVisualizationState(
   config: LensTableConfig & LensBaseConfig
 ): DatatableVisualizationState {
@@ -99,6 +98,12 @@ function buildFormulaLayer(
 }
 
 function getValueColumns(layer: LensTableConfig['layers'][0]) {
+  if (layer.breakdown && layer.breakdown.filter((b) => typeof b !== 'string').length) {
+    throw new Error('breakdown must be a field name when not using index source');
+  }
+  if (layer.splitBy && layer.splitBy.filter((s) => typeof s !== 'string').length) {
+    throw new Error('xAxis must be a field name when not using index source');
+  }
   return [
     ...(layer.breakdown
       ? layer.breakdown.map((b, i) => {

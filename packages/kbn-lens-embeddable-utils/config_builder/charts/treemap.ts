@@ -112,6 +112,10 @@ function buildFormulaLayer(
 }
 
 function getValueColumns(layer: LensTreeMapConfig['layers'][0]) {
+  if (layer.breakdown && layer.breakdown.filter((b) => typeof b !== 'string').length) {
+    throw new Error('breakdown must be a field name when not using index source');
+  }
+
   return [
     ...(layer.breakdown
       ? layer.breakdown.map((b, i) => {

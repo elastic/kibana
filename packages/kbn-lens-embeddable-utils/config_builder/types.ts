@@ -12,7 +12,6 @@ import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/common';
 
 export type LensAttributes = TypedLensByValueInput['attributes'];
-
 export const DEFAULT_LAYER_ID = 'layer_0';
 
 type Identity<T> = T extends object
@@ -41,7 +40,6 @@ export interface TimeRange {
 }
 
 export type LensLayerQuery = string;
-
 export interface LensDataviewDataset {
   index: string;
   timeFieldName?: string;
