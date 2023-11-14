@@ -1,0 +1,5 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/panel-loader",
+  "owner": "@elastic/kibana-presentation"
+}
