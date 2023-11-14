@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { APP_ID } from '../../../../../common';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
 
 /**
  * Returns true if the user has read privileges for cases, false otherwise
  */
 export const useShowRelatedCases = (): boolean => {
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const { cases } = useKibana().services;
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+
   return userCasesPermissions.read;
 };

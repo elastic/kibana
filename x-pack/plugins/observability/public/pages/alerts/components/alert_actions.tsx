@@ -30,12 +30,11 @@ import {
 } from '@kbn/rule-data-utils';
 import { useBulkUntrackAlerts } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '../../../utils/kibana_react';
-import { useGetUserCasesPermissions } from '../../../hooks/use_get_user_cases_permissions';
 import { isAlertDetailsEnabledPerApp } from '../../../utils/is_alert_details_enabled';
 import { parseAlert } from '../helpers/parse_alert';
 import { paths } from '../../../../common/locators/paths';
 import { RULE_DETAILS_PAGE_ID } from '../../rule_details/constants';
-import type { ObservabilityRuleTypeRegistry } from '../../..';
+import { observabilityFeatureId, ObservabilityRuleTypeRegistry } from '../../..';
 import type { ConfigSchema } from '../../../plugin';
 import type { TopAlert } from '../../../typings/alerts';
 
@@ -62,15 +61,15 @@ export function AlertActions({
 }: Props) {
   const {
     cases: {
-      helpers: { getRuleIdFromEvent },
+      helpers: { getRuleIdFromEvent, canUseCases },
       hooks: { useCasesAddToNewCaseFlyout, useCasesAddToExistingCaseModal },
     },
     http: {
       basePath: { prepend },
     },
   } = useKibana().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
   const { mutateAsync: untrackAlerts } = useBulkUntrackAlerts();
+  const userCasesPermissions = canUseCases([observabilityFeatureId]);
 
   const parseObservabilityAlert = useMemo(
     () => parseAlert(observabilityRuleTypeRegistry),

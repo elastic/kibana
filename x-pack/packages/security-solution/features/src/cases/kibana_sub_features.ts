@@ -65,7 +65,7 @@ export const getCasesSubFeaturesMap = ({
     name: i18n.translate(
       'securitySolutionPackages.features.featureRegistry.configureSubFeatureName',
       {
-        defaultMessage: 'Configure',
+        defaultMessage: 'Case Settings',
       }
     ),
     privilegeGroups: [
@@ -73,12 +73,11 @@ export const getCasesSubFeaturesMap = ({
         groupType: 'independent',
         privileges: [
           {
-            api: apiTags.delete,
             id: 'cases_configure',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.configureSubFeatureDetails',
               {
-                defaultMessage: 'Configure cases',
+                defaultMessage: 'Edit Case Settings',
               }
             ),
             includeIn: 'all',

@@ -15,7 +15,7 @@ import { APP_ID, APP_UI_ID } from '../../../../../common/constants';
 import { timelineSelectors } from '../../../store/timeline';
 import { setInsertTimeline, showTimeline } from '../../../store/timeline/actions';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
 import { getCreateCaseUrl, getCaseDetailsUrl } from '../../../../common/components/link_to';
@@ -68,7 +68,7 @@ const AddToCaseButtonComponent: React.FC<Props> = ({ timelineId }) => {
     [dispatch, graphEventId, navigateToApp, savedObjectId, timelineId, timelineTitle]
   );
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   const handleButtonClick = useCallback(() => {
     setPopover((currentIsOpen) => !currentIsOpen);

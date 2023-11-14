@@ -24,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { APP_ID } from '../../../../../common';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
@@ -35,7 +36,7 @@ import { AddToFavoritesButton } from '../../timeline/properties/helpers';
 import type { TimerangeInput } from '../../../../../common/search_strategy';
 import { AddToCaseButton } from '../add_to_case_button';
 import { AddTimelineButton } from '../add_timeline_button';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { InspectButton } from '../../../../common/components/inspect';
 import { useTimelineKpis } from '../../../containers/kpis';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
@@ -360,7 +361,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
       };
     }
   });
-  const { uiSettings } = useKibana().services;
+  const { uiSettings, cases } = useKibana().services;
   const esQueryConfig = useMemo(() => getEsQueryConfig(uiSettings), [uiSettings]);
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timeline: TimelineModel = useSelector(
@@ -408,7 +409,7 @@ const FlyoutHeaderComponent: React.FC<FlyoutHeaderProps> = ({ timelineId }) => {
     filterQuery: combinedQueries?.filterQuery ?? '',
   });
 
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
   return (
     <StyledTimelineHeader alignItems="center" gutterSize="s">
       <EuiFlexItem>

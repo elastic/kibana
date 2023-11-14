@@ -16,7 +16,7 @@ import {
   SecurityStepId,
 } from '../../../../common/components/guided_onboarding_tour/tour_config';
 import { useTourContext } from '../../../../common/components/guided_onboarding_tour';
-import { useGetUserCasesPermissions, useKibana } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import type { TimelineNonEcsData } from '../../../../../common/search_strategy';
 import { ADD_TO_EXISTING_CASE, ADD_TO_NEW_CASE } from '../translations';
 import type { AlertTableContextMenuItem } from '../types';
@@ -43,7 +43,7 @@ export const useAddToCaseActions = ({
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');
