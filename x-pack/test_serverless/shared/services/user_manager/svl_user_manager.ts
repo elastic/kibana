@@ -48,7 +48,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     'packages/kbn-es/src/serverless_resources/roles.yml'
   );
   const roles: string[] = Object.keys(loadYaml(fs.readFileSync(rolesDefinitionFilePath, 'utf8')));
-  let roleToUserMap: Map<string, User> = new Map<string, User>();
+  const roleToUserMap: Map<string, User> = new Map<string, User>();
 
   if (!isServerless) {
     throw new Error(`'svlUserManager' service can't be used in non-serverless FTR context`);
@@ -69,7 +69,6 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     for (const [roleName, user] of Object.entries(JSON.parse(data)) as Array<[string, User]>) {
       roleToUserMap.set(roleName, user);
     }
-    roleToUserMap = new Map(Object.entries(JSON.parse(data)));
   }
   // to be re-used within FTR config run
   const sessionCache = new Map<Role, Session>();
