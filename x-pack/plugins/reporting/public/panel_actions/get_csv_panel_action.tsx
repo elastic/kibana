@@ -21,7 +21,7 @@ import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { checkLicense } from '../lib/license_check';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
-import type { ReportingPublicPluginStartDendencies } from '../plugin';
+import type { ReportingPublicPluginStartDependencies } from '../plugin';
 
 function isSavedSearchEmbeddable(
   embeddable: IEmbeddable | ISearchEmbeddable
@@ -36,7 +36,7 @@ export interface ActionContext {
 interface Params {
   apiClient: ReportingAPIClient;
   core: CoreSetup;
-  startServices$: Observable<[CoreStart, ReportingPublicPluginStartDendencies, unknown]>;
+  startServices$: Observable<[CoreStart, ReportingPublicPluginStartDependencies, unknown]>;
   usesUiCapabilities: boolean;
 }
 

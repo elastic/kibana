@@ -69,7 +69,7 @@ function handleError(
   return Rx.of({ completed: [], failed: [] });
 }
 
-export interface ReportingPublicPluginSetupDendencies {
+export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
   uiActions: UiActionsSetup;
@@ -77,7 +77,7 @@ export interface ReportingPublicPluginSetupDendencies {
   share: SharePluginSetup;
 }
 
-export interface ReportingPublicPluginStartDendencies {
+export interface ReportingPublicPluginStartDependencies {
   home: HomePublicPluginStart;
   data: DataPublicPluginStart;
   management: ManagementStart;
@@ -95,8 +95,8 @@ export class ReportingPublicPlugin
     Plugin<
       ReportingSetup,
       ReportingStart,
-      ReportingPublicPluginSetupDendencies,
-      ReportingPublicPluginStartDendencies
+      ReportingPublicPluginSetupDependencies,
+      ReportingPublicPluginStartDependencies
     >
 {
   private kibanaVersion: string;
@@ -142,8 +142,8 @@ export class ReportingPublicPlugin
   }
 
   public setup(
-    core: CoreSetup<ReportingPublicPluginStartDendencies>,
-    setupDeps: ReportingPublicPluginSetupDendencies
+    core: CoreSetup<ReportingPublicPluginStartDependencies>,
+    setupDeps: ReportingPublicPluginSetupDependencies
   ) {
     const { getStartServices, uiSettings } = core;
     const { home, management, screenshotMode, share, uiActions } = setupDeps;
