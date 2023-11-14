@@ -28,6 +28,7 @@ packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
 packages/analytics/client @elastic/kibana-core
+packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
@@ -544,8 +545,8 @@ src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_ai_assistant @elastic/obs-knowledge-team
-x-pack/packages/observability/alert_details @elastic/actionable-observability
-x-pack/packages/observability/alerting_test_data @elastic/actionable-observability
+x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_log_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_onboarding @elastic/obs-ux-logs-team
@@ -789,6 +790,7 @@ packages/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
+packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -990,7 +992,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 /x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
 
-# Actionable observability
+# Observability UX management team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/test/observability_functional @elastic/obs-ux-management-team
 x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
