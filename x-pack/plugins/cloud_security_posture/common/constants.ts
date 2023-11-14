@@ -87,6 +87,7 @@ export const INTERNAL_FEATURE_FLAGS = {
 } as const;
 
 export const CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE = 'csp-rule-template';
+export const CSP_RULE_TEMPLATE_INTERNAL_SAVED_OBJECT_TYPE = 'csp-rule-template-internal';
 
 export const CLOUDBEAT_VANILLA = 'cloudbeat/cis_k8s';
 export const CLOUDBEAT_EKS = 'cloudbeat/cis_eks';
