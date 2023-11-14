@@ -101,7 +101,7 @@ export const validateFilePathInput = ({
 };
 
 export const validateWildcardInput = (value?: string): string | undefined => {
-  if (/\*|\?/.test(value ?? '')) {
+  if (/[*?]/.test(value ?? '')) {
     return WILDCARD_WARNING;
   }
 };
