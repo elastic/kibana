@@ -566,6 +566,10 @@ export type AlertsTableProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
