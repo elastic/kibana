@@ -25,10 +25,7 @@ let content: string;
 let mockPdfExportType: PdfV1ExportType;
 let stream: jest.Mocked<Writable>;
 
-const cancellationToken = {
-  on: jest.fn(),
-} as unknown as CancellationToken;
-
+const cancellationToken = new CancellationToken();
 const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'testencryptionkey';

@@ -26,10 +26,7 @@ let content: string;
 let mockPngExportType: PngExportType;
 let stream: jest.Mocked<Writable>;
 
-const cancellationToken = {
-  on: jest.fn(),
-} as unknown as CancellationToken;
-
+const cancellationToken = new CancellationToken();
 const mockLogger = loggingSystemMock.createLogger();
 
 const mockEncryptionKey = 'abcabcsecuresecret';

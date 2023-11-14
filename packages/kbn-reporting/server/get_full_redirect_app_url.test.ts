@@ -7,10 +7,10 @@
  */
 
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
-import type { ReportingConfigType } from '.';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 describe('getFullRedirectAppUrl', () => {
-  const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
+  const mockConfig = createMockConfigSchema();
   const mockServerInfo = {
     name: 'localhost',
     uuid: 'test-test-test-test',

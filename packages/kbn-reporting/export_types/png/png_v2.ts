@@ -31,7 +31,7 @@ import {
   REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { LocatorParams, TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskRunResult } from '@kbn/reporting-common/types';
 import {
   JobParamsPNGV2,
   PNG_JOB_TYPE_V2,
@@ -39,7 +39,6 @@ import {
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
 import { decryptJobHeaders, getFullRedirectAppUrl, ExportType } from '@kbn/reporting-server';
-import { SerializableRecord } from '@kbn/utility-types';
 
 import { generatePngObservable } from './generate_png';
 
@@ -69,7 +68,7 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   public createJob = async ({ locatorParams, ...jobParams }: JobParamsPNGV2) => {
     return {
       ...jobParams,
-      locatorParams: [locatorParams] as unknown as LocatorParams<SerializableRecord>,
+      locatorParams: [locatorParams],
       isDeprecated: false,
       browserTimezone: jobParams.browserTimezone,
       forceNow: new Date().toISOString(),

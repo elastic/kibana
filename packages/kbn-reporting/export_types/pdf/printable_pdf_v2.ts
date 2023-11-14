@@ -105,7 +105,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               payload.forceNow
             ),
             locator,
-          ]) as unknown as UrlOrUrlLocatorTuple[];
+          ]);
         }
 
         apmGetAssets?.end();
