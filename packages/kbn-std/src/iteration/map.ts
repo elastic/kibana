@@ -58,5 +58,8 @@ export async function asyncMapWithLimit<T1, T2>(
 
   return results
     .sort(([a], [b]) => a - b)
-    .reduce((acc: T2[], [, result]) => acc.concat(result), []);
+    .reduce((acc: T2[], [, result]) => {
+      acc.push(...result);
+      return acc;
+    }, []);
 }

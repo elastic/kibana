@@ -24,7 +24,7 @@ import {
 } from '../../../screens/timeline';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
-import { cleanKibana, deleteTimelines } from '../../../tasks/common';
+import { deleteTimelines } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import { openTimelineUsingToggle } from '../../../tasks/security_main';
@@ -72,7 +72,7 @@ describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] },
 
 describe('Timelines', (): void => {
   before(() => {
-    cleanKibana();
+    deleteTimelines();
   });
 
   describe('Toggle create timeline from plus icon', () => {
@@ -148,7 +148,8 @@ describe('Timelines', (): void => {
     }
   );
 
-  describe('shows the different timeline states', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/170691
+  describe.skip('shows the different timeline states', () => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
