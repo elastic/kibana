@@ -8,8 +8,8 @@
 import React from 'react';
 import { EuiTab, EuiTabs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MobileErrorGroupOverview } from '../error_groups';
-import { MobileCrashGroupOverview } from '../crash_groups';
+import { MobileErrorsOverview } from '../errors_overview';
+import { MobileCrashesOverview } from '../crashes_overview';
 
 export enum MobileErrorTabIds {
   ERRORS = 'errors',
@@ -60,12 +60,8 @@ export function Tabs({
     <>
       <EuiTabs>{tabEntries}</EuiTabs>
       <EuiSpacer />
-      {selectedTabId === MobileErrorTabIds.ERRORS && (
-        <MobileErrorGroupOverview />
-      )}
-      {selectedTabId === MobileErrorTabIds.CRASHES && (
-        <MobileCrashGroupOverview />
-      )}
+      {selectedTabId === MobileErrorTabIds.ERRORS && <MobileErrorsOverview />}
+      {selectedTabId === MobileErrorTabIds.CRASHES && <MobileCrashesOverview />}
     </>
   );
 }

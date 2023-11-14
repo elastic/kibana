@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import React from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,46 +14,47 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { orderBy } from 'lodash';
+import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
-import { useTimeRange } from '../../../../hooks/use_time_range';
-import { useCrashGroupDistributionFetcher } from '../../../../hooks/use_crash_group_distribution_fetcher';
-import { MobileCrashesTreemap } from '../charts/mobile_crashes_treemap';
-import { MobileCrashGroupList } from './crash_group_list';
+import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
+import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
+import { useApmParams } from '../../../../hooks/use_apm_params';
+import { useErrorGroupDistributionFetcher } from '../../../../hooks/use_error_group_distribution_fetcher';
 import {
   FETCH_STATUS,
   isPending,
   useFetcher,
 } from '../../../../hooks/use_fetcher';
+import { useTimeRange } from '../../../../hooks/use_time_range';
 import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
-import { useApmParams } from '../../../../hooks/use_apm_params';
-import { ErrorDistribution } from '../error_group_details/distribution';
-import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
+import { ErrorDistribution } from '../error_group_details/distribution';
+import { MobileErrorGroupList } from './error_group_list';
+import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
 
-type MobileCrashGroupMainStatistics =
-  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics'>;
-type MobileCrashGroupDetailedStatistics =
-  APIReturnType<'POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics'>;
+type MobileErrorGroupMainStatistics =
+  APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics'>;
+type MobileErrorGroupDetailedStatistics =
+  APIReturnType<'POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics'>;
 
 const INITIAL_STATE_MAIN_STATISTICS: {
-  mobileCrashGroupMainStatistics: MobileCrashGroupMainStatistics['errorGroups'];
+  mobileErrorGroupMainStatistics: MobileErrorGroupMainStatistics['errorGroups'];
   requestId?: string;
-  currentPageGroupIds: MobileCrashGroupMainStatistics['errorGroups'];
+  currentPageGroupIds: MobileErrorGroupMainStatistics['errorGroups'];
 } = {
-  mobileCrashGroupMainStatistics: [],
+  mobileErrorGroupMainStatistics: [],
   requestId: undefined,
   currentPageGroupIds: [],
 };
 
-const INITIAL_STATE_DETAILED_STATISTICS: MobileCrashGroupDetailedStatistics = {
+const INITIAL_STATE_DETAILED_STATISTICS: MobileErrorGroupDetailedStatistics = {
   currentPeriod: {},
   previousPeriod: {},
 };
 
-export function MobileCrashGroupOverview() {
+export function MobileErrorsOverview() {
   const { serviceName } = useApmServiceContext();
-
   const {
     query: {
       environment,
@@ -68,10 +68,10 @@ export function MobileCrashGroupOverview() {
       page = 0,
       pageSize = 25,
     },
-  } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes/');
+  } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const { crashDistributionData, status } = useCrashGroupDistributionFetcher({
+  const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
     environment,
@@ -79,15 +79,15 @@ export function MobileCrashGroupOverview() {
   });
 
   const {
-    data: crashGroupListData = INITIAL_STATE_MAIN_STATISTICS,
-    status: crashGroupListDataStatus,
+    data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
+    status: errorGroupListDataStatus,
   } = useFetcher(
     (callApmApi) => {
       const normalizedSortDirection = sortDirection === 'asc' ? 'asc' : 'desc';
 
       if (start && end) {
         return callApmApi(
-          'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics',
+          'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics',
           {
             params: {
               path: {
@@ -116,7 +116,7 @@ export function MobileCrashGroupOverview() {
           return {
             // Everytime the main statistics is refetched, updates the requestId making the comparison API to be refetched.
             requestId: uuidv4(),
-            mobileCrashGroupMainStatistics: response.errorGroups,
+            mobileErrorGroupMainStatistics: response.errorGroups,
             currentPageGroupIds,
           };
         });
@@ -134,17 +134,16 @@ export function MobileCrashGroupOverview() {
       pageSize,
     ]
   );
-
-  const { requestId, mobileCrashGroupMainStatistics, currentPageGroupIds } =
-    crashGroupListData;
+  const { requestId, mobileErrorGroupMainStatistics, currentPageGroupIds } =
+    errorGroupListData;
   const {
-    data: mobileCrashGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
-    status: mobileCrashGroupDetailedStatisticsStatus,
+    data: mobileErrorGroupDetailedStatistics = INITIAL_STATE_DETAILED_STATISTICS,
+    status: mobileErrorGroupDetailedStatisticsStatus,
   } = useFetcher(
     (callApmApi) => {
       if (requestId && currentPageGroupIds.length && start && end) {
         return callApmApi(
-          'POST /internal/apm/mobile-services/{serviceName}/crashes/groups/detailed_statistics',
+          'POST /internal/apm/mobile-services/{serviceName}/errors/groups/detailed_statistics',
           {
             params: {
               path: { serviceName },
@@ -183,27 +182,39 @@ export function MobileCrashGroupOverview() {
                   <EuiPanel hasBorder={true}>
                     <ErrorDistribution
                       fetchStatus={status}
-                      distribution={crashDistributionData}
-                      height={375}
+                      distribution={errorDistributionData}
+                      height={150}
                       title={i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.crashOccurrencesChart.title',
-                        { defaultMessage: 'Crash occurrences' }
+                        'xpack.apm.serviceDetails.metrics.errorRateChart.title',
+                        { defaultMessage: 'Error rate' }
                       )}
                       tip={i18n.translate(
-                        'xpack.apm.serviceDetails.metrics.errorOccurrencesChart.tip',
+                        'xpack.apm.serviceDetails.metrics.errorRateChart.tip',
                         {
-                          defaultMessage: `Crash occurrence is measured in crashes per minute.`,
+                          defaultMessage: `Error rate is measured in transactions per minute.`,
                         }
                       )}
                     />
                   </EuiPanel>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <HttpErrorRateChart
+                    height={150}
+                    kuery={kuery}
+                    serviceName={serviceName}
+                    comparisonEnabled={comparisonEnabled}
+                    start={start}
+                    end={end}
+                    offset={offset}
+                    environment={environment}
+                  />
                 </EuiFlexItem>
               </ChartPointerEventContextProvider>
             </EuiFlexGroup>
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiPanel hasBorder={true}>
-              <MobileCrashesTreemap
+              <MobileErrorTreemap
                 serviceName={serviceName}
                 kuery={kuery}
                 environment={environment}
@@ -221,23 +232,23 @@ export function MobileCrashGroupOverview() {
             <h3>
               {i18n.translate(
                 'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Crashes' }
+                { defaultMessage: 'Errors' }
               )}
             </h3>
           </EuiTitle>
           <EuiSpacer size="s" />
 
-          <MobileCrashGroupList
-            mainStatistics={mobileCrashGroupMainStatistics}
+          <MobileErrorGroupList
+            mainStatistics={mobileErrorGroupMainStatistics}
             serviceName={serviceName}
             detailedStatisticsLoading={isPending(
-              mobileCrashGroupDetailedStatisticsStatus
+              mobileErrorGroupDetailedStatisticsStatus
             )}
-            detailedStatistics={mobileCrashGroupDetailedStatistics}
+            detailedStatistics={mobileErrorGroupDetailedStatistics}
             comparisonEnabled={comparisonEnabled}
             initialSortField={sortField}
             initialSortDirection={sortDirection}
-            isLoading={crashGroupListDataStatus === FETCH_STATUS.LOADING}
+            isLoading={errorGroupListDataStatus === FETCH_STATUS.LOADING}
           />
         </EuiPanel>
       </EuiFlexItem>
