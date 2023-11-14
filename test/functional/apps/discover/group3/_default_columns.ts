@@ -141,5 +141,35 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.discover.waitUntilSearchingHasFinished();
       expect(await dataGrid.getHeaderFields()).to.eql(['@timestamp', 'extension', 'bytes']);
     });
+
+    it('should not change columns if discover:modifyColumnsOnSwitch is off', async function () {
+      await kibanaServer.uiSettings.update({
+        'discover:modifyColumnsOnSwitch': false,
+      });
+      await PageObjects.common.navigateToApp('discover');
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+
+      expect(await dataGrid.getHeaderFields()).to.eql([
+        '@timestamp',
+        'message',
+        'extension',
+        'DestCountry',
+      ]);
+
+      await PageObjects.unifiedSearch.switchDataView(
+        'discover-dataView-switch-link',
+        'kibana_sample_data_flights',
+        false
+      );
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      await PageObjects.discover.expandTimeRangeAsSuggestedInNoResultsMessage();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
+      expect(await dataGrid.getHeaderFields()).to.eql([
+        'timestamp',
+        'message',
+        'extension',
+        'DestCountry',
+      ]);
+    });
   });
 }
