@@ -138,8 +138,7 @@ export class APMPlugin
       })
       .catch((e) => {
         this.logger?.error(
-          'Failed to make APM data view available globally',
-          e
+          `Failed to make APM data view available globally: ${e?.message}`
         );
       });
 

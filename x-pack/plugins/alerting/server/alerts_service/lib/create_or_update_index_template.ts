@@ -123,8 +123,7 @@ export const createOrUpdateIndexTemplate = async ({
     mappings = simulateResponse.template.mappings;
   } catch (err) {
     logger.error(
-      `Failed to simulate index template mappings for ${template.name}; not applying mappings - ${err.message}`,
-      err
+      `Failed to simulate index template mappings for ${template.name}; not applying mappings - ${err.message}`
     );
     return;
   }
@@ -140,7 +139,7 @@ export const createOrUpdateIndexTemplate = async ({
       logger,
     });
   } catch (err) {
-    logger.error(`Error installing index template ${template.name} - ${err.message}`, err);
+    logger.error(`Error installing index template ${template.name} - ${err.message}`);
     throw err;
   }
 };

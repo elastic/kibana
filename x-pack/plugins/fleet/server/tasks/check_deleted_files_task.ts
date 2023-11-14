@@ -86,7 +86,7 @@ export class CheckDeletedFilesTask {
         params: { version: VERSION },
       });
     } catch (e) {
-      this.logger.error(`Error scheduling task, received error: ${e.message}`, e);
+      this.logger.error(`Error scheduling task, received error: ${e.message}`);
     }
   };
 

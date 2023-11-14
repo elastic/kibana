@@ -315,7 +315,7 @@ export class MlServerPlugin
         try {
           await this.savedObjectsSyncService.unscheduleSyncTask(plugins.taskManager);
         } catch (e) {
-          this.log.debug(`Error unscheduling saved objects sync task`, e);
+          this.log.debug(`Error unscheduling saved objects sync task: ${e?.message}`);
         }
         return;
       }
