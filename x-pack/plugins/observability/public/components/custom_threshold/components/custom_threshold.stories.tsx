@@ -34,7 +34,7 @@ const defaultProps: Props = {
   chartProps: { theme: EUI_CHARTS_THEME_LIGHT.theme, baseTheme: LIGHT_THEME },
   comparator: Comparator.GT,
   id: 'componentId',
-  threshold: 90,
+  threshold: [90],
   title: 'Threshold breached',
   value: 93,
   valueFormatter: (d) => `${d}%`,
