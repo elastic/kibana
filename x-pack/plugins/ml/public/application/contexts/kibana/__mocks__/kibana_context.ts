@@ -12,19 +12,6 @@ import { mlApiServicesMock } from '../../../services/__mocks__/ml_api_services';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
 export const chartsServiceMock = {
-  theme: {
-    useChartsTheme: jest.fn(() => {
-      return {
-        crosshair: {
-          line: {
-            stroke: 'black',
-            strokeWidth: 1,
-            dash: [4, 4],
-          },
-        },
-      };
-    }),
-  },
   activeCursor: {
     activeCursor$: new BehaviorSubject({
       cursor: {

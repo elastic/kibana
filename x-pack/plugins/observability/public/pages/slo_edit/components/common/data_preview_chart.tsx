@@ -70,7 +70,6 @@ export function DataPreviewChart({
     isError,
   } = useDebouncedGetPreviewData(isIndicatorSectionValid, watch('indicator'));
 
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const dateFormat = uiSettings.get('dateFormat');
   const numberFormat =
@@ -189,7 +188,6 @@ export function DataPreviewChart({
                 showLegend={false}
                 theme={[
                   {
-                    ...theme,
                     lineSeriesStyle: {
                       point: { visible: false },
                     },

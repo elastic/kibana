@@ -82,7 +82,6 @@ function InternalAlertsPage() {
     }
   };
   const chartProps = {
-    theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
     onBrushEnd,
   };

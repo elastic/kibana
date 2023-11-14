@@ -97,7 +97,6 @@ const MemoAlertSummaryWidget = React.memo(
     const { getAlertSummaryWidget: AlertSummaryWidget } = triggersActionsUi;
 
     const chartProps = {
-      theme: charts.theme.useChartsTheme(),
       baseTheme: charts.theme.useChartsBaseTheme(),
     };
 

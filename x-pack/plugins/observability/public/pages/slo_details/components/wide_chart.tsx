@@ -40,7 +40,6 @@ export interface Props {
 
 export function WideChart({ chart, data, id, isLoading, state }: Props) {
   const { charts, uiSettings } = useKibana().services;
-  const theme = charts.theme.useChartsTheme();
   const baseTheme = charts.theme.useChartsBaseTheme();
   const { euiTheme } = useEuiTheme();
   const dateFormat = uiSettings.get('dateFormat');
@@ -64,7 +63,6 @@ export function WideChart({ chart, data, id, isLoading, state }: Props) {
       <Settings
         baseTheme={baseTheme}
         showLegend={false}
-        theme={[theme]}
         noResults={<EuiIcon type="visualizeApp" size="l" color="subdued" title="no results" />}
         onPointerUpdate={handleCursorUpdate}
         externalPointerEvents={{
