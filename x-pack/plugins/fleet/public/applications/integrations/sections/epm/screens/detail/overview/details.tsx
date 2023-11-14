@@ -179,6 +179,45 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
       ),
     });
 
+    let ownerTypeDescription: React.ReactNode;
+    switch (packageInfo.owner.type) {
+      case 'community':
+        ownerTypeDescription = (
+          <FormattedMessage
+            id="xpack.fleet.epm.ownerTypeCommunityDescription"
+            defaultMessage="Community"
+          />
+        );
+        break;
+      case 'partner':
+        ownerTypeDescription = (
+          <FormattedMessage
+            id="xpack.fleet.epm.ownerTypePartnerDescription"
+            defaultMessage="Partner"
+          />
+        );
+        break;
+      case 'elastic':
+        ownerTypeDescription = (
+          <FormattedMessage
+            id="xpack.fleet.epm.ownerTypeElasticDescription"
+            defaultMessage="Elastic"
+          />
+        );
+        break;
+    }
+
+    if (ownerTypeDescription) {
+      items.push({
+        title: (
+          <EuiTextColor color="subdued">
+            <FormattedMessage id="xpack.fleet.epm.ownerTypeLabel" defaultMessage="Developed by" />
+          </EuiTextColor>
+        ),
+        description: ownerTypeDescription,
+      });
+    }
+
     // License details
     if (packageInfo.licensePath || packageInfo.source?.license || packageInfo.notice) {
       items.push({
