@@ -19,7 +19,7 @@ import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 import { RouteValidator, RouteValidatorFullConfig } from './validator';
-import { patchRequest } from './patch_requests';
+import { patchRequest } from './patch_request';
 
 // patching at module load
 patchRequest();
