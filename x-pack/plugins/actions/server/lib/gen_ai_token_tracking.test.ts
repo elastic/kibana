@@ -9,19 +9,16 @@ import { getGenAiTokenTracking } from './gen_ai_token_tracking';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import { IncomingMessage } from 'http';
 import { Socket } from 'net';
 
 jest.mock('./get_token_count_from_bedrock_invoke');
-jest.mock('./get_token_count_from_openai_stream');
 jest.mock('./get_token_count_from_invoke_stream');
 
 const logger = loggerMock.create();
 
 describe('getGenAiTokenTracking', () => {
   let mockGetTokenCountFromBedrockInvoke: jest.Mock;
-  let mockGetTokenCountFromOpenAIStream: jest.Mock;
   let mockGetTokenCountFromInvokeStream: jest.Mock;
   beforeEach(() => {
     mockGetTokenCountFromBedrockInvoke = (
@@ -33,13 +30,6 @@ describe('getGenAiTokenTracking', () => {
     });
     mockGetTokenCountFromInvokeStream = (
       getTokenCountFromInvokeStream as jest.Mock
-    ).mockResolvedValueOnce({
-      total: 100,
-      prompt: 50,
-      completion: 50,
-    });
-    mockGetTokenCountFromOpenAIStream = (
-      getTokenCountFromOpenAIStream as jest.Mock
     ).mockResolvedValueOnce({
       total: 100,
       prompt: 50,

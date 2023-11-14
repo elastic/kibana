@@ -22,9 +22,6 @@ import {
 } from '../../../common/bedrock/constants';
 import { DEFAULT_BODY } from '../../../public/connector_types/bedrock/constants';
 import { AxiosError } from 'axios';
-import { IncomingMessage } from 'http';
-import { Socket } from 'net';
-import { PassThrough } from 'stream';
 
 // @ts-ignore
 const mockSigner = jest.spyOn(aws, 'sign').mockReturnValue({ signed: true });
@@ -104,56 +101,6 @@ describe('BedrockConnector', () => {
       });
     });
 
-    describe('streamApi', () => {
-      const mockStream = new IncomingMessage(new Socket());
-      beforeEach(() => {
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: mockStream });
-        // @ts-ignore
-        connector.request = mockRequest;
-      });
-
-      it('the aws signature has streaming headers', async () => {
-        await connector.streamApi({ body: DEFAULT_BODY });
-
-        expect(mockSigner).toHaveBeenCalledWith(
-          {
-            body: '{"prompt":"\\n\\nHuman: Hello world! \\n\\nAssistant:","max_tokens_to_sample":8191,"stop_sequences":["\\n\\nHuman:"]}',
-            headers: {
-              accept: 'application/vnd.amazon.eventstream',
-              'Content-Type': 'application/json',
-              'x-amzn-bedrock-accept': '*/*',
-            },
-            host: 'bedrock.us-east-1.amazonaws.com',
-            path: '/model/anthropic.claude-v2/invoke-with-response-stream',
-            service: 'bedrock',
-          },
-          { accessKeyId: '123', secretAccessKey: 'secret' }
-        );
-      });
-      it('the Bedrock API call is successful with correct parameters', async () => {
-        const response = await connector.streamApi({ body: DEFAULT_BODY });
-        expect(mockRequest).toBeCalledTimes(1);
-        expect(mockRequest).toHaveBeenCalledWith({
-          signed: true,
-          url: `${DEFAULT_BEDROCK_URL}/model/${DEFAULT_BEDROCK_MODEL}/invoke-with-response-stream`,
-          method: 'post',
-          responseSchema: StreamingResponseSchema,
-          data: DEFAULT_BODY,
-          responseType: 'stream',
-        });
-        expect(JSON.stringify(response)).toStrictEqual(
-          JSON.stringify(mockStream.pipe(new PassThrough()))
-        );
-      });
-
-      it('errors during API calls are properly handled', async () => {
-        // @ts-ignore
-        connector.request = mockError;
-
-        await expect(connector.streamApi({ body: DEFAULT_BODY })).rejects.toThrow('API Error');
-      });
-    });
-
     describe('invokeStream', () => {
       let stream;
       beforeEach(() => {
@@ -172,6 +119,30 @@ describe('BedrockConnector', () => {
           },
         ],
       };
+
+      it('the aws signature has streaming headers', async () => {
+        await connector.invokeStream(aiAssistantBody);
+
+        expect(mockSigner).toHaveBeenCalledWith(
+          {
+            body: JSON.stringify({
+              prompt: '\n\nHuman:Hello world \n\nAssistant:',
+              max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+              temperature: 0.5,
+              stop_sequences: ['\n\nHuman:'],
+            }),
+            headers: {
+              accept: 'application/vnd.amazon.eventstream',
+              'Content-Type': 'application/json',
+              'x-amzn-bedrock-accept': '*/*',
+            },
+            host: 'bedrock.us-east-1.amazonaws.com',
+            path: '/model/anthropic.claude-v2/invoke-with-response-stream',
+            service: 'bedrock',
+          },
+          { accessKeyId: '123', secretAccessKey: 'secret' }
+        );
+      });
 
       it('the API call is successful with correct request parameters', async () => {
         await connector.invokeStream(aiAssistantBody);

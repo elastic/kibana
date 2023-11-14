@@ -41,7 +41,6 @@ export const InvokeAIActionResponseSchema = schema.object({
 export const StreamActionParamsSchema = schema.object({
   body: schema.string(),
   model: schema.maybe(schema.string()),
-  stream: schema.maybe(schema.boolean()),
 });
 
 export const RunActionResponseSchema = schema.object(

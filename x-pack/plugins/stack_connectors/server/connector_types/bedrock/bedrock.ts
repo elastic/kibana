@@ -16,7 +16,6 @@ import {
   RunActionParamsSchema,
   RunActionResponseSchema,
   InvokeAIActionParamsSchema,
-  StreamActionParamsSchema,
   StreamingResponseSchema,
 } from '../../../common/bedrock/schema';
 import type {
@@ -63,13 +62,6 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
       method: 'runApi',
       schema: RunActionParamsSchema,
     });
-
-    this.registerSubAction({
-      name: SUB_ACTION.STREAM,
-      method: 'streamApi',
-      schema: StreamActionParamsSchema,
-    });
-
     this.registerSubAction({
       name: SUB_ACTION.INVOKE_AI,
       method: 'invokeAI',
@@ -151,14 +143,14 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
+   *  NOT INTENDED TO BE CALLED DIRECTLY
+   *  call invokeStream instead
    *  responsible for making a POST request to a specified URL with a given request body.
-   *  The method can handle both regular API requests and streaming requests based on the stream parameter.
-   *  It uses helper functions getRequestWithStreamOption and getAxiosOptions to prepare the request body and headers respectively.
    *  The response is then processed based on whether it is a streaming response or a regular response.
-   * @param body request body for the API request
-   * @param stream flag indicating whether it is a streaming request or not
+   * @param body The stringified request body to be sent in the POST request.
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
    */
-  public async streamApi({
+  private async streamApi({
     body,
     model: reqModel,
   }: StreamActionParams): Promise<StreamingResponse> {
@@ -179,16 +171,20 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     return response.data.pipe(new PassThrough());
   }
 
-  public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
-    try {
-      const res = (await this.streamApi({
-        body: JSON.stringify(formatBedrockBody(body)),
-        stream: true,
-      })) as unknown as IncomingMessage;
-      return res.pipe(transformToString());
-    } catch (e) {
-      console.log('INVOKE STREAM ERfROR?!', e);
-    }
+  /**
+   *  takes in an array of messages and a model as inputs. It calls the streamApi method to make a
+   *  request to the Bedrock API with the formatted messages and model. It then returns a Transform stream
+   *  that pipes the response from the API through the transformToString function,
+   *  which parses the proprietary response into a string of the response text alone
+   * @param messages An array of messages to be sent to the API
+   * @param model Optional model to be used for the API request. If not provided, the default model from the connector will be used.
+   */
+  public async invokeStream({ messages, model }: InvokeAIActionParams): Promise<Transform> {
+    const res = (await this.streamApi({
+      body: JSON.stringify(formatBedrockBody({ messages })),
+      model,
+    })) as unknown as IncomingMessage;
+    return res.pipe(transformToString());
   }
 
   /**
