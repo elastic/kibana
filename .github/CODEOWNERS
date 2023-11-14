@@ -28,6 +28,7 @@ packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
 packages/analytics/client @elastic/kibana-core
+packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
@@ -314,6 +315,7 @@ src/plugins/data_view_field_editor @elastic/kibana-data-discovery
 src/plugins/data_view_management @elastic/kibana-data-discovery
 src/plugins/data_views @elastic/kibana-data-discovery
 x-pack/plugins/data_visualizer @elastic/ml-ui
+x-pack/plugins/dataset_quality @elastic/obs-ux-logs-team
 packages/kbn-datemath @elastic/kibana-data-discovery
 packages/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 packages/deeplinks/devtools @elastic/platform-deployment-management
@@ -788,6 +790,7 @@ packages/kbn-unified-field-list @elastic/kibana-data-discovery
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 src/plugins/unified_histogram @elastic/kibana-data-discovery
 src/plugins/unified_search @elastic/kibana-visualizations
+packages/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 x-pack/plugins/upgrade_assistant @elastic/platform-deployment-management
 x-pack/plugins/uptime @elastic/obs-ux-infra_services-team
 x-pack/plugins/drilldowns/url_drilldown @elastic/appex-sharedux
@@ -1370,6 +1373,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
+/x-pack/plugins/security_solution/server/lib/detection_engine/scripts/roles_users @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
 /x-pack/plugins/security_solution/public/common/components/threat_match @elastic/security-detection-engine
