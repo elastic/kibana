@@ -10,40 +10,42 @@ import {
   LogExplorerControllerContext,
 } from '@kbn/log-explorer-plugin/public';
 import { QueryState } from '@kbn/data-plugin/common';
-import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
-import { UrlSchema } from './url_state_storage_service';
+// import { DatasetSelectionPlain } from '@kbn/log-explorer-plugin/common';
+import {
+  LogExplorerPublicState,
+  LogExplorerPublicStateUpdate,
+} from '@kbn/log-explorer-plugin/public/controller';
+// import { UrlSchema } from './url_state_storage_service';
 
 export type ObservabilityLogExplorerContext = ObservabilityLogExplorerTypeState['context'];
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface DefaultObservabilityLogExplorerContext {}
+interface CommonObservabilityLogExplorerContext {}
+
+interface WithInitialState {
+  initialLogExplorerState: LogExplorerPublicStateUpdate;
+}
+
+interface WithLogExplorerState {
+  logExplorerState: LogExplorerPublicState;
+}
 
 interface WithController {
   controller: LogExplorerController;
 }
 
-interface WithLogExplorerState {
-  logExplorerState: LogExplorerControllerContext;
-}
-
-interface WithTimeFilter {
-  time: QueryState['time'];
-  refreshInterval: QueryState['refreshInterval'];
-}
-
-interface WithInitialState {
-  initialControllerState: Omit<UrlSchema, 'datasetSelection'> &
-    WithDecodedDatasetSelection &
-    WithTimeFilter;
-}
-interface WithDecodedDatasetSelection {
-  datasetSelection?: DatasetSelectionPlain;
-}
+//   initialControllerState: Omit<UrlSchema, 'datasetSelection'> &
+//     WithDecodedDatasetSelection &
+//     WithTimeFilter;
+// interface WithDecodedDatasetSelection {
+//   datasetSelection?: DatasetSelectionPlain;
+// }
 
 export type ObservabilityLogExplorerEvent =
   | {
       type: 'INITIALIZED_FROM_URL';
-      stateFromUrl?: Omit<UrlSchema, 'datasetSelection'> & WithDecodedDatasetSelection;
+      // stateFromUrl?: Omit<UrlSchema, 'datasetSelection'> & WithDecodedDatasetSelection;
+      stateFromUrl?: {};
     }
   | {
       type: 'INITIALIZED_FROM_TIME_FILTER_SERVICE';
@@ -62,9 +64,13 @@ export type ObservabilityLogExplorerEvent =
 export type ObservabilityLogExplorerTypeState =
   | {
       value: 'uninitialized';
-      context: DefaultObservabilityLogExplorerContext;
+      context: CommonObservabilityLogExplorerContext;
+    }
+  | {
+      value: 'initializingFromUrl' | 'initializingFromTimeFilterService' | 'creatingController';
+      context: CommonObservabilityLogExplorerContext & WithInitialState;
     }
   | {
       value: 'initialized';
-      context: WithInitialState & WithController;
+      context: WithLogExplorerState & WithController;
     };

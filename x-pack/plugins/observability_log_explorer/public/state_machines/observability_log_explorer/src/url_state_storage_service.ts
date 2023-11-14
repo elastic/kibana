@@ -32,7 +32,8 @@ export const updateUrlFromLogExplorerState =
       filters: event.state?.filters,
       time: event.state?.time,
       refreshInterval: event.state?.refreshInterval,
-      columns: event.state?.columns,
+      columns: event.state?.grid.columns,
+      // TODO: add other properties
       datasetSelection: event.state?.datasetSelection,
       controlPanels: event.state?.controlPanels
         ? cleanControlPanels(event.state.controlPanels)

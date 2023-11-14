@@ -7,12 +7,12 @@
 
 import { EuiHeaderLink } from '@elastic/eui';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
-import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
+import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
 import { discoverLinkTitle } from '../../common/translations';
 import {
-  ObservabilityLogExplorerContext,
+  ObservabilityLogExplorerService,
   useObservabilityLogExplorerPageStateContext,
 } from '../state_machines/observability_log_explorer/src';
 import { getRouterLinkProps } from '../utils/get_router_link_props';
@@ -34,21 +34,17 @@ export const ConnectedDiscoverLink = React.memo(() => {
   }
 });
 
+type InitializedPageState = MatchedStateFromActor<ObservabilityLogExplorerService, 'initialized'>;
+
 export const DiscoverLink = React.memo(
-  ({
-    discover,
-    pageState,
-  }: {
-    discover: DiscoverStart;
-    pageState: ObservabilityLogExplorerContext;
-  }) => {
+  ({ discover, pageState }: { discover: DiscoverStart; pageState: InitializedPageState }) => {
     const discoverLinkParams = useMemo(
       () => ({
-        columns:
-          logExplorerState != null ? getDiscoverColumnsFromDisplayOptions(pageState) : undefined,
+        // columns:
+        //   logExplorerState != null ? getDiscoverColumnsFromDisplayOptions(pageState) : undefined,
         // filters: appState?.filters,
         // query: appState?.query,
-        dataViewSpec: pageState.datasetSelection?.selection.dataset.toDataviewSpec(),
+        // dataViewSpec: pageState.datasetSelection?.selection.dataset.toDataviewSpec(),
       }),
       [pageState]
     );

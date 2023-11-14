@@ -46,7 +46,7 @@ export const createPureObservabilityLogExplorerStateMachine = (
           on: {
             INITIALIZED_FROM_TIME_FILTER_SERVICE: {
               target: 'initializingFromUrl',
-              actions: ['storeTimeFilter'],
+              actions: ['storeInitialTimeFilter'],
             },
           },
         },
@@ -57,7 +57,7 @@ export const createPureObservabilityLogExplorerStateMachine = (
           on: {
             INITIALIZED_FROM_URL: {
               target: '#creatingController',
-              actions: ['storeUrlState'],
+              actions: ['storeInitialUrlState'],
             },
           },
         },
@@ -92,23 +92,23 @@ export const createPureObservabilityLogExplorerStateMachine = (
             ? { controller: event.controller }
             : {};
         }),
-        storeTimeFilter: actions.assign((context, event) => {
+        storeInitialTimeFilter: actions.assign((context, event) => {
           return 'time' in event &&
             'refreshInterval' in event &&
             event.type === 'INITIALIZED_FROM_TIME_FILTER_SERVICE'
             ? {
-                initialControllerState: {
-                  ...('initialControllerState' in context ? context.initialControllerState : {}),
+                initialLogExplorerState: {
+                  ...('initialLogExplorerState' in context ? context.initialLogExplorerState : {}),
                   ...{ time: event.time, refreshInterval: event.refreshInterval },
                 },
               }
             : {};
         }),
-        storeUrlState: actions.assign((context, event) => {
+        storeInitialUrlState: actions.assign((context, event) => {
           return 'stateFromUrl' in event && event.type === 'INITIALIZED_FROM_URL'
             ? {
-                initialControllerState: {
-                  ...('initialControllerState' in context ? context.initialControllerState : {}),
+                initialLogExplorerState: {
+                  ...('initialLogExplorerState' in context ? context.initialLogExplorerState : {}),
                   ...event.stateFromUrl,
                 },
               }
@@ -156,3 +156,5 @@ export const createObservabilityLogExplorerStateMachine = ({
 export type ObservabilityLogExplorerService = InterpreterFrom<
   typeof createObservabilityLogExplorerStateMachine
 >;
+
+// export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;
