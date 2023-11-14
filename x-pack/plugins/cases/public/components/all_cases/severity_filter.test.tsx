@@ -49,7 +49,7 @@ describe('Severity form field', () => {
     userEvent.click(screen.getByRole('option', { name: 'high' }));
 
     await waitFor(() => {
-      expect(onChange).toHaveBeenCalledWith({ filterId: 'severity', options: ['high'] });
+      expect(onChange).toHaveBeenCalledWith({ filterId: 'severity', selectedOptionKeys: ['high'] });
     });
   });
 });
