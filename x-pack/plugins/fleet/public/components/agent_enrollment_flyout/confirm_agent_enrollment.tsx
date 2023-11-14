@@ -25,7 +25,7 @@ interface Props {
   onClickViewAgents?: () => void;
   agentCount: number;
   showLoading?: boolean;
-  isCsp?: boolean;
+  isLongEnrollment?: boolean;
 }
 
 interface UsePollingAgentCountOptions {
@@ -98,7 +98,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
   onClickViewAgents,
   agentCount,
   showLoading = false,
-  isCsp = false,
+  isLongEnrollment = false,
 }) => {
   const { getHref } = useLink();
   const { application } = useStartServices();
@@ -141,7 +141,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           color="primary"
           iconType={EuiLoadingSpinner}
           title={
-            isCsp ? (
+            isLongEnrollment ? (
               <FormattedMessage
                 id="xpack.fleet.agentEnrollment.loading.listeningcsp"
                 defaultMessage="Listening for agent... this can take several minutes"

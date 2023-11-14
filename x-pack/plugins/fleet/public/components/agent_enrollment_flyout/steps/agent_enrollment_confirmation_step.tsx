@@ -46,7 +46,7 @@ export const AgentEnrollmentConfirmationStep = ({
   agentCount,
   showLoading,
   poll = true,
-  isCsp = false,
+  isLongEnrollment = false,
 }: {
   selectedPolicyId?: string;
   troubleshootLink: string;
@@ -54,7 +54,7 @@ export const AgentEnrollmentConfirmationStep = ({
   agentCount: number;
   poll?: boolean;
   showLoading?: boolean;
-  isCsp?: boolean;
+  isLongEnrollment?: boolean;
 }): EuiContainedStepProps => {
   const isComplete = !!agentCount;
   return {
@@ -73,7 +73,7 @@ export const AgentEnrollmentConfirmationStep = ({
           onClickViewAgents={onClickViewAgents}
           agentCount={agentCount}
           showLoading={!isComplete || showLoading}
-          isCsp={isCsp}
+          isLongEnrollment={isLongEnrollment}
         />
       ) : (
         <AgentEnrollmentPrePollInstructions troubleshootLink={troubleshootLink} />
