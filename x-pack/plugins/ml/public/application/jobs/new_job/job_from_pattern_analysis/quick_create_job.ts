@@ -158,11 +158,16 @@ export class QuickCategorizationJobCreator extends QuickJobCreatorBase {
         {
           function: categorizationType,
           by_field_name: MLCATEGORY,
-          ...(partitionField ? { partition_field_name: partitionField.name } : {}),
         },
       ],
       bucket_span: bucketSpan,
     };
+
+    if (partitionField !== null) {
+      jobConfig.analysis_config.detectors[0].partition_field_name = partitionField.name;
+      jobConfig.analysis_config.influencers!.push(partitionField.name);
+    }
+
     jobConfig.data_description.time_field = dataView.timeFieldName;
 
     let start: number | undefined;

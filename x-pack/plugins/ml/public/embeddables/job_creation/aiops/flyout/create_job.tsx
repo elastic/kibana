@@ -220,7 +220,12 @@ export const CreateJob: FC<Props> = ({ dataView, field, query, timeRange }) => {
 
             <EuiCallOut
               size="s"
-              title="Determine categories independently for each value of the partition field."
+              title={
+                <FormattedMessage
+                  id="xpack.ml.newJobFromPatternAnalysisFlyout.categorizationPerPartitionField.infoCallout"
+                  defaultMessage="Determine categories independently for each value of the partition field."
+                />
+              }
             />
 
             <EuiSpacer size="m" />
