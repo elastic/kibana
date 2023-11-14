@@ -41,7 +41,7 @@ export const AlertSummaryWidgetFullSize = ({
   hideChart,
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
-    theme,
+    ...(theme ? [theme] : []),
     {
       chartPaddings: {
         top: 7,
