@@ -13,8 +13,8 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./index_lifecycle_management'));
     loadTestFile(require.resolve('./ml'));
     loadTestFile(require.resolve('./ml_anomaly_detection'));
-    loadTestFile(require.resolve('./ml_embeddables_in_dashboard'));
     loadTestFile(require.resolve('./transform'));
     loadTestFile(require.resolve('./lens'));
+    loadTestFile(require.resolve('./ml_embeddables_in_dashboard'));
   });
 };

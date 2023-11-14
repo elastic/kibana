@@ -25,11 +25,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     after(async () => {
-      await PageObjects.common.navigateToApp('visualize');
-      await listingTable.searchForItemWithName(lensChartName);
-      await listingTable.checkListingSelectAllCheckbox();
-      await listingTable.clickDeleteSelected();
-      await PageObjects.common.clickConfirmOnModal();
       await esArchiver.unload('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -173,6 +168,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('saves lens chart', async () => {
       await PageObjects.lens.save(lensChartName);
       await a11y.testAppSnapshot();
+      // delete newly created Lens
+      await PageObjects.common.navigateToApp('visualize');
+      await listingTable.searchForItemWithName(lensChartName);
+      await listingTable.checkListingSelectAllCheckbox();
+      await listingTable.clickDeleteSelected();
+      await PageObjects.common.clickConfirmOnModal();
     });
   });
 }
