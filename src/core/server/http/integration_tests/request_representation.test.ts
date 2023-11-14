@@ -18,7 +18,8 @@ import { contextServiceMock } from '../../context/context_service.mock';
 import { executionContextServiceMock } from '../../execution_context/execution_context_service.mock';
 import { loggingSystemMock } from '../../logging/logging_system.mock';
 import { createHttpServer } from '../test_utils';
-import { schema } from '@kbn/config-schema';
+import { inspect } from 'util';
+import { ensureRawRequest } from '../router/request';
 
 let server: HttpService;
 
