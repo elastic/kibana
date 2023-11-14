@@ -24,6 +24,7 @@ import { History as History_2 } from 'history';
 import { Href } from 'history';
 import { IconType } from '@elastic/eui';
 import { IncomingHttpHeaders } from 'http';
+import { inspect } from 'util';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Location as Location_2 } from 'history';
 import { LocationDescriptorObject } from 'history';
@@ -1758,7 +1759,7 @@ export interface UserProvidedValues<T = any> {
 
 // Warnings were encountered during analysis:
 //
-// bazel-kibana/packages/kbn-config-schema/src/byte_size_value/index.ts:1:1 - (ae-wrong-input-file-type) Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. Troubleshooting tips: https://api-extractor.com/link/dts-error
+// bazel-kibana-2/packages/kbn-config-schema/src/byte_size_value/index.ts:1:1 - (ae-wrong-input-file-type) Incorrect file type; API Extractor expects to analyze compiler outputs with the .d.ts file extension. Troubleshooting tips: https://api-extractor.com/link/dts-error
 // src/core/public/core_system.ts:168:21 - (ae-forgotten-export) The symbol "InternalApplicationStart" needs to be exported by the entry point index.d.ts
 
 ```

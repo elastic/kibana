@@ -36,3 +36,11 @@ export declare class KibanaRequest<Params = unknown, Query = unknown, Body = unk
 |  [url](./kibana-plugin-core-server.kibanarequest.url.md) | <code>readonly</code> | URL | a WHATWG URL standard object. |
 |  [uuid](./kibana-plugin-core-server.kibanarequest.uuid.md) | <code>readonly</code> | string | A UUID to identify this request. |
 
+## Methods
+
+|  Method | Modifiers | Description |
+|  --- | --- | --- |
+|  [\[inspect.custom\]()](./kibana-plugin-core-server.kibanarequest._inspect.custom_.md) |  |  |
+|  [toJSON()](./kibana-plugin-core-server.kibanarequest.tojson.md) |  |  |
+|  [toString()](./kibana-plugin-core-server.kibanarequest.tostring.md) |  |  |
+
