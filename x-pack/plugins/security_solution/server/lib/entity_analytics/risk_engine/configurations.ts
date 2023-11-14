@@ -7,7 +7,7 @@
 import type { FieldMap } from '@kbn/alerts-as-data-utils';
 import type { IdentifierType } from '../../../../common/risk_engine';
 import { RiskScoreEntity, riskScoreBaseIndexName } from '../../../../common/risk_engine';
-import type { IIndexPatternString } from './utils/create_datastream';
+import type { IIndexPatternString } from '../utils/create_datastream';
 
 const commonRiskFields: FieldMap = {
   id_field: {

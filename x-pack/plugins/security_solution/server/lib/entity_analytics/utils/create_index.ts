@@ -10,6 +10,7 @@ import type {
   IndicesCreateRequest,
   IndicesCreateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
+import { updateIndexMappings } from './update_mappings';
 
 export const createIndex = async ({
   esClient,
@@ -25,11 +26,19 @@ export const createIndex = async ({
       index: options.index,
     });
     if (isIndexExist) {
+      const response = await esClient.indices.get({
+        index: options.index,
+      });
+      const indices = Object.keys(response?.indicies ?? {});
+      await updateIndexMappings({
+        esClient,
+        logger,
+        indices,
+      });
       logger.info(`${options.index} already exist`);
-      return;
+    } else {
+      return esClient.indices.create(options);
     }
-
-    return esClient.indices.create(options);
   } catch (err) {
     const error = transformError(err);
     const fullErrorMessage = `Failed to create index: ${options.index}: ${error.message}`;

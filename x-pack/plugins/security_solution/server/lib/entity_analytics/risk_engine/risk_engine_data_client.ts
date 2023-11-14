@@ -23,7 +23,7 @@ import {
   mappingComponentName,
   getTransformOptions,
 } from './configurations';
-import { createDataStream } from './utils/create_datastream';
+import { createDataStream } from '../utils/create_datastream';
 import type { RiskEngineDataWriter as Writer } from './risk_engine_data_writer';
 import { RiskEngineDataWriter } from './risk_engine_data_writer';
 import type { InitRiskEngineResult } from '../../../../common/risk_engine';
@@ -47,12 +47,15 @@ import {
 } from './utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { removeRiskScoringTask, startRiskScoringTask } from './tasks';
-import { createIndex } from './utils/create_index';
+import { createIndex } from '../utils/create_index';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
+import type { AssetCriticalityDataClient } from '../asset_criticality/asset_criticality_data_client';
 
 interface InitOpts {
   namespace: string;
   taskManager: TaskManagerStartContract;
+  assetCriticalityDataClient: AssetCriticalityDataClient;
+  isAssetCriticalityEnabled: boolean;
 }
 
 interface InitializeRiskEngineResourcesOpts {
@@ -71,12 +74,18 @@ export class RiskEngineDataClient {
   private writerCache: Map<string, Writer> = new Map();
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({ namespace, taskManager }: InitOpts) {
+  public async init({
+    namespace,
+    taskManager,
+    assetCriticalityDataClient,
+    isAssetCriticalityEnabled,
+  }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
       riskEngineConfigurationCreated: false,
       riskEngineEnabled: false,
+      assetCriticalityInstalled: false,
       errors: [] as string[],
     };
 
@@ -95,6 +104,16 @@ export class RiskEngineDataClient {
       return result;
     }
 
+    if (isAssetCriticalityEnabled) {
+      try {
+        await assetCriticalityDataClient.init();
+        result.assetCriticalityInstalled = true;
+      } catch (e) {
+        result.errors.push(e.message);
+        return result;
+      }
+    }
+
     try {
       await initSavedObjects({
         savedObjectsClient: this.options.soClient,
@@ -106,6 +125,7 @@ export class RiskEngineDataClient {
       return result;
     }
 
+    // should be the last step, after all resources are installed
     try {
       await this.enableRiskEngine({ taskManager });
       result.riskEngineEnabled = true;

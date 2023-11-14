@@ -18,10 +18,11 @@ import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
 import { RiskEngineDataClient } from './risk_engine_data_client';
 import type { RiskEngineConfiguration } from './types';
-import { createDataStream } from './utils/create_datastream';
+import { createDataStream } from '../utils/create_datastream';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from './utils/transforms';
-import { createIndex } from './utils/create_index';
+import { createIndex } from '../utils/create_index';
+import { assetCriticalityDataClientMock } from '../asset_criticality/asset_criticality_data_client.mock';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,
@@ -63,7 +64,7 @@ jest.mock('@kbn/alerting-plugin/server', () => ({
   createOrUpdateIndexTemplate: jest.fn(),
 }));
 
-jest.mock('./utils/create_datastream', () => ({
+jest.mock('../utils/create_datastream', () => ({
   createDataStream: jest.fn(),
 }));
 
@@ -71,7 +72,7 @@ jest.mock('../../risk_score/transform/helpers/transforms', () => ({
   createAndStartTransform: jest.fn(),
 }));
 
-jest.mock('./utils/create_index', () => ({
+jest.mock('../utils/create_index', () => ({
   createIndex: jest.fn(),
 }));
 
@@ -740,6 +741,8 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            isAssetCriticalityEnabled: true,
           });
 
           expect(initResult).toEqual({
@@ -748,6 +751,7 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: true,
             riskEngineResourcesInstalled: true,
+            assetCriticalityInstalled: true,
           });
         });
 
@@ -758,6 +762,8 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            isAssetCriticalityEnabled: true,
           });
 
           expect(initResult).toEqual({
@@ -766,6 +772,7 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: true,
             riskEngineResourcesInstalled: true,
+            assetCriticalityInstalled: true,
           });
         });
 
@@ -777,6 +784,8 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            isAssetCriticalityEnabled: true,
           });
 
           expect(initResult).toEqual({
@@ -785,6 +794,7 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: true,
             riskEngineResourcesInstalled: true,
+            assetCriticalityInstalled: true,
           });
         });
 
@@ -796,6 +806,8 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            isAssetCriticalityEnabled: true,
           });
 
           expect(initResult).toEqual({
@@ -804,6 +816,30 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: false,
             riskEngineEnabled: false,
             riskEngineResourcesInstalled: false,
+            assetCriticalityInstalled: false,
+          });
+        });
+
+        it('should catch error for asset criticality init and stop', async () => {
+          const assetCriticalityDataClient = assetCriticalityDataClientMock.create();
+          assetCriticalityDataClient.init.mockImplementationOnce(() => {
+            throw new Error('Error assetCriticalityDataClient');
+          });
+
+          const initResult = await riskEngineDataClient.init({
+            namespace: 'default',
+            taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient,
+            isAssetCriticalityEnabled: true,
+          });
+
+          expect(initResult).toEqual({
+            errors: ['Error assetCriticalityDataClient'],
+            legacyRiskEngineDisabled: true,
+            riskEngineConfigurationCreated: false,
+            riskEngineEnabled: false,
+            riskEngineResourcesInstalled: true,
+            assetCriticalityInstalled: false,
           });
         });
 
@@ -815,6 +851,8 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            isAssetCriticalityEnabled: true,
           });
 
           expect(initResult).toEqual({
@@ -823,6 +861,7 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: false,
             riskEngineEnabled: false,
             riskEngineResourcesInstalled: true,
+            assetCriticalityInstalled: true,
           });
         });
 
@@ -834,6 +873,8 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            isAssetCriticalityEnabled: true,
           });
 
           expect(initResult).toEqual({
@@ -842,6 +883,7 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: false,
             riskEngineResourcesInstalled: true,
+            assetCriticalityInstalled: true,
           });
         });
       });

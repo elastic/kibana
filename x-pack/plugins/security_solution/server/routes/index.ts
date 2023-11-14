@@ -185,7 +185,12 @@ export const initRoutes = (
     riskScorePreviewRoute(router, logger);
     riskScoreCalculationRoute(router, logger);
     riskEngineStatusRoute(router);
-    riskEngineInitRoute(router, getStartServices);
+    riskEngineInitRoute(
+      router,
+      getStartServices,
+      logger,
+      config.experimentalFeatures.entityAnalyticsAssetCriticalityEnabled
+    );
     riskEngineEnableRoute(router, getStartServices);
     riskEngineDisableRoute(router, getStartServices);
     if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {

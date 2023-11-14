@@ -23,6 +23,7 @@ export interface InitRiskEngineResult {
   riskEngineResourcesInstalled: boolean;
   riskEngineConfigurationCreated: boolean;
   riskEngineEnabled: boolean;
+  assetCriticalityInstalled: boolean;
   errors: string[];
 }
 

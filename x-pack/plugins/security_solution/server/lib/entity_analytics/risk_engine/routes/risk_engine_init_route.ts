@@ -5,17 +5,21 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
+import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
 import type { StartPlugins } from '../../../../plugin';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { AssetCriticalityDataClient } from '../../asset_criticality/asset_criticality_data_client';
+import type { InitRiskEngineResultResponse } from '../types';
 
 export const riskEngineInitRoute = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
+  getStartServices: StartServicesAccessor<StartPlugins>,
+  logger: Logger,
+  isAssetCriticalityEnabled: boolean
 ) => {
   router.versioned
     .post({
@@ -40,12 +44,23 @@ export const riskEngineInitRoute = (
           });
         }
 
-        const initResult = await riskEngineDataClient.init({
-          taskManager,
+        const coreContext = await context.core;
+
+        // We use internal user here for resource installation, not current user
+        const assetCriticalityDataClient = new AssetCriticalityDataClient({
+          esClient: coreContext.elasticsearch.client.asInternalUser,
+          logger,
           namespace: spaceId,
         });
 
-        const initResultResponse = {
+        const initResult = await riskEngineDataClient.init({
+          taskManager,
+          namespace: spaceId,
+          assetCriticalityDataClient,
+          isAssetCriticalityEnabled,
+        });
+
+        const initResultResponse: InitRiskEngineResultResponse = {
           risk_engine_enabled: initResult.riskEngineEnabled,
           risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
           risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
@@ -53,10 +68,18 @@ export const riskEngineInitRoute = (
           errors: initResult.errors,
         };
 
+        // TODO: after enabling asset criticality by default, we don't need assetCriticalityInstallFailed
+        let assetCriticalityInstallFailed = false;
+        if (isAssetCriticalityEnabled) {
+          initResultResponse.asset_criticality_installed = initResult.assetCriticalityInstalled;
+          assetCriticalityInstallFailed = !initResult.assetCriticalityInstalled;
+        }
+
         if (
           !initResult.riskEngineEnabled ||
           !initResult.riskEngineResourcesInstalled ||
-          !initResult.riskEngineConfigurationCreated
+          !initResult.riskEngineConfigurationCreated ||
+          assetCriticalityInstallFailed
         ) {
           return siemResponse.error({
             statusCode: 400,
