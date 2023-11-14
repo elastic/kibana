@@ -4997,6 +4997,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-data-view-utils@link:x-pack/packages/ml/data_view_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-date-picker@link:x-pack/packages/ml/date_picker":
   version "0.0.0"
   uid ""
