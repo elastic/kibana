@@ -26,7 +26,7 @@ const buildFileKind = (config: FilesConfig, owner: Owner): FileKind => {
     http: fileKindHttpTags(owner),
     maxSizeBytes: createMaxCallback(config),
     allowedMimeTypes: config.allowedMimeTypes,
-    hashes: ['md5', 'sha256'],
+    hashes: ['md5', 'sha1', 'sha256'],
   };
 };
 

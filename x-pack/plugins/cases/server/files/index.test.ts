@@ -124,6 +124,7 @@ describe('server files', () => {
                 ],
                 "hashes": Array [
                   "md5",
+                  "sha1",
                   "sha256",
                 ],
                 "http": Object {
@@ -166,6 +167,7 @@ describe('server files', () => {
                 ],
                 "hashes": Array [
                   "md5",
+                  "sha1",
                   "sha256",
                 ],
                 "http": Object {
@@ -208,6 +210,7 @@ describe('server files', () => {
                 ],
                 "hashes": Array [
                   "md5",
+                  "sha1",
                   "sha256",
                 ],
                 "http": Object {
@@ -252,6 +255,7 @@ describe('server files', () => {
                 "allowedMimeTypes": Array [],
                 "hashes": Array [
                   "md5",
+                  "sha1",
                   "sha256",
                 ],
                 "http": Object {
@@ -292,6 +296,7 @@ describe('server files', () => {
                 "allowedMimeTypes": Array [],
                 "hashes": Array [
                   "md5",
+                  "sha1",
                   "sha256",
                 ],
                 "http": Object {
@@ -332,6 +337,7 @@ describe('server files', () => {
                 "allowedMimeTypes": Array [],
                 "hashes": Array [
                   "md5",
+                  "sha1",
                   "sha256",
                 ],
                 "http": Object {
@@ -465,6 +471,7 @@ describe('server files', () => {
               ],
               "hashes": Array [
                 "md5",
+                "sha1",
                 "sha256",
               ],
               "http": Object {
@@ -593,6 +600,7 @@ describe('server files', () => {
               ],
               "hashes": Array [
                 "md5",
+                "sha1",
                 "sha256",
               ],
               "http": Object {
@@ -721,6 +729,7 @@ describe('server files', () => {
               ],
               "hashes": Array [
                 "md5",
+                "sha1",
                 "sha256",
               ],
               "http": Object {
