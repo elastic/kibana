@@ -10,6 +10,8 @@ import { IRouter } from '@kbn/core/server';
 import { verifyAccessAndContext, handleDisabledApiKeysError } from './lib';
 import { ILicenseState, RuleTypeDisabledError } from '../lib';
 import { AlertingRequestHandlerContext, INTERNAL_BASE_ALERTING_API_PATH } from '../types';
+import { transformRuleToRuleResponseV1 } from './rule/transforms';
+import { Rule } from '../application/rule/types';
 
 export const bulkEnableRulesRoute = ({
   router,
@@ -35,8 +37,20 @@ export const bulkEnableRulesRoute = ({
           const { filter, ids } = req.body;
 
           try {
-            const result = await rulesClient.bulkEnableRules({ filter, ids });
-            return res.ok({ body: result });
+            const bulkEnableResults = await rulesClient.bulkEnableRules({ filter, ids });
+
+            const resultBody = {
+              body: {
+                ...bulkEnableResults,
+                rules: bulkEnableResults.rules.map((rule) => {
+                  // TODO (http-versioning): Remove this cast, this enables us to move forward
+                  // without fixing all of other solution types
+                  return transformRuleToRuleResponseV1(rule as Rule);
+                }),
+              },
+            };
+
+            return res.ok(resultBody);
           } catch (e) {
             if (e instanceof RuleTypeDisabledError) {
               return e.sendResponse(res);
