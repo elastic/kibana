@@ -12,7 +12,6 @@ export const PrivateLocationCodec = t.intersection([
     label: t.string,
     id: t.string,
     agentPolicyId: t.string,
-    concurrentMonitors: t.number,
   }),
   t.partial({
     isServiceManaged: t.boolean,
@@ -26,8 +25,6 @@ export const PrivateLocationCodec = t.intersection([
   }),
 ]);
 
-export const SyntheticsPrivateLocationsType = t.type({
-  locations: t.array(PrivateLocationCodec),
-});
+export const SyntheticsPrivateLocationsType = t.array(PrivateLocationCodec);
 export type PrivateLocation = t.TypeOf<typeof PrivateLocationCodec>;
 export type SyntheticsPrivateLocations = t.TypeOf<typeof SyntheticsPrivateLocationsType>;

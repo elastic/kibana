@@ -29,9 +29,6 @@ export default defineCypressConfig({
   viewportWidth: 1680,
 
   env: {
-    'cypress-react-selector': {
-      root: '#osquery-app',
-    },
     grepFilterSpecs: true,
     grepTags: '@serverless --@brokenInServerless',
     grepOmitFiltered: true,
