@@ -89,14 +89,15 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     csp: { header: cspHeader },
   } = config;
 
+  const additionalHeaders = {
+    ...securityResponseHeaders,
+    ...customResponseHeaders,
+    'Content-Security-Policy': cspHeader,
+    [KIBANA_NAME_HEADER]: serverName,
+  };
+
   return (request, response, toolkit) => {
-    const additionalHeaders = {
-      ...securityResponseHeaders,
-      ...customResponseHeaders,
-      'Content-Security-Policy': cspHeader,
-      [KIBANA_NAME_HEADER]: serverName,
-    };
-    return toolkit.next({ headers: additionalHeaders });
+    return toolkit.next({ headers: { ...additionalHeaders } });
   };
 };
 
