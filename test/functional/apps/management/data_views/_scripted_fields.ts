@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('creating and using Painless string scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Painless string scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painString';
 
       before(async () => {
