@@ -12,7 +12,6 @@ export const makeSingleFieldMatchQuery: MakeSingleFieldMatchQuery = ({ values, s
     match: {
       [searchByField]: {
         query: value,
-        minimum_should_match: 1,
       },
     },
   }));

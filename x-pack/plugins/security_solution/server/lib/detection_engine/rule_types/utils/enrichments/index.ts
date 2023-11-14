@@ -29,7 +29,7 @@ export const enrichEvents: EnrichEventsFunction = async ({
   experimentalFeatures,
 }) => {
   try {
-    const enrichments = [];
+    const enrichments: Array<Promise<EventsMapByEnrichments>> = [];
 
     logger.debug('Alert enrichments started');
     const isNewRiskScoreModuleAvailable = experimentalFeatures?.riskScoringRoutesEnabled ?? false;
@@ -74,7 +74,7 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     const allEnrichmentsResults = await Promise.allSettled(enrichments);
 
-    const allFulfilledEnrichmentsResults = allEnrichmentsResults
+    const allFulfilledEnrichmentsResults: EventsMapByEnrichments[] = allEnrichmentsResults
       .filter((result) => result.status === 'fulfilled')
       .map((result) => (result as PromiseFulfilledResult<EventsMapByEnrichments>)?.value);
 

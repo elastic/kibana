@@ -27,7 +27,8 @@ export type EnrichmentFunction = <T extends BaseFieldsLatest>(
   e: EventsForEnrichment<T>
 ) => EventsForEnrichment<T>;
 
-//
+/** A map from event._id's to arrays of enrichment functions. the enrichment functions are bound to enrichment events via stack context.
+ * TODO: reconsider if we need this. */
 export interface EventsMapByEnrichments {
   [id: string]: EnrichmentFunction[];
 }
@@ -46,11 +47,6 @@ interface BasedEnrichParamters<T extends BaseFieldsLatest> {
   services: RuleServices;
   logger: IRuleExecutionLogForExecutors;
   events: Array<EventsForEnrichment<T>>;
-}
-
-interface SingleMappingField {
-  eventField: string;
-  enrichmentField: string;
 }
 
 export type GetEventValue = <T extends BaseFieldsLatest>(
@@ -90,7 +86,13 @@ export type CreateFieldsMatchEnrichment = <T extends BaseFieldsLatest>(
   params: BasedEnrichParamters<T> & {
     name: string;
     index: string[];
-    mappingField: SingleMappingField;
+    mappingField: {
+      /** The field on events which contains the value we'll use to build a query. */
+      eventField: string;
+      /** Used in a `match` query to find documents that match the values of `eventField`. */
+      enrichmentField: string;
+    };
+    /** Specifies which fields should be returned when querying the enrichment index. */
     enrichmentResponseFields: string[];
     createEnrichmentFunction: (enrichmentDoc: EnrichmentType) => EnrichmentFunction;
   }

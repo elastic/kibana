@@ -6,7 +6,7 @@
  */
 import { mergeWith, isArray } from 'lodash';
 
-import type { ApplyEnrichmentsToEvents, MergeEnrichments } from '../types';
+import type { ApplyEnrichmentsToEvents, EventsMapByEnrichments, MergeEnrichments } from '../types';
 
 function customizer<T>(objValue: T, srcValue: T) {
   if (isArray(objValue)) {
@@ -18,12 +18,14 @@ export const mergeEnrichments: MergeEnrichments = (enrichmentsList = []) => {
   return enrichmentsList.reduce((acc, val) => mergeWith(acc, val, customizer), {});
 };
 
+// TODO, figure out what all this does. and why it could be needed.
+// start here on nov 15
 export const applyEnrichmentsToEvents: ApplyEnrichmentsToEvents = ({
   events,
   enrichmentsList,
   logger,
 }) => {
-  const mergedEnrichments = mergeEnrichments(enrichmentsList);
+  const mergedEnrichments: EventsMapByEnrichments = mergeEnrichments(enrichmentsList);
   logger.debug(`${Object.keys(mergedEnrichments).length} events ready to be enriched`);
   const enrichedEvents = events.map((event) => {
     const enrichFunctions = mergedEnrichments[event._id];

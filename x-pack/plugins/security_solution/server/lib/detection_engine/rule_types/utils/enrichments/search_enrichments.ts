@@ -8,6 +8,7 @@
 import { getQueryFilter } from '../get_query_filter';
 import type { SearchEnrichments } from './types';
 
+// TODO I inlined a similar function in another file. Consider deleting this if we don't use it
 export const searchEnrichments: SearchEnrichments = async ({ index, services, query, fields }) => {
   try {
     const response = await services.scopedClusterClient.asCurrentUser.search({
