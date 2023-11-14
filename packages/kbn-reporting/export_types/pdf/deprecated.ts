@@ -30,11 +30,12 @@ import {
 import {
   ExportType,
   decryptJobHeaders,
-  generatePdfObservable,
   getCustomLogo,
   getFullUrls,
   validateUrls,
 } from '@kbn/reporting-server';
+
+import { generatePdfObservable } from './generate_pdf';
 
 /**
  * @deprecated
@@ -98,10 +99,8 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
         //  make a new function that will call reporting.getScreenshots
-        const snapshotFn = () => {
-          if (!this.startDeps.screenshotting)
-            throw new Error('Screenshotting plugin is not initialized');
-          return this.startDeps.screenshotting.getScreenshots({
+        const snapshotFn = () =>
+          this.startDeps.screenshotting!.getScreenshots({
             format: 'pdf',
             title,
             logo,
@@ -110,7 +109,6 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             headers,
             layout,
           });
-        };
         return generatePdfObservable(snapshotFn, {
           format: 'pdf',
           title,

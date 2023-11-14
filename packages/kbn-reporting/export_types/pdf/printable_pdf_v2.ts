@@ -21,7 +21,7 @@ import {
   LICENSE_TYPE_TRIAL,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
-import type { TaskRunResult } from '@kbn/reporting-common/types';
+import type { TaskRunResult, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
 import {
   JobParamsPDFV2,
   PDF_JOB_TYPE_V2,
@@ -32,10 +32,10 @@ import {
   decryptJobHeaders,
   getFullRedirectAppUrl,
   ExportType,
-  generatePdfObservableV2,
   getCustomLogo,
 } from '@kbn/reporting-server';
-import { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
+
+import { generatePdfObservableV2 } from './generate_pdf_v2';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;
@@ -98,7 +98,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
       }),
       mergeMap(({ logo, headers }) => {
         const { browserTimezone, layout, title, locatorParams } = payload;
-        let urls: UrlOrUrlWithContext[];
+        let urls: UrlOrUrlLocatorTuple[];
         if (locatorParams) {
           urls = locatorParams.map((locator) => [
             getFullRedirectAppUrl(
@@ -108,7 +108,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               payload.forceNow
             ),
             locator,
-          ]) as unknown as UrlOrUrlWithContext[];
+          ]) as unknown as UrlOrUrlLocatorTuple[];
         }
 
         apmGetAssets?.end();
@@ -117,10 +117,8 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
         return generatePdfObservableV2(
           this.config,
           this.getServerInfo(),
-          () => {
-            if (!this.startDeps.screenshotting)
-              throw new Error('Screenshotting plugin is not initialized');
-            return this.startDeps.screenshotting.getScreenshots({
+          () =>
+            this.startDeps.screenshotting!.getScreenshots({
               format: 'pdf',
               title,
               logo,
@@ -128,8 +126,7 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
               headers,
               layout,
               urls,
-            });
-          },
+            }),
           payload,
           locatorParams,
           {

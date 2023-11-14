@@ -13,9 +13,7 @@ import type { LocatorParams, ReportingServerInfo } from '@kbn/reporting-common/t
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import type { PdfScreenshotOptions, PdfScreenshotResult } from '@kbn/screenshotting-plugin/server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
-
-import type { ReportingConfigType } from '.';
-import { getFullRedirectAppUrl } from '.';
+import { type ReportingConfigType, getFullRedirectAppUrl } from '@kbn/reporting-server';
 
 import { getTracker } from './pdf_tracker';
 

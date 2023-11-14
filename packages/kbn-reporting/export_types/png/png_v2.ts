@@ -37,14 +37,11 @@ import {
   PNG_REPORT_TYPE_V2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
-import {
-  decryptJobHeaders,
-  getFullRedirectAppUrl,
-  ExportType,
-  generatePngObservable,
-} from '@kbn/reporting-server';
+import { decryptJobHeaders, getFullRedirectAppUrl, ExportType } from '@kbn/reporting-server';
 import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';
+
+import { generatePngObservable } from './generate_png';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
@@ -114,17 +111,13 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
         return generatePngObservable(
-          () => {
-            if (!this.startDeps.screenshotting)
-              throw new Error('Screenshotting plugin is not initialized');
-
-            return this.startDeps.screenshotting.getScreenshots({
+          () =>
+            this.startDeps.screenshotting!.getScreenshots({
               format: 'png',
               headers,
               layout: { ...payload.layout, id: 'preserve_layout' },
               urls: [[url, locatorParams]],
-            });
-          },
+            }),
           jobLogger,
           {
             headers,
