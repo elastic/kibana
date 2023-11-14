@@ -48,6 +48,12 @@ interface Project {
   product: string;
 }
 
+interface ProjectConfigurationOverride {
+  tier: string;
+  ignoreEndpoint: boolean;
+  ignoreCloud: boolean;
+}
+
 interface Credentials {
   username: string;
   password: string;
@@ -322,21 +328,19 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
 const getProductTypes = (
   filePath: string,
-  tier?: string,
-  ignoreEndpointLine?: boolean,
-  ignoreCloudLine?: boolean
+  projectConfigurationOverride: ProjectConfigurationOverride
 ): ProductType[] => {
   let productTypes = parseTestFileConfig(filePath).productTypes as ProductType[];
-  if (tier) {
+  if (projectConfigurationOverride.tier) {
     productTypes = productTypes.map((product) => ({
       ...product,
-      product_tier: tier,
+      product_tier: projectConfigurationOverride.tier,
     }));
   }
-  if (ignoreEndpointLine) {
+  if (projectConfigurationOverride.ignoreEndpoint) {
     productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
   }
-  if (ignoreCloudLine) {
+  if (projectConfigurationOverride.ignoreCloud) {
     productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
   }
   return productTypes;
@@ -405,9 +409,11 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      const projectTier = argv.tier as string;
-      const ignoreEndpoint = argv.ignoreEndpoint as boolean;
-      const ignoreCloud = argv.ignoreCloud as boolean;
+      const projectConfigurationOverride: ProjectConfigurationOverride = {
+        tier: argv.tier as string,
+        ignoreEndpoint: argv.ignoreEndpoint as boolean,
+        ignoreCloud: argv.ignoreClous as boolean,
+      };
 
       log.info(`
 ----------------------------------------------
@@ -477,12 +483,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           await withProcRunner(log, async (procs) => {
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
-            const productTypes = getProductTypes(
-              filePath,
-              projectTier,
-              ignoreEndpoint,
-              ignoreCloud
-            );
+            const productTypes = getProductTypes(filePath, projectConfigurationOverride);
 
             if (!API_KEY) {
               log.info('API KEY to create project could not be retrieved.');
