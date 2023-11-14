@@ -52,44 +52,57 @@ export enum OperatingSystem {
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
 
-export const validatePotentialWildcardInput = ({
-  fieldName = 'file.path.text',
+export const validateWildcardInput = ({
+  field = '',
   os,
   value = '',
 }: {
-  fieldName?: string;
+  field?: string;
   os: OperatingSystem;
   value?: string;
 }): string | undefined => {
   const textInput = value.trim();
-  const isFieldFilePath = fieldName === 'file.path.text';
-  const isValidFilePath =
-    isFieldFilePath &&
-    isPathValid({
-      os,
-      field: 'file.path.text',
-      type: 'wildcard',
-      value: textInput,
-    });
+  if (field === 'file.path.text') {
+    return validateFilePathInput({ os, value: textInput });
+  }
+  return validatePotentialWildcardInput(textInput);
+};
+
+const validateFilePathInput = ({
+  os,
+  value,
+}: {
+  os: OperatingSystem;
+  value: string;
+}): string | undefined => {
+  const isValidFilePath = isPathValid({
+    os,
+    field: 'file.path.text',
+    type: 'wildcard',
+    value,
+  });
   const hasSimpleFileName = hasSimpleExecutableName({
     os,
     type: 'wildcard',
-    value: textInput,
+    value,
   });
 
-  if (!textInput.length) {
+  if (!value.length) {
     return FILEPATH_WARNING;
   }
 
-  if (
-    (isFieldFilePath && isValidFilePath) ||
-    (!isFieldFilePath && hasSimpleFileName !== undefined)
-  ) {
+  if (isValidFilePath) {
     if (hasSimpleFileName !== undefined && !hasSimpleFileName) {
       return WILDCARD_WARNING;
     }
   } else {
     return FILEPATH_WARNING;
+  }
+};
+
+const validatePotentialWildcardInput = (value?: string): string | undefined => {
+  if (/\*|\?/.test(value ?? '')) {
+    return WILDCARD_WARNING;
   }
 };
 

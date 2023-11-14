@@ -53,7 +53,7 @@ import {
 import {
   OperatingSystem,
   WILDCARD_WARNING,
-  validatePotentialWildcardInput,
+  validateWildcardInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -359,7 +359,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
     }
   };
 
-  // show this when wildcard filename with matches operator
+  // show this when wildcard with matches operator
   const getWildcardWarningInfo = (precedingWarning: string): React.ReactNode => {
     return (
       <p>
@@ -431,8 +431,8 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
           }
-          const warning = validatePotentialWildcardInput({
-            fieldName: entry.field?.name ?? '',
+          const warning = validateWildcardInput({
+            field: entry.field?.name,
             os,
             value: wildcardValue,
           });
