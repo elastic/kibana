@@ -9,6 +9,11 @@ import { produce } from 'immer';
 import type { SavedObjectsType } from '@kbn/core/server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import {
+  packAssetSavedObjectModelVersion1,
+  packSavedObjectModelVersion1,
+  savedQueryModelVersion1,
+} from './saved_object_model_versions';
+import {
   savedQuerySavedObjectType,
   packSavedObjectType,
   packAssetSavedObjectType,
@@ -83,6 +88,9 @@ export const savedQueryType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: savedQuerySavedObjectMappings,
+  modelVersions: {
+    1: savedQueryModelVersion1,
+  },
   management: {
     importableAndExportable: true,
     getTitle: (savedObject) => savedObject.attributes.id,
@@ -172,6 +180,9 @@ export const packType: SavedObjectsType = {
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: packSavedObjectMappings,
+  modelVersions: {
+    1: packSavedObjectModelVersion1,
+  },
   management: {
     defaultSearchField: 'name',
     importableAndExportable: true,
@@ -250,6 +261,9 @@ export const packAssetType: SavedObjectsType = {
   management: {
     importableAndExportable: true,
     visibleInManagement: false,
+  },
+  modelVersions: {
+    1: packAssetSavedObjectModelVersion1,
   },
   namespaceType: 'agnostic',
   mappings: packAssetSavedObjectMappings,
