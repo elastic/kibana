@@ -193,7 +193,7 @@ Task [cypress/support/es_archiver.ts](https://github.com/elastic/kibana/blob/mai
 Note that we use tags in order to select which tests we want to execute, if you want a test to be executed on serverless you need to add @serverless tag to it.
 
 
-### Running the serverless tests locally
+### Running serverless tests locally pointing to FTR serverless (First Quality Gate) 
 
 Run the tests with the following yarn scripts from `x-pack/test/security_solution_cypress`:
 
@@ -205,6 +205,33 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
+
+
+### Running serverless tests locally pointing to a MKI project created in QA environment (Second Quality Gate)
+#### Setup required
+
+Setup a valid Elastic Cloud API key for QA environment:
+
+1. Navigate to QA environment.
+2. Click on the `User menu button` located on the top right of the header.
+3. Click on `Organization`.
+4. Click on the `API keys` tab.
+5. Click on `Create API key` button.
+6. Add a name, set an expiration date, assign an organization owner role.
+7. Click on `Create API key`
+8. Save the value of the key
+
+Store the saved key on `~/.elastic/cloud.json` using the following format:
+
+```json
+{
+  "api_key": {
+    "qa": "<API_KEY>"
+  }
+}
+```
+
+#### Known limitations
 
 ### PLIs
 When running serverless Cypress tests, the following PLIs are set by default:
