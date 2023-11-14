@@ -15,8 +15,8 @@ import {
 
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 
-import type { ReportingConfigType } from '.';
 import { getAbsoluteUrlFactory } from './get_absolute_url';
 import { validateUrls } from './validate_urls';
 
