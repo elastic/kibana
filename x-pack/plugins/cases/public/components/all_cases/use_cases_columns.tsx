@@ -357,7 +357,11 @@ export const useCasesColumns = ({
   const columns: CasesColumns[] = [];
 
   selectedColumns.forEach(({ field, isChecked }) => {
-    if (field in columnsDict && isChecked && casesColumnsConfig[field].canDisplay) {
+    if (
+      field in columnsDict &&
+      (isChecked || isSelectorView) &&
+      casesColumnsConfig[field].canDisplay
+    ) {
       columns.push(columnsDict[field]);
     }
   });
