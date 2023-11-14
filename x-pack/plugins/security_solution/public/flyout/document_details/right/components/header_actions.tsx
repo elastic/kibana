@@ -7,7 +7,7 @@
 
 import type { VFC } from 'react';
 import React, { memo } from 'react';
-import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
@@ -40,23 +40,28 @@ export const HeaderActions: VFC = memo(() => {
     <EuiFlexGroup direction="row" justifyContent="flexEnd">
       {showShareAlertButton && (
         <EuiFlexItem grow={false}>
-          <EuiCopy textToCopy={alertDetailsLink}>
-            {(copy) => (
-              <EuiButtonIcon
-                iconType={'share'}
-                color={'text'}
-                aria-label={i18n.translate(
-                  'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
-                  {
-                    defaultMessage: 'Share Alert',
-                  }
-                )}
-                data-test-subj={SHARE_BUTTON_TEST_ID}
-                onClick={() => copyFunction(copy, alertDetailsLink, modifier)}
-                onKeyDown={() => copyFunction(copy, alertDetailsLink, modifier)}
-              />
+          <EuiToolTip
+            content={i18n.translate(
+              'xpack.securitySolution.flyout.right.header.shareButtonToolTip',
+              { defaultMessage: 'Share alert' }
             )}
-          </EuiCopy>
+          >
+            <EuiCopy textToCopy={alertDetailsLink}>
+              {(copy) => (
+                <EuiButtonIcon
+                  iconType={'share'}
+                  color={'text'}
+                  aria-label={i18n.translate(
+                    'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
+                    { defaultMessage: 'Share alert' }
+                  )}
+                  data-test-subj={SHARE_BUTTON_TEST_ID}
+                  onClick={() => copyFunction(copy, alertDetailsLink, modifier)}
+                  onKeyDown={() => copyFunction(copy, alertDetailsLink, modifier)}
+                />
+              )}
+            </EuiCopy>
+          </EuiToolTip>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
