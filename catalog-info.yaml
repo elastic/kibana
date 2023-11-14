@@ -68,6 +68,8 @@ spec:
           access_level: BUILD_AND_READ
         cloud-tooling:
           access_level: BUILD_AND_READ
+        apm-ui:
+          access_level: BUILD_AND_READ
         everyone:
           access_level: READ_ONLY
 
