@@ -72,6 +72,7 @@ export function InternalDashboardTopNav({
     },
     chrome: {
       setBreadcrumbs,
+      docTitle,
       setIsVisible: setChromeVisibility,
       getIsVisible$: getChromeIsVisible$,
       recentlyAccessed: chromeRecentlyAccessed,
@@ -152,6 +153,11 @@ export function InternalDashboardTopNav({
     viewMode,
     title,
   ]);
+
+  /** Set chrome tab title when dashboard's title changes */
+  useEffect(() => {
+    docTitle.change(title);
+  }, [title, docTitle]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
