@@ -93,6 +93,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
       await driver.manage().window().setRect({ width, height });
       await clearBrowserStorage('sessionStorage');
       await clearBrowserStorage('localStorage');
+      await driver.manage().deleteAllCookies();
     });
   });
 
