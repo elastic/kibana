@@ -990,7 +990,8 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 /x-pack/plugins/infra/public/common @elastic/obs-ux-infra_services-team
 /x-pack/plugins/infra/public/observability_logs @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/public/services @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/infra/logs @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
 
 # Observability UX management team
