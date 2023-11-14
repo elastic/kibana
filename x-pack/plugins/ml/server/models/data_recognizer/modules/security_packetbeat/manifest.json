@@ -59,5 +59,8 @@
       "file": "datafeed_packetbeat_rare_user_agent.json",
       "job_id": "packetbeat_rare_user_agent"
     }
+  ],
+  "tags": [
+    "security"
   ]
 }

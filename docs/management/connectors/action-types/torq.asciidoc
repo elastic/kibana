@@ -3,6 +3,10 @@
 ++++
 <titleabbrev>Torq</titleabbrev>
 ++++
+:frontmatter-description: Add a connector that can use Torq to trigger workflows.
+:frontmatter-tags-products: [kibana] 
+:frontmatter-tags-content-type: [how-to]
+:frontmatter-tags-user-goals: [configure]
 
 The Torq connector uses a Torq webhook to trigger workflows with Kibana actions.
 
@@ -26,34 +30,6 @@ Name:: The name of the connector. The name is used to identify a connector in th
 Torq endpoint URL:: Endpoint URL (webhook) of the Elastic Security integration you created in Torq.
 
 Torq authentication header secret:: Secret of the webhook authentication header.
-
-[float]
-[[preconfigured-torq-configuration]]
-=== Create preconfigured connectors
-
-If you are running {kib} on-prem, you can define connectors by
-adding `xpack.actions.preconfigured` settings to your `kibana.yml` file.
-For example:
-
-[source,yaml]
---
-xpack.actions.preconfigured:
-  my-torq:
-    name: preconfigured-torq-connector-type
-    actionTypeId: .torq
-    config:
-      webhookIntegrationUrl: https://hooks.torq.io/v1/somehook
-    secrets:
-      token: mytorqtoken
---
-
-Config defines information for the connector type.
-
-`webhookIntegrationUrl`:: An address that corresponds to **Torq endpoint URL**.
-
-Secrets defines sensitive information for the connector type.
-
-`token`:: A string that corresponds to **Torq authentication header secret**.
 
 [float]
 [[torq-action-configuration]]

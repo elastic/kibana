@@ -20,7 +20,7 @@ export const constructLocatorPath = async (params: LocatorPathCosntructionParams
   const { isFilterPinned } = await import('@kbn/es-query');
 
   const {
-    locatorParams: { filters, query, refreshInterval, timeRange, columns, sort },
+    locatorParams: { filters, query, refreshInterval, timeRange, columns, sort, origin },
     index,
     useHash,
   } = params;
@@ -55,6 +55,8 @@ export const constructLocatorPath = async (params: LocatorPathCosntructionParams
   return {
     app: 'observability-log-explorer',
     path,
-    state: {},
+    state: {
+      ...(origin ? { origin } : {}),
+    },
   };
 };

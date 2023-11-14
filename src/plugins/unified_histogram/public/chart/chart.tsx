@@ -7,6 +7,7 @@
  */
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
+import type { Observable } from 'rxjs';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -17,8 +18,11 @@ import {
   EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableComponentProps, Suggestion } from '@kbn/lens-plugin/public';
-import type { Datatable } from '@kbn/expressions-plugin/common';
+import type {
+  EmbeddableComponentProps,
+  Suggestion,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
@@ -69,7 +73,8 @@ export interface ChartProps {
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
   disabledActions?: LensEmbeddableInput['disabledActions'];
   input$?: UnifiedHistogramInput$;
-  lensTablesAdapter?: Record<string, Datatable>;
+  lensAdapters?: UnifiedHistogramChartLoadEvent['adapters'];
+  lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>;
   isOnHistogramMode?: boolean;
   isChartLoading?: boolean;
   onResetChartHeight?: () => void;
@@ -107,7 +112,8 @@ export function Chart({
   disableTriggers,
   disabledActions,
   input$: originalInput$,
-  lensTablesAdapter,
+  lensAdapters,
+  lensEmbeddableOutput$,
   isOnHistogramMode,
   isChartLoading,
   onResetChartHeight,
@@ -463,8 +469,8 @@ export function Chart({
           {...{
             services,
             lensAttributesContext,
-            dataView,
-            lensTablesAdapter,
+            lensAdapters,
+            lensEmbeddableOutput$,
             currentSuggestion,
             isFlyoutVisible,
             setIsFlyoutVisible,

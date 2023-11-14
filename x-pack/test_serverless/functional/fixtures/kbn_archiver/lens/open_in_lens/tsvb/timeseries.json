@@ -1,0 +1,521 @@
+{
+  "attributes": {
+    "fieldAttrs": "{\"utc_time\":{\"customLabel\":\"UTC time\"}}",
+    "fieldFormatMap": "{\"bytes\":{\"id\":\"bytes\"}}",
+    "fields": "[{\"name\":\"referer\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"agent\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:image:width\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"xss.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"headings.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.user.lastname\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:tag.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"geo.dest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:section.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"utc_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:card\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.char\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"clientip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image:height\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"host\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"machine.ram\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"links\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"id\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@tags.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"phpmemory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.twitter:card.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"ip\",\"type\":\"ip\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:modified_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:site_name.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"request.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:tag\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"agent.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"spaces\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:site.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"headings\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"_source\",\"type\":\"_source\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"relatedContent.og:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"request\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"index.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"extension\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"memory\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"_index\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"relatedContent.twitter:site\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:description\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"geo.coordinates\",\"type\":\"geo_point\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"meta.related\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:title.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"response.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@message.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"machine.os\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.article:section\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"xss\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"links.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"geo.srcdest\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"url.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"extension.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"machine.os.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@tags\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"host.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:type.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"geo.src\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"spaces.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:image:height.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"url\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:site_name\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:title\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"@message\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.twitter:image.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"@timestamp\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"bytes\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"response\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"meta.user.firstname\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":true,\"doc_values\":false},{\"name\":\"relatedContent.og:image:width.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.og:description.raw\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"relatedContent.article:published_time\",\"type\":\"date\",\"count\":0,\"scripted\":false,\"indexed\":true,\"analyzed\":false,\"doc_values\":true},{\"name\":\"_id\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"_type\",\"type\":\"string\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false},{\"name\":\"_score\",\"type\":\"number\",\"count\":0,\"scripted\":false,\"indexed\":false,\"analyzed\":false,\"doc_values\":false}]",
+    "runtimeFieldMap": "{\"hello_world_runtime_field\":{\"type\":\"keyword\",\"script\":{\"source\":\"emit('hello world')\"}}}",
+    "timeFieldName": "@timestamp",
+    "title": "logstash-*"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-24T19:23:41.590Z",
+  "id": "logstash-*",
+  "managed": false,
+  "references": [],
+  "type": "index-pattern",
+  "typeMigrationVersion": "7.11.0",
+  "updated_at": "2023-08-24T19:23:41.590Z",
+  "version": "WzE1NCwyXQ=="
+}
+
+{
+  "attributes": {
+    "color": "#965783",
+    "description": "",
+    "name": "serverless"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-24T19:23:41.590Z",
+  "id": "serverless-tag",
+  "managed": false,
+  "references": [],
+  "type": "tag",
+  "typeMigrationVersion": "8.0.0",
+  "updated_at": "2023-08-24T19:23:41.590Z",
+  "version": "WzcyMzYsMl0="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "Timeseries -  Basic",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries -  Basic\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"type\":\"timeseries\",\"series\":[{\"time_range_mode\":\"entire_time_range\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"palette\":{\"type\":\"palette\",\"name\":\"default\"},\"metrics\":[{\"id\":\"73f6d087-b8cb-45b4-b768-b1ce67451530\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"default\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"override_index_pattern\":0,\"series_drop_last_bucket\":0}],\"time_field\":\"\",\"use_kibana_indexes\":true,\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"truncate_legend\":1,\"max_lines_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":0,\"isModelInvalid\":false,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:29:19.635Z",
+  "id": "17fcbe30-4603-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:29:53.582Z",
+  "version": "WzM4NiwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "title": "Timeseries -  Reference line",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries -  Reference line\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"time_range_mode\":\"entire_time_range\",\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"line_width\":1,\"metrics\":[{\"id\":\"7f8229a0-460d-11ee-9837-135820940af5\",\"type\":\"count\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"label\":\"\"},{\"id\":\"f2a2aa90-460d-11ee-9837-135820940af5\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"palette\":{\"type\":\"palette\",\"name\":\"default\"},\"metrics\":[{\"id\":\"f2a2aa91-460d-11ee-9837-135820940af5\",\"type\":\"static\",\"value\":\"10\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"default\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"override_index_pattern\":0,\"series_drop_last_bucket\":0,\"label\":\"\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:33:33.217Z",
+  "id": "af224910-4603-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T01:47:50.568Z",
+  "version": "WzQ3NiwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "title": "Timeseries -  Agg with params",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries -  Agg with params\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"time_range_mode\":\"entire_time_range\",\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"line_width\":1,\"metrics\":[{\"unit\":\"\",\"id\":\"73f6d087-b8cb-45b4-b768-b1ce67451530\",\"type\":\"positive_rate\",\"value\":\"10\",\"field\":\"machine.ram\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"label\":\"\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:34:55.310Z",
+  "id": "e010aee0-4603-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:34:55.310Z",
+  "version": "WzM5OSwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "title": "Timeseries -  Invalid panel",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries -  Invalid panel\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"time_range_mode\":\"entire_time_range\",\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"line_width\":1,\"metrics\":[{\"unit\":\"\",\"id\":\"73f6d087-b8cb-45b4-b768-b1ce67451530\",\"type\":\"positive_rate\",\"value\":\"10\",\"field\":null}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"label\":\"\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:36:12.342Z",
+  "id": "0dfad560-4604-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:36:12.342Z",
+  "version": "WzQwMywyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "title": "Timeseries -  Unsupported aggregations",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries -  Unsupported aggregations\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"time_range_mode\":\"entire_time_range\",\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"line_width\":1,\"metrics\":[{\"unit\":\"\",\"id\":\"73f6d087-b8cb-45b4-b768-b1ce67451530\",\"type\":\"sum_of_squares\",\"value\":\"10\",\"field\":\"machine.ram\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"label\":\"\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:36:50.362Z",
+  "id": "24a439a0-4604-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:36:50.362Z",
+  "version": "WzQwNywyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"language\":\"kuery\",\"query\":\"\"},\"filter\":[]}"
+    },
+    "title": "Timeseries -  Parent pipeline agg",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"label\":\"\",\"line_width\":1,\"metrics\":[{\"id\":\"629a7fd0-4604-11ee-a985-93d7c1e8c7ef\",\"type\":\"count\"},{\"field\":\"629a7fd0-4604-11ee-a985-93d7c1e8c7ef\",\"id\":\"de58f750-4604-11ee-a985-93d7c1e8c7ef\",\"type\":\"cumulative_sum\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"extension.raw\",\"time_range_mode\":\"entire_time_range\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"time_range_mode\":\"entire_time_range\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"},\"title\":\"Timeseries -  Parent pipeline agg\",\"type\":\"metrics\"}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:44:22.549Z",
+  "id": "322a7c50-4605-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:44:22.549Z",
+  "version": "WzQxOCwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "Timeseries - Sibling pipeline agg",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"39e9d894-19a4-4b79-9326-e06eed8b5e25\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"38652a6e-49e1-486a-b283-cf84f1ae0441\",\"label\":\"\",\"line_width\":1,\"metrics\":[{\"id\":\"049c454d-5a6c-4daf-96b7-8de0a40a23cc\",\"type\":\"count\"},{\"field\":\"049c454d-5a6c-4daf-96b7-8de0a40a23cc\",\"id\":\"3edd10c0-4605-11ee-a985-93d7c1e8c7ef\",\"sigma\":\"\",\"type\":\"avg_bucket\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"extension.raw\",\"time_range_mode\":\"entire_time_range\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"time_range_mode\":\"entire_time_range\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"},\"title\":\"Timeseries - Sibling pipeline agg\",\"type\":\"metrics\"}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:45:48.375Z",
+  "id": "65527e70-4605-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:45:48.375Z",
+  "version": "WzQyNywyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "Timeseries - Ignore global filters series",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries - Ignore global filters series\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"39e9d894-19a4-4b79-9326-e06eed8b5e25\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"38652a6e-49e1-486a-b283-cf84f1ae0441\",\"label\":\"\",\"line_width\":1,\"metrics\":[{\"id\":\"049c454d-5a6c-4daf-96b7-8de0a40a23cc\",\"type\":\"count\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"time_range_mode\":\"entire_time_range\",\"ignore_global_filter\":1}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"time_range_mode\":\"entire_time_range\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:46:44.783Z",
+  "id": "86f1abf0-4605-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:46:44.783Z",
+  "version": "WzQzMywyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "Timeseries - Ignore global filters panel",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries - Ignore global filters panel\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"39e9d894-19a4-4b79-9326-e06eed8b5e25\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"time_range_mode\":\"entire_time_range\",\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"38652a6e-49e1-486a-b283-cf84f1ae0441\",\"label\":\"\",\"line_width\":1,\"metrics\":[{\"id\":\"049c454d-5a6c-4daf-96b7-8de0a40a23cc\",\"type\":\"count\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"everything\",\"stacked\":\"none\",\"ignore_global_filter\":0}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"ignore_global_filter\":1,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T00:47:25.582Z",
+  "id": "9f431ae0-4605-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T00:47:25.582Z",
+  "version": "WzQzOCwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"field\":\"extension\",\"key\":\"extension\",\"negate\":false,\"params\":{\"query\":\"css\"},\"type\":\"phrase\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match_phrase\":{\"extension\":\"css\"}}}]}"
+    },
+    "title": "Timeseries - Test",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries - Test\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"axis_formatter\":\"number\",\"axis_position\":\"left\",\"axis_scale\":\"normal\",\"drop_last_bucket\":0,\"id\":\"39e9d894-19a4-4b79-9326-e06eed8b5e25\",\"interval\":\"\",\"isModelInvalid\":false,\"max_lines_legend\":1,\"series\":[{\"axis_position\":\"right\",\"chart_type\":\"line\",\"color\":\"#68BC00\",\"fill\":0.5,\"formatter\":\"default\",\"id\":\"38652a6e-49e1-486a-b283-cf84f1ae0441\",\"label\":\"\",\"line_width\":1,\"metrics\":[{\"id\":\"049c454d-5a6c-4daf-96b7-8de0a40a23cc\",\"type\":\"count\"},{\"field\":\"049c454d-5a6c-4daf-96b7-8de0a40a23cc\",\"id\":\"3edd10c0-4605-11ee-a985-93d7c1e8c7ef\",\"sigma\":\"\",\"type\":\"avg_bucket\"}],\"override_index_pattern\":0,\"palette\":{\"name\":\"default\",\"type\":\"palette\"},\"point_size\":1,\"separate_axis\":0,\"series_drop_last_bucket\":0,\"split_mode\":\"terms\",\"stacked\":\"none\",\"terms_field\":\"extension.raw\",\"time_range_mode\":\"entire_time_range\"}],\"show_grid\":1,\"show_legend\":1,\"time_field\":\"\",\"time_range_mode\":\"entire_time_range\",\"tooltip_mode\":\"show_all\",\"truncate_legend\":1,\"type\":\"timeseries\",\"use_kibana_indexes\":true,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T01:08:39.409Z",
+  "id": "9685ae10-4608-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T01:08:39.409Z",
+  "version": "WzQ0NCwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"machine.os : ios\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "title": "Timeseries - With query",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries - With query\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"type\":\"timeseries\",\"series\":[{\"time_range_mode\":\"entire_time_range\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"palette\":{\"type\":\"palette\",\"name\":\"default\"},\"metrics\":[{\"id\":\"73f6d087-b8cb-45b4-b768-b1ce67451530\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"default\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"override_index_pattern\":0,\"series_drop_last_bucket\":0}],\"time_field\":\"\",\"use_kibana_indexes\":true,\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"truncate_legend\":1,\"max_lines_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":0,\"isModelInvalid\":false,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T01:12:16.100Z",
+  "id": "17ae1a40-4609-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T01:12:16.100Z",
+  "version": "WzQ2MiwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[{\"$state\":{\"store\":\"appState\"},\"meta\":{\"alias\":null,\"disabled\":false,\"field\":\"extension\",\"key\":\"extension\",\"negate\":false,\"params\":{\"query\":\"css\"},\"type\":\"phrase\",\"indexRefName\":\"kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index\"},\"query\":{\"match_phrase\":{\"extension\":\"css\"}}}]}"
+    },
+    "title": "Timeseries - With filter",
+    "uiStateJSON": "{}",
+    "version": 1,
+    "visState": "{\"title\":\"Timeseries - With filter\",\"type\":\"metrics\",\"aggs\":[],\"params\":{\"time_range_mode\":\"entire_time_range\",\"id\":\"c54a209d-8bb9-45ca-90e5-92ee93498f4d\",\"type\":\"timeseries\",\"series\":[{\"time_range_mode\":\"entire_time_range\",\"id\":\"3735cb41-cc73-423a-91b7-1dbf91e76899\",\"color\":\"#68BC00\",\"split_mode\":\"everything\",\"palette\":{\"type\":\"palette\",\"name\":\"default\"},\"metrics\":[{\"id\":\"73f6d087-b8cb-45b4-b768-b1ce67451530\",\"type\":\"count\"}],\"separate_axis\":0,\"axis_position\":\"right\",\"formatter\":\"default\",\"chart_type\":\"line\",\"line_width\":1,\"point_size\":1,\"fill\":0.5,\"stacked\":\"none\",\"override_index_pattern\":0,\"series_drop_last_bucket\":0}],\"time_field\":\"\",\"use_kibana_indexes\":true,\"interval\":\"\",\"axis_position\":\"left\",\"axis_formatter\":\"number\",\"axis_scale\":\"normal\",\"show_legend\":1,\"truncate_legend\":1,\"max_lines_legend\":1,\"show_grid\":1,\"tooltip_mode\":\"show_all\",\"drop_last_bucket\":0,\"isModelInvalid\":false,\"index_pattern_ref_name\":\"metrics_0_index_pattern\"}}"
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T01:10:41.622Z",
+  "id": "df5de760-4608-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "logstash-*",
+      "name": "kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index",
+      "type": "index-pattern"
+    },
+    {
+      "id": "serverless-tag",
+      "name": "tag-ref-serverless-tag",
+      "type": "tag"
+    },
+    {
+      "id": "logstash-*",
+      "name": "metrics_0_index_pattern",
+      "type": "index-pattern"
+    }
+  ],
+  "type": "visualization",
+  "typeMigrationVersion": "8.5.0",
+  "updated_at": "2023-08-29T01:11:14.372Z",
+  "version": "WzQ1NiwyXQ=="
+}
+
+{
+  "attributes": {
+    "description": "",
+    "kibanaSavedObjectMeta": {
+      "searchSourceJSON": "{\"query\":{\"query\":\"\",\"language\":\"kuery\"},\"filter\":[]}"
+    },
+    "optionsJSON": "{\"useMargins\":true,\"syncColors\":false,\"syncCursor\":true,\"syncTooltips\":false,\"hidePanelTitles\":false}",
+    "panelsJSON": "[{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":0,\"w\":24,\"h\":15,\"i\":\"8bd35619-2857-479e-b2ad-c42177db8f4c\"},\"panelIndex\":\"8bd35619-2857-479e-b2ad-c42177db8f4c\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_8bd35619-2857-479e-b2ad-c42177db8f4c\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":0,\"w\":24,\"h\":15,\"i\":\"08411e04-5232-472e-be83-553586e84255\"},\"panelIndex\":\"08411e04-5232-472e-be83-553586e84255\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_08411e04-5232-472e-be83-553586e84255\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":15,\"w\":24,\"h\":15,\"i\":\"59afa58a-fa67-4af3-b422-a63eb4a250fe\"},\"panelIndex\":\"59afa58a-fa67-4af3-b422-a63eb4a250fe\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_59afa58a-fa67-4af3-b422-a63eb4a250fe\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":15,\"w\":24,\"h\":15,\"i\":\"fc8df122-75b6-42de-9a08-348f45f027c4\"},\"panelIndex\":\"fc8df122-75b6-42de-9a08-348f45f027c4\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_fc8df122-75b6-42de-9a08-348f45f027c4\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":30,\"w\":24,\"h\":15,\"i\":\"afd9e964-9afa-402d-bc32-795a3ecec4ff\"},\"panelIndex\":\"afd9e964-9afa-402d-bc32-795a3ecec4ff\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_afd9e964-9afa-402d-bc32-795a3ecec4ff\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":30,\"w\":24,\"h\":15,\"i\":\"b6571ff0-693d-4dbd-8dbd-8a57d4b75a36\"},\"panelIndex\":\"b6571ff0-693d-4dbd-8dbd-8a57d4b75a36\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_b6571ff0-693d-4dbd-8dbd-8a57d4b75a36\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":45,\"w\":24,\"h\":15,\"i\":\"e00255dc-a4ae-4d0f-bb71-546623bdd4c0\"},\"panelIndex\":\"e00255dc-a4ae-4d0f-bb71-546623bdd4c0\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_e00255dc-a4ae-4d0f-bb71-546623bdd4c0\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":45,\"w\":24,\"h\":15,\"i\":\"68a688a4-b0fa-49a2-8b35-a20c70500d8a\"},\"panelIndex\":\"68a688a4-b0fa-49a2-8b35-a20c70500d8a\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_68a688a4-b0fa-49a2-8b35-a20c70500d8a\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":60,\"w\":24,\"h\":15,\"i\":\"6680ba9b-b669-4bed-87b1-67a9453244e5\"},\"panelIndex\":\"6680ba9b-b669-4bed-87b1-67a9453244e5\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_6680ba9b-b669-4bed-87b1-67a9453244e5\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":60,\"w\":24,\"h\":15,\"i\":\"cdcb3397-5a51-4627-9f5c-caa6c26ef203\"},\"panelIndex\":\"cdcb3397-5a51-4627-9f5c-caa6c26ef203\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_cdcb3397-5a51-4627-9f5c-caa6c26ef203\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":24,\"y\":75,\"w\":24,\"h\":15,\"i\":\"5e0f79cd-690a-4d64-97d3-b6c9a6a8080b\"},\"panelIndex\":\"5e0f79cd-690a-4d64-97d3-b6c9a6a8080b\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_5e0f79cd-690a-4d64-97d3-b6c9a6a8080b\"},{\"version\":\"8.9.1\",\"type\":\"visualization\",\"gridData\":{\"x\":0,\"y\":75,\"w\":24,\"h\":15,\"i\":\"41045521-aa6e-41cb-92af-a951bb033acc\"},\"panelIndex\":\"41045521-aa6e-41cb-92af-a951bb033acc\",\"embeddableConfig\":{\"enhancements\":{}},\"panelRefName\":\"panel_41045521-aa6e-41cb-92af-a951bb033acc\"}]",
+    "timeRestore": false,
+    "title": "Convert to Lens - TSVB - Timeseries",
+    "version": 1
+  },
+  "coreMigrationVersion": "8.8.0",
+  "created_at": "2023-08-29T01:12:25.942Z",
+  "id": "203c4110-4603-11ee-8b96-35b00ddf1245",
+  "managed": false,
+  "references": [
+    {
+      "id": "17fcbe30-4603-11ee-8b96-35b00ddf1245",
+      "name": "8bd35619-2857-479e-b2ad-c42177db8f4c:panel_8bd35619-2857-479e-b2ad-c42177db8f4c",
+      "type": "visualization"
+    },
+    {
+      "id": "af224910-4603-11ee-8b96-35b00ddf1245",
+      "name": "08411e04-5232-472e-be83-553586e84255:panel_08411e04-5232-472e-be83-553586e84255",
+      "type": "visualization"
+    },
+    {
+      "id": "e010aee0-4603-11ee-8b96-35b00ddf1245",
+      "name": "59afa58a-fa67-4af3-b422-a63eb4a250fe:panel_59afa58a-fa67-4af3-b422-a63eb4a250fe",
+      "type": "visualization"
+    },
+    {
+      "id": "0dfad560-4604-11ee-8b96-35b00ddf1245",
+      "name": "fc8df122-75b6-42de-9a08-348f45f027c4:panel_fc8df122-75b6-42de-9a08-348f45f027c4",
+      "type": "visualization"
+    },
+    {
+      "id": "24a439a0-4604-11ee-8b96-35b00ddf1245",
+      "name": "afd9e964-9afa-402d-bc32-795a3ecec4ff:panel_afd9e964-9afa-402d-bc32-795a3ecec4ff",
+      "type": "visualization"
+    },
+    {
+      "id": "322a7c50-4605-11ee-8b96-35b00ddf1245",
+      "name": "b6571ff0-693d-4dbd-8dbd-8a57d4b75a36:panel_b6571ff0-693d-4dbd-8dbd-8a57d4b75a36",
+      "type": "visualization"
+    },
+    {
+      "id": "65527e70-4605-11ee-8b96-35b00ddf1245",
+      "name": "e00255dc-a4ae-4d0f-bb71-546623bdd4c0:panel_e00255dc-a4ae-4d0f-bb71-546623bdd4c0",
+      "type": "visualization"
+    },
+    {
+      "id": "86f1abf0-4605-11ee-8b96-35b00ddf1245",
+      "name": "68a688a4-b0fa-49a2-8b35-a20c70500d8a:panel_68a688a4-b0fa-49a2-8b35-a20c70500d8a",
+      "type": "visualization"
+    },
+    {
+      "id": "9f431ae0-4605-11ee-8b96-35b00ddf1245",
+      "name": "6680ba9b-b669-4bed-87b1-67a9453244e5:panel_6680ba9b-b669-4bed-87b1-67a9453244e5",
+      "type": "visualization"
+    },
+    {
+      "id": "9685ae10-4608-11ee-8b96-35b00ddf1245",
+      "name": "cdcb3397-5a51-4627-9f5c-caa6c26ef203:panel_cdcb3397-5a51-4627-9f5c-caa6c26ef203",
+      "type": "visualization"
+    },
+    {
+      "id": "17ae1a40-4609-11ee-8b96-35b00ddf1245",
+      "name": "5e0f79cd-690a-4d64-97d3-b6c9a6a8080b:panel_5e0f79cd-690a-4d64-97d3-b6c9a6a8080b",
+      "type": "visualization"
+    },
+    {
+      "id": "df5de760-4608-11ee-8b96-35b00ddf1245",
+      "name": "41045521-aa6e-41cb-92af-a951bb033acc:panel_41045521-aa6e-41cb-92af-a951bb033acc",
+      "type": "visualization"
+    }
+  ],
+  "type": "dashboard",
+  "typeMigrationVersion": "8.9.0",
+  "updated_at": "2023-08-29T01:12:25.942Z",
+  "version": "WzQ2NCwyXQ=="
+}

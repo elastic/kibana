@@ -19,9 +19,9 @@ const name = 'Some boolean field';
 const id = 'some:boolean:field';
 
 describe('BooleanInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: InputProps<'boolean'> = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'boolean',
@@ -36,7 +36,7 @@ describe('BooleanInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders false', () => {
@@ -60,16 +60,16 @@ describe('BooleanInput', () => {
     expect(screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`)).toBeChecked();
   });
 
-  it('calls onChange when toggled', () => {
+  it('calls onInputChange when toggled', () => {
     render(wrap(<BooleanInput {...defaultProps} />));
     const input = screen.getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    expect(defaultProps.onChange).not.toHaveBeenCalled();
+    expect(defaultProps.onInputChange).not.toHaveBeenCalled();
 
     act(() => {
       fireEvent.click(input);
     });
 
-    expect(defaultProps.onChange).toBeCalledWith({ type: 'boolean', unsavedValue: true });
+    expect(defaultProps.onInputChange).toBeCalledWith({ type: 'boolean', unsavedValue: true });
 
     act(() => {
       fireEvent.click(input);

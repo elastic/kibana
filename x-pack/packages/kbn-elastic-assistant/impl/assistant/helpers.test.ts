@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { getDefaultConnector, getBlockBotConversation } from './helpers';
+import {
+  getBlockBotConversation,
+  getDefaultConnector,
+  getFormattedMessageContent,
+} from './helpers';
 import { enterpriseMessaging } from './use_conversation/sample_conversations';
 import { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -188,6 +192,43 @@ describe('getBlockBotConversation', () => {
       ];
       const result = getDefaultConnector(connectors);
       expect(result).toBeUndefined();
+    });
+  });
+
+  describe('getFormattedMessageContent', () => {
+    it('returns the value of the action_input property when `content` has properly prefixed and suffixed JSON with the action_input property', () => {
+      const content = '```json\n{"action_input": "value from action_input"}\n```';
+
+      expect(getFormattedMessageContent(content)).toBe('value from action_input');
+    });
+
+    it('returns the original content when `content` has properly formatted JSON WITHOUT the action_input property', () => {
+      const content = '```json\n{"some_key": "some value"}\n```';
+      expect(getFormattedMessageContent(content)).toBe(content);
+    });
+
+    it('returns the original content when `content` has improperly formatted JSON', () => {
+      const content = '```json\n{"action_input": "value from action_input",}\n```'; // <-- the trailing comma makes it invalid
+
+      expect(getFormattedMessageContent(content)).toBe(content);
+    });
+
+    it('returns the original content when `content` is missing the prefix', () => {
+      const content = '{"action_input": "value from action_input"}\n```'; // <-- missing prefix
+
+      expect(getFormattedMessageContent(content)).toBe(content);
+    });
+
+    it('returns the original content when `content` is missing the suffix', () => {
+      const content = '```json\n{"action_input": "value from action_input"}'; // <-- missing suffix
+
+      expect(getFormattedMessageContent(content)).toBe(content);
+    });
+
+    it('returns the original content when `content` does NOT contain a JSON string', () => {
+      const content = 'plain text content';
+
+      expect(getFormattedMessageContent(content)).toBe(content);
     });
   });
 });

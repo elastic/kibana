@@ -7,46 +7,20 @@
  */
 
 import type { ConnectionRequestParams } from '@elastic/transport';
-import { RequestStatus, Response } from './types';
+import { Response } from './types';
 
-interface ErrorResponse {
-  [key: string]: unknown;
-  err?: {
-    [key: string]: unknown;
-    requestParams?: ConnectionRequestParams;
-  };
-}
-
-interface OkResponse {
+interface SearchResponse {
   [key: string]: unknown;
   requestParams?: ConnectionRequestParams;
 }
 
-export function moveRequestParamsToTopLevel(status: RequestStatus, response: Response) {
-  if (status === RequestStatus.ERROR) {
-    const requestParams = (response.json as ErrorResponse)?.err?.requestParams;
-    if (!requestParams) {
-      return response;
-    }
-
-    const json = {
-      ...response.json,
-      err: { ...(response.json as ErrorResponse).err },
-    };
-    delete json.err.requestParams;
-    return {
-      ...response,
-      json,
-      requestParams,
-    };
-  }
-
-  const requestParams = (response.json as OkResponse)?.requestParams;
+export function moveRequestParamsToTopLevel(response: Response) {
+  const requestParams = (response.json as SearchResponse)?.requestParams;
   if (!requestParams) {
     return response;
   }
 
-  const json = { ...response.json } as OkResponse;
+  const json = { ...response.json } as SearchResponse;
   delete json.requestParams;
   return {
     ...response,

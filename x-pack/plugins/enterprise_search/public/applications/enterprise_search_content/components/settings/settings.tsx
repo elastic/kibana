@@ -23,7 +23,6 @@ import { SettingsPanel } from './settings_panel';
 export const Settings: React.FC = () => {
   const { makeRequest, setPipeline } = useActions(SettingsLogic);
   const { defaultPipeline, hasNoChanges, isLoading, pipelineState } = useValues(SettingsLogic);
-
   const {
     extract_binary_content: extractBinaryContent,
     reduce_whitespace: reduceWhitespace,
@@ -62,6 +61,7 @@ export const Settings: React.FC = () => {
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => makeRequest(pipelineState)}
+            data-test-subj={'entSearchContentSettingsSaveButton'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.settings.saveButtonLabel', {
               defaultMessage: 'Save',
@@ -71,6 +71,7 @@ export const Settings: React.FC = () => {
             disabled={hasNoChanges}
             isLoading={isLoading}
             onClick={() => setPipeline(defaultPipeline)}
+            data-test-subj={'entSearchContentSettingsResetButton'}
           >
             {i18n.translate('xpack.enterpriseSearch.content.settings.resetButtonLabel', {
               defaultMessage: 'Reset',

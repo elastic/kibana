@@ -6,7 +6,8 @@
  */
 
 import { exportTimeline } from '../../../tasks/timelines';
-import { login, visitWithoutDateRange } from '../../../tasks/login';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 import {
   expectedExportedTimelineTemplate,
   getTimeline as getTimelineTemplate,
@@ -14,15 +15,12 @@ import {
 
 import { TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
-import { cleanKibana } from '../../../tasks/common';
 import { searchByTitle } from '../../../tasks/table_pagination';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165760
 // FLAKY: https://github.com/elastic/kibana/issues/165645
-describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Export timelines', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
-    cleanKibana();
-
     createTimelineTemplate(getTimelineTemplate()).then((response) => {
       cy.wrap(response).as('templateResponse');
       cy.wrap(response.body.data.persistTimeline.timeline.savedObjectId).as('templateId');
@@ -36,7 +34,7 @@ describe('Export timelines', { tags: ['@ess', '@serverless', '@brokenInServerles
       path: '/api/timeline/_export?file_name=timelines_export.ndjson',
     }).as('export');
     login();
-    visitWithoutDateRange(TIMELINE_TEMPLATES_URL);
+    visit(TIMELINE_TEMPLATES_URL);
     searchByTitle(this.templateTitle);
     exportTimeline(this.templateId);
 

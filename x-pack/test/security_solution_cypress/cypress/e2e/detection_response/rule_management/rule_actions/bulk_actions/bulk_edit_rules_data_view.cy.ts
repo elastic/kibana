@@ -35,10 +35,11 @@ import {
   getDetails,
   assertDetailsNotExist,
 } from '../../../../../tasks/rule_details';
-import { login, visitSecurityDetectionRulesPage } from '../../../../../tasks/login';
+import { login } from '../../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import { cleanKibana, deleteAlertsAndRules, postDataView } from '../../../../../tasks/common';
+import { deleteAlertsAndRules, deleteDataView, postDataView } from '../../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -52,10 +53,9 @@ const DATA_VIEW_ID = 'auditbeat';
 
 const expectedIndexPatterns = ['index-1-*', 'index-2-*'];
 
-// TODO: https://github.com/elastic/kibana/issues/161540
 describe(
   'Bulk editing index patterns of rules with a data view only',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const TESTED_CUSTOM_QUERY_RULE_DATA = getNewRule({
       index: undefined,
@@ -101,15 +101,11 @@ describe(
       enabled: false,
     });
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
-      login();
+      deleteDataView(DATA_VIEW_ID);
 
+      login();
       postDataView(DATA_VIEW_ID);
 
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA);
@@ -119,7 +115,7 @@ describe(
       createRule(TESTED_TERMS_RULE_DATA);
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA_2);
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       expectManagementTableRules([
@@ -243,7 +239,7 @@ describe(
 
 describe(
   'Bulk editing index patterns of rules with index patterns and rules with a data view',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     const TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW = getNewRule({
       name: 'with dataview',
@@ -257,24 +253,23 @@ describe(
       rule_id: '2',
     });
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       deleteAlertsAndRules();
-      cy.task('esArchiverResetKibana');
 
       postDataView(DATA_VIEW_ID);
 
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITH_DATAVIEW);
       createRule(TESTED_CUSTOM_QUERY_RULE_DATA_WITHOUT_DATAVIEW);
 
-      visitSecurityDetectionRulesPage();
+      visitRulesManagementTable();
       disableAutoRefresh();
 
       expectManagementTableRules(['with dataview', 'no data view']);
+    });
+
+    afterEach(() => {
+      deleteDataView(DATA_VIEW_ID);
     });
 
     it('Add index patterns to custom rules: one rule is updated, one rule is skipped', () => {

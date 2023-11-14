@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -43,11 +43,26 @@ export enum AddDataTabs {
   Symbols = 'symbols',
 }
 
+interface Step {
+  title: string;
+  content: string | React.ReactNode;
+}
+
+interface Tab {
+  key: string;
+  title: string;
+  steps?: Step[];
+  subTabs?: Tab[];
+}
+
+const supportedCPUArchitectures = ['x86_64', 'arm64'];
+
 export function AddDataView() {
   const { query } = useProfilingParams('/add-data-instructions');
   const { selectedTab } = query;
   const profilingRouter = useProfilingRouter();
   const routePath = useProfilingRoutePath();
+  const [selectedSubTabKey, setSelectedSubTabKey] = useState<string | undefined>();
 
   const {
     services: { setupDataCollectionInstructions },
@@ -67,393 +82,429 @@ export function AddDataView() {
   const stackVersion = data?.stackVersion!;
   const majorVersion = stackVersion ? major(stackVersion).toString() : undefined;
 
-  const tabs = [
-    {
-      key: AddDataTabs.Kubernetes,
-      title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
-        defaultMessage: 'Kubernetes',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.kubernetesRepositoryStep', {
-            defaultMessage: 'Configure the Universal Profiling host-agent Helm repository:',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              helm repo add elastic https://helm.elastic.co
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.kubernetesInstallStep', {
-            defaultMessage: 'Install host-agent via Helm:',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
+  const tabs: Tab[] = useMemo(
+    () => [
+      {
+        key: AddDataTabs.Kubernetes,
+        title: i18n.translate('xpack.profiling.tabs.kubernetesTitle', {
+          defaultMessage: 'Kubernetes',
+        }),
+        steps: [
+          {
+            title: i18n.translate('xpack.profiling.tabs.kubernetesRepositoryStep', {
+              defaultMessage: 'Configure the Universal Profiling Agent Helm repository:',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.helmRepoAddElasticCodeBlockLabel', {
+                  defaultMessage: 'helm repo add elastic https://helm.elastic.co',
+                })}
+              </EuiCodeBlock>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.kubernetesInstallStep', {
+              defaultMessage: 'Install host-agent via Helm:',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`helm install --create-namespace -n=universal-profiling universal-profiling-agent \\
 --set "projectID=1,secretToken=${secretToken}" \\
 --set "collectionAgentHostPort=${collectionAgentHost}" \\
 --set "version=${stackVersion}" \\
 --version=${stackVersion} \\
 elastic/pf-host-agent`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.kubernetesValidationStep', {
-            defaultMessage: 'Validate the host-agent pods are running:',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              kubectl -n universal-profiling get pods
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.postValidationStep', {
-            defaultMessage:
-              'Use the Helm install output to get host-agent logs and spot potential errors',
-          }),
-          content: <></>,
-        },
-      ],
-    },
-    {
-      key: AddDataTabs.Docker,
-      title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
-        defaultMessage: 'Docker',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.dockerRunContainerStep', {
-            defaultMessage: 'Run the Universal Profiling container:',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`docker run --name pf-host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
+              </EuiCodeBlock>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.kubernetesValidationStep', {
+              defaultMessage: 'Validate the host-agent pods are running:',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {i18n.translate('xpack.profiling.tabs.kubectlGetPods', {
+                  defaultMessage: 'kubectl -n universal-profiling get pods',
+                })}
+              </EuiCodeBlock>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.postValidationStep', {
+              defaultMessage:
+                'Use the Helm install output to get host-agent logs and spot potential errors',
+            }),
+            content: <></>,
+          },
+        ],
+      },
+      {
+        key: AddDataTabs.Docker,
+        title: i18n.translate('xpack.profiling.tabs.dockerTitle', {
+          defaultMessage: 'Docker',
+        }),
+        steps: [
+          {
+            title: i18n.translate('xpack.profiling.tabs.dockerRunContainerStep', {
+              defaultMessage: 'Run the Universal Profiling container:',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`docker run --name pf-host-agent --privileged --pid=host -v /etc/machine-id:/etc/machine-id:ro \\
 -v /var/run/docker.sock:/var/run/docker.sock -v /sys/kernel/debug:/sys/kernel/debug:ro \\
 docker.elastic.co/observability/profiling-agent:${stackVersion} /root/pf-host-agent \\
 -project-id=1 -secret-token=${secretToken} \\
 -collection-agent=${collectionAgentHost}`}
-            </EuiCodeBlock>
-          ),
-        },
-      ],
-    },
-    {
-      key: AddDataTabs.Binary,
-      title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
-        defaultMessage: 'Binary',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.binaryDownloadStep', {
-            defaultMessage: 'Download the binary for the right architecture:',
-          }),
-          content: (
-            <EuiText>
-              <b>For x86_64:</b>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {`wget -O pf-host-agent.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-x86_64.tar.gz" && tar xzf pf-host-agent.tgz`}
               </EuiCodeBlock>
-              <EuiSpacer size="m" />
-              <b>For ARM64:</b>
-              <EuiSpacer size="s" />
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {`wget -O pf-host-agent.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-arm64.tar.gz" && tar xzf pf-host-agent.tgz`}
-              </EuiCodeBlock>
-            </EuiText>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.binaryGrantPermissionStep', {
-            defaultMessage: 'Grant executable permissions:',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              chmod +x pf-host-agent/pf-host-agent
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.binaryRunHostAgentStep', {
-            defaultMessage: 'Run the Universal Profiling host-agent (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo pf-host-agent/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHost}`}
-            </EuiCodeBlock>
-          ),
-        },
-      ],
-    },
-    {
-      key: AddDataTabs.Deb,
-      title: i18n.translate('xpack.profiling.tabs.debTitle', {
-        defaultMessage: 'DEB Package',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.debConfigureRepoStep', {
-            defaultMessage: 'Configure the apt repository (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
-sudo apt-get install apt-transport-https
-echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-${majorVersion}.x.list
-`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.debInstallPackageStep', {
-            defaultMessage: 'Install the DEB package (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo apt-get update && sudo apt-get install pf-host-agent`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.debEditConfigStep', {
-            defaultMessage: 'Edit the configuration (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/Elastic/universal-profiling/pf-host-agent.conf`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.debStartSystemdServiceStep', {
-            defaultMessage:
-              'Start the Universal Profiling systemd service (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo systemctl enable pf-host-agent && sudo systemctl restart pf-host-agent`}
-            </EuiCodeBlock>
-          ),
-        },
-      ],
-    },
-    {
-      key: AddDataTabs.RPM,
-      title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
-        defaultMessage: 'RPM Package',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.rpmConfigureRepoStep', {
-            defaultMessage: 'Configure the yum repository (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
-cat <<EOF > /etc/yum.repos.d/elastic.repo
-[elastic-${majorVersion}.x]
-name=Elastic repository for ${majorVersion}.x packages
-baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
-gpgcheck=1
-gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
-enabled=1
-autorefresh=1
-type=rpm-md
-EOF`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.rpmInstallPackageStep', {
-            defaultMessage: 'Install the RPM package (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo yum install pf-host-agent`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.rpmEditConfigStep', {
-            defaultMessage: 'Edit the configuration (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/Elastic/universal-profiling/pf-host-agent.conf`}
-            </EuiCodeBlock>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.rpmStartSystemdServiceStep', {
-            defaultMessage:
-              'Start the Universal Profiling systemd service (requires root privileges):',
-          }),
-          content: (
-            <EuiCodeBlock paddingSize="s" isCopyable>
-              {`sudo systemctl enable pf-host-agent && sudo systemctl restart pf-host-agent`}
-            </EuiCodeBlock>
-          ),
-        },
-      ],
-    },
-    {
-      key: AddDataTabs.ElasticAgentIntegration,
-      title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.title', {
-        defaultMessage: 'Elastic Agent Integration',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1', {
-            defaultMessage: 'Copy credentials',
-          }),
-          content: (
-            <>
-              <EuiText>
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1.hint', {
+            ),
+          },
+        ],
+      },
+      {
+        key: AddDataTabs.Binary,
+        title: i18n.translate('xpack.profiling.tabs.binaryTitle', {
+          defaultMessage: 'Binary',
+        }),
+        // Create a dedicated sub tab for each architecture that we support
+        subTabs: supportedCPUArchitectures.map((arch) => {
+          return {
+            key: arch,
+            title: `Linux ${arch}`,
+            steps: [
+              {
+                title: i18n.translate('xpack.profiling.tabs.binaryDownloadStep', {
+                  defaultMessage: 'Download the binary:',
+                }),
+                content: (
+                  <EuiCodeBlock paddingSize="s" isCopyable>
+                    {`wget -O pf-host-agent.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-${arch}.tar.gz" && tar xzf pf-host-agent.tgz`}
+                  </EuiCodeBlock>
+                ),
+              },
+              {
+                title: i18n.translate('xpack.profiling.tabs.binaryGrantPermissionStep', {
+                  defaultMessage: 'Grant executable permissions:',
+                }),
+                content: (
+                  <EuiCodeBlock paddingSize="s" isCopyable>
+                    {`chmod +x pf-host-agent-${stackVersion}-linux-${arch}/pf-host-agent`}
+                  </EuiCodeBlock>
+                ),
+              },
+              {
+                title: i18n.translate('xpack.profiling.tabs.binaryRunHostAgentStep', {
                   defaultMessage:
-                    "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
-                })}
-              </EuiText>
-              <EuiSpacer />
-              <EuiText style={{ fontWeight: 'bold' }} size="s">
-                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1.secretToken', {
-                  defaultMessage: 'Secret token:',
-                })}
-              </EuiText>
+                    'Run the Universal Profiling host-agent (requires root privileges):',
+                }),
+                content: (
+                  <EuiCodeBlock paddingSize="s" isCopyable>
+                    {`sudo pf-host-agent-${stackVersion}-linux-${arch}/pf-host-agent -project-id=1 -secret-token=${secretToken} -collection-agent=${collectionAgentHost}`}
+                  </EuiCodeBlock>
+                ),
+              },
+            ],
+          };
+        }),
+      },
+      {
+        key: AddDataTabs.Deb,
+        title: i18n.translate('xpack.profiling.tabs.debTitle', {
+          defaultMessage: 'DEB Package',
+        }),
+        steps: [
+          {
+            title: i18n.translate('xpack.profiling.tabs.debConfigureRepoStep', {
+              defaultMessage: 'Configure the apt repository (requires root privileges):',
+            }),
+            content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
-                {secretToken}
+                {`wget -qO - https://artifacts.elastic.co/GPG-KEY-elasticsearch | sudo apt-key add -
+      sudo apt-get install apt-transport-https
+      echo "deb https://artifacts.elastic.co/packages/${majorVersion}.x/apt stable main" | sudo tee -a /etc/apt/sources.list.d/elastic-${majorVersion}.x.list
+      `}
               </EuiCodeBlock>
-              <EuiSpacer size="s" />
-              <EuiText style={{ fontWeight: 'bold' }} size="s">
-                {i18n.translate(
-                  'xpack.profiling.tabs.elasticAgentIntegration.step1.collectionAgentUrl',
-                  { defaultMessage: 'Universal Profiling Collector URL:' }
-                )}
-              </EuiText>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.debInstallPackageStep', {
+              defaultMessage: 'Install the DEB package (requires root privileges):',
+            }),
+            content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
-                {collectionAgentHost}
+                {`sudo apt-get update && sudo apt-get install pf-host-agent`}
               </EuiCodeBlock>
-            </>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2', {
-            defaultMessage: 'Fleet',
-          }),
-          content: (
-            <EuiButton
-              data-test-subj="profilingAddDataViewManageUniversalProfilingAgentInFleetButton"
-              iconType="gear"
-              fill
-              href={`${core.http.basePath.prepend(
-                `/app/integrations/detail/profiler_agent-${data?.profilerAgent.version}/overview`
-              )}`}
-            >
-              {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2.button', {
-                defaultMessage: 'Manage Universal Profiling agent in Fleet',
-              })}
-            </EuiButton>
-          ),
-        },
-      ],
-    },
-    {
-      key: AddDataTabs.Symbols,
-      title: i18n.translate('xpack.profiling.tabs.symbols.title', {
-        defaultMessage: 'Upload Symbols',
-      }),
-      steps: [
-        {
-          title: i18n.translate('xpack.profiling.tabs.symbols.step1', {
-            defaultMessage: 'Download and extract symbtool',
-          }),
-          content: (
-            <EuiText>
-              <b>For x86_64:</b>
-              <EuiSpacer size="s" />
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.debEditConfigStep', {
+              defaultMessage: 'Edit the configuration (requires root privileges):',
+            }),
+            content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
-                {`wget -O symbtool-amd64.tgz "https://artifacts.elastic.co/downloads/prodfiler/symbtool-${stackVersion}-linux-x86_64.tar.gz" && tar xzf symbtool-amd64.tgz && cd symbtool-*-linux-x86_64`}
+                {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/Elastic/universal-profiling/pf-host-agent.conf`}
               </EuiCodeBlock>
-              <EuiSpacer size="m" />
-              <b>For ARM64:</b>
-              <EuiSpacer size="s" />
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.debStartSystemdServiceStep', {
+              defaultMessage:
+                'Start the Universal Profiling systemd service (requires root privileges):',
+            }),
+            content: (
               <EuiCodeBlock paddingSize="s" isCopyable>
-                {`wget -O symbtool-arm64.tgz "https://artifacts.elastic.co/downloads/prodfiler/pf-host-agent-${stackVersion}-linux-arm64.tar.gz" && tar xzf symbtool-arm64.tgz && cd symbtool-*-linux-arm64`}
+                {`sudo systemctl enable pf-host-agent && sudo systemctl restart pf-host-agent`}
               </EuiCodeBlock>
-            </EuiText>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
-            defaultMessage: 'Generate an Elasticsearch token',
-          }),
-          content: (
-            <EuiText>
-              <EuiLink
-                data-test-subj="profilingAddDataViewInstructionsHereLink"
-                target="_blank"
-                href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+            ),
+          },
+        ],
+      },
+      {
+        key: AddDataTabs.RPM,
+        title: i18n.translate('xpack.profiling.tabs.rpmTitle', {
+          defaultMessage: 'RPM Package',
+        }),
+        steps: [
+          {
+            title: i18n.translate('xpack.profiling.tabs.rpmConfigureRepoStep', {
+              defaultMessage: 'Configure the yum repository (requires root privileges):',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`sudo rpm --import https://packages.elastic.co/GPG-KEY-elasticsearch
+      cat <<EOF > /etc/yum.repos.d/elastic.repo
+      [elastic-${majorVersion}.x]
+      name=Elastic repository for ${majorVersion}.x packages
+      baseurl=https://artifacts.elastic.co/packages/${majorVersion}.x/yum
+      gpgcheck=1
+      gpgkey=https://artifacts.elastic.co/GPG-KEY-elasticsearch
+      enabled=1
+      autorefresh=1
+      type=rpm-md
+      EOF`}
+              </EuiCodeBlock>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.rpmInstallPackageStep', {
+              defaultMessage: 'Install the RPM package (requires root privileges):',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`sudo yum install pf-host-agent`}
+              </EuiCodeBlock>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.rpmEditConfigStep', {
+              defaultMessage: 'Edit the configuration (requires root privileges):',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`echo -e "project-id 1\nsecret-token ${secretToken}\ncollection-agent ${collectionAgentHost}" | sudo tee -a /etc/Elastic/universal-profiling/pf-host-agent.conf`}
+              </EuiCodeBlock>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.rpmStartSystemdServiceStep', {
+              defaultMessage:
+                'Start the Universal Profiling systemd service (requires root privileges):',
+            }),
+            content: (
+              <EuiCodeBlock paddingSize="s" isCopyable>
+                {`sudo systemctl enable pf-host-agent && sudo systemctl restart pf-host-agent`}
+              </EuiCodeBlock>
+            ),
+          },
+        ],
+      },
+      {
+        key: AddDataTabs.ElasticAgentIntegration,
+        title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.title', {
+          defaultMessage: 'Elastic Agent Integration',
+        }),
+        steps: [
+          {
+            title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1', {
+              defaultMessage: 'Copy credentials',
+            }),
+            content: (
+              <>
+                <EuiText>
+                  {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step1.hint', {
+                    defaultMessage:
+                      "You'll need these credentials to set up Universal Profiling. Please save them in a secure location, as they will be required in the subsequent step.",
+                  })}
+                </EuiText>
+                <EuiSpacer />
+                <EuiText style={{ fontWeight: 'bold' }} size="s">
+                  {i18n.translate(
+                    'xpack.profiling.tabs.elasticAgentIntegration.step1.secretToken',
+                    {
+                      defaultMessage: 'Secret token:',
+                    }
+                  )}
+                </EuiText>
+                <EuiCodeBlock paddingSize="s" isCopyable>
+                  {secretToken}
+                </EuiCodeBlock>
+                <EuiSpacer size="s" />
+                <EuiText style={{ fontWeight: 'bold' }} size="s">
+                  {i18n.translate(
+                    'xpack.profiling.tabs.elasticAgentIntegration.step1.collectionAgentUrl',
+                    { defaultMessage: 'Universal Profiling Collector URL:' }
+                  )}
+                </EuiText>
+                <EuiCodeBlock paddingSize="s" isCopyable>
+                  {collectionAgentHost}
+                </EuiCodeBlock>
+              </>
+            ),
+          },
+          {
+            title: i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2', {
+              defaultMessage: 'Fleet',
+            }),
+            content: (
+              <EuiButton
+                data-test-subj="profilingAddDataViewManageUniversalProfilingAgentInFleetButton"
+                iconType="gear"
+                fill
+                href={`${core.http.basePath.prepend(
+                  `/app/integrations/detail/profiler_agent-${data?.profilerAgent.version}/overview`
+                )}`}
               >
-                {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
-                  defaultMessage: 'Instructions here',
+                {i18n.translate('xpack.profiling.tabs.elasticAgentIntegration.step2.button', {
+                  defaultMessage: 'Manage Universal Profiling agent in Fleet',
                 })}
-              </EuiLink>
-            </EuiText>
-          ),
-        },
-        {
-          title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
-            defaultMessage: 'Upload symbols',
-          }),
-          content: (
-            <div>
-              <EuiCodeBlock paddingSize="s" isCopyable>
-                {`./symbtool push-symbols executable -u "${symbolUrl}" -t <ES token> -e <my executable>`}
-              </EuiCodeBlock>
-              <EuiSpacer size="m" />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.profiling.tabs.symbols.step3.replace"
-                  defaultMessage="Replace {es_token} etc. with the actual values. You can pass {help} to obtain a list of other arguments."
-                  values={{
-                    es_token: <EuiCode>{`<ES token>`}</EuiCode>,
-                    help: <EuiCode>--help</EuiCode>,
-                  }}
-                />
-              </EuiText>
-              <EuiSpacer size="s" />
-              <EuiText>
-                <FormattedMessage
-                  id="xpack.profiling.tabs.symbols.step3.doc-ref"
-                  defaultMessage="Documentation for more advanced uses cases is available in {link}."
-                  values={{
-                    link: (
-                      <EuiLink
-                        data-test-subj="profilingAddDataViewTheCorrespondingDocumentationPageLink"
-                        target="_blank"
-                        href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
-                      >
-                        {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
-                          defaultMessage: 'the corresponding documentation page',
-                        })}
-                      </EuiLink>
-                    ),
-                  }}
-                />
-              </EuiText>
-            </div>
-          ),
-        },
-      ],
-    },
-  ];
+              </EuiButton>
+            ),
+          },
+        ],
+      },
+      {
+        key: AddDataTabs.Symbols,
+        title: i18n.translate('xpack.profiling.tabs.symbols.title', {
+          defaultMessage: 'Upload Symbols',
+        }),
+        subTabs: supportedCPUArchitectures.map((arch) => {
+          return {
+            key: arch,
+            title: `Linux ${arch}`,
+            // inside each sub tab you define the steps as usual
+            steps: [
+              {
+                title: i18n.translate('xpack.profiling.tabs.symbols.step1', {
+                  defaultMessage: 'Download and extract symbtool',
+                }),
+                content: (
+                  <EuiCodeBlock paddingSize="s" isCopyable>
+                    {`wget -O symbtool-${arch}.tgz "https://artifacts.elastic.co/downloads/prodfiler/symbtool-${stackVersion}-linux-${arch}.tar.gz" && tar xzf symbtool-${arch}.tgz && cd symbtool-${stackVersion}-linux-${arch}`}
+                  </EuiCodeBlock>
+                ),
+              },
+              {
+                title: i18n.translate('xpack.profiling.tabs.symbols.step2', {
+                  defaultMessage: 'Generate an Elasticsearch token',
+                }),
+                content: (
+                  <EuiText>
+                    <EuiLink
+                      data-test-subj="profilingAddDataViewInstructionsHereLink"
+                      target="_blank"
+                      href={`https://www.elastic.co/guide/en/kibana/master/api-keys.html`}
+                    >
+                      {i18n.translate('xpack.profiling.tabs.symbols.step2.instructions', {
+                        defaultMessage: 'Instructions here',
+                      })}
+                    </EuiLink>
+                  </EuiText>
+                ),
+              },
+              {
+                title: i18n.translate('xpack.profiling.tabs.symbols.step3', {
+                  defaultMessage: 'Upload symbols',
+                }),
+                content: (
+                  <div>
+                    <EuiCodeBlock paddingSize="s" isCopyable>
+                      {`./symbtool push-symbols executable -u "${symbolUrl}" -t <ES token> -e <my executable>`}
+                    </EuiCodeBlock>
+                    <EuiSpacer size="m" />
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.profiling.tabs.symbols.step3.replace"
+                        defaultMessage="Replace {es_token} etc. with the actual values. You can pass {help} to obtain a list of other arguments."
+                        values={{
+                          es_token: <EuiCode>{`<ES token>`}</EuiCode>,
+                          help: (
+                            <EuiCode>
+                              {i18n.translate('xpack.profiling.tabs.symbols.helpFlag', {
+                                defaultMessage: '--help',
+                              })}
+                            </EuiCode>
+                          ),
+                        }}
+                      />
+                    </EuiText>
+                    <EuiSpacer size="s" />
+                    <EuiText>
+                      <FormattedMessage
+                        id="xpack.profiling.tabs.symbols.step3.doc-ref"
+                        defaultMessage="Documentation for more advanced uses cases is available in {link}."
+                        values={{
+                          link: (
+                            <EuiLink
+                              data-test-subj="profilingAddDataViewTheCorrespondingDocumentationPageLink"
+                              target="_blank"
+                              href={`${core.docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${core.docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
+                            >
+                              {i18n.translate('xpack.profiling.tabs.symbols.step3.doc-ref.link', {
+                                defaultMessage: 'the corresponding documentation page',
+                              })}
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </EuiText>
+                  </div>
+                ),
+              },
+            ],
+          };
+        }),
+      },
+    ],
+    [
+      collectionAgentHost,
+      core.docLinks.DOC_LINK_VERSION,
+      core.docLinks.ELASTIC_WEBSITE_URL,
+      core.http.basePath,
+      data?.profilerAgent.version,
+      majorVersion,
+      secretToken,
+      stackVersion,
+      symbolUrl,
+    ]
+  );
 
-  const displayedTab = tabs.find((tab) => tab.key === selectedTab)!;
+  const displayedTab = useMemo(
+    () => tabs.find((tab) => tab.key === selectedTab)!,
+    [selectedTab, tabs]
+  );
 
-  const displayedSteps = displayedTab.steps ?? [];
+  useEffect(() => {
+    if (displayedTab.subTabs) {
+      const firstTabKey = displayedTab.subTabs[0].key;
+      setSelectedSubTabKey(firstTabKey);
+    }
+  }, [displayedTab]);
+
+  const selectedSubTab = selectedSubTabKey
+    ? displayedTab.subTabs?.find((tab) => tab.key === selectedSubTabKey)
+    : undefined;
+
+  const displayedSteps = displayedTab.steps || selectedSubTab?.steps || [];
+  const subTabs = displayedTab.subTabs ?? [];
 
   const isLoading = status === AsyncStatus.Loading;
 
@@ -492,8 +543,20 @@ EOF`}
                 id="xpack.profiling.tabs.debWarning"
                 defaultMessage="Due to a {linuxLink} which impacts stability, the profiling agent will refuse to run on kernel versions {versionFrom} to {versionTo}. Refer to {debianLink} and {fedoraLink} to learn more. If you are running such a kernel with a backported fix, please refer to {advancedLink} for instructions to override the precautionary measure."
                 values={{
-                  versionFrom: <strong>5.19</strong>,
-                  versionTo: <strong>6.4</strong>,
+                  versionFrom: (
+                    <strong>
+                      {i18n.translate('xpack.profiling.tabs.strong.5.19Label', {
+                        defaultMessage: '5.19',
+                      })}
+                    </strong>
+                  ),
+                  versionTo: (
+                    <strong>
+                      {i18n.translate('xpack.profiling.tabs.strong.6.4Label', {
+                        defaultMessage: '6.4',
+                      })}
+                    </strong>
+                  ),
                   linuxLink: (
                     <EuiLink
                       data-test-subj="profilingAddDataViewLinuxKernelBugLink"
@@ -545,7 +608,7 @@ EOF`}
           <EuiSpacer />
           <EuiText>
             {i18n.translate('xpack.profiling.noDataPage.addDataTitle', {
-              defaultMessage: 'Select an option below to deploy the host-agent.',
+              defaultMessage: 'Select an option below to deploy the Universal Profiling Agent.',
             })}
           </EuiText>
           <EuiSpacer />
@@ -572,16 +635,36 @@ EOF`}
                 </EuiTabs>
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner style={{ padding: '0 24px' }}>
+                <EuiSpacer size="s" />
+                {subTabs.length > 0 && (
+                  <EuiTabs style={{ padding: '0 24px' }}>
+                    {subTabs.map((tab) => {
+                      return (
+                        <EuiTab
+                          key={tab.key}
+                          onClick={() => {
+                            setSelectedSubTabKey(tab.key);
+                          }}
+                          isSelected={tab.key === selectedSubTabKey}
+                        >
+                          {tab.title}
+                        </EuiTab>
+                      );
+                    })}
+                  </EuiTabs>
+                )}
                 <EuiSpacer size="xxl" />
-                <EuiSteps
-                  steps={displayedSteps.map((step) => {
-                    return {
-                      title: step.title,
-                      children: step.content,
-                      status: 'incomplete',
-                    };
-                  })}
-                />
+                {displayedSteps.length > 0 && (
+                  <EuiSteps
+                    steps={displayedSteps.map((step) => {
+                      return {
+                        title: step.title,
+                        children: step.content,
+                        status: 'incomplete',
+                      };
+                    })}
+                  />
+                )}
               </EuiSplitPanel.Inner>
             </EuiPanel>
           </EuiSplitPanel.Outer>

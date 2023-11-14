@@ -5,7 +5,13 @@
  * 2.0.
  */
 
+// Actions Connector Execute (LLM Wrapper)
+export { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
+
+// Knowledge Base
 export { deleteKnowledgeBaseRoute } from './knowledge_base/delete_knowledge_base';
 export { getKnowledgeBaseStatusRoute } from './knowledge_base/get_knowledge_base_status';
-export { postActionsConnectorExecuteRoute } from './post_actions_connector_execute';
 export { postKnowledgeBaseRoute } from './knowledge_base/post_knowledge_base';
+
+// Evaluate
+export { postEvaluateRoute } from './evaluate/post_evaluate';

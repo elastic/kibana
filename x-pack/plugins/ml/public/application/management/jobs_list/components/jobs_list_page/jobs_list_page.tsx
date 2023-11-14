@@ -22,15 +22,13 @@ import {
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
-import {
-  KibanaContextProvider,
-  KibanaThemeProvider,
-  RedirectAppLinks,
-} from '@kbn/kibana-react-plugin/public';
+import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesContextProps, SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { PLUGIN_ID } from '../../../../../../common/constants/app';
+import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
+import { type MlFeatures, PLUGIN_ID } from '../../../../../../common/constants/app';
 
 import { checkGetManagementMlJobsResolver } from '../../../../capabilities/check_capabilities';
 
@@ -46,7 +44,7 @@ import { DocsLink } from './docs_link';
 
 const getEmptyFunctionComponent: React.FC<SpacesContextProps> = ({ children }) => <>{children}</>;
 
-export const JobsListPage: FC<{
+interface Props {
   coreStart: CoreStart;
   share: SharePluginStart;
   history: ManagementAppMountParams['history'];
@@ -55,7 +53,10 @@ export const JobsListPage: FC<{
   usageCollection?: UsageCollectionSetup;
   fieldFormats: FieldFormatsStart;
   isServerless: boolean;
-}> = ({
+  mlFeatures: MlFeatures;
+}
+
+export const JobsListPage: FC<Props> = ({
   coreStart,
   share,
   history,
@@ -64,6 +65,7 @@ export const JobsListPage: FC<{
   usageCollection,
   fieldFormats,
   isServerless,
+  mlFeatures,
 }) => {
   const [initialized, setInitialized] = useState(false);
   const [accessDenied, setAccessDenied] = useState(false);
@@ -74,8 +76,8 @@ export const JobsListPage: FC<{
   const theme$ = coreStart.theme.theme$;
 
   const mlServices = useMemo(
-    () => getMlGlobalServices(coreStart.http, isServerless, usageCollection),
-    [coreStart.http, isServerless, usageCollection]
+    () => getMlGlobalServices(coreStart.http, usageCollection),
+    [coreStart.http, usageCollection]
   );
 
   const check = async () => {
@@ -119,7 +121,11 @@ export const JobsListPage: FC<{
   }
 
   return (
-    <RedirectAppLinks application={coreStart.application}>
+    <RedirectAppLinks
+      coreStart={{
+        application: coreStart.application,
+      }}
+    >
       <I18nContext>
         <KibanaThemeProvider theme$={theme$}>
           <KibanaContextProvider
@@ -134,62 +140,64 @@ export const JobsListPage: FC<{
             }}
           >
             <ContextWrapper feature={PLUGIN_ID}>
-              <Router history={history}>
-                <EuiPageTemplate.Header
-                  pageTitle={
-                    <FormattedMessage
-                      id="xpack.ml.management.jobsList.jobsListTitle"
-                      defaultMessage="Machine Learning"
-                    />
-                  }
-                  description={
-                    <FormattedMessage
-                      id="xpack.ml.management.jobsList.jobsListTagline"
-                      defaultMessage="View, export, and import machine learning analytics and anomaly detection items."
-                    />
-                  }
-                  rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
-                  bottomBorder
-                  paddingSize={'none'}
-                />
-
-                <EuiSpacer size="l" />
-
-                <EuiPageTemplate.Section
-                  paddingSize={'none'}
-                  id="kibanaManagementMLSection"
-                  data-test-subj="mlPageStackManagementJobsList"
-                >
-                  <EuiFlexGroup>
-                    <EuiFlexItem grow={false}>
-                      <>
-                        <EuiButtonEmpty
-                          onClick={() => setShowSyncFlyout(true)}
-                          data-test-subj="mlStackMgmtSyncButton"
-                        >
-                          {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
-                            defaultMessage: 'Synchronize saved objects',
-                          })}
-                        </EuiButtonEmpty>
-                        {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
-                        <EuiSpacer size="s" />
-                      </>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ExportJobsFlyout
-                        isDisabled={false}
-                        currentTab={
-                          currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
-                        }
+              <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
+                <Router history={history}>
+                  <EuiPageTemplate.Header
+                    pageTitle={
+                      <FormattedMessage
+                        id="xpack.ml.management.jobsList.jobsListTitle"
+                        defaultMessage="Machine Learning"
                       />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <ImportJobsFlyout isDisabled={false} />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                  <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
-                </EuiPageTemplate.Section>
-              </Router>
+                    }
+                    description={
+                      <FormattedMessage
+                        id="xpack.ml.management.jobsList.jobsListTagline"
+                        defaultMessage="Identify, analyze, and process your data using advanced analysis techniques."
+                      />
+                    }
+                    rightSideItems={[<DocsLink currentTabId={currentTabId} />]}
+                    bottomBorder
+                    paddingSize={'none'}
+                  />
+
+                  <EuiSpacer size="l" />
+
+                  <EuiPageTemplate.Section
+                    paddingSize={'none'}
+                    id="kibanaManagementMLSection"
+                    data-test-subj="mlPageStackManagementJobsList"
+                  >
+                    <EuiFlexGroup>
+                      <EuiFlexItem grow={false}>
+                        <>
+                          <EuiButtonEmpty
+                            onClick={() => setShowSyncFlyout(true)}
+                            data-test-subj="mlStackMgmtSyncButton"
+                          >
+                            {i18n.translate('xpack.ml.management.jobsList.syncFlyoutButton', {
+                              defaultMessage: 'Synchronize saved objects',
+                            })}
+                          </EuiButtonEmpty>
+                          {showSyncFlyout && <JobSpacesSyncFlyout onClose={onCloseSyncFlyout} />}
+                          <EuiSpacer size="s" />
+                        </>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ExportJobsFlyout
+                          isDisabled={false}
+                          currentTab={
+                            currentTabId === 'trained-model' ? 'anomaly-detector' : currentTabId
+                          }
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <ImportJobsFlyout isDisabled={false} />
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                    <SpaceManagement spacesApi={spacesApi} setCurrentTab={setCurrentTabId} />
+                  </EuiPageTemplate.Section>
+                </Router>
+              </EnabledFeaturesContextProvider>
             </ContextWrapper>
           </KibanaContextProvider>
         </KibanaThemeProvider>

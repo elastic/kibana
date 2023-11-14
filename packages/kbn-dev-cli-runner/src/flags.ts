@@ -27,6 +27,7 @@ export interface FlagOptions {
   allowUnexpected?: boolean;
   guessTypesForUnexpectedFlags?: boolean;
   help?: string;
+  examples?: string;
   alias?: { [key: string]: string | string[] };
   boolean?: string[];
   string?: string[];
@@ -47,6 +48,7 @@ export function mergeFlagOptions(global: FlagOptions = {}, local: FlagOptions = 
     },
 
     help: local.help,
+    examples: local.examples,
 
     allowUnexpected: !!(global.allowUnexpected || local.allowUnexpected),
     guessTypesForUnexpectedFlags: !!(global.allowUnexpected || local.allowUnexpected),

@@ -11,9 +11,10 @@ import type { TimeRange } from '@kbn/es-query';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
 import { type BrushEndArgs, LensChart, type OnFilterEvent } from '../../../../lens';
 import { METRIC_CHART_HEIGHT } from '../../../constants';
-import { useDateRangeProviderContext } from '../../../hooks/use_date_range';
+import { useDatePickerContext } from '../../../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
 import type { XYConfig } from '../../../../../common/visualizations';
+import { useLoadingStateContext } from '../../../hooks/use_loading_state';
 
 export interface ChartProps extends XYConfig {
   visualOptions?: XYVisualOptions;
@@ -39,7 +40,8 @@ export const Chart = ({
   assetName,
   ...props
 }: ChartProps) => {
-  const { setDateRange } = useDateRangeProviderContext();
+  const { setDateRange } = useDatePickerContext();
+  const { searchSessionId } = useLoadingStateContext();
 
   const dataView = useMemo(() => {
     return dataViewOrigin === 'metrics' ? metricsDataView : logsDataView;
@@ -89,6 +91,7 @@ export const Chart = ({
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
       visualOptions={visualOptions}
+      searchSessionId={searchSessionId}
       layers={layers}
       filters={filters}
       title={title}

@@ -14,11 +14,10 @@ jest.mock('../../../../package.json', () => ({
 describe('getEsNames()', () => {
   test('works as expected', () => {
     const base = 'XYZ';
-    const kibanaVersion = '1.2.3';
-    const esNames = getEsNames(base, kibanaVersion);
+    const esNames = getEsNames(base);
     expect(esNames.base).toEqual(base);
-    expect(esNames.dataStream).toEqual(`${base}-event-log-${kibanaVersion}`);
+    expect(esNames.dataStream).toEqual(`${base}-event-log-ds`);
     expect(esNames.indexPattern).toEqual(`${base}-event-log-*`);
-    expect(esNames.indexTemplate).toEqual(`${base}-event-log-${kibanaVersion}-template`);
+    expect(esNames.indexTemplate).toEqual(`${base}-event-log-template`);
   });
 });

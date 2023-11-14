@@ -18,10 +18,10 @@ import {
 } from '@elastic/eui';
 
 import type { SyncSavedObjectResponse, SyncResult } from '../../../../common/types/saved_objects';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 export const SyncList: FC<{ syncItems: SyncSavedObjectResponse | null }> = ({ syncItems }) => {
-  const [isADEnabled] = usePermissionCheck(['isADEnabled']);
+  const { isADEnabled } = useEnabledFeatures();
 
   if (syncItems === null) {
     return null;

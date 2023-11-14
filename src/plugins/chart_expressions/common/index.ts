@@ -13,3 +13,4 @@ export {
   isOnAggBasedEditor,
 } from './utils';
 export type { Simplify, MakeOverridesSerializable } from './types';
+export { getColorCategories } from './color_categories';

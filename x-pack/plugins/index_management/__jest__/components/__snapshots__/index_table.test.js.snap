@@ -8,8 +8,6 @@ exports[`index table close index button works from context menu 1`] = `"closing.
 
 exports[`index table close index button works from context menu 2`] = `"closed"`;
 
-exports[`index table edit index button works from context menu 1`] = `"Edit settings"`;
-
 exports[`index table flush button works from context menu 1`] = `"flushing..."`;
 
 exports[`index table flush button works from context menu 2`] = `"open"`;
@@ -114,9 +112,9 @@ Array [
 
 exports[`index table should show the right context menu options when one index is selected and closed 1`] = `
 Array [
+  "Show index overview",
   "Show index settings",
   "Show index mapping",
-  "Edit index settings",
   "Open index",
   "Delete index",
 ]
@@ -124,10 +122,10 @@ Array [
 
 exports[`index table should show the right context menu options when one index is selected and open 1`] = `
 Array [
+  "Show index overview",
   "Show index settings",
   "Show index mapping",
   "Show index stats",
-  "Edit index settings",
   "Close index",
   "Force merge index",
   "Refresh index",
@@ -173,9 +171,3 @@ Array [
   "testy90",
 ]
 `;
-
-exports[`index table show mappings button works from context menu 1`] = `"Mappings"`;
-
-exports[`index table show settings button works from context menu 1`] = `"Settings"`;
-
-exports[`index table show stats button works from context menu 1`] = `"Stats"`;

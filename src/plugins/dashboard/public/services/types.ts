@@ -19,7 +19,7 @@ import { DashboardCoreContextService } from './core_context/types';
 import { DashboardCustomBrandingService } from './custom_branding/types';
 import { DashboardCapabilitiesService } from './dashboard_capabilities/types';
 import { DashboardContentManagementService } from './dashboard_content_management/types';
-import { DashboardSessionStorageServiceType } from './dashboard_session_storage/types';
+import { DashboardBackupServiceType } from './dashboard_backup/types';
 import { DashboardDataService } from './data/types';
 import { DashboardDataViewEditorService } from './data_view_editor/types';
 import { DashboardDocumentationLinksService } from './documentation_links/types';
@@ -44,7 +44,7 @@ export type DashboardPluginServiceParams = KibanaPluginServiceParams<DashboardSt
   initContext: PluginInitializerContext; // need a custom type so that initContext is a required parameter for initializerContext
 };
 export interface DashboardServices {
-  dashboardSessionStorage: DashboardSessionStorageServiceType;
+  dashboardBackup: DashboardBackupServiceType;
   dashboardContentManagement: DashboardContentManagementService;
 
   analytics: DashboardAnalyticsService;

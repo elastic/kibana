@@ -56,6 +56,7 @@ export {
   ECS_COMPONENT_TEMPLATE_NAME,
   ECS_CONTEXT,
   TOTAL_FIELDS_LIMIT,
+  VALID_ALERT_INDEX_PREFIXES,
   getComponentTemplate,
   type PublicFrameworkAlertsService,
   createOrUpdateIlmPolicy,
@@ -64,6 +65,8 @@ export {
   createOrUpdateIndexTemplate,
   createConcreteWriteIndex,
   installWithTimeout,
+  isValidAlertIndexName,
+  InstallShutdownError,
 } from './alerts_service';
 export { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 

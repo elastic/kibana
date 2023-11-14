@@ -76,6 +76,7 @@ describe('validateMonitor', () => {
       ],
       [ConfigKey.NAMESPACE]: 'testnamespace',
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.MULTISTEP,
+      [ConfigKey.MAX_ATTEMPTS]: 2,
     };
     testMetaData = {
       is_tls_enabled: false,
@@ -477,6 +478,7 @@ function getJsonPayload() {
     '    }' +
     '  },' +
     '  "max_redirects": "3",' +
+    '  "max_attempts": 2,' +
     '  "password": "test",' +
     '  "urls": "https://nextjs-test-synthetics.vercel.app/api/users",' +
     '  "proxy_url": "http://proxy.com",' +

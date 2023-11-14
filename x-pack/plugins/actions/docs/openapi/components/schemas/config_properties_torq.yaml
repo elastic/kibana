@@ -1,0 +1,9 @@
+title: Connector request properties for a Torq connector
+description: Defines properties for connectors when type is `.torq`.
+type: object
+required:
+  - webhookIntegrationUrl
+properties:
+  webhookIntegrationUrl:
+    description: The endpoint URL of the Elastic Security integration in Torq.
+    type: string

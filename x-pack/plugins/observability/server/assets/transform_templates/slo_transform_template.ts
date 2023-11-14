@@ -36,6 +36,7 @@ export const getSLOTransformTemplate = (
   dest: destination,
   settings: {
     deduce_mappings: false,
+    unattended: true,
   },
   sync: {
     time: {

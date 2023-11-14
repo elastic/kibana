@@ -14,7 +14,11 @@ import type { DefaultInspectorAdapters, Datatable } from '@kbn/expressions-plugi
 import type { IKibanaSearchResponse } from '@kbn/data-plugin/public';
 import type { estypes } from '@elastic/elasticsearch';
 import type { TimeRange } from '@kbn/es-query';
-import type { EmbeddableComponentProps, LensEmbeddableInput } from '@kbn/lens-plugin/public';
+import type {
+  EmbeddableComponentProps,
+  LensEmbeddableInput,
+  LensEmbeddableOutput,
+} from '@kbn/lens-plugin/public';
 import { RequestStatus } from '@kbn/inspector-plugin/public';
 import type { Observable } from 'rxjs';
 import {
@@ -103,6 +107,7 @@ export function Histogram({
     timeRange: getTimeRange(),
     timeInterval,
     isPlainRecord,
+    timeField: dataView.timeFieldName,
   });
   const chartRef = useRef<HTMLDivElement | null>(null);
   const { height: containerHeight, width: containerWidth } = useResizeObserver(chartRef.current);
@@ -118,7 +123,11 @@ export function Histogram({
   }, [attributes, containerHeight, containerWidth]);
 
   const onLoad = useStableCallback(
-    (isLoading: boolean, adapters: Partial<DefaultInspectorAdapters> | undefined) => {
+    (
+      isLoading: boolean,
+      adapters: Partial<DefaultInspectorAdapters> | undefined,
+      lensEmbeddableOutput$?: Observable<LensEmbeddableOutput>
+    ) => {
       const lensRequest = adapters?.requests?.getRequests()[0];
       const requestFailed = lensRequest?.status === RequestStatus.ERROR;
       const json = lensRequest?.response?.json as
@@ -155,7 +164,7 @@ export function Histogram({
         setBucketInterval(newBucketInterval);
       }
 
-      onChartLoad?.({ adapters: adapters ?? {} });
+      onChartLoad?.({ adapters: adapters ?? {}, embeddableOutput$: lensEmbeddableOutput$ });
     }
   );
 

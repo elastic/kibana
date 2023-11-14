@@ -8,19 +8,20 @@
 import React, { useMemo } from 'react';
 import { ScopedHistory } from '@kbn/core-application-browser';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { DiscoverAppState, DiscoverStart } from '@kbn/discover-plugin/public';
+import { DiscoverAppState } from '@kbn/discover-plugin/public';
 import type { BehaviorSubject } from 'rxjs';
+import { CoreStart } from '@kbn/core/public';
 import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { HIDE_ANNOUNCEMENTS } from '@kbn/discover-utils';
-import {
-  createLogExplorerProfileCustomizations,
-  CreateLogExplorerProfileCustomizationsDeps,
-} from '../../customizations/log_explorer_profile';
+import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
 import { createPropertyGetProxy } from '../../utils/proxies';
 import { LogExplorerProfileContext } from '../../state_machines/log_explorer_profile';
+import { LogExplorerStartDeps } from '../../types';
+import { LogExplorerCustomizations } from './types';
 
-export interface CreateLogExplorerArgs extends CreateLogExplorerProfileCustomizationsDeps {
-  discover: DiscoverStart;
+export interface CreateLogExplorerArgs {
+  core: CoreStart;
+  plugins: LogExplorerStartDeps;
 }
 
 export interface LogExplorerStateContainer {
@@ -29,24 +30,26 @@ export interface LogExplorerStateContainer {
 }
 
 export interface LogExplorerProps {
+  customizations?: LogExplorerCustomizations;
   scopedHistory: ScopedHistory;
   state$?: BehaviorSubject<LogExplorerStateContainer>;
 }
 
-export const createLogExplorer = ({
-  core,
-  data,
-  discover: { DiscoverContainer },
-}: CreateLogExplorerArgs) => {
+export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
+  const {
+    data,
+    discover: { DiscoverContainer },
+  } = plugins;
+
   const overrideServices = {
     data: createDataServiceProxy(data),
     uiSettings: createUiSettingsServiceProxy(core.uiSettings),
   };
 
-  return ({ scopedHistory, state$ }: LogExplorerProps) => {
+  return ({ customizations = {}, scopedHistory, state$ }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, data, state$ })],
-      [state$]
+      () => [createLogExplorerProfileCustomizations({ core, customizations, plugins, state$ })],
+      [customizations, state$]
     );
 
     return (

@@ -18,11 +18,13 @@ describe('Get Knowledge Base Status Route', () => {
 
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
+  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    getKnowledgeBaseStatusRoute(server.router);
+    getKnowledgeBaseStatusRoute(server.router, mockGetElser);
   });
 
   describe('Status codes', () => {

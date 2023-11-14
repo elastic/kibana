@@ -57,7 +57,7 @@ export class TimelinePageObject extends FtrService {
     await this.showOpenTimelinePopupFromBottomBar();
     await this.testSubjects.click('open-timeline-button');
     await this.testSubjects.findService.clickByCssSelector(
-      `${testSubjSelector('open-timeline-modal')} ${testSubjSelector(`title-${id}`)}`
+      `${testSubjSelector('open-timeline-modal')} ${testSubjSelector(`timeline-title-${id}`)}`
     );
 
     await this.ensureTimelineIsOpen();

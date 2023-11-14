@@ -60,7 +60,7 @@ export const hostsRelatedUsers: SecuritySolutionFactory<RelatedEntitiesQueries.r
           relatedUsers,
           deps.spaceId,
           deps.esClient,
-          options.isNewRiskScoreModuleAvailable
+          options.isNewRiskScoreModuleInstalled
         )
       : relatedUsers;
 
@@ -77,14 +77,14 @@ async function addUserRiskData(
   relatedUsers: RelatedUser[],
   spaceId: string,
   esClient: IScopedClusterClient,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): Promise<RelatedUser[]> {
   const userNames = relatedUsers.map((item) => item.user);
   const userRiskData = await getUserRiskData(
     esClient,
     spaceId,
     userNames,
-    isNewRiskScoreModuleAvailable
+    isNewRiskScoreModuleInstalled
   );
   const usersRiskByUserName: Record<string, RiskSeverity> | undefined =
     userRiskData?.hits.hits.reduce(

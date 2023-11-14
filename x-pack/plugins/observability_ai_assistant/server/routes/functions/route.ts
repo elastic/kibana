@@ -10,13 +10,13 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { nonEmptyStringRt, toBooleanRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
 import { omit } from 'lodash';
-import { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
+import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import {
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
 } from '@kbn/rule-registry-plugin/common/technical_rule_data_field_names';
-import type { KnowledgeBaseEntry } from '../../../common/types';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
+import type { RecalledEntry } from '../../service/kb_service';
 
 const functionElasticsearchRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/elasticsearch',
@@ -157,23 +157,34 @@ const functionAlertsRoute = createObservabilityAIAssistantServerRoute({
 const functionRecallRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /internal/observability_ai_assistant/functions/recall',
   params: t.type({
-    body: t.type({
-      queries: t.array(nonEmptyStringRt),
-    }),
+    body: t.intersection([
+      t.type({
+        queries: t.array(nonEmptyStringRt),
+      }),
+      t.partial({
+        contexts: t.array(t.string),
+      }),
+    ]),
   }),
   options: {
     tags: ['access:ai_assistant'],
   },
   handler: async (
     resources
-  ): Promise<{ entries: Array<Pick<KnowledgeBaseEntry, 'text' | 'id'>> }> => {
+  ): Promise<{
+    entries: RecalledEntry[];
+  }> => {
     const client = await resources.service.getClient({ request: resources.request });
+
+    const {
+      body: { queries, contexts },
+    } = resources.params;
 
     if (!client) {
       throw notImplemented();
     }
 
-    return client.recall(resources.params.body.queries);
+    return client.recall({ queries, contexts });
   },
 });
 
@@ -265,6 +276,78 @@ const setupKnowledgeBaseRoute = createObservabilityAIAssistantServerRoute({
   },
 });
 
+const functionGetDatasetInfoRoute = createObservabilityAIAssistantServerRoute({
+  endpoint: 'POST /internal/observability_ai_assistant/functions/get_dataset_info',
+  params: t.type({
+    body: t.type({
+      index: t.string,
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (
+    resources
+  ): Promise<{
+    indices: string[];
+    fields: Array<{ name: string; description: string; type: string }>;
+  }> => {
+    const esClient = (await resources.context.core).elasticsearch.client.asCurrentUser;
+
+    const savedObjectsClient = (await resources.context.core).savedObjects.getClient();
+
+    const index = resources.params.body.index;
+
+    let indices: string[] = [];
+
+    try {
+      const body = await esClient.indices.resolveIndex({
+        name: index === '' ? '*' : index,
+        expand_wildcards: 'open',
+      });
+      indices = [...body.indices.map((i) => i.name), ...body.data_streams.map((d) => d.name)];
+    } catch (e) {
+      indices = [];
+    }
+
+    if (index === '') {
+      return {
+        indices,
+        fields: [],
+      };
+    }
+
+    if (indices.length === 0) {
+      return {
+        indices,
+        fields: [],
+      };
+    }
+
+    const dataViews = await (
+      await resources.plugins.dataViews.start()
+    ).dataViewsServiceFactory(savedObjectsClient, esClient);
+
+    const fields = await dataViews.getFieldsForWildcard({
+      pattern: index,
+    });
+
+    // else get all the fields for the found dataview
+    return {
+      indices: [index],
+      fields: fields.flatMap((field) => {
+        return (field.esTypes ?? [field.type]).map((type) => {
+          return {
+            name: field.name,
+            description: field.customLabel || '',
+            type,
+          };
+        });
+      }),
+    };
+  },
+});
+
 export const functionRoutes = {
   ...functionElasticsearchRoute,
   ...functionRecallRoute,
@@ -272,4 +355,5 @@ export const functionRoutes = {
   ...setupKnowledgeBaseRoute,
   ...getKnowledgeBaseStatus,
   ...functionAlertsRoute,
+  ...functionGetDatasetInfoRoute,
 };

@@ -26,14 +26,14 @@ export const NumberInput = ({
   field,
   unsavedChange,
   isSavingEnabled,
-  onChange: onChangeProp,
+  onInputChange,
 }: NumberInputProps) => {
   const onChange: EuiFieldNumberProps['onChange'] = (event) => {
     const inputValue = Number(event.target.value);
     onUpdate({ type: field.type, unsavedValue: inputValue });
   };
 
-  const onUpdate = useUpdate({ onChange: onChangeProp, field });
+  const onUpdate = useUpdate({ onInputChange, field });
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;

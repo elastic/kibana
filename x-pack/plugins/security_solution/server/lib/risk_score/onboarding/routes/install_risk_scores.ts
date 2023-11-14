@@ -23,42 +23,44 @@ export const installRiskScoresRoute = (
   logger: Logger,
   security: SetupPlugins['security']
 ) => {
-  router.post(
-    {
+  router.versioned
+    .post({
+      access: 'internal',
       path: INTERNAL_RISK_SCORE_URL,
-      validate: onboardingRiskScoreRequestBody,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
-    },
-    async (context, request, response) => {
-      const siemResponse = buildSiemResponse(response);
-      const { riskScoreEntity } = request.body;
+    })
+    .addVersion(
+      { validate: { request: onboardingRiskScoreRequestBody }, version: '1' },
+      async (context, request, response) => {
+        const siemResponse = buildSiemResponse(response);
+        const { riskScoreEntity } = request.body;
 
-      try {
-        const securitySolution = await context.securitySolution;
+        try {
+          const securitySolution = await context.securitySolution;
 
-        const spaceId = securitySolution?.getSpaceId();
+          const spaceId = securitySolution?.getSpaceId();
 
-        const { client } = (await context.core).elasticsearch;
-        const esClient = client.asCurrentUser;
-        const res = await installRiskScoreModule({
-          esClient,
-          logger,
-          riskScoreEntity,
-          spaceId,
-        });
+          const { client } = (await context.core).elasticsearch;
+          const esClient = client.asCurrentUser;
+          const res = await installRiskScoreModule({
+            esClient,
+            logger,
+            riskScoreEntity,
+            spaceId,
+          });
 
-        return response.ok({
-          body: res,
-        });
-      } catch (err) {
-        const error = transformError(err);
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
+          return response.ok({
+            body: res,
+          });
+        } catch (err) {
+          const error = transformError(err);
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
+          });
+        }
       }
-    }
-  );
+    );
 };

@@ -546,12 +546,12 @@
           },
           {
             "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.DatePickerDependencies.isServerless",
+            "id": "def-common.DatePickerDependencies.showFrozenDataTierChoice",
             "type": "CompoundType",
             "tags": [],
-            "label": "isServerless",
+            "label": "showFrozenDataTierChoice",
             "description": [
-              "\nOptional flag to indicate whether kibana is running in serverless"
+              "\nOptional flag to disable the frozen data tier choice."
             ],
             "signature": [
               "boolean | undefined"
@@ -947,22 +947,6 @@
                 "text": "SetFullTimeRangeApiPath"
               },
               " | undefined"
-            ],
-            "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/ml-date-picker",
-            "id": "def-common.FullTimeRangeSelectorProps.hideFrozenDataTierChoice",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "hideFrozenDataTierChoice",
-            "description": [
-              "\nOptional flag to disable the frozen data tier choice."
-            ],
-            "signature": [
-              "boolean | undefined"
             ],
             "path": "x-pack/packages/ml/date_picker/src/components/full_time_range_selector.tsx",
             "deprecated": false,

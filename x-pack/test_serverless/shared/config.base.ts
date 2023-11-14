@@ -121,6 +121,21 @@ export default async () => {
             appenders: ['deprecation'],
           },
         ])}`,
+        // Add meta info to the logs so FTR logs are more actionable
+        `--logging.appenders.default=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: '[%date][%level][%logger] %message %meta',
+          },
+        })}`,
+        `--logging.appenders.console=${JSON.stringify({
+          type: 'console',
+          layout: {
+            type: 'pattern',
+            pattern: '[%date][%level][%logger] %message %meta',
+          },
+        })}`,
         // This ensures that we register the Security SAML API endpoints.
         // In the real world the SAML config is injected by control plane.
         `--plugin-path=${samlIdPPlugin}`,

@@ -14,3 +14,6 @@ export const POST_ACTIONS_CONNECTOR_EXECUTE = `${BASE_PATH}/actions/connector/{c
 
 // Knowledge Base
 export const KNOWLEDGE_BASE = `${BASE_PATH}/knowledge_base/{resource?}`;
+
+// Model Evaluation
+export const EVALUATE = `${BASE_PATH}/evaluate`;

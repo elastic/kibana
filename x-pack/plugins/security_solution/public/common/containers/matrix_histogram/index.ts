@@ -10,7 +10,7 @@ import { getOr, noop } from 'lodash/fp';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
-import { isCompleteResponse } from '@kbn/data-plugin/common';
+import { isRunningResponse } from '@kbn/data-plugin/common';
 import type { MatrixHistogramRequestOptionsInput } from '../../../../common/api/search_strategy';
 import type { MatrixHistogramQueryProps } from '../../components/matrix_histogram/types';
 import type { inputsModel } from '../../store';
@@ -121,7 +121,7 @@ export const useMatrixHistogram = ({
           })
           .subscribe({
             next: (response) => {
-              if (isCompleteResponse(response)) {
+              if (!isRunningResponse(response)) {
                 const histogramBuckets: Buckets = getOr(
                   bucketEmpty,
                   MatrixHistogramTypeToAggName[histogramType],

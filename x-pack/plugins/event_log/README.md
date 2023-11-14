@@ -44,7 +44,7 @@ prior releases, it was an alias with an initial index set up, with the
 alias used to deal with rolled over indices from ILM.  With the data stream,
 there's a little less set up, and the bulk writing is slightly different.
 
-The default data stream / alias name is `.kibana-event-log-${kibanaVersion}`.
+The default data stream / alias name is `.kibana-event-log-ds`.
 To search across all versions' event logs, use `.kibana-event-log-*`; 
 it will search over data streams and aliases as expected.
 

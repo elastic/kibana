@@ -6,7 +6,6 @@
  */
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/observability-plugin/common/constants';
 import { i18n } from '@kbn/i18n';
 import {
   SubFeaturePrivilegeGroupConfig,
@@ -26,11 +25,7 @@ const UPTIME_RULE_TYPES = [
   'xpack.uptime.alerts.durationAnomaly',
 ];
 
-const ruleTypes = [
-  ...UPTIME_RULE_TYPES,
-  ...SYNTHETICS_RULE_TYPES,
-  OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-];
+const ruleTypes = [...UPTIME_RULE_TYPES, ...SYNTHETICS_RULE_TYPES];
 
 const elasticManagedLocationsEnabledPrivilege: SubFeaturePrivilegeGroupConfig = {
   groupType: 'independent' as SubFeaturePrivilegeGroupType,

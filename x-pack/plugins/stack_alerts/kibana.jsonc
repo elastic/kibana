@@ -24,6 +24,7 @@
     "requiredBundles": [
       "esUiShared",
       "textBasedLanguages"
-    ]
+    ],
+    "extraPublicDirs": ["common"]
   }
 }

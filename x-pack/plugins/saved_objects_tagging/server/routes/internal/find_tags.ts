@@ -33,7 +33,7 @@ export const registerInternalFindTagsRoute = (router: TagsPluginRouter) => {
         perPage: query.perPage,
         search: query.search,
         type: [tagSavedObjectTypeName],
-        searchFields: ['title', 'description'],
+        searchFields: ['name', 'description'],
       });
 
       const tags = findResponse.saved_objects.map(savedObjectToTag);

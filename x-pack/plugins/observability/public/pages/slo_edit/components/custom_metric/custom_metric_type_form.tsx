@@ -15,6 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ALL_VALUE } from '@kbn/slo-schema/src/schema/common';
 import React from 'react';
 import { useFormContext } from 'react-hook-form';
 import { useFetchIndexPatternFields } from '../../../../hooks/slo/use_fetch_index_pattern_fields';
@@ -27,6 +28,8 @@ import { MetricIndicator } from './metric_indicator';
 
 export { NEW_CUSTOM_METRIC } from './metric_indicator';
 
+const SUPPORTED_METRIC_FIELD_TYPES = ['number', 'histogram'];
+
 export function CustomMetricIndicatorTypeForm() {
   const { watch } = useFormContext<CreateSLOForm>();
   const index = watch('indicator.params.index');
@@ -34,6 +37,9 @@ export function CustomMetricIndicatorTypeForm() {
     useFetchIndexPatternFields(index);
   const timestampFields = indexFields.filter((field) => field.type === 'date');
   const partitionByFields = indexFields.filter((field) => field.aggregatable);
+  const metricFields = indexFields.filter((field) =>
+    SUPPORTED_METRIC_FIELD_TYPES.includes(field.type)
+  );
 
   return (
     <>
@@ -115,7 +121,7 @@ export function CustomMetricIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <MetricIndicator
             type="good"
-            indexFields={indexFields}
+            metricFields={metricFields}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -136,7 +142,7 @@ export function CustomMetricIndicatorTypeForm() {
           <EuiSpacer size="s" />
           <MetricIndicator
             type="total"
-            indexFields={indexFields}
+            metricFields={metricFields}
             isLoadingIndex={isIndexFieldsLoading}
           />
         </EuiFlexItem>
@@ -148,6 +154,7 @@ export function CustomMetricIndicatorTypeForm() {
         <IndexFieldSelector
           indexFields={partitionByFields}
           name="groupBy"
+          defaultValue={ALL_VALUE}
           label={
             <span>
               {i18n.translate('xpack.observability.slo.sloEdit.groupBy.label', {

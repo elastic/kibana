@@ -38,6 +38,7 @@ const DEFAULT_VALUES: TextExpansionCalloutValues = {
   textExpansionModel: undefined,
   textExpansionModelPollTimeoutId: null,
   textExpansionError: null,
+  elserModelId: '.elser_model_2',
 };
 
 jest.useFakeTimers();
@@ -79,19 +80,19 @@ describe('TextExpansionCalloutLogic', () => {
     });
     it('uses the correct title and message from a create error', () => {
       expect(getTextExpansionError(error, undefined, undefined)).toEqual({
-        title: 'Error with ELSER deployment',
+        title: 'Error with ELSER v2 deployment',
         message: error.body?.message,
       });
     });
     it('uses the correct title and message from a fetch error', () => {
       expect(getTextExpansionError(undefined, error, undefined)).toEqual({
-        title: 'Error fetching ELSER model',
+        title: 'Error fetching ELSER v2 model',
         message: error.body?.message,
       });
     });
     it('uses the correct title and message from a start error', () => {
       expect(getTextExpansionError(undefined, undefined, error)).toEqual({
-        title: 'Error starting ELSER deployment',
+        title: 'Error starting ELSER v2 deployment',
         message: error.body?.message,
       });
     });
@@ -302,7 +303,7 @@ describe('TextExpansionCalloutLogic', () => {
     describe('textExpansionError', () => {
       const error = {
         body: {
-          error: 'Error with ELSER deployment',
+          error: 'Error with ELSER v2 deployment',
           message: 'Mocked error message',
           statusCode: 500,
         },
@@ -317,21 +318,21 @@ describe('TextExpansionCalloutLogic', () => {
       it('returns extracted error for create', () => {
         CreateTextExpansionModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
-          title: 'Error with ELSER deployment',
+          title: 'Error with ELSER v2 deployment',
           message: 'Mocked error message',
         });
       });
       it('returns extracted error for fetch', () => {
         FetchTextExpansionModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
-          title: 'Error fetching ELSER model',
+          title: 'Error fetching ELSER v2 model',
           message: 'Mocked error message',
         });
       });
       it('returns extracted error for start', () => {
         StartTextExpansionModelApiLogic.actions.apiError(error);
         expect(TextExpansionCalloutLogic.values.textExpansionError).toStrictEqual({
-          title: 'Error starting ELSER deployment',
+          title: 'Error starting ELSER v2 deployment',
           message: 'Mocked error message',
         });
       });

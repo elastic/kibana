@@ -8,6 +8,7 @@
 import type { ElasticsearchClient, Logger, SavedObjectsFindResult } from '@kbn/core/server';
 import {
   EQL_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
   INDICATOR_RULE_TYPE_ID,
   ML_RULE_TYPE_ID,
   QUERY_RULE_TYPE_ID,
@@ -88,6 +89,7 @@ const _getEventLogByTypeAndStatus = async ({
     ruleStatuses: ['succeeded', 'failed', 'partial failure'],
     ruleTypes: [
       EQL_RULE_TYPE_ID,
+      ESQL_RULE_TYPE_ID,
       INDICATOR_RULE_TYPE_ID,
       ML_RULE_TYPE_ID,
       QUERY_RULE_TYPE_ID,

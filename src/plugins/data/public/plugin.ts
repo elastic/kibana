@@ -25,7 +25,6 @@ import { SearchService } from './search/search_service';
 import { QueryService } from './query';
 import {
   setIndexPatterns,
-  setNotifications,
   setOverlays,
   setSearchService,
   setUiSettings,
@@ -121,10 +120,9 @@ export class DataPublicPlugin
 
   public start(
     core: CoreStart,
-    { uiActions, fieldFormats, dataViews, screenshotMode }: DataStartDependencies
+    { uiActions, fieldFormats, dataViews, inspector, screenshotMode }: DataStartDependencies
   ): DataPublicPluginStart {
-    const { uiSettings, notifications, overlays } = core;
-    setNotifications(notifications);
+    const { uiSettings, overlays } = core;
     setOverlays(overlays);
     setUiSettings(uiSettings);
     setIndexPatterns(dataViews);
@@ -138,6 +136,7 @@ export class DataPublicPlugin
     const search = this.searchService.start(core, {
       fieldFormats,
       indexPatterns: dataViews,
+      inspector,
       screenshotMode,
       scriptedFieldsEnabled: dataViews.scriptedFieldsEnabled,
     });

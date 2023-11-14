@@ -27,6 +27,7 @@ interface TagCloudCommonParams {
   metric: ExpressionValueVisDimension | string;
   bucket?: ExpressionValueVisDimension | string;
   palette: PaletteOutput;
+  colorMapping?: string; // JSON stringified object of the color mapping
 }
 
 export interface TagCloudVisConfig extends TagCloudCommonParams {

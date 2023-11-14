@@ -9,13 +9,11 @@
 import React from 'react';
 import { render, fireEvent } from '@testing-library/react';
 
-import { SettingType } from '@kbn/management-settings-types';
-
 import { wrap } from '../mocks';
 import { InputResetLink, InputResetLinkProps } from './reset_link';
 
 describe('InputResetLink', () => {
-  const defaultProps: InputResetLinkProps<SettingType> = {
+  const defaultProps: InputResetLinkProps = {
     field: {
       type: 'string',
       id: 'test',

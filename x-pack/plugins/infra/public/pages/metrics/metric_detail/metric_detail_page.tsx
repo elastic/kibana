@@ -8,14 +8,14 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useMetricsBreadcrumbs } from '../../../hooks/use_metrics_breadcrumbs';
 import { useMetadata } from '../../../components/asset_details/hooks/use_metadata';
 import { useSourceContext } from '../../../containers/metrics_source';
 import { InfraLoadingPanel } from '../../../components/loading';
-import { findInventoryModel } from '../../../../common/inventory_models';
 import type { NavItem } from './lib/side_nav_context';
 import { NodeDetailsPage } from './components/node_details_page';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
 import { useMetricsTimeContext } from './hooks/use_metrics_time';
 import { MetricsPageTemplate } from '../page_template';
 
@@ -42,7 +42,13 @@ export const MetricDetailPage = () => {
     loading: metadataLoading,
     cloudId,
     metadata,
-  } = useMetadata(nodeId, nodeType, inventoryModel.requiredMetrics, sourceId, parsedTimeRange);
+  } = useMetadata({
+    assetId: nodeId,
+    assetType: nodeType,
+    requiredMetrics: inventoryModel.requiredMetrics,
+    sourceId,
+    timeRange: parsedTimeRange,
+  });
 
   const [sideNav, setSideNav] = useState<NavItem[]>([]);
 

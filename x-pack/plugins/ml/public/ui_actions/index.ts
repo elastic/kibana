@@ -34,24 +34,17 @@ export { SWIM_LANE_SELECTION_TRIGGER };
  */
 export function registerMlUiActions(
   uiActions: UiActionsSetup,
-  core: CoreSetup<MlStartDependencies, MlPluginStart>,
-  isServerless: boolean
+  core: CoreSetup<MlStartDependencies, MlPluginStart>
 ) {
   // Initialize actions
-  const editSwimlanePanelAction = createEditSwimlanePanelAction(
-    core.getStartServices,
-    isServerless
-  );
+  const editSwimlanePanelAction = createEditSwimlanePanelAction(core.getStartServices);
   const openInExplorerAction = createOpenInExplorerAction(core.getStartServices);
   const applyInfluencerFiltersAction = createApplyInfluencerFiltersAction(core.getStartServices);
   const applyEntityFieldFilterAction = createApplyEntityFieldFiltersAction(core.getStartServices);
   const applyTimeRangeSelectionAction = createApplyTimeRangeSelectionAction(core.getStartServices);
   const clearSelectionAction = createClearSelectionAction(core.getStartServices);
-  const editExplorerPanelAction = createEditAnomalyChartsPanelAction(
-    core.getStartServices,
-    isServerless
-  );
-  const visToAdJobAction = createVisToADJobAction(core.getStartServices, isServerless);
+  const editExplorerPanelAction = createEditAnomalyChartsPanelAction(core.getStartServices);
+  const visToAdJobAction = createVisToADJobAction(core.getStartServices);
 
   // Register actions
   uiActions.registerAction(editSwimlanePanelAction);

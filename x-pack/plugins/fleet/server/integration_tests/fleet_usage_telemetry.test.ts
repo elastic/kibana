@@ -217,7 +217,7 @@ describe('fleet usage telemetry', () => {
             version: '8.6.0',
           },
           last_checkin_status: 'online',
-          last_checkin: '2023-09-13T12:26:24Z',
+          last_checkin: new Date(Date.now() - 1000 * 60 * 6).toISOString(),
           active: true,
           policy_id: 'policy2',
         },

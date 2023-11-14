@@ -51,7 +51,7 @@ export const ModelDeployed = ({
                 <h3>
                   {i18n.translate(
                     'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.deployedTitle',
-                    { defaultMessage: 'Your ELSER model has deployed but not started.' }
+                    { defaultMessage: 'Your ELSER v2 model has deployed but not started.' }
                   )}
                 </h3>
               </EuiText>
@@ -92,7 +92,7 @@ export const ModelDeployed = ({
                 data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-textExpansionCallOut-startModel`}
                 disabled={isStartButtonDisabled}
                 iconType="playFilled"
-                onClick={() => startTextExpansionModel(undefined)}
+                onClick={() => startTextExpansionModel()}
               >
                 {i18n.translate(
                   'xpack.enterpriseSearch.content.indices.pipelines.textExpansionCallOut.startModelButton.label',

@@ -6,11 +6,22 @@
  * Side Public License, v 1.
  */
 
+import type { SavedObjectsTypeMappingDefinition } from '@kbn/core-saved-objects-server';
 import { mergeForUpdate } from './merge_for_update';
+
+const defaultMappings: SavedObjectsTypeMappingDefinition = {
+  properties: {},
+};
 
 describe('mergeForUpdate', () => {
   it('merges top level properties', () => {
-    expect(mergeForUpdate({ foo: 'bar', hello: 'dolly' }, { baz: 42 })).toEqual({
+    expect(
+      mergeForUpdate({
+        targetAttributes: { foo: 'bar', hello: 'dolly' },
+        updatedAttributes: { baz: 42 },
+        typeMappings: defaultMappings,
+      })
+    ).toEqual({
       foo: 'bar',
       hello: 'dolly',
       baz: 42,
@@ -18,7 +29,13 @@ describe('mergeForUpdate', () => {
   });
 
   it('overrides top level properties', () => {
-    expect(mergeForUpdate({ foo: 'bar', hello: 'dolly' }, { baz: 42, foo: '9000' })).toEqual({
+    expect(
+      mergeForUpdate({
+        targetAttributes: { foo: 'bar', hello: 'dolly' },
+        updatedAttributes: { baz: 42, foo: '9000' },
+        typeMappings: defaultMappings,
+      })
+    ).toEqual({
       foo: '9000',
       hello: 'dolly',
       baz: 42,
@@ -26,7 +43,13 @@ describe('mergeForUpdate', () => {
   });
 
   it('ignores undefined top level properties', () => {
-    expect(mergeForUpdate({ foo: 'bar', hello: 'dolly' }, { baz: 42, foo: undefined })).toEqual({
+    expect(
+      mergeForUpdate({
+        targetAttributes: { foo: 'bar', hello: 'dolly' },
+        updatedAttributes: { baz: 42, foo: undefined },
+        typeMappings: defaultMappings,
+      })
+    ).toEqual({
       foo: 'bar',
       hello: 'dolly',
       baz: 42,
@@ -35,7 +58,11 @@ describe('mergeForUpdate', () => {
 
   it('merges nested properties', () => {
     expect(
-      mergeForUpdate({ nested: { foo: 'bar', hello: 'dolly' } }, { nested: { baz: 42 } })
+      mergeForUpdate({
+        targetAttributes: { nested: { foo: 'bar', hello: 'dolly' } },
+        updatedAttributes: { nested: { baz: 42 } },
+        typeMappings: defaultMappings,
+      })
     ).toEqual({
       nested: {
         foo: 'bar',
@@ -47,10 +74,11 @@ describe('mergeForUpdate', () => {
 
   it('overrides nested properties', () => {
     expect(
-      mergeForUpdate(
-        { nested: { foo: 'bar', hello: 'dolly' } },
-        { nested: { baz: 42, foo: '9000' } }
-      )
+      mergeForUpdate({
+        targetAttributes: { nested: { foo: 'bar', hello: 'dolly' } },
+        updatedAttributes: { nested: { baz: 42, foo: '9000' } },
+        typeMappings: defaultMappings,
+      })
     ).toEqual({
       nested: {
         foo: '9000',
@@ -62,10 +90,11 @@ describe('mergeForUpdate', () => {
 
   it('ignores undefined nested properties', () => {
     expect(
-      mergeForUpdate(
-        { nested: { foo: 'bar', hello: 'dolly' } },
-        { nested: { baz: 42, foo: undefined } }
-      )
+      mergeForUpdate({
+        targetAttributes: { nested: { foo: 'bar', hello: 'dolly' } },
+        updatedAttributes: { nested: { baz: 42, foo: undefined } },
+        typeMappings: defaultMappings,
+      })
     ).toEqual({
       nested: {
         foo: 'bar',
@@ -77,10 +106,17 @@ describe('mergeForUpdate', () => {
 
   it('functions with mixed levels of properties', () => {
     expect(
-      mergeForUpdate(
-        { rootPropA: 'A', nested: { foo: 'bar', hello: 'dolly', deep: { deeper: 'we need' } } },
-        { rootPropB: 'B', nested: { baz: 42, foo: '9000', deep: { deeper: 'we are' } } }
-      )
+      mergeForUpdate({
+        targetAttributes: {
+          rootPropA: 'A',
+          nested: { foo: 'bar', hello: 'dolly', deep: { deeper: 'we need' } },
+        },
+        updatedAttributes: {
+          rootPropB: 'B',
+          nested: { baz: 42, foo: '9000', deep: { deeper: 'we are' } },
+        },
+        typeMappings: defaultMappings,
+      })
     ).toEqual({
       rootPropA: 'A',
       rootPropB: 'B',
@@ -92,6 +128,47 @@ describe('mergeForUpdate', () => {
           deeper: 'we are',
         },
       },
+    });
+  });
+
+  describe('with flattened fields', () => {
+    const mappingsWithFlattened: SavedObjectsTypeMappingDefinition = {
+      properties: {
+        flattened: {
+          type: 'flattened',
+        },
+        nested: {
+          properties: {
+            deepFlat: {
+              type: 'flattened',
+            },
+          },
+        },
+      },
+    };
+
+    it('replaces top level flattened properties', () => {
+      expect(
+        mergeForUpdate({
+          targetAttributes: { flattened: { before: 42 }, notFlattened: { before: 42 } },
+          updatedAttributes: { flattened: { after: 9000 }, notFlattened: { after: 9000 } },
+          typeMappings: mappingsWithFlattened,
+        })
+      ).toEqual({ flattened: { after: 9000 }, notFlattened: { before: 42, after: 9000 } });
+    });
+
+    it('replaces nested flattened properties', () => {
+      expect(
+        mergeForUpdate({
+          targetAttributes: { nested: { deepFlat: { before: 42 }, notFlattened: { before: 42 } } },
+          updatedAttributes: {
+            nested: { deepFlat: { after: 9000 }, notFlattened: { after: 9000 } },
+          },
+          typeMappings: mappingsWithFlattened,
+        })
+      ).toEqual({
+        nested: { deepFlat: { after: 9000 }, notFlattened: { before: 42, after: 9000 } },
+      });
     });
   });
 });

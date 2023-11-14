@@ -56,9 +56,7 @@ describe('Description', () => {
 
     userEvent.click(res.getByTestId('description-collapse-icon'));
 
-    await waitFor(() => {
-      expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
-    });
+    expect(await screen.findByText('Security banana Issue')).toBeInTheDocument();
   });
 
   it('shows textarea on edit click', async () => {
@@ -68,9 +66,7 @@ describe('Description', () => {
 
     userEvent.click(res.getByTestId('description-edit-icon'));
 
-    await waitFor(() => {
-      expect(screen.getByTestId('euiMarkdownEditorTextArea')).toBeInTheDocument();
-    });
+    expect(await screen.findByTestId('euiMarkdownEditorTextArea')).toBeInTheDocument();
   });
 
   it('edits the description correctly when saved', async () => {
@@ -82,12 +78,15 @@ describe('Description', () => {
     userEvent.click(res.getByTestId('description-edit-icon'));
 
     userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
 
     userEvent.click(screen.getByTestId('editable-save-markdown'));
 
     await waitFor(() => {
-      expect(onUpdateField).toHaveBeenCalledWith({ key: 'description', value: editedDescription });
+      expect(onUpdateField).toHaveBeenCalledWith({
+        key: 'description',
+        value: editedDescription,
+      });
     });
   });
 
@@ -100,20 +99,21 @@ describe('Description', () => {
     userEvent.click(res.getByTestId('description-edit-icon'));
 
     userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
-    userEvent.type(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+    userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), editedDescription);
+
+    expect(screen.getByText(editedDescription)).toBeInTheDocument();
 
     userEvent.click(screen.getByTestId('editable-cancel-markdown'));
 
     await waitFor(() => {
       expect(onUpdateField).not.toHaveBeenCalled();
-      expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
     });
+
+    expect(screen.getByText('Security banana Issue')).toBeInTheDocument();
   });
 
   it('shows an error when description is too long', async () => {
-    const longDescription = Array(MAX_DESCRIPTION_LENGTH / 2 + 1)
-      .fill('a')
-      .toString();
+    const longDescription = 'a'.repeat(MAX_DESCRIPTION_LENGTH + 1);
 
     const res = appMockRender.render(
       <Description {...defaultProps} onUpdateField={onUpdateField} />
@@ -124,14 +124,13 @@ describe('Description', () => {
     userEvent.clear(screen.getByTestId('euiMarkdownEditorTextArea'));
     userEvent.paste(screen.getByTestId('euiMarkdownEditorTextArea'), longDescription);
 
-    await waitFor(() => {
-      expect(
-        screen.getByText(
-          'The length of the description is too long. The maximum length is 30000 characters.'
-        )
-      ).toBeInTheDocument();
-      expect(screen.getByTestId('editable-save-markdown')).toHaveAttribute('disabled');
-    });
+    expect(
+      await screen.findByText(
+        'The length of the description is too long. The maximum length is 30000 characters.'
+      )
+    ).toBeInTheDocument();
+
+    expect(await screen.findByTestId('editable-save-markdown')).toHaveAttribute('disabled');
   });
 
   it('should hide the edit button when the user does not have update permissions', () => {

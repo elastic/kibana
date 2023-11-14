@@ -18,7 +18,6 @@ import {
   RuleEditProps,
   RuleTypeModel,
   AlertsTableProps,
-  AlertsTableConfigurationRegistry,
   FieldBrowserProps,
   RuleTagBadgeOptions,
   RuleTagBadgeProps,
@@ -48,11 +47,12 @@ import { getRuleDefinitionLazy } from './common/get_rule_definition';
 import { getRuleStatusPanelLazy } from './common/get_rule_status_panel';
 import { getRuleSnoozeModalLazy } from './common/get_rule_snooze_modal';
 import { getRulesSettingsLinkLazy } from './common/get_rules_settings_link';
+import { AlertTableConfigRegistry } from './application/alert_table_config_registry';
 
 function createStartMock(): TriggersAndActionsUIPublicPluginStart {
   const actionTypeRegistry = new TypeRegistry<ActionTypeModel>();
   const ruleTypeRegistry = new TypeRegistry<RuleTypeModel>();
-  const alertsTableConfigurationRegistry = new TypeRegistry<AlertsTableConfigurationRegistry>();
+  const alertsTableConfigurationRegistry = new AlertTableConfigRegistry();
   const connectorServices = { validateEmailAddresses: jest.fn() };
   return {
     actionTypeRegistry,

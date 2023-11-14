@@ -21,19 +21,36 @@ export const useInvalidateRiskEngineStatusQuery = () => {
   }, [queryClient]);
 };
 
+export const useIsNewRiskScoreModuleInstalled = () => {
+  const { data: riskEngineStatus } = useRiskEngineStatus();
+
+  return riskEngineStatus?.isNewRiskScoreModuleInstalled ?? false;
+};
+
 export const useRiskEngineStatus = () => {
-  const isRiskEngineEnabled = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
+  const isNewRiskScoreModuleAvailable = useIsExperimentalFeatureEnabled('riskScoringRoutesEnabled');
 
   return useQuery(FETCH_RISK_ENGINE_STATUS, async ({ signal }) => {
-    if (!isRiskEngineEnabled) {
-      return null;
+    if (!isNewRiskScoreModuleAvailable) {
+      return {
+        isUpdateAvailable: false,
+        isNewRiskScoreModuleInstalled: false,
+        isNewRiskScoreModuleAvailable,
+        risk_engine_status: null,
+        legacy_risk_engine_status: null,
+        is_max_amount_of_risk_engines_reached: false,
+      };
     }
     const response = await fetchRiskEngineStatus({ signal });
     const isUpdateAvailable =
       response?.legacy_risk_engine_status === RiskEngineStatus.ENABLED &&
       response.risk_engine_status === RiskEngineStatus.NOT_INSTALLED;
+    const isNewRiskScoreModuleInstalled =
+      response.risk_engine_status !== RiskEngineStatus.NOT_INSTALLED;
     return {
       isUpdateAvailable,
+      isNewRiskScoreModuleInstalled,
+      isNewRiskScoreModuleAvailable,
       ...response,
     };
   });

@@ -119,6 +119,27 @@
       "enabled": true
     },
     {
+      "groupName": "LaunchDarkly",
+      "matchPackageNames": [
+        "launchdarkly-js-client-sdk",
+        "launchdarkly-node-server-sdk"
+      ],
+      "reviewers": [
+        "team:kibana-security",
+        "team:kibana-core"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "release_note:skip",
+        "Team:Security",
+        "Team:Core",
+        "backport:prev-minor"
+      ],
+      "enabled": true
+    },
+    {
       "groupName": "APM",
       "matchPackageNames": [
         "elastic-apm-node",
@@ -256,11 +277,8 @@
     },
     {
       "groupName": "cypress",
-      "matchPackageNames": [
-        "eslint-plugin-cypress"
-      ],
       "matchPackagePatterns": [
-        "^cypress"
+        "cypress"
       ],
       "reviewers": [
         "Team:apm",
@@ -272,6 +290,23 @@
       "labels": [
         "buildkite-ci",
         "ci:all-cypress-suites"
+      ],
+      "enabled": true
+    },
+    {
+      "groupName": "security solution modules",
+      "matchPackageNames": [
+        "zod",
+        "langchain"
+      ],
+      "reviewers": [
+        "Team: SecuritySolution"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team: SecuritySolution"
       ],
       "enabled": true
     },

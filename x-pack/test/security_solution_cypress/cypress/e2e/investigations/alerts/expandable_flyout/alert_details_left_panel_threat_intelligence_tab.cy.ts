@@ -10,9 +10,9 @@ import { getNewRule } from '../../../../objects/rule';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { INDICATOR_MATCH_ENRICHMENT_SECTION } from '../../../../screens/alerts_details';
-import { cleanKibana } from '../../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
-import { login, visit } from '../../../../tasks/login';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { openThreatIntelligenceTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
@@ -24,10 +24,9 @@ import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from 
 
 describe(
   'Expandable flyout left panel threat intelligence',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);

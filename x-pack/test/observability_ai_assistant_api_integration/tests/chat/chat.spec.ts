@@ -181,7 +181,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       expect(response.body.message).to.contain(
-        `400 - Bad Request - This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.`
+        `an error occurred while running the action - Status code: 400. Message: API Error: Bad Request - This model's maximum context length is 8192 tokens. However, your messages resulted in 11036 tokens. Please reduce the length of the messages.`
       );
     });
 

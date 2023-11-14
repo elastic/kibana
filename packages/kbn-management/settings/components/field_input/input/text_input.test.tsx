@@ -16,9 +16,9 @@ const name = 'Some text field';
 const id = 'some:text:field';
 
 describe('TextInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: TextInputProps = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'string',
@@ -33,7 +33,7 @@ describe('TextInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -47,11 +47,11 @@ describe('TextInput', () => {
     expect(input).toHaveValue('initial value');
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByTestId } = render(<TextInput {...defaultProps} />);
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: 'new value' } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
       type: 'string',
       unsavedValue: 'new value',
     });

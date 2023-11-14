@@ -22,6 +22,7 @@ import type { BuilderDeps } from './types';
 import { AssigneesUserActionBuilder } from './builders/assignees';
 import { NoopUserActionBuilder } from './builders/noop';
 import { CategoryUserActionBuilder } from './builders/category';
+import { CustomFieldsUserActionBuilder } from './builders/custom_fields';
 
 const builderMap = {
   assignees: AssigneesUserActionBuilder,
@@ -37,6 +38,7 @@ const builderMap = {
   severity: SeverityUserActionBuilder,
   settings: SettingsUserActionBuilder,
   delete_case: NoopUserActionBuilder,
+  customFields: CustomFieldsUserActionBuilder,
 };
 
 export class BuilderFactory {

@@ -59,6 +59,7 @@ export class AppsMenuService extends FtrService {
     if (!(await this.testSubjects.exists('collapsibleNav'))) {
       await this.testSubjects.click('toggleNavButton');
     }
+    await this.testSubjects.exists('collapsibleNav');
   }
 
   /**

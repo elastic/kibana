@@ -5,4 +5,6 @@
  * 2.0.
  */
 
-export * from './v1';
+export type { MaintenanceWindowStatus } from './v1';
+
+export { maintenanceWindowStatus } from './v1';

@@ -125,6 +125,16 @@ export const CreateCustomIntegrationForm = ({
           {i18n.translate('customIntegrationsPackage.create.configureIntegrationDescription', {
             defaultMessage: 'Configure integration',
           })}
+          <EuiSpacer size="xs" />
+          <EuiText size="xs" color="subdued">
+            {i18n.translate(
+              'customIntegrationsPackage.create.configureIntegrationDescription.helper',
+              {
+                defaultMessage:
+                  'Elastic creates an integration to streamline connecting your log data to the Elastic Stack.',
+              }
+            )}
+          </EuiText>
         </p>
       </EuiText>
       <EuiSpacer size="l" />
@@ -143,7 +153,7 @@ export const CreateCustomIntegrationForm = ({
                     'customIntegrationsPackage.create.integration.name.tooltip',
                     {
                       defaultMessage:
-                        'Provide a name for the integration that will be created to organise these custom logs.',
+                        'The name of the integration that will be created to organize your custom logs.',
                     }
                   )}
                   position="right"
@@ -187,7 +197,7 @@ export const CreateCustomIntegrationForm = ({
                 <EuiIconTip
                   content={i18n.translate('customIntegrationsPackage.create.dataset.name.tooltip', {
                     defaultMessage:
-                      'Provide a dataset name to help organise these custom logs. This dataset will be associated with the integration. ',
+                      'The name of the dataset associated with this integration. This will be part of the Elasticsearch data stream name ',
                   })}
                   position="right"
                 />

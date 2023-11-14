@@ -22,10 +22,7 @@ import {
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
-import {
-  getCustomPipelineNameForDatastream,
-  getPipelineNameForDatastream,
-} from '../../../../../common/services';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -172,8 +169,7 @@ export async function installAllPipelines({
     const content = getAsset(path).toString('utf-8');
     pipelinesInfos.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation:
-        dataStream && isMainPipeline ? getCustomPipelineNameForDatastream(dataStream) : undefined,
+      shouldInstallCustomPipelines: dataStream && isMainPipeline,
       dataStream,
       content,
       extension,
@@ -200,7 +196,7 @@ export async function installAllPipelines({
 
     pipelinesToInstall.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation: getCustomPipelineNameForDatastream(dataStream),
+      shouldInstallCustomPipelines: true,
       dataStream,
       contentForInstallation: 'processors: []',
       extension: 'yml',

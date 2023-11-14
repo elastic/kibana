@@ -776,7 +776,6 @@ describe('date_histogram', () => {
             sourceField: 'missing',
             params: { interval: 'auto' },
           },
-          indexPattern1,
           {
             col1: {
               label: '',
@@ -786,7 +785,8 @@ describe('date_histogram', () => {
               sourceField: 'missing',
               params: { interval: 'auto' },
             } as DateHistogramIndexPatternColumn,
-          }
+          },
+          indexPattern1
         )
       ).toEqual('Missing field');
     });

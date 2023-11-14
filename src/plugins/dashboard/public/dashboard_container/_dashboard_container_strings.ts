@@ -83,7 +83,12 @@ export const dashboardSavedObjectErrorStrings = {
     }),
 };
 
-export const panelStorageErrorStrings = {
+export const backupServiceStrings = {
+  viewModeStorageError: (message: string) =>
+    i18n.translate('dashboard.viewmodeBackup.error', {
+      defaultMessage: 'Error encountered while backing up view mode: {message}',
+      values: { message },
+    }),
   getPanelsGetError: (message: string) =>
     i18n.translate('dashboard.panelStorageError.getError', {
       defaultMessage: 'Error encountered while fetching unsaved changes: {message}',

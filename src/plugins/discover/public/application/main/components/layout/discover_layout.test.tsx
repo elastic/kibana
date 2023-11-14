@@ -41,6 +41,11 @@ import { act } from 'react-dom/test-utils';
 import { ErrorCallout } from '../../../../components/common/error_callout';
 import * as localStorageModule from 'react-use/lib/useLocalStorage';
 
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  useResizeObserver: jest.fn(() => ({ width: 1000, height: 1000 })),
+}));
+
 jest.spyOn(localStorageModule, 'default');
 
 setHeaderActionMenuMounter(jest.fn());
@@ -114,7 +119,6 @@ async function mountComponent(
     navigateTo: jest.fn(),
     onChangeDataView: jest.fn(),
     onUpdateQuery: jest.fn(),
-    resetSavedSearch: jest.fn(),
     savedSearch: savedSearchMock,
     searchSource: searchSourceMock,
     state: { columns: [], query, hideChart: false, interval: 'auto' },

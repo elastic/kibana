@@ -16,9 +16,9 @@ const name = 'Some select field';
 const id = 'some:select:field';
 
 describe('SelectInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: SelectInputProps = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'select',
@@ -39,7 +39,7 @@ describe('SelectInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -49,11 +49,14 @@ describe('SelectInput', () => {
     expect(input).toHaveValue('option2');
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByTestId } = render(wrap(<SelectInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: 'option3' } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ type: 'select', unsavedValue: 'option3' });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      type: 'select',
+      unsavedValue: 'option3',
+    });
   });
 
   it('disables the input when isDisabled prop is true', () => {

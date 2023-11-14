@@ -41,7 +41,6 @@ import {
   Index,
   IndexSettingsResponse,
 } from '../../../common';
-import { TAB_SETTINGS, TAB_MAPPING, TAB_STATS } from '../constants';
 import { useRequest, sendRequest } from './use_request';
 import { httpService } from './http';
 import { UiMetricService } from './ui_metric';
@@ -81,6 +80,32 @@ export async function deleteDataStreams(dataStreams: string[]) {
     path: `${API_BASE_PATH}/delete_data_streams`,
     method: 'post',
     body: { dataStreams },
+  });
+}
+
+export async function updateDataRetention(
+  name: string,
+  data: {
+    dataRetention: string;
+    timeUnit: string;
+    infiniteRetentionPeriod: boolean;
+    dataRetentionEnabled: boolean;
+  }
+) {
+  let body;
+
+  if (!data.dataRetentionEnabled) {
+    body = { enabled: false };
+  } else {
+    body = data.infiniteRetentionPeriod
+      ? {}
+      : { dataRetention: `${data.dataRetention}${data.timeUnit}` };
+  }
+
+  return sendRequest({
+    path: `${API_BASE_PATH}/data_streams/${encodeURIComponent(name)}/data_retention`,
+    method: 'put',
+    body,
   });
 }
 
@@ -230,19 +255,6 @@ export async function loadIndexMapping(indexName: string) {
     `${API_BASE_PATH}/mapping/${encodeURIComponent(indexName)}`
   );
   return response;
-}
-
-export async function loadIndexData(type: string, indexName: string) {
-  switch (type) {
-    case TAB_MAPPING:
-      return loadIndexMapping(indexName);
-
-    case TAB_SETTINGS:
-      return loadIndexSettings(indexName);
-
-    case TAB_STATS:
-      return loadIndexStats(indexName);
-  }
 }
 
 export function useLoadIndexTemplates() {

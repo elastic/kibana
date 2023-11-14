@@ -23,6 +23,7 @@ exports[`GroupsFilterPopover renders correctly against snapshot 1`] = `
   ownFocus={true}
   panelPaddingSize="none"
   repositionOnScroll={true}
+  repositionToCrossAxis={true}
 >
   <EuiFilterSelectItemClass
     key="0-auditbeat"

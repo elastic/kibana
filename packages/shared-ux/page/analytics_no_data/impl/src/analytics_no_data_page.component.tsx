@@ -79,6 +79,31 @@ const flavors: {
       },
     },
   }),
+  serverless_observability: ({ prependBasePath }) => ({
+    solution: i18n.translate('sharedUXPackages.noDataConfig.observability', {
+      defaultMessage: 'Observability',
+    }),
+    pageTitle: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageTitle', {
+      defaultMessage: 'Welcome to Elastic Observability!',
+    }),
+    pageDescription: i18n.translate('sharedUXPackages.noDataConfig.observabilityPageDescription', {
+      defaultMessage:
+        'Converge metrics, logs, and traces to monitor the health of your applications.',
+    }),
+    logo: 'logoObservability',
+    action: {
+      observability: {
+        title: i18n.translate('sharedUXPackages.noDataConfig.observabilityTitle', {
+          defaultMessage: 'Add data',
+        }),
+        description: i18n.translate('sharedUXPackages.noDataConfig.observabilityDescription', {
+          defaultMessage: 'Get started by collecting data using one of our many integrations.',
+        }),
+        'data-test-subj': 'kbnObservabilityNoData',
+        href: prependBasePath('/app/observabilityOnboarding/'),
+      },
+    },
+  }),
 };
 
 /**

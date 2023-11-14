@@ -46,6 +46,28 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await find.byCssSelector('[data-test-subj="cloudOnboardingSetupGuideLink"]')
         ).to.not.be(null);
       });
+
+      it('A button to open a modal to view the CloudID and ES endpoint is added', async () => {
+        await PageObjects.common.clickAndValidate('helpMenuButton', 'endpointsHelpLink');
+        expect(await find.byCssSelector('[data-test-subj="endpointsHelpLink"]')).to.not.be(null);
+
+        // Open the modal
+        await PageObjects.common.clickAndValidate('endpointsHelpLink', 'deploymentDetailsModal');
+
+        const esEndpointInput = await find.byCssSelector(
+          '[data-test-subj="deploymentDetailsEsEndpoint"]'
+        );
+        const esEndpointValue = await esEndpointInput.getAttribute('value');
+        expect(esEndpointValue).to.be('https://ES123abc.hello.com:443');
+
+        const cloudIdInput = await find.byCssSelector(
+          '[data-test-subj="deploymentDetailsCloudID"]'
+        );
+        const cloudIdInputValue = await cloudIdInput.getAttribute('value');
+        expect(cloudIdInputValue).to.be(
+          'ftr_fake_cloud_id:aGVsbG8uY29tOjQ0MyRFUzEyM2FiYyRrYm4xMjNhYmM='
+        );
+      });
     });
 
     it('"Manage this deployment" is appended to the nav list', async () => {

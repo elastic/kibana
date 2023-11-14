@@ -41,7 +41,6 @@ import {
   VisualizationMap,
   DatasourceLayers,
   UserMessagesGetter,
-  FrameDatasourceAPI,
 } from '../../types';
 import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
@@ -63,7 +62,7 @@ import {
   selectChangesApplied,
   applyChanges,
   selectStagedActiveData,
-  selectFrameDatasourceAPI,
+  selectFramePublicAPI,
 } from '../../state_management';
 import { filterAndSortUserMessages } from '../../app_plugin/get_application_user_messages';
 const MAX_SUGGESTIONS_DISPLAYED = 5;
@@ -74,7 +73,7 @@ const configurationsValid = (
   currentDatasourceState: unknown,
   currentVisualization: Visualization,
   currentVisualizationState: unknown,
-  frame: FrameDatasourceAPI
+  frame: FramePublicAPI
 ): boolean => {
   try {
     return (
@@ -103,6 +102,7 @@ export interface SuggestionPanelProps {
   getUserMessages: UserMessagesGetter;
   nowProvider: DataPublicPluginStart['nowProvider'];
   core: CoreStart;
+  showOnlyIcons?: boolean;
 }
 
 const PreviewRenderer = ({
@@ -230,6 +230,7 @@ export function SuggestionPanel({
   getUserMessages,
   nowProvider,
   core,
+  showOnlyIcons,
 }: SuggestionPanelProps) {
   const dispatchLens = useLensDispatch();
   const activeDatasourceId = useLensSelector(selectActiveDatasourceId);
@@ -239,9 +240,7 @@ export function SuggestionPanel({
   const currentVisualization = useLensSelector(selectCurrentVisualization);
   const currentDatasourceStates = useLensSelector(selectCurrentDatasourceStates);
 
-  const frameDatasourceAPI = useLensSelector((state) =>
-    selectFrameDatasourceAPI(state, datasourceMap)
-  );
+  const framePublicAPI = useLensSelector((state) => selectFramePublicAPI(state, datasourceMap));
   const changesApplied = useLensSelector(selectChangesApplied);
   // get user's selection from localStorage, this key defines if the suggestions panel will be hidden or not
   const [hideSuggestions, setHideSuggestions] = useLocalStorage(
@@ -287,7 +286,7 @@ export function SuggestionPanel({
                   suggestionDatasourceState,
                   visualizationMap[visualizationId],
                   suggestionVisualizationState,
-                  frameDatasourceAPI
+                  framePublicAPI
                 )
               );
             }
@@ -437,7 +436,7 @@ export function SuggestionPanel({
           <SuggestionPreview
             preview={{
               error: currentStateError,
-              expression: currentStateExpression,
+              expression: !showOnlyIcons ? currentStateExpression : undefined,
               icon:
                 visualizationMap[currentVisualization.activeId].getDescription(
                   currentVisualization.state
@@ -458,7 +457,7 @@ export function SuggestionPanel({
             return (
               <SuggestionPreview
                 preview={{
-                  expression: suggestion.previewExpression,
+                  expression: !showOnlyIcons ? suggestion.previewExpression : undefined,
                   icon: suggestion.previewIcon,
                   title: suggestion.title,
                 }}
@@ -474,6 +473,7 @@ export function SuggestionPanel({
                 }}
                 selected={index === lastSelectedSuggestion}
                 onRender={() => onSuggestionRender(index + 1)}
+                showTitleAsLabel={showOnlyIcons}
               />
             );
           })}

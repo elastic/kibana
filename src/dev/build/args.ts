@@ -16,6 +16,7 @@ export function readCliArgs(argv: string[]) {
   const flags = getopts(argv, {
     boolean: [
       'skip-archives',
+      'skip-cdn-assets',
       'skip-initialize',
       'skip-generic-folders',
       'skip-platform-folders',
@@ -132,6 +133,7 @@ export function readCliArgs(argv: string[]) {
     createGenericFolders: !Boolean(flags['skip-generic-folders']),
     createPlatformFolders: !Boolean(flags['skip-platform-folders']),
     createArchives: !Boolean(flags['skip-archives']),
+    createCdnAssets: !Boolean(flags['skip-cdn-assets']),
     createRpmPackage: isOsPackageDesired('rpm'),
     createDebPackage: isOsPackageDesired('deb'),
     createDockerUbuntu:

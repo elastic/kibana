@@ -50,5 +50,5 @@ export const journey = new Journey({
   })
 
   .step('Wait for visualization animations to finish', async ({ kibanaPage }) => {
-    await kibanaPage.waitForVisualizations(1);
+    await kibanaPage.waitForVisualizations({ count: 1 });
   });

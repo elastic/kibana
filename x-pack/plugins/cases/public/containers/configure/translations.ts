@@ -10,5 +10,5 @@ import { i18n } from '@kbn/i18n';
 export * from '../translations';
 
 export const SUCCESS_CONFIGURE = i18n.translate('xpack.cases.configure.successSaveToast', {
-  defaultMessage: 'Saved external connection settings',
+  defaultMessage: 'Settings successfully updated',
 });

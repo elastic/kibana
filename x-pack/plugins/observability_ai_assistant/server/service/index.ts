@@ -25,9 +25,20 @@ function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
+export const ELSER_MODEL_ID = '.elser_model_2';
+
 export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
+
+type KnowledgeBaseEntryRequest = { id: string; labels?: Record<string, string> } & (
+  | {
+      text: string;
+    }
+  | {
+      texts: string[];
+    }
+);
 
 export class ObservabilityAIAssistantService {
   private readonly core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
@@ -50,9 +61,6 @@ export class ObservabilityAIAssistantService {
     indexTemplate: {
       conversations: getResourceName('index-template-conversations'),
       kb: getResourceName('index-template-kb'),
-    },
-    ilmPolicy: {
-      conversations: getResourceName('ilm-policy-conversations'),
     },
     pipelines: {
       kb: getResourceName('kb-ingest-pipeline'),
@@ -103,23 +111,6 @@ export class ObservabilityAIAssistantService {
         template: conversationComponentTemplate,
       });
 
-      await esClient.ilm.putLifecycle({
-        name: this.resourceNames.ilmPolicy.conversations,
-        policy: {
-          phases: {
-            hot: {
-              min_age: '0s',
-              actions: {
-                rollover: {
-                  max_age: '90d',
-                  max_primary_shard_size: '50gb',
-                },
-              },
-            },
-          },
-        },
-      });
-
       await esClient.indices.putIndexTemplate({
         name: this.resourceNames.indexTemplate.conversations,
         composed_of: [this.resourceNames.componentTemplate.conversations],
@@ -129,7 +120,12 @@ export class ObservabilityAIAssistantService {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
-            refresh_interval: '1s',
+            hidden: true,
+          },
+          mappings: {
+            _meta: {
+              model: ELSER_MODEL_ID,
+            },
           },
         },
       });
@@ -161,7 +157,7 @@ export class ObservabilityAIAssistantService {
         processors: [
           {
             inference: {
-              model_id: '.elser_model_1',
+              model_id: ELSER_MODEL_ID,
               target_field: 'ml',
               field_map: {
                 text: 'text_field',
@@ -186,7 +182,7 @@ export class ObservabilityAIAssistantService {
           settings: {
             number_of_shards: 1,
             auto_expand_replicas: '0-1',
-            refresh_interval: '1s',
+            hidden: true,
           },
         },
       });
@@ -258,18 +254,7 @@ export class ObservabilityAIAssistantService {
     });
   }
 
-  addToKnowledgeBase(
-    entries: Array<
-      | {
-          id: string;
-          text: string;
-        }
-      | {
-          id: string;
-          texts: string[];
-        }
-    >
-  ): void {
+  addToKnowledgeBase(entries: KnowledgeBaseEntryRequest[]): void {
     this.init()
       .then(() => {
         this.kbService!.queue(
@@ -281,6 +266,7 @@ export class ObservabilityAIAssistantService {
               confidence: 'high' as const,
               is_correction: false,
               labels: {
+                ...entry.labels,
                 document_id: entry.id,
               },
             };
@@ -305,5 +291,19 @@ export class ObservabilityAIAssistantService {
         );
         this.logger.error(error);
       });
+  }
+
+  addCategoryToKnowledgeBase(categoryId: string, entries: KnowledgeBaseEntryRequest[]) {
+    this.addToKnowledgeBase(
+      entries.map((entry) => {
+        return {
+          ...entry,
+          labels: {
+            ...entry.labels,
+            category: categoryId,
+          },
+        };
+      })
+    );
   }
 }

@@ -133,6 +133,11 @@ export interface TimelineModel {
   isSelectAllChecked: boolean;
   isLoading: boolean;
   selectAll: boolean;
+  /* discover saved search Id */
+  savedSearchId: string | null;
+  isDiscoverSavedSearchLoaded?: boolean;
+  /** used to mark the timeline as unsaved in the UI */
+  changed?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -186,6 +191,9 @@ export type SubsetTimelineModel = Readonly<
     | 'status'
     | 'filters'
     | 'filterManager'
+    | 'savedSearchId'
+    | 'isDiscoverSavedSearchLoaded'
+    | 'changed'
   >
 >;
 
@@ -194,4 +202,5 @@ export interface TimelineUrl {
   id?: string;
   isOpen: boolean;
   graphEventId?: string;
+  savedSearchId?: string;
 }

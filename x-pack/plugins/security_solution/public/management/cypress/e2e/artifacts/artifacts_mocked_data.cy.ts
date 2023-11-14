@@ -5,47 +5,48 @@
  * 2.0.
  */
 
-import {
-  getRoleWithArtifactReadPrivilege,
-  login,
-  loginWithCustomRole,
-  loginWithRole,
-  ROLE,
-} from '../../tasks/login';
+import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
+import { login, ROLE } from '../../tasks/login';
 import { loadPage } from '../../tasks/common';
 
 import { getArtifactsListTestsData } from '../../fixtures/artifacts_page';
 import { removeAllArtifacts } from '../../tasks/artifacts';
 import { performUserActions } from '../../tasks/perform_user_actions';
-import { loadEndpointDataForEventFiltersIfNeeded } from '../../tasks/load_endpoint_data';
+import { indexEndpointHosts } from '../../tasks/index_endpoint_hosts';
+import type { ReturnTypeFromChainable } from '../../types';
 
 const loginWithWriteAccess = (url: string) => {
-  loginWithRole(ROLE.endpoint_security_policy_manager);
+  login(ROLE.endpoint_policy_manager);
   loadPage(url);
 };
 
 const loginWithReadAccess = (privilegePrefix: string, url: string) => {
   const roleWithArtifactReadPrivilege = getRoleWithArtifactReadPrivilege(privilegePrefix);
-  loginWithCustomRole('roleWithArtifactReadPrivilege', roleWithArtifactReadPrivilege);
+  login.withCustomRole({ name: 'roleWithArtifactReadPrivilege', ...roleWithArtifactReadPrivilege });
   loadPage(url);
 };
 
 const loginWithoutAccess = (url: string) => {
-  loginWithRole(ROLE.t1_analyst);
+  login(ROLE.t1_analyst);
   loadPage(url);
 };
 
-describe('Artifacts pages', { tags: '@ess' }, () => {
+describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
+  let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
+
   before(() => {
-    login();
-    loadEndpointDataForEventFiltersIfNeeded();
-    // Clean artifacts data
+    indexEndpointHosts().then((indexEndpoints) => {
+      endpointData = indexEndpoints;
+    });
+
     removeAllArtifacts();
   });
 
   after(() => {
-    // Clean artifacts data
     removeAllArtifacts();
+
+    endpointData?.cleanup();
+    endpointData = undefined;
   });
 
   for (const testData of getArtifactsListTestsData()) {
@@ -58,14 +59,19 @@ describe('Artifacts pages', { tags: '@ess' }, () => {
         cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
       });
 
-      it(`read - should show empty state page if there is no ${testData.title} entry and the add button does not exist`, () => {
-        loginWithReadAccess(
-          testData.privilegePrefix,
-          `/app/security/administration/${testData.urlPath}`
-        );
-        cy.getByTestSubj(testData.emptyState).should('exist');
-        cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
-      });
+      it(
+        `read - should show empty state page if there is no ${testData.title} entry and the add button does not exist`,
+        // there is no such role in Serverless environment that only reads artifacts
+        { tags: ['@skipInServerless'] },
+        () => {
+          loginWithReadAccess(
+            testData.privilegePrefix,
+            `/app/security/administration/${testData.urlPath}`
+          );
+          cy.getByTestSubj(testData.emptyState).should('exist');
+          cy.getByTestSubj(`${testData.pagePrefix}-emptyState-addButton`).should('not.exist');
+        }
+      );
 
       it(`write - should show empty state page if there is no ${testData.title} entry and the add button exists`, () => {
         loginWithWriteAccess(`/app/security/administration/${testData.urlPath}`);
@@ -92,25 +98,35 @@ describe('Artifacts pages', { tags: '@ess' }, () => {
         cy.getByTestSubj('header-page-title').contains(testData.title);
       });
 
-      it(`read - should not be able to update/delete an existing ${testData.title} entry`, () => {
-        loginWithReadAccess(
-          testData.privilegePrefix,
-          `/app/security/administration/${testData.urlPath}`
-        );
-        cy.getByTestSubj('header-page-title').contains(testData.title);
-        cy.getByTestSubj(`${testData.pagePrefix}-card-header-actions-button`).should('not.exist');
-        cy.getByTestSubj(`${testData.pagePrefix}-card-cardEditAction`).should('not.exist');
-        cy.getByTestSubj(`${testData.pagePrefix}-card-cardDeleteAction`).should('not.exist');
-      });
+      it(
+        `read - should not be able to update/delete an existing ${testData.title} entry`,
+        // there is no such role in Serverless environment that only reads artifacts
+        { tags: ['@skipInServerless'] },
+        () => {
+          loginWithReadAccess(
+            testData.privilegePrefix,
+            `/app/security/administration/${testData.urlPath}`
+          );
+          cy.getByTestSubj('header-page-title').contains(testData.title);
+          cy.getByTestSubj(`${testData.pagePrefix}-card-header-actions-button`).should('not.exist');
+          cy.getByTestSubj(`${testData.pagePrefix}-card-cardEditAction`).should('not.exist');
+          cy.getByTestSubj(`${testData.pagePrefix}-card-cardDeleteAction`).should('not.exist');
+        }
+      );
 
-      it(`read - should not be able to create a new ${testData.title} entry`, () => {
-        loginWithReadAccess(
-          testData.privilegePrefix,
-          `/app/security/administration/${testData.urlPath}`
-        );
-        cy.getByTestSubj('header-page-title').contains(testData.title);
-        cy.getByTestSubj(`${testData.pagePrefix}-pageAddButton`).should('not.exist');
-      });
+      it(
+        `read - should not be able to create a new ${testData.title} entry`,
+        // there is no such role in Serverless environment that only reads artifacts
+        { tags: ['@skipInServerless'] },
+        () => {
+          loginWithReadAccess(
+            testData.privilegePrefix,
+            `/app/security/administration/${testData.urlPath}`
+          );
+          cy.getByTestSubj('header-page-title').contains(testData.title);
+          cy.getByTestSubj(`${testData.pagePrefix}-pageAddButton`).should('not.exist');
+        }
+      );
 
       it(`write - should be able to update an existing ${testData.title} entry`, () => {
         loginWithWriteAccess(`/app/security/administration/${testData.urlPath}`);

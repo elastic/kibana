@@ -26,7 +26,7 @@ export const ActionBar = ({
   canUsePublicLocations = true,
 }: {
   readOnly: boolean;
-  canUsePublicLocations: boolean;
+  canUsePublicLocations?: boolean;
 }) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const history = useHistory();

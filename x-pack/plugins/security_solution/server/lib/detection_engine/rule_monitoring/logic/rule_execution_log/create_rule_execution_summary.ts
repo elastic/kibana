@@ -9,9 +9,9 @@ import type { ResolvedSanitizedRule, SanitizedRule } from '@kbn/alerting-plugin/
 
 import type { RuleExecutionSummary } from '../../../../../../common/api/detection_engine/rule_monitoring';
 import {
-  ruleLastRunOutcomeToExecutionStatus,
+  RuleExecutionStatusEnum,
   ruleExecutionStatusToNumber,
-  RuleExecutionStatus,
+  ruleLastRunOutcomeToExecutionStatus,
 } from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { RuleParams } from '../../../rule_schema';
@@ -39,8 +39,8 @@ export const createRuleExecutionSummary = (
     return {
       last_execution: {
         date: lastRunInternal.timestamp,
-        status: RuleExecutionStatus.running,
-        status_order: ruleExecutionStatusToNumber(RuleExecutionStatus.running),
+        status: RuleExecutionStatusEnum.running,
+        status_order: ruleExecutionStatusToNumber(RuleExecutionStatusEnum.running),
         message: '',
         metrics: {},
       },

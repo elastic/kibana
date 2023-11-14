@@ -43,12 +43,13 @@ export const PageReducerStream: FC = () => {
 
   const [simulateErrors, setSimulateErrors] = useState(false);
   const [compressResponse, setCompressResponse] = useState(true);
+  const [flushFix, setFlushFix] = useState(false);
 
   const { dispatch, start, cancel, data, errors, isCancelled, isRunning } = useFetchStream(
     http,
     RESPONSE_STREAM_API_ENDPOINT.REDUCER_STREAM,
     '1',
-    { compressResponse, simulateErrors },
+    { compressResponse, flushFix, simulateErrors },
     { reducer: reducerStreamReducer, initialState }
   );
 
@@ -147,6 +148,13 @@ export const PageReducerStream: FC = () => {
           label="Toggle compression setting for response stream."
           checked={compressResponse}
           onChange={(e) => setCompressResponse(!compressResponse)}
+          compressed
+        />
+        <EuiCheckbox
+          id="responseStreamFlushFixCheckbox"
+          label="Toggle flushFix setting for response stream."
+          checked={flushFix}
+          onChange={(e) => setFlushFix(!flushFix)}
           compressed
         />
       </EuiText>

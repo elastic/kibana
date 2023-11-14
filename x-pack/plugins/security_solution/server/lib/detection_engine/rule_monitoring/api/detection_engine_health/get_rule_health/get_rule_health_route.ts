@@ -23,7 +23,7 @@ import { validateGetRuleHealthRequest } from './get_rule_health_request';
 /**
  * Get health overview of a rule. Scope: a given detection rule in the current Kibana space.
  * Returns:
- * - health stats at the moment of the API call (rule and its execution summary)
+ * - health state at the moment of the API call (rule and its execution summary)
  * - health stats over a specified period of time ("health interval")
  * - health stats history within the same interval in the form of a histogram
  *   (the same stats are calculated over each of the discreet sub-intervals of the whole interval)

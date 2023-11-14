@@ -13,7 +13,7 @@ import { KnownTypeToValue, SettingType } from './setting_type';
  * yet been saved.
  * @public
  */
-export interface UnsavedFieldChange<T extends SettingType> {
+export interface UnsavedFieldChange<T extends SettingType = SettingType> {
   /**
    * The type of setting.
    * @see {@link SettingType}
@@ -125,3 +125,5 @@ export type KnownTypeToUnsavedChange<T extends SettingType> =
   T extends 'string' ? StringUnsavedFieldChange:
   T extends 'undefined' ? UndefinedUnsavedFieldChange :
   never;
+
+export type UnsavedFieldChanges = Record<string, UnsavedFieldChange>;

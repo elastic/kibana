@@ -6,7 +6,7 @@
  */
 
 import { ensureResponseActionAuthzAccess } from '../../../tasks/response_actions';
-import { loginServerless, ServerlessUser } from '../../../tasks/login_serverless';
+import { login, ROLE } from '../../../tasks/login';
 import { RESPONSE_ACTION_API_COMMANDS_NAMES } from '../../../../../../common/endpoint/service/response_actions/constants';
 import { getNoPrivilegesPage } from '../../../screens/common';
 import { getEndpointManagementPageList } from '../../../screens';
@@ -14,7 +14,7 @@ import { getEndpointManagementPageList } from '../../../screens';
 describe(
   'App Features for Security Essential PLI',
   {
-    tags: ['@serverless', '@brokenInServerless'],
+    tags: ['@serverless'],
     env: {
       ftrConfig: {
         productTypes: [{ product_line: 'security', product_tier: 'essentials' }],
@@ -33,7 +33,7 @@ describe(
     let password: string;
 
     beforeEach(() => {
-      loginServerless(ServerlessUser.ENDPOINT_OPERATIONS_ANALYST).then((response) => {
+      login(ROLE.endpoint_operations_analyst).then((response) => {
         username = response.username;
         password = response.password;
       });

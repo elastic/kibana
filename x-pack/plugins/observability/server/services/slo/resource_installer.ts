@@ -23,7 +23,6 @@ import {
   SLO_INDEX_TEMPLATE_PATTERN,
   SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
   SLO_INGEST_PIPELINE_NAME,
-  SLO_RESOURCES_VERSION,
   SLO_SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   SLO_SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   SLO_SUMMARY_DESTINATION_INDEX_NAME,
@@ -46,13 +45,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
 
   public async ensureCommonResourcesInstalled(): Promise<void> {
-    const alreadyInstalled = await this.areResourcesAlreadyInstalled();
-
-    if (alreadyInstalled) {
-      this.logger.info('SLO resources already installed - skipping');
-      return;
-    }
-
     try {
       this.logger.info('Installing SLO shared resources');
       await Promise.all([
@@ -103,77 +95,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       this.logger.error(`Error installing resources shared for SLO: ${err.message}`);
       throw err;
     }
-  }
-
-  private async areResourcesAlreadyInstalled(): Promise<boolean> {
-    let indexTemplateExists = false;
-    try {
-      const { index_templates: indexTemplates } = await this.execute(() =>
-        this.esClient.indices.getIndexTemplate({
-          name: SLO_INDEX_TEMPLATE_NAME,
-        })
-      );
-
-      const sloIndexTemplate = indexTemplates.find(
-        (template) => template.name === SLO_INDEX_TEMPLATE_NAME
-      );
-      indexTemplateExists =
-        !!sloIndexTemplate &&
-        sloIndexTemplate.index_template._meta?.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    let summaryIndexTemplateExists = false;
-    try {
-      const { index_templates: indexTemplates } = await this.execute(() =>
-        this.esClient.indices.getIndexTemplate({
-          name: SLO_SUMMARY_INDEX_TEMPLATE_NAME,
-        })
-      );
-      const sloSummaryIndexTemplate = indexTemplates.find(
-        (template) => template.name === SLO_SUMMARY_INDEX_TEMPLATE_NAME
-      );
-      summaryIndexTemplateExists =
-        !!sloSummaryIndexTemplate &&
-        sloSummaryIndexTemplate.index_template._meta?.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    let ingestPipelineExists = false;
-    try {
-      const pipeline = await this.execute(() =>
-        this.esClient.ingest.getPipeline({ id: SLO_INGEST_PIPELINE_NAME })
-      );
-
-      ingestPipelineExists =
-        // @ts-ignore _meta is not defined on the type
-        pipeline && pipeline[SLO_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    let summaryIngestPipelineExists = false;
-    try {
-      const pipeline = await this.execute(() =>
-        this.esClient.ingest.getPipeline({ id: SLO_SUMMARY_INGEST_PIPELINE_NAME })
-      );
-
-      summaryIngestPipelineExists =
-        pipeline &&
-        // @ts-ignore _meta is not defined on the type
-        pipeline[SLO_SUMMARY_INGEST_PIPELINE_NAME]._meta.version === SLO_RESOURCES_VERSION;
-    } catch (err) {
-      return false;
-    }
-
-    return (
-      indexTemplateExists &&
-      summaryIndexTemplateExists &&
-      ingestPipelineExists &&
-      summaryIngestPipelineExists
-    );
   }
 
   private async createOrUpdateComponentTemplate(template: ClusterPutComponentTemplateRequest) {

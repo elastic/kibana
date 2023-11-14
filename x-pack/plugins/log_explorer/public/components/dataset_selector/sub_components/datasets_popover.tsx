@@ -57,8 +57,8 @@ export const DatasetsPopover = ({
             <EuiIcon type={iconType} />
           ) : hasIntegration ? (
             <PackageIcon
-              packageName={parentIntegration.name}
-              version={parentIntegration.version}
+              packageName={parentIntegration.name ?? ''}
+              version={parentIntegration.version ?? '1.0.0'}
               icons={parentIntegration.icons}
               size="m"
               tryApi

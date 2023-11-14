@@ -2,7 +2,7 @@ steps:
   - label: ":releasethekraken: Release kibana"
     # https://regex101.com/r/tY52jo/1
     if: build.tag =~ /^deploy@\d+\$/
-    trigger: gpctl-promote-with-e2e-tests
+    trigger: gpctl-promote
     build:
       env:
         SERVICE_COMMIT_HASH: "${BUILDKITE_COMMIT:0:12}"

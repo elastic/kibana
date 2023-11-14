@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ObservabilityOnboardingLocatorParams } from './types';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability/locators';
 import { PLUGIN_ID } from '../../../common';
 
 export function getLocation(params: ObservabilityOnboardingLocatorParams) {

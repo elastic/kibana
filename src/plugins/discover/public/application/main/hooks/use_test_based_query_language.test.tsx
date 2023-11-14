@@ -106,6 +106,7 @@ describe('useTextBasedQueryLanguage', () => {
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
+        columns: [],
       });
     });
 
@@ -123,6 +124,7 @@ describe('useTextBasedQueryLanguage', () => {
     expect(replaceUrlState).toHaveBeenCalledWith({
       index: 'the-data-view-id',
       viewMode: VIEW_MODE.DOCUMENT_LEVEL,
+      columns: [],
     });
   });
   test('changing a text based query with different result columns should change state when loading and finished', async () => {
@@ -155,6 +157,35 @@ describe('useTextBasedQueryLanguage', () => {
     });
   });
 
+  test('changing a text based query with same result columns should change state when loading and finished', async () => {
+    const { replaceUrlState, stateContainer } = renderHookWithContext(false);
+    const documents$ = stateContainer.dataState.data$.documents$;
+    stateContainer.dataState.data$.documents$.next(msgComplete);
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+    replaceUrlState.mockReset();
+
+    documents$.next({
+      recordRawType: RecordRawType.PLAIN,
+      fetchStatus: FetchStatus.PARTIAL,
+      result: [
+        {
+          id: '1',
+          raw: { field1: 1 },
+          flattened: { field1: 1 },
+        } as unknown as DataTableRecord,
+      ],
+      query: { esql: 'from the-data-view-2' },
+    });
+    await waitFor(() => expect(replaceUrlState).toHaveBeenCalledTimes(1));
+
+    await waitFor(() => {
+      expect(replaceUrlState).toHaveBeenCalledWith({
+        index: 'the-data-view-id',
+        columns: [],
+      });
+    });
+  });
+
   test('changing a text based query with no transformational commands should only change dataview state when loading and finished', async () => {
     const { replaceUrlState, stateContainer } = renderHookWithContext(false);
     const documents$ = stateContainer.dataState.data$.documents$;
@@ -180,6 +211,7 @@ describe('useTextBasedQueryLanguage', () => {
     await waitFor(() => {
       expect(replaceUrlState).toHaveBeenCalledWith({
         index: 'the-data-view-id',
+        columns: [],
       });
     });
   });

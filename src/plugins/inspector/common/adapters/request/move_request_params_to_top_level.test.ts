@@ -7,42 +7,11 @@
  */
 
 import { moveRequestParamsToTopLevel } from './move_request_params_to_top_level';
-import { RequestStatus } from './types';
 
 describe('moveRequestParamsToTopLevel', () => {
-  test('should move request meta from error response', () => {
+  test('should move request meta to top level', () => {
     expect(
-      moveRequestParamsToTopLevel(RequestStatus.ERROR, {
-        json: {
-          attributes: {},
-          err: {
-            message: 'simulated error',
-            requestParams: {
-              method: 'POST',
-              path: '/_query',
-            },
-          },
-        },
-        time: 1,
-      })
-    ).toEqual({
-      json: {
-        attributes: {},
-        err: {
-          message: 'simulated error',
-        },
-      },
-      requestParams: {
-        method: 'POST',
-        path: '/_query',
-      },
-      time: 1,
-    });
-  });
-
-  test('should move request meta from ok response', () => {
-    expect(
-      moveRequestParamsToTopLevel(RequestStatus.OK, {
+      moveRequestParamsToTopLevel({
         json: {
           rawResponse: {},
           requestParams: {

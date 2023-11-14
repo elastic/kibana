@@ -26,8 +26,6 @@ import { RiskScoresNoDataDetected } from '../../../../explore/components/risk_sc
 import { useRefetchQueries } from '../../../../common/hooks/use_refetch_queries';
 import { Loader } from '../../../../common/components/loader';
 import { Panel } from '../../../../common/components/panel';
-import * as commonI18n from '../common/translations';
-import * as i18n from './translations';
 import { useEntityInfo } from './use_entity';
 import { RiskScoreHeaderContent } from './header_content';
 import { ChartContent } from './chart_content';
@@ -35,7 +33,6 @@ import { useNavigateToAlertsPageWithFilters } from '../../../../common/hooks/use
 import { getRiskEntityTranslation } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
-import { useRiskEngineStatus } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
   const { deleteQuery, setQuery, from, to } = useGlobalTime();
@@ -126,8 +123,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     includeAlertsCount: true,
   });
 
-  const { data: riskScoreEngineStatus } = useRiskEngineStatus();
-
   useQueryInspector({
     queryId: entity.tableQueryId,
     loading: isTableLoading,
@@ -151,10 +146,6 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
     isDisabled: !isModuleEnabled && !isTableLoading,
     isDeprecated: isDeprecated && !isTableLoading,
   };
-
-  if (riskScoreEngineStatus?.isUpdateAvailable) {
-    return null;
-  }
 
   if (status.isDisabled || status.isDeprecated) {
     return (
@@ -183,15 +174,8 @@ const EntityAnalyticsRiskScoresComponent = ({ riskEntity }: { riskEntity: RiskSc
           id={entity.tableQueryId}
           toggleStatus={toggleStatus}
           toggleQuery={setToggleStatus}
-          tooltip={
-            riskEntity === RiskScoreEntity.host
-              ? i18n.HOST_RISK_TABLE_TOOLTIP
-              : i18n.USER_RISK_TABLE_TOOLTIP
-          }
-          tooltipTitle={commonI18n.RISK_TABLE_TOOLTIP_TITLE}
         >
           <RiskScoreHeaderContent
-            entityDocLink={entity.docLink}
             entityLinkProps={entity.linkProps}
             onSelectSeverityFilterGroup={onSelectSeverityFilterGroup}
             riskEntity={riskEntity}

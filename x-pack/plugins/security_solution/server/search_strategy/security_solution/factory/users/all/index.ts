@@ -78,7 +78,7 @@ export const allUsers: SecuritySolutionFactory<UsersQueries.users> = {
           userNames,
           deps.spaceId,
           deps.esClient,
-          options.isNewRiskScoreModuleAvailable
+          options.isNewRiskScoreModuleInstalled
         )
       : edges;
 
@@ -101,13 +101,13 @@ async function enhanceEdges(
   userNames: string[],
   spaceId: string,
   esClient: IScopedClusterClient,
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ): Promise<User[]> {
   const userRiskData = await getUserRiskData(
     esClient,
     spaceId,
     userNames,
-    isNewRiskScoreModuleAvailable
+    isNewRiskScoreModuleInstalled
   );
   const usersRiskByUserName: Record<string, RiskSeverity> | undefined =
     userRiskData?.hits.hits.reduce(
@@ -132,12 +132,12 @@ export async function getUserRiskData(
   esClient: IScopedClusterClient,
   spaceId: string,
   userNames: string[],
-  isNewRiskScoreModuleAvailable: boolean
+  isNewRiskScoreModuleInstalled: boolean
 ) {
   try {
     const userRiskResponse = await esClient.asCurrentUser.search<UserRiskScore>(
       buildRiskScoreQuery({
-        defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleAvailable)],
+        defaultIndex: [getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled)],
         filterQuery: buildUserNamesFilter(userNames),
         riskScoreEntity: RiskScoreEntity.user,
         factoryQueryType: RiskQueries.usersRiskScore,

@@ -159,7 +159,28 @@ function validateParams(anyParams: unknown): string | undefined {
     }
   }
 
-  if (isSearchSourceRule(searchType) || isEsqlQueryRule(searchType)) {
+  if (isSearchSourceRule(searchType)) {
+    return;
+  }
+
+  if (isEsqlQueryRule(searchType)) {
+    const { timeField } = anyParams as EsQueryRuleParams;
+
+    if (!timeField) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlTimeFieldErrorMessage', {
+        defaultMessage: '[timeField]: is required',
+      });
+    }
+    if (thresholdComparator !== Comparator.GT) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdComparatorErrorMessage', {
+        defaultMessage: '[thresholdComparator]: is required to be greater than',
+      });
+    }
+    if (threshold && threshold[0] !== 0) {
+      return i18n.translate('xpack.stackAlerts.esQuery.esqlThresholdErrorMessage', {
+        defaultMessage: '[threshold]: is required to be 0',
+      });
+    }
     return;
   }
 

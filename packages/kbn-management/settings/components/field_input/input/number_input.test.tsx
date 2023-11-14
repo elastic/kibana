@@ -16,9 +16,9 @@ const name = 'Some number field';
 const id = 'some:number:field';
 
 describe('NumberInput', () => {
-  const onChange = jest.fn();
+  const onInputChange = jest.fn();
   const defaultProps: NumberInputProps = {
-    onChange,
+    onInputChange,
     field: {
       name,
       type: 'number',
@@ -33,7 +33,7 @@ describe('NumberInput', () => {
   };
 
   beforeEach(() => {
-    onChange.mockClear();
+    onInputChange.mockClear();
   });
 
   it('renders without errors', () => {
@@ -65,11 +65,14 @@ describe('NumberInput', () => {
     expect(input).toHaveValue(4321);
   });
 
-  it('calls the onChange prop when the value changes', () => {
+  it('calls the onInputChange prop when the value changes', () => {
     const { getByTestId } = render(wrap(<NumberInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
     fireEvent.change(input, { target: { value: '54321' } });
-    expect(defaultProps.onChange).toHaveBeenCalledWith({ type: 'number', unsavedValue: 54321 });
+    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+      type: 'number',
+      unsavedValue: 54321,
+    });
   });
 
   it('disables the input when isDisabled prop is true', () => {

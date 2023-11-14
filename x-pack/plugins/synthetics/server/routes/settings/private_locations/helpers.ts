@@ -16,18 +16,19 @@ export const toClientContract = (
   attributes: SyntheticsPrivateLocationsAttributes,
   agentPolicies?: AgentPolicyInfo[]
 ): SyntheticsPrivateLocations => {
-  return {
-    locations: attributes.locations.map((location) => ({
+  return attributes.locations.map((location) => {
+    const agPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
+    return {
       label: location.label,
       id: location.id,
       agentPolicyId: location.agentPolicyId,
-      concurrentMonitors: location.concurrentMonitors,
       isServiceManaged: false,
-      isInvalid: !Boolean(agentPolicies?.find((policy) => policy.id === location.agentPolicyId)),
+      isInvalid: !Boolean(agPolicy),
       tags: location.tags,
       geo: location.geo,
-    })),
-  };
+      namespace: agPolicy?.namespace,
+    };
+  });
 };
 
 export const toSavedObjectContract = (location: PrivateLocation): PrivateLocationAttributes => {
@@ -35,9 +36,9 @@ export const toSavedObjectContract = (location: PrivateLocation): PrivateLocatio
     label: location.label,
     id: location.id,
     agentPolicyId: location.agentPolicyId,
-    concurrentMonitors: location.concurrentMonitors,
     tags: location.tags,
     isServiceManaged: false,
     geo: location.geo,
+    namespace: location.namespace,
   };
 };

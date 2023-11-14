@@ -32,8 +32,9 @@ exports[`Should render cancel button when drawing 1`] = `
       isOpen={false}
       ownFocus={true}
       panelPaddingSize="none"
+      repositionToCrossAxis={true}
     >
-      <EuiContextMenu
+      <EuiContextMenuClass
         initialPanelId={0}
         panels={
           Array [
@@ -86,13 +87,11 @@ exports[`Should render cancel button when drawing 1`] = `
             },
           ]
         }
-        size="m"
       />
     </EuiPopover>
   </EuiFlexItem>
   <EuiFlexItem>
     <EuiButton
-      color="primary"
       fill={true}
       onClick={[Function]}
       size="s"
@@ -135,8 +134,9 @@ exports[`renders 1`] = `
   isOpen={false}
   ownFocus={true}
   panelPaddingSize="none"
+  repositionToCrossAxis={true}
 >
-  <EuiContextMenu
+  <EuiContextMenuClass
     initialPanelId={0}
     panels={
       Array [
@@ -189,7 +189,6 @@ exports[`renders 1`] = `
         },
       ]
     }
-    size="m"
   />
 </EuiPopover>
 `;

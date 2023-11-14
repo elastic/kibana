@@ -14,7 +14,7 @@ export const pythonDefinition: LanguageDefinition = {
   apiReference: docLinks.pythonApiReference,
   basicConfig: docLinks.pythonBasicConfig,
   buildSearchQuery: `client.search(index="books", q="snow")`,
-  configureClient: ({ url, apiKey }) => `from elasticsearch import Elasticsearch
+  configureClient: ({ url, apiKey }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
@@ -45,7 +45,11 @@ client = Elasticsearch(
 ]
 
 client.bulk(operations=documents)`,
-  ingestDataIndex: ({ apiKey, url, indexName }) => `from elasticsearch import Elasticsearch
+  ingestDataIndex: ({
+    apiKey,
+    url,
+    indexName,
+  }) => `from elasticsearch_serverless import Elasticsearch
 
 client = Elasticsearch(
   "${url}",
@@ -59,10 +63,10 @@ documents = [
 
 client.bulk(operations=documents)
 `,
-  installClient: `python -m pip install elasticsearch
+  installClient: `python -m pip install elasticsearch-serverless
 
 # If your application uses async/await in Python you can install with the async extra
-# python -m pip install elasticsearch[async]
+# python -m pip install elasticsearch_serverless[async]
   `,
   name: i18n.translate('xpack.serverlessSearch.languages.python', {
     defaultMessage: 'Python',

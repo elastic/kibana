@@ -49,20 +49,20 @@ export const ModelStarted = ({
                   ? isCompact
                     ? i18n.translate(
                         'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedSingleThreadedTitleCompact',
-                        { defaultMessage: 'Your ELSER model is running single-threaded.' }
+                        { defaultMessage: 'Your ELSER v2 model is running single-threaded.' }
                       )
                     : i18n.translate(
                         'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedSingleThreadedTitle',
-                        { defaultMessage: 'Your ELSER model has started single-threaded.' }
+                        { defaultMessage: 'Your ELSER v2 model has started single-threaded.' }
                       )
                   : isCompact
                   ? i18n.translate(
                       'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitleCompact',
-                      { defaultMessage: 'Your ELSER model is running.' }
+                      { defaultMessage: 'Your ELSER v2 model is running.' }
                     )
                   : i18n.translate(
                       'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedTitle',
-                      { defaultMessage: 'Your ELSER model has started.' }
+                      { defaultMessage: 'Your ELSER v2 model has started.' }
                     )}
               </h3>
             </EuiText>
@@ -91,7 +91,7 @@ export const ModelStarted = ({
                       'xpack.enterpriseSearch.content.index.pipelines.textExpansionCallOut.startedBody',
                       {
                         defaultMessage:
-                          'Enjoy the power of ELSER in your custom Inference pipeline.',
+                          'Enjoy the power of ELSER v2 in your custom Inference pipeline.',
                       }
                     )}
               </p>

@@ -17,7 +17,7 @@ import { countBy } from 'lodash';
 import useMount from 'react-use/lib/useMount';
 import { useMlApiContext } from '../../contexts/kibana';
 import { useToastNotificationService } from '../../services/toast_notification_service';
-import { usePermissionCheck } from '../../capabilities/check_capabilities';
+import { useEnabledFeatures } from '../../contexts/ml';
 
 type EntityType = 'anomaly_detector' | 'data_frame_analytics' | 'trained_models';
 
@@ -61,11 +61,7 @@ export const MlEntitySelector: FC<MlEntitySelectorProps> = ({
   onSelectionChange,
   handleDuplicates = false,
 }) => {
-  const [isADEnabled, isDFAEnabled, isNLPEnabled] = usePermissionCheck([
-    'isADEnabled',
-    'isDFAEnabled',
-    'isNLPEnabled',
-  ]);
+  const { isADEnabled, isDFAEnabled, isNLPEnabled } = useEnabledFeatures();
   const { jobs: jobsApi, trainedModels, dataFrameAnalytics } = useMlApiContext();
   const { displayErrorToast } = useToastNotificationService();
   const visColorsBehindText = euiPaletteColorBlindBehindText();

@@ -12,7 +12,7 @@ import type { Moment } from 'moment';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { Client } from '@elastic/elasticsearch';
 import { createQueue, getIndexName } from './lib/queue';
-import { deleteTemplate, installTemplate } from './lib/install_template';
+import { deleteTemplate, installTemplate } from './lib/manage_template';
 import * as fakeHosts from './data_sources/fake_hosts';
 
 const generateEventsFns = {
@@ -20,7 +20,7 @@ const generateEventsFns = {
 };
 
 const templates = {
-  fake_hosts: fakeHosts.template,
+  fake_hosts: fakeHosts.indexTemplate,
 };
 
 const EVENTS_PER_CYCLE = 1;
@@ -68,5 +68,6 @@ export const generate = async ({
 };
 
 export const cleanup = async ({ esClient, logger }: { esClient: Client; logger: ToolingLog }) => {
-  await deleteTemplate(esClient, DATASET, logger);
+  const template = templates[DATASET];
+  await deleteTemplate(esClient, template, logger);
 };

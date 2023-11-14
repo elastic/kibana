@@ -22,3 +22,8 @@ export type ValueToStringConverter = (
   columnId: string,
   options?: { compatibleWithCSV?: boolean }
 ) => { formattedString: string; withFormula: boolean };
+
+/**
+ * Custom column types per column name
+ */
+export type DataTableColumnTypes = Record<string, string>;

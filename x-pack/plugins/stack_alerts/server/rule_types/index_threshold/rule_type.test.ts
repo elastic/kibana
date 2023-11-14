@@ -20,6 +20,11 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common/rules_set
 
 let fakeTimer: sinon.SinonFakeTimers;
 
+function getTimeRange() {
+  const date = new Date(Date.now()).toISOString();
+  return { dateStart: date, dateEnd: date };
+}
+
 describe('ruleType', () => {
   const logger = loggingSystemMock.create().get();
   const data = {
@@ -224,6 +229,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(alertServices.alertsClient.report).toHaveBeenCalledWith({
@@ -242,17 +248,14 @@ describe('ruleType', () => {
       },
       id: 'all documents',
       payload: {
-        kibana: {
-          alert: {
-            evaluation: { conditions: 'foo is less than 1', value: 0 },
-            reason: `alert '${ruleName}' is active for group 'all documents':
+        'kibana.alert.evaluation.conditions': 'foo is less than 1',
+        'kibana.alert.evaluation.value': '0',
+        'kibana.alert.reason': `alert '${ruleName}' is active for group 'all documents':
 
 - Value: 0
 - Conditions Met: foo is less than 1 over 5m
 - Timestamp: 1970-01-01T00:00:00.000Z`,
-            title: `alert ${ruleName} group all documents met threshold`,
-          },
-        },
+        'kibana.alert.title': `alert ${ruleName} group all documents met threshold`,
       },
       state: {},
     });
@@ -321,6 +324,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -389,6 +393,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(customAlertServices.alertFactory.create).not.toHaveBeenCalled();
@@ -456,6 +461,7 @@ describe('ruleType', () => {
       },
       logger,
       flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+      getTimeRange,
     });
 
     expect(data.timeSeriesQuery).toHaveBeenCalledWith(

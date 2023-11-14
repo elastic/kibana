@@ -18,7 +18,6 @@ import {
   CASES_URL,
   CASE_COMMENT_SAVED_OBJECT,
   CASE_CONFIGURE_SAVED_OBJECT,
-  CASE_CONFIGURE_URL,
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
   CASE_STATUS_URL,
@@ -30,13 +29,10 @@ import {
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
-import { ActionResult } from '@kbn/actions-plugin/server/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
 import type { ConfigurationPersistedAttributes } from '@kbn/cases-plugin/server/common/types/configure';
 import {
-  Configurations,
-  Configuration,
   ConnectorMappingsAttributes,
   Case,
   Cases,
@@ -49,7 +45,6 @@ import {
   CasesFindResponse,
   CasesPatchRequest,
   CasesStatusResponse,
-  ConfigurationPatchRequest,
   GetRelatedCasesByAlertResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import { User } from '../authentication/types';
@@ -439,52 +434,6 @@ export const updateCase = async ({
     .expect(expectedHttpCode);
 
   return cases;
-};
-
-export const getConfiguration = async ({
-  supertest,
-  query = { owner: 'securitySolutionFixture' },
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.SuperTest<SuperTest.Test>;
-  query?: Record<string, unknown>;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}): Promise<Configurations> => {
-  const { body: configuration } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_CONFIGURE_URL}`)
-    .auth(auth.user.username, auth.user.password)
-    .set('kbn-xsrf', 'true')
-    .query(query)
-    .expect(expectedHttpCode);
-
-  return configuration;
-};
-
-export type CreateConnectorResponse = Omit<ActionResult, 'actionTypeId'> & {
-  connector_type_id: string;
-};
-
-export const updateConfiguration = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  id: string,
-  req: ConfigurationPatchRequest,
-  expectedHttpCode: number = 200,
-  auth: { user: User; space: string | null } | null = { user: superUser, space: null },
-  headers: Record<string, unknown> = {}
-): Promise<Configuration> => {
-  const apiCall = supertest.patch(`${getSpaceUrlPrefix(auth?.space)}${CASE_CONFIGURE_URL}/${id}`);
-
-  setupAuth({ apiCall, headers, auth });
-
-  const { body: configuration } = await apiCall
-    .set('kbn-xsrf', 'true')
-    .set(headers)
-    .send(req)
-    .expect(expectedHttpCode);
-
-  return configuration;
 };
 
 export const getAllCasesStatuses = async ({

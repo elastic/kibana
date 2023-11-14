@@ -23,6 +23,7 @@ export interface FleetConfigType {
     elasticsearch: {
       hosts?: string[];
       ca_sha256?: string;
+      ca_trusted_fingerprint?: string;
     };
     fleet_server?: {
       hosts?: string[];
@@ -51,6 +52,7 @@ export interface FleetConfigType {
     fleetServerStandalone: boolean;
     onlyAllowAgentUpgradeToKnownVersions: boolean;
     activeAgentsSoftLimit?: number;
+    retrySetupOnBoot: boolean;
     registry: {
       kibanaVersionCheckEnabled: boolean;
       capabilities: string[];
@@ -58,6 +60,7 @@ export interface FleetConfigType {
         min?: string;
         max?: string;
       };
+      excludePackages: string[];
     };
   };
   createArtifactsBulkBatchSize?: number;

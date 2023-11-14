@@ -20,7 +20,10 @@ import { AppDependencies } from './app_dependencies';
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
-import { ServerlessContextProvider } from './serverless_context';
+import {
+  EnabledFeaturesContextProvider,
+  type TransformEnabledFeatures,
+} from './serverless_context';
 
 export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
   <Router history={history}>
@@ -41,7 +44,7 @@ export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
 export const renderApp = (
   element: HTMLElement,
   appDependencies: AppDependencies,
-  isServerless: boolean
+  enabledFeatures: TransformEnabledFeatures
 ) => {
   const I18nContext = appDependencies.i18n.Context;
 
@@ -60,9 +63,9 @@ export const renderApp = (
         <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
           <KibanaContextProvider services={appDependencies}>
             <I18nContext>
-              <ServerlessContextProvider isServerless={isServerless}>
+              <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
                 <App history={appDependencies.history} />
-              </ServerlessContextProvider>
+              </EnabledFeaturesContextProvider>
             </I18nContext>
           </KibanaContextProvider>
         </KibanaThemeProvider>

@@ -5,7 +5,6 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-
 import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { Suggestion } from '@kbn/lens-plugin/public';
@@ -15,7 +14,7 @@ import { UnifiedHistogramFetchStatus } from '../../types';
 import { dataViewMock } from '../../__mocks__/data_view';
 import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefield';
 import { currentSuggestionMock } from '../../__mocks__/suggestions';
-import { lensTablesAdapterMock } from '../../__mocks__/lens_table_adapter';
+import { lensAdaptersMock } from '../../__mocks__/lens_adapters';
 import { unifiedHistogramServicesMock } from '../../__mocks__/services';
 import {
   createStateService,
@@ -29,7 +28,7 @@ describe('useStateProps', () => {
     breakdownField: 'bytes',
     chartHidden: false,
     lensRequestAdapter: new RequestAdapter(),
-    lensTablesAdapter: lensTablesAdapterMock,
+    lensAdapters: lensAdaptersMock,
     timeInterval: 'auto',
     topPanelHeight: 100,
     totalHitsStatus: UnifiedHistogramFetchStatus.uninitialized,
@@ -84,37 +83,42 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
-        "lensTablesAdapter": Object {
-          "default": Object {
-            "columns": Array [
-              Object {
-                "id": "col-0-1",
-                "meta": Object {
-                  "dimensionName": "Slice size",
-                  "type": "number",
-                },
-                "name": "Field 1",
+        "lensAdapters": Object {
+          "tables": Object {
+            "tables": Object {
+              "default": Object {
+                "columns": Array [
+                  Object {
+                    "id": "col-0-1",
+                    "meta": Object {
+                      "dimensionName": "Slice size",
+                      "type": "number",
+                    },
+                    "name": "Field 1",
+                  },
+                  Object {
+                    "id": "col-0-2",
+                    "meta": Object {
+                      "dimensionName": "Slice",
+                      "type": "number",
+                    },
+                    "name": "Field 2",
+                  },
+                ],
+                "rows": Array [
+                  Object {
+                    "col-0-1": 0,
+                    "col-0-2": 0,
+                    "col-0-3": 0,
+                    "col-0-4": 0,
+                  },
+                ],
+                "type": "datatable",
               },
-              Object {
-                "id": "col-0-2",
-                "meta": Object {
-                  "dimensionName": "Slice",
-                  "type": "number",
-                },
-                "name": "Field 2",
-              },
-            ],
-            "rows": Array [
-              Object {
-                "col-0-1": 0,
-                "col-0-2": 0,
-                "col-0-3": 0,
-                "col-0-4": 0,
-              },
-            ],
-            "type": "datatable",
+            },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -159,37 +163,42 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": true,
-        "lensTablesAdapter": Object {
-          "default": Object {
-            "columns": Array [
-              Object {
-                "id": "col-0-1",
-                "meta": Object {
-                  "dimensionName": "Slice size",
-                  "type": "number",
-                },
-                "name": "Field 1",
+        "lensAdapters": Object {
+          "tables": Object {
+            "tables": Object {
+              "default": Object {
+                "columns": Array [
+                  Object {
+                    "id": "col-0-1",
+                    "meta": Object {
+                      "dimensionName": "Slice size",
+                      "type": "number",
+                    },
+                    "name": "Field 1",
+                  },
+                  Object {
+                    "id": "col-0-2",
+                    "meta": Object {
+                      "dimensionName": "Slice",
+                      "type": "number",
+                    },
+                    "name": "Field 2",
+                  },
+                ],
+                "rows": Array [
+                  Object {
+                    "col-0-1": 0,
+                    "col-0-2": 0,
+                    "col-0-3": 0,
+                    "col-0-4": 0,
+                  },
+                ],
+                "type": "datatable",
               },
-              Object {
-                "id": "col-0-2",
-                "meta": Object {
-                  "dimensionName": "Slice",
-                  "type": "number",
-                },
-                "name": "Field 2",
-              },
-            ],
-            "rows": Array [
-              Object {
-                "col-0-1": 0,
-                "col-0-2": 0,
-                "col-0-3": 0,
-                "col-0-4": 0,
-              },
-            ],
-            "type": "datatable",
+            },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -255,37 +264,42 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
-        "lensTablesAdapter": Object {
-          "default": Object {
-            "columns": Array [
-              Object {
-                "id": "col-0-1",
-                "meta": Object {
-                  "dimensionName": "Slice size",
-                  "type": "number",
-                },
-                "name": "Field 1",
+        "lensAdapters": Object {
+          "tables": Object {
+            "tables": Object {
+              "default": Object {
+                "columns": Array [
+                  Object {
+                    "id": "col-0-1",
+                    "meta": Object {
+                      "dimensionName": "Slice size",
+                      "type": "number",
+                    },
+                    "name": "Field 1",
+                  },
+                  Object {
+                    "id": "col-0-2",
+                    "meta": Object {
+                      "dimensionName": "Slice",
+                      "type": "number",
+                    },
+                    "name": "Field 2",
+                  },
+                ],
+                "rows": Array [
+                  Object {
+                    "col-0-1": 0,
+                    "col-0-2": 0,
+                    "col-0-3": 0,
+                    "col-0-4": 0,
+                  },
+                ],
+                "type": "datatable",
               },
-              Object {
-                "id": "col-0-2",
-                "meta": Object {
-                  "dimensionName": "Slice",
-                  "type": "number",
-                },
-                "name": "Field 2",
-              },
-            ],
-            "rows": Array [
-              Object {
-                "col-0-1": 0,
-                "col-0-2": 0,
-                "col-0-3": 0,
-                "col-0-4": 0,
-              },
-            ],
-            "type": "datatable",
+            },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],
@@ -327,37 +341,42 @@ describe('useStateProps', () => {
           "total": undefined,
         },
         "isPlainRecord": false,
-        "lensTablesAdapter": Object {
-          "default": Object {
-            "columns": Array [
-              Object {
-                "id": "col-0-1",
-                "meta": Object {
-                  "dimensionName": "Slice size",
-                  "type": "number",
-                },
-                "name": "Field 1",
+        "lensAdapters": Object {
+          "tables": Object {
+            "tables": Object {
+              "default": Object {
+                "columns": Array [
+                  Object {
+                    "id": "col-0-1",
+                    "meta": Object {
+                      "dimensionName": "Slice size",
+                      "type": "number",
+                    },
+                    "name": "Field 1",
+                  },
+                  Object {
+                    "id": "col-0-2",
+                    "meta": Object {
+                      "dimensionName": "Slice",
+                      "type": "number",
+                    },
+                    "name": "Field 2",
+                  },
+                ],
+                "rows": Array [
+                  Object {
+                    "col-0-1": 0,
+                    "col-0-2": 0,
+                    "col-0-3": 0,
+                    "col-0-4": 0,
+                  },
+                ],
+                "type": "datatable",
               },
-              Object {
-                "id": "col-0-2",
-                "meta": Object {
-                  "dimensionName": "Slice",
-                  "type": "number",
-                },
-                "name": "Field 2",
-              },
-            ],
-            "rows": Array [
-              Object {
-                "col-0-1": 0,
-                "col-0-2": 0,
-                "col-0-3": 0,
-                "col-0-4": 0,
-              },
-            ],
-            "type": "datatable",
+            },
           },
         },
+        "lensEmbeddableOutput$": undefined,
         "onBreakdownFieldChange": [Function],
         "onChartHiddenChange": [Function],
         "onChartLoad": [Function],

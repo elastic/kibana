@@ -35,7 +35,7 @@ import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { InfraClientStartExports } from '@kbn/infra-plugin/public';
+import { MetricsDataPluginStart } from '@kbn/metrics-data-access-plugin/public';
 import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -69,6 +69,7 @@ import type {
 import { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import { DashboardStart } from '@kbn/dashboard-plugin/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
 import type { ConfigSchema } from '.';
@@ -84,7 +85,6 @@ import { featureCatalogueEntry } from './feature_catalogue_entry';
 import { APMServiceDetailLocator } from './locator/service_detail_locator';
 import { ITelemetryClient, TelemetryService } from './services/telemetry';
 export type ApmPluginSetup = ReturnType<ApmPlugin['setup']>;
-
 export type ApmPluginStart = void;
 
 export interface ApmPluginSetupDeps {
@@ -128,7 +128,6 @@ export interface ApmPluginStartDeps {
   fieldFormats?: FieldFormatsStart;
   security?: SecurityPluginStart;
   spaces?: SpacesPluginStart;
-  infra?: InfraClientStartExports;
   dataViews: DataViewsPublicPluginStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   storage: IStorageWrapper;
@@ -136,6 +135,8 @@ export interface ApmPluginStartDeps {
   uiActions: UiActionsStart;
   profiling?: ProfilingPluginStart;
   observabilityAIAssistant: ObservabilityAIAssistantPluginStart;
+  dashboard: DashboardStart;
+  metricsDataAccess: MetricsDataPluginStart;
 }
 
 const servicesTitle = i18n.translate('xpack.apm.navigation.servicesTitle', {

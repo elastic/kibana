@@ -29,6 +29,7 @@ export const journeySummary = ({
     summary: {
       up: 1,
       down: 0,
+      final_attempt: true,
     },
     test_run_id: testRunId ?? '07e339f4-4d56-4cdb-b314-96faacaee645',
     agent: {

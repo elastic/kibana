@@ -8,7 +8,6 @@
 import { EuiFormRow, EuiLink, EuiTitle, EuiText, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
 import { HttpSetup } from '@kbn/core-http-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
@@ -27,7 +26,6 @@ import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getGenAiConfig } from '../../../connectorland/helpers';
 
 export interface ConversationSettingsProps {
-  actionTypeRegistry: ActionTypeRegistryContract;
   allSystemPrompts: Prompt[];
   conversationSettings: UseAssistantContext['conversations'];
   defaultConnectorId?: string;
@@ -46,7 +44,6 @@ export interface ConversationSettingsProps {
  */
 export const ConversationSettings: React.FC<ConversationSettingsProps> = React.memo(
   ({
-    actionTypeRegistry,
     allSystemPrompts,
     defaultConnectorId,
     defaultProvider,
@@ -205,7 +202,6 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
 
         <ConversationSelectorSettings
           selectedConversationId={selectedConversation?.id}
-          allSystemPrompts={allSystemPrompts}
           conversations={conversationSettings}
           onConversationDeleted={onConversationDeleted}
           onConversationSelectionChange={onConversationSelectionChange}
@@ -223,7 +219,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
             compressed
             conversation={selectedConversation}
             isEditing={true}
-            isDisabled={selectedConversation == null}
+            isDisabled={isDisabled}
             onSystemPromptSelectionChange={handleOnSystemPromptSelectionChange}
             selectedPrompt={selectedSystemPrompt}
             showTitles={true}
@@ -250,10 +246,7 @@ export const ConversationSettings: React.FC<ConversationSettingsProps> = React.m
           }
         >
           <ConnectorSelector
-            actionTypeRegistry={actionTypeRegistry}
-            http={http}
-            isDisabled={selectedConversation == null}
-            onConnectorModalVisibilityChange={() => {}}
+            isDisabled={isDisabled}
             onConnectorSelectionChange={handleOnConnectorSelectionChange}
             selectedConnectorId={selectedConnector?.id}
           />

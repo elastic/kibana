@@ -10,6 +10,7 @@ import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timel
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { DATE_RANGE_OPTION_TO_TEST_SUBJ_MAP } from '@kbn/security-solution-plugin/common/test';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { targetTags } from '../../target_tags';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const pageObjects = getPageObjects([
@@ -81,7 +82,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     );
   };
 
-  describe('Response Actions Responder', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/170435
+  describe.skip('Response Actions Responder', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     let endpointAgentId: string;
 
@@ -142,6 +146,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
                 serializedQuery: getEndpointAlertsQueryForAgentId(endpointAgentId).$stringify(),
               },
             },
+            savedSearchId: null,
           },
           timeline.data.persistTimeline.timeline.version
         );

@@ -49,7 +49,6 @@ jest.mock('react-reverse-portal', () => ({
 }));
 
 describe('global header', () => {
-  const mockSetHeaderActionMenu = jest.fn();
   const state = {
     ...mockGlobalState,
     timeline: {
@@ -75,7 +74,7 @@ describe('global header', () => {
     ]);
     const { getByText } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByText('Add integrations')).toBeInTheDocument();
@@ -87,7 +86,7 @@ describe('global header', () => {
     ]);
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -98,7 +97,7 @@ describe('global header', () => {
     (useLocation as jest.Mock).mockReturnValue({ pathname: THREAT_INTELLIGENCE_PATH });
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -118,7 +117,7 @@ describe('global header', () => {
     );
     const { queryByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     const link = queryByTestId('add-data');
@@ -130,7 +129,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -141,7 +140,7 @@ describe('global header', () => {
 
     const { getByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
     expect(getByTestId('sourcerer-trigger')).toBeInTheDocument();
@@ -166,7 +165,7 @@ describe('global header', () => {
 
     const { queryByTestId } = render(
       <TestProviders store={mockStore}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
 
@@ -180,7 +179,7 @@ describe('global header', () => {
 
     const { findByTestId } = render(
       <TestProviders store={store}>
-        <GlobalHeader setHeaderActionMenu={mockSetHeaderActionMenu} />
+        <GlobalHeader />
       </TestProviders>
     );
 

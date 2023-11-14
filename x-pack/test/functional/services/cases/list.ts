@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
@@ -85,15 +84,17 @@ export function CasesTableServiceProvider(
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(3000, async () => {
+      await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-        expect(rows.length).equal(nrRows);
+        return rows.length === nrRows;
       });
+
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
       await header.waitUntilLoadingHasFinished();
@@ -101,7 +102,7 @@ export function CasesTableServiceProvider(
 
     async waitForCasesToBeDeleted() {
       await retry.waitFor('the cases table to be empty', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         return rows.length === 0;
       });

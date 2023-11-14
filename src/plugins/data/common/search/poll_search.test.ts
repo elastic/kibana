@@ -10,7 +10,7 @@ import { pollSearch } from './poll_search';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 
 describe('pollSearch', () => {
-  function getMockedSearch$(resolveOnI = 1, finishWithError = false) {
+  function getMockedSearch$(resolveOnI = 1) {
     let counter = 0;
     return jest.fn().mockImplementation(() => {
       counter++;
@@ -19,7 +19,7 @@ describe('pollSearch', () => {
         if (lastCall) {
           resolve({
             isRunning: false,
-            isPartial: finishWithError,
+            isPartial: false,
             rawResponse: {},
           });
         } else {
@@ -54,15 +54,6 @@ describe('pollSearch', () => {
     const cancelFn = jest.fn();
     await pollSearch(searchFn, cancelFn).toPromise();
     expect(searchFn).toBeCalledTimes(3);
-    expect(cancelFn).toBeCalledTimes(0);
-  });
-
-  test('Throws Error on ES error response', async () => {
-    const searchFn = getMockedSearch$(2, true);
-    const cancelFn = jest.fn();
-    const poll = pollSearch(searchFn, cancelFn).toPromise();
-    await expect(poll).rejects.toThrow(Error);
-    expect(searchFn).toBeCalledTimes(2);
     expect(cancelFn).toBeCalledTimes(0);
   });
 

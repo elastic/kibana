@@ -1,0 +1,269 @@
+{
+  "id": "@kbn/ml-chi2test",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-chi2test",
+        "id": "def-common.computeChi2PValue",
+        "type": "Function",
+        "tags": [],
+        "label": "computeChi2PValue",
+        "description": [
+          "\nCompute the p-value for how similar the datasets are.\nReturned value ranges from 0 to 1, with 1 meaning the datasets are identical.\n"
+        ],
+        "signature": [
+          "(normalizedBaselineTerms: ",
+          {
+            "pluginId": "@kbn/ml-chi2test",
+            "scope": "common",
+            "docId": "kibKbnMlChi2testPluginApi",
+            "section": "def-common.Histogram",
+            "text": "Histogram"
+          },
+          "[], normalizedDriftedTerms: ",
+          {
+            "pluginId": "@kbn/ml-chi2test",
+            "scope": "common",
+            "docId": "kibKbnMlChi2testPluginApi",
+            "section": "def-common.Histogram",
+            "text": "Histogram"
+          },
+          "[]) => number"
+        ],
+        "path": "x-pack/packages/ml/chi2test/compute_chi_2_pvalue.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.computeChi2PValue.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "normalizedBaselineTerms",
+            "description": [
+              "- An array of normalized baseline terms (Histogram objects)."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-chi2test",
+                "scope": "common",
+                "docId": "kibKbnMlChi2testPluginApi",
+                "section": "def-common.Histogram",
+                "text": "Histogram"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/chi2test/compute_chi_2_pvalue.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.computeChi2PValue.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "normalizedDriftedTerms",
+            "description": [
+              "- An array of normalized drifted terms (Histogram objects)."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/ml-chi2test",
+                "scope": "common",
+                "docId": "kibKbnMlChi2testPluginApi",
+                "section": "def-common.Histogram",
+                "text": "Histogram"
+              },
+              "[]"
+            ],
+            "path": "x-pack/packages/ml/chi2test/compute_chi_2_pvalue.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The p-value indicating the similarity of the datasets."
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-chi2test",
+        "id": "def-common.criticalTableLookup",
+        "type": "Function",
+        "tags": [
+          "throws"
+        ],
+        "label": "criticalTableLookup",
+        "description": [
+          "\nPerforms a lookup in a critical values table to determine the significance level\nassociated with a given chi-squared statistic and degrees of freedom.\n"
+        ],
+        "signature": [
+          "(chi2Statistic: number, df: number) => number"
+        ],
+        "path": "x-pack/packages/ml/chi2test/critical_table_lookup.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.criticalTableLookup.$1",
+            "type": "number",
+            "tags": [],
+            "label": "chi2Statistic",
+            "description": [
+              "- The chi-squared statistic for which the significance level is to be determined."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/chi2test/critical_table_lookup.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.criticalTableLookup.$2",
+            "type": "number",
+            "tags": [],
+            "label": "df",
+            "description": [
+              "- The degrees of freedom (an integer) for the chi-squared test."
+            ],
+            "signature": [
+              "number"
+            ],
+            "path": "x-pack/packages/ml/chi2test/critical_table_lookup.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The significance level corresponding to the chi-squared statistic and degrees of freedom."
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-chi2test",
+        "id": "def-common.Histogram",
+        "type": "Interface",
+        "tags": [],
+        "label": "Histogram",
+        "description": [
+          "\nInterface for the Histogram type used by computeChi2PValue."
+        ],
+        "path": "x-pack/packages/ml/chi2test/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.Histogram.doc_count",
+            "type": "number",
+            "tags": [],
+            "label": "doc_count",
+            "description": [
+              "\nThe doc count."
+            ],
+            "path": "x-pack/packages/ml/chi2test/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.Histogram.key",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "key",
+            "description": [
+              "\nThe key."
+            ],
+            "signature": [
+              "string | number"
+            ],
+            "path": "x-pack/packages/ml/chi2test/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-chi2test",
+            "id": "def-common.Histogram.percentage",
+            "type": "number",
+            "tags": [],
+            "label": "percentage",
+            "description": [
+              "\nOptional percentage."
+            ],
+            "signature": [
+              "number | undefined"
+            ],
+            "path": "x-pack/packages/ml/chi2test/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-chi2test",
+        "id": "def-common.CRITICAL_VALUES_TABLE",
+        "type": "Array",
+        "tags": [],
+        "label": "CRITICAL_VALUES_TABLE",
+        "description": [
+          "\nTable generated from following python code\n\nimport scipy.stats as stats\nimport numpy as np\n\n# generate a chi-squared critical value table\n\n# degrees of freedom\ndf = range(1,100)\n\n# levels of significance\nsignificance_levels = np.concatenate((np.logspace(-6, -3, 3), np.linspace(0.01, 0.99, 99)))\n\n# create the table\ntable = []\nfor d in df:\n    row = []\n    for l in significance_levels:\n        row.append(round(stats.chi2.ppf(1 - l, d), 2))\n    table.append(row)\n\ncritical_value_table = np.array(table)\n\n# print the critical value table as a TypeScipt array\nprint(\"export const CRITICAL_VALUES_TABLE = [\")\nfor row in critical_value_table:\n    print(f\"  [{', '.join([str(x) for x in row])}],\")\nprint(\"];\")\n\n# print the significance levels as a TypeScript array\nprint(\"export const SIGNIFICANCE_LEVELS = [\")\nprint(f\"  {', '.join([f'{x:.6f}' for x in significance_levels])}\")\nprint(\"];\")\n\nuntil we find a low size replacement for doing chi2test in js"
+        ],
+        "signature": [
+          "number[][]"
+        ],
+        "path": "x-pack/packages/ml/chi2test/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-chi2test",
+        "id": "def-common.SIGNIFICANCE_LEVELS",
+        "type": "Array",
+        "tags": [],
+        "label": "SIGNIFICANCE_LEVELS",
+        "description": [
+          "\nSignifance levels used by `computeChi2PValue`."
+        ],
+        "signature": [
+          "number[]"
+        ],
+        "path": "x-pack/packages/ml/chi2test/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

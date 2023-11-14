@@ -163,4 +163,5 @@ export interface FieldMap {
   [ConfigKey.IGNORE_HTTPS_ERRORS]: FieldMeta<ConfigKey.IGNORE_HTTPS_ERRORS>;
   [ConfigKey.MODE]: FieldMeta<ConfigKey.MODE>;
   [ConfigKey.IPV4]: FieldMeta<ConfigKey.IPV4>;
+  [ConfigKey.MAX_ATTEMPTS]: FieldMeta<ConfigKey.MAX_ATTEMPTS>;
 }

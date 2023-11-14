@@ -19,6 +19,7 @@ export type AggregateOptions = TypeOf<typeof aggregateOptionsSchema> & {
   filter?: string | KueryNode;
   page?: AggregateOptionsSchemaTypes['page'];
   perPage?: AggregateOptionsSchemaTypes['perPage'];
+  filterConsumers?: string[];
 };
 
 export interface AggregateParams<AggregationResult> {

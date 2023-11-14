@@ -7,6 +7,7 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kbn/slo-schema';
+import { isEqual } from 'lodash';
 import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
@@ -28,18 +29,42 @@ export class UpdateSLO {
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
     const originalSlo = await this.repository.findById(sloId);
-    const updatedSlo: SLO = Object.assign({}, originalSlo, params, {
+    let updatedSlo: SLO = Object.assign({}, originalSlo, params, {
+      groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
+    });
+
+    if (isEqual(originalSlo, updatedSlo)) {
+      return this.toResponse(originalSlo);
+    }
+
+    updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
       revision: originalSlo.revision + 1,
-      groupBy: !!params.groupBy ? params.groupBy : originalSlo.groupBy,
     });
 
     validateSLO(updatedSlo);
 
-    await this.deleteObsoleteSLORevisionData(originalSlo);
+    const updatedSloTransformId = getSLOTransformId(updatedSlo.id, updatedSlo.revision);
     await this.repository.save(updatedSlo);
-    await this.transformManager.install(updatedSlo);
-    await this.transformManager.start(getSLOTransformId(updatedSlo.id, updatedSlo.revision));
+
+    try {
+      await this.transformManager.install(updatedSlo);
+    } catch (err) {
+      await this.repository.save(originalSlo);
+      throw err;
+    }
+
+    try {
+      await this.transformManager.preview(updatedSloTransformId);
+      await this.transformManager.start(updatedSloTransformId);
+    } catch (err) {
+      await Promise.all([
+        this.transformManager.uninstall(updatedSloTransformId),
+        this.repository.save(originalSlo),
+      ]);
+
+      throw err;
+    }
 
     await this.esClient.index({
       index: SLO_SUMMARY_TEMP_INDEX_NAME,
@@ -48,13 +73,21 @@ export class UpdateSLO {
       refresh: true,
     });
 
+    await this.deleteOriginalSLO(originalSlo);
+
     return this.toResponse(updatedSlo);
   }
 
-  private async deleteObsoleteSLORevisionData(originalSlo: SLO) {
-    const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
-    await this.transformManager.stop(originalSloTransformId);
-    await this.transformManager.uninstall(originalSloTransformId);
+  private async deleteOriginalSLO(originalSlo: SLO) {
+    try {
+      const originalSloTransformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
+      await this.transformManager.stop(originalSloTransformId);
+      await this.transformManager.uninstall(originalSloTransformId);
+    } catch (err) {
+      // Any errors here should not prevent moving forward.
+      // Worst case we keep rolling up data for the previous revision number.
+    }
+
     await this.deleteRollupData(originalSlo.id, originalSlo.revision);
     await this.deleteSummaryData(originalSlo.id, originalSlo.revision);
   }

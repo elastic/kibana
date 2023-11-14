@@ -20,7 +20,7 @@ describe('Transform: Job List Columns', () => {
     const wrapper: FC = ({ children }) => (
       <QueryClientProvider client={queryClient}>{children}</QueryClientProvider>
     );
-    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, []), {
+    const { result, waitForNextUpdate } = renderHook(() => useColumns([], () => {}, 1, [], false), {
       wrapper,
     });
 

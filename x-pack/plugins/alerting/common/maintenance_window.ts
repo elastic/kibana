@@ -33,6 +33,7 @@ export interface MaintenanceWindowSOProperties {
   expirationDate: string;
   events: DateRange[];
   rRule: RRuleParams;
+  categoryIds?: string[] | null;
 }
 
 export type MaintenanceWindowSOAttributes = MaintenanceWindowSOProperties &

@@ -11,6 +11,7 @@ import {
   ChangePanelHandler,
   DatasetSelectionHandler,
   DatasetsSelectorSearchHandler,
+  DataViewSelectionHandler,
   PanelId,
 } from '../types';
 import { createDatasetsSelectorStateMachine } from './state_machine';
@@ -18,6 +19,9 @@ import { DatasetsSelectorStateMachineDependencies } from './types';
 
 export const useDatasetSelector = ({
   initialContext,
+  onDataViewSelection,
+  onDataViewsSearch,
+  onDataViewsSort,
   onIntegrationsLoadMore,
   onIntegrationsReload,
   onIntegrationsSearch,
@@ -25,13 +29,16 @@ export const useDatasetSelector = ({
   onIntegrationsStreamsSearch,
   onIntegrationsStreamsSort,
   onSelectionChange,
-  onUnmanagedStreamsSearch,
-  onUnmanagedStreamsSort,
-  onUnmanagedStreamsReload,
+  onUncategorizedSearch,
+  onUncategorizedSort,
+  onUncategorizedReload,
 }: DatasetsSelectorStateMachineDependencies) => {
   const datasetsSelectorStateService = useInterpret(() =>
     createDatasetsSelectorStateMachine({
       initialContext,
+      onDataViewSelection,
+      onDataViewsSearch,
+      onDataViewsSort,
       onIntegrationsLoadMore,
       onIntegrationsReload,
       onIntegrationsSearch,
@@ -39,9 +46,9 @@ export const useDatasetSelector = ({
       onIntegrationsStreamsSearch,
       onIntegrationsStreamsSort,
       onSelectionChange,
-      onUnmanagedStreamsSearch,
-      onUnmanagedStreamsSort,
-      onUnmanagedStreamsReload,
+      onUncategorizedSearch,
+      onUncategorizedSort,
+      onUncategorizedReload,
     })
   );
 
@@ -61,6 +68,11 @@ export const useDatasetSelector = ({
 
   const switchToUncategorizedTab = useCallback(
     () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_UNCATEGORIZED_TAB' }),
+    [datasetsSelectorStateService]
+  );
+
+  const switchToDataViewsTab = useCallback(
+    () => datasetsSelectorStateService.send({ type: 'SWITCH_TO_DATA_VIEWS_TAB' }),
     [datasetsSelectorStateService]
   );
 
@@ -90,6 +102,11 @@ export const useDatasetSelector = ({
 
   const selectDataset = useCallback<DatasetSelectionHandler>(
     (dataset) => datasetsSelectorStateService.send({ type: 'SELECT_DATASET', dataset }),
+    [datasetsSelectorStateService]
+  );
+
+  const selectDataView = useCallback<DataViewSelectionHandler>(
+    (dataView) => datasetsSelectorStateService.send({ type: 'SELECT_DATA_VIEW', dataView }),
     [datasetsSelectorStateService]
   );
 
@@ -124,9 +141,11 @@ export const useDatasetSelector = ({
     searchByName,
     selectAllLogDataset,
     selectDataset,
+    selectDataView,
     sortByOrder,
     switchToIntegrationsTab,
     switchToUncategorizedTab,
+    switchToDataViewsTab,
     togglePopover,
   };
 };
