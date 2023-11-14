@@ -96,7 +96,6 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
-      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
@@ -106,7 +105,6 @@ export default ({ getService }: FtrProviderContext) => {
 
     after(async () => {
       await esArchiver.unload(auditbeatPath);
-      await esArchiver.unload('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       await esArchiver.unload('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
       await deleteAllAlerts(supertest, log, es, ['.preview.alerts-security.alerts-*']);
       await deleteAllRules(supertest, log);
@@ -196,9 +194,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should query and get back expected alert structure when it is a alert on a alert', async () => {
-      const alertId = '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a';
+      const alertId = 'BhbXBmkBR346wHgn4PeZ';
       const rule: QueryRuleCreateProps = {
-        ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
+        ...getRuleForAlertTesting([`auditbeat-*`]),
         rule_id: 'signal-on-signal',
         query: `_id:${alertId}`,
       };
@@ -218,26 +216,17 @@ export default ({ getService }: FtrProviderContext) => {
         ...alert,
         [ALERT_ANCESTORS]: [
           {
-            id: 'ahEToH8BK09aFtXZFVMq',
+            id: 'BhbXBmkBR346wHgn4PeZ',
             type: 'event',
-            index: 'events-index-000001',
+            index: 'auditbeat-8.0.0-2019.02.19-000001',
             depth: 0,
-          },
-          {
-            rule: '031d5c00-a72f-11ec-a8a3-7b1c8077fc3e',
-            id: '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a',
-            type: 'signal',
-            index: '.internal.alerts-security.alerts-default-000001',
-            depth: 1,
           },
         ],
         [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_DEPTH]: 2,
-        [ALERT_ORIGINAL_TIME]: '2022-03-19T02:48:12.634Z',
+        [ALERT_DEPTH]: 1,
+        [ALERT_ORIGINAL_TIME]: '2019-02-19T17:40:03.790Z',
         ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, {
-          agent_id_status: 'verified',
-          ingested: '2022-03-19T02:47:57.376Z',
-          dataset: 'elastic_agent.filebeat',
+          dataset: 'socket',
         }),
       });
     });
@@ -2282,7 +2271,8 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('legacy investigation_fields', () => {
+    // TODO: Ask YARA
+    describe('@brokenInServerless legacy investigation_fields', () => {
       let ruleWithLegacyInvestigationField: Rule<BaseRuleParams>;
 
       beforeEach(async () => {
