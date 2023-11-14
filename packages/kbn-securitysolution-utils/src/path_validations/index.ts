@@ -52,7 +52,7 @@ export enum OperatingSystem {
 export type EntryTypes = 'match' | 'wildcard' | 'match_any';
 export type TrustedAppEntryTypes = Extract<EntryTypes, 'match' | 'wildcard'>;
 
-export const validateWildcardInput = ({
+export const validatePotentialWildcardInput = ({
   field = '',
   os,
   value = '',
@@ -65,10 +65,10 @@ export const validateWildcardInput = ({
   if (field === 'file.path.text') {
     return validateFilePathInput({ os, value: textInput });
   }
-  return validatePotentialWildcardInput(textInput);
+  return validateWildcardInput(textInput);
 };
 
-const validateFilePathInput = ({
+export const validateFilePathInput = ({
   os,
   value,
 }: {
@@ -100,7 +100,7 @@ const validateFilePathInput = ({
   }
 };
 
-const validatePotentialWildcardInput = (value?: string): string | undefined => {
+export const validateWildcardInput = (value?: string): string | undefined => {
   if (/\*|\?/.test(value ?? '')) {
     return WILDCARD_WARNING;
   }
