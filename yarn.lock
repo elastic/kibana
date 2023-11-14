@@ -3000,6 +3000,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-ftr-helpers-plugin@link:test/analytics/plugins/analytics_ftr_helpers":
   version "0.0.0"
   uid ""
@@ -4145,6 +4149,10 @@
   uid ""
 
 "@kbn/data-visualizer-plugin@link:x-pack/plugins/data_visualizer":
+  version "0.0.0"
+  uid ""
+
+"@kbn/dataset-quality-plugin@link:x-pack/plugins/dataset_quality":
   version "0.0.0"
   uid ""
 
@@ -6041,6 +6049,10 @@
   uid ""
 
 "@kbn/unified-search-plugin@link:src/plugins/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
   version "0.0.0"
   uid ""
 

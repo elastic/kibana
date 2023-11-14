@@ -231,6 +231,19 @@ describe('Discover flyout', function () {
   });
 
   describe('with applied customizations', () => {
+    describe('when title is customized', () => {
+      it('should display the passed string as title', async () => {
+        const customTitle = 'Custom flyout title';
+        mockFlyoutCustomization.title = customTitle;
+
+        const { component } = await mountComponent({});
+
+        const titleNode = findTestSubject(component, 'docTableRowDetailsTitle');
+
+        expect(titleNode.text()).toBe(customTitle);
+      });
+    });
+
     describe('when actions are customized', () => {
       it('should display actions added by getActionItems', async () => {
         mockFlyoutCustomization.actions = {
