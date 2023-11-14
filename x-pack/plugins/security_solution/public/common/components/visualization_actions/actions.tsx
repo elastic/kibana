@@ -71,6 +71,13 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
   const [isInspectModalOpen, setIsInspectModalOpen] = useState(false);
   const [isSaveModalVisible, setIsSaveModalVisible] = useState(false);
   const { addSuccess } = useAppToasts();
+  const onSave = useCallback(() => {
+    setIsSaveModalVisible(false);
+    addSuccess(ADDED_TO_LIBRARY);
+  }, [addSuccess]);
+  const onClose = useCallback(() => {
+    setIsSaveModalVisible(false);
+  }, []);
   const hasPermission = canUseEditor();
 
   const onButtonClick = useCallback(() => {
@@ -285,11 +292,8 @@ const VisualizationActionsComponent: React.FC<VisualizationActionsProps> = ({
       {isSaveModalVisible && hasPermission && (
         <SaveModalComponent
           initialInput={attributes as unknown as LensEmbeddableInput}
-          onSave={() => {
-            setIsSaveModalVisible(false);
-            addSuccess(ADDED_TO_LIBRARY);
-          }}
-          onClose={() => setIsSaveModalVisible(false)}
+          onSave={onSave}
+          onClose={onClose}
         />
       )}
     </Wrapper>

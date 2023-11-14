@@ -79,11 +79,9 @@ const StartAppComponent: FC<StartAppComponent> = ({
                               <UpsellingProvider upsellingService={upselling}>
                                 <DiscoverInTimelineContextProvider>
                                   <AssistantProvider>
-                                    <DashboardContextProvider>
-                                      <PageRouter history={history} onAppLeave={onAppLeave}>
-                                        {children}
-                                      </PageRouter>
-                                    </DashboardContextProvider>
+                                    <PageRouter history={history} onAppLeave={onAppLeave}>
+                                      {children}
+                                    </PageRouter>
                                   </AssistantProvider>
                                 </DiscoverInTimelineContextProvider>
                               </UpsellingProvider>

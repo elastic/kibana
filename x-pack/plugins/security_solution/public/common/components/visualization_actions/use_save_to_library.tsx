@@ -13,7 +13,7 @@ import type { SaveProps } from '@kbn/lens-plugin/public/plugin';
 import { useKibana } from '../../lib/kibana';
 import type { LensAttributes } from './types';
 import { useRedirectToDashboardFromLens } from './use_redirect_to_dashboard_from_lens';
-import { APP_UI_ID } from '../../../../common';
+import { APP_UI_ID, SecurityPageName } from '../../../../common';
 import { useGetSecuritySolutionUrl } from '../link_to';
 
 export const useSaveToLibrary = ({
@@ -24,7 +24,9 @@ export const useSaveToLibrary = ({
   const { lens, theme, i18n } = useKibana().services;
   const { SaveModalComponent, canUseEditor } = lens;
   const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
-  const redirectTo = useRedirectToDashboardFromLens({ getSecuritySolutionUrl });
+  const { redirectTo, getEditOrCreateDashboardPath } = useRedirectToDashboardFromLens({
+    getSecuritySolutionUrl,
+  });
 
   const openSaveVisualizationFlyout = useCallback(() => {
     const targetDomElement = document.createElement('div');
@@ -39,9 +41,7 @@ export const useSaveToLibrary = ({
         }}
         originatingApp={APP_UI_ID}
         getOriginatingPath={(dashboardId) =>
-          dashboardId == null || dashboardId === 'new'
-            ? `dashboards/create`
-            : `dashboards/${dashboardId}/edit`
+          `${SecurityPageName.dashboards}/${getEditOrCreateDashboardPath(dashboardId)}`
         }
         redirectTo={redirectTo}
       />,
@@ -49,7 +49,7 @@ export const useSaveToLibrary = ({
     );
 
     mount(targetDomElement);
-  }, [SaveModalComponent, attributes, i18n, redirectTo, theme]);
+  }, [SaveModalComponent, attributes, getEditOrCreateDashboardPath, i18n, redirectTo, theme]);
 
   const disableVisualizations = useMemo(
     () => !canUseEditor() || attributes == null,

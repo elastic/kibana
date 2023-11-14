@@ -7,7 +7,6 @@
 
 import { useMemo } from 'react';
 import { SecurityPageName } from '../../../../common/constants';
-import { useSecurityTags } from '../../../dashboards/context/dashboard_context';
 import { NetworkRouteType } from '../../../explore/network/pages/navigation/types';
 import { useSourcererDataView } from '../../containers/sourcerer';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
@@ -32,7 +31,6 @@ export const useLensAttributes = ({
   stackByField,
   title,
 }: UseLensAttributesProps): LensAttributes | null => {
-  const tags = useSecurityTags();
   const { selectedPatterns, dataViewId, indicesExist } = useSourcererDataView(scopeId);
   const getGlobalQuerySelector = useMemo(() => inputsSelectors.globalQuerySelector(), []);
   const getGlobalFiltersQuerySelector = useMemo(
@@ -89,12 +87,7 @@ export const useLensAttributes = ({
     }
 
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
-    const attrReferences = attrs?.references?.map(
-      (ref: { id: string; name: string; type: string }) => ({
-        ...ref,
-        id: dataViewId,
-      })
-    );
+
     return {
       ...attrs,
       ...(title != null ? { title } : {}),
@@ -109,7 +102,10 @@ export const useLensAttributes = ({
           ...(applyGlobalQueriesAndFilters ? filters : []),
         ],
       },
-      references: [...attrReferences, ...(tags != null ? tags : [])],
+      references: attrs?.references?.map((ref: { id: string; name: string; type: string }) => ({
+        ...ref,
+        id: dataViewId,
+      })),
     } as LensAttributes;
   }, [
     applyGlobalQueriesAndFilters,
@@ -124,7 +120,6 @@ export const useLensAttributes = ({
     selectedPatterns,
     stackByField,
     tabsFilters,
-    tags,
     title,
   ]);
   return hasAdHocDataViews || (!hasAdHocDataViews && indicesExist)

@@ -16,6 +16,7 @@ export const useRedirectToDashboardFromLens = ({
   getSecuritySolutionUrl: GetSecuritySolutionUrl;
 }) => {
   const { navigateTo } = useNavigateTo();
+
   const dashboardListingUrl = useMemo(
     () =>
       `${getSecuritySolutionUrl({
@@ -23,13 +24,18 @@ export const useRedirectToDashboardFromLens = ({
       })}`,
     [getSecuritySolutionUrl]
   );
+
+  const getEditOrCreateDashboardPath = useCallback(
+    (id: string | null | undefined) => (id != null && id !== 'new' ? `${id}/edit` : `/create`),
+    []
+  );
   const getEditOrCreateDashboardUrl = useCallback(
-    (id: string | undefined) =>
+    (id: string | null | undefined) =>
       `${getSecuritySolutionUrl({
         deepLinkId: SecurityPageName.dashboards,
-        path: id ? `${id}/edit` : `/create`,
+        path: getEditOrCreateDashboardPath(id),
       })}`,
-    [getSecuritySolutionUrl]
+    [getEditOrCreateDashboardPath, getSecuritySolutionUrl]
   );
 
   const redirectTo = useCallback(
@@ -44,5 +50,10 @@ export const useRedirectToDashboardFromLens = ({
     [dashboardListingUrl, getEditOrCreateDashboardUrl, navigateTo]
   );
 
-  return redirectTo;
+  return {
+    redirectTo,
+    getEditOrCreateDashboardPath,
+    getEditOrCreateDashboardUrl,
+    dashboardListingUrl,
+  };
 };
