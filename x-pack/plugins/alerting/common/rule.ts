@@ -116,6 +116,7 @@ export interface RuleAction {
   params: RuleActionParams;
   frequency?: RuleActionFrequency;
   alertsFilter?: AlertsFilter;
+  useAlertDataForTemplate?: boolean;
 }
 
 export interface RuleLastRun {

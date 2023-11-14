@@ -839,6 +839,9 @@ export const RuleForm = ({
                 : { ...actionGroup, defaultActionMessage: ruleTypeModel?.defaultActionMessage }
             )}
             recoveryActionGroup={recoveryActionGroup}
+            setActionUseAlertDataForTemplate={(enabled: boolean, index: number) => {
+              setActionProperty('useAlertDataForTemplate', enabled, index);
+            }}
             setActionIdByIndex={(id: string, index: number) => setActionProperty('id', id, index)}
             setActionGroupIdByIndex={(group: string, index: number) =>
               setActionProperty('group', group, index)

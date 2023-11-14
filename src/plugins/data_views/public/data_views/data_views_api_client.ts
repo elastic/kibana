@@ -94,6 +94,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       includeUnmapped,
       fields,
       forceRefresh,
+      allowHidden,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
 
@@ -107,6 +108,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
+        allow_hidden: allowHidden,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
       forceRefresh
