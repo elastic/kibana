@@ -6,11 +6,11 @@
  * Side Public License, v 1.
  */
 
+import type { ReportingConfigType } from '.';
 import { getFullRedirectAppUrl } from './get_full_redirect_app_url';
-import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 describe('getFullRedirectAppUrl', () => {
-  const mockConfig = createMockConfigSchema();
+  const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
   const mockServerInfo = {
     name: 'localhost',
     uuid: 'test-test-test-test',
