@@ -809,7 +809,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
       items.push(
         <EuiContextMenuItem
           key="create_rule"
-          icon="controlsHorizontal"
+          icon="machineLearningApp"
           onClick={() => {
             closePopover();
             uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
@@ -826,7 +826,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
         >
           <FormattedMessage
             id="xpack.ml.anomaliesTable.linksMenu.patternAnalysisLabel"
-            defaultMessage="Pattern Analysis"
+            defaultMessage="Pattern analysis"
           />
         </EuiContextMenuItem>
       );
