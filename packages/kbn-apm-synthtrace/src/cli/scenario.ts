@@ -12,10 +12,6 @@ import { RunOptions } from './utils/parse_run_cli_flags';
 import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
 import { ScenarioReturnType } from '../lib/utils/with_client';
 
-// type Generate<TFields> = (options: {
-//   range: Timerange;
-// }) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
-
 type Generate<TFields> = (options: {
   range: Timerange;
   client: {
