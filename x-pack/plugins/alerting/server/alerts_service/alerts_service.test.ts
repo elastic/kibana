@@ -922,8 +922,7 @@ describe('Alerts Service', () => {
           );
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - fail`,
-            expect.any(Error)
+            `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - fail`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(
@@ -1001,8 +1000,7 @@ describe('Alerts Service', () => {
           ).toEqual({ error: 'Failure during installation. fail', result: false });
 
           expect(logger.error).toHaveBeenCalledWith(
-            `Error installing index template .alerts-test.alerts-default-index-template - fail`,
-            expect.any(Error)
+            `Error installing index template .alerts-test.alerts-default-index-template - fail`
           );
 
           expect(clusterClient.ilm.putLifecycle).toHaveBeenCalledTimes(

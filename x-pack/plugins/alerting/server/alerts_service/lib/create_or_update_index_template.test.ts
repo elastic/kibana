@@ -191,8 +191,7 @@ describe('createOrUpdateIndexTemplate', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"foo"`);
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Error installing index template .alerts-test.alerts-default-index-template - foo`,
-      expect.any(Error)
+      `Error installing index template .alerts-test.alerts-default-index-template - foo`
     );
     expect(clusterClient.indices.putIndexTemplate).toHaveBeenCalledTimes(4);
   });
@@ -210,8 +209,7 @@ describe('createOrUpdateIndexTemplate', () => {
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"generic error"`);
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Error installing index template .alerts-test.alerts-default-index-template - generic error`,
-      expect.any(Error)
+      `Error installing index template .alerts-test.alerts-default-index-template - generic error`
     );
   });
 
@@ -226,8 +224,7 @@ describe('createOrUpdateIndexTemplate', () => {
     });
 
     expect(logger.error).toHaveBeenCalledWith(
-      `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - simulate error`,
-      expect.any(Error)
+      `Failed to simulate index template mappings for .alerts-test.alerts-default-index-template; not applying mappings - simulate error`
     );
     expect(clusterClient.indices.putIndexTemplate).not.toHaveBeenCalled();
   });
