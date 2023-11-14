@@ -29,14 +29,10 @@ import {
   PDF_REPORT_TYPE_V2,
   TaskPayloadPDFV2,
 } from '@kbn/reporting-export-types-pdf-common';
-import {
-  decryptJobHeaders,
-  getFullRedirectAppUrl,
-  ExportType,
-  getCustomLogo,
-} from '@kbn/reporting-server';
+import { decryptJobHeaders, getFullRedirectAppUrl, ExportType } from '@kbn/reporting-server';
 
 import { generatePdfObservableV2 } from './generate_pdf_v2';
+import { getCustomLogo } from './get_custom_logo';
 
 export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> {
   id = PDF_REPORT_TYPE_V2;

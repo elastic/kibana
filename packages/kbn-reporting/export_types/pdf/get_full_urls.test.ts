@@ -8,12 +8,12 @@
 
 import type { ReportingServerInfo } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
-import type { ReportingConfigType } from '.';
 import { getFullUrls } from './get_full_urls';
 
 const getMockJob = (base: object) => base as TaskPayloadPDF;
-const mockConfig = { kibanaServer: {} } as unknown as ReportingConfigType;
+const mockConfig = createMockConfigSchema();
 const mockServerInfo: ReportingServerInfo = {
   hostname: 'localhost',
   protocol: 'http',

@@ -27,15 +27,12 @@ import {
   PDF_JOB_TYPE,
   TaskPayloadPDF,
 } from '@kbn/reporting-export-types-pdf-common';
-import {
-  ExportType,
-  decryptJobHeaders,
-  getCustomLogo,
-  getFullUrls,
-  validateUrls,
-} from '@kbn/reporting-server';
+import { ExportType, decryptJobHeaders } from '@kbn/reporting-server';
 
 import { generatePdfObservable } from './generate_pdf';
+import { validateUrls } from './validate_urls';
+import { getCustomLogo } from './get_custom_logo';
+import { getFullUrls } from './get_full_urls';
 
 /**
  * @deprecated

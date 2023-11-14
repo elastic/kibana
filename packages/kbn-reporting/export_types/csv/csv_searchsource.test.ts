@@ -22,7 +22,9 @@ import { coreMock, elasticsearchServiceMock, loggingSystemMock } from '@kbn/core
 import { Writable } from 'stream';
 import { CancellationToken } from '@kbn/reporting-common';
 import { discoverPluginMock } from '@kbn/discover-plugin/server/mocks';
+import { createFieldFormatsStartMock } from '@kbn/field-formats-plugin/server/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
+import { setFieldFormats } from '@kbn/reporting-server';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import { CsvSearchSourceExportType } from '.';
@@ -35,6 +37,10 @@ let stream: jest.Mocked<Writable>;
 let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
 
 beforeAll(async () => {
+  // use fieldFormats plugin for csv formats
+  // normally, this is done in the Reporting plugin
+  setFieldFormats(createFieldFormatsStartMock());
+
   const crypto = nodeCrypto({ encryptionKey });
 
   encryptedHeaders = await crypto.encrypt(headers);
