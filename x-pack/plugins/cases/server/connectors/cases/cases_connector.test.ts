@@ -310,7 +310,7 @@ describe('CasesConnector', () => {
           });
         });
 
-        it('does not creates when there are no 404 errors', async () => {
+        it('does not create when there are no 404 errors', async () => {
           casesClientMock.cases.bulkGet.mockResolvedValue({
             cases: [cases[0], cases[1]],
             errors: [
