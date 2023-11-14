@@ -44,7 +44,6 @@
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-logging-server-mocks",
     "@kbn/serverless",
-    "@kbn/stack-connectors-plugin"
   ],
   "exclude": [
     "target/**/*",

@@ -22,10 +22,6 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
-import {
-  SENTINELONE_CONNECTOR_ID,
-  SENTINELONE_TITLE,
-} from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { SecurityConnectorFeatureId } from '../../common';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
@@ -846,8 +842,8 @@ test('successfully authorize system actions', async () => {
 
 test('Execute of SentinelOne sub-actions require create privilege', async () => {
   const actionType: jest.Mocked<ActionType> = {
-    id: SENTINELONE_CONNECTOR_ID,
-    name: SENTINELONE_TITLE,
+    id: '.sentinelone',
+    name: 'sentinelone',
     minimumLicenseRequired: 'enterprise',
     supportedFeatureIds: [SecurityConnectorFeatureId],
     validate: {
@@ -862,7 +858,7 @@ test('Execute of SentinelOne sub-actions require create privilege', async () => 
     type: 'action',
     attributes: {
       name: '1',
-      actionTypeId: SENTINELONE_CONNECTOR_ID,
+      actionTypeId: '.sentinelone',
       config: {
         bar: true,
       },

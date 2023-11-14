@@ -14,7 +14,6 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PassThrough, Readable } from 'stream';
-import { SENTINELONE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import {
   validateParams,
   validateConfig,
@@ -593,7 +592,7 @@ const ensureAuthorizedToExecute = async ({
 
     // SentinelOne sub-actions require that a user have `all` privilege to Actions and Connectors.
     // This is a temporary solution until a more robust RBAC approach can be implemented for sub-actions
-    if (actionTypeId === SENTINELONE_CONNECTOR_ID) {
+    if (actionTypeId === '.sentinelone') {
       await authorization.ensureAuthorized({
         operation: 'create',
       });
