@@ -10,6 +10,7 @@ import { resolve } from 'path';
 import * as fs from 'fs';
 import Url from 'url';
 import { load as loadYaml } from 'js-yaml';
+import { Cookie } from 'tough-cookie';
 import { createNewSAMLSession, createSessionWithFakeSAMLAuth } from './saml_auth';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
@@ -19,10 +20,20 @@ export interface User {
 }
 
 export type Role = string;
-export interface Session {
-  cookie: string;
-  username: string;
-  fullName: string;
+
+export class Session {
+  readonly cookie;
+  readonly username;
+  readonly fullname;
+  constructor(cookie: Cookie, username: string, fullname: string) {
+    this.cookie = cookie;
+    this.username = username;
+    this.fullname = fullname;
+  }
+
+  getCookieValue() {
+    return this.cookie.value;
+  }
 }
 
 export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
@@ -37,17 +48,13 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     'packages/kbn-es/src/serverless_resources/roles.yml'
   );
   const roles: string[] = Object.keys(loadYaml(fs.readFileSync(rolesDefinitionFilePath, 'utf8')));
-  let users: Map<string, User> = new Map<string, User>();
+  let roleToUserMap: Map<string, User> = new Map<string, User>();
 
   if (!isServerless) {
     throw new Error(`'svlUserManager' service can't be used in non-serverless FTR context`);
   }
 
-  if (!isCloud) {
-    roles.map((role) => {
-      users.set(role, { username: `elastic_${role}`, password: 'changeme' });
-    });
-  } else {
+  if (isCloud) {
     // QAF should prepare the '.ftr/role_users.json' file for MKI pipelines
     if (!fs.existsSync(cloudRoleUsersFilePath)) {
       throw new Error(
@@ -59,9 +66,11 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
     if (data.length === 0) {
       throw new Error(`'${cloudRoleUsersFilePath}' is empty: no roles are defined`);
     }
-    users = new Map(Object.entries(JSON.parse(data)));
+    for (const [roleName, user] of Object.entries(JSON.parse(data)) as Array<[string, User]>) {
+      roleToUserMap.set(roleName, user);
+    }
+    roleToUserMap = new Map(Object.entries(JSON.parse(data)));
   }
-
   // to be re-used within FTR config run
   const sessionCache = new Map<Role, Session>();
 
@@ -81,7 +90,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
      */
     async getCredentialsForRole(role: string) {
       const session = await this.getSessionByRole(role);
-      return { Cookie: `sid=${session.cookie}` };
+      return { Cookie: `sid=${session.getCookieValue()}` };
     },
 
     async getSessionByRole(role: string) {
@@ -89,7 +98,6 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
         return sessionCache.get(role)!;
       }
 
-      const { username, password } = this.getUserByRole(role);
       const kbnHost = Url.format({
         protocol: config.get('servers.kibana.protocol'),
         hostname: config.get('servers.kibana.hostname'),
@@ -100,22 +108,17 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       if (isCloud) {
         log.debug(`new SAML authentication with '${role}' role`);
         const kbnVersion = await kibanaServer.version.get();
-
         session = await createNewSAMLSession({
-          username,
-          password,
+          ...this.getCloudUserByRole(role),
           kbnHost,
           kbnVersion,
         });
       } else {
         log.debug(`new fake SAML authentication with '${role}' role`);
-        const email = `${username}@elastic.co`;
-        const fullName = `test ${role}`;
-
         session = await createSessionWithFakeSAMLAuth({
-          username,
-          email,
-          fullName,
+          username: `elastic_${role}`,
+          email: `elastic_${role}@elastic.co`,
+          fullName: `test ${role}`,
           role,
           kbnHost,
         });
@@ -125,12 +128,12 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
       return session;
     },
 
-    getUserByRole(role: string) {
+    getCloudUserByRole(role: string) {
       if (!roles.includes(role)) {
         log.warning(`Role '${role}' is not listed in 'kbn-es/src/serverless_resources/roles.yml'`);
       }
-      if (users.has(role)) {
-        return users.get(role)!;
+      if (roleToUserMap.has(role)) {
+        return roleToUserMap.get(role)!;
       } else {
         throw new Error(`User with '${role}' role is not defined`);
       }

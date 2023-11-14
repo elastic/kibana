@@ -24,10 +24,12 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
   return {
     async loginWithRole(role: string) {
-      log.debug(`Logging with cookie for '${role}' role`);
+      log.debug(`Logging by setting browser cookie for '${role}' role`);
       const session = await svlUserManager.getSessionByRole(role);
+      // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
       await browser.get(deployment.getHostPort() + '/bootstrap.js');
-      await browser.setCookie('sid', session.cookie);
+      await browser.setCookie('sid', session.getCookieValue());
+      // Navigating to project home page
       await browser.get(deployment.getHostPort());
       // ensure welcome screen won't be shown. This is relevant for environments which don't allow
       // to use the yml setting, e.g. cloud

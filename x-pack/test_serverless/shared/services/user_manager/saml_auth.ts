@@ -8,6 +8,8 @@
 import axios, { AxiosResponse } from 'axios';
 import Url from 'url';
 import * as cheerio from 'cheerio';
+import { parse as parseCookie } from 'tough-cookie';
+import { Session } from './svl_user_manager';
 // import { createSAMLResponse as createFakeSAMLResponse } from 'kbn-mock-idp-plugin';
 
 export interface SAMLSessionParams {
@@ -31,8 +33,8 @@ const envHosts: { [key: string]: string } = {
   production: 'api.elastic-cloud.com',
 };
 
-const getSidCookie = (cookies: string[]) => {
-  return cookies?.[0].toString().split(';')[0].split('sid=')[1] ?? '';
+const getSessionCookie = (cookieString: string) => {
+  return parseCookie(cookieString);
 };
 
 const getCloudHostName = () => {
@@ -80,7 +82,7 @@ const createCloudSession = async (hostname: string, email: string, password: str
   const lastName = sessionResponse?.data?.last_name ?? '';
   const fullName = `${firstName} ${lastName}`.trim();
   return {
-    token: sessionResponse?.data?.token,
+    token: sessionResponse?.data?.token as string,
     fullName,
   };
 };
@@ -102,8 +104,8 @@ const createSAMLRequest = async (kbnUrl: string, kbnVersion: string) => {
     validateStatus: () => true,
     maxRedirects: 0,
   });
-  const sid = getSidCookie(samlResponse.headers['set-cookie']!);
-  return { location: samlResponse.data.location, sid };
+  const cookie = getSessionCookie(samlResponse.headers['set-cookie']![0])!;
+  return { location: samlResponse.data.location, sid: cookie.value };
 };
 
 const createSAMLResponse = async (url: string, ecSession: string) => {
@@ -139,7 +141,7 @@ const finishSAMLHandshake = async (
     maxRedirects: 0,
   });
 
-  return getSidCookie(authResponse.headers['set-cookie']!);
+  return getSessionCookie(authResponse.headers['set-cookie']![0])!;
 };
 
 export const createNewSAMLSession = async (params: SAMLSessionParams) => {
@@ -149,7 +151,7 @@ export const createNewSAMLSession = async (params: SAMLSessionParams) => {
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
   const samlResponse = await createSAMLResponse(location, token);
   const cookie = await finishSAMLHandshake(kbnHost, samlResponse, sid);
-  return { username, fullName, cookie };
+  return new Session(cookie, username, fullName);
 };
 
 export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParams) => {
@@ -161,6 +163,6 @@ export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParam
   //   [role],
   // });
   // const cookie = await finishSAMLHandshake(kbnHost, samlResponse);
-  // return { username, fullName, cookie };
+  // return new Session(cookie, username, fullName);
   throw new Error('WIP: uncomment when #170852 is merged');
 };
