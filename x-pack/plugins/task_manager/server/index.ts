@@ -35,9 +35,10 @@ export {
   isSkipError,
   createSkipError,
   createTaskRunError,
+  TaskErrorSource,
 } from './task_running';
 
-export type { DecoratedError, TaskErrorSource } from './task_running';
+export type { DecoratedError } from './task_running';
 
 export type { RunNowResult, BulkUpdateTaskResult } from './task_scheduling';
 export { getOldestIdleActionTask } from './queries/oldest_idle_action_task';
