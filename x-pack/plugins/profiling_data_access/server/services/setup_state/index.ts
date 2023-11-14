@@ -28,7 +28,7 @@ export async function getSetupState({
 }: RegisterServicesParams & SetupStateParams): Promise<CloudSetupStateType | SetupStateType> {
   const kibanaInternalProfilingESClient = createProfilingEsClient({
     esClient: esClient.asInternalUser,
-    useDefaultAuth: true,
+    useDefaultAuth: false,
   });
   const profilingESClient = createProfilingEsClient({
     esClient: esClient.asCurrentUser,

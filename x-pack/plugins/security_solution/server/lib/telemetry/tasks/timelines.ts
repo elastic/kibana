@@ -115,7 +115,6 @@ export function createTelemetryTimelineTaskConfig() {
           // Fetch event lineage
 
           const timelineEvents = await receiver.fetchTimelineEvents(nodeIds);
-          tlog(logger, `Timeline Events: ${JSON.stringify(timelineEvents)}`);
           const eventsStore = new Map<string, SafeEndpointEvent>();
           for (const event of timelineEvents.hits.hits) {
             const doc = event._source;

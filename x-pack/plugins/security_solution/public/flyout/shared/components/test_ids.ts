@@ -23,3 +23,12 @@ export const EXPANDABLE_PANEL_HEADER_RIGHT_SECTION_TEST_ID = (dataTestSubj: stri
   `${dataTestSubj}RightSection`;
 export const EXPANDABLE_PANEL_LOADING_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Loading`;
 export const EXPANDABLE_PANEL_CONTENT_TEST_ID = (dataTestSubj: string) => `${dataTestSubj}Content`;
+
+/* Header Navigation */
+
+const FLYOUT_NAVIGATION_TEST_ID = `${PREFIX}Navigation` as const;
+export const EXPAND_DETAILS_BUTTON_TEST_ID =
+  `${FLYOUT_NAVIGATION_TEST_ID}ExpandDetailButton` as const;
+export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
+  `${FLYOUT_NAVIGATION_TEST_ID}CollapseDetailButton` as const;
+export const HEADER_ACTIONS_TEST_ID = `${FLYOUT_NAVIGATION_TEST_ID}Actions` as const;

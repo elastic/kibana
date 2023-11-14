@@ -11,7 +11,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { firstValueFrom } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DashboardAppLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
+import type { DashboardLocatorParams, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { Filter, Query, DataViewBase } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { Embeddable } from '@kbn/lens-plugin/public';
@@ -245,7 +245,7 @@ export class QuickJobCreatorBase {
       return null;
     }
 
-    const params: DashboardAppLocatorParams = {
+    const params: DashboardLocatorParams = {
       dashboardId: foundDashboard.id,
       timeRange: {
         from: '$earliest$',

@@ -423,6 +423,9 @@ export class SyntheticsService {
     };
 
     for await (const result of finder.find()) {
+      if (result.saved_objects.length === 0) {
+        return;
+      }
       try {
         if (!output) {
           output = await this.getOutput();
@@ -640,6 +643,7 @@ export class SyntheticsService {
         monitor: normalizeSecrets(monitor).attributes,
         configId: monitor.id,
         heartbeatId: attributes[ConfigKey.MONITOR_QUERY_ID],
+        spaceId: monitorSpace,
       };
     });
 

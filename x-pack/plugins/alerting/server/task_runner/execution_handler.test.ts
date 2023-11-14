@@ -308,6 +308,7 @@ describe('Execution Handler', () => {
         foo: true,
         stateVal: 'My  goes here',
       },
+      ruleName: rule.name,
     });
 
     expect(ruleRunMetricsStore.getTriggeredActionsStatus()).toBe(ActionsCompletion.COMPLETE);
@@ -1995,6 +1996,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
               "basePathname": "",
@@ -2067,6 +2069,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/basePath/s/test1/app/test/rule/1?start=30000&end=90000",
               "basePathname": "/basePath",
@@ -2102,6 +2105,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/app/management/insightsAndAlerting/triggersActions/rule/1",
               "basePathname": "",
@@ -2134,6 +2138,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/s/test1/app/management/insightsAndAlerting/triggersActions/rule/1",
               "basePathname": "",
@@ -2166,6 +2171,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": undefined,
           },
         ]
@@ -2195,6 +2201,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": undefined,
           },
         ]
@@ -2224,6 +2231,7 @@ describe('Execution Handler', () => {
               "val": "rule url: ",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": undefined,
           },
         ]
@@ -2256,6 +2264,7 @@ describe('Execution Handler', () => {
               "val": "rule url: http://localhost:12345/s/test1/app/management/some/other/place",
             },
             "actionTypeId": "test",
+            "ruleName": "name-of-alert",
             "ruleUrl": Object {
               "absoluteUrl": "http://localhost:12345/s/test1/app/management/some/other/place",
               "basePathname": "",
