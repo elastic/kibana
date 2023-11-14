@@ -14,6 +14,7 @@ import { withEuiTheme, WithEuiThemeProps } from '@elastic/eui';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { phrasesValuesComboboxCss } from './phrases_values_input.styles';
+import { MIDDLE_TRUNCATION_PROPS } from './lib/helpers';
 
 interface Props {
   values?: string[];
@@ -26,7 +27,6 @@ interface Props {
 }
 
 export type PhrasesValuesInputProps = Props & PhraseSuggestorProps & WithEuiThemeProps;
-
 class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
   comboBoxWrapperRef = React.createRef<HTMLDivElement>();
 
@@ -62,7 +62,7 @@ class PhrasesValuesInputUI extends PhraseSuggestorUI<PhrasesValuesInputProps> {
           isClearable={false}
           data-test-subj="filterParamsComboBox phrasesParamsComboxBox"
           isDisabled={disabled}
-          truncationProps={{ truncation: 'middle' }}
+          truncationProps={MIDDLE_TRUNCATION_PROPS}
         />
       </div>
     );

@@ -14,6 +14,10 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { useGeneratedHtmlId, EuiComboBox, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getFilterableFields } from '../../filter_bar/filter_editor';
 import { FiltersBuilderContextType } from '../context';
+import {
+  MIDDLE_TRUNCATION_PROPS,
+  SINGLE_SELECTION_AS_TEXT_PROPS,
+} from '../../filter_bar/filter_editor/lib/helpers';
 
 export const strings = {
   getFieldSelectPlaceholderLabel: () =>
@@ -93,14 +97,14 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
         isDisabled={disabled}
         placeholder={strings.getFieldSelectPlaceholderLabel()}
         sortMatchesBy="startsWith"
-        singleSelection={{ asPlainText: true }}
         aria-label={strings.getFieldSelectPlaceholderLabel()}
         isClearable={false}
         compressed
         fullWidth
         onFocus={handleFocus}
         data-test-subj="filterFieldSuggestionList"
-        truncationProps={{ truncation: 'middle' }}
+        singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+        truncationProps={MIDDLE_TRUNCATION_PROPS}
       />
     </div>
   );

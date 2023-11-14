@@ -24,6 +24,9 @@ export interface FieldPickerProps<T extends FieldOptionValue>
   'data-test-subj'?: string;
 }
 
+const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
+const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };
+
 export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
   selectedOptions,
   options,
@@ -75,8 +78,8 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
         options={styledOptions}
         isInvalid={fieldIsInvalid}
         selectedOptions={selectedOptions}
-        singleSelection={{ asPlainText: true }}
-        truncationProps={{ truncation: 'middle' }}
+        singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+        truncationProps={MIDDLE_TRUNCATION_PROPS}
         onChange={(choices) => {
           if (choices.length === 0) {
             onDelete?.();

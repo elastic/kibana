@@ -13,6 +13,7 @@ import { withKibana } from '@kbn/kibana-react-plugin/public';
 import { GenericComboBox, GenericComboBoxProps } from './generic_combo_box';
 import { PhraseSuggestorUI, PhraseSuggestorProps } from './phrase_suggestor';
 import { ValueInputType } from './value_input_type';
+import { MIDDLE_TRUNCATION_PROPS, SINGLE_SELECTION_AS_TEXT_PROPS } from './lib/helpers';
 
 interface PhraseValueInputProps extends PhraseSuggestorProps {
   value?: string;
@@ -86,11 +87,11 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
             });
           }}
           onSearchChange={this.onSearchChange}
-          singleSelection={{ asPlainText: true }}
           onCreateOption={onChange}
           isClearable={false}
           data-test-subj="filterParamsComboBox phraseParamsComboxBox"
-          truncationProps={{ truncation: 'middle' }}
+          singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+          truncationProps={MIDDLE_TRUNCATION_PROPS}
         />
       </div>
     );
