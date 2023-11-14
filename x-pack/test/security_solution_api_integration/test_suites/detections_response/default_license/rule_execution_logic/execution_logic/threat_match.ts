@@ -132,6 +132,7 @@ function alertsAreTheSame(alertsA: any[], alertsB: any[]): void {
       'kibana.alert.start',
       'kibana.alert.reason',
       'kibana.alert.uuid',
+      'kibana.alert.url',
     ]);
   };
 

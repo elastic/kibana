@@ -20,6 +20,7 @@ export const removeRandomValuedPropertiesFromAlert = (alert: DetectionAlert | un
     'kibana.alert.rule.created_at': createdAt,
     'kibana.alert.rule.updated_at': updatedAt,
     'kibana.alert.uuid': alertUuid,
+    'kibana.alert.url': alertURL,
     [ALERT_START]: alertStart,
     [ALERT_LAST_DETECTED]: lastDetected,
     ...restOfAlert

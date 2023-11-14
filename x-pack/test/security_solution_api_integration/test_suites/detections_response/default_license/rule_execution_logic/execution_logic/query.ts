@@ -195,7 +195,6 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // Is Rule Preview in Serverless?
     it('should query and get back expected alert structure when it is a alert on a alert', async () => {
       const alertId = '30a75fe46d3dbdfab55982036f77a8d60e2d1112e96f277c3b8c22f9bb57817a';
       const rule: QueryRuleCreateProps = {

@@ -28,7 +28,7 @@ interface Ignore {
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext): void => {
   /**
-   * See the config file (detection_engine_api_integration/common/config.ts) for which field values were added to be ignored
+   * See the config file (config.ts) for which field values were added to be ignored
    * for testing. The values should be in the config around the area of:
    * --xpack.securitySolution.alertIgnoreFields=[testing.ignore_1,/[testingRegex]
    * meaning that the ignore fields values should be the array: ["testing.ignore_1", "/[testingRegex]/"]
