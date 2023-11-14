@@ -29,7 +29,7 @@ const navigationTree: NavigationTreeDefinition = {
       breadcrumbStatus: 'hidden',
       children: [
         {
-          title: i18n.translate('xpack.navigation.nav.logExplorer', {
+          title: i18n.translate('navigation.nav.logExplorer', {
             defaultMessage: 'Log Explorer',
           }),
           link: 'observability-log-explorer',
@@ -43,7 +43,7 @@ const navigationTree: NavigationTreeDefinition = {
           ],
         },
         {
-          title: i18n.translate('xpack.navigation.nav.dashboards', {
+          title: i18n.translate('navigation.nav.dashboards', {
             defaultMessage: 'Dashboards',
           }),
           link: 'dashboards',
@@ -52,7 +52,7 @@ const navigationTree: NavigationTreeDefinition = {
           },
         },
         {
-          title: i18n.translate('xpack.navigation.nav.visualizations', {
+          title: i18n.translate('navigation.nav.visualizations', {
             defaultMessage: 'Visualizations',
           }),
           link: 'visualize',
@@ -89,7 +89,7 @@ const navigationTree: NavigationTreeDefinition = {
           spaceBefore: null,
           children: [
             {
-              title: i18n.translate('xpack.navigation.nav.ml.jobs', {
+              title: i18n.translate('navigation.nav.ml.jobs', {
                 defaultMessage: 'Anomaly detection',
               }),
               link: 'ml:anomalyDetection',
@@ -107,7 +107,7 @@ const navigationTree: NavigationTreeDefinition = {
               ],
             },
             {
-              title: i18n.translate('xpack.navigation.ml.logRateAnalysis', {
+              title: i18n.translate('navigation.ml.logRateAnalysis', {
                 defaultMessage: 'Log rate analysis',
               }),
               link: 'ml:logRateAnalysis',
@@ -116,7 +116,7 @@ const navigationTree: NavigationTreeDefinition = {
               },
             },
             {
-              title: i18n.translate('xpack.navigation.ml.changePointDetection', {
+              title: i18n.translate('navigation.ml.changePointDetection', {
                 defaultMessage: 'Change point detection',
               }),
               link: 'ml:changePointDetections',
@@ -125,7 +125,7 @@ const navigationTree: NavigationTreeDefinition = {
               },
             },
             {
-              title: i18n.translate('xpack.navigation.nav.ml.job.notifications', {
+              title: i18n.translate('navigation.nav.ml.job.notifications', {
                 defaultMessage: 'Job notifications',
               }),
               link: 'ml:notifications',
@@ -134,7 +134,7 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           id: 'apm',
-          title: i18n.translate('xpack.navigation.nav.applications', {
+          title: i18n.translate('navigation.nav.applications', {
             defaultMessage: 'Applications',
           }),
           renderAs: 'accordion',
@@ -162,7 +162,7 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           id: 'metrics',
-          title: i18n.translate('xpack.navigation.nav.infrastructure', {
+          title: i18n.translate('navigation.nav.infrastructure', {
             defaultMessage: 'Infrastructure',
           }),
           renderAs: 'accordion',
@@ -187,7 +187,7 @@ const navigationTree: NavigationTreeDefinition = {
   footer: [
     {
       type: 'navItem',
-      title: i18n.translate('xpack.navigation.nav.getStarted', {
+      title: i18n.translate('navigation.nav.getStarted', {
         defaultMessage: 'Get started',
       }),
       link: 'observabilityOnboarding',
@@ -196,7 +196,7 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       id: 'devTools',
-      title: i18n.translate('xpack.navigation.nav.devTools', {
+      title: i18n.translate('navigation.nav.devTools', {
         defaultMessage: 'Developer tools',
       }),
       link: 'dev_tools',
@@ -205,7 +205,7 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
-      title: i18n.translate('xpack.navigation.nav.projectSettings', {
+      title: i18n.translate('navigation.nav.projectSettings', {
         defaultMessage: 'Project settings',
       }),
       icon: 'gear',
@@ -213,7 +213,7 @@ const navigationTree: NavigationTreeDefinition = {
       children: [
         {
           link: 'management',
-          title: i18n.translate('xpack.navigation.nav.mngt', {
+          title: i18n.translate('navigation.nav.mngt', {
             defaultMessage: 'Management',
           }),
           renderAs: 'panelOpener',

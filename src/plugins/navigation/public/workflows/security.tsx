@@ -605,7 +605,7 @@ const navigationTree: NavigationTreeDefinition = {
       children: [
         {
           link: 'management',
-          title: i18n.translate('xpack.navigation.nav.mngt', {
+          title: i18n.translate('navigation.nav.mngt', {
             defaultMessage: 'Management',
           }),
           renderAs: 'panelOpener',

@@ -30,7 +30,7 @@ const navigationTree: NavigationTreeDefinition = {
       children: [
         {
           id: 'dev_tools',
-          title: i18n.translate('xpack.navigation.nav.devTools', {
+          title: i18n.translate('navigation.nav.devTools', {
             defaultMessage: 'Dev Tools',
           }),
           link: 'dev_tools:console',
@@ -40,7 +40,7 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           id: 'explore',
-          title: i18n.translate('xpack.navigation.nav.explore', {
+          title: i18n.translate('navigation.nav.explore', {
             defaultMessage: 'Explore',
           }),
           children: [
@@ -55,7 +55,7 @@ const navigationTree: NavigationTreeDefinition = {
             },
             {
               link: 'visualize',
-              title: i18n.translate('xpack.navigation.nav.visualize', {
+              title: i18n.translate('navigation.nav.visualize', {
                 defaultMessage: 'Visualizations',
               }),
               getIsActive: ({ pathNameSerialized, prepend }) => {
@@ -68,7 +68,7 @@ const navigationTree: NavigationTreeDefinition = {
             },
             {
               link: 'management:triggersActions',
-              title: i18n.translate('xpack.navigation.nav.alerts', {
+              title: i18n.translate('navigation.nav.alerts', {
                 defaultMessage: 'Alerts',
               }),
             },
@@ -76,12 +76,12 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           id: 'content',
-          title: i18n.translate('xpack.navigation.nav.content', {
+          title: i18n.translate('navigation.nav.content', {
             defaultMessage: 'Content',
           }),
           children: [
             {
-              title: i18n.translate('xpack.navigation.nav.content.indices', {
+              title: i18n.translate('navigation.nav.content.indices', {
                 defaultMessage: 'Index Management',
               }),
               link: 'management:index_management',
@@ -89,7 +89,7 @@ const navigationTree: NavigationTreeDefinition = {
                 'hidden' /* management sub-pages set their breadcrumbs themselves */,
             },
             {
-              title: i18n.translate('xpack.navigation.nav.content.pipelines', {
+              title: i18n.translate('navigation.nav.content.pipelines', {
                 defaultMessage: 'Pipelines',
               }),
               link: 'management:ingest_pipelines',
@@ -100,7 +100,7 @@ const navigationTree: NavigationTreeDefinition = {
         },
         {
           id: 'security',
-          title: i18n.translate('xpack.navigation.nav.security', {
+          title: i18n.translate('navigation.nav.security', {
             defaultMessage: 'Security',
           }),
           children: [
@@ -118,7 +118,7 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       id: 'search_getting_started',
-      title: i18n.translate('xpack.navigation.nav.gettingStarted', {
+      title: i18n.translate('navigation.nav.gettingStarted', {
         defaultMessage: 'Get started',
       }),
       icon: 'launch',
@@ -127,7 +127,7 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navGroup',
       id: 'project_settings_project_nav',
-      title: i18n.translate('xpack.navigation.nav.projectSettings', {
+      title: i18n.translate('navigation.nav.projectSettings', {
         defaultMessage: 'Project settings',
       }),
       icon: 'gear',
@@ -135,7 +135,7 @@ const navigationTree: NavigationTreeDefinition = {
       children: [
         {
           link: 'management',
-          title: i18n.translate('xpack.navigation.nav.mngt', {
+          title: i18n.translate('navigation.nav.mngt', {
             defaultMessage: 'Management',
           }),
           renderAs: 'panelOpener',
@@ -202,7 +202,7 @@ const navigationTree: NavigationTreeDefinition = {
         {
           id: 'cloudLinkDeployment',
           cloudLink: 'deployment',
-          title: i18n.translate('xpack.navigation.nav.performance', {
+          title: i18n.translate('navigation.nav.performance', {
             defaultMessage: 'Performance',
           }),
         },
