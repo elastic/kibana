@@ -69,21 +69,27 @@ export class TOCEntryButton extends Component<Props, State> {
     footnotes: Footnote[];
     postScript?: string;
   } {
-    if (this.props.layer.hasErrors()) {
-      return {
-        icon: (
-          <EuiIcon
-            size="m"
-            type="error"
-            color="danger"
-            data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
-          />
-        ),
-        tooltipContent: this.props.layer
-          .getErrors()
-          .map(({ title }) => <div key={title}>{title}</div>),
-        footnotes: [],
-      };
+    const errors = this.props.layer.getErrors();
+    if (errors.length) {
+      const errorIcon = <EuiIcon
+        size="m"
+        type="error"
+        color="danger"
+        data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
+      />;
+      return isLayerGroup(this.props.layer)
+        ? {
+            icon: errorIcon,
+            footnotes: [],
+            postScript: errors[0].title,
+          }
+        : {
+            icon: errorIcon,
+            tooltipContent: this.props.layer
+              .getErrors()
+              .map(({ title }) => <div key={title}>{title}</div>),
+            footnotes: [],
+          };
     }
 
     if (!this.props.layer.isVisible()) {
@@ -118,8 +124,8 @@ export class TOCEntryButton extends Component<Props, State> {
     }
 
     const { icon: layerIcon, tooltipContent } = this.props.layer.getLayerIcon(true);
-    const hasWarnings = this.props.layer.hasWarnings();
-    const icon = hasWarnings ? (
+    const warnings = this.props.layer.getWarnings();
+    const icon = warnings.length ? (
       <EuiIcon
         size="m"
         type="warning"
@@ -135,10 +141,8 @@ export class TOCEntryButton extends Component<Props, State> {
         icon,
         tooltipContent,
         footnotes: [],
-        postScript: hasWarnings
-          ? i18n.translate('xpack.maps.layer.toc.tooltip.postScript.layerGroupWarning', {
-              defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
-            })
+        postScript: warnings.length
+          ? warnings[0].title
           : undefined,
       };
     }
@@ -177,7 +181,7 @@ export class TOCEntryButton extends Component<Props, State> {
       icon,
       tooltipContent,
       footnotes,
-      postScript: hasWarnings ? INCOMPLETE_RESULTS_WARNING : undefined,
+      postScript: warnings.length ? INCOMPLETE_RESULTS_WARNING : undefined,
     };
   }
 

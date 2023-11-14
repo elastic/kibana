@@ -319,8 +319,16 @@ export class LayerGroup implements ILayer {
   }
 
   getWarnings(): LayerMessage[] {
-    // Nested layers display warnings
-    return [];
+    return this.hasWarnings()
+      ? [
+          {
+            title: i18n.translate('xpack.maps.layerGroup.incompleteResultsWarning', {
+              defaultMessage: `Nested layer(s) had issues returning data and results might be incomplete.`,
+            }),
+            body: '',
+          },
+        ]
+      : [];
   }
 
   async syncData(syncContext: DataRequestContext) {
