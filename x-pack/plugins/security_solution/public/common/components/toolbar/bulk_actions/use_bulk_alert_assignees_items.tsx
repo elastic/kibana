@@ -5,9 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
-import type { RenderContentPanelProps } from '@kbn/triggers-actions-ui-plugin/public/types';
+import { union } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
+
+import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
+import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import type {
+  BulkActionsConfig,
+  RenderContentPanelProps,
+} from '@kbn/triggers-actions-ui-plugin/public/types';
+
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
@@ -15,7 +22,7 @@ import * as i18n from './translations';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
 
 export interface UseBulkAlertAssigneesItemsProps {
-  refetch?: () => void;
+  onAssigneesUpdate?: () => void;
 }
 
 export interface UseBulkAlertAssigneesPanel {
@@ -26,9 +33,12 @@ export interface UseBulkAlertAssigneesPanel {
   width?: number;
 }
 
-export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesItemsProps) => {
+export const useBulkAlertAssigneesItems = ({
+  onAssigneesUpdate,
+}: UseBulkAlertAssigneesItemsProps) => {
   const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
+
   const handleOnAlertAssigneesSubmit = useCallback(
     async (assignees, ids, onSuccess, setIsLoading) => {
       if (setAlertAssignees) {
@@ -36,6 +46,33 @@ export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesIte
       }
     },
     [setAlertAssignees]
+  );
+
+  const onSuccess = useCallback(() => {
+    onAssigneesUpdate?.();
+  }, [onAssigneesUpdate]);
+
+  const onActionClick = useCallback<Required<BulkActionsConfig>['onClick']>(
+    async (items, isSelectAllChecked, setAlertLoading, clearSelection, refresh) => {
+      const ids: string[] | undefined = items.map((item) => item._id);
+      const assignedUserIds = union(
+        ...items.map(
+          (item) =>
+            item.data.find((data) => data.field === ALERT_WORKFLOW_ASSIGNEE_IDS)?.value ?? []
+        )
+      );
+      if (!assignedUserIds.length) {
+        return;
+      }
+      const assignees = {
+        assignees_to_add: [],
+        assignees_to_remove: assignedUserIds,
+      };
+      if (setAlertAssignees) {
+        await setAlertAssignees(assignees, ids, onSuccess, setAlertLoading);
+      }
+    },
+    [onSuccess, setAlertAssignees]
   );
 
   const alertAssigneesItems = useMemo(
@@ -50,9 +87,17 @@ export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesIte
               label: i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE,
               disableOnQuery: true,
             },
+            {
+              key: 'remove-all-alert-assignees',
+              'data-test-subj': 'remove-alert-assignees-menu-item',
+              name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
+              label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
+              disableOnQuery: false,
+              onClick: onActionClick,
+            },
           ]
         : [],
-    [hasIndexWrite]
+    [hasIndexWrite, onActionClick]
   );
 
   const TitleContent = useMemo(
@@ -81,14 +126,13 @@ export const useBulkAlertAssigneesItems = ({ refetch }: UseBulkAlertAssigneesIte
       <BulkAlertAssigneesPanel
         alertItems={alertItems}
         refresh={refresh}
-        refetchQuery={refetch}
         setIsLoading={setIsBulkActionsLoading}
         clearSelection={clearSelection}
         closePopoverMenu={closePopoverMenu}
         onSubmit={handleOnAlertAssigneesSubmit}
       />
     ),
-    [handleOnAlertAssigneesSubmit, refetch]
+    [handleOnAlertAssigneesSubmit]
   );
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(

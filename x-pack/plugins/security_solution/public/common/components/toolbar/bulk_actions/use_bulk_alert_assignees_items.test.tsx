@@ -7,8 +7,11 @@
 
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import { TestProviders } from '@kbn/timelines-plugin/public/mock';
+import type { BulkActionsConfig } from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { TimelineItem } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/bulk_actions/components/toolbar';
 import { act, fireEvent, render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
+
 import type {
   UseBulkAlertAssigneesItemsProps,
   UseBulkAlertAssigneesPanel,
@@ -33,7 +36,7 @@ const mockUserProfiles = [
 ];
 
 const defaultProps: UseBulkAlertAssigneesItemsProps = {
-  refetch: () => {},
+  onAssigneesUpdate: () => {},
 };
 
 const mockAssigneeItems = [
@@ -75,15 +78,19 @@ describe('useBulkAlertAssigneesItems', () => {
     jest.clearAllMocks();
   });
 
-  it('should render alert assignees actions', () => {
+  it('should return two alert assignees action items and one panel', () => {
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,
     });
-    expect(result.current.alertAssigneesItems.length).toEqual(1);
+
+    expect(result.current.alertAssigneesItems.length).toEqual(2);
     expect(result.current.alertAssigneesPanels.length).toEqual(1);
 
     expect(result.current.alertAssigneesItems[0]['data-test-subj']).toEqual(
       'alert-assignees-context-menu-item'
+    );
+    expect(result.current.alertAssigneesItems[1]['data-test-subj']).toEqual(
+      'remove-alert-assignees-menu-item'
     );
     expect(result.current.alertAssigneesPanels[0]['data-test-subj']).toEqual(
       'alert-assignees-context-menu-panel'
@@ -119,6 +126,45 @@ describe('useBulkAlertAssigneesItems', () => {
       fireEvent.click(wrapper.getByTestId(ASSIGNEES_APPLY_BUTTON_TEST_ID));
     });
     expect(mockSetAlertAssignees).toHaveBeenCalled();
+  });
+
+  it('should call setAlertAssignees with the correct parameters on `Remove all assignees` button click', () => {
+    const mockSetAlertAssignees = jest.fn();
+    (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
+    const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
+      wrapper: TestProviders,
+    });
+
+    const items: TimelineItem[] = [
+      {
+        _id: 'alert1',
+        data: [{ field: ALERT_WORKFLOW_ASSIGNEE_IDS, value: ['user1', 'user2'] }],
+        ecs: { _id: 'alert1', _index: 'index1' },
+      },
+      {
+        _id: 'alert2',
+        data: [{ field: ALERT_WORKFLOW_ASSIGNEE_IDS, value: ['user1', 'user3'] }],
+        ecs: { _id: 'alert2', _index: 'index1' },
+      },
+      {
+        _id: 'alert3',
+        data: [],
+        ecs: { _id: 'alert3', _index: 'index1' },
+      },
+    ];
+
+    const setAlertLoadingMock = jest.fn();
+    (
+      result.current.alertAssigneesItems[1] as unknown as { onClick: BulkActionsConfig['onClick'] }
+    ).onClick?.(items, true, setAlertLoadingMock, jest.fn(), jest.fn());
+
+    expect(mockSetAlertAssignees).toHaveBeenCalled();
+    expect(mockSetAlertAssignees).toHaveBeenCalledWith(
+      { assignees_to_add: [], assignees_to_remove: ['user1', 'user2', 'user3'] },
+      ['alert1', 'alert2', 'alert3'],
+      expect.any(Function),
+      setAlertLoadingMock
+    );
   });
 
   it('should return 0 items for the VIEWER role', () => {

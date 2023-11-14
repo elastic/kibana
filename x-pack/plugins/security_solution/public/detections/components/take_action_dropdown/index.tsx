@@ -190,11 +190,18 @@ export const TakeActionDropdown = React.memo(
       refetch,
     });
 
+    const onAssigneesUpdate = useCallback(() => {
+      if (refetch) {
+        refetch();
+      }
+      if (refetchFlyoutData) {
+        refetchFlyoutData();
+      }
+    }, [refetch, refetchFlyoutData]);
     const { alertAssigneesItems, alertAssigneesPanels } = useAlertAssigneesActions({
       closePopover: closePopoverHandler,
       ecsRowData: ecsData ?? { _id: actionsData.eventId },
-      refresh: refetchFlyoutData,
-      refetch,
+      refetch: onAssigneesUpdate,
     });
 
     const { investigateInTimelineActionItems } = useInvestigateInTimeline({

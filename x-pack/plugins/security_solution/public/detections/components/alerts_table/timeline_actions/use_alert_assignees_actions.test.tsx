@@ -77,12 +77,16 @@ describe('useAlertAssigneesActions', () => {
     const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {
       wrapper: TestProviders,
     });
-    expect(result.current.alertAssigneesItems.length).toEqual(1);
-    expect(result.current.alertAssigneesPanels.length).toEqual(1);
 
+    expect(result.current.alertAssigneesItems.length).toEqual(2);
+    expect(result.current.alertAssigneesPanels.length).toEqual(1);
     expect(result.current.alertAssigneesItems[0]['data-test-subj']).toEqual(
       'alert-assignees-context-menu-item'
     );
+    expect(result.current.alertAssigneesItems[1]['data-test-subj']).toEqual(
+      'remove-alert-assignees-menu-item'
+    );
+
     expect(result.current.alertAssigneesPanels[0].content).toMatchInlineSnapshot(`
       <Memo(BulkAlertAssigneesPanelComponent)
         alertItems={
@@ -105,7 +109,7 @@ describe('useAlertAssigneesActions', () => {
         }
         closePopoverMenu={[MockFunction]}
         onSubmit={[Function]}
-        refetchQuery={[MockFunction]}
+        refresh={[Function]}
         setIsLoading={[Function]}
       />
     `);
@@ -131,7 +135,7 @@ describe('useAlertAssigneesActions', () => {
     const { result } = renderHook(() => useAlertAssigneesActions(newProps), {
       wrapper: TestProviders,
     });
-    expect(result.current.alertAssigneesItems.length).toEqual(1);
+    expect(result.current.alertAssigneesItems.length).toEqual(2);
     expect(result.current.alertAssigneesPanels.length).toEqual(1);
     expect(result.current.alertAssigneesPanels[0].content).toMatchInlineSnapshot(`
       <Memo(BulkAlertAssigneesPanelComponent)
@@ -155,7 +159,7 @@ describe('useAlertAssigneesActions', () => {
         }
         closePopoverMenu={[MockFunction]}
         onSubmit={[Function]}
-        refetchQuery={[MockFunction]}
+        refresh={[Function]}
         setIsLoading={[Function]}
       />
     `);

@@ -18,7 +18,6 @@ import { removeNoAssigneesSelection } from '../../assignees/utils';
 
 interface BulkAlertAssigneesPanelComponentProps {
   alertItems: TimelineItem[];
-  refetchQuery?: () => void;
   setIsLoading: (isLoading: boolean) => void;
   refresh?: () => void;
   clearSelection?: () => void;
@@ -28,7 +27,6 @@ interface BulkAlertAssigneesPanelComponentProps {
 const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponentProps> = ({
   alertItems,
   refresh,
-  refetchQuery,
   setIsLoading,
   clearSelection,
   closePopoverMenu,
@@ -63,7 +61,6 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
         assignees_to_remove: assigneesToRemoveArray,
       };
       const onSuccess = () => {
-        if (refetchQuery) refetchQuery();
         if (refresh) refresh();
         if (clearSelection) clearSelection();
       };
@@ -72,16 +69,7 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
         await onSubmit(assignees, ids, onSuccess, setIsLoading);
       }
     },
-    [
-      alertItems,
-      assignedUserIds,
-      clearSelection,
-      closePopoverMenu,
-      onSubmit,
-      refetchQuery,
-      refresh,
-      setIsLoading,
-    ]
+    [alertItems, assignedUserIds, clearSelection, closePopoverMenu, onSubmit, refresh, setIsLoading]
   );
 
   return (
