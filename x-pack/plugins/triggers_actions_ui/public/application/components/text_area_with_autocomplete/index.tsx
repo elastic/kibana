@@ -22,8 +22,8 @@ import {
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { euiThemeVars } from '@kbn/ui-theme';
-import { filterSuggestions } from '../lib/filter_suggestions_for_autocomplete';
-import { templateActionVariable } from '../lib/template_action_variable';
+import { filterSuggestions } from './lib/filter_suggestions_for_autocomplete';
+import { templateActionVariable } from './lib/template_action_variable';
 
 export interface TextAreaWithAutocompleteProps {
   editAction: (property: string, value: any, index: number) => void;
@@ -291,7 +291,6 @@ export const TextAreaWithAutocomplete: React.FunctionComponent<TextAreaWithAutoc
     }
   }, [editAction, index, inputTargetValue, isListOpen, paramsProperty]);
   const onClick = useCallback(() => closeList(), [closeList]);
-
   const onScroll = useCallback(
     (evt) => {
       // FUTURE ENGINEER -> we need to make sure to not close the autocomplete option list
