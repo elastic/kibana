@@ -256,7 +256,18 @@ describe('search', () => {
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        ` Error: In order to filter cases by customFields, you must provide owner.`
+        ` Error: Owner must be provided. Multiple owners are not supported.`
+      );
+    });
+
+    it('throws error when search with customFields and owner as empty string array', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true] },
+        owner: [""],
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
 
@@ -267,7 +278,7 @@ describe('search', () => {
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        ` Error: In order to filter cases by customFields, you must provide only one owner.`
+        ` Error: Owner must be provided. Multiple owners are not supported.`
       );
     });
 

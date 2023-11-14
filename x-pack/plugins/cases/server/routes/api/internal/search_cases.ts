@@ -25,7 +25,7 @@ export const searchCasesRoute = createCasesRoute({
        * throw error if request body does not have owner
        */
       if (!Object.hasOwn(options, 'owner')) {
-        throw Boom.badRequest('Search cases must have a valid owner.');
+        throw Boom.badRequest('Owner is required.');
       }
 
       const res: caseApiV1.CasesFindResponse = await casesClient.cases.search({ ...options });
