@@ -6,8 +6,9 @@
  * Side Public License, v 1.
  */
 
+import { createHash } from 'crypto';
 import { IRouter, RequestHandler, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
-import { unwrapEtag, calculateHash } from '../../../common/utils';
+import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
@@ -16,6 +17,12 @@ import type {
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
 import { parseFields, IBody, IQuery, querySchema } from './fields_for';
+
+export function calculateHash(srcBuffer: Buffer) {
+  const hash = createHash('sha1');
+  hash.update(srcBuffer);
+  return hash.digest('hex');
+}
 
 const handler: (
   isRollupsEnabled: () => boolean,

@@ -7,7 +7,6 @@
  */
 
 import { HttpSetup, HttpResponse } from '@kbn/core/public';
-import { calculateHash } from '../../common/utils';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
@@ -15,6 +14,14 @@ import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
+
+async function sha1(str: string) {
+  const enc = new TextEncoder();
+  const hash = await crypto.subtle.digest('SHA-1', enc.encode(str));
+  return Array.from(new Uint8Array(hash))
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('');
+}
 
 /**
  * Data Views API Client - client implementation
@@ -46,7 +53,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
     const userId = await this.getCurrentUserId();
 
-    const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
+    const userHash = userId ? await sha1(userId) : '';
 
     const request = body
       ? this.http.post<T>(url, { query, body, version, asResponse })
