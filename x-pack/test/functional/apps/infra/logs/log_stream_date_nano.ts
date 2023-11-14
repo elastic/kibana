@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { URL } from 'url';
-import { FtrProviderContext } from '../../ftr_provider_context';
-import { DATES } from './constants';
+import { FtrProviderContext } from '../../../ftr_provider_context';
+import { DATES } from '../constants';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const retry = getService('retry');
