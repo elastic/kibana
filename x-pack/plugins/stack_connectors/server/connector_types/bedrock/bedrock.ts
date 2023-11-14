@@ -224,6 +224,11 @@ const formatBedrockBody = ({
   };
 };
 
+/**
+ * Takes in a readable stream of data and returns a Transform stream that
+ * uses the AWS proprietary codec to parse the proprietary bedrock response into
+ * a string of the response text alone, returning the response string to the stream
+ */
 const transformToString = () =>
   new Transform({
     transform(chunk, encoding, callback) {

@@ -15,6 +15,14 @@ export interface InvokeBody {
     content: string;
   }>;
 }
+
+/**
+ * Takes the OpenAI and Bedrock `invokeStream` sub action response stream and the request messages array as inputs.
+ * Uses gpt-tokenizer encoding to calculate the number of tokens in the prompt and completion parts of the response stream
+ * Returns an object containing the total, prompt, and completion token counts.
+ * @param responseStream the response stream from the `invokeStream` sub action
+ * @param body the request messages array
+ */
 export async function getTokenCountFromInvokeStream({
   responseStream,
   body,
