@@ -20,6 +20,9 @@ export interface BreakdownFieldSelectorProps {
   onBreakdownFieldChange?: (breakdownField: DataViewField | undefined) => void;
 }
 
+const TRUNCATION_PROPS = { truncation: 'middle' as const };
+const SINGLE_SELECTION = { asPlainText: true };
+
 export const BreakdownFieldSelector = ({
   dataView,
   breakdown,
@@ -78,11 +81,11 @@ export const BreakdownFieldSelector = ({
         aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
           defaultMessage: 'Break down by',
         })}
-        singleSelection={{ asPlainText: true }}
+        singleSelection={SINGLE_SELECTION}
         options={fieldOptions}
         selectedOptions={selectedFields}
         onChange={onFieldChange}
-        truncationProps={{ truncation: 'middle' }}
+        truncationProps={TRUNCATION_PROPS}
         compressed
         fullWidth={true}
         onFocus={disableFieldPopover}
