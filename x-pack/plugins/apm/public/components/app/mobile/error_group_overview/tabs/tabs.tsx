@@ -19,7 +19,7 @@ export enum MobileErrorTabIds {
 const tabs = [
   {
     id: MobileErrorTabIds.ERRORS,
-    name: i18n.translate('xpack.apm.serviceDetails.metrics.errorsList.title', {
+    name: i18n.translate('xpack.apm.mobile.errorsAndCrashes.errorsTab', {
       defaultMessage: 'Errors',
     }),
     'data-test-subj': 'apmMobileErrorsTabButton',
