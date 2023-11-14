@@ -80,9 +80,13 @@ const getTabs = (props: ShareModalProps) => {
     }),
     content: (
       <LinksModalPage
-        isEmbedded={props.allowEmbed}
-        allowShortUrl={props.allowShortUrl}
-        objectId={props.objectId}
+        allowShortUrl={allowShortUrl}
+        isEmbedded
+        objectId={objectId}
+        shareableUrl={shareableUrl}
+        shareableUrlForSavedObject={shareableUrlForSavedObject}
+        shareableUrlLocatorParams={shareableUrlLocatorParams}
+        urlService={urlService}
         onClose={props.onClose}
       />
     ),

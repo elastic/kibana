@@ -13,7 +13,6 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
-  EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
   EuiSpacer,
@@ -29,6 +28,7 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService, UrlParamExtension } from '../../types';
 import { ExportUrlAsType } from '../url_panel_content';
+import { makeIframeTag, makeUrlEmbeddable, renderWithIconTip, UrlParams } from './helpers';
 
 interface EmbedModalPageProps {
   isEmbedded?: boolean;
@@ -47,12 +47,6 @@ interface EmbedModalPageProps {
   urlService: BrowserUrlService;
   snapshotShareWarning?: string;
   onClose: () => void;
-}
-
-interface UrlParams {
-  [extensionName: string]: {
-    [queryParam: string]: boolean;
-  };
 }
 
 export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) => {
@@ -74,24 +68,10 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
   const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['filterBar']: true });
   const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
 
-  const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
-    ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT
-  );
+  const [exportUrlAs] = useState<ExportUrlAsType>(ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT);
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
-  const [anonymousAccessParameters, setAnonymousAccessParameters] =
-    useState<null | AnonymousAccessServiceContract>(null);
-  const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
-
-  const makeUrlEmbeddable = (url: string): string => {
-    const embedParam = '?embed=true';
-    const urlHasQueryString = url.indexOf('?') !== -1;
-
-    if (urlHasQueryString) {
-      return url.replace('?', `${embedParam}&`);
-    }
-
-    return `${url}${embedParam}`;
-  };
+  const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
+  const [usePublicUrl] = useState<boolean>(false);
 
   const getUrlParamExtensions = (url: string): string => {
     return urlParams
@@ -209,25 +189,6 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
     }
 
     return parsedUrl.toString();
-  };
-
-  const makeIframeTag = (url?: string) => {
-    if (!url) {
-      return;
-    }
-
-    return `<iframe src="${url}" height="600" width="800"></iframe>`;
-  };
-
-  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
-    return (
-      <EuiFlexGroup gutterSize="none" responsive={false}>
-        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip content={tipContent} position="bottom" />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
   };
 
   const setUrl = () => {
