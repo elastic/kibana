@@ -112,7 +112,7 @@ export const registerObservabilityRuleTypes = (
       ),
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.links.observability.threshold}`;
+        return `${docLinks.links.observability.customThreshold}`;
       },
       ruleParamsExpression: lazy(
         () => import('../components/custom_threshold/custom_threshold_rule_expression')
