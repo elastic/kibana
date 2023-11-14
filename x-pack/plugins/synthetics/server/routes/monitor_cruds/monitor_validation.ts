@@ -18,7 +18,6 @@ import {
   DataStream,
   DataStreamCodec,
   HTTPFieldsCodec,
-  ICMPSimpleFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
   SyntheticsMonitor,
@@ -68,7 +67,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   }
 
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPSimpleFieldsCodec;
+  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPFieldsCodec;
 
   if (!SyntheticsMonitorCodec) {
     return {
