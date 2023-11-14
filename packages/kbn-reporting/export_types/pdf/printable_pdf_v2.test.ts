@@ -14,12 +14,13 @@ import { CancellationToken } from '@kbn/reporting-common';
 import type { LocatorParams } from '@kbn/reporting-common/types';
 import type { TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
-import { cryptoFactory, generatePdfObservableV2 } from '@kbn/reporting-server';
+import { cryptoFactory } from '@kbn/reporting-server';
 import type { ScreenshottingStart } from '@kbn/screenshotting-plugin/server';
 
 import { PdfExportType } from '.';
+import { generatePdfObservableV2 } from './generate_pdf_v2';
 
-jest.mock('@kbn/reporting-server/generate_pdf_v2');
+jest.mock('./generate_pdf_v2');
 
 let content: string;
 let mockPdfExportType: PdfExportType;
