@@ -67,12 +67,15 @@ import {
 
 import { RouteDependencies } from '../../types';
 
-import { isRequestTimeout, fillResultsWithTimeouts, wrapError, wrapEsError } from './error_utils';
-import { registerTransformsAuditMessagesRoutes } from './transforms_audit_messages';
-import { registerTransformNodesRoutes } from './transforms_nodes';
+import {
+  isRequestTimeout,
+  fillResultsWithTimeouts,
+  wrapError,
+  wrapEsError,
+} from '../utils/error_utils';
+
 import { isLatestTransform } from '../../../common/types/transform';
 import { isKeywordDuplicate } from '../../../common/utils/field_utils';
-import { transformHealthServiceProvider } from '../../lib/alerting/transform_health_rule_type/transform_health_service';
 
 enum TRANSFORM_ACTIONS {
   DELETE = 'delete',
@@ -85,126 +88,6 @@ enum TRANSFORM_ACTIONS {
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   const { router, license, coreStart, dataViews, security: securityStart } = routeDependencies;
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {get} /internal/transform/transforms Get transforms
-   * @apiName GetTransforms
-   * @apiDescription Returns transforms
-   *
-   * @apiSchema (params) jobAuditMessagesJobIdSchema
-   * @apiSchema (query) jobAuditMessagesQuerySchema
-   */
-  router.versioned
-    .get({
-      path: addInternalBasePath('transforms'),
-      access: 'internal',
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: false,
-      },
-      license.guardApiRoute<estypes.TransformGetTransformRequest, undefined, undefined>(
-        async (ctx, req, res) => {
-          try {
-            const esClient = (await ctx.core).elasticsearch.client;
-            const body = await esClient.asCurrentUser.transform.getTransform({
-              size: 1000,
-              ...req.params,
-            });
-
-            const alerting = await ctx.alerting;
-            if (alerting) {
-              const transformHealthService = transformHealthServiceProvider({
-                esClient: esClient.asCurrentUser,
-                rulesClient: alerting.getRulesClient(),
-              });
-
-              // @ts-ignore
-              await transformHealthService.populateTransformsWithAssignedRules(body.transforms);
-            }
-
-            return res.ok({ body });
-          } catch (e) {
-            return res.customError(wrapError(wrapEsError(e)));
-          }
-        }
-      )
-    );
-
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {get} /internal/transform/transforms/:transformId Get transform
-   * @apiName GetTransform
-   * @apiDescription Returns a single transform
-   *
-   * @apiSchema (params) transformIdParamSchema
-   */
-  router.versioned
-    .get({
-      path: addInternalBasePath('transforms/{transformId}'),
-      access: 'internal',
-    })
-    .addVersion<TransformIdParamSchema, undefined, undefined>(
-      {
-        version: '1',
-        validate: {
-          request: {
-            params: transformIdParamSchema,
-          },
-        },
-      },
-      license.guardApiRoute<TransformIdParamSchema, undefined, undefined>(async (ctx, req, res) => {
-        const { transformId } = req.params;
-        try {
-          const esClient = (await ctx.core).elasticsearch.client;
-          const body = await esClient.asCurrentUser.transform.getTransform({
-            transform_id: transformId,
-          });
-          return res.ok({ body });
-        } catch (e) {
-          return res.customError(wrapError(wrapEsError(e)));
-        }
-      })
-    );
-
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {get} /internal/transform/transforms/_stats Get transforms stats
-   * @apiName GetTransformsStats
-   * @apiDescription Returns transforms stats
-   */
-  router.versioned
-    .get({
-      path: addInternalBasePath('transforms/_stats'),
-      access: 'internal',
-    })
-    .addVersion(
-      {
-        version: '1',
-        validate: false,
-      },
-      license.guardApiRoute<estypes.TransformGetTransformStatsResponse, undefined, undefined>(
-        async (ctx, req, res) => {
-          try {
-            const esClient = (await ctx.core).elasticsearch.client;
-            const body = await esClient.asCurrentUser.transform.getTransformStats(
-              {
-                size: 1000,
-                transform_id: '_all',
-              },
-              { maxRetries: 0 }
-            );
-            return res.ok({ body });
-          } catch (e) {
-            return res.customError(wrapError(wrapEsError(e)));
-          }
-        }
-      )
-    );
 
   /**
    * @apiGroup Transforms
@@ -281,21 +164,28 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
           };
 
           const esClient = (await ctx.core).elasticsearch.client;
-          await esClient.asCurrentUser.transform
-            .putTransform({
+
+          try {
+            const resp = await esClient.asCurrentUser.transform.putTransform({
               // @ts-expect-error @elastic/elasticsearch group_by is expected to be optional in TransformPivot
               body: req.body,
               transform_id: transformId,
-            })
-            .then(() => {
+            });
+
+            if (resp.acknowledged) {
               response.transformsCreated.push({ transform: transformId });
-            })
-            .catch((e) =>
+            } else {
               response.errors.push({
                 id: transformId,
-                error: wrapEsError(e),
-              })
-            );
+                error: wrapEsError(resp),
+              });
+            }
+          } catch (e) {
+            response.errors.push({
+              id: transformId,
+              error: wrapEsError(e),
+            });
+          }
 
           return res.ok({ body: response });
         }
@@ -622,9 +512,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         scheduleNowTransformsHandler
       )
     );
-
-  registerTransformsAuditMessagesRoutes(routeDependencies);
-  registerTransformNodesRoutes(routeDependencies);
 }
 
 async function getDataViewId(indexName: string, dataViewsService: DataViewsService) {

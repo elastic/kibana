@@ -7,10 +7,18 @@
 
 import { RouteDependencies } from '../types';
 
-import { registerFieldHistogramsRoutes } from './api/field_histograms';
-import { registerTransformsRoutes } from './api/transforms';
+import { registerRoute as registerFieldHistogramsRoute } from './api/field_histograms/register_route';
+import { registerRoute as registerAuditMessagesRoute } from './api/audit_messages/register_route';
+import { registerRoute as registerTransformsNodesRoute } from './api/transforms_nodes/register_route';
+import { registerRoute as registerTransformsAllRoute } from './api/transforms_all/register_route';
+import { registerRoute as registerTransformsSingleRoute } from './api/transforms_single/register_route';
+import { registerRoute as registerTransformsStatsAllRoute } from './api/transforms_stats_all/register_route';
 
 export function registerRoutes(dependencies: RouteDependencies) {
-  registerFieldHistogramsRoutes(dependencies);
-  registerTransformsRoutes(dependencies);
+  registerFieldHistogramsRoute(dependencies);
+  registerAuditMessagesRoute(dependencies);
+  registerTransformsNodesRoute(dependencies);
+  registerTransformsAllRoute(dependencies);
+  registerTransformsSingleRoute(dependencies);
+  registerTransformsStatsAllRoute(dependencies);
 }

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isNodes } from './transforms_nodes';
+import { isNodes } from './route_handler_factory';
 
 describe('Transform: Nodes API endpoint', () => {
   test('isNodes()', () => {
