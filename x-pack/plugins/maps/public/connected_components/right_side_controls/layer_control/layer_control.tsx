@@ -67,7 +67,11 @@ export function LayerControl({
         })}
         position="left"
       >
-        <ExpandButton hasErrorsOrWarnings={hasErrorsOrWarnings} isLoading={isLoading} onClick={openLayerTOC} />
+        <ExpandButton
+          hasErrorsOrWarnings={hasErrorsOrWarnings}
+          isLoading={isLoading}
+          onClick={openLayerTOC}
+        />
       </EuiToolTip>
     );
   }

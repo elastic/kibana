@@ -71,12 +71,14 @@ export class TOCEntryButton extends Component<Props, State> {
   } {
     const errors = this.props.layer.getErrors();
     if (errors.length) {
-      const errorIcon = <EuiIcon
-        size="m"
-        type="error"
-        color="danger"
-        data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
-      />;
+      const errorIcon = (
+        <EuiIcon
+          size="m"
+          type="error"
+          color="danger"
+          data-test-subj={`layerTocErrorIcon${this.props.escapedDisplayName}`}
+        />
+      );
       return isLayerGroup(this.props.layer)
         ? {
             icon: errorIcon,
@@ -141,9 +143,7 @@ export class TOCEntryButton extends Component<Props, State> {
         icon,
         tooltipContent,
         footnotes: [],
-        postScript: warnings.length
-          ? warnings[0].title
-          : undefined,
+        postScript: warnings.length ? warnings[0].title : undefined,
       };
     }
 
