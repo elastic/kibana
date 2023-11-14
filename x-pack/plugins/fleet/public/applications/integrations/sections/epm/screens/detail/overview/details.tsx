@@ -272,6 +272,7 @@ export const Details: React.FC<Props> = memo(({ packageInfo }) => {
     packageInfo.licensePath,
     packageInfo.notice,
     packageInfo.source?.license,
+    packageInfo.owner.type,
     packageInfo.version,
     toggleLicenseModal,
     toggleNoticeModal,
