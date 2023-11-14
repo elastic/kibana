@@ -9,7 +9,7 @@ import * as rt from 'io-ts';
 import { decodeOrThrow } from '../runtime_types';
 
 export const logEntryCursorRT = rt.type({
-  time: rt.number,
+  time: rt.string,
   tiebreaker: rt.number,
 });
 export type LogEntryCursor = rt.TypeOf<typeof logEntryCursorRT>;
@@ -29,7 +29,7 @@ export const logEntryAroundCursorRT = rt.type({
 });
 export type LogEntryAroundCursor = rt.TypeOf<typeof logEntryAroundCursorRT>;
 
-export const getLogEntryCursorFromHit = (hit: { sort: [number, number] }) =>
+export const getLogEntryCursorFromHit = (hit: { sort: [string, number] }) =>
   decodeOrThrow(logEntryCursorRT)({
     time: hit.sort[0],
     tiebreaker: hit.sort[1],
