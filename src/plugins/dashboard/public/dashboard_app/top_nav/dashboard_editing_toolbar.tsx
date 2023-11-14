@@ -12,7 +12,7 @@ import { useEuiTheme } from '@elastic/eui';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { EmbeddableFactory, EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { BaseVisType, INLINE_EDITING_ALIAS, VisTypeAlias } from '@kbn/visualizations-plugin/public';
+import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import { isExplicitInputWithAttributes } from '@kbn/embeddable-plugin/public';
 
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
@@ -58,7 +58,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
           // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
-        } else if (visType.alias !== INLINE_EDITING_ALIAS) {
+        } else if ('path' in visType.alias) {
           // this visualization **is** an alias, and it has an app to redirect to for creation
           appId = visType.alias.app;
           path = visType.alias.path;

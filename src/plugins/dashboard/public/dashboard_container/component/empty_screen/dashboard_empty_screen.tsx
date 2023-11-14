@@ -20,7 +20,6 @@ import {
 } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
-import { INLINE_EDITING_ALIAS } from '@kbn/visualizations-plugin/public';
 
 import { DASHBOARD_UI_METRIC_ID } from '../../../dashboard_constants';
 import { pluginServices } from '../../../services/plugin_services';
@@ -54,7 +53,7 @@ export function DashboardEmptyScreen() {
   const originatingApp = embeddableAppContext?.currentAppId;
 
   const goToLens = useCallback(() => {
-    if (!lensAlias || lensAlias.alias === INLINE_EDITING_ALIAS) return;
+    if (!lensAlias || !('path' in lensAlias.alias)) return;
     const trackUiMetric = usageCollection.reportUiCounter?.bind(
       usageCollection,
       DASHBOARD_UI_METRIC_ID

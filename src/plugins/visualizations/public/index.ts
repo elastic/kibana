@@ -53,7 +53,6 @@ export type {
   VisualizationListItem,
   VisualizationStage,
 } from './vis_types/vis_type_alias_registry';
-export { INLINE_EDITING_ALIAS } from './vis_types/vis_type_alias_registry';
 export {
   SAVED_OBJECTS_LIMIT_SETTING,
   SAVED_OBJECTS_PER_PAGE_SETTING,

@@ -7,12 +7,7 @@
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import {
-  BaseVisType,
-  INLINE_EDITING_ALIAS,
-  VisGroups,
-  VisTypeAlias,
-} from '@kbn/visualizations-plugin/public';
+import { BaseVisType, VisGroups, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 import {
   EmbeddableFactory,
   EmbeddableFactoryDefinition,
@@ -77,7 +72,7 @@ export const EditorMenu: FC<Props> = ({ addElement }) => {
           // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
-        } else if (visType.alias !== INLINE_EDITING_ALIAS) {
+        } else if ('path' in visType.alias) {
           // this visualization **is** an alias, and it has an app to redirect to for creation
           appId = visType.alias.app;
           path = visType.alias.path;
