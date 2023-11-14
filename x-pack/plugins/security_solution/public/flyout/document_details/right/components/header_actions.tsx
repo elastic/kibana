@@ -9,10 +9,16 @@ import type { VFC } from 'react';
 import React, { memo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NewChatById } from '@kbn/elastic-assistant';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
 import { CopyToClipboard } from '../../../shared/components/copy_to_clipboard';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
+import { useAssistant } from '../hooks/use_assistant';
+import {
+  ALERT_SUMMARY_CONVERSATION_ID,
+  EVENT_SUMMARY_CONVERSATION_ID,
+} from '../../../../common/components/event_details/translations';
 import { useRightPanelContext } from '../context';
 import { SHARE_BUTTON_TEST_ID } from './test_ids';
 
@@ -31,8 +37,22 @@ export const HeaderActions: VFC = memo(() => {
 
   const showShareAlertButton = isAlert && alertDetailsLink;
 
+  const { showAssistant, promptContextId } = useAssistant({
+    dataFormattedForFieldBrowser,
+    isAlert,
+  });
+
   return (
-    <EuiFlexGroup direction="row" justifyContent="flexEnd">
+    <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center" gutterSize="none">
+      {showAssistant && (
+        <EuiFlexItem grow={false}>
+          <NewChatById
+            conversationId={isAlert ? ALERT_SUMMARY_CONVERSATION_ID : EVENT_SUMMARY_CONVERSATION_ID}
+            promptContextId={promptContextId}
+            iconOnly
+          />
+        </EuiFlexItem>
+      )}
       {showShareAlertButton && (
         <EuiFlexItem grow={false}>
           <CopyToClipboard
