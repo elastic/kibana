@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { set } from 'lodash';
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
@@ -59,5 +60,19 @@ describe('OpenLensButton', () => {
     appMockRender.render(<OpenLensButton {...props} />);
 
     expect(screen.queryByText('Open visualization')).not.toBeInTheDocument();
+  });
+
+  it('returns null if the visualization is an ESQL', () => {
+    const esqlProps = {
+      attachmentId: 'test',
+      ...lensVisualization,
+    };
+
+    set(esqlProps, 'state.query', { type: 'esql' });
+
+    // @ts-expect-error: props are correct
+    appMockRender.render(<OpenLensButton {...esqlProps} />);
+
+    expect(screen.queryByText('Open visualization')).toBeInTheDocument();
   });
 });
