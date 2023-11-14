@@ -24,7 +24,7 @@ import { i18n } from '@kbn/i18n';
 import {
   Aggregators,
   Comparator,
-  CustomMetricAggTypes,
+  AggType,
 } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { MetricExpression } from '../../types';
@@ -88,6 +88,13 @@ function PreviewChart({
   useEffect(() => {
     if (!threshold) return;
     const refLayers = [];
+    const isPercent = Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct'));
+    const format = {
+      id: isPercent ? 'percent' : 'number',
+      params: {
+        decimals: isPercent ? 0 : 2,
+      },
+    };
 
     if (
       comparator === Comparator.OUTSIDE_RANGE ||
@@ -99,12 +106,7 @@ function PreviewChart({
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'below' : 'above',
-            format: {
-              id: 'number',
-              params: {
-                decimals: 2,
-              },
-            },
+            format,
           },
         ],
       });
@@ -114,12 +116,7 @@ function PreviewChart({
             value: (threshold[1] || 0).toString(),
             color: euiTheme.colors.danger,
             fill: comparator === Comparator.OUTSIDE_RANGE ? 'above' : 'below',
-            format: {
-              id: 'number',
-              params: {
-                decimals: 2,
-              },
-            },
+            format,
           },
         ],
       });
@@ -130,25 +127,31 @@ function PreviewChart({
       if (comparator === Comparator.LT || comparator === Comparator.LT_OR_EQ) {
         fill = 'below';
       }
-      const refLine = new XYReferenceLinesLayer({
+      const thresholdRefLine = new XYReferenceLinesLayer({
         data: [
           {
             value: (threshold[0] || 0).toString(),
             color: euiTheme.colors.danger,
             fill,
-            format: {
-              id: 'number',
-              params: {
-                decimals: 2,
-              },
-            },
+            format,
           },
         ],
       });
-      refLayers.push(refLine);
+      // A transparent line to add extra buffer at the top of threshold
+      const bufferRefLine = new XYReferenceLinesLayer({
+        data: [
+          {
+            value: Math.round((threshold[0] || 0) * 1.1).toString(),
+            color: 'transparent',
+            fill,
+            format,
+          },
+        ],
+      });
+      refLayers.push(thresholdRefLine, bufferRefLine);
     }
     setThresholdReferenceLine(refLayers);
-  }, [threshold, comparator, euiTheme.colors.danger]);
+  }, [threshold, comparator, euiTheme.colors.danger, metrics]);
 
   // Build the aggregation map from the metrics
   useEffect(() => {
@@ -193,7 +196,7 @@ function PreviewChart({
     }
   }, [aggMap, equation]);
 
-  const getOperationTypeFromRuleAggType = (aggType: CustomMetricAggTypes): OperationType => {
+  const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
     if (aggType === Aggregators.AVERAGE) return 'average';
     if (aggType === Aggregators.CARDINALITY) return 'unique_count';
     return aggType;
@@ -203,15 +206,16 @@ function PreviewChart({
     if (!formulaAsync.value || !dataView || !formula) {
       return;
     }
+    const isPercent = Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct'));
     const baseLayer = {
       type: 'formula',
       value: formula,
       label: 'Custom Threshold',
       groupBy,
       format: {
-        id: 'number',
+        id: isPercent ? 'percent' : 'number',
         params: {
-          decimals: 2,
+          decimals: isPercent ? 0 : 2,
         },
       },
       filter: {
