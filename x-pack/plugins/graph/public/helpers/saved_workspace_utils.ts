@@ -59,6 +59,7 @@ function mapHits(hit: any, url: string): GraphWorkspaceSavedObject {
   source.id = hit.id;
   source.url = url;
   source.updatedAt = hit.updatedAt;
+  source.namespaces = hit.namespaces;
   source.icon = 'cluster'; // maybe there's a better choice here?
   return source;
 }

@@ -28,6 +28,7 @@ const toTableListViewSavedObject = (savedObject: GraphWorkspaceSavedObject): Gra
     id: savedObject.id!,
     updatedAt: savedObject.updatedAt!,
     references: savedObject.references ?? [],
+    namespaces: savedObject.namespaces!,
     type: savedObject.type,
     attributes: {
       title: savedObject.title,
