@@ -30,6 +30,7 @@ import { EcsEventType } from '@kbn/logging';
 import { EnvironmentMode } from '@kbn/config';
 import type { estypes } from '@elastic/elasticsearch';
 import { IncomingHttpHeaders } from 'http';
+import { inspect } from 'util';
 import type { KibanaClient } from '@elastic/elasticsearch/api/kibana';
 import { Logger as Logger_2 } from '@kbn/logging';
 import { LoggerFactory } from '@kbn/logging';
@@ -1303,6 +1304,21 @@ export type KibanaExecutionContext = {
 
 // @public
 export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Method extends RouteMethod = any> {
+    // (undocumented)
+    [inspect.custom](): {
+        id: string;
+        uuid: string;
+        url: string;
+        isSystemRequest: boolean;
+        auth: {
+            isAuthenticated: boolean;
+        };
+        route: Readonly<{
+            path: string;
+            method: RecursiveReadonly<Method>;
+            options: RecursiveReadonly<KibanaRequestRouteOptions<Method>>;
+        }>;
+    };
     // @internal (undocumented)
     protected readonly [requestSymbol]: Request_2;
     constructor(request: Request_2, params: Params, query: Query, body: Body, withoutSecretHeaders: boolean);
@@ -1328,6 +1344,23 @@ export class KibanaRequest<Params = unknown, Query = unknown, Body = unknown, Me
     readonly route: RecursiveReadonly<KibanaRequestRoute<Method>>;
     // (undocumented)
     readonly socket: IKibanaSocket;
+    // (undocumented)
+    toJSON(): {
+        id: string;
+        uuid: string;
+        url: string;
+        isSystemRequest: boolean;
+        auth: {
+            isAuthenticated: boolean;
+        };
+        route: Readonly<{
+            path: string;
+            method: RecursiveReadonly<Method>;
+            options: RecursiveReadonly<KibanaRequestRouteOptions<Method>>;
+        }>;
+    };
+    // (undocumented)
+    toString(): string;
     readonly url: URL_2;
     readonly uuid: string;
 }

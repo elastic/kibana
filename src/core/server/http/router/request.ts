@@ -8,6 +8,7 @@
 
 import { URL } from 'url';
 import uuid from 'uuid';
+import { inspect } from 'util';
 import { Request, RouteOptionsApp, RequestApplicationState, RouteOptions } from '@hapi/hapi';
 import { Observable, fromEvent, merge } from 'rxjs';
 import { shareReplay, first, takeUntil } from 'rxjs/operators';
@@ -18,6 +19,10 @@ import { Headers } from './headers';
 import { RouteMethod, RouteConfigOptions, validBodyOutput, isSafeMethod } from './route';
 import { KibanaSocket, IKibanaSocket } from './socket';
 import { RouteValidator, RouteValidatorFullConfig } from './validator';
+import { patchRequest } from './patch_request';
+
+// patching at module load
+patchRequest();
 
 const requestSymbol = Symbol('request');
 
@@ -222,6 +227,27 @@ export class KibanaRequest<
       // missing in fakeRequests, so we cast to false
       isAuthenticated: Boolean(request.auth?.isAuthenticated),
     };
+  }
+
+  toString() {
+    return `[CoreKibanaRequest id="${this.id}" method="${this.route.method}" url="${this.url}" system="${this.isSystemRequest}"]`;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      uuid: this.uuid,
+      url: `${this.url}`,
+      isSystemRequest: this.isSystemRequest,
+      auth: {
+        isAuthenticated: this.auth.isAuthenticated,
+      },
+      route: this.route,
+    };
+  }
+
+  [inspect.custom]() {
+    return this.toJSON();
   }
 
   private getEvents(request: Request): KibanaRequestEvents {
