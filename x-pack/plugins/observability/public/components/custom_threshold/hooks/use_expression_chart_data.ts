@@ -8,20 +8,24 @@
 import DateMath from '@kbn/datemath';
 import { DataViewBase } from '@kbn/es-query';
 import { useMemo } from 'react';
-import { MetricExplorerCustomMetricAggregations } from '../../../../common/custom_threshold_rule/metrics_explorer';
-import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
-import { MetricExpression, TimeRange } from '../types';
-import { useMetricsExplorerData } from './use_metrics_explorer_data';
-
 import {
-  MetricsExplorerOptions,
-  MetricsExplorerTimestampsRT,
-} from './use_metrics_explorer_options';
+  Aggregators,
+  AggType,
+  CustomThresholdExpressionMetric,
+} from '../../../../common/custom_threshold_rule/types';
+import {
+  ExpressionOptions,
+  ExpressionTimestampsRT,
+  MetricExpression,
+  MetricsExplorerMetricRT,
+  TimeRange,
+} from '../types';
+import { useExpressionData } from './use_expression_data';
 
 const DEFAULT_TIME_RANGE = {};
 const DEFAULT_TIMESTAMP = '@timestamp';
 
-export const useMetricsExplorerChartData = (
+export const useExpressionChartData = (
   expression: MetricExpression,
   derivedIndexPattern: DataViewBase,
   filterQuery?: string,
@@ -31,7 +35,7 @@ export const useMetricsExplorerChartData = (
 ) => {
   const { timeSize, timeUnit } = expression || { timeSize: 1, timeUnit: 'm' };
 
-  const options: MetricsExplorerOptions = useMemo(
+  const options: ExpressionOptions = useMemo(
     () => ({
       limit: 1,
       forceInterval: true,
@@ -39,29 +43,28 @@ export const useMetricsExplorerChartData = (
       groupBy,
       filterQuery,
       metrics: [
-        expression.aggType === 'custom'
-          ? {
-              aggregation: 'custom',
-              custom_metrics:
-                expression?.metrics?.map(mapMetricThresholdMetricToMetricsExplorerMetric) ?? [],
-              equation: expression.equation,
-            }
-          : { field: expression.metric, aggregation: expression.aggType },
+        {
+          aggregation: 'custom',
+          // Infra API expects this field to be custom_metrics
+          // since the same field is used in the metric threshold rule
+          custom_metrics:
+            expression?.metrics?.map(mapCustomThresholdMetricToMetricsExplorerMetric) ?? [],
+          equation: expression.equation,
+        },
       ],
-      aggregation: expression.aggType || 'avg',
+      aggregation: expression.aggType || 'custom',
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       expression.aggType,
       expression.equation,
-      expression.metric,
       // eslint-disable-next-line react-hooks/exhaustive-deps
       JSON.stringify(expression.metrics),
       filterQuery,
       groupBy,
     ]
   );
-  const timestamps: MetricsExplorerTimestampsRT = useMemo(() => {
+  const timestamps: ExpressionTimestampsRT = useMemo(() => {
     const from = timeRange.from ?? `now-${(timeSize || 1) * 20}${timeUnit}`;
     const to = timeRange.to ?? 'now';
     const fromTimestamp = DateMath.parse(from)!.valueOf();
@@ -74,23 +77,23 @@ export const useMetricsExplorerChartData = (
     };
   }, [timeRange.from, timeRange.to, timeSize, timeUnit, timeFieldName]);
 
-  return useMetricsExplorerData(options, derivedIndexPattern, timestamps);
+  return useExpressionData(options, derivedIndexPattern, timestamps);
 };
 
-const mapMetricThresholdMetricToMetricsExplorerMetric = (
+const mapCustomThresholdMetricToMetricsExplorerMetric = (
   metric: CustomThresholdExpressionMetric
-) => {
+): MetricsExplorerMetricRT => {
   if (metric.aggType === 'count') {
     return {
       name: metric.name,
-      aggregation: 'count' as MetricExplorerCustomMetricAggregations,
+      aggregation: Aggregators.COUNT,
       filter: metric.filter,
     };
   }
 
   return {
     name: metric.name,
-    aggregation: metric.aggType as MetricExplorerCustomMetricAggregations,
+    aggregation: metric.aggType as AggType,
     field: metric.field,
   };
 };
