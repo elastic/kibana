@@ -47,7 +47,10 @@ const create = (
 const execute = (client: IScopedClusterClient, policyName: string) => {
   // Enrich policy executions can last as short as a few seconds to as long as half and hour or longer.
   // In order to prevent the enrich policies UI from timing out, we are disabling `waitForCompletion`.
-  return client.asCurrentUser.enrich.executePolicy({ name: policyName, wait_for_completion: false });
+  return client.asCurrentUser.enrich.executePolicy({
+    name: policyName,
+    wait_for_completion: false,
+  });
 };
 
 const remove = (client: IScopedClusterClient, policyName: string) => {
