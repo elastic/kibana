@@ -32,7 +32,6 @@ import { UserPrivilegesProvider } from '../common/components/user_privileges/use
 import { ReactQueryClientProvider } from '../common/containers/query_client/query_client_provider';
 import { DiscoverInTimelineContextProvider } from '../common/components/discover_in_timeline/provider';
 import { AssistantProvider } from '../assistant/provider';
-import { DashboardContextProvider } from '../dashboards/context/dashboard_context';
 
 interface StartAppComponent {
   children: React.ReactNode;
