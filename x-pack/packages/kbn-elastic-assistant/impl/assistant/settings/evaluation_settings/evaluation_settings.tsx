@@ -271,6 +271,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     selectedEvaluationType,
     selectedEvaluatorModelOptions,
     selectedModelOptions,
+    useLangSmithDataset,
   ]);
 
   const discoverLink = `${basePath}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-7d%2Fd,to:now))&_a=(columns:!('@timestamp',evaluationId,totalAgents,totalInput,totalRequests,input,reference,prediction,evaluation.value,evaluation.reasoning,predictionResponse.value.connector_id),filters:!(),grid:(columns:('@timestamp':(width:212),evaluationId:(width:285),totalAgents:(width:111),totalInput:(width:98),totalRequests:(width:121))),index:'6d9ba861-a76b-4d31-90f4-dfb8f01b78bd',interval:auto,query:(esql:'from%20.kibana-elastic-ai-assistant-evaluation-results%20%0A%7C%20keep%20@timestamp,%20evaluationId,%20totalAgents,%20totalInput,%20totalRequests,%20input,%20reference,%20prediction,%20evaluation.value,%20evaluation.reasoning,%20predictionResponse.value.connector_id%0A%7C%20sort%20@timestamp%20desc%0A%7C%20limit%20100%0A%0A%0A'),sort:!(!('@timestamp',desc)))`;
