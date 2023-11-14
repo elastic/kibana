@@ -78,6 +78,7 @@ const createStartContractMock = () => {
       setBreadcrumbs: jest.fn(),
       getActiveNavigationNodes$: jest.fn(),
     },
+    updateWorkflows: jest.fn(),
   };
   startContract.navLinks.getAll.mockReturnValue([]);
   startContract.getIsVisible$.mockReturnValue(new BehaviorSubject(false));
