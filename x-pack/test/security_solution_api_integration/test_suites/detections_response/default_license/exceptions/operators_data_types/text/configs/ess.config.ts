@@ -16,7 +16,8 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Detection Engine ESS/ Exception Operators Data Types API text Integration Tests',
+      reportName:
+        'Detection Engine ESS - - Exception Operators Data Types API - Text Integration Tests',
     },
   };
 }

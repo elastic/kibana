@@ -8,7 +8,7 @@
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Detection exceptions data types and operators', function () {
+  describe('Detection exceptions IPs', function () {
     loadTestFile(require.resolve('./ip'));
     loadTestFile(require.resolve('./ip_array'));
   });
