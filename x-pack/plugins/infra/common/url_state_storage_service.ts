@@ -24,18 +24,18 @@ export const defaultLogViewKey = 'logView';
 
 const encodeRisonUrlState = (state: any) => encode(state);
 
-// Used by linkTo components
+// Used by Locator components
 export const replaceLogPositionInQueryString = (time?: number) =>
   Number.isNaN(time) || time == null
     ? (value: string) => value
     : replaceStateKeyInQueryString<PositionStateInUrl>(defaultPositionStateKey, {
         position: {
-          time,
+          time: moment(time).toISOString(),
           tiebreaker: 0,
         },
       });
 
-// NOTE: Used by link-to components
+// NOTE: Used by Locator components
 export const replaceLogViewInQueryString = (logViewReference: LogViewReference) =>
   replaceStateKeyInQueryString(defaultLogViewKey, logViewReference);
 
