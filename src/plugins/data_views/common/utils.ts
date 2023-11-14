@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { createHash } from 'crypto';
 import type { PersistenceAPI } from './types';
 
 /**
@@ -34,4 +35,10 @@ export function unwrapEtag(ifNoneMatch: string) {
     requestHash = requestHash.split('-')[0];
   }
   return requestHash;
+}
+
+export function calculateHash(srcBuffer: Buffer) {
+  const hash = createHash('sha1');
+  hash.update(srcBuffer);
+  return hash.digest('hex');
 }

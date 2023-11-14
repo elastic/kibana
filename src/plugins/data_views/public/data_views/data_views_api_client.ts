@@ -7,6 +7,7 @@
  */
 
 import { HttpSetup, HttpResponse } from '@kbn/core/public';
+import { calculateHash } from '../../common/utils';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
@@ -45,6 +46,8 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
     const userId = await this.getCurrentUserId();
 
+    const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
+
     const request = body
       ? this.http.post<T>(url, { query, body, version, asResponse })
       : this.http.fetch<T>(url, {
@@ -53,7 +56,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
           ...cacheOptions,
           asResponse,
           rawResponse,
-          headers: { 'user-hash': userId },
+          headers: { 'user-hash': userHash },
         });
 
     return request.catch((resp) => {

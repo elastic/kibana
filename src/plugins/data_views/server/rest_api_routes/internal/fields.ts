@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { createHash } from 'crypto';
 import { IRouter, RequestHandler, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
-import { unwrapEtag } from '../../../common/utils';
+import { unwrapEtag, calculateHash } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
@@ -18,17 +17,11 @@ import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
 import { parseFields, IBody, IQuery, querySchema } from './fields_for';
 
-function calculateHash(srcBuffer: Buffer) {
-  const hash = createHash('sha1');
-  hash.update(srcBuffer);
-  return hash.digest('hex');
-}
-
 const handler: (
   isRollupsEnabled: () => boolean,
   getUserId: () => (kibanaRequest: KibanaRequest) => Promise<string | undefined>
 ) => RequestHandler<{}, IQuery, IBody> =
-  (isRollupsEnabled, getUserId) => async (context, request, response) => {
+  (isRollupsEnabled, getUserIdGetter) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
@@ -71,11 +64,15 @@ const handler: (
 
       const etag = calculateHash(Buffer.from(JSON.stringify(body)));
 
+      const getUserId = getUserIdGetter();
+      const userId = await getUserId(request);
+      const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
+
       const headers: Record<string, string> = {
         'content-type': 'application/json',
         etag,
         vary: 'accept-encoding, user-hash',
-        'user-hash': (await getUserId()(request)) || '',
+        'user-hash': userHash,
       };
 
       const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
