@@ -182,11 +182,11 @@ export const mobileServiceDetailRoute = {
           },
         },
       },
-      '/mobile-services/{serviceName}/errors': {
+      '/mobile-services/{serviceName}/errors-and-crashes': {
         ...page({
-          tabKey: 'errors',
+          tabKey: 'errors-and-crashes',
           title: i18n.translate('xpack.apm.views.errors.title', {
-            defaultMessage: 'Errors',
+            defaultMessage: 'Errors & Crashes',
           }),
           element: <Outlet />,
           searchBarOptions: {
@@ -208,27 +208,29 @@ export const mobileServiceDetailRoute = {
           }),
         }),
         children: {
-          '/mobile-services/{serviceName}/errors/{groupId}': {
-            element: <ErrorGroupDetails />,
-            params: t.type({
-              path: t.type({
-                groupId: t.string,
+          '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}':
+            {
+              element: <ErrorGroupDetails />,
+              params: t.type({
+                path: t.type({
+                  groupId: t.string,
+                }),
+                query: t.partial({ errorId: t.string }),
               }),
-              query: t.partial({ errorId: t.string }),
-            }),
-          },
-          '/mobile-services/{serviceName}/errors': {
+            },
+          '/mobile-services/{serviceName}/errors-and-crashes/': {
             element: <MobileErrorCrashesOverview />,
           },
-          '/mobile-services/{serviceName}/errors/crashes/{groupId}': {
-            element: <CrashGroupDetails />,
-            params: t.type({
-              path: t.type({
-                groupId: t.string,
+          '/mobile-services/{serviceName}/errors-and-crashes/crashes/{groupId}':
+            {
+              element: <CrashGroupDetails />,
+              params: t.type({
+                path: t.type({
+                  groupId: t.string,
+                }),
+                query: t.partial({ errorId: t.string }),
               }),
-              query: t.partial({ errorId: t.string }),
-            }),
-          },
+            },
         },
       },
       '/mobile-services/{serviceName}/dependencies': page({

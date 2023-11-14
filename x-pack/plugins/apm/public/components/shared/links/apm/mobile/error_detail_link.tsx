@@ -13,13 +13,13 @@ interface Props extends APMLinkExtendProps {
   errorGroupId: string;
 }
 
-function CrashDetailLink({ serviceName, errorGroupId, ...rest }: Props) {
+function ErrorDetailLink({ serviceName, errorGroupId, ...rest }: Props) {
   return (
     <LegacyAPMLink
-      path={`/mobile-services/${serviceName}/errors-and-crashes/crashes/${errorGroupId}`}
+      path={`/mobile-services/${serviceName}/errors-and-crashes/errors/${errorGroupId}`}
       {...rest}
     />
   );
 }
 
-export { CrashDetailLink };
+export { ErrorDetailLink };

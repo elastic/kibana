@@ -14,7 +14,7 @@ import { push } from '../../../shared/links/url_helpers';
 export function MobileErrorCrashesOverview() {
   const {
     query: { mobileErrorTabId = MobileErrorTabIds.ERRORS },
-  } = useApmParams('/mobile-services/{serviceName}/errors');
+  } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes');
   const history = useHistory();
   return (
     <EuiFlexGroup direction="column" gutterSize="m">

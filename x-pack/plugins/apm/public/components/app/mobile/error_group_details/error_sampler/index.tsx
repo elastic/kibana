@@ -36,7 +36,9 @@ export function ErrorSampler({
   const {
     path: { groupId },
     query,
-  } = useApmParams('/mobile-services/{serviceName}/errors/{groupId}');
+  } = useApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
+  );
 
   const { rangeFrom, rangeTo, environment, kuery, errorId } = query;
 

@@ -99,27 +99,32 @@ export function ErrorGroupDetails() {
       comparisonEnabled,
       errorId,
     },
-  } = useApmParams('/mobile-services/{serviceName}/errors/{groupId}');
+  } = useApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
+  );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb(
     () => ({
       title: groupId,
-      href: apmRouter.link('/mobile-services/{serviceName}/errors/{groupId}', {
-        path: {
-          serviceName,
-          groupId,
-        },
-        query: {
-          rangeFrom,
-          rangeTo,
-          environment,
-          kuery,
-          serviceGroup,
-          comparisonEnabled,
-        },
-      }),
+      href: apmRouter.link(
+        '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}',
+        {
+          path: {
+            serviceName,
+            groupId,
+          },
+          query: {
+            rangeFrom,
+            rangeTo,
+            environment,
+            kuery,
+            serviceGroup,
+            comparisonEnabled,
+          },
+        }
+      ),
     }),
     [
       apmRouter,

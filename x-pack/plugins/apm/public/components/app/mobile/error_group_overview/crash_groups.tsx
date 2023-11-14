@@ -68,7 +68,7 @@ export function MobileCrashGroupOverview() {
       page = 0,
       pageSize = 25,
     },
-  } = useApmParams('/mobile-services/{serviceName}/errors');
+  } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes/');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { crashDistributionData, status } = useCrashGroupDistributionFetcher({

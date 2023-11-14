@@ -33,7 +33,7 @@ type Tab = NonNullable<EuiPageHeaderProps['tabs']>[0] & {
     | 'overview'
     | 'transactions'
     | 'dependencies'
-    | 'errors'
+    | 'errors-and-crashes'
     | 'service-map'
     | 'alerts';
   hidden?: boolean;
@@ -203,8 +203,8 @@ function useTabs({ selectedTabKey }: { selectedTabKey: Tab['key'] }) {
       }),
     },
     {
-      key: 'errors',
-      href: router.link('/mobile-services/{serviceName}/errors', {
+      key: 'errors-and-crashes',
+      href: router.link('/mobile-services/{serviceName}/errors-and-crashes', {
         path: { serviceName },
         query,
       }),

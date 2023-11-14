@@ -65,7 +65,9 @@ function MobileCrashGroupList({
   initialSortDirection,
   isLoading,
 }: Props) {
-  const { query } = useApmParams('/mobile-services/{serviceName}/errors');
+  const { query } = useApmParams(
+    '/mobile-services/{serviceName}/errors-and-crashes'
+  );
   const { offset } = query;
   const columns = useMemo(() => {
     return [

@@ -23,7 +23,7 @@ const stories: Meta<Args> = {
       return (
         <MemoryRouter
           initialEntries={[
-            '/mobile-services/{serviceName}/errors?rangeFrom=now-15m&rangeTo=now',
+            '/mobile-services/{serviceName}/errors-and-crashes?rangeFrom=now-15m&rangeTo=now',
           ]}
         >
           <MockApmPluginContextWrapper>

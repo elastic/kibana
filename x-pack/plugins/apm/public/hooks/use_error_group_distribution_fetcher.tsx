@@ -24,7 +24,7 @@ export function useErrorGroupDistributionFetcher({
     query: { rangeFrom, rangeTo, offset, comparisonEnabled },
   } = useAnyOfApmParams(
     '/services/{serviceName}/errors',
-    '/mobile-services/{serviceName}/errors'
+    '/mobile-services/{serviceName}/errors-and-crashes'
   );
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
