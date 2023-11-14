@@ -8,7 +8,7 @@
 
 import { http } from './data_views_api_client.test.mock';
 import { DataViewsApiClient } from './data_views_api_client';
-import { FIELDS_FOR_WILDCARD_PATH as expectedPath } from '../../common/constants';
+import { FIELDS_PATH as expectedPath } from '../../common/constants';
 
 describe('IndexPatternsApiClient', () => {
   let fetchSpy: jest.SpyInstance;
@@ -16,7 +16,7 @@ describe('IndexPatternsApiClient', () => {
 
   beforeEach(() => {
     fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
-    indexPatternsApiClient = new DataViewsApiClient(http);
+    indexPatternsApiClient = new DataViewsApiClient(http, () => Promise.resolve(undefined));
   });
 
   test('uses the right URI to fetch fields for wildcard', async function () {

@@ -309,6 +309,8 @@ export interface GetFieldsOptions {
   indexFilter?: QueryDslQueryContainer;
   includeUnmapped?: boolean;
   fields?: string[];
+  allowHidden?: boolean;
+  forceRefresh?: boolean;
 }
 
 /**
@@ -317,6 +319,7 @@ export interface GetFieldsOptions {
 export interface FieldsForWildcardResponse {
   fields: FieldSpec[];
   indices: string[];
+  etag?: string;
 }
 
 /**
