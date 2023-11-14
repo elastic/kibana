@@ -12,6 +12,7 @@ import { useGetCaseConfiguration } from '../../containers/configure/use_get_case
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import type { FilterConfig } from './use_system_filter_config';
+import { MORE_FILTERS_LABEL } from './translations';
 
 const MoreFiltersSelectable = ({
   options,
@@ -24,13 +25,13 @@ const MoreFiltersSelectable = ({
 }) => {
   return (
     <MultiSelectFilter
+      buttonLabel={MORE_FILTERS_LABEL}
+      buttonIconType="plus"
+      hideActiveOptionsNumber
       id="filters"
-      buttonLabel={'more +'} // FIXME: Translation and + icon
+      onChange={onChange}
       options={options}
       selectedOptionKeys={activeFilters}
-      limit={10} // FIXME: We should set a limit
-      onChange={onChange}
-      hideActiveOptionsNumber
     />
   );
 };
@@ -111,7 +112,6 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
   }, [systemFilterConfig, customFieldsFilterConfig]);
 
   const onFilterConfigChange = ({
-    filterId,
     selectedOptionKeys,
   }: {
     filterId: string;
@@ -143,8 +143,9 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
       label,
     }))
     .sort((a, b) => {
-      const compare = a.label.localeCompare(b.label);
-      return compare === 0 ? a.key.localeCompare(b.key) : compare;
+      if (a.label > b.label) return 1;
+      if (a.label < b.label) return -1;
+      return a.key > b.key ? 1 : -1;
     });
   const activeFilters = configArray.filter((filter) => filter.isActive).map((filter) => filter);
   const activeFilterKeys = activeFilters.map((filter) => filter.key);

@@ -189,3 +189,7 @@ export const OPTIONS = (totalCount: number) =>
     defaultMessage: '{totalCount, plural, one {# option} other {# options}}',
     values: { totalCount },
   });
+
+export const MORE_FILTERS_LABEL = i18n.translate('xpack.cases.tableFilters.moreFiltersLabel', {
+  defaultMessage: 'More',
+});

@@ -63,6 +63,7 @@ const getEuiSelectableCheckedOptions = <T extends string>(options: Array<FilterO
 
 interface UseFilterParams<T extends string> {
   buttonLabel?: string;
+  buttonIconType?: string;
   hideActiveOptionsNumber?: boolean;
   id: string;
   limit?: number;
@@ -74,6 +75,7 @@ interface UseFilterParams<T extends string> {
 }
 export const MultiSelectFilter = <T extends string>({
   buttonLabel,
+  buttonIconType,
   hideActiveOptionsNumber,
   id,
   limit,
@@ -123,7 +125,7 @@ export const MultiSelectFilter = <T extends string>({
       button={
         <EuiFilterButton
           data-test-subj={`options-filter-popover-button-${id}`}
-          iconType="arrowDown"
+          iconType={buttonIconType || 'arrowDown'}
           onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
           numFilters={showActiveOptionsNumber ? options.length : undefined} // FIXME: add tests
