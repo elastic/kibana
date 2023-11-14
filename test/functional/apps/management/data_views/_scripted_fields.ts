@@ -145,14 +145,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe('discover scripted field', async () => {
+      describe.skip('discover scripted field', async () => {
         before(async () => {
           const from = 'Sep 17, 2015 @ 06:31:44.000';
           const to = 'Sep 18, 2015 @ 18:31:44.000';
           await PageObjects.common.setTime({ from, to });
         });
 
-        it.skip('should see scripted field value in Discover', async function () {
+        it('should see scripted field value in Discover', async function () {
           await PageObjects.common.navigateToApp('discover');
 
           await retry.try(async function () {
