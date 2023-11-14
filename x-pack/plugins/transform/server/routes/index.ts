@@ -18,6 +18,7 @@ import { registerRoute as registerTransformsCreate } from './api/transforms_crea
 import { registerRoute as registerTransformsUpdate } from './api/transforms_update/register_route';
 import { registerRoute as registerReauthorizeTransformsUpdate } from './api/reauthorize_transforms/register_route';
 import { registerRoute as registerResetTransformsUpdate } from './api/reset_transforms/register_route';
+import { registerRoute as registerTransformsPreviewUpdate } from './api/transforms_preview/register_route';
 
 export function registerRoutes(dependencies: RouteDependencies) {
   registerFieldHistogramsRoute(dependencies);
@@ -31,4 +32,5 @@ export function registerRoutes(dependencies: RouteDependencies) {
   registerTransformsUpdate(dependencies);
   registerReauthorizeTransformsUpdate(dependencies);
   registerResetTransformsUpdate(dependencies);
+  registerTransformsPreviewUpdate(dependencies);
 }
