@@ -65,17 +65,17 @@ describe('useCasesColumnsSelection ', () => {
         "selectedColumns": Array [
           Object {
             "field": "title",
-            "isChecked": true,
+            "isChecked": undefined,
             "name": "Name",
           },
           Object {
             "field": "assignees",
-            "isChecked": true,
+            "isChecked": undefined,
             "name": "Assignees",
           },
           Object {
             "field": "tags",
-            "isChecked": true,
+            "isChecked": undefined,
             "name": "Tags",
           },
         ],
@@ -109,12 +109,12 @@ describe('useCasesColumnsSelection ', () => {
           },
           Object {
             "field": "assignees",
-            "isChecked": false,
+            "isChecked": undefined,
             "name": "Assignees",
           },
           Object {
             "field": "tags",
-            "isChecked": false,
+            "isChecked": undefined,
             "name": "Tags",
           },
         ],

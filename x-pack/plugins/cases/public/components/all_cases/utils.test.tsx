@@ -125,8 +125,8 @@ describe('utils', () => {
           casesColumnsConfig: mockConfiguration,
         })
       ).toStrictEqual([
-        { field: 'foo', name: 'foo', isChecked: false },
-        { field: 'bar', name: 'bar', isChecked: false },
+        { field: 'foo', name: 'foo', isChecked: true },
+        { field: 'bar', name: 'bar', isChecked: true },
       ]);
     });
 
@@ -136,12 +136,12 @@ describe('utils', () => {
           selectedColumns: [],
           casesColumnsConfig: {
             ...mockConfiguration,
-            foobar: { field: 'foobar', name: 'foobar', canDisplay: false, isCheckedDefault: true },
+            foobar: { field: 'foobar', name: 'foobar', canDisplay: false, isCheckedDefault: false },
           },
         })
       ).toStrictEqual([
-        { field: 'foo', name: 'foo', isChecked: false },
-        { field: 'bar', name: 'bar', isChecked: false },
+        { field: 'foo', name: 'foo', isChecked: true },
+        { field: 'bar', name: 'bar', isChecked: true },
       ]);
     });
   });

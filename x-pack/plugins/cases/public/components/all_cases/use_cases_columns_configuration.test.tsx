@@ -49,61 +49,73 @@ describe('useCasesColumnsConfiguration ', () => {
         "assignees": Object {
           "canDisplay": true,
           "field": "assignees",
+          "isCheckedDefault": true,
           "name": "Assignees",
         },
         "category": Object {
           "canDisplay": true,
           "field": "category",
+          "isCheckedDefault": true,
           "name": "Category",
         },
         "closedAt": Object {
           "canDisplay": true,
           "field": "closedAt",
+          "isCheckedDefault": false,
           "name": "Closed on",
         },
         "createdAt": Object {
           "canDisplay": true,
           "field": "createdAt",
+          "isCheckedDefault": true,
           "name": "Created on",
         },
         "externalIncident": Object {
           "canDisplay": true,
           "field": "externalIncident",
+          "isCheckedDefault": true,
           "name": "External incident",
         },
         "severity": Object {
           "canDisplay": true,
           "field": "severity",
+          "isCheckedDefault": true,
           "name": "Severity",
         },
         "status": Object {
           "canDisplay": true,
           "field": "status",
+          "isCheckedDefault": true,
           "name": "Status",
         },
         "tags": Object {
           "canDisplay": true,
           "field": "tags",
+          "isCheckedDefault": true,
           "name": "Tags",
         },
         "title": Object {
           "canDisplay": true,
           "field": "title",
+          "isCheckedDefault": true,
           "name": "Name",
         },
         "totalAlerts": Object {
           "canDisplay": true,
           "field": "totalAlerts",
+          "isCheckedDefault": true,
           "name": "Alerts",
         },
         "totalComment": Object {
           "canDisplay": true,
           "field": "totalComment",
+          "isCheckedDefault": true,
           "name": "Comments",
         },
         "updatedAt": Object {
           "canDisplay": true,
           "field": "updatedAt",
+          "isCheckedDefault": true,
           "name": "Updated on",
         },
       }
@@ -124,6 +136,7 @@ describe('useCasesColumnsConfiguration ', () => {
       Object {
         "canDisplay": false,
         "field": "assignees",
+        "isCheckedDefault": true,
         "name": "Assignees",
       }
     `);
@@ -143,6 +156,7 @@ describe('useCasesColumnsConfiguration ', () => {
       Object {
         "canDisplay": false,
         "field": "totalAlerts",
+        "isCheckedDefault": true,
         "name": "Alerts",
       }
     `);
@@ -169,11 +183,17 @@ describe('useCasesColumnsConfiguration ', () => {
       wrapper: appMockRender.AppWrapper,
     });
 
-    expect(result.current[textKey]).toEqual({ field: textKey, name: textLabel, canDisplay: true });
+    expect(result.current[textKey]).toEqual({
+      field: textKey,
+      name: textLabel,
+      canDisplay: true,
+      isCheckedDefault: false,
+    });
     expect(result.current[toggleKey]).toEqual({
       field: toggleKey,
       name: toggleLabel,
       canDisplay: true,
+      isCheckedDefault: false,
     });
   });
 });
