@@ -15,6 +15,7 @@ import {
   AuthorizeUpdateObject,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
+  SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -36,6 +37,8 @@ import {
   isLeft,
   isRight,
   rawDocExistsInNamespace,
+  getSavedObjectFromSource,
+  mergeForUpdate,
 } from './utils';
 import { ApiExecutionContext } from './types';
 
@@ -273,7 +276,54 @@ export const performBulkUpdate = async <T>(
         namespaces,
         esRequestIndex: bulkUpdateRequestIndexCounter++,
         documentToSave: expectedBulkGetResult.value.documentToSave,
+        rawMigratedUpdatedDoc: {} as SavedObjectsRawDoc,
+        migrationVersionCompatibility,
       };
+      let migrated: SavedObject<T>;
+      const typeDefinition = registry.getType(type)!;
+      if (docFound) {
+        const document = getSavedObjectFromSource<T>(
+          registry,
+          type,
+          id,
+          actualResult as SavedObjectsRawDoc
+        );
+        try {
+          migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
+        } catch (migrateStorageDocError) {
+          throw SavedObjectsErrorHelpers.decorateGeneralError(
+            migrateStorageDocError,
+            'Failed to migrate document to the latest version.'
+          );
+        }
+      }
+      const updatedAttributes = mergeForUpdate({
+        targetAttributes: {
+          ...migrated!.attributes,
+        },
+        updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
+          type,
+          id,
+          namespace,
+          documentToSave[type]
+        ),
+        typeMappings: typeDefinition.mappings,
+      });
+      const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
+        ...migrated!,
+        id,
+        type,
+        namespace,
+        namespaces,
+        attributes: updatedAttributes,
+        updated_at: time,
+        ...(Array.isArray(documentToSave.references) && { references: documentToSave.references }),
+      });
+
+      const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
+        migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
+      );
+      expectedResult.rawMigratedUpdatedDoc = updatedMigratedDocumentToSave;
 
       bulkUpdateParams.push(
         {
