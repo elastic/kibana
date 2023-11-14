@@ -41,7 +41,7 @@ export async function getNCT({
     apm: {
       sources: [
         {
-          documentType: ApmDocumentType.TransactionEvent,
+          documentType: ApmDocumentType.SpanEvent,
           rollupInterval: RollupInterval.None,
         },
       ],
