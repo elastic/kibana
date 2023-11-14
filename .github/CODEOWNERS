@@ -28,6 +28,7 @@ packages/kbn-ambient-storybook-types @elastic/kibana-operations
 packages/kbn-ambient-ui-types @elastic/kibana-operations
 packages/kbn-analytics @elastic/kibana-core
 packages/analytics/client @elastic/kibana-core
+packages/analytics/utils/analytics_collection_utils @elastic/kibana-core
 test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 packages/analytics/shippers/elastic_v3/browser @elastic/kibana-core
