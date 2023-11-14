@@ -7,27 +7,37 @@
 
 import type { RunFn } from '@kbn/dev-cli-runner';
 import { run } from '@kbn/dev-cli-runner';
-import { userInfo } from 'os';
 import { ok } from 'assert';
+import {
+  isFleetServerRunning,
+  startFleetServer,
+} from '../common/fleet_server/fleet_server_services';
+import type { HostVm } from '../common/types';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import {
   addSentinelOneIntegrationToAgentPolicy,
+  DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+  enrollHostVmWithFleet,
+  fetchAgentPolicy,
   getOrCreateDefaultAgentPolicy,
 } from '../common/fleet_services';
 import { installSentinelOneAgent, S1Client } from './common';
-import { createVm } from '../common/vm_services';
-import { createRuntimeServices } from '../common/stack_services';
+import { createVm, generateVmName, getMultipassVmCountNotice } from '../common/vm_services';
+import { createKbnClient } from '../common/stack_services';
 
 export const cli = async () => {
   // TODO:PT add support for CPU, Disk and Memory input args
 
   return run(runCli, {
-    description:
-      'Creates a new VM and runs both SentinelOne agent and elastic agent with the SentinelOne integration',
+    description: `Sets up the kibana system so that SentinelOne hosts data can be be streamed to Elasticsearch.
+It will first setup a host VM that runs the SentinelOne agent on it. This VM will ensure that data is being
+created in SentinelOne.
+It will then also setup a second VM (if necessary) that runs Elastic Agent along with the SentinelOne integration
+policy (an agent-less integration) - this is the process that then connects to the SentinelOne management
+console and pushes the data to Elasticsearch.`,
     flags: {
       string: [
         'kibanaUrl',
-        'elasticUrl',
         'username',
         'password',
         'version',
@@ -36,29 +46,28 @@ export const cli = async () => {
         's1ApiToken',
         'vmName',
       ],
-      boolean: ['force'],
+      boolean: ['forceFleetServer'],
       default: {
         kibanaUrl: 'http://127.0.0.1:5601',
-        elasticUrl: 'http://127.0.0.1:9200',
         username: 'elastic',
         password: 'changeme',
-        version: '',
         policy: '',
-        force: false,
       },
       help: `
       --s1Url             Required. The base URL for SentinelOne management console.
                           Ex: https://usea1-partners.sentinelone.net (valid as of Oct. 2023)
       --s1ApiToken        Required. The API token for SentinelOne
-      --vmName            Optional. The name for the VM
+      --vmName            Optional. The name for the VM.
+                          Default: [current login user name]-sentinelone-[unique number]
       --policy            Optional. The UUID of the Fleet Agent Policy that should be used to setup
                           the SentinelOne Integration
                           Default: re-uses existing dev policy (if found) or creates a new one
+      --forceFleetServer  Optional. If fleet server should be started/configured even if it seems
+                          like it is already setup.
       --username          Optional. User name to be used for auth against elasticsearch and
                           kibana (Default: elastic).
       --password          Optional. Password associated with the username (Default: changeme)
       --kibanaUrl         Optional. The url to Kibana (Default: http://127.0.0.1:5601)
-      --elasticUrl        Optional. The url to Elasticsearch (Default: http://127.0.0.1:9200)
 `,
     },
   });
@@ -68,38 +77,24 @@ const runCli: RunFn = async ({ log, flags }) => {
   const username = flags.username as string;
   const password = flags.password as string;
   const kibanaUrl = flags.kibanaUrl as string;
-  const elasticUrl = flags.elasticUrl as string;
   const s1Url = flags.s1Url as string;
   const s1ApiToken = flags.s1ApiToken as string;
   const policy = flags.policy as string;
-
-  createToolingLogger.defaultLogLevel = flags.verbose
-    ? 'verbose'
-    : flags.debug
-    ? 'debug'
-    : flags.silent
-    ? 'silent'
-    : flags.quiet
-    ? 'error'
-    : 'info';
-
+  const forceFleetServer = flags.forceFleetServer as boolean;
   const getRequiredArgMessage = (argName: string) => `${argName} argument is required`;
+
+  createToolingLogger.setDefaultLogLevelFromCliFlags(flags);
 
   ok(s1Url, getRequiredArgMessage('s1Url'));
   ok(s1ApiToken, getRequiredArgMessage('s1ApiToken'));
 
-  const vmName =
-    (flags.vmName as string) ||
-    `${userInfo().username.toLowerCase().replaceAll('.', '-')}-sentinelone-${Math.random()
-      .toString()
-      .substring(2, 6)}`;
+  const vmName = (flags.vmName as string) || generateVmName('sentinelone');
   const s1Client = new S1Client({ url: s1Url, apiToken: s1ApiToken, log });
-  const { kbnClient } = await createRuntimeServices({
-    kibanaUrl,
-    elasticsearchUrl: elasticUrl,
+  const kbnClient = createKbnClient({
+    log,
+    url: kibanaUrl,
     username,
     password,
-    log,
   });
 
   const hostVm = await createVm({
@@ -116,7 +111,17 @@ const runCli: RunFn = async ({ log, flags }) => {
     s1Client,
   });
 
-  const agentPolicyId = policy || (await getOrCreateDefaultAgentPolicy({ kbnClient, log })).id;
+  const {
+    id: agentPolicyId,
+    agents = 0,
+    name: agentPolicyName,
+  } = policy
+    ? await fetchAgentPolicy(kbnClient, policy)
+    : await getOrCreateDefaultAgentPolicy({
+        kbnClient,
+        log,
+        policyName: DEFAULT_AGENTLESS_INTEGRATIONS_AGENT_POLICY_NAME,
+      });
 
   await addSentinelOneIntegrationToAgentPolicy({
     kbnClient,
@@ -126,10 +131,42 @@ const runCli: RunFn = async ({ log, flags }) => {
     apiToken: s1ApiToken,
   });
 
+  let agentPolicyVm: HostVm | undefined;
+
+  // If no agents are running against the given Agent policy for agentless integrations, then add one now
+  if (!agents) {
+    log.info(`Creating VM and enrolling it with Fleet using policy [${agentPolicyName}]`);
+
+    agentPolicyVm = await createVm({
+      type: 'multipass',
+      name: generateVmName('agentless-integrations'),
+    });
+
+    if (forceFleetServer || !(await isFleetServerRunning(kbnClient, log))) {
+      await startFleetServer({
+        kbnClient,
+        logger: log,
+        force: forceFleetServer,
+      });
+    }
+
+    await enrollHostVmWithFleet({
+      hostVm: agentPolicyVm,
+      kbnClient,
+      log,
+      agentPolicyId,
+    });
+  } else {
+    log.info(
+      `No host VM created for Fleet agent policy [${agentPolicyName}]. It already shows to have [${agents}] enrolled`
+    );
+  }
+
   log.info(`Done!
 
 ${hostVm.info()}
-
+${agentPolicyVm ? `${agentPolicyVm.info()}\n` : ''}
+${await getMultipassVmCountNotice(2)}
 SentinelOne Agent Status:
 ${s1Info.status}
 `);
