@@ -7,12 +7,12 @@
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { SavedObjectsClientContract } from '@kbn/core/server';
 
+import { CspRuleTemplate } from '../../common/schemas';
+import { CspRuleTemplateState } from '../../common/schemas/csp_rule_template_state';
 import {
   CSP_RULE_TEMPLATE_INTERNAL_SAVED_OBJECT_TYPE,
   CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
 } from '../../common/constants';
-import { CspRuleTemplate } from '@kbn/cloud-security-posture-plugin/common/schemas';
-import { CspRuleTemplateState } from '@kbn/cloud-security-posture-plugin/common/schemas/csp_rule_template_state';
 
 export const synchronizeCspRuleTemplatesState = async (
   soClient: SavedObjectsClientContract,
