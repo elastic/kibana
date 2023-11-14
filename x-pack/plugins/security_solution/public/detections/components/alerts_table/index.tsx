@@ -76,9 +76,12 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
     align-items: center;
   }
 
+  div .euiDataGridRowCell__content {
+    width: 100%;
+  }
+  
   div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
     flex-grow: 0;
-    width: 100%;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;
@@ -274,6 +277,7 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showSortSelector: !isEventRenderedView,
       },
       hasAccessToLists,
+      dynamicRowHeight: isEventRenderedView,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,

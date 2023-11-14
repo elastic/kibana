@@ -707,5 +707,19 @@ describe('AlertsTable', () => {
         expect(await screen.findByTestId('cases-components-tooltip')).toBeInTheDocument();
       });
     });
+
+    describe('dynamic row height mode', () => {
+      it('should render a non-virtualized grid body when the dynamicRowHeight option is on', async () => {
+        const { container } = render(<AlertsTableWithProviders {...tableProps} dynamicRowHeight />);
+
+        expect(container.querySelector('.euiDataGrid__customRenderBody')).toBeTruthy();
+      });
+
+      it('should render a virtualized grid body when the dynamicRowHeight option is off', async () => {
+        const { container } = render(<AlertsTableWithProviders {...tableProps} />);
+
+        expect(container.querySelector('.euiDataGrid__virtualized')).toBeTruthy();
+      });
+    });
   });
 });
