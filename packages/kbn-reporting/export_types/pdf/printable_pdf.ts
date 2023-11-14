@@ -98,7 +98,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         apmGetAssets?.end();
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
-        //  make a new function that will call reporting.getScreenshots
+
         const snapshotFn = () =>
           this.startDeps.screenshotting!.getScreenshots({
             format: 'pdf',
@@ -109,6 +109,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             headers,
             layout,
           });
+
         return generatePdfObservable(snapshotFn, {
           format: 'pdf',
           title,

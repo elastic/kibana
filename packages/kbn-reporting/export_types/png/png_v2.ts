@@ -28,6 +28,7 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import type { LocatorParams, TaskRunResult } from '@kbn/reporting-common/types';
@@ -38,7 +39,6 @@ import {
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
 import { decryptJobHeaders, getFullRedirectAppUrl, ExportType } from '@kbn/reporting-server';
-import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
 import { SerializableRecord } from '@kbn/utility-types';
 
 import { generatePngObservable } from './generate_png';
@@ -105,27 +105,24 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           payload.forceNow
         );
 
-        const [locatorParams] = payload.locatorParams as unknown as Context[];
+        const [locatorParams] = payload.locatorParams;
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
-        return generatePngObservable(
-          () =>
-            this.startDeps.screenshotting!.getScreenshots({
-              format: 'png',
-              headers,
-              layout: { ...payload.layout, id: 'preserve_layout' },
-              urls: [[url, locatorParams]],
-            }),
-          jobLogger,
-          {
+        const snapshotFn = () =>
+          this.startDeps.screenshotting!.getScreenshots({
+            format: 'png',
             headers,
-            browserTimezone: payload.browserTimezone,
             layout: { ...payload.layout, id: 'preserve_layout' },
-            urls: [[url, locatorParams]],
-          }
-        );
+            urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
+          });
+
+        return generatePngObservable(snapshotFn, jobLogger, {
+          headers,
+          browserTimezone: payload.browserTimezone,
+          layout: { ...payload.layout, id: 'preserve_layout' },
+        });
       }),
       tap(({ buffer }) => stream.write(buffer)),
       map(({ metrics, warnings }) => ({

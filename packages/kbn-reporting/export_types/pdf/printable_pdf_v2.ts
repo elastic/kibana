@@ -19,6 +19,7 @@ import {
   LICENSE_TYPE_GOLD,
   LICENSE_TYPE_PLATINUM,
   LICENSE_TYPE_TRIAL,
+  REPORTING_REDIRECT_LOCATOR_STORE_KEY,
   REPORTING_TRANSACTION_TYPE,
 } from '@kbn/reporting-common';
 import type { TaskRunResult, UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
@@ -114,19 +115,25 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
         apmGetAssets?.end();
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
+
+        const snapshotFn = () =>
+          this.startDeps.screenshotting!.getScreenshots({
+            format: 'pdf',
+            title,
+            logo,
+            browserTimezone,
+            headers,
+            layout,
+            urls: urls.map((url) =>
+              typeof url === 'string'
+                ? url
+                : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+            ),
+          });
         return generatePdfObservableV2(
           this.config,
           this.getServerInfo(),
-          () =>
-            this.startDeps.screenshotting!.getScreenshots({
-              format: 'pdf',
-              title,
-              logo,
-              browserTimezone,
-              headers,
-              layout,
-              urls,
-            }),
+          snapshotFn,
           payload,
           locatorParams,
           {
