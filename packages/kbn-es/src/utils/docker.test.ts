@@ -436,7 +436,7 @@ describe('resolveEsArgs()', () => {
       kibanaUrl: 'https://localhost:5601/',
     });
 
-    expect(esArgs).toHaveLength(28);
+    expect(esArgs).toHaveLength(26);
     expect(esArgs).toMatchInlineSnapshot(`
       Array [
         "--env",
@@ -445,8 +445,6 @@ describe('resolveEsArgs()', () => {
         "xpack.security.http.ssl.keystore.path=/usr/share/elasticsearch/config/certs/elasticsearch.p12",
         "--env",
         "xpack.security.http.ssl.verification_mode=certificate",
-        "--env",
-        "xpack.security.authc.token.enabled=true",
         "--env",
         "xpack.security.authc.realms.saml.mock-idp.order=0",
         "--env",
