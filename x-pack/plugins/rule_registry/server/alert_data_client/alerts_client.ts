@@ -22,6 +22,7 @@ import {
   ALERT_STATUS_ACTIVE,
   ALERT_CASE_IDS,
   MAX_CASES_PER_ALERT,
+  AlertConsumers,
 } from '@kbn/rule-data-utils';
 
 import {
@@ -1006,6 +1007,7 @@ export class AlertsClient {
         operation: ReadOperations.Find,
         sort,
         lastSortIds: searchAfter,
+        featureIds,
       });
 
       if (alertsSearchResponse == null) {
@@ -1099,11 +1101,13 @@ export class AlertsClient {
 
   public async getAADFields({ ruleTypeId }: { ruleTypeId: string }) {
     const { producer, fieldsForAAD = [] } = this.getRuleType(ruleTypeId);
+    if (producer === AlertConsumers.SIEM) {
+      throw Boom.badRequest(`Security solution rule type is not supported`);
+    }
     const indices = await this.getAuthorizedAlertsIndices([producer]);
-    const o11yIndices = indices?.filter((index) => index.startsWith('.alerts-observability')) ?? [];
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
-    const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
-      pattern: o11yIndices,
+    const { fields = [] } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
+      pattern: indices ?? [],
       metaFields: ['_id', '_index'],
       fieldCapsOptions: { allow_no_indices: true },
       fields: [...fieldsForAAD, 'kibana.*'],
