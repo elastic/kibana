@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-export const SNAPSHOT_CUSTOM_AGGREGATIONS = ['avg', 'max', 'min', 'rate'] as const;
 export const METRIC_EXPLORER_AGGREGATIONS = [
   'avg',
   'max',
   'min',
   'cardinality',
-  'rate',
   'count',
   'sum',
-  'p95',
-  'p99',
-  'custom',
 ] as const;
+
+export const CUSTOM_AGGREGATOR = 'custom';
