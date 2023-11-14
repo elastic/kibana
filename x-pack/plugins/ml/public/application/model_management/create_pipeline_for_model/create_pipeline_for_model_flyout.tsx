@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, useContext, useMemo, useState } from 'react';
+import React, { FC, useMemo, useState } from 'react';
 
 import {
   EuiFlyout,
@@ -34,10 +34,10 @@ import { getPipelineConfig } from './get_pipeline_config';
 import { validateInferencePipelineConfigurationStep } from '../../components/ml_inference/validation';
 import { type InferecePipelineCreationState } from './state';
 import { useFetchPipelines } from '../../components/ml_inference/hooks/use_fetch_pipelines';
-import { TestTrainedModelsContext } from '../test_models/test_trained_models_context';
+import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 
 export interface CreatePipelineForModelFlyoutProps {
-  onClose: () => void;
+  onClose: (refreshList?: boolean) => void;
   model: ModelItem;
 }
 
@@ -45,8 +45,8 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
   onClose,
   model,
 }) => {
-  const currentContext = useContext(TestTrainedModelsContext);
-  const pipelineConfig = currentContext?.currentContext.pipelineConfig ?? {};
+  const testTrainedModelsContext = useTestTrainedModelsContext();
+  const pipelineConfig = testTrainedModelsContext?.currentContext.pipelineConfig ?? {};
 
   const initialState = useMemo(
     () => getInitialState(model, pipelineConfig),
@@ -94,8 +94,8 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
   const handleSetStep = (currentStep: AddInferencePipelineSteps) => {
     setStep(currentStep);
     if (currentStep !== ADD_INFERENCE_PIPELINE_STEPS.CREATE) {
-      currentContext?.setCurrentContext({
-        ...currentContext.currentContext,
+      testTrainedModelsContext?.setCurrentContext({
+        ...testTrainedModelsContext.currentContext,
         pipelineConfig: getPipelineConfig(formState),
       });
     }
@@ -111,7 +111,7 @@ export const CreatePipelineForModelFlyout: FC<CreatePipelineForModelFlyoutProps>
 
   return (
     <EuiFlyout
-      onClose={onClose}
+      onClose={onClose.bind(null, true)}
       size="l"
       data-test-subj="mlTrainedModelsFromTestInferencePipelineFlyout"
     >

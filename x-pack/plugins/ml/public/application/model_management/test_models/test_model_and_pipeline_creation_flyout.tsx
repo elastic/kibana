@@ -17,9 +17,9 @@ import { CreatePipelineForModelFlyout } from '../create_pipeline_for_model/creat
 
 interface Props {
   model: ModelItem;
-  onClose: () => void;
+  onClose: (refreshList?: boolean) => void;
 }
-export const TestFlyoutWrapper: FC<Props> = ({ model, onClose }) => {
+export const TestModelAndPipelineCreationFlyout: FC<Props> = ({ model, onClose }) => {
   const [currentContext, setCurrentContext] = useState<TestTrainedModelsContextType>({
     pipelineConfig: undefined,
     createPipelineFlyoutOpen: false,
@@ -29,10 +29,9 @@ export const TestFlyoutWrapper: FC<Props> = ({ model, onClose }) => {
     <TestTrainedModelsContext.Provider value={{ currentContext, setCurrentContext }}>
       {currentContext.createPipelineFlyoutOpen === false ? (
         <TestTrainedModelFlyout model={model} onClose={onClose} />
-      ) : null}
-      {currentContext.createPipelineFlyoutOpen ? (
+      ) : (
         <CreatePipelineForModelFlyout model={model} onClose={onClose} />
-      ) : null}
+      )}
     </TestTrainedModelsContext.Provider>
   );
 };

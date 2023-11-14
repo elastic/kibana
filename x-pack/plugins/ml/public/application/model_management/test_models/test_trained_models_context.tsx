@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createContext, Dispatch } from 'react';
+import { createContext, Dispatch, useContext } from 'react';
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 export interface TestTrainedModelsContextType {
@@ -19,3 +19,13 @@ export const TestTrainedModelsContext = createContext<
     }
   | undefined
 >(undefined);
+
+export function useTestTrainedModelsContext() {
+  const testTraindedModelsContext = useContext(TestTrainedModelsContext);
+
+  if (testTraindedModelsContext === undefined) {
+    throw new Error('TestTrainedModelsContext has not been initialized.');
+  }
+
+  return testTraindedModelsContext;
+}

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { FC, memo, useContext, useState } from 'react';
+import React, { FC, memo, useState } from 'react';
 
 import {
   EuiButtonEmpty,
@@ -22,7 +22,7 @@ import { CodeEditor } from '@kbn/kibana-react-plugin/public';
 import { type InferecePipelineCreationState } from './state';
 import { EDIT_MESSAGE, CANCEL_EDIT_MESSAGE } from '../../components/ml_inference/constants';
 import { isValidJson } from '../../../../common/util/validation_utils';
-import { TestTrainedModelsContext } from '../test_models/test_trained_models_context';
+import { useTestTrainedModelsContext } from '../test_models/test_trained_models_context';
 import { SaveChangesButton } from '../../components/ml_inference/components/save_changes_button';
 import { validatePipelineProcessors } from '../../components/ml_inference/validation';
 import { PipelineDetailsTitle, PipelineNameAndDescription } from '../../components/shared';
@@ -50,7 +50,7 @@ export const PipelineDetails: FC<Props> = memo(
     const [isProcessorConfigValid, setIsProcessorConfigValid] = useState<boolean>(true);
     const [processorConfigError, setProcessorConfigError] = useState<string | undefined>();
 
-    const currentContext = useContext(TestTrainedModelsContext);
+    const testTrainedModelsContext = useTestTrainedModelsContext();
     const [processorConfigString, setProcessorConfigString] = useState<string>(
       JSON.stringify(initialPipelineConfig ?? {}, null, 2)
     );
@@ -80,7 +80,7 @@ export const PipelineDetails: FC<Props> = memo(
 
     const resetProcessorConfig = () => {
       setProcessorConfigString(
-        JSON.stringify(currentContext?.currentContext.pipelineConfig ?? {}, null, 2)
+        JSON.stringify(testTrainedModelsContext?.currentContext.pipelineConfig ?? {}, null, 2)
       );
       setIsProcessorConfigValid(true);
       setProcessorConfigError(undefined);

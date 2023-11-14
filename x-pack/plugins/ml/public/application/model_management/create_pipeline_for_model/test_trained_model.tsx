@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { ModelItem } from '../models_list';
-import { TestTrainedModelFlyoutContent } from '../test_models/test_flyout';
+import { TestTrainedModelContent } from '../test_models/test_trained_model_content';
 import { useMlKibana } from '../../contexts/kibana';
 
 interface ContentProps {
@@ -60,7 +60,7 @@ export const TestTrainedModel: FC<ContentProps> = ({ model }) => {
         </EuiText>
       </EuiFlexItem>
       <EuiFlexItem grow={7}>
-        <TestTrainedModelFlyoutContent model={model} />
+        <TestTrainedModelContent model={model} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

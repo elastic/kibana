@@ -6,7 +6,7 @@
  */
 
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import React, { FC, useContext, useMemo, useEffect } from 'react';
+import React, { FC, useMemo, useEffect } from 'react';
 
 import { TRAINED_MODEL_TYPE, SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
 import { NerInference } from './models/ner';
@@ -22,7 +22,7 @@ import {
 import { TextEmbeddingInference } from './models/text_embedding';
 
 import { useMlApiContext } from '../../contexts/kibana';
-import { TestTrainedModelsContext } from './test_trained_models_context';
+import { useTestTrainedModelsContext } from './test_trained_models_context';
 import { InferenceInputForm } from './models/inference_input_form';
 import { InferrerType } from './models';
 import { INPUT_TYPE } from './models/inference_base';
@@ -36,10 +36,10 @@ interface Props {
 
 export const SelectedModel: FC<Props> = ({ model, inputType, deploymentId }) => {
   const { trainedModels } = useMlApiContext();
-  const currentContext = useContext(TestTrainedModelsContext);
+  const testTrainedModelsContext = useTestTrainedModelsContext();
   const pipeline =
-    (currentContext?.currentContext.createPipelineFlyoutOpen &&
-      currentContext?.currentContext.pipelineConfig) ||
+    (testTrainedModelsContext?.currentContext.createPipelineFlyoutOpen &&
+      testTrainedModelsContext?.currentContext.pipelineConfig) ||
     undefined;
 
   const inferrer = useMemo<InferrerType | undefined>(() => {

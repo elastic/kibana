@@ -5,109 +5,13 @@
  * 2.0.
  */
 
-import React, { FC, useState, useMemo } from 'react';
+import React, { FC } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiFlyout,
-  EuiFlyoutBody,
-  EuiFlyoutHeader,
-  EuiFormRow,
-  EuiSelect,
-  EuiSpacer,
-  EuiTab,
-  EuiTabs,
-  EuiTitle,
-  useEuiPaddingSize,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 
-import { SUPPORTED_PYTORCH_TASKS } from '@kbn/ml-trained-models-utils';
-import { SelectedModel } from './selected_model';
-import { INPUT_TYPE } from './models/inference_base';
 import { type ModelItem } from '../models_list';
-
-interface ContentProps {
-  model: ModelItem;
-}
-
-export const TestTrainedModelFlyoutContent: FC<ContentProps> = ({ model }) => {
-  const [deploymentId, setDeploymentId] = useState<string>(model.deployment_ids[0]);
-  const mediumPadding = useEuiPaddingSize('m');
-
-  const [inputType, setInputType] = useState<INPUT_TYPE>(INPUT_TYPE.TEXT);
-
-  const onlyShowTab: INPUT_TYPE | undefined = useMemo(() => {
-    return (model.type ?? []).includes(SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION)
-      ? INPUT_TYPE.INDEX
-      : undefined;
-  }, [model]);
-  return (
-    <>
-      {' '}
-      {model.deployment_ids.length > 1 ? (
-        <>
-          <EuiFormRow
-            fullWidth
-            label={
-              <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.deploymentIdLabel"
-                defaultMessage="Deployment ID"
-              />
-            }
-          >
-            <EuiSelect
-              fullWidth
-              options={model.deployment_ids.map((v) => {
-                return { text: v, value: v };
-              })}
-              value={deploymentId}
-              onChange={(e) => {
-                setDeploymentId(e.target.value);
-              }}
-            />
-          </EuiFormRow>
-          <EuiSpacer size="l" />
-        </>
-      ) : null}
-      {onlyShowTab === undefined ? (
-        <>
-          <EuiTabs
-            size="m"
-            css={{
-              marginTop: `-${mediumPadding}`,
-            }}
-          >
-            <EuiTab
-              isSelected={inputType === INPUT_TYPE.TEXT}
-              onClick={() => setInputType(INPUT_TYPE.TEXT)}
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.textTab"
-                defaultMessage="Test using text"
-              />
-            </EuiTab>
-            <EuiTab
-              isSelected={inputType === INPUT_TYPE.INDEX}
-              onClick={() => setInputType(INPUT_TYPE.INDEX)}
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.testModelsFlyout.indexTab"
-                defaultMessage="Test using existing index"
-              />
-            </EuiTab>
-          </EuiTabs>
-
-          <EuiSpacer size="m" />
-        </>
-      ) : null}
-      <SelectedModel
-        model={model}
-        inputType={onlyShowTab ?? inputType}
-        deploymentId={deploymentId ?? model.model_id}
-      />
-    </>
-  );
-};
+import { TestTrainedModelContent } from './test_trained_model_content';
 
 interface Props {
   model: ModelItem;
@@ -130,7 +34,7 @@ export const TestTrainedModelFlyout: FC<Props> = ({ model, onClose }) => (
       </EuiTitle>
     </EuiFlyoutHeader>
     <EuiFlyoutBody>
-      <TestTrainedModelFlyoutContent model={model} />
+      <TestTrainedModelContent model={model} />
     </EuiFlyoutBody>
   </EuiFlyout>
 );

@@ -10,7 +10,10 @@ import type { InferecePipelineCreationState } from './state';
 
 export function getPipelineConfig(state: InferecePipelineCreationState): estypes.IngestPipeline {
   const { ignoreFailure, modelId, onFailure, pipelineDescription, initialPipelineConfig } = state;
-  const processor = initialPipelineConfig?.processors ? initialPipelineConfig?.processors[0] : {};
+  const processor =
+    initialPipelineConfig?.processors && initialPipelineConfig.processors?.length
+      ? initialPipelineConfig?.processors[0]
+      : {};
 
   return {
     description: pipelineDescription,

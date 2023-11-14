@@ -72,7 +72,6 @@ export abstract class InferenceBase<TInferResponse> {
   private isValid$ = new BehaviorSubject<boolean>(false);
   private pipeline$ = new BehaviorSubject<estypes.IngestPipeline>({});
   private supportedFieldTypes: ES_FIELD_TYPES[] = [ES_FIELD_TYPES.TEXT];
-  private pipelineForCreation: estypes.IngestPipeline | undefined;
 
   protected readonly info: string[] = [];
 
@@ -83,9 +82,8 @@ export abstract class InferenceBase<TInferResponse> {
     protected readonly model: estypes.MlTrainedModelConfig,
     protected readonly inputType: INPUT_TYPE,
     protected readonly deploymentId: string,
-    protected readonly pipeline?: estypes.IngestPipeline
+    private readonly pipelineForCreation?: estypes.IngestPipeline
   ) {
-    this.pipelineForCreation = pipeline;
     this.modelInputField = model.input?.field_names[0] ?? DEFAULT_INPUT_FIELD;
     this.inputField$.next(this.modelInputField);
   }

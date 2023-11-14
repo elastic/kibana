@@ -205,7 +205,7 @@ export const ReindexWithPipeline: FC<Props> = ({ pipelineName, sourceIndex }) =>
           setCanReindexError(errorMessage);
         }
       }
-      if (hasPrivileges !== undefined) {
+      if (hasPrivileges !== undefined && selectedIndex.length) {
         checkPrivileges();
       }
     },

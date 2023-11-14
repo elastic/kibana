@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import React, { useContext, FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
+import React, { FC, useState, useMemo, useCallback, FormEventHandler } from 'react';
 
 import useObservable from 'react-use/lib/useObservable';
 
 import {
   EuiSpacer,
-  EuiButton,
   EuiButtonEmpty,
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +27,7 @@ import { ErrorMessage } from '../../inference_error';
 import type { InferrerType } from '..';
 import { useIndexInput, InferenceInputFormIndexControls } from '../index_input';
 import { RUNNING_STATE } from '../inference_base';
-import { TestTrainedModelsContext } from '../../test_trained_models_context';
+import { InputFormControls } from './input_form_controls';
 
 interface Props {
   inferrer: InferrerType;
@@ -44,8 +43,6 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
   const isValid = useObservable(inferrer.getIsValid$(), inferrer.getIsValid());
   const outputComponent = useMemo(() => inferrer.getOutputComponent(), [inferrer]);
   const infoComponent = useMemo(() => inferrer.getInfoComponent(), [inferrer]);
-
-  const currentContext = useContext(TestTrainedModelsContext);
 
   const run: FormEventHandler<HTMLFormElement> = useCallback(
     async (event) => {
@@ -70,38 +67,13 @@ export const IndexInputForm: FC<Props> = ({ inferrer }) => {
       <EuiFlexGroup>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                disabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
-                fullWidth={false}
-                data-test-subj={'mlTestModelTestButton'}
-                type={'submit'}
-              >
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.runButton"
-                  defaultMessage="Test"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            {!currentContext?.currentContext.createPipelineFlyoutOpen ? (
-              <EuiFlexItem grow={false}>
-                <EuiButtonEmpty
-                  disabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
-                  data-test-subj={'mlTestModelCreatePipelineButton'}
-                  onClick={() =>
-                    currentContext?.setCurrentContext({
-                      pipelineConfig: inferrer.getPipeline(),
-                      createPipelineFlyoutOpen: true,
-                    })
-                  }
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.testModelsFlyout.inferenceInputForm.createPipelineButton"
-                    defaultMessage="Create pipeline"
-                  />
-                </EuiButtonEmpty>
-              </EuiFlexItem>
-            ) : null}
+            <InputFormControls
+              testButtonDisabled={runningState === RUNNING_STATE.RUNNING || isValid === false}
+              createPipelineButtonDisabled={
+                runningState === RUNNING_STATE.RUNNING || isValid === false
+              }
+              inferrer={inferrer}
+            />
           </EuiFlexGroup>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
