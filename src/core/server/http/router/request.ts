@@ -230,7 +230,7 @@ export class KibanaRequest<
   }
 
   toString() {
-    return `[CoreKibanaRequest id="${this.id}" method="${this.route.method}" url="${this.url}" fake="${this.isFakeRequest}" system="${this.isSystemRequest}" api="${this.isInternalApiRequest}"]`;
+    return `[CoreKibanaRequest id="${this.id}" method="${this.route.method}" url="${this.url}" system="${this.isSystemRequest}"]`;
   }
 
   toJSON() {
@@ -238,9 +238,7 @@ export class KibanaRequest<
       id: this.id,
       uuid: this.uuid,
       url: `${this.url}`,
-      isFakeRequest: this.isFakeRequest,
       isSystemRequest: this.isSystemRequest,
-      isInternalApiRequest: this.isInternalApiRequest,
       auth: {
         isAuthenticated: this.auth.isAuthenticated,
       },

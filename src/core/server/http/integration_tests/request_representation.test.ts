@@ -58,7 +58,7 @@ describe('request logging', () => {
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
       expect(replacePorts(response.body.req)).toEqual(
-        `[CoreKibanaRequest id="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" method="get" url="http://127.0.0.1:XXXX/" fake="false" system="false" api="false"]`
+        `[CoreKibanaRequest id="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx" method="get" url="http://127.0.0.1:XXXX/" system="false"]`
       );
     });
 
@@ -78,8 +78,6 @@ describe('request logging', () => {
       expect(JSON.parse(replacePorts(response.body.req))).toEqual({
         id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
         url: 'http://127.0.0.1:XXXX/',
-        isFakeRequest: false,
-        isInternalApiRequest: false,
         isSystemRequest: false,
         auth: {
           isAuthenticated: false,
@@ -110,9 +108,7 @@ describe('request logging', () => {
           id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
           url: 'http://127.0.0.1:XXXX/',
-          isFakeRequest: false,
           isSystemRequest: false,
-          isInternalApiRequest: false,
           auth: { isAuthenticated: false },
           route: {
             path: '/',
