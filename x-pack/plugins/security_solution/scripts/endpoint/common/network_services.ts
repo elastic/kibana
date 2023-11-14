@@ -7,7 +7,7 @@
 
 import { networkInterfaces } from 'node:os';
 
-export const getBridgeNetworkHostIp = (): string => {
+export const getLocalhostRealIp = (): string => {
   // reverse to get the last interface first
   for (const netInterfaceList of Object.values(networkInterfaces()).reverse()) {
     if (netInterfaceList) {

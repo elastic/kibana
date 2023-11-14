@@ -10,9 +10,9 @@ import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { FleetStartContract } from '@kbn/fleet-plugin/server';
 import { createFetchFlamechart } from './fetch_flamechart';
 import { createGetStatusService } from './status';
-import { createGetSetupState } from './get_setup_state';
 import { ProfilingESClient } from '../../common/profiling_es_client';
 import { createFetchFunctions } from './functions';
+import { createSetupState } from './setup_state';
 
 export interface RegisterServicesParams {
   createProfilingEsClient: (params: {
@@ -21,8 +21,8 @@ export interface RegisterServicesParams {
   }) => ProfilingESClient;
   logger: Logger;
   deps: {
-    fleet: FleetStartContract;
-    cloud: CloudStart;
+    fleet?: FleetStartContract;
+    cloud?: CloudStart;
   };
 }
 
@@ -30,7 +30,7 @@ export function registerServices(params: RegisterServicesParams) {
   return {
     fetchFlamechartData: createFetchFlamechart(params),
     getStatus: createGetStatusService(params),
-    getSetupState: createGetSetupState(params),
+    getSetupState: createSetupState(params),
     fetchFunction: createFetchFunctions(params),
   };
 }

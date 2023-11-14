@@ -30,6 +30,7 @@ export async function validateResourceManagement({
       enabled: statusResponse.resource_management.enabled,
     },
     resources: {
+      // If the flag is true, that means that all index templates / data streams and indices have been created
       created: statusResponse.resources.created,
       pre_8_9_1_data: statusResponse.resources.pre_8_9_1_data,
     },

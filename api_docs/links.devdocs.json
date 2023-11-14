@@ -339,6 +339,38 @@
           },
           {
             "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.onRender",
+            "type": "Function",
+            "tags": [],
+            "label": "onRender",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
+            "id": "def-public.LinksEmbeddable.onLoading",
+            "type": "Function",
+            "tags": [],
+            "label": "onLoading",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "links",
             "id": "def-public.LinksEmbeddable.inputIsRefType",
             "type": "Function",
             "tags": [],
@@ -476,12 +508,28 @@
             "label": "render",
             "description": [],
             "signature": [
-              "() => JSX.Element | undefined"
+              "(domNode: HTMLElement) => JSX.Element | undefined"
             ],
             "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
             "deprecated": false,
             "trackAdoption": false,
-            "children": [],
+            "children": [
+              {
+                "parentPluginId": "links",
+                "id": "def-public.LinksEmbeddable.render.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "domNode",
+                "description": [],
+                "signature": [
+                  "HTMLElement"
+                ],
+                "path": "src/plugins/links/public/embeddable/links_embeddable.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
             "returnComment": []
           }
         ],

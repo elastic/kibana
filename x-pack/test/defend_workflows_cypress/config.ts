@@ -7,7 +7,7 @@
 
 import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import { getBridgeNetworkHostIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
+import { getLocalhostRealIp } from '@kbn/security-solution-plugin/scripts/endpoint/common/network_services';
 import { services } from './services';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
@@ -18,7 +18,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     require.resolve('../functional/config.base.js')
   );
 
-  const hostIp = getBridgeNetworkHostIp();
+  const hostIp = getLocalhostRealIp();
 
   return {
     ...kibanaCommonTestsConfig.getAll(),

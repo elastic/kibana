@@ -18,6 +18,7 @@ export type {
 export { metricsDataSourceSavedObjectName } from './saved_objects/metrics_data_source';
 
 export { MetricsDataClient } from './client';
+export { MetricsDataClientMock } from './client_mock';
 
 export function plugin(context: PluginInitializerContext) {
   return new MetricsDataPlugin(context);

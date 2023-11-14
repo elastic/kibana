@@ -15,6 +15,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "ColorPickerProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
@@ -357,6 +365,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LegendToggleProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",

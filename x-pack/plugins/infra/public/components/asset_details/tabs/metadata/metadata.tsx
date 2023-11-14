@@ -9,7 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiHorizontalRule } from '@elastic/eui';
 import { Table } from './table';
 import { getAllFields } from './utils';
-import { useMetadataStateProviderContext } from '../../hooks/use_metadata_state';
+import { useMetadataStateContext } from '../../hooks/use_metadata_state';
 import { MetadataExplanationMessage } from '../../components/metadata_explanation';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useAssetDetailsUrlState } from '../../hooks/use_asset_details_url_state';
@@ -27,7 +27,7 @@ export const Metadata = () => {
     metadata,
     loading: metadataLoading,
     error: fetchMetadataError,
-  } = useMetadataStateProviderContext();
+  } = useMetadataStateContext();
   const { showActionsColumn = false } = overrides?.metadata ?? {};
 
   const fields = useMemo(() => getAllFields(metadata), [metadata]);

@@ -6,12 +6,14 @@
  * Side Public License, v 1.
  */
 
-export type { SearchResponseInterceptedWarning } from './src/types';
+export type { SearchResponseWarning, WarningHandlerCallback } from './src/types';
 
 export {
-  SearchResponseWarnings,
-  type SearchResponseWarningsProps,
+  SearchResponseWarningsBadge,
+  SearchResponseWarningsBadgePopoverContent,
+  SearchResponseWarningsCallout,
+  SearchResponseWarningsEmptyPrompt,
 } from './src/components/search_response_warnings';
 
-export { getSearchResponseInterceptedWarnings } from './src/utils/get_search_response_intercepted_warnings';
-export { hasUnsupportedDownsampledAggregationFailure } from './src/utils/has_unsupported_downsampled_aggregation_failure';
+export { handleWarnings } from './src/handle_warnings';
+export { hasUnsupportedDownsampledAggregationFailure } from './src/has_unsupported_downsampled_aggregation_failure';

@@ -44,6 +44,7 @@ export const Popover = ({
       closePopover={closePopover}
       repositionOnScroll
       anchorPosition="upCenter"
+      panelStyle={{ maxWidth: 350 }}
     >
       {children}
     </EuiPopover>

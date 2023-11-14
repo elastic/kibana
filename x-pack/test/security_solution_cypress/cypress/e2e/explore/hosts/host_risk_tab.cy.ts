@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { cleanKibana } from '../../../tasks/common';
 import {
   navigateToHostRiskDetailTab,
   openRiskTableFilterAndSelectTheCriticalOption,
@@ -20,15 +19,14 @@ import {
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { hostsUrl } from '../../../urls/navigation';
-import { clearSearchBar, kqlSearch } from '../../../tasks/security_header';
+import { kqlSearch } from '../../../tasks/security_header';
 import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_engine';
 import { enableRiskEngine } from '../../../tasks/entity_analytics';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
-describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
+describe('risk tab', { tags: ['@ess', '@serverless'] }, () => {
   describe('with legacy risk score', () => {
     before(() => {
-      cleanKibana();
       login();
       deleteRiskEngineConfiguration();
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
@@ -49,10 +47,10 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     it('renders the table', () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('have.text', 'siem-kibana');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', '21');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Low');
-      clearSearchBar();
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '21');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Low');
     });
 
     it.skip('filters the table', () => {
@@ -73,13 +71,11 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
     it('should not allow page change when page is empty', () => {
       kqlSearch('host.name: "nonexistent_host" {enter}');
       cy.get(HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON).should(`not.exist`);
-      clearSearchBar();
     });
   });
 
   describe('with new risk score', () => {
     before(() => {
-      cleanKibana();
       cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
       login();
       enableRiskEngine();
@@ -101,10 +97,10 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     it('renders the table', () => {
       kqlSearch('host.name: "siem-kibana" {enter}');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(3).should('have.text', 'siem-kibana');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', '90');
-      cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Critical');
-      clearSearchBar();
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(4).should('have.text', 'siem-kibana');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(5).should('have.text', 'Mar 10, 2021 @ 14:51:05.766');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(6).should('have.text', '90');
+      cy.get(HOST_BY_RISK_TABLE_CELL).eq(7).should('have.text', 'Critical');
     });
 
     it.skip('filters the table', () => {
@@ -125,7 +121,6 @@ describe('risk tab', { tags: ['@ess', '@brokenInServerless'] }, () => {
     it('should not allow page change when page is empty', () => {
       kqlSearch('host.name: "nonexistent_host" {enter}');
       cy.get(HOST_BY_RISK_TABLE_NEXT_PAGE_BUTTON).should(`not.exist`);
-      clearSearchBar();
     });
   });
 });

@@ -9,7 +9,10 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { PreviewSection } from './preview_section';
-import { PREVIEW_SECTION_BACK_BUTTON, PREVIEW_SECTION_CLOSE_BUTTON } from './test_ids';
+import {
+  PREVIEW_SECTION_BACK_BUTTON_TEST_ID,
+  PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID,
+} from './test_ids';
 import { ExpandableFlyoutContext } from '../context';
 
 describe('PreviewSection', () => {
@@ -36,7 +39,7 @@ describe('PreviewSection', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_SECTION_CLOSE_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 
   it('should render back button in header', () => {
@@ -50,6 +53,6 @@ describe('PreviewSection', () => {
       </ExpandableFlyoutContext.Provider>
     );
 
-    expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON)).toBeInTheDocument();
+    expect(getByTestId(PREVIEW_SECTION_BACK_BUTTON_TEST_ID)).toBeInTheDocument();
   });
 });

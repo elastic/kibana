@@ -567,11 +567,18 @@ export const apmPerServiceSchema: MakeSchemaFrom<APMPerService, true> = {
 
 export const apmSchema: MakeSchemaFrom<APMUsage, true> = {
   ...apmPerAgentSchema,
+  has_any_services_per_official_agent: {
+    type: 'boolean',
+    _meta: {
+      description:
+        'Indicates whether any service is being monitored. This is determined by checking all officially supported agents within the last day',
+    },
+  },
   has_any_services: {
     type: 'boolean',
     _meta: {
       description:
-        'Indicates whether any service is being monitored. This is determined by checking all agents within the last day',
+        'Indicates whether any service is being monitored within the last day.',
     },
   },
   version: {

@@ -228,13 +228,9 @@ export const parseCaseUsers = ({
 };
 
 export const convertCustomFieldValue = (value: string | boolean) => {
-  let fieldValue = null;
-
-  if (!isEmpty(value) && typeof value === 'string') {
-    fieldValue = [value];
-  } else if (typeof value === 'boolean') {
-    fieldValue = value;
+  if (typeof value === 'string' && isEmpty(value)) {
+    return null;
   }
 
-  return fieldValue;
+  return value;
 };

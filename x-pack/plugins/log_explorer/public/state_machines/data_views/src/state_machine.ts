@@ -146,7 +146,10 @@ export const createDataViewsStateMachine = ({
         const searchParams = context.search;
         return context.cache.has(searchParams)
           ? Promise.resolve(context.cache.get(searchParams))
-          : dataViews.getIdsWithTitle().then((views) => views.map(parseDataViewListItem));
+          : dataViews
+              .getIdsWithTitle()
+              .then((views) => views.map(parseDataViewListItem))
+              .then((views) => searchDataViews(views, searchParams));
       },
     },
   });

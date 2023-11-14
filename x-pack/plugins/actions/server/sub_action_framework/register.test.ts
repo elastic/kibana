@@ -16,6 +16,7 @@ import {
   TestSubActionConnector,
 } from './mocks';
 import { register } from './register';
+import { ServiceParams } from './types';
 
 describe('Registration', () => {
   const renderedVariables = { body: '' };
@@ -30,7 +31,8 @@ describe('Registration', () => {
       config: TestConfigSchema,
       secrets: TestSecretsSchema,
     },
-    Service: TestSubActionConnector,
+    getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
+      new TestSubActionConnector(serviceParams),
     renderParameterTemplates: mockRenderParameterTemplates,
   };
 

@@ -12,7 +12,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['svlCommonPage']);
   const adJobId = 'fq_single_permission';
 
-  describe('Anomaly detection jobs list', () => {
+  describe('Anomaly detection jobs list', function () {
+    // Error: Failed to delete all indices with pattern [.ml-*]
+    this.tags(['failsOnMKI']);
     before(async () => {
       await PageObjects.svlCommonPage.login();
 

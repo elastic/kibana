@@ -71,6 +71,27 @@ describe('stripNonEcsFields', () => {
     ]);
   });
 
+  // https://github.com/elastic/sdh-security-team/issues/736
+  describe('fields that exists in the alerts mapping but not in local ECS(ruleRegistry) definition', () => {
+    it('should strip object type "device" field if it is supplied as a keyword', () => {
+      const { result, removed } = stripNonEcsFields({
+        device: 'test',
+        message: 'test message',
+      });
+
+      expect(result).toEqual({
+        message: 'test message',
+      });
+
+      expect(removed).toEqual([
+        {
+          key: 'device',
+          value: 'test',
+        },
+      ]);
+    });
+  });
+
   describe('array fields', () => {
     it('should not strip arrays of objects when an object is expected', () => {
       const { result, removed } = stripNonEcsFields({

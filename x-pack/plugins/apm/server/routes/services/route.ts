@@ -6,7 +6,12 @@
  */
 
 import Boom from '@hapi/boom';
-import { isoToEpochRt, jsonRt, toNumberRt } from '@kbn/io-ts-utils';
+import {
+  isoToEpochRt,
+  jsonRt,
+  toBooleanRt,
+  toNumberRt,
+} from '@kbn/io-ts-utils';
 import {
   InsufficientMLCapabilities,
   MLPrivilegesUninitialized,
@@ -105,7 +110,12 @@ const servicesRoute = createApmServerRoute({
       t.partial({ serviceGroup: t.string }),
       t.intersection([
         probabilityRt,
-        serviceTransactionDataSourceRt,
+        t.intersection([
+          serviceTransactionDataSourceRt,
+          t.type({
+            useDurationSummary: toBooleanRt,
+          }),
+        ]),
         environmentRt,
         kueryRt,
         rangeRt,
@@ -131,6 +141,7 @@ const servicesRoute = createApmServerRoute({
       probability,
       documentType,
       rollupInterval,
+      useDurationSummary,
     } = params.query;
     const savedObjectsClient = (await context.core).savedObjects.client;
 
@@ -163,6 +174,7 @@ const servicesRoute = createApmServerRoute({
       randomSampler,
       documentType,
       rollupInterval,
+      useDurationSummary,
     });
   },
 });

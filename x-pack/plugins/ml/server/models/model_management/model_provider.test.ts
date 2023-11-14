@@ -8,6 +8,7 @@
 import { modelsProvider } from './models_provider';
 import { type IScopedClusterClient } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/server/mocks';
+import type { MlClient } from '../../lib/ml_client';
 
 describe('modelsProvider', () => {
   const mockClient = {
@@ -36,8 +37,10 @@ describe('modelsProvider', () => {
     },
   } as unknown as jest.Mocked<IScopedClusterClient>;
 
+  const mockMlClient = {} as unknown as jest.Mocked<MlClient>;
+
   const mockCloud = cloudMock.createSetup();
-  const modelService = modelsProvider(mockClient, mockCloud);
+  const modelService = modelsProvider(mockClient, mockMlClient, mockCloud);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -57,15 +60,14 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           default: true,
-          description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2',
           name: '.elser_model_2',
           version: 2,
         },
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
-          description:
-            'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
           name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           recommended: true,
@@ -109,15 +111,14 @@ describe('modelsProvider', () => {
         {
           config: { input: { field_names: ['text_field'] } },
           recommended: true,
-          description: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2',
           name: '.elser_model_2',
           version: 2,
         },
         {
           arch: 'amd64',
           config: { input: { field_names: ['text_field'] } },
-          description:
-            'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+          description: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
           name: '.elser_model_2_linux-x86_64',
           os: 'Linux',
           version: 2,

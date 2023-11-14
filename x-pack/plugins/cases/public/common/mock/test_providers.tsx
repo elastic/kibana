@@ -11,6 +11,7 @@ import React from 'react';
 import { MemoryRouter } from 'react-router-dom';
 import { ThemeProvider } from 'styled-components';
 
+import { render as reactRender } from '@testing-library/react';
 import type { RenderOptions, RenderResult } from '@testing-library/react';
 import type { ILicense } from '@kbn/licensing-plugin/public';
 import type { ScopedFilesClient } from '@kbn/files-plugin/public';
@@ -20,7 +21,6 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
-import { render as reactRender } from '@testing-library/react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 

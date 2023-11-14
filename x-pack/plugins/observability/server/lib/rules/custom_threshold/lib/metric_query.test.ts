@@ -5,18 +5,25 @@
  * 2.0.
  */
 
+import moment from 'moment';
+import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
 import {
   Comparator,
   Aggregators,
-  MetricExpressionParams,
+  CustomMetricExpressionParams,
 } from '../../../../../common/custom_threshold_rule/types';
-import moment from 'moment';
 import { getElasticsearchMetricQuery } from './metric_query';
 
 describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
-  const expressionParams: MetricExpressionParams = {
-    metric: 'system.is.a.good.puppy.dog',
-    aggType: Aggregators.AVERAGE,
+  const expressionParams: CustomMetricExpressionParams = {
+    metrics: [
+      {
+        name: 'A',
+        aggType: Aggregators.AVERAGE,
+        field: 'system.is.a.good.puppy.dog',
+      },
+    ],
+    aggType: CUSTOM_AGGREGATOR,
     timeUnit: 'm',
     timeSize: 1,
     threshold: [1],
@@ -47,8 +54,28 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
     });
 
     test('includes a metric field filter', () => {
-      expect(searchBody.query.bool.filter).toMatchObject(
-        expect.arrayContaining([{ exists: { field: 'system.is.a.good.puppy.dog' } }])
+      expect(searchBody.aggs.groupings.aggs.currentPeriod).toMatchObject(
+        expect.objectContaining({
+          aggs: {
+            // eslint-disable-next-line @typescript-eslint/naming-convention
+            aggregatedValue_A: {
+              avg: {
+                field: 'system.is.a.good.puppy.dog',
+              },
+            },
+            aggregatedValue: {
+              bucket_script: {
+                buckets_path: {
+                  A: 'aggregatedValue_A',
+                },
+                script: {
+                  source: 'params.A',
+                  lang: 'painless',
+                },
+              },
+            },
+          },
+        })
       );
     });
   });
@@ -79,7 +106,6 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
       expect(searchBody.query.bool.filter).toMatchObject(
         expect.arrayContaining([
           { range: { mockedTimeFieldName: expect.any(Object) } },
-          { exists: { field: 'system.is.a.good.puppy.dog' } },
           {
             bool: {
               filter: [
@@ -107,6 +133,36 @@ describe("The Metric Threshold Alert's getElasticsearchMetricQuery", () => {
             },
           },
         ])
+      );
+      expect(searchBody.aggs.groupings.aggs).toMatchObject(
+        expect.objectContaining({
+          currentPeriod: {
+            filters: {
+              filters: {
+                all: { range: { mockedTimeFieldName: expect.any(Object) } },
+              },
+            },
+            aggs: {
+              // eslint-disable-next-line @typescript-eslint/naming-convention
+              aggregatedValue_A: {
+                avg: {
+                  field: 'system.is.a.good.puppy.dog',
+                },
+              },
+              aggregatedValue: {
+                bucket_script: {
+                  buckets_path: {
+                    A: 'aggregatedValue_A',
+                  },
+                  script: {
+                    source: 'params.A',
+                    lang: 'painless',
+                  },
+                },
+              },
+            },
+          },
+        })
       );
     });
   });

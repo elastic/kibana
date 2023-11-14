@@ -11,6 +11,7 @@ import { orderBy } from 'lodash';
 
 import { EsqlRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema';
 import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
 
 import { getMaxSignalsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
 import {
@@ -26,6 +27,7 @@ import { previewRuleWithExceptionEntries } from '../../utils/preview_rule_with_e
 import { deleteAllExceptions } from '../../../lists_api_integration/utils';
 import { dataGeneratorFactory } from '../../utils/data_generator';
 import { removeRandomValuedProperties } from './utils';
+import { patchRule } from '../../utils/patch_rule';
 
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
@@ -116,9 +118,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.space_ids': ['default'],
         'kibana.alert.rule.tags': [],
         'agent.name': 'test-1',
-        'agent.type': null,
-        'agent.version': null,
-        'host.name': null,
         id,
         'event.kind': 'signal',
         'kibana.alert.original_time': expect.any(String),
@@ -155,8 +154,6 @@ export default ({ getService }: FtrProviderContext) => {
         'kibana.alert.workflow_tags': [],
         'kibana.alert.rule.risk_score': 55,
         'kibana.alert.rule.severity': 'high',
-        'kibana.alert.original_event.created': null,
-        'kibana.alert.original_event.ingested': null,
       });
     });
 
@@ -715,16 +712,22 @@ export default ({ getService }: FtrProviderContext) => {
         expect(previewAlerts.length).toBe(150);
       });
 
-      it('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the executions', async () => {
+      // we use actual rule executions, not preview, because for preview API alerts index refresh=false for non suppressed alerts
+      // first rule execution catches 130 documents and generates 100 alerts
+      // second rule execution catches 150 docs, 120 of which were captured during the first execution and generates only 60 alerts. Because rest are deduplicated
+      // so in total 160 alerts should be generated
+      it('should generate alerts when docs overlap execution intervals and alerts number reached max_signals in one of the real executions', async () => {
         const id = uuidv4();
         const rule: EsqlRuleCreateProps = {
-          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          ...getCreateEsqlRulesSchemaMock(`rule-${id}`, true),
           query: `from ecs_compliant [metadata _id] ${internalIdPipe(
             id
           )} | keep _id, agent.name | sort agent.name`,
-          from: 'now-45m',
-          interval: '30m',
+          from: '2020-10-28T05:15:00.000Z',
+          to: '2020-10-28T06:00:00.000Z',
+          interval: '45m',
           max_signals: 100,
+          enabled: true,
         };
 
         // docs fall in first rule executions
@@ -775,20 +778,46 @@ export default ({ getService }: FtrProviderContext) => {
           }),
         });
 
-        const { previewId } = await previewRule({
+        const createdRule = await createRule(supertest, log, rule);
+
+        // first rule run should generate 100 alerts from first 3 batches of index documents
+        const alertsResponseFromFirstRuleExecution = await getOpenAlerts(
           supertest,
-          rule,
-          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
-          invocationCount: 2,
-        });
-        const previewAlerts = await getPreviewAlerts({
+          log,
           es,
-          previewId,
-          size: 200,
+          createdRule,
+          // rule has warning, alerts were truncated, thus "partial failure" status
+          RuleExecutionStatusEnum['partial failure'],
+          200
+        );
+
+        // should return 100 alerts
+        expect(alertsResponseFromFirstRuleExecution.hits.hits.length).toBe(100);
+
+        // re-trigger rule execution with new interval
+        await patchRule(supertest, log, {
+          id: createdRule.id,
+          enabled: false,
+        });
+        await patchRule(supertest, log, {
+          id: createdRule.id,
+          from: '2020-10-28T05:45:00.000Z',
+          to: '2020-10-28T06:30:00.000Z',
+          enabled: true,
         });
 
-        // should generate 160 alerts
-        expect(previewAlerts.length).toBe(160);
+        const alertsResponse = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          200,
+          new Date()
+        );
+
+        // should return 160 alerts
+        expect(alertsResponse.hits.hits.length).toBe(160);
       });
     });
 
@@ -827,6 +856,164 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_level', 'Low');
         expect(previewAlerts[0]._source).toHaveProperty('host.risk.calculated_score_norm', 1);
+      });
+    });
+
+    describe('ECS fields validation', () => {
+      it('creates alert if ECS field has multifields', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = { agent: { name: 'test-1' }, 'observer.os.full': 'full test os' };
+        const doc2 = { agent: { name: 'test-2' } };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1, doc2],
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty(['observer.os.full'], 'full test os');
+        // *.text is multifield define in mappings for observer.os.full
+        expect(previewAlerts[0]._source).not.toHaveProperty(['observer.os.full.text']);
+      });
+      // https://github.com/elastic/security-team/issues/7741
+      it('creates alert if ECS field has multifields and is not in ruleRegistry ECS map', async () => {
+        const id = uuidv4();
+        const interval: [string, string] = ['2020-10-28T06:00:00.000Z', '2020-10-28T06:10:00.000Z'];
+        const doc1 = {
+          agent: { name: 'test-1' },
+          // this field is mapped in alerts index, but not in ruleRegistry ECS map
+          'process.entry_leader.name': 'test_process_name',
+        };
+        const doc2 = { agent: { name: 'test-2' } };
+
+        const rule: EsqlRuleCreateProps = {
+          ...getCreateEsqlRulesSchemaMock('rule-1', true),
+          query: `from ecs_compliant [metadata _id] ${internalIdPipe(
+            id
+          )} | where agent.name=="test-1"`,
+          from: 'now-1h',
+          interval: '1h',
+        };
+
+        await indexEnhancedDocuments({
+          documents: [doc1, doc2],
+          interval,
+          id,
+        });
+
+        const { previewId } = await previewRule({
+          supertest,
+          rule,
+          timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+        });
+
+        const previewAlerts = await getPreviewAlerts({
+          es,
+          previewId,
+          size: 10,
+        });
+
+        expect(previewAlerts.length).toBe(1);
+        expect(previewAlerts[0]._source).toHaveProperty(
+          ['process.entry_leader.name'],
+          'test_process_name'
+        );
+        expect(previewAlerts[0]._source).not.toHaveProperty(['process.entry_leader.name.text']);
+        expect(previewAlerts[0]._source).not.toHaveProperty(['process.entry_leader.name.caseless']);
+      });
+
+      describe('non-ecs', () => {
+        before(async () => {
+          await esArchiver.load(
+            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+          );
+        });
+
+        after(async () => {
+          await esArchiver.unload(
+            'x-pack/test/functional/es_archives/security_solution/ecs_non_compliant'
+          );
+        });
+
+        const { indexEnhancedDocuments: indexEnhancedDocumentsToNonEcs } = dataGeneratorFactory({
+          es,
+          index: 'ecs_non_compliant',
+          log,
+        });
+
+        it('creates alert if non ECS field has multifields', async () => {
+          const id = uuidv4();
+          const interval: [string, string] = [
+            '2020-10-28T06:00:00.000Z',
+            '2020-10-28T06:10:00.000Z',
+          ];
+          const doc1 = {
+            'random.entry_leader.name': 'random non-ecs field',
+          };
+
+          const rule: EsqlRuleCreateProps = {
+            ...getCreateEsqlRulesSchemaMock('rule-1', true),
+            query: `from ecs_non_compliant [metadata _id] ${internalIdPipe(id)}`,
+            from: 'now-1h',
+            interval: '1h',
+          };
+
+          await indexEnhancedDocumentsToNonEcs({
+            documents: [doc1],
+            interval,
+            id,
+          });
+
+          const { previewId } = await previewRule({
+            supertest,
+            rule,
+            timeframeEnd: new Date('2020-10-28T06:30:00.000Z'),
+          });
+
+          const previewAlerts = await getPreviewAlerts({
+            es,
+            previewId,
+            size: 10,
+          });
+
+          expect(previewAlerts.length).toBe(1);
+          // all multifields have been indexed, which is expected, seen we don't know original mappings
+          expect(previewAlerts[0]._source).toHaveProperty(
+            ['random.entry_leader.name'],
+            'random non-ecs field'
+          );
+          expect(previewAlerts[0]._source).toHaveProperty(
+            ['random.entry_leader.name.text'],
+            'random non-ecs field'
+          );
+          expect(previewAlerts[0]._source).toHaveProperty(
+            ['random.entry_leader.name.caseless'],
+            'random non-ecs field'
+          );
+        });
       });
     });
   });

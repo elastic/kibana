@@ -37,7 +37,6 @@ describe('http normalizers', () => {
         id: 'germany',
         label: 'Germany',
         isServiceManaged: false,
-        concurrentMonitors: 1,
         agentPolicyId: 'germany',
       },
     ];
@@ -78,6 +77,7 @@ describe('http normalizers', () => {
           supported_protocols: ['TLSv1.2', 'TLSv1.3'],
         },
         hash: testHash,
+        max_redirects: 2,
       },
       {
         locations: ['localhost'],
@@ -160,7 +160,7 @@ describe('http normalizers', () => {
             form_monitor_type: 'http',
             journey_id: 'my-monitor-2',
             locations: [],
-            max_redirects: '0',
+            max_redirects: '2',
             name: 'My Monitor 2',
             namespace: 'test_space',
             origin: 'project',
@@ -300,7 +300,7 @@ describe('http normalizers', () => {
             form_monitor_type: 'http',
             journey_id: 'my-monitor-2',
             locations: [],
-            max_redirects: '0',
+            max_redirects: '2',
             name: 'My Monitor 2',
             namespace: 'test_space',
             origin: 'project',

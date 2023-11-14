@@ -38,6 +38,8 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
+import type { Cluster } from '@kbn/remote-clusters-plugin/public';
+import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
@@ -86,6 +88,10 @@ interface Props {
   fatalErrors: FatalErrorsSetup;
   history: ScopedHistory;
   spacesApiUi?: SpacesApiUi;
+}
+
+function useRemoteClusters(http: HttpStart) {
+  return useAsync(() => http.get<Cluster[]>(REMOTE_CLUSTERS_PATH));
 }
 
 function useFeatureCheck(http: HttpStart) {
@@ -320,6 +326,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   const spaces = useSpaces(http, fatalErrors);
   const features = useFeatures(getFeatures, fatalErrors);
   const featureCheckState = useFeatureCheck(http);
+  const remoteClustersState = useRemoteClusters(http);
   const [role, setRole] = useRole(
     rolesAPIClient,
     fatalErrors,
@@ -471,6 +478,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
           runAsUsers={runAsUsers}
           validator={validator}
           indexPatterns={indexPatternsTitles}
+          remoteClusters={remoteClustersState.value}
           builtinESPrivileges={builtInESPrivileges}
           license={license}
           docLinks={docLinks}

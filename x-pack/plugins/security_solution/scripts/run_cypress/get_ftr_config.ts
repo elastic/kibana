@@ -9,7 +9,7 @@ import _ from 'lodash';
 import { EsVersion, readConfigFile } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { CA_TRUSTED_FINGERPRINT } from '@kbn/dev-utils';
-import { getBridgeNetworkHostIp } from '../endpoint/common/network_services';
+import { getLocalhostRealIp } from '../endpoint/common/network_services';
 import type { parseTestFileConfig } from './utils';
 
 export const getFTRConfig = ({
@@ -58,7 +58,7 @@ export const getFTRConfig = ({
       // },
     },
     (vars) => {
-      const hostRealIp = getBridgeNetworkHostIp();
+      const hostRealIp = getLocalhostRealIp();
 
       const hasFleetServerArgs = _.some(
         vars.kbnTestServer.serverArgs,

@@ -85,7 +85,7 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
         //  make a new function that will call reporting.getScreenshots
         const snapshotFn = () =>
-          this.startDeps.reporting.getScreenshots({
+          this.startDeps.reporting.getScreenshots!({
             format: 'pdf',
             title,
             logo,

@@ -16,8 +16,7 @@ export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
 
-  // Failing: See https://github.com/elastic/kibana/issues/165476
-  describe.skip('rollup data views - fields for wildcard', function () {
+  describe('rollup data views - fields for wildcard', function () {
     before(async () => {
       await esArchiver.load('test/api_integration/fixtures/es_archiver/index_patterns/basic_index');
     });

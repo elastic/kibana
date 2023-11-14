@@ -505,6 +505,40 @@
     "functions": [
       {
         "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.addObserverVersionTransform",
+        "type": "Function",
+        "tags": [],
+        "label": "addObserverVersionTransform",
+        "description": [],
+        "signature": [
+          "(observerVersion: string) => ",
+          "Transform"
+        ],
+        "path": "packages/kbn-apm-synthtrace/src/lib/utils/transform_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/apm-synthtrace",
+            "id": "def-server.addObserverVersionTransform.$1",
+            "type": "string",
+            "tags": [],
+            "label": "observerVersion",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-apm-synthtrace/src/lib/utils/transform_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
         "id": "def-server.createLogger",
         "type": "Function",
         "tags": [],
@@ -548,6 +582,24 @@
             "isRequired": true
           }
         ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/apm-synthtrace",
+        "id": "def-server.deleteSummaryFieldTransform",
+        "type": "Function",
+        "tags": [],
+        "label": "deleteSummaryFieldTransform",
+        "description": [],
+        "signature": [
+          "() => ",
+          "Transform"
+        ],
+        "path": "packages/kbn-apm-synthtrace/src/lib/utils/transform_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
         "returnComment": [],
         "initialIsOpen": false
       }

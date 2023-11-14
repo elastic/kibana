@@ -306,6 +306,7 @@ export const normalizeYamlConfig = (monitor: NormalizedProjectProps['monitor']) 
     privateLocations: _privateLocations,
     content: _content,
     id: _id,
+    retestOnFailure: _retestOnFailure,
     ...yamlConfig
   } = flattenedConfig;
   const unsupportedKeys = Object.keys(yamlConfig).filter((key) => !supportedKeys.includes(key));

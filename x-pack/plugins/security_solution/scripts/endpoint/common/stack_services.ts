@@ -6,7 +6,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ToolingLog } from '@kbn/tooling-log';
+import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClientOptions } from '@kbn/test';
 import { KbnClient } from '@kbn/test';
 import type { StatusResponse } from '@kbn/core-status-common-internal';
@@ -16,9 +16,10 @@ import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
-import { getBridgeNetworkHostIp } from './network_services';
+import { getLocalhostRealIp } from './network_services';
 import { createSecuritySuperuser } from './security_user_services';
 
 const CA_CERTIFICATE: Buffer = fs.readFileSync(CA_CERT_PATH);
@@ -108,26 +109,25 @@ export const createRuntimeServices = async ({
   apiKey,
   esUsername,
   esPassword,
-  log = new ToolingLog({ level: 'info', writeTo: process.stdout }),
+  log: _log,
   asSuperuser = false,
   noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
+  const log = _log ?? createToolingLogger();
   let username = _username;
   let password = _password;
 
   if (asSuperuser) {
-    await waitForKibana(
-      createKbnClient({ log, url: kibanaUrl, username, password, apiKey, noCertForSsl })
-    );
-    const tmpEsClient = createEsClient({
-      url: elasticsearchUrl,
+    const tmpKbnClient = createKbnClient({
+      url: kibanaUrl,
       username,
       password,
-      log,
       noCertForSsl,
+      log,
     });
 
-    const isServerlessEs = (await tmpEsClient.info()).version.build_flavor === 'serverless';
+    await waitForKibana(tmpKbnClient);
+    const isServerlessEs = await isServerlessKibanaFlavor(tmpKbnClient);
 
     if (isServerlessEs) {
       log?.warning(
@@ -138,7 +138,15 @@ export const createRuntimeServices = async ({
       username = 'system_indices_superuser';
       password = 'changeme';
     } else {
-      const superuserResponse = await createSecuritySuperuser(tmpEsClient);
+      const superuserResponse = await createSecuritySuperuser(
+        createEsClient({
+          url: elasticsearchUrl,
+          username: esUsername ?? username,
+          password: esPassword ?? password,
+          log,
+          noCertForSsl,
+        })
+      );
 
       ({ username, password } = superuserResponse);
 
@@ -163,7 +171,7 @@ export const createRuntimeServices = async ({
       noCertForSsl,
     }),
     log,
-    localhostRealIp: getBridgeNetworkHostIp(),
+    localhostRealIp: getLocalhostRealIp(),
     apiKey: apiKey ?? '',
     user: {
       username,
@@ -246,7 +254,7 @@ export const createKbnClient = ({
   username,
   password,
   apiKey,
-  log = new ToolingLog(),
+  log = createToolingLogger(),
   noCertForSsl,
 }: {
   url: string;
@@ -296,13 +304,7 @@ export const fetchStackVersion = async (kbnClient: KbnClient): Promise<string> =
 };
 
 export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusResponse> => {
-  return kbnClient
-    .request<StatusResponse>({
-      method: 'GET',
-      path: '/api/status',
-    })
-    .catch(catchAxiosErrorFormatAndThrow)
-    .then((response) => response.data);
+  return (await kbnClient.status.get().catch(catchAxiosErrorFormatAndThrow)) as StatusResponse;
 };
 
 /**
@@ -312,27 +314,37 @@ export const fetchKibanaStatus = async (kbnClient: KbnClient): Promise<StatusRes
 export const waitForKibana = async (kbnClient: KbnClient): Promise<void> => {
   await pRetry(
     async () => {
-      try {
-        await kbnClient.status.get();
-      } catch (err) {
-        throw new Error(`Kibana not available: ${err.message}`);
+      const response = await kbnClient.status.get();
+
+      if (response.status.overall.level !== 'available') {
+        throw new Error(
+          `Kibana not available. [status.overall.level: ${response.status.overall.level}]`
+        );
       }
     },
     { maxTimeout: 10000 }
   );
 };
 
-export const isServerlessKibanaFlavor = async (kbnClient: KbnClient): Promise<boolean> => {
-  const kbnStatus = await fetchKibanaStatus(kbnClient);
+/**
+ * Checks to see if Kibana/ES is running in serverless mode
+ * @param client
+ */
+export const isServerlessKibanaFlavor = async (client: KbnClient | Client): Promise<boolean> => {
+  if (client instanceof KbnClient) {
+    const kbnStatus = await fetchKibanaStatus(client);
 
-  // If we don't have status for plugins, then error
-  // the Status API will always return something (its an open API), but if auth was successful,
-  // it will also return more data.
-  if (!kbnStatus.status.plugins) {
-    throw new Error(
-      `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
-    );
+    // If we don't have status for plugins, then error
+    // the Status API will always return something (its an open API), but if auth was successful,
+    // it will also return more data.
+    if (!kbnStatus?.status?.plugins) {
+      throw new Error(
+        `Unable to retrieve Kibana plugins status (likely an auth issue with the username being used for kibana)`
+      );
+    }
+
+    return kbnStatus.status.plugins?.serverless?.level === 'available';
+  } else {
+    return (await client.info()).version.build_flavor === 'serverless';
   }
-
-  return kbnStatus.status.plugins?.serverless?.level === 'available';
 };

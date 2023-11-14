@@ -647,7 +647,7 @@ describe('ConfigureCases', () => {
       appMockRender.render(<ConfigureCases />);
 
       expect(
-        screen.getByTestId(`custom-field-${customFieldsMock[0].label}-${customFieldsMock[0].type}`)
+        screen.getByTestId(`custom-field-${customFieldsMock[0].key}-${customFieldsMock[0].type}`)
       ).toBeInTheDocument();
     });
 
@@ -666,7 +666,7 @@ describe('ConfigureCases', () => {
 
       for (const field of customFieldsConfigurationMock) {
         expect(
-          within(list).getByTestId(`custom-field-${field.label}-${field.type}`)
+          within(list).getByTestId(`custom-field-${field.key}-${field.type}`)
         ).toBeInTheDocument();
       }
     });

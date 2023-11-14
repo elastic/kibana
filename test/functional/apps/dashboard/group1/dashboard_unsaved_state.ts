@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let unsavedPanelCount = 0;
   const testQuery = 'Test Query';
 
-  // Failing: See https://github.com/elastic/kibana/issues/167661
-  describe.skip('dashboard unsaved state', () => {
+  describe('dashboard unsaved state', () => {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -140,6 +139,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visualize.gotoVisualizationLandingPage();
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.dashboard.navigateToApp();
+        if (await PageObjects.dashboard.onDashboardLandingPage()) {
+          await testSubjects.existOrFail('unsavedDashboardsCallout');
+        }
         await PageObjects.dashboard.loadSavedDashboard('few panels');
         const currentPanelCount = await PageObjects.dashboard.getPanelCount();
         expect(currentPanelCount).to.eql(unsavedPanelCount);

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { checkResults, clickRuleName, submitQuery } from '../../tasks/live_query';
 import { loadRule, cleanupRule } from '../../tasks/api_fixtures';
 import { ServerlessRoleName } from '../../support/roles';
@@ -14,6 +15,7 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
   let ruleId: string;
 
   before(() => {
+    initializeDataViews();
     loadRule().then((data) => {
       ruleName = data.name;
       ruleId = data.id;
@@ -21,12 +23,6 @@ describe('Alert Test', { tags: ['@ess'] }, () => {
   });
 
   describe('t1_analyst role', () => {
-    before(() => {
-      cy.login(ServerlessRoleName.SOC_MANAGER);
-
-      cy.visit('/app/security/rules');
-      clickRuleName(ruleName);
-    });
     beforeEach(() => {
       cy.login(ServerlessRoleName.T1_ANALYST);
 

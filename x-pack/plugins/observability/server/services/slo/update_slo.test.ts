@@ -7,6 +7,8 @@
 
 import { ElasticsearchClient } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { UpdateSLOParams } from '@kbn/slo-schema';
+import { cloneDeep, pick, omit } from 'lodash';
 
 import {
   getSLOTransformId,
@@ -38,6 +40,123 @@ describe('UpdateSLO', () => {
     updateSLO = new UpdateSLO(mockRepository, mockTransformManager, mockEsClient);
   });
 
+  describe('when the update payload does not change the original SLO', () => {
+    function expectNoCallsToAnyMocks() {
+      expect(mockTransformManager.stop).not.toBeCalled();
+      expect(mockTransformManager.uninstall).not.toBeCalled();
+      expect(mockTransformManager.install).not.toBeCalled();
+      expect(mockTransformManager.preview).not.toBeCalled();
+      expect(mockTransformManager.start).not.toBeCalled();
+      expect(mockEsClient.deleteByQuery).not.toBeCalled();
+    }
+
+    it('returns early with a full identical SLO payload', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = omit(cloneDeep(slo), [
+        'id',
+        'revision',
+        'createdAt',
+        'updatedAt',
+        'enabled',
+      ]);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical name', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['name']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical indicator', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['indicator']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical timeWindow', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['timeWindow']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical budgetingMethod', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['budgetingMethod']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical description', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['description']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical groupBy', async () => {
+      const slo = createSLO({ groupBy: 'project.id' });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['groupBy']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical objective', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['objective']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical tags', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['tags']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+
+    it('returns early with identical settings', async () => {
+      const slo = createSLO();
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      const updatePayload: UpdateSLOParams = pick(cloneDeep(slo), ['settings']);
+
+      await updateSLO.execute(slo.id, updatePayload);
+
+      expectNoCallsToAnyMocks();
+    });
+  });
+
   it('updates the settings correctly', async () => {
     const slo = createSLO();
     mockRepository.findById.mockResolvedValueOnce(slo);
@@ -45,7 +164,7 @@ describe('UpdateSLO', () => {
     const newSettings = { ...slo.settings, timestamp_field: 'newField' };
     await updateSLO.execute(slo.id, { settings: newSettings });
 
-    expectDeletionOfObsoleteSLOData(slo);
+    expectDeletionOfOriginalSLO(slo);
     expect(mockRepository.save).toBeCalledWith(
       expect.objectContaining({
         ...slo,
@@ -70,7 +189,7 @@ describe('UpdateSLO', () => {
       },
     });
 
-    expectDeletionOfObsoleteSLOData(slo);
+    expectDeletionOfOriginalSLO(slo);
     expectInstallationOfNewSLOTransform();
   });
 
@@ -86,7 +205,7 @@ describe('UpdateSLO', () => {
       },
     });
 
-    expectDeletionOfObsoleteSLOData(slo);
+    expectDeletionOfOriginalSLO(slo);
     expectInstallationOfNewSLOTransform();
   });
 
@@ -102,7 +221,7 @@ describe('UpdateSLO', () => {
       },
     });
 
-    expectDeletionOfObsoleteSLOData(slo);
+    expectDeletionOfOriginalSLO(slo);
     expectInstallationOfNewSLOTransform();
   });
 
@@ -119,7 +238,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
   });
 
-  it('removes the obsolete data from the SLO previous revision', async () => {
+  it('removes the original data from the original SLO', async () => {
     const slo = createSLO({
       indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
     });
@@ -128,7 +247,6 @@ describe('UpdateSLO', () => {
     const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
     await updateSLO.execute(slo.id, { indicator: newIndicator });
 
-    expectDeletionOfObsoleteSLOData(slo);
     expect(mockRepository.save).toBeCalledWith(
       expect.objectContaining({
         ...slo,
@@ -138,6 +256,53 @@ describe('UpdateSLO', () => {
       })
     );
     expectInstallationOfNewSLOTransform();
+    expectDeletionOfOriginalSLO(slo);
+  });
+
+  describe('when error happens during the transform installation step', () => {
+    it('restores the previous SLO definition in the repository', async () => {
+      const slo = createSLO({
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockTransformManager.install.mockRejectedValueOnce(new Error('Transform install error'));
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      await expect(updateSLO.execute(slo.id, { indicator: newIndicator })).rejects.toThrowError(
+        'Transform install error'
+      );
+
+      expect(mockRepository.save).toHaveBeenCalledWith(slo);
+      expect(mockTransformManager.preview).not.toHaveBeenCalled();
+      expect(mockTransformManager.start).not.toHaveBeenCalled();
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when error happens during the transform start step', () => {
+    it('removes the new transform and restores the previous SLO definition in the repository', async () => {
+      const slo = createSLO({
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(slo);
+      mockTransformManager.start.mockRejectedValueOnce(new Error('Transform start error'));
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      await expect(updateSLO.execute(slo.id, { indicator: newIndicator })).rejects.toThrowError(
+        'Transform start error'
+      );
+
+      expect(mockTransformManager.uninstall).toHaveBeenCalledWith(
+        getSLOTransformId(slo.id, slo.revision + 1)
+      );
+      expect(mockRepository.save).toHaveBeenCalledWith(slo);
+      expect(mockTransformManager.stop).not.toHaveBeenCalled();
+      expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+    });
   });
 
   function expectInstallationOfNewSLOTransform() {
@@ -146,12 +311,12 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.start).toBeCalled();
   }
 
-  function expectDeletionOfObsoleteSLOData(originalSlo: SLO) {
+  function expectDeletionOfOriginalSLO(originalSlo: SLO) {
     const transformId = getSLOTransformId(originalSlo.id, originalSlo.revision);
     expect(mockTransformManager.stop).toBeCalledWith(transformId);
     expect(mockTransformManager.uninstall).toBeCalledWith(transformId);
-    expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
 
+    expect(mockEsClient.deleteByQuery).toHaveBeenCalledTimes(2);
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({

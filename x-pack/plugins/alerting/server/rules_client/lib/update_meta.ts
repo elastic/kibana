@@ -8,6 +8,9 @@
 import { RawRule } from '../../types';
 import { RulesClientContext } from '../types';
 
+/**
+ * @deprecated Use updateMetaAttributes instead
+ */
 export function updateMeta<T extends Partial<RawRule>>(
   context: RulesClientContext,
   alertAttributes: T

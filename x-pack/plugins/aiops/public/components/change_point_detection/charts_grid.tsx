@@ -52,7 +52,11 @@ export const ChartsGrid: FC<{
     Object.fromEntries(changePoints.map((v, i) => [i, true]))
   );
 
-  const onLoadCallback = useCallback(
+  /**
+   * Callback to track render of each chart component
+   * to report when all charts are ready.
+   */
+  const onChartRenderCompleteCallback = useCallback(
     (chartId: number, isLoading: boolean) => {
       if (!onRenderComplete) return;
       loadCounter.current[chartId] = isLoading;
@@ -141,7 +145,12 @@ export const ChartsGrid: FC<{
                 annotation={v}
                 interval={interval}
                 onLoading={(isLoading) => {
-                  onLoadCallback(index, isLoading);
+                  if (isLoading) {
+                    onChartRenderCompleteCallback(index, true);
+                  }
+                }}
+                onRenderComplete={() => {
+                  onChartRenderCompleteCallback(index, false);
                 }}
               />
             </EuiPanel>

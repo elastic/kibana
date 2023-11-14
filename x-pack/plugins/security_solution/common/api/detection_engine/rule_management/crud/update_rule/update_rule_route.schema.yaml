@@ -6,7 +6,7 @@ paths:
   /api/detection_engine/rules:
     put:
       operationId: UpdateRule
-      x-codegen-enabled: false
+      x-codegen-enabled: true
       description: Update a single rule
       tags:
         - Rules API

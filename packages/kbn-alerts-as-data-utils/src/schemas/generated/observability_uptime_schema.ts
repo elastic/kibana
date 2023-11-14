@@ -74,6 +74,7 @@ const ObservabilityUptimeAlertOptional = rt.partial({
   'anomaly.bucket_span.minutes': schemaString,
   'anomaly.start': schemaDate,
   'error.message': schemaString,
+  'kibana.alert.context': schemaUnknown,
   'kibana.alert.evaluation.threshold': schemaStringOrNumber,
   'kibana.alert.evaluation.value': schemaStringOrNumber,
   'kibana.alert.evaluation.values': schemaStringOrNumberArray,

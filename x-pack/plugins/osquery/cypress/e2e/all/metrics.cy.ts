@@ -15,46 +15,48 @@ describe('ALL - Inventory', { tags: ['@ess'] }, () => {
   let savedQueryName: string;
   let savedQueryId: string;
 
-  before(() => {
+  beforeEach(() => {
     loadSavedQuery().then((data) => {
       savedQueryId = data.saved_object_id;
       savedQueryName = data.id;
     });
   });
 
-  beforeEach(() => {
-    cy.login(ServerlessRoleName.SOC_MANAGER);
-    navigateTo('/app/osquery');
-  });
-
-  after(() => {
+  afterEach(() => {
     cleanupSavedQuery(savedQueryId);
   });
 
-  it('should be able to run the query', () => {
-    cy.getBySel('toggleNavButton').click();
-    cy.contains('Infrastructure').click();
+  describe('', () => {
+    beforeEach(() => {
+      cy.login(ServerlessRoleName.SOC_MANAGER);
+      navigateTo('/app/osquery');
+    });
 
-    triggerLoadData();
-    cy.contains('Osquery').click();
-    inputQuery('select * from uptime;');
+    it('should be able to run the query', () => {
+      cy.getBySel('toggleNavButton').click();
+      cy.contains('Infrastructure').click();
 
-    submitQuery();
-    checkResults();
-  });
+      triggerLoadData();
+      cy.contains('Osquery').click();
+      inputQuery('select * from uptime;');
 
-  it('should be able to run the previously saved query', () => {
-    cy.getBySel('toggleNavButton').click();
-    cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
+      submitQuery();
+      checkResults();
+    });
 
-    triggerLoadData();
-    cy.contains('Osquery').click();
+    it('should be able to run the previously saved query', () => {
+      cy.getBySel('toggleNavButton').click();
+      cy.getBySel('collapsibleNavAppLink').contains('Infrastructure').click();
 
-    cy.getBySel('comboBoxInput').first().click();
-    cy.wait(500);
-    cy.getBySel('comboBoxInput').first().type(`${savedQueryName}{downArrow}{enter}`);
+      triggerLoadData();
+      cy.contains('Osquery').click();
 
-    submitQuery();
-    checkResults();
+      cy.getBySel('comboBoxInput').first().click();
+      cy.wait(500);
+      cy.getBySel('comboBoxInput').first().type(`${savedQueryName}{downArrow}{enter}`);
+
+      submitQuery();
+      checkResults();
+    });
   });
 });

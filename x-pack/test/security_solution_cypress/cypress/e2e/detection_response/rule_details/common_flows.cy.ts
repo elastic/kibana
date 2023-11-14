@@ -45,7 +45,7 @@ import {
 } from '../../../screens/rule_details';
 
 import { createTimeline } from '../../../tasks/api_calls/timelines';
-import { cleanKibana, deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visit } from '../../../tasks/navigation';
 import { ruleDetailsUrl } from '../../../urls/rule_details';
@@ -53,15 +53,11 @@ import { ruleDetailsUrl } from '../../../urls/rule_details';
 // This test is meant to test all common aspects of the rule details page that should function
 // the same regardless of rule type. For any rule type specific functionalities, please include
 // them in the relevant /rule_details/[RULE_TYPE].cy.ts test.
-describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
+describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, function () {
   beforeEach(() => {
+    login();
     deleteAlertsAndRules();
     deleteConnectors();
-    login();
     createTimeline(getTimeline()).then((response) => {
       createRule({
         ...getNewRule({
@@ -93,12 +89,13 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
           ],
         }),
       }).then((rule) => {
-        visit(ruleDetailsUrl(rule.body.id));
+        cy.wrap(rule.body.id).as('ruleId');
       });
     });
   });
 
-  it('Only modifies rule active status on enable/disable', () => {
+  it('Only modifies rule active status on enable/disable', function () {
+    visit(ruleDetailsUrl(this.ruleId));
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
 
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as(
@@ -117,6 +114,7 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   it('Displays rule details', function () {
+    visit(ruleDetailsUrl(this.ruleId));
     cy.get(RULE_NAME_HEADER).should('contain', ruleFields.ruleName);
     cy.get(ABOUT_RULE_DESCRIPTION).should('have.text', ruleFields.ruleDescription);
     cy.get(ABOUT_DETAILS).within(() => {
@@ -161,7 +159,8 @@ describe('Common rule detail flows', { tags: ['@ess', '@serverless'] }, () => {
     });
   });
 
-  it('Deletes one rule from detail page', () => {
+  it('Deletes one rule from detail page', function () {
+    visit(ruleDetailsUrl(this.ruleId));
     cy.intercept('POST', '/api/detection_engine/rules/_bulk_delete').as('deleteRule');
 
     deleteRuleFromDetailsPage();

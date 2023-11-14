@@ -20,9 +20,14 @@ describe('usePluginConfig()', () => {
   it('returns the plugin config what was set through the provider', () => {
     const config: Partial<InfraConfig> = {
       featureFlags: {
+        customThresholdAlertsEnabled: true,
+        logsUIEnabled: false,
         metricsExplorerEnabled: false,
         osqueryEnabled: false,
-        customThresholdAlertsEnabled: true,
+        inventoryThresholdAlertRuleEnabled: true,
+        metricThresholdAlertRuleEnabled: true,
+        logThresholdAlertRuleEnabled: true,
+        alertsAndRulesDropdownEnabled: true,
       },
     };
     const { result } = renderHook(() => usePluginConfig(), {
