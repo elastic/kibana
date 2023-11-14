@@ -320,7 +320,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.discover.toggleChartVisibility();
       await PageObjects.discover.waitUntilSearchingHasFinished();
-      await PageObjects.discover.clickResetSavedSearchButton();
+      await PageObjects.discover.revertUnsavedChanges();
       await PageObjects.discover.waitUntilSearchingHasFinished();
       requestData = await testSubjects.getAttribute('unifiedHistogramChart', 'data-request-data');
       expect(JSON.parse(requestData)).to.eql({
