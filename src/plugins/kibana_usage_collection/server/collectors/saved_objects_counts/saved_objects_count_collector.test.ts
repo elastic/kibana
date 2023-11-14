@@ -90,7 +90,7 @@ describe('saved_objects_count_collector', () => {
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
       fetchContextMock.soClient,
       ['type_one', 'type_two', 'type-three', 'type-four'],
-      false
+      { exclusive: false, namespaces: ['*'] }
     );
   });
 });

@@ -72,12 +72,16 @@ export function registerSavedObjectsCountUsageCollector(
       async fetch() {
         const soClient = await getSoClientWithHiddenIndices();
         const allRegisteredSOTypes = await getAllSavedObjectTypes();
+        const namespaces = ['*'];
         const {
           total,
           per_type: buckets,
           non_expected_types: nonRegisteredTypes,
           others,
-        } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, false);
+        } = await getSavedObjectsCounts(soClient, allRegisteredSOTypes, {
+          namespaces,
+          exclusive: false,
+        });
         return {
           total,
           by_type: buckets.map(({ key: type, doc_count: count }) => ({ type, count })),

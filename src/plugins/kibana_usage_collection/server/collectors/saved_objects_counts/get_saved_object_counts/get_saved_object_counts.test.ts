@@ -49,7 +49,7 @@ describe('getSavedObjectsCounts', () => {
 
   test('should apply the terms query and aggregation with the size matching the length of the list when `exclusive === true`', async () => {
     soClient.find.mockResolvedValueOnce(soEmptyResponse);
-    await getSavedObjectsCounts(soClient, ['type_one', 'type_two'], true);
+    await getSavedObjectsCounts(soClient, ['type_one', 'type_two'], { exclusive: true });
     expect(soClient.find).toHaveBeenCalledWith({
       type: ['type_one', 'type_two'],
       perPage: 0,
