@@ -1,0 +1,267 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+
+import { riskEngineRouteHelpersFactory } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+const USER_PASSWORD = 'changeme';
+const ROLES = [
+  {
+    name: 'security_feature_read',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            siem: ['read'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
+  {
+    name: 'cluster_manage_index_templates',
+    privileges: {
+      elasticsearch: {
+        cluster: ['manage_index_templates'],
+      },
+    },
+  },
+  {
+    name: 'cluster_manage_transform',
+    privileges: {
+      elasticsearch: {
+        cluster: ['manage_transform'],
+      },
+    },
+  },
+  {
+    name: 'risk_score_index_read',
+    privileges: {
+      elasticsearch: {
+        indices: [
+          {
+            names: ['risk-score.risk-score-*'],
+            privileges: ['read'],
+          },
+        ],
+      },
+    },
+  },
+  {
+    name: 'risk_score_index_write',
+    privileges: {
+      elasticsearch: {
+        indices: [
+          {
+            names: ['risk-score.risk-score-*'],
+            privileges: ['write'],
+          },
+        ],
+      },
+    },
+  },
+  {
+    name: 'saved_objects_management_all',
+    privileges: {
+      kibana: [
+        {
+          feature: {
+            savedObjectsManagement: ['all'],
+          },
+          spaces: ['default'],
+        },
+      ],
+    },
+  },
+];
+
+const ALL_ROLES = ROLES.map((role) => role.name);
+
+const allRolesExcept = (role: string) => ALL_ROLES.filter((r) => r !== role);
+
+const USERNAME_TO_ROLES = {
+  no_cluster_manage_index_templates: allRolesExcept('cluster_manage_index_templates'),
+  no_cluster_manage_transform: allRolesExcept('cluster_manage_transform'),
+  no_risk_score_index_read: allRolesExcept('risk_score_index_read'),
+  no_risk_score_index_write: allRolesExcept('risk_score_index_write'),
+  no_saved_objects_management_all: allRolesExcept('saved_objects_management_all'),
+  all: ALL_ROLES,
+};
+
+export default ({ getService }: FtrProviderContext) => {
+  const supertestWithoutAuth = getService('supertestWithoutAuth');
+  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
+  const security = getService('security');
+
+  const createRole = async ({ name, privileges }: Role) => {
+    return await security.role.create(name, privileges);
+  };
+
+  const createUser = async ({ username, password, roles }: User) => {
+    return await security.user.create(username, {
+      password,
+      roles,
+      full_name: username.replace('_', ' '),
+      email: `${username}@elastic.co`,
+    });
+  };
+
+  async function createPrivilegeTestUsers() {
+    const rolePromises = ROLES.map((role) => createRole(role));
+
+    await Promise.all(rolePromises);
+    const userPromises = Object.entries(USERNAME_TO_ROLES).map(([username, roles]) =>
+      createUser({ username, roles, password: USER_PASSWORD })
+    );
+
+    return Promise.all(userPromises);
+  }
+
+  const getPrivilegesForUsername = async (username: string) =>
+    riskEngineRoutes.privilegesForUser({
+      username,
+      password: USER_PASSWORD,
+    });
+
+  describe('@ess @serverless privileges_apis', () => {
+    before(async () => {
+      await createPrivilegeTestUsers(supertestWithoutAuth);
+    });
+
+    describe('Risk engine privileges API', () => {
+      it('should return has_all_required true for user with all risk engine privileges', async () => {
+        const { body } = await getPrivilegesForUsername('all');
+        expect(body.has_all_required).to.eql(true);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            cluster: {
+              manage_index_templates: true,
+              manage_transform: true,
+            },
+            index: {
+              'risk-score.risk-score-*': {
+                read: true,
+                write: true,
+              },
+            },
+          },
+          kibana: {
+            'feature_savedObjectsManagement.all': true,
+          },
+        });
+      });
+      it('should return has_all_required false for user with no write access to risk indices', async () => {
+        const { body } = await getPrivilegesForUsername('no_risk_score_index_write');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            cluster: {
+              manage_index_templates: true,
+              manage_transform: true,
+            },
+            index: {
+              'risk-score.risk-score-*': {
+                read: true,
+                write: false,
+              },
+            },
+          },
+          kibana: {
+            'feature_savedObjectsManagement.all': true,
+          },
+        });
+      });
+      it('should return has_all_required false for user with no read access to risk indices', async () => {
+        const { body } = await getPrivilegesForUsername('no_risk_score_index_read');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            cluster: {
+              manage_index_templates: true,
+              manage_transform: true,
+            },
+            index: {
+              'risk-score.risk-score-*': {
+                read: false,
+                write: true,
+              },
+            },
+          },
+          kibana: {
+            'feature_savedObjectsManagement.all': true,
+          },
+        });
+      });
+      it('should return has_all_required false for user with no cluster manage transform privilege', async () => {
+        const { body } = await getPrivilegesForUsername('no_cluster_manage_transform');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            cluster: {
+              manage_index_templates: true,
+              manage_transform: false,
+            },
+            index: {
+              'risk-score.risk-score-*': {
+                read: true,
+                write: true,
+              },
+            },
+          },
+          kibana: {
+            'feature_savedObjectsManagement.all': true,
+          },
+        });
+      });
+      it('should return has_all_required false for user with no cluster manage index templates privilege', async () => {
+        const { body } = await getPrivilegesForUsername('no_cluster_manage_index_templates');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            cluster: {
+              manage_index_templates: false,
+              manage_transform: true,
+            },
+            index: {
+              'risk-score.risk-score-*': {
+                read: true,
+                write: true,
+              },
+            },
+          },
+          kibana: {
+            'feature_savedObjectsManagement.all': true,
+          },
+        });
+      });
+      it('should return has_all_required false for user with no saved objects management all privilege', async () => {
+        const { body } = await getPrivilegesForUsername('no_saved_objects_management_all');
+        expect(body.has_all_required).to.eql(false);
+        expect(body.privileges).to.eql({
+          elasticsearch: {
+            cluster: {
+              manage_index_templates: true,
+              manage_transform: true,
+            },
+            index: {
+              'risk-score.risk-score-*': {
+                read: true,
+                write: true,
+              },
+            },
+          },
+          kibana: {
+            'feature_savedObjectsManagement.all': false,
+          },
+        });
+      });
+    });
+  });
+};
