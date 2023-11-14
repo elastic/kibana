@@ -58,7 +58,13 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.11.1]]
 == {kib} 8.11.1
 
-The 8.11.1 release includes the following bug fixes.
+For information about the {kib} 8.11.1 release, review the following information.
+
+[float]
+[[security-update-v8.11.1]]
+=== Security updates
+
+An issue was discovered by Elastic whereby sensitive information is recorded in Kibana logs in the event of an error. Elastic has released Kibana 8.11.1 and 7.17.15 which resolves this issue. The error object recorded in the log may contain account credentials for the `kibana_system` user, API keys and credentials of, Kibana end-users. For more information, refer to link:https://discuss.elastic.co/t/kibana-8-10-1-security-update/343287[Security announcements].
 
 [float]
 [[fixes-v8.11.1]]
