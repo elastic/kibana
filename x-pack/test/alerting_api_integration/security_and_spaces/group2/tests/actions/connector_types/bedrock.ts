@@ -31,6 +31,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
   const configService = getService('config');
+  const retry = getService('retry');
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const result = await supertest
       .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
@@ -406,6 +407,133 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               connector_id: bedrockActionId,
               data: { message: bedrockSuccessResponse.completion },
             });
+          });
+          const binaryToString = (res: any, callback: any): void => {
+            res.setEncoding('binary');
+            res.data = '';
+            res.on('data', (chunk: any) => {
+              res.data += chunk;
+            });
+            res.on('end', () => {
+              console.log('DATA??????', res.data);
+              callback(null, Buffer.from(res.data));
+            });
+          };
+          it.only('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            const response = await supertest
+              .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+              .set('kbn-xsrf', 'foo')
+              // .set('Accept', '*/*')
+              .set('Accept-Encoding', 'chunked')
+              .set('Content-Type', 'application/json;charset=UTF-8')
+              .buffer(true)
+              .send({
+                params: {
+                  subAction: 'invokeStream',
+                  subActionParams: {
+                    messages: [
+                      {
+                        role: 'user',
+                        content: 'Hello world',
+                      },
+                    ],
+                  },
+                },
+              });
+            console.log('response.body???', response);
+            console.log('response Object.keys???', Object.keys(response));
+            const receivedChunks: any[] = [];
+
+            response.res.on('data', (chunk) => {
+              console.log('HEYHEYHEYHEYdata', chunk.toString());
+              receivedChunks.push(chunk.toString());
+            });
+
+            response.res.on('end', () => {
+              console.log('HEYHEYHEYHEYend', receivedChunks);
+            });
+            // const mockResponseString = 'Hello! How can I assist you today?';
+            // const passThrough = new PassThrough();
+            // const response = await supertest
+            //   .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+            //   .set('kbn-xsrf', 'stream')
+            //   // .set('Content-Type', 'text/event-stream')
+            //   // .set('Transfer-Encoding', 'chunked')
+            //   .send({
+            //     params: {
+            //       subAction: 'invokeStream',
+            //       subActionParams: {
+            //         messages: [
+            //           {
+            //             role: 'user',
+            //             content: 'Hello world',
+            //           },
+            //         ],
+            //       },
+            //     },
+            //   })
+            //   .pipe(passThrough);
+            // console.log('omg good for us???', response);
+            // console.log('Object.keys???', Object.keys(response));
+            // const receivedChunks: any[] = [];
+            //
+            // passThrough.on('data', (chunk) => {
+            //   console.log('HEYHEYHEYHEYdata', chunk);
+            //   receivedChunks.push(chunk);
+            // });
+            //
+            // passThrough.on('end', () => {
+            //   console.log('HEYHEYHEYHEYend', receivedChunks);
+            // });
+            // console.log('text???', response.res);
+            //
+            // // // Initialize an array to store chunks of data
+            // // const chunks = [];
+            // //
+            // // // Listen for the 'data' event to capture chunks of data
+            // response.on('response', (res) => {
+            //   console.log('HEYHEYHEYHEYresponse');
+            // });
+            // response.on('data', (chunk) => {
+            //   console.log('HEYHEYHEYHEYdata');
+            // });
+            // response.on('end', () => {
+            //   console.log('HEYHEYHEYHEYend');
+            // });
+            // response.on('finish', () => {
+            //   console.log('HEYHEYHEYHEYfinish');
+            // });
+            // response.on('progress', (res) => {
+            //   console.log('HEYHEYHEYHEYprogress');
+            // });
+            // response.res.on('response', (res) => {
+            //   console.log('bodyHEYHEYHEYHEYresponse');
+            // });
+            // response.res.on('data', (chunk) => {
+            //   console.log('bodyHEYHEYHEYHEYdata');
+            // });
+            // response.res.on('end', () => {
+            //   console.log('bodyHEYHEYHEYHEYend');
+            // });
+            // response.res.on('finish', () => {
+            //   console.log('bodyHEYHEYHEYHEYfinish');
+            // });
+            // response.res.on('progress', (res) => {
+            //   console.log('bodyHEYHEYHEYHEYprogress');
+            // });
+            //
+            // // Listen for the 'end' event to indicate the end of the stream
+            // response.body.on('end', () => {
+            //   console.log('HEYHEYHEYHEY');
+            //   // Combine the chunks into a single buffer
+            //   const responseData = Buffer.concat(chunks);
+            //
+            //   // If the response is in JSON format, you can parse it
+            //   const jsonData = JSON.parse(responseData.toString());
+            //
+            //   // Now you can work with the parsed data (jsonData)
+            //   console.log(jsonData);
+            // });
           });
         });
       });

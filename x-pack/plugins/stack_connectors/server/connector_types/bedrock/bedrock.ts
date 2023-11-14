@@ -180,11 +180,15 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
   }
 
   public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
-    const res = (await this.streamApi({
-      body: JSON.stringify(formatBedrockBody(body)),
-      stream: true,
-    })) as unknown as IncomingMessage;
-    return res.pipe(transformToString());
+    try {
+      const res = (await this.streamApi({
+        body: JSON.stringify(formatBedrockBody(body)),
+        stream: true,
+      })) as unknown as IncomingMessage;
+      return res.pipe(transformToString());
+    } catch (e) {
+      console.log('INVOKE STREAM ERfROR?!', e);
+    }
   }
 
   /**
@@ -227,15 +231,18 @@ const formatBedrockBody = ({
 const transformToString = () =>
   new Transform({
     transform(chunk, encoding, callback) {
+      console.log('WE GOT chunk?!!!', new TextDecoder().decode(chunk));
       const encoder = new TextEncoder();
       const decoder = new EventStreamCodec(toUtf8, fromUtf8);
       const event = decoder.decode(chunk);
+      console.log('WE GOT event!!!!', event);
       const body = JSON.parse(
         Buffer.from(
           JSON.parse(new TextDecoder('utf-8').decode(event.body)).bytes,
           'base64'
         ).toString()
       );
+      console.log('WE GOT body!!!!', body);
       const newChunk = encoder.encode(body.completion);
       callback(null, newChunk);
     },
