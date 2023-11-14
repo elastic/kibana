@@ -14,6 +14,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./maps'));
     loadTestFile(require.resolve('./graph'));
     loadTestFile(require.resolve('./security_solution'));
+    loadTestFile(require.resolve('./ml_embeddables_in_dashboard'));
     loadTestFile(require.resolve('./rules_connectors'));
     // Please make sure that the remote clusters, snapshot and restore and
     // CCR tests stay in that order. Their execution fails if rearranged.
