@@ -263,7 +263,7 @@ describe('search', () => {
     it('throws error when search with customFields and owner as empty string array', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
-        owner: [""],
+        owner: [''],
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(

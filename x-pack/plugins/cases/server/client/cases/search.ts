@@ -73,7 +73,9 @@ export const search = async (
        * throw error if params has customFields and no owner
        */
 
-      const isValidArray = isArray(paramArgs.owner) && (!paramArgs.owner.length || paramArgs.owner.length > 1 || isEmpty(paramArgs.owner[0]));
+      const isValidArray =
+        isArray(paramArgs.owner) &&
+        (!paramArgs.owner.length || paramArgs.owner.length > 1 || isEmpty(paramArgs.owner[0]));
 
       if (!paramArgs.owner || isValidArray) {
         throw Boom.badRequest('Owner must be provided. Multiple owners are not supported.');
