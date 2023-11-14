@@ -22,6 +22,7 @@ export const createNewAction = async (
   const response = await supertest
     .post('/api/actions/action')
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '2023-10-31')
     .send(getWebHookAction());
   if (response.status !== 200) {
     log.error(
