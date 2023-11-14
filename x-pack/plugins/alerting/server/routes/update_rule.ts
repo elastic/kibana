@@ -12,7 +12,7 @@ import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '..
 import { UpdateOptions } from '../rules_client';
 import {
   verifyAccessAndContext,
-  RewriteResponseCase,
+  AsApiContract,
   handleDisabledApiKeysError,
   actionsSchema,
   rewriteRuleLastRun,
@@ -26,7 +26,6 @@ import {
   PartialRule,
 } from '../types';
 import { transformRuleActions } from './rule/transforms';
-import { RulePartialResponse } from '../../common/routes/rule/response';
 
 const paramSchema = schema.object({
   id: schema.string(),
@@ -72,7 +71,9 @@ const rewriteBodyReq = (
     },
   };
 };
-const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
+
+import { RuleResponseV1 } from '../../common/routes/rule/response';
+const rewriteBodyRes = ({
   actions,
   alertTypeId,
   scheduledTaskId,
@@ -91,7 +92,10 @@ const rewriteBodyRes: RewriteResponseCase<PartialRule<RuleTypeParams>> = ({
   lastRun,
   nextRun,
   ...rest
-}: PartialRule<RuleTypeParams>): RulePartialResponse<RuleTypeParams> => ({
+}: PartialRule<RuleTypeParams>): Omit<
+  AsApiContract<PartialRule<RuleTypeParams> & { actions?: RuleResponseV1['actions'] }>,
+  'actions'
+> => ({
   ...rest,
   api_key_owner: apiKeyOwner,
   created_by: createdBy,
