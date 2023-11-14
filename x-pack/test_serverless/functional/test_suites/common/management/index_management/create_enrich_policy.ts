@@ -52,7 +52,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
       await pageObjects.header.waitUntilLoadingHasFinished();
       // Click create policy button
-      await testSubjects.click('enrichPoliciesPoliciesTableCreateButton');
+      await testSubjects.click('enrichPoliciesEmptyPromptCreateButton');
     });
 
     after(async () => {
