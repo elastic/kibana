@@ -14,6 +14,11 @@ import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
 import type { AgentExecutorParams, AgentExecutorResponse } from './types';
+import { withAssistantSpan } from '../tracers/with_assistant_span';
+import { APMTracer } from '../tracers/apm_tracer';
+
+export const OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID =
+  'Elastic AI Assistant Agent Executor (OpenAI Functions)';
 
 /**
  * This is an agent executor to be used with the model evaluation API for benchmarking.
@@ -30,6 +35,7 @@ export const callOpenAIFunctionsExecutor = async ({
   llmType,
   logger,
   request,
+  traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
 
@@ -48,12 +54,14 @@ export const callOpenAIFunctionsExecutor = async ({
   const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger, elserId);
   const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
 
+  // TODO: Dependency inject these tools
   const tools: Tool[] = [
     new ChainTool({
-      name: 'esql-language-knowledge-base',
+      name: 'ESQLKnowledgeBaseTool',
       description:
         'Call this for knowledge on how to build an ESQL query, or answer questions about the ES|QL query language.',
       chain,
+      tags: ['esql', 'query-generation', 'knowledge-base'],
     }),
   ];
 
@@ -63,11 +71,35 @@ export const callOpenAIFunctionsExecutor = async ({
     verbose: false,
   });
 
-  await executor.call({ input: latestMessage[0].content });
+  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  const tracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  let traceData;
+
+  // Wrap executor call with an APM span for instrumentation
+  await withAssistantSpan(OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID, async (span) => {
+    if (span?.ids['span.id'] != null && span?.ids['trace.id'] != null) {
+      traceData = {
+        // Transactions ID since this span is the parent
+        transaction_id: span.ids['span.id'],
+        trace_id: span.ids['trace.id'],
+      };
+    }
+
+    return executor.call(
+      { input: latestMessage[0].content },
+      {
+        callbacks: [tracer],
+        runName: OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID,
+        tags: traceOptions?.tags ?? [],
+      }
+    );
+  });
 
   return {
     connector_id: connectorId,
     data: llm.getActionResultData(), // the response from the actions framework
+    trace_data: traceData,
     status: 'ok',
   };
 };

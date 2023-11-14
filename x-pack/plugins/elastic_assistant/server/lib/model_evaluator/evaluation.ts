@@ -8,7 +8,7 @@
 import { loadEvaluator } from 'langchain/evaluation';
 import { LLM } from 'langchain/llms/base';
 import { ChainValues, HumanMessage } from 'langchain/schema';
-import { chunk } from 'lodash/fp';
+import { chunk as createChunks } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
 import { asyncForEach } from '@kbn/std';
@@ -21,11 +21,12 @@ export interface PerformEvaluationParams {
   agentExecutorEvaluators: AgentExecutorEvaluator[];
   dataset: Dataset;
   evaluationId: string;
-  evaluatorModel: LLM;
+  evaluatorModel?: LLM;
   evaluationPrompt?: string;
-  evaluationType: string;
-  maxConcurrency?: number;
+  evaluationType?: string;
   logger: Logger | ToolingLog;
+  maxConcurrency?: number;
+  runName?: string;
 }
 
 export interface EvaluationResult {
@@ -61,8 +62,9 @@ export const performEvaluation = async ({
   evaluatorModel,
   evaluationPrompt,
   evaluationType,
-  maxConcurrency = 3,
+  maxConcurrency = 1,
   logger,
+  runName,
 }: PerformEvaluationParams) => {
   const startTime = new Date().getTime();
   const evaluationResults: EvaluationResult[] = [];
@@ -71,35 +73,64 @@ export const performEvaluation = async ({
     agentExecutorEvaluators.map((agent) => ({
       input,
       reference,
-      request: callAgentWithRetry({ agent, messages: [new HumanMessage(input)], logger }),
+      request: () => callAgentWithRetry({ agent, messages: [new HumanMessage(input)], logger }),
     }))
   );
 
+  const requestChunks = createChunks(maxConcurrency, predictionRequests);
+  const totalChunks = requestChunks.length;
+
   logger.info(`Total prediction requests: ${predictionRequests.length}`);
-  logger.info(`Chunk size: ${maxConcurrency}`);
+  logger.info(`Chunk size (maxConcurrency): ${maxConcurrency}`);
+  logger.info(`Total chunks: ${totalChunks}`);
   logger.info('Fetching predictions...');
-  const requestChunks = chunk(maxConcurrency, predictionRequests);
-  await asyncForEach(requestChunks, async (c, i) => {
-    logger.info(`Prediction request chunk: ${i + 1} of ${requestChunks.length}`);
+
+  while (requestChunks.length) {
+    const chunk = requestChunks.shift() ?? [];
+    const chunkNumber = totalChunks - requestChunks.length;
+    logger.info(`Prediction request chunk: ${chunkNumber} of ${totalChunks}`);
+    logger.debug(chunk);
 
     // Note, order is kept between chunk and dataset, and is preserved w/ Promise.allSettled
-    const chunkResults = await Promise.allSettled(c.map((r) => r.request));
-    logger.info(`Prediction request chunk ${i + 1} response:\n${JSON.stringify(chunkResults)}`);
+    const chunkResults = await Promise.allSettled(chunk.map((r) => r.request()));
+    logger.info(
+      `Prediction request chunk ${chunkNumber} response:\n${JSON.stringify(chunkResults)}`
+    );
     chunkResults.forEach((response, chunkResultIndex) =>
       evaluationResults.push({
         '@timestamp': new Date().toISOString(),
-        input: c[chunkResultIndex].input,
-        reference: c[chunkResultIndex].reference,
+        input: chunk[chunkResultIndex].input,
+        reference: chunk[chunkResultIndex].reference,
         evaluationId,
         evaluation: {},
         prediction: getMessageFromLangChainResponse(response),
         predictionResponse: response,
       })
     );
-  });
+  }
 
   logger.info(`Prediction results:\n${JSON.stringify(evaluationResults)}`);
 
+  if (evaluatorModel == null) {
+    const endTime = new Date().getTime();
+
+    const evaluationSummary: EvaluationSummary = {
+      evaluationId,
+      '@timestamp': new Date().toISOString(),
+      evaluationStart: startTime,
+      evaluationEnd: endTime,
+      evaluationDuration: endTime - startTime,
+      totalAgents: agentExecutorEvaluators.length,
+      totalInput: dataset.length,
+      totalRequests: predictionRequests.length,
+    };
+
+    logger.info(`Final results:\n${JSON.stringify(evaluationResults, null, 2)}`);
+
+    return { evaluationResults, evaluationSummary };
+  }
+
+  // Continue with actual evaluation if expected
   logger.info('Performing evaluation....');
   logger.info(`Evaluation model: ${evaluatorModel._llmType()}`);
 
@@ -111,11 +142,14 @@ export const performEvaluation = async ({
     });
     await asyncForEach(evaluationResults, async ({ input, prediction, reference }, index) => {
       // TODO: Rate limit evaluator calls, though haven't seen any `429`'s yet in testing datasets up to 10 w/ azure/bedrock
-      const evaluation = await evaluator.evaluateStrings({
-        input,
-        prediction,
-        reference,
-      });
+      const evaluation = await evaluator.evaluateStrings(
+        {
+          input,
+          prediction,
+          reference,
+        },
+        { tags: ['security-assistant-evaluation'] }
+      );
       evaluationResults[index].evaluation = evaluation;
       await wait(1000);
     });

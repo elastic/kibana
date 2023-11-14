@@ -22,6 +22,7 @@ export interface AgentExecutorParams {
   logger: Logger;
   request: KibanaRequest<unknown, unknown, RequestBody>;
   elserId?: string;
+  traceOptions?: TraceOptions;
 }
 
 export type AgentExecutorResponse = Promise<ResponseBody>;
@@ -29,3 +30,9 @@ export type AgentExecutorResponse = Promise<ResponseBody>;
 export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
 
 export type AgentExecutorEvaluator = (langChainMessages: BaseMessage[]) => AgentExecutorResponse;
+
+export interface TraceOptions {
+  projectName?: string;
+  runName?: string;
+  tags?: string[];
+}

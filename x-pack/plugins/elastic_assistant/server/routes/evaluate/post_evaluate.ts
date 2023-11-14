@@ -24,7 +24,7 @@ import {
   indexEvaluations,
   setupEvaluationIndex,
 } from '../../lib/model_evaluator/output_index/utils';
-import { getLlmType } from './utils';
+import { fetchLangSmithDataset, getConnectorName, getLlmType } from './utils';
 import { RequestBody } from '../../lib/langchain/types';
 
 /**
@@ -53,12 +53,17 @@ export const postEvaluateRoute = (
       const resp = buildResponse(response);
       const logger: Logger = (await context.elasticAssistant).logger;
 
-      const { evalModel, evaluationType, outputIndex } = request.query;
-      const { dataset, evalPrompt } = request.body;
+      const { evalModel, evaluationType, outputIndex, datasetName, projectName, runName } =
+        request.query;
+      const { dataset: customDataset = [], evalPrompt } = request.body;
       const connectorIds = request.query.models?.split(',') || [];
       const agentNames = request.query.agents?.split(',') || [];
 
       const evaluationId = uuidv4();
+
+      // Fetch dataset from langsmith
+      const langsmithDataset = await fetchLangSmithDataset(datasetName, logger);
+      const dataset = datasetName != null ? langsmithDataset : customDataset;
 
       logger.info('postEvaluateRoute:');
       logger.info(`request.query:\n${JSON.stringify(request.query, null, 2)}`);
@@ -117,6 +122,7 @@ export const postEvaluateRoute = (
           agentNames.forEach((agentName) => {
             logger.info(`Creating agent: ${connectorId} + ${agentName}`);
             const llmType = getLlmType(connectorId, connectors);
+            const connectorName = getConnectorName(connectorId, connectors);
             agents.push((langChainMessages) =>
               AGENT_EXECUTOR_MAP[agentName]({
                 actions,
@@ -128,19 +134,30 @@ export const postEvaluateRoute = (
                 logger,
                 request: skeletonRequest,
                 kbResource: ESQL_RESOURCE,
+                traceOptions: {
+                  projectName: projectName ?? 'default',
+                  runName: runName ?? evaluationId,
+                  tags: [
+                    'security-assistant-prediction',
+                    ...(connectorName != null ? [connectorName] : []),
+                  ],
+                },
               })
             );
           });
         });
-
         logger.info(`Agents created: ${agents.length}`);
 
-        const evaluatorModel = new ActionsClientLlm({
-          actions,
-          connectorId: evalModel,
-          request: skeletonRequest,
-          logger,
-        });
+        // Evaluator Model is optional to support just running predictions
+        const evaluatorModel =
+          evalModel == null || evalModel === ''
+            ? undefined
+            : new ActionsClientLlm({
+                actions,
+                connectorId: evalModel,
+                request: skeletonRequest,
+                logger,
+              });
 
         const { evaluationResults, evaluationSummary } = await performEvaluation({
           agentExecutorEvaluators: agents,
@@ -150,6 +167,7 @@ export const postEvaluateRoute = (
           evaluationPrompt: evalPrompt,
           evaluationType,
           logger,
+          runName,
         });
 
         logger.info(`Writing evaluation results to index: ${outputIndex}`);
