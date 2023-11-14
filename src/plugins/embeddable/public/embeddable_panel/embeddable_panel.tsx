@@ -14,7 +14,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/e
 
 import { isPromise } from '@kbn/std';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
-
+import { PanelLoader } from '@kbn/panel-loader';
 import {
   EditPanelAction,
   RemovePanelAction,
@@ -208,7 +208,7 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
         </EuiFlexGroup>
       )}
       <div className="embPanel__content" ref={embeddableRoot} {...contentAttrs}>
-        {node}
+        {node ? node : <PanelLoader />}
       </div>
     </EuiPanel>
   );
