@@ -25,18 +25,11 @@ import { first, last } from 'lodash';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../utils/kibana_react';
-import {
-  MetricsExplorerAggregation,
-  MetricsExplorerRow,
-} from '../../../../common/custom_threshold_rule/metrics_explorer';
 import { Color } from '../../../../common/custom_threshold_rule/color_palette';
-import {
-  MetricsExplorerChartType,
-  MetricsExplorerOptionsMetric,
-} from '../../../../common/custom_threshold_rule/types';
+import { MetricsExplorerChartType } from '../../../../common/custom_threshold_rule/types';
 import { MetricExpression, TimeRange } from '../types';
 import { createFormatterForMetric } from '../helpers/create_formatter_for_metric';
-import { useMetricsExplorerChartData } from '../hooks/use_metrics_explorer_chart_data';
+import { useExpressionChartData } from '../hooks/use_expression_chart_data';
 import {
   ChartContainer,
   LoadingState,
@@ -47,8 +40,8 @@ import {
 import { ThresholdAnnotations } from './criterion_preview_chart/threshold_annotations';
 import { CUSTOM_EQUATION } from '../i18n_strings';
 import { calculateDomain } from '../helpers/calculate_domain';
-import { getMetricId } from '../helpers/get_metric_id';
 import { MetricExplorerSeriesChart } from './series_chart';
+import { MetricsExplorerRow } from '../types';
 
 interface Props {
   expression: MetricExpression;
@@ -74,7 +67,7 @@ export function ExpressionChart({
   timeFieldName,
 }: Props) {
   const { charts, uiSettings } = useKibana().services;
-  const { isLoading, data } = useMetricsExplorerChartData(
+  const { isLoading, data } = useExpressionChartData(
     expression,
     derivedIndexPattern,
     filterQuery,
@@ -106,15 +99,7 @@ export function ExpressionChart({
 
   const firstTimestamp = first(firstSeries.rows)!.timestamp;
   const lastTimestamp = last(firstSeries.rows)!.timestamp;
-  const metric: MetricsExplorerOptionsMetric = {
-    field: expression.metric,
-    aggregation: expression.aggType as MetricsExplorerAggregation,
-    color: Color.color0,
-  };
-
-  if (metric.aggregation === 'custom') {
-    metric.label = expression.label || CUSTOM_EQUATION;
-  }
+  const name = expression.label || CUSTOM_EQUATION;
 
   const dateFormatter =
     firstTimestamp == null || lastTimestamp == null
@@ -130,13 +115,13 @@ export function ExpressionChart({
     rows: firstSeries.rows.map((row) => {
       const newRow: MetricsExplorerRow = { ...row };
       thresholds.forEach((thresholdValue, index) => {
-        newRow[getMetricId(metric, `threshold_${index}`)] = thresholdValue;
+        newRow[`metric_threshold_${index}`] = thresholdValue;
       });
       return newRow;
     }),
   };
 
-  const dataDomain = calculateDomain(series, [metric], false);
+  const dataDomain = calculateDomain(series);
   const domain = {
     max: Math.max(dataDomain.max, last(thresholds) || dataDomain.max) * 1.1,
     min: Math.min(dataDomain.min, first(thresholds) || dataDomain.min) * 0.9, // add 10% floor,
@@ -155,7 +140,8 @@ export function ExpressionChart({
         <Chart ref={chartRef}>
           <MetricExplorerSeriesChart
             type={chartType}
-            metric={metric}
+            name={name}
+            color={Color.color0}
             id="0"
             series={series}
             stack={false}
@@ -192,7 +178,7 @@ export function ExpressionChart({
           <Axis
             id={'values'}
             position={Position.Left}
-            tickFormat={createFormatterForMetric(metric)}
+            tickFormat={createFormatterForMetric(expression.metrics)}
             domain={domain}
           />
           <Tooltip

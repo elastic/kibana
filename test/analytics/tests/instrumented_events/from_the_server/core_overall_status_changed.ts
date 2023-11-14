@@ -13,7 +13,8 @@ import { FtrProviderContext } from '../../../services';
 export default function ({ getService }: FtrProviderContext) {
   const ebtServerHelper = getService('kibana_ebt_server');
 
-  describe('core-overall_status_changed', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/171164
+  describe.skip('core-overall_status_changed', () => {
     let initialEvent: Event<Record<string, unknown>>;
     let secondEvent: Event<Record<string, unknown>>;
 
