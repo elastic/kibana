@@ -15,13 +15,6 @@ import {
 } from '@kbn/core/server';
 
 import { DataViewsService } from '@kbn/data-views-plugin/common';
-import type { TransportRequestOptions } from '@elastic/elasticsearch';
-import { generateTransformSecondaryAuthHeaders } from '../../../common/utils/transform_api_key';
-import {
-  reauthorizeTransformsRequestSchema,
-  ReauthorizeTransformsRequestSchema,
-  ReauthorizeTransformsResponseSchema,
-} from '../../../common/api_schemas/reauthorize_transforms';
 import { addInternalBasePath, TRANSFORM_STATE } from '../../../common/constants';
 import { ResponseStatus } from '../../../common/api_schemas/common';
 import {
@@ -76,67 +69,7 @@ enum TRANSFORM_ACTIONS {
 }
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
-  const { router, license, coreStart, dataViews, security: securityStart } = routeDependencies;
-
-  /**
-   * @apiGroup Reauthorize transforms with API key generated from currently logged in user
-   * @api {post} /internal/transform/reauthorize_transforms Post reauthorize transforms
-   * @apiName Reauthorize Transforms
-   * @apiDescription Reauthorize transforms by generating an API Key for current user
-   * and update transform's es-secondary-authorization headers with the generated key,
-   * then start the transform.
-   * @apiSchema (body) reauthorizeTransformsRequestSchema
-   */
-  router.versioned
-    .post({
-      path: addInternalBasePath('reauthorize_transforms'),
-      access: 'internal',
-    })
-    .addVersion<undefined, undefined, StartTransformsRequestSchema>(
-      {
-        version: '1',
-        validate: {
-          request: {
-            body: reauthorizeTransformsRequestSchema,
-          },
-        },
-      },
-      license.guardApiRoute<undefined, undefined, StartTransformsRequestSchema>(
-        async (ctx, req, res) => {
-          try {
-            const transformsInfo = req.body;
-            const { elasticsearch } = coreStart;
-            const esClient = elasticsearch.client.asScoped(req).asCurrentUser;
-
-            let apiKeyWithCurrentUserPermission;
-
-            // If security is not enabled or available, user should not have the need to reauthorize
-            // in that case, start anyway
-            if (securityStart) {
-              apiKeyWithCurrentUserPermission =
-                await securityStart.authc.apiKeys.grantAsInternalUser(req, {
-                  name: `auto-generated-transform-api-key`,
-                  role_descriptors: {},
-                });
-            }
-            const secondaryAuth = generateTransformSecondaryAuthHeaders(
-              apiKeyWithCurrentUserPermission
-            );
-
-            const authorizedTransforms = await reauthorizeAndStartTransforms(
-              transformsInfo,
-              esClient,
-              {
-                ...(secondaryAuth ? secondaryAuth : {}),
-              }
-            );
-            return res.ok({ body: authorizedTransforms });
-          } catch (e) {
-            return res.customError(wrapError(wrapEsError(e)));
-          }
-        }
-      )
-    );
+  const { router, license, coreStart, dataViews } = routeDependencies;
 
   /**
    * @apiGroup Transforms
@@ -698,47 +631,6 @@ async function scheduleNowTransforms(
           id: transformId,
           items: transformsInfo,
           action: TRANSFORM_ACTIONS.SCHEDULE_NOW,
-        });
-      }
-      results[transformId] = { success: false, error: e.meta.body.error };
-    }
-  }
-  return results;
-}
-
-async function reauthorizeAndStartTransforms(
-  transformsInfo: ReauthorizeTransformsRequestSchema,
-  esClient: ElasticsearchClient,
-  options?: TransportRequestOptions
-) {
-  const results: ReauthorizeTransformsResponseSchema = {};
-
-  for (const transformInfo of transformsInfo) {
-    const transformId = transformInfo.id;
-    try {
-      await esClient.transform.updateTransform(
-        {
-          body: {},
-          transform_id: transformId,
-        },
-        options ?? {}
-      );
-
-      await esClient.transform.startTransform(
-        {
-          transform_id: transformId,
-        },
-        { ignore: [409] }
-      );
-
-      results[transformId] = { success: true };
-    } catch (e) {
-      if (isRequestTimeout(e)) {
-        return fillResultsWithTimeouts({
-          results,
-          id: transformId,
-          items: transformsInfo,
-          action: TRANSFORM_ACTIONS.REAUTHORIZE,
         });
       }
       results[transformId] = { success: false, error: e.meta.body.error };
