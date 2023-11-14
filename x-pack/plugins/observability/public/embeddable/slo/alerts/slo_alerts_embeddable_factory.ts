@@ -68,7 +68,7 @@ export class SloAlertsEmbeddableFactoryDefinition
 
       const [
         { uiSettings, application, http, i18n: i18nService, notifications, settings },
-        { triggersActionsUi, cases, data, security },
+        { triggersActionsUi, cases, data, security, charts },
       ] = await this.getStartServices();
       // const [coreStart, pluginsStart] = await this.getStartServices();
       return new SLOAlertsEmbeddable(
@@ -83,6 +83,7 @@ export class SloAlertsEmbeddableFactoryDefinition
           data,
           settings,
           security,
+          charts,
         },
         initialInput,
         parent
