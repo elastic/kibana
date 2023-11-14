@@ -26,7 +26,7 @@ const tabs = [
   },
   {
     id: MobileErrorTabIds.CRASHES,
-    name: i18n.translate('xpack.apm.mobile.location.metrics.crashes', {
+    name: i18n.translate('xpack.apm.mobile.errorsAndCrashes.crashesTab', {
       defaultMessage: 'Crashes',
     }),
     append: <div />,
