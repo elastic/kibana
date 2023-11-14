@@ -9,7 +9,6 @@
 import type { FormulaPublicApi, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 
-
 type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 
 export type FormulaValueConfig = Omit<LensFormula, 'formula'> & {
@@ -21,7 +20,7 @@ export function getFormulaColumn(
   config: FormulaValueConfig,
   dataView: DataView,
   formulaAPI: FormulaPublicApi,
-  baseLayer?: PersistedIndexPatternLayer,
+  baseLayer?: PersistedIndexPatternLayer
 ): PersistedIndexPatternLayer {
   const { value, ...rest } = config;
   const formulaLayer = formulaAPI.insertOrReplaceFormulaColumn(

@@ -6,21 +6,24 @@
  * Side Public License, v 1.
  */
 
+import { DataView } from '@kbn/data-views-plugin/public';
+import { GenericIndexPatternColumn } from '@kbn/lens-plugin/public';
 import {
   LensBreakdownConfig,
   LensBreakdownDateHistogramConfig,
-  LensBreakdownFiltersConfig, LensBreakdownIntervalsConfig,
-  LensBreakdownTopValuesConfig
-} from "../types";
-import {DataView} from "@kbn/data-views-plugin/public";
-import {getHistogramColumn} from "./date_histogram";
-import {getTopValuesColumn} from './top_values';
-import {getIntervalsColumn} from './intervals';
-import {getFiltersColumn} from './filters';
-import {GenericIndexPatternColumn} from "@kbn/lens-plugin/public";
+  LensBreakdownFiltersConfig,
+  LensBreakdownIntervalsConfig,
+  LensBreakdownTopValuesConfig,
+} from '../types';
+import { getHistogramColumn } from './date_histogram';
+import { getTopValuesColumn } from './top_values';
+import { getIntervalsColumn } from './intervals';
+import { getFiltersColumn } from './filters';
 function getBreakdownType(field: string, dataview: DataView) {
   if (!dataview.fields.getByName(field)) {
-    throw `field ${field} does not exist on dataview ${dataview.id ? dataview.id : dataview.title}`;
+    throw new Error(
+      `field ${field} does not exist on dataview ${dataview.id ? dataview.id : dataview.title}`
+    );
   }
 
   switch (dataview.fields.getByName(field)!.type) {
@@ -35,52 +38,69 @@ function getBreakdownType(field: string, dataview: DataView) {
   }
 }
 export const getBreakdownColumn = ({
-   options,
-   dataView,
+  options,
+  dataView,
 }: {
-    options: LensBreakdownConfig;
-    dataView: DataView;
+  options: LensBreakdownConfig;
+  dataView: DataView;
 }): GenericIndexPatternColumn => {
-  const breakdownType = typeof options === 'string' ? getBreakdownType(options, dataView) : options.type;
-  const field: string = typeof options === 'string' ? options : 'field' in options ? options.field : '';
+  const breakdownType =
+    typeof options === 'string' ? getBreakdownType(options, dataView) : options.type;
+  const field: string =
+    typeof options === 'string' ? options : 'field' in options ? options.field : '';
   const config = typeof options !== 'string' ? options : {};
 
   switch (breakdownType) {
     case 'dateHistogram':
-      return getHistogramColumn({ options: {
-        sourceField: field,
-          params: typeof options !== 'string' ? {
-            interval: (options as LensBreakdownDateHistogramConfig).minimumInterval || 'auto',
-          } : {
-            interval: 'auto'
-          }
-      }});
+      return getHistogramColumn({
+        options: {
+          sourceField: field,
+          params:
+            typeof options !== 'string'
+              ? {
+                  interval: (options as LensBreakdownDateHistogramConfig).minimumInterval || 'auto',
+                }
+              : {
+                  interval: 'auto',
+                },
+        },
+      });
     case 'topValues':
       const topValuesOptions = config as LensBreakdownTopValuesConfig;
-      return getTopValuesColumn({ field, options: {
-        size: topValuesOptions.size || 5,
-      }});
+      return getTopValuesColumn({
+        field,
+        options: {
+          size: topValuesOptions.size || 5,
+        },
+      });
     case 'intervals':
       const intervalOptions = config as LensBreakdownIntervalsConfig;
-      return getIntervalsColumn({ field, options: {
-        type: 'range',
-        ranges: [{
-          from: 0,
-          to: 1000,
-          label: '',
-        }],
-        maxBars: intervalOptions.granularity || 'auto',
-      }});
+      return getIntervalsColumn({
+        field,
+        options: {
+          type: 'range',
+          ranges: [
+            {
+              from: 0,
+              to: 1000,
+              label: '',
+            },
+          ],
+          maxBars: intervalOptions.granularity || 'auto',
+        },
+      });
     case 'filters':
       const filterOptions = config as LensBreakdownFiltersConfig;
-      return getFiltersColumn({ options: {
-        filters: filterOptions.filters.map(f => ({
-          label: f.label || '',
-          input: {
-            language: 'kql',
-            query: f.filter
-          },
-        })),
-      }});
+      return getFiltersColumn({
+        options: {
+          filters: filterOptions.filters.map((f) => ({
+            label: f.label || '',
+            input: {
+              language: 'kql',
+              query: f.filter,
+            },
+          })),
+        },
+      });
   }
 };

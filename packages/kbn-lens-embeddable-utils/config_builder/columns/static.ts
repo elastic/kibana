@@ -8,7 +8,7 @@
 
 import type { PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
 import type { ReferenceBasedIndexPatternColumn } from '@kbn/lens-plugin/public/datasources/form_based/operations/definitions/column_types';
-import {FormulaPublicApi} from "@kbn/lens-plugin/public";
+import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 
 export type LensFormula = Parameters<FormulaPublicApi['insertOrReplaceFormulaColumn']>[1];
 
@@ -16,7 +16,11 @@ export type StaticValueConfig = Omit<LensFormula, 'formula'> & {
   color?: string;
   value: string;
 };
-export function getStaticColumn(id: string, baseLayer: PersistedIndexPatternLayer, config: StaticValueConfig): PersistedIndexPatternLayer {
+export function getStaticColumn(
+  id: string,
+  baseLayer: PersistedIndexPatternLayer,
+  config: StaticValueConfig
+): PersistedIndexPatternLayer {
   const { label, ...params } = config;
   return {
     linkToLayers: [],

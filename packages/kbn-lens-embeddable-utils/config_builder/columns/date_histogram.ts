@@ -6,26 +6,26 @@
  * Side Public License, v 1.
  */
 
-import {DateHistogramIndexPatternColumn} from "@kbn/lens-plugin/public";
+import { DateHistogramIndexPatternColumn } from '@kbn/lens-plugin/public';
 
 export type DateHistogramColumnParams = DateHistogramIndexPatternColumn['params'];
 export const getHistogramColumn = ({
-   options,
+  options,
 }: {
-    options?: Partial<
-        Pick<DateHistogramIndexPatternColumn, 'sourceField'> & {
-        params: DateHistogramColumnParams;
+  options?: Partial<
+    Pick<DateHistogramIndexPatternColumn, 'sourceField'> & {
+      params: DateHistogramColumnParams;
     }
-    >;
+  >;
 }): DateHistogramIndexPatternColumn => {
-    return {
-      dataType: 'date',
-      isBucketed: true,
-      label: '@timestamp',
-      operationType: 'date_histogram',
-      scale: 'interval',
-      sourceField: '@timestamp',
-      ...options,
-      params: { interval: 'auto', ...options?.params },
-    };
+  return {
+    dataType: 'date',
+    isBucketed: true,
+    label: '@timestamp',
+    operationType: 'date_histogram',
+    scale: 'interval',
+    sourceField: '@timestamp',
+    ...options,
+    params: { interval: 'auto', ...options?.params },
+  };
 };

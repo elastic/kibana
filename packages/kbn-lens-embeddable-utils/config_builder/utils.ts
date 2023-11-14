@@ -10,11 +10,14 @@ import { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_
 import { DataViewSpec, DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-import {
+/* import {
   ValueBasedLayerColumn,
   ValueBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/value_based/types';
-import { TextBasedPersistedState } from '@kbn/lens-plugin/public/datasources/text_based/types';
+} from '@kbn/lens-plugin/public/datasources/value_based/types'; */
+import {
+  TextBasedLayerColumn,
+  TextBasedPersistedState,
+} from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { AggregateQuery } from '@kbn/es-query';
 import {
   LensAttributes,
@@ -117,13 +120,14 @@ export function buildDatasourceStatesLayer(
     i: number,
     dataView: DataView
   ) => PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: any, i: number) => ValueBasedLayerColumn[]
+  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): [
   'textBased' | 'formBased', // | 'valueBased' ,
   (
     | PersistedIndexPatternLayer
-    | ValueBasedPersistedState['layers'][0]
+    // | ValueBasedPersistedState['layers'][0]
     | TextBasedPersistedState['layers'][0]
+    | undefined
   )
 ] {
   // function buildValueLayer(config: any & LensBaseConfig): ValueBasedPersistedState['layers'][0] {
@@ -173,7 +177,7 @@ export const buildDatasourceStates = async (
     i: number,
     dataView: DataView
   ) => PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: any, i: number) => ValueBasedLayerColumn[],
+  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[], // ValueBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
   const layers: LensAttributes['state']['datasourceStates'] = {

@@ -6,9 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {ValueBasedLayerColumn} from "@kbn/lens-plugin/public/datasources/value_based/types";
+// import {ValueBasedLayerColumn} from "@kbn/lens-plugin/public/datasources/value_based/types";
 
-export function getValueColumn(id: string, fieldName?: string): ValueBasedLayerColumn {
+export function getValueColumn(id: string, fieldName?: string) /* : ValueBasedLayerColumn*/ {
   return {
     columnId: id,
     fieldName: fieldName || id,

@@ -6,23 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { FiltersIndexPatternColumn } from "@kbn/lens-plugin/public";
+import { FiltersIndexPatternColumn } from '@kbn/lens-plugin/public';
 
 export const getFiltersColumn = ({
-                                       options,
-                                   }: {
-    options?: FiltersIndexPatternColumn['params'];
+  options,
+}: {
+  options?: FiltersIndexPatternColumn['params'];
 }): FiltersIndexPatternColumn => {
-    const { filters = [], ...params } = options ?? {};
-    return {
-      label: `Filters`,
-      dataType: 'number',
-      operationType: 'filters',
-      scale: 'ordinal',
-      isBucketed: true,
-      params: {
-        filters,
-        ...params,
-      },
-    };
+  const { filters = [], ...params } = options ?? {};
+  return {
+    label: `Filters`,
+    dataType: 'number',
+    operationType: 'filters',
+    scale: 'ordinal',
+    isBucketed: true,
+    params: {
+      filters,
+      ...params,
+    },
+  };
 };
