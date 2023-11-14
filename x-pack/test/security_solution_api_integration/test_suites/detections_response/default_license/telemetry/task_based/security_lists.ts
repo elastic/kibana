@@ -11,19 +11,18 @@ import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,
 } from '@kbn/securitysolution-list-constants';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   getSecurityTelemetryStats,
   createExceptionListItem,
   createExceptionList,
   removeTimeFieldsFromTelemetryStats,
-} from '../../../../utils';
-import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
+} from '../../../utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -32,7 +31,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
 
   // Failing: See https://github.com/elastic/kibana/issues/164334
-  describe.skip('Security lists task telemetry', async () => {
+  describe.skip('@ess @serverless Security lists task telemetry', async () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -42,7 +41,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
       // Calling stats endpoint once like this guarantees that the trusted applications and exceptions lists are created for us.
       await getSecurityTelemetryStats(supertest, log);
     });

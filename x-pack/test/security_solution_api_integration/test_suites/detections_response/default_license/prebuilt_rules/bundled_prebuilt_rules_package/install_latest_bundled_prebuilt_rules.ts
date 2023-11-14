@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(bundledInstallResponse._meta.install_source).toBe('bundled');
 
       // Refresh ES indices to avoid race conditions between write and reading of indeces
-      // See implementation utility function at x-pack/test/detection_engine_api_integration/utils/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
+      // See implementation utility function at x-pack/test/security_solution_api_integration/test_suites/detections_response/utils/rules/prebuilt_rules/install_prebuilt_rules_fleet_package.ts
       await es.indices.refresh({ index: ALL_SAVED_OBJECT_INDICES });
 
       // Verify that status is updated after package installation

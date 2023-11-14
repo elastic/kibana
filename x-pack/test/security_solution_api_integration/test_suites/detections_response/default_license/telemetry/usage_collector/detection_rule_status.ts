@@ -22,21 +22,20 @@ import {
 } from '@kbn/security-solution-plugin/server/usage/detections/rules/get_initial_usage';
 import {
   createRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getEqlRuleForSignalTesting,
-  getRuleForSignalTesting,
+  getEqlRuleForAlertTesting,
+  getRuleForAlertTesting,
   getSimpleThreatMatch,
   getStats,
-  getThresholdRuleForSignalTesting,
+  getThresholdRuleForAlertTesting,
   waitForRuleSuccess,
-  waitForSignalsToBePresent,
+  waitForAlertsToBePresent,
   deleteAllEventLogExecutionEvents,
-} from '../../../../utils';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -46,7 +45,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   // Note: We don't actually find signals well with ML tests at the moment so there are not tests for ML rule type for telemetry
   // FAILING ES PROMOTION: https://github.com/elastic/kibana/issues/132856
-  describe('Detection rule status telemetry', async () => {
+  describe('@ess @serverless Detection rule status telemetry', async () => {
     before(async () => {
       // Just in case other tests do not clean up the event logs, let us clear them now and here only once.
       await deleteAllEventLogExecutionEvents(es, log);
@@ -58,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -70,10 +69,10 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"kql" rule type', () => {
       let stats: DetectionMetrics | undefined;
       before(async () => {
-        const rule = getRuleForSignalTesting(['telemetry']);
+        const rule = getRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
           stats = await getStats(supertest, log);
@@ -257,10 +256,10 @@ export default ({ getService }: FtrProviderContext) => {
     describe('"eql" rule type', () => {
       let stats: DetectionMetrics | undefined;
       before(async () => {
-        const rule = getEqlRuleForSignalTesting(['telemetry']);
+        const rule = getEqlRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
           stats = await getStats(supertest, log);
@@ -445,7 +444,7 @@ export default ({ getService }: FtrProviderContext) => {
       let stats: DetectionMetrics | undefined;
       before(async () => {
         const rule: ThresholdRuleCreateProps = {
-          ...getThresholdRuleForSignalTesting(['telemetry']),
+          ...getThresholdRuleForAlertTesting(['telemetry']),
           threshold: {
             field: 'keyword',
             value: 1,
@@ -453,7 +452,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
           stats = await getStats(supertest, log);
@@ -662,7 +661,7 @@ export default ({ getService }: FtrProviderContext) => {
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 4, [id]);
+        await waitForAlertsToBePresent(supertest, log, 4, [id]);
         // get the stats for all the tests where we at least have the expected "query" to reduce chances of flake by checking that at least one custom rule passed
         await retry.try(async () => {
           stats = await getStats(supertest, log);

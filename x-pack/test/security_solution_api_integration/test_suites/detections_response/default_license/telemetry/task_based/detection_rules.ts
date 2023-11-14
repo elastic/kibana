@@ -10,23 +10,22 @@
 import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import {
   createRule,
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
-  getRule,
-  getRuleForSignalTesting,
+  fetchRule,
+  getRuleForAlertTesting,
   installMockPrebuiltRules,
   getSecurityTelemetryStats,
   createExceptionList,
   createExceptionListItem,
   removeTimeFieldsFromTelemetryStats,
-} from '../../../../utils';
-import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
+} from '../../../utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const supertest = getService('supertest');
@@ -34,7 +33,7 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const retry = getService('retry');
 
-  describe('Detection rule task telemetry', async () => {
+  describe('@ess @serverless Detection rule task telemetry', async () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -44,7 +43,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -55,7 +54,7 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('custom rules should never show any detection_rules telemetry data for each list type', () => {
       it('should NOT give telemetry/stats for an exception list of type "detection"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+        const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
@@ -111,7 +110,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+        const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
@@ -167,7 +166,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+        const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
@@ -223,7 +222,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint_events"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+        const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
@@ -279,7 +278,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
 
       it('should NOT give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
-        const rule = getRuleForSignalTesting(['telemetry'], 'rule-1', false);
+        const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
         const { id, list_id, namespace_type, type } = await createExceptionList(supertest, log, {
@@ -368,7 +367,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule using "PATCH" endpoint
-        const { exceptions_list } = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const { exceptions_list } = await fetchRule(supertest, {
+          ruleId: ELASTIC_SECURITY_RULE_ID,
+        });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -427,7 +428,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -504,7 +505,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -581,7 +582,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -658,7 +659,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -735,7 +736,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
@@ -836,7 +837,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         // add the exception list to the pre-built/immutable/elastic rule
-        const immutableRule = await getRule(supertest, log, ELASTIC_SECURITY_RULE_ID);
+        const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
         await supertest
           .patch(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
