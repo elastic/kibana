@@ -421,9 +421,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
     }
   }, [expressionExists, localState.expressionToRender]);
 
-  const [dimensionDisplayOptions, setDimensionOptions] = useState<
-    ChartDimensionOptions | undefined
-  >();
+  const [dimensionOptions, setDimensionOptions] = useState<ChartDimensionOptions | undefined>();
 
   const onEvent = useCallback(
     (event: ExpressionRendererEvent) => {
@@ -496,6 +494,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   const IS_DARK_THEME: boolean = useObservable(core.theme.theme$, { darkMode: false }).darkMode;
 
   const renderDragDropPrompt = () => {
+    if (dimensionOptions) {
+      setDimensionOptions(undefined);
+    }
+
     return (
       <EuiText
         className={classNames('lnsWorkspacePanel__emptyContent')}
@@ -550,6 +552,10 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
   };
 
   const renderApplyChangesPrompt = () => {
+    if (dimensionOptions) {
+      setDimensionOptions(undefined);
+    }
+
     const applyChangesString = i18n.translate('xpack.lens.editorFrame.applyChanges', {
       defaultMessage: 'Apply changes',
     });
@@ -665,7 +671,7 @@ export const InnerWorkspacePanel = React.memo(function InnerWorkspacePanel({
       isFullscreen={isFullscreen}
       lensInspector={lensInspector}
       getUserMessages={getUserMessages}
-      displayOptions={dimensionDisplayOptions}
+      displayOptions={dimensionOptions}
     >
       {renderWorkspace()}
     </WorkspacePanelWrapper>
