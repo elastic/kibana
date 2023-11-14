@@ -62,7 +62,7 @@ export const plugin: PluginInitializer<void, void, PluginsSetup, PluginsStart> =
         mappings: deepFreeze({
           properties: {
             publicProperty: { type: 'keyword' },
-            publicPropertyExcludedFromAAD: { type: 'keyword' },
+            publicPropertyIncludedInAAD: { type: 'keyword' },
             publicPropertyStoredEncrypted: { type: 'binary' },
             privateProperty: { type: 'binary' },
           },

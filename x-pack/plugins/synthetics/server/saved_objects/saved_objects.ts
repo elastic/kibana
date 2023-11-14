@@ -44,10 +44,8 @@ export const registerUptimeSavedObjects = (
   savedObjectsService.registerType(syntheticsParamSavedObjectType);
 
   encryptedSavedObjects.registerType({
-    type: syntheticsServiceApiKey.name, // 'uptime-synthetics-api-key'
+    type: syntheticsServiceApiKey.name,
     attributesToEncrypt: new Set(['apiKey']),
-    // attributesToExcludeFromAAD: new Set([ConfigKey.ALERT_CONFIG]), // 'alert'
-    // These all come from x-pack/plugins/synthetics/common/constants/monitor_management.ts
     attributesToIncludeInAAD: new Set([
       ConfigKey.APM_SERVICE_NAME,
       ConfigKey.CUSTOM_HEARTBEAT_ID,
