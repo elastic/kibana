@@ -21,6 +21,7 @@ import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
+import { BenchmarkWithoutTrend } from './get_benchmarks';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -33,6 +34,15 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
     trend: trends.map(({ timestamp, clusters: clustersTrendData }) => ({
       timestamp,
       ...clustersTrendData[cluster.meta.assetIdentifierId],
+    })),
+  }));
+
+const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], trends: Trends) =>
+  benchmarksWithoutTrends.map((benchmark) => ({
+    ...benchmark,
+    trend: trends.map(({ timestamp, benchmarks: benchmarksTrendData }) => ({
+      timestamp,
+      ...benchmarksTrendData[`${benchmark.meta.benchmarkId}_${benchmark.meta.benchmarkVersion}`],
     })),
   }));
 
@@ -77,13 +87,19 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             },
           };
 
-          const [stats, groupedFindingsEvaluation, clustersWithoutTrends, trends] =
-            await Promise.all([
-              getStats(esClient, query, pitId, runtimeMappings),
-              getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings),
-              getClusters(esClient, query, pitId, runtimeMappings),
-              getTrends(esClient, policyTemplate),
-            ]);
+          const [
+            stats,
+            groupedFindingsEvaluation,
+            clustersWithoutTrends,
+            // benchmarksWithoutTrends,
+            trends,
+          ] = await Promise.all([
+            getStats(esClient, query, pitId, runtimeMappings),
+            getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings),
+            getClusters(esClient, query, pitId, runtimeMappings),
+            // getBenchmarks(esClient, query, pitId, runtimeMappings),
+            getTrends(esClient, policyTemplate),
+          ]);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
           //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
@@ -92,6 +108,9 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           });
 
           const clusters = getClustersTrends(clustersWithoutTrends, trends);
+          // const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trends);
+          // console.log(JSON.stringify(benchmarks))
+
           const trend = getSummaryTrend(trends);
 
           const body: ComplianceDashboardData = {
