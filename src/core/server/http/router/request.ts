@@ -229,7 +229,6 @@ export class KibanaRequest<
     };
   }
 
-
   toString() {
     return `[CoreKibanaRequest id="${this.id}" method="${this.route.method}" url="${this.url}" fake="${this.isFakeRequest}" system="${this.isSystemRequest}" api="${this.isInternalApiRequest}"]`;
   }
