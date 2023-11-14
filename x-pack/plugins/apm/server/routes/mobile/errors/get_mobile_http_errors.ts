@@ -15,8 +15,11 @@ import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-
-import { SERVICE_NAME, SPAN_SUBTYPE } from '../../../../common/es_fields/apm';
+import {
+  SERVICE_NAME,
+  SPAN_SUBTYPE,
+  HTTP_RESPONSE_STATUS_CODE,
+} from '../../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
 
@@ -53,14 +56,15 @@ async function getMobileHttpErrorsTimeseries({
     end: endWithOffset,
     minBucketSize: 60,
   });
-
+  //
+  // `{HTTP_RESPONSE_STATUS_CODE}`: {
+  //   gte: 400,
+  // },a
   const aggs = {
     httpErrors: {
       filter: {
         range: {
-          'http.response.status_code': {
-            gte: 400,
-          },
+          ...rangeQuery(400, 599, HTTP_RESPONSE_STATUS_CODE),
         },
       },
     },
