@@ -7,20 +7,9 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
-import {
-  ElasticsearchClient,
-  KibanaResponseFactory,
-  RequestHandler,
-  RequestHandlerContext,
-} from '@kbn/core/server';
+import { ElasticsearchClient, RequestHandler } from '@kbn/core/server';
 
 import { addInternalBasePath, TRANSFORM_STATE } from '../../../common/constants';
-import { ResponseStatus } from '../../../common/api_schemas/common';
-import {
-  resetTransformsRequestSchema,
-  ResetTransformsRequestSchema,
-  ResetTransformsResponseSchema,
-} from '../../../common/api_schemas/reset_transforms';
 import {
   startTransformsRequestSchema,
   StartTransformsRequestSchema,
@@ -64,53 +53,6 @@ enum TRANSFORM_ACTIONS {
 
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   const { router, license } = routeDependencies;
-
-  /**
-   * @apiGroup Transforms
-   *
-   * @api {post} /internal/transform/reset_transforms Post reset transforms
-   * @apiName ResetTransforms
-   * @apiDescription resets transforms
-   *
-   * @apiSchema (body) resetTransformsRequestSchema
-   */
-  router.versioned
-    .post({
-      path: addInternalBasePath('reset_transforms'),
-      access: 'internal',
-    })
-    .addVersion<undefined, undefined, ResetTransformsRequestSchema>(
-      {
-        version: '1',
-        validate: {
-          request: {
-            body: resetTransformsRequestSchema,
-          },
-        },
-      },
-      license.guardApiRoute<undefined, undefined, ResetTransformsRequestSchema>(
-        async (ctx, req, res) => {
-          try {
-            const body = await resetTransforms(req.body, ctx, res);
-
-            if (body && body.status) {
-              if (body.status === 404) {
-                return res.notFound();
-              }
-              if (body.status === 403) {
-                return res.forbidden();
-              }
-            }
-
-            return res.ok({
-              body,
-            });
-          } catch (e) {
-            return res.customError(wrapError(wrapEsError(e)));
-          }
-        }
-      )
-    );
 
   /**
    * @apiGroup Transforms
@@ -223,51 +165,6 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
         scheduleNowTransformsHandler
       )
     );
-}
-
-async function resetTransforms(
-  reqBody: ResetTransformsRequestSchema,
-  ctx: RequestHandlerContext,
-  response: KibanaResponseFactory
-) {
-  const { transformsInfo } = reqBody;
-
-  const results: ResetTransformsResponseSchema = {};
-  const esClient = (await ctx.core).elasticsearch.client;
-
-  for (const transformInfo of transformsInfo) {
-    const transformReset: ResponseStatus = { success: false };
-    const transformId = transformInfo.id;
-
-    try {
-      try {
-        await esClient.asCurrentUser.transform.resetTransform({
-          transform_id: transformId,
-        });
-        transformReset.success = true;
-      } catch (resetTransformJobError) {
-        transformReset.error = resetTransformJobError.meta.body.error;
-        if (resetTransformJobError.statusCode === 403) {
-          return response.forbidden();
-        }
-      }
-
-      results[transformId] = {
-        transformReset,
-      };
-    } catch (e) {
-      if (isRequestTimeout(e)) {
-        return fillResultsWithTimeouts({
-          results,
-          id: transformInfo.id,
-          items: transformsInfo,
-          action: TRANSFORM_ACTIONS.RESET,
-        });
-      }
-      results[transformId] = { transformReset: { success: false, error: e.meta.body.error } };
-    }
-  }
-  return results;
 }
 
 const previewTransformHandler: RequestHandler<
