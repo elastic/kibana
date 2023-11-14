@@ -55,8 +55,6 @@ import type { AnalyzerState } from '../../resolver/types';
 import { resolverMiddlewareFactory } from '../../resolver/store/middleware';
 import { dataAccessLayerFactory } from '../../resolver/data_access_layer/factory';
 import { sourcererActions } from './sourcerer';
-import { getDiscoverStateSelector } from './discover/selectors';
-import type { SecuritySolutionDiscoverState } from './discover/model';
 
 let store: Store<State, Action> | null = null;
 
@@ -117,12 +115,6 @@ export const createStoreFactory = async (
     },
   };
 
-  const discoverInitialState = {
-    discover: {
-      ...subPlugins.timelines.store.initialState.discover,
-    },
-  };
-
   const dataTableInitialState = {
     dataTable: {
       tableById: {
@@ -152,16 +144,10 @@ export const createStoreFactory = async (
     subPlugins.timelines.store.reducer.timeline
   ) as unknown as Reducer<TimelineState, AnyAction>;
 
-  const discoverReducer = reduceReducers(
-    discoverInitialState.discover,
-    subPlugins.timelines.store.reducer.discover
-  ) as unknown as Reducer<SecuritySolutionDiscoverState, AnyAction>;
-
   const initialState = createInitialState(
     {
       ...subPlugins.explore.store.initialState,
       ...timelineInitialState,
-      ...discoverInitialState,
       ...subPlugins.management.store.initialState,
     },
     {
@@ -178,7 +164,6 @@ export const createStoreFactory = async (
   const rootReducer = {
     ...subPlugins.explore.store.reducer,
     timeline: timelineReducer,
-    discover: discoverReducer,
     ...subPlugins.management.store.reducer,
   };
 
@@ -293,7 +278,6 @@ export const createStore = (
     timelineByIdSelector: timelineSelectors.timelineByIdSelector,
     timelineTimeRangeSelector: inputsSelectors.timelineTimeRangeSelector,
     tableByIdSelector: dataTableSelectors.tableByIdSelector,
-    discoverStateSeletor: getDiscoverStateSelector,
     storage,
   };
 

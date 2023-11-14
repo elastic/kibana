@@ -12,7 +12,6 @@ import { timelineReducer } from '../../timelines/store/timeline/reducer';
 import { managementReducer } from '../../management/store/reducer';
 import type { ManagementPluginReducer } from '../../management';
 import type { SubPluginsInitReducer } from '../store';
-import { securitySolutionDiscoverReducer } from '../store/discover/reducer';
 
 type GlobalThis = typeof globalThis;
 interface Global extends GlobalThis {
@@ -29,7 +28,6 @@ export const SUB_PLUGINS_REDUCER: SubPluginsInitReducer = {
   network: networkReducer,
   users: usersReducer,
   timeline: timelineReducer,
-  discover: securitySolutionDiscoverReducer,
   /**
    * These state's are wrapped in `Immutable`, but for compatibility with the overall app architecture,
    * they are cast to mutable versions here.

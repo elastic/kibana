@@ -12,7 +12,6 @@ import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { TableById } from '@kbn/securitysolution-data-table';
-import type { SecuritySolutionDiscoverState } from '../../../common/store/discover/model';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../../common/types';
 import type { RowRendererId } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
@@ -55,7 +54,6 @@ export interface TimelineEpicDependencies<State> {
   selectAllTimelineQuery: () => (state: State, id: string) => inputsModel.GlobalQuery;
   selectNotesByIdSelector: (state: State) => NotesById;
   tableByIdSelector: (state: State) => TableById;
-  discoverStateSeletor: (state: State) => SecuritySolutionDiscoverState;
   kibana$: Observable<CoreStart>;
   storage: Storage;
 }

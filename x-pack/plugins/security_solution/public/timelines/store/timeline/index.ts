@@ -6,7 +6,6 @@
  */
 
 import type { AnyAction, Reducer } from 'redux';
-import type { SecuritySolutionDiscoverState } from '../../../common/store/discover/model';
 import * as timelineActions from './actions';
 import * as timelineSelectors from './selectors';
 import type { TimelineState } from './types';
@@ -15,10 +14,8 @@ export { timelineActions, timelineSelectors };
 
 export interface TimelinePluginState {
   timeline: TimelineState;
-  discover: SecuritySolutionDiscoverState;
 }
 
 export interface TimelinePluginReducer {
   timeline: Reducer<TimelineState, AnyAction>;
-  discover: Reducer<SecuritySolutionDiscoverState, AnyAction>;
 }
