@@ -24,7 +24,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
 
   return {
     async loginWithRole(role: string) {
-      log.debug(`Logging by setting browser cookie for '${role}' role`);
+      log.debug(`Logging in by setting browser cookie for '${role}' role`);
       const session = await svlUserManager.getSessionByRole(role);
       // Loading bootstrap.js in order to be on the domain that the cookie will be set for.
       await browser.get(deployment.getHostPort() + '/bootstrap.js');
@@ -35,7 +35,7 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       // to use the yml setting, e.g. cloud
       await browser.setLocalStorageItem('home:welcome:show', 'false');
       if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
-        log.debug('userMenuButton is found, logged in passed');
+        log.debug('userMenuButton found, login passed');
       } else {
         throw new Error(`Failed to login with cookie for '${role}' role`);
       }
