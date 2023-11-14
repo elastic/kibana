@@ -7,9 +7,9 @@
 
 import { EuiButton } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { JobId } from '@kbn/reporting-common/types';
 import React from 'react';
-import { JobId } from '../../common/constants';
-import { JobSummary } from '../../common/types';
+import { JobSummary } from '../types';
 
 interface Props {
   getUrl: (jobId: JobId) => string;

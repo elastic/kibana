@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ByteSizeValue } from '@kbn/config-schema';
+import type { ByteSizeValue } from '@kbn/config-schema';
 import type { IUiSettingsClient, Logger } from '@kbn/core/server';
 import { createEscapeValue } from '@kbn/data-plugin/common';
-import { ReportingConfigType } from '@kbn/reporting-config-server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import {
   CSV_BOM_CHARS,
   UI_SETTINGS_CSV_QUOTE_VALUES,

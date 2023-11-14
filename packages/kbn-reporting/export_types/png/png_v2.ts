@@ -38,15 +38,10 @@ import {
   PNG_REPORT_TYPE_V2,
   TaskPayloadPNGV2,
 } from '@kbn/reporting-export-types-png-common';
-import {
-  decryptJobHeaders,
-  getFullRedirectAppUrl,
-  ExportType,
-  generatePngObservable,
-} from '@kbn/reporting-server';
-import type { PngScreenshotOptions, PngScreenshotResult } from '@kbn/screenshotting-plugin/server';
-import type { Context } from '@kbn/screenshotting-plugin/server/browsers';
+import { decryptJobHeaders, getFullRedirectAppUrl, ExportType } from '@kbn/reporting-server';
 import { SerializableRecord } from '@kbn/utility-types';
+
+import { generatePngObservable } from './generate_png';
 
 export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> {
   id = PNG_REPORT_TYPE_V2;
@@ -65,16 +60,6 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
   constructor(...args: ConstructorParameters<typeof ExportType>) {
     super(...args);
     this.logger = this.logger.get('png-export-v2');
-  }
-
-  public getScreenshots(options: PngScreenshotOptions): Observable<PngScreenshotResult> {
-    if (!this.startDeps.screenshotting) throw new Error('Screenshotting plugin is not initialized');
-    return this.startDeps.screenshotting.getScreenshots({
-      ...options,
-      urls: options?.urls?.map((url) =>
-        typeof url === 'string' ? url : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-      ),
-    });
   }
 
   /**
@@ -120,25 +105,24 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
           payload.forceNow
         );
 
-        const [locatorParams] = payload.locatorParams as unknown as Context[];
+        const [locatorParams] = payload.locatorParams;
 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
         return generatePngObservable(
           () =>
-            this.getScreenshots({
+            this.startDeps.screenshotting!.getScreenshots({
               format: 'png',
               headers,
               layout: { ...payload.layout, id: 'preserve_layout' },
-              urls: [[url, locatorParams]],
+              urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
             }),
           jobLogger,
           {
             headers,
             browserTimezone: payload.browserTimezone,
             layout: { ...payload.layout, id: 'preserve_layout' },
-            urls: [[url, locatorParams]],
           }
         );
       }),

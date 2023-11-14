@@ -24,7 +24,7 @@
     "@kbn/config-schema",
     "@kbn/i18n",
     "@kbn/reporting-common",
+    "@kbn/reporting-server",
     "@kbn/reporting-export-types-csv-common",
-    "@kbn/reporting-config-server",
   ]
 }

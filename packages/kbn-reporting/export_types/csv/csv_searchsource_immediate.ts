@@ -8,7 +8,6 @@
 
 import { Writable } from 'stream';
 
-import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import { KibanaRequest } from '@kbn/core-http-server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
@@ -27,22 +26,16 @@ import {
   CSV_SEARCHSOURCE_IMMEDIATE_TYPE,
   JobParamsDownloadCSV,
 } from '@kbn/reporting-export-types-csv-common';
-import type {
-  BaseExportTypeSetupDeps,
-  BaseExportTypeStartDeps,
-  ReportingServerPluginSetup,
-} from '@kbn/reporting-server';
+import type { BaseExportTypeSetupDeps, BaseExportTypeStartDeps } from '@kbn/reporting-server';
 import { ExportType, getFieldFormats } from '@kbn/reporting-server';
+
+import { ReportingRequestHandlerContext } from './types';
 
 type CsvSearchSourceImmediateExportTypeSetupDeps = BaseExportTypeSetupDeps;
 interface CsvSearchSourceImmediateExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
 }
-
-type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
-  reporting: ReportingServerPluginSetup | null;
-}>;
 
 /*
  * ImmediateExecuteFn receives the job doc payload because the payload was

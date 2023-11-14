@@ -25,7 +25,7 @@ import { IScopedSearchClient } from '@kbn/data-plugin/server';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { CancellationToken } from '@kbn/reporting-common';
-import { ReportingConfigType } from '@kbn/reporting-config-server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { JobParamsCSV } from '@kbn/reporting-export-types-csv-common';
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,

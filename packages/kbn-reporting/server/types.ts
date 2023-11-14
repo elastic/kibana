@@ -8,11 +8,14 @@
 
 import { Writable } from 'stream';
 
+import type { TypeOf } from '@kbn/config-schema';
 import type { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { CancellationToken } from '@kbn/reporting-common';
 import type { BaseParams, BasePayload, TaskRunResult } from '@kbn/reporting-common/types';
-import { ExportType } from './export_type';
+
+import { ConfigSchema } from './config_schema';
+import type { ExportType } from './export_type';
 
 export interface ReportingServerPluginSetup {
   registerExportTypes: (item: ExportType) => void;
@@ -38,3 +41,10 @@ export type RunTaskFn<TaskPayloadType = BasePayload> = (
   cancellationToken: CancellationToken,
   stream: Writable
 ) => Promise<TaskRunResult>;
+
+export interface TimeRangeParams {
+  min?: Date | string | number | null;
+  max?: Date | string | number | null;
+}
+
+export type ReportingConfigType = TypeOf<typeof ConfigSchema>;

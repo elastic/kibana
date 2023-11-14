@@ -24,5 +24,6 @@
     "@kbn/reporting-export-types-png-common",
     "@kbn/core",
     "@kbn/reporting-mocks-server",
+    "@kbn/logging",
   ]
 }

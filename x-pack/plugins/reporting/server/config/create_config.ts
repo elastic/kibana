@@ -10,7 +10,7 @@ import ipaddr from 'ipaddr.js';
 import { sum } from 'lodash';
 
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import { ReportingConfigType } from '.';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 
 /*
  * Set up dynamic config defaults

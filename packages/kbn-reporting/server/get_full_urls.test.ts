@@ -6,10 +6,10 @@
  * Side Public License, v 1.
  */
 
-import { ReportingServerInfo } from '@kbn/reporting-common/types';
-import { ReportingConfigType } from '@kbn/reporting-config-server';
-import { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
+import type { ReportingServerInfo } from '@kbn/reporting-common/types';
+import type { TaskPayloadPDF } from '@kbn/reporting-export-types-pdf-common';
 
+import type { ReportingConfigType } from '.';
 import { getFullUrls } from './get_full_urls';
 
 const getMockJob = (base: object) => base as TaskPayloadPDF;

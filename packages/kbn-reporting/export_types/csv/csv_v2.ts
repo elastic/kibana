@@ -35,7 +35,10 @@ import {
   type BaseExportTypeStartDeps,
 } from '@kbn/reporting-server';
 
+import { ReportingRequestHandlerContext } from './types';
+
 type CsvV2ExportTypeSetupDeps = BaseExportTypeSetupDeps;
+
 export interface CsvV2ExportTypeStartDeps extends BaseExportTypeStartDeps {
   discover: DiscoverServerPluginStart;
   data: DataPluginStart;
@@ -68,7 +71,7 @@ export class CsvV2ExportType extends ExportType<
 
   public createJob = async (
     jobParams: JobParamsCsvFromSavedObject,
-    _context: unknown,
+    _context: ReportingRequestHandlerContext,
     req: KibanaRequest
   ) => {
     // 1. Validation of locatorParams

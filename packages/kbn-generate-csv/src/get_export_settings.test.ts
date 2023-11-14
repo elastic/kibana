@@ -6,13 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { IUiSettingsClient } from '@kbn/core/server';
+import type { IUiSettingsClient } from '@kbn/core/server';
 import {
   loggingSystemMock,
   savedObjectsClientMock,
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
-import { ReportingConfigType } from '@kbn/reporting-config-server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 
 import {
   UI_SETTINGS_CSV_QUOTE_VALUES,

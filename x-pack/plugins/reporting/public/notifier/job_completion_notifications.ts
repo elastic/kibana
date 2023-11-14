@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { JobId, JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../../common/constants';
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '@kbn/reporting-common';
+import { JobId } from '@kbn/reporting-common/types';
 
 const set = (jobs: string[]) => {
   sessionStorage.setItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, JSON.stringify(jobs));

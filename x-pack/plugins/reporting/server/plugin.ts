@@ -12,10 +12,11 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import { PLUGIN_ID } from '@kbn/reporting-common';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import { setFieldFormats } from '@kbn/reporting-server';
 import { ReportingCore } from '.';
-import { PLUGIN_ID } from '../common/constants';
-import { ReportingConfigType, registerUiSettings } from './config';
+import { registerUiSettings } from './config';
 import { registerDeprecations } from './deprecations';
 import { ReportingStore } from './lib';
 import { registerRoutes } from './routes';

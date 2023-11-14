@@ -5248,10 +5248,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/reporting-config-server@link:packages/kbn-reporting/config_server":
-  version "0.0.0"
-  uid ""
-
 "@kbn/reporting-example-plugin@link:x-pack/examples/reporting_example":
   version "0.0.0"
   uid ""
@@ -5285,6 +5281,10 @@
   uid ""
 
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-public@link:packages/kbn-reporting/public":
   version "0.0.0"
   uid ""
 

@@ -6,12 +6,15 @@
  */
 
 import { CustomRequestHandlerContext } from '@kbn/core-http-request-handler-context-server';
+import { IRouter } from '@kbn/core-http-server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import type { DiscoverServerPluginStart } from '@kbn/discover-plugin/server';
 import type { PluginSetupContract as FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { UrlOrUrlLocatorTuple } from '@kbn/reporting-common/types';
+import type { ReportApiJSON } from '@kbn/reporting-common/types';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
 import type {
   PdfScreenshotOptions as BasePdfScreenshotOptions,
@@ -30,9 +33,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { ReportApiJSON } from '../common/types';
-import type { ReportingConfigType } from './config';
-import { ReportingCore } from './core';
 import { ExportTypesRegistry } from './lib';
 
 /**
@@ -40,7 +40,6 @@ import { ExportTypesRegistry } from './lib';
  */
 export interface ReportingSetup {
   registerExportTypes: ExportTypesRegistry['register'];
-  getScreenshots?: ReportingCore['getScreenshots'];
   /**
    * Used to inform plugins if Reporting config is compatible with UI Capabilities / Application Sub-Feature Controls
    */
@@ -77,6 +76,8 @@ export interface ReportingStartDeps {
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
   reporting: ReportingStart | null;
 }>;
+
+export type ReportingPluginRouter = IRouter<ReportingRequestHandlerContext>;
 
 /**
  * Interface of a response to an HTTP request for our plugin to generate a report.
