@@ -6,10 +6,9 @@
  */
 
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { ConcreteTaskInstance, DecoratedError } from '@kbn/task-manager-plugin/server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server/actions_client';
-import { DecoratedError } from '@kbn/task-manager-plugin/server/task_running';
 import { IAlertsClient } from '../alerts_client/types';
 import { Alert } from '../alert';
 import { TaskRunnerContext } from './task_runner_factory';
