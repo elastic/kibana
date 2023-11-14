@@ -149,8 +149,6 @@ export interface StackFrameMetadata {
   FunctionName: string;
   /** StackFrame.FunctionOffset */
   FunctionOffset: number;
-  /** should this be StackFrame.SourceID? */
-  SourceID: FileID;
   /** StackFrame.Filename */
   SourceFilename: string;
   /** StackFrame.LineNumber */
@@ -176,7 +174,6 @@ export function createStackFrameMetadata(
   metadata.AddressOrLine = options.AddressOrLine ?? 0;
   metadata.FunctionName = options.FunctionName ?? '';
   metadata.FunctionOffset = options.FunctionOffset ?? 0;
-  metadata.SourceID = options.SourceID ?? '';
   metadata.SourceFilename = options.SourceFilename ?? '';
   metadata.SourceLine = options.SourceLine ?? 0;
   metadata.ExeFileName = options.ExeFileName ?? '';
