@@ -29,7 +29,6 @@ import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/p
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
-import { SloSummary } from './slo_summary';
 
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
 
