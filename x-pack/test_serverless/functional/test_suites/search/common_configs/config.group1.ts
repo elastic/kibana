@@ -20,7 +20,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         // Removing the Observability plugin since the SLO feature now installs
         // an enrich policy by default. The tests expect to start with a fresh
         // install without enrich policies.
-        '--xpack.observability.enabled=false',
+        // '--xpack.observability.enabled=false',
       ],
     },
     testFiles: [
