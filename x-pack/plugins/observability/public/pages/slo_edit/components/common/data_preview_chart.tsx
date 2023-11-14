@@ -224,7 +224,7 @@ export function DataPreviewChart({
                 timeAxisLayerCount={2}
                 gridLine={{ visible: true }}
                 style={{
-                  tickLine: { size: 0.0001, padding: 4, visible: true },
+                  tickLine: { size: 0, padding: 4, visible: true },
                   tickLabel: {
                     alignment: {
                       horizontal: Position.Left,
