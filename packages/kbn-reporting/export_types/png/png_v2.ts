@@ -110,19 +110,21 @@ export class PngExportType extends ExportType<JobParamsPNGV2, TaskPayloadPNGV2> 
         apmGetAssets?.end();
         apmGeneratePng = apmTrans.startSpan('generate-png-pipeline', 'execute');
 
-        const snapshotFn = () =>
-          this.startDeps.screenshotting!.getScreenshots({
-            format: 'png',
+        return generatePngObservable(
+          () =>
+            this.startDeps.screenshotting!.getScreenshots({
+              format: 'png',
+              headers,
+              layout: { ...payload.layout, id: 'preserve_layout' },
+              urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
+            }),
+          jobLogger,
+          {
             headers,
+            browserTimezone: payload.browserTimezone,
             layout: { ...payload.layout, id: 'preserve_layout' },
-            urls: [[url, { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: locatorParams }]],
-          });
-
-        return generatePngObservable(snapshotFn, jobLogger, {
-          headers,
-          browserTimezone: payload.browserTimezone,
-          layout: { ...payload.layout, id: 'preserve_layout' },
-        });
+          }
+        );
       }),
       tap(({ buffer }) => stream.write(buffer)),
       map(({ metrics, warnings }) => ({

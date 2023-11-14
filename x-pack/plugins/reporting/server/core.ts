@@ -157,7 +157,7 @@ export class ReportingCore {
     this.pluginStartDeps = startDeps; // cache
 
     this.exportTypesRegistry.getAll().forEach((et) => {
-      return et.start({ ...startDeps });
+      et.start({ ...startDeps });
     });
 
     const { taskManager } = startDeps;

@@ -116,24 +116,23 @@ export class PdfExportType extends ExportType<JobParamsPDFV2, TaskPayloadPDFV2> 
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
 
-        const snapshotFn = () =>
-          this.startDeps.screenshotting!.getScreenshots({
-            format: 'pdf',
-            title,
-            logo,
-            browserTimezone,
-            headers,
-            layout,
-            urls: urls.map((url) =>
-              typeof url === 'string'
-                ? url
-                : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
-            ),
-          });
         return generatePdfObservableV2(
           this.config,
           this.getServerInfo(),
-          snapshotFn,
+          () =>
+            this.startDeps.screenshotting!.getScreenshots({
+              format: 'pdf',
+              title,
+              logo,
+              browserTimezone,
+              headers,
+              layout,
+              urls: urls.map((url) =>
+                typeof url === 'string'
+                  ? url
+                  : [url[0], { [REPORTING_REDIRECT_LOCATOR_STORE_KEY]: url[1] }]
+              ),
+            }),
           payload,
           locatorParams,
           {

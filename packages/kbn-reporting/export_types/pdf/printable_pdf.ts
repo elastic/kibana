@@ -99,8 +99,18 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
 
         apmGeneratePdf = apmTrans.startSpan('generate-pdf-pipeline', 'execute');
 
-        const snapshotFn = () =>
-          this.startDeps.screenshotting!.getScreenshots({
+        return generatePdfObservable(
+          () =>
+            this.startDeps.screenshotting!.getScreenshots({
+              format: 'pdf',
+              title,
+              logo,
+              urls,
+              browserTimezone,
+              headers,
+              layout,
+            }),
+          {
             format: 'pdf',
             title,
             logo,
@@ -108,17 +118,8 @@ export class PdfV1ExportType extends ExportType<JobParamsPDFDeprecated, TaskPayl
             browserTimezone,
             headers,
             layout,
-          });
-
-        return generatePdfObservable(snapshotFn, {
-          format: 'pdf',
-          title,
-          logo,
-          urls,
-          browserTimezone,
-          headers,
-          layout,
-        });
+          }
+        );
       }),
       tap(({ buffer }) => {
         apmGeneratePdf?.end();
