@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { IRouter } from '@kbn/core/server';
+import { TypeOf } from '@kbn/config-schema/src/types/object_type';
 import { ILicenseState, RuleTypeDisabledError, validateDurationSchema } from '../lib';
 import { UpdateOptions } from '../rules_client';
 import {
@@ -61,7 +62,7 @@ const rewriteBodyReq: RewriteRequestCase<UpdateOptions<RuleTypeParams>> = (resul
     data: {
       ...rest,
       notifyWhen,
-      actions: rewriteActionsReq(actions),
+      actions: rewriteActionsReq(actions as TypeOf<typeof actionsSchema>),
     },
   };
 };

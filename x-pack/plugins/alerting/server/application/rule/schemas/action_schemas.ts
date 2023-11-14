@@ -15,14 +15,7 @@ const actionAlertsFilterQueryFiltersSchema = schema.arrayOf(
   schema.object({
     query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
     meta: schema.recordOf(schema.string(), schema.any()),
-    $state: schema.maybe(
-      schema.object({
-        store: schema.oneOf([
-          schema.literal(filterStateStore.APP_STATE),
-          schema.literal(filterStateStore.GLOBAL_STATE),
-        ]),
-      })
-    ),
+    $state: schema.maybe(schema.object({ store: schema.literal(filterStateStore.APP_STATE) })),
   })
 );
 
