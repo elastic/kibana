@@ -628,11 +628,7 @@ export function registerEncryptedSavedObjects(
       { key: 'ssl', dangerouslyExposeValue: true },
       { key: 'password', dangerouslyExposeValue: true },
     ]),
-    attributesToIncludeInAAD: new Set([
-      'ssl',
-      'shipper',
-      'allow_edit',
-    ]),
+    attributesToIncludeInAAD: new Set(['ssl', 'shipper', 'allow_edit']),
   });
   // Encrypted saved objects
   encryptedSavedObjects.registerType({
