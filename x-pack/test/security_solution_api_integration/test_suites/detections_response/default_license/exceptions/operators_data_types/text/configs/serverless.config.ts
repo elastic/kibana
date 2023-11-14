@@ -11,6 +11,6 @@ export default createTestConfig({
   testFiles: [require.resolve('..')],
   junit: {
     reportName:
-      'Detection Engine Serverless/ Exception Operators Data Types ips_text_array API Integration Tests',
+      'Detection Engine Serverless - Exception Operators Data Types API - Text Integration Tests',
   },
 });
