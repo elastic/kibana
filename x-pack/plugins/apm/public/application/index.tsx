@@ -46,6 +46,7 @@ export const renderApp = ({
     appMountParameters,
     config,
     core: coreStart,
+    cloudExperiments: pluginsStart.cloudExperiments,
     plugins: pluginsSetup,
     data: pluginsStart.data,
     inspector: pluginsStart.inspector,

@@ -19,9 +19,11 @@ import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
+  cloudExperiments: CloudExperimentsPluginStart;
   config: ConfigSchema;
   core: CoreStart;
   inspector: InspectorPluginStart;

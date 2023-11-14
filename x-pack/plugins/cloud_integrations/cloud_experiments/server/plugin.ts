@@ -83,7 +83,7 @@ export class CloudExperimentsPlugin
       }));
     }
 
-    if (deps.cloud.isCloudEnabled && deps.cloud.deploymentId) {
+    if (deps.cloud && deps.cloud.isCloudEnabled && deps.cloud.deploymentId) {
       this.metadataService.setup({
         // We use the Cloud Deployment ID as the userId in the Cloud Experiments
         userId: deps.cloud.deploymentId,

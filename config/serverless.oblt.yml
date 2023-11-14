@@ -11,6 +11,12 @@ xpack.legacy_uptime.enabled: false
 ## Cloud settings
 xpack.cloud.serverless.project_type: observability
 
+## Cloud experiments
+xpack.cloud_integrations.experiments.enabled: true
+xpack.cloud_integrations.experiments.launch_darkly.sdk_key: 'x'
+xpack.cloud_integrations.experiments.launch_darkly.client_id: 'y'
+xpack.cloud_integrations.experiments.launch_darkly.client_log_level: 'debug'
+
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
 

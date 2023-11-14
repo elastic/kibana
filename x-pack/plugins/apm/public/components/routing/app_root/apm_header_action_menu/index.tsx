@@ -13,7 +13,7 @@ import {
 } from '@elastic/eui';
 import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
@@ -22,9 +22,32 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
+import {
+  CloudExperimentsPluginStart,
+  CloudExperimentsFeatureFlagNames,
+} from '@kbn/cloud-experiments-plugin/common';
+
+function useFeatureFlag(
+  key: keyof CloudExperimentsFeatureFlagNames,
+  defaultValue: any,
+  cloudExperiments: CloudExperimentsPluginStart
+) {
+  const [value, setValue] = useState(defaultValue);
+
+  useEffect(() => {
+    async function getVariation() {
+      const result = await cloudExperiments.getVariation(key, defaultValue);
+      setValue(result);
+    }
+    getVariation();
+    return () => {};
+  });
+
+  return value;
+}
 
 export function ApmHeaderActionMenu() {
-  const { core, plugins, config } = useApmPluginContext();
+  const { core, cloudExperiments, plugins, config } = useApmPluginContext();
   const { search } = window.location;
   const { application, http } = core;
   const { basePath } = http;
@@ -49,8 +72,15 @@ export function ApmHeaderActionMenu() {
     false
   );
 
+  const isShowHeadingMessageEnabled = useFeatureFlag(
+    'observability-heading-message-enabled-test',
+    false,
+    cloudExperiments
+  );
+
   return (
     <EuiHeaderLinks gutterSize="xs">
+      {isShowHeadingMessageEnabled && 'Hello and welcome!'}
       {isLabsButtonEnabled && <Labs />}
       {featureFlags.storageExplorerAvailable && (
         <EuiHeaderLink
