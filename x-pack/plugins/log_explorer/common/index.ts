@@ -18,8 +18,12 @@ export {
 export type { DatasetSelectionPlain } from './dataset_selection';
 export type {
   ChartDisplayOptions,
+  PartialChartDisplayOptions,
   GridColumnDisplayOptions,
   GridRowsDisplayOptions,
+  PartialGridRowsDisplayOptions,
   GridDisplayOptions,
+  PartialGridDisplayOptions,
   DisplayOptions,
+  PartialDisplayOptions,
 } from './display_options';

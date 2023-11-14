@@ -22,6 +22,10 @@ interface WithController {
   controller: LogExplorerController;
 }
 
+interface WithLogExplorerState {
+  logExplorerState: LogExplorerControllerContext;
+}
+
 interface WithTimeFilter {
   time: QueryState['time'];
   refreshInterval: QueryState['refreshInterval'];

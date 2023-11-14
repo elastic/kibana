@@ -7,36 +7,27 @@
 
 import { CoreStart } from '@kbn/core/public';
 import { getDevToolsOptions } from '@kbn/xstate-utils';
-import { BehaviorSubject } from 'rxjs';
+import { EMPTY, from, map, shareReplay } from 'rxjs';
 import { interpret } from 'xstate';
-import { DatasetSelectionPlain, hydrateDatasetSelection } from '../../common';
 import { DatasetsService } from '../services/datasets';
-import {
-  createLogExplorerControllerStateMachine,
-  LogExplorerControllerContext,
-  WithDisplayOptions,
-  WithQueryState,
-} from '../state_machines/log_explorer_controller';
-import { DEFAULT_CONTEXT } from '../state_machines/log_explorer_controller/src/defaults';
+import { createLogExplorerControllerStateMachine } from '../state_machines/log_explorer_controller';
 import { LogExplorerStartDeps } from '../types';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
 import { createMemoryUrlStateStorage } from './custom_url_state_storage';
-import { LogExplorerController, LogExplorerDiscoverServices } from './types';
-// import { mapContextFromStateStorageContainer } from '../state_machines/log_explorer_controller/src/services/discover_service';
-// import { createStateStorageContainer } from './create_state_storage';
+import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
+import {
+  LogExplorerController,
+  LogExplorerDiscoverServices,
+  LogExplorerPublicStateUpdate,
+} from './types';
 
 interface Dependencies {
   core: CoreStart;
   plugins: LogExplorerStartDeps;
 }
 
-type InitialState = Partial<
-  WithQueryState &
-    WithDisplayOptions & {
-      datasetSelection: DatasetSelectionPlain;
-    }
->;
+type InitialState = LogExplorerPublicStateUpdate;
 
 export const createLogExplorerControllerFactory =
   ({ core, plugins: { data } }: Dependencies) =>
@@ -56,9 +47,7 @@ export const createLogExplorerControllerFactory =
       urlStateStorage: createMemoryUrlStateStorage(),
     };
 
-    const initialContext = createInitialContext(initialState);
-
-    const logExplorerContext$ = new BehaviorSubject<LogExplorerControllerContext>(initialContext);
+    const initialContext = getContextFromPublicState(initialState ?? {});
 
     const machine = createLogExplorerControllerStateMachine({
       datasetsClient,
@@ -71,37 +60,40 @@ export const createLogExplorerControllerFactory =
       devTools: getDevToolsOptions(),
     }).start();
 
-    // Notify consumers of changes to the state machine's context
-    service.subscribe((state) => {
-      logExplorerContext$.next(state.context);
-    });
+    const logExplorerState$ = from(service).pipe(
+      map(({ context }) => getPublicStateFromContext(context)),
+      shareReplay(1)
+    );
 
     return {
+      actions: {},
       datasetsClient,
       discoverServices,
+      event$: EMPTY,
       service,
-      state$: logExplorerContext$.asObservable(),
+      state$: logExplorerState$,
       stateMachine: machine,
     };
   };
 
 export type CreateLogExplorerController = ReturnType<typeof createLogExplorerControllerFactory>;
 
-const createInitialContext = (
-  initialState: InitialState | undefined
-): LogExplorerControllerContext => {
-  if (initialState != null) {
-    const { datasetSelection, ...remainingInitialState } = initialState;
+// const createInitialContext = (
+//   initialState: InitialState | undefined
+// ): LogExplorerControllerContext => {
+//   if (initialState != null) {
+//     // const { datasetSelection, ...remainingInitialState } = initialState;
 
-    return {
-      ...DEFAULT_CONTEXT,
-      ...remainingInitialState,
-      datasetSelection:
-        datasetSelection != null
-          ? hydrateDatasetSelection(datasetSelection)
-          : DEFAULT_CONTEXT.datasetSelection,
-    };
-  }
+//     return {
+//       ...DEFAULT_CONTEXT,
+//       ...getContextFromPublicState(initialState),
+//       // ...remainingInitialState,
+//       // datasetSelection:
+//       //   datasetSelection != null
+//       //     ? hydrateDatasetSelection(datasetSelection)
+//       //     : DEFAULT_CONTEXT.datasetSelection,
+//     };
+//   }
 
-  return DEFAULT_CONTEXT;
-};
+//   return DEFAULT_CONTEXT;
+// };

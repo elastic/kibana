@@ -34,7 +34,6 @@ export interface WithDiscoverStateContainer {
 
 export type DefaultLogExplorerControllerState = WithDatasetSelection &
   WithQueryState &
-  WithDisplayOptions &
   WithDisplayOptions;
 
 export type LogExplorerControllerTypeState =

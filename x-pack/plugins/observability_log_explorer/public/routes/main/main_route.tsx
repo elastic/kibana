@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { EuiEmptyPrompt, EuiLoadingLogo } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   LogExplorerController,
   LogExplorerPluginStart,
@@ -25,7 +27,7 @@ import { useKibanaContextForPlugin } from '../../utils/use_kibana';
 export const ObservablityLogExplorerMainRoute = () => {
   const { services } = useKibanaContextForPlugin();
   const { logExplorer, serverless, chrome, notifications, appParams } = services;
-  const { history, setHeaderActionMenu, theme$ } = appParams;
+  const { history } = appParams;
 
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
@@ -38,11 +40,7 @@ export const ObservablityLogExplorerMainRoute = () => {
       urlStateStorageContainer={urlStateStorageContainer}
       timeFilterService={services.data.query.timefilter.timefilter}
     >
-      <LogExplorerTopNavMenu
-        setHeaderActionMenu={setHeaderActionMenu}
-        services={services}
-        theme$={theme$}
-      />
+      <LogExplorerTopNavMenu />
       <LazyOriginInterpreter history={history} toasts={notifications.toasts} />
       <ConnectedContent />
     </ObservabilityLogExplorerPageStateProvider>
@@ -60,7 +58,7 @@ const ConnectedContent = React.memo(() => {
   const [state] = useActor(useObservabilityLogExplorerPageStateContext());
 
   if (state.matches('uninitialized')) {
-    return <ObservabilityLogExplorerPageTemplate />;
+    return <InitializingContent />;
   } else if (state.matches('initialized')) {
     return (
       <InitializedContent
@@ -73,6 +71,20 @@ const ConnectedContent = React.memo(() => {
     return null;
   }
 });
+
+const InitializingContent = React.memo(() => (
+  <ObservabilityLogExplorerPageTemplate>
+    <EuiEmptyPrompt
+      icon={<EuiLoadingLogo logo="logoKibana" size="xl" />}
+      title={
+        <FormattedMessage
+          id="xpack.observabilityLogExplorer.InitializingTitle"
+          defaultMessage="Initializing the Log Explorer"
+        />
+      }
+    />
+  </ObservabilityLogExplorerPageTemplate>
+));
 
 const InitializedContent = React.memo(
   ({

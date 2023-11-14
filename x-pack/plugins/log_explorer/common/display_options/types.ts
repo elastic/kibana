@@ -9,6 +9,8 @@ export interface ChartDisplayOptions {
   breakdownField: string;
 }
 
+export type PartialChartDisplayOptions = Partial<ChartDisplayOptions>;
+
 export interface GridColumnDisplayOptions {
   field: string;
   width?: number;
@@ -19,12 +21,23 @@ export interface GridRowsDisplayOptions {
   rowsPerPage: number;
 }
 
+export type PartialGridRowsDisplayOptions = Partial<GridRowsDisplayOptions>;
+
 export interface GridDisplayOptions {
   columns: GridColumnDisplayOptions[];
   rows: GridRowsDisplayOptions;
 }
 
+export type PartialGridDisplayOptions = Partial<
+  Omit<GridDisplayOptions, 'rows'> & { rows?: PartialGridRowsDisplayOptions }
+>;
+
 export interface DisplayOptions {
   grid: GridDisplayOptions;
   chart: ChartDisplayOptions;
+}
+
+export interface PartialDisplayOptions {
+  grid?: PartialGridDisplayOptions;
+  chart?: PartialChartDisplayOptions;
 }
