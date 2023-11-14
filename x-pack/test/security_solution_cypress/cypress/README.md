@@ -71,6 +71,10 @@ Run the tests with the following yarn scripts from `x-pack/test/security_solutio
 | cypress:explore:run:ess | Runs all tests tagged as ESS in the `e2e/explore` directory in headless mode |
 | cypress:investigations:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode |
 | cypress:explore:run:serverless | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode |
+| cypress:open:qa:serverless | Opens the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment. The kibana instance will reload when you make code changes. This is the recommended way to debug tests in QA. Follow the readme in order to learn about the known limitations. |
+| cypress:run:qa:serverless | Runs all tests tagged as SERVERLESS placed in the `e2e` directory excluding `investigations` and `explore` directories in headless mode using the QA environment and real MKI projects.|
+| cypress:run:qa:serverless:explore | Runs all tests tagged as SERVERLESS in the `e2e/explore` directory in headless mode using the QA environment and real MKI prorjects. |
+| cypress:run:qa:serverless:investigations | Runs all tests tagged as SERVERLESS in the `e2e/investigations` directory in headless mode using the QA environment and reak MKI projects. |
 | junit:merge | Merges individual test reports into a single report and moves the report to the `junit` directory |
 
 Please note that all the headless mode commands do not open the Cypress UI and are typically used in CI/CD environments. The scripts that open the Cypress UI are useful for development and debugging.
