@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import React, { FC, useState } from 'react';
+import React, { FC } from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import {
   EuiContextMenuPanelDescriptor,
@@ -16,7 +16,6 @@ import {
   EuiModalHeaderTitle,
   EuiOverlayMask,
   EuiTabbedContent,
-  EuiTabbedContentTab,
 } from '@elastic/eui';
 import { Capabilities } from '@kbn/core-capabilities-common';
 import { i18n } from '@kbn/i18n';
@@ -202,17 +201,11 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
     formattedTabs.push({
       name: t.title,
       title: t.title,
-      id: i,
+      id: `${t.title}-${i}`,
       content: t.content,
     });
     // }
   });
-
-  const [selectedTab, setSelectedTab] = useState(formattedTabs[0]);
-
-  const onTabClick = (selectTab: EuiTabbedContentTab) => {
-    setSelectedTab(selectTab);
-  };
 
   return (
     <I18nProvider>
@@ -223,9 +216,10 @@ export const ShareUxModal: FC<ShareModalProps> = (props: ShareModalProps) => {
           </EuiModalHeader>
           <EuiModalBody>
             <EuiTabbedContent
+              size="s"
               tabs={formattedTabs}
-              selectedTab={selectedTab}
-              onTabClick={onTabClick}
+              initialSelectedTab={formattedTabs[0]}
+              autoFocus="selected"
               data-test-subject="shareModalTabs"
             />
           </EuiModalBody>

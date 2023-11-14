@@ -26,7 +26,7 @@ interface LinksModalPageProps {
 }
 
 export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
-  const [selectedRadio, setSelectedRadio] = useState<string>('0');
+  const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
   const { objectId, onClose } = props;
   const isNotSaved = () => {
     return objectId === undefined || objectId === '';
@@ -55,8 +55,8 @@ export const LinksModalPage: FC<LinksModalPageProps> = (props: LinksModalPagePro
     <EuiForm className="kbnShareContextMenu__finalPanel">
       <EuiRadioGroup
         options={[
-          { id: '0', label: 'Saved object' },
-          { id: '1', label: 'Snapshot' },
+          { id: 'savedObject', label: 'Saved object' },
+          { id: 'snapshot', label: 'Snapshot' },
         ]}
         onChange={(id) => setSelectedRadio(id)}
         name="embed radio group"

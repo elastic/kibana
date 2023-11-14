@@ -12,6 +12,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiForm,
+  EuiFormRow,
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
@@ -70,8 +71,9 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
-  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['0']: true });
-  const [selectedRadio, setSelectedRadio] = useState<string>('0');
+  const [checkboxSelectedMap, setCheckboxIdSelectedMap] = useState({ ['filterBar']: true });
+  const [selectedRadio, setSelectedRadio] = useState<string>('savedObject');
+
   const [exportUrlAs, setExportUrlAs] = useState<ExportUrlAsType>(
     ExportUrlAsType.EXPORT_URL_AS_SNAPSHOT
   );
@@ -79,18 +81,6 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
   const [anonymousAccessParameters, setAnonymousAccessParameters] =
     useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl, setUsePublicUrl] = useState<boolean>(false);
-
-  const shortUrlLabel = (
-    <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
-  );
-  const switchLabel =
-    isCreatingShortUrl !== undefined ? (
-      <span>
-        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
-      </span>
-    ) : (
-      shortUrlLabel
-    );
 
   const makeUrlEmbeddable = (url: string): string => {
     const embedParam = '?embed=true';
@@ -275,6 +265,46 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
     createShortUrl();
   };
 
+  const renderShortUrlSwitch = () => {
+    if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT || !allowShortUrl) {
+      return null;
+    }
+    const shortUrlLabel = (
+      <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
+    );
+    const switchLabel =
+      isCreatingShortUrl !== undefined ? (
+        <span>
+          <EuiLoadingSpinner size="s" /> {shortUrlLabel}
+        </span>
+      ) : (
+        shortUrlLabel
+      );
+    const switchComponent = (
+      <EuiSwitch
+        label={switchLabel}
+        checked={setShortUrl as unknown as boolean}
+        onChange={handleShortUrlChange}
+        data-test-subj="useShortUrl"
+      />
+    );
+    const tipContent = (
+      <FormattedMessage
+        id="share.urlPanel.shortUrlHelpText"
+        defaultMessage="We recommend sharing shortened snapshot URLs for maximum compatibility.
+        Internet Explorer has URL length restrictions,
+        and some wiki and markup parsers don't do well with the full-length version of the snapshot URL,
+        but the short URL should work great."
+      />
+    );
+
+    return (
+      <EuiFormRow helpText={shortUrlErrorMsg} data-test-subj="createShortUrl">
+        {renderWithIconTip(switchComponent, tipContent)}
+      </EuiFormRow>
+    );
+  };
+
   const checkboxOnChangeHandler = (id: string): void => {
     const newCheckboxMap = {
       ...checkboxSelectedMap,
@@ -286,15 +316,15 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
   };
 
   const checkboxOptions = [
-    { id: '0', label: 'Filter bar' },
-    { id: '1', label: 'Query' },
-    { id: '2', label: 'Time filter' },
-    { id: '3', label: 'Top menu' },
+    { id: 'filterBar', label: 'Filter bar', 'data-test-sub': 'filter-bar-embed' },
+    { id: 'query', label: 'Query', 'data-test-sub': 'query-embed' },
+    { id: 'timeFilter', label: 'Time filter', 'data-test-sub': 'time-filter-embed' },
+    { id: 'topMenu', label: 'Top menu', 'data-test-sub': 'top-menu-embed' },
   ];
 
   const radioOptions = [
-    { id: '0', label: 'Saved object' },
-    { id: '1', label: 'Snapshot' },
+    { id: 'savedObject', label: 'Saved object' },
+    { id: 'snapshot', label: 'Snapshot' },
   ];
 
   return (
@@ -318,16 +348,7 @@ export const EmbedModalPage: FC<EmbedModalPageProps> = (props: EmbedModalPagePro
               idSelected={selectedRadio}
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={1}>
-            {allowShortUrl && (
-              <EuiSwitch
-                label={switchLabel}
-                checked={allowShortUrl}
-                onChange={(id) => setShortUrl(id)}
-                data-test-subj="useShortUrl"
-              />
-            )}
-          </EuiFlexItem>
+          <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
           <EuiSpacer size="m" />
         </EuiFlexGroup>
         <EuiSpacer size="m" />
