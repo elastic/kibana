@@ -12,7 +12,7 @@ import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { CSV_JOB_TYPE } from '../../common/constants';
 import { checkLicense } from '../lib/license_check';
 import { ExportPanelShareOpts } from '.';
-import { ReportingPanelContent } from './reporting_panel_content_lazy';
+import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
   apiClient,
@@ -23,7 +23,14 @@ export const reportingCsvShareProvider = ({
   usesUiCapabilities,
   theme,
 }: ExportPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({ objectType, objectId, sharingData, onClose }: ShareContext) => {
+  const getShareMenuItems = ({
+    objectType,
+    objectId,
+    onClose,
+    shareableUrl,
+    sharingData,
+    ...shareOpts
+  }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -69,7 +76,7 @@ export const reportingCsvShareProvider = ({
 
     if (licenseHasCsvReporting && capabilityHasCsvReporting) {
       const panelTitle = i18n.translate('xpack.reporting.shareContextMenu.csvReportsButtonLabel', {
-        defaultMessage: 'CSV Reports',
+        defaultMessage: 'Exports',
       });
 
       shareActions.push({
@@ -85,16 +92,15 @@ export const reportingCsvShareProvider = ({
           id: 'csvReportingPanel',
           title: panelTitle,
           content: (
-            <ReportingPanelContent
+            <CsvModalContent
               requiresSavedState={false}
               apiClient={apiClient}
               toasts={toasts}
               uiSettings={uiSettings}
               reportType={CSV_JOB_TYPE}
-              layoutId={undefined}
               objectId={objectId}
-              getJobParams={getJobParams}
               onClose={onClose}
+              getJobParams={getJobParams}
               theme={theme}
             />
           ),

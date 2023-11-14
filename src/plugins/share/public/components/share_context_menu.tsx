@@ -7,18 +7,19 @@
  */
 
 import React, { Component } from 'react';
-
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
 
-import type { Capabilities } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 
+import { Capabilities } from '@kbn/core-capabilities-common';
 import type { LocatorPublic } from '../../common';
-import { UrlPanelContent } from './url_panel_content';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
 import type { BrowserUrlService } from '../types';
+import { LinkModal, EmbedModal } from './modals';
 
 export interface ShareContextMenuProps {
   allowEmbed: boolean;
@@ -41,19 +42,92 @@ export interface ShareContextMenuProps {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
+  overlays: CoreStart['overlays'];
+  theme: CoreStart['theme'];
+  i18nStart: CoreStart['i18n'];
 }
 
 export class ShareContextMenu extends Component<ShareContextMenuProps> {
+  constructor(props: ShareContextMenuProps) {
+    super(props);
+  }
+  private openLinkModal() {
+    const session = this.props.overlays.openModal(
+      toMountPoint(
+        <LinkModal
+          isEmbedded={false}
+          allowShortUrl={false}
+          onClose={() => {
+            this.props.onClose;
+            session.close();
+          }}
+          urlService={this.props.urlService}
+        />,
+        { theme: this.props.theme, i18n: this.props.i18nStart }
+      ),
+      {
+        maxWidth: 400,
+        'data-test-subj': 'link-modal',
+      }
+    );
+  }
+
+  private openEmbedModal() {
+    const session = this.props.overlays.openModal(
+      toMountPoint(
+        <EmbedModal
+          isEmbedded={false}
+          allowShortUrl={false}
+          onClose={() => {
+            this.props.onClose;
+            session.close();
+          }}
+          urlService={this.props.urlService}
+          objectType={this.props.objectType}
+        />,
+        { theme: this.props.theme, i18n: this.props.i18nStart }
+      ),
+      {
+        maxWidth: 400,
+        'data-test-subj': 'embed-modal',
+      }
+    );
+  }
+
+  // private openCsvExportModal() {
+  //   const session = this.props.overlays.openModal(
+  //     toMountPoint(
+  //       <CsvModalContentUI
+  //         isEmbedded={false}
+  //         allowShortUrl={false}
+  //         onClose={() => {
+  //           this.props.onClose();
+  //           session.close();
+  //         }}
+  //         urlService={this.props.urlService}
+  //         objectType={this.props.objectType}
+  //       />,
+  //       { theme: this.props.theme, i18n: this.props.i18nStart }
+  //     ),
+  //     {
+  //       maxWidth: 400,
+  //       'data-test-subj': 'embed-modal',
+  //     }
+  //   );
+  // }
+
   public render() {
-    const { panels, initialPanelId } = this.getPanels();
+    const { panels } = this.getPanels();
     return (
-      <I18nProvider>
-        <EuiContextMenu
-          initialPanelId={initialPanelId}
-          panels={panels}
-          data-test-subj="shareContextMenu"
-        />
-      </I18nProvider>
+      <>
+        <I18nProvider>
+          <EuiContextMenu
+            initialPanelId={panels[panels.length - 1].id}
+            panels={panels}
+            data-test-subj="shareContextMenu"
+          />
+        </I18nProvider>
+      </>
     );
   }
 
@@ -61,82 +135,37 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
     const panels: EuiContextMenuPanelDescriptor[] = [];
     const menuItems: ShareContextMenuPanelItem[] = [];
 
-    const permalinkPanel = {
-      id: panels.length + 1,
-      title: i18n.translate('share.contextMenu.permalinkPanelTitle', {
-        defaultMessage: 'Get link',
-      }),
-      content: (
-        <UrlPanelContent
-          allowShortUrl={this.props.allowShortUrl}
-          objectId={this.props.objectId}
-          objectType={this.props.objectType}
-          shareableUrl={this.props.shareableUrl}
-          shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
-          shareableUrlLocatorParams={this.props.shareableUrlLocatorParams}
-          anonymousAccess={this.props.anonymousAccess}
-          showPublicUrlSwitch={this.props.showPublicUrlSwitch}
-          urlService={this.props.urlService}
-          snapshotShareWarning={this.props.snapshotShareWarning}
-        />
-      ),
-    };
     menuItems.push({
       name: i18n.translate('share.contextMenu.permalinksLabel', {
-        defaultMessage: 'Get links',
+        defaultMessage: 'Get Link',
       }),
       icon: 'link',
-      panel: permalinkPanel.id,
       sortOrder: 0,
       disabled: Boolean(this.props.disabledShareUrl),
       // do not break functional tests
       'data-test-subj': 'Permalinks',
+      onClick: this.openLinkModal,
     });
-    panels.push(permalinkPanel);
 
     if (this.props.allowEmbed) {
-      const embedPanel = {
-        id: panels.length + 1,
-        title: i18n.translate('share.contextMenu.embedCodePanelTitle', {
-          defaultMessage: 'Embed Code',
-        }),
-        content: (
-          <UrlPanelContent
-            allowShortUrl={this.props.allowShortUrl}
-            isEmbedded
-            objectId={this.props.objectId}
-            objectType={this.props.objectType}
-            shareableUrl={this.props.shareableUrl}
-            shareableUrlForSavedObject={this.props.shareableUrlForSavedObject}
-            shareableUrlLocatorParams={this.props.shareableUrlLocatorParams}
-            urlParamExtensions={this.props.embedUrlParamExtensions}
-            anonymousAccess={this.props.anonymousAccess}
-            showPublicUrlSwitch={this.props.showPublicUrlSwitch}
-            urlService={this.props.urlService}
-            snapshotShareWarning={this.props.snapshotShareWarning}
-          />
-        ),
-      };
-      panels.push(embedPanel);
       menuItems.push({
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
-          defaultMessage: 'Embed code',
+          defaultMessage: 'Embed',
         }),
         icon: 'console',
-        panel: embedPanel.id,
         sortOrder: 0,
+        onClick: this.openEmbedModal,
       });
     }
 
-    this.props.shareMenuItems.forEach(({ shareMenuItem, panel }) => {
+    this.props.shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
       panels.push({
-        ...panel,
+        ...panels,
         id: panelId,
       });
       menuItems.push({
         ...shareMenuItem,
-        panel: panelId,
       });
     });
 
@@ -176,8 +205,6 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       panels.push(topLevelMenuPanel);
     }
 
-    const lastPanelIndex = panels.length - 1;
-    const initialPanelId = panels[lastPanelIndex].id;
-    return { panels, initialPanelId };
+    return { panels };
   };
 }

@@ -11,8 +11,9 @@ import ReactDOM from 'react-dom';
 import { I18nProvider } from '@kbn/i18n-react';
 import { EuiWrappingPopover } from '@elastic/eui';
 
-import { CoreStart, ThemeServiceStart } from '@kbn/core/public';
+import { ThemeServiceStart } from '@kbn/core/public';
 import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { ShareContextMenu } from '../components/share_context_menu';
 import { ShareMenuItem, ShowShareMenuOptions } from '../types';
 import { ShareMenuRegistryStart } from './share_menu_registry';
@@ -52,6 +53,8 @@ export class ShareMenuManager {
           urlService,
           anonymousAccess,
           theme: core.theme,
+          overlays: core.overlays,
+          i18n: core.i18n,
         });
       },
     };
@@ -82,12 +85,16 @@ export class ShareMenuManager {
     onClose,
     objectTypeTitle,
     disabledShareUrl,
+    overlays,
+    i18n,
   }: ShowShareMenuOptions & {
     menuItems: ShareMenuItem[];
     urlService: BrowserUrlService;
     anonymousAccess: AnonymousAccessServiceContract | undefined;
     theme: ThemeServiceStart;
+    overlays: CoreStart['overlays'];
     onClose: () => void;
+    i18n: CoreStart['i18n'];
   }) {
     if (this.isOpen) {
       onClose();
@@ -126,6 +133,9 @@ export class ShareMenuManager {
               urlService={urlService}
               snapshotShareWarning={snapshotShareWarning}
               disabledShareUrl={disabledShareUrl}
+              overlays={overlays}
+              theme={theme}
+              i18nStart={i18n}
             />
           </EuiWrappingPopover>
         </KibanaThemeProvider>
