@@ -34,6 +34,7 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(soClient, ['type-a', 'type_2']);
     expect(soClient.find).toHaveBeenCalledWith({
       type: ['type-a', 'type_2'],
+      namespaces: ['*'],
       perPage: 0,
       aggs: {
         types: {
@@ -52,6 +53,7 @@ describe('getSavedObjectsCounts', () => {
     await getSavedObjectsCounts(soClient, ['type_one', 'type_two'], { exclusive: true });
     expect(soClient.find).toHaveBeenCalledWith({
       type: ['type_one', 'type_two'],
+      namespaces: ['*'],
       perPage: 0,
       aggs: { types: { terms: { field: 'type', size: 2 } } },
     });
