@@ -477,7 +477,6 @@ export function resolveEsArgs(
   ) {
     const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
-    esArgs.set('xpack.security.authc.token.enabled', 'true');
     esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
     esArgs.set(
       `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
