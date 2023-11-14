@@ -105,7 +105,7 @@ export default function ({ getService }: FtrProviderContext) {
       const secondUniqueEventName = `my_event_${nano}_2`;
       const { report } = reportManager.assignReports([
         createUiCounterEvent(firstUniqueEventName, METRIC_TYPE.COUNT),
-        createUiCounterEvent(`${secondUniqueEventName}`, METRIC_TYPE.COUNT),
+        createUiCounterEvent(secondUniqueEventName, METRIC_TYPE.COUNT),
         createUiCounterEvent(firstUniqueEventName, METRIC_TYPE.CLICK, 2),
       ]);
 
