@@ -221,7 +221,7 @@ export function MobileCrashGroupOverview() {
             <h3>
               {i18n.translate(
                 'xpack.apm.serviceDetails.metrics.errorsList.title',
-                { defaultMessage: 'Errors' }
+                { defaultMessage: 'Crashes' }
               )}
             </h3>
           </EuiTitle>
