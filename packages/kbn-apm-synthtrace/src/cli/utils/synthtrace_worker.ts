@@ -7,13 +7,13 @@
  */
 import { parentPort, workerData } from 'worker_threads';
 import pidusage from 'pidusage';
+import { castArray } from 'lodash';
 import { memoryUsage } from 'process';
 import { timerange } from '@kbn/apm-synthtrace-client';
 import { getApmEsClient } from './get_apm_es_client';
 import { getScenario } from './get_scenario';
 import { loggerProxy } from './logger_proxy';
 import { RunOptions } from './parse_run_cli_flags';
-import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
 import { getLogsEsClient } from './get_logs_es_client';
 
 export interface WorkerData {
@@ -44,30 +44,23 @@ async function start() {
 
   const file = runOptions.file;
 
-  let client: ApmSynthtraceEsClient | LogsSynthtraceEsClient = apmEsClient;
-
   const scenario = await logger.perf('get_scenario', () => getScenario({ file, logger }));
 
   logger.info(`Running scenario from ${bucketFrom.toISOString()} to ${bucketTo.toISOString()}`);
 
-  const { generate, bootstrap, setClient } = await scenario({ ...runOptions, logger });
+  const { generate, bootstrap } = await scenario({ ...runOptions, logger });
 
   if (bootstrap) {
     await bootstrap({ apmEsClient, logsEsClient });
   }
 
-  if (setClient) {
-    client = setClient({
-      logsEsClient,
-      apmEsClient,
-    });
-  }
-
   logger.debug('Generating scenario');
 
-  const generators = logger.perf('generate_scenario', () =>
-    generate({ range: timerange(bucketFrom, bucketTo) })
+  const generatorsAndClients = logger.perf('generate_scenario', () =>
+    generate({ range: timerange(bucketFrom, bucketTo), client: { logsEsClient, apmEsClient } })
   );
+
+  const generatorsAndClientsArray = castArray(generatorsAndClients);
 
   logger.debug('Indexing scenario');
 
@@ -82,8 +75,12 @@ async function start() {
   }, 5000);
 
   await logger.perf('index_scenario', async () => {
-    await client.index(generators);
-    await client.refresh();
+    const promises = generatorsAndClientsArray.map(async ({ client, generator }) => {
+      await client.index(generator);
+      await client.refresh();
+    });
+
+    await Promise.all(promises);
   });
 }
 

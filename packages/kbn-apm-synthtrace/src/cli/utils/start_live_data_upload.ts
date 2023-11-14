@@ -14,7 +14,6 @@ import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
-import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../../..';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -28,35 +27,18 @@ export async function startLiveDataUpload({
   const { logger, apmEsClient, logsEsClient } = await bootstrap(runOptions);
 
   const scenario = await getScenario({ file, logger });
-  const { generate, setClient } = await scenario({ ...runOptions, logger });
-
-  let client: ApmSynthtraceEsClient | LogsSynthtraceEsClient = apmEsClient;
-
-  if (setClient) {
-    client = setClient({
-      apmEsClient,
-      logsEsClient,
-    });
-  }
+  const { generate } = await scenario({ ...runOptions, logger });
 
   const bucketSizeInMs = 1000 * 60;
   let requestedUntil = start;
 
-  const stream = new PassThrough({
-    objectMode: true,
-  });
-
-  client.index(stream);
-
-  function closeStream() {
-    stream.end(() => {
-      process.exit(0);
+  function closeStreams(streams: PassThrough[]) {
+    streams.forEach((stream) => {
+      stream.end(() => {
+        process.exit(0);
+      });
     });
   }
-
-  process.on('SIGINT', closeStream);
-  process.on('SIGTERM', closeStream);
-  process.on('SIGQUIT', closeStream);
 
   async function uploadNextBatch() {
     const now = Date.now();
@@ -69,22 +51,46 @@ export async function startLiveDataUpload({
         `Requesting ${new Date(bucketFrom).toISOString()} to ${new Date(bucketTo).toISOString()}`
       );
 
-      const next = logger.perf('execute_scenario', () =>
-        generate({ range: timerange(bucketFrom.getTime(), bucketTo.getTime()) })
-      );
+      const generatorsAndClients = generate({
+        range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
+        client: { logsEsClient, apmEsClient },
+      });
 
-      const concatenatedStream = castArray(next)
-        .reverse()
-        .reduce<Writable>((prev, current) => {
-          const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
-          return currentStream.pipe(prev);
-        }, new PassThrough({ objectMode: true }));
+      const generatorsAndClientsArray = castArray(generatorsAndClients);
 
-      concatenatedStream.pipe(stream, { end: false });
+      const streams = generatorsAndClientsArray.map(({ client }) => {
+        const stream = new PassThrough({ objectMode: true });
+        client.index(stream);
+        return stream;
+      });
 
-      await awaitStream(concatenatedStream);
+      process.on('SIGINT', () => closeStreams(streams));
+      process.on('SIGTERM', () => closeStreams(streams));
+      process.on('SIGQUIT', () => closeStreams(streams));
 
-      await client.refresh();
+      const promises = generatorsAndClientsArray.map(({ generator }, i) => {
+        const concatenatedStream = castArray(generator)
+          .reverse()
+          .reduce<Writable>((prev, current) => {
+            const currentStream = isGeneratorObject(current) ? Readable.from(current) : current;
+            return currentStream.pipe(prev);
+          }, new PassThrough({ objectMode: true }));
+
+        concatenatedStream.pipe(streams[i], { end: false });
+
+        return awaitStream(concatenatedStream);
+      });
+
+      await Promise.all(promises);
+
+      logger.info('Indexing completed');
+
+      const refreshPromise = generatorsAndClientsArray.map(async ({ client }) => {
+        await client.refresh();
+      });
+
+      await Promise.all(refreshPromise);
+      logger.info('Refreshing completed');
 
       requestedUntil = bucketTo;
     }

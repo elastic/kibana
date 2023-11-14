@@ -6,15 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { SynthtraceGenerator, Timerange } from '@kbn/apm-synthtrace-client';
-import { Readable } from 'stream';
+import { Timerange } from '@kbn/apm-synthtrace-client';
 import { Logger } from '../lib/utils/create_logger';
 import { RunOptions } from './utils/parse_run_cli_flags';
 import { ApmSynthtraceEsClient, LogsSynthtraceEsClient } from '../..';
+import { ScenarioReturnType } from '../lib/utils/with_client';
+
+// type Generate<TFields> = (options: {
+//   range: Timerange;
+// }) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
 
 type Generate<TFields> = (options: {
   range: Timerange;
-}) => SynthtraceGenerator<TFields> | Array<SynthtraceGenerator<TFields>> | Readable;
+  client: {
+    apmEsClient: ApmSynthtraceEsClient;
+    logsEsClient: LogsSynthtraceEsClient;
+  };
+}) => ScenarioReturnType<TFields> | Array<ScenarioReturnType<TFields>>;
 
 export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Promise<{
   bootstrap?: (options: {
@@ -22,8 +30,4 @@ export type Scenario<TFields> = (options: RunOptions & { logger: Logger }) => Pr
     logsEsClient: LogsSynthtraceEsClient;
   }) => Promise<void>;
   generate: Generate<TFields>;
-  setClient?: (options: {
-    apmEsClient: ApmSynthtraceEsClient;
-    logsEsClient: LogsSynthtraceEsClient;
-  }) => ApmSynthtraceEsClient | LogsSynthtraceEsClient;
 }>;

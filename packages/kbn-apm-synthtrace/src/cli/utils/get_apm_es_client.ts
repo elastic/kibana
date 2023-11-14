@@ -7,7 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { ApmSynthtraceEsClient } from '../../..';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 

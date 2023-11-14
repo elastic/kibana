@@ -5,17 +5,20 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { LogDocument, log, generateShortId } from '@kbn/apm-synthtrace-client';
+import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
+import { withClient } from '../lib/utils/with_client';
 
-const scenario: Scenario<LogDocument> = async () => {
+const scenario: Scenario<LogDocument> = async (runOptions) => {
   return {
-    setClient: ({ logsEsClient }) => logsEsClient,
-    generate: ({ range }) => {
+    generate: ({ range, client: { logsEsClient } }) => {
+      const { logger } = runOptions;
+
+      // Logs Data logic
       const MESSAGE_LOG_LEVELS = [
         { message: 'A simple log', level: 'info' },
         { message: 'Yet another debug log', level: 'debug' },
-        { message: 'Something went wrong', level: 'error' },
+        { message: 'Error with certificate: "ca_trusted_fingerprint"', level: 'error' },
       ];
       const CLOUD_PROVIDERS = ['gcp', 'aws', 'azure'];
       const CLOUD_REGION = ['eu-central-1', 'us-east-1', 'area-51'];
@@ -26,7 +29,11 @@ const scenario: Scenario<LogDocument> = async () => {
         { clusterId: generateShortId(), clusterName: 'synth-cluster-3' },
       ];
 
-      return range
+      const SERVICE_NAMES = Array(3)
+        .fill(null)
+        .map((_, idx) => `synth-service-${idx}`);
+
+      const logs = range
         .interval('1m')
         .rate(1)
         .generator((timestamp) => {
@@ -38,7 +45,7 @@ const scenario: Scenario<LogDocument> = async () => {
                 .create()
                 .message(MESSAGE_LOG_LEVELS[index].message)
                 .logLevel(MESSAGE_LOG_LEVELS[index].level)
-                .service(`service-${index}`)
+                .service(SERVICE_NAMES[index])
                 .defaults({
                   'trace.id': generateShortId(),
                   'agent.name': 'synth-agent',
@@ -50,11 +57,16 @@ const scenario: Scenario<LogDocument> = async () => {
                   'cloud.availability_zone': `${CLOUD_REGION[index]}a`,
                   'cloud.project.id': generateShortId(),
                   'cloud.instance.id': generateShortId(),
-                  'log.file.path': `/logs/${generateShortId()}.txt`,
+                  'log.file.path': `/logs/${generateLongId()}/error.txt`,
                 })
                 .timestamp(timestamp);
             });
         });
+
+      return withClient(
+        logsEsClient,
+        logger.perf('generating_logs', () => logs)
+      );
     },
   };
 };
