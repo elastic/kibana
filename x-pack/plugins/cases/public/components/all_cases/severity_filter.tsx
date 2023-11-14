@@ -9,22 +9,25 @@ import { EuiFlexGroup, EuiFlexItem, EuiHealth } from '@elastic/eui';
 import React from 'react';
 import type { CaseSeverity } from '../../../common/types/domain';
 import { severities } from '../severity/config';
-import { MultiSelectFilter } from './multi_select_filter';
+import type { MultiSelectFilterOption } from './multi_select_filter';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import * as i18n from './translations';
 
-interface SeverityOption {
-  label: CaseSeverity;
-}
-
 interface Props {
-  selectedOptions: CaseSeverity[];
-  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
+  selectedOptionKeys: CaseSeverity[];
+  onChange: ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => void;
 }
 
-const options = Object.keys(severities) as CaseSeverity[];
+const options = mapToMultiSelectOption(Object.keys(severities) as CaseSeverity[]);
 
-export const SeverityFilter: React.FC<Props> = ({ selectedOptions, onChange }) => {
-  const renderOption = (option: SeverityOption) => {
+export const SeverityFilter: React.FC<Props> = ({ selectedOptionKeys, onChange }) => {
+  const renderOption = (option: MultiSelectFilterOption<CaseSeverity>) => {
     const severityData = severities[option.label];
     return (
       <EuiFlexGroup gutterSize="xs" alignItems={'center'} responsive={false}>
@@ -36,13 +39,13 @@ export const SeverityFilter: React.FC<Props> = ({ selectedOptions, onChange }) =
   };
 
   return (
-    <MultiSelectFilter<SeverityOption>
+    <MultiSelectFilter<CaseSeverity>
       buttonLabel={i18n.SEVERITY}
       id={'severity'}
       onChange={onChange}
       options={options}
       renderOption={renderOption}
-      selectedOptions={selectedOptions}
+      selectedOptionKeys={selectedOptionKeys}
     />
   );
 };

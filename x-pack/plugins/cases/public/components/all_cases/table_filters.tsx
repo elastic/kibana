@@ -10,6 +10,9 @@ import { isEqual } from 'lodash/fp';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 import type { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
+import { SolutionFilter } from './solution_filter';
+import { StatusFilter } from './status_filter';
 import * as i18n from './translations';
 import { useGetTags } from '../../containers/use_get_tags';
 import { useGetCategories } from '../../containers/use_get_categories';
@@ -51,6 +54,23 @@ const CasesTableFiltersComponent = ({
   const { data: tags = [] } = useGetTags();
   const { data: categories = [] } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
+
+  const onChange = ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => {
+    const newFilters = {
+      ...filterOptions,
+      [filterId]: selectedOptionKeys,
+    };
+
+    if (!isEqual(newFilters, filterOptions)) {
+      onFilterChanged(newFilters);
+    }
+  };
 
   const handleSelectedAssignees = useCallback(
     (newAssignees: AssigneesFilteringSelection[]) => {

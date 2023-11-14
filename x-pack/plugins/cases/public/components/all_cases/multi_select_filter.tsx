@@ -22,37 +22,63 @@ import {
 import { isEqual } from 'lodash/fp';
 import * as i18n from './translations';
 
-const fromRawOptionsToEuiSelectableOptions = (options: string[], selectedOptions: string[]) => {
+type FilterOption<T extends string> = EuiSelectableOption<{
+  key: string;
+  label: T;
+}>;
+
+export type { FilterOption as MultiSelectFilterOption };
+
+export const mapToMultiSelectOption = <T extends string>(options: T[]) => {
   return options.map((option) => {
-    const selectableOption: EuiSelectableOption = { label: option };
-    if (selectedOptions.includes(option)) {
+    return {
+      key: option,
+      label: option,
+    };
+  });
+};
+
+const fromRawOptionsToEuiSelectableOptions = <T extends string>(
+  options: Array<FilterOption<T>>,
+  selectedOptionKeys: string[]
+): Array<FilterOption<T>> => {
+  return options.map(({ key, label }) => {
+    const selectableOption: FilterOption<T> = { label, key };
+    if (selectedOptionKeys.includes(key)) {
       selectableOption.checked = 'on';
     }
-    selectableOption['data-test-subj'] = `options-filter-popover-item-${option
-      .split(' ')
-      .join('-')}`;
+    selectableOption['data-test-subj'] = `options-filter-popover-item-${key.split(' ').join('-')}`;
     return selectableOption;
   });
 };
 
-const fromEuiSelectableOptionToRawOption = (options: EuiSelectableOption[]) =>
-  options.map((option) => option.label);
+const fromEuiSelectableOptionToRawOption = <T extends string>(
+  options: Array<FilterOption<T>>
+): string[] => {
+  return options.map((option) => option.key);
+};
 
-const getEuiSelectableCheckedOptions = (options: EuiSelectableOption[]) =>
+const getEuiSelectableCheckedOptions = <T extends string>(options: Array<FilterOption<T>>) =>
   options.filter((option) => option.checked === 'on');
 
-interface UseFilterParams<T> {
+interface UseFilterParams<T extends string> {
   buttonLabel?: string;
   hideActiveOptionsNumber?: boolean;
   id: string;
   limit?: number;
   limitReachedMessage?: string;
-  onChange: ({ filterId, options }: { filterId: string; options: string[] }) => void;
-  options: string[];
-  renderOption?: (option: T) => React.ReactNode;
-  selectedOptions?: string[];
+  onChange: ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => void;
+  options: Array<FilterOption<T>>;
+  selectedOptionKeys?: string[];
+  renderOption?: (option: FilterOption<T>) => React.ReactNode;
 }
-export const MultiSelectFilter = <T extends EuiSelectableOption>({
+export const MultiSelectFilter = <T extends string>({
   buttonLabel,
   hideActiveOptionsNumber,
   id,
@@ -60,27 +86,32 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
   limitReachedMessage,
   onChange,
   options: rawOptions,
+  selectedOptionKeys = [],
   renderOption,
-  selectedOptions = [],
 }: UseFilterParams<T>) => {
   const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const toggleIsPopoverOpen = () => setIsPopoverOpen((prevValue) => !prevValue);
-  const isInvalid = Boolean(limit && limitReachedMessage && selectedOptions.length >= limit);
-  const options = fromRawOptionsToEuiSelectableOptions(rawOptions, selectedOptions);
+  const isInvalid = Boolean(limit && limitReachedMessage && selectedOptionKeys.length >= limit);
+  const options: Array<FilterOption<T>> = fromRawOptionsToEuiSelectableOptions(
+    rawOptions,
+    selectedOptionKeys
+  );
   const showActiveOptionsNumber = !hideActiveOptionsNumber;
 
   useEffect(() => {
-    const trimmedSelectedOptions = selectedOptions.filter((option) => rawOptions.includes(option));
-    if (!isEqual(trimmedSelectedOptions, selectedOptions)) {
+    const newSelectedOptions = selectedOptionKeys.filter((selectedOptionKey) =>
+      rawOptions.some(({ key: optionKey }) => optionKey === selectedOptionKey)
+    );
+    if (!isEqual(newSelectedOptions, selectedOptionKeys)) {
       onChange({
         filterId: id,
-        options: trimmedSelectedOptions,
+        selectedOptionKeys: newSelectedOptions,
       });
     }
-  }, [selectedOptions, rawOptions, id, onChange]);
+  }, [selectedOptionKeys, rawOptions, id, onChange]);
 
-  const _onChange = (newOptions: EuiSelectableOption[]) => {
+  const _onChange = (newOptions: Array<FilterOption<T>>) => {
     const newSelectedOptions = getEuiSelectableCheckedOptions(newOptions);
     if (isInvalid && limit && newSelectedOptions.length >= limit) {
       return;
@@ -88,7 +119,7 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
 
     onChange({
       filterId: id,
-      options: fromEuiSelectableOptionToRawOption(newSelectedOptions),
+      selectedOptionKeys: fromEuiSelectableOptionToRawOption(newSelectedOptions),
     });
   };
 
@@ -102,8 +133,8 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
           onClick={toggleIsPopoverOpen}
           isSelected={isPopoverOpen}
           numFilters={showActiveOptionsNumber ? options.length : undefined} // FIXME: add tests to check that the number is not shown
-          hasActiveFilters={showActiveOptionsNumber ? selectedOptions.length > 0 : undefined}
-          numActiveFilters={showActiveOptionsNumber ? selectedOptions.length : undefined}
+          hasActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length > 0 : undefined}
+          numActiveFilters={showActiveOptionsNumber ? selectedOptionKeys.length : undefined}
           aria-label={buttonLabel}
         >
           {buttonLabel}
@@ -126,7 +157,7 @@ export const MultiSelectFilter = <T extends EuiSelectableOption>({
           <EuiHorizontalRule margin="none" />
         </>
       )}
-      <EuiSelectable<T>
+      <EuiSelectable<FilterOption<T>>
         options={options}
         searchable
         searchProps={{ placeholder: buttonLabel, compressed: false }}

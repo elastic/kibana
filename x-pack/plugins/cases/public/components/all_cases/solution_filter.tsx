@@ -10,16 +10,21 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 
 import { OWNER_INFO } from '../../../common/constants';
-import type { FilterOptions } from '../../../common/ui';
 import * as i18n from './translations';
 import type { Solution } from './types';
-import { MultiSelectFilter } from './multi_select_filter';
+import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
 import type { CasesOwners } from '../../client/helpers/can_use_cases';
 import { useCasesContext } from '../cases_context/use_cases_context';
 
 interface FilterPopoverProps {
-  onChange: ({ filterId, options }: { filterId: keyof FilterOptions; options: string[] }) => void;
-  selectedOptions: string[];
+  onChange: ({
+    filterId,
+    selectedOptionKeys,
+  }: {
+    filterId: string;
+    selectedOptionKeys: string[];
+  }) => void;
+  selectedOptionKeys: string[];
   availableSolutions: string[];
 }
 
@@ -36,12 +41,12 @@ const mapToReadableSolutionName = (solution: string): Solution => {
 
 export const SolutionFilterComponent = ({
   onChange,
-  selectedOptions,
+  selectedOptionKeys,
   availableSolutions,
 }: FilterPopoverProps) => {
   const { owner } = useCasesContext();
   const hasOwner = Boolean(owner.length);
-  const options = hasOwner ? owner : availableSolutions;
+  const options = mapToMultiSelectOption(hasOwner ? owner : availableSolutions);
   const solutions = availableSolutions.map((solution) => mapToReadableSolutionName(solution));
 
   /**
@@ -54,20 +59,26 @@ export const SolutionFilterComponent = ({
    */
   const _onChange = ({
     filterId,
-    options: newOptions,
+    selectedOptionKeys: newOptions,
   }: {
-    filterId: keyof FilterOptions;
-    options: string[];
+    filterId: string;
+    selectedOptionKeys: string[];
   }) => {
     if (hasOwner) {
-      onChange({ filterId, options: newOptions.length === 0 ? owner : newOptions });
+      onChange({
+        filterId,
+        selectedOptionKeys: newOptions.length === 0 ? owner : newOptions,
+      });
     } else {
-      onChange({ filterId, options: newOptions.length === 0 ? availableSolutions : newOptions });
+      onChange({
+        filterId,
+        selectedOptionKeys: newOptions.length === 0 ? availableSolutions : newOptions,
+      });
     }
   };
 
   const selectedOptionsInFilter =
-    selectedOptions.length === availableSolutions.length ? [] : selectedOptions;
+    selectedOptionKeys.length === availableSolutions.length ? [] : selectedOptionKeys;
 
   const renderOption = (option: EuiSelectableOption) => {
     const solution = solutions.find((solutionData) => solutionData.id === option.label) as Solution;
@@ -88,7 +99,7 @@ export const SolutionFilterComponent = ({
       onChange={_onChange}
       options={options}
       renderOption={renderOption}
-      selectedOptions={selectedOptionsInFilter}
+      selectedOptionKeys={selectedOptionsInFilter}
     />
   );
 };
