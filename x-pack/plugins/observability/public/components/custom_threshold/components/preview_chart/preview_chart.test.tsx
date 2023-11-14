@@ -7,13 +7,14 @@
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
-import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import { MetricExpression } from '../../types';
-import { Aggregators, Comparator } from '../../../../../common/custom_threshold_rule/types';
-import PreviewChart from './preview_chart';
 import { DataView } from '@kbn/data-views-plugin/common';
+import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
+import { CUSTOM_AGGREGATOR } from '../../../../../common/custom_threshold_rule/constants';
+import { Comparator, Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../../utils/kibana_react';
 import { kibanaStartMock } from '../../../../utils/kibana_react.mock';
+import { MetricExpression } from '../../types';
+import PreviewChart from './preview_chart';
 
 jest.mock('../../../../utils/kibana_react');
 
@@ -30,11 +31,11 @@ describe('Preview chart', () => {
     jest.clearAllMocks();
     mockKibana();
   });
-  async function setup(expression: MetricExpression) {
+  async function setup(expression: MetricExpression, dataview?: DataView) {
     const wrapper = mountWithIntl(
       <PreviewChart
         metricExpression={expression}
-        dataView={{} as DataView}
+        dataView={dataview}
         filterQuery={''}
         groupBy={[]}
         error={{}}
@@ -54,7 +55,13 @@ describe('Preview chart', () => {
 
   it('should display no data message', async () => {
     const expression: MetricExpression = {
-      aggType: Aggregators.AVERAGE,
+      aggType: CUSTOM_AGGREGATOR,
+      metrics: [
+        {
+          name: 'A',
+          aggType: Aggregators.COUNT,
+        },
+      ],
       timeSize: 1,
       timeUnit: 'm',
       sourceId: 'default',
