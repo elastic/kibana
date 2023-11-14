@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { Chart, Settings, AreaSeries, TooltipType, Tooltip } from '@elastic/charts';
+import { Chart, Settings, AreaSeries, TooltipType, Tooltip, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { ThemeContext } from 'styled-components';
@@ -29,10 +27,8 @@ interface Props {
 export function MetricWithSparkline({ id, formatter, value, timeseries, color }: Props) {
   const themeCTX = useContext(ThemeContext);
   const isDarkTheme = (themeCTX && themeCTX.darkMode) || false;
-  const theme = [
-    EUI_SPARKLINE_THEME_PARTIAL,
-    isDarkTheme ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
-  ];
+  const theme = [EUI_SPARKLINE_THEME_PARTIAL];
+  const baseTheme = isDarkTheme ? DARK_THEME : LIGHT_THEME;
 
   const colors = theme[1].colors?.vizColors ?? [];
 
@@ -53,7 +49,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
       <EuiFlexItem grow={false}>
         <Chart size={{ height: 18, width: 40 }}>
           <Tooltip type={TooltipType.None} />
-          <Settings theme={theme} showLegend={false} locale={i18n.getLocale()} />
+          <Settings baseTheme={baseTheme} theme={theme} showLegend={false} locale={i18n.getLocale()} />
           <AreaSeries
             id={id}
             data={timeseries}

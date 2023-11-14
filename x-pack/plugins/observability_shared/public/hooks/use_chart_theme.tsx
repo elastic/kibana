@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import { PartialTheme } from '@elastic/charts';
-import { EUI_CHARTS_THEME_DARK, EUI_CHARTS_THEME_LIGHT } from '@elastic/eui/dist/eui_charts_theme';
+import { PartialTheme, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import { useMemo } from 'react';
 import { useTheme } from './use_theme';
 
 export function useChartTheme(): PartialTheme[] {
   const theme = useTheme();
-  const baseChartTheme = theme.darkMode
-    ? EUI_CHARTS_THEME_DARK.theme
-    : EUI_CHARTS_THEME_LIGHT.theme;
+  const baseChartTheme = theme.darkMode ? DARK_THEME : LIGHT_THEME;
 
   return useMemo(
     () => [

@@ -14,12 +14,10 @@ import {
   ScaleType,
   Settings,
   Tooltip,
+  LIGHT_THEME,
+  DARK_THEME,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
-import {
-  EUI_CHARTS_THEME_DARK,
-  EUI_CHARTS_THEME_LIGHT,
-} from '@elastic/eui/dist/eui_charts_theme';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -103,8 +101,8 @@ export function ErrorDistribution({ distribution, title, fetchStatus }: Props) {
             legendPosition={Position.Bottom}
             theme={
               theme.darkMode
-                ? EUI_CHARTS_THEME_DARK.theme
-                : EUI_CHARTS_THEME_LIGHT.theme
+                ? DARK_THEME
+                : LIGHT_THEME
             }
             locale={i18n.getLocale()}
           />

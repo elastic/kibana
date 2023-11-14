@@ -6,11 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import { Chart, Settings, AreaSeries, ScaleType, TooltipType, Tooltip } from '@elastic/charts';
+import { Chart, Settings, AreaSeries, ScaleType, TooltipType, Tooltip, LIGHT_THEME, DARK_THEME } from '@elastic/charts';
 import {
-  EUI_CHARTS_THEME_LIGHT,
   EUI_SPARKLINE_THEME_PARTIAL,
-  EUI_CHARTS_THEME_DARK,
 } from '@elastic/eui/dist/eui_charts_theme';
 import { i18n } from '@kbn/i18n';
 import { useIsDarkMode } from '../../../../../hooks/use_is_dark_mode';
@@ -40,7 +38,7 @@ export const SingleMetricSparkline: React.FunctionComponent<{
     () => [
       // localThemeOverride,
       EUI_SPARKLINE_THEME_PARTIAL,
-      isDarkMode ? EUI_CHARTS_THEME_DARK.theme : EUI_CHARTS_THEME_LIGHT.theme,
+      isDarkMode ? DARK_THEME : LIGHT_THEME,
     ],
     [isDarkMode]
   );
