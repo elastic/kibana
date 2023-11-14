@@ -47,11 +47,7 @@ export function AlertsSearchBar({
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
   const { dataview, loading } = useAlertDataView(featureIds ?? []);
-  const {
-    value: aadFields,
-    loading: fieldsLoading,
-    error: fieldsError,
-  } = useRuleAADFields(ruleTypeId);
+  const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns =
     ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataview;
@@ -99,7 +95,7 @@ export function AlertsSearchBar({
       appName={appName}
       disableQueryLanguageSwitcher={disableQueryLanguageSwitcher}
       // @ts-expect-error - DataView fields prop and SearchBar indexPatterns props are overly broad
-      indexPatterns={loading || fieldsLoading || fieldsError ? NO_INDEX_PATTERNS : indexPatterns}
+      indexPatterns={loading || fieldsLoading ? NO_INDEX_PATTERNS : indexPatterns}
       placeholder={placeholder}
       query={{ query: query ?? '', language: queryLanguage }}
       filters={filters}

@@ -6,50 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { DataView, FieldSpec } from '@kbn/data-views-plugin/common';
+import { DataView } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { BASE_RAC_ALERTS_API_PATH } from '@kbn/rule-registry-plugin/common';
 import { AlertConsumers, ValidFeatureId } from '@kbn/rule-data-utils';
 import { useEffect, useMemo, useState } from 'react';
-import { HttpSetup } from '@kbn/core/public';
 import { useQuery } from '@tanstack/react-query';
 import { TriggersAndActionsUiServices } from '../..';
+import { fetchAlertIndexNames } from '../lib/rule_api/alert_index';
+import { fetchAlertFields } from '../lib/rule_api/alert_fields';
 
 export interface UserAlertDataView {
   dataview?: DataView[];
   loading: boolean;
-}
-
-async function fetchIndexNames({
-  http,
-  features,
-}: {
-  http: HttpSetup;
-  features: string;
-}): Promise<string[]> {
-  const { index_name: indexNamesStr } = await http.get<{ index_name: string[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/index`,
-    {
-      query: { features },
-    }
-  );
-  return indexNamesStr;
-}
-
-async function fetchAlertFields({
-  http,
-  featureIds,
-}: {
-  http: HttpSetup;
-  featureIds: ValidFeatureId[];
-}): Promise<FieldSpec[]> {
-  const { fields: alertFields } = await http.get<{ fields: FieldSpec[] }>(
-    `${BASE_RAC_ALERTS_API_PATH}/browser_fields`,
-    {
-      query: { featureIds },
-    }
-  );
-  return alertFields;
 }
 
 export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataView {
@@ -63,8 +31,11 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
   const isOnlySecurity =
     featureIds.length === 1 && (featureIds as AlertConsumers[]).includes(AlertConsumers.SIEM);
 
+  const hasSecurityAndO11yFeatureIds =
+    featureIds.length > 1 && (featureIds as AlertConsumers[]).includes(AlertConsumers.SIEM);
+
   const queryIndexNameFn = () => {
-    return fetchIndexNames({ http, features });
+    return fetchAlertIndexNames({ http, features });
   };
 
   const queryAlertFieldsFn = () => {
@@ -73,7 +44,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
 
   const onErrorFn = () => {
     toasts.addDanger(
-      i18n.translate('xpack.triggersActionsUI.alertSearchBar.useAlertDataMessage', {
+      i18n.translate('xpack.triggersActionsUI.useAlertDataView.useAlertDataMessage', {
         defaultMessage: 'Unable to load alert data view',
       })
     );
@@ -82,7 +53,6 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
   const {
     data: indexNames,
     isSuccess: isIndexNameSuccess,
-    isFetching: isIndexNameFetching,
     isInitialLoading: isIndexNameInitialLoading,
     isLoading: isIndexNameLoading,
   } = useQuery({
@@ -90,21 +60,32 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     queryFn: queryIndexNameFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
-    enabled: featureIds.length > 0,
+    enabled: featureIds.length > 0 && !hasSecurityAndO11yFeatureIds,
   });
 
   const {
     data: alertFields,
-    isSuccess: isalertFieldsSuccess,
-    isFetching: isalertFieldsFetching,
-    isInitialLoading: isalertFieldsInitialLoading,
-    isLoading: isalertFieldsLoading,
+    isSuccess: isAlertFieldsSuccess,
+    isInitialLoading: isAlertFieldsInitialLoading,
+    isLoading: isAlertFieldsLoading,
   } = useQuery({
     queryKey: ['loadAlertFields'],
     queryFn: queryAlertFieldsFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
-    enabled: !isOnlySecurity,
+    enabled: !isOnlySecurity && !hasSecurityAndO11yFeatureIds,
+  });
+
+  useEffect(() => {
+    return () => {
+      if ((dataview ?? []).length > 0) {
+        dataview?.map(async (dv) => {
+          if (dv.id) {
+            await dataService.dataViews.delete(dv.id);
+          }
+        });
+      }
+    };
   });
 
   useEffect(() => {
@@ -116,18 +97,18 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
       setDataview([localDataview]);
     }
 
-    if (isOnlySecurity && isIndexNameSuccess && !isIndexNameFetching) {
+    if (isOnlySecurity && isIndexNameSuccess) {
       createDataView();
     }
-  }, [dataService.dataViews, indexNames, isIndexNameFetching, isIndexNameSuccess, isOnlySecurity]);
+  }, [dataService.dataViews, indexNames, isIndexNameSuccess, isOnlySecurity]);
 
   useEffect(() => {
     if (
+      indexNames &&
+      alertFields &&
       !isOnlySecurity &&
-      isalertFieldsSuccess &&
-      isIndexNameSuccess &&
-      !isIndexNameFetching &&
-      !isalertFieldsFetching
+      isAlertFieldsSuccess &&
+      isIndexNameSuccess
     ) {
       setDataview([
         {
@@ -146,30 +127,33 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     alertFields,
     dataService.dataViews,
     indexNames,
-    isIndexNameFetching,
     isIndexNameSuccess,
     isOnlySecurity,
-    isalertFieldsFetching,
-    isalertFieldsSuccess,
+    isAlertFieldsSuccess,
   ]);
 
   return useMemo(
     () => ({
       dataview,
-      loading: isOnlySecurity
-        ? isIndexNameInitialLoading || isIndexNameLoading
-        : isIndexNameInitialLoading ||
-          isIndexNameLoading ||
-          isalertFieldsInitialLoading ||
-          isalertFieldsLoading,
+      loading:
+        featureIds.length === 0 || hasSecurityAndO11yFeatureIds
+          ? false
+          : isOnlySecurity
+          ? isIndexNameInitialLoading || isIndexNameLoading
+          : isIndexNameInitialLoading ||
+            isIndexNameLoading ||
+            isAlertFieldsInitialLoading ||
+            isAlertFieldsLoading,
     }),
     [
       dataview,
+      featureIds.length,
+      hasSecurityAndO11yFeatureIds,
+      isOnlySecurity,
       isIndexNameInitialLoading,
       isIndexNameLoading,
-      isOnlySecurity,
-      isalertFieldsInitialLoading,
-      isalertFieldsLoading,
+      isAlertFieldsInitialLoading,
+      isAlertFieldsLoading,
     ]
   );
 }
