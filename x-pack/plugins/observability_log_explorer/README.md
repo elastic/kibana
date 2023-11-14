@@ -8,33 +8,33 @@ This plugin provides an app based on the `LogExplorer` component from the `log_e
 
 #### FTR Server
 ```
-node scripts/functional_tests_server --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts
+yarn test:ftr:server --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts
 ```
 
 #### FTR Runner
 ```
-node scripts/functional_test_runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts --include ./x-pack/test/functional/apps/observability_log_explorer/index.ts
 ```
 
 #### Running Individual Tests
 ```
-node scripts/functional_test_runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/$1
+yarn test:ftr:runner --config ./x-pack/test/functional/apps/observability_log_explorer/config.ts --include ./x-pack/test/functional/apps/observability_log_explorer/$1
 ```
 
 ### Serverless
 
 #### Server
 ```
-node scripts/functional_tests_server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
+yarn test:ftr:server --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts
 ```
 
 #### Runner
 ```
-node scripts/functional_test_runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/index.ts
+yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/index.ts
 ```
 #### Running Individual Tests
 ```
-node scripts/functional_test_runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/$1
+yarn test:ftr:runner --config ./x-pack/test_serverless/functional/test_suites/observability/config.ts --include ./x-pack/test_serverless/functional/test_suites/observability/observability_log_explorer/$1
 ```
 
 ## Checktypes
@@ -63,6 +63,9 @@ node scripts/synthtrace logs_and_metrics.ts --clean [--live]
 ### General Issues
 
 #### Kibana CI broken due to `kbn/optimiser` issue ?
+
+The limit is done to protect us in case we add some dependency that heavily impacts the bundle size, so this is not to be intended as a fix, but as a conscious update after double-checking the bundle size increase and see if it can be reduced
+
 ```
 node scripts/build_kibana_platform_plugins --focus logExplorer --update-limits
 ```
