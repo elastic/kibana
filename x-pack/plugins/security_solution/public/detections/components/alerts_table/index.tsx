@@ -79,7 +79,7 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
   div .euiDataGridRowCell__content {
     width: 100%;
   }
-  
+
   div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
     flex-grow: 0;
   }
