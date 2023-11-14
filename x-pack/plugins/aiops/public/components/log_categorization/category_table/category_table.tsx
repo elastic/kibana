@@ -203,7 +203,7 @@ export const CategoryTable: FC<Props> = ({
   if (showSubTimeCount) {
     columns.splice(1, 0, {
       field: 'subTimeRangeCount',
-      name: i18n.translate('xpack.aiops.logCategorization.column.count', {
+      name: i18n.translate('xpack.aiops.logCategorization.column.subCount', {
         defaultMessage: 'Count2',
       }),
       sortable: true,
