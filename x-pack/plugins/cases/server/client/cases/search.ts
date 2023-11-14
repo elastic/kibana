@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
@@ -69,12 +69,17 @@ export const search = async (
      * Validate custom fields
      */
     if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
-
       /**
        * throw error if params has customFields and no owner
        */
-      if(!paramArgs.owner || !paramArgs.owner.length) {
-        throw Boom.badRequest( 'In order to filter cases by customFields, you must provide owner.');
+      if (!paramArgs.owner || !paramArgs.owner.length) {
+        throw Boom.badRequest('In order to filter cases by customFields, you must provide owner.');
+      }
+
+      if (isArray(paramArgs.owner) && paramArgs.owner.length > 1) {
+        throw Boom.badRequest(
+          'In order to filter cases by customFields, you must provide only one owner.'
+        );
       }
 
       validateSearchCasesCustomFields({

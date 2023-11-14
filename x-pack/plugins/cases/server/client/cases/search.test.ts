@@ -123,7 +123,7 @@ describe('search', () => {
     it('search with multiple custom fields', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true], third_key: [true] },
-        owner: ['cases', 'observability'],
+        owner: ['cases'],
       });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
@@ -257,6 +257,17 @@ describe('search', () => {
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
         ` Error: In order to filter cases by customFields, you must provide owner.`
+      );
+    });
+
+    it('throws error when search with customFields and multiple owners', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true] },
+        owner: ['cases', 'observability'],
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: In order to filter cases by customFields, you must provide only one owner.`
       );
     });
 

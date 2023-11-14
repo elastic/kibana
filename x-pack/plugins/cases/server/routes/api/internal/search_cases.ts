@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import Boom from '@hapi/boom';
 
 import { CASES_INTERNAL_URL } from '../../../../common/constants';
 import { createCaseError } from '../../../common/error';
@@ -23,8 +24,8 @@ export const searchCasesRoute = createCasesRoute({
       /**
        * throw error if request body does not have owner
        */
-      if(!Object.hasOwn(options, 'owner')) {
-        throw new Error('Search cases must have a valid owner.');
+      if (!Object.hasOwn(options, 'owner')) {
+        throw Boom.badRequest('Search cases must have a valid owner.');
       }
 
       const res: caseApiV1.CasesFindResponse = await casesClient.cases.search({ ...options });

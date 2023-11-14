@@ -200,7 +200,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
       });
 
-      it('filters by customField with multiple owners', async () => {
+      it('filters by customField with correct owner', async () => {
         await createConfiguration(
           supertest,
           getConfigurationRequest({
@@ -325,21 +325,6 @@ export default ({ getService }: FtrProviderContext): void => {
           cases: [obsCase],
           count_open_cases: 1,
         });
-
-        expect(
-          await searchCases({
-            supertest,
-            body: {
-              customFields: { valid_key_2: [false], valid_obs_key_2: [false] },
-              owner: ['observabilityFixture', 'securitySolutionFixture'],
-            },
-          })
-        ).to.eql({
-          ...findCasesResp,
-          total: 0,
-          cases: [],
-          count_open_cases: 0,
-        });
       });
 
       it('filters by customField and tags', async () => {
@@ -417,12 +402,97 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('errors', () => {
-      it('unhappy path - 500s when no owner', async () => {
-        await createConfiguration(supertest, getConfigurationRequest({}));
+      it('unhappy path - 400s when no owner', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+              owner: 'securitySolutionFixture',
+            },
+          })
+        );
+
         await searchCases({
           supertest,
-          body: { customFields: { random_key: [false] } },
-          expectedHttpCode: 500, // error thrown from routes
+          body: { customFields: { valid_key_2: [false] } },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('unhappy path - 400s when multiple owners', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+              owner: 'securitySolutionFixture',
+            },
+          })
+        );
+
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_obs_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_obs_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+                {
+                  key: 'valid_obs_key_3',
+                  label: 'another_toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: false,
+                },
+              ],
+              owner: 'observabilityFixture',
+            },
+          })
+        );
+
+        await searchCases({
+          supertest,
+          body: {
+            customFields: { valid_key_2: [false], valid_obs_key_2: [false] },
+            owner: ['observabilityFixture', 'securitySolutionFixture'],
+          },
+          expectedHttpCode: 400,
         });
       });
 
