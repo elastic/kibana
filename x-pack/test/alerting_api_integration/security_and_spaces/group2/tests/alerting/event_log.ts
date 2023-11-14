@@ -80,7 +80,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
       const expectedDescriptor: SavedObjectDescriptor = {
         id: alertId,
         type: 'alert',
-        namespace: spaceId !== 'default' ? spaceId : undefined,
+        // alerts types are multinamespace, so the namespace in the descriptor should not get set
       };
 
       validateEvent(event, {
@@ -88,7 +88,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
         savedObjects: [{ type: 'alert', id: alertId, rel: 'primary', type_id: 'test.noop' }],
         outcome: 'failure',
         message: `test.noop:${alertId}: execution failed`,
-        errorMessage: `Unable to decrypt attribute "apiKey" of object "${descriptorToArray(
+        errorMessage: `Unable to decrypt attribute "apiKey" of saved object "${descriptorToArray(
           expectedDescriptor
         )}"`,
         status: 'error',
