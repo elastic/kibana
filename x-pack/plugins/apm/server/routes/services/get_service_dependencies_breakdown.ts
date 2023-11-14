@@ -9,8 +9,6 @@ import { kqlQuery } from '@kbn/observability-plugin/server';
 import { getNodeName } from '../../../common/connections';
 import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';
-import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
@@ -26,8 +24,6 @@ export async function getServiceDependenciesBreakdown({
   serviceName,
   environment,
   kuery,
-  documentType,
-  rollupInterval,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -35,8 +31,6 @@ export async function getServiceDependenciesBreakdown({
   serviceName: string;
   environment: string;
   kuery: string;
-  documentType: ApmServiceTransactionDocumentType;
-  rollupInterval: RollupInterval;
 }): Promise<ServiceDependenciesBreakdownResponse> {
   const items = await getConnectionStats({
     apmEventClient,
@@ -49,8 +43,6 @@ export async function getServiceDependenciesBreakdown({
       ...kqlQuery(kuery),
       { term: { [SERVICE_NAME]: serviceName } },
     ],
-    documentType,
-    rollupInterval,
   });
 
   return take(

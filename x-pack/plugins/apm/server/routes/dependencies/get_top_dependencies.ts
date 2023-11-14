@@ -12,8 +12,6 @@ import {
   Node,
   NodeType,
 } from '../../../common/connections';
-import { ApmServiceTransactionDocumentType } from '../../../common/document_type';
-import { RollupInterval } from '../../../common/rollup';
 import { environmentQuery } from '../../../common/utils/environment_query';
 import { getConnectionStats } from '../../lib/connections/get_connection_stats';
 import { getConnectionStatsItemsWithRelativeImpact } from '../../lib/connections/get_connection_stats/get_connection_stats_items_with_relative_impact';
@@ -27,8 +25,6 @@ interface Options {
   environment: string;
   offset?: string;
   kuery: string;
-  documentType: ApmServiceTransactionDocumentType;
-  rollupInterval: RollupInterval;
 }
 
 async function getTopDependenciesForTimeRange({
@@ -39,8 +35,6 @@ async function getTopDependenciesForTimeRange({
   environment,
   offset,
   kuery,
-  documentType,
-  rollupInterval,
 }: Options): Promise<ConnectionStatsItemWithImpact[]> {
   const statsItems = await getConnectionStats({
     apmEventClient,
@@ -50,8 +44,6 @@ async function getTopDependenciesForTimeRange({
     filter: [...environmentQuery(environment), ...kqlQuery(kuery)],
     offset,
     collapseBy: 'downstream',
-    documentType,
-    rollupInterval,
   });
 
   return getConnectionStatsItemsWithRelativeImpact(

@@ -10,12 +10,7 @@ import * as t from 'io-ts';
 import { offsetRt } from '../../../common/comparison_rt';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import {
-  environmentRt,
-  kueryRt,
-  rangeRt,
-  serviceTransactionDataSourceRt,
-} from '../default_api_types';
+import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
 import {
   DependencyLatencyDistributionResponse,
   getDependencyLatencyDistribution,
@@ -58,7 +53,6 @@ const topDependenciesRoute = createApmServerRoute({
         rangeRt,
         environmentRt,
         kueryRt,
-        serviceTransactionDataSourceRt,
         t.type({ numBuckets: toNumberRt }),
       ]),
     }),
@@ -71,16 +65,8 @@ const topDependenciesRoute = createApmServerRoute({
   },
   handler: async (resources): Promise<TopDependenciesResponse> => {
     const apmEventClient = await getApmEventClient(resources);
-    const {
-      environment,
-      offset,
-      numBuckets,
-      kuery,
-      start,
-      end,
-      documentType,
-      rollupInterval,
-    } = resources.params.query;
+    const { environment, offset, numBuckets, kuery, start, end } =
+      resources.params.query;
 
     return getTopDependencies({
       apmEventClient,
@@ -90,8 +76,6 @@ const topDependenciesRoute = createApmServerRoute({
       environment,
       kuery,
       offset,
-      documentType,
-      rollupInterval,
     });
   },
 });
@@ -107,12 +91,7 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       ]),
     }),
     t.partial({
-      query: t.intersection([
-        environmentRt,
-        offsetRt,
-        kueryRt,
-        serviceTransactionDataSourceRt,
-      ]),
+      query: t.intersection([environmentRt, offsetRt, kueryRt]),
     }),
   ]),
   options: {
@@ -131,8 +110,6 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
         kuery,
         start,
         end,
-        documentType,
-        rollupInterval,
       },
     } = resources.params;
 
@@ -145,8 +122,6 @@ const upstreamServicesForDependencyRoute = createApmServerRoute({
       environment,
       kuery,
       offset,
-      documentType,
-      rollupInterval,
     });
   },
 });

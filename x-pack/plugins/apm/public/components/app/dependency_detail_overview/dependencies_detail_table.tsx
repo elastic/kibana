@@ -16,8 +16,6 @@ import { ServiceLink } from '../../shared/links/apm/service_link';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { getComparisonEnabled } from '../../shared/time_comparison/get_comparison_enabled';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';
-import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferred_data_source_and_bucket_size';
-import { ApmDocumentType } from '../../../../common/document_type';
 
 export function DependenciesDetailTable() {
   const {
@@ -41,47 +39,26 @@ export function DependenciesDetailTable() {
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
-
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (preferred) {
-        return callApmApi('GET /internal/apm/dependencies/upstream_services', {
-          params: {
-            query: {
-              dependencyName,
-              start,
-              end,
-              environment,
-              numBuckets: 20,
-              offset:
-                comparisonEnabled && isTimeComparison(offset)
-                  ? offset
-                  : undefined,
-              kuery,
-              documentType: preferred.source.documentType,
-              rollupInterval: preferred.source.rollupInterval,
-            },
+      return callApmApi('GET /internal/apm/dependencies/upstream_services', {
+        params: {
+          query: {
+            dependencyName,
+            start,
+            end,
+            environment,
+            numBuckets: 20,
+            offset:
+              comparisonEnabled && isTimeComparison(offset)
+                ? offset
+                : undefined,
+            kuery,
           },
-        });
-      }
+        },
+      });
     },
-    [
-      start,
-      end,
-      environment,
-      offset,
-      dependencyName,
-      kuery,
-      comparisonEnabled,
-      preferred,
-    ]
+    [start, end, environment, offset, dependencyName, kuery, comparisonEnabled]
   );
 
   const dependencies =

@@ -19,8 +19,6 @@ import { useTimeRange } from '../../../../hooks/use_time_range';
 import { DependencyLink } from '../../../shared/links/dependency_link';
 import { DependenciesTable } from '../../../shared/dependencies_table';
 import { ServiceLink } from '../../../shared/links/apm/service_link';
-import { ApmDocumentType } from '../../../../../common/document_type';
-import { usePreferredDataSourceAndBucketSize } from '../../../../hooks/use_preferred_data_source_and_bucket_size';
 
 interface ServiceOverviewDependenciesTableProps {
   fixedHeight?: boolean;
@@ -50,19 +48,11 @@ export function ServiceOverviewDependenciesTable({
 
   const { serviceName, transactionType } = useApmServiceContext();
 
-  const preferred = usePreferredDataSourceAndBucketSize({
-    start,
-    end,
-    kuery,
-    type: ApmDocumentType.ServiceTransactionMetric,
-    numBuckets: 20,
-  });
-
   const trackEvent = useUiTracker();
 
   const { data, status } = useFetcher(
     (callApmApi) => {
-      if (!start || !end || !preferred) {
+      if (!start || !end) {
         return;
       }
 
@@ -80,14 +70,12 @@ export function ServiceOverviewDependenciesTable({
                 comparisonEnabled && isTimeComparison(offset)
                   ? offset
                   : undefined,
-              documentType: preferred.source.documentType,
-              rollupInterval: preferred.source.rollupInterval,
             },
           },
         }
       );
     },
-    [start, end, serviceName, environment, offset, comparisonEnabled, preferred]
+    [start, end, serviceName, environment, offset, comparisonEnabled]
   );
 
   const dependencies =
