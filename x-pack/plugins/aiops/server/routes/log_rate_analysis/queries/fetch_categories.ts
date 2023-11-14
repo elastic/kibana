@@ -68,8 +68,8 @@ export const getCategoryRequest = (
   const query = getQueryWithParams({
     // Passing in an empty string for the time field name will avoid
     // adding any range queries. We're enforcing this here since this
-    // is covered by the filter which will match docs in both
-    // baseline and deviation time range.
+    // is covered by the filter which will match docs in both baseline
+    // and deviation time range via `getBaselineOrDeviationFilter`.
     params: { ...params, timeFieldName: '' },
     termFilters: undefined,
     filter: getBaselineOrDeviationFilter(params),
@@ -85,6 +85,9 @@ export const getCategoryRequest = (
     wrap
   );
 
+  // In this case we're only interested in the aggregation which
+  // `createCategoryRequest` returns, so we're re-applying the original
+  // query we create via `getQueryWithParams` here.
   request.body.query = query;
 
   return request;
