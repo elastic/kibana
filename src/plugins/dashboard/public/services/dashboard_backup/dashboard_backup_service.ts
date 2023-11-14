@@ -51,8 +51,8 @@ class DashboardBackupService implements DashboardBackupServiceType {
     this.localStorage = new Storage(localStorage);
 
     this.activeSpaceId = 'default';
-    if (this.spaces.getActiveSpace$) {
-      firstValueFrom(this.spaces.getActiveSpace$()).then((space) => {
+    if (this.spaces.spacesApi?.getActiveSpace$) {
+      firstValueFrom(this.spaces.spacesApi.getActiveSpace$()).then((space) => {
         this.activeSpaceId = space.id;
       });
     }
