@@ -47,7 +47,6 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  console.log('actionResult', actionResult);
   const readable = get('data', actionResult) as Readable;
 
   if (typeof readable?.read !== 'function') {
