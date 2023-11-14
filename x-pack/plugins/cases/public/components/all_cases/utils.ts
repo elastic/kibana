@@ -66,7 +66,7 @@ export const mergeSelectedColumnsWithConfiguration = ({
       result.push({
         field: casesColumnsConfig[field].field,
         name: casesColumnsConfig[field].name,
-        isChecked: false,
+        isChecked: casesColumnsConfig[field].isCheckedDefault,
       });
     }
   });

@@ -30,7 +30,6 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
-import { SELECTOR_VIEW_CASES_TABLE_COLUMNS } from '../../../common/constants';
 import { getEmptyTagValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
@@ -93,7 +92,7 @@ export const useCasesColumns = ({
   disableActions = false,
   selectedColumns,
 }: GetCasesColumn): UseCasesColumnsReturnValue => {
-  const casesColumnsConfig = useCasesColumnsConfiguration();
+  const casesColumnsConfig = useCasesColumnsConfiguration(isSelectorView);
   const { actions } = useActions({ disableActions });
 
   const {
@@ -357,22 +356,16 @@ export const useCasesColumns = ({
 
   const columns: CasesColumns[] = [];
 
-  if (isSelectorView) {
-    SELECTOR_VIEW_CASES_TABLE_COLUMNS.forEach(({ field }) => {
+  selectedColumns.forEach(({ field, isChecked }) => {
+    if (field in columnsDict && isChecked && casesColumnsConfig[field].canDisplay) {
       columns.push(columnsDict[field]);
-    });
-
-    columns.push(columnsDict.assignCaseAction);
-  } else {
-    selectedColumns.forEach(({ field, isChecked }) => {
-      if (field in columnsDict && isChecked && casesColumnsConfig[field].canDisplay) {
-        columns.push(columnsDict[field]);
-      }
-    });
-
-    if (actions) {
-      columns.push(actions);
     }
+  });
+
+  if (isSelectorView) {
+    columns.push(columnsDict.assignCaseAction);
+  } else if (actions) {
+    columns.push(actions);
   }
 
   return { columns, isLoadingColumns };

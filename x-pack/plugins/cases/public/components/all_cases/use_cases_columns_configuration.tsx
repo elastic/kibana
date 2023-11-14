@@ -16,10 +16,13 @@ export type CasesColumnsConfiguration = Record<
     field: string;
     name: string;
     canDisplay: boolean;
+    isCheckedDefault: boolean;
   }
 >;
 
-export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
+export const useCasesColumnsConfiguration = (
+  isSelectorView?: boolean
+): CasesColumnsConfiguration => {
   const { isAlertsEnabled, caseAssignmentAuthorized } = useCasesFeatures();
   const {
     data: { customFields },
@@ -32,61 +35,73 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
       field: 'title',
       name: i18n.NAME,
       canDisplay: canDisplayDefault,
+      isCheckedDefault: true,
     },
     assignees: {
       field: 'assignees',
       name: i18n.ASSIGNEES,
-      canDisplay: caseAssignmentAuthorized,
+      canDisplay: caseAssignmentAuthorized && !isSelectorView,
+      isCheckedDefault: true,
     },
     tags: {
       field: 'tags',
       name: i18n.TAGS,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: true,
     },
     totalAlerts: {
       field: 'totalAlerts',
       name: ALERTS,
-      canDisplay: isAlertsEnabled,
+      canDisplay: isAlertsEnabled && !isSelectorView,
+      isCheckedDefault: true,
     },
     totalComment: {
       field: 'totalComment',
       name: i18n.COMMENTS,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: true,
     },
     category: {
       field: 'category',
       name: i18n.CATEGORY,
       canDisplay: canDisplayDefault,
+      isCheckedDefault: true,
     },
     closedAt: {
       field: 'closedAt',
       name: i18n.CLOSED_ON,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: false,
     },
     createdAt: {
       field: 'createdAt',
       name: i18n.CREATED_ON,
       canDisplay: canDisplayDefault,
+      isCheckedDefault: true,
     },
     updatedAt: {
       field: 'updatedAt',
       name: i18n.UPDATED_ON,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: true,
     },
     externalIncident: {
       field: 'externalIncident',
       name: i18n.EXTERNAL_INCIDENT,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: true,
     },
     status: {
       field: 'status',
       name: i18n.STATUS,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: true,
     },
     severity: {
       field: 'severity',
       name: i18n.SEVERITY,
       canDisplay: canDisplayDefault,
+      isCheckedDefault: true,
     },
   };
 
@@ -95,7 +110,8 @@ export const useCasesColumnsConfiguration = (): CasesColumnsConfiguration => {
     result[key] = {
       field: key,
       name: label,
-      canDisplay: canDisplayDefault,
+      canDisplay: canDisplayDefault && !isSelectorView,
+      isCheckedDefault: false,
     };
   });
 

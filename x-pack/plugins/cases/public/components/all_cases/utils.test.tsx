@@ -74,8 +74,8 @@ describe('utils', () => {
 
   describe('mergeSelectedColumnsWithConfiguration', () => {
     const mockConfiguration: CasesColumnsConfiguration = {
-      foo: { field: 'foo', name: 'foo', canDisplay: true },
-      bar: { field: 'bar', name: 'bar', canDisplay: true },
+      foo: { field: 'foo', name: 'foo', canDisplay: true, isCheckedDefault: true },
+      bar: { field: 'bar', name: 'bar', canDisplay: true, isCheckedDefault: true },
     };
     const mockSelectedColumns: CasesColumnSelection[] = [
       { field: 'foo', name: 'foo', isChecked: true },
@@ -136,7 +136,7 @@ describe('utils', () => {
           selectedColumns: [],
           casesColumnsConfig: {
             ...mockConfiguration,
-            foobar: { field: 'foobar', name: 'foobar', canDisplay: false },
+            foobar: { field: 'foobar', name: 'foobar', canDisplay: false, isCheckedDefault: true },
           },
         })
       ).toStrictEqual([

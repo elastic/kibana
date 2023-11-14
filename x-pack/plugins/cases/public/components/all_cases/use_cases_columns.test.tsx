@@ -19,12 +19,27 @@ import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../.
 import { renderHook } from '@testing-library/react-hooks';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
-import { DEFAULT_CASES_TABLE_COLUMNS } from '../../../common/constants';
+import {} from '../../../common/constants';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
+
+const DEFAULT_CASES_TABLE_COLUMNS = [
+  { field: 'title', name: 'title', isChecked: true },
+  { field: 'assignees', name: 'assignees', isChecked: true },
+  { field: 'tags', name: 'tags', isChecked: true },
+  { field: 'totalAlerts', name: 'totalAlerts', isChecked: true },
+  { field: 'totalComment', name: 'totalComment', isChecked: true },
+  { field: 'category', name: 'category', isChecked: true },
+  { field: 'createdAt', name: 'createdAt', isChecked: true },
+  { field: 'updatedAt', name: 'updatedAt', isChecked: true },
+  { field: 'closedAt', name: 'closedAt', isChecked: false },
+  { field: 'externalIncident', name: 'externalIncident', isChecked: true },
+  { field: 'status', name: 'status', isChecked: true },
+  { field: 'severity', name: 'severity', isChecked: true },
+];
 
 describe('useCasesColumns ', () => {
   let appMockRender: AppMockRenderer;

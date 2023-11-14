@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { CasesColumnSelection } from '../../public/components/all_cases/types';
 import type { CasesFeaturesAllRequired } from '../ui/types';
 
 export * from './owners';
@@ -168,28 +167,6 @@ export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 /**
  * Cases UI Constants
  */
-
-export const DEFAULT_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
-  { field: 'title', name: 'title', isChecked: true },
-  { field: 'assignees', name: 'assignees', isChecked: true },
-  { field: 'tags', name: 'tags', isChecked: true },
-  { field: 'totalAlerts', name: 'totalAlerts', isChecked: true },
-  { field: 'totalComment', name: 'totalComment', isChecked: true },
-  { field: 'category', name: 'category', isChecked: true },
-  { field: 'createdAt', name: 'createdAt', isChecked: true },
-  { field: 'updatedAt', name: 'updatedAt', isChecked: true },
-  { field: 'closedAt', name: 'closedAt', isChecked: false },
-  { field: 'externalIncident', name: 'externalIncident', isChecked: true },
-  { field: 'status', name: 'status', isChecked: true },
-  { field: 'severity', name: 'severity', isChecked: true },
-];
-
-export const SELECTOR_VIEW_CASES_TABLE_COLUMNS: CasesColumnSelection[] = [
-  { field: 'title', name: 'title', isChecked: true },
-  { field: 'category', name: 'category', isChecked: true },
-  { field: 'createdAt', name: 'createdAt', isChecked: true },
-  { field: 'severity', name: 'severity', isChecked: true },
-];
 
 /**
  * Cases API Tags

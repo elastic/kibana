@@ -9,7 +9,7 @@ import { act, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import type { AppMockRenderer } from '../../common/mock';
-import { DEFAULT_CASES_TABLE_COLUMNS, MAX_DOCS_PER_PAGE } from '../../../common/constants';
+import { MAX_DOCS_PER_PAGE } from '../../../common/constants';
 import {
   noCasesPermissions,
   onlyDeleteCasesPermission,
@@ -34,7 +34,7 @@ describe('Severity form field', () => {
       pageSize: 10,
       totalItemCount: 5,
     },
-    selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
+    selectedColumns: [],
     onSelectedColumnsChange: jest.fn(),
   };
 
@@ -90,7 +90,7 @@ describe('Severity form field', () => {
         pageIndex: 1,
         totalItemCount: 0,
       },
-      selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
+      selectedColumns: [],
       onSelectedColumnsChange: jest.fn(),
     };
     appMockRender.render(<CasesTableUtilityBar {...updatedProps} />);
