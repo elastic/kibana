@@ -56,10 +56,10 @@ export type ScrollConfig = ReportingConfigType['csv']['scroll'];
 
 export interface ReportingSetupDeps {
   features: FeaturesPluginSetup;
-  screenshotMode?: ScreenshotModePluginSetup;
+  screenshotMode: ScreenshotModePluginSetup;
+  taskManager: TaskManagerSetupContract;
   security?: SecurityPluginSetup;
   spaces?: SpacesPluginSetup;
-  taskManager: TaskManagerSetupContract;
   usageCollection?: UsageCollectionSetup;
 }
 
@@ -68,9 +68,9 @@ export interface ReportingStartDeps {
   discover: DiscoverServerPluginStart;
   fieldFormats: FieldFormatsStart;
   licensing: LicensingPluginStart;
+  taskManager: TaskManagerStartContract;
   screenshotting?: ScreenshottingStart;
   security?: SecurityPluginStart;
-  taskManager: TaskManagerStartContract;
 }
 
 export type ReportingRequestHandlerContext = CustomRequestHandlerContext<{
