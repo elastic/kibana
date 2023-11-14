@@ -20,7 +20,7 @@ import { populateTimeline } from '../../../tasks/timeline';
 import { hostsUrl } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/165638
-describe('Toggle full screen', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Toggle full screen', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

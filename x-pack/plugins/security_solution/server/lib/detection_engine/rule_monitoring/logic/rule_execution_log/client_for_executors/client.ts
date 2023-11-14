@@ -14,7 +14,6 @@ import type {
   PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
 import type {
-  RuleExecutionMetrics,
   RuleExecutionSettings,
   RuleExecutionStatus,
 } from '../../../../../../../common/api/detection_engine/rule_monitoring';
@@ -38,6 +37,7 @@ import type {
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,

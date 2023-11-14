@@ -29,7 +29,7 @@ export class VisualizationsPlugin
 {
   private readonly logger: Logger;
 
-  constructor(initializerContext: PluginInitializerContext) {
+  constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
@@ -55,7 +55,10 @@ export class VisualizationsPlugin
 
     plugins.contentManagement.register({
       id: CONTENT_ID,
-      storage: new VisualizationsStorage(),
+      storage: new VisualizationsStorage({
+        logger: this.logger,
+        throwOnResultValidationError: this.initializerContext.env.mode.dev,
+      }),
       version: {
         latest: LATEST_VERSION,
       },

@@ -107,5 +107,3 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-servers:
-  - url: https://localhost:5601

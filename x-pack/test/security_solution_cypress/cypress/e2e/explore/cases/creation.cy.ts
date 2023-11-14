@@ -53,6 +53,7 @@ import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 
 import { CASES_URL, OVERVIEW_URL } from '../../../urls/navigation';
+import { ELASTICSEARCH_USERNAME } from '../../../env_var_names_constants';
 
 // Tracked by https://github.com/elastic/security-team/issues/7696
 describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
@@ -107,10 +108,10 @@ describe('Cases', { tags: ['@ess', '@serverless'] }, () => {
     );
     cy.get(CASE_DETAILS_USERNAMES)
       .eq(REPORTER)
-      .should('have.text', Cypress.env('ELASTICSEARCH_USERNAME'));
+      .should('have.text', Cypress.env(ELASTICSEARCH_USERNAME));
     cy.get(CASE_DETAILS_USERNAMES)
       .eq(PARTICIPANTS)
-      .should('have.text', Cypress.env('ELASTICSEARCH_USERNAME'));
+      .should('have.text', Cypress.env(ELASTICSEARCH_USERNAME));
     cy.get(CASE_DETAILS_TAGS).should('have.text', expectedTags);
 
     EXPECTED_METRICS.forEach((metric) => {

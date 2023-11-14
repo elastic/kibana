@@ -1,0 +1,25 @@
+title: Timeslice Metric Basic Metric with Field
+required:
+  - name
+  - aggregation
+  - field
+type: object
+properties:
+  name:
+    description: The name of the metric. Only valid options are A-Z
+    type: string
+    example: A
+    pattern: "^[A-Z]$"
+  aggregation:
+    description: The aggregation type of the metric.
+    type: string
+    example: sum
+    enum: [sum, avg, min, max, std_deviation, last_value, cardinality]
+  field:
+    description: The field of the metric.
+    type: string
+    example: processor.processed
+  filter:
+    description: The filter to apply to the metric.
+    type: string
+    example: 'processor.outcome: "success"'

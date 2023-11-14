@@ -107,6 +107,7 @@ export const JourneyScreenshotDialog = ({
     <EuiOutsideClickDetector onOutsideClick={onClose}>
       <EuiModal
         onClose={(evt?: KeyboardEvent<HTMLDivElement> | MouseEvent<HTMLButtonElement>) => {
+          // for table row click to work
           evt?.stopPropagation?.();
           onClose();
         }}
@@ -127,6 +128,10 @@ export const JourneyScreenshotDialog = ({
             animateLoading={false}
             hasBorder={false}
             size={'full'}
+            onClick={(evt) => {
+              // for table row click to work
+              evt.stopPropagation();
+            }}
           />
         </ModalBodyStyled>
 

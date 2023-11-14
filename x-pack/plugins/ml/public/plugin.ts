@@ -13,7 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/public';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, mergeMap } from 'rxjs';
 import { take } from 'rxjs/operators';
 
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
@@ -204,65 +204,69 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
-    licensing.subscribe(async (license) => {
-      const mlEnabled = isMlEnabled(license);
-      const fullLicense = isFullLicense(license);
-      const [coreStart, pluginStart] = await core.getStartServices();
-      const { capabilities } = coreStart.application;
-      const mlCapabilities = capabilities.ml as MlCapabilities;
+    licensing
+      .pipe(
+        mergeMap(async (license) => {
+          const mlEnabled = isMlEnabled(license);
+          const fullLicense = isFullLicense(license);
+          const [coreStart, pluginStart] = await core.getStartServices();
+          const { capabilities } = coreStart.application;
+          const mlCapabilities = capabilities.ml as MlCapabilities;
 
-      // register various ML plugin features which require a full license
-      // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
-      if (mlEnabled) {
-        // add ML to home page
-        if (pluginsSetup.home) {
-          registerHomeFeature(pluginsSetup.home);
-        }
-
-        const {
-          registerEmbeddables,
-          registerMlUiActions,
-          registerSearchLinks,
-          registerMlAlerts,
-          registerMapExtension,
-          registerCasesAttachments,
-        } = await import('./register_helper');
-        registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
-
-        if (fullLicense) {
-          registerMlUiActions(pluginsSetup.uiActions, core);
-
-          if (this.enabledFeatures.ad) {
-            registerEmbeddables(pluginsSetup.embeddable, core);
-
-            if (pluginsSetup.cases) {
-              registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+          // register various ML plugin features which require a full license
+          // note including registerHomeFeature in register_helper would cause the page bundle size to increase significantly
+          if (mlEnabled) {
+            // add ML to home page
+            if (pluginsSetup.home) {
+              registerHomeFeature(pluginsSetup.home);
             }
 
-            if (
-              pluginsSetup.triggersActionsUi &&
-              mlCapabilities.canUseMlAlerts &&
-              mlCapabilities.canGetJobs
-            ) {
-              registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
-            }
+            const {
+              registerEmbeddables,
+              registerMlUiActions,
+              registerSearchLinks,
+              registerMlAlerts,
+              registerMapExtension,
+              registerCasesAttachments,
+            } = await import('./register_helper');
+            registerSearchLinks(this.appUpdater$, fullLicense, mlCapabilities, !this.isServerless);
 
-            if (pluginsSetup.maps) {
-              // Pass canGetJobs as minimum permission to show anomalies card in maps layers
-              await registerMapExtension(pluginsSetup.maps, core, {
-                canGetJobs: mlCapabilities.canGetJobs,
-                canCreateJobs: mlCapabilities.canCreateJob,
-              });
+            if (fullLicense) {
+              registerMlUiActions(pluginsSetup.uiActions, core);
+
+              if (this.enabledFeatures.ad) {
+                registerEmbeddables(pluginsSetup.embeddable, core);
+
+                if (pluginsSetup.cases) {
+                  registerCasesAttachments(pluginsSetup.cases, coreStart, pluginStart);
+                }
+
+                if (
+                  pluginsSetup.triggersActionsUi &&
+                  mlCapabilities.canUseMlAlerts &&
+                  mlCapabilities.canGetJobs
+                ) {
+                  registerMlAlerts(pluginsSetup.triggersActionsUi, pluginsSetup.alerting);
+                }
+
+                if (pluginsSetup.maps) {
+                  // Pass canGetJobs as minimum permission to show anomalies card in maps layers
+                  await registerMapExtension(pluginsSetup.maps, core, {
+                    canGetJobs: mlCapabilities.canGetJobs,
+                    canCreateJobs: mlCapabilities.canCreateJob,
+                  });
+                }
+              }
             }
+          } else {
+            // if ml is disabled in elasticsearch, disable ML in kibana
+            this.appUpdater$.next(() => ({
+              status: AppStatus.inaccessible,
+            }));
           }
-        }
-      } else {
-        // if ml is disabled in elasticsearch, disable ML in kibana
-        this.appUpdater$.next(() => ({
-          status: AppStatus.inaccessible,
-        }));
-      }
-    });
+        })
+      )
+      .subscribe();
 
     return {
       locator: this.locator,

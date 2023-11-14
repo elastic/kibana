@@ -18,7 +18,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const log = getService('log');
 
-  describe('annotation listing page', function () {
+  // Failing: See https://github.com/elastic/kibana/issues/170578
+  describe.skip('annotation listing page', function () {
     before(async function () {
       await kibanaServer.importExport.load(
         'test/functional/fixtures/kbn_archiver/annotation_listing_page_search'
@@ -121,7 +122,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await listingTable.expectItemsCount('eventAnnotation', 1);
       });
 
-      describe('individual annotations', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/170568
+      describe.skip('individual annotations', () => {
         it('edits an existing annotation', async function () {
           await listingTable.clickItemLink('eventAnnotation', 'edited title');
           expect(await PageObjects.annotationEditor.getAnnotationCount()).to.be(1);

@@ -9,10 +9,8 @@
     "configPath": ["xpack", "profiling"],
     "requiredPlugins": [
       "data", 
-      "fleet",
-      "cloud"
     ],
-    "optionalPlugins": [],
+    "optionalPlugins": ["cloud",  "fleet"],
     "requiredBundles": []
   }
 }

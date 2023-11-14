@@ -545,7 +545,7 @@ describe('helpers', () => {
           range: {
             '@timestamp': {
               gte: '2020-10-29T21:06:10.192Z',
-              lt: '2020-10-29T21:07:38.774Z',
+              lte: '2020-10-29T21:07:38.774Z',
               format: 'strict_date_optional_time',
             },
           },
@@ -557,7 +557,7 @@ describe('helpers', () => {
             key: '@timestamp',
             params: {
               gte: from,
-              lt: to,
+              lte: to,
               format: 'strict_date_optional_time',
             },
           },

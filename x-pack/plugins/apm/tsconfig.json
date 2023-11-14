@@ -28,7 +28,6 @@
     "@kbn/alerting-plugin",
     "@kbn/cloud-plugin",
     "@kbn/features-plugin",
-    "@kbn/infra-plugin",
     "@kbn/licensing-plugin",
     "@kbn/license-management-plugin",
     "@kbn/maps-plugin",

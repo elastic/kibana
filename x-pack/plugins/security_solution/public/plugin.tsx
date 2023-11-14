@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Subject } from 'rxjs';
+import { Subject, mergeMap } from 'rxjs';
 import type * as H from 'history';
 import type {
   AppMountParameters,
@@ -532,18 +532,22 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       capabilities: core.application.capabilities,
     };
 
-    license$.subscribe(async (license) => {
-      const linksPermissions: LinksPermissions = {
-        ...baseLinksPermissions,
-        ...(license.type != null && { license }),
-      };
+    license$
+      .pipe(
+        mergeMap(async (license) => {
+          const linksPermissions: LinksPermissions = {
+            ...baseLinksPermissions,
+            ...(license.type != null && { license }),
+          };
 
-      // set initial links to not block rendering
-      updateAppLinks(appLinksSwitcher(links), linksPermissions);
+          // set initial links to not block rendering
+          updateAppLinks(appLinksSwitcher(links), linksPermissions);
 
-      // set filtered links asynchronously
-      const filteredLinks = await getFilteredLinks(core, plugins);
-      updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
-    });
+          // set filtered links asynchronously
+          const filteredLinks = await getFilteredLinks(core, plugins);
+          updateAppLinks(appLinksSwitcher(filteredLinks), linksPermissions);
+        })
+      )
+      .subscribe();
   }
 }

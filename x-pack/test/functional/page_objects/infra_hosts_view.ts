@@ -46,28 +46,6 @@ export function InfraHostsViewProvider({ getService }: FtrProviderContext) {
       return await testSubjects.click('inventory-hostsView-link-badge');
     },
 
-    // Splash screen
-
-    async getHostsLandingPageDisabled() {
-      const container = await testSubjects.find('hostView-no-enable-access');
-      const containerText = await container.getVisibleText();
-      return containerText;
-    },
-
-    async getHostsLandingPageDocsLink() {
-      const container = await testSubjects.find('hostsView-docs-link');
-      const containerText = await container.getAttribute('href');
-      return containerText;
-    },
-
-    async getHostsLandingPageEnableButton() {
-      return testSubjects.find('hostsView-enable-feature-button');
-    },
-
-    async clickEnableHostViewButton() {
-      return testSubjects.click('hostsView-enable-feature-button');
-    },
-
     // Table
 
     async getHostsTable() {

@@ -39,6 +39,7 @@ export const checkRecognizer = async ({
       version: '1',
       asSystemRequest: true,
       signal,
+      query: { filter: 'security' },
     }
   );
 
@@ -56,6 +57,7 @@ export const getModules = async ({ moduleId = '', signal }: GetModulesProps): Pr
     version: '1',
     asSystemRequest: true,
     signal,
+    query: { filter: 'security' },
   });
 
 /**

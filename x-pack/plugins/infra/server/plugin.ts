@@ -83,7 +83,7 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
     featureFlags: schema.object({
       customThresholdAlertsEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: false }),
-        serverless: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
       }),
       logsUIEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
@@ -94,6 +94,22 @@ export const config: PluginConfigDescriptor<InfraConfig> = {
         serverless: schema.boolean({ defaultValue: false }),
       }),
       osqueryEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      inventoryThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      metricThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      logThresholdAlertRuleEnabled: offeringBasedSchema({
+        traditional: schema.boolean({ defaultValue: true }),
+        serverless: schema.boolean({ defaultValue: false }),
+      }),
+      alertsAndRulesDropdownEnabled: offeringBasedSchema({
         traditional: schema.boolean({ defaultValue: true }),
         serverless: schema.boolean({ defaultValue: false }),
       }),
@@ -238,7 +254,7 @@ export class InfraServerPlugin
     }
 
     initInfraServer(this.libs);
-    registerRuleTypes(plugins.alerting, this.libs, plugins.ml);
+    registerRuleTypes(plugins.alerting, this.libs, this.config);
 
     core.http.registerRouteHandlerContext<InfraPluginRequestHandlerContext, 'infra'>(
       'infra',

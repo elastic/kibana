@@ -416,19 +416,19 @@ export class Plugin implements ISecuritySolutionPlugin {
           depsStart.cloudExperiments
             .getVariation('security-solutions.guided-onboarding-content', defaultGuideTranslations)
             .then((variation) => {
-              plugins.guidedOnboarding.registerGuideConfig(
+              plugins.guidedOnboarding?.registerGuideConfig(
                 siemGuideId,
                 getSiemGuideConfig(variation)
               );
             });
         } catch {
-          plugins.guidedOnboarding.registerGuideConfig(
+          plugins.guidedOnboarding?.registerGuideConfig(
             siemGuideId,
             getSiemGuideConfig(defaultGuideTranslations)
           );
         }
       } else {
-        plugins.guidedOnboarding.registerGuideConfig(
+        plugins.guidedOnboarding?.registerGuideConfig(
           siemGuideId,
           getSiemGuideConfig(defaultGuideTranslations)
         );

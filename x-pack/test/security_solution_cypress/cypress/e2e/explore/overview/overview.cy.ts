@@ -17,7 +17,7 @@ import { cleanKibana } from '../../../tasks/common';
 import { createTimeline, favoriteTimeline } from '../../../tasks/api_calls/timelines';
 import { getTimeline } from '../../../objects/timeline';
 
-describe('Overview Page', { tags: ['@ess', '@serverless'] }, () => {
+describe('Overview Page', { tags: ['@ess', '@serverless', '@serverlessQA'] }, () => {
   before(() => {
     cleanKibana();
     cy.task('esArchiverLoad', { archiveName: 'overview' });

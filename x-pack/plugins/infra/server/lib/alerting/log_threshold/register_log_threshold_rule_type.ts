@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { GetViewInAppRelativeUrlFnOpts, PluginSetupContract } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
+import type { InfraConfig } from '../../../../common/plugin_config_types';
 import { O11Y_AAD_FIELDS } from '../../../../common/constants';
 import { createLogThresholdExecutor, FIRED_ACTIONS } from './log_threshold_executor';
 import { extractReferences, injectReferences } from './log_threshold_references_manager';
@@ -103,8 +104,13 @@ const viewInAppUrlActionVariableDescription = i18n.translate(
 
 export async function registerLogThresholdRuleType(
   alertingPlugin: PluginSetupContract,
-  libs: InfraBackendLibs
+  libs: InfraBackendLibs,
+  { featureFlags }: InfraConfig
 ) {
+  if (!featureFlags.logThresholdAlertRuleEnabled) {
+    return;
+  }
+
   if (!alertingPlugin) {
     throw new Error(
       'Cannot register log threshold alert type.  Both the actions and alerting plugins need to be enabled.'

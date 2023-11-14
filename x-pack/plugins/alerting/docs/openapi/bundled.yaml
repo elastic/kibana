@@ -9,8 +9,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: /
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -36,6 +35,8 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
+              createEsQueryEsqlRuleRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
               createEsQueryRuleRequest:
                 $ref: '#/components/examples/create_es_query_rule_request'
               createEsQueryKqlRuleRequest:
@@ -50,6 +51,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
+                createEsQueryEsqlRuleResponse:
+                  $ref: '#/components/examples/create_es_query_esql_rule_response'
                 createEsQueryRuleResponse:
                   $ref: '#/components/examples/create_es_query_rule_response'
                 createEsQueryKqlRuleResponse:
@@ -68,10 +71,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}:
     get:
       summary: Retrieves a rule by its identifier.
@@ -105,8 +104,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a rule.
       operationId: deleteRule
@@ -133,8 +130,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a rule with a specific rule identifier.
       operationId: createRuleId
@@ -160,6 +155,8 @@ paths:
             schema:
               $ref: '#/components/schemas/create_rule_request'
             examples:
+              createEsQueryEsqlRuleIdRequest:
+                $ref: '#/components/examples/create_es_query_esql_rule_request'
               createEsQueryRuleIdRequest:
                 $ref: '#/components/examples/create_es_query_rule_request'
               createEsQueryKqlRuleIdRequest:
@@ -174,6 +171,8 @@ paths:
               schema:
                 $ref: '#/components/schemas/rule_response_properties'
               examples:
+                createEsQueryEsqlRuleIdResponse:
+                  $ref: '#/components/examples/create_es_query_esql_rule_response'
                 createEsQueryRuleIdResponse:
                   $ref: '#/components/examples/create_es_query_rule_response'
                 createEsQueryKqlRuleIdResponse:
@@ -192,8 +191,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a rule.
       operationId: updateRule
@@ -236,10 +233,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_disable:
     post:
       summary: Disables a rule.
@@ -267,10 +260,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/404_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_enable:
     post:
       summary: Enables a rule.
@@ -298,10 +287,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rules/_find:
     get:
       summary: Retrieves information about rules.
@@ -415,10 +400,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/_health:
     get:
       summary: Retrieves the health status of the alerting framework.
@@ -504,8 +485,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule_types:
     get:
       summary: Retrieves a list of rule types.
@@ -571,6 +550,8 @@ paths:
                                 type: string
                               name:
                                 type: string
+                    alerts:
+                      type: object
                     authorized_consumers:
                       description: The list of the plugins IDs that have access to the rule type.
                       type: object
@@ -645,6 +626,13 @@ paths:
                               type: boolean
                             read:
                               type: boolean
+                    category:
+                      type: string
+                      description: The rule category, which is used by features such as category-specific maintenance windows.
+                      enum:
+                        - management
+                        - observability
+                        - securitySolution
                     default_action_group_id:
                       description: The default identifier for the rule type group.
                       type: string
@@ -653,6 +641,10 @@ paths:
                       type: boolean
                     enabled_in_license:
                       description: Indicates whether the rule type is enabled or disabled based on the subscription.
+                      type: boolean
+                    has_alerts_mappings:
+                      type: boolean
+                    has_fields_for_a_a_d:
                       type: boolean
                     id:
                       description: The unique identifier for the rule type.
@@ -691,8 +683,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_mute_all:
     post:
       summary: Mutes all alerts.
@@ -714,10 +704,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_unmute_all:
     post:
       summary: Unmutes all alerts.
@@ -739,10 +725,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/_update_api_key:
     post:
       summary: Updates the API key for a rule.
@@ -763,10 +745,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/400_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_mute:
     post:
       summary: Mutes an alert.
@@ -789,10 +767,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerting/rule/{ruleId}/alert/{alertId}/_unmute:
     post:
       summary: Unmutes an alert.
@@ -815,10 +789,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}:
     delete:
       summary: Permanently removes an alert.
@@ -847,8 +817,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves an alert by its identifier.
       operationId: legacyGetAlert
@@ -878,8 +846,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Create an alert.
       operationId: legacyCreateAlert
@@ -989,8 +955,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for an alert.
       operationId: legacyUpdateAlert
@@ -1089,10 +1053,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_disable:
     post:
       summary: Disables an alert.
@@ -1120,10 +1080,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_enable:
     post:
       summary: Enables an alert.
@@ -1151,10 +1107,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_mute_all:
     post:
       summary: Mutes all alert instances.
@@ -1182,10 +1134,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/_unmute_all:
     post:
       summary: Unmutes all alert instances.
@@ -1213,10 +1161,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/_find:
     get:
       summary: Retrieves a paginated set of alerts.
@@ -1326,10 +1270,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/_health:
     get:
       summary: Retrieves the health status of the alerting framework.
@@ -1412,8 +1352,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alerts/list_alert_types:
     get:
       summary: Retrieves a list of alert types.
@@ -1516,8 +1454,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_mute:
     post:
       summary: Mutes an alert instance.
@@ -1552,10 +1488,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/alerts/alert/{alertId}/alert_instance/{alertInstanceId}/_unmute:
     post:
       summary: Unmutes an alert instance.
@@ -1590,10 +1522,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/401_response'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -2224,32 +2152,10 @@ components:
         - all
         - top
       default: all
-    termfield:
-      description: |
-        This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.
-      type: string
     termsize:
       description: |
         This property is required when `groupBy` is `top`. It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
       type: integer
-    threshold:
-      description: |
-        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
-      type: array
-      items:
-        type: integer
-        example: 4000
-    thresholdcomparator:
-      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
-      type: string
-      enum:
-        - '>'
-        - '>='
-        - <
-        - <=
-        - between
-        - notBetween
-      example: '>'
     timefield:
       description: The field that is used to calculate the time window.
       type: string
@@ -2268,8 +2174,97 @@ components:
         - h
         - d
       example: m
+    size:
+      description: |
+        The number of documents to pass to the configured actions when the threshold condition is met.
+      type: integer
+    termfield:
+      description: |
+        This property is required when `groupBy` is `top`. The name of the field that is used for grouping the aggregation.
+      type: string
+    threshold:
+      description: |
+        The threshold value that is used with the `thresholdComparator`. If the `thresholdComparator` is `between` or `notBetween`, you must specify the boundary values.
+      type: array
+      items:
+        type: integer
+        example: 4000
+    thresholdcomparator:
+      description: The comparison function for the threshold. For example, "is above", "is above or equals", "is below", "is below or equals", "is between", and "is not between".
+      type: string
+      enum:
+        - '>'
+        - '>='
+        - <
+        - <=
+        - between
+        - notBetween
+      example: '>'
     params_es_query_rule:
       oneOf:
+        - type: object
+          x-technical-preview: true
+          description: |
+            The parameters for an Elasticsearch query rule that uses ES|QL to define the query. This functionality is in technical pre view and may be changed or removed in a future release. Elastic will work to fix any issues, but features in technical preview are not subject to the support SLA of official GA features.
+          required:
+            - esqlQuery
+            - searchType
+            - size
+            - threshold
+            - thresholdComparator
+            - timeWindowSize
+            - timeWindowUnit
+          properties:
+            aggField:
+              $ref: '#/components/schemas/aggfield'
+            aggType:
+              $ref: '#/components/schemas/aggtype'
+            esqlQuery:
+              type: object
+              required:
+                - esql
+              properties:
+                esql:
+                  description: The query definition, which uses Elasticsearch Query Language.
+                  type: string
+            excludeHitsFromPreviousRun:
+              $ref: '#/components/schemas/excludehitsfrompreviousrun'
+            groupBy:
+              $ref: '#/components/schemas/groupby'
+            searchType:
+              description: The type of query, in this case a query that uses Elasticsearch Query Language (ES|QL).
+              type: string
+              enum:
+                - esqlQuery
+              example: esqlQuery
+            size:
+              type: integer
+              description: |
+                When `searchType` is `esqlQuery`, this property is required but it does not affect the rule behavior.
+              example: 0
+            termSize:
+              $ref: '#/components/schemas/termsize'
+            threshold:
+              type: array
+              items:
+                type: integer
+                minimum: 0
+                maximum: 0
+              description: |
+                The threshold value that is used with the `thresholdComparator`. When `searchType` is `esqlQuery`, this property is required and must be set to zero.
+            thresholdComparator:
+              type: string
+              description: |
+                The comparison function for the threshold. When `searchType` is `esqlQuery`, this property is required and must be set to ">". Since the `threshold` value must be `0`, the result is that an alert occurs whenever the query returns results.
+              enum:
+                - '>'
+              example: '>'
+            timeField:
+              $ref: '#/components/schemas/timefield'
+            timeWindowSize:
+              $ref: '#/components/schemas/timewindowsize'
+            timeWindowUnit:
+              $ref: '#/components/schemas/timewindowunit'
         - type: object
           description: The parameters for an Elasticsearch query rule that uses KQL or Lucene to define the query.
           required:
@@ -2318,9 +2313,7 @@ components:
                 - searchSource
               example: searchSource
             size:
-              description: |
-                The number of documents to pass to the configured actions when the threshold condition is met.
-              type: integer
+              $ref: '#/components/schemas/size'
             termField:
               $ref: '#/components/schemas/termfield'
             termSize:
@@ -2372,9 +2365,7 @@ components:
               default: esQuery
               example: esQuery
             size:
-              description: |
-                The number of documents to pass to the configured actions when the threshold condition is met.
-              type: integer
+              $ref: '#/components/schemas/size'
             termField:
               $ref: '#/components/schemas/termfield'
             termSize:
@@ -4640,6 +4631,36 @@ components:
           nullable: true
           example: elastic
   examples:
+    create_es_query_esql_rule_request:
+      summary: Create an Elasticsearch query rule that uses Elasticsearch Query Language (ES|QL).
+      value:
+        name: my Elasticsearch query ESQL rule
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: FROM kibana_sample_data_logs | KEEP bytes, clientip, host, geo.dest | where geo.dest != "GB" | STATS sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | SORT sumbytes desc | LIMIT 10
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          size: 0
+          thresholdComparator: '>'
+          threshold:
+            - 0
+        consumer: stackAlerts
+        rule_type_id: .es-query
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+            params:
+              level: info
+              message: |-
+                Elasticsearch query rule '{{rule.name}}' is active:
+                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+            frequency:
+              summary: false
+              notify_when: onActiveAlert
     create_es_query_rule_request:
       summary: Create an Elasticsearch query rule that uses Elasticsearch query domain specific language (DSL) to define its query and a server log connector to send notifications.
       value:
@@ -4739,6 +4760,61 @@ components:
           interval: 1m
         tags:
           - cpu
+    create_es_query_esql_rule_response:
+      summary: The create rule API returns a JSON object that contains details about the rule.
+      value:
+        id: e0d62360-78e8-11ee-9177-f7d404c8c945
+        enabled: true
+        name: my Elasticsearch query ESQL rule
+        tags: []
+        rule_type_id: .es-query
+        consumer: stackAlerts
+        schedule:
+          interval: 1d
+        actions:
+          - group: query matched
+            id: d0db1fe0-78d6-11ee-9177-f7d404c8c945
+            params:
+              level: info
+              message: |-
+                Elasticsearch query rule '{{rule.name}}' is active:
+                - Value: {{context.value}} - Conditions Met: {{context.conditions}} over {{rule.params.timeWindowSize}}{{rule.params.timeWindowUnit}} - Timestamp: {{context.date}} - Link: {{context.link}}
+            connector_type_id: .server-log
+            frequency:
+              summary: false
+              notify_when: onActiveAlert
+              throttle: null
+            uuid: bfe370a3-531b-4855-bbe6-ad739f578844
+        params:
+          searchType: esqlQuery
+          esqlQuery:
+            esql: FROM kibana_sample_data_logs | keep bytes, clientip, host, geo.dest | WHERE geo.dest != "GB" | stats sumbytes = sum(bytes) by clientip, host | WHERE sumbytes > 5000 | sort sumbytes desc | limit 10
+          timeField: '@timestamp'
+          timeWindowSize: 1
+          timeWindowUnit: d
+          size: 0
+          thresholdComparator: '>'
+          threshold:
+            - 0
+          excludeHitsFromPreviousRun": true,
+          aggType: count
+          groupBy: all
+        scheduled_task_id: e0d62360-78e8-11ee-9177-f7d404c8c945
+        created_by: elastic
+        updated_by: elastic",
+        created_at: '2023-11-01T19:00:10.453Z'
+        updated_at: '2023-11-01T19:00:10.453Z'
+        api_key_owner: elastic
+        api_key_created_by_user: false
+        throttle: null
+        mute_all: false
+        notify_when: null
+        muted_alert_ids: []
+        execution_status:
+          status: pending
+          last_execution_date: '2023-11-01T19:00:10.453Z'
+        revision: 0
+        running: false
     create_es_query_rule_response:
       summary: The create rule API returns a JSON object that contains details about the rule.
       value:
@@ -5294,11 +5370,101 @@ components:
       summary: Retrieve rule types associated with Kibana machine learning features
       value:
         - id: xpack.ml.anomaly_detection_alert
+          name: Anomaly detection alert
+          category: management
+          producer: ml
+          alerts:
+            context: ml.anomaly-detection
+            mappings:
+              fieldMap:
+                kibana.alert.job_id:
+                  type: keyword
+                  array: false
+                  required: true
+                kibana.alert.anomaly_score:
+                  type: double
+                  array: false
+                  required: false
+                kibana.alert.is_interim:
+                  type: boolean
+                  array: false
+                  required: false
+                kibana.alert.anomaly_timestamp:
+                  type: date
+                  array: false
+                  required: false
+                kibana.alert.top_records:
+                  type: object
+                  array: true
+                  required: false
+                  dynamic: false
+                  properties:
+                    job_id:
+                      type: keyword
+                    record_score:
+                      type: double
+                    initial_record_score:
+                      type: double
+                    detector_index:
+                      type: integer
+                    is_interim:
+                      type: boolean
+                    timestamp:
+                      type: date
+                    partition_field_name:
+                      type: keyword
+                    partition_field_value:
+                      type: keyword
+                    over_field_name:
+                      type: keyword
+                    over_field_value:
+                      type: keyword
+                    by_field_name:
+                      type: keyword
+                    by_field_value:
+                      type: keyword
+                    function:
+                      type: keyword
+                    typical:
+                      type: double
+                    actual:
+                      type: double
+                    field_name:
+                      type: keyword
+                kibana.alert.top_influencers:
+                  type: object
+                  array: true
+                  required: false
+                  dynamic: false
+                  properties:
+                    job_id:
+                      type: keyword
+                    influencer_field_name:
+                      type: keyword
+                    influencer_field_value:
+                      type: keyword
+                    influencer_score:
+                      type: double
+                    initial_influencer_score:
+                      type: double
+                    is_interim:
+                      type: boolean
+                    timestamp:
+                      type: date
+            shouldWrite: true
+          enabled_in_license: true
+          recovery_action_group:
+            id: recovered
+            name: Recovered
           action_groups:
             - id: anomaly_score_match
               name: Anomaly score matched the condition
             - id: recovered
               name: Recovered
+          default_action_group_id: anomaly_score_match
+          minimum_license_required: platinum
+          is_exportable: true
+          rule_task_timeout: 5m
           action_variables:
             context:
               - name: timestamp
@@ -5320,55 +5486,104 @@ components:
               - name: anomalyExplorerUrl
                 description: URL to open in the Anomaly Explorer
                 useWithTripleBracesInTemplates: true
-            params: []
             state: []
+            params: []
           authorized_consumers:
             alerts:
-              all: true
               read: true
+              all: true
+            stackAlerts:
+              read: true
+              all: true
+            slo:
+              read: true
+              all: true
             ml:
-              all: true
               read: true
-          default_action_group_id: anomaly_score_match
+              all: true
+            uptime:
+              read: true
+              all: true
+            infrastructure:
+              read: true
+              all: true
+            logs:
+              read: true
+              all: true
+            monitoring:
+              read: true
+              all: true
+            siem:
+              read: true
+              all: true
+            apm:
+              read: true
+              all: true
+            discover:
+              read: true
+              all: true
           does_set_recovery_context: true
-          enabled_in_license: true
-          is_exportable: true
-          minimum_license_required: platinum
-          name: Anomaly detection alert
+          has_alerts_mappings: true
+          has_fields_for_a_a_d: false
+        - id: xpack.ml.anomaly_detection_jobs_health
+          name: Anomaly detection jobs health
+          category: management
           producer: ml
+          enabled_in_license: true
           recovery_action_group:
             id: recovered
             name: Recovered
-          rule_task_timeout: 5m
-        - id: xpack.ml.anomaly_detection_jobs_health
           action_groups:
             - id: anomaly_detection_realtime_issue
               name: Issue detected
             - id: recovered
               name: Recovered
+          default_action_group_id: anomaly_detection_realtime_issue
+          minimum_license_required: platinum
+          is_exportable: true
+          rule_task_timeout: 5m
           action_variables:
             context:
               - name: results
                 description: Results of the rule execution
               - name: message
                 description: Alert info message
-            params: []
             state: []
+            params: []
           authorized_consumers:
             alerts:
-              all: true
               read: true
+              all: true
+            stackAlerts:
+              read: true
+              all: true
+            slo:
+              read: true
+              all: true
             ml:
-              all: true
               read: true
-          default_action_group_id: anomaly_detection_realtime_issue
+              all: true
+            uptime:
+              read: true
+              all: true
+            infrastructure:
+              read: true
+              all: true
+            logs:
+              read: true
+              all: true
+            monitoring:
+              read: true
+              all: true
+            siem:
+              read: true
+              all: true
+            apm:
+              read: true
+              all: true
+            discover:
+              read: true
+              all: true
           does_set_recovery_context: true
-          enabled_in_license: true
-          is_exportable: true
-          minimum_license_required: platinum
-          name: Anomaly detection jobs health
-          producer: ml
-          recovery_action_group:
-            id: recovered
-            name: Recovered
-          rule_task_timeout: 5m
+          has_alerts_mappings: false
+          has_fields_for_a_a_d: false

@@ -97,13 +97,11 @@ exports[`LayerControl is rendered 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
-    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
     isDisabled={false}
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Add layer"
@@ -363,13 +361,11 @@ exports[`LayerControl should disable buttons when flyout is open 1`] = `
   />
   <EuiButton
     className="mapLayerControl__addLayerButton"
-    color="primary"
     data-test-subj="addLayerButton"
     fill={true}
     fullWidth={true}
     isDisabled={true}
     onClick={[Function]}
-    size="m"
   >
     <FormattedMessage
       defaultMessage="Add layer"

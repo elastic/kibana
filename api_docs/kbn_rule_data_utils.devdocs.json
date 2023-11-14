@@ -176,7 +176,20 @@
       }
     ],
     "interfaces": [],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/rule-data-utils",
+        "id": "def-common.ApmRuleType",
+        "type": "Enum",
+        "tags": [],
+        "label": "ApmRuleType",
+        "description": [],
+        "path": "packages/kbn-rule-data-utils/src/rule_types/o11y_rules.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [
       {
         "parentPluginId": "@kbn/rule-data-utils",
@@ -1416,7 +1429,7 @@
         "label": "AlertConsumers",
         "description": [],
         "signature": [
-          "\"uptime\" | \"siem\" | \"apm\" | \"observability\" | \"logs\" | \"infrastructure\" | \"slo\""
+          "\"uptime\" | \"siem\" | \"observability\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,
@@ -1716,7 +1729,7 @@
         "label": "ValidFeatureId",
         "description": [],
         "signature": [
-          "\"uptime\" | \"siem\" | \"apm\" | \"observability\" | \"logs\" | \"infrastructure\" | \"slo\""
+          "\"uptime\" | \"siem\" | \"observability\" | \"apm\" | \"logs\" | \"infrastructure\" | \"slo\""
         ],
         "path": "packages/kbn-rule-data-utils/src/alerts_as_data_rbac.ts",
         "deprecated": false,

@@ -8,19 +8,24 @@
 
 import url from 'url';
 import expect from '@kbn/expect';
-import { PluginFunctionalProviderContext } from '../../services';
+import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {
   const PageObjects = getPageObjects(['common']);
-
   const browser = getService('browser');
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
+  const log = getService('log');
 
-  const loadingScreenNotShown = async () =>
-    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+  const clickAppLink = async (app: string) => {
+    const appLink = `dlNav${app}`;
+    if (!(await testSubjects.exists(appLink))) {
+      log.debug(`App ${app} not found on side nav`);
+    }
+    await testSubjects.click(appLink);
+  };
 
   const getKibanaUrl = (pathname?: string, search?: string) =>
     url.format({
@@ -35,61 +40,70 @@ export default function ({ getService, getPageObjects }: PluginFunctionalProvide
   const waitForUrlToBe = (pathname?: string, search?: string) => {
     const expectedUrl = getKibanaUrl(pathname, search);
     return retry.waitFor(`Url to be ${expectedUrl}`, async () => {
-      return (await browser.getCurrentUrl()) === expectedUrl;
+      const currentUrl = await browser.getCurrentUrl();
+      log?.debug(`waiting for currentUrl ${currentUrl} to be expectedUrl ${expectedUrl}`);
+      return currentUrl === expectedUrl;
     });
   };
 
-  // Failing: See https://github.com/elastic/kibana/issues/166893
-  describe.skip('application deep links navigation', function describeDeepLinksTests() {
+  const loadingScreenNotShown = async () =>
+    expect(await testSubjects.exists('kbnLoadingMessage')).to.be(false);
+
+  const checkAppVisible = async (app: string) => {
+    const appContainer = `dlApp${app}`;
+    await testSubjects.existOrFail(appContainer);
+  };
+
+  describe('application deep links navigation', function describeDeepLinksTests() {
     before(async () => {
       await esArchiver.emptyKibanaIndex();
       await PageObjects.common.navigateToApp('dl');
     });
 
     it('should start on home page', async () => {
-      await testSubjects.existOrFail('dlAppHome');
+      await checkAppVisible('Home');
     });
 
     it('should navigate to page A when navlink is clicked', async () => {
-      await appsMenu.clickLink('DL Page A');
+      await clickAppLink('PageA');
       await waitForUrlToBe('/app/dl/page-a');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('dlAppPageA');
+      await checkAppVisible('PageA');
     });
 
     it('should be able to use the back button to navigate back to previous deep link', async () => {
       await browser.goBack();
       await waitForUrlToBe('/app/dl/home');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('dlAppHome');
+      await checkAppVisible('Home');
     });
 
     it('should navigate to nested page B when navlink is clicked', async () => {
-      await appsMenu.clickLink('DL Page B');
+      await clickAppLink('DeepPageB');
       await waitForUrlToBe('/app/dl/page-b');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('dlAppPageB');
+      await checkAppVisible('PageB');
     });
 
     it('should navigate to Home when navlink is clicked inside the defined category group', async () => {
-      await appsMenu.clickLink('DL Home', { category: 'securitySolution' });
+      await clickAppLink('Home');
       await waitForUrlToBe('/app/dl/home');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('dlAppHome');
+      await checkAppVisible('Home');
     });
 
     it('should navigate to nested page B using navigateToApp path', async () => {
-      await testSubjects.click('dlNavDeepPageB');
+      await clickAppLink('DeepPageB');
       await waitForUrlToBe('/app/dl/page-b');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('dlAppPageB');
+      await checkAppVisible('PageB');
     });
 
     it('should navigate to nested page A using navigateToApp deepLinkId', async () => {
-      await testSubjects.click('dlNavDeepPageAById');
+      await clickAppLink('DeepPageAById');
       await waitForUrlToBe('/app/dl/page-a');
       await loadingScreenNotShown();
-      await testSubjects.existOrFail('dlAppPageA');
+      await checkAppVisible('PageA');
     });
 
     it('should not display hidden deep links', async () => {

@@ -51,7 +51,7 @@ export function Threshold({
       data-test-subj={`thresholdRule-${threshold}-${value}`}
     >
       <Chart>
-        <Settings theme={theme} baseTheme={baseTheme} />
+        <Settings theme={theme} baseTheme={baseTheme} locale={i18n.getLocale()} />
         <Metric
           id={id}
           data={[

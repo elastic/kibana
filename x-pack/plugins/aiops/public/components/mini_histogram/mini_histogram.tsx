@@ -22,6 +22,7 @@ import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SignificantTermHistogramItem } from '@kbn/ml-agg-utils';
 
+import { i18n } from '@kbn/i18n';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
@@ -105,7 +106,11 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
     <div css={cssChartSize}>
       <Chart>
         <Tooltip type={TooltipType.None} />
-        <Settings theme={[miniHistogramChartTheme, defaultChartTheme]} showLegend={false} />
+        <Settings
+          theme={[miniHistogramChartTheme, defaultChartTheme]}
+          showLegend={false}
+          locale={i18n.getLocale()}
+        />
         <BarSeries
           id="doc_count_overall"
           xScaleType={ScaleType.Time}

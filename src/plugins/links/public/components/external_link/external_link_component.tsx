@@ -7,6 +7,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import useMount from 'react-use/lib/useMount';
 
 import {
   UrlDrilldownOptions,
@@ -21,11 +22,17 @@ import { Link, LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../../common/co
 export const ExternalLinkComponent = ({
   link,
   layout,
+  onRender,
 }: {
   link: Link;
   layout: LinksLayoutType;
+  onRender: () => void;
 }) => {
   const [error, setError] = useState<string | undefined>();
+
+  useMount(() => {
+    onRender();
+  });
 
   const linkOptions = useMemo(() => {
     return {

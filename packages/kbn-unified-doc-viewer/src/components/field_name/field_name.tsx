@@ -36,7 +36,7 @@ export function FieldName({
   const typeName = getFieldTypeName(fieldType);
   const displayName =
     fieldMapping && fieldMapping.displayName ? fieldMapping.displayName : fieldName;
-  const tooltip = displayName !== fieldName ? `${fieldName} (${displayName})` : fieldName;
+  const tooltip = displayName !== fieldName ? `${displayName} (${fieldName})` : fieldName;
   const subTypeMulti = fieldMapping && getDataViewFieldSubtypeMulti(fieldMapping.spec);
   const isMultiField = !!subTypeMulti?.multi;
 

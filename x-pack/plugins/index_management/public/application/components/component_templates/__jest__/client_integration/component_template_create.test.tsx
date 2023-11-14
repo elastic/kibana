@@ -8,8 +8,6 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import '@kbn/es-ui-shared-plugin/public/components/code_editor/jest_mock';
-import '../../../../../../test/global_mocks';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { setupEnvironment } from './helpers';
 import { API_BASE_PATH } from './helpers/constants';

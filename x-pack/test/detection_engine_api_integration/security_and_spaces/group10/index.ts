@@ -17,7 +17,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./get_rule_execution_results'));
     loadTestFile(require.resolve('./import_rules'));
     loadTestFile(require.resolve('./import_export_rules'));
-    loadTestFile(require.resolve('./legacy_actions_migrations'));
     loadTestFile(require.resolve('./read_rules'));
     loadTestFile(require.resolve('./resolve_read_rules'));
     loadTestFile(require.resolve('./update_rules'));
@@ -36,7 +35,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./runtime'));
     loadTestFile(require.resolve('./throttle'));
     loadTestFile(require.resolve('./ignore_fields'));
-    loadTestFile(require.resolve('./migrations'));
     loadTestFile(require.resolve('./risk_engine/init_and_status_apis'));
     loadTestFile(require.resolve('./risk_engine/risk_score_preview'));
     loadTestFile(require.resolve('./risk_engine/risk_score_calculation'));

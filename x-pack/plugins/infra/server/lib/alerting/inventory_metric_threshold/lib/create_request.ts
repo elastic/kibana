@@ -5,12 +5,9 @@
  * 2.0.
  */
 import type { ESSearchRequest } from '@kbn/es-types';
-import { findInventoryFields } from '../../../../../common/inventory_models';
+import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../common/inventory_models/types';
 import { parseFilterQuery } from '../../../../utils/serialized_query';
 import { createMetricAggregations } from './create_metric_aggregations';
 import { InventoryMetricConditions } from '../../../../../common/alerting/metrics';

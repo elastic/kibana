@@ -34,6 +34,8 @@ const serializeRowHeight = (rowHeight?: EuiDataGridRowHeightOption): number => {
     return ROWS_HEIGHT_OPTIONS.auto;
   } else if (typeof rowHeight === 'object' && rowHeight.lineCount) {
     return rowHeight.lineCount; // custom
+  } else if (typeof rowHeight === 'number') {
+    return rowHeight;
   }
 
   return ROWS_HEIGHT_OPTIONS.single;

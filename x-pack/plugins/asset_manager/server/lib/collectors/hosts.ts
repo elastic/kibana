@@ -15,12 +15,15 @@ export async function collectHosts({
   to,
   sourceIndices,
   afterKey,
+  filters = [],
 }: CollectorOptions) {
   if (!sourceIndices?.metrics || !sourceIndices?.logs) {
     throw new Error('missing required metrics/logs indices');
   }
 
   const { metrics, logs } = sourceIndices;
+
+  const musts = [...filters, { exists: { field: 'host.hostname' } }];
   const dsl: estypes.SearchRequest = {
     index: [metrics, logs],
     size: QUERY_MAX_SIZE,
@@ -47,11 +50,12 @@ export async function collectHosts({
             },
           },
         ],
-        must: [{ exists: { field: 'host.hostname' } }],
+        must: musts,
         should: [
           { exists: { field: 'kubernetes.node.name' } },
           { exists: { field: 'kubernetes.pod.uid' } },
           { exists: { field: 'container.id' } },
+          { exists: { field: 'cloud.provider' } },
         ],
       },
     },

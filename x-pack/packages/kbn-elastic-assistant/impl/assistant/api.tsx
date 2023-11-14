@@ -59,19 +59,16 @@ export const fetchConnectorExecuteAction = async ({
       subActionParams: body,
       subAction: 'invokeAI',
     },
+    assistantLangChain,
   };
 
   try {
-    const path = assistantLangChain
-      ? `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`
-      : `/api/actions/connector/${apiConfig?.connectorId}/_execute`;
-
     const response = await http.fetch<{
       connector_id: string;
       status: string;
       data: string;
       service_message?: string;
-    }>(path, {
+    }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -98,7 +95,7 @@ export const fetchConnectorExecuteAction = async ({
     };
   } catch (error) {
     return {
-      response: API_ERROR,
+      response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
       isError: true,
     };
   }

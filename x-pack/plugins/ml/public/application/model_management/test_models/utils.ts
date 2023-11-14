@@ -15,6 +15,14 @@ import type { ModelItem } from '../models_list';
 
 const PYTORCH_TYPES = Object.values(SUPPORTED_PYTORCH_TASKS);
 
+export function isDfaTrainedModel(modelItem: ModelItem) {
+  return (
+    modelItem.metadata?.analytics_config !== undefined ||
+    modelItem.inference_config?.regression !== undefined ||
+    modelItem.inference_config?.classification !== undefined
+  );
+}
+
 export function isTestable(modelItem: ModelItem, checkForState = false) {
   if (
     modelItem.model_type === TRAINED_MODEL_TYPE.PYTORCH &&
@@ -31,5 +39,5 @@ export function isTestable(modelItem: ModelItem, checkForState = false) {
     return true;
   }
 
-  return false;
+  return isDfaTrainedModel(modelItem);
 }

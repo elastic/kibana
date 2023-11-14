@@ -42,7 +42,7 @@ describe('Rules table: selection', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     /* Create and install two mock rules */
-    createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
+    createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
     visit(RULES_MANAGEMENT_URL);
     waitForPrebuiltDetectionRulesToBeLoaded();
   });

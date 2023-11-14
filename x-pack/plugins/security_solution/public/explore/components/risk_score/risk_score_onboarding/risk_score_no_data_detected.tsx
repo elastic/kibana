@@ -14,7 +14,6 @@ import * as i18n from './translations';
 import { RiskScoreHeaderTitle } from './risk_score_header_title';
 import { RiskScoreRestartButton } from './risk_score_restart_button';
 import type { inputsModel } from '../../../../common/store';
-import * as overviewI18n from '../../../../overview/components/entity_analytics/common/translations';
 import { useIsNewRiskScoreModuleInstalled } from '../../../../entity_analytics/api/hooks/use_risk_engine_status';
 
 const RiskScoresNoDataDetectedComponent = ({
@@ -37,15 +36,7 @@ const RiskScoresNoDataDetectedComponent = ({
 
   return (
     <EuiPanel data-test-subj={`${entityType}-risk-score-no-data-detected`} hasBorder>
-      <HeaderSection
-        title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />}
-        titleSize="s"
-        tooltip={
-          entityType === RiskScoreEntity.user
-            ? overviewI18n.USER_RISK_TABLE_TOOLTIP
-            : overviewI18n.HOST_RISK_TABLE_TOOLTIP
-        }
-      />
+      <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt
         title={<h2>{translations.title}</h2>}
         body={translations.body}

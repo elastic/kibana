@@ -114,7 +114,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         await pageObjects.infraHome.clickDismissKubernetesTourButton();
 
-        await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        await retry.try(async () => {
+          await pageObjects.infraHome.ensureKubernetesTourIsClosed();
+        });
       });
 
       it('renders an empty data prompt for dates with no data', async () => {
@@ -197,6 +199,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           before(async () => {
             await pageObjects.infraHome.clickOnNode();
             await pageObjects.assetDetails.clickApmTabLink();
+            await pageObjects.infraHome.waitForLoading();
           });
 
           it('should navigate to APM traces', async () => {
@@ -204,11 +207,19 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             const query = decodeURIComponent(url.query ?? '');
             const kuery = 'kuery=host.hostname:"demo-stack-nginx-01"';
 
-            expect(url.pathname).to.eql('/app/apm/traces');
-            expect(query).to.contain(kuery);
-
+            await retry.try(async () => {
+              expect(url.pathname).to.eql('/app/apm/traces');
+              expect(query).to.contain(kuery);
+            });
             await returnTo(INVENTORY_PATH);
           });
+        });
+
+        it('Should show auto-refresh option', async () => {
+          const kibanaRefreshConfig = await pageObjects.timePicker.getRefreshConfig();
+          expect(kibanaRefreshConfig.interval).to.equal('5');
+          expect(kibanaRefreshConfig.units).to.equal('Seconds');
+          expect(kibanaRefreshConfig.isPaused).to.equal(true);
         });
       });
 

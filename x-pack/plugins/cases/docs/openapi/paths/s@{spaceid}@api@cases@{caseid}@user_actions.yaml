@@ -21,16 +21,9 @@ get:
             type: array
             items:
               $ref: '../components/schemas/user_actions_response_properties.yaml'
-          examples:
-            getCaseActivityResponse:
-              $ref: '../components/examples/get_case_activity_response.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
         application/json:
           schema:
             $ref: '../components/schemas/4xx_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

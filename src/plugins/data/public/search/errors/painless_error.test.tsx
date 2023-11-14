@@ -23,11 +23,13 @@ describe('PainlessError', () => {
     const e = new PainlessError({
       statusCode: 400,
       message: 'search_phase_execution_exception',
-      attributes: searchPhaseException.error,
+      attributes: {
+        error: searchPhaseException.error,
+      },
     });
     const component = mount(e.getErrorMessage(startMock.application));
 
-    const failedShards = e.attributes?.failed_shards![0];
+    const failedShards = searchPhaseException.error.failed_shards![0];
 
     const stackTraceElem = findTestSubject(component, 'painlessStackTrace').getDOMNode();
     const stackTrace = failedShards!.reason.script_stack!.splice(-2).join('\n');

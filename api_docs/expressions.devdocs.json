@@ -3802,7 +3802,7 @@
                 "id": "def-public.ExpressionRenderHandler.Unnamed.$2",
                 "type": "Object",
                 "tags": [],
-                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      getCompatibleCellValueActions = async () => [],\n      executionContext,\n    }",
+                "label": "{\n      onRenderError,\n      renderMode,\n      syncColors,\n      syncTooltips,\n      syncCursor,\n      interactive,\n      hasCompatibleActions = async () => false,\n      getCompatibleCellValueActions = async () => [],\n      executionContext,\n      shouldShowLegendAction,\n    }",
                 "description": [],
                 "signature": [
                   "ExpressionRenderHandlerParams"
@@ -7342,6 +7342,38 @@
                     "section": "def-common.Datatable",
                     "text": "Datatable"
                   }
+                ],
+                "path": "src/plugins/expressions/common/execution/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ExecutionContext.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ExecutionContext.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "src/plugins/expressions/common/execution/types.ts",
                 "deprecated": false,
@@ -10980,6 +11012,38 @@
             "path": "src/plugins/expressions/public/types/index.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IExpressionLoaderParams.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.IExpressionLoaderParams.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/public/types/index.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11362,6 +11426,38 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.IInterpreterRenderHandlers.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.IInterpreterRenderHandlers.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11705,6 +11801,38 @@
             "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.ReactExpressionRendererProps.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-public.ReactExpressionRendererProps.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/public/react_expression_renderer/react_expression_renderer.tsx",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -11925,7 +12053,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -18757,6 +18885,38 @@
               }
             ],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.ExecutionContext.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.ExecutionContext.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/execution/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21406,6 +21566,38 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.IInterpreterRenderHandlers.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-server.IInterpreterRenderHandlers.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -21833,7 +22025,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -30258,7 +30450,7 @@
             "label": "type",
             "description": [],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
             ],
             "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -30816,6 +31008,38 @@
                     "section": "def-common.Datatable",
                     "text": "Datatable"
                   }
+                ],
+                "path": "src/plugins/expressions/common/execution/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.ExecutionContext.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/execution/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.ExecutionContext.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
                 ],
                 "path": "src/plugins/expressions/common/execution/types.ts",
                 "deprecated": false,
@@ -35698,6 +35922,38 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.IInterpreterRenderHandlers.shouldShowLegendAction",
+            "type": "Function",
+            "tags": [],
+            "label": "shouldShowLegendAction",
+            "description": [],
+            "signature": [
+              "((actionId: string) => boolean) | undefined"
+            ],
+            "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "expressions",
+                "id": "def-common.IInterpreterRenderHandlers.shouldShowLegendAction.$1",
+                "type": "string",
+                "tags": [],
+                "label": "actionId",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/plugins/expressions/common/expression_renderers/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -36540,7 +36796,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"unknown\" | \"_source\" | \"attachment\" | \"conflict\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"unknown\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/plugins/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,

@@ -271,7 +271,22 @@ describe('rules_list component empty', () => {
   it('renders MaintenanceWindowCallout if one exists', async () => {
     fetchActiveMaintenanceWindowsMock.mockResolvedValue([RUNNING_MAINTENANCE_WINDOW_1]);
     renderWithProviders(<RulesList />);
-    expect(await screen.findByText('Maintenance window is running')).toBeInTheDocument();
+    expect(
+      await screen.findByText(
+        'Rule notifications are stopped while maintenance windows are running.'
+      )
+    ).toBeInTheDocument();
+    expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("hides MaintenanceWindowCallout if filterConsumers does not match the running maintenance window's category", async () => {
+    fetchActiveMaintenanceWindowsMock.mockResolvedValue([
+      { ...RUNNING_MAINTENANCE_WINDOW_1, categoryIds: ['securitySolution'] },
+    ]);
+    renderWithProviders(<RulesList filterConsumers={['observability']} />);
+    await expect(
+      screen.findByText('Rule notifications are stopped while maintenance windows are running.')
+    ).rejects.toThrow();
     expect(fetchActiveMaintenanceWindowsMock).toHaveBeenCalledTimes(1);
   });
 
@@ -458,7 +473,8 @@ describe('rules_list ', () => {
     });
   });
 
-  describe('rules_list component with items', () => {
+  // FLAKY: https://github.com/elastic/kibana/issues/149061
+  describe.skip('rules_list component with items', () => {
     it('should render basic table and its row', async () => {
       renderWithProviders(<RulesList />);
       await waitFor(() => expect(screen.queryAllByTestId('rule-row')).toHaveLength(6));

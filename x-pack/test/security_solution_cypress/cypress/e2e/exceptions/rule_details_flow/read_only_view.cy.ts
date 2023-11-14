@@ -27,8 +27,7 @@ import {
   deleteExceptionList,
 } from '../../../tasks/api_calls/exceptions';
 
-// TODO: https://github.com/elastic/kibana/issues/161539 Do we need this to run in Serverless?
-describe('Exceptions viewer read only', { tags: ['@ess', '@skipInServerless'] }, () => {
+describe('Exceptions viewer read only', { tags: ['@ess'] }, () => {
   const exceptionList = getExceptionList();
 
   beforeEach(() => {
@@ -55,8 +54,8 @@ describe('Exceptions viewer read only', { tags: ['@ess', '@skipInServerless'] },
       );
     });
 
-    login(ROLES.reader);
-    visitRulesManagementTable(ROLES.reader);
+    login(ROLES.t1_analyst);
+    visitRulesManagementTable(ROLES.t1_analyst);
     goToRuleDetailsOf('Test exceptions rule');
     goToExceptionsTab();
   });

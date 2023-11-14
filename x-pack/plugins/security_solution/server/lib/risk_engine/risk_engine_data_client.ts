@@ -305,8 +305,6 @@ export class RiskEngineDataClient {
             template: {
               lifecycle: {},
               settings: {
-                auto_expand_replicas: '0-1',
-                hidden: true,
                 'index.mapping.total_fields.limit': totalFieldsLimit,
               },
               mappings: {

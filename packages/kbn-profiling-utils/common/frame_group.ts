@@ -41,7 +41,7 @@ export function createFrameGroupID(
   }
 
   if (sourceFilename === '') {
-    return `elf;${exeFilename};${functionName}`;
+    return `elf;${fileID};${functionName}`;
   }
 
   return `full;${exeFilename};${functionName};${stripLeadingSubdirs(sourceFilename || '')}`;

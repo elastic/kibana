@@ -6,7 +6,6 @@
  */
 
 import React, { FC, useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import { orderBy, isEqual } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
@@ -54,14 +53,7 @@ const PAGINATION_SIZE_OPTIONS = [5, 10, 20, 50];
 const DEFAULT_SORT_FIELD = 'pValue';
 const DEFAULT_SORT_DIRECTION = 'asc';
 
-const TRUNCATE_MAX_LINES = 3;
-const cssMultiLineTruncation = css`
-  display: -webkit-box;
-  line-clamp: ${TRUNCATE_MAX_LINES};
-  -webkit-line-clamp: ${TRUNCATE_MAX_LINES};
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-`;
+const TRUNCATE_TEXT_LINES = 3;
 
 interface LogRateAnalysisResultsTableProps {
   significantTerms: SignificantTerm[];
@@ -169,11 +161,12 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
               </EuiToolTip>
             )}
 
-            {fieldName}
+            <span title={fieldName}>{fieldName}</span>
           </>
         );
       },
       sortable: true,
+      truncateText: true,
       valign: 'middle',
     },
     {
@@ -183,21 +176,21 @@ export const LogRateAnalysisResultsTable: FC<LogRateAnalysisResultsTableProps> =
         defaultMessage: 'Field value',
       }),
       render: (_, { fieldValue, type }) => (
-        <div css={cssMultiLineTruncation}>
+        <span title={String(fieldValue)}>
           {type === 'keyword' ? (
             String(fieldValue)
           ) : (
             <EuiText size="xs">
               <EuiCode language="log" transparentBackground css={{ paddingInline: '0px' }}>
-                {fieldValue}
+                {String(fieldValue)}
               </EuiCode>
             </EuiText>
           )}
-        </div>
+        </span>
       ),
       sortable: true,
       textOnly: true,
-      truncateText: false,
+      truncateText: { lines: TRUNCATE_TEXT_LINES },
       valign: 'middle',
     },
     {

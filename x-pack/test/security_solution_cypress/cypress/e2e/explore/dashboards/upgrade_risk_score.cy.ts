@@ -36,8 +36,7 @@ import { deleteRiskEngineConfiguration } from '../../../tasks/api_calls/risk_eng
 
 const spaceId = 'default';
 
-// Flaky on serverless
-describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Upgrade risk scores', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
     login();
@@ -72,18 +71,15 @@ describe('Upgrade risk scores', { tags: ['@ess', '@serverless', '@brokenInServer
   });
 
   describe('upgrade risk engine', () => {
-    before(() => {
+    beforeEach(() => {
       cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
       cy.task('esArchiverLoad', { archiveName: 'risk_users' });
-    });
-
-    beforeEach(() => {
       login();
       installRiskScoreModule();
       visitWithTimeRange(ENTITY_ANALYTICS_URL);
     });
 
-    after(() => {
+    afterEach(() => {
       cy.task('esArchiverUnload', 'risk_hosts');
       cy.task('esArchiverUnload', 'risk_users');
       deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId });

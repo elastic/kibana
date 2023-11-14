@@ -19,7 +19,15 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; title: string; } & React.RefAttributes<{}>>"
+          "[]; title: string; } & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/index.ts",
         "deprecated": false,
@@ -51,7 +59,15 @@
         "label": "ObservabilityAIAssistantActionMenuItem",
         "description": [],
         "signature": [
-          "React.ForwardRefExoticComponent<React.RefAttributes<{}>>"
+          "React.ForwardRefExoticComponent<",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
+          " & React.RefAttributes<{}>>"
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/index.ts",
         "deprecated": false,
@@ -367,7 +383,17 @@
         "label": "APIReturnType",
         "description": [],
         "signature": [
-          "{ \"POST /internal/observability_ai_assistant/functions/alerts\": { endpoint: \"POST /internal/observability_ai_assistant/functions/alerts\"; params?: ",
+          "{ \"POST /internal/observability_ai_assistant/functions/get_dataset_info\": { endpoint: \"POST /internal/observability_ai_assistant/functions/get_dataset_info\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          "ObservabilityAIAssistantRouteHandlerResources",
+          " & { params: { body: { index: string; }; }; }) => Promise<{ indices: string[]; fields: { name: string; description: string; type: string; }[]; }>; } & ",
+          "ObservabilityAIAssistantRouteCreateOptions",
+          "; \"POST /internal/observability_ai_assistant/functions/alerts\": { endpoint: \"POST /internal/observability_ai_assistant/functions/alerts\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -734,7 +760,7 @@
             "text": "Message"
           },
           "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; } & { query?: { stream: boolean; } | undefined; }; }) => Promise<",
-          "IncomingMessage",
+          "Readable",
           " | ",
           "CreateChatCompletionResponse",
           ">; } & ",
@@ -756,7 +782,17 @@
         "label": "ObservabilityAIAssistantAPIClientRequestParamsOf",
         "description": [],
         "signature": [
-          "{ \"POST /internal/observability_ai_assistant/functions/alerts\": { endpoint: \"POST /internal/observability_ai_assistant/functions/alerts\"; params?: ",
+          "{ \"POST /internal/observability_ai_assistant/functions/get_dataset_info\": { endpoint: \"POST /internal/observability_ai_assistant/functions/get_dataset_info\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          "ObservabilityAIAssistantRouteHandlerResources",
+          " & { params: { body: { index: string; }; }; }) => Promise<{ indices: string[]; fields: { name: string; description: string; type: string; }[]; }>; } & ",
+          "ObservabilityAIAssistantRouteCreateOptions",
+          "; \"POST /internal/observability_ai_assistant/functions/alerts\": { endpoint: \"POST /internal/observability_ai_assistant/functions/alerts\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -1123,7 +1159,7 @@
             "text": "Message"
           },
           "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; } & { query?: { stream: boolean; } | undefined; }; }) => Promise<",
-          "IncomingMessage",
+          "Readable",
           " | ",
           "CreateChatCompletionResponse",
           ">; } & ",
@@ -1153,7 +1189,7 @@
         "label": "ObservabilityAIAssistantAPIEndpoint",
         "description": [],
         "signature": [
-          "\"POST /internal/observability_ai_assistant/chat\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"POST /internal/observability_ai_assistant/functions/elasticsearch\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarize\" | \"POST /internal/observability_ai_assistant/functions/setup_kb\" | \"GET /internal/observability_ai_assistant/functions/kb_status\" | \"POST /internal/observability_ai_assistant/functions/alerts\""
+          "\"POST /internal/observability_ai_assistant/chat\" | \"GET /internal/observability_ai_assistant/conversation/{conversationId}\" | \"POST /internal/observability_ai_assistant/conversations\" | \"POST /internal/observability_ai_assistant/conversation\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/auto_title\" | \"PUT /internal/observability_ai_assistant/conversation/{conversationId}/title\" | \"DELETE /internal/observability_ai_assistant/conversation/{conversationId}\" | \"GET /internal/observability_ai_assistant/connectors\" | \"POST /internal/observability_ai_assistant/functions/elasticsearch\" | \"POST /internal/observability_ai_assistant/functions/recall\" | \"POST /internal/observability_ai_assistant/functions/summarize\" | \"POST /internal/observability_ai_assistant/functions/setup_kb\" | \"GET /internal/observability_ai_assistant/functions/kb_status\" | \"POST /internal/observability_ai_assistant/functions/alerts\" | \"POST /internal/observability_ai_assistant/functions/get_dataset_info\""
         ],
         "path": "x-pack/plugins/observability_ai_assistant/public/api/index.ts",
         "deprecated": false,
@@ -1251,7 +1287,17 @@
         "label": "ObservabilityAIAssistantServerRouteRepository",
         "description": [],
         "signature": [
-          "{ \"POST /internal/observability_ai_assistant/functions/alerts\": { endpoint: \"POST /internal/observability_ai_assistant/functions/alerts\"; params?: ",
+          "{ \"POST /internal/observability_ai_assistant/functions/get_dataset_info\": { endpoint: \"POST /internal/observability_ai_assistant/functions/get_dataset_info\"; params?: ",
+          "TypeC",
+          "<{ body: ",
+          "TypeC",
+          "<{ index: ",
+          "StringC",
+          "; }>; }> | undefined; handler: ({}: ",
+          "ObservabilityAIAssistantRouteHandlerResources",
+          " & { params: { body: { index: string; }; }; }) => Promise<{ indices: string[]; fields: { name: string; description: string; type: string; }[]; }>; } & ",
+          "ObservabilityAIAssistantRouteCreateOptions",
+          "; \"POST /internal/observability_ai_assistant/functions/alerts\": { endpoint: \"POST /internal/observability_ai_assistant/functions/alerts\"; params?: ",
           "TypeC",
           "<{ body: ",
           "IntersectionC",
@@ -1618,7 +1664,7 @@
             "text": "Message"
           },
           "[]; connectorId: string; functions: { name: string; description: string; parameters: any; }[]; } & { functionCall?: string | undefined; }; } & { query?: { stream: boolean; } | undefined; }; }) => Promise<",
-          "IncomingMessage",
+          "Readable",
           " | ",
           "CreateChatCompletionResponse",
           ">; } & ",

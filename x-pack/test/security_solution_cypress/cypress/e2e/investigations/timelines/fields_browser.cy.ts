@@ -51,7 +51,8 @@ const defaultHeaders = [
 ];
 
 // Flaky in serverless tests
-describe('Fields Browser', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+// FLAKY: https://github.com/elastic/kibana/issues/169363
+describe.skip('Fields Browser', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
     cleanKibana();
   });

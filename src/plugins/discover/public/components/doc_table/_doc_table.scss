@@ -4,6 +4,7 @@
 // stylelint-disable selector-no-qualifying-type
 .kbnDocTableWrapper {
   @include euiScrollBar;
+  @include euiOverflowShadow;
   overflow: auto;
   display: flex;
   flex: 1 1 100%;

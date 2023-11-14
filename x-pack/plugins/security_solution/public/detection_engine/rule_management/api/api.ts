@@ -77,7 +77,6 @@ import type {
   PatchRuleProps,
   PrePackagedRulesStatusResponse,
   PreviewRulesProps,
-  Rule,
   RulesSnoozeSettingsBatchResponse,
   RulesSnoozeSettingsMap,
   UpdateRulesProps,
@@ -105,15 +104,15 @@ export const createRule = async ({ rule, signal }: CreateRulesProps): Promise<Ru
  * @param rule RuleUpdateProps to be updated
  * @param signal to cancel request
  *
- * @returns Promise<Rule> An updated rule
+ * @returns Promise<RuleResponse> An updated rule
  *
  * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
  * It should be addressed as a part of OpenAPI schema adoption.
  *
  * @throws An error if response is not OK
  */
-export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<Rule> =>
-  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+export const updateRule = async ({ rule, signal }: UpdateRulesProps): Promise<RuleResponse> =>
+  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'PUT',
     version: '2023-10-31',
     body: JSON.stringify(rule),
@@ -208,15 +207,15 @@ export const fetchRules = async ({
  * @param id Rule ID's (not rule_id)
  * @param signal to cancel request
  *
- * @returns Promise<Rule>
+ * @returns Promise<RuleResponse>
  *
  * In fact this function should return Promise<RuleResponse> but it'd require massive refactoring.
  * It should be addressed as a part of OpenAPI schema adoption.
  *
  * @throws An error if response is not OK
  */
-export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<Rule> =>
-  KibanaServices.get().http.fetch<Rule>(DETECTION_ENGINE_RULES_URL, {
+export const fetchRuleById = async ({ id, signal }: FetchRuleProps): Promise<RuleResponse> =>
+  KibanaServices.get().http.fetch<RuleResponse>(DETECTION_ENGINE_RULES_URL, {
     method: 'GET',
     version: '2023-10-31',
     query: { id },
@@ -297,10 +296,10 @@ export interface BulkActionSummary {
 }
 
 export interface BulkActionResult {
-  updated: Rule[];
-  created: Rule[];
-  deleted: Rule[];
-  skipped: Rule[];
+  updated: RuleResponse[];
+  created: RuleResponse[];
+  deleted: RuleResponse[];
+  skipped: RuleResponse[];
 }
 
 export interface BulkActionAggregatedError {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { getSyntheticsParamsRoute } from './settings/params/params';
+import { editSyntheticsParamsRoute } from './settings/params/edit_param';
 import { getConnectorTypesRoute } from './default_alerts/get_connector_types';
 import { getActionConnectorsRoute } from './default_alerts/get_action_connectors';
 import { SyntheticsRestApiRouteFactory } from './types';
@@ -18,8 +20,6 @@ import { createLastSuccessfulCheckRoute } from './pings/last_successful_check';
 import { createJourneyFailedStepsRoute, createJourneyRoute } from './pings/journeys';
 import { updateDefaultAlertingRoute } from './default_alerts/update_default_alert';
 import { syncParamsSyntheticsParamsRoute } from './settings/sync_global_params';
-import { editSyntheticsParamsRoute } from './settings/edit_param';
-import { getSyntheticsParamsRoute } from './settings/params';
 import { getIndexSizesRoute } from './settings/settings';
 import { getAPIKeySyntheticsRoute } from './monitor_cruds/get_api_key';
 import { getServiceLocationsRoute } from './synthetics_service/get_service_locations';
@@ -44,8 +44,6 @@ import { addSyntheticsProjectMonitorRoute } from './monitor_cruds/add_monitor_pr
 import { syntheticsGetPingsRoute, syntheticsGetPingStatusesRoute } from './pings';
 import { createGetCurrentStatusRoute } from './overview_status/overview_status';
 import { getHasIntegrationMonitorsRoute } from './fleet/get_has_integration_monitors';
-import { addSyntheticsParamsRoute } from './settings/add_param';
-import { deleteSyntheticsParamsRoute } from './settings/delete_param';
 import { enableDefaultAlertingRoute } from './default_alerts/enable_default_alert';
 import { getDefaultAlertingRoute } from './default_alerts/get_default_alert';
 import { createNetworkEventsRoute } from './network_events';
@@ -55,6 +53,8 @@ import { getPrivateLocationsRoute } from './settings/private_locations/get_priva
 import { getSyntheticsFilters } from './filters/filters';
 import { getAllSyntheticsMonitorRoute } from './monitor_cruds/get_monitors_list';
 import { getLocationMonitors } from './settings/private_locations/get_location_monitors';
+import { addSyntheticsParamsRoute } from './settings/params/add_param';
+import { deleteSyntheticsParamsRoute } from './settings/params/delete_param';
 
 export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   addSyntheticsMonitorRoute,
@@ -79,10 +79,6 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getHasIntegrationMonitorsRoute,
   createGetCurrentStatusRoute,
   getIndexSizesRoute,
-  getSyntheticsParamsRoute,
-  editSyntheticsParamsRoute,
-  addSyntheticsParamsRoute,
-  deleteSyntheticsParamsRoute,
   syncParamsSyntheticsParamsRoute,
   enableDefaultAlertingRoute,
   getDefaultAlertingRoute,
@@ -104,4 +100,11 @@ export const syntheticsAppRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
   getSyntheticsCertsRoute,
   getActionConnectorsRoute,
   getConnectorTypesRoute,
+];
+
+export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] = [
+  getSyntheticsParamsRoute,
+  editSyntheticsParamsRoute,
+  addSyntheticsParamsRoute,
+  deleteSyntheticsParamsRoute,
 ];

@@ -78,6 +78,7 @@ export function createEsFileClient(arg: CreateEsFileClientArgs): FileClient {
       undefined,
       logger,
       undefined,
+      undefined,
       indexIsAlias
     ),
     undefined,

@@ -53,7 +53,7 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupNavigation(core, setupDeps, this.experimentalFeatures);
+    setupNavigation(core, setupDeps);
     return {};
   }
 
@@ -73,7 +73,7 @@ export class SecuritySolutionServerlessPlugin
       dashboardsLandingCallout: getDashboardsLandingCallout(services),
     });
 
-    startNavigation(services, this.config);
+    startNavigation(services);
     setRoutes(services);
 
     return {};

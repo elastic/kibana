@@ -66,6 +66,7 @@ const deploymentAgnosticFunctionalServices = _.pick(functionalServices, [
   'snapshots',
   'supertest',
   'testSubjects',
+  'transform',
   'toasts',
   'uptime',
   'usageCollection',

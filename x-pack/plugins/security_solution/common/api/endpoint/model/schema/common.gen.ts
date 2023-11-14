@@ -65,8 +65,8 @@ export const Command = z.enum([
   'execute',
   'upload',
 ]);
-export const CommandEnum = Command.enum;
 export type CommandEnum = typeof Command.enum;
+export const CommandEnum = Command.enum;
 
 export type Commands = z.infer<typeof Commands>;
 export const Commands = z.array(Command);
@@ -79,8 +79,8 @@ export const Timeout = z.number().int().min(1);
 
 export type Status = z.infer<typeof Status>;
 export const Status = z.enum(['failed', 'pending', 'successful']);
-export const StatusEnum = Status.enum;
 export type StatusEnum = typeof Status.enum;
+export const StatusEnum = Status.enum;
 
 export type Statuses = z.infer<typeof Statuses>;
 export const Statuses = z.array(Status);
@@ -99,8 +99,8 @@ export const WithOutputs = z.union([z.array(z.string().min(1)).min(1), z.string(
 
 export type Type = z.infer<typeof Type>;
 export const Type = z.enum(['automated', 'manual']);
-export const TypeEnum = Type.enum;
 export type TypeEnum = typeof Type.enum;
+export const TypeEnum = Type.enum;
 
 export type Types = z.infer<typeof Types>;
 export const Types = z.array(Type);

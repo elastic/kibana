@@ -32,7 +32,7 @@ import {
 } from '@kbn/data-plugin/public';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 
-import { merge, Subscription } from 'rxjs';
+import { merge, Subscription, switchMap } from 'rxjs';
 import { toExpression } from '@kbn/interpreter';
 import { DefaultInspectorAdapters, ErrorLike, RenderMode } from '@kbn/expressions-plugin/common';
 import { map, distinctUntilChanged, skip, debounceTime } from 'rxjs/operators';
@@ -176,6 +176,7 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
+  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type LensByValueInput = {
@@ -544,18 +545,21 @@ export class Embeddable
     // Merge and debounce the observables to avoid multiple reloads
     this.inputReloadSubscriptions.push(
       merge(searchContext$, attributesOrSavedObjectId$)
-        .pipe(debounceTime(0))
-        .subscribe(async ({ trigger, input }) => {
-          if (trigger === 'attributesOrSavedObjectId') {
-            await this.initializeSavedVis(input);
-          }
+        .pipe(
+          debounceTime(0),
+          switchMap(async ({ trigger, input }) => {
+            if (trigger === 'attributesOrSavedObjectId') {
+              await this.initializeSavedVis(input);
+            }
 
-          // reset removable messages
-          // Dashboard search/context changes are detected here
-          this.additionalUserMessages = {};
+            // reset removable messages
+            // Dashboard search/context changes are detected here
+            this.additionalUserMessages = {};
 
-          this.reload();
-        })
+            this.reload();
+          })
+        )
+        .subscribe()
     );
   }
 
@@ -1103,6 +1107,7 @@ export class Embeddable
               }}
               noPadding={this.visDisplayOptions.noPadding}
               docLinks={this.deps.coreStart.docLinks}
+              shouldShowLegendAction={input.shouldShowLegendAction}
             />
           </KibanaThemeProvider>
           <MessagesBadge

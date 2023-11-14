@@ -550,7 +550,7 @@ describe('create', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
@@ -566,7 +566,7 @@ describe('create', () => {
       await expect(
         create({ ...theCase }, clientArgs, casesClient)
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 
@@ -578,13 +578,13 @@ describe('create', () => {
             {
               key: 'first_key',
               type: CustomFieldTypes.TEXT,
-              label: 'foo',
+              label: 'missing field 1',
               required: true,
             },
             {
               key: 'second_key',
               type: CustomFieldTypes.TOGGLE,
-              label: 'foo',
+              label: 'missing field 2',
               required: true,
             },
           ],
@@ -612,7 +612,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key,second_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\", \\"missing field 2\\""`
       );
     });
 
@@ -695,7 +695,7 @@ describe('create', () => {
           casesClient
         )
       ).rejects.toThrowErrorMatchingInlineSnapshot(
-        `"Failed to create case: Error: Missing required custom fields: first_key"`
+        `"Failed to create case: Error: Missing required custom fields: \\"missing field 1\\""`
       );
     });
 

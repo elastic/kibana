@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { FtrConfigProviderContext } from '@kbn/test';
-
 export interface CreateTestConfigOptions {
   testFiles: string[];
   junit: { reportName: string };

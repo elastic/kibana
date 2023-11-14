@@ -53,14 +53,12 @@ exports[`AddData render 1`] = `
             }
           >
             <EuiButton
-              color="primary"
               data-test-subj="homeAddData"
               fill={true}
               fullWidth={true}
               href="/app/integrations/browse"
               iconType="plusInCircle"
               onClick={[Function]}
-              size="m"
             >
               <FormattedMessage
                 defaultMessage="Add integrations"

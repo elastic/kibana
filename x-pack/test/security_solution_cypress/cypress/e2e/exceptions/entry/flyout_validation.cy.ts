@@ -67,7 +67,6 @@ import { getExceptionList } from '../../../objects/exception';
 // ensure the most basic logic holds.
 describe.skip('Exceptions flyout', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
     // this is a made-up index that has just the necessary
     // mappings to conduct tests, avoiding loading large
     // amounts of data like in auditbeat_exceptions

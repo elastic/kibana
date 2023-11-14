@@ -24,6 +24,7 @@ export const NoDataPage = ({
   action,
   docsLink,
   pageTitle,
+  pageDescription,
   className,
 }: NoDataPageProps) => {
   const title =
@@ -39,21 +40,23 @@ export const NoDataPage = ({
     </EuiLink>
   ) : null;
 
-  const message = link ? (
-    <FormattedMessage
-      id="sharedUXPackages.noDataPage.intro"
-      defaultMessage="Add your data to get started, or {link} about {solution}."
-      values={{
-        solution,
-        link,
-      }}
-    />
-  ) : (
-    <FormattedMessage
-      id="sharedUXPackages.noDataPage.introNoDocLink"
-      defaultMessage="Add your data to get started."
-    />
-  );
+  const message =
+    pageDescription ??
+    (link ? (
+      <FormattedMessage
+        id="sharedUXPackages.noDataPage.intro"
+        defaultMessage="Add your data to get started, or {link} about {solution}."
+        values={{
+          solution,
+          link,
+        }}
+      />
+    ) : (
+      <FormattedMessage
+        id="sharedUXPackages.noDataPage.introNoDocLink"
+        defaultMessage="Add your data to get started."
+      />
+    ));
 
   return (
     <EuiPageTemplate.Section

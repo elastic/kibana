@@ -8,7 +8,7 @@
 
 import { EuiFlexItem } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import { RIGHT_SECTION } from './test_ids';
+import { RIGHT_SECTION_TEST_ID } from './test_ids';
 
 interface RightSectionProps {
   /**
@@ -34,7 +34,7 @@ export const RightSection: React.FC<RightSectionProps> = ({
   );
 
   return (
-    <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION}>
+    <EuiFlexItem grow={false} style={style} data-test-subj={RIGHT_SECTION_TEST_ID}>
       {component}
     </EuiFlexItem>
   );

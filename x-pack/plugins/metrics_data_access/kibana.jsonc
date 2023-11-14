@@ -6,10 +6,15 @@
   "plugin": {
     "id": "metricsDataAccess",
     "server": true,
-    "browser": false,
+    "browser": true,
     "configPath": ["xpack", "metrics_data_access"],
-    "requiredPlugins": [],
-    "requiredBundles": [],
-    "extraPublicDirs": []
+    "requiredPlugins": [
+      "data",
+      "observabilityShared"
+    ],
+    "requiredBundles": [
+      "kibanaReact"
+    ],
+    "extraPublicDirs": ["common"]
   }
 }
