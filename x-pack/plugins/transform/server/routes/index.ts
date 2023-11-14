@@ -14,11 +14,13 @@ import { registerRoute as registerTransformsAllRoute } from './api/transforms_al
 import { registerRoute as registerTransformsSingleRoute } from './api/transforms_single/register_route';
 import { registerRoute as registerTransformsStatsAllRoute } from './api/transforms_stats_all/register_route';
 import { registerRoute as registerTransformsStatsSingleRoute } from './api/transforms_stats_single/register_route';
-import { registerRoute as registerTransformsCreate } from './api/transforms_create/register_route';
-import { registerRoute as registerTransformsUpdate } from './api/transforms_update/register_route';
-import { registerRoute as registerReauthorizeTransformsUpdate } from './api/reauthorize_transforms/register_route';
-import { registerRoute as registerResetTransformsUpdate } from './api/reset_transforms/register_route';
-import { registerRoute as registerTransformsPreviewUpdate } from './api/transforms_preview/register_route';
+import { registerRoute as registerTransformsCreateRoute } from './api/transforms_create/register_route';
+import { registerRoute as registerTransformsUpdateRoute } from './api/transforms_update/register_route';
+import { registerRoute as registerReauthorizeTransformsRoute } from './api/reauthorize_transforms/register_route';
+import { registerRoute as registerResetTransformsRoute } from './api/reset_transforms/register_route';
+import { registerRoute as registerTransformsPreviewRoute } from './api/transforms_preview/register_route';
+import { registerRoute as registerStartTransformsRoute } from './api/start_transforms/register_route';
+import { registerRoute as registerStopTransformsRoute } from './api/stop_transforms/register_route';
 
 export function registerRoutes(dependencies: RouteDependencies) {
   registerFieldHistogramsRoute(dependencies);
@@ -28,9 +30,11 @@ export function registerRoutes(dependencies: RouteDependencies) {
   registerTransformsSingleRoute(dependencies);
   registerTransformsStatsAllRoute(dependencies);
   registerTransformsStatsSingleRoute(dependencies);
-  registerTransformsCreate(dependencies);
-  registerTransformsUpdate(dependencies);
-  registerReauthorizeTransformsUpdate(dependencies);
-  registerResetTransformsUpdate(dependencies);
-  registerTransformsPreviewUpdate(dependencies);
+  registerTransformsCreateRoute(dependencies);
+  registerTransformsUpdateRoute(dependencies);
+  registerReauthorizeTransformsRoute(dependencies);
+  registerResetTransformsRoute(dependencies);
+  registerTransformsPreviewRoute(dependencies);
+  registerStartTransformsRoute(dependencies);
+  registerStopTransformsRoute(dependencies);
 }
