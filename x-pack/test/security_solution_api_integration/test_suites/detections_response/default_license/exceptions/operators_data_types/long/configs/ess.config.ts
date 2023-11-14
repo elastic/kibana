@@ -9,14 +9,15 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(
-    require.resolve('../../../../../../config/ess/config.base.trial')
+    require.resolve('../../../../../../../config/ess/config.base.trial')
   );
 
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('..')],
     junit: {
-      reportName: 'Detection Engine ESS - Exception - Workflows API Integration Tests',
+      reportName:
+        'Detection Engine ESS - Exception Operators Data Types API - Long Integration Tests',
     },
   };
 }

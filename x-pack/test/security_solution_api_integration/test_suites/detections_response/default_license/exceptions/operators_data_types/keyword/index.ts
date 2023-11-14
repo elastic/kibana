@@ -4,13 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
-  describe('Detection exceptions data and numeric types', function () {
-    loadTestFile(require.resolve('./date'));
-    loadTestFile(require.resolve('./double'));
-    loadTestFile(require.resolve('./float'));
-    loadTestFile(require.resolve('./integer'));
+  describe('Detection exceptions Keyword', function () {
+    loadTestFile(require.resolve('./keyword'));
+    loadTestFile(require.resolve('./keyword_array'));
   });
 };
