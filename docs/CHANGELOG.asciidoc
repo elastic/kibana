@@ -91,6 +91,22 @@ Review important information about the {kib} 7.17.x releases.
 Review the following information about the {kib} 7.17.15 release.
 
 [float]
+[[security-update-v7.17.15]]
+=== Security updates
+
+* An issue was discovered by Elastic whereby sensitive information is recorded
+in {kib} logs in the event of an error. The error message recorded in the log
+may contain account credentials for the `kibana_system` user, API Keys, and
+credentials of {kib} end users.
++
+The issue impacts {kib} versions before 7.17.15 and {kib} versions on or after
+8.0.0 and before 8.11.1. The issue is resolved in {kib} 8.11.1 and {kib} 7.17.15.
++
+For more information, see our related
+https://discuss.elastic.co/t/8-11-1-7-17-15-security-update-esa-2023-25/347149[security
+announcement].
+
+[float]
 [[breaking-changes-v7.17.15]]
 === Breaking changes
 Breaking changes can prevent your application from optimal operation and performance. Before you upgrade to 7.17.15, review the breaking changes, then mitigate the impact to your application.
