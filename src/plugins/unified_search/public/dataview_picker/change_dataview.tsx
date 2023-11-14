@@ -231,7 +231,7 @@ export function ChangeDataView({
           }}
         >
           {i18n.translate('unifiedSearch.query.queryBar.indexPattern.refreshFieldButton', {
-            defaultMessage: 'Refresh field list',
+            defaultMessage: 'Refresh field list for this data view',
           })}
         </EuiContextMenuItem>,
         <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
