@@ -408,7 +408,7 @@ export interface DocLinks {
     infrastructureThreshold: string;
     logsThreshold: string;
     metricsThreshold: string;
-    threshold: string;
+    customThreshold: string;
     monitorStatus: string;
     monitorUptime: string;
     tlsCertificate: string;
