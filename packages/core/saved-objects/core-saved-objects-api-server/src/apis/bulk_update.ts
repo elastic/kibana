@@ -15,7 +15,10 @@ import type { SavedObjectsUpdateOptions, SavedObjectsUpdateResponse } from './up
  * @public
  */
 export interface SavedObjectsBulkUpdateObject<T = unknown>
-  extends Pick<SavedObjectsUpdateOptions<T>, 'version' | 'references'> {
+  extends Pick<
+    SavedObjectsUpdateOptions<T>,
+    'version' | 'references' | 'migrationVersionCompatibility'
+  > {
   /** The ID of this Saved Object, guaranteed to be unique for all objects of the same `type` */
   id: string;
   /**  The type of this Saved Object. Each plugin can define it's own custom Saved Object types. */

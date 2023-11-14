@@ -14,6 +14,7 @@ import {
   DecoratedError,
   AuthorizeUpdateObject,
   SavedObjectsRawDoc,
+  SavedObjectsRawDocSource,
 } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
@@ -47,7 +48,11 @@ export const performBulkUpdate = async <T>(
   { objects, options }: PerformUpdateParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsBulkUpdateResponse<T>> => {
-  const { common: commonHelper, encryption: encryptionHelper } = helpers;
+  const {
+    common: commonHelper,
+    encryption: encryptionHelper,
+    migration: migrationHelper,
+  } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -64,10 +69,19 @@ export const performBulkUpdate = async <T>(
       documentToSave: DocumentToSave;
       objectNamespace?: string;
       esRequestIndex?: number;
+      migrationVersionCompatibility?: 'raw' | 'compatible';
     }
   >;
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
-    const { type, id, attributes, references, version, namespace: objectNamespace } = object;
+    const {
+      type,
+      id,
+      attributes,
+      references,
+      version,
+      namespace: objectNamespace,
+      migrationVersionCompatibility,
+    } = object;
     let error: DecoratedError | undefined;
     if (!allowedTypes.includes(type)) {
       error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
@@ -91,7 +105,7 @@ export const performBulkUpdate = async <T>(
       ...(Array.isArray(references) && { references }),
     };
 
-    const requiresNamespacesCheck = registry.isMultiNamespace(object.type);
+    // const requiresNamespacesCheck = registry.isMultiNamespace(object.type);
 
     return right({
       type,
@@ -99,7 +113,8 @@ export const performBulkUpdate = async <T>(
       version,
       documentToSave,
       objectNamespace,
-      ...(requiresNamespacesCheck && { esRequestIndex: bulkGetRequestIndexCounter++ }),
+      esRequestIndex: bulkGetRequestIndexCounter++,
+      migrationVersionCompatibility,
     });
   });
 
@@ -117,20 +132,26 @@ export const performBulkUpdate = async <T>(
   // `objectNamespace` is a namespace string, while `namespace` is a namespace ID.
   // The object namespace string, if defined, will supersede the operation's namespace ID.
   const namespaceString = SavedObjectsUtils.namespaceIdToString(namespace);
+
   const getNamespaceId = (objectNamespace?: string) =>
     objectNamespace !== undefined
       ? SavedObjectsUtils.namespaceStringToId(objectNamespace)
       : namespace;
+
   const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
+
   const bulkGetDocs = validObjects
     .filter(({ value }) => value.esRequestIndex !== undefined)
     .map(({ value: { type, id, objectNamespace } }) => ({
       _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
       _index: commonHelper.getIndexForType(type),
-      _source: ['type', 'namespaces'],
+      _source: true,
     }));
   const bulkGetResponse = bulkGetDocs.length
-    ? await client.mget({ body: { docs: bulkGetDocs } }, { ignore: [404], meta: true })
+    ? await client.mget<SavedObjectsRawDocSource>(
+        { body: { docs: bulkGetDocs } },
+        { ignore: [404], meta: true }
+      )
     : undefined;
   // fail fast if we can't verify a 404 response is from Elasticsearch
   if (
@@ -144,15 +165,27 @@ export const performBulkUpdate = async <T>(
   }
 
   const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
+    let result;
     const { type, id, objectNamespace, esRequestIndex: index } = element.value;
+
     const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
-    return {
-      type,
-      id,
-      objectNamespace,
-      // @ts-expect-error MultiGetHit._source is optional
-      existingNamespaces: preflightResult?._source?.namespaces ?? [],
-    };
+    if (registry.isMultiNamespace(type)) {
+      result = {
+        type,
+        id,
+        objectNamespace, // the namespace as defined per object in params.objects
+        // @ts-expect-error MultiGetHit._source is optional
+        existingNamespaces: preflightResult?._source?.namespaces ?? [], // we only have _source.namespaces for multi-namespace objects.
+      };
+    } else {
+      result = {
+        type,
+        id,
+        objectNamespace,
+        existingNamespaces: [], // we only have _source.namespaces for multi-namespace objects.
+      };
+    }
+    return result;
   });
 
   const authorizationResult = await securityExtension?.authorizeBulkUpdate({
@@ -162,31 +195,43 @@ export const performBulkUpdate = async <T>(
 
   let bulkUpdateRequestIndexCounter = 0;
   const bulkUpdateParams: object[] = [];
+
   type ExpectedBulkUpdateResult = Either<
     { type: string; id: string; error: Payload },
     {
       type: string;
       id: string;
-      namespaces: string[];
+      namespaces?: string[];
       documentToSave: DocumentToSave;
       esRequestIndex: number;
     }
   >;
+
   const expectedBulkUpdateResults = await Promise.all(
     expectedBulkGetResults.map<Promise<ExpectedBulkUpdateResult>>(async (expectedBulkGetResult) => {
       if (isLeft(expectedBulkGetResult)) {
         return expectedBulkGetResult;
       }
 
-      const { esRequestIndex, id, type, version, documentToSave, objectNamespace } =
-        expectedBulkGetResult.value;
+      const {
+        esRequestIndex,
+        id,
+        type,
+        version,
+        documentToSave,
+        objectNamespace,
+        migrationVersionCompatibility,
+      } = expectedBulkGetResult.value;
 
       let namespaces;
       let versionProperties;
-      if (esRequestIndex !== undefined) {
-        const indexFound = bulkGetResponse?.statusCode !== 404;
-        const actualResult = indexFound ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-        const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+      const indexFound = bulkGetResponse?.statusCode !== 404;
+
+      // if (esRequestIndex !== undefined) {
+      const actualResult =
+        indexFound && esRequestIndex ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
+      const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+      if (registry.isMultiNamespace(type)) {
         if (
           !docFound ||
           !rawDocExistsInNamespace(
@@ -209,6 +254,13 @@ export const performBulkUpdate = async <T>(
         versionProperties = getExpectedVersionProperties(version);
       } else {
         if (registry.isSingleNamespace(type)) {
+          if (!docFound) {
+            return left({
+              id,
+              type,
+              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+            });
+          }
           // if `objectNamespace` is undefined, fall back to `options.namespace`
           namespaces = [getNamespaceString(objectNamespace)];
         }
