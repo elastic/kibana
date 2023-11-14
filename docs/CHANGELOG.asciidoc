@@ -81,7 +81,6 @@ announcement].
 === Bug Fixes
 
 Fleet::
-* Fixes inability to upgrade agents from version 8.10.4 to version 8.11 ({kibana-pull}170974[#170974]).
 * Append space ID to security solution tag ({kibana-pull}170789[#170789]).
 * Modify bulk unenroll to include inactive agents ({kibana-pull}170249[#170249]).
 Lens & Visualizations::
