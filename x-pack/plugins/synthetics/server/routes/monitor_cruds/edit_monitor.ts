@@ -226,12 +226,13 @@ export const syncEditedMonitor = async ({
         publicSyncErrors
       )
     );
-
-    updateDefaultAlerts(
-      editedMonitorSavedObject.attributes as EncryptedSyntheticsMonitorAttributes,
-      previousMonitor.attributes as EncryptedSyntheticsMonitorAttributes,
-      routeContext
-    );
+    if (editedMonitorSavedObject) {
+      updateDefaultAlerts(
+        editedMonitorSavedObject.attributes as EncryptedSyntheticsMonitorAttributes,
+        previousMonitor.attributes as EncryptedSyntheticsMonitorAttributes,
+        routeContext
+      );
+    }
 
     return {
       failedPolicyUpdates,

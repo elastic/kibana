@@ -79,7 +79,7 @@ export interface FieldMeta<TFieldKey extends keyof FormConfig> {
   label?: string | React.ReactNode;
   ariaLabel?: string;
   helpText?: string | React.ReactNode;
-  hidden?: (depenencies: unknown[]) => boolean;
+  hidden?: (dependencies: unknown[]) => boolean;
   props?: (params: {
     field?: ControllerRenderProps<FormConfig, TFieldKey>;
     formState: FormState<FormConfig>;

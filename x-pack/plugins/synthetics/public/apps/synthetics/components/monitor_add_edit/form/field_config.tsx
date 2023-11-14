@@ -532,15 +532,18 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
   [AlertConfigKey.CONNECTORS]: {
     fieldKey: AlertConfigKey.CONNECTORS,
     component: AlertConnectorWrapper,
-    label: i18n.translate('xpack.synthetics.monitorConfig.tlsVersion.label', {
+    label: i18n.translate('xpack.synthetics.monitorConfig.connectors.label', {
       defaultMessage: 'Connectors',
     }),
     controlled: true,
     dependencies: [AlertConfigKey.STATUS_ENABLED],
-    props: ({ field, setValue }): EuiComboBoxProps<TLSVersion> => {
+    props: ({ setValue }): EuiComboBoxProps<string> => {
       return {
-        onChange: (updatedValues: string[]) => {
-          setValue(AlertConfigKey.CONNECTORS, updatedValues);
+        onChange: (updatedValues: Array<EuiComboBoxOptionOption<string>>) => {
+          setValue(
+            AlertConfigKey.CONNECTORS,
+            updatedValues.map((option) => option.label as string)
+          );
         },
         isDisabled: readOnly,
       };
