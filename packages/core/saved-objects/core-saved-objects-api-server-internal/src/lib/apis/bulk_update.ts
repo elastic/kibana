@@ -207,6 +207,7 @@ export const performBulkUpdate = async <T>(
       namespaces?: string[];
       documentToSave: DocumentToSave;
       esRequestIndex: number;
+      rawMigratedUpdatedDoc: SavedObjectsRawDoc;
     }
   >;
 
@@ -281,12 +282,14 @@ export const performBulkUpdate = async <T>(
       };
       let migrated: SavedObject<T>;
       const typeDefinition = registry.getType(type)!;
+
       if (docFound) {
         const document = getSavedObjectFromSource<T>(
           registry,
           type,
           id,
-          actualResult as SavedObjectsRawDoc
+          actualResult as SavedObjectsRawDoc,
+          { migrationVersionCompatibility }
         );
         try {
           migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
@@ -297,6 +300,7 @@ export const performBulkUpdate = async <T>(
           );
         }
       }
+
       const updatedAttributes = mergeForUpdate({
         targetAttributes: {
           ...migrated!.attributes,
@@ -309,6 +313,7 @@ export const performBulkUpdate = async <T>(
         ),
         typeMappings: typeDefinition.mappings,
       });
+
       const migratedUpdatedSavedObjectDoc = migrationHelper.migrateInputDocument({
         ...migrated!,
         id,
@@ -327,23 +332,13 @@ export const performBulkUpdate = async <T>(
 
       bulkUpdateParams.push(
         {
-          update: {
+          index: {
             _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
             _index: commonHelper.getIndexForType(type),
             ...versionProperties,
           },
         },
-        {
-          doc: {
-            ...documentToSave,
-            [type]: await encryptionHelper.optionallyEncryptAttributes(
-              type,
-              id,
-              objectNamespace || namespace,
-              documentToSave[type]
-            ),
-          },
-        }
+        updatedMigratedDocumentToSave._source
       );
 
       return right(expectedResult);
@@ -359,14 +354,15 @@ export const performBulkUpdate = async <T>(
         require_alias: true,
       })
     : undefined;
-
+  // @TINA MARKER: refactor to use rawMigratedUpdatedDoc (the whole doc) rather than documentToSave (partial SO fields to update)
   const result = {
     saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
       if (isLeft(expectedResult)) {
         return expectedResult.value as any;
       }
 
-      const { type, id, namespaces, documentToSave, esRequestIndex } = expectedResult.value;
+      const { type, id, namespaces, documentToSave, esRequestIndex, rawMigratedUpdatedDoc } =
+        expectedResult.value;
       const response = bulkUpdateResponse?.items[esRequestIndex] ?? {};
       const rawResponse = Object.values(response)[0] as any;
 
@@ -375,14 +371,13 @@ export const performBulkUpdate = async <T>(
         return { type, id, error };
       }
 
-      // When a bulk update operation is completed, any fields specified in `_sourceIncludes` will be found in the "get" value of the
-      // returned object. We need to retrieve the `originId` if it exists so we can return it to the consumer.
-      const { _seq_no: seqNo, _primary_term: primaryTerm, get } = rawResponse;
+      const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { [type]: attributes, references, updated_at } = documentToSave;
+      const { [type]: attributes, references, updated_at } = documentToSave; // use the original request params
 
-      const { originId } = get._source;
+      const { originId } = rawMigratedUpdatedDoc._source;
+      // @TINA TODO: ensure we return the correct response without changing the signature
       return {
         id,
         type,
