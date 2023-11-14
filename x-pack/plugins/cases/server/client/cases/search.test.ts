@@ -105,6 +105,7 @@ describe('search', () => {
     it('search with single custom field', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
+        owner: 'cases',
       });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
@@ -113,6 +114,7 @@ describe('search', () => {
     it('search with single custom field with multiple values', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true, null] },
+        owner: ['cases'],
       });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
@@ -121,6 +123,7 @@ describe('search', () => {
     it('search with multiple custom fields', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true], third_key: [true] },
+        owner: ['cases', 'observability'],
       });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
@@ -129,6 +132,7 @@ describe('search', () => {
     it('search with null custom fields', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [null] },
+        owner: 'cases',
       });
       await search(findRequest, clientArgs, casesClientMock);
       await expect(clientArgs.services.caseService.findCasesGroupedByID).toHaveBeenCalled();
@@ -246,9 +250,20 @@ describe('search', () => {
       );
     });
 
+    it('throws error when search with customFields and no owner', async () => {
+      const findRequest = createCasesClientMockSearchRequest({
+        customFields: { second_key: [true] },
+      });
+
+      await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
+        ` Error: In order to filter cases by customFields, you must provide owner.`
+      );
+    });
+
     it('throws error when no customField is not same as configuration', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { test_custom_field_key: [true] },
+        owner: 'cases',
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
@@ -259,6 +274,7 @@ describe('search', () => {
     it('throws error when search with non filterable custom field', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { first_key: ['hello'] },
+        owner: 'cases',
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
@@ -269,10 +285,11 @@ describe('search', () => {
     it('throws error when search with invalid value', async () => {
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: ['hello'] },
+        owner: 'cases',
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(
-        ` Error: The custom field type toggle doesn't have boolean value.`
+        ` Error: Unsupported filtering value for custom field of type toggle.`
       );
     });
 
@@ -280,6 +297,7 @@ describe('search', () => {
       casesClientMock.configure.get = jest.fn().mockResolvedValue([]);
       const findRequest = createCasesClientMockSearchRequest({
         customFields: { second_key: [true] },
+        owner: 'cases',
       });
 
       await expect(search(findRequest, clientArgs, casesClientMock)).rejects.toThrowError(

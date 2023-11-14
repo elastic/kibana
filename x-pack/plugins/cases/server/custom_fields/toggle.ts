@@ -12,10 +12,10 @@ export const getCasesToggleCustomField = () => ({
   isFilterable: true,
   isSortable: false,
   savedObjectMappingType: 'boolean',
-  validator: (values: Array<string | number | boolean | null>) => {
+  validateFilteringValues: (values: Array<string | number | boolean | null>) => {
     values.forEach((value) => {
       if (value !== null && !isBoolean(value)) {
-        throw Boom.badRequest(`The custom field type toggle doesn't have boolean value.`);
+        throw Boom.badRequest(`Unsupported filtering value for custom field of type toggle.`);
       }
     });
   },

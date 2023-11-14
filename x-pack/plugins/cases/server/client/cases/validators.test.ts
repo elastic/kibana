@@ -552,7 +552,7 @@ describe('validators', () => {
           customFields: { second_key: ['foobar', true, 1234] },
         })
       ).toThrowErrorMatchingInlineSnapshot(
-        `"The custom field type toggle doesn't have boolean value."`
+        `"Unsupported filtering value for custom field of type toggle."`
       );
     });
 

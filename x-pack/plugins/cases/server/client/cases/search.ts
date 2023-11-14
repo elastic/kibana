@@ -69,6 +69,14 @@ export const search = async (
      * Validate custom fields
      */
     if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
+
+      /**
+       * throw error if params has customFields and no owner
+       */
+      if(!paramArgs.owner || !paramArgs.owner.length) {
+        throw Boom.badRequest( 'In order to filter cases by customFields, you must provide owner.');
+      }
+
       validateSearchCasesCustomFields({
         customFieldsConfiguration,
         customFields: paramArgs.customFields,

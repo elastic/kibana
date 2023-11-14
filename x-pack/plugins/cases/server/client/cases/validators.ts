@@ -173,6 +173,6 @@ export const validateSearchCasesCustomFields = ({
       );
     }
 
-    customFieldsMapping?.validator(value);
+    customFieldsMapping?.validateFilteringValues(value);
   });
 };

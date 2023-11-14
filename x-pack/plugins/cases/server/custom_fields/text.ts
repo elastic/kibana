@@ -12,10 +12,10 @@ export const getCasesTextCustomField = () => ({
   isFilterable: false,
   isSortable: false,
   savedObjectMappingType: 'string',
-  validator: (values: Array<string | number | boolean | null>) => {
+  validateFilteringValues: (values: Array<string | number | boolean | null>) => {
     values.forEach((value) => {
       if (value !== null && !isString(value)) {
-        throw Boom.badRequest(`The custom field type text doesn't have string value.`);
+        throw Boom.badRequest(`Unsupported filtering value for custom field of type text.`);
       }
     });
   },

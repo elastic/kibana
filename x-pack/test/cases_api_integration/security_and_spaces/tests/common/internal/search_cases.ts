@@ -102,7 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const cases = await searchCases({
           supertest,
-          body: { customFields: { valid_key_2: [true] } },
+          body: { customFields: { valid_key_2: [true] }, owner: 'securitySolutionFixture' },
         });
 
         expect(cases).to.eql({
@@ -186,7 +186,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const cases = await searchCases({
           supertest,
-          body: { customFields: { valid_key_2: [true], valid_key_3: [false] } },
+          body: {
+            customFields: { valid_key_2: [true], valid_key_3: [false] },
+            owner: 'securitySolutionFixture',
+          },
         });
 
         expect(cases).to.eql({
@@ -250,7 +253,7 @@ export default ({ getService }: FtrProviderContext): void => {
                   required: false,
                 },
               ],
-              owner: 'observability',
+              owner: 'observabilityFixture',
             },
           })
         );
@@ -279,7 +282,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const obsCase = await createCase(supertest, {
           ...postCaseReq,
-          owner: 'observability',
+          owner: 'observabilityFixture',
           customFields: [
             {
               key: 'valid_obs_key_1',
@@ -302,7 +305,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(
           await searchCases({
             supertest,
-            body: { customFields: { valid_key_2: [false] } },
+            body: { customFields: { valid_key_2: [false] }, owner: 'securitySolutionFixture' },
           })
         ).to.eql({
           ...findCasesResp,
@@ -314,7 +317,7 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(
           await searchCases({
             supertest,
-            body: { customFields: { valid_obs_key_2: [false] } },
+            body: { customFields: { valid_obs_key_2: [false] }, owner: 'observabilityFixture' },
           })
         ).to.eql({
           ...findCasesResp,
@@ -326,7 +329,10 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(
           await searchCases({
             supertest,
-            body: { customFields: { valid_key_2: [false], valid_obs_key_2: [false] } },
+            body: {
+              customFields: { valid_key_2: [false], valid_obs_key_2: [false] },
+              owner: ['observabilityFixture', 'securitySolutionFixture'],
+            },
           })
         ).to.eql({
           ...findCasesResp,
@@ -394,7 +400,11 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const cases = await searchCases({
           supertest,
-          body: { customFields: { valid_key_2: [true] }, tags: ['unique'] },
+          body: {
+            customFields: { valid_key_2: [true] },
+            tags: ['unique'],
+            owner: 'securitySolutionFixture',
+          },
         });
 
         expect(cases).to.eql({
@@ -407,11 +417,51 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     describe('errors', () => {
-      it('unhappy path - 400s when configuration is empty', async () => {
+      it('unhappy path - 500s when no owner', async () => {
         await createConfiguration(supertest, getConfigurationRequest({}));
         await searchCases({
           supertest,
           body: { customFields: { random_key: [false] } },
+          expectedHttpCode: 500, // error thrown from routes
+        });
+      });
+
+      it('unhappy path - 400s when customFieldConfiguration owner and search customFields owner are different ', async () => {
+        await createConfiguration(
+          supertest,
+          getConfigurationRequest({
+            overrides: {
+              customFields: [
+                {
+                  key: 'valid_key_1',
+                  label: 'text',
+                  type: CustomFieldTypes.TEXT,
+                  required: false,
+                },
+                {
+                  key: 'valid_key_2',
+                  label: 'toggle',
+                  type: CustomFieldTypes.TOGGLE,
+                  required: true,
+                },
+              ],
+              owner: 'securitySolutionFixture',
+            },
+          })
+        );
+
+        await searchCases({
+          supertest,
+          body: { customFields: { valid_key_2: [false] }, owner: 'observabilityFixture' },
+          expectedHttpCode: 400,
+        });
+      });
+
+      it('unhappy path - 400s when configuration is empty', async () => {
+        await createConfiguration(supertest, getConfigurationRequest({}));
+        await searchCases({
+          supertest,
+          body: { customFields: { random_key: [false] }, owner: 'securitySolutionFixture' },
           expectedHttpCode: 400,
         });
       });
@@ -441,7 +491,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await searchCases({
           supertest,
-          body: { customFields: { random_key: [false] } },
+          body: { customFields: { random_key: [false] }, owner: 'securitySolutionFixture' },
           expectedHttpCode: 400,
         });
       });
@@ -471,7 +521,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await searchCases({
           supertest,
-          body: { customFields: { valid_key_2: [1234] } },
+          body: { customFields: { valid_key_2: [1234] }, owner: 'securitySolutionFixture' },
           expectedHttpCode: 400,
         });
       });
@@ -501,7 +551,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
         await searchCases({
           supertest,
-          body: { customFields: { valid_key_1: ['hello!'] } },
+          body: { customFields: { valid_key_1: ['hello!'] }, owner: 'securitySolutionFixture' },
           expectedHttpCode: 400,
         });
       });
@@ -561,6 +611,7 @@ export default ({ getService }: FtrProviderContext): void => {
               user: scenario.user,
               space: 'space1',
             },
+            body: { owner: ['securitySolutionFixture', 'observabilityFixture'] },
           });
 
           ensureSavedObjectIsAuthorized(res.cases, scenario.numberOfExpectedCases, scenario.owners);
@@ -592,6 +643,7 @@ export default ({ getService }: FtrProviderContext): void => {
               user: scenario.user,
               space: scenario.space,
             },
+            body: { owner: 'securitySolutionFixture' },
             expectedHttpCode: 403,
           });
         });
@@ -606,6 +658,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             sortOrder: 'asc',
             filter: `{cases.attributes.owner:"observabilityFixture"}`,
+            owner: 'observabilityFixture',
           })
           .expect(400);
       });
@@ -613,7 +666,11 @@ export default ({ getService }: FtrProviderContext): void => {
       it('should NOT allow to pass non-valid fields', async () => {
         await searchCases({
           supertest,
-          body: { searchFields: ['foobar'], search: 'some search string*' },
+          body: {
+            searchFields: ['foobar'],
+            search: 'some search string*',
+            owner: 'observabilityFixture',
+          },
           expectedHttpCode: 400,
         });
       });
@@ -627,6 +684,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             sortOrder: 'asc',
             filter: `{namespaces[0]=*}`,
+            owner: 'observabilityFixture',
           })
           .expect(400);
 
@@ -636,6 +694,7 @@ export default ({ getService }: FtrProviderContext): void => {
           .send({
             sortOrder: 'asc',
             namespaces: '*',
+            owner: 'observabilityFixture',
           })
           .expect(400);
       });
@@ -644,7 +703,7 @@ export default ({ getService }: FtrProviderContext): void => {
         await supertest
           .post(`${CASES_INTERNAL_URL}/_search`)
           .set('kbn-xsrf', 'true')
-          .send({ notExists: 'papa' })
+          .send({ notExists: 'papa', owner: 'observabilityFixture' })
           .expect(400);
       });
 
@@ -744,6 +803,7 @@ export default ({ getService }: FtrProviderContext): void => {
             body: {
               from: '2022-03-15',
               to: '2022-03-21',
+              owner: 'securitySolutionFixture',
             },
             auth: {
               user: secOnly,
@@ -793,6 +853,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             body: {
               severity: CaseSeverity.HIGH,
+              owner: 'securitySolutionFixture',
             },
             auth: {
               user: secOnly,

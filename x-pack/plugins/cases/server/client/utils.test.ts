@@ -775,6 +775,62 @@ describe('utils', () => {
           `"(cases.attributes.customFields: { key: second_key } AND cases.attributes.customFields: { key: third_key })"`
         );
       });
+
+      it('does not create a filter when customFields is undefined', () => {
+        expect(
+          constructQueryOptions({
+            customFields: undefined,
+            customFieldsConfiguration,
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when customFieldsConfiguration is undefined', () => {
+        expect(
+          constructQueryOptions({
+            customFields: { second_key: [true] },
+            customFieldsConfiguration: undefined,
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when customFieldsConfiguration is empty', () => {
+        expect(
+          constructQueryOptions({
+            customFields: { second_key: [true] },
+            customFieldsConfiguration: [],
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when customFields key does not match with any key of customFieldsConfiguration', () => {
+        expect(
+          constructQueryOptions({
+            customFields: { random_key: [true] },
+            customFieldsConfiguration,
+          }).filter
+        ).toBeUndefined();
+      });
+
+      it('does not create a filter when no customFields mapping found', () => {
+        const newCustomFieldsConfiguration = [
+          ...customFieldsConfiguration,
+          {
+            key: 'fourth_key',
+            type: 'number',
+            label: 'Number field',
+            required: true,
+          },
+        ];
+
+        expect(
+          constructQueryOptions({
+            customFields: { fourth_key: [1] },
+            // @ts-expect-error: need to create a mapping check
+            customFieldsConfiguration: newCustomFieldsConfiguration,
+          }).filter
+        ).toBeUndefined();
+      });
     });
   });
 
