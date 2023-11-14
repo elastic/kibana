@@ -15,7 +15,8 @@
     "@kbn/i18n",
     "@kbn/analytics-client",
     "@kbn/subscription-tracking",
-    "@kbn/core-analytics-browser"
+    "@kbn/core-analytics-browser",
+    "@kbn/logging-mocks"
   ],
   "exclude": ["target/**/*"]
 }

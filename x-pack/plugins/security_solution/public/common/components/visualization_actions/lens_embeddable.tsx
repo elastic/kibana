@@ -24,7 +24,7 @@ import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { getRequestsAndResponses } from './utils';
+import { getRequestsAndResponses, showLegendActionsByActionId } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
@@ -218,6 +218,11 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [attributes?.state?.adHocDataViews]
   );
 
+  const shouldShowLegendAction = useCallback(
+    (actionId: string) => showLegendActionsByActionId({ actionId, scopeId }),
+    [scopeId]
+  );
+
   if (!searchSessionId) {
     return null;
   }
@@ -281,6 +286,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
             showInspector={false}
             syncTooltips={false}
             syncCursor={false}
+            shouldShowLegendAction={shouldShowLegendAction}
           />
         </LensComponentWrapper>
       )}

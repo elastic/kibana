@@ -23,22 +23,24 @@ const taskManagerSetup = taskManagerMock.createSetup();
 
 const mockCoreStart = coreMock.createStart() as CoreStart;
 
-mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
-  license: {
-    status: 'active',
-    uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
-    type: 'platinum',
-    issue_date: '2022-11-29T00:00:00.000Z',
-    issue_date_in_millis: 1669680000000,
-    expiry_date: '2024-12-31T23:59:59.999Z',
-    expiry_date_in_millis: 1735689599999,
-    max_nodes: 100,
-    max_resource_units: null,
-    issued_to: 'Elastic - INTERNAL (development environments)',
-    issuer: 'API',
-    start_date_in_millis: 1669680000000,
-  },
-});
+const mockLicense = () => {
+  mockCoreStart.elasticsearch.client.asInternalUser.license.get = jest.fn().mockResolvedValue({
+    license: {
+      status: 'active',
+      uid: 'c5788419-1c6f-424a-9217-da7a0a9151a0',
+      type: 'platinum',
+      issue_date: '2022-11-29T00:00:00.000Z',
+      issue_date_in_millis: 1669680000000,
+      expiry_date: '2024-12-31T23:59:59.999Z',
+      expiry_date_in_millis: 1735689599999,
+      max_nodes: 100,
+      max_resource_units: null,
+      issued_to: 'Elastic - INTERNAL (development environments)',
+      issuer: 'API',
+      start_date_in_millis: 1669680000000,
+    },
+  });
+};
 
 const getFakePayload = (locations: HeartbeatConfig['locations']) => {
   return {
@@ -87,6 +89,16 @@ describe('SyntheticsService', () => {
     savedObjectsClient: savedObjectsClientMock.create()!,
   } as unknown as SyntheticsServerSetup;
 
+  const mockConfig = {
+    service: {
+      devUrl: 'http://localhost',
+      manifestUrl: 'https://test-manifest.com',
+    },
+    enabled: true,
+  };
+
+  mockLicense();
+
   const getMockedService = (locationsNum: number = 1) => {
     const locations = times(locationsNum).map((n) => {
       return {
@@ -101,13 +113,7 @@ describe('SyntheticsService', () => {
         status: LocationStatus.GA,
       };
     });
-    serverMock.config = {
-      service: {
-        devUrl: 'http://localhost',
-        manifestUrl: 'https://test-manifest.com',
-      },
-      enabled: true,
-    };
+    serverMock.config = mockConfig;
     if (serverMock.savedObjectsClient) {
       serverMock.savedObjectsClient.find = jest.fn().mockResolvedValue({
         saved_objects: [
@@ -133,8 +139,10 @@ describe('SyntheticsService', () => {
     const service = new SyntheticsService(serverMock);
 
     service.apiClient.locations = locations;
+    service.locations = locations;
 
     jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
 
     return { service, locations };
   };
@@ -222,7 +230,7 @@ describe('SyntheticsService', () => {
       const { service } = getMockedService();
       jest.spyOn(service, 'getOutput').mockRestore();
 
-      serverMock.encryptedSavedObjects = mockEncryptedSO(null) as any;
+      serverMock.encryptedSavedObjects = mockEncryptedSO();
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -240,8 +248,12 @@ describe('SyntheticsService', () => {
       jest.spyOn(service, 'getOutput').mockRestore();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
-        attributes: getFakePayload([locations[0]]),
-      }) as any;
+        monitors: [
+          {
+            attributes: getFakePayload([locations[0]]),
+          },
+        ],
+      });
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -309,8 +321,12 @@ describe('SyntheticsService', () => {
       const { service, locations } = getMockedService();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
-        attributes: getFakePayload([locations[0]]),
-      }) as any;
+        monitors: [
+          {
+            attributes: getFakePayload([locations[0]]),
+          },
+        ],
+      });
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -357,8 +373,10 @@ describe('SyntheticsService', () => {
           });
 
         serverMock.encryptedSavedObjects = mockEncryptedSO({
-          attributes: getFakePayload([locations[0]]),
-        }) as any;
+          monitors: {
+            attributes: getFakePayload([locations[0]]),
+          },
+        });
 
         (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
@@ -370,13 +388,18 @@ describe('SyntheticsService', () => {
   describe('getSyntheticsParams', () => {
     it('returns the params for all spaces', async () => {
       const { service } = getMockedService();
+      jest.spyOn(service, 'getSyntheticsParams').mockReset();
 
       (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
-        attributes: { key: 'username', value: 'elastic' },
-        namespaces: ['*'],
-      }) as any;
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['*'],
+          },
+        ],
+      });
 
       const params = await service.getSyntheticsParams();
 
@@ -389,6 +412,16 @@ describe('SyntheticsService', () => {
 
     it('returns the params for specific space', async () => {
       const { service } = getMockedService();
+      jest.spyOn(service, 'getSyntheticsParams').mockReset();
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['*'],
+          },
+        ],
+      });
 
       const params = await service.getSyntheticsParams({ spaceId: 'default' });
 
@@ -403,11 +436,16 @@ describe('SyntheticsService', () => {
     });
     it('returns the space limited params', async () => {
       const { service } = getMockedService();
+      jest.spyOn(service, 'getSyntheticsParams').mockReset();
 
       serverMock.encryptedSavedObjects = mockEncryptedSO({
-        attributes: { key: 'username', value: 'elastic' },
-        namespaces: ['default'],
-      }) as any;
+        params: [
+          {
+            attributes: { key: 'username', value: 'elastic' },
+            namespaces: ['default'],
+          },
+        ],
+      });
 
       const params = await service.getSyntheticsParams({ spaceId: 'default' });
 
@@ -416,6 +454,64 @@ describe('SyntheticsService', () => {
           username: 'elastic',
         },
       });
+    });
+  });
+
+  describe('pagination', () => {
+    const service = new SyntheticsService(serverMock);
+
+    const locations = times(5).map((n) => {
+      return {
+        id: `loc-${n}`,
+        label: `Location ${n}`,
+        url: `https://example.com/${n}`,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
+        isServiceManaged: true,
+        status: LocationStatus.GA,
+      };
+    });
+    service.apiClient.locations = locations;
+    service.locations = locations;
+    jest.spyOn(service, 'getOutput').mockResolvedValue({ hosts: ['es'], api_key: 'i:k' });
+    jest.spyOn(service, 'getSyntheticsParams').mockResolvedValue({});
+
+    it('paginates the results', async () => {
+      serverMock.config = mockConfig;
+
+      mockLicense();
+
+      const syncSpy = jest.spyOn(service.apiClient, 'syncMonitors');
+
+      let num = -1;
+      const data = times(10000).map((n) => {
+        if (num === 4) {
+          num = -1;
+        }
+        num++;
+        if (locations?.[num + 1]) {
+          return {
+            attributes: getFakePayload([locations[num], locations[num + 1]]),
+          };
+        }
+        return {
+          attributes: getFakePayload([locations[num]]),
+        };
+      });
+
+      serverMock.encryptedSavedObjects = mockEncryptedSO({ monitors: data });
+
+      (axios as jest.MockedFunction<typeof axios>).mockResolvedValue({} as AxiosResponse);
+
+      await service.pushConfigs();
+
+      expect(syncSpy).toHaveBeenCalledTimes(72);
+      expect(axios).toHaveBeenCalledTimes(72);
+      expect(logger.debug).toHaveBeenCalledTimes(112);
+      expect(logger.info).toHaveBeenCalledTimes(0);
+      expect(logger.error).toHaveBeenCalledTimes(0);
     });
   });
 });

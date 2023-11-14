@@ -5,14 +5,12 @@
  * 2.0.
  */
 import {
-  useEuiTheme,
   EuiIcon,
   type EuiPageHeaderProps,
   type EuiBreadcrumbsProps,
   EuiFlexGroup,
   EuiFlexItem,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
 import React, { useCallback, useMemo } from 'react';
 import { capitalize } from 'lodash';
@@ -64,7 +62,7 @@ export const useTemplateHeaderBreadcrumbs = () => {
       ? [
           {
             text: (
-              <EuiFlexGroup gutterSize="xs" alignItems="center">
+              <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
                 <EuiFlexItem>
                   <EuiIcon size="s" type="arrowLeft" />
                 </EuiFlexItem>
@@ -89,15 +87,17 @@ export const useTemplateHeaderBreadcrumbs = () => {
 };
 
 const useRightSideItems = (links?: LinkOptions[]) => {
-  const { asset, assetType, overrides } = useAssetDetailsRenderPropsContext();
+  const { asset } = useAssetDetailsRenderPropsContext();
 
   const topCornerLinkComponents: Record<LinkOptions, JSX.Element> = useMemo(
     () => ({
-      nodeDetails: <LinkToNodeDetails asset={asset} assetType={assetType} />,
-      alertRule: <LinkToAlertsRule onClick={overrides?.alertRule?.onCreateRuleClick} />,
+      nodeDetails: (
+        <LinkToNodeDetails assetId={asset.id} assetName={asset.name} assetType={asset.type} />
+      ),
+      alertRule: <LinkToAlertsRule />,
       apmServices: <LinkToApmServices assetName={asset.name} apmField={APM_HOST_FILTER_FIELD} />,
     }),
-    [asset, assetType, overrides?.alertRule?.onCreateRuleClick]
+    [asset.id, asset.name, asset.type]
   );
 
   const rightSideItems = useMemo(
@@ -132,7 +132,6 @@ const useFeatureFlagTabs = () => {
 const useTabs = (tabs: Tab[]) => {
   const { showTab, activeTabId } = useTabSwitcherContext();
   const { asset } = useAssetDetailsRenderPropsContext();
-  const { euiTheme } = useEuiTheme();
   const { isTabEnabled } = useFeatureFlagTabs();
 
   const onTabClick = useCallback(
@@ -155,18 +154,15 @@ const useTabs = (tabs: Tab[]) => {
       ...apmTracesMenuItemLinkProps,
       'data-test-subj': 'infraAssetDetailsApmServicesLinkTab',
       label: (
-        <>
-          <EuiIcon
-            type="popout"
-            css={css`
-              margin-right: ${euiTheme.size.xs};
-            `}
-          />
-          {name}
-        </>
+        <EuiFlexGroup responsive={false} gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
+            <EuiIcon type="popout" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{name}</EuiFlexItem>
+        </EuiFlexGroup>
       ),
     }),
-    [apmTracesMenuItemLinkProps, euiTheme.size.xs]
+    [apmTracesMenuItemLinkProps]
   );
 
   const tabEntries: TabItem[] = useMemo(

@@ -18,6 +18,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createOneCaseBeforeDeleteAllAfter,
   createAndNavigateToCase,
+  navigateToCasesApp,
 } from '../../../../../shared/lib/cases/helpers';
 
 const owner = SECURITY_SOLUTION_OWNER;
@@ -26,22 +27,21 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const header = getPageObject('header');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
+  const svlCases = getService('svlCases');
   const find = getService('find');
-
+  const config = getService('config');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
 
   describe('Case View', function () {
-    // security_exception: action [indices:data/write/delete/byquery] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.kibana_alerting_cases], this action is granted by the index privileges [delete,write,all]
-    this.tags(['failsOnMKI']);
     before(async () => {
       await svlCommonPage.login();
     });
 
     after(async () => {
-      await cases.api.deleteAllCases();
+      await svlCases.api.deleteAllCaseItems();
       await svlCommonPage.forceLogout();
     });
 
@@ -279,7 +279,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
       after(async () => {
         await cases.testResources.removeKibanaSampleData('logs');
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('adds lens visualization in description', async () => {
@@ -324,7 +324,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('initially renders user actions list correctly', async () => {
@@ -436,7 +436,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       after(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('should set the cases title', async () => {
@@ -453,7 +453,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const reporterText = await reporter.getVisibleText();
 
-        expect(reporterText).to.be('elastic_serverless');
+        expect(reporterText).to.be(config.get('servers.kibana.username'));
       });
     });
 
@@ -474,14 +474,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async () => {
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [
             {
               key: 'valid_key_1',
               type: CustomFieldTypes.TEXT,
-              value: ['this is a text field value'],
+              value: 'this is a text field value',
             },
             {
               key: 'valid_key_2',
@@ -498,17 +498,17 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       afterEach(async () => {
-        await cases.api.deleteAllCases();
+        await svlCases.api.deleteAllCaseItems();
       });
 
       it('updates a custom field correctly', async () => {
-        const summary = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
-        expect(await summary.getVisibleText()).equal('this is a text field value');
+        const textField = await testSubjects.find(`case-text-custom-field-${customFields[0].key}`);
+        expect(await textField.getVisibleText()).equal('this is a text field value');
 
-        const sync = await testSubjects.find(
+        const toggle = await testSubjects.find(
           `case-toggle-custom-field-form-field-${customFields[1].key}`
         );
-        expect(await sync.getAttribute('aria-checked')).equal('true');
+        expect(await toggle.getAttribute('aria-checked')).equal('true');
 
         await testSubjects.click(`case-text-custom-field-edit-button-${customFields[0].key}`);
 
@@ -526,19 +526,23 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await testSubjects.click(`case-text-custom-field-submit-button-${customFields[0].key}`);
 
+        await header.waitUntilLoadingHasFinished();
+
         await retry.waitFor('update toast exist', async () => {
           return await testSubjects.exists('toastCloseButton');
         });
 
         await testSubjects.click('toastCloseButton');
 
-        await sync.click();
+        await header.waitUntilLoadingHasFinished();
+
+        await toggle.click();
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await summary.getVisibleText()).equal('this is a text field value edited!!');
+        expect(await textField.getVisibleText()).equal('this is a text field value edited!!');
 
-        expect(await sync.getAttribute('aria-checked')).equal('false');
+        expect(await toggle.getAttribute('aria-checked')).equal('false');
 
         // validate user action
         const userActions = await find.allByCssSelector(

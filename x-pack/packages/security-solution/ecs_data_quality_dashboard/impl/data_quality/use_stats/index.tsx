@@ -11,6 +11,7 @@ import { HttpFetchQuery } from '@kbn/core/public';
 
 import { useDataQualityContext } from '../data_quality_panel/data_quality_context';
 import * as i18n from '../translations';
+import { INTERNAL_API_VERSION } from '../helpers';
 
 const STATS_ENDPOINT = '/internal/ecs_data_quality_dashboard/stats';
 
@@ -53,6 +54,7 @@ export const useStats = ({
         const response = await httpFetch<Record<string, IndicesStatsIndicesStats>>(
           `${STATS_ENDPOINT}/${encodedIndexName}`,
           {
+            version: INTERNAL_API_VERSION,
             method: 'GET',
             signal: abortController.signal,
             query,

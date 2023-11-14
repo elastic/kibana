@@ -17,7 +17,7 @@ export const CustomFieldToggleTypeRt = rt.literal(CustomFieldTypes.TOGGLE);
 const CaseCustomFieldTextRt = rt.strict({
   key: rt.string,
   type: CustomFieldTextTypeRt,
-  value: rt.union([rt.array(rt.string), rt.null]),
+  value: rt.union([rt.string, rt.null]),
 });
 
 export const CaseCustomFieldToggleRt = rt.strict({

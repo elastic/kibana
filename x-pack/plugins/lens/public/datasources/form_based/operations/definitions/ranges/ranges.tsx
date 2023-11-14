@@ -97,8 +97,8 @@ export const rangeOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern) =>
-    indexPattern.getFieldByName(column.sourceField)?.displayName ??
+  getDefaultLabel: (column, columns, indexPattern) =>
+    indexPattern?.getFieldByName(column.sourceField)?.displayName ??
     i18n.translate('xpack.lens.indexPattern.missingFieldLabel', {
       defaultMessage: 'Missing field',
     }),

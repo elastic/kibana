@@ -23,8 +23,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/167939
-  describe.skip('data view field editor example', function () {
+  describe('data view field editor example', function () {
     before(async () => {
       // TODO: Serverless tests require login first
       await PageObjects.svlCommonPage.login();

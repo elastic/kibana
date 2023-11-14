@@ -36,6 +36,7 @@ export enum KNOWN_FIELD_TYPES {
   RANK_FEATURES = 'rank_features',
   POINT = 'point',
   SHAPE = 'shape',
+  SPARSE_VECTOR = 'sparse_vector',
   STRING = 'string',
   TEXT = 'text',
   VERSION = 'version',

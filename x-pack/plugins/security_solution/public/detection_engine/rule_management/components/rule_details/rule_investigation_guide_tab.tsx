@@ -8,7 +8,7 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { MarkdownRenderer } from '../../../../common/components/markdown_editor';
-import type { InvestigationGuide } from '../../../../../common/api/detection_engine/model/rule_schema/common_attributes';
+import type { InvestigationGuide } from '../../../../../common/api/detection_engine/model/rule_schema';
 
 interface RuleInvestigationGuideTabProps {
   note: InvestigationGuide;

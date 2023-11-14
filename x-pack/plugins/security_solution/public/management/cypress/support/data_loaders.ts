@@ -11,14 +11,14 @@ import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import execa from 'execa';
 import type { KbnClient } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { getHostVmClient } from '../../../../scripts/endpoint/common/vm_services';
+import { setupStackServicesUsingCypressConfig } from './common';
 import type { KibanaKnownUserAccounts } from '../common/constants';
 import { KIBANA_KNOWN_DEFAULT_ACCOUNTS } from '../common/constants';
 import type { EndpointSecurityRoleNames } from '../../../../scripts/endpoint/common/roles_users';
 import { SECURITY_SERVERLESS_ROLE_NAMES } from '../../../../scripts/endpoint/common/roles_users';
 import type { LoadedRoleAndUser } from '../../../../scripts/endpoint/common/role_and_user_loader';
 import { EndpointSecurityTestRolesLoader } from '../../../../scripts/endpoint/common/role_and_user_loader';
-import { startRuntimeServices } from '../../../../scripts/endpoint/endpoint_agent_runner/runtime';
-import { runFleetServerIfNeeded } from '../../../../scripts/endpoint/endpoint_agent_runner/fleet_server';
 import {
   sendEndpointActionResponse,
   sendFleetActionResponse,
@@ -35,7 +35,6 @@ import {
   destroyEndpointHost,
   startEndpointHost,
   stopEndpointHost,
-  VAGRANT_CWD,
 } from '../../../../scripts/endpoint/common/endpoint_host_services';
 import type { IndexedEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_endpoint_policy_response';
 import {
@@ -47,6 +46,7 @@ import type {
   IndexEndpointHostsCyTaskOptions,
   LoadUserAndRoleCyTaskOptions,
   CreateUserAndRoleCyTaskOptions,
+  LogItTaskOptions,
 } from '../types';
 import type {
   DeletedIndexedEndpointRuleAlerts,
@@ -60,7 +60,6 @@ import type { IndexedHostsAndAlertsResponse } from '../../../../common/endpoint/
 import { deleteIndexedHostsAndAlerts } from '../../../../common/endpoint/index_data';
 import type { IndexedCase } from '../../../../common/endpoint/data_loaders/index_case';
 import { deleteIndexedCase, indexCase } from '../../../../common/endpoint/data_loaders/index_case';
-import { createRuntimeServices } from '../../../../scripts/endpoint/common/stack_services';
 import type { IndexedFleetEndpointPolicyResponse } from '../../../../common/endpoint/data_loaders/index_fleet_endpoint_policy';
 import {
   deleteIndexedFleetEndpointPolicies,
@@ -128,18 +127,7 @@ export const dataLoaders = (
 ): void => {
   // Env. variable is set by `cypress_serverless.config.ts`
   const isServerless = config.env.IS_SERVERLESS;
-
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    esUsername: config.env.ELASTICSEARCH_USERNAME,
-    esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
-  });
-
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
   const roleAndUserLoaderPromise: Promise<TestRoleAndUserLoader> = stackServicesPromise.then(
     ({ kbnClient, log }) => {
       return new TestRoleAndUserLoader(kbnClient, log, isServerless);
@@ -147,6 +135,14 @@ export const dataLoaders = (
   );
 
   on('task', {
+    logIt: async ({ level = 'info', data }: LogItTaskOptions): Promise<null> => {
+      return stackServicesPromise
+        .then(({ log }) => {
+          log[level](data);
+        })
+        .then(() => null);
+    },
+
     indexFleetEndpointPolicy: async ({
       policyName,
       endpointPackageVersion,
@@ -183,7 +179,7 @@ export const dataLoaders = (
     },
 
     indexEndpointHosts: async (options: IndexEndpointHostsCyTaskOptions = {}) => {
-      const { kbnClient, esClient } = await stackServicesPromise;
+      const { kbnClient, esClient, log } = await stackServicesPromise;
       const {
         count: numHosts,
         version,
@@ -194,7 +190,7 @@ export const dataLoaders = (
         alertIds,
       } = options;
 
-      return cyLoadEndpointDataHandler(esClient, kbnClient, {
+      return cyLoadEndpointDataHandler(esClient, kbnClient, log, {
         numHosts,
         version,
         os,
@@ -290,53 +286,46 @@ export const dataLoadersForRealEndpoints = (
   on: Cypress.PluginEvents,
   config: Cypress.PluginConfigOptions
 ): void => {
-  let fleetServerContainerId: string | undefined;
-
-  const stackServicesPromise = createRuntimeServices({
-    kibanaUrl: config.env.KIBANA_URL,
-    elasticsearchUrl: config.env.ELASTICSEARCH_URL,
-    fleetServerUrl: config.env.FLEET_SERVER_URL,
-    username: config.env.KIBANA_USERNAME,
-    password: config.env.KIBANA_PASSWORD,
-    esUsername: config.env.ELASTICSEARCH_USERNAME,
-    esPassword: config.env.ELASTICSEARCH_PASSWORD,
-    asSuperuser: true,
-  });
-
-  on('before:run', async () => {
-    await startRuntimeServices({
-      kibanaUrl: config.env.KIBANA_URL,
-      elasticUrl: config.env.ELASTICSEARCH_URL,
-      fleetServerUrl: config.env.FLEET_SERVER_URL,
-      username: config.env.KIBANA_USERNAME,
-      password: config.env.KIBANA_PASSWORD,
-      asSuperuser: true,
-    });
-    const data = await runFleetServerIfNeeded();
-    fleetServerContainerId = data?.fleetServerContainerId;
-  });
-
-  on('after:run', () => {
-    if (fleetServerContainerId) {
-      execa.sync('docker', ['kill', fleetServerContainerId]);
-    }
-  });
+  const stackServicesPromise = setupStackServicesUsingCypressConfig(config);
 
   on('task', {
     createEndpointHost: async (
       options: Omit<CreateAndEnrollEndpointHostOptions, 'log' | 'kbnClient'>
     ): Promise<CreateAndEnrollEndpointHostResponse> => {
       const { kbnClient, log } = await stackServicesPromise;
-      return createAndEnrollEndpointHost({
-        useClosestVersionMatch: true,
-        ...options,
-        log,
-        kbnClient,
-      }).then((newHost) => {
-        return waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000).then(() => {
+
+      let retryAttempt = 0;
+      const attemptCreateEndpointHost = async (): Promise<CreateAndEnrollEndpointHostResponse> => {
+        try {
+          log.info(`Creating endpoint host, attempt ${retryAttempt}`);
+          const newHost = await createAndEnrollEndpointHost({
+            useClosestVersionMatch: true,
+            ...options,
+            log,
+            kbnClient,
+          });
+          await waitForEndpointToStreamData(kbnClient, newHost.agentId, 360000);
           return newHost;
-        });
-      });
+        } catch (err) {
+          log.info(`Caught error when setting up the agent: ${err}`);
+          if (retryAttempt === 0 && err.agentId) {
+            retryAttempt++;
+            await destroyEndpointHost(kbnClient, {
+              hostname: err.hostname || '', // No hostname in CI env for vagrant
+              agentId: err.agentId,
+            });
+            log.info(`Deleted endpoint host ${err.agentId} and retrying`);
+            return attemptCreateEndpointHost();
+          } else {
+            log.info(
+              `${retryAttempt} attempts of creating endpoint host failed, reason for the last failure was ${err}`
+            );
+            throw err;
+          }
+        }
+      };
+
+      return attemptCreateEndpointHost();
     },
 
     destroyEndpointHost: async (
@@ -355,15 +344,7 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       content: string;
     }): Promise<null> => {
-      if (process.env.CI) {
-        await execa('vagrant', ['ssh', '--', `echo ${content} > ${path}`], {
-          env: {
-            VAGRANT_CWD,
-          },
-        });
-      } else {
-        await execa(`multipass`, ['exec', hostname, '--', 'sh', '-c', `echo ${content} > ${path}`]);
-      }
+      await getHostVmClient(hostname).exec(`echo ${content} > ${path}`);
       return null;
     },
 
@@ -376,16 +357,7 @@ export const dataLoadersForRealEndpoints = (
       srcPath: string;
       destPath: string;
     }): Promise<null> => {
-      if (process.env.CI) {
-        await execa('vagrant', ['upload', srcPath, destPath], {
-          env: {
-            VAGRANT_CWD,
-          },
-        });
-      } else {
-        await execa(`multipass`, ['transfer', srcPath, `${hostname}:${destPath}`]);
-      }
-
+      await getHostVmClient(hostname).transfer(srcPath, destPath);
       return null;
     },
 
@@ -416,38 +388,19 @@ export const dataLoadersForRealEndpoints = (
       path: string;
       password?: string;
     }): Promise<string> => {
-      let result;
-
-      if (process.env.CI) {
-        result = await execa(
-          `vagrant`,
-          ['ssh', '--', `unzip -p ${password ? `-P ${password} ` : ''}${path}`],
-          {
-            env: {
-              VAGRANT_CWD,
-            },
-          }
-        );
-      } else {
-        result = await execa(`multipass`, [
-          'exec',
-          hostname,
-          '--',
-          'sh',
-          '-c',
-          `unzip -p ${password ? `-P ${password} ` : ''}${path}`,
-        ]);
-      }
-
-      return result.stdout;
+      return (
+        await getHostVmClient(hostname).exec(`unzip -p ${password ? `-P ${password} ` : ''}${path}`)
+      ).stdout;
     },
 
     stopEndpointHost: async (hostName) => {
-      return stopEndpointHost(hostName);
+      await stopEndpointHost(hostName);
+      return null;
     },
 
     startEndpointHost: async (hostName) => {
-      return startEndpointHost(hostName);
+      await startEndpointHost(hostName);
+      return null;
     },
   });
 };

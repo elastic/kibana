@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { expect } from 'expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function telemetryConfigTest({ getService }: FtrProviderContext) {
@@ -23,30 +24,34 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     };
 
     it('GET should get the default config', async () => {
-      await supertest
+      const { body } = await supertest
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
-        .expect(200, baseConfig);
+        .expect(200);
+
+      expect(body).toMatchObject(baseConfig);
     });
 
     it('GET should get updated labels after dynamically updating them', async () => {
+      const uniqueJourneyName = `my-ftr-test-${new Date().getMilliseconds()}`;
       await supertest
         .put('/internal/core/_settings')
         .set(svlCommonApi.getInternalRequestHeader())
         .set('elastic-api-version', '1')
-        .send({ 'telemetry.labels.journeyName': 'my-ftr-test' })
+        .send({ 'telemetry.labels.journeyName': uniqueJourneyName })
         .expect(200, { ok: true });
 
-      await supertest
+      const { body } = await supertest
         .get('/api/telemetry/v2/config')
         .set(svlCommonApi.getCommonRequestHeader())
-        .expect(200, {
-          ...baseConfig,
-          labels: {
-            ...baseConfig.labels,
-            journeyName: 'my-ftr-test',
-          },
-        });
+        .expect(200);
+      expect(body).toMatchObject({
+        ...baseConfig,
+        labels: {
+          ...baseConfig.labels,
+          journeyName: uniqueJourneyName,
+        },
+      });
     });
   });
 }

@@ -1111,7 +1111,13 @@
         "description": [],
         "signature": [
           "(extraCrumbs: ",
-          "EuiBreadcrumbProps",
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          },
           "[], app?: { id: string; label: string; } | undefined) => void"
         ],
         "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -1126,7 +1132,13 @@
             "label": "extraCrumbs",
             "description": [],
             "signature": [
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]"
             ],
             "path": "x-pack/plugins/observability_shared/public/hooks/use_breadcrumbs.ts",
@@ -3648,6 +3660,21 @@
           "\"transaction.marks.agent.largestContentfulPaint\""
         ],
         "path": "x-pack/plugins/observability_shared/common/field_names/elasticsearch.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "observabilityShared",
+        "id": "def-common.LOG_EXPLORER_FEEDBACK_LINK",
+        "type": "string",
+        "tags": [],
+        "label": "LOG_EXPLORER_FEEDBACK_LINK",
+        "description": [],
+        "signature": [
+          "\"https://ela.st/explorer-feedback\""
+        ],
+        "path": "x-pack/plugins/observability_shared/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -59,10 +59,10 @@ describe('findSharedOriginObjects', () => {
     });
   }
 
-  const obj1 = { type: 'type-1', origin: 'id-1' };
-  const obj2 = { type: 'type-2', origin: 'id-2' };
-  const obj3 = { type: 'type-3', origin: 'id-3' };
-  const obj4 = { type: 'type-4', origin: 'id-4' };
+  const obj1 = { type: 'type-1', id: 'id-1', origin: 'origin-1' };
+  const obj2 = { type: 'type-2', id: 'id-2', origin: 'origin-2' };
+  const obj3 = { type: 'type-3', id: 'id-3', origin: 'origin-3' };
+  const obj4 = { type: 'type-4', id: 'id-4', origin: 'origin-4' };
 
   it('uses the PointInTimeFinder to search for legacy URL aliases', async () => {
     mockFindResults(
@@ -155,5 +155,221 @@ describe('findSharedOriginObjects', () => {
     expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
     expect(pointInTimeFinder.find).toHaveBeenCalledTimes(1);
     expect(pointInTimeFinder.close).toHaveBeenCalledTimes(2);
+  });
+
+  describe(`when options.purpose is 'updateObjectsSpaces'`, () => {
+    it('calls createPointInTimeFinder with filter to ignore direct ID matches', async () => {
+      const objects = [obj1, obj2, obj3];
+      await findSharedOriginObjects(createPointInTimeFinder, objects, 999, 'updateObjectsSpaces');
+      expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            arguments: expect.arrayContaining([
+              expect.objectContaining({
+                arguments: expect.arrayContaining([
+                  expect.objectContaining({
+                    arguments: [
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-1.id',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-1:id-1',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                    ],
+                    function: 'not',
+                    type: 'function',
+                  }),
+                ]),
+              }),
+              expect.objectContaining({
+                arguments: expect.arrayContaining([
+                  expect.objectContaining({
+                    arguments: [
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-2.id',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-2:id-2',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                    ],
+                    function: 'not',
+                    type: 'function',
+                  }),
+                ]),
+              }),
+              expect.objectContaining({
+                arguments: expect.arrayContaining([
+                  expect.objectContaining({
+                    arguments: [
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-3.id',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-3:id-3',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                    ],
+                    function: 'not',
+                    type: 'function',
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        }),
+        undefined,
+        { disableExtensions: true }
+      );
+    });
+
+    it('calls createPointInTimeFinder without redundant filter when object does not have an origin ID', async () => {
+      const objects = [obj1, { ...obj2, origin: undefined }, obj3];
+      await findSharedOriginObjects(createPointInTimeFinder, objects, 999, 'updateObjectsSpaces');
+      expect(createPointInTimeFinder).toHaveBeenCalledTimes(1);
+      expect(createPointInTimeFinder).toHaveBeenCalledWith(
+        expect.objectContaining({
+          filter: expect.objectContaining({
+            arguments: expect.arrayContaining([
+              expect.objectContaining({
+                arguments: expect.arrayContaining([
+                  expect.objectContaining({
+                    arguments: [
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-1.id',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-1:origin-1',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-1.originId',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'origin-1',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                    ],
+                    function: 'or',
+                    type: 'function',
+                  }),
+                ]),
+              }),
+              expect.objectContaining({
+                arguments: expect.arrayContaining([
+                  expect.objectContaining({
+                    arguments: [
+                      {
+                        isQuoted: false,
+                        type: 'literal',
+                        value: 'type-2.originId',
+                      },
+                      {
+                        isQuoted: false,
+                        type: 'literal',
+                        value: 'id-2',
+                      },
+                    ],
+                    function: 'is',
+                    type: 'function',
+                  }),
+                ]),
+              }),
+              expect.objectContaining({
+                arguments: expect.arrayContaining([
+                  expect.objectContaining({
+                    arguments: [
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-3.id',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-3:origin-3',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                      {
+                        arguments: [
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'type-3.originId',
+                          },
+                          {
+                            isQuoted: false,
+                            type: 'literal',
+                            value: 'origin-3',
+                          },
+                        ],
+                        function: 'is',
+                        type: 'function',
+                      },
+                    ],
+                    function: 'or',
+                    type: 'function',
+                  }),
+                ]),
+              }),
+            ]),
+          }),
+        }),
+        undefined,
+        { disableExtensions: true }
+      );
+    });
   });
 });

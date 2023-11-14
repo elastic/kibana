@@ -123,4 +123,5 @@ export type DataRequestDescriptor = {
   dataRequestToken?: symbol;
   data?: object;
   dataRequestMeta?: DataRequestMeta;
+  error?: string;
 };

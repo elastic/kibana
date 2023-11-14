@@ -340,7 +340,7 @@ export const durationAnomalyTranslations = {
 export const statusCheckTranslations = {
   downMonitorsLabel: (count: number, interval: string, numTimes: number) =>
     i18n.translate('xpack.uptime.alerts.monitorStatus.actionVariables.down', {
-      defaultMessage: `failed {count} times in the last {interval}. Alert when > {numTimes}.`,
+      defaultMessage: `failed {count} times in the last {interval}. Alert when >= {numTimes}.`,
       values: {
         count,
         interval,

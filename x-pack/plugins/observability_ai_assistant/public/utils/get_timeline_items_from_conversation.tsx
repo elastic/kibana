@@ -92,7 +92,7 @@ export function getTimelineItemsfromConversation({
           ? messages[index - 1].message.function_call
           : undefined;
 
-      const role = message.message.function_call?.trigger || message.message.role;
+      let role = message.message.function_call?.trigger || message.message.role;
 
       const actions = {
         canCopy: false,
@@ -159,8 +159,12 @@ export function getTimelineItemsfromConversation({
 
             content = !element ? convertMessageToMarkdownCodeBlock(message.message) : undefined;
 
+            if (prevFunctionCall?.trigger === MessageRole.Assistant) {
+              role = MessageRole.Assistant;
+            }
+
             actions.canEdit = false;
-            display.collapsed = !isError && !element;
+            display.collapsed = !element;
           } else if (message.message.function_call) {
             // User suggested a function
             title = (

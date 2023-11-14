@@ -23,7 +23,6 @@ import {
   MAX_ASSIGNEES_PER_CASE,
   MAX_CUSTOM_FIELDS_PER_CASE,
   MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
 } from '../../../constants';
 import {
   limitedStringSchema,
@@ -44,15 +43,10 @@ import { CaseConnectorRt } from '../../domain/connector/v1';
 import { CaseUserProfileRt, UserRt } from '../../domain/user/v1';
 import { CasesStatusResponseRt } from '../stats/v1';
 
-const CaseCustomFieldTextWithValidationValueRt = limitedArraySchema({
-  codec: limitedStringSchema({
-    fieldName: 'value',
-    min: 1,
-    max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
-  }),
+const CaseCustomFieldTextWithValidationValueRt = limitedStringSchema({
   fieldName: 'value',
   min: 1,
-  max: MAX_CUSTOM_FIELD_TEXT_VALUE_ITEMS,
+  max: MAX_CUSTOM_FIELD_TEXT_VALUE_LENGTH,
 });
 
 const CaseCustomFieldTextWithValidationRt = rt.strict({
@@ -140,6 +134,27 @@ export const CasePostRequestRt = rt.intersection([
     })
   ),
 ]);
+
+/**
+ * Bulk create cases
+ */
+
+const CaseCreateRequestWithOptionalId = rt.intersection([
+  CasePostRequestRt,
+  rt.exact(rt.partial({ id: rt.string })),
+]);
+
+export const BulkCreateCasesRequestRt = rt.strict({
+  cases: rt.array(CaseCreateRequestWithOptionalId),
+});
+
+export const BulkCreateCasesResponseRt = rt.strict({
+  cases: rt.array(CaseRt),
+});
+
+/**
+ * Find cases
+ */
 
 export const CasesFindRequestSearchFieldsRt = rt.keyof({
   description: null,
@@ -486,3 +501,5 @@ export type CasesBulkGetRequest = rt.TypeOf<typeof CasesBulkGetRequestRt>;
 export type CasesBulkGetResponse = rt.TypeOf<typeof CasesBulkGetResponseRt>;
 export type GetRelatedCasesByAlertResponse = rt.TypeOf<typeof GetRelatedCasesByAlertResponseRt>;
 export type CaseRequestCustomFields = rt.TypeOf<typeof CustomFieldsRt>;
+export type BulkCreateCasesRequest = rt.TypeOf<typeof BulkCreateCasesRequestRt>;
+export type BulkCreateCasesResponse = rt.TypeOf<typeof BulkCreateCasesResponseRt>;

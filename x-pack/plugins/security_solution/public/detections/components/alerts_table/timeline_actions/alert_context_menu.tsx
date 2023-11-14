@@ -20,7 +20,6 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '../../../../common/components/heade
 import { isActiveTimeline } from '../../../../helpers';
 import { useOsqueryContextActionItem } from '../../osquery/use_osquery_context_action_item';
 import { OsqueryFlyout } from '../../osquery/osquery_flyout';
-import { useRouteSpy } from '../../../../common/utils/route/use_route_spy';
 import { buildGetAlertByIdQuery } from '../../../../detection_engine/rule_exceptions/utils/helpers';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { EventsTdContent } from '../../../../timelines/components/timeline/styles';
@@ -38,13 +37,18 @@ import { useAlertsActions } from './use_alerts_actions';
 import { useExceptionFlyout } from './use_add_exception_flyout';
 import { useAlertExceptionActions } from './use_add_exception_actions';
 import { useEventFilterModal } from './use_event_filter_modal';
-import type { Status } from '../../../../../common/api/detection_engine';
+import type {
+  DataViewId,
+  IndexPatternArray,
+  RuleObjectId,
+  RuleSignatureId,
+  Status,
+} from '../../../../../common/api/detection_engine';
 import { ATTACH_ALERT_TO_CASE_FOR_ROW } from '../../../../timelines/components/timeline/body/translations';
 import { useEventFilterAction } from './use_event_filter_action';
 import { useAddToCaseActions } from './use_add_to_case_actions';
 import { isAlertFromEndpointAlert } from '../../../../common/utils/endpoint_alert_check';
 import type { Rule } from '../../../../detection_engine/rule_management/logic/types';
-import { useOpenAlertDetailsAction } from './use_open_alert_details';
 import type { AlertTableContextMenuItem } from '../types';
 import { useAlertTagsActions } from './use_alert_tags_actions';
 
@@ -73,7 +77,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
-  const [routeProps] = useRouteSpy();
 
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
@@ -145,14 +148,11 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
   const refetchAll = useCallback(() => {
     if (isActiveTimeline(scopeId ?? '')) {
       refetchQuery([timelineQuery]);
-      if (routeProps.pageName === 'alerts') {
-        refetchQuery(globalQuery);
-      }
     } else {
       refetchQuery(globalQuery);
       if (refetch) refetch();
     }
-  }, [scopeId, globalQuery, timelineQuery, routeProps, refetch]);
+  }, [scopeId, globalQuery, timelineQuery, refetch]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -216,12 +216,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
 
   const { osqueryActionItems } = useOsqueryContextActionItem({ handleClick: handleOnOsqueryClick });
 
-  const { alertDetailsActionItems } = useOpenAlertDetailsAction({
-    alertId,
-    closePopover,
-    ruleId,
-  });
-
   const { alertTagsItems, alertTagsPanels } = useAlertTagsActions({
     closePopover,
     ecsRowData,
@@ -237,7 +231,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
             ...alertTagsItems,
             ...exceptionActionItems,
             ...(agentId ? osqueryActionItems : []),
-            ...alertDetailsActionItems,
           ]
         : [
             ...addToCaseActionItems,
@@ -252,7 +245,6 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps & PropsFromRedux
       exceptionActionItems,
       agentId,
       osqueryActionItems,
-      alertDetailsActionItems,
       eventFilterActionItems,
       canCreateEndpointEventFilters,
       alertTagsItems,
@@ -359,10 +351,10 @@ type AddExceptionFlyoutWrapperProps = Omit<
   | 'showAlertCloseOptions'
 > & {
   eventId?: string;
-  ruleId: Rule['id'];
-  ruleRuleId: Rule['rule_id'];
-  ruleIndices: Rule['index'];
-  ruleDataViewId: Rule['data_view_id'];
+  ruleId: RuleObjectId;
+  ruleRuleId: RuleSignatureId;
+  ruleIndices: IndexPatternArray | undefined;
+  ruleDataViewId: DataViewId | undefined;
   ruleName: Rule['name'];
   exceptionListType: ExceptionListTypeEnum | null;
 };

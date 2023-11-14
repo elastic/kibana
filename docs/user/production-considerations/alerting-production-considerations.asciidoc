@@ -72,6 +72,11 @@ There are several scenarios where running alerting rules and actions can start t
 
 Running large numbers of rules at very short intervals can quickly clog up Task Manager throughput, leading to higher schedule drift. Use `xpack.alerting.rules.minimumScheduleInterval.value` to set a minimum schedule interval for rules. The default (and recommended) value for this configuration is `1m`. Use `xpack.alerting.rules.minimumScheduleInterval.enforce` to specify whether to strictly enforce this minimum. While the default value for this setting is `false` to maintain backwards compatibility with existing rules, set this to `true` to prevent new and updated rules from running at an interval below the minimum.
 
+Another related setting is `xpack.alerting.rules.maxScheduledPerMinute`, which limits the number of rules that can run per minute.
+For example if it's set to `400`, you can have 400 rules with one minute check intervals or 2,000 rules with 5 minute check intervals.
+You cannot create or edit a rule if its check interval would cause this setting to be exceeded.
+To stay within this limit, delete or disable some rules or update the check intervals so that your rules run less frequently.
+
 [float]
 ==== Rules that run for a long time
 

@@ -64,6 +64,18 @@ describe('SavedObjectsManagementActionRegistry', () => {
         `"Saved Objects Management Action with id 'my-action' already exists"`
       );
     });
+
+    it('does not register spaces share and copy actions when SpacesApi.hasOnlyDefaultSpace is true', () => {
+      const action = createAction('foo');
+      setup.register(action);
+      const start = service.start(spacesPluginMock.createStartContract(true));
+      expect(start.getAll()).toEqual(
+        expect.not.arrayContaining([
+          expect.any(ShareToSpaceSavedObjectsManagementAction),
+          expect.any(CopyToSpaceSavedObjectsManagementAction),
+        ])
+      );
+    });
   });
 
   describe('#has', () => {

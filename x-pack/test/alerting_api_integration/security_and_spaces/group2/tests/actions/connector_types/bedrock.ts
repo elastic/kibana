@@ -160,7 +160,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring AWS Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: Error configuring Amazon Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -280,7 +280,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: AWS Bedrock. Connector type: .bedrock`,
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
       });
@@ -404,7 +404,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse.completion,
+              data: { message: bedrockSuccessResponse.completion },
             });
           });
         });

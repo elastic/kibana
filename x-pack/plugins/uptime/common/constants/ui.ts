@@ -109,3 +109,5 @@ export const SYNTHETICS_INDEX_PATTERN = 'synthetics-*';
 export const LICENSE_NOT_ACTIVE_ERROR = 'License not active';
 export const LICENSE_MISSING_ERROR = 'Missing license information';
 export const LICENSE_NOT_SUPPORTED_ERROR = 'License not supported';
+
+export const INITIAL_REST_VERSION = '2023-10-31';

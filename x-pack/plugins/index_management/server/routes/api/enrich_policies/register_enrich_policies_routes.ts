@@ -11,10 +11,12 @@ import { registerListRoute } from './register_list_route';
 import { registerDeleteRoute } from './register_delete_route';
 import { registerExecuteRoute } from './register_execute_route';
 import { registerCreateRoute } from './register_create_route';
+import { registerPrivilegesRoute } from './register_privileges_route';
 
 export function registerEnrichPoliciesRoute(dependencies: RouteDependencies) {
   registerListRoute(dependencies);
   registerDeleteRoute(dependencies);
   registerExecuteRoute(dependencies);
   registerCreateRoute(dependencies);
+  registerPrivilegesRoute(dependencies);
 }
