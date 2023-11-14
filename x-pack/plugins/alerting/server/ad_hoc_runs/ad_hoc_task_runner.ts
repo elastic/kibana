@@ -196,6 +196,8 @@ export class AdHocTaskRunner {
       },
     });
 
+    const nowDate = new Date(new Date(intervalStart).valueOf() + parseDuration(intervalDuration));
+
     await this.ruleRunner.run({
       alertingEventLogger: this.alertingEventLogger,
       alertsClient: alertsClient as unknown as UntypedAlertsClient,
@@ -205,9 +207,7 @@ export class AdHocTaskRunner {
         getTimeRangeFn: () =>
           getTimeRange({
             logger: this.logger,
-            nowDate: new Date(
-              new Date(intervalStart).valueOf() + parseDuration(intervalDuration)
-            ).toISOString(),
+            nowDate: nowDate.toISOString(),
             window: intervalDuration,
           }),
       },
@@ -237,8 +237,8 @@ export class AdHocTaskRunner {
       ruleLabel,
       ruleRunMetricsStore,
       spaceId,
-      startedAt: this.taskInstance.startedAt,
-      state: this.taskInstance.state,
+      startedAt: nowDate,
+      state: {},
       validatedParams: params,
     });
   }

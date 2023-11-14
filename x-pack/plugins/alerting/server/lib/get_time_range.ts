@@ -12,7 +12,7 @@ import { parseDuration, RulesSettingsQueryDelayProperties } from '../../common';
 interface GetTimeRangeOpts {
   logger: Logger;
   queryDelaySettings?: RulesSettingsQueryDelayProperties;
-  window?: string;
+  window: string;
   nowDate?: string;
 }
 export function getTimeRange({ logger, queryDelaySettings, nowDate, window }: GetTimeRangeOpts) {

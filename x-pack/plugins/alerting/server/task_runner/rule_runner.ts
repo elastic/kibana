@@ -37,7 +37,7 @@ interface RunOpts {
   alertsClient: UntypedAlertsClient;
   executionId: string;
   executorServices: ExecutorServices & {
-    getTimeRangeFn?: (timeWindow?: string) => { dateStart: string; dateEnd: string };
+    getTimeRangeFn?: (timeWindow: string) => { dateStart: string; dateEnd: string };
   };
   fakeRequest: KibanaRequest;
   maintenanceWindowIds?: string[];
@@ -159,11 +159,12 @@ export class RuleRunner {
               flappingSettings,
               getTimeRange:
                 executorServices.getTimeRangeFn ??
-                ((timeWindow?: string) =>
+                ((timeWindow: string, nowDate?: string) =>
                   getTimeRange({
                     logger: this.options.logger,
                     queryDelaySettings,
                     window: timeWindow,
+                    nowDate,
                   })),
             })
           );

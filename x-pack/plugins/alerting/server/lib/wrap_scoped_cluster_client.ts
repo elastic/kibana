@@ -139,7 +139,7 @@ function getWrappedSearchFn(opts: WrapEsClientOpts) {
     try {
       const searchOptions = options ?? {};
       const start = Date.now();
-      opts.logger.debug(
+      opts.logger.info(
         `executing query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
           opts.rule.spaceId
         } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`

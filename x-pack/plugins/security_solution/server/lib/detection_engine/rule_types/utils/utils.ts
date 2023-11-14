@@ -416,16 +416,20 @@ export const getRuleRangeTuples = ({
   from,
   to,
   interval,
+  additionalLookback,
   maxSignals,
   ruleExecutionLogger,
+  getTimeRange,
 }: {
   startedAt: Date;
   previousStartedAt: Date | null | undefined;
   from: string;
   to: string;
   interval: string;
+  additionalLookback?: string;
   maxSignals: number;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
+  getTimeRange: (timeWindow: string, nowDate?: string) => { dateStart: string; dateEnd: string };
 }) => {
   const originalFrom = dateMath.parse(from, { forceNow: startedAt });
   const originalTo = dateMath.parse(to, { forceNow: startedAt });
@@ -433,10 +437,23 @@ export const getRuleRangeTuples = ({
     throw new Error('Failed to parse date math of rule.from or rule.to');
   }
 
+  console.log(
+    `getRuleRangeTuples - originalTo ${originalTo.toISOString()} - originalFrom ${originalFrom.toISOString()}`
+  );
+
+  const rangeInMillis =
+    parseDuration(interval) + (additionalLookback ? parseDuration(additionalLookback) : 0);
+
+  const { dateStart, dateEnd } = getTimeRange(
+    `${rangeInMillis / 1000}s`,
+    new Date(startedAt).toISOString()
+  );
+  console.log(`getRuleRangeTuples - dateEnd ${dateEnd} - dateStart ${dateStart}`);
+
   const tuples = [
     {
-      to: originalTo,
-      from: originalFrom,
+      to: moment(dateEnd),
+      from: moment(dateStart),
       maxSignals,
     },
   ];
@@ -453,8 +470,8 @@ export const getRuleRangeTuples = ({
 
   const gap = getGapBetweenRuns({
     previousStartedAt,
-    originalTo,
-    originalFrom,
+    originalTo: moment(dateEnd),
+    originalFrom: moment(dateStart),
     startedAt,
   });
   const catchup = getNumCatchupIntervals({
@@ -462,8 +479,8 @@ export const getRuleRangeTuples = ({
     intervalDuration,
   });
   const catchupTuples = getCatchupTuples({
-    originalTo,
-    originalFrom,
+    originalTo: moment(dateEnd),
+    originalFrom: moment(dateStart),
     ruleParamsMaxSignals: maxSignals,
     catchup,
     intervalDuration,

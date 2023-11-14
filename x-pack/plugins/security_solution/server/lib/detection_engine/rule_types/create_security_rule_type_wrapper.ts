@@ -129,6 +129,7 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             spaceId,
             state,
             rule,
+            getTimeRange,
           } = options;
           let runState = state;
           let inputIndex: string[] = [];
@@ -311,9 +312,13 @@ export const createSecurityRuleTypeWrapper: CreateSecurityRuleTypeWrapper =
             from,
             to,
             interval,
+            additionalLookback: params.meta?.from as string,
             maxSignals: maxSignals ?? DEFAULT_MAX_SIGNALS,
             ruleExecutionLogger,
+            getTimeRange,
           });
+          logger.info(`startedAt - ${startedAt} - previousStartedAt ${previousStartedAt}`);
+          logger.info(`tuples ${JSON.stringify(tuples)}`);
 
           if (remainingGap.asMilliseconds() > 0) {
             hasError = true;
