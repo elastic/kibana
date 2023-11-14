@@ -131,7 +131,9 @@ describe('CreateMaintenanceWindowForm', () => {
       'Press the down key to open a popover containing a calendar.'
     );
     const recurringInput = within(result.getByTestId('recurring-field')).getByTestId('input');
-    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId('comboBoxSearchInput');
+    const timezoneInput = within(result.getByTestId('timezone-field')).getByTestId(
+      'comboBoxSearchInput'
+    );
 
     await waitFor(() => {
       expect(

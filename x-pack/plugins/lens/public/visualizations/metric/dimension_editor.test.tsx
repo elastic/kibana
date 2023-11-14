@@ -457,8 +457,7 @@ describe('dimension editor', () => {
         none: screen.queryByTitle(/none/i),
         // in eui when bar or line become disabled they change from input to button so we have to do this weird check
         bar: screen.queryByTitle(/bar/i) || screen.queryByRole('button', { name: /bar/i }),
-        trendline:
-          screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
+        trendline: screen.queryByTitle(/line/i) || screen.queryByRole('button', { name: /line/i }),
       };
 
       const clickOnSupportingVis = (type: SupportingVisType) => {
