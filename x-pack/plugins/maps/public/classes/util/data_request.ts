@@ -51,6 +51,10 @@ export class DataRequest {
   getRequestToken(): symbol | undefined {
     return this._descriptor.dataRequestToken;
   }
+
+  getError(): string | undefined {
+    return this._descriptor.error;
+  }
 }
 
 export class DataRequestAbortError extends Error {

@@ -12,9 +12,7 @@ import type {
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { createRuleExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import { RuleObjectId } from '../../model/rule_schema_legacy';
+import { UUID } from '@kbn/securitysolution-io-ts-types';
 
 /**
  * URL path parameters of the API route.
@@ -22,7 +20,7 @@ import { RuleObjectId } from '../../model/rule_schema_legacy';
 export type CreateRuleExceptionsRequestParams = t.TypeOf<typeof CreateRuleExceptionsRequestParams>;
 export const CreateRuleExceptionsRequestParams = t.exact(
   t.type({
-    id: RuleObjectId,
+    id: UUID,
   })
 );
 

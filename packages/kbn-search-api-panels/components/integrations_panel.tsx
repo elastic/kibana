@@ -127,7 +127,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
             <EuiTitle size="s">
               <h3>
                 {i18n.translate('searchApiPanels.welcomeBanner.ingestData.connectorsTitle', {
-                  defaultMessage: 'Connector Client',
+                  defaultMessage: 'Connector clients',
                 })}
               </h3>
             </EuiTitle>
@@ -135,7 +135,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
             <EuiText size="s">
               {i18n.translate('searchApiPanels.welcomeBanner.ingestData.connectorsDescription', {
                 defaultMessage:
-                  'Specialized integrations for syncing data from third-party sources to Elasticsearch. Use Elastic Connectors to sync content from a range of databases and object stores.',
+                  'Specialized integrations for syncing data from third-party sources to Elasticsearch. Use Elastic connectors to sync content from a range of databases and object stores.',
               })}
             </EuiText>
             <EuiSpacer size="m" />
@@ -153,7 +153,7 @@ export const IntegrationsPanel: React.FC<IntegrationsPanelProps> = ({
                   label={i18n.translate(
                     'searchApiPanels.welcomeBanner.ingestData.connectorsPythonLink',
                     {
-                      defaultMessage: 'connectors-python',
+                      defaultMessage: 'elastic/connectors',
                     }
                   )}
                   assetBasePath={assetBasePath}

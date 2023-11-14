@@ -11,7 +11,7 @@ import { SavedObjectsBulkUpdateObject, SavedObjectsFindResult } from '@kbn/core/
 import { withSpan } from '@kbn/apm-utils';
 import { Logger } from '@kbn/core/server';
 import { TaskManagerStartContract, TaskStatus } from '@kbn/task-manager-plugin/server';
-import { RawRule, IntervalSchedule, SanitizedRule } from '../../types';
+import { RawRule, IntervalSchedule } from '../../types';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import {
@@ -35,7 +35,7 @@ import {
   transformRuleAttributesToRuleDomain,
   transformRuleDomainToRule,
 } from '../../application/rule/transforms';
-import type { RuleParams, RuleDomain } from '../../application/rule/types';
+import type { RuleParams } from '../../application/rule/types';
 import { ruleDomainSchema } from '../../application/rule/schemas';
 
 const getShouldScheduleTask = async (
@@ -120,14 +120,10 @@ export const bulkEnableRules = async <Params extends RuleParams>(
     } catch (e) {
       context.logger.warn(`Error validating bulk enabled rule domain object for id: ${id}, ${e}`);
     }
-    return ruleDomain;
+    return transformRuleDomainToRule(ruleDomain);
   });
-  // TODO (http-versioning): This should be of type Rule, change this when all rule types are fixed
-  const enabledPublicRules = enabledRules.map((rule: RuleDomain<Params>) => {
-    return transformRuleDomainToRule<Params>(rule);
-  }) as Array<SanitizedRule<Params>>;
 
-  return { errors, rules: enabledPublicRules, total, taskIdsFailedToBeEnabled };
+  return { errors, rules: enabledRules, total, taskIdsFailedToBeEnabled };
 };
 
 const bulkEnableRulesWithOCC = async (
