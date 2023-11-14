@@ -20,6 +20,7 @@ import {
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridRefProps,
+  EuiSkeletonText,
   EuiDataGridStyle,
   EuiFlexGroup,
   EuiDataGridProps,
