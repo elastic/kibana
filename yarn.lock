@@ -3000,6 +3000,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-ftr-helpers-plugin@link:test/analytics/plugins/analytics_ftr_helpers":
   version "0.0.0"
   uid ""

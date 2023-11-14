@@ -50,6 +50,8 @@
       "@kbn/analytics/*": ["packages/kbn-analytics/*"],
       "@kbn/analytics-client": ["packages/analytics/client"],
       "@kbn/analytics-client/*": ["packages/analytics/client/*"],
+      "@kbn/analytics-collection-utils": ["packages/analytics/utils/analytics_collection_utils"],
+      "@kbn/analytics-collection-utils/*": ["packages/analytics/utils/analytics_collection_utils/*"],
       "@kbn/analytics-ftr-helpers-plugin": ["test/analytics/plugins/analytics_ftr_helpers"],
       "@kbn/analytics-ftr-helpers-plugin/*": ["test/analytics/plugins/analytics_ftr_helpers/*"],
       "@kbn/analytics-plugin-a-plugin": ["test/analytics/plugins/analytics_plugin_a"],
