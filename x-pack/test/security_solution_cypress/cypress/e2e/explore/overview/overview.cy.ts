@@ -64,13 +64,6 @@ describe('Overview Page', { tags: ['@ess', '@serverless', '@serverlessQA'] }, ()
 });
 
 describe('Overview page with no data', { tags: '@brokenInServerless' }, () => {
-  before(() => {
-    cy.task('esArchiverUnload', 'auditbeat');
-  });
-  after(() => {
-    cy.task('esArchiverLoad', { archiveName: 'auditbeat' });
-  });
-
   it('Splash screen should be here', () => {
     login();
     visitWithTimeRange(OVERVIEW_URL);
