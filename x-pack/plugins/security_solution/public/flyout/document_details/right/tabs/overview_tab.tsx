@@ -32,13 +32,13 @@ export const OverviewTab: FC = memo(() => {
       )}
     >
       <AboutSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <InvestigationSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <VisualizationsSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <InsightsSection />
-      <EuiHorizontalRule margin="l" />
+      <EuiHorizontalRule margin="m" />
       <ResponseSection />
     </EuiPanel>
   );

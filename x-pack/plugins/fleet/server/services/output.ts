@@ -25,6 +25,7 @@ import type {
   OutputSOAttributes,
   AgentPolicy,
   OutputSoKafkaAttributes,
+  OutputSoRemoteElasticsearchAttributes,
   PolicySecretReference,
 } from '../types';
 import {
@@ -421,6 +422,13 @@ class OutputService {
     options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
+    if (output.type === outputType.RemoteElasticsearch) {
+      if (data.is_default) {
+        throw new OutputInvalidError(
+          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
+        );
+      }
+    }
     const defaultDataOutputId = await this.getDefaultDataOutputId(soClient);
 
     if (output.type === outputType.Logstash || output.type === outputType.Kafka) {
@@ -466,7 +474,10 @@ class OutputService {
       }
     }
 
-    if (data.type === outputType.Elasticsearch && data.hosts) {
+    if (
+      (data.type === outputType.Elasticsearch || data.type === outputType.RemoteElasticsearch) &&
+      data.hosts
+    ) {
       data.hosts = data.hosts.map(normalizeHostsForAgents);
     }
 
@@ -709,6 +720,14 @@ class OutputService {
       fromPreconfiguration: false,
     }
   ) {
+    if (data.type === outputType.RemoteElasticsearch) {
+      if (data.is_default) {
+        throw new OutputInvalidError(
+          'Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.'
+        );
+      }
+    }
+
     let secretsToDelete: PolicySecretReference[] = [];
     const originalOutput = await this.get(soClient, id);
 
@@ -770,10 +789,7 @@ class OutputService {
 
     // If the output type changed
     if (data.type && data.type !== originalOutput.type) {
-      if (
-        (data.type === outputType.Elasticsearch || data.type === outputType.Logstash) &&
-        originalOutput.type === outputType.Kafka
-      ) {
+      if (data.type !== outputType.Kafka && originalOutput.type === outputType.Kafka) {
         removeKafkaFields(updateData as Nullable<OutputSoKafkaAttributes>);
       }
 
@@ -781,9 +797,10 @@ class OutputService {
         // remove ES specific field
         updateData.ca_trusted_fingerprint = null;
         updateData.ca_sha256 = null;
+        delete (updateData as Nullable<OutputSoRemoteElasticsearchAttributes>).service_token;
       }
 
-      if (data.type === outputType.Elasticsearch) {
+      if (data.type !== outputType.Logstash) {
         // remove logstash specific field
         updateData.ssl = null;
       }
@@ -889,7 +906,10 @@ class OutputService {
       }
     }
 
-    if (mergedType === outputType.Elasticsearch && updateData.hosts) {
+    if (
+      (mergedType === outputType.Elasticsearch || mergedType === outputType.RemoteElasticsearch) &&
+      updateData.hosts
+    ) {
       updateData.hosts = updateData.hosts.map(normalizeHostsForAgents);
     }
 

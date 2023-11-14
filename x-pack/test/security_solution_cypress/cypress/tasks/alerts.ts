@@ -75,6 +75,7 @@ import {
   OPTION_LIST_VALUES,
   OPTION_LIST_CLEAR_BTN,
   OPTION_SELECTABLE,
+  CONTROL_GROUP,
 } from '../screens/common/filter_group';
 import { LOADING_SPINNER } from '../screens/common/page';
 import { ALERTS_URL } from '../urls/navigation';
@@ -171,7 +172,7 @@ export const refreshAlertPageFilter = () => {
 };
 
 export const togglePageFilterPopover = (filterIndex: number) => {
-  cy.get(OPTION_LIST_VALUES(filterIndex)).click({ force: true });
+  cy.get(OPTION_LIST_VALUES(filterIndex)).click();
 };
 
 export const openPageFilterPopover = (filterIndex: number) => {
@@ -189,7 +190,7 @@ export const closePageFilterPopover = (filterIndex: number) => {
 };
 
 export const clearAllSelections = (filterIndex: number) => {
-  cy.scrollTo('top');
+  cy.get(CONTROL_GROUP).scrollIntoView();
   recurse(
     () => {
       cy.get(CONTROL_FRAME_TITLE).eq(filterIndex).realHover();

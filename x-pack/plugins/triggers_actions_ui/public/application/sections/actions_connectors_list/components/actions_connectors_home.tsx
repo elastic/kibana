@@ -99,6 +99,7 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
           <EuiButtonEmpty
             data-test-subj="documentationButton"
             key="documentation-button"
+            target="_blank"
             href={docLinks.links.alerting.actionTypes}
             iconType="help"
           >

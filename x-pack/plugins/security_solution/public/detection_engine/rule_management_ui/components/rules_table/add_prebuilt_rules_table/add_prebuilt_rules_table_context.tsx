@@ -7,6 +7,7 @@
 
 import type { Dispatch, SetStateAction } from 'react';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import { EuiButton } from '@elastic/eui';
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine';
@@ -232,10 +233,21 @@ export const AddPrebuiltRulesTableContextProvider = ({
         {previewedRule && (
           <RuleDetailsFlyout
             rule={previewedRule}
-            actionButtonLabel={i18n.INSTALL_BUTTON_LABEL}
-            isActionButtonDisabled={canPreviewedRuleBeInstalled}
-            onActionButtonClick={installOneRule}
+            dataTestSubj="installPrebuiltRulePreview"
             closeFlyout={closeRulePreview}
+            ruleActions={
+              <EuiButton
+                disabled={canPreviewedRuleBeInstalled}
+                onClick={() => {
+                  installOneRule(previewedRule.rule_id ?? '');
+                  closeRulePreview();
+                }}
+                fill
+                data-test-subj="installPrebuiltRuleFromFlyoutButton"
+              >
+                {i18n.INSTALL_BUTTON_LABEL}
+              </EuiButton>
+            }
           />
         )}
       </>

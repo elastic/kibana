@@ -38,10 +38,57 @@ describe('Public assets client', () => {
       });
     });
 
+    it('should include provided filters, but in string form', async () => {
+      const client = new PublicAssetsClient(http);
+      const filters = { id: '*id-1*' };
+      await client.getHosts({ from: 'x', filters });
+      expect(http.get).toBeCalledWith(routePaths.GET_HOSTS, {
+        query: {
+          from: 'x',
+          stringFilters: JSON.stringify(filters),
+        },
+      });
+    });
+
     it('should return the direct results of http.get', async () => {
       const client = new PublicAssetsClient(http);
       http.get.mockResolvedValueOnce('my hosts');
       const result = await client.getHosts({ from: 'x', to: 'y' });
+      expect(result).toBe('my hosts');
+    });
+  });
+
+  describe('getContainers', () => {
+    it('should call the REST API', async () => {
+      const client = new PublicAssetsClient(http);
+      await client.getContainers({ from: 'x', to: 'y' });
+      expect(http.get).toBeCalledTimes(1);
+    });
+
+    it('should include specified "from" and "to" parameters in http.get query', async () => {
+      const client = new PublicAssetsClient(http);
+      await client.getContainers({ from: 'x', to: 'y' });
+      expect(http.get).toBeCalledWith(routePaths.GET_CONTAINERS, {
+        query: { from: 'x', to: 'y' },
+      });
+    });
+
+    it('should include provided filters, but in string form', async () => {
+      const client = new PublicAssetsClient(http);
+      const filters = { id: '*id-1*' };
+      await client.getContainers({ from: 'x', filters });
+      expect(http.get).toBeCalledWith(routePaths.GET_CONTAINERS, {
+        query: {
+          from: 'x',
+          stringFilters: JSON.stringify(filters),
+        },
+      });
+    });
+
+    it('should return the direct results of http.get', async () => {
+      const client = new PublicAssetsClient(http);
+      http.get.mockResolvedValueOnce('my hosts');
+      const result = await client.getContainers({ from: 'x', to: 'y' });
       expect(result).toBe('my hosts');
     });
   });
@@ -58,6 +105,18 @@ describe('Public assets client', () => {
       await client.getServices({ from: 'x', to: 'y' });
       expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
         query: { from: 'x', to: 'y' },
+      });
+    });
+
+    it('should include provided filters, but in string form', async () => {
+      const client = new PublicAssetsClient(http);
+      const filters = { id: '*id-1*' };
+      await client.getServices({ from: 'x', filters });
+      expect(http.get).toBeCalledWith(routePaths.GET_SERVICES, {
+        query: {
+          from: 'x',
+          stringFilters: JSON.stringify(filters),
+        },
       });
     });
 

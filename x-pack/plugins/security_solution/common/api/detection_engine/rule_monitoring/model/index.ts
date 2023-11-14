@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-export * from './execution_event';
-export * from './execution_metrics';
+export * from './execution_event.gen';
+export * from './execution_metrics.gen';
 export * from './execution_result.gen';
 export * from './execution_settings';
 export * from './execution_status.gen';
-export * from './execution_summary';
+export * from './execution_summary.gen';
 export * from './log_level';

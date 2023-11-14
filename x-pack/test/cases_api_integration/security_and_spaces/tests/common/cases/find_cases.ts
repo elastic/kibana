@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { v1 as uuidv1 } from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 
 import expect from '@kbn/expect';
 import {
@@ -387,7 +387,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should successfully find a case with a valid uuid in title', async () => {
-          const uuid = uuidv1();
+          const uuid = uuidv4();
           await createCase(supertest, { ...postCaseReq, title: uuid });
 
           const cases = await findCases({
@@ -400,7 +400,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('should successfully find a case with a valid uuid in description', async () => {
-          const uuid = uuidv1();
+          const uuid = uuidv4();
           await createCase(supertest, { ...postCaseReq, description: uuid });
 
           const cases = await findCases({

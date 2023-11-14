@@ -1680,6 +1680,10 @@
         "type": "keyword",
         "index": false
       },
+      "service_token": {
+        "type": "keyword",
+        "index": false
+      },
       "config": {
         "type": "flattened"
       },

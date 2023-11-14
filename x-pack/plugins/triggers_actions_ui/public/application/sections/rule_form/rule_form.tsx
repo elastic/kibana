@@ -59,6 +59,7 @@ import {
   RuleActionAlertsFilterProperty,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { AlertConsumers } from '@kbn/rule-data-utils';
 import { RuleReducerAction, InitialRule } from './rule_reducer';
 import {
   RuleTypeModel,
@@ -250,11 +251,11 @@ export const RuleForm = ({
             validConsumers,
           })
         )
-        .filter((item) =>
-          rule.consumer === ALERTS_FEATURE_ID
+        .filter((item) => {
+          return rule.consumer === ALERTS_FEATURE_ID
             ? !item.ruleTypeModel.requiresAppContext
-            : item.ruleType!.producer === rule.consumer
-        );
+            : item.ruleType!.producer === rule.consumer;
+        });
 
     const availableRuleTypesResult = getAvailableRuleTypes(ruleTypes);
     setAvailableRuleTypes(availableRuleTypesResult);
@@ -274,9 +275,13 @@ export const RuleForm = ({
       },
       new Map()
     );
-    setSolutions(
-      new Map([...solutionsResult.entries()].sort(([, a], [, b]) => a.localeCompare(b)))
-    );
+    const solutionsEntries = [...solutionsResult.entries()];
+    const isOnlyO11y =
+      availableRuleTypesResult.length === 1 &&
+      availableRuleTypesResult.every((rt) => rt.ruleType.producer === AlertConsumers.OBSERVABILITY);
+    if (!isOnlyO11y) {
+      setSolutions(new Map(solutionsEntries.sort(([, a], [, b]) => a.localeCompare(b))));
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [
     ruleTypes,
@@ -399,6 +404,16 @@ export const RuleForm = ({
     );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [ruleTypeRegistry, availableRuleTypes, searchText, JSON.stringify(solutionsFilter)]);
+
+  useEffect(() => {
+    if (ruleTypeModel) {
+      const ruleType = ruleTypes.find((rt) => rt.id === ruleTypeModel.id);
+      if (ruleType && useRuleProducer && !MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleType.id)) {
+        setConsumer(ruleType.producer as RuleCreationValidConsumer);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ruleTypeModel, ruleTypes]);
 
   const authorizedConsumers = useMemo(() => {
     // If the app context provides a consumer, we assume that consumer is

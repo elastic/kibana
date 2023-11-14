@@ -1,5 +1,5 @@
 {
   "type": "shared-common",
   "id": "@kbn/use-tracked-promise",
-  "owner": "@elastic/infra-monitoring-ui"
+  "owner": "@elastic/obs-ux-logs-team"
 }
