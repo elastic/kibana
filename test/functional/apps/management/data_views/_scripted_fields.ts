@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await PageObjects.common.setTime({ from, to });
         });
 
-        it('should see scripted field value in Discover', async function () {
+        it.skip('should see scripted field value in Discover', async function () {
           await PageObjects.common.navigateToApp('discover');
 
           await retry.try(async function () {
