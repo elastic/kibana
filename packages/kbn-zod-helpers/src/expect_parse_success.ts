@@ -7,9 +7,14 @@
  */
 
 import type { SafeParseReturnType, SafeParseSuccess } from 'zod';
+import { stringifyZodError } from './stringify_zod_error';
 
 export function expectParseSuccess<Input, Output>(
   result: SafeParseReturnType<Input, Output>
 ): asserts result is SafeParseSuccess<Output> {
-  expect(result.success).toEqual(true);
+  if (!result.success) {
+    // We are throwing here instead of using assertions because we want to show
+    // the stringified error to assist with debugging.
+    throw new Error(`Expected parse success, got error: ${stringifyZodError(result.error)}`);
+  }
 }

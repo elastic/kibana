@@ -23,6 +23,7 @@ const setSelectedPromptContexts = jest.fn();
 const setUserPrompt = jest.fn();
 const sendMessages = jest.fn();
 const appendMessage = jest.fn();
+const removeLastMessage = jest.fn();
 const appendReplacements = jest.fn();
 const clearConversation = jest.fn();
 
@@ -55,6 +56,7 @@ describe('use chat send', () => {
     (useConversation as jest.Mock).mockReturnValue({
       appendMessage,
       appendReplacements,
+      removeLastMessage,
       clearConversation,
     });
   });
@@ -104,6 +106,19 @@ describe('use chat send', () => {
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();
       expect(appendMessage.mock.calls[0][0].message.content).toEqual(`\n\n${promptText}`);
+    });
+  });
+  it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
+    const { result } = renderHook(() =>
+      useChatSend({ ...testProps, currentConversation: welcomeConvo })
+    );
+
+    result.current.handleRegenerateResponse();
+    expect(removeLastMessage).toHaveBeenCalledWith('Welcome');
+
+    await waitFor(() => {
+      expect(sendMessages).toHaveBeenCalled();
+      expect(appendMessage.mock.calls[0][0].message.content).toEqual(robotMessage.response);
     });
   });
 });
