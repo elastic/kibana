@@ -15,7 +15,7 @@ import { REACT_QUERY_KEYS } from '../constants';
 
 type ServerError = IHttpFetchError<ResponseErrorBody>;
 
-export function useCreateKnowledgeBaseEntry() {
+export function useImportKnowledgeBaseEntries() {
   const {
     http,
     notifications: { toasts },
@@ -26,22 +26,26 @@ export function useCreateKnowledgeBaseEntry() {
     void,
     ServerError,
     {
-      entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
+      entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
     }
   >(
-    [REACT_QUERY_KEYS.CREATE_KB_ENTRIES],
-    ({ entry }) => {
-      const body = JSON.stringify(entry);
-      return http.post(`/internal/management/ai_assistant/observability/kb/entries/save`, { body });
+    [REACT_QUERY_KEYS.IMPORT_KB_ENTRIES],
+    ({ entries }) => {
+      const body = JSON.stringify({ entries });
+
+      console.log('/internal/management/ai_assistant/observability/kb/entries/import');
+      return http.post(`/internal/management/ai_assistant/observability/kb/entries/import`, {
+        body,
+      });
     },
     {
-      onSuccess: (_data, { entry }) => {
+      onSuccess: (_data, { entries }) => {
         toasts.addSuccess(
           i18n.translate(
-            'aiAssistantManagementObservability.kb.addManualEntry.successNotification',
+            'aiAssistantManagementObservability.kb.importEntries.successNotification',
             {
-              defaultMessage: 'Successfully created {name}',
-              values: { name: entry.id },
+              defaultMessage: 'Successfully imported {number} items',
+              values: { number: entries.length },
             }
           )
         );
@@ -51,13 +55,12 @@ export function useCreateKnowledgeBaseEntry() {
           refetchType: 'all',
         });
       },
-      onError: (error, { entry }) => {
+      onError: (error) => {
         toasts.addError(new Error(error.body?.message ?? error.message), {
           title: i18n.translate(
-            'aiAssistantManagementObservability.kb.addManualEntry.errorNotification',
+            'aiAssistantManagementObservability.kb.importEntries.errorNotification',
             {
-              defaultMessage: 'Something went wrong while creating {name}',
-              values: { name: entry.id },
+              defaultMessage: 'Something went wrong while importing items',
             }
           ),
         });

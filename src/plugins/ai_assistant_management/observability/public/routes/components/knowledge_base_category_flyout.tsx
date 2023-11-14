@@ -6,7 +6,9 @@
  * Side Public License, v 1.
  */
 import React from 'react';
+import { i18n } from '@kbn/i18n';
 import {
+  EuiBadge,
   EuiBasicTable,
   EuiBasicTableColumn,
   EuiFlyout,
@@ -16,15 +18,15 @@ import {
 } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import type { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/common/types';
+import moment from 'moment';
 import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
+import { KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
 
 export function KnowledgeBaseCategoryFlyout({
   category,
-  entries,
   onClose,
 }: {
-  category: string;
-  entries: KnowledgeBaseEntry[];
+  category: KnowledgeBaseEntryCategory;
   onClose: () => void;
 }) {
   const { mutate } = useDeleteKnowledgeBaseEntry();
@@ -34,11 +36,15 @@ export function KnowledgeBaseCategoryFlyout({
       field: '@timestamp',
       name: 'Date created',
       sortable: true,
+      render: (timestamp: KnowledgeBaseEntry['@timestamp']) => (
+        <EuiBadge color="hollow">{moment(timestamp).format('MM-DD-YYYY')}</EuiBadge>
+      ),
     },
     {
       field: 'id',
-      name: 'ID',
+      name: 'Name',
       sortable: true,
+      width: '340px',
     },
     {
       name: 'Actions',
@@ -56,15 +62,22 @@ export function KnowledgeBaseCategoryFlyout({
     },
   ];
 
-  return (
+  return category.entries.length === 1 && category.entries[0].labels.type === 'manual' ? (
+    <div>
+      {i18n.translate(
+        'aiAssistantManagementObservability.knowledgeBaseCategoryFlyout.div.helloLabel',
+        { defaultMessage: 'hello' }
+      )}
+    </div>
+  ) : (
     <EuiFlyout onClose={onClose}>
-      <EuiFlyoutHeader>
+      <EuiFlyoutHeader hasBorder>
         <EuiTitle>
-          <h2>{capitalize(category)}</h2>
+          <h2>{capitalize(category.categoryName)}</h2>
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiBasicTable<KnowledgeBaseEntry> columns={columns} items={entries ?? []} />
+        <EuiBasicTable<KnowledgeBaseEntry> columns={columns} items={category.entries ?? []} />
       </EuiFlyoutBody>
     </EuiFlyout>
   );

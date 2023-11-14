@@ -1,0 +1,184 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
+ */
+
+import React, { useState } from 'react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFieldText,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiFlyoutFooter,
+  EuiFlyoutHeader,
+  EuiFormRow,
+  EuiMarkdownEditor,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import moment from 'moment';
+import type { KnowledgeBaseEntry } from '../../../common/types';
+import { useCreateKnowledgeBaseEntry } from '../../hooks/use_create_knowledge_base_entry';
+import { useDeleteKnowledgeBaseEntry } from '../../hooks/use_delete_knowledge_base_entry';
+
+export function KnowledgeBaseEditManualEntryFlyout({
+  entry,
+  onClose,
+}: {
+  entry?: KnowledgeBaseEntry;
+  onClose: () => void;
+}) {
+  const { mutateAsync: createEntry, isLoading } = useCreateKnowledgeBaseEntry();
+  const { mutateAsync: deleteEntry, isLoading: isDeleting } = useDeleteKnowledgeBaseEntry();
+
+  const [newEntryId, setNewEntryId] = useState(entry?.id ?? '');
+  const [newEntryText, setNewEntryText] = useState(entry?.text ?? '');
+
+  const handleSubmitNewEntryClick = async () => {
+    try {
+      await createEntry({
+        entry: {
+          id: newEntryId,
+          text: newEntryText,
+          confidence: 'high',
+          is_correction: false,
+          public: true,
+          labels: {
+            type: 'manual',
+          },
+        },
+      });
+      onClose();
+    } catch (_) {
+      /* empty */
+    }
+  };
+
+  const handleDelete = async () => {
+    await deleteEntry({ id: entry!.id });
+    onClose();
+  };
+
+  return (
+    <EuiFlyout onClose={onClose}>
+      <EuiFlyoutHeader hasBorder>
+        <EuiTitle>
+          <h2>
+            {!entry
+              ? i18n.translate(
+                  'aiAssistantManagementObservabilityknowledgeBaseNewEntryFlyout.h2.newEntryLabel',
+                  {
+                    defaultMessage: 'New entry',
+                  }
+                )
+              : i18n.translate(
+                  'aiAssistantManagementObservabilityknowledgeBaseNewEntryFlyout.h2.editEntryLabel',
+                  {
+                    defaultMessage: 'Edit {id}',
+                    values: { id: entry.id },
+                  }
+                )}
+          </h2>
+        </EuiTitle>
+      </EuiFlyoutHeader>
+
+      <EuiFlyoutBody>
+        {!entry ? (
+          <EuiFormRow
+            fullWidth
+            label={i18n.translate(
+              'aiAssistantManagementObservability.knowledgeBaseEditManualEntryFlyout.euiFormRow.idLabel',
+              { defaultMessage: 'Name' }
+            )}
+          >
+            <EuiFieldText
+              fullWidth
+              value={newEntryId}
+              onChange={(e) => setNewEntryId(e.target.value)}
+            />
+          </EuiFormRow>
+        ) : (
+          <EuiFlexGroup>
+            <EuiFlexItem>
+              <EuiText color="subdued" size="s">
+                {i18n.translate(
+                  'aiAssistantManagementObservability.knowledgeBaseEditManualEntryFlyout.createdOnTextLabel',
+                  { defaultMessage: 'Created on' }
+                )}
+              </EuiText>
+              <EuiText size="s">{moment(entry['@timestamp']).format('MM-DD-YYYY hh:mm')}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                color="danger"
+                iconType="trash"
+                isLoading={isDeleting}
+                onClick={handleDelete}
+              >
+                {i18n.translate(
+                  'aiAssistantManagementObservability.knowledgeBaseEditManualEntryFlyout.deleteEntryButtonLabel',
+                  { defaultMessage: 'Delete entry' }
+                )}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
+
+        <EuiSpacer size="m" />
+
+        <EuiFormRow
+          fullWidth
+          label={i18n.translate(
+            'aiAssistantManagementObservability.knowledgeBaseEditManualEntryFlyout.euiFormRow.contentsLabel',
+            { defaultMessage: 'Contents' }
+          )}
+        >
+          <EuiMarkdownEditor
+            aria-label={i18n.translate(
+              'aiAssistantManagementObservability.knowledgeBaseNewManualEntryFlyout.euiMarkdownEditor.observabilityAiAssistantKnowledgeBaseViewMarkdownEditorLabel',
+              { defaultMessage: 'observabilityAiAssistantKnowledgeBaseViewMarkdownEditor' }
+            )}
+            height={300}
+            initialViewMode="editing"
+            readOnly={false}
+            placeholder={i18n.translate(
+              'aiAssistantManagementObservability.knowledgeBaseEditManualEntryFlyout.euiMarkdownEditor.enterContentsLabel',
+              { defaultMessage: 'Enter contents' }
+            )}
+            value={newEntryText}
+            onChange={(text) => setNewEntryText(text)}
+          />
+        </EuiFormRow>
+      </EuiFlyoutBody>
+
+      <EuiFlyoutFooter>
+        <EuiFlexGroup justifyContent="spaceBetween">
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty disabled={isLoading} onClick={onClose}>
+              {i18n.translate(
+                'aiAssistantManagementObservability.knowledgeBaseNewManualEntryFlyout.cancelButtonEmptyLabel',
+                { defaultMessage: 'Cancel' }
+              )}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiButton fill isLoading={isLoading} onClick={handleSubmitNewEntryClick}>
+              {i18n.translate(
+                'aiAssistantManagementObservability.knowledgeBaseNewManualEntryFlyout.saveButtonLabel',
+                { defaultMessage: 'Save' }
+              )}
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlyoutFooter>
+    </EuiFlyout>
+  );
+}

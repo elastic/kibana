@@ -116,9 +116,44 @@ const saveKnowledgeBaseEntry = createAIAssistantManagementObservabilityServerRou
       request: resources.request,
     });
 
-    return client.createKnowledgeBaseEntry({
+    return await client.createKnowledgeBaseEntry({
       entry: resources.params.body,
     });
+  },
+});
+
+const importKnowledgeBaseEntries = createAIAssistantManagementObservabilityServerRoute({
+  endpoint: 'POST /internal/management/ai_assistant/observability/kb/entries/import',
+  params: t.type({
+    body: t.type({
+      entries: t.array(
+        t.type({
+          id: t.string,
+          text: nonEmptyStringRt,
+          confidence: t.union([t.literal('low'), t.literal('medium'), t.literal('high')]),
+          is_correction: toBooleanRt,
+          public: toBooleanRt,
+          labels: t.record(t.string, t.string),
+        })
+      ),
+    }),
+  }),
+  options: {
+    tags: ['access:ai_assistant'],
+  },
+  handler: async (resources): Promise<void> => {
+    const observabilityAIAssistantPlugin =
+      await resources.plugins.observabilityAIAssistant?.start();
+
+    if (!observabilityAIAssistantPlugin) {
+      throw notImplemented();
+    }
+
+    const client = await observabilityAIAssistantPlugin.service.getClient({
+      request: resources.request,
+    });
+
+    return await client.importKnowledgeBaseEntries({ entries: resources.params.body.entries });
   },
 });
 
@@ -144,7 +179,7 @@ const deleteKnowledgeBaseEntry = createAIAssistantManagementObservabilityServerR
       request: resources.request,
     });
 
-    return client.deleteKnowledgeBaseEntry(resources.params.path.entryId);
+    return await client.deleteKnowledgeBaseEntry(resources.params.path.entryId);
   },
 });
 
@@ -152,6 +187,7 @@ export const knowledgeBaseRoutes = {
   ...setupKnowledgeBase,
   ...getKnowledgeBaseStatus,
   ...getKnowledgeBaseEntries,
+  ...importKnowledgeBaseEntries,
   ...saveKnowledgeBaseEntry,
   ...deleteKnowledgeBaseEntry,
 };

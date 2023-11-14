@@ -28,7 +28,11 @@ import {
   type KnowledgeBaseEntry,
   type Message,
 } from '../../../common/types';
-import type { KnowledgeBaseService, RecalledEntry } from '../knowledge_base_service';
+import {
+  KnowledgeBaseEntryOperationType,
+  KnowledgeBaseService,
+  RecalledEntry,
+} from '../knowledge_base_service';
 import type { ObservabilityAIAssistantResourceNames } from '../types';
 import { getAccessQuery } from '../util/get_access_query';
 
@@ -395,6 +399,20 @@ export class ObservabilityAIAssistantClient {
       user: this.dependencies.user,
       entry,
     });
+  };
+
+  importKnowledgeBaseEntries = async ({
+    entries,
+  }: {
+    entries: Array<Omit<KnowledgeBaseEntry, '@timestamp'>>;
+  }): Promise<void> => {
+    const operations = entries.map((entry) => ({
+      type: KnowledgeBaseEntryOperationType.Index,
+      document: { ...entry, '@timestamp': new Date().toISOString() },
+    }));
+
+    this.dependencies.knowledgeBaseService.queue(operations);
+    await this.dependencies.knowledgeBaseService.processQueue();
   };
 
   getKnowledgeBaseEntries = async () => {

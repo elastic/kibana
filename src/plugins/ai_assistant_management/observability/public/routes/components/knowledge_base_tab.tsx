@@ -15,44 +15,35 @@ import {
   EuiBasicTableColumn,
   EuiButton,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
   EuiScreenReaderOnly,
   EuiTableSortingType,
 } from '@elastic/eui';
-import { capitalize } from 'lodash';
-import type { KnowledgeBaseEntry } from '../../../common/types';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
-import { KnowledgeBaseNewManualEntryFlyout } from './knowledge_base_new_manual_entry_flyout';
+import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
+import { KnowledgeBaseEditManualEntryFlyout } from './knowledge_base_edit_manual_entry_flyout';
 import { KnowledgeBaseCategoryFlyout } from './knowledge_base_category_flyout';
-
-interface KnowledgeBaseEntryCategory {
-  categoryName: string;
-  entries: KnowledgeBaseEntry[];
-}
+import { KnowledgeBaseBulkImportFlyout } from './knowledge_base_bulk_import_flyout';
 
 export function KnowledgeBaseTab() {
-  const { entries = [] } = useGetKnowledgeBaseEntries();
+  const { entries = [], isLoading } = useGetKnowledgeBaseEntries();
 
-  const categories = entries.reduce((acc, entry) => {
-    const categoryName = entry.labels.category ?? 'other';
+  const categories = categorizeEntries({ entries });
 
-    const index = acc.findIndex((item) => item.categoryName === categoryName);
-
-    if (index > -1) {
-      acc[index].entries.push(entry);
-      return acc;
-    } else {
-      return acc.concat({ categoryName, entries: [entry] });
-    }
-  }, [] as Array<{ categoryName: string; entries: KnowledgeBaseEntry[] }>);
-
-  const [selectedCategory, setSelectedCategory] = useState<string>('');
-  const [newEntryFlyoutOpen, setNewEntryFlyoutOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<
+    KnowledgeBaseEntryCategory | undefined
+  >();
+  const [newManualEntryFlyoutOpen, setNewManualEntryFlyoutOpen] = useState(false);
+  const [bulkImportFlyoutOpen, setBulkImportFlyoutOpen] = useState(false);
+  const [newEntryPopoverOpen, setNewEntryPopoverOpen] = useState(false);
 
   const handleClickNewEntry = () => {
-    setNewEntryFlyoutOpen(true);
+    setNewEntryPopoverOpen(true);
   };
 
   const columns: Array<EuiBasicTableColumn<KnowledgeBaseEntryCategory>> = [
@@ -72,34 +63,48 @@ export function KnowledgeBaseTab() {
       render: (category: KnowledgeBaseEntryCategory) => {
         return (
           <EuiButtonIcon
-            onClick={() => setSelectedCategory(category.categoryName)}
-            aria-label={category.categoryName === selectedCategory ? 'Collapse' : 'Expand'}
-            iconType={category.categoryName === selectedCategory ? 'minimize' : 'expand'}
+            onClick={() => setSelectedCategory(category)}
+            aria-label={
+              category.categoryName === selectedCategory?.categoryName ? 'Collapse' : 'Expand'
+            }
+            iconType={
+              category.categoryName === selectedCategory?.categoryName ? 'minimize' : 'expand'
+            }
           />
         );
       },
     },
     {
       field: 'categoryName',
-      name: 'Category',
+      name: 'Name',
       sortable: true,
-      render: (categoryName: KnowledgeBaseEntryCategory['categoryName']) => (
-        <strong>{capitalize(categoryName)}</strong>
-      ),
     },
     {
-      field: 'entries',
-      name: 'Number of entries',
-      sortable: true,
-      render: (categoryEntries: KnowledgeBaseEntryCategory['entries']) => (
-        <EuiBadge>{categoryEntries.length}</EuiBadge>
-      ),
+      name: i18n.translate('aiAssistantManagementObservability.kbTab.columns.numberOfEntries', {
+        defaultMessage: 'Number of entries',
+      }),
+      render: (category: KnowledgeBaseEntryCategory) =>
+        category.entries.length === 1 && category.entries[0].labels.type === 'manual' ? null : (
+          <EuiBadge>{category.entries.length}</EuiBadge>
+        ),
     },
     {
-      name: 'Type',
+      name: i18n.translate('aiAssistantManagementObservability.kbTab.columns.type', {
+        defaultMessage: 'Type',
+      }),
       render: (category: KnowledgeBaseEntryCategory) => {
+        if (category.entries.length === 1 && category.entries[0].labels.type === 'manual') {
+          return (
+            <EuiBadge color="hollow">
+              {i18n.translate('aiAssistantManagementObservability.kbTab.columns.manualBadgeLabel', {
+                defaultMessage: 'Manual',
+              })}
+            </EuiBadge>
+          );
+        }
+
         return (
-          <EuiBadge color="hollow">
+          <EuiBadge>
             {i18n.translate('aiAssistantManagementObservability.columns.systemBadgeLabel', {
               defaultMessage: 'System',
             })}
@@ -166,14 +171,52 @@ export function KnowledgeBaseTab() {
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton onClick={handleClickNewEntry}>
-                {i18n.translate(
-                  'aiAssistantManagementObservability.knowledgeBaseTab.newEntryButtonLabel',
-                  {
-                    defaultMessage: 'New entry',
-                  }
-                )}
-              </EuiButton>
+              <EuiPopover
+                isOpen={newEntryPopoverOpen}
+                button={
+                  <EuiButton onClick={handleClickNewEntry}>
+                    {i18n.translate(
+                      'aiAssistantManagementObservability.knowledgeBaseTab.newEntryButtonLabel',
+                      {
+                        defaultMessage: 'New entry',
+                      }
+                    )}
+                  </EuiButton>
+                }
+              >
+                <EuiContextMenuPanel
+                  size="s"
+                  items={[
+                    <EuiContextMenuItem
+                      key="newSingleEntry"
+                      icon="document"
+                      onClick={() => {
+                        setNewEntryPopoverOpen(false);
+                        setNewManualEntryFlyoutOpen(true);
+                      }}
+                      size="s"
+                    >
+                      {i18n.translate(
+                        'aiAssistantManagementObservability.knowledgeBaseTab.singleEntryContextMenuItemLabel',
+                        { defaultMessage: 'Single entry' }
+                      )}
+                    </EuiContextMenuItem>,
+                    <EuiContextMenuItem
+                      key="importBulk"
+                      icon="documents"
+                      onClick={() => {
+                        setNewEntryPopoverOpen(false);
+                        setBulkImportFlyoutOpen(true);
+                      }}
+                    >
+                      {i18n.translate(
+                        'aiAssistantManagementObservability.knowledgeBaseTab.bulkImportContextMenuItemLabel',
+                        { defaultMessage: 'Bulk import' }
+                      )}
+                    </EuiContextMenuItem>,
+                  ]}
+                />
+              </EuiPopover>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
@@ -182,9 +225,10 @@ export function KnowledgeBaseTab() {
           <EuiBasicTable<KnowledgeBaseEntryCategory>
             columns={columns}
             items={pageOfItems}
+            loading={isLoading}
             pagination={pagination}
             rowProps={(row) => ({
-              onClick: () => setSelectedCategory(row.categoryName),
+              onClick: () => setSelectedCategory(row),
             })}
             sorting={sorting}
             onChange={onTableChange}
@@ -192,16 +236,27 @@ export function KnowledgeBaseTab() {
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {selectedCategory ? (
-        <KnowledgeBaseCategoryFlyout
-          category={selectedCategory}
-          entries={categories.find((obj) => obj.categoryName === selectedCategory)?.entries || []}
-          onClose={() => setSelectedCategory('')}
-        />
+      {newManualEntryFlyoutOpen ? (
+        <KnowledgeBaseEditManualEntryFlyout onClose={() => setNewManualEntryFlyoutOpen(false)} />
       ) : null}
 
-      {newEntryFlyoutOpen ? (
-        <KnowledgeBaseNewManualEntryFlyout onClose={() => setNewEntryFlyoutOpen(false)} />
+      {bulkImportFlyoutOpen ? (
+        <KnowledgeBaseBulkImportFlyout onClose={() => setBulkImportFlyoutOpen(false)} />
+      ) : null}
+
+      {selectedCategory ? (
+        selectedCategory.entries.length === 1 &&
+        selectedCategory.entries[0].labels.type === 'manual' ? (
+          <KnowledgeBaseEditManualEntryFlyout
+            entry={selectedCategory.entries[0]}
+            onClose={() => setSelectedCategory(undefined)}
+          />
+        ) : (
+          <KnowledgeBaseCategoryFlyout
+            category={selectedCategory}
+            onClose={() => setSelectedCategory(undefined)}
+          />
+        )
       ) : null}
     </>
   );
