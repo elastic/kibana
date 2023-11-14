@@ -80,7 +80,7 @@ test(`passes browserTimezone to generatePng`, async () => {
     'pngJobId',
     getBasePayload({
       forceNow: 'test',
-      locatorParams: [{ version: 'test', id: 'test', params: {} }] as LocatorParams[],
+      locatorParams: [],
       browserTimezone,
       headers: encryptedHeaders,
     }),
@@ -92,14 +92,9 @@ test(`passes browserTimezone to generatePng`, async () => {
     expect.anything(),
     expect.anything(),
     expect.objectContaining({
-      urls: [
-        [
-          'http://localhost:80/mock-server-basepath/app/reportingRedirect?forceNow=test',
-          { id: 'test', params: {}, version: 'test' },
-        ],
-      ],
       browserTimezone: 'UTC',
       headers: {},
+      layout: { id: 'preserve_layout' },
     })
   );
 });
