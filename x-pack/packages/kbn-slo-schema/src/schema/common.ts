@@ -50,10 +50,15 @@ const historicalSummarySchema = t.intersection([
   summarySchema,
 ]);
 
-const previewDataSchema = t.type({
-  date: dateType,
-  sliValue: t.number,
-});
+const previewDataSchema = t.intersection([
+  t.type({
+    date: dateType,
+    sliValue: t.number,
+  }),
+  t.partial({
+    label: t.string,
+  }),
+]);
 
 const dateRangeSchema = t.type({ from: dateType, to: dateType });
 

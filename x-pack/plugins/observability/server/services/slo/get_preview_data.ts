@@ -15,10 +15,12 @@ import {
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
+  SyntheticsAvailabilityIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { APMTransactionDurationIndicator } from '../../domain/models';
+import { buildParamValues } from './transform_generators/synthetics_availability';
 import { computeSLI } from '../../domain/services';
 import { InvalidQueryError } from '../../errors';
 import {
@@ -180,6 +182,94 @@ export class GetPreviewData {
           ? computeSLI(bucket.good.doc_count, bucket.total.doc_count)
           : null,
     }));
+  }
+
+  private async getSyntheticsAvailabilityPreviewData(
+    indicator: SyntheticsAvailabilityIndicator
+  ): Promise<GetPreviewDataResponse> {
+    const filter = [];
+    const { monitorIds, locations, tags, projects } = buildParamValues(indicator.params);
+    if (!monitorIds.includes(ALL_VALUE))
+      filter.push({
+        terms: { 'monitor.id': monitorIds },
+      });
+    if (!locations.includes(ALL_VALUE))
+      filter.push({
+        terms: { 'observer.name': locations },
+      });
+    if (!tags.includes(ALL_VALUE))
+      filter.push({
+        terms: { tags },
+      });
+    if (!projects.includes(ALL_VALUE))
+      filter.push({
+        terms: { 'monitor.project.id': projects },
+      });
+
+    const result = await this.esClient.search({
+      index: 'synthetics-*',
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            { range: { '@timestamp': { gte: 'now-2h' } } },
+            { exists: { field: 'summary.final_attempt' } },
+            ...filter,
+          ],
+        },
+      },
+      aggs: {
+        perMinute: {
+          date_histogram: {
+            field: '@timestamp',
+            fixed_interval: '10m',
+          },
+          aggs: {
+            good: {
+              filter: {
+                range: {
+                  'summary.up': {
+                    gte: 1,
+                  },
+                },
+              },
+            },
+            bad: {
+              filter: {
+                range: {
+                  'summary.up': {
+                    lte: 0,
+                  },
+                },
+              },
+            },
+            total: {
+              filter: {
+                match_all: {},
+              },
+            },
+          },
+        },
+      },
+    });
+
+    const data: GetPreviewDataResponse = [];
+
+    // @ts-ignore buckets is not improperly typed
+    result.aggregations?.perMinute.buckets.forEach((bucket) => {
+      data.push({
+        date: bucket.key_as_string,
+        sliValue: !!bucket.good ? bucket.good.doc_count : 0,
+        label: 'good events',
+      });
+      data.push({
+        date: bucket.key_as_string,
+        sliValue: !!bucket.bad ? bucket.bad.doc_count : 0,
+        label: 'bad events',
+      });
+    });
+
+    return data;
   }
 
   private async getHistogramPreviewData(
@@ -358,6 +448,8 @@ export class GetPreviewData {
           return this.getCustomMetricPreviewData(params.indicator);
         case 'sli.metric.timeslice':
           return this.getTimesliceMetricPreviewData(params.indicator);
+        case 'sli.synthetics.availability':
+          return this.getSyntheticsAvailabilityPreviewData(params.indicator);
         default:
           assertNever(type);
       }

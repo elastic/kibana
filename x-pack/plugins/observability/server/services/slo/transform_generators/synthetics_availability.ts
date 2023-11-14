@@ -77,35 +77,36 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
         },
       },
     ];
+    const { monitorIds, locations, tags, projects } = buildParamValues(indicator.params);
 
-    if (indicator.params.monitorIds !== ALL_VALUE) {
+    if (!monitorIds.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'monitor.id': indicator.params.monitorIds,
+          'monitor.id': monitorIds,
         },
       });
     }
 
-    if (indicator.params.location !== ALL_VALUE) {
+    if (!locations.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'observer.name': indicator.params.location,
+          'observer.name': locations,
         },
       });
     }
 
-    if (indicator.params.tags !== ALL_VALUE) {
+    if (!tags.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          tags: indicator.params.tags,
+          tags,
         },
       });
     }
 
-    if (indicator.params.project !== ALL_VALUE) {
+    if (!projects.includes(ALL_VALUE)) {
       queryFilter.push({
         match: {
-          'monitor.project.id': indicator.params.project,
+          'monitor.project.id': projects,
         },
       });
     }
@@ -143,7 +144,7 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
       'slo.denominator': {
         filter: {
           exists: {
-            field: 'name',
+            field: 'summary.final_attempt',
           },
         },
       },
@@ -161,3 +162,17 @@ export class SyntheticsAvailabilityTransformGenerator extends TransformGenerator
     };
   }
 }
+
+export const buildParamValues = (
+  params: SyntheticsAvailabilityIndicator['params']
+): Record<keyof SyntheticsAvailabilityIndicator['params'], string[]> => {
+  return (Object.keys(params) as Array<keyof SyntheticsAvailabilityIndicator['params']>).reduce(
+    (acc, key) => {
+      return {
+        ...acc,
+        [key]: params[key]?.map((p) => p.value),
+      };
+    },
+    {} as Record<keyof SyntheticsAvailabilityIndicator['params'], string[]>
+  );
+};

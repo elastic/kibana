@@ -7,7 +7,8 @@
 
 import {
   AnnotationDomainType,
-  AreaSeries,
+  // AreaSeries,
+  BarSeries,
   Axis,
   Chart,
   LineAnnotation,
@@ -27,7 +28,7 @@ import {
   EuiSpacer,
   EuiTitle,
 } from '@elastic/eui';
-import numeral from '@elastic/numeral';
+// import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React from 'react';
@@ -84,9 +85,9 @@ export function DataPreviewChart({
   const domain = {
     fit: true,
     min:
-      threshold != null && minValue != null && threshold < minValue ? threshold : minValue || NaN,
+      threshold != null && minValue != null && threshold < minValue ? threshold : minValue ?? NaN,
     max:
-      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue || NaN,
+      threshold != null && maxValue != null && threshold > maxValue ? threshold : maxValue ?? NaN,
   };
 
   const title = (
@@ -210,7 +211,7 @@ export function DataPreviewChart({
                 })}
                 ticks={5}
                 position={Position.Left}
-                tickFormat={(d) => numeral(d).format(numberFormat)}
+                tickFormat={(d: any) => Number(d).toFixed(2)}
                 domain={domain}
               />
 
@@ -235,15 +236,18 @@ export function DataPreviewChart({
                   },
                 }}
               />
-              <AreaSeries
+              <BarSeries
                 id="SLI"
                 xScaleType={ScaleType.Time}
-                yScaleType={ScaleType.Linear}
+                yScaleType={ScaleType.Log}
                 xAccessor="date"
                 yAccessors={['value']}
+                splitSeriesAccessors={['label']}
+                stackAccessors={['date']}
                 data={(previewData ?? []).map((datum) => ({
                   date: new Date(datum.date).getTime(),
                   value: datum.sliValue >= 0 ? datum.sliValue : null,
+                  label: datum.label || undefined,
                 }))}
               />
             </Chart>

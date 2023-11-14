@@ -201,7 +201,7 @@ export const SYNTHETICS_AVAILABILITY_DEFAULT_VALUES: SyntheticsAvailabilityIndic
     projects: [],
     tags: [],
     monitorIds: [],
-    index: 'synthetics-*',
+    // index: 'synthetics-*',
   },
 };
 
