@@ -125,14 +125,17 @@ export const useBulkAlertAssigneesItems = ({
     }: RenderContentPanelProps) => (
       <BulkAlertAssigneesPanel
         alertItems={alertItems}
-        refresh={refresh}
+        refresh={() => {
+          onSuccess();
+          refresh?.();
+        }}
         setIsLoading={setIsBulkActionsLoading}
         clearSelection={clearSelection}
         closePopoverMenu={closePopoverMenu}
         onSubmit={handleOnAlertAssigneesSubmit}
       />
     ),
-    [handleOnAlertAssigneesSubmit]
+    [handleOnAlertAssigneesSubmit, onSuccess]
   );
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(
