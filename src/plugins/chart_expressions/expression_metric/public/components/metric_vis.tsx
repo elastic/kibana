@@ -327,9 +327,8 @@ export const MetricVis = ({
             locale={i18n.getLocale()}
             theme={[
               {
-                background: { color: 'transparent' },
+                background: { color: defaultColor },
                 metric: {
-                  background: defaultColor,
                   barBackground: euiThemeVars.euiColorLightShade,
                 },
                 ...chartTheme,
