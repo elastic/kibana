@@ -38,6 +38,7 @@ let mockCsvSearchSourceExportType: CsvSearchSourceExportType;
 
 beforeAll(async () => {
   // use fieldFormats plugin for csv formats
+  // normally, this is done in the Reporting plugin
   setFieldFormats(createFieldFormatsStartMock());
 
   const crypto = nodeCrypto({ encryptionKey });
