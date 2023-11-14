@@ -15,6 +15,10 @@ import { apmLabsButton } from '@kbn/observability-plugin/common';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState } from 'react';
 import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
+import {
+  CloudExperimentsPluginStart,
+  CloudExperimentsFeatureFlagNames,
+} from '@kbn/cloud-experiments-plugin/common';
 import { getAlertingCapabilities } from '../../../alerting/utils/get_alerting_capabilities';
 import { getLegacyApmHref } from '../../../shared/links/apm/apm_link';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
@@ -22,10 +26,6 @@ import { AlertingPopoverAndFlyout } from './alerting_popover_flyout';
 import { AnomalyDetectionSetupLink } from './anomaly_detection_setup_link';
 import { InspectorHeaderLink } from './inspector_header_link';
 import { Labs } from './labs';
-import {
-  CloudExperimentsPluginStart,
-  CloudExperimentsFeatureFlagNames,
-} from '@kbn/cloud-experiments-plugin/common';
 
 function useFeatureFlag(
   key: keyof CloudExperimentsFeatureFlagNames,

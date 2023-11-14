@@ -17,9 +17,9 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { ObservabilityAIAssistantPluginStart } from '@kbn/observability-ai-assistant-plugin/public';
 import { SharePluginSetup } from '@kbn/share-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import type { ApmPluginSetupDeps } from '../../plugin';
 import type { ConfigSchema } from '../..';
-import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 
 export interface ApmPluginContextValue {
   appMountParameters: AppMountParameters;
