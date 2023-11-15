@@ -87,6 +87,40 @@ export default ({ getService }: FtrProviderContext) => {
       await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
     });
 
+    it('should create a transform with data view and time field', async () => {
+      const transformId = 'test_transform_id_create_with_data_view_and_time_field';
+      const destinationIndex = generateDestIndex(transformId);
+
+      const { body, status } = await supertest
+        .put(
+          `/internal/transform/transforms/${transformId}?createDataView=true&timeFieldName=@timestamp`
+        )
+        .auth(
+          USER.TRANSFORM_POWERUSER,
+          transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
+        )
+        .set(getCommonRequestHeader('1'))
+        .send({
+          ...generateTransformConfig(transformId),
+        });
+
+      transform.api.assertResponseStatusCode(200, status, body);
+
+      // The data view id will be returned as a non-deterministic uuid
+      // so we cannot assert the actual id returned. We'll just assert
+      // that a data view has been created a no errors were returned.
+      expect(body.dataViewsCreated.length).to.be(1);
+      expect(body.dataViewsErrors.length).to.be(0);
+      expect(body.errors.length).to.be(0);
+      expect(body.transformsCreated).to.eql([
+        {
+          transform: transformId,
+        },
+      ]);
+
+      await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+    });
+
     it('should not allow pivot and latest configs in same transform', async () => {
       const transformId = 'test_transform_id_fail';
 
