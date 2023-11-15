@@ -425,6 +425,17 @@ export class Plugin
       alertsTableConfigurationRegistry.register(alertsTableConfig);
     });
 
+    const getAsyncSloEmbeddableAlertsTableConfiguration = async () => {
+      const { getSloAlertsTableConfiguration } = await import(
+        './components/alerts_table/slo/get_slo_alerts_table_configuration'
+      );
+      return getSloAlertsTableConfiguration(this.observabilityRuleTypeRegistry, config);
+    };
+
+    getAsyncSloEmbeddableAlertsTableConfiguration().then((alertsTableConfig) => {
+      alertsTableConfigurationRegistry.register(alertsTableConfig);
+    });
+
     return {
       observabilityRuleTypeRegistry: this.observabilityRuleTypeRegistry,
       useRulesLink: createUseRulesLink(),

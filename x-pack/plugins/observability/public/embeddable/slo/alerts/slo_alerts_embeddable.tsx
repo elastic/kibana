@@ -144,7 +144,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
                       },
                     }}
                     alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
-                    configurationId={AlertConsumers.OBSERVABILITY}
+                    configurationId={AlertConsumers.SLO}
                     featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
                     hideLazyLoader
                     id={ALERTS_TABLE_ID}
