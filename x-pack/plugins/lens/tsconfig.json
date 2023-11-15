@@ -91,6 +91,7 @@
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/field-utils",
+    "@kbn/shared-ux-button-toolbar",
     "@kbn/cell-actions"
   ],
   "exclude": [
