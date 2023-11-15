@@ -14,6 +14,7 @@ import type { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL as DETECTION_ENGINE_QUERY_ALERTS_URL } from '@kbn/security-solution-plugin/common/constants';
 import { countDownTest } from '../count_down_test';
 import { getQueryAlertsId } from './get_query_alerts_ids';
+import { routeWithNamespace } from '../route_with_namespace';
 
 /**
  * Given an array of rule ids this will return only alerts based on that rule id both
@@ -25,12 +26,14 @@ export const getAlertsByIds = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   ids: string[],
-  size?: number
+  size?: number,
+  namespace?: string
 ): Promise<SearchResponse<DetectionAlert & RiskEnrichmentFields>> => {
   const alertsOpen = await countDownTest<SearchResponse<DetectionAlert & RiskEnrichmentFields>>(
     async () => {
+      const route = routeWithNamespace(DETECTION_ENGINE_QUERY_ALERTS_URL, namespace);
       const response = await supertest
-        .post(DETECTION_ENGINE_QUERY_ALERTS_URL)
+        .post(route)
         .set('kbn-xsrf', 'true')
         .send(getQueryAlertsId(ids, size));
       if (response.status !== 200) {

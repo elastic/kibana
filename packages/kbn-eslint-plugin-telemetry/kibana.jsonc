@@ -1,6 +1,6 @@
 {
   "type": "shared-common",
   "id": "@kbn/eslint-plugin-telemetry",
-  "owner": "@elastic/actionable-observability",
+  "owner": "@elastic/obs-knowledge-team",
   "devOnly": true
 }
