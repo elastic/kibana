@@ -500,6 +500,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequestQueryParams() {
+    await this.sleepForDebouncePeriod();
     const requestEditor = await this.getRequestEditor();
     const requestQueryParams = await requestEditor.findAllByCssSelector('.ace_url.ace_param');
 
@@ -531,6 +532,7 @@ export class ConsolePageObject extends FtrService {
   }
 
   public async getRequestLineHighlighting() {
+    await this.sleepForDebouncePeriod();
     const requestEditor = await this.getRequestEditor();
     const requestLine = await requestEditor.findAllByCssSelector('.ace_line > *');
     const line = [];

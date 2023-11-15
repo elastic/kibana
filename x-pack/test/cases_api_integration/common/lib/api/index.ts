@@ -787,3 +787,24 @@ export const bulkGetCases = async ({
 
   return res;
 };
+
+export const searchCases = async ({
+  supertest,
+  body = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  body?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CasesFindResponse> => {
+  const { body: res } = await supertest
+    .post(`${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/_search`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send({ ...body })
+    .expect(expectedHttpCode);
+
+  return res;
+};
