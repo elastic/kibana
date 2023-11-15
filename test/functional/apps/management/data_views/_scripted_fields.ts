@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
   ]);
 
-  describe.skip('scripted fields', function () {
+  describe('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('creating and using Painless date scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
       before(async () => {
