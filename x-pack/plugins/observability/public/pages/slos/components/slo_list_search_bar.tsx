@@ -77,20 +77,14 @@ const VIEW_MODE_OPTIONS: Array<EuiComboBoxOptionOption<ViewMode>> = [
     }),
   },
   {
-    value: 'table',
+    value: 'compact',
     label: i18n.translate('xpack.observability.slo.list.viewMode.compact', {
       defaultMessage: 'Compact',
     }),
   },
-  {
-    value: 'card',
-    label: i18n.translate('xpack.observability.slo.list.viewMode.card', {
-      defaultMessage: 'Card',
-    }),
-  },
 ];
 
-export type ViewMode = 'default' | 'table' | 'card';
+export type ViewMode = 'default' | 'compact';
 
 export function SloListSearchBar({
   loading,

@@ -8,12 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
 import { SloListItems } from './slo_list_items';
 import { SloListSearchBar, SortField, ViewMode } from './slo_list_search_bar';
-import { SloListTableView } from './table_view/slo_list_table_view';
+import { SloListCompactView } from './compact_view/slo_list_compact_view';
 
 export interface Props {
   autoRefresh: boolean;
@@ -81,18 +80,15 @@ export function SloList({ autoRefresh }: Props) {
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        {viewMode === 'table' && (
-          <SloListTableView sloList={results} loading={isLoading || isRefetching} error={isError} />
+        {viewMode === 'compact' && (
+          <SloListCompactView
+            sloList={results}
+            loading={isLoading || isRefetching}
+            error={isError}
+          />
         )}
         {viewMode === 'default' && (
           <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
-        )}
-        {viewMode === 'card' && (
-          <>
-            {i18n.translate('xpack.observability.sloList.notImplementedYetLabel', {
-              defaultMessage: 'Not implemented yet',
-            })}
-          </>
         )}
       </EuiFlexItem>
 

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { useHistory } from 'react-router-dom';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import deepmerge from 'deepmerge';
+import { useHistory } from 'react-router-dom';
 import type { SortField, ViewMode } from '../components/slo_list_search_bar';
 
 export const SLO_LIST_SEARCH_URL_STORAGE_KEY = 'search';
@@ -26,7 +26,7 @@ export const DEFAULT_STATE = {
   kqlQuery: '',
   page: 0,
   sort: { by: 'status' as const, direction: 'desc' as const },
-  viewMode: 'default' as const,
+  viewMode: 'compact' as const,
 };
 
 export function useUrlSearchState(): {

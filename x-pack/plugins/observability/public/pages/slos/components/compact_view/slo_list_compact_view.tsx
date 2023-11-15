@@ -9,8 +9,6 @@ import {
   DefaultItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
-  EuiFlexGroup,
-  EuiFlexItem,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -19,9 +17,9 @@ import { i18n } from '@kbn/i18n';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { rulesLocatorID, sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
+import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 import { paths } from '../../../../../common/locators/paths';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { SloStatusBadge } from '../../../../components/slo/slo_status_badge';
@@ -41,10 +39,10 @@ import {
   transformCreateSLOFormToCreateSLOInput,
   transformSloResponseToCreateSloForm,
 } from '../../../slo_edit/helpers/process_slo_form_values';
+import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloListEmpty } from '../slo_list_empty';
 import { SloListError } from '../slo_list_error';
 import { SloSparkline } from '../slo_sparkline';
-import { SloRulesBadge } from '../badges/slo_rules_badge';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -52,7 +50,7 @@ export interface Props {
   error: boolean;
 }
 
-export function SloListTableView({ sloList, loading, error }: Props) {
+export function SloListCompactView({ sloList, loading, error }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -199,8 +197,24 @@ export function SloListTableView({ sloList, loading, error }: Props) {
 
   const columns: Array<EuiBasicTableColumn<SLOWithSummaryResponse>> = [
     {
+      field: 'status',
+      name: 'Status',
+      render: (_, slo: SLOWithSummaryResponse) => <SloStatusBadge slo={slo} />,
+    },
+    {
+      field: 'alerts',
+      name: 'Alerts',
+      truncateText: true,
+      render: (_, slo: SLOWithSummaryResponse) => (
+        <>
+          <SloRulesBadge rules={rulesBySlo?.[slo.id]} onClick={() => setSloToAddRule(slo)} />
+          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlertsBySlo.get(slo)} />
+        </>
+      ),
+    },
+    {
       field: 'name',
-      name: 'SLO name',
+      name: 'Name',
       width: '20%',
       truncateText: { lines: 2 },
       render: (_, slo: SLOWithSummaryResponse) => {
@@ -227,7 +241,6 @@ export function SloListTableView({ sloList, loading, error }: Props) {
     {
       field: 'instance',
       name: 'Instance',
-      truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) => (
         <EuiToolTip
           position="top"
@@ -242,11 +255,6 @@ export function SloListTableView({ sloList, loading, error }: Props) {
           <span>{slo.instanceId}</span>
         </EuiToolTip>
       ),
-    },
-    {
-      field: 'status',
-      name: 'Status',
-      render: (_, slo: SLOWithSummaryResponse) => <SloStatusBadge slo={slo} />,
     },
     {
       field: 'objective',
@@ -279,6 +287,7 @@ export function SloListTableView({ sloList, loading, error }: Props) {
           <SloSparkline
             chart="line"
             id="sli_history"
+            size="compact"
             state={isSloFailed ? 'error' : 'success'}
             data={historicalSliData}
             isLoading={historicalSummaryLoading}
@@ -313,22 +322,14 @@ export function SloListTableView({ sloList, loading, error }: Props) {
             chart="area"
             id="error_budget_burn_down"
             state={isSloFailed ? 'error' : 'success'}
+            size="compact"
             data={errorBudgetBurnDownData}
             isLoading={historicalSummaryLoading}
           />
         );
       },
     },
-    {
-      field: 'alerts',
-      name: 'Alerts',
-      render: (_, slo: SLOWithSummaryResponse) => (
-        <>
-          <SloRulesBadge rules={rulesBySlo?.[slo.id]} onClick={() => setSloToAddRule(slo)} />
-          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlertsBySlo.get(slo)} />
-        </>
-      ),
-    },
+
     {
       name: 'Actions',
       actions,
