@@ -22,6 +22,7 @@ import {
   TIMELINE_SAVE_MODAL_OPEN_BUTTON,
   SAVE_TIMELINE_BTN_TOOLTIP,
 } from '../../../screens/timeline';
+import { ROWS } from '../../../screens/timelines';
 import { createTimelineTemplate } from '../../../tasks/api_calls/timelines';
 
 import { deleteTimelines } from '../../../tasks/common';
@@ -42,9 +43,10 @@ import {
   pinFirstEvent,
   populateTimeline,
   addNameToTimelineAndSave,
+  addNameToTimelineAndSaveAsNew,
 } from '../../../tasks/timeline';
 
-import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL } from '../../../urls/navigation';
+import { OVERVIEW_URL, TIMELINE_TEMPLATES_URL, TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Create a timeline from a template', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {
@@ -177,6 +179,30 @@ describe('Timelines', (): void => {
       cy.get(TIMELINE_STATUS)
         .invoke('text')
         .should('match', /^Has unsaved changes/);
+    });
+  });
+
+  describe('saves timeline as new', () => {
+    before(() => {
+      deleteTimelines();
+      login();
+      visitWithTimeRange(TIMELINES_URL);
+    });
+
+    it('should save timelines as new', { tags: ['@ess', '@serverless'] }, () => {
+      cy.get(ROWS).should('have.length', '0');
+
+      createNewTimeline();
+      addNameToTimelineAndSave('First');
+      addNameToTimelineAndSaveAsNew('Second');
+      closeTimeline();
+
+      cy.get(ROWS).should('have.length', '2');
+      cy.get(ROWS)
+        .first()
+        .invoke('text')
+        .should('match', /Second/);
+      cy.get(ROWS).last().invoke('text').should('match', /First/);
     });
   });
 });
