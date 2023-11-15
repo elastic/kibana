@@ -9,7 +9,7 @@
 import React from 'react';
 import { css } from '@emotion/react';
 
-import { EuiButton, EuiEmptyPrompt, EuiPanel } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { withSuspense } from '@kbn/shared-ux-utility';
@@ -31,18 +31,53 @@ export const NoDataViewsPrompt = ({
   onClickCreate,
   canCreateNewDataView,
   dataViewsDocLink,
+  showESQLView,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
-  const actions = canCreateNewDataView && (
-    <EuiButton
-      onClick={onClickCreate}
-      iconType="plusInCircle"
-      fill={true}
-      data-test-subj="createDataViewButton"
-    >
-      {createDataViewText}
-    </EuiButton>
-  );
+  let actions;
+
+  if (canCreateNewDataView && showESQLView) {
+    const onClickEsql = () => {
+      location;
+    };
+
+    actions = (
+      <>
+        <EuiButton
+          onClick={onClickCreate}
+          iconType="plusInCircle"
+          fill={true}
+          data-test-subj="createDataViewButton"
+        >
+          {createDataViewText}
+        </EuiButton>
+        <EuiSpacer size="l" />
+        <EuiButton
+          onClick={onClickEsql}
+          iconType="plusInCircle"
+          fill={true}
+          data-test-subj="gotoESQLDiscover"
+        >
+          {i18n.translate('sharedUXPackages.noDataViewsPrompt.goToESQLDiscover', {
+            defaultMessage: 'Go to ESQL-mode-Discover',
+          })}
+        </EuiButton>
+      </>
+    );
+  }
+  if (canCreateNewDataView && !showESQLView) {
+    actions = (
+      <EuiButton
+        onClick={onClickCreate}
+        iconType="plusInCircle"
+        // fill={true}
+        color={'success'}
+        data-test-subj="createDataViewButton"
+      >
+        {createDataViewText}
+      </EuiButton>
+    );
+  }
 
   const title = canCreateNewDataView ? (
     <h2>
@@ -65,21 +100,37 @@ export const NoDataViewsPrompt = ({
     </h2>
   );
 
-  const body = canCreateNewDataView ? (
-    <p>
-      <FormattedMessage
-        id="sharedUXPackages.noDataViewsPrompt.dataViewExplanation"
-        defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
-      />
-    </p>
-  ) : (
-    <p>
-      <FormattedMessage
-        id="sharedUXPackages.noDataViewsPrompt.noPermission.dataViewExplanation"
-        defaultMessage="Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions."
-      />
-    </p>
-  );
+  let body;
+
+  if (canCreateNewDataView && !showESQLView) {
+    body = (
+      <p>
+        <FormattedMessage
+          id="sharedUXPackages.noDataViewsPrompt.dataViewExplanation"
+          defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
+        />
+      </p>
+    );
+  } else if (showESQLView) {
+    // // src/plugins/discover/public/application/main/components/layout/discover_layout.tsx
+    body = (
+      <span>
+        <FormattedMessage
+          id="sharedUXPackages.noDataViewsPrompt.dataViewExplanation"
+          defaultMessage="Data views identify the Elasticsearch data you want to explore. You can point data views to one or more data streams, indices, and index aliases, such as your log data from yesterday, or all indices that contain your log data."
+        />
+      </span>
+    );
+  } else {
+    body = (
+      <p>
+        <FormattedMessage
+          id="sharedUXPackages.noDataViewsPrompt.noPermission.dataViewExplanation"
+          defaultMessage="Data views identify the Elasticsearch data that you want to explore. To create data views, ask your administrator for the required permissions."
+        />
+      </p>
+    );
+  }
 
   const footer = dataViewsDocLink ? <DocumentationLink href={dataViewsDocLink} /> : undefined;
 

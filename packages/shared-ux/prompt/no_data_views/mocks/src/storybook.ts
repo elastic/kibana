@@ -36,6 +36,10 @@ export class StorybookMock extends AbstractStorybookMock<
       options: ['some/link', undefined],
       control: { type: 'radio' },
     },
+    showESQLView: {
+      control: 'boolean',
+      defaultValue: false,
+    },
   };
   dependencies = [];
 

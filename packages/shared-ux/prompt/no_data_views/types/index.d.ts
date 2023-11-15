@@ -71,6 +71,8 @@ export interface NoDataViewsPromptComponentProps {
   dataViewsDocLink?: string;
   /** The background color of the prompt; defaults to `plain`. */
   emptyPromptColor?: EuiEmptyPromptProps['color'];
+  /** Show a button to the user to navigate to the ES|QL Discover */
+  showESQLView: boolean;
 }
 
 // TODO: https://github.com/elastic/kibana/issues/127695
@@ -79,4 +81,6 @@ export interface NoDataViewsPromptProps {
   onDataViewCreated: (dataView: unknown) => void;
   /** if set to true allows creation of an ad-hoc data view from data view editor */
   allowAdHocDataView?: boolean;
+  /** show the link to ESQL Discover */
+  showESQLView?: boolean;
 }

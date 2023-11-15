@@ -346,7 +346,7 @@ export const IndexPatternTable = ({
       </ContextWrapper>
     </>
   );
-  if (!hasDataView)
+  if (!hasDataView && hasESData) {
     displayIndexPatternSection = (
       <>
         <EuiSpacer size="xxl" />
@@ -355,10 +355,12 @@ export const IndexPatternTable = ({
           canCreateNewDataView={application.capabilities.indexPatterns.save as boolean}
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
           emptyPromptColor={'subdued'}
+          showESQLView={true}
         />
       </>
     );
-  if (!hasDataView && !hasESData)
+  }
+  if (!hasDataView && !hasESData) {
     displayIndexPatternSection = (
       <>
         <EuiSpacer size="xxl" />
@@ -371,6 +373,7 @@ export const IndexPatternTable = ({
         />
       </>
     );
+  }
 
   return (
     <div data-test-subj="indexPatternTable" role="region" aria-label={title}>
