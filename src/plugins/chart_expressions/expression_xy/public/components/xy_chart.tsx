@@ -30,6 +30,7 @@ import {
   Tooltip,
   XYChartSeriesIdentifier,
   SettingsProps,
+  LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
 import { partition } from 'lodash';
 import { IconType } from '@elastic/eui';
@@ -807,7 +808,8 @@ export function XYChart({
                 },
                 // if not title or labels are shown for axes, add some padding if required by reference line markers
                 chartMargins: {
-                  ...chartBaseTheme.chartPaddings,
+                  // Temporary margin defaults
+                  ...LEGACY_LIGHT_THEME.chartMargins,
                   ...computeChartMargins(
                     linesPaddings,
                     { ...tickLabelsVisibilitySettings, x: xAxisConfig?.showLabels },
