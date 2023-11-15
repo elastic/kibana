@@ -40,6 +40,12 @@ export const submitQuery = () => {
   cy.contains('Submit').click();
 };
 
+export const fillInQueryTimeout = (timeout: string) => {
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').clear().type(timeout);
+  });
+};
+
 // sometimes the results get stuck in the tests, this is a workaround
 export const checkResults = () => {
   cy.getBySel('osqueryResultsTable').then(($table) => {
