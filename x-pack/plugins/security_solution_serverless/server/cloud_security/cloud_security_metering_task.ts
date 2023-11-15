@@ -215,7 +215,7 @@ const indexHasDataInDateRange = async (
     { ignore: [404] }
   );
 
-  return response.hits.hits.length > 0;
+  return response.hits?.hits.length > 0;
 };
 
 const getSearchStartDate = (lastSuccessfulReport: Date): Date => {
