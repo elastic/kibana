@@ -11,6 +11,7 @@ import {
   Plugin,
   PluginInitializerContext,
   AppMountParameters,
+  AppNavLinkStatus,
 } from '@kbn/core/public';
 import { from } from 'rxjs';
 import { map } from 'rxjs/operators';
@@ -111,9 +112,13 @@ export type ClientStart = void;
 export class UptimePlugin
   implements Plugin<ClientSetup, ClientStart, ClientPluginsSetup, ClientPluginsStart>
 {
-  constructor(private readonly initContext: PluginInitializerContext) {}
+  private readonly _initContext: PluginInitializerContext;
+  constructor(private readonly initContext: PluginInitializerContext) {
+    this._initContext = initContext;
+  }
 
   public setup(core: CoreSetup<ClientPluginsStart, unknown>, plugins: ClientPluginsSetup): void {
+    const config = this._initContext.config.get<{ serverless?: { enabled?: boolean } }>();
     locators.forEach((locator) => {
       plugins.share.url.locators.create(locator);
     });
@@ -146,7 +151,18 @@ export class UptimePlugin
       title: PLUGIN.SYNTHETICS,
       category: DEFAULT_APP_CATEGORIES.observability,
       keywords: appKeywords,
-      deepLinks: [],
+      deepLinks: [
+        {
+          id: 'overview',
+          title: i18n.translate('xpack.synthetics.overviewPage.linkText', {
+            defaultMessage: 'Overview',
+          }),
+          path: '/synthetics',
+          navLinkStatus: config?.serverless?.enabled
+            ? AppNavLinkStatus.visible
+            : AppNavLinkStatus.default,
+        },
+      ],
       mount: async (params: AppMountParameters) => {
         const [coreStart, corePlugins] = await core.getStartServices();
 
