@@ -56,8 +56,7 @@ const PROCESSOR_REQUIRED = i18n.translate(
 const INFERENCE_PROCESSOR_REQUIRED = i18n.translate(
   'xpack.ml.trainedModels.content.indices.pipelines.addInferencePipelineModal.steps.configure.inferenceProcessorRequiredError',
   {
-    defaultMessage:
-      "An inference processor specifying 'model_id' and 'inference_config' is required.",
+    defaultMessage: "An inference processor specifying 'model_id' is required.",
   }
 );
 
@@ -140,9 +139,7 @@ export const validatePipelineProcessors = (pipelineProcessors: estypes.IngestPip
   }
 
   const hasInferenceProcessor = processors?.some((processor) => {
-    return (
-      processor.inference && processor.inference.model_id && processor.inference.inference_config
-    );
+    return processor.inference && processor.inference.model_id;
   });
 
   if (hasInferenceProcessor === false) {
