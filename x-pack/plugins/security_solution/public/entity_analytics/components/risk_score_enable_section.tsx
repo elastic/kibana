@@ -39,6 +39,7 @@ import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine'
 
 import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
+import { useKibana } from '../../common/lib/kibana';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 
@@ -177,6 +178,7 @@ const RiskScoreUpdateModal = ({
 };
 
 export const RiskScoreEnableSection = () => {
+  const { http } = useKibana().services;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
@@ -332,7 +334,7 @@ export const RiskScoreEnableSection = () => {
         <EuiSpacer />
         <ul>
           <li key={DETECTION_ENTITY_DASHBOARD}>
-            <EuiLink href={DETECTION_ENTITY_DASHBOARD} target="_blank" external>
+            <EuiLink href={http.basePath.prepend(DETECTION_ENTITY_DASHBOARD)} target="_blank">
               {i18n.EA_DOCS_DASHBOARD}
             </EuiLink>
             <EuiSpacer size="s" />
