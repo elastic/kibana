@@ -166,7 +166,7 @@ describe(
       cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
       login();
       visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-      cy.wait('@getPrivileges', { timeout: 20000 });
+      cy.wait('@getPrivileges', { timeout: 15000 });
       cy.get(RISK_SCORE_STATUS_LOADING, { timeout: 2000 }).should('not.exist');
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('not.exist');
     });
@@ -175,7 +175,7 @@ describe(
       cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
       loadPageAsUserWithNoPrivileges();
       cy.get(RISK_SCORE_STATUS_LOADING, { timeout: 2000 }).should('not.exist');
-      cy.wait('@getPrivileges', { timeout: 20000 });
+      cy.wait('@getPrivileges', { timeout: 15000 });
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT);
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should(
         'contain',
