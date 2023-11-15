@@ -8,12 +8,11 @@
 import createContainer from 'constate';
 import { useState } from 'react';
 import useThrottle from 'react-use/lib/useThrottle';
-
+import { TimeKey } from '@kbn/io-ts-utils';
 import { LogViewReference } from '../../../../common';
 import { useLogEntryHighlights } from './log_entry_highlights';
 import { useLogSummaryHighlights } from './log_summary_highlights';
 import { useNextAndPrevious } from './next_and_previous';
-import { TimeKey } from '../../../../common/time';
 import { useLogPositionStateContext } from '../log_position';
 
 const FETCH_THROTTLE_INTERVAL = 3000;

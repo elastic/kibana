@@ -28,6 +28,7 @@ Object {
 
 exports[`IndexPattern toMinimalSpec can exclude fields 1`] = `
 Object {
+  "allowHidden": false,
   "allowNoIndex": false,
   "fieldAttrs": undefined,
   "fieldFormats": Object {},
@@ -51,6 +52,7 @@ Object {
 
 exports[`IndexPattern toSpec can optionally exclude fields 1`] = `
 Object {
+  "allowHidden": false,
   "allowNoIndex": false,
   "fieldAttrs": Object {},
   "fieldFormats": Object {},
@@ -74,6 +76,7 @@ Object {
 
 exports[`IndexPattern toSpec should match snapshot 1`] = `
 Object {
+  "allowHidden": false,
   "allowNoIndex": false,
   "fieldAttrs": Object {
     "@timestamp": Object {

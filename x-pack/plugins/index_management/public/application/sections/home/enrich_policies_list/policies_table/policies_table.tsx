@@ -58,6 +58,7 @@ export const PoliciesTable: FunctionComponent<Props> = ({
         fill
         iconType="plusInCircle"
         {...reactRouterNavigate(history, '/enrich_policies/create')}
+        data-test-subj="enrichPoliciesPoliciesTableCreateButton"
       >
         <FormattedMessage
           id="xpack.idxMgmt.enrichPolicies.table.createPolicyButton"
