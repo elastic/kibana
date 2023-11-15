@@ -92,6 +92,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
     data: { aggregations },
   } = useActionResults({
     actionId,
+    startDate,
     activePage: 0,
     agentIds,
     limit: 0,
@@ -140,6 +141,7 @@ const ResultsTableComponent: React.FC<ResultsTableComponentProps> = ({
 
   const { data: allResultsData, isLoading } = useAllResults({
     actionId,
+    startDate,
     activePage: pagination.pageIndex,
     limit: pagination.pageSize,
     isLive,
