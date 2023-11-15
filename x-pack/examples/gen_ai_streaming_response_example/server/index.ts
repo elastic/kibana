@@ -6,7 +6,8 @@
  */
 
 import { PluginInitializer } from '@kbn/core/server';
-import { GenAiStreamingResponseExamplePlugin } from './plugin';
 
-export const plugin: PluginInitializer<void, void> = () =>
-  new GenAiStreamingResponseExamplePlugin();
+export const plugin: PluginInitializer<void, void> = async () => {
+  const { GenAiStreamingResponseExamplePlugin } = await import('./plugin');
+  return new GenAiStreamingResponseExamplePlugin();
+};

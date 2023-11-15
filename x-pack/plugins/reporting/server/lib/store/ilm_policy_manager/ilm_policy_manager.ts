@@ -6,8 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { ILM_POLICY_NAME } from '../../../../common/constants';
-
+import { ILM_POLICY_NAME } from '@kbn/reporting-common';
 import { reportingIlmPolicy } from './constants';
 
 /**
