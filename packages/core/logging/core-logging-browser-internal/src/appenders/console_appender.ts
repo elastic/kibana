@@ -8,6 +8,8 @@
 
 import type { Layout, LogRecord, DisposableAppender } from '@kbn/logging';
 
+// import { unsafeConsole } from '../../../../../../src/setup_node_env/harden/console';
+
 /**
  *
  * Appender that formats all the `LogRecord` instances it receives and logs them via built-in `console`.
@@ -27,6 +29,7 @@ export class ConsoleAppender implements DisposableAppender {
   public append(record: LogRecord) {
     // eslint-disable-next-line no-console
     console.log(this.layout.format(record));
+    // unsafeConsole.log(this.layout.format(record));
   }
 
   /**
