@@ -535,6 +535,7 @@ x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
+packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
 x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
@@ -545,8 +546,8 @@ src/plugins/no_data_page @elastic/appex-sharedux
 x-pack/plugins/notifications @elastic/appex-sharedux
 packages/kbn-object-versioning @elastic/appex-sharedux
 x-pack/plugins/observability_ai_assistant @elastic/obs-knowledge-team
-x-pack/packages/observability/alert_details @elastic/actionable-observability
-x-pack/packages/observability/alerting_test_data @elastic/actionable-observability
+x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
+x-pack/packages/observability/alerting_test_data @elastic/obs-ux-management-team
 x-pack/test/cases_api_integration/common/plugins/observability @elastic/response-ops
 x-pack/plugins/observability_log_explorer @elastic/obs-ux-logs-team
 x-pack/plugins/observability_onboarding @elastic/obs-ux-logs-team
@@ -989,10 +990,11 @@ packages/kbn-monaco/src/esql @elastic/kibana-visualizations
 /x-pack/plugins/infra/public/common @elastic/obs-ux-infra_services-team
 /x-pack/plugins/infra/public/observability_logs @elastic/obs-ux-logs-team
 /x-pack/plugins/infra/public/services @elastic/obs-ux-infra_services-team
-/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+/x-pack/test/functional/apps/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
+/x-pack/test/functional/apps/infra/logs @elastic/infra-monitoring-ui @elastic/obs-ux-logs-team
 /x-pack/test/api_integration/apis/infra @elastic/infra-monitoring-ui @elastic/obs-ux-infra_services-team
 
-# Actionable observability
+# Observability UX management team
 x-pack/packages/observability/alert_details @elastic/obs-ux-management-team
 x-pack/test/observability_functional @elastic/obs-ux-management-team
 x-pack/plugins/infra/public/alerting @elastic/obs-ux-management-team
