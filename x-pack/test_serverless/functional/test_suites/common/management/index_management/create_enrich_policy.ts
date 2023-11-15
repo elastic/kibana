@@ -25,6 +25,11 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     before(async () => {
       log.debug('Creating test index');
       try {
+        await es.ingest.deletePipeline({ id: '.slo-*' }, { ignore: [404] });
+        await es.enrich.deletePolicy(
+          { name: 'slo-observability.summary.enrich_policy' },
+          { ignore: [404] }
+        );
         await es.indices.create({
           index: INDEX_NAME,
           body: {

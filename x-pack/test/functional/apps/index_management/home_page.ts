@@ -15,6 +15,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const browser = getService('browser');
   const retry = getService('retry');
   const security = getService('security');
+  const es = getService('es');
 
   describe('Home page', function () {
     before(async () => {
@@ -94,6 +95,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
 
     describe('Enrich policies', () => {
+      before(async () => {
+        await es.ingest.deletePipeline({ id: '.slo-*' }, { ignore: [404] });
+        await es.enrich.deletePolicy(
+          { name: 'slo-observability.summary.enrich_policy' },
+          { ignore: [404] }
+        );
+      });
       it('renders the enrich policies tab', async () => {
         // Navigate to the component templates tab
         await pageObjects.indexManagement.changeTabs('enrich_policiesTab');
