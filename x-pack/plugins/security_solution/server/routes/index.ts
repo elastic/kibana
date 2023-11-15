@@ -186,7 +186,9 @@ export const initRoutes = (
     riskScoreCalculationRoute(router, logger);
     riskEngineStatusRoute(router);
     riskEngineInitRoute(router, getStartServices);
-    riskEngineEnableRoute(router, getStartServices);
+    if (config.experimentalFeatures.riskEnginePrivilegesRouteEnabled) {
+      riskEngineEnableRoute(router, getStartServices);
+    }
     riskEngineDisableRoute(router, getStartServices);
     riskEnginePrivilegesRoute(router, getStartServices);
   }

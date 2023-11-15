@@ -11,7 +11,7 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-export const allowedExperimentalValues = Object.freeze({
+const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
 
@@ -114,6 +114,12 @@ export const allowedExperimentalValues = Object.freeze({
    * This flag is used to disable the tour in cypress tests.
    */
   disableTimelineSaveTour: false,
+
+  /**
+   * Enabled the risk engine privileges route
+   * and associated callout in the UI
+   */
+  riskEnginePrivilegesRouteEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
