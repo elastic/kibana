@@ -64,7 +64,6 @@ export const RenderCustomGridBodyComponent: React.FC<Props & EuiDataGridCustomBo
   const { timeline: { eventIdToNoteIds } = timelineDefaults } = useSelector((state: State) =>
     timelineBodySelector(state, timelineId)
   );
-  console.log(eventIdToNoteIds);
 
   return (
     <>

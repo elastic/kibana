@@ -69,7 +69,7 @@ export const getUseActionColumnHook =
             index={rowIndex}
             isDetails={cveProps.isDetails}
             isExpanded={cveProps.isExpanded}
-            isEventViewer={false}
+            isEventViewer={true}
             isExpandable={cveProps.isExpandable}
             loadingEventIds={loadingEventIds}
             onRowSelected={() => {}}

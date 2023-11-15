@@ -68,47 +68,6 @@ import RowDetails from './row_details';
 export const SAMPLE_SIZE_SETTING = 500;
 const DataGridMemoized = React.memo(UnifiedDataTable);
 
-const ActionsControlColumnRenderCell = React.memo((cveProps: EuiDataGridCellValueElementProps) => {
-  if (expandedDoc && expandedDoc.id === discoverGridRows[cveProps.rowIndex].id) {
-    cveProps.setCellProps({
-      className: 'dscDocsGrid__cell--expanded',
-    });
-  } else {
-    cveProps.setCellProps({ style: undefined });
-  }
-  return (
-    <Actions
-      ariaRowindex={cveProps.rowIndex}
-      columnId={cveProps.columnId}
-      data={discoverGridRows[cveProps.rowIndex].data}
-      index={cveProps.colIndex}
-      rowIndex={cveProps.rowIndex}
-      setEventsDeleted={setEventsDeleted}
-      checked={Object.keys(selectedEventIds).includes(discoverGridRows[cveProps.rowIndex].id)}
-      isEventPinned={eventIsPinned({
-        eventId: discoverGridRows[cveProps.rowIndex].id,
-        pinnedEventIds,
-      })}
-      columnValues={x.columnValues ?? ''}
-      ecsData={discoverGridRows[cveProps.rowIndex].ecs}
-      eventId={discoverGridRows[cveProps.rowIndex].id}
-      eventIdToNoteIds={eventIdToNoteIds}
-      loadingEventIds={loadingEventIds}
-      onRowSelected={x.onRowSelected ? x.onRowSelected : () => {}}
-      showCheckboxes={x.showCheckboxes ?? false}
-      // showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
-      timelineId={timelineId}
-      // toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
-      refetch={refetch}
-      setEventsLoading={setEventsLoading}
-      isUnifiedDataTable={true}
-      onEventDetailsPanelOpened={() => {}}
-    />
-  );
-});
-
-ActionsControlColumnRenderCell.displayName = 'ActionsControlColumnRenderCell';
-
 interface Props {
   columns: ColumnHeaderOptions[];
   // renderCellValue: (props: CellValueElementProps) => React.ReactNode;
@@ -141,7 +100,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   sort,
   events,
   onFieldEdited,
-  renderId,
   refetch,
   dataLoadingState,
   totalCount,
@@ -185,13 +143,12 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     SourcererScopeName.timeline
   );
   const dataView = useMemo(() => {
-    if (sourcererDataView != null && renderId) {
-      console.log('sourcererDataView', sourcererDataView, 'fieldFormats', fieldFormats);
+    if (sourcererDataView != null) {
       return new DataView({ spec: sourcererDataView, fieldFormats });
     } else {
       return undefined;
     }
-  }, [sourcererDataView, fieldFormats, renderId]);
+  }, [sourcererDataView, fieldFormats]);
   const showTimeCol = useMemo(() => !!dataView && !!dataView.timeFieldName, [dataView]);
   const defaultColumns = useMemo(() => {
     return columns.map((c) => c.id);
@@ -343,51 +300,55 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
   );
 
   const leadingControlColumns = useMemo(() => {
-    return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((column) => ({
-      ...column,
-      headerCellProps: {
-        ...column.headerCellProps,
-      },
-      rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-        if (expandedDoc && expandedDoc.id === discoverGridRows[cveProps.rowIndex].id) {
-          cveProps.setCellProps({
-            className: 'dscDocsGrid__cell--expanded',
-          });
-        } else {
-          cveProps.setCellProps({ style: undefined });
-        }
-        return (
-          <Actions
-            ariaRowindex={cveProps.rowIndex}
-            columnId={cveProps.columnId}
-            data={discoverGridRows[cveProps.rowIndex].data}
-            index={cveProps.colIndex}
-            rowIndex={cveProps.rowIndex}
-            setEventsDeleted={setEventsDeleted}
-            checked={Object.keys(selectedEventIds).includes(discoverGridRows[cveProps.rowIndex].id)}
-            isEventPinned={eventIsPinned({
-              eventId: discoverGridRows[cveProps.rowIndex].id,
-              pinnedEventIds,
-            })}
-            columnValues={column.columnValues ?? ''}
-            ecsData={discoverGridRows[cveProps.rowIndex].ecs}
-            eventId={discoverGridRows[cveProps.rowIndex].id}
-            eventIdToNoteIds={eventIdToNoteIds}
-            loadingEventIds={loadingEventIds}
-            onRowSelected={column.onRowSelected ? column.onRowSelected : () => {}}
-            showCheckboxes={column.showCheckboxes ?? false}
-            // showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
-            timelineId={timelineId}
-            // toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
-            refetch={refetch}
-            setEventsLoading={setEventsLoading}
-            isUnifiedDataTable={true}
-            onEventDetailsPanelOpened={() => {}}
-          />
-        );
-      },
-      headerCellRender: () => <></>,
-    }));
+    return getDefaultControlColumn(ACTION_BUTTON_COUNT).map((column) => {
+      return {
+        ...column,
+        headerCellProps: {
+          ...column.headerCellProps,
+        },
+        rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
+          if (expandedDoc && expandedDoc.id === discoverGridRows[cveProps.rowIndex].id) {
+            cveProps.setCellProps({
+              className: 'dscDocsGrid__cell--expanded',
+            });
+          } else {
+            cveProps.setCellProps({ style: undefined });
+          }
+          return (
+            <Actions
+              ariaRowindex={cveProps.rowIndex}
+              columnId={cveProps.columnId}
+              data={discoverGridRows[cveProps.rowIndex].data}
+              index={cveProps.colIndex}
+              rowIndex={cveProps.rowIndex}
+              setEventsDeleted={setEventsDeleted}
+              checked={Object.keys(selectedEventIds).includes(
+                discoverGridRows[cveProps.rowIndex].id
+              )}
+              isEventPinned={eventIsPinned({
+                eventId: discoverGridRows[cveProps.rowIndex].id,
+                pinnedEventIds,
+              })}
+              columnValues={column.columnValues ?? ''}
+              ecsData={discoverGridRows[cveProps.rowIndex].ecs}
+              eventId={discoverGridRows[cveProps.rowIndex].id}
+              eventIdToNoteIds={eventIdToNoteIds}
+              loadingEventIds={loadingEventIds}
+              onRowSelected={column.onRowSelected ? column.onRowSelected : () => {}}
+              showCheckboxes={column.showCheckboxes ?? false}
+              // showNotes={showNotes[discoverGridRows[cveProps.rowIndex].id]}
+              timelineId={timelineId}
+              // toggleShowNotes={() => onToggleShowNotes(discoverGridRows[cveProps.rowIndex])}
+              refetch={refetch}
+              setEventsLoading={setEventsLoading}
+              isUnifiedDataTable={true}
+              onEventDetailsPanelOpened={() => {}}
+            />
+          );
+        },
+        headerCellRender: () => <></>,
+      };
+    });
   }, [
     ACTION_BUTTON_COUNT,
     discoverGridRows,

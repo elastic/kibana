@@ -326,7 +326,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 
   const onFieldEdited = useCallback(() => {
-    console.log('holla');
     refetch();
     renderId.current += 1;
   }, [refetch]);
@@ -374,32 +373,28 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
   );
 
   const table = useMemo(() => {
-    console.log('updatin', renderId.current, columns);
-    if (renderId.current) {
-      return (
-        <DataGridMemoized
-          columns={columns}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          itemsPerPage={itemsPerPage}
-          itemsPerPageOptions={itemsPerPageOptions}
-          sort={sort}
-          events={events}
-          refetch={refetch}
-          onFieldEdited={onFieldEdited}
-          dataLoadingState={dataLoadingState}
-          totalCount={totalCount}
-          onEventClosed={onEventClosed}
-          expandedDetail={expandedDetail}
-          showExpandedDetails={showExpandedDetails}
-          onChangePage={onChangePage}
-          activeTab={activeTab}
-          updatedAt={updatedAt}
-          isTextBasedQuery={isTextBasedQuery}
-          renderId={renderId.current}
-        />
-      );
-    }
+    return (
+      <DataGridMemoized
+        columns={columns}
+        rowRenderers={rowRenderers}
+        timelineId={timelineId}
+        itemsPerPage={itemsPerPage}
+        itemsPerPageOptions={itemsPerPageOptions}
+        sort={sort}
+        events={events}
+        refetch={refetch}
+        onFieldEdited={onFieldEdited}
+        dataLoadingState={dataLoadingState}
+        totalCount={totalCount}
+        onEventClosed={onEventClosed}
+        expandedDetail={expandedDetail}
+        showExpandedDetails={showExpandedDetails}
+        onChangePage={onChangePage}
+        activeTab={activeTab}
+        updatedAt={updatedAt}
+        isTextBasedQuery={isTextBasedQuery}
+      />
+    );
   }, [
     activeTab,
     columns,
@@ -413,7 +408,6 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
     onEventClosed,
     refetch,
     onFieldEdited,
-    renderId,
     rowRenderers,
     showExpandedDetails,
     sort,

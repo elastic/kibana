@@ -17,6 +17,7 @@ import type {
   TimelineItem,
   TimelineNonEcsData,
 } from '../../../../common/search_strategy';
+import { TimelineId } from '../../../../common/types';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -49,6 +50,7 @@ export interface TransformColumnsProps {
   theme: EuiTheme;
   setEventsLoading: SetEventsLoading;
   setEventsDeleted: SetEventsDeleted;
+  entityType: 'events' | 'alerts';
 }
 
 export const transformControlColumns = ({
@@ -71,7 +73,9 @@ export const transformControlColumns = ({
   theme,
   setEventsLoading,
   setEventsDeleted,
+  entityType,
 }: TransformColumnsProps): EuiDataGridControlColumn[] => {
+  console.log('make me a hook please');
   return controlColumns.map(
     ({ id: columnId, headerCellRender = EmptyHeaderCellRender, rowCellRender, width }, i) => ({
       id: `${columnId}`,
@@ -126,7 +130,7 @@ export const transformControlColumns = ({
             index={i}
             isDetails={isDetails}
             isExpanded={isExpanded}
-            isEventViewer={false}
+            isEventViewer={timelineId !== TimelineId.active}
             isExpandable={isExpandable}
             loadingEventIds={loadingEventIds}
             onRowSelected={onRowSelected}

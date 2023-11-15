@@ -100,6 +100,7 @@ export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
           notes={getNotes(event._id)}
           showAddNote={notesMap && (notesMap[event._id]?.isAddingNote ?? false)}
           toggleShowAddNote={() => onToggleShowNotes()}
+          eventIdToNoteIds={eventIdToNoteIds}
         />
       </EventsTrSupplement>
       {enabledRowRenderers.length > 0 ? (

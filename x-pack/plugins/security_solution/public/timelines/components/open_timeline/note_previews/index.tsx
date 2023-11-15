@@ -28,7 +28,7 @@ import { timelineActions, timelineSelectors } from '../../../store/timeline';
 import { appActions } from '../../../../common/store/app';
 import { NOTE_CONTENT_CLASS_NAME } from '../../timeline/body/helpers';
 import * as i18n from './translations';
-import { TimelineTabs } from '../../../../../common/types/timeline';
+import { TimelineTabs, TimelineId } from '../../../../../common/types/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { EditTimelineButton } from '../../timeline/header/edit_timeline_button';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -101,7 +101,7 @@ const DeleteNoteConfirm = React.memo<{
 
 DeleteNoteConfirm.displayName = 'DeleteNoteConfirm';
 
-function useDeleteNote(noteId: string | null | undefined) {
+function useDeleteNote(noteId: string | null | undefined, eventId: string | null | undefined) {
   const {
     services: { http },
   } = useKibana();
@@ -117,12 +117,22 @@ function useDeleteNote(noteId: string | null | undefined) {
       });
     },
     onSuccess: () => {
+      console.log({noteId, eventId});
       if (noteId) {
         dispatch(
           appActions.deleteNote({
             id: noteId,
           })
         );
+        if (eventId) {
+          console.log({eventId});
+          dispatch(
+            timelineActions.unPinEvent({
+              id: TimelineId.active,
+              eventId,
+            })
+          );
+        }
       }
     },
     onError: (err: string) => {
@@ -131,45 +141,47 @@ function useDeleteNote(noteId: string | null | undefined) {
   });
 }
 
-const DeleteNoteButton = React.memo<{ noteId?: string | null }>(({ noteId }) => {
-  const { confirmingNoteId, setConfirmingNoteId } = useContext(TimelineDataTableContext);
-  const { mutate, isLoading } = useDeleteNote(noteId);
+const DeleteNoteButton = React.memo<{ noteId?: string | null; eventId?: string | null }>(
+  ({ noteId, eventId }) => {
+    const { confirmingNoteId, setConfirmingNoteId } = useContext(TimelineDataTableContext);
+    const { mutate, isLoading } = useDeleteNote(noteId, eventId);
 
-  const handleOpenDeleteModal = useCallback(async () => {
-    setConfirmingNoteId(noteId);
-  }, [noteId, setConfirmingNoteId]);
+    const handleOpenDeleteModal = useCallback(async () => {
+      setConfirmingNoteId(noteId);
+    }, [noteId, setConfirmingNoteId]);
 
-  const handleCancelDelete = useCallback(() => {
-    setConfirmingNoteId(null);
-  }, [setConfirmingNoteId]);
+    const handleCancelDelete = useCallback(() => {
+      setConfirmingNoteId(null);
+    }, [setConfirmingNoteId]);
 
-  const handleConfirmDelete = useCallback(() => {
-    mutate(noteId);
-    setConfirmingNoteId(null);
-  }, [mutate, noteId, setConfirmingNoteId]);
+    const handleConfirmDelete = useCallback(() => {
+      mutate(noteId);
+      setConfirmingNoteId(null);
+    }, [mutate, noteId, setConfirmingNoteId]);
 
-  const disableDelete = useMemo(() => {
-    return isLoading || noteId == null;
-  }, [isLoading, noteId]);
+    const disableDelete = useMemo(() => {
+      return isLoading || noteId == null;
+    }, [isLoading, noteId]);
 
-  return (
-    <>
-      <EuiButtonIcon
-        title={i18n.DELETE_NOTE}
-        aria-label={i18n.DELETE_NOTE}
-        data-test-subj={'delete-note'}
-        color="text"
-        iconType="trash"
-        onClick={handleOpenDeleteModal}
-        disabled={disableDelete}
-      />
-      <span>{confirmingNoteId}</span>
-      {confirmingNoteId && (
-        <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
-      )}
-    </>
-  );
-});
+    return (
+      <>
+        <EuiButtonIcon
+          title={i18n.DELETE_NOTE}
+          aria-label={i18n.DELETE_NOTE}
+          data-test-subj={'delete-note'}
+          color="text"
+          iconType="trash"
+          onClick={handleOpenDeleteModal}
+          disabled={disableDelete}
+        />
+        <span>{confirmingNoteId}</span>
+        {confirmingNoteId && (
+          <DeleteNoteConfirm closeModal={handleCancelDelete} confirmModal={handleConfirmDelete} />
+        )}
+      </>
+    );
+  }
+);
 
 DeleteNoteButton.displayName = 'DeleteNoteButton';
 
@@ -178,10 +190,12 @@ const NoteActions = React.memo<{
   timelineId?: string;
   noteId?: string | null;
 }>(({ eventId, timelineId, noteId }) => {
+  console.log({eventId, timelineId, noteId});
+  debugger;
   return eventId && timelineId ? (
     <>
       <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
-      <DeleteNoteButton noteId={noteId} />
+      <DeleteNoteButton noteId={noteId} eventId={eventId} />
     </>
   ) : (
     <DeleteNoteButton noteId={noteId} />

@@ -26,6 +26,7 @@ describe('transformControlColumns', () => {
     onSelectPage: jest.fn(),
     pageSize: 0,
     sort: [],
+    entityType: 'events',
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     theme: {} as any,
   };

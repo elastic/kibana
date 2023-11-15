@@ -32,6 +32,7 @@ const PinEventActionComponent: React.FC<PinEventActionProps> = ({
   timelineType,
 }) => {
   const { kibanaSecuritySolutionsPrivileges } = useUserPrivileges();
+
   const tooltipContent = useMemo(
     () =>
       getPinTooltip({
