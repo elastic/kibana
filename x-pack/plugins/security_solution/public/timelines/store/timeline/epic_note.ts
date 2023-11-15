@@ -40,7 +40,6 @@ export function isNoteAction(action: Action): action is NoteAction {
 
 export const epicPersistNote = (
   action: NoteAction,
-  timeline: TimelineById,
   notes: NotesById,
   action$: Observable<Action>,
   timeline$: Observable<TimelineById>,

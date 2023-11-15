@@ -140,15 +140,7 @@ export const createTimelineEpic =
           const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
           if (isNoteAction(action)) {
-            return epicPersistNote(
-              action,
-              timeline,
-              notes,
-              action$,
-              timeline$,
-              notes$,
-              allTimelineQuery$
-            );
+            return epicPersistNote(action, notes, action$, timeline$, notes$, allTimelineQuery$);
           } else if (isPinnedEventAction(action)) {
             return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
           } else if (isFavoriteTimelineAction(action)) {
