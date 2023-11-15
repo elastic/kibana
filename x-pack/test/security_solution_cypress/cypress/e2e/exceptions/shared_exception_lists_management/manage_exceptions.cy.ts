@@ -42,7 +42,9 @@ import {
 import { visitRuleDetailsPage } from '../../../tasks/rule_details';
 import { deleteEndpointExceptionList, deleteExceptionLists } from '../../../tasks/common';
 
-describe('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
+// https://github.com/elastic/kibana/issues/171235
+// FLAKY: https://github.com/elastic/kibana/issues/171242
+describe.skip('Add, edit and delete exception', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     deleteExceptionLists();
