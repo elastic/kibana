@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { CreateLogExplorerController } from '@kbn/log-explorer-plugin/public';
-import { InvokeCreator } from 'xstate';
-import { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
+import type { CreateLogExplorerController } from '@kbn/log-explorer-plugin/public';
+import { map, throwError } from 'rxjs';
+import type { InvokeCreator } from 'xstate';
+import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
 
 export const createController =
   ({
@@ -17,12 +18,18 @@ export const createController =
   }): InvokeCreator<ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent> =>
   (context, event) =>
   (send) => {
-    if (!('initialControllerState' in context)) {
-      send({ type: 'CONTROLLER_CREATED', controller: createLogExplorerController({}) });
-    } else {
-      send({
-        type: 'CONTROLLER_CREATED',
-        controller: createLogExplorerController({ initialState: context.initialControllerState }),
-      });
-    }
+    send({
+      type: 'CONTROLLER_CREATED',
+      controller: createLogExplorerController({ initialState: context.initialLogExplorerState }),
+    });
   };
+
+export const subscribeToLogExplorerState: InvokeCreator<
+  ObservabilityLogExplorerContext,
+  ObservabilityLogExplorerEvent
+> = (context, event) =>
+  'controller' in context
+    ? context.controller?.state$.pipe(
+        map((value) => ({ type: 'LOG_EXPLORER_STATE_CHANGED', state: value }))
+      )
+    : throwError(() => new Error('Failed to subscribe to controller: no controller in context'));

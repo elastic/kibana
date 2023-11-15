@@ -9,7 +9,6 @@ import { IToasts } from '@kbn/core-notifications-browser';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { CreateLogExplorerController } from '@kbn/log-explorer-plugin/public';
 import { actions, createMachine, InterpreterFrom } from 'xstate';
-import { map, throwError } from 'rxjs';
 import { TimefilterContract } from '@kbn/data-plugin/public';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
@@ -17,14 +16,14 @@ import {
   ObservabilityLogExplorerEvent,
   ObservabilityLogExplorerTypeState,
 } from './types';
-import { initializeFromUrl } from './url_state_storage_service';
-import { createController } from './controller_service';
+import { initializeFromUrl, updateUrlFromLogExplorerState } from './url_state_storage_service';
+import { createController, subscribeToLogExplorerState } from './controller_service';
 import { initializeFromTimeFilterService } from './time_filter_service';
 
 export const createPureObservabilityLogExplorerStateMachine = (
   initialContext: ObservabilityLogExplorerContext
 ) =>
-  /** @xstate-layout N4IgpgJg5mDOIC5QHkBGswCcBuBDVAlgDYEAuAngDID2UAogB4AOR1mWAdAK4B2BfpArhIAvSAGIA2gAYAuolBNqsMgWo8FIBogDMOjgFYAbAEZpAdgCcRgwBYAHAcsGANCHK7bHWztsGTRjomevbmRpYAvhFuaBg4+MRkVLSMLGyc-KrCBCL8UABimNQAtgAqBMVg+cSkWADKWNgEAMZg4gCSAHLtpe0AgpTtAFp0ACIA+vkASsgAsuO9s3ST7ZSldFPjdRsAau0AwnQy8kggSiqC6praCAC0ZvrhRua24Tp2jiZuHggATEb2Dj-aQ2PQmcEGSFRGLoRoJEgUGj0ZisdiYDiZQTZXI8ApFYoAVUwRA63V6A2GY0mM3mBKmlGOmnOqiupxutx0Rg49ksv2kBl+9hMQp0oV+30QBnsXgsAX8lhevx0lki0RAsThhARyWRaTRHGa7Fwglx+3UpCKRCIWHE+2QnVKM0olA2432UzofXWo0Zp2Zlw0bMQHMB9h05h0v3Mxl+KpM1glCB5XN+ZgCzijUvMJmh6th8S1SSRqVRGQEQlEEkoyAA4uM6AANAAK1Y9mzqpS9y32AAk+p0a2NfYplCzA6AbpzLIZbKnRWHfADOYnLLYTBwjL9fj5s7G1-8omqeNQIHBNBqC4lESkUelMEzRwHrsGTP4N9YXm8Pv5E-dwxxpEA6QzFsax+UjX5cwvPBC2vXVS3RXhMQrHJIAfC41HHLREHMd95yFHlt2cEFf1AwwgJMJUzCsexwgMKD8xgq8dRLO8MXLbE8kKEpykqaoiFqTAGhwFowHQsdnzuexpG5XlpFsUDQRMWwXkTSiuRUyNHF+AVKPsexILVaD4SLG89TLLJRC4-EiSIcSnyDO5OQ4d5Yxooxnh8PxE1nddzH+AxlXBfTNIYuImO1Ytb31Q0wGNPIzR4C1qCtLB7MwySOS5awlVAywzGA1cdETF51xMCNfHK2NAKcMLNWYqLzPRZDsTQv1HwyxzbksfR-OA8wDP05xlXFdxEBA35vAGqqQNebdDwiIA */
+  /** @xstate-layout N4IgpgJg5mDOIC5QHkBGswCcBuBDVAlgDYEAuAngDID2UAogB4AOR1mWAdAK4B2BfpArhIAvSAGIA2gAYAuolBNqsMgWo8FIBogDMOjgFYAbAEZpAdgCcRgwBYAHAcsGANCHK7bHWztsGTRjomevbmRpYAvhFuaBg4+MRkVLSMLGyc-KrCBCL8UABimNQAtgAqBMVg+cSkWADKWNgEAMZg4gCSAHLtpe0AgpTtAFp0ACIA+vkASsgAsuO9s3ST7ZSldFPjdRsAau0AwnQy8kggSiqC6praCAC0ZvrhRua24Tp2jiZuHggATEb2Dj-aQ2PQmcEGSFRGLoRoJEgUGj0ZisdiYDiZQTZXI8ApFYoAVUwRA63V6A2GY0mM3mBKmlGOmnOqiupxutx0Rg49ksv2kBl+9hMQp0oV+30QBnsXgsAX8lhevx0lki0RAsThhARyWRaTRHGa7Fwglx+3UpCKRCIWHE+2QnVKM0olA2432UzofXWo0Zp2Zlw0bMQHMB9h05h0v3MVj00bsEoQPJMHCMtl+zj8tks0l+0PVsPiWqSSNSqIyAiEogklGQAHFxnQABoABRrHs2dVKXuW+wAEn1OrWxr7FMoWYHQDdfgZ9P8w5Y-CDXnYdAmkym058TAqwqKomqeNQIHBNBrC4lESkUelMEyxwHrsGTP4U9YXm8Pv4E-dwxxpP--0sbdpAXAxpFsPMzzwItL11Mt0V4TFKxySA7wuNQJy0RBzFfUV7CFHlfizMCjG-LNDAAkwlTMKx7HCAxIILaCLx1UsbwxCtsTyQoSnKSpqiIWpMAaHAWjANDx0fO57GkbleXArNQRMWwXgTKiuRUyNHGnX4qPw3M1Sg+FiyvPVyyyURuPxIkiAkh8gzuTkOHedNaKMZ4fD8BM02Tcx-hnIDhWlCNGLiZjtRLa99UNMBjTyM0eAtagrSwOyMKkjkuWsJUsyA-9tx8BMXmTEwI18Ur03-JxQs1FjIrM9EkOxVC-XvdKHNuSx9D86RSvsQUeQC8V3EQMw028cwhT8sbXiI-cIiAA */
   createMachine<
     ObservabilityLogExplorerContext,
     ObservabilityLogExplorerEvent,
@@ -79,7 +78,7 @@ export const createPureObservabilityLogExplorerStateMachine = (
           },
           on: {
             LOG_EXPLORER_STATE_CHANGED: {
-              actions: ['updateUrlFromLogExplorerState'],
+              actions: ['storeLogExplorerState', 'updateUrlFromLogExplorerState'],
             },
           },
         },
@@ -114,17 +113,22 @@ export const createPureObservabilityLogExplorerStateMachine = (
               }
             : {};
         }),
+        storeLogExplorerState: actions.assign((context, event) => {
+          return 'state' in event && event.type === 'LOG_EXPLORER_STATE_CHANGED'
+            ? { logExplorerState: event.state }
+            : {};
+        }),
       },
       guards: {},
     }
   );
 
 export interface ObservabilityLogExplorerStateMachineDependencies {
+  createLogExplorerController: CreateLogExplorerController;
   initialContext?: ObservabilityLogExplorerContext;
+  timeFilterService: TimefilterContract;
   toasts: IToasts;
   urlStateStorageContainer: IKbnUrlStateStorage;
-  createLogExplorerController: CreateLogExplorerController;
-  timeFilterService: TimefilterContract;
 }
 
 export const createObservabilityLogExplorerStateMachine = ({
@@ -136,25 +140,16 @@ export const createObservabilityLogExplorerStateMachine = ({
 }: ObservabilityLogExplorerStateMachineDependencies) =>
   createPureObservabilityLogExplorerStateMachine(initialContext).withConfig({
     actions: {
-      updateUrlFromLogExplorerState: actions.pure(() => undefined), // updateUrlFromLogExplorerState({ urlStateStorageContainer }),
+      updateUrlFromLogExplorerState: updateUrlFromLogExplorerState({ urlStateStorageContainer }),
     },
     services: {
-      initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
       createController: createController({ createLogExplorerController }),
       initializeFromTimeFilterService: initializeFromTimeFilterService({ timeFilterService }),
-      subscribeToLogExplorerState: (context, event) =>
-        'controller' in context
-          ? context.controller?.state$.pipe(
-              map((value) => ({ type: 'LOG_EXPLORER_STATE_CHANGED', state: value }))
-            )
-          : throwError(
-              () => new Error('Failed to subscribe to controller: no controller in context')
-            ),
+      initializeFromUrl: initializeFromUrl({ urlStateStorageContainer, toastsService: toasts }),
+      subscribeToLogExplorerState,
     },
   });
 
 export type ObservabilityLogExplorerService = InterpreterFrom<
   typeof createObservabilityLogExplorerStateMachine
 >;
-
-// export type LogStreamPageActorRef = OmitDeprecatedState<ActorRefFrom<LogStreamPageStateMachine>>;

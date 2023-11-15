@@ -19,10 +19,7 @@ import {
 
 export type ObservabilityLogExplorerContext = ObservabilityLogExplorerTypeState['context'];
 
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-interface CommonObservabilityLogExplorerContext {}
-
-interface WithInitialState {
+export interface CommonObservabilityLogExplorerContext {
   initialLogExplorerState: LogExplorerPublicStateUpdate;
 }
 
@@ -63,14 +60,14 @@ export type ObservabilityLogExplorerEvent =
 
 export type ObservabilityLogExplorerTypeState =
   | {
-      value: 'uninitialized';
+      value:
+        | 'uninitialized'
+        | 'initializingFromUrl'
+        | 'initializingFromTimeFilterService'
+        | 'creatingController';
       context: CommonObservabilityLogExplorerContext;
     }
   | {
-      value: 'initializingFromUrl' | 'initializingFromTimeFilterService' | 'creatingController';
-      context: CommonObservabilityLogExplorerContext & WithInitialState;
-    }
-  | {
       value: 'initialized';
-      context: WithLogExplorerState & WithController;
+      context: CommonObservabilityLogExplorerContext & WithLogExplorerState & WithController;
     };

@@ -6,7 +6,7 @@
  */
 
 import type { QueryStart } from '@kbn/data-plugin/public';
-import { InvokeCallback } from 'xstate';
+import { actions, InvokeCallback } from 'xstate';
 import type { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
 export const subscribeToQueryState =
@@ -28,3 +28,14 @@ export const subscribeToQueryState =
       subscription.unsubscribe();
     };
   };
+
+export const updateQueryStateFromQueryState = actions.assign<
+  LogExplorerControllerContext,
+  LogExplorerControllerEvent
+>((context, event) =>
+  'queryState' in event && event.type === 'RECEIVE_QUERY_STATE'
+    ? {
+        ...event.queryState,
+      }
+    : {}
+);

@@ -23,21 +23,25 @@ interface ObservabilityLogExplorerUrlStateDependencies {
 export const updateUrlFromLogExplorerState =
   ({ urlStateStorageContainer }: { urlStateStorageContainer: IKbnUrlStateStorage }) =>
   (context: ObservabilityLogExplorerContext, event: ObservabilityLogExplorerEvent) => {
-    if (event.type !== 'LOG_EXPLORER_STATE_CHANGED') return;
+    if (!('logExplorerState' in context)) {
+      return;
+    }
+
+    const { logExplorerState } = context;
 
     // we want to write in the newest schema
     const encodedUrlStateValues = urlSchemaV1.urlSchemaRT.encode({
       v: 1,
-      query: event.state?.query,
-      filters: event.state?.filters,
-      time: event.state?.time,
-      refreshInterval: event.state?.refreshInterval,
-      columns: event.state?.grid.columns,
+      query: logExplorerState.query,
+      filters: logExplorerState.filters,
+      time: logExplorerState.time,
+      refreshInterval: logExplorerState.refreshInterval,
+      columns: logExplorerState.grid.columns,
       // TODO: add other properties
-      datasetSelection: event.state?.datasetSelection,
-      controlPanels: event.state?.controlPanels
-        ? cleanControlPanels(event.state.controlPanels)
-        : undefined,
+      // datasetSelection: logExplorerState.datasetSelection,
+      // controlPanels: logExplorerState.controlPanels
+      //   ? cleanControlPanels(logExplorerState.controlPanels)
+      //   : undefined,
     });
 
     Object.entries(encodedUrlStateValues).forEach(([stateKey, encodedValue]) =>
