@@ -93,6 +93,11 @@ async function createSecurityProject(
   ftrConfig?.productTypes?.forEach((t) => {
     productTypes.push(t as ProductType);
   });
+
+  log.info('INSIDE CREATE SECURITY PROJECT METHOD');
+  log.info(productTypes);
+  log.info('ABOVE YOU HAVE THE PRODUCT TYPES');
+
   if (productTypes.length > 0) body.product_types = productTypes;
 
   try {
