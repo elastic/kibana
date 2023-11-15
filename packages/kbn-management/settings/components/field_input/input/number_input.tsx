@@ -6,11 +6,12 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { EuiFieldNumber, EuiFieldNumberProps } from '@elastic/eui';
 
 import { getFieldInputValue, useUpdate } from '@kbn/management-settings-utilities';
 
+import { debounce } from 'lodash';
 import { InputProps } from '../types';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
 import { useServices } from '../services';
@@ -32,35 +33,39 @@ export const NumberInput = ({
   const [inputValue] = getFieldInputValue(field, unsavedChange) || undefined;
   const [value, setValue] = useState(inputValue);
   const { validateChange } = useServices();
+  const onUpdate = useUpdate({ onInputChange, field });
+
+  const updateValue = useCallback(
+    async (newValue: number, onUpdateFn) => {
+      const validationResponse = await validateChange(field.id, newValue);
+      if (validationResponse.successfulValidation && !validationResponse.valid) {
+        onUpdateFn({
+          type: field.type,
+          unsavedValue: newValue,
+          isInvalid: !validationResponse.valid,
+          error: validationResponse.errorMessage,
+        });
+      } else {
+        onUpdateFn({ type: field.type, unsavedValue: newValue });
+      }
+    },
+    [validateChange, field.id, field.type]
+  );
+
+  const debouncedUpdateValue = useMemo(() => {
+    // Trigger update 500 ms after the user stopped typing to reduce validation requests to the server
+    return debounce(updateValue, 500);
+  }, [updateValue]);
 
   const onChange: EuiFieldNumberProps['onChange'] = async (event) => {
     const newValue = Number(event.target.value);
     setValue(newValue);
+    await debouncedUpdateValue(newValue, onUpdate);
   };
-
-  const onUpdate = useUpdate({ onInputChange, field });
 
   useEffect(() => {
     setValue(inputValue);
   }, [inputValue]);
-
-  // In the past, each keypress would invoke the `onChange` callback.  This
-  // is likely wasteful, so we've switched it to `onBlur` instead.
-  const onBlur = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const blurValue = Number(event.target.value);
-    const validationResponse = await validateChange(field.id, blurValue);
-    if (validationResponse.successfulValidation && !validationResponse.valid) {
-      onUpdate({
-        type: field.type,
-        unsavedValue: blurValue,
-        isInvalid: !validationResponse.valid,
-        error: validationResponse.errorMessage,
-      });
-    } else {
-      onUpdate({ type: field.type, unsavedValue: blurValue });
-    }
-    setValue(blurValue);
-  };
 
   const { id, name, ariaAttributes } = field;
   const { ariaLabel, ariaDescribedBy } = ariaAttributes;
@@ -72,7 +77,7 @@ export const NumberInput = ({
       data-test-subj={`${TEST_SUBJ_PREFIX_FIELD}-${id}`}
       fullWidth
       disabled={!isSavingEnabled}
-      {...{ name, value, onBlur, onChange }}
+      {...{ name, value, onChange }}
     />
   );
 };
