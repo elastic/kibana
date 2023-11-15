@@ -24,13 +24,15 @@ export interface VisualizeFieldContext {
   query?: AggregateQuery;
 }
 
+// move to AIOPs package !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 export interface CategorizeFieldContext {
   field: DataViewField;
   dataView: DataView;
   originatingApp: string;
-  additionalTimeRange?: {
+  additionalFilter?: {
     from: number;
     to: number;
+    field?: { name: string; value: string };
   };
 }
 

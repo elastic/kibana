@@ -13,6 +13,9 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   useEuiTheme,
+  EuiTabs,
+  EuiTab,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
@@ -45,6 +48,17 @@ import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
 
+enum SELECTED_TAB {
+  BUCKET,
+  FULL_TIME_RANGE,
+}
+
+export interface CategorizationAdditionalFilter {
+  from: number;
+  to: number;
+  field?: { name: string; value: string };
+}
+
 export interface LogCategorizationPageProps {
   dataView: DataView;
   savedSearch: SavedSearch | null;
@@ -52,7 +66,7 @@ export interface LogCategorizationPageProps {
   onClose: () => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
-  additionalTimeRange?: { from: number; to: number };
+  additionalFilter?: CategorizationAdditionalFilter;
 }
 
 const BAR_TARGET = 20;
@@ -63,7 +77,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   selectedField,
   onClose,
   embeddingOrigin,
-  additionalTimeRange,
+  additionalFilter,
 }) => {
   const {
     notifications: { toasts },
@@ -97,10 +111,13 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
   const [pinnedCategory, setPinnedCategory] = useState<Category | null>(null);
   const [data, setData] = useState<{
     categories: Category[];
+    categoriesInBucket: Category[] | null;
   } | null>(null);
   const [fieldValidationResult, setFieldValidationResult] = useState<FieldValidationResults | null>(
     null
   );
+  const [showTabs, setShowTabs] = useState<boolean>(false);
+  const [selectedTab, setSelectedTab] = useState<SELECTED_TAB>(SELECTED_TAB.FULL_TIME_RANGE);
 
   const cancelRequest = useCallback(() => {
     cancelValidationRequest();
@@ -170,15 +187,35 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
           timeRange,
           searchQuery,
           intervalMs,
-          additionalTimeRange
+          additionalFilter
         ),
       ]);
 
       if (mounted.current === true) {
         setFieldValidationResult(validationResult);
+        const { categories } = categorizationResult;
+
+        const hasBucketCategories = categories.some((c) => c.subTimeRangeCount !== undefined);
+        const categoriesInBucket = hasBucketCategories
+          ? categorizationResult.categories
+              .filter(
+                (category) => category.subFieldCount !== undefined && category.subFieldCount > 0
+              )
+              .map((category) => ({
+                ...category,
+                count: category.subFieldCount!,
+                examples: category.subFieldExamples!,
+                sparkline: undefined,
+              }))
+          : null;
+
         setData({
-          categories: categorizationResult.categories,
+          categories,
+          categoriesInBucket,
         });
+
+        setShowTabs(hasBucketCategories);
+        setSelectedTab(SELECTED_TAB.BUCKET);
       }
     } catch (error) {
       toasts.addError(error, {
@@ -202,7 +239,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
     embeddingOrigin,
     runCategorizeRequest,
     intervalMs,
-    additionalTimeRange,
+    additionalFilter,
     toasts,
   ]);
 
@@ -278,21 +315,62 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         />
 
         {loading === false && data !== null && data.categories.length > 0 ? (
-          <CategoryTable
-            categories={data.categories}
-            aiopsListState={stateFromUrl}
-            dataViewId={dataView.id!}
-            eventRate={eventRate}
-            selectedField={selectedField}
-            pinnedCategory={pinnedCategory}
-            setPinnedCategory={setPinnedCategory}
-            selectedCategory={selectedCategory}
-            setSelectedCategory={setSelectedCategory}
-            timefilter={timefilter}
-            onAddFilter={onAddFilter}
-            onClose={onClose}
-            enableRowActions={false}
-          />
+          <>
+            {showTabs ? (
+              <>
+                <EuiTabs>
+                  <EuiTab
+                    isSelected={selectedTab === SELECTED_TAB.BUCKET}
+                    onClick={() => setSelectedTab(SELECTED_TAB.BUCKET)}
+                  >
+                    <FormattedMessage
+                      id="xpack.aiops.logCategorization.tabs.bucket"
+                      defaultMessage="Bucket"
+                    />
+                  </EuiTab>
+
+                  <EuiTab
+                    isSelected={selectedTab === SELECTED_TAB.FULL_TIME_RANGE}
+                    onClick={() => setSelectedTab(SELECTED_TAB.FULL_TIME_RANGE)}
+                  >
+                    <FormattedMessage
+                      id="xpack.aiops.logCategorization.tabs.fullTimeRange"
+                      defaultMessage="Full time range"
+                    />
+                  </EuiTab>
+                </EuiTabs>
+                <EuiSpacer size="s" />
+              </>
+            ) : null}
+            <CategoryTable
+              categories={
+                selectedTab === SELECTED_TAB.BUCKET && data.categoriesInBucket !== null
+                  ? data.categoriesInBucket
+                  : data.categories
+              }
+              aiopsListState={stateFromUrl}
+              dataViewId={dataView.id!}
+              eventRate={eventRate}
+              selectedField={selectedField}
+              pinnedCategory={pinnedCategory}
+              setPinnedCategory={setPinnedCategory}
+              selectedCategory={selectedCategory}
+              setSelectedCategory={setSelectedCategory}
+              timefilter={timefilter}
+              onAddFilter={onAddFilter}
+              onClose={onClose}
+              enableRowActions={false}
+              discoverTimeRangeOverride={
+                selectedTab === SELECTED_TAB.BUCKET && additionalFilter !== undefined
+                  ? {
+                      from: additionalFilter.from,
+                      to: additionalFilter.to,
+                    }
+                  : undefined
+              }
+              navigateToDiscover={additionalFilter !== undefined}
+            />
+          </>
         ) : null}
       </EuiFlyoutBody>
     </>

@@ -24,6 +24,7 @@ import { DataViewField } from '@kbn/data-views-plugin/common';
 import { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
+import moment from 'moment';
 import type { Category } from '../../../../common/api/log_categorization/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -51,6 +52,8 @@ interface Props {
   onAddFilter?: (values: Filter, alias?: string) => void;
   onClose?: () => void;
   enableRowActions?: boolean;
+  discoverTimeRangeOverride?: { from: number; to: number };
+  navigateToDiscover?: boolean;
 }
 
 export const CategoryTable: FC<Props> = ({
@@ -67,6 +70,8 @@ export const CategoryTable: FC<Props> = ({
   onAddFilter,
   onClose = () => {},
   enableRowActions = true,
+  discoverTimeRangeOverride,
+  navigateToDiscover = true,
 }) => {
   const euiTheme = useEuiTheme();
   const primaryBackgroundColor = useEuiBackgroundColor('primary');
@@ -79,15 +84,16 @@ export const CategoryTable: FC<Props> = ({
     [onAddFilter, onClose]
   );
 
-  const showSubTimeCount = useMemo(() => {
-    return categories.some((category) => category.subTimeRangeCount !== undefined);
+  const showSparkline = useMemo(() => {
+    return categories.some((category) => category.sparkline !== undefined);
   }, [categories]);
 
   const openInDiscover = (mode: QueryMode, category?: Category) => {
     if (
       onAddFilter !== undefined &&
       selectedField !== undefined &&
-      typeof selectedField !== 'string'
+      typeof selectedField !== 'string' &&
+      navigateToDiscover === false
     ) {
       onAddFilter(
         createFilter('', selectedField.name, selectedCategories, mode, category),
@@ -97,7 +103,14 @@ export const CategoryTable: FC<Props> = ({
       return;
     }
 
-    const timefilterActiveBounds = timefilter.getActiveBounds();
+    const timefilterActiveBounds =
+      discoverTimeRangeOverride !== undefined
+        ? {
+            min: moment(discoverTimeRangeOverride.from),
+            max: moment(discoverTimeRangeOverride.to),
+          }
+        : timefilter.getActiveBounds();
+
     if (timefilterActiveBounds === undefined || selectedField === undefined) {
       return;
     }
@@ -121,39 +134,6 @@ export const CategoryTable: FC<Props> = ({
       }),
       sortable: true,
       width: '80px',
-    },
-    {
-      field: 'count',
-      name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
-        defaultMessage: 'Log rate',
-      }),
-      sortable: false,
-      width: '100px',
-      render: (_, { sparkline }) => {
-        if (sparkline === undefined) {
-          return null;
-        }
-        const histogram = eventRate.map(({ key: catKey, docCount }) => {
-          const term = sparkline[catKey] ?? 0;
-          const newTerm = term > docCount ? docCount : term;
-          const adjustedDocCount = docCount - newTerm;
-
-          return {
-            doc_count_overall: adjustedDocCount,
-            doc_count_significant_item: newTerm,
-            key: catKey,
-            key_as_string: `${catKey}`,
-          };
-        });
-
-        return (
-          <MiniHistogram
-            chartData={histogram}
-            isLoading={categories === null && histogram === undefined}
-            label={''}
-          />
-        );
-      },
     },
     {
       field: 'examples',
@@ -200,14 +180,39 @@ export const CategoryTable: FC<Props> = ({
     },
   ] as Array<EuiBasicTableColumn<Category>>;
 
-  if (showSubTimeCount) {
+  if (showSparkline === true) {
     columns.splice(1, 0, {
-      field: 'subTimeRangeCount',
-      name: i18n.translate('xpack.aiops.logCategorization.column.subCount', {
-        defaultMessage: 'Count2',
+      field: 'sparkline',
+      name: i18n.translate('xpack.aiops.logCategorization.column.logRate', {
+        defaultMessage: 'Log rate',
       }),
-      sortable: true,
-      width: '80px',
+      sortable: false,
+      width: '100px',
+      render: (sparkline: Category['sparkline']) => {
+        if (sparkline === undefined) {
+          return null;
+        }
+        const histogram = eventRate.map(({ key: catKey, docCount }) => {
+          const term = sparkline[catKey] ?? 0;
+          const newTerm = term > docCount ? docCount : term;
+          const adjustedDocCount = docCount - newTerm;
+
+          return {
+            doc_count_overall: adjustedDocCount,
+            doc_count_significant_item: newTerm,
+            key: catKey,
+            key_as_string: `${catKey}`,
+          };
+        });
+
+        return (
+          <MiniHistogram
+            chartData={histogram}
+            isLoading={categories === null && histogram === undefined}
+            label={''}
+          />
+        );
+      },
     });
   }
 

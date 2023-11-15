@@ -40,9 +40,13 @@ export function processCategoryResults(
     return {
       key: b.key,
       count: b.doc_count,
-      subTimeRangeCount: b.sub_time_range?.buckets[0].doc_count ?? undefined,
-      examples: b.hit.hits.hits.map((h) => get(h._source, field)),
+      examples: b.examples.hits.hits.map((h) => get(h._source, field)),
       sparkline,
+      subTimeRangeCount: b.sub_time_range?.buckets[0].doc_count ?? undefined,
+      subFieldCount: b.sub_time_range?.buckets[0].sub_field?.doc_count ?? undefined,
+      subFieldExamples:
+        b.sub_time_range?.buckets[0].examples.hits.hits.map((h) => get(h._source, field)) ??
+        undefined,
     };
   });
   return {

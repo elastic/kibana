@@ -20,7 +20,10 @@ import { DatePickerContextProvider, type DatePickerDependencies } from '@kbn/ml-
 import { StorageContextProvider } from '@kbn/ml-local-storage';
 import type { AiopsPluginStartDeps } from '../../types';
 import { AiopsAppContext } from '../../hooks/use_aiops_app_context';
-import { LogCategorizationFlyout } from './log_categorization_for_flyout';
+import {
+  type CategorizationAdditionalFilter,
+  LogCategorizationFlyout,
+} from './log_categorization_for_flyout';
 import { AIOPS_STORAGE_KEYS } from '../../types/storage';
 
 const localStorage = new Storage(window.localStorage);
@@ -31,7 +34,7 @@ export async function showCategorizeFlyout(
   coreStart: CoreStart,
   plugins: AiopsPluginStartDeps,
   originatingApp: string,
-  additionalTimeRange?: { from: number; to: number }
+  additionalFilter?: CategorizationAdditionalFilter
 ): Promise<void> {
   const { http, theme, overlays, application, notifications, uiSettings, i18n } = coreStart;
 
@@ -73,7 +76,7 @@ export async function showCategorizeFlyout(
                     selectedField={field}
                     onClose={onFlyoutClose}
                     embeddingOrigin={originatingApp}
-                    additionalTimeRange={additionalTimeRange}
+                    additionalFilter={additionalFilter}
                   />
                 </StorageContextProvider>
               </DatePickerContextProvider>

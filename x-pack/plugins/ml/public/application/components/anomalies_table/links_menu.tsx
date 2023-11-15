@@ -816,9 +816,13 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
               dataView: messageField.dataView,
               field: messageField.field,
               originatingApp: PLUGIN_ID,
-              additionalTimeRange: {
+              additionalFilter: {
                 from: anomaly.source.timestamp,
                 to: anomaly.source.timestamp + anomaly.source.bucket_span * 1000,
+                field: {
+                  name: anomaly.entityName,
+                  value: anomaly.entityValue,
+                },
               },
             });
           }}

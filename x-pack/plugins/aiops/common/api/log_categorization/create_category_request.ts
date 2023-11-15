@@ -14,6 +14,12 @@ import { createCategorizeQuery } from './create_categorize_query';
 const CATEGORY_LIMIT = 1000;
 const EXAMPLE_LIMIT = 1;
 
+interface CategorizationAdditionalFilter {
+  from: number;
+  to: number;
+  field?: { name: string; value: string };
+}
+
 export function createCategoryRequest(
   index: string,
   field: string,
@@ -22,7 +28,7 @@ export function createCategoryRequest(
   queryIn: QueryDslQueryContainer,
   wrap: ReturnType<typeof createRandomSamplerWrapper>['wrap'],
   intervalMs?: number,
-  subTimeRange?: { from: number; to: number }
+  additionalFilter?: CategorizationAdditionalFilter
 ) {
   const query = createCategorizeQuery(queryIn, timeField, timeRange);
   const aggs = {
@@ -32,7 +38,7 @@ export function createCategoryRequest(
         size: CATEGORY_LIMIT,
       },
       aggs: {
-        hit: {
+        examples: {
           top_hits: {
             size: EXAMPLE_LIMIT,
             sort: [timeField],
@@ -49,13 +55,33 @@ export function createCategoryRequest(
               },
             }
           : {}),
-        ...(subTimeRange
+        ...(additionalFilter
           ? {
               sub_time_range: {
                 date_range: {
                   field: timeField,
                   format: 'epoch_millis',
-                  ranges: [subTimeRange],
+                  ranges: [{ from: additionalFilter.from, to: additionalFilter.to }],
+                },
+                aggs: {
+                  examples: {
+                    top_hits: {
+                      size: EXAMPLE_LIMIT,
+                      sort: [timeField],
+                      _source: field,
+                    },
+                  },
+                  ...(additionalFilter.field
+                    ? {
+                        sub_field: {
+                          filter: {
+                            term: {
+                              [additionalFilter.field.name]: additionalFilter.field.value,
+                            },
+                          },
+                        },
+                      }
+                    : {}),
                 },
               },
             }

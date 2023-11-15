@@ -26,6 +26,7 @@ import {
 
 import { RandomSampler } from './sampling_menu';
 import { RANDOM_SAMPLER_OPTION, DEFAULT_PROBABILITY } from './sampling_menu/random_sampler';
+import { CategorizationAdditionalFilter } from './log_categorization_for_flyout';
 
 export type EventRate = Array<{
   key: number;
@@ -67,7 +68,7 @@ export function useCategorizeRequest() {
       timeRange: { from: number; to: number },
       query: QueryDslQueryContainer,
       intervalMs?: number,
-      subTimeRange?: { from: number; to: number }
+      additionalFilter?: CategorizationAdditionalFilter
     ): Promise<{ categories: Category[] }> => {
       const { wrap, unwrap } = randomSampler.createRandomSamplerWrapper();
 
@@ -82,7 +83,7 @@ export function useCategorizeRequest() {
               query,
               wrap,
               intervalMs,
-              subTimeRange
+              additionalFilter
             ),
             { abortSignal: abortController.current.signal }
           )
