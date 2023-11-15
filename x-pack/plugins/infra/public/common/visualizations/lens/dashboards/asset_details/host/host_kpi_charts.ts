@@ -10,6 +10,8 @@ import { hostLensFormulas } from '../../../formulas';
 import { METRICS_TOOLTIP } from '../../translations';
 import type { KPIChartProps } from '../../types';
 
+const BACKGROUND_COLOR = '#e6f1fA';
+
 export const hostKPICharts: KPIChartProps[] = [
   {
     id: 'cpuUsage',
@@ -29,7 +31,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: '#F1D86F',
+        backgroundColor: BACKGROUND_COLOR,
         showTrendLine: true,
       },
       type: 'visualization',
@@ -57,7 +59,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: '#79AAD9',
+        backgroundColor: BACKGROUND_COLOR,
         showTrendLine: true,
       },
       type: 'visualization',
@@ -82,7 +84,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: '#A987D1',
+        backgroundColor: BACKGROUND_COLOR,
         showTrendLine: true,
       },
       type: 'visualization',
@@ -107,7 +109,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: '#F5A35C',
+        backgroundColor: BACKGROUND_COLOR,
         showTrendLine: true,
       },
       type: 'visualization',

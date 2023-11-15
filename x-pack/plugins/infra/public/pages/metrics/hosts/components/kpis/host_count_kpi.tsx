@@ -15,7 +15,7 @@ import { TooltipContent } from '../../../../../components/lens';
 
 const HOSTS_CHART: Omit<Props, 'loading' | 'value' | 'toolTip'> = {
   id: 'hostsViewKPI-hostsCount',
-  color: '#6DCCB1',
+  color: '#e6f1fA',
   title: i18n.translate('xpack.infra.hostsViewPage.kpi.hostCount.title', {
     defaultMessage: 'Hosts',
   }),
