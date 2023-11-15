@@ -283,13 +283,8 @@ export const DocViewerTable = ({
   );
 
   const headers = [
-    !isSingleDocView && (
-      <EuiTableHeaderCell
-        key="header-cell-actions"
-        align="left"
-        width={showActionsInsideTableCell ? 150 : 62}
-        isSorted={false}
-      >
+    !isSingleDocView && !showActionsInsideTableCell && (
+      <EuiTableHeaderCell key="header-cell-actions" align="left" width={62} isSorted={false}>
         <EuiText size="xs">
           <strong>
             <FormattedMessage
@@ -332,7 +327,7 @@ export const DocViewerTable = ({
         }: FieldRecord) => {
           return (
             <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              {!isSingleDocView && (
+              {!isSingleDocView && !showActionsInsideTableCell && (
                 <EuiTableRowCell
                   key={field + '-actions'}
                   align={showActionsInsideTableCell ? 'left' : 'center'}
@@ -342,7 +337,7 @@ export const DocViewerTable = ({
                   mobileOptions={MOBILE_OPTIONS}
                 >
                   <TableActions
-                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
+                    mode="as_popover"
                     field={field}
                     pinned={pinned}
                     fieldMapping={fieldMapping}
@@ -362,6 +357,19 @@ export const DocViewerTable = ({
                 textOnly={false}
                 mobileOptions={MOBILE_OPTIONS}
               >
+                {!isSingleDocView && showActionsInsideTableCell && (
+                  <TableActions
+                    mode="inline"
+                    field={field}
+                    pinned={pinned}
+                    fieldMapping={fieldMapping}
+                    flattenedField={flattenedField}
+                    onFilter={onFilter!}
+                    onToggleColumn={onToggleColumn}
+                    ignoredValue={!!ignored}
+                    onTogglePinned={onTogglePinned}
+                  />
+                )}
                 <FieldName
                   fieldName={field}
                   fieldType={fieldType}

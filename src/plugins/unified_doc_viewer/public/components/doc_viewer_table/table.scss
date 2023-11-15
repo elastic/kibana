@@ -5,6 +5,7 @@
 }
 
 .kbnDocViewer__tableRow {
+  position: relative;
   font-size: $euiFontSizeXS;
   font-family: $euiCodeFontFamily;
 
@@ -14,27 +15,27 @@
   }
 
   .kbnDocViewer__buttons {
-    // Show all icons if one is focused,
-    &:focus-within {
-      .kbnDocViewer__actionButton {
-        opacity: 1;
-      }
-    }
+    opacity: 0;
+    visibility: hidden;
+    // slower transition on hover leave in case the user accidentally stops hover
+    transition: visibility $euiAnimSpeedSlow, opacity $euiAnimSpeedSlow;
+
+    position: absolute;
+    left: $euiSizeXS;
+    top: (-$euiSizeL);
+    z-index: $euiZLevel9; // the highest possible z-level
+
+    padding: 4px;
+    border-radius: 6px;
+    background-color: #FFF;
+    box-shadow: 0 0 0 1px #D3DAE6;
   }
 
-  &:hover {
-    .kbnDocViewer__actionButton {
+  &:hover, &:focus-within {
+    .kbnDocViewer__buttons {
       opacity: 1;
-    }
-  }
-
-  .kbnDocViewer__actionButton {
-    @include euiBreakpoint('m', 'l', 'xl') {
-      opacity: 0;
-    }
-
-    &:focus {
-      opacity: 1;
+      visibility: visible;
+      transition: visibility $euiAnimSpeedFast, opacity $euiAnimSpeedFast;
     }
   }
 }
