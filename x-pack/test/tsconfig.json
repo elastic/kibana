@@ -146,5 +146,6 @@
     "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
+    "@kbn/dataset-quality-plugin",
   ]
 }

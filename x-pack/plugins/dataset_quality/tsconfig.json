@@ -11,6 +11,10 @@
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/server-route-repository",
+    "@kbn/core-plugins-server",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/std",
   ],
   "exclude": [
     "target/**/*",
