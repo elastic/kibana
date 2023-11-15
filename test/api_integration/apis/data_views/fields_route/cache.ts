@@ -24,7 +24,8 @@ export default function ({ getService }: FtrProviderContext) {
       esArchiver.unload('test/api_integration/fixtures/es_archiver/index_patterns/basic_index')
     );
 
-    it('are present', async () => {
+    // disabled since caching is disabled. Try to load uiSettings so this test can be enabled
+    it.skip('are present', async () => {
       const response = await supertest
         .get(FIELDS_PATH)
         .set(ELASTIC_HTTP_VERSION_HEADER, INITIAL_REST_VERSION_INTERNAL)
