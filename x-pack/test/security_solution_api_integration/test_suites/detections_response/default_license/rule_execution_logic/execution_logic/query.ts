@@ -215,18 +215,21 @@ export default ({ getService }: FtrProviderContext) => {
       if (!alert) {
         return expect(alert).to.be.ok();
       }
+      const alertAncestorIndex = isServerless
+        ? '.ds-.alerts-security.alerts-default-2023.11.15-000001'
+        : '.internal.alerts-security.alerts-default-000001';
       expect(alert[ALERT_ANCESTORS]).eql([
         {
           id: 'vT9cwocBh3b8EMpD8lsi',
           type: 'event',
-          index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
+          index: alertAncestorIndex,
           depth: 0,
         },
         {
           rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
           id: 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1',
           type: 'signal',
-          index: '.ds-.alerts-security.alerts-default-2023.11.15-000001',
+          index: alertAncestorIndex,
           depth: 1,
         },
       ]);
