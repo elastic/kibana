@@ -175,44 +175,26 @@ describe('getDataStreams', () => {
     const results = await getDataStreams({
       esClient: esClientMock,
       type: 'logs',
-      datasetQuery: 'nginx',
       sortOrder: 'desc',
       uncategorisedOnly: false,
     });
     expect(results.items).toEqual([
-      { name: 'logs-test.test-default' },
-      { name: 'logs-elastic_agent.metricbeat-default' },
-      { name: 'logs-elastic_agent.fleet_server-default' },
-      { name: 'logs-elastic_agent.filebeat-default' },
-      { name: 'logs-elastic_agent-default' },
-    ]);
-  });
-  it('Includes extended information', async () => {
-    const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-    const results = await getDataStreams({
-      esClient: esClientMock,
-      type: 'logs',
-      sortOrder: 'desc',
-      uncategorisedOnly: false,
-      extendedResponse: true,
-    });
-    expect(results.items).toEqual([
-      { name: 'logs-test.test-default', package: {} },
+      { name: 'logs-test.test-default', integration: {} },
       {
         name: 'logs-elastic_agent.metricbeat-default',
-        package: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent', managed_by: 'fleet' },
       },
       {
         name: 'logs-elastic_agent.fleet_server-default',
-        package: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent', managed_by: 'fleet' },
       },
       {
         name: 'logs-elastic_agent.filebeat-default',
-        package: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent', managed_by: 'fleet' },
       },
       {
         name: 'logs-elastic_agent-default',
-        package: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent', managed_by: 'fleet' },
       },
     ]);
   });

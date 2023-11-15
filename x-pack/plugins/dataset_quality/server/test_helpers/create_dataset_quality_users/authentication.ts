@@ -9,7 +9,7 @@ export enum DatasetQualityUsername {
   noAccessUser = 'no_access_user',
   viewerUser = 'viewer',
   editorUser = 'editor',
-  datasetQualityLogsUser = 'dataset_quality_user',
+  datasetQualityLogsUser = 'dataset_quality_logs_user',
 }
 
 export enum DatasetQualityCustomRolename {

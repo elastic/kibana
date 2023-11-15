@@ -16,7 +16,7 @@ export interface DataStreamStat {
   size?: ByteSize;
   size_bytes?: number;
   last_activity?: number;
-  package?: {
+  integration?: {
     name?: string;
     managed_by?: string;
   };
