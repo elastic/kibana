@@ -89,7 +89,7 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logExplorer: 39045
+  logExplorer: 54342
   logsShared: 281060
   logstash: 53548
   management: 46112
@@ -124,7 +124,7 @@ pageLoadAssetSize:
   screenshotting: 22870
   searchprofiler: 67080
   security: 81771
-  securitySolution: 66738
+  securitySolution: 67584
   securitySolutionEss: 16573
   securitySolutionServerless: 62488
   serverless: 16573
