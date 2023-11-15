@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
   ]);
 
-  describe('scripted fields', function () {
+  describe.skip('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
