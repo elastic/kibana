@@ -196,7 +196,7 @@ const navigationTree: NavigationTreeDefinition = {
     {
       type: 'navItem',
       id: 'devTools',
-      title: i18n.translate('navigation.nav.devTools', {
+      title: i18n.translate('navigation.nav.oblt.devTools', {
         defaultMessage: 'Developer tools',
       }),
       link: 'dev_tools',

@@ -30,7 +30,7 @@ const navigationTree: NavigationTreeDefinition = {
       children: [
         {
           id: 'dev_tools',
-          title: i18n.translate('navigation.nav.devTools', {
+          title: i18n.translate('navigation.nav.search.devTools', {
             defaultMessage: 'Dev Tools',
           }),
           link: 'dev_tools:console',
