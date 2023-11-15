@@ -24,6 +24,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { durationToNumber } from '@kbn/reporting-common';
 
+import { ApplicationStart } from '@kbn/core-application-browser';
 import { ListingProps as Props } from '.';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
@@ -45,7 +46,6 @@ import { guessAppIconTypeFromObjectType } from './utils';
 
 import './report_listing.scss';
 import { useDefaultPolicyStatus } from '../lib/default_status_context';
-import { ApplicationStart } from '@kbn/core-application-browser';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
