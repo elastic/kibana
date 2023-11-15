@@ -85,9 +85,7 @@ export const RiskInformationButtonIcon = ({ riskEntity }: { riskEntity: RiskScor
         }
         data-test-subj="open-risk-information-flyout-trigger"
       />
-      {isFlyoutVisible && (
-        <RiskInformationFlyout riskEntity={riskEntity} handleOnClose={handleOnClose} />
-      )}
+      {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
 };
@@ -100,26 +98,17 @@ export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskSco
       <EuiButtonEmpty onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
         {i18n.INFO_BUTTON_TEXT}
       </EuiButtonEmpty>
-      {isFlyoutVisible && (
-        <RiskInformationFlyout riskEntity={riskEntity} handleOnClose={handleOnClose} />
-      )}
+      {isFlyoutVisible && <RiskInformationFlyout handleOnClose={handleOnClose} />}
     </>
   );
 };
 
-export const RiskInformationFlyout = ({
-  handleOnClose,
-  riskEntity,
-}: {
-  handleOnClose: () => void;
-  riskEntity?: RiskScoreEntity;
-}) => {
+export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => void }) => {
   const { euiTheme } = useEuiTheme();
   const simpleFlyoutTitleId = useGeneratedHtmlId({
     prefix: 'RiskInformation',
   });
 
-  const riskEntityText = riskEntity ?? 'entity';
   return (
     <EuiFlyout
       ownFocus
@@ -158,15 +147,13 @@ export const RiskInformationFlyout = ({
           <p>
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreFieldText"
-              defaultMessage="The {riskScoreField} field represents the normalized risk of the {riskEntityText} as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
+              defaultMessage="The {riskScoreField} field represents the normalized risk of the Entity as a single numerical value. You can use this value as a relative indicator of risk in triaging and response playbooks."
               values={{
-                riskEntityText,
                 riskScoreField: (
                   <b>
                     <FormattedMessage
                       id="xpack.securitySolution.riskInformation.riskScoreFieldLabel"
-                      defaultMessage="{riskEntityText} risk score"
-                      values={{ riskEntityText }}
+                      defaultMessage="Entity risk score"
                     />
                   </b>
                 ),
@@ -177,15 +164,13 @@ export const RiskInformationFlyout = ({
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.riskScoreLevelText"
               defaultMessage="The {riskLevelField} field represents one of the six risk level of
-              the {riskEntityText} based on a predefined risk metrics."
+              the Entity based on a predefined risk metrics."
               values={{
-                riskEntityText,
                 riskLevelField: (
                   <b>
                     <FormattedMessage
                       id="xpack.securitySolution.riskInformation.riskScoreLevelLabel"
-                      defaultMessage="{riskEntityText} risk level"
-                      values={{ riskEntityText }}
+                      defaultMessage="Entity risk level"
                     />
                   </b>
                 ),
@@ -243,19 +228,18 @@ export const RiskInformationFlyout = ({
         </EuiText>
         <EuiSpacer />
         <EuiBasicTable
-          columns={getTableColumns(riskEntity)}
+          columns={getTableColumns()}
           items={tableItems}
           data-test-subj="risk-information-table"
         />
         <EuiSpacer size="l" />
         <RiskScoreDocLink
-          riskScoreEntity={riskEntity}
           title={
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.learnMore"
               defaultMessage="Learn more about {riskEntity} risk"
               values={{
-                riskEntity: getRiskEntityTranslation(riskEntity, true),
+                riskEntity: getRiskEntityTranslation(undefined, true),
               }}
             />
           }
