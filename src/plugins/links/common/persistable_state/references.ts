@@ -7,8 +7,8 @@
  */
 
 import { Reference } from '@kbn/content-management-utils';
-import { pick } from 'lodash';
-import { DASHBOARD_LINK_TYPE, Link, LinksAttributes } from '../content_management';
+import { omit } from 'lodash';
+import { DASHBOARD_LINK_TYPE, LinksAttributes } from '../content_management';
 
 export function extractReferences({
   attributes,
@@ -23,20 +23,18 @@ export function extractReferences({
 
   const { links } = attributes;
   const extractedReferences: Reference[] = [];
-  const newLinks: Link[] = [];
-  links.forEach((link) => {
+
+  const newLinks = links.map((link) => {
     if (link.type === DASHBOARD_LINK_TYPE && link.destination) {
       const refName = `link_${link.id}_dashboard`;
-      const newLink = { ...pick(link, ['order', 'id', 'type']), destinationRefName: refName };
       extractedReferences.push({
         name: refName,
         type: 'dashboard',
         id: link.destination,
       });
-      newLinks.push(newLink);
-    } else {
-      newLinks.push(link);
+      return { ...omit(link, 'destination'), destinationRefName: refName };
     }
+    return link;
   });
 
   return {
