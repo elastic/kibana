@@ -59,7 +59,7 @@ describe('elasticsearch clients errors', () => {
       });
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
-      const inspectedError = inspect(e)
+      const inspectedError = inspect(e);
       expect(inspectedError).not.toContain('headers');
       expect(inspectedError).not.toContain('authorization');
     }
