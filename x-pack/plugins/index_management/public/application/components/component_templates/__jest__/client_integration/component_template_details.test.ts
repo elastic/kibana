@@ -19,6 +19,7 @@ const COMPONENT_TEMPLATE: ComponentTemplateDeserialized = {
     mappings: { properties: { ip_address: { type: 'ip' } } },
     aliases: { mydata: {} },
     settings: { number_of_shards: 1 },
+    lifecycle: { enabled: true, data_retention: '4d' },
   },
   version: 1,
   _meta: { description: 'component template test' },
@@ -72,6 +73,7 @@ describe('<ComponentTemplateDetails />', () => {
       expect(exists('summaryTabContent.usedByTitle')).toBe(true);
       expect(exists('summaryTabContent.versionTitle')).toBe(true);
       expect(exists('summaryTabContent.metaTitle')).toBe(true);
+      expect(exists('summaryTabContent.dataRetentionTitle')).toBe(true);
 
       // [Settings tab] Navigate to tab and verify content
       act(() => {
