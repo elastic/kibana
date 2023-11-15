@@ -38,7 +38,12 @@ export const actionsSchema = schema.arrayOf(
                 query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
                 meta: schema.recordOf(schema.string(), schema.any()),
                 $state: schema.maybe(
-                  schema.object({ store: schema.literal(FilterStateStore.APP_STATE) })
+                  schema.object({
+                    store: schema.oneOf([
+                      schema.literal(FilterStateStore.APP_STATE),
+                      schema.literal(FilterStateStore.GLOBAL_STATE),
+                    ]),
+                  })
                 ),
               })
             ),

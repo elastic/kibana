@@ -171,7 +171,7 @@ const rawRuleAlertsFilterSchema = schema.object({
           }),
           $state: schema.maybe(
             schema.object({
-              store: schema.literal('appState'),
+              store: schema.oneOf([schema.literal('appState'), schema.literal('globalState')]),
             })
           ),
         })
