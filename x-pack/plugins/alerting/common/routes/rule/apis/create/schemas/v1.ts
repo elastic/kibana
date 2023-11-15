@@ -14,7 +14,7 @@ import {
   validateHoursV1,
   validateTimezoneV1,
 } from '../../../validation';
-import {} from '../'
+
 export const notifyWhenSchema = schema.oneOf(
   [
     schema.literal(ruleNotifyWhenV1.CHANGE),
