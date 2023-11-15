@@ -128,11 +128,11 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
    */
   public async runApi({ body, model: reqModel }: RunActionParams): Promise<RunActionResponse> {
     // set model on per request basis
-    const model = reqModel ? reqModel : this.model;
-    const signed = this.signRequest(body, `/model/${model}/invoke`, false);
+    const path = `/model/${reqModel ?? this.model}/invoke`;
+    const signed = this.signRequest(body, path, false);
     const response = await this.request({
       ...signed,
-      url: `${this.url}/model/${model}/invoke`,
+      url: path,
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: body,
@@ -155,13 +155,12 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     model: reqModel,
   }: StreamActionParams): Promise<StreamingResponse> {
     // set model on per request basis
-    const model = reqModel ? reqModel : this.model;
-
-    const signed = this.signRequest(body, `/model/${model}/invoke-with-response-stream`, true);
+    const path = `/model/${reqModel ?? this.model}/invoke-with-response-stream`;
+    const signed = this.signRequest(body, path, true);
 
     const response = await this.request({
       ...signed,
-      url: `${this.url}/model/${model}/invoke-with-response-stream`,
+      url: path,
       method: 'post',
       responseSchema: StreamingResponseSchema,
       data: body,

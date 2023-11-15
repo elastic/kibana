@@ -49,11 +49,7 @@ export async function getTokenCountFromInvokeStream({
     responseBody += chunk.toString();
   });
 
-  try {
-    await finished(responseStream);
-  } catch {
-    // no need to handle this explicitly
-  }
+  await finished(responseStream);
 
   const completionTokens = encode(responseBody).length;
 
