@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { Observable } from 'rxjs';
+
 import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { I18nProvider } from '@kbn/i18n-react';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
-import { ReportingAPIClient, InternalApiClientProvider } from '../lib/reporting_api_client';
+import type { ClientConfigType } from '@kbn/reporting-public';
+import { ReportListing } from '.';
 import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
-import { ClientConfigType } from '../plugin';
+import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
-import { ReportListing } from '.';
 
 export async function mountManagementSection(
   coreSetup: CoreSetup,

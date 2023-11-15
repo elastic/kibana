@@ -6,9 +6,12 @@
  */
 import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { JOB_STATUS } from '@kbn/reporting-common';
+import { ReportDocument } from '@kbn/reporting-common/types';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+import { Report, ReportingStore, SavedReport } from '.';
 import { ReportingCore } from '../..';
-import { createMockConfigSchema, createMockReportingCore } from '../../test_helpers';
-import { Report, ReportDocument, ReportingStore, SavedReport } from '.';
+import { createMockReportingCore } from '../../test_helpers';
 
 describe('ReportingStore', () => {
   const mockLogger = loggingSystemMock.createLogger();
@@ -184,7 +187,7 @@ describe('ReportingStore', () => {
         created_at: 'some time',
         created_by: 'some security person',
         jobtype: 'csv_searchsource',
-        status: 'pending',
+        status: JOB_STATUS.PENDING,
         meta: { testMeta: 'meta' } as any,
         payload: { testPayload: 'payload' } as any,
         attempts: 0,
@@ -391,7 +394,7 @@ describe('ReportingStore', () => {
       _primary_term: 10002,
       jobtype: 'test-report-2',
       created_by: 'created_by_test_string',
-      status: 'processing',
+      status: JOB_STATUS.PROCESSING,
       process_expiration: '2002',
       max_attempts: 3,
       payload: {
