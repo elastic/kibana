@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 export const cacheMaxAge = {
   'data_views:cache_max_age': {
     name: i18n.translate('dataViews.advancedSettings.cacheMaxAgeTitle', {
-      defaultMessage: 'Field cache max age',
+      defaultMessage: 'Field cache max age (in seconds)',
     }),
     value: 0,
     description: i18n.translate('dataViews.advancedSettings.cacheMaxAgeText', {

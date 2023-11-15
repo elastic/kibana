@@ -308,10 +308,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   describe('Search source Alert', () => {
     before(async () => {
-      // todo try removing this
-      await kibanaServer.uiSettings.replace({
-        'data_views:fields_max_cache': '0',
-      });
       await security.testUser.setRoles(['discover_alert']);
 
       log.debug('create source indices');
@@ -335,9 +331,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await deleteConnector(connectorId);
       await security.testUser.restoreDefaults();
       await kibanaServer.savedObjects.cleanStandardList();
-      await kibanaServer.uiSettings.replace({
-        'data_views:fields_max_cache': '300',
-      });
     });
 
     it('should create an alert when there is no data view', async () => {
@@ -406,7 +399,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW, true);
     });
 
-    // this test fails with caching in place
     it('should navigate to alert results via link provided in notification', async () => {
       await openAlertResults(RULE_NAME);
       await checkInitialRuleParamsState(SOURCE_DATA_VIEW);

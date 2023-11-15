@@ -286,7 +286,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    //
     describe('renders field groups', function () {
       it('should show field list groups excluding subfields', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -477,7 +476,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      //
       it('should work correctly for a data view for a missing index', async function () {
         // but we are skipping importing the index itself
         await kibanaServer.importExport.load(

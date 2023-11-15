@@ -46,10 +46,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     forceRefresh?: boolean
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
-    // circle back to this, will likely need changes to any code that loads fields
-    // setting to true skips automatic json parsing
-    // const rawResponse = true;
-    const rawResponse = false;
     const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
     const userId = await this.getCurrentUserId();
 
@@ -62,7 +58,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
           version,
           ...cacheOptions,
           asResponse,
-          rawResponse,
           headers: { 'user-hash': userHash },
         });
 
@@ -129,8 +124,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       this._getUrl(['has_user_index_pattern'])
     );
 
-    // const body = await response?.response?.json();
-    // return body?.result ?? false;
     return response?.body?.result ?? false;
   }
 }
