@@ -7,8 +7,9 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 
-import { LicenseManagementServerPlugin } from './plugin';
-
 export { config } from './config';
 
-export const plugin = (ctx: PluginInitializerContext) => new LicenseManagementServerPlugin();
+export const plugin = async (ctx: PluginInitializerContext) => {
+  const { LicenseManagementServerPlugin } = await import('./plugin');
+  return new LicenseManagementServerPlugin();
+};
