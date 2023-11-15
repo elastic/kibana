@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { kibanaPackageJson } from '@kbn/repo-info';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test/src/kbn_client';
 import { isFleetServerRunning } from '../../../../scripts/endpoint/common/fleet_server/fleet_server_services';
@@ -32,7 +33,7 @@ export interface CreateAndEnrollEndpointHostCIOptions
   /** The fleet Agent Policy ID to use for enrolling the agent */
   agentPolicyId: string;
   /** version of the Agent to install. Defaults to stack version */
-  version: string;
+  version?: string;
   /** The name for the host. Will also be the name of the VM */
   hostname?: string;
   /** If `version` should be exact, or if this is `true`, then the closest version will be used. Defaults to `false` */
@@ -56,7 +57,7 @@ export const createAndEnrollEndpointHostCI = async ({
   disk,
   memory,
   hostname,
-  version,
+  version = kibanaPackageJson.version,
   useClosestVersionMatch = true,
 }: CreateAndEnrollEndpointHostCIOptions): Promise<CreateAndEnrollEndpointHostCIResponse> => {
   const vmName = hostname ?? `test-host-${Math.random().toString().substring(2, 6)}`;
