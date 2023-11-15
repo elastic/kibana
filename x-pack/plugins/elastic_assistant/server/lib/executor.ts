@@ -31,10 +31,7 @@ export const executeAction = async ({
 
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params: {
-      ...request.body.params,
-      subActionParams: request.body.params,
-    },
+    params: request.body.params,
   });
 
   if (actionResult.status === 'error') {
