@@ -31,7 +31,7 @@ export const DEFAULT_CONVERSATION_STATE: Conversation = {
   },
 };
 
-export interface AppendMessageProps {
+interface AppendMessageProps {
   conversationId: string;
   message: Message;
 }
