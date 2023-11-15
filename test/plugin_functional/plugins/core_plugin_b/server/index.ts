@@ -8,4 +8,4 @@
 
 import { CorePluginBPlugin } from './plugin';
 
-export const plugin = () => new CorePluginBPlugin();
+export const plugin = async () => new CorePluginBPlugin();
