@@ -415,6 +415,15 @@ function getErrorCountByParentId(
   }, {});
 }
 
+export const getHasOrphanTraceItems = (
+  waterfallItems: IWaterfallSpanOrTransaction[]
+) => {
+  const waterfallItemsIds = waterfallItems.map(({ id }) => id);
+  return waterfallItems.some(
+    (item) => item?.parent?.id && !waterfallItemsIds.includes(item.parent.id)
+  );
+};
+
 export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const { traceItems, entryTransaction } = apiResponse;
   if (isEmpty(traceItems.traceDocs) || !entryTransaction) {

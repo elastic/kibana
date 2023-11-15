@@ -13,7 +13,8 @@ import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_c
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
 import {
-  IWaterfall,
+  getHasOrphanTraceItems,
+  type IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
 import { WaterfallLegends } from './waterfall_legends';
@@ -83,8 +84,7 @@ export function WaterfallContainer({
     return { ...legend, value: !legend.value ? serviceName : legend.value };
   });
 
-  const spans = items.filter((item) => item.docType === 'span');
-  const shouldShowWarning = spans.some((item) => !item?.parent?.id);
+  const shouldShowWarning = getHasOrphanTraceItems(items);
 
   return (
     <EuiFlexGroup direction="column">
