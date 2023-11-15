@@ -11,7 +11,7 @@ export type ExperimentalFeatures = { [K in keyof typeof allowedExperimentalValue
  * A list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.
  * This object is then used to validate and parse the value entered.
  */
-const allowedExperimentalValues = Object.freeze({
+export const allowedExperimentalValues = Object.freeze({
   tGridEnabled: true,
   tGridEventRenderedViewEnabled: true,
 
