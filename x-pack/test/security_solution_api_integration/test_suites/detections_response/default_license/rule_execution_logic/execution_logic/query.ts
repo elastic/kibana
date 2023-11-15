@@ -45,6 +45,7 @@ import {
   DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { getMaxSignalsWarning as getMaxAlertsWarning } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/utils';
+import moment from 'moment';
 import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 import {
   createExceptionList,
@@ -201,7 +202,7 @@ export default ({ getService }: FtrProviderContext) => {
       const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
       const rule: QueryRuleCreateProps = {
         ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
-        rule_id: 'signal-on-signal',
+        rule_id: 'alert-on-alert',
         query: `_id:${alertId}`,
       };
 
@@ -215,19 +216,21 @@ export default ({ getService }: FtrProviderContext) => {
       if (!alert) {
         return expect(alert).to.be.ok();
       }
+      const date = moment();
+      const formattedDate = date.format('YYYY.MM.DD');
       const alertAncestorIndex = isServerless
-        ? '.ds-.alerts-security.alerts-default-2023.11.15-000001'
+        ? `.ds-.alerts-security.alerts-default-${formattedDate}-000001`
         : '.internal.alerts-security.alerts-default-000001';
       expect(alert[ALERT_ANCESTORS]).eql([
         {
           id: 'vT9cwocBh3b8EMpD8lsi',
           type: 'event',
-          index: alertAncestorIndex,
+          index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
           depth: 0,
         },
         {
           rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
-          id: 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1',
+          id: alertId,
           type: 'signal',
           index: alertAncestorIndex,
           depth: 1,
