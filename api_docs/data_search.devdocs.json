@@ -19,7 +19,7 @@
             "section": "def-common.ApplicationStart",
             "text": "ApplicationStart"
           },
-          "; }) => { title: string; body: React.ReactNode; } | undefined"
+          "; }) => { title: string; body: React.ReactNode; actions?: React.ReactNode[] | undefined; } | undefined"
         ],
         "path": "src/plugins/data/public/search/search_interceptor/utils.ts",
         "deprecated": false,
@@ -27283,8 +27283,8 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.ISearchOptions",
-            "text": "ISearchOptions"
+            "section": "def-common.SearchSourceSearchOptions",
+            "text": "SearchSourceSearchOptions"
           }
         ],
         "path": "src/plugins/data/common/search/strategies/ese_search/types.ts",
