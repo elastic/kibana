@@ -154,33 +154,39 @@ describe(
         deleteRiskScore({ riskScoreEntity: RiskScoreEntity.host, spaceId: 'default' });
       });
     });
+  }
+);
 
-    describe('Risk Engine Privileges Callout', { tags: ['@ess'] }, () => {
-      it('should not show the callout for superuser', () => {
-        cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
-        visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
-        cy.wait('@getPrivileges', { timeout: 15000 });
-        cy.get(RISK_SCORE_STATUS_LOADING, { timeout: 2000 }).should('not.exist');
-        cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('not.exist');
-      });
+// this test suite doesn't run on serverless because it requires a custom role
+describe(
+  'Entity analytics management page - Risk Engine Privileges Callout',
+  { tags: ['@ess'] },
+  () => {
+    it('should not show the callout for superuser', () => {
+      cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
+      login();
+      visit(ENTITY_ANALYTICS_MANAGEMENT_URL);
+      cy.wait('@getPrivileges', { timeout: 20000 });
+      cy.get(RISK_SCORE_STATUS_LOADING, { timeout: 2000 }).should('not.exist');
+      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('not.exist');
+    });
 
-      it('should show the callout for user without risk engine privileges', () => {
-        cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
-        loadPageAsUserWithNoPrivileges();
-        cy.wait('@getPrivileges', { timeout: 15000 });
-        cy.get(RISK_SCORE_STATUS_LOADING, { timeout: 2000 }).should('not.exist');
-        cy.get(RISK_SCORE_PRIVILEGES_CALLOUT);
-        cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should(
-          'contain',
-          'Missing read, write privileges for the risk-score.risk-score-* index.'
-        );
-        cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_index_templates');
-        cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_transform');
-        cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should(
-          'contain',
-          '"All" for the "Saved Objects Management" feature under Management'
-        );
-      });
+    it('should show the callout for user without risk engine privileges', () => {
+      cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
+      loadPageAsUserWithNoPrivileges();
+      cy.get(RISK_SCORE_STATUS_LOADING, { timeout: 2000 }).should('not.exist');
+      cy.wait('@getPrivileges', { timeout: 20000 });
+      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT);
+      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should(
+        'contain',
+        'Missing read, write privileges for the risk-score.risk-score-* index.'
+      );
+      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_index_templates');
+      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_transform');
+      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should(
+        'contain',
+        '"All" for the "Saved Objects Management" feature under Management'
+      );
     });
   }
 );
