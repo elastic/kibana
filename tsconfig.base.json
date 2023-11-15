@@ -1064,6 +1064,8 @@
       "@kbn/ml-trained-models-utils/*": ["x-pack/packages/ml/trained_models_utils/*"],
       "@kbn/ml-url-state": ["x-pack/packages/ml/url_state"],
       "@kbn/ml-url-state/*": ["x-pack/packages/ml/url_state/*"],
+      "@kbn/mock-idp-plugin": ["packages/kbn-mock-idp-plugin"],
+      "@kbn/mock-idp-plugin/*": ["packages/kbn-mock-idp-plugin/*"],
       "@kbn/monaco": ["packages/kbn-monaco"],
       "@kbn/monaco/*": ["packages/kbn-monaco/*"],
       "@kbn/monitoring-collection-plugin": ["x-pack/plugins/monitoring_collection"],
