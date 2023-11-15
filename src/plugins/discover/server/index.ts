@@ -9,7 +9,6 @@
 import { KibanaRequest } from '@kbn/core/server';
 import { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ColumnsFromLocatorFn, SearchSourceFromLocatorFn, TitleFromLocatorFn } from './locator';
-import { DiscoverServerPlugin } from './plugin';
 
 export interface DiscoverServerPluginStartDeps {
   data: DataPluginStart;
@@ -29,4 +28,7 @@ export interface DiscoverServerPluginStart {
   locator: DiscoverServerPluginLocatorService;
 }
 
-export const plugin = () => new DiscoverServerPlugin();
+export const plugin = async () => {
+  const { DiscoverServerPlugin } = await import('./plugin');
+  return new DiscoverServerPlugin();
+};
