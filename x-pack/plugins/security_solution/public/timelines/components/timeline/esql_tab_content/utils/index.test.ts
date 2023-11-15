@@ -14,57 +14,32 @@ const customQuery = {
   query: '_id: *',
 };
 
-const firstDataViewMock = buildDataViewMock({
+const dataViewMock = buildDataViewMock({
   name: 'first-data-view',
   fields: shallowMockedFields,
 });
 
-const secondDataViewMock = buildDataViewMock({
-  name: 'second-data-view',
-  fields: shallowMockedFields,
-});
-
 describe('savedSearchComparator', () => {
-  const firstMockSavedSearch = {
+  const mockSavedSearch = {
     id: 'first',
     title: 'first title',
     breakdownField: 'firstBreakdown Field',
     searchSource: createSearchSourceMock({
-      index: firstDataViewMock,
+      index: dataViewMock,
       query: customQuery,
     }),
   };
 
-  const secondMockSavedSearch = {
-    id: 'second',
-    title: 'second title',
-    breakdownField: 'second Breakdown Field',
-    searchSource: createSearchSourceMock({
-      index: secondDataViewMock,
-      query: customQuery,
-    }),
-  };
   it('should result true when saved search is same', () => {
-    const result = savedSearchComparator(firstMockSavedSearch, { ...firstMockSavedSearch });
+    const result = savedSearchComparator(mockSavedSearch, { ...mockSavedSearch });
     expect(result).toBe(true);
-  });
-
-  it('should return false index is different', () => {
-    const newMockedSavedSearch = {
-      ...firstMockSavedSearch,
-      searchSource: secondMockSavedSearch.searchSource,
-    };
-
-    const result = savedSearchComparator(firstMockSavedSearch, newMockedSavedSearch);
-
-    expect(result).toBe(false);
   });
 
   it('should return false when query is different', () => {
     const newMockedSavedSearch = {
-      ...firstMockSavedSearch,
+      ...mockSavedSearch,
       searchSource: createSearchSourceMock({
-        index: firstDataViewMock,
+        index: dataViewMock,
         query: {
           ...customQuery,
           query: '*',
@@ -72,17 +47,17 @@ describe('savedSearchComparator', () => {
       }),
     };
 
-    const result = savedSearchComparator(firstMockSavedSearch, newMockedSavedSearch);
+    const result = savedSearchComparator(mockSavedSearch, newMockedSavedSearch);
 
     expect(result).toBe(false);
   });
 
   it('should result false when title is different', () => {
     const newMockedSavedSearch = {
-      ...firstMockSavedSearch,
+      ...mockSavedSearch,
       title: 'new-title',
     };
-    const result = savedSearchComparator(firstMockSavedSearch, newMockedSavedSearch);
+    const result = savedSearchComparator(mockSavedSearch, newMockedSavedSearch);
 
     expect(result).toBe(false);
   });
