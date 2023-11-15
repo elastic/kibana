@@ -333,7 +333,10 @@ export class CasesConnector extends SubActionConnector<
     const tags = Array.isArray(params.rule.tags) ? params.rule.tags : [];
 
     /**
-     * TODO: Add grouping info to
+     * TODO:
+     * 1. Add grouping info to
+     * 2. Required custom fields will throw an error when creating a case.
+     * We should find a way to fill the custom fields with default values.
      */
     return {
       description,
