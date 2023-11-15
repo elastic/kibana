@@ -158,4 +158,16 @@ describe('ColumnsPopover', () => {
       await screen.queryByTestId('column-selection-popover-draggable-icon')
     ).not.toBeInTheDocument();
   });
+
+  it('searching for text disables hideAll and showAll buttons', async () => {
+    appMockRenderer.render(
+      <ColumnsPopover selectedColumns={selectedColumns} onSelectedColumnsChange={() => {}} />
+    );
+
+    userEvent.click(await screen.findByTestId('column-selection-popover-button'));
+    userEvent.paste(await screen.findByTestId('column-selection-popover-search'), 'Foobar');
+
+    expect(await screen.findByTestId('column-selection-popover-show-all-button')).toBeDisabled();
+    expect(await screen.findByTestId('column-selection-popover-hide-all-button')).toBeDisabled();
+  });
 });

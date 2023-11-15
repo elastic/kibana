@@ -30,7 +30,7 @@ import type { ActionConnector } from '../../../common/types/domain';
 import { CaseSeverity } from '../../../common/types/domain';
 import type { CaseUI } from '../../../common/ui/types';
 import type { CasesColumnSelection } from './types';
-import { getEmptyTagValue } from '../empty_value';
+import { getEmptyCellValue } from '../empty_value';
 import { FormattedRelativePreferenceDate } from '../formatted_date';
 import { CaseDetailsLink } from '../links';
 import * as i18n from './translations';
@@ -67,7 +67,7 @@ const StyledEuiBadge = euiStyled(EuiBadge)`
 `; // to allow for ellipsis
 
 const renderStringField = (field: string, dataTestSubj: string) =>
-  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyTagValue();
+  field != null ? <span data-test-subj={dataTestSubj}>{field}</span> : getEmptyCellValue();
 
 export interface GetCasesColumn {
   filterStatus: string;
@@ -127,7 +127,7 @@ export const useCasesColumns = ({
 
             return caseDetailsLinkComponent;
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
         width: !isSelectorView ? '20%' : '55%',
       },
@@ -182,7 +182,7 @@ export const useCasesColumns = ({
               </EuiToolTip>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
         width: '15%',
       },
@@ -193,7 +193,7 @@ export const useCasesColumns = ({
         render: (totalAlerts: CaseUI['totalAlerts']) =>
           totalAlerts != null
             ? renderStringField(`${totalAlerts}`, `case-table-column-alertsCount`)
-            : getEmptyTagValue(),
+            : getEmptyCellValue(),
         width: !isSelectorView ? '80px' : '55px',
       },
       totalComment: {
@@ -203,7 +203,7 @@ export const useCasesColumns = ({
         render: (totalComment: CaseUI['totalComment']) =>
           totalComment != null
             ? renderStringField(`${totalComment}`, `case-table-column-commentCount`)
-            : getEmptyTagValue(),
+            : getEmptyCellValue(),
       },
       category: {
         field: casesColumnsConfig.category.field,
@@ -215,7 +215,7 @@ export const useCasesColumns = ({
               <span data-test-subj={`case-table-column-category-${category}`}>{category}</span>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
         width: '100px',
       },
@@ -231,7 +231,7 @@ export const useCasesColumns = ({
               </span>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
       },
       createdAt: {
@@ -246,7 +246,7 @@ export const useCasesColumns = ({
               </span>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
       },
       updatedAt: {
@@ -261,7 +261,7 @@ export const useCasesColumns = ({
               </span>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
       },
       externalIncident: {
@@ -271,7 +271,7 @@ export const useCasesColumns = ({
           if (theCase.id != null) {
             return <ExternalServiceColumn theCase={theCase} connectors={connectors} />;
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
         width: isSelectorView ? '80px' : undefined,
       },
@@ -284,7 +284,7 @@ export const useCasesColumns = ({
             return <Status status={status} />;
           }
 
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
       },
       severity: {
@@ -303,7 +303,7 @@ export const useCasesColumns = ({
               </EuiHealth>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
         width: '90px',
       },
@@ -324,7 +324,7 @@ export const useCasesColumns = ({
               </EuiButton>
             );
           }
-          return getEmptyTagValue();
+          return getEmptyCellValue();
         },
       },
     }),
@@ -345,7 +345,7 @@ export const useCasesColumns = ({
           );
 
           if (!customField) {
-            return getEmptyTagValue();
+            return getEmptyCellValue();
           }
 
           return columnDefinition.render(customField);

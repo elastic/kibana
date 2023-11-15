@@ -165,10 +165,6 @@ export const PUSH_CASES_CAPABILITY = 'push_cases' as const;
 export const CASES_CONNECTORS_CAPABILITY = 'cases_connectors' as const;
 
 /**
- * Cases UI Constants
- */
-
-/**
  * Cases API Tags
  */
 

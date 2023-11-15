@@ -19,14 +19,13 @@ import { createAppMockRenderer, readCasesPermissions, TestProviders } from '../.
 import { renderHook } from '@testing-library/react-hooks';
 import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { userProfilesMap } from '../../containers/user_profiles/api.mock';
-import {} from '../../../common/constants';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 jest.mock('../../containers/configure/use_get_case_configuration');
 
 const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 
-const DEFAULT_CASES_TABLE_COLUMNS = [
+const DEFAULT_SELECTED_COLUMNS = [
   { field: 'title', name: 'title', isChecked: true },
   { field: 'assignees', name: 'assignees', isChecked: true },
   { field: 'tags', name: 'tags', isChecked: true },
@@ -47,7 +46,7 @@ describe('useCasesColumns ', () => {
     filterStatus: CaseStatuses.open,
     userProfiles: userProfilesMap,
     isSelectorView: false,
-    selectedColumns: DEFAULT_CASES_TABLE_COLUMNS,
+    selectedColumns: DEFAULT_SELECTED_COLUMNS,
   };
 
   beforeEach(() => {
@@ -67,7 +66,7 @@ describe('useCasesColumns ', () => {
       () =>
         useCasesColumns({
           ...useCasesColumnsProps,
-          selectedColumns: DEFAULT_CASES_TABLE_COLUMNS.map((element) => ({
+          selectedColumns: DEFAULT_SELECTED_COLUMNS.map((element) => ({
             ...element,
             isChecked: true,
           })),
@@ -513,7 +512,7 @@ describe('useCasesColumns ', () => {
         useCasesColumns({
           ...useCasesColumnsProps,
           selectedColumns: [
-            ...DEFAULT_CASES_TABLE_COLUMNS,
+            ...DEFAULT_SELECTED_COLUMNS,
             { field: textKey, name: textLabel, isChecked: true },
             { field: toggleKey, name: toggleLabel, isChecked: true },
           ],
