@@ -6,13 +6,14 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
 
-import { MetricThresholdAlert, MetricThresholdRule } from '../components/alert_details_app_section';
+import { CustomThresholdAlert, CustomThresholdRule } from '../components/alert_details_app_section';
 
-export const buildMetricThresholdRule = (
-  rule: Partial<MetricThresholdRule> = {}
-): MetricThresholdRule => {
+export const buildCustomThresholdRule = (
+  rule: Partial<CustomThresholdRule> = {}
+): CustomThresholdRule => {
   return {
     alertTypeId: 'metrics.alert.threshold',
     createdBy: 'admin',
@@ -59,29 +60,47 @@ export const buildMetricThresholdRule = (
     params: {
       criteria: [
         {
-          aggType: Aggregators.COUNT,
+          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'A',
+              aggType: Aggregators.COUNT,
+            },
+          ],
           threshold: [2000],
           timeSize: 15,
           timeUnit: 'm',
         },
         {
-          aggType: Aggregators.MAX,
+          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'B',
+              aggType: Aggregators.MAX,
+              field: 'system.cpu.user.pct',
+            },
+          ],
           threshold: [4],
           timeSize: 15,
           timeUnit: 'm',
-          metric: 'system.cpu.user.pct',
           warningComparator: Comparator.GT,
           warningThreshold: [2.2],
         },
         {
-          aggType: Aggregators.MIN,
+          aggType: CUSTOM_AGGREGATOR,
           comparator: Comparator.GT,
+          metrics: [
+            {
+              name: 'C',
+              aggType: Aggregators.MIN,
+              field: 'system.memory.used.pct',
+            },
+          ],
           threshold: [0.8],
           timeSize: 15,
           timeUnit: 'm',
-          metric: 'system.memory.used.pct',
         },
       ],
       searchConfiguration: {
@@ -126,9 +145,9 @@ export const buildMetricThresholdRule = (
   };
 };
 
-export const buildMetricThresholdAlert = (
-  alert: Partial<MetricThresholdAlert> = {}
-): MetricThresholdAlert => {
+export const buildCustomThresholdAlert = (
+  alert: Partial<CustomThresholdAlert> = {}
+): CustomThresholdAlert => {
   return {
     link: '/app/metrics/explorer',
     reason: 'system.cpu.user.pct reported no data in the last 1m for ',
@@ -136,20 +155,32 @@ export const buildMetricThresholdAlert = (
       'kibana.alert.rule.parameters': {
         criteria: [
           {
-            aggType: Aggregators.AVERAGE,
+            aggType: CUSTOM_AGGREGATOR,
             comparator: Comparator.GT,
+            metrics: [
+              {
+                name: 'A',
+                aggType: Aggregators.AVERAGE,
+                field: 'system.cpu.user.pct',
+              },
+            ],
             threshold: [2000],
             timeSize: 15,
             timeUnit: 'm',
-            metric: 'system.cpu.user.pct',
           },
           {
-            aggType: Aggregators.MAX,
+            aggType: CUSTOM_AGGREGATOR,
             comparator: Comparator.GT,
+            metrics: [
+              {
+                name: 'B',
+                aggType: Aggregators.MAX,
+                metric: 'system.cpu.user.pct',
+              },
+            ],
             threshold: [4],
             timeSize: 15,
             timeUnit: 'm',
-            metric: 'system.cpu.user.pct',
             warningComparator: Comparator.GT,
             warningThreshold: [2.2],
           },
