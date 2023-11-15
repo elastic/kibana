@@ -13,7 +13,6 @@ import { useCriticalPathFeatureEnabledSetting } from '../../../../../hooks/use_c
 import { TechnicalPreviewBadge } from '../../../../shared/technical_preview_badge';
 import { Waterfall } from './waterfall';
 import {
-  getHasOrphanTraceItems,
   type IWaterfall,
   WaterfallLegendType,
 } from './waterfall/waterfall_helpers/waterfall_helpers';
@@ -40,7 +39,7 @@ export function WaterfallContainer({
   if (!waterfall) {
     return null;
   }
-  const { legends, items } = waterfall;
+  const { legends, items, hasOrphanTraceItems } = waterfall;
 
   // Service colors are needed to color the dot in the error popover
   const serviceLegends = legends.filter(
@@ -84,8 +83,6 @@ export function WaterfallContainer({
     return { ...legend, value: !legend.value ? serviceName : legend.value };
   });
 
-  const shouldShowWarning = getHasOrphanTraceItems(items);
-
   return (
     <EuiFlexGroup direction="column">
       {isCriticalPathFeatureEnabled ? (
@@ -119,7 +116,7 @@ export function WaterfallContainer({
               type={colorBy}
             />
           </EuiFlexItem>
-          {shouldShowWarning ? (
+          {hasOrphanTraceItems ? (
             <EuiFlexItem grow={false}>
               <MissingTransactionWarning />
             </EuiFlexItem>

@@ -48,6 +48,7 @@ export interface IWaterfall {
   totalErrorsCount: number;
   traceDocsTotal: number;
   maxTraceItems: number;
+  hasOrphanTraceItems: boolean;
 }
 
 interface IWaterfallItemBase<TDocument, TDoctype> {
@@ -416,11 +417,16 @@ function getErrorCountByParentId(
 }
 
 export const getHasOrphanTraceItems = (
-  waterfallItems: IWaterfallSpanOrTransaction[]
+  traceDocs: Array<WaterfallTransaction | WaterfallSpan>
 ) => {
-  const waterfallItemsIds = waterfallItems.map(({ id }) => id);
-  return waterfallItems.some(
-    (item) => item?.parent?.id && !waterfallItemsIds.includes(item.parent.id)
+  const waterfallItemsIds = traceDocs.map((doc) =>
+    doc.processor.event === 'span'
+      ? (doc?.span as WaterfallSpan['span']).id
+      : doc?.transaction?.id
+  );
+
+  return traceDocs.some(
+    (item) => item.parent?.id && !waterfallItemsIds.includes(item.parent?.id)
   );
 };
 
@@ -438,6 +444,7 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
       totalErrorsCount: 0,
       traceDocsTotal: 0,
       maxTraceItems: 0,
+      hasOrphanTraceItems: false,
     };
   }
 
@@ -473,6 +480,8 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
   const duration = getWaterfallDuration(items);
   const legends = getLegends(items);
 
+  const hasOrphanTraceItems = getHasOrphanTraceItems(traceItems.traceDocs);
+
   return {
     entryWaterfallTransaction,
     rootWaterfallTransaction,
@@ -487,5 +496,6 @@ export function getWaterfall(apiResponse: TraceAPIResponse): IWaterfall {
     totalErrorsCount: traceItems.errorDocs.length,
     traceDocsTotal: traceItems.traceDocsTotal,
     maxTraceItems: traceItems.maxTraceItems,
+    hasOrphanTraceItems,
   };
 }
