@@ -154,10 +154,13 @@ export function InternalDashboardTopNav({
     title,
   ]);
 
-  /** Set chrome tab title when dashboard's title changes */
+  /**
+   * Set chrome tab title when dashboard's title changes
+   */
   useEffect(() => {
-    chromeDocTitle.change(title);
-  }, [title, chromeDocTitle]);
+    /** We do not want the tab title to include the "Editing" prefix, so always send in view mode */
+    chromeDocTitle.change(getDashboardTitle(title, ViewMode.VIEW, !lastSavedId));
+  }, [title, lastSavedId, chromeDocTitle]);
 
   /**
    * Set breadcrumbs to dashboard title when dashboard's title or view mode changes
