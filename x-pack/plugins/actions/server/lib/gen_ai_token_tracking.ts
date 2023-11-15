@@ -94,20 +94,28 @@ export const getGenAiTokenTracking = async ({
     actionTypeId === '.bedrock' &&
     (validatedParams.subAction === 'run' || validatedParams.subAction === 'test')
   ) {
-    const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
-      response: (
-        result.data as unknown as {
-          completion: string;
-        }
-      ).completion,
-      body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
-    });
+    try {
+      const { total, prompt, completion } = await getTokenCountFromBedrockInvoke({
+        response: (
+          result.data as unknown as {
+            completion: string;
+          }
+        ).completion,
+        body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+      });
 
-    return {
-      total_tokens: total,
-      prompt_tokens: prompt,
-      completion_tokens: completion,
-    };
+      return {
+        total_tokens: total,
+        prompt_tokens: prompt,
+        completion_tokens: completion,
+      };
+    } catch (e) {
+      logger.error('Failed to calculate tokens from Bedrock invoke response');
+      logger.error(e);
+    }
   }
   return null;
 };
+
+export const shouldTrackGenAiToken = (actionTypeId: string) =>
+  actionTypeId === '.gen-ai' || actionTypeId === '.bedrock';

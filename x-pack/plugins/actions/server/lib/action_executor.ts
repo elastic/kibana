@@ -8,12 +8,13 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { getGenAiTokenTracking } from './gen_ai_token_tracking';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateParams,
   validateConfig,
@@ -328,7 +329,7 @@ export class ActionExecutor {
         }
 
         // start genai extension
-        if (result.status === 'ok') {
+        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
           getGenAiTokenTracking({
             actionTypeId,
             logger,
@@ -337,24 +338,11 @@ export class ActionExecutor {
           })
             .then((tokenTracking) => {
               if (tokenTracking != null) {
-                event.kibana = event.kibana || {};
-                event.kibana.action = event.kibana.action || {};
-                event.kibana = {
-                  ...event.kibana,
-                  action: {
-                    ...event.kibana.action,
-                    execution: {
-                      ...event.kibana.action.execution,
-                      gen_ai: {
-                        usage: {
-                          total_tokens: tokenTracking.total_tokens,
-                          prompt_tokens: tokenTracking.prompt_tokens,
-                          completion_tokens: tokenTracking.completion_tokens,
-                        },
-                      },
-                    },
-                  },
-                };
+                set(event, 'kibana.action.execution.get_ai.usage', {
+                  total_tokens: tokenTracking.total_tokens,
+                  prompt_tokens: tokenTracking.prompt_tokens,
+                  completion_tokens: tokenTracking.completion_tokens,
+                });
               }
             })
             .catch((err) => {
