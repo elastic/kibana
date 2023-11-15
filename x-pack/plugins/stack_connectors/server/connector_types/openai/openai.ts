@@ -192,6 +192,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     return { available: response.success };
   }
 
+  /**
+   * Responsible for invoking the streamApi method with the provided body and
+   * stream parameters set to true. It then returns a Transform stream that processes
+   * the response from the streamApi method and returns the response string alone.
+   * @param body - the OpenAI Invoke request body
+   */
   public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
     const res = (await this.streamApi({
       body: JSON.stringify(body),
@@ -222,6 +228,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
     };
   }
 }
+
+/**
+ * Takes in a readable stream of data and returns a Transform stream that
+ * parses the proprietary OpenAI response into a string of the response text alone,
+ * returning the response string to the stream
+ */
 const transformToString = () =>
   new Transform({
     transform(chunk, encoding, callback) {

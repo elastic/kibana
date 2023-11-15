@@ -18,7 +18,15 @@ interface OwnProps {
   result: ActionTypeExecutorRawResult<unknown>;
   validatedParams: Record<string, unknown>;
 }
-
+/*
+ * Calculates the total, prompt, and completion token counts from different types of responses.
+ * It handles both streamed and non-streamed responses from OpenAI and Bedrock.
+ * It returns null if it cannot calculate the token counts.
+ * @param actionTypeId the action type id
+ * @param logger the logger
+ * @param result the result from the action executor
+ * @param validatedParams the validated params from the action executor
+ */
 export const getGenAiTokenTracking = async ({
   actionTypeId,
   logger,
