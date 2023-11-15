@@ -427,7 +427,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('creating and using Painless date scripted fields', function describeIndexTests() {
+    describe('creating and using Painless date scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painDate';
 
       before(async () => {
