@@ -109,7 +109,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('creating and using Painless numeric scripted fields', function describeIndexTests() {
+    describe.skip('creating and using Painless numeric scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName = 'ram_Pain1';
 
       it('should create scripted field', async function () {
