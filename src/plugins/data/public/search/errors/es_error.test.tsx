@@ -21,7 +21,7 @@ describe('EsError', () => {
         },
       },
     } as IEsError;
-    const esError = new EsError(error);
+    const esError = new EsError(error, () => {});
 
     expect(typeof esError.attributes).toEqual('object');
     expect(esError.attributes).toEqual(error.attributes);
@@ -50,7 +50,7 @@ describe('EsError', () => {
         },
       },
     } as IEsError;
-    const esError = new EsError(error);
+    const esError = new EsError(error, () => {});
     expect(esError.message).toEqual(
       'EsError: The supplied interval [2q] could not be parsed as a calendar interval.'
     );

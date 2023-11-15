@@ -2728,7 +2728,7 @@
             "label": "actions",
             "description": [],
             "signature": [
-              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; state$?: Readonly<{} & { store: string; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
+              "Readonly<{ frequency?: Readonly<{} & { throttle: string | null; notifyWhen: \"onActionGroupChange\" | \"onActiveAlert\" | \"onThrottleInterval\"; summary: boolean; }> | undefined; alertsFilter?: Readonly<{ query?: Readonly<{ dsl?: string | undefined; } & { kql: string; filters: Readonly<{ query?: Record<string, any> | undefined; state$?: Readonly<{} & { store: string; }> | undefined; } & { meta: Record<string, any>; }>[]; }> | undefined; timeframe?: Readonly<{} & { days: (2 | 7 | 6 | 5 | 4 | 3 | 1)[]; hours: Readonly<{} & { start: string; end: string; }>; timezone: string; }> | undefined; } & {}> | undefined; uuid?: string | undefined; useAlertDataForTemplate?: boolean | undefined; } & { id: string; params: Record<string, any>; actionTypeId: string; group: string; }>[]"
             ],
             "path": "x-pack/plugins/alerting/server/application/rule/types/rule.ts",
             "deprecated": false,
@@ -4691,11 +4691,35 @@
         "signature": [
           "{ getContext: () => Context; getState: () => State; getUuid: () => string; getStart: () => string | null; hasContext: () => boolean; replaceState: (state: State) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
+          "<State, Context, ActionGroupIds, ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.AADAlert",
+            "text": "AADAlert"
+          },
+          ">; scheduleActions: (actionGroup: ActionGroupIds, context?: Context) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; setContext: (context: Context) => ",
+          "<State, Context, ActionGroupIds, ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.AADAlert",
+            "text": "AADAlert"
+          },
+          ">; setContext: (context: Context) => ",
           "Alert",
-          "<State, Context, ActionGroupIds>; }"
+          "<State, Context, ActionGroupIds, ",
+          {
+            "pluginId": "@kbn/alerts-as-data-utils",
+            "scope": "common",
+            "docId": "kibKbnAlertsAsDataUtilsPluginApi",
+            "section": "def-common.AADAlert",
+            "text": "AADAlert"
+          },
+          ">; }"
         ],
         "path": "x-pack/plugins/alerting/server/alert/alert.ts",
         "deprecated": false,
@@ -8156,6 +8180,20 @@
                 "text": "AlertsFilter"
               },
               " | undefined"
+            ],
+            "path": "x-pack/plugins/alerting/common/rule.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "alerting",
+            "id": "def-common.RuleAction.useAlertDataForTemplate",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "useAlertDataForTemplate",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "x-pack/plugins/alerting/common/rule.ts",
             "deprecated": false,
