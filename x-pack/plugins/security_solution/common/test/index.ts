@@ -14,10 +14,7 @@ type EssSecurityRoleName = keyof typeof essRoleDefinitions;
 export const KNOWN_SERVERLESS_ROLE_DEFINITIONS = serverlessRoleDefinitions;
 export const KNOWN_ESS_ROLE_DEFINITIONS = essRoleDefinitions;
 
-export type SecurityRoleName =
-  | ServerlessSecurityRoleName
-  | EssSecurityRoleName
-  | 'no_risk_engine_privileges';
+export type SecurityRoleName = ServerlessSecurityRoleName | EssSecurityRoleName;
 
 export enum ROLES {
   // Serverless roles
@@ -32,7 +29,6 @@ export enum ROLES {
   reader = 'reader',
   hunter = 'hunter',
   hunter_no_actions = 'hunter_no_actions',
-  // Test only roles
   no_risk_engine_privileges = 'no_risk_engine_privileges',
 }
 
