@@ -12,8 +12,8 @@ import {
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
 
-describe('logging service', () => {
-  describe('logs according to context name hierarchy', () => {
+describe('Error logging', () => {
+  describe('ES client errors', () => {
     let mockConsoleLog: jest.SpyInstance;
     let esServer: TestElasticsearchUtils;
     let kibanaServer: TestKibanaUtils;
@@ -54,7 +54,7 @@ describe('logging service', () => {
       await esServer.stop();
     });
 
-    it('uses the most specific context name', async () => {
+    it('logs errors following the expected pattern for the json layout', async () => {
       const esClient = kibanaServer.coreStart.elasticsearch.client.asInternalUser;
       const logger = kibanaServer.root.logger.get('console-json');
 
