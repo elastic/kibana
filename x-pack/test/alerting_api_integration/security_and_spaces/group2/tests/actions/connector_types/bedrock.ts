@@ -411,39 +411,14 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           });
 
           it.only('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
-            // const resp = await fetch(`/api/actions/connector/${bedrockActionId}/_execute`, {
-            //   method: 'POST',
-            //   headers: {
-            //     'Content-Type': 'application/json',
-            //     [ELASTIC_HTTP_VERSION_HEADER]: '1',
-            //     'kbn-xsrf': 'stream',
-            //   },
-            //   body: JSON.stringify({
-            //     params: {
-            //       subAction: 'invokeStream',
-            //       subActionParams: {
-            //         messages: [
-            //           {
-            //             role: 'user',
-            //             content: 'Hello world',
-            //           },
-            //         ],
-            //       },
-            //     },
-            //   }),
-            // });
-            // console.log('resp', resp);
             await new Promise<void>((resolve, reject) => {
-              const receivedChunks: any[] = [];
+              let responseBody: string = '';
 
               const passThrough = new PassThrough();
 
               supertest
                 .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
                 .set('kbn-xsrf', 'foo')
-                //   .set('Accept', '*/*')
-                //   .set('Accept-Encoding', 'chunked')
-                // .set('Content-Type', 'application/octet-stream')
                 .on('error', reject)
                 .send({
                   params: {
@@ -462,13 +437,11 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                 .pipe(passThrough);
 
               passThrough.on('data', (chunk) => {
-                // logs the state of the stream, but not the stream itself
-                console.log('passThrough.data???', chunk.toString());
-                receivedChunks.push(chunk.toString());
+                responseBody += chunk.toString();
               });
 
               passThrough.on('end', () => {
-                console.log('passThrough.end???', receivedChunks);
+                expect(responseBody).to.eql('Hello world, what a unique string!');
                 resolve();
               });
             });

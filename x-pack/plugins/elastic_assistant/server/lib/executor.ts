@@ -27,7 +27,6 @@ export const executeAction = async ({
   request,
   connectorId,
 }: Props): Promise<StaticResponse | Readable> => {
-  console.log('we made it!');
   const actionsClient = await actions.getActionsClientWithRequest(request);
 
   const actionResult = await actionsClient.execute({

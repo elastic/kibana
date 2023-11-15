@@ -25,7 +25,6 @@ export class BedrockSimulator extends Simulator {
     response: http.ServerResponse,
     data: Record<string, unknown>
   ) {
-    console.log('request.url!!!!!!!!!!!!!!!!: ', request.url);
     if (this.returnError) {
       return BedrockSimulator.sendErrorResponse(response);
     }
@@ -47,7 +46,7 @@ export class BedrockSimulator extends Simulator {
     response.statusCode = 200;
     response.setHeader('Content-Type', 'application/octet-stream');
     response.setHeader('Transfer-Encoding', 'chunked');
-    response.write(encodeBedrockResponse('hi'));
+    response.write(encodeBedrockResponse('Hello world, what a unique string!'));
     response.end();
   }
 

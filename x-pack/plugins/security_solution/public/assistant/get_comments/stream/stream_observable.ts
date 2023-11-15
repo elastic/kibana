@@ -48,7 +48,7 @@ export const getStreamObservable = (
                 `${API_ERROR}\n\n${JSON.parse(decoded).message}`
               : // all other responses are just strings (handled by subaction invokeStream)
                 decoded;
-            console.log('content?', content);
+
             chunks.push(content);
             observer.next({
               chunks,
@@ -67,7 +67,6 @@ export const getStreamObservable = (
     }
     read();
     return () => {
-      console.log('canceling stream');
       reader.cancel();
     };
   }).pipe(

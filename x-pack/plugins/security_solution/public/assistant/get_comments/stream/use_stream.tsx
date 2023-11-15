@@ -55,7 +55,6 @@ export const useStream = ({
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();
-    console.log('unsubscribe?');
     setLoading(false);
     amendMessage(pendingMessage ?? '');
   }, [amendMessage, pendingMessage, subscription]);
