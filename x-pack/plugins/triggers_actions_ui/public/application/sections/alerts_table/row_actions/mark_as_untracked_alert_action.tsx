@@ -40,7 +40,7 @@ export const MarkAsUntrackedAlertAction = memo(
         size="s"
         onClick={handleUntrackAlert}
       >
-        {i18n.translate('xpack.triggersActionsUi.alertsTable.actions.untrack', {
+        {i18n.translate('xpack.triggersActionsUI.alertsTable.actions.untrack', {
           defaultMessage: 'Mark as untracked',
         })}
       </EuiContextMenuItem>

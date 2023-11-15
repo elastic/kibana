@@ -43,7 +43,7 @@ export const ViewAlertDetailsAlertAction = memo(
           size="s"
           href={linkToAlert}
         >
-          {i18n.translate('xpack.triggersActionsUi.alertsTable.viewAlertDetails', {
+          {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
             defaultMessage: 'View alert details',
           })}
         </EuiContextMenuItem>
@@ -60,7 +60,7 @@ export const ViewAlertDetailsAlertAction = memo(
           setFlyoutAlert({ fields: Object.entries(alert).map(([k, v]) => [k, v?.[0]]) });
         }}
       >
-        {i18n.translate('xpack.triggersActionsUi.alertsTable.viewAlertDetails', {
+        {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {
           defaultMessage: 'View alert details',
         })}
       </EuiContextMenuItem>

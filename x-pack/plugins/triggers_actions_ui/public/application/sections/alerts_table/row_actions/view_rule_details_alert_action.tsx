@@ -42,7 +42,7 @@ export const ViewRuleDetailsAlertAction = memo(({ alert }: AlertActionsProps) =>
 
   return (
     <MenuItem data-test-subj="viewRuleDetails" key="viewRuleDetails" href={linkToRule} size="s">
-      {i18n.translate('xpack.triggersActionsUi.alertsTable.viewRuleDetails', {
+      {i18n.translate('xpack.triggersActionsUI.alertsTable.viewRuleDetails', {
         defaultMessage: 'View rule details',
       })}
     </MenuItem>
