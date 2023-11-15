@@ -37,11 +37,6 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'number',
     description: 'Repeat the test n number of times',
   })
-  .option('updateSnapshots', {
-    default: false,
-    type: 'boolean',
-    description: 'Update snapshots',
-  })
   .check((argv) => {
     const { inspect, runner } = argv;
     if (inspect && !runner) {
@@ -52,7 +47,7 @@ const { argv } = yargs(process.argv.slice(2))
   })
   .help();
 
-const { server, runner, grep, grepFiles, updateSnapshots } = argv;
+const { server, runner, grep, grepFiles } = argv;
 
 const license = 'basic';
 
@@ -67,7 +62,6 @@ const cmd = [
   'node',
   `../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
-  ...(updateSnapshots ? [`--updateSnapshots`] : []),
   `--config ../../../test/dataset_quality_api_integration/${license}/config.ts`,
 ].join(' ');
 
