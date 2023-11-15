@@ -218,12 +218,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           });
         });
 
-        describe.skip('lnsMetric', () => {
+        describe('lnsMetric', () => {
           it('propagates to Elasticsearch via "x-opaque-id" header', async () => {
             await logContains({
               description: 'execution context propagates to Elasticsearch via "x-opaque-id" header',
               predicate: checkHttpRequestId(
-                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsLegacyMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
+                'dashboard:dashboards:7adfa750-4c81-11e8-b3d7-01146121b73d;lens:lnsMetric:b766e3b8-4544-46ed-99e6-9ecc4847e2a2'
               ),
             });
           });
@@ -244,7 +244,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
                   description: '[Flights] Global Flight Dashboard',
                   child: {
                     type: 'lens',
-                    name: 'lnsLegacyMetric',
+                    name: 'lnsMetric',
                     id: 'b766e3b8-4544-46ed-99e6-9ecc4847e2a2',
                     description: '',
                     url: '/app/lens#/edit_by_value',
