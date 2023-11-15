@@ -10,11 +10,11 @@ import { ComponentType } from 'react';
 import { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiContextMenuPanelItemDescriptorEntry } from '@elastic/eui/src/components/context_menu/context_menu';
 import type { Capabilities, CoreStart } from '@kbn/core/public';
+import type { JobParamsProviderOptions } from '@kbn/reporting-plugin/public/share_context_menu';
+import { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
-import type { JobParamsProviderOptions } from '@kbn/reporting-plugin/public/share_context_menu';
-import { SearchSourceFields } from '@kbn/data-plugin/common';
 
 export type BrowserUrlService = UrlService<
   BrowserShortUrlClientFactoryCreateParams,
@@ -89,12 +89,14 @@ export interface ShareMenuProvider {
 
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 
-  jobProviderOptions: JobParamsProviderOptions | ((forShareUrl?: boolean) => {
-    searchSource: SearchSourceFields;
-    title: string;
-    objectType: string;
-    columns: string[] | undefined;
-})
+  jobProviderOptions:
+    | JobParamsProviderOptions
+    | ((forShareUrl?: boolean) => {
+        searchSource: SearchSourceFields;
+        title: string;
+        objectType: string;
+        columns: string[] | undefined;
+      });
 }
 
 interface UrlParamExtensionProps {

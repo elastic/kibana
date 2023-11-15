@@ -147,7 +147,7 @@ export class ReportingPublicPlugin
   ) {
     const { getStartServices, uiSettings } = core;
     const { home, management, screenshotMode, share, uiActions } = setupDeps;
-    
+
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
@@ -247,7 +247,7 @@ export class ReportingPublicPlugin
               usesUiCapabilities,
               theme: core.theme,
               overlays: core.overlays,
-            i18nStart: core.i18n,
+              i18nStart: core.i18n,
             })
           );
         }
