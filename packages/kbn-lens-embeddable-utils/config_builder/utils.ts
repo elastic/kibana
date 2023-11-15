@@ -10,10 +10,6 @@ import { SavedObjectReference } from '@kbn/core-saved-objects-common/src/server_
 import { DataViewSpec, DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
 import { GenericIndexPatternColumn, PersistedIndexPatternLayer } from '@kbn/lens-plugin/public';
-/* import {
-  ValueBasedLayerColumn,
-  ValueBasedPersistedState,
-} from '@kbn/lens-plugin/public/datasources/value_based/types'; */
 import {
   TextBasedLayerColumn,
   TextBasedPersistedState,
@@ -23,7 +19,7 @@ import {
   LensAttributes,
   LensBaseConfig,
   LensDataset,
-  // LensDatatableDataset,
+  LensDatatableDataset,
   LensESQLDataset,
 } from './types';
 
@@ -122,22 +118,28 @@ export function buildDatasourceStatesLayer(
   ) => PersistedIndexPatternLayer | undefined,
   getValueColumns: (config: any, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): [
-  'textBased' | 'formBased', // | 'valueBased' ,
-  (
-    | PersistedIndexPatternLayer
-    // | ValueBasedPersistedState['layers'][0]
-    | TextBasedPersistedState['layers'][0]
-    | undefined
-  )
+  'textBased' | 'formBased',
+  PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] | undefined
 ] {
-  // function buildValueLayer(config: any & LensBaseConfig): ValueBasedPersistedState['layers'][0] {
-  //   const newLayer = {
-  //     table: (config.dataset || layer.dataset) as LensDatatableDataset,
-  //     columns: getValueColumns(layer, i),
-  //   };
-  //
-  //   return newLayer;
-  // }
+  function buildValueLayer(config: any & LensBaseConfig): TextBasedPersistedState['layers'][0] {
+    const table = (config.dataset || layer.dataset) as LensDatatableDataset;
+    const newLayer = {
+      table,
+      columns: getValueColumns(layer, i),
+      allColumns: table.columns.map(
+        (column) =>
+          ({
+            fieldName: column.name,
+            columnId: column.id,
+            meta: column.meta,
+          } as TextBasedLayerColumn)
+      ),
+      index: '',
+      query: undefined,
+    };
+
+    return newLayer;
+  }
 
   function buildESQLLayer(config: any & LensBaseConfig): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i);
@@ -154,9 +156,9 @@ export function buildDatasourceStatesLayer(
 
   if ('query' in dataset) {
     return ['textBased', buildESQLLayer(layer)];
-  } /* else if ('type' in dataset) {
-    return ['valueBased', buildValueLayer(layer)];
-  } */
+  } else if ('type' in dataset) {
+    return ['textBased', buildValueLayer(layer)];
+  }
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
 }
 
@@ -177,12 +179,11 @@ export const buildDatasourceStates = async (
     i: number,
     dataView: DataView
   ) => PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[], // ValueBasedLayerColumn[],
+  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[],
   dataViewsAPI: DataViewsPublicPluginStart
 ) => {
   const layers: LensAttributes['state']['datasourceStates'] = {
     textBased: { layers: {} },
-    // valueBased: { layers: {} },
     formBased: { layers: {} },
   };
 
