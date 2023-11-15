@@ -15,7 +15,7 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
-import { getRenderCellValue } from '../render_cell_value';
+import { getRenderCellValue } from './render_cell_value';
 import { columns } from './default_columns';
 import {
   AlertActions,
@@ -43,29 +43,7 @@ export const getSloAlertsTableConfiguration = (
       },
     },
   ],
-  useActionsColumn: () => ({
-    renderCustomActionsRow: ({
-      alert,
-      id,
-      setFlyoutAlert,
-      refresh,
-    }: RenderCustomActionsRowArgs) => {
-      return (
-        <AlertActions
-          config={config}
-          data={Object.entries(alert).reduce<AlertActionsProps['data']>(
-            (acc, [field, value]) => [...acc, { field, value: value as string[] }],
-            []
-          )}
-          ecsData={{ _id: alert._id, _index: alert._index }}
-          id={id}
-          observabilityRuleTypeRegistry={observabilityRuleTypeRegistry}
-          setFlyoutAlert={setFlyoutAlert}
-          refresh={refresh}
-        />
-      );
-    },
-  }),
+
   useInternalFlyout: () => {
     const { header, body, footer } = useGetAlertFlyoutComponents(observabilityRuleTypeRegistry);
     return { header, body, footer };

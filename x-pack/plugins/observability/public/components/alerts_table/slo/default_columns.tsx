@@ -10,7 +10,7 @@
  * We have types and code at different imports because we don't want to import the whole package in the resulting webpack bundle for the plugin.
  * This way plugins can do targeted imports to reduce the final code bundle
  */
-import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS } from '@kbn/rule-data-utils';
+import { ALERT_DURATION, ALERT_REASON, ALERT_STATUS, ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { EuiDataGridColumn } from '@elastic/eui';
 import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
 import { i18n } from '@kbn/i18n';
@@ -25,7 +25,7 @@ export const columns: Array<
   {
     columnHeaderType: 'not-filtered',
     displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
-      defaultMessage: 'Alert Status',
+      defaultMessage: 'Status',
     }),
     id: ALERT_STATUS,
     initialWidth: 110,
@@ -37,6 +37,14 @@ export const columns: Array<
     }),
     id: ALERT_DURATION,
     initialWidth: 116,
+  },
+  {
+    columnHeaderType: 'not-filtered',
+    displayAsText: i18n.translate('xpack.observability.alertsTGrid.sloColumnDescription', {
+      defaultMessage: 'Rule name',
+    }),
+    id: ALERT_RULE_NAME,
+    initialWidth: 110,
   },
   {
     columnHeaderType: 'not-filtered',
