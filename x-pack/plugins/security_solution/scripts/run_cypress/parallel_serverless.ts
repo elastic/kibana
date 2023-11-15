@@ -33,10 +33,22 @@ interface ProductType {
   product_tier: string;
 }
 
+interface OverrideEntry {
+  docker_image: string;
+}
+
+interface ProductOverrides {
+  kibana?: OverrideEntry;
+  elasticsearch?: OverrideEntry;
+  fleet?: OverrideEntry;
+  cluster?: OverrideEntry;
+}
+
 interface CreateProjectRequestBody {
   name: string;
   region_id: string;
   product_types?: ProductType[];
+  overrides?: ProductOverrides;
 }
 
 interface Project {
@@ -94,6 +106,14 @@ async function createSecurityProject(
     productTypes.push(t as ProductType);
   });
   if (productTypes.length > 0) body.product_types = productTypes;
+
+  if (process.env.OVERRIDE_KIBANA && process.env.OVERRIDE_KIBANA === '1') {
+    body.overrides = {
+      kibana: {
+        docker_image: 'docker.elastic.co/kibana-ci/kibana-serverless:latest',
+      },
+    };
+  }
 
   try {
     const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
