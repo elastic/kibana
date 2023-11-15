@@ -11,7 +11,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { Query } from '@kbn/es-query';
-import { type SignificantTerm, SIGNIFICANT_TERM_TYPE } from '@kbn/ml-agg-utils';
+import { type SignificantItem, SIGNIFICANT_ITEM_TYPE } from '@kbn/ml-agg-utils';
 
 import { buildBaseFilterCriteria } from '@kbn/ml-query-utils';
 
@@ -30,8 +30,8 @@ export function buildExtendedBaseFilterCriteria(
   earliestMs?: number,
   latestMs?: number,
   query?: Query['query'],
-  selectedSignificantTerm?: SignificantTerm,
-  includeSelectedSignificantTerm = true,
+  selectedSignificantItem?: SignificantItem,
+  includeSelectedSignificantItem = true,
   selectedGroup?: GroupTableItem | null
 ): estypes.QueryDslQueryContainer[] {
   const filterCriteria = buildBaseFilterCriteria(timeFieldName, earliestMs, latestMs, query);
@@ -41,7 +41,7 @@ export function buildExtendedBaseFilterCriteria(
     const allItems = selectedGroup.groupItemsSortedByUniqueness;
     for (const item of allItems) {
       const { fieldName, fieldValue, key, type, docCount } = item;
-      if (type === SIGNIFICANT_TERM_TYPE.KEYWORD) {
+      if (type === SIGNIFICANT_ITEM_TYPE.KEYWORD) {
         groupFilter.push({ term: { [fieldName]: fieldValue } });
       } else {
         groupFilter.push(
@@ -57,18 +57,18 @@ export function buildExtendedBaseFilterCriteria(
     }
   }
 
-  if (includeSelectedSignificantTerm) {
-    if (selectedSignificantTerm) {
-      if (selectedSignificantTerm.type === 'keyword') {
+  if (includeSelectedSignificantItem) {
+    if (selectedSignificantItem) {
+      if (selectedSignificantItem.type === 'keyword') {
         filterCriteria.push({
-          term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
+          term: { [selectedSignificantItem.fieldName]: selectedSignificantItem.fieldValue },
         });
       } else {
         filterCriteria.push(
-          getCategoryQuery(selectedSignificantTerm.fieldName, [
+          getCategoryQuery(selectedSignificantItem.fieldName, [
             {
-              key: `${selectedSignificantTerm.key}`,
-              count: selectedSignificantTerm.doc_count,
+              key: `${selectedSignificantItem.key}`,
+              count: selectedSignificantItem.doc_count,
               examples: [],
             },
           ])
@@ -77,13 +77,13 @@ export function buildExtendedBaseFilterCriteria(
     } else if (selectedGroup) {
       filterCriteria.push(...groupFilter);
     }
-  } else if (selectedSignificantTerm && !includeSelectedSignificantTerm) {
-    if (selectedSignificantTerm.type === 'keyword') {
+  } else if (selectedSignificantItem && !includeSelectedSignificantItem) {
+    if (selectedSignificantItem.type === 'keyword') {
       filterCriteria.push({
         bool: {
           must_not: [
             {
-              term: { [selectedSignificantTerm.fieldName]: selectedSignificantTerm.fieldValue },
+              term: { [selectedSignificantItem.fieldName]: selectedSignificantItem.fieldValue },
             },
           ],
         },
@@ -92,10 +92,10 @@ export function buildExtendedBaseFilterCriteria(
       filterCriteria.push({
         bool: {
           must_not: [
-            getCategoryQuery(selectedSignificantTerm.fieldName, [
+            getCategoryQuery(selectedSignificantItem.fieldName, [
               {
-                key: `${selectedSignificantTerm.key}`,
-                count: selectedSignificantTerm.doc_count,
+                key: `${selectedSignificantItem.key}`,
+                count: selectedSignificantItem.doc_count,
                 examples: [],
               },
             ]),
@@ -103,7 +103,7 @@ export function buildExtendedBaseFilterCriteria(
         },
       });
     }
-  } else if (selectedGroup && !includeSelectedSignificantTerm) {
+  } else if (selectedGroup && !includeSelectedSignificantItem) {
     filterCriteria.push({
       bool: {
         must_not: [
