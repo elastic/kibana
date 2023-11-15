@@ -30,7 +30,7 @@ import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
-
+import { AlertSummary } from './alert_summary';
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
 
 interface SloEmbeddableDeps {
@@ -82,83 +82,18 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
 
     const I18nContext = this.deps.i18n.Context;
     const {
-      charts,
       triggersActionsUi: {
         alertsTableConfigurationRegistry,
         getAlertsStateTable: AlertsStateTable,
-        getAlertSummaryWidget: AlertSummaryWidget,
       },
     } = this.deps;
     const { slos } = this.getInput(); // TODO fix types
-    console.log(slos, '!!slos');
     const slosWithoutName = slos.map((slo) => ({
       id: slo.id,
       instanceId: slo.instanceId,
     }));
     const sloIdsAndInstanceIds = slosWithoutName.map(Object.values) as SloIdAndInstanceId[];
-    console.log(sloIdsAndInstanceIds, '!!sloIdsAndInstanceIds');
-    const chartProps = {
-      theme: 'light',
-      baseTheme: 'light',
-      onBrushEnd: () => {},
-    };
 
-    const alertSummaryTimeRange = {
-      utcFrom: '2023-11-10T15:00:00.000Z',
-      utcTo: '2023-11-15T15:00:00.000Z',
-      fixedInterval: '60s',
-    };
-    const esQuery = {
-      bool: {
-        filter: [
-          {
-            range: {
-              '@timestamp': {
-                gte: 'now-5m/m',
-              },
-            },
-          },
-          {
-            term: {
-              'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
-            },
-          },
-          {
-            term: {
-              'kibana.alert.status': 'active',
-            },
-          },
-        ],
-        should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-          bool: {
-            filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.instanceId': instanceId } }],
-          },
-        })),
-        minimum_should_match: 1,
-      },
-    };
-    // const esQuery = {
-    //   bool: {
-    //     // should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-    //     //   bool: {
-    //     //     filter: [
-    //     //       { term: { 'slo.id': sloId } },
-    //     //       { term: { 'slo.instanceId': instanceId } },
-    //     //     ],
-    //     //   },
-    //     // })),
-    //     minimum_should_match: 1,
-    //   },
-    // };
-
-    console.log(
-      sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-        bool: {
-          filter: [{ term: { 'slo.id': sloId } }, { term: { 'slo.instanceId': instanceId } }],
-        },
-      })),
-      '!!aaaa'
-    );
     const deps = this.deps;
     ReactDOM.render(
       <I18nContext>
@@ -175,94 +110,43 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
                 <EuiFlexItem>
                   <AlertsStateTable
                     query={{
-                      // bool: {
-                      //   filter: [
-                      //     // TODO alerts for multiple SLOs
-                      //     // { term: { 'slo.id': sloId } },
-                      //     // { term: { 'slo.instanceId': sloInstanceId ?? ALL_VALUE } },
-                      //     { term: { 'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974' } }, // TEMP hardcode it, until I implement explicit input
-                      //     { term: { 'slo.instanceId': 'blast-mail.co' } },
-                      //   ],
-                      // },
-                      // 12 ALERTS
-                      // bool: {
-                      //   filter: [
-                      //     {
-                      //       term: {
-                      //         'slo.id': '9270f550-7b5f-11ee-8f2d-95d71754a584',
-                      //       },
-                      //     },
-                      //     {
-                      //       term: {
-                      //         'slo.instanceId': '*',
-                      //       },
-                      //     },
-                      //   ],
-                      // },
-                      // bool: {
-                      //   should: [
-                      //     {
-                      //       bool: {
-                      //         filter: [
-                      //           {
-                      //             term: {
-                      //               'slo.id': '9270f550-7b5f-11ee-8f2d-95d71754a584',
-                      //             },
-                      //           },
-                      //           {
-                      //             term: {
-                      //               'slo.instanceId': '*',
-                      //             },
-                      //           },
-                      //         ],
-                      //       },
-                      //     },
-                      //     {
-                      //       bool: {
-                      //         filter: [
-                      //           {
-                      //             term: {
-                      //               'slo.id': '7bd92700-743d-11ee-bd9f-0fb31b48b974',
-                      //             },
-                      //           },
-                      //           {
-                      //             term: {
-                      //               'slo.instanceId': 'blast-mail.co',
-                      //             },
-                      //           },
-                      //         ],
-                      //       },
-                      //     },
-                      //   ],
-                      //   minimum_should_match: 1,
-                      // },
                       bool: {
-                        // filter: [
-                        //   {
-                        //     term: {
-                        //       'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
-                        //     },
-                        //   },
-                        //   {
-                        //     term: {
-                        //       'kibana.alert.status': 'active',
-                        //     },
-                        //   },
-                        // ],
-                        should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
-                          bool: {
-                            filter: [
-                              { term: { 'slo.id': sloId } },
-                              { term: { 'slo.instanceId': instanceId } },
-                            ],
+                        filter: [
+                          {
+                            term: {
+                              'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
+                            },
                           },
-                        })),
-                        minimum_should_match: 1,
+                          // {
+                          //   term: {
+                          //     'kibana.alert.status': 'active',
+                          //   },
+                          // },
+                          {
+                            range: {
+                              '@timestamp': {
+                                gte: 'now-5m/m', // TODO read from datepicker
+                              },
+                            },
+                          },
+                          {
+                            bool: {
+                              should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
+                                bool: {
+                                  filter: [
+                                    { term: { 'slo.id': sloId } },
+                                    { term: { 'slo.instanceId': instanceId } },
+                                  ],
+                                },
+                              })),
+                            },
+                          },
+                        ],
                       },
                     }}
                     alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                     configurationId={AlertConsumers.OBSERVABILITY}
-                    featureIds={[AlertConsumers.SLO]}
+                    featureIds={[AlertConsumers.SLO, AlertConsumers.OBSERVABILITY]}
                     hideLazyLoader
                     id={ALERTS_TABLE_ID}
                     pageSize={ALERTS_PER_PAGE}
