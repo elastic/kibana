@@ -387,7 +387,8 @@ export class ActionsClientLlm extends LLM {
     //   );
     // }
     // this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
-
+  }
+}
 function getMessageFromChunks(chunks) {
   let message = '';
   chunks.forEach((chunk) => {
