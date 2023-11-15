@@ -8,7 +8,6 @@
 import { EuiButtonIcon, EuiFlyout, EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import { UnifiedDocViewer, useEsDocSearch } from '@kbn/unified-doc-viewer-plugin/public';
 import React, { useState, MouseEvent } from 'react';
-import { UnifiedDocViewer } from '@kbn/unified-doc-viewer-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { LoadingState } from '../../monitors_page/overview/overview/monitor_detail_flyout';
