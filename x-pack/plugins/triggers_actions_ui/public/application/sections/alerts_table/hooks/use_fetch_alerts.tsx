@@ -258,6 +258,8 @@ const useFetchAlerts = ({
                     ecsAlertsData,
                     totalAlerts,
                   });
+                  dispatch({ type: 'loading', loading: false });
+
                   searchSubscription$.current.unsubscribe();
                 }
               },
