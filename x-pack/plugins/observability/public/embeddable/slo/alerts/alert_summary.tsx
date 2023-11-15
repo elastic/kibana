@@ -8,7 +8,7 @@ import React from 'react';
 import { observabilityAlertFeatureIds } from '../../../../common/constants';
 type SloIdAndInstanceId = [string, string];
 
-export function AlertSummary({ slos, deps }) {
+export function AlertSummary({ slos, deps, timeRange }) {
   const {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
@@ -24,7 +24,7 @@ export function AlertSummary({ slos, deps }) {
         {
           range: {
             '@timestamp': {
-              gte: 'now-5m/m',
+              gte: timeRange.from,
             },
           },
         },
@@ -33,11 +33,11 @@ export function AlertSummary({ slos, deps }) {
             'kibana.alert.rule.rule_type_id': 'slo.rules.burnRate',
           },
         },
-        {
-          term: {
-            'kibana.alert.status': 'active',
-          },
-        },
+        // {
+        //   term: {
+        //     'kibana.alert.status': 'active',
+        //   },
+        // },
       ],
       should: sloIdsAndInstanceIds.map(([sloId, instanceId]) => ({
         bool: {

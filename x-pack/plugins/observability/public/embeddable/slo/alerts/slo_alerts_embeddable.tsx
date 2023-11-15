@@ -86,7 +86,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
         getAlertsStateTable: AlertsStateTable,
       },
     } = this.deps;
-    const { slos } = this.getInput(); // TODO fix types
+    const { slos, timeRange } = this.getInput(); // TODO fix types
     const slosWithoutName = slos.map((slo) => ({
       id: slo.id,
       instanceId: slo.instanceId,
@@ -104,7 +104,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
                 <SloSummary slos={slos} />
               </EuiFlexItem> */}
                 <EuiFlexItem>
-                  <AlertSummary slos={slos} deps={deps} />
+                  <AlertSummary slos={slos} deps={deps} timeRange={timeRange} />
                 </EuiFlexItem>
                 <EuiFlexItem>
                   <AlertsStateTable
@@ -124,7 +124,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
                           {
                             range: {
                               '@timestamp': {
-                                gte: 'now-5m/m', // TODO read from datepicker
+                                gte: timeRange.from, // TODO read from datepicker
                               },
                             },
                           },
