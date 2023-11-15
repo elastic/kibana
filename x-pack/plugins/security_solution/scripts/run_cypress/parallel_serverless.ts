@@ -101,11 +101,18 @@ async function createSecurityProject(
   if (productTypes.length > 0) body.product_types = productTypes;
 
   try {
+    log.info('BELOW THE BODY I WILL SEND');
+    log.info(body);
+
     const response = await axios.post(`${BASE_ENV_URL}/api/v1/serverless/projects/security`, body, {
       headers: {
         Authorization: `ApiKey ${apiKey}`,
       },
     });
+
+    log.info('BELOW THE RESPONSE');
+    log.info(response);
+
     return {
       name: response.data.name,
       id: response.data.id,
