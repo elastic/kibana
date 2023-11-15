@@ -1292,7 +1292,7 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
 
-      it('should set no expiration time when the start_time is set to now (immediate rollout period)', async () => {
+      it('should set a long expiration time when the start_time is set to now (immediate rollout period)', async () => {
         await es.update({
           id: 'agent1',
           refresh: 'wait_for',
@@ -1331,8 +1331,18 @@ export default function (providerContext: FtrProviderContext) {
         });
 
         const action: any = actionsRes.hits.hits[0]._source;
-        expect(action).to.have.keys('agents', 'start_time', 'minimum_execution_duration');
-        expect(action).not.to.have.keys('expiration');
+        expect(action).to.have.keys(
+          'agents',
+          'start_time',
+          'minimum_execution_duration',
+          'expiration'
+        );
+        // calculate 1 month from now
+        const today = new Date();
+        const nextMonthUnixTime = today.setMonth(today.getMonth() + 1);
+        const nextMonth = new Date(nextMonthUnixTime).toISOString().slice(0, 10);
+
+        expect(action.expiration).contain(`${nextMonth}`);
         expect(action.agents).contain('agent1');
         expect(action.agents).contain('agent2');
       });
