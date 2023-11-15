@@ -57,18 +57,21 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     allowEmbed,
     shareMenuItems,
     objectTypeTitle,
+    objectId,
   } = props;
 
   const openLinkModal = () => {
     const session = openModal(
       toMountPoint(
         <LinkModal
-          isEmbedded={false}
-          allowShortUrl={false}
+          isEmbedded={true}
+          allowShortUrl={true}
           onClose={() => {
             session.close();
           }}
           urlService={urlService}
+          objectId={objectId}
+          objectType={objectType}
         />,
         { theme, i18n: i18nStart }
       ),
@@ -83,8 +86,8 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     const session = openModal(
       toMountPoint(
         <EmbedModal
-          isEmbedded={false}
-          allowShortUrl={false}
+          isEmbedded={true}
+          allowShortUrl={true}
           onClose={() => {
             session.close();
           }}
@@ -99,8 +102,6 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
       }
     );
   };
-
-
 
   const getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
@@ -131,13 +132,10 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
 
     shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
-      console.log({shareMenuItem})
-      menuItems.push(
-        {
-          icon: 'document',
-          ...shareMenuItem,
-        }
-      )
+      menuItems.push({
+        icon: 'document',
+        ...shareMenuItem,
+      });
       panels.push({
         ...panels,
         id: panelId,

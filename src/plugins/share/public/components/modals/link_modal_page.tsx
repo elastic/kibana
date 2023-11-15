@@ -41,6 +41,7 @@ interface LinksModalPageProps {
   };
   urlService: BrowserUrlService;
   shareableUrl?: string;
+  objectType: string;
 }
 
 export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) => {
@@ -53,7 +54,9 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     shareableUrlLocatorParams,
     urlService,
     onClose,
+    objectType,
   } = props;
+
   const isMounted = useMountedState();
   const [, isCreatingShortUrl] = useState<boolean>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
@@ -104,12 +107,13 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     return objectId === undefined || objectId === '';
   };
 
-  const saveNeeded = isNotSaved() && (
-    <FormattedMessage
-      id="share.linkModalPage.saveWorkDescription"
-      defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
-    />
-  );
+  const saveNeeded =
+    isNotSaved() && objectType === 'dashboard' ? (
+      <FormattedMessage
+        id="share.linkModalPage.saveWorkDescription"
+        defaultMessage="One or more panels on this dashboard have changed. Before you generate a snapshot, save the dashboard."
+      />
+    ) : null;
 
   const getSavedObjectUrl = () => {
     if (isNotSaved()) {

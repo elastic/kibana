@@ -11,9 +11,9 @@ import { ThemeServiceSetup } from '@kbn/core-theme-browser';
 import { IUiSettingsClient } from '@kbn/core/public';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
+import { BaseParams } from '@kbn/reporting-common/types';
 import React, { FC, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
-import { BaseParams } from '../../common';
 import { ReportingAPIClient } from '../lib/reporting_api_client';
 
 export interface CsvModalProps {
