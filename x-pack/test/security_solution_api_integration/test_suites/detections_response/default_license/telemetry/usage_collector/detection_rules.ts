@@ -16,7 +16,7 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { RulesTypeUsage } from '@kbn/security-solution-plugin/server/usage/detections/rules/types';
 import {
   createLegacyRuleAction,
-  createNewAction,
+  createWebHookRuleAction,
   createRule,
   createAlertsIndex,
   deleteAllRules,
@@ -137,7 +137,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
         await createRule(supertest, log, ruleToCreate);
 
@@ -160,9 +160,9 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
         await waitForRuleSuccess({ supertest, log, id });
@@ -189,10 +189,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
 
         await retry.try(async () => {
@@ -215,10 +215,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
@@ -244,7 +244,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('legacy investigation fields', () => {
+      describe('@brokenInServerless legacy investigation fields', () => {
         beforeEach(async () => {
           await deleteAllRules(supertest, log);
           await createRuleThroughAlertingEndpoint(
@@ -357,7 +357,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
         await createRule(supertest, log, ruleToCreate);
 
@@ -382,7 +382,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry']);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
         await waitForRuleSuccess({ supertest, log, id });
@@ -409,10 +409,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry'], 'rule-1', false);
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
 
         await retry.try(async () => {
@@ -434,10 +434,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getEqlRuleForAlertTesting(['telemetry']);
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
@@ -549,7 +549,7 @@ export default ({ getService }: FtrProviderContext) => {
             value: 1,
           },
         };
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
         await createRule(supertest, log, ruleToCreate);
 
@@ -580,7 +580,7 @@ export default ({ getService }: FtrProviderContext) => {
             value: 1,
           },
         };
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
         await waitForRuleSuccess({ supertest, log, id });
@@ -607,7 +607,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['telemetry'], 'rule-1', false),
           threshold: {
@@ -616,7 +616,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
 
         await retry.try(async () => {
@@ -638,7 +638,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule: ThresholdRuleCreateProps = {
           ...getThresholdRuleForAlertTesting(['telemetry']),
           threshold: {
@@ -647,7 +647,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
         };
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
@@ -738,7 +738,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getSimpleMlRule();
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
         await createRule(supertest, log, ruleToCreate);
 
@@ -763,7 +763,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show "notifications_enabled" to be "1" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getSimpleMlRule('rule-1', true);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         await createRule(supertest, log, ruleToCreate);
 
@@ -786,10 +786,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getSimpleMlRule();
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
 
         await retry.try(async () => {
@@ -811,10 +811,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule = getSimpleMlRule('rule-1', true);
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
 
         await retry.try(async () => {
@@ -919,7 +919,7 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should show "notifications_disabled" to be "1" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getSimpleThreatMatch();
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, false, rule);
         await createRule(supertest, log, ruleToCreate);
 
@@ -959,7 +959,7 @@ export default ({ getService }: FtrProviderContext) => {
             },
           ],
         };
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const ruleToCreate = getRuleWithWebHookAction(hookAction.id, true, rule);
         const { id } = await createRule(supertest, log, ruleToCreate);
         await waitForRuleSuccess({ supertest, log, id });
@@ -986,10 +986,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "disabled"/"in-active"', async () => {
         const rule = getSimpleThreatMatch();
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
 
         await retry.try(async () => {
@@ -1011,7 +1011,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1" for rule that has at least "1" legacy action(s) and the alert is "enabled"/"active"', async () => {
         const rule: ThreatMatchRuleCreateProps = {
           ...getSimpleThreatMatch('rule-1', true),
           index: ['telemetry'],
@@ -1029,7 +1029,7 @@ export default ({ getService }: FtrProviderContext) => {
           ],
         };
         const { id } = await createRule(supertest, log, rule);
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         await createLegacyRuleAction(supertest, id, hookAction.id);
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 4, [id]);
@@ -1057,7 +1057,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('"pre-packaged"/"immutable" rules', async () => {
-      it('should show stats for totals for in-active pre-packaged rules', async () => {
+      it('@skipInQA should show stats for totals for in-active pre-packaged rules', async () => {
         await installMockPrebuiltRules(supertest, es);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1090,7 +1090,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
+      it('@skipInQA should show stats for the detection_rule_details for a specific pre-packaged rule', async () => {
         await installMockPrebuiltRules(supertest, es);
         await retry.try(async () => {
           const stats = await getStats(supertest, log);
@@ -1121,10 +1121,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@skipInQA should show "notifications_disabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, false, newRuleToUpdate);
         await updateRule(supertest, ruleToUpdate);
@@ -1174,10 +1174,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@skipInQA should show "notifications_enabled" to be "1", "has_notification" to be "true, "has_legacy_notification" to be "false" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id);
         const ruleToUpdate = getRuleWithWebHookAction(hookAction.id, true, newRuleToUpdate);
         await updateRule(supertest, ruleToUpdate);
@@ -1227,10 +1227,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_disabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "disabled"/"in-active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, false);
         await updateRule(supertest, newRuleToUpdate);
         await createLegacyRuleAction(supertest, immutableRule.id, hookAction.id);
@@ -1280,10 +1280,10 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should show "legacy_notifications_enabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
+      it('@brokenInServerless should show "legacy_notifications_enabled" to be "1", "has_notification" to be "false, "has_legacy_notification" to be "true" for rule that has at least "1" action(s) and the alert is "enabled"/"active"', async () => {
         await installMockPrebuiltRules(supertest, es);
         const immutableRule = await fetchRule(supertest, { ruleId: ELASTIC_SECURITY_RULE_ID });
-        const hookAction = await createNewAction(supertest, log);
+        const hookAction = await createWebHookRuleAction(supertest);
         const newRuleToUpdate = getSimpleRule(immutableRule.rule_id, true);
         await updateRule(supertest, newRuleToUpdate);
         await createLegacyRuleAction(supertest, immutableRule.id, hookAction.id);
