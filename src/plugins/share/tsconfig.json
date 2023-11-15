@@ -17,6 +17,9 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/core-analytics-browser",
     "@kbn/shared-ux-error-boundary",
+    "@kbn/core-capabilities-common",
+    "@kbn/react-kibana-mount",
+    "@kbn/core-lifecycle-browser",
   ],
   "exclude": [
     "target/**/*",
