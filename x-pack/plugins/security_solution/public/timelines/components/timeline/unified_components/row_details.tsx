@@ -4,10 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo, useCallback, useRef, useContext } from 'react';
+import React, { useMemo, useCallback, useRef, useContext, memo, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { EuiDataGridSetCellProps } from '@elastic/eui';
 import type { TimelineItem } from '../../../../../common/search_strategy';
 import type { State } from '../../../../common/store';
 import { appSelectors } from '../../../../common/store';
@@ -28,9 +29,10 @@ const ARIA_ROW_INDEX_OFFSET = 2;
 interface Props {
   rowIndex: number;
   event: TimelineItem;
+  setCellProps?: (props: EuiDataGridSetCellProps) => void;
 }
 
-export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
+export const RowDetailsComponent: React.FC<Props> = memo(({ rowIndex, event, setCellProps }) => {
   const dispatch = useDispatch();
   const { timelineId, notesMap, enabledRowRenderers, setNotesMap } =
     useContext(TimelineDataTableContext);
@@ -46,6 +48,12 @@ export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
       };
     });
   }, [event._id, notesMap, setNotesMap]);
+
+  useEffect(() => {
+    if (setCellProps) {
+      setCellProps({ style: { width: '100%', height: 'auto' } });
+    }
+  }, [setCellProps]);
 
   const { timeline: { eventIdToNoteIds, pinnedEventIds } = timelineDefaults } = useSelector(
     (state: State) => timelineBodySelector(state, timelineId)
@@ -122,7 +130,8 @@ export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
       ) : null}
     </>
   );
-};
+});
+RowDetailsComponent.displayName = 'RowDetailsComponent';
 
 export const RowDetails = React.memo(RowDetailsComponent);
 // eslint-disable-next-line import/no-default-export

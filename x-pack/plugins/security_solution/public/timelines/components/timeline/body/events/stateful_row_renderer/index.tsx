@@ -7,7 +7,7 @@
 
 import { noop } from 'lodash/fp';
 import { EuiFocusTrap, EuiOutsideClickDetector, EuiScreenReaderOnly } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useMemo, memo } from 'react';
 
 import {
   ARIA_COLINDEX_ATTRIBUTE,
@@ -34,38 +34,48 @@ import * as i18n from '../translations';
  *   which focuses the current or next row, respectively.
  * - A screen-reader-only message provides additional context and instruction
  */
-export const StatefulRowRenderer = ({
-  ariaRowindex,
-  containerRef,
-  event,
-  lastFocusedAriaColindex,
-  rowRenderers,
-  timelineId,
-}: {
-  ariaRowindex: number;
-  containerRef: React.MutableRefObject<HTMLDivElement | null>;
-  event: TimelineItem;
-  lastFocusedAriaColindex: number;
-  rowRenderers: RowRenderer[];
-  timelineId: string;
-}) => {
-  const { focusOwnership, onFocus, onKeyDown, onOutsideClick } = useStatefulEventFocus({
+export const StatefulRowRenderer = memo(
+  ({
     ariaRowindex,
-    colindexAttribute: ARIA_COLINDEX_ATTRIBUTE,
     containerRef,
+    event,
     lastFocusedAriaColindex,
-    onColumnFocused: noop,
-    rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
-  });
+    rowRenderers,
+    timelineId,
+  }: {
+    ariaRowindex: number;
+    containerRef: React.MutableRefObject<HTMLDivElement | null>;
+    event: TimelineItem;
+    lastFocusedAriaColindex: number;
+    rowRenderers: RowRenderer[];
+    timelineId: string;
+  }) => {
+    const { focusOwnership, onFocus, onKeyDown, onOutsideClick } = useStatefulEventFocus({
+      ariaRowindex,
+      colindexAttribute: ARIA_COLINDEX_ATTRIBUTE,
+      containerRef,
+      lastFocusedAriaColindex,
+      onColumnFocused: noop,
+      rowindexAttribute: ARIA_ROWINDEX_ATTRIBUTE,
+    });
 
-  const rowRenderer = useMemo(
-    () => getRowRenderer({ data: event.ecs, rowRenderers }),
-    [event.ecs, rowRenderers]
-  );
+    const rowRenderer = useMemo(() => {
+      const foundRowRenderer = getRowRenderer({ data: event.ecs, rowRenderers });
+      if (!foundRowRenderer) {
+        return null;
+      } else {
+        return foundRowRenderer.renderRow({
+          data: event.ecs,
+          isDraggable: true,
+          scopeId: timelineId,
+        });
+      }
+    }, [event.ecs, rowRenderers, timelineId]);
 
-  const content = useMemo(
-    () =>
-      rowRenderer && (
+    if (!rowRenderer) {
+      return null;
+    } else {
+      return (
         // eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions
         <div className={getRowRendererClassName(ariaRowindex)} role="dialog" onFocus={onFocus}>
           <EuiOutsideClickDetector onOutsideClick={onOutsideClick}>
@@ -73,28 +83,12 @@ export const StatefulRowRenderer = ({
               <EuiScreenReaderOnly data-test-subj="eventRendererScreenReaderOnly">
                 <p>{i18n.YOU_ARE_IN_AN_EVENT_RENDERER(ariaRowindex)}</p>
               </EuiScreenReaderOnly>
-              <div onKeyDown={onKeyDown}>
-                {rowRenderer.renderRow({
-                  data: event.ecs,
-                  isDraggable: true,
-                  scopeId: timelineId,
-                })}
-              </div>
+              <div onKeyDown={onKeyDown}>{rowRenderer}</div>
             </EuiFocusTrap>
           </EuiOutsideClickDetector>
         </div>
-      ),
-    [
-      ariaRowindex,
-      event.ecs,
-      focusOwnership,
-      onFocus,
-      onKeyDown,
-      onOutsideClick,
-      rowRenderer,
-      timelineId,
-    ]
-  );
-
-  return content;
-};
+      );
+    }
+  }
+);
+StatefulRowRenderer.displayName = 'StatefulRowRenderer';

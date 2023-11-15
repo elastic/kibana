@@ -307,13 +307,6 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
           ...column.headerCellProps,
         },
         rowCellRender: (cveProps: EuiDataGridCellValueElementProps) => {
-          if (expandedDoc && expandedDoc.id === discoverGridRows[cveProps.rowIndex].id) {
-            cveProps.setCellProps({
-              className: 'dscDocsGrid__cell--expanded',
-            });
-          } else {
-            cveProps.setCellProps({ style: undefined });
-          }
           return (
             <Actions
               ariaRowindex={cveProps.rowIndex}
@@ -332,6 +325,8 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
               columnValues={column.columnValues ?? ''}
               ecsData={discoverGridRows[cveProps.rowIndex].ecs}
               eventId={discoverGridRows[cveProps.rowIndex].id}
+              expandedDoc={expandedDoc}
+              setCellProps={cveProps.setCellProps}
               eventIdToNoteIds={eventIdToNoteIds}
               loadingEventIds={loadingEventIds}
               onRowSelected={column.onRowSelected ? column.onRowSelected : () => {}}
@@ -410,8 +405,13 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
         // When rendering this custom cell, we'll want to override
         // the automatic width/heights calculated by EuiDataGrid
         rowCellRender: ({ setCellProps, rowIndex }) => {
-          setCellProps({ style: { width: '100%', height: 'auto' } });
-          return <RowDetails event={discoverGridRows[rowIndex]} rowIndex={rowIndex} />;
+          return (
+            <RowDetails
+              event={discoverGridRows[rowIndex]}
+              rowIndex={rowIndex}
+              setCellProps={setCellProps}
+            />
+          );
         },
       },
     ],
@@ -558,6 +558,44 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
     [dispatch, rowHeight, timelineId]
   );
 
+  const services = useMemo(() => {
+    return {
+      theme,
+      fieldFormats,
+      storage,
+      toastNotifications: toastsService,
+      uiSettings,
+      dataViewFieldEditor,
+      data: dataPluginContract,
+    };
+  }, [
+    theme,
+    fieldFormats,
+    storage,
+    toastsService,
+    uiSettings,
+    dataViewFieldEditor,
+    dataPluginContract,
+  ]);
+
+  const timelineDataTableContextValue = useMemo(() => {
+    return {
+      notesMap,
+      setNotesMap,
+      confirmingNoteId,
+      setConfirmingNoteId,
+      timelineId,
+      enabledRowRenderers,
+    };
+  }, [
+    notesMap,
+    setNotesMap,
+    confirmingNoteId,
+    setConfirmingNoteId,
+    timelineId,
+    enabledRowRenderers,
+  ]);
+
   if (!dataView) {
     return null;
   }
@@ -574,16 +612,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             css={progressStyle}
           />
         )}
-        <TimelineDataTableContext.Provider
-          value={{
-            notesMap,
-            setNotesMap,
-            confirmingNoteId,
-            setConfirmingNoteId,
-            timelineId,
-            enabledRowRenderers,
-          }}
-        >
+        <TimelineDataTableContext.Provider value={timelineDataTableContextValue}>
           <DataGridMemoized
             ariaLabelledBy="timelineDocumentsAriaLabel"
             className={'udtTimeline'}
@@ -610,15 +639,7 @@ export const TimelineDataTableComponent: React.FC<Props> = ({
             onUpdateRowHeight={onUpdateRowHeight}
             onFieldEdited={onFieldEdited}
             cellActionsTriggerId={SecurityCellActionsTrigger.DEFAULT}
-            services={{
-              theme,
-              fieldFormats,
-              storage,
-              toastNotifications: toastsService,
-              uiSettings,
-              dataViewFieldEditor,
-              data: dataPluginContract,
-            }}
+            services={services}
             visibleCellActions={3}
             externalCustomRenderers={customColumnRenderers}
             renderDocumentView={() => <></>}

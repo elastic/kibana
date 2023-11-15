@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useContext, useMemo, useRef } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
@@ -65,6 +65,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   ecsData,
   eventId,
   eventIdToNoteIds,
+  expandedDoc,
+  setCellProps,
   isEventPinned = false,
   isEventViewer = false,
   loadingEventIds,
@@ -111,6 +113,16 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventId, onRowSelected]
   );
+
+  useEffect(() => {
+    if (expandedDoc && expandedDoc.id === eventId && setCellProps) {
+      setCellProps({
+        className: 'dscDocsGrid__cell--expanded',
+      });
+    } else if (setCellProps) {
+      setCellProps({ style: undefined });
+    }
+  }, [eventId, expandedDoc, setCellProps]);
 
   const toggleShowNotesEvent = useCallback(() => {
     setNotesMap((prevShowNotes: NotesMap) => {

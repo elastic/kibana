@@ -47,7 +47,7 @@ interface Props {
   notes: TimelineResultNote[];
   showAddNote: boolean;
   toggleShowAddNote: () => void;
-  eventIdToNoteIds: Readonly<Record<string, string[]>>;
+  eventIdToNoteIds?: Readonly<Record<string, string[]>>;
 }
 
 /** A view for entering and reviewing notes */
