@@ -5,30 +5,33 @@
  * 2.0.
  */
 
-import { isEmpty } from 'lodash';
+import { isEmpty, isArray } from 'lodash';
 import Boom from '@hapi/boom';
 
-import type { CasesFindRequest, CasesFindResponse } from '../../../common/types/api';
-import { CasesFindRequestRt, CasesFindResponseRt } from '../../../common/types/api';
+import type { CustomFieldsConfiguration } from '../../../common/types/domain';
+import type { CasesSearchRequest, CasesFindResponse } from '../../../common/types/api';
+import { CasesSearchRequestRt, CasesFindResponseRt } from '../../../common/types/api';
 import { decodeWithExcessOrThrow } from '../../../common/api';
 
 import { createCaseError } from '../../common/error';
 import { asArray, transformCases } from '../../common/utils';
 import { constructQueryOptions, constructSearch } from '../utils';
 import { Operations } from '../../authorization';
-import type { CasesClientArgs } from '..';
+import type { CasesClient, CasesClientArgs } from '..';
 import { LICENSING_CASE_ASSIGNMENT_FEATURE } from '../../common/constants';
-import type { CasesFindQueryParams } from '../types';
+import type { CasesSearchParams } from '../types';
 import { decodeOrThrow } from '../../../common/api/runtime_types';
+import { validateSearchCasesCustomFields } from './validators';
 
 /**
  * Retrieves a case and optionally its comments.
  *
  * @ignore
  */
-export const find = async (
-  params: CasesFindRequest,
-  clientArgs: CasesClientArgs
+export const search = async (
+  params: CasesSearchRequest,
+  clientArgs: CasesClientArgs,
+  casesClient: CasesClient
 ): Promise<CasesFindResponse> => {
   const {
     services: { caseService, licensingService },
@@ -39,13 +42,18 @@ export const find = async (
   } = clientArgs;
 
   try {
-    const queryParams = decodeWithExcessOrThrow(CasesFindRequestRt)(params);
+    const paramArgs = decodeWithExcessOrThrow(CasesSearchRequestRt)(params);
+    const configArgs = paramArgs.owner ? { owner: paramArgs.owner } : {};
+    const configurations = await casesClient.configure.get(configArgs);
+    const customFieldsConfiguration: CustomFieldsConfiguration = configurations
+      .map((config) => config.customFields)
+      .flat();
 
     /**
      * Assign users to a case is only available to Platinum+
      */
 
-    if (!isEmpty(queryParams.assignees)) {
+    if (!isEmpty(paramArgs.assignees)) {
       const hasPlatinumLicenseOrGreater = await licensingService.isAtLeastPlatinum();
 
       if (!hasPlatinumLicenseOrGreater) {
@@ -57,39 +65,67 @@ export const find = async (
       licensingService.notifyUsage(LICENSING_CASE_ASSIGNMENT_FEATURE);
     }
 
+    /**
+     * Validate custom fields
+     */
+    if (paramArgs?.customFields && !isEmpty(paramArgs?.customFields)) {
+      /**
+       * throw error if params has customFields and no owner
+       */
+
+      const isValidArray =
+        isArray(paramArgs.owner) &&
+        (!paramArgs.owner.length || paramArgs.owner.length > 1 || isEmpty(paramArgs.owner[0]));
+
+      if (!paramArgs.owner || isValidArray) {
+        throw Boom.badRequest('Owner must be provided. Multiple owners are not supported.');
+      }
+
+      validateSearchCasesCustomFields({
+        customFieldsConfiguration,
+        customFields: paramArgs.customFields,
+      });
+    }
+
     const { filter: authorizationFilter, ensureSavedObjectsAreAuthorized } =
       await authorization.getAuthorizationFilter(Operations.findCases);
 
-    const queryArgs: CasesFindQueryParams = {
-      tags: queryParams.tags,
-      reporters: queryParams.reporters,
-      sortField: queryParams.sortField,
-      status: queryParams.status,
-      severity: queryParams.severity,
-      owner: queryParams.owner,
-      from: queryParams.from,
-      to: queryParams.to,
-      assignees: queryParams.assignees,
-      category: queryParams.category,
+    const options: CasesSearchParams = {
+      tags: paramArgs.tags,
+      reporters: paramArgs.reporters,
+      sortField: paramArgs.sortField,
+      status: paramArgs.status,
+      severity: paramArgs.severity,
+      owner: paramArgs.owner,
+      from: paramArgs.from,
+      to: paramArgs.to,
+      assignees: paramArgs.assignees,
+      category: paramArgs.category,
+      customFields: paramArgs.customFields,
     };
 
     const statusStatsOptions = constructQueryOptions({
-      ...queryArgs,
+      ...options,
       status: undefined,
+      customFieldsConfiguration,
       authorizationFilter,
     });
 
-    const caseQueryOptions = constructQueryOptions({ ...queryArgs, authorizationFilter });
+    const caseQueryOptions = constructQueryOptions({
+      ...options,
+      customFieldsConfiguration,
+      authorizationFilter,
+    });
 
-    const caseSearch = constructSearch(queryParams.search, spaceId, savedObjectsSerializer);
+    const caseSearch = constructSearch(paramArgs.search, spaceId, savedObjectsSerializer);
 
     const [cases, statusStats] = await Promise.all([
       caseService.findCasesGroupedByID({
         caseOptions: {
-          ...queryParams,
+          ...paramArgs,
           ...caseQueryOptions,
           ...caseSearch,
-          searchFields: asArray(queryParams.searchFields),
+          searchFields: asArray(paramArgs.searchFields),
         },
       }),
       caseService.getCaseStatusStats({
