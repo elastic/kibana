@@ -7,20 +7,24 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useStream } from './use_stream';
-import { getReaderValue, mockUint8Arrays } from './mock';
 
 const amendMessage = jest.fn();
 const reader = jest.fn();
 const cancel = jest.fn();
+
 const readerComplete = {
   read: reader
     .mockResolvedValueOnce({
       done: false,
-      value: getReaderValue(mockUint8Arrays[0]),
+      value: new Uint8Array(new TextEncoder().encode('one chunk ')),
     })
     .mockResolvedValueOnce({
       done: false,
-      value: getReaderValue(mockUint8Arrays[1]),
+      value: new Uint8Array(new TextEncoder().encode(`another chunk`)),
+    })
+    .mockResolvedValueOnce({
+      done: false,
+      value: new Uint8Array(new TextEncoder().encode(``)),
     })
     .mockResolvedValue({
       done: true,
@@ -30,7 +34,7 @@ const readerComplete = {
   closed: jest.fn().mockResolvedValue(true),
 } as unknown as ReadableStreamDefaultReader<Uint8Array>;
 
-const defaultProps = { amendMessage, reader: readerComplete };
+const defaultProps = { amendMessage, reader: readerComplete, isError: false };
 describe('useStream', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -53,7 +57,7 @@ describe('useStream', () => {
         error: undefined,
         isLoading: true,
         isStreaming: true,
-        pendingMessage: 'Ch',
+        pendingMessage: 'one chunk ',
         setComplete: expect.any(Function),
       });
     });
@@ -63,11 +67,12 @@ describe('useStream', () => {
         error: undefined,
         isLoading: false,
         isStreaming: false,
-        pendingMessage: 'Cheddar',
+        pendingMessage: 'one chunk another chunk',
         setComplete: expect.any(Function),
       });
     });
-    expect(reader).toHaveBeenCalledTimes(3);
+
+    expect(reader).toHaveBeenCalledTimes(4);
   });
 
   it('should not call observable when content is provided', () => {
@@ -87,7 +92,7 @@ describe('useStream', () => {
         .fn()
         .mockResolvedValueOnce({
           done: false,
-          value: getReaderValue(mockUint8Arrays[0]),
+          value: new Uint8Array(new TextEncoder().encode(`one chunk`)),
         })
         .mockRejectedValue(new Error(errorMessage)),
       cancel,
@@ -96,7 +101,7 @@ describe('useStream', () => {
     } as unknown as ReadableStreamDefaultReader<Uint8Array>;
     const { result, waitForNextUpdate } = renderHook(() =>
       useStream({
-        amendMessage,
+        ...defaultProps,
         reader: errorReader,
       })
     );

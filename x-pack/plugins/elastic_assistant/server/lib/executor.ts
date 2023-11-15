@@ -11,7 +11,7 @@ import { KibanaRequest } from '@kbn/core-http-server';
 import { PassThrough, Readable } from 'stream';
 import { RequestBody } from './langchain/types';
 
-interface Props {
+export interface Props {
   actions: ActionsPluginStart;
   connectorId: string;
   request: KibanaRequest<unknown, unknown, RequestBody>;
@@ -42,6 +42,11 @@ export const executeAction = async ({
     },
   });
 
+  if (actionResult.status === 'error') {
+    throw new Error(
+      `Action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+    );
+  }
   const content = get('data.message', actionResult);
   if (typeof content === 'string') {
     return {
@@ -50,7 +55,11 @@ export const executeAction = async ({
       status: 'ok',
     };
   }
-  const readable = get('data', actionResult);
+  const readable = get('data', actionResult) as Readable;
 
-  return (readable as Readable).pipe(new PassThrough());
+  if (typeof readable?.read !== 'function') {
+    throw new Error('Action result status is error: result is not streamable');
+  }
+
+  return readable.pipe(new PassThrough());
 };

@@ -25,6 +25,12 @@ import {
   AllDatasetsLocatorParams,
   ALL_DATASETS_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import {
+  LOGS_LOCATOR_ID,
+  LogsLocatorParams,
+  NODE_LOGS_LOCATOR_ID,
+  NodeLogsLocatorParams,
+} from '@kbn/logs-shared-plugin/common';
 import type { ProfilingLocators } from '@kbn/observability-shared-plugin/public';
 import { useAnyOfApmParams } from '../../../hooks/use_apm_params';
 import { ApmFeatureFlagName } from '../../../../common/apm_feature_flags';
@@ -129,13 +135,17 @@ function ActionMenuSections({
   transaction?: Transaction;
   profilingLocators?: ProfilingLocators;
 }) {
-  const { core, uiActions, infra, share } = useApmPluginContext();
+  const { core, uiActions, share } = useApmPluginContext();
   const location = useLocation();
   const apmRouter = useApmRouter();
 
   const allDatasetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
     ALL_DATASETS_LOCATOR_ID
   )!;
+  const logsLocator =
+    share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID)!;
+  const nodeLogsLocator =
+    share.url.locators.get<NodeLogsLocatorParams>(NODE_LOGS_LOCATOR_ID)!;
 
   const infraLinksAvailable = useApmFeatureFlag(
     ApmFeatureFlagName.InfraUiAvailable
@@ -155,13 +165,14 @@ function ActionMenuSections({
     basePath: core.http.basePath,
     location,
     apmRouter,
-    infraLocators: infra?.locators,
     infraLinksAvailable,
     profilingLocators,
     rangeFrom,
     rangeTo,
     environment,
     allDatasetsLocator,
+    logsLocator,
+    nodeLogsLocator,
   });
 
   const externalMenuItems = useAsync(() => {

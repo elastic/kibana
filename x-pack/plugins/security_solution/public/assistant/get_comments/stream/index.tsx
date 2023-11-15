@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { ContentMessage } from '..';
 import { useStream } from './use_stream';
 import { StopGeneratingButton } from './buttons/stop_generating_button';
 import { RegenerateResponseButton } from './buttons/regenerate_response_button';
@@ -16,26 +17,55 @@ import { MessageText } from './message_text';
 interface Props {
   amendMessage: (message: string) => void;
   content?: string;
-  isLastComment: boolean;
+  isError?: boolean;
   isFetching?: boolean;
-  regenerateMessage: () => void;
+  isLastComment: boolean;
+  index: number;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
+  regenerateMessage: () => void;
+  transformMessage: (message: string) => ContentMessage;
 }
 
 export const StreamComment = ({
   amendMessage,
   content,
+  index,
+  isError = false,
+  isFetching = false,
   isLastComment,
   reader,
   regenerateMessage,
-  isFetching = false,
+  transformMessage,
 }: Props) => {
   const { error, isLoading, isStreaming, pendingMessage, setComplete } = useStream({
     amendMessage,
     content,
     reader,
+    isError,
   });
-  const message = useMemo(() => content ?? pendingMessage, [content, pendingMessage]);
+
+  const currentState = useRef({ isStreaming, pendingMessage, amendMessage });
+
+  useEffect(() => {
+    currentState.current = { isStreaming, pendingMessage, amendMessage };
+  }, [amendMessage, isStreaming, pendingMessage]);
+
+  useEffect(
+    () => () => {
+      // if the component is unmounted while streaming, amend the message with the pending message
+      if (currentState.current.isStreaming && currentState.current.pendingMessage.length > 0) {
+        currentState.current.amendMessage(currentState.current.pendingMessage ?? '');
+      }
+    },
+    // store values in currentState to detect true unmount
+    []
+  );
+
+  const message = useMemo(
+    // only transform streaming message, transform happens upstream for content message
+    () => content ?? transformMessage(pendingMessage).content,
+    [content, transformMessage, pendingMessage]
+  );
   const isAnythingLoading = useMemo(
     () => isFetching || isLoading || isStreaming,
     [isFetching, isLoading, isStreaming]
@@ -61,9 +91,10 @@ export const StreamComment = ({
       </EuiFlexGroup>
     );
   }, [isAnythingLoading, isLastComment, reader, regenerateMessage, setComplete]);
+
   return (
     <MessagePanel
-      body={<MessageText content={message} loading={isAnythingLoading} />}
+      body={<MessageText content={message} index={index} loading={isAnythingLoading} />}
       error={error ? new Error(error) : undefined}
       controls={controls}
     />

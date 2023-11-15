@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 export function StopGeneratingButton(props: Partial<EuiButtonEmptyProps>) {
   return (
     <EuiButtonEmpty
-      data-test-subj="aiAssistantStopGeneratingButton"
+      data-test-subj="stopGeneratingButton"
       color="text"
       iconType="stop"
       size="s"

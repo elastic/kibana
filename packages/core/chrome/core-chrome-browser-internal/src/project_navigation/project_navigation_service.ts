@@ -48,6 +48,7 @@ export class ProjectNavigationService {
   private projectHome$ = new BehaviorSubject<string | undefined>(undefined);
   private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
+  private projectUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
@@ -106,6 +107,9 @@ export class ProjectNavigationService {
       getProjectName$: () => {
         return this.projectName$.asObservable();
       },
+      setProjectUrl: (projectUrl: string) => {
+        this.projectUrl$.next(projectUrl);
+      },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
@@ -136,17 +140,30 @@ export class ProjectNavigationService {
         return combineLatest([
           this.projectBreadcrumbs$,
           this.activeNodes$,
-          this.projectHome$.pipe(map((homeHref) => homeHref ?? '/')),
           chromeBreadcrumbs$,
+          this.projectsUrl$,
+          this.projectUrl$,
+          this.projectName$,
         ]).pipe(
-          map(([projectBreadcrumbs, activeNodes, homeHref, chromeBreadcrumbs]) => {
-            return buildBreadcrumbs({
-              homeHref: this.http?.basePath.prepend?.(homeHref) ?? homeHref,
+          map(
+            ([
               projectBreadcrumbs,
               activeNodes,
               chromeBreadcrumbs,
-            });
-          })
+              projectsUrl,
+              projectUrl,
+              projectName,
+            ]) => {
+              return buildBreadcrumbs({
+                projectUrl,
+                projectName,
+                projectsUrl,
+                projectBreadcrumbs,
+                activeNodes,
+                chromeBreadcrumbs,
+              });
+            }
+          )
         );
       },
     };

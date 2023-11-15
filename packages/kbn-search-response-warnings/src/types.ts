@@ -25,9 +25,9 @@ export interface SearchResponseIncompleteWarning {
    */
   type: 'incomplete';
   /**
-   * message: human-friendly message
+   * requestName: human-friendly request name
    */
-  message: string;
+  requestName: string;
   /**
    * clusters: cluster details.
    */

@@ -93,8 +93,8 @@ export function Navigation({
     });
   }, []);
 
-  const register = useCallback(
-    (navNode: ChromeProjectNavigationNode) => {
+  const register = useCallback<RegisterFunction>(
+    (navNode) => {
       if (orderChildrenRef.current[navNode.id] === undefined) {
         orderChildrenRef.current[navNode.id] = idx.current++;
       }

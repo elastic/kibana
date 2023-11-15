@@ -702,6 +702,28 @@ describe('Output Service', () => {
         { id: 'output-1' }
       );
     });
+
+    it('should throw when a remote es output is attempted to be created as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: true,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'remote_elasticsearch',
+          },
+          { id: 'output-1' }
+        )
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
+      );
+    });
   });
 
   describe('update', () => {
@@ -1499,6 +1521,23 @@ describe('Output Service', () => {
         'synthetics_policy',
         { data_output_id: 'output-test' },
         { force: true }
+      );
+    });
+
+    it('should throw when a remote es output is attempted to be updated as default data output', async () => {
+      const soClient = getMockedSoClient({
+        defaultOutputId: 'output-test',
+      });
+
+      await expect(
+        outputService.update(soClient, esClientMock, 'output-test', {
+          is_default: true,
+          is_default_monitoring: false,
+          name: 'Test',
+          type: 'remote_elasticsearch',
+        })
+      ).rejects.toThrow(
+        `Remote elasticsearch output cannot be set as default output for integration data. Please set "is_default" to false.`
       );
     });
   });

@@ -8,9 +8,6 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-// TODO: Why do i get this error here? its imported in other places without issue
-// eslint-disable-next-line import/no-nodejs-modules
-import { IncomingMessage } from 'http';
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -57,18 +54,16 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  // TODO: Remove in part 2 of streaming work for security solution
+  // TODO: Remove in part 3 of streaming work for security solution
   // tracked here: https://github.com/elastic/security-team/issues/7363
-  // My "Feature Flag", turn to false before merging
-  // In part 2 I will make enhancements to invokeAI to make it work with both openA, but to keep it to a Security Soltuion only review on this PR,
-  // I'm calling the stream action directly
-  const isStream = true;
-
+  // In part 3 I will make enhancements to langchain to introduce streaming
+  // Once implemented, invokeAI can be removed
+  const isStream = true; // !assistantLangChain;
   const requestBody = isStream
     ? {
         params: {
           subActionParams: body,
-          subAction: 'stream',
+          subAction: 'invokeStream',
         },
         assistantLangChain,
       }
@@ -82,7 +77,7 @@ export const fetchConnectorExecuteAction = async ({
 
   try {
     if (isStream) {
-      const response = await http.fetch<IncomingMessage>(
+      const response = await http.fetch(
         `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
         {
           method: 'POST',
@@ -109,7 +104,7 @@ export const fetchConnectorExecuteAction = async ({
       };
     }
 
-    // TODO: Remove in part 2 of streaming work for security solution
+    // TODO: Remove in part 3 of streaming work for security solution
     // tracked here: https://github.com/elastic/security-team/issues/7363
     // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
@@ -120,6 +115,7 @@ export const fetchConnectorExecuteAction = async ({
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
       body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
       signal,
     });
 
@@ -143,8 +139,18 @@ export const fetchConnectorExecuteAction = async ({
       isStream: false,
     };
   } catch (error) {
+    const reader = error?.response?.body?.getReader();
+
+    if (!reader) {
+      return {
+        response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+        isError: true,
+        isStream: false,
+      };
+    }
     return {
-      response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
+      response: reader,
+      isStream: true,
       isError: true,
       isStream: false,
     };

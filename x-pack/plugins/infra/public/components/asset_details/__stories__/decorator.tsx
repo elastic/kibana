@@ -11,24 +11,33 @@ import {
   KibanaContextProvider,
   type KibanaReactContextValue,
 } from '@kbn/kibana-react-plugin/public';
-import { of } from 'rxjs';
+import { Observable, of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
 import { useParameter } from '@storybook/addons';
 import type { DeepPartial } from 'utility-types';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/data-plugin/public';
+import type {
+  IKibanaSearchRequest,
+  ISearchOptions,
+  SearchSessionState,
+} from '@kbn/data-plugin/public';
 import { AlertSummaryWidget } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget/alert_summary_widget';
 import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
 import type { AlertSummaryWidgetProps } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alert_summary_widget';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { MemoryRouter } from 'react-router-dom';
+import { ObservabilityAIAssistantProvider } from '@kbn/observability-ai-assistant-plugin/public';
+import { ObservabilityAIAssistantService } from '@kbn/observability-ai-assistant-plugin/public/types';
+import { PluginConfigProvider } from '../../../containers/plugin_config_context';
 import type { PluginKibanaContextValue } from '../../../hooks/use_kibana';
 import { SourceProvider } from '../../../containers/metrics_source';
 import { getHttp } from './context/http';
 import { assetDetailsProps, getLogEntries } from './context/fixtures';
 import { ContextProviders } from '../context_providers';
 import { DataViewsProvider } from '../hooks/use_data_views';
+import type { InfraConfig } from '../../../../server';
 
 const settings: Record<string, any> = {
   'dateFormat:scaled': [['', 'HH:mm:ss.SSS']],
@@ -57,6 +66,10 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
       search: {
         search: (request: IKibanaSearchRequest, options?: ISearchOptions) => {
           return getLogEntries(request, options) as any;
+        },
+        session: {
+          start: () => 'started',
+          state$: { closed: false } as unknown as Observable<SearchSessionState>,
         },
       },
       query: {
@@ -144,14 +157,64 @@ export const DecorateWithKibanaContext: DecoratorFn = (story) => {
     },
     telemetry: {
       reportAssetDetailsFlyoutViewed: () => {},
+      reportAssetDetailsPageViewed: () => {},
+    },
+  };
+
+  const config: InfraConfig = {
+    alerting: {
+      inventory_threshold: {
+        group_by_page_size: 11,
+      },
+      metric_threshold: {
+        group_by_page_size: 11,
+      },
+    },
+    enabled: true,
+    inventory: {
+      compositeSize: 11,
+    },
+    sources: {
+      default: {
+        fields: {
+          message: ['default'],
+        },
+      },
+    },
+    featureFlags: {
+      customThresholdAlertsEnabled: true,
+      logsUIEnabled: false,
+      metricsExplorerEnabled: false,
+      osqueryEnabled: true,
+      inventoryThresholdAlertRuleEnabled: true,
+      metricThresholdAlertRuleEnabled: true,
+      logThresholdAlertRuleEnabled: true,
+      alertsAndRulesDropdownEnabled: true,
     },
   };
 
   return (
     <I18nProvider>
-      <KibanaContextProvider services={mockServices}>
-        <SourceProvider sourceId="default">{story()}</SourceProvider>
-      </KibanaContextProvider>
+      <MemoryRouter initialEntries={['/infra/metrics/hosts']}>
+        <PluginConfigProvider value={config}>
+          <KibanaContextProvider services={mockServices}>
+            <ObservabilityAIAssistantProvider
+              value={
+                {
+                  isEnabled: () => true,
+                  callApi: () => {},
+                  getCurrentUser: () => {},
+                  getLicense: () => {},
+                  getLicenseManagementLocator: () => {},
+                  start: {},
+                } as unknown as ObservabilityAIAssistantService
+              }
+            >
+              <SourceProvider sourceId="default">{story()}</SourceProvider>
+            </ObservabilityAIAssistantProvider>
+          </KibanaContextProvider>
+        </PluginConfigProvider>
+      </MemoryRouter>
     </I18nProvider>
   );
 };

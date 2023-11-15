@@ -369,7 +369,8 @@ export class ActionsClientLlm extends LLM {
 
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-    //
+    console.log('returning dummy data');
+    return JSON.stringify('readable');
     // const actionResult = await actionsClient.execute(requestBody);
     //
     // if (actionResult.status === 'error') {
@@ -377,26 +378,15 @@ export class ActionsClientLlm extends LLM {
     //     `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
     //   );
     // }
-    // // TODO: handle errors from the connector
+    //
     // const content = get('data.message', actionResult);
     //
-    // if (typeof content === 'string') {
-    //   this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
-    //
-    //   return content; // per the contact of _call, return a string
-    // }
-    // const readable = get('data', actionResult);
-    // console.log('readable getting defined now');
-    // this.#stream = (readable as Readable).pipe(new PassThrough());
-    console.log('returning dummy data');
-    return JSON.stringify('readable');
     // if (typeof content !== 'string') {
     //   throw new Error(
     //     `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
     //   );
     // }
-  }
-}
+    // this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
 
 function getMessageFromChunks(chunks) {
   let message = '';

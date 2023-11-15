@@ -139,9 +139,9 @@
           "\nCreates a concrete HttpServer with a mocked context."
         ],
         "signature": [
-          "(overrides?: Partial<",
+          "({ buildNum, ...overrides }?: Partial<",
           "CoreContext",
-          ">) => ",
+          " & { buildNum: number; }>) => ",
           "HttpService"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
@@ -153,12 +153,12 @@
             "id": "def-common.createHttpServer.$1",
             "type": "Object",
             "tags": [],
-            "label": "overrides",
+            "label": "{\n  buildNum,\n  ...overrides\n}",
             "description": [],
             "signature": [
               "Partial<",
               "CoreContext",
-              ">"
+              " & { buildNum: number; }>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
             "deprecated": false,

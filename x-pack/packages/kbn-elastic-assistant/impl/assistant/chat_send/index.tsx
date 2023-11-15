@@ -23,14 +23,14 @@ export interface Props extends UseChatSend {
  * Allows the user to clear the chat and switch between different system prompts.
  */
 export const ChatSend: React.FC<Props> = ({
-  isDisabled,
-  userPrompt,
-  shouldRefocusPrompt,
   handleButtonSendMessage,
   handleOnChatCleared,
   handlePromptChange,
   handleSendMessage,
+  isDisabled,
   isLoading,
+  shouldRefocusPrompt,
+  userPrompt,
 }) => {
   // For auto-focusing prompt within timeline
   const promptTextAreaRef = useRef<HTMLTextAreaElement>(null);

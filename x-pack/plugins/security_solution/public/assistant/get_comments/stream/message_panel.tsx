@@ -19,10 +19,10 @@ export function MessagePanel(props: Props) {
     <>
       {props.body}
       {props.error ? (
-        <>
+        <span data-test-subj="messsage-error">
           {props.body ? <EuiSpacer size="xs" /> : null}
           <FailedToLoadResponse />
-        </>
+        </span>
       ) : null}
       {props.controls ? (
         <>

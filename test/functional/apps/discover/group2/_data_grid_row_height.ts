@@ -45,12 +45,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(rows.length).to.be.above(0);
 
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
     });
 
     it('should allow to change row height', async () => {
       await dataGrid.clickGridSettings();
-      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Auto fit');
+      expect(await dataGrid.getCurrentRowHeightValue()).to.be('Custom');
 
       await dataGrid.changeRowHeightValue('Single');
 

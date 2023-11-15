@@ -10,17 +10,21 @@ import {
   EuiText,
   getDefaultEuiMarkdownParsingPlugins,
   getDefaultEuiMarkdownProcessingPlugins,
+  transparentize,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import classNames from 'classnames';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
 import React from 'react';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import type { Node } from 'unist';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
 
 interface Props {
   content: string;
+  index: number;
   loading: boolean;
 }
 
@@ -44,10 +48,12 @@ const cursorCss = css`
   height: 16px;
   vertical-align: middle;
   display: inline-block;
-  background: rgba(0, 0, 0, 0.25);
+  background: ${transparentize(euiThemeVars.euiColorDarkShade, 0.25)};
 `;
 
-const Cursor = () => <span key="cursor" className={classNames(cursorCss, 'cursor')} />;
+const Cursor = () => (
+  <span data-test-subj="cursor" key="cursor" className={classNames(cursorCss, 'cursor')} />
+);
 
 // a weird combination of different whitespace chars to make sure it stays
 // invisible even when we cannot properly parse the text while still being
@@ -148,7 +154,7 @@ const getPluginDependencies = () => {
   };
 };
 
-export function MessageText({ loading, content }: Props) {
+export function MessageText({ loading, content, index }: Props) {
   const containerClassName = css`
     overflow-wrap: break-word;
   `;
@@ -158,6 +164,9 @@ export function MessageText({ loading, content }: Props) {
   return (
     <EuiText className={containerClassName}>
       <EuiMarkdownFormat
+        // used by augmentMessageCodeBlocks
+        className={`message-${index}`}
+        data-test-subj={'messageText'}
         parsingPluginList={parsingPluginList}
         processingPluginList={processingPluginList}
       >

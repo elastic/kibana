@@ -42,7 +42,7 @@ export const PanelNavItem: FC<Props> = ({ item }) => {
       wrapText
       className="sideNavPanelLink"
       size="s"
-      data-test-subj={`nav-item-id-${item.id}`}
+      data-test-subj={`panelNavItem panelNavItem-id-${item.id}`}
       href={href}
       iconType={icon}
       onClick={onClick}

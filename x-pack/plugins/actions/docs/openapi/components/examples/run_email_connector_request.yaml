@@ -1,0 +1,12 @@
+summary: Send an email message from an email connector.
+value:
+  params:
+    bcc:
+      - user1@example.com
+    cc:
+      - user2@example.com
+      - user3@example.com 
+    message: Test email message.
+    subject: Test message subject
+    to:
+      - user4@example.com 

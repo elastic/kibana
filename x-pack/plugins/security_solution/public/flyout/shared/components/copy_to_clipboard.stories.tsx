@@ -78,3 +78,48 @@ export const MultipleSizes: Story<void> = () => {
     </EuiFlexGroup>
   );
 };
+
+export const ButtonOnly: Story<void> = () => {
+  return (
+    <CopyToClipboard
+      rawValue={json}
+      modifier={(value) => {
+        window.alert('modifier');
+        return value;
+      }}
+      iconType={'copyClipboard'}
+      ariaLabel={'Copy'}
+    />
+  );
+};
+
+export const CustomColor: Story<void> = () => {
+  return (
+    <CopyToClipboard
+      rawValue={json}
+      modifier={(value) => {
+        window.alert('modifier');
+        return value;
+      }}
+      iconType={'copyClipboard'}
+      ariaLabel={'Copy'}
+      text={<p>{'showing custom color'}</p>}
+      color={'accent'}
+    />
+  );
+};
+
+export const CustomIcon: Story<void> = () => {
+  return (
+    <CopyToClipboard
+      rawValue={json}
+      modifier={(value) => {
+        window.alert('modifier');
+        return value;
+      }}
+      iconType={'share'}
+      ariaLabel={'Share'}
+      text={<p>{'custom icon'}</p>}
+    />
+  );
+};

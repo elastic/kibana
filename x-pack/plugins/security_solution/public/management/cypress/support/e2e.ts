@@ -23,7 +23,6 @@
 // ***********************************************************
 
 import { subj as testSubjSelector } from '@kbn/test-subj-selector';
-import 'cypress-react-selector';
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
 
@@ -65,7 +64,7 @@ Cypress.Commands.addQuery<'findByTestSubj'>(
 Cypress.Commands.add(
   'waitUntil',
   { prevSubject: 'optional' },
-  (subject, fn, { interval = 500, timeout = 30000 } = {}) => {
+  (subject, fn, { interval = 500, timeout = 30000 } = {}, msg = 'waitUntil()') => {
     let attempts = Math.floor(timeout / interval);
 
     const completeOrRetry = (result: boolean) => {
@@ -73,7 +72,7 @@ Cypress.Commands.add(
         return result;
       }
       if (attempts < 1) {
-        throw new Error(`Timed out while retrying, last result was: {${result}}`);
+        throw new Error(`${msg}: Timed out while retrying - last result was: [${result}]`);
       }
       cy.wait(interval, { log: false }).then(() => {
         attempts--;
@@ -91,7 +90,7 @@ Cypress.Commands.add(
         return result.then(completeOrRetry);
       } else {
         throw new Error(
-          `Unknown return type from callback: ${Object.prototype.toString.call(result)}`
+          `${msg}: Unknown return type from callback: ${Object.prototype.toString.call(result)}`
         );
       }
     };
