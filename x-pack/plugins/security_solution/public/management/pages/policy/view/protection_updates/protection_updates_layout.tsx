@@ -307,10 +307,8 @@ export const ProtectionUpdatesLayout = React.memo<ProtectionUpdatesLayoutProps>(
             )}
           >
             <FormattedMessage
-              id={'xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled'}
-              defaultMessage={
-                'Protection updates will always be updated to the latest available version. If you want to control updates manually, disable the {toggleName} toggle.'
-              }
+              id="xpack.securitySolution.endpoint.protectionUpdates.automaticUpdates.enabled"
+              defaultMessage="Protection updates will always be updated to the latest available version. If you want to control updates manually, disable the {toggleName} toggle."
               values={{
                 toggleName: (
                   <strong>
