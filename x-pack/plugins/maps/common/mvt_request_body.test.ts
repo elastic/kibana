@@ -68,8 +68,8 @@ describe('getHitsTileRequest', () => {
       y: 0,
       z: 0,
     });
-    expect(body.track_total_hits).toEqual(20001);
-    expect(body.size).toEqual(20000);
+    expect(body?.track_total_hits).toEqual(20001);
+    expect(body?.size).toEqual(20000);
   });
 
   describe('sort', () => {
