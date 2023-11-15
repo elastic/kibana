@@ -132,7 +132,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
     const signed = this.signRequest(body, path, false);
     const response = await this.request({
       ...signed,
-      url: path,
+      url: `${this.url}${path}`,
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: body,
@@ -160,7 +160,7 @@ export class BedrockConnector extends SubActionConnector<Config, Secrets> {
 
     const response = await this.request({
       ...signed,
-      url: path,
+      url: `${this.url}${path}`,
       method: 'post',
       responseSchema: StreamingResponseSchema,
       data: body,
