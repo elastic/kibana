@@ -21,15 +21,19 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from './slo_selector';
 
-import type { EmbeddableSloProps } from './types';
+import type { EmbeddableSloProps, SloAlertsEmbeddableInput } from './types';
 
 interface SloConfigurationProps {
+  initialInput?: Partial<SloAlertsEmbeddableInput>;
   onCreate: (props: EmbeddableSloProps) => void; // TODO check change point detection
   onCancel: () => void;
 }
 
-export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) {
-  const [selectedSlos, setSelectedSlos] = useState<EmbeddableSloProps>();
+export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
+  console.log(initialInput, '!!initialInput');
+  const slos = initialInput?.slos;
+  console.log(slos, '!!slos');
+  const [selectedSlos, setSelectedSlos] = useState<EmbeddableSloProps>(slos);
   const onConfirmClick = () => onCreate({ slos: selectedSlos });
   const [hasError, setHasError] = useState(false);
 
@@ -46,6 +50,7 @@ export function SloConfiguration({ onCreate, onCancel }: SloConfigurationProps) 
         <EuiFlexGroup>
           <EuiFlexItem grow>
             <SloSelector
+              initialSlos={selectedSlos}
               hasError={hasError}
               onSelected={(slos) => {
                 if (slos === undefined) {

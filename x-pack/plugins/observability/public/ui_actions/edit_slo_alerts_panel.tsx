@@ -32,7 +32,7 @@ export function createEditSloAlertsPanelAction(
     },
     getDisplayName: () =>
       i18n.translate('xpack.observability.actions.editSloAlertsEmbeddableTitle', {
-        defaultMessage: 'Edit SLOs',
+        defaultMessage: 'Edit configuration',
       }),
     async execute({ embeddable }) {
       if (!embeddable) {

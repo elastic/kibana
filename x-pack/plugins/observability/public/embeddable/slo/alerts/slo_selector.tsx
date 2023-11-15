@@ -11,9 +11,14 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
+interface SloItem {
+  id: string | undefined;
+  instanceId: string | undefined;
+  name: string;
+}
 
 interface Props {
-  initialSlo?: SLOWithSummaryResponse;
+  initialSlos?: SloItem[];
   onSelected: (slos: SLOWithSummaryResponse[] | undefined) => void;
   hasError?: boolean;
 }
@@ -22,9 +27,19 @@ const SLO_REQUIRED = i18n.translate('xpack.observability.sloEmbeddable.config.er
   defaultMessage: 'SLO is required.',
 });
 
-export function SloSelector({ initialSlo, onSelected, hasError }: Props) {
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
-  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
+export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
+  const initialSelectedOptions = initialSlos?.map((slo) => {
+    const label = slo.instanceId !== ALL_VALUE ? `${slo.name} (: ${slo.instanceId})` : slo.name;
+    return {
+      label,
+      value: `${slo.id}-${slo.instanceId}`,
+      instanceId: slo.instanceId,
+    };
+  });
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
+  const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
+    initialSelectedOptions ?? []
+  );
   const [searchValue, setSearchValue] = useState<string>('');
   const {
     isInitialLoading,
