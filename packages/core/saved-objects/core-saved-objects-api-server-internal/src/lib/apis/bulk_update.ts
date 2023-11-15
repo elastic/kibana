@@ -75,6 +75,10 @@ export const performBulkUpdate = async <T>(
       migrationVersionCompatibility?: 'raw' | 'compatible';
     }
   >;
+  // get all docs from ES -> once we have them, we're pretty much in a similar flow as
+  // bulkCreate when requestId !== undefined && overwrite === true
+
+  // maps to expectedResults in bulkCreate
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
     const {
       type,
@@ -120,7 +124,7 @@ export const performBulkUpdate = async <T>(
       migrationVersionCompatibility,
     });
   });
-
+  // maps to validObjects in bulkCreate
   const validObjects = expectedBulkGetResults.filter(isRight);
   if (validObjects.length === 0) {
     // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
@@ -142,14 +146,18 @@ export const performBulkUpdate = async <T>(
       : namespace;
 
   const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
-
+  // bulkGetDocs maps to preflightCheckObjects in bulkCreate
+  // bulkCreate uses bulkGetObjectsAndAliases to mget them
+  // here we're only interested in the objects themselves
   const bulkGetDocs = validObjects
-    .filter(({ value }) => value.esRequestIndex !== undefined)
+    .filter(({ value }) => value.esRequestIndex !== undefined) // line 136 in bulk_create
     .map(({ value: { type, id, objectNamespace } }) => ({
       _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
       _index: commonHelper.getIndexForType(type),
-      _source: true,
+      // _source: true,
+      _source: ['type', 'namespaces'],
     }));
+  // bulkGetResponse maps to preflightCheckResponse in bulkCreate
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: bulkGetDocs } },
@@ -166,7 +174,7 @@ export const performBulkUpdate = async <T>(
   ) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
-
+  // we need to still check auth for bulkUpdate a doc, regardless of using a different esClient API
   const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
     let result;
     const { type, id, objectNamespace, esRequestIndex: index } = element.value;
@@ -227,15 +235,17 @@ export const performBulkUpdate = async <T>(
         migrationVersionCompatibility,
       } = expectedBulkGetResult.value;
 
-      let namespaces;
+      let namespaces: string[] | undefined;
       let versionProperties;
       const indexFound = bulkGetResponse?.statusCode !== 404;
-
-      // if (esRequestIndex !== undefined) {
       const actualResult =
-        indexFound && esRequestIndex ? bulkGetResponse?.body.docs[esRequestIndex] : undefined;
-      const docFound = indexFound && isMgetDoc(actualResult) && actualResult.found;
+        indexFound && esRequestIndex !== undefined
+          ? bulkGetResponse?.body.docs[esRequestIndex]
+          : undefined;
+      const docFound =
+        indexFound && esRequestIndex !== undefined && isMgetDoc(actualResult) && actualResult.found;
       if (registry.isMultiNamespace(type)) {
+        // esRequestIndex will be undefined for invalid types. we assign an esReqeustIndex to all docs, regardless of namespace type and can't use it as an indicator for a multinamespace object type.
         if (
           !docFound ||
           !rawDocExistsInNamespace(
@@ -257,14 +267,14 @@ export const performBulkUpdate = async <T>(
         ];
         versionProperties = getExpectedVersionProperties(version);
       } else {
+        if (!docFound) {
+          return left({
+            id,
+            type,
+            error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
+          });
+        }
         if (registry.isSingleNamespace(type)) {
-          if (!docFound) {
-            return left({
-              id,
-              type,
-              error: errorContent(SavedObjectsErrorHelpers.createGenericNotFoundError(type, id)),
-            });
-          }
           // if `objectNamespace` is undefined, fall back to `options.namespace`
           namespaces = [getNamespaceString(objectNamespace)];
         }
@@ -284,6 +294,7 @@ export const performBulkUpdate = async <T>(
       const typeDefinition = registry.getType(type)!;
 
       if (docFound) {
+        // actualResult could be undefined
         const document = getSavedObjectFromSource<T>(
           registry,
           type,
@@ -291,6 +302,7 @@ export const performBulkUpdate = async <T>(
           actualResult as SavedObjectsRawDoc,
           { migrationVersionCompatibility }
         );
+
         try {
           migrated = migrationHelper.migrateStorageDocument(document) as SavedObject<T>;
         } catch (migrateStorageDocError) {
@@ -350,11 +362,11 @@ export const performBulkUpdate = async <T>(
     ? await client.bulk({
         refresh,
         body: bulkUpdateParams,
-        _source_includes: ['originId'],
+        _source_includes: ['originId'], // originId can only be defined for multi-namespace object types
         require_alias: true,
       })
     : undefined;
-  // @TINA MARKER: refactor to use rawMigratedUpdatedDoc (the whole doc) rather than documentToSave (partial SO fields to update)
+
   const result = {
     saved_objects: expectedBulkUpdateResults.map((expectedResult) => {
       if (isLeft(expectedResult)) {
@@ -374,7 +386,7 @@ export const performBulkUpdate = async <T>(
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { [type]: attributes, references, updated_at } = documentToSave; // use the original request params
+      const { [type]: attributes, references, updated_at } = documentToSave; // use the original request params ?? probably need to return the actual updated doc that exists in es now.
 
       const { originId } = rawMigratedUpdatedDoc._source;
       // @TINA TODO: ensure we return the correct response without changing the signature

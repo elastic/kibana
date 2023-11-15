@@ -22,7 +22,10 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
+import {
+  SavedObjectUnsanitizedDoc,
+  type SavedObjectReference,
+} from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -120,8 +123,28 @@ describe('SavedObjectsRepository', () => {
     const references = [{ name: 'ref_0', type: 'test', id: '1' }];
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
+    const mockMigrationVersion = { foo: '2.3.4' };
+    const mockMigrateDocumentForUpdate = (doc: SavedObjectUnsanitizedDoc<any>) => {
+      const response = {
+        ...doc,
+        attributes: {
+          ...doc.attributes,
+          ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
+        },
+        migrationVersion: mockMigrationVersion,
+        managed: doc.managed ?? false,
+        references: doc.references || [
+          {
+            name: 'ref_0',
+            type: 'test',
+            id: '1',
+          },
+        ],
+      };
+      return response;
+    };
 
-    // bulk create calls have two objects for each source -- the action, and the source
+    // bulk index calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
       objects: TypeIdTuple[],
       {
@@ -153,14 +176,26 @@ describe('SavedObjectsRepository', () => {
       );
     };
 
-    const expectObjArgs = ({ type, attributes }: { type: string; attributes: unknown }) => [
-      expect.any(Object),
+    const expectObjArgs = (
       {
-        doc: expect.objectContaining({
-          [type]: attributes,
-          ...mockTimestampFields,
-        }),
+        type,
+        attributes,
+        references,
+      }: {
+        type: string;
+        attributes: unknown;
+        references?: SavedObjectReference[];
       },
+      overrides: Record<string, unknown> = {}
+    ) => [
+      expect.any(Object),
+      expect.objectContaining({
+        [type]: attributes,
+        references,
+        type,
+        ...overrides,
+        ...mockTimestampFields,
+      }),
     ];
 
     describe('client calls', () => {
@@ -169,13 +204,14 @@ describe('SavedObjectsRepository', () => {
         expect(client.bulk).toHaveBeenCalled();
       });
 
-      it(`should use the ES mget action before bulk action for any types that are multi-namespace`, async () => {
+      it(`should use the ES mget action before bulk action for any types that are valid`, async () => {
         const objects = [obj1, { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE }];
         await bulkUpdateSuccess(client, repository, registry, objects);
         expect(client.bulk).toHaveBeenCalled();
         expect(client.mget).toHaveBeenCalled();
 
         const docs = [
+          expect.objectContaining({ _id: `${obj1.type}:${obj1.id}` }),
           expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
         ];
         expect(client.mget).toHaveBeenCalledWith(
@@ -186,21 +222,14 @@ describe('SavedObjectsRepository', () => {
 
       it(`formats the ES request`, async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+        // expect client.bulk call args should include the whole doc
+        expectClientCallArgsAction([obj1, obj2], { method: 'index' });
       });
 
       it(`formats the ES request for any types that are multi-namespace`, async () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
         await bulkUpdateSuccess(client, repository, registry, [obj1, _obj2]);
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(_obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+        expectClientCallArgsAction([obj1, _obj2], { method: 'index' });
       });
 
       it(`doesnt call Elasticsearch if there are no valid objects to update`, async () => {
@@ -211,8 +240,10 @@ describe('SavedObjectsRepository', () => {
 
       it(`defaults to no references`, async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
-        const body = [expect.any(Object), expected, expect.any(Object), expected];
+        const body = [
+          ...expectObjArgs({ ...obj1, references: [] }),
+          ...expectObjArgs({ ...obj2, references: [] }),
+        ];
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({ body }),
           expect.anything()
@@ -223,13 +254,16 @@ describe('SavedObjectsRepository', () => {
         const test = async (references: SavedObjectReference[]) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const expected = { doc: expect.objectContaining({ references }) };
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const body = [
+            ...expectObjArgs({ ...obj1, references }),
+            ...expectObjArgs({ ...obj2, references }),
+          ];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
             expect.anything()
           );
           client.bulk.mockClear();
+          client.mget.mockClear();
         };
         await test(references);
         await test([{ type: 'type', id: 'id', name: 'some ref' }]);
@@ -238,15 +272,18 @@ describe('SavedObjectsRepository', () => {
 
       it(`doesn't accept custom references if not an array`, async () => {
         const test = async (references: unknown) => {
-          const objects = [obj1, obj2]; // .map((obj) => ({ ...obj }));
+          const objects = [obj1, obj2];
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const expected = { doc: expect.not.objectContaining({ references: expect.anything() }) };
-          const body = [expect.any(Object), expected, expect.any(Object), expected];
+          const body = [
+            ...expectObjArgs({ ...obj1, references: expect.not.arrayContaining([references]) }),
+            ...expectObjArgs({ ...obj2, references: expect.not.arrayContaining([references]) }),
+          ];
           expect(client.bulk).toHaveBeenCalledWith(
             expect.objectContaining({ body }),
             expect.anything()
           );
           client.bulk.mockClear();
+          client.mget.mockClear();
         };
         await test('string');
         await test(123);
@@ -265,7 +302,7 @@ describe('SavedObjectsRepository', () => {
       it(`defaults to no version for types that are not multi-namespace`, async () => {
         const objects = [obj1, { ...obj2, type: NAMESPACE_AGNOSTIC_TYPE }];
         await bulkUpdateSuccess(client, repository, registry, objects);
-        expectClientCallArgsAction(objects, { method: 'update' });
+        expectClientCallArgsAction(objects, { method: 'index' });
       });
 
       it(`accepts version`, async () => {
@@ -277,13 +314,13 @@ describe('SavedObjectsRepository', () => {
         ];
         await bulkUpdateSuccess(client, repository, registry, objects);
         const overrides = { if_seq_no: 100, if_primary_term: 200 };
-        expectClientCallArgsAction(objects, { method: 'update', overrides });
+        expectClientCallArgsAction(objects, { method: 'index', overrides });
       });
 
       it(`prepends namespace to the id when providing namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${namespace}:${type}:${id}`; // test that the raw document ID equals this (e.g., has a namespace prefix)
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], { namespace });
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -291,13 +328,13 @@ describe('SavedObjectsRepository', () => {
           { ...obj1, namespace },
           { ...obj2, namespace },
         ]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
       it(`doesn't prepend namespace to the id when providing no namespace for single-namespace type`, async () => {
         const getId = (type: string, id: string) => `${type}:${id}`; // test that the raw document ID equals this (e.g., does not have a namespace prefix)
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
@@ -311,7 +348,7 @@ describe('SavedObjectsRepository', () => {
           ],
           { namespace }
         );
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
       it(`normalizes options.namespace from 'default' to undefined`, async () => {
@@ -319,7 +356,7 @@ describe('SavedObjectsRepository', () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2], {
           namespace: 'default',
         });
-        expectClientCallArgsAction([obj1, obj2], { method: 'update', getId });
+        expectClientCallArgsAction([obj1, obj2], { method: 'index', getId });
       });
 
       it(`doesn't prepend namespace to the id when not using single-namespace type`, async () => {
@@ -328,18 +365,20 @@ describe('SavedObjectsRepository', () => {
         const _obj2 = { ...obj2, type: MULTI_NAMESPACE_ISOLATED_TYPE };
 
         await bulkUpdateSuccess(client, repository, registry, [_obj1], { namespace });
-        expectClientCallArgsAction([_obj1], { method: 'update', getId });
+        expectClientCallArgsAction([_obj1], { method: 'index', getId });
         client.bulk.mockClear();
+        client.mget.mockClear();
         await bulkUpdateSuccess(client, repository, registry, [_obj2], { namespace });
-        expectClientCallArgsAction([_obj2], { method: 'update', getId });
+        expectClientCallArgsAction([_obj2], { method: 'index', getId });
 
         jest.clearAllMocks();
         // test again with object namespace string that supersedes the operation's namespace ID
         await bulkUpdateSuccess(client, repository, registry, [{ ..._obj1, namespace }]);
-        expectClientCallArgsAction([_obj1], { method: 'update', getId });
+        expectClientCallArgsAction([_obj1], { method: 'index', getId });
         client.bulk.mockClear();
+        client.mget.mockClear();
         await bulkUpdateSuccess(client, repository, registry, [{ ..._obj2, namespace }]);
-        expectClientCallArgsAction([_obj2], { method: 'update', getId });
+        expectClientCallArgsAction([_obj2], { method: 'index', getId });
       });
     });
 
