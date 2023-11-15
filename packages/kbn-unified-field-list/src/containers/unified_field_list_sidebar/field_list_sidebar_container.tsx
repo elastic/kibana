@@ -97,6 +97,7 @@ export type UnifiedFieldListSidebarContainerProps = Omit<
     removedFieldName?: string;
     editedFieldName?: string;
   }) => Promise<void>;
+  onRefreshDataView?: () => void;
 };
 
 /**
@@ -116,10 +117,15 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     prependInFlyout,
     variant = 'responsive',
     onFieldEdited,
+    onRefreshDataView,
   } = props;
   const [stateService] = useState<UnifiedFieldListSidebarContainerStateService>(
     createStateService({ options: getCreationOptions() })
   );
+  const [showNewFieldsFlyout, setShowNewFieldsFlyout] = useState<boolean>(false);
+  const onNewFields = useCallback(() => {
+    setShowNewFieldsFlyout(true);
+  }, []);
   const { data, dataViewFieldEditor } = services;
   const [isFieldListFlyoutVisible, setIsFieldListFlyoutVisible] = useState<boolean>(false);
   const { isSidebarCollapsed, onToggleSidebar } = useSidebarToggle({ stateService });
@@ -152,6 +158,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     fromDate: querySubscriberResult.fromDate,
     toDate: querySubscriberResult.toDate,
     services,
+    onNewFields,
   });
 
   const editField = useMemo(
@@ -242,6 +249,13 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     [isSidebarCollapsed$, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
   );
 
+  const onRefreshDataViewWrapped = useCallback(() => {
+    if (onRefreshDataView) {
+      setShowNewFieldsFlyout(false);
+      onRefreshDataView();
+    }
+  }, [onRefreshDataView, setShowNewFieldsFlyout]);
+
   if (!dataView) {
     return null;
   }
@@ -256,6 +270,7 @@ const UnifiedFieldListSidebarContainer = forwardRef<
     onDeleteField: deleteField,
     compressed: stateService.creationOptions.compressed ?? false,
     buttonAddFieldVariant: stateService.creationOptions.buttonAddFieldVariant ?? 'primary',
+    onRefreshDataView: showNewFieldsFlyout ? onRefreshDataViewWrapped : undefined,
   };
 
   if (stateService.creationOptions.showSidebarToggleButton) {

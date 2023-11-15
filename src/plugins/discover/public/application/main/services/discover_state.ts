@@ -176,7 +176,7 @@ export interface DiscoverStateContainer {
      * Triggered when a data view fields should be refreshed (because e.g. new fields might have been ingested)
      * @param dataView
      */
-    onRefreshDataViewFields: (dataView: DataView) => Promise<void>;
+    onRefreshDataViewFields: () => Promise<void>;
     /**
      * Triggered when the user selects a different data view in the data view picker
      * @param id - id of the data view
@@ -346,12 +346,14 @@ export function getDiscoverStateContainer({
     fetchData();
   };
 
-  const onRefreshDataViewFields = async (editedDataView: DataView) => {
+  const onRefreshDataViewFields = async () => {
+    const editedDataView = internalStateContainer.getState().dataView;
+    if (!editedDataView) return;
     if (editedDataView.isPersisted()) {
       // Clear the current data view from the cache and create a new instance
       // of it, ensuring we have a new object reference to trigger a re-render
       services.dataViews.clearInstanceCache(editedDataView.id);
-      setDataView(await services.dataViews.create(editedDataView.toSpec(), true));
+      setDataView(await services.dataViews.create(editedDataView.toSpec(), false));
     } else {
       await updateAdHocDataViewId();
     }

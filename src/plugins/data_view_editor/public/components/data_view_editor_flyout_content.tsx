@@ -250,6 +250,17 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           </EuiLink>
         )}
+        {showManagementLink && editData && editData.id && (
+          <EuiLink
+            href={application.getUrlForApp('management', {
+              path: `/kibana/dataViews/dataView/${editData.id}`,
+            })}
+          >
+            {i18n.translate('indexPatternEditor.goToManagementPage', {
+              defaultMessage: 'Reload fields',
+            })}
+          </EuiLink>
+        )}
         <Form
           form={form}
           className="indexPatternEditor__form"

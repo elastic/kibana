@@ -41,6 +41,7 @@ export interface ExistingFieldsFetcherParams {
     dataViews: DataViewsContract;
   };
   onNoData?: (dataViewId: string) => unknown;
+  onNewFields?: () => void;
 }
 
 type ExistingFieldsByDataViewMap = Record<string, ExistingFieldsInfo>;
@@ -88,6 +89,7 @@ export const useExistingFieldsFetcher = (
       toDate,
       services: { dataViews, data, core },
       onNoData,
+      onNewFields,
       fetchId,
     }: ExistingFieldsFetcherParams & {
       dataViewId: string | undefined;
@@ -146,6 +148,9 @@ export const useExistingFieldsFetcher = (
           });
 
           const existingFieldNames = result?.existingFieldNames || [];
+          if (result?.hasNewFields && onNewFields) {
+            onNewFields();
+          }
 
           if (
             onNoData &&

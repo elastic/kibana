@@ -136,6 +136,7 @@ export interface DiscoverSidebarResponsiveProps {
 
   unifiedFieldListSidebarContainerApi: UnifiedFieldListSidebarContainerApi | null;
   setUnifiedFieldListSidebarContainerApi: (api: UnifiedFieldListSidebarContainerApi) => void;
+  onRefreshDataView?: () => void;
 }
 
 /**
@@ -158,6 +159,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
     onRemoveField,
     unifiedFieldListSidebarContainerApi,
     setUnifiedFieldListSidebarContainerApi,
+    onRefreshDataView,
   } = props;
   const [sidebarState, dispatchSidebarStateAction] = useReducer(
     discoverSidebarReducer,
@@ -394,6 +396,7 @@ export function DiscoverSidebarResponsive(props: DiscoverSidebarResponsiveProps)
       onAddFilter={onAddFilter}
       onFieldEdited={onFieldEdited}
       prependInFlyout={prependDataViewPickerForMobile}
+      onRefreshDataView={onRefreshDataView}
     />
   );
 }

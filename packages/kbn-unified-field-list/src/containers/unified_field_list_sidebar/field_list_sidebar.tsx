@@ -12,6 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import {
+  EuiCallOut,
+  EuiLink,
   EuiButton,
   EuiButtonProps,
   EuiFlexGroup,
@@ -73,6 +75,8 @@ export type UnifiedFieldListSidebarCustomizableProps = Pick<
    * Custom logic for determining which field is selected
    */
   onSelectedFieldFilter?: GroupedFieldsParams<DataViewField>['onSelectedFieldFilter'];
+  onNewFields?: () => void;
+  onRefreshDataView?: () => void;
 };
 
 interface UnifiedFieldListSidebarInternalProps {
@@ -160,6 +164,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
   onEditField,
   onDeleteField,
   onToggleSidebar,
+  onRefreshDataView,
 }) => {
   const { dataViews, core } = services;
   const useNewFieldsApi = useMemo(
@@ -374,14 +379,23 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
           <FieldList
             isProcessing={isProcessing}
             prepend={
-              <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
-                {sidebarToggleButton && (
-                  <EuiFlexItem grow={false}>{sidebarToggleButton}</EuiFlexItem>
+              <>
+                <EuiFlexGroup direction="row" gutterSize="s" responsive={false}>
+                  {sidebarToggleButton && (
+                    <EuiFlexItem grow={false}>{sidebarToggleButton}</EuiFlexItem>
+                  )}
+                  <EuiFlexItem>
+                    <FieldListFilters {...fieldListFiltersProps} compressed={compressed} />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+                {onRefreshDataView && (
+                  <EuiCallOut color="success" iconType="info">
+                    <p>
+                      Hurray! New fields! <EuiLink onClick={onRefreshDataView}>Refresh</EuiLink>.
+                    </p>
+                  </EuiCallOut>
                 )}
-                <EuiFlexItem>
-                  <FieldListFilters {...fieldListFiltersProps} compressed={compressed} />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              </>
             }
             className="unifiedFieldListSidebar__list"
           >

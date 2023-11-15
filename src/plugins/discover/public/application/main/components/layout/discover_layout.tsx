@@ -314,6 +314,7 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
                     availableFields$={stateContainer.dataState.data$.availableFields$}
                     unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
                     setUnifiedFieldListSidebarContainerApi={setUnifiedFieldListSidebarContainerApi}
+                    onRefreshDataView={stateContainer.actions.onRefreshDataViewFields}
                   />
                 </EuiFlexItem>
                 <EuiHideFor sizes={['xs', 's']}>
