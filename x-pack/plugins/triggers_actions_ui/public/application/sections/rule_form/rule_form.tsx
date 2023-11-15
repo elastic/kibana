@@ -444,6 +444,13 @@ export const RuleForm = ({
   }, [availableRuleTypes, rule, validConsumers]);
 
   const shouldShowConsumerSelect = useMemo(() => {
+    console.log(
+      'CONSUMER',
+      canShowConsumerSelection,
+      authorizedConsumers,
+      rule.ruleTypeId,
+      MULTI_CONSUMER_RULE_TYPE_IDS
+    );
     if (!canShowConsumerSelection) {
       return false;
     }
