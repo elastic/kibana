@@ -117,7 +117,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
         session = await createSessionWithFakeSAMLAuth({
           username: `elastic_${role}`,
           email: `elastic_${role}@elastic.co`,
-          fullName: `test ${role}`,
+          fullname: `test ${role}`,
           role,
           kbnHost,
         });

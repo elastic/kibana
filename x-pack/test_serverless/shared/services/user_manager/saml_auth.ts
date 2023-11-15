@@ -9,8 +9,8 @@ import axios, { AxiosResponse } from 'axios';
 import Url from 'url';
 import * as cheerio from 'cheerio';
 import { parse as parseCookie } from 'tough-cookie';
+import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-plugin/common';
 import { Session } from './svl_user_manager';
-// import { createSAMLResponse as createFakeSAMLResponse } from 'kbn-mock-idp-plugin';
 
 export interface SAMLSessionParams {
   username: string;
@@ -22,7 +22,7 @@ export interface SAMLSessionParams {
 export interface FakeSAMLSessionParams {
   username: string;
   email: string;
-  fullName: string;
+  fullname: string;
   role: string;
   kbnHost: string;
 }
@@ -80,10 +80,10 @@ const createCloudSession = async (hostname: string, email: string, password: str
   });
   const firstName = sessionResponse?.data?.user?.data?.first_name ?? '';
   const lastName = sessionResponse?.data?.user?.data?.last_name ?? '';
-  const fullName = `${firstName} ${lastName}`.trim();
+  const fullname = `${firstName} ${lastName}`.trim();
   return {
     token: sessionResponse?.data?.token as string,
-    fullName,
+    fullname,
   };
 };
 
@@ -147,22 +147,22 @@ const finishSAMLHandshake = async (
 export const createNewSAMLSession = async (params: SAMLSessionParams) => {
   const { username, password, kbnHost, kbnVersion } = params;
   const hostName = getCloudHostName();
-  const { token, fullName } = await createCloudSession(hostName, username, password);
+  const { token, fullname } = await createCloudSession(hostName, username, password);
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
   const samlResponse = await createSAMLResponse(location, token);
   const cookie = await finishSAMLHandshake(kbnHost, samlResponse, sid);
-  return new Session(cookie, username, fullName);
+  return new Session(cookie, username, fullname);
 };
 
 export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParams) => {
-  // const { username, email, fullName, role, kbnHost } = params;
-  // const samlResponse = await createFakeSAMLResponse({
-  //   username
-  //   email,
-  //   fullName,
-  //   [role],
-  // });
-  // const cookie = await finishSAMLHandshake(kbnHost, samlResponse);
-  // return new Session(cookie, username, fullName);
-  throw new Error('WIP: uncomment when #170852 is merged');
+  const { username, email, fullname, role, kbnHost } = params;
+  const samlResponse = await createMockedSAMLResponse({
+    kibanaUrl: kbnHost,
+    username,
+    fullname,
+    email,
+    roles: [role],
+  });
+  const cookie = await finishSAMLHandshake(kbnHost, samlResponse);
+  return new Session(cookie, username, fullname);
 };
