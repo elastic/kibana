@@ -20,6 +20,7 @@
     "@kbn/core-capabilities-common",
     "@kbn/react-kibana-mount",
     "@kbn/core-lifecycle-browser",
+    "@kbn/core-overlays-browser",
   ],
   "exclude": [
     "target/**/*",
