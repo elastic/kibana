@@ -98,10 +98,10 @@ const CasesTableFiltersComponent = ({
   });
 
   const {
-    config: filterConfig,
+    filters: activeFilters,
     moreFiltersSelectableComponent: MoreFiltersSelectable,
-    filterConfigOptions,
-    activeFilters,
+    selectableOptions,
+    activeSelectableOptionKeys,
     onFilterConfigChange,
   } = useFilterConfig({ systemFilterConfig });
 
@@ -165,12 +165,12 @@ const CasesTableFiltersComponent = ({
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiFilterGroup>
-          {filterConfig.map((filter) =>
+          {activeFilters.map((filter) =>
             filter.render({ filterOptions, onChange: onFilterOptionChange })
           )}
           <MoreFiltersSelectable
-            options={filterConfigOptions}
-            activeFilters={activeFilters}
+            options={selectableOptions}
+            activeFilters={activeSelectableOptionKeys}
             onChange={onFilterConfigChange}
           />
         </EuiFilterGroup>

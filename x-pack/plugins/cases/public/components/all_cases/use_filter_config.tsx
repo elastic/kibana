@@ -6,12 +6,13 @@
  */
 
 import React, { useState, useEffect } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { CustomFieldTypes } from '../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 import type { MultiSelectFilterOption } from './multi_select_filter';
 import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
-import type { FilterConfig } from './use_system_filter_config';
+import type { FilterConfig, FilterConfigState } from './use_system_filter_config';
 import { MORE_FILTERS_LABEL } from './translations';
 
 const MoreFiltersSelectable = ({
@@ -77,67 +78,70 @@ const useCustomFieldsFilterConfig = () => {
 
 export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: FilterConfig[] }) => {
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig();
-  const [config, setConfig] = useState<Map<string, FilterConfig>>(() => {
-    return new Map(
-      [...systemFilterConfig, ...customFieldsFilterConfig].map((filter) => [filter.key, filter])
-    );
-  });
+  const [config, setConfig] = useState<Map<string, FilterConfig>>(
+    () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
+  );
+  const [storedOptions, setStoredOptions] = useLocalStorage<Map<string, FilterConfigState>>(
+    'filters',
+    new Map(),
+    {
+      raw: false,
+      serializer: (value) => {
+        return JSON.stringify(
+          Array.from(value.entries()).map(([key, filter]) => ({
+            key,
+            isActive: filter.isActive,
+          }))
+        );
+      },
+      deserializer: (value) => {
+        return new Map(
+          JSON.parse(value).map(({ key, isActive }: { key: string; isActive: boolean }) => [
+            key,
+            { key, isActive },
+          ])
+        );
+      },
+    }
+  );
 
   useEffect(() => {
-    setConfig((prevConfig) => {
-      const _config = new Map(prevConfig);
-      const updatedConfig = new Map(
-        [...systemFilterConfig, ...customFieldsFilterConfig].map((filter) => [filter.key, filter])
-      );
-
-      updatedConfig.forEach((filter) => {
-        if (_config.has(filter.key)) {
-          const outputFilter = _config.get(filter.key);
-          if (outputFilter) {
-            _config.set(filter.key, { ...filter, isActive: outputFilter.isActive });
-          }
-        } else {
-          _config.set(filter.key, filter);
-        }
-      });
-
-      _config.forEach((filter) => {
-        if (!updatedConfig.has(filter.key)) {
-          _config.delete(filter.key);
-        }
-      });
-
-      return _config;
-    });
+    const newConfig = new Map(
+      [...systemFilterConfig, ...customFieldsFilterConfig]
+        .filter((filter) => filter.isAvailable)
+        .map((filter) => [filter.key, filter])
+    );
+    setConfig(newConfig);
   }, [systemFilterConfig, customFieldsFilterConfig]);
 
-  const onFilterConfigChange = ({
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => {
-    setConfig((prevConfig) => {
-      const _config = new Map(prevConfig);
+  const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
+    const _storedOptions = new Map(storedOptions);
 
-      prevConfig.forEach((filter) => {
-        if (selectedOptionKeys.includes(filter.key)) {
-          if (!filter.isActive) {
-            // new activated options are inserted at the end of the list
-            _config.delete(filter.key);
-            _config.set(filter.key, { ...filter, isActive: true });
-          }
-        } else {
-          _config.set(filter.key, { ...filter, isActive: false });
+    _storedOptions.forEach(({ key, isActive }) => {
+      if (selectedOptionKeys.includes(key)) {
+        if (!isActive) {
+          _storedOptions.delete(key);
+          _storedOptions.set(key, { key, isActive: true });
         }
-      });
-
-      return _config;
+      } else {
+        _storedOptions.set(key, { key, isActive: false });
+      }
     });
+
+    config.forEach(({ key, isActive }) => {
+      if (!_storedOptions.has(key)) {
+        _storedOptions.set(key, {
+          key,
+          isActive: selectedOptionKeys.includes(key),
+        });
+      }
+    });
+
+    setStoredOptions(_storedOptions);
   };
 
-  const configArray = Array.from(config.values()).filter((filter) => filter.isAvailable);
-  const filterSelectableOptions = configArray
+  const availableConfigs = Array.from(config.values()).filter((filter) => filter.isAvailable);
+  const selectableOptions = availableConfigs
     .map(({ key, label }) => ({
       key,
       label,
@@ -147,14 +151,17 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
       if (a.label < b.label) return -1;
       return a.key > b.key ? 1 : -1;
     });
-  const activeFilters = configArray.filter((filter) => filter.isActive).map((filter) => filter);
+  const source = storedOptions && storedOptions.size > 0 ? storedOptions : config;
+  const activeFilters = Array.from(source.values())
+    .filter((filter) => filter.isActive && config.has(filter.key))
+    .map((filter) => config.get(filter.key)) as FilterConfig[];
   const activeFilterKeys = activeFilters.map((filter) => filter.key);
 
   return {
-    config: activeFilters,
-    filterConfigOptions: filterSelectableOptions,
-    onFilterConfigChange,
-    activeFilters: activeFilterKeys,
+    activeSelectableOptionKeys: activeFilterKeys,
+    filters: activeFilters,
     moreFiltersSelectableComponent: MoreFiltersSelectable,
+    onFilterConfigChange: onChange,
+    selectableOptions,
   };
 };

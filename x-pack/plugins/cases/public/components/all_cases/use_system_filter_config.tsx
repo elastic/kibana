@@ -35,6 +35,11 @@ interface UseFilterConfigProps {
   tags: string[];
 }
 
+export interface FilterConfigState {
+  key: string;
+  isActive: boolean;
+}
+
 export interface FilterConfig {
   key: string;
   label: string;
