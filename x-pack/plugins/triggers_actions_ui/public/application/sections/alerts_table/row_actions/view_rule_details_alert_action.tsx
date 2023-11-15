@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import styled from '@emotion/styled';
+import { useLocation } from 'react-router-dom';
 import { useKibana } from '../../../../common/lib/kibana';
 import { AlertActionsProps } from './types';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
@@ -29,12 +30,13 @@ export const ViewRuleDetailsAlertAction = memo(({ alert }: AlertActionsProps) =>
       basePath: { prepend },
     },
   } = useKibana().services;
+  const { pathname } = useLocation();
   const { resolveRulePagePath } = useContext(AlertsTableContext);
 
   const ruleId = alert[ALERT_RULE_UUID]?.[0] ?? null;
   const linkToRule = ruleId && resolveRulePagePath ? prepend(resolveRulePagePath(ruleId)) : null;
 
-  if (!linkToRule) {
+  if (!linkToRule || linkToRule.endsWith(pathname)) {
     return null;
   }
 

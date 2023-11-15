@@ -6,24 +6,20 @@
  */
 
 import { EuiContextMenuItem } from '@elastic/eui';
-import React, { memo, useCallback, useContext, useMemo } from 'react';
+import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { ALERT_STATUS, ALERT_STATUS_ACTIVE } from '@kbn/rule-data-utils';
 import { useMuteAlert } from '../hooks/alert_mute/use_mute_alert';
 import { AlertActionsProps } from './types';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { MUTE, UNMUTE } from '../hooks/translations';
 import { useUnmuteAlert } from '../hooks/alert_mute/use_unmute_alert';
+import { useAlertMutedState } from '../hooks/alert_mute/use_alert_muted_state';
 
 /**
  * Alerts table row action to mute/unmute the selected alert
  */
 export const MuteAlertAction = memo(({ alert, refresh, onActionExecuted }: AlertActionsProps) => {
-  const { mutedAlerts } = useContext(AlertsTableContext);
-  const alertInstanceId = alert['kibana.alert.instance.id']![0];
-  const ruleId = alert['kibana.alert.rule.uuid']![0];
-  const rule = mutedAlerts[ruleId];
-  const isMuted = rule?.includes(alertInstanceId);
+  const { isMuted, ruleId, rule, alertInstanceId } = useAlertMutedState(alert);
   const { mutateAsync: muteAlert } = useMuteAlert();
   const { mutateAsync: unmuteAlert } = useUnmuteAlert();
   const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);

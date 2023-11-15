@@ -9,6 +9,7 @@ import React, { memo, useContext } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
+import { useLocation } from 'react-router-dom';
 import { AlertActionsProps } from './types';
 import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { useKibana } from '../../../../common/lib/kibana';
@@ -23,11 +24,16 @@ export const ViewAlertDetailsAlertAction = memo(
         basePath: { prepend },
       },
     } = useKibana().services;
+    const { pathname } = useLocation();
     const { resolveAlertPagePath } = useContext(AlertsTableContext);
 
     const alertId = alert[ALERT_UUID]?.[0] ?? null;
     const linkToAlert =
       alertId && resolveAlertPagePath ? prepend(resolveAlertPagePath(alertId)) : null;
+
+    if (linkToAlert?.endsWith(pathname)) {
+      return null;
+    }
 
     if (isAlertDetailsEnabled && linkToAlert) {
       return (

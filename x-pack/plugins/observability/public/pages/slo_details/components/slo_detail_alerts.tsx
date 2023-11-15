@@ -9,6 +9,7 @@ import React, { Fragment } from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 
 const ALERTS_TABLE_ID = 'xpack.observability.slo.sloDetails.alertTable';
@@ -43,6 +44,8 @@ export function SloDetailsAlerts({ slo }: Props) {
             }}
             showAlertStatusWithFlapping
             pageSize={100}
+            resolveRulePagePath={paths.observability.ruleDetails}
+            resolveAlertPagePath={paths.observability.alertDetails}
           />
         </EuiFlexItem>
       </EuiFlexGroup>

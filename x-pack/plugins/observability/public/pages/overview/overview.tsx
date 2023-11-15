@@ -194,6 +194,8 @@ export function OverviewPage() {
               pageSize={ALERTS_PER_PAGE}
               query={esQuery}
               showAlertStatusWithFlapping
+              resolveRulePagePath={paths.observability.ruleDetails}
+              resolveAlertPagePath={paths.observability.alertDetails}
             />
           </SectionContainer>
         </EuiFlexItem>
