@@ -40,7 +40,9 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", type: Invalid literal value, expected \\"saved_query\\", saved_id: Required, and 15 more"`
+    );
   });
 
   test('it should validate a type of "query" with a saved_id together', () => {
@@ -68,7 +70,9 @@ describe('Rule response schema', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", type: Invalid literal value, expected \\"query\\", saved_id: Required, type: Invalid literal value, expected \\"threshold\\", and 14 more"`
+    );
   });
 
   test('it should validate a type of "timeline_id" if there is a "timeline_title" dependent', () => {
@@ -98,7 +102,9 @@ describe('Rule response schema', () => {
 
       const result = RuleResponse.safeParse(payload);
       expectParseError(result);
-      expect(stringifyZodError(result.error)).toEqual('Invalid input');
+      expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+        `"exceptions_list: Expected array, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", exceptions_list: Expected array, received string, exceptions_list: Expected array, received string, and 22 more"`
+      );
     });
   });
 
@@ -232,6 +238,8 @@ describe('investigation_fields', () => {
 
     const result = RuleResponse.safeParse(payload);
     expectParseError(result);
-    expect(stringifyZodError(result.error)).toEqual('Invalid input');
+    expect(stringifyZodError(result.error)).toMatchInlineSnapshot(
+      `"investigation_fields: Expected object, received string, type: Invalid literal value, expected \\"eql\\", language: Invalid literal value, expected \\"eql\\", investigation_fields: Expected object, received string, investigation_fields: Expected object, received string, and 22 more"`
+    );
   });
 });

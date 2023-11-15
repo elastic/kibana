@@ -6,9 +6,6 @@
  */
 
 import * as t from 'io-ts';
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import { DataViewId } from '../../api/detection_engine/model/rule_schema_legacy';
 import { afterKeysSchema } from '../after_keys';
 import { identifierTypeSchema } from '../identifier_types';
 import { riskWeightsSchema } from '../risk_weights/schema';
@@ -16,7 +13,7 @@ import { riskWeightsSchema } from '../risk_weights/schema';
 export const riskScoreCalculationRequestSchema = t.exact(
   t.intersection([
     t.type({
-      data_view_id: DataViewId,
+      data_view_id: t.string,
       identifier_type: identifierTypeSchema,
       range: t.type({
         start: t.string,
