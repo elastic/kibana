@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { SLO_SUMMARY_ENRICH_POLICY_NAME } from '@kbn/observability-plugin/server/assets/constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -26,10 +27,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       log.debug('Creating test index');
       try {
         await es.ingest.deletePipeline({ id: '.slo-*' }, { ignore: [404] });
-        await es.enrich.deletePolicy(
-          { name: 'slo-observability.summary.enrich_policy' },
-          { ignore: [404] }
-        );
+        await es.enrich.deletePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME }, { ignore: [404] });
         await es.indices.create({
           index: INDEX_NAME,
           body: {

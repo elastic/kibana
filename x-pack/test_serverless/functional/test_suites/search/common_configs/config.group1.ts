@@ -9,20 +9,9 @@ import { FtrConfigProviderContext } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const baseTestConfig = await readConfigFile(require.resolve('../config.ts'));
-  const configBase = baseTestConfig.getAll();
 
   return {
-    ...configBase,
-    kbnTestServer: {
-      ...configBase.kbnTestServer,
-      serverArgs: [
-        ...configBase.kbnTestServer.serverArgs,
-        // Removing the Observability plugin since the SLO feature now installs
-        // an enrich policy by default. The tests expect to start with a fresh
-        // install without enrich policies.
-        // '--xpack.observability.enabled=false',
-      ],
-    },
+    ...baseTestConfig.getAll(),
     testFiles: [
       require.resolve('../../common/home_page'),
       require.resolve('../../common/management'),
