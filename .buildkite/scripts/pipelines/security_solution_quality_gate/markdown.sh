@@ -25,8 +25,3 @@ if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
 else
     echo "KIBANA_OVERRIDE_FLAG is $KIBANA_OVERRIDE_FLAG"
 fi 
-
-
-
-
-
