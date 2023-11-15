@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { render, fireEvent } from '@testing-library/react';
+import { render, fireEvent, waitFor } from '@testing-library/react';
 
 import { CodeEditorInput, CodeEditorInputProps } from './code_editor_input';
 import { TEST_SUBJ_PREFIX_FIELD } from '.';
@@ -69,10 +69,13 @@ describe('MarkdownEditorInput', () => {
   it('calls the onInputChange prop when the value changes', async () => {
     const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '# New Markdown Title' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'markdown',
-      unsavedValue: '# New Markdown Title',
-    });
+    fireEvent.change(input, { target: { value: '# New Markdown Title' } });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'markdown',
+        unsavedValue: '# New Markdown Title',
+      })
+    );
   });
 });

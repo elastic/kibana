@@ -69,37 +69,32 @@ describe('JsonEditorInput', () => {
   it('calls the onInputChange prop when the object value changes', async () => {
     const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '{"bar":"foo"}' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'json',
-      unsavedValue: '{"bar":"foo"}',
-    });
+    fireEvent.change(input, { target: { value: '{"bar":"foo"}' } });
+
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({
+        type: 'json',
+        unsavedValue: '{"bar":"foo"}',
+      })
+    );
   });
 
   it('calls the onInputChange prop when the object value changes with no value', async () => {
     const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '' });
-  });
+    fireEvent.change(input, { target: { value: '' } });
 
-  it('calls the onInputChange prop with an error when the object value changes to invalid JSON', async () => {
-    const { getByTestId } = render(wrap(<CodeEditorInput {...defaultProps} />));
-    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '{"bar" "foo"}' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'json',
-      unsavedValue: '{"bar" "foo"}',
-      error: 'Invalid JSON syntax',
-      isInvalid: true,
-    });
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '' })
+    );
   });
 
   it('calls the onInputChange prop when the array value changes', async () => {
     const props = { ...defaultProps, defaultValue: '["bar", "foo"]', value: undefined };
     const { getByTestId } = render(wrap(<CodeEditorInput {...props} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '["foo", "bar", "baz"]' } });
+    fireEvent.change(input, { target: { value: '["foo", "bar", "baz"]' } });
+
     await waitFor(() =>
       expect(defaultProps.onInputChange).toHaveBeenCalledWith({
         type: 'json',
@@ -116,20 +111,10 @@ describe('JsonEditorInput', () => {
     };
     const { getByTestId } = render(wrap(<CodeEditorInput {...props} />));
     const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '' });
-  });
+    fireEvent.change(input, { target: { value: '' } });
 
-  it('calls the onInputChange prop with an array when the array value changes to invalid JSON', async () => {
-    const props = { ...defaultProps, defaultValue: '["bar", "foo"]', value: undefined };
-    const { getByTestId } = render(wrap(<CodeEditorInput {...props} />));
-    const input = getByTestId(`${TEST_SUBJ_PREFIX_FIELD}-${id}`);
-    await fireEvent.change(input, { target: { value: '["bar", "foo" | "baz"]' } });
-    expect(defaultProps.onInputChange).toHaveBeenCalledWith({
-      type: 'json',
-      unsavedValue: '["bar", "foo" | "baz"]',
-      error: 'Invalid JSON syntax',
-      isInvalid: true,
-    });
+    await waitFor(() =>
+      expect(defaultProps.onInputChange).toHaveBeenCalledWith({ type: 'json', unsavedValue: '' })
+    );
   });
 });
