@@ -532,6 +532,12 @@ describe('<TemplateCreate />', () => {
       await actions.completeStepOne({
         name: TEMPLATE_NAME,
         indexPatterns: DEFAULT_INDEX_PATTERNS,
+        dataStream: {},
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
         allowAutoCreate: true,
       });
       // Component templates
@@ -560,6 +566,7 @@ describe('<TemplateCreate />', () => {
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
             allowAutoCreate: true,
+            dataStream: {},
             _kbnMeta: {
               type: 'default',
               hasDatastream: false,
@@ -582,6 +589,10 @@ describe('<TemplateCreate />', () => {
                 },
               },
               aliases: ALIASES,
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })
@@ -621,6 +632,11 @@ describe('<TemplateCreate />', () => {
       name: TEMPLATE_NAME,
       indexPatterns: DEFAULT_INDEX_PATTERNS,
       dataStream: {},
+      lifecycle: {
+        enabled: true,
+        value: 1,
+        unit: 'd',
+      },
     });
 
     await act(async () => {
@@ -631,6 +647,12 @@ describe('<TemplateCreate />', () => {
       `${API_BASE_PATH}/index_templates/simulate`,
       expect.objectContaining({
         body: JSON.stringify({
+          template: {
+            lifecycle: {
+              enabled: true,
+              data_retention: '1d',
+            },
+          },
           index_patterns: DEFAULT_INDEX_PATTERNS,
           data_stream: {},
           allow_auto_create: false,

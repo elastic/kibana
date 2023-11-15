@@ -1574,10 +1574,10 @@
     "@elastic/transport" "^8.3.3"
     tslib "^2.4.0"
 
-"@elastic/ems-client@8.5.0":
-  version "8.5.0"
-  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.0.tgz#5e3988ab01dee54bace9f8c2f9e71470b26a1bfa"
-  integrity sha512-uEI8teyS3gWErlEL4mEYh0MDHms9Rp3eEHKnMMSdMtAkaa3xs60SOm3Vd0ld9sIPsyarQHrAybAw30GXVXXRjw==
+"@elastic/ems-client@8.5.1":
+  version "8.5.1"
+  resolved "https://registry.yarnpkg.com/@elastic/ems-client/-/ems-client-8.5.1.tgz#60c179e53ad81f5e26680e7e1c6cbffe4fb64aed"
+  integrity sha512-lc65i/cW6fGuRMt3pUte35sL8HxXM7TbYJwx1bHWcWn4aN3zv8i5RhPKFz+Wr/1ubfFOTrIoFYCP4h1uq2O/dQ==
   dependencies:
     "@types/geojson" "^7946.0.10"
     "@types/lru-cache" "^5.1.0"
@@ -3000,6 +3000,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-ftr-helpers-plugin@link:test/analytics/plugins/analytics_ftr_helpers":
   version "0.0.0"
   uid ""
@@ -4148,6 +4152,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/dataset-quality-plugin@link:x-pack/plugins/dataset_quality":
+  version "0.0.0"
+  uid ""
+
 "@kbn/datemath@link:packages/kbn-datemath":
   version "0.0.0"
   uid ""
@@ -4301,6 +4309,10 @@
   uid ""
 
 "@kbn/enterprise-search-plugin@link:x-pack/plugins/enterprise_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/error-boundary-example-plugin@link:examples/error_boundary":
   version "0.0.0"
   uid ""
 
@@ -5017,6 +5029,10 @@
   uid ""
 
 "@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/mock-idp-plugin@link:packages/kbn-mock-idp-plugin":
   version "0.0.0"
   uid ""
 
@@ -6037,6 +6053,10 @@
   uid ""
 
 "@kbn/unified-search-plugin@link:src/plugins/unified_search":
+  version "0.0.0"
+  uid ""
+
+"@kbn/unsaved-changes-badge@link:packages/kbn-unsaved-changes-badge":
   version "0.0.0"
   uid ""
 

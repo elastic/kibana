@@ -49,6 +49,7 @@ type SloIdAndInstanceId = [string, string];
 
 interface Params {
   sloIdsAndInstanceIds: SloIdAndInstanceId[];
+  shouldRefetch?: boolean;
 }
 
 export interface UseFetchActiveAlerts {
@@ -70,9 +71,13 @@ interface FindApiResponse {
   };
 }
 
+const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 const EMPTY_ACTIVE_ALERTS_MAP = new ActiveAlerts();
 
-export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): UseFetchActiveAlerts {
+export function useFetchActiveAlerts({
+  sloIdsAndInstanceIds = [],
+  shouldRefetch = false,
+}: Params): UseFetchActiveAlerts {
   const { http } = useKibana().services;
 
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data } = useQuery({
@@ -136,6 +141,7 @@ export function useFetchActiveAlerts({ sloIdsAndInstanceIds = [] }: Params): Use
       }
     },
     refetchOnWindowFocus: false,
+    refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
     enabled: Boolean(sloIdsAndInstanceIds.length),
   });
 
