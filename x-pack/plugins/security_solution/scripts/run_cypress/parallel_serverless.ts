@@ -343,10 +343,10 @@ const getOverridedProductTypes = (
       product_tier: projectConfigurationParameters.tier,
     }));
   }
-  if (projectConfigurationParameters.endpointAddon) {
+  if (projectConfigurationParameters.endpointAddon && !projectConfigurationParameters.cloudAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
   }
-  if (projectConfigurationParameters.cloudAddon) {
+  if (projectConfigurationParameters.cloudAddon && !projectConfigurationParameters.endpointAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
   }
 
@@ -401,14 +401,17 @@ export const cli = () => {
           }, {} as Record<string, string | number>)
         )
         .option('tier', {
+          alias: 't',
           type: 'string',
           default: 'complete',
         })
         .option('endpointAddon', {
+          alias: 'ea',
           type: 'boolean',
           default: true,
         })
         .option('cloudAddon', {
+          alias: 'ca',
           type: 'boolean',
           default: true,
         });
