@@ -9,7 +9,6 @@
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { configSchema, ConfigSchema } from '../config';
-import { VisTypeVegaPlugin } from './plugin';
 
 export const config: PluginConfigDescriptor<ConfigSchema> = {
   exposeToBrowser: {
@@ -18,7 +17,8 @@ export const config: PluginConfigDescriptor<ConfigSchema> = {
   schema: configSchema,
 };
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { VisTypeVegaPlugin } = await import('./plugin');
   return new VisTypeVegaPlugin(initializerContext);
 }
 

@@ -97,6 +97,6 @@ export async function syncMvtSourceData({
     };
     syncContext.stopLoading(SOURCE_DATA_REQUEST_ID, requestToken, sourceData, {});
   } catch (error) {
-    syncContext.onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error.message);
+    syncContext.onLoadError(SOURCE_DATA_REQUEST_ID, requestToken, error);
   }
 }

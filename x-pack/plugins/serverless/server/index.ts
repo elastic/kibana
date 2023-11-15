@@ -6,10 +6,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { ServerlessPlugin } from './plugin';
 export { config } from './config';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { ServerlessPlugin } = await import('./plugin');
   return new ServerlessPlugin(initializerContext);
 };
 

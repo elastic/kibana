@@ -7,8 +7,6 @@
 
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import { FleetPlugin } from './plugin';
-
 export { buildAgentStatusRuntimeField } from './services/agents/build_status_runtime_field';
 export type {
   AgentService,
@@ -50,6 +48,7 @@ export type {
   FleetFileUpdatableFields,
 } from './services/files/types';
 
-export const plugin = (initializerContext: PluginInitializerContext) => {
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { FleetPlugin } = await import('./plugin');
   return new FleetPlugin(initializerContext);
 };
