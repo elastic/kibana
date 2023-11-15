@@ -20,7 +20,7 @@ import { routeHandlerFactory } from './route_handler_factory';
 
 /**
  * `defineRoute` is called in the root `plugin.ts` to set up the API route
- * for log pattern analysis. It's purpose is to take care of the route setup
+ * for log pattern analysis. Its purpose is to take care of the route setup
  * and versioning only. `routeHandlerFactory` is used to take care of
  * the actual route logic.
  */

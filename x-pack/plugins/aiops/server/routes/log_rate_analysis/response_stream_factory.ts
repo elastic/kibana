@@ -66,7 +66,7 @@ export interface ResponseStreamFetchOptions<T extends ApiVersion> extends Respon
  * `responseStreamFactory` sets up the response stream, the stream's state (for example
  * if it's running, how far the stream progressed etc.), some custom actions for the stream
  * as well as analysis handlers that fetch data from ES and pass it on to the stream.
- * This factory should avoid to include any logic, it's purpose is to take care of setting up
+ * This factory should avoid to include any logic, its purpose is to take care of setting up
  * and passing around dependencies for the various other parts involved
  * running the analysis.
  */
