@@ -33,13 +33,20 @@ describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockSystemEsClient: jest.Mocked<ElasticsearchClient>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    updateSLO = new UpdateSLO(mockRepository, mockTransformManager, mockEsClient);
+    mockSystemEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    updateSLO = new UpdateSLO(
+      mockRepository,
+      mockTransformManager,
+      mockEsClient,
+      mockSystemEsClient
+    );
   });
 
   describe('when the update payload does not change the original SLO', () => {
@@ -379,6 +386,7 @@ describe('UpdateSLO', () => {
       await updateSLO.execute(slo.id, { indicator: newIndicator });
 
       expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
+      expect(mockSystemEsClient.enrich.executePolicy).toBeCalled();
     });
 
     it('removes the original data from the original SLO', async () => {
@@ -423,6 +431,7 @@ describe('UpdateSLO', () => {
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
       expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(mockSystemEsClient.enrich.executePolicy).not.toHaveBeenCalled();
     });
   });
 
@@ -446,6 +455,7 @@ describe('UpdateSLO', () => {
       expect(mockRepository.save).toHaveBeenCalledWith(slo);
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
+      expect(mockSystemEsClient.enrich.executePolicy).not.toHaveBeenCalled();
     });
   });
 
@@ -456,6 +466,7 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.preview).not.toBeCalled();
     expect(mockTransformManager.start).not.toBeCalled();
     expect(mockEsClient.deleteByQuery).not.toBeCalled();
+    expect(mockSystemEsClient.enrich.executePolicy).not.toHaveBeenCalled();
   }
 
   function expectInstallationOfNewSLOTransform() {

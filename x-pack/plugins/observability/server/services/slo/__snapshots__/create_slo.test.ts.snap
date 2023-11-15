@@ -46,3 +46,11 @@ Array [
   },
 ]
 `;
+
+exports[`CreateSLO happy path calls the expected services 2`] = `
+Array [
+  Object {
+    "name": "slo-observability.summary.enrich_policy",
+  },
+]
+`;
