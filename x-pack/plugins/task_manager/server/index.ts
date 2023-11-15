@@ -7,10 +7,12 @@
 
 import { get } from 'lodash';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { TaskManagerPlugin } from './plugin';
 import { configSchema, TaskManagerConfig, MAX_WORKERS_LIMIT } from './config';
 
-export const plugin = (initContext: PluginInitializerContext) => new TaskManagerPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { TaskManagerPlugin } = await import('./plugin');
+  return new TaskManagerPlugin(initContext);
+};
 
 export type {
   TaskInstance,
