@@ -316,7 +316,7 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
           </EuiFlexGroup>
           <EuiSpacer size="m" />
           <EuiFlexGroup direction="row" justifyContent="flexEnd">
-            <EuiButton fill onSubmit={onClose}>
+            <EuiButton fill onClick={onClose}>
               <FormattedMessage id="share.embed.doneButton" defaultMessage="Done" />
             </EuiButton>
           </EuiFlexGroup>

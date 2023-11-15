@@ -14,7 +14,9 @@ import type {
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
+export { reportingScreenshotShareProvider } from './register_pdf_png_reporting';
 
+export { ReportingModalContent } from './reporting_panel_content_lazy';
 export interface ExportPanelShareOpts {
   apiClient: ReportingAPIClient;
   toasts: ToastsSetup;

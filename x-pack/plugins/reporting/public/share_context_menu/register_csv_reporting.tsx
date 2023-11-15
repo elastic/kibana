@@ -111,8 +111,44 @@ export const reportingCsvShareProvider = ({
     return shareActions;
   };
 
+  const getJobParams = ({
+    objectType,
+    objectId,
+    onClose,
+    shareableUrl,
+    sharingData,
+    ...shareOpts
+  }: ShareContext) => {
+    const getSearchSource = sharingData.getSearchSource as ({
+      addGlobalTimeFilter,
+      absoluteTime,
+    }: {
+      addGlobalTimeFilter?: boolean;
+      absoluteTime?: boolean;
+    }) => SearchSourceFields;
+
+    const jobParams = {
+      title: sharingData.title as string,
+      objectType,
+      columns: sharingData.columns as string[] | undefined,
+    };
+
+    const getJobParams = (forShareUrl?: boolean) => {
+      return {
+        ...jobParams,
+        searchSource: getSearchSource({
+          addGlobalTimeFilter: true,
+          absoluteTime: !forShareUrl,
+        }),
+      };
+    };
+
+    return getJobParams;
+  };
+
   return {
     id: 'csvReports',
     getShareMenuItems,
+    jobProviderOptions: getJobParams,
   };
 };

@@ -130,11 +130,11 @@ export class ReportingPublicPlugin
     return this.apiClient;
   }
 
-  private getContract(core?: CoreSetup) {
+  private getContract(share?: SharePluginSetup, core?: CoreSetup) {
     if (core) {
       this.contract = {
         usesUiCapabilities: () => this.config.roles?.enabled === false,
-        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings)),
+        components: getSharedComponents(core, this.getApiClient(core.http, core.uiSettings), share),
       };
     }
 
@@ -221,7 +221,7 @@ export class ReportingPublicPlugin
       new ReportingCsvPanelAction({ core, apiClient, startServices$, usesUiCapabilities })
     );
 
-    const reportingStart = this.getContract(core);
+    const reportingStart = this.getContract(share, core);
     const { toasts } = core.notifications;
 
     startServices$.subscribe(([{ application }, { licensing }]) => {

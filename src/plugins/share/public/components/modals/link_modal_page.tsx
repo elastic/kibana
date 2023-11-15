@@ -281,7 +281,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
         <EuiFlexItem grow={1}>{allowShortUrl && renderShortUrlSwitch()}</EuiFlexItem>
         <EuiSpacer size="m" />
         <EuiFlexGroup direction="row" justifyContent="flexEnd">
-          <EuiButton fill onSubmit={onClose}>
+          <EuiButton fill onClick={onClose}>
             <FormattedMessage id="share.links.doneButton" defaultMessage="Done" />
           </EuiButton>
         </EuiFlexGroup>

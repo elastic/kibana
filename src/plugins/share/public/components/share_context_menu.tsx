@@ -49,7 +49,6 @@ export interface ShareContextMenuProps {
 export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextMenuProps) => {
   const {
     openModal,
-    onClose,
     urlService,
     theme,
     i18nStart,
@@ -67,7 +66,6 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           isEmbedded={false}
           allowShortUrl={false}
           onClose={() => {
-            onClose();
             session.close();
           }}
           urlService={urlService}
@@ -88,7 +86,6 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
           isEmbedded={false}
           allowShortUrl={false}
           onClose={() => {
-            onClose();
             session.close();
           }}
           urlService={urlService}
@@ -102,6 +99,10 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
       }
     );
   };
+
+  const openReportModal = () => {};
+
+  const openCsvModal = () => {};
 
   // private openCsvExportModal() {
   //   const session = overlays.openModal(
@@ -153,13 +154,23 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
 
     shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
+      console.log({ objectType });
+      const imageReportingModal = {
+        icon: 'document',
+        onClick: openReportModal,
+        ...shareMenuItem,
+      };
+      const csvModal = {
+        icon: 'document',
+        onClick: openCsvModal,
+        ...shareMenuItem,
+      };
       panels.push({
         ...panels,
         id: panelId,
       });
-      menuItems.push({
-        ...shareMenuItem,
-      });
+      if (objectType === 'dashboard') menuItems.push(imageReportingModal);
+      else if (objectType === 'search') menuItems.push(csvModal);
     });
 
     if (menuItems.length > 1) {

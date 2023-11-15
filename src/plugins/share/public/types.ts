@@ -86,6 +86,8 @@ export interface ShareMenuProvider {
   readonly id: string;
 
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
+
+  jobProviderOptions: any;
 }
 
 interface UrlParamExtensionProps {
