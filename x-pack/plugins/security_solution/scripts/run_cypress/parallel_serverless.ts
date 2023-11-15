@@ -343,10 +343,10 @@ const getOverridedProductTypes = (
       product_tier: projectConfigurationParameters.tier,
     }));
   }
-  if (projectConfigurationParameters.endpointAddon && !projectConfigurationParameters.cloudAddon) {
+  if (!projectConfigurationParameters.cloudAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
   }
-  if (projectConfigurationParameters.cloudAddon && !projectConfigurationParameters.endpointAddon) {
+  if (!projectConfigurationParameters.endpointAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
   }
 
