@@ -116,3 +116,6 @@ export const getGenAiTokenTracking = async ({
   }
   return null;
 };
+
+export const shouldTrackGenAiToken = (actionTypeId: string) =>
+  actionTypeId === '.gen-ai' || actionTypeId === '.bedrock';

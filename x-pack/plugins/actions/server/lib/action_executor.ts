@@ -14,7 +14,7 @@ import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { getGenAiTokenTracking } from './gen_ai_token_tracking';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateParams,
   validateConfig,
@@ -329,7 +329,7 @@ export class ActionExecutor {
         }
 
         // start genai extension
-        if (result.status === 'ok') {
+        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
           getGenAiTokenTracking({
             actionTypeId,
             logger,
