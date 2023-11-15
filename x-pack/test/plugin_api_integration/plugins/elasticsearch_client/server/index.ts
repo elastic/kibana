@@ -7,4 +7,4 @@
 
 import { ElasticsearchClientXPack } from './plugin';
 
-export const plugin = () => new ElasticsearchClientXPack();
+export const plugin = async () => new ElasticsearchClientXPack();
