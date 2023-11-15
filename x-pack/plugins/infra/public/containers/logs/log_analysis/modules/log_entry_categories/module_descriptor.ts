@@ -146,7 +146,7 @@ const validateSetupIndices = async (
       fields: [
         {
           name: timestampField,
-          validTypes: ['date'],
+          validTypes: ['date', 'date_nanos'],
         },
         {
           name: partitionField,
