@@ -9,6 +9,7 @@ import {
   DefaultItemAction,
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiSkeletonRectangle,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
@@ -199,7 +200,18 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
     {
       field: 'status',
       name: 'Status',
-      render: (_, slo: SLOWithSummaryResponse) => <SloStatusBadge slo={slo} />,
+      render: (_, slo: SLOWithSummaryResponse) =>
+        !slo.summary ? (
+          <EuiSkeletonRectangle
+            isLoading
+            contentAriaLabel="Loading"
+            width="54.16px"
+            height="20px"
+            borderRadius="s"
+          />
+        ) : (
+          <SloStatusBadge slo={slo} />
+        ),
     },
     {
       field: 'alerts',
@@ -225,36 +237,40 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           )
         );
         return (
-          <EuiText size="s">
-            {slo.summary ? (
-              <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
-                {slo.name}
-              </a>
-            ) : (
-              <span>{slo.name}</span>
-            )}
-          </EuiText>
+          <EuiToolTip position="top" content={slo.name} display="block">
+            <EuiText size="s">
+              {slo.summary ? (
+                <a data-test-subj="o11ySloListItemLink" href={sloDetailsUrl}>
+                  {slo.name}
+                </a>
+              ) : (
+                <span>{slo.name}</span>
+              )}
+            </EuiText>
+          </EuiToolTip>
         );
       },
     },
-
     {
       field: 'instance',
       name: 'Instance',
-      render: (_, slo: SLOWithSummaryResponse) => (
-        <EuiToolTip
-          position="top"
-          content={i18n.translate('xpack.observability.slo.partitionByBadge', {
-            defaultMessage: 'Partition by {partitionKey}',
-            values: {
-              partitionKey: slo.groupBy,
-            },
-          })}
-          display="block"
-        >
-          <span>{slo.instanceId}</span>
-        </EuiToolTip>
-      ),
+      render: (_, slo: SLOWithSummaryResponse) =>
+        slo.groupBy !== ALL_VALUE ? (
+          <EuiToolTip
+            position="top"
+            content={i18n.translate('xpack.observability.slo.partitionByBadge', {
+              defaultMessage: 'Partition by {partitionKey}',
+              values: {
+                partitionKey: slo.groupBy,
+              },
+            })}
+            display="block"
+          >
+            <span>{slo.instanceId}</span>
+          </EuiToolTip>
+        ) : (
+          <span>{NOT_AVAILABLE_LABEL}</span>
+        ),
     },
     {
       field: 'objective',
@@ -266,7 +282,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       name: 'SLI value',
       truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) =>
-        slo.summary.status === 'NO_DATA'
+        !slo.summary || slo.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
           : numeral(slo.summary.sliValue).format(percentFormat),
     },
@@ -274,7 +290,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       field: 'historicalSli',
       name: 'Historical SLI',
       render: (_, slo: SLOWithSummaryResponse) => {
-        const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
+        const isSloFailed =
+          (slo.summary && slo.summary.status === 'VIOLATED') ||
+          (slo.summary && slo.summary.status === 'DEGRADING');
         const historicalSliData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
@@ -300,7 +318,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       name: 'Budget remaining',
       truncateText: true,
       render: (_, slo: SLOWithSummaryResponse) =>
-        slo.summary.status === 'NO_DATA'
+        !slo.summary || slo.summary.status === 'NO_DATA'
           ? NOT_AVAILABLE_LABEL
           : numeral(slo.summary.errorBudget.remaining).format(percentFormat),
     },
@@ -308,7 +326,9 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
       field: 'historicalErrorBudgetRemaining',
       name: 'Historical budget remaining',
       render: (_, slo: SLOWithSummaryResponse) => {
-        const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
+        const isSloFailed =
+          (slo.summary && slo.summary.status === 'VIOLATED') ||
+          (slo.summary && slo.summary.status === 'DEGRADING');
         const errorBudgetBurnDownData = formatHistoricalData(
           historicalSummaries.find(
             (historicalSummary) =>
@@ -353,7 +373,7 @@ export function SloListCompactView({ sloList, loading, error }: Props) {
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           initialValues={{
-            name: `${sloToAddRule.name} Burn Rate rule`,
+            name: `${sloToAddRule.name} burn rate rule`,
             params: { sloId: sloToAddRule.id },
           }}
           onSave={handleSavedRule}

@@ -271,7 +271,7 @@ export function SloListItem({
           consumer={sloFeatureId}
           filteredRuleTypes={filteredRuleTypes}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
+          initialValues={{ name: `${slo.name} burn rate rule`, params: { sloId: slo.id } }}
           onSave={handleSavedRule}
           onClose={() => {
             setIsAddRuleFlyoutOpen(false);
