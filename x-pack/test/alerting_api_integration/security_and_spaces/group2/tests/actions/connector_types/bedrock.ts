@@ -32,7 +32,6 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const objectRemover = new ObjectRemover(supertest);
   const configService = getService('config');
-  const retry = getService('retry');
   const createConnector = async (apiUrl: string, spaceId?: string) => {
     const result = await supertest
       .post(`${getUrlPrefix(spaceId ?? 'default')}/api/actions/connector`)
@@ -410,7 +409,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             });
           });
 
-          it.only('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
             await new Promise<void>((resolve, reject) => {
               let responseBody: string = '';
 
