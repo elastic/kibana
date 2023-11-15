@@ -42,10 +42,7 @@ import {
   isCspPackagePolicyInstalled,
   onPackagePolicyPostCreateCallback,
 } from './fleet_integration/fleet_integration';
-import {
-  CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
-  CSP_RULE_TEMPLATE_INTERNAL_SAVED_OBJECT_TYPE,
-} from '../common/constants';
+import { CLOUD_SECURITY_POSTURE_PACKAGE_NAME } from '../common/constants';
 import {
   removeFindingsStatsTask,
   scheduleFindingsStatsTask,
@@ -53,7 +50,6 @@ import {
 } from './tasks/findings_stats_task';
 import { registerCspmUsageCollector } from './lib/telemetry/collectors/register';
 import { CloudSecurityPostureConfig } from './config';
-import { synchronizeCspRuleTemplatesState } from './fleet_integration/synchronize_csp_rule_state';
 
 export class CspPlugin
   implements
@@ -113,10 +109,6 @@ export class CspPlugin
         this.initialize(core, plugins.taskManager);
       }
 
-      const internalSoClient = core.savedObjects.createInternalRepository([
-        CSP_RULE_TEMPLATE_INTERNAL_SAVED_OBJECT_TYPE,
-      ]);
-
       plugins.fleet.registerExternalCallback(
         'packagePolicyCreate',
         async (packagePolicy: NewPackagePolicy): Promise<NewPackagePolicy> => {
@@ -127,6 +119,7 @@ export class CspPlugin
                 'To use this feature you must upgrade your subscription or start a trial'
               );
             }
+
             if (!isSingleEnabledInput(packagePolicy.inputs)) {
               throw new Error('Only one enabled input is allowed per policy');
             }
@@ -176,37 +169,6 @@ export class CspPlugin
 
             return packagePolicy;
           }
-
-          await synchronizeCspRuleTemplatesState(soClient, internalSoClient, this.logger);
-
-          // const cspRulesTemplatesSo = await soClient.find<CspRuleTemplate>({
-          //   type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-          //   perPage: 10000, // max value
-          // });
-
-          // const cspRulesTemplatesIds = cspRulesTemplatesSo.saved_objects.map(
-          //   (cspRuleTemplate) => cspRuleTemplate.attributes.metadata.id
-          // );
-
-          // const existingObjects = await internalSoClient.find<CspRuleTemplateState>({
-          //   type: CSP_RULE_TEMPLATE_INTERNAL_SAVED_OBJECT_TYPE,
-          //   perPage: 10000, // max value
-          // });
-
-          // const bulkCreateObjects = cspRulesTemplatesIds.map((id) => {
-          //   const existingObject = existingObjects.saved_objects.find(
-          //     (obj) => obj.attributes.id === id
-          //   );
-          //   const enabled = existingObject ? existingObject.attributes.enabled : true;
-
-          //   return {
-          //     id,
-          //     type: CSP_RULE_TEMPLATE_INTERNAL_SAVED_OBJECT_TYPE,
-          //     attributes: { enabled },
-          //   };
-          // });
-
-          // await internalSoClient.bulkCreate(bulkCreateObjects);
 
           return packagePolicy;
         }

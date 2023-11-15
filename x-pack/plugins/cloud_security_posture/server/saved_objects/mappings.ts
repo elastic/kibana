@@ -60,18 +60,3 @@ export const cspRuleTemplateSavedObjectMapping: SavedObjectsTypeMappingDefinitio
     },
   },
 };
-
-export const cspRuleTemplateStateSavedObjectMapping: SavedObjectsTypeMappingDefinition = {
-  dynamic: false,
-  properties: {
-    metadata: {
-      type: 'object',
-      properties: {
-        id: {
-          type: 'keyword',
-        },
-        enabled: { type: 'boolean' },
-      },
-    },
-  },
-};
