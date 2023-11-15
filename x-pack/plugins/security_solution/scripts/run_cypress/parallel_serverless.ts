@@ -50,8 +50,8 @@ interface Project {
 
 interface ProjectConfigurationParameters {
   tier: string;
-  ignoreEndpoint: boolean;
-  ignoreCloud: boolean;
+  endpointAddon: boolean;
+  cloudAddon: boolean;
 }
 
 interface Credentials {
@@ -343,12 +343,13 @@ const getOverridedProductTypes = (
       product_tier: projectConfigurationParameters.tier,
     }));
   }
-  if (projectConfigurationParameters.ignoreEndpoint) {
-    productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
-  }
-  if (projectConfigurationParameters.ignoreCloud) {
+  if (projectConfigurationParameters.endpointAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
   }
+  if (projectConfigurationParameters.cloudAddon) {
+    productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
+  }
+
   return productTypes;
 };
 
@@ -398,7 +399,19 @@ export const cli = () => {
             }
             return acc;
           }, {} as Record<string, string | number>)
-        );
+        )
+        .option('tier', {
+          type: 'string',
+          default: 'complete',
+        })
+        .option('endpointAddon', {
+          type: 'boolean',
+          default: true,
+        })
+        .option('cloudAddon', {
+          type: 'boolean',
+          default: true,
+        });
 
       log.info(`
 ----------------------------------------------
@@ -417,8 +430,8 @@ ${JSON.stringify(argv, null, 2)}
 
       const projectConfigurationParameters: ProjectConfigurationParameters = {
         tier: argv.tier as string,
-        ignoreEndpoint: argv.ignoreEndpoint as boolean,
-        ignoreCloud: argv.ignoreCloud as boolean,
+        endpointAddon: argv.endpointAddon as boolean,
+        cloudAddon: argv.cloudAddon as boolean,
       };
 
       log.info(`
