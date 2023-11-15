@@ -16,7 +16,7 @@ import { fetchAlertIndexNames } from '../lib/rule_api/alert_index';
 import { fetchAlertFields } from '../lib/rule_api/alert_fields';
 
 export interface UserAlertDataView {
-  dataview?: DataView[];
+  dataviews?: DataView[];
   loading: boolean;
 }
 
@@ -26,13 +26,12 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     data: dataService,
     notifications: { toasts },
   } = useKibana<TriggersAndActionsUiServices>().services;
-  const [dataview, setDataview] = useState<DataView[] | undefined>(undefined);
+  const [dataviews, setDataviews] = useState<DataView[] | undefined>(undefined);
   const features = featureIds.sort().join(',');
-  const isOnlySecurity =
-    featureIds.length === 1 && (featureIds as AlertConsumers[]).includes(AlertConsumers.SIEM);
+  const isOnlySecurity = featureIds.length === 1 && featureIds.includes(AlertConsumers.SIEM);
 
   const hasSecurityAndO11yFeatureIds =
-    featureIds.length > 1 && (featureIds as AlertConsumers[]).includes(AlertConsumers.SIEM);
+    featureIds.length > 1 && featureIds.includes(AlertConsumers.SIEM);
 
   const hasNoSecuritySolution = !isOnlySecurity && !hasSecurityAndO11yFeatureIds;
 
@@ -80,12 +79,12 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
 
   useEffect(() => {
     return () => {
-      dataview?.map((dv) => {
+      dataviews?.map((dv) => {
         dataService.dataViews.clearInstanceCache(dv.id);
       });
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dataview]);
+  }, [dataviews]);
 
   // FUTURE ENGINEER this useEffect is for security solution user since
   // we are using the user privilege to access the security alert index
@@ -95,7 +94,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
         title: (indexNames ?? []).join(','),
         allowNoIndex: true,
       });
-      setDataview([localDataview]);
+      setDataviews([localDataview]);
     }
 
     if (isOnlySecurity && isIndexNameSuccess) {
@@ -113,7 +112,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
       isAlertFieldsSuccess &&
       isIndexNameSuccess
     ) {
-      setDataview([
+      setDataviews([
         {
           title: (indexNames ?? []).join(','),
           fieldFormatMap: {},
@@ -137,7 +136,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
 
   return useMemo(
     () => ({
-      dataview,
+      dataviews,
       loading:
         featureIds.length === 0 || hasSecurityAndO11yFeatureIds
           ? false
@@ -149,7 +148,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
             isAlertFieldsLoading,
     }),
     [
-      dataview,
+      dataviews,
       featureIds.length,
       hasSecurityAndO11yFeatureIds,
       isOnlySecurity,

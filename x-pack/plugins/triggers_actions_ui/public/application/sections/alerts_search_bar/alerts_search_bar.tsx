@@ -46,11 +46,11 @@ export function AlertsSearchBar({
   } = useKibana<TriggersAndActionsUiServices>().services;
 
   const [queryLanguage, setQueryLanguage] = useState<QueryLanguageType>('kuery');
-  const { dataview, loading } = useAlertDataView(featureIds ?? []);
+  const { dataviews, loading } = useAlertDataView(featureIds ?? []);
   const { aadFields, loading: fieldsLoading } = useRuleAADFields(ruleTypeId);
 
   const indexPatterns =
-    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataview;
+    ruleTypeId && aadFields?.length ? [{ title: ruleTypeId, fields: aadFields }] : dataviews;
 
   const ruleType = useLoadRuleTypesQuery({
     filteredRuleTypes: ruleTypeId !== undefined ? [ruleTypeId] : [],
