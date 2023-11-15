@@ -32,8 +32,8 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views/_index_patterns_empty'));
     */
     loadTestFile(require.resolve('./data_views/_scripted_fields'));
-    /*
     loadTestFile(require.resolve('./data_views/_scripted_fields_classic_table'));
+    /*
     loadTestFile(require.resolve('./data_views/_runtime_fields'));
     loadTestFile(require.resolve('./data_views/_runtime_fields_composite'));
     loadTestFile(require.resolve('./data_views/_field_formatter'));
