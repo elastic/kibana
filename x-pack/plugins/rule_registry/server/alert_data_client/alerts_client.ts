@@ -81,6 +81,7 @@ export interface ConstructorOptions {
   esClient: ElasticsearchClient;
   ruleDataService: IRuleDataService;
   getRuleType: RuleTypeRegistry['get'];
+  getRuleList: RuleTypeRegistry['list'];
   getAlertIndicesAlias: AlertingStart['getAlertIndicesAlias'];
 }
 
@@ -154,6 +155,7 @@ export class AlertsClient {
   private readonly spaceId: string | undefined;
   private readonly ruleDataService: IRuleDataService;
   private readonly getRuleType: RuleTypeRegistry['get'];
+  private readonly getRuleList: RuleTypeRegistry['list'];
   private getAlertIndicesAlias!: AlertingStart['getAlertIndicesAlias'];
 
   constructor(options: ConstructorOptions) {
@@ -166,6 +168,7 @@ export class AlertsClient {
     this.spaceId = this.authorization.getSpaceId();
     this.ruleDataService = options.ruleDataService;
     this.getRuleType = options.getRuleType;
+    this.getRuleList = options.getRuleList;
     this.getAlertIndicesAlias = options.getAlertIndicesAlias;
   }
 
@@ -1078,19 +1081,31 @@ export class AlertsClient {
   }
 
   public async getBrowserFields({
+    featureIds,
     indices,
     metaFields,
     allowNoIndex,
   }: {
+    featureIds: string[];
     indices: string[];
     metaFields: string[];
     allowNoIndex: boolean;
   }): Promise<{ browserFields: BrowserFields; fields: FieldDescriptor[] }> {
     const indexPatternsFetcherAsInternalUser = new IndexPatternsFetcher(this.esClient);
+    const ruleTypeList = this.getRuleList();
+    const fieldsForAAD = new Set<string>();
+    for (const rule of ruleTypeList) {
+      if (featureIds.includes(rule.producer) && rule.hasFieldsForAAD) {
+        (rule.fieldsForAAD ?? []).forEach((f) => {
+          fieldsForAAD.add(f);
+        });
+      }
+    }
     const { fields } = await indexPatternsFetcherAsInternalUser.getFieldsForWildcard({
       pattern: indices,
       metaFields,
       fieldCapsOptions: { allow_no_indices: allowNoIndex },
+      fields: [...fieldsForAAD, 'kibana.*'],
     });
 
     return {

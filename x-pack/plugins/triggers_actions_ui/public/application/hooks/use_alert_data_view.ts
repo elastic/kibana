@@ -34,6 +34,8 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
   const hasSecurityAndO11yFeatureIds =
     featureIds.length > 1 && (featureIds as AlertConsumers[]).includes(AlertConsumers.SIEM);
 
+  const hasNoSecuritySolution = !isOnlySecurity && !hasSecurityAndO11yFeatureIds;
+
   const queryIndexNameFn = () => {
     return fetchAlertIndexNames({ http, features });
   };
@@ -73,21 +75,20 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     queryFn: queryAlertFieldsFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
-    enabled: !isOnlySecurity && !hasSecurityAndO11yFeatureIds,
+    enabled: hasNoSecuritySolution,
   });
 
   useEffect(() => {
     return () => {
-      if ((dataview ?? []).length > 0) {
-        dataview?.map(async (dv) => {
-          if (dv.id) {
-            await dataService.dataViews.delete(dv.id);
-          }
-        });
-      }
+      dataview?.map((dv) => {
+        dataService.dataViews.clearInstanceCache(dv.id);
+      });
     };
-  });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dataview]);
 
+  // FUTURE ENGINEER this useEffect is for security solution user since
+  // we are using the user privilege to access the security alert index
   useEffect(() => {
     async function createDataView() {
       const localDataview = await dataService.dataViews.create({
@@ -102,6 +103,8 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     }
   }, [dataService.dataViews, indexNames, isIndexNameSuccess, isOnlySecurity]);
 
+  // FUTURE ENGINEER this useEffect is for o11y and stack solution user since
+  // we are using the kibana user privilege to access the alert index
   useEffect(() => {
     if (
       indexNames &&
