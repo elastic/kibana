@@ -40,7 +40,7 @@ export function MobileCrashesTreemap({
       const fieldName = ES_FIELD_MAPPING[selectedTreemap];
       if (fieldName) {
         return callApmApi(
-          'GET /internal/apm/mobile-services/{serviceName}/crash_terms',
+          'GET /internal/apm/mobile-services/{serviceName}/error_terms',
           {
             params: {
               path: {
@@ -48,7 +48,7 @@ export function MobileCrashesTreemap({
               },
               query: {
                 environment,
-                kuery,
+                kuery: `${kuery} and error.type: crash`,
                 start,
                 end,
                 fieldName,

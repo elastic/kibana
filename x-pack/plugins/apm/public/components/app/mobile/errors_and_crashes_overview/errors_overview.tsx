@@ -77,7 +77,6 @@ export function MobileErrorsOverview() {
     environment,
     kuery,
   });
-
   const {
     data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
     status: errorGroupListDataStatus,

@@ -14,7 +14,6 @@ import {
   getMobileCrashGroupMainStatistics,
   MobileCrashGroupMainStatisticsResponse,
 } from './get_crash_groups/get_crash_group_main_statistics';
-import { getMobileCrashesTermsByField } from './get_mobile_crash_terms_by_field';
 import {
   MobileCrashesGroupPeriodsResponse,
   getMobileCrashesGroupPeriods,
@@ -23,7 +22,6 @@ import {
   CrashDistributionResponse,
   getCrashDistribution,
 } from './distribution/get_distribution';
-import { MobileTermsByFieldResponse } from '../get_mobile_terms_by_field';
 
 const mobileCrashDistributionRoute = createApmServerRoute({
   endpoint:
@@ -146,49 +144,7 @@ const mobileCrashDetailedStatisticsRoute = createApmServerRoute({
   },
 });
 
-const mobileCrashTermsByFieldRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/crash_terms',
-  params: t.type({
-    path: t.type({
-      serviceName: t.string,
-    }),
-    query: t.intersection([
-      kueryRt,
-      rangeRt,
-      environmentRt,
-      t.type({
-        size: toNumberRt,
-        fieldName: t.string,
-      }),
-    ]),
-  }),
-  options: { tags: ['access:apm'] },
-  handler: async (
-    resources
-  ): Promise<{
-    terms: MobileTermsByFieldResponse;
-  }> => {
-    const apmEventClient = await getApmEventClient(resources);
-    const { params } = resources;
-    const { serviceName } = params.path;
-    const { kuery, environment, start, end, size, fieldName } = params.query;
-    const terms = await getMobileCrashesTermsByField({
-      kuery,
-      environment,
-      start,
-      end,
-      serviceName,
-      apmEventClient,
-      fieldName,
-      size,
-    });
-
-    return { terms };
-  },
-});
-
 export const mobileCrashRoutes = {
-  ...mobileCrashTermsByFieldRoute,
   ...mobileCrashDetailedStatisticsRoute,
   ...mobileCrashMainStatisticsRoute,
   ...mobileCrashDistributionRoute,

@@ -24,7 +24,7 @@ import { RedirectToDefaultServiceRouteView } from '../service_detail/redirect_to
 import { ApmTimeRangeMetadataContextProvider } from '../../../context/time_range_metadata/time_range_metadata_context';
 import { ErrorGroupDetails } from '../../app/mobile/error_group_details';
 import { CrashGroupDetails } from '../../app/mobile/crash_group_details';
-import { MobileErrorCrashesOverview } from '../../app/mobile/error_group_overview';
+import { MobileErrorCrashesOverview } from '../../app/mobile/errors_and_crashes_overview';
 import { ServiceDependencies } from '../../app/service_dependencies';
 
 export function page({

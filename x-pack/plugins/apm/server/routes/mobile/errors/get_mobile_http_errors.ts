@@ -13,15 +13,14 @@ import {
 } from '@kbn/observability-plugin/server';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
-import { getBucketSize } from '../../../../common/utils/get_bucket_size';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 import {
   SERVICE_NAME,
-  SPAN_SUBTYPE,
   HTTP_RESPONSE_STATUS_CODE,
 } from '../../../../common/es_fields/apm';
 import { offsetPreviousPeriodCoordinates } from '../../../../common/utils/offset_previous_period_coordinate';
 import { Coordinate } from '../../../../typings/timeseries';
+import { BUCKET_TARGET_COUNT } from '../../transactions/constants';
 
 interface Props {
   apmEventClient: APMEventClient;
@@ -31,6 +30,10 @@ interface Props {
   end: number;
   kuery: string;
   offset?: string;
+}
+
+function getBucketSize({ start, end }: { start: number; end: number }) {
+  return Math.floor((end - start) / BUCKET_TARGET_COUNT);
 }
 
 export interface MobileHttpErrorsTimeseries {
@@ -44,33 +47,13 @@ async function getMobileHttpErrorsTimeseries({
   environment,
   start,
   end,
-  offset,
 }: Props) {
-  const { startWithOffset, endWithOffset } = getOffsetInMs({
+  const bucketSize = getBucketSize({
     start,
     end,
-    offset,
   });
-  const { intervalString } = getBucketSize({
-    start: startWithOffset,
-    end: endWithOffset,
-    minBucketSize: 60,
-  });
-
-  const aggs = {
-    httpErrors: {
-      filter: {
-        range: {
-          [HTTP_RESPONSE_STATUS_CODE]: {
-            gte: 400,
-          },
-        },
-      },
-    },
-  };
-
   const response = await apmEventClient.search('get_mobile_http_errors', {
-    apm: { events: [ProcessorEvent.span] },
+    apm: { events: [ProcessorEvent.error] },
     body: {
       track_total_hits: false,
       size: 0,
@@ -78,33 +61,38 @@ async function getMobileHttpErrorsTimeseries({
         bool: {
           filter: [
             ...termQuery(SERVICE_NAME, serviceName),
-            ...termQuery(SPAN_SUBTYPE, 'http'),
             ...environmentQuery(environment),
-            ...rangeQuery(startWithOffset, endWithOffset),
+            ...rangeQuery(start, end),
+            ...rangeQuery(400, 599, HTTP_RESPONSE_STATUS_CODE),
             ...kqlQuery(kuery),
           ],
+          must_not: {
+            term: { 'error.type': 'crash' },
+          },
         },
       },
       aggs: {
         timeseries: {
-          date_histogram: {
+          histogram: {
             field: '@timestamp',
-            fixed_interval: intervalString,
             min_doc_count: 0,
-            extended_bounds: { min: startWithOffset, max: endWithOffset },
+            interval: bucketSize,
+            extended_bounds: {
+              min: start,
+              max: end,
+            },
           },
-          aggs,
         },
       },
     },
   });
 
-  const timeseries =
-    response?.aggregations?.timeseries.buckets.reduce((prev, bucket) => {
-      const time = bucket.key;
-      prev.push({ x: time, y: bucket.doc_count });
-      return prev;
-    }, [] as Coordinate[]) ?? [];
+  const timeseries = (response?.aggregations?.timeseries.buckets || []).map(
+    (bucket) => ({
+      x: bucket.key,
+      y: bucket.doc_count,
+    })
+  );
   return { timeseries };
 }
 
@@ -123,6 +111,12 @@ export async function getMobileHttpErrors({
     kuery,
     environment,
   };
+  const { startWithOffset, endWithOffset } = getOffsetInMs({
+    start,
+    end,
+    offset,
+  });
+
   const currentPeriodPromise = getMobileHttpErrorsTimeseries({
     ...options,
     start,
@@ -131,9 +125,8 @@ export async function getMobileHttpErrors({
   const previousPeriodPromise = offset
     ? getMobileHttpErrorsTimeseries({
         ...options,
-        start,
-        end,
-        offset,
+        start: startWithOffset,
+        end: endWithOffset,
       })
     : { timeseries: [] as Coordinate[] };
   const [currentPeriod, previousPeriod] = await Promise.all([
