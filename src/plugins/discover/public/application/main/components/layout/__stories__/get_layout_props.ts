@@ -86,7 +86,6 @@ const getCommonProps = () => {
     inspectorAdapters: { requests: new RequestAdapter() },
     onChangeDataView: action('change the data view'),
     onUpdateQuery: action('update the query'),
-    resetSavedSearch: action('reset the saved search the query'),
     savedSearch: savedSearchMock,
     savedSearchRefetch$: new Subject(),
     searchSource: searchSourceMock,
