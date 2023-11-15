@@ -283,6 +283,21 @@ export const CasesFindRequestRt = rt.intersection([
   paginationSchema({ maxPerPage: MAX_CASES_PER_PAGE }),
 ]);
 
+export const CasesSearchRequestRt = rt.intersection([
+  rt.exact(
+    rt.partial({
+      /**
+       * custom fields of the case
+       */
+      customFields: rt.record(
+        rt.string,
+        rt.array(rt.union([rt.string, rt.boolean, rt.number, rt.null]))
+      ),
+    })
+  ),
+  CasesFindRequestRt,
+]);
+
 export const CasesFindResponseRt = rt.intersection([
   rt.strict({
     cases: rt.array(CaseRt),
@@ -487,6 +502,7 @@ export type CaseResolveResponse = rt.TypeOf<typeof CaseResolveResponseRt>;
 export type CasesDeleteRequest = rt.TypeOf<typeof CasesDeleteRequestRt>;
 export type CasesByAlertIDRequest = rt.TypeOf<typeof CasesByAlertIDRequestRt>;
 export type CasesFindRequest = rt.TypeOf<typeof CasesFindRequestRt>;
+export type CasesSearchRequest = rt.TypeOf<typeof CasesSearchRequestRt>;
 export type CasesFindRequestSortFields = rt.TypeOf<typeof CasesFindRequestSortFieldsRt>;
 export type CasesFindResponse = rt.TypeOf<typeof CasesFindResponseRt>;
 export type CasePatchRequest = rt.TypeOf<typeof CasePatchRequestRt>;
