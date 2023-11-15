@@ -12,10 +12,8 @@ import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/applicati
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {

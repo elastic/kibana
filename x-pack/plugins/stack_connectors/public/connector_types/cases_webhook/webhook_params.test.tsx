@@ -11,10 +11,8 @@ import WebhookParamsFields from './webhook_params';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { CasesWebhookActionConnector } from './types';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {

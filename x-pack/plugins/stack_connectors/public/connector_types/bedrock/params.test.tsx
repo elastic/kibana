@@ -12,10 +12,8 @@ import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/applicati
 import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {

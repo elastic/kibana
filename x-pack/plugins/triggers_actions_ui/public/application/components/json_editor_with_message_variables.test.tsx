@@ -9,10 +9,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { JsonEditorWithMessageVariables } from './json_editor_with_message_variables';
 import { MockCodeEditor } from '../code_editor.mock';
 
-const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
-
-jest.mock(kibanaReactPath, () => {
-  const original = jest.requireActual(kibanaReactPath);
+jest.mock('@kbn/code-editor', () => {
+  const original = jest.requireActual('@kbn/code-editor');
   return {
     ...original,
     CodeEditor: (props: any) => {
