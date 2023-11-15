@@ -183,7 +183,10 @@ export class ComboBoxService extends FtrService {
   ): Promise<void> {
     const input = await comboBoxElement.findByTagName('input');
 
+    await input.click();
+    await input.clearValue();
     await input.clearValueWithKeyboard();
+
     await this.waitForOptionsListLoading(comboBoxElement);
     await input.type(filterValue);
     await this.waitForOptionsListLoading(comboBoxElement);
