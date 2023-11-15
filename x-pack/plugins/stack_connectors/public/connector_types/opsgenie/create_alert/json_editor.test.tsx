@@ -8,17 +8,6 @@
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import JsonEditor from './json_editor';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('JsonEditor', () => {
   const editAction = jest.fn();

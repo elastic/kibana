@@ -8,18 +8,7 @@
 import React from 'react';
 import { screen, render, within, fireEvent, waitFor } from '@testing-library/react';
 import { CreateAlert } from '.';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import userEvent from '@testing-library/user-event';
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('CreateAlert', () => {
   const editSubAction = jest.fn();

@@ -6,19 +6,8 @@
  */
 
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import React from 'react';
 import TorqParamsFields from './torq_params';
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('TorqParamsFields renders', () => {
   test('all params fields is rendered', () => {

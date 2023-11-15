@@ -8,19 +8,9 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import BedrockParamsFields from './params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { DEFAULT_BEDROCK_URL, SUB_ACTION } from '../../../common/bedrock/constants';
 import { I18nProvider } from '@kbn/i18n-react';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 const messageVariables = [
   {
     name: 'myVar',

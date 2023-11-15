@@ -8,19 +8,9 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import ParamsFields from './params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpenAiProviderType, SUB_ACTION } from '../../../common/openai/constants';
 import { DEFAULT_BODY, DEFAULT_BODY_AZURE, DEFAULT_URL } from './constants';
 
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 const messageVariables = [
   {
     name: 'myVar',

@@ -10,7 +10,6 @@ import CasesWebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import * as i18n from './translations';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
@@ -22,16 +21,6 @@ jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {
         docLinks: { ELASTIC_WEBSITE_URL: 'url' },
       },
     }),
-  };
-});
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
   };
 });
 

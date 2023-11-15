@@ -10,19 +10,8 @@ import { act, screen, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import OpsgenieParamFields from './params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 describe('OpsgenieParamFields', () => {
   const editAction = jest.fn();

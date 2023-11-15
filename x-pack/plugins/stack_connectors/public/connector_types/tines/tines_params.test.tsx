@@ -7,7 +7,6 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import type { UseSubActionParams } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_sub_action';
 import TinesParamsFields from './tines_params';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
@@ -44,16 +43,6 @@ jest.mock(triggersActionsPath, () => {
       ...original.useKibana(),
       notifications: { toasts: mockToasts },
     }),
-  };
-});
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
   };
 });
 

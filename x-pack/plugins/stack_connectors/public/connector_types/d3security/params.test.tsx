@@ -8,18 +8,7 @@
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
 import D3ParamsFields from './params';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { SUB_ACTION } from '../../../common/d3security/constants';
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 const messageVariables = [
   {

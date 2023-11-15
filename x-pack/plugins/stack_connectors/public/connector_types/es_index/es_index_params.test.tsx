@@ -10,19 +10,8 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from '@testing-library/react';
 import ParamsFields from './es_index_params';
 import { AlertHistoryEsIndexConnectorId } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana');
-
-jest.mock('@kbn/code-editor', () => {
-  const original = jest.requireActual('@kbn/code-editor');
-  return {
-    ...original,
-    CodeEditor: (props: any) => {
-      return <MockCodeEditor {...props} />;
-    },
-  };
-});
 
 const actionConnector = {
   actionTypeId: '.index',
