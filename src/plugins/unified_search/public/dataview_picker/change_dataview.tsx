@@ -233,7 +233,7 @@ export function ChangeDataView({
           }}
         >
           {i18n.translate('unifiedSearch.query.queryBar.indexPattern.refreshFieldsButton', {
-            defaultMessage: 'Refresh fields of this data view',
+            defaultMessage: 'Reload data view',
           })}
         </EuiContextMenuItem>
       );

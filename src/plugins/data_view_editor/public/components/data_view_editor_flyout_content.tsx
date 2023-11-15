@@ -257,7 +257,7 @@ const IndexPatternEditorFlyoutContentComponent = ({
             })}
           >
             {i18n.translate('indexPatternEditor.goToManagementPage', {
-              defaultMessage: 'Reload fields',
+              defaultMessage: 'Reload data view',
             })}
           </EuiLink>
         )}
