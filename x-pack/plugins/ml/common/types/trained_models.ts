@@ -12,6 +12,7 @@ import type {
   TotalFeatureImportance,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { IndexName, IndicesIndexState } from '@elastic/elasticsearch/lib/api/types';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import type { XOR } from './common';
 import type { MlSavedObjectType } from './saved_objects';
 
@@ -290,4 +291,11 @@ export interface MemoryStatsResponse {
 export interface TrainedModelStatsResponse extends estypes.MlTrainedModelStats {
   deployment_stats?: Omit<TrainedModelDeploymentStatsResponse, 'model_id'>;
   model_size_stats?: TrainedModelModelSizeStats;
+}
+
+export function isTrainedModelConfigResponse(arg: unknown): arg is TrainedModelConfigResponse {
+  return (
+    isPopulatedObject(arg, ['metadata']) &&
+    isPopulatedObject(arg.metadata ?? {}, ['analytics_config'])
+  );
 }

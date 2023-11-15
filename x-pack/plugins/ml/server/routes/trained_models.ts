@@ -29,9 +29,10 @@ import {
   createIngestPipelineSchema,
   modelDownloadsQuery,
 } from './schemas/inference_schema';
-import type {
+import {
+  isTrainedModelConfigResponse,
   PipelineDefinition,
-  TrainedModelConfigResponse,
+  type TrainedModelConfigResponse,
 } from '../../common/types/trained_models';
 import { mlLog } from '../lib/log';
 import { forceQuerySchema } from './schemas/anomaly_detectors_schema';
@@ -190,38 +191,48 @@ export function trainedModelsRoutes(
             // we don't need to fill kibana's log with these messages.
             mlLog.debug(e);
           }
-          const enabledFeatures = getEnabledFeatures();
-          try {
-            if (enabledFeatures.dfa) {
-              const jobIds = result.map((model) => {
-                let id = model.metadata?.analytics_config?.id;
-                if (id) {
-                  id = `${id}*`;
-                }
-                return id;
-              });
-              const filteredJobIds = jobIds.filter((id) => id !== undefined);
 
+          const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
+
+          try {
+            // @ts-ignore
+            const jobIdsString = filteredModels.reduce(
+              (
+                jobIdsStr: string,
+                currentModel: TrainedModelConfigResponse | estypes.MlTrainedModelConfig,
+                idx: number
+              ) => {
+                if (isTrainedModelConfigResponse(currentModel)) {
+                  let id = currentModel.metadata?.analytics_config?.id ?? '';
+                  if (id !== '') {
+                    id = `${idx > 0 ? ',' : ''}${id}*`;
+                  }
+                  return `${jobIdsStr}${id}`;
+                }
+                return jobIdsStr;
+              },
+              ''
+            );
+
+            if (jobIdsString !== '') {
               const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
-                id: filteredJobIds.join(','),
+                id: jobIdsString,
                 allow_no_match: true,
               });
 
-              jobs.forEach(({ id }) => {
-                const model = result.find(
-                  (modelWithJob) => id === modelWithJob.metadata?.analytics_config?.id
-                );
-
-                if (model) {
-                  model.origin_job_exists = true;
+              filteredModels.forEach((model) => {
+                if (isTrainedModelConfigResponse(model)) {
+                  const dfaId = model?.metadata?.analytics_config?.id;
+                  if (dfaId !== undefined) {
+                    // if this is a dfa model, set origin_job_exists
+                    model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
+                  }
                 }
               });
             }
           } catch (e) {
             // Swallow error to prevent blocking trained models result
           }
-
-          const filteredModels = filterForEnabledFeatureModels(result, enabledFeatures);
 
           return response.ok({
             body: filteredModels,
