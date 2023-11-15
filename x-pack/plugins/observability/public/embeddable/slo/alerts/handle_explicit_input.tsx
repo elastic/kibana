@@ -11,17 +11,18 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { EmbeddableSloProps, SloEmbeddableInput } from './types';
+import type { EmbeddableSloProps, SloAlertsEmbeddableInput } from './types';
 
 import { ObservabilityPublicPluginsStart } from '../../..';
 import { SloConfiguration } from './slo_configuration';
 export async function resolveEmbeddableSloUserInput(
   coreStart: CoreStart,
   pluginStart: ObservabilityPublicPluginsStart,
-  input?: SloEmbeddableInput
+  input?: SloAlertsEmbeddableInput
 ): Promise<EmbeddableSloProps> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
+  console.log('!!here');
   return new Promise(async (resolve, reject) => {
     try {
       const modalSession = overlays.openModal(

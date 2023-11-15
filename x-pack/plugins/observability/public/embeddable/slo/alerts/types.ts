@@ -17,4 +17,4 @@ export interface EmbeddableSloProps {
   lastReloadRequestTime?: number | undefined;
 }
 
-export type SloEmbeddableInput = EmbeddableInput & EmbeddableSloProps;
+export type SloAlertsEmbeddableInput = EmbeddableInput & EmbeddableSloProps;

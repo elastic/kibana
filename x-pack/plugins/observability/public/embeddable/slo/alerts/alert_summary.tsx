@@ -13,7 +13,6 @@ export function AlertSummary({ slos, deps }) {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = deps;
-  console.log(deps, '!!deps');
   const slosWithoutName = slos.map((slo) => ({
     id: slo.id,
     instanceId: slo.instanceId,

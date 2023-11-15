@@ -60,6 +60,7 @@ import {
 import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -115,6 +116,7 @@ export interface ObservabilityPublicPluginsSetup {
   home?: HomePublicPluginSetup;
   usageCollection: UsageCollectionSetup;
   embeddable: EmbeddableSetup;
+  uiActions: UiActionsSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
@@ -145,6 +147,7 @@ export interface ObservabilityPublicPluginsStart {
   aiops: AiopsPluginStart;
   serverless?: ServerlessPluginStart;
   uiSettings: IUiSettingsClient;
+  uiActions: UiActionsStart;
 }
 
 export type ObservabilityPublicStart = ReturnType<Plugin['start']>;
@@ -310,6 +313,14 @@ export class Plugin
       pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
     };
     registerSloAlertsEmbeddableFactory();
+
+    const registerAsyncSloAlertsUiActions = async () => {
+      if (pluginsSetup.uiActions) {
+        const { registerSloAlertsUiActions } = await import('./ui_actions');
+        registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+      }
+    };
+    registerAsyncSloAlertsUiActions();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({

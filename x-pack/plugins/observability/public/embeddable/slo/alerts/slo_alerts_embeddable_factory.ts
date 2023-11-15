@@ -14,14 +14,12 @@ import {
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
-import { IProvidesPanelPlacementSettings } from '@kbn/dashboard-plugin/public/dashboard_container/component/panel_placement/types';
 import { SLOAlertsEmbeddable, SLO_ALERTS_EMBEDDABLE } from './slo_alerts_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
+import { SloAlertsEmbeddableInput } from './types';
 
 export type SloAlertsEmbeddableFactory = EmbeddableFactory;
-export class SloAlertsEmbeddableFactoryDefinition
-  implements EmbeddableFactoryDefinition, IProvidesPanelPlacementSettings<SloEmbeddableInput>
-{
+export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDefinition {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
 
   public readonly grouping = [
@@ -42,16 +40,7 @@ export class SloAlertsEmbeddableFactoryDefinition
     return true;
   }
 
-  // public getPanelPlacementSettings: IProvidesPanelPlacementSettings<
-  //   SloEmbeddableInput,
-  //   unknown
-  // >['getPanelPlacementSettings'] = () => {
-  //   const width = 8;
-  //   const height = 7;
-  //   return { width, height };
-  // };
-
-  public async getExplicitInput(): Promise<Partial<SloEmbeddableInput>> {
+  public async getExplicitInput(): Promise<Partial<SloAlertsEmbeddableInput>> {
     const [coreStart, pluginStart] = await this.getStartServices();
     try {
       const { resolveEmbeddableSloUserInput } = await import('./handle_explicit_input');
