@@ -234,14 +234,19 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
  * parses the proprietary OpenAI response into a string of the response text alone,
  * returning the response string to the stream
  */
-const transformToString = () =>
-  new Transform({
+const transformToString = () => {
+  let lineBuffer: string = '';
+
+  return new Transform({
     transform(chunk, encoding, callback) {
       const decoder = new TextDecoder();
       const encoder = new TextEncoder();
-      const nextChunk = decoder
-        .decode(chunk)
-        .split('\n')
+      const lines = decoder.decode(chunk).split('\n');
+      lines[0] = lineBuffer + lines[0];
+
+      lineBuffer = lines.pop() || '';
+
+      const nextChunk = lines
         // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
         .map((str) => str.substring(6))
         // filter out empty lines and the "[DONE]" string
@@ -255,3 +260,4 @@ const transformToString = () =>
       callback(null, newChunk);
     },
   });
+};

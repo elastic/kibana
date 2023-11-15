@@ -11,8 +11,8 @@ import {
   BedrockSimulator,
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
-import { PassThrough } from 'stream';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -411,17 +411,39 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           });
 
           it.only('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            // const resp = await fetch(`/api/actions/connector/${bedrockActionId}/_execute`, {
+            //   method: 'POST',
+            //   headers: {
+            //     'Content-Type': 'application/json',
+            //     [ELASTIC_HTTP_VERSION_HEADER]: '1',
+            //     'kbn-xsrf': 'stream',
+            //   },
+            //   body: JSON.stringify({
+            //     params: {
+            //       subAction: 'invokeStream',
+            //       subActionParams: {
+            //         messages: [
+            //           {
+            //             role: 'user',
+            //             content: 'Hello world',
+            //           },
+            //         ],
+            //       },
+            //     },
+            //   }),
+            // });
+            // console.log('resp', resp);
             await new Promise<void>((resolve, reject) => {
               const receivedChunks: any[] = [];
 
               const passThrough = new PassThrough();
 
               supertest
-                .post(`/api/actions/connector/${bedrockActionId}/_execute`)
+                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
                 .set('kbn-xsrf', 'foo')
                 //   .set('Accept', '*/*')
                 //   .set('Accept-Encoding', 'chunked')
-                //   .set('Content-Type', 'application/json;charset=UTF-8')
+                // .set('Content-Type', 'application/octet-stream')
                 .on('error', reject)
                 .send({
                   params: {
@@ -435,6 +457,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
                       ],
                     },
                   },
+                  assistantLangChain: false,
                 })
                 .pipe(passThrough);
 

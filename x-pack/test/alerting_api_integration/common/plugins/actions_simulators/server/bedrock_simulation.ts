@@ -45,7 +45,7 @@ export class BedrockSimulator extends Simulator {
 
   private static sendStreamResponse(response: http.ServerResponse) {
     response.statusCode = 200;
-    response.setHeader('Content-Type', 'application/json;charset=UTF-8');
+    response.setHeader('Content-Type', 'application/octet-stream');
     response.setHeader('Transfer-Encoding', 'chunked');
     response.write(encodeBedrockResponse('hi'));
     response.end();

@@ -51,6 +51,8 @@ export async function getTokenCountFromInvokeStream({
 
   await finished(responseStream);
 
+  console.log('responseBody', responseBody);
+
   const completionTokens = encode(responseBody).length;
 
   return {

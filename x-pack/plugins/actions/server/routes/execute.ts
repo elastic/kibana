@@ -55,6 +55,7 @@ export const executeActionRoute = (
           source: asHttpRequestExecutionSource(req),
           relatedSavedObjects: [],
         });
+        console.log('BODY!!!!!!', body);
         return body
           ? res.ok({
               body: rewriteBodyRes(body),
