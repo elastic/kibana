@@ -45,7 +45,6 @@ import { getInstallations, reinstallPackageForInstallation } from './epm/package
 import { isPackageInstalled } from './epm/packages/install';
 import type { UpgradeManagedPackagePoliciesResult } from './managed_package_policies';
 import { upgradeManagedPackagePolicies } from './managed_package_policies';
-import { getBundledPackages } from './epm/packages';
 import { upgradePackageInstallVersion } from './setup/upgrade_package_install_version';
 import { upgradeAgentPolicySchemaVersion } from './setup/upgrade_agent_policy_schema_version';
 import { migrateSettingsToFleetServerHost } from './fleet_server_host';
@@ -219,24 +218,9 @@ export async function ensureFleetGlobalEsAssets(
   if (assetResults.some((asset) => asset.isCreated)) {
     // Update existing index template
     const installedPackages = await getInstallations(soClient);
-    const bundledPackages = await getBundledPackages();
-    const findMatchingBundledPkg = (pkg: Installation) =>
-      bundledPackages.find(
-        (bundledPkg: BundledPackage) =>
-          bundledPkg.name === pkg.name && bundledPkg.version === pkg.version
-      );
     await pMap(
       installedPackages.saved_objects,
       async ({ attributes: installation }) => {
-        if (installation.install_source !== 'registry') {
-          const matchingBundledPackage = findMatchingBundledPkg(installation);
-          if (!matchingBundledPackage) {
-            logger.error(
-              `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets`
-            );
-            return;
-          }
-        }
         await reinstallPackageForInstallation({
           soClient,
           esClient,
