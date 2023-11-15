@@ -8,8 +8,12 @@
 import axios, { AxiosResponse } from 'axios';
 import Url from 'url';
 import * as cheerio from 'cheerio';
+import * as fs from 'fs';
 import { parse as parseCookie } from 'tough-cookie';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-plugin/common';
+import { CA_CERT_PATH } from '@kbn/dev-utils';
+import https from 'https';
+import { ToolingLog } from '@kbn/tooling-log';
 import { Session } from './svl_user_manager';
 
 export interface SAMLSessionParams {
@@ -17,6 +21,7 @@ export interface SAMLSessionParams {
   password: string;
   kbnHost: string;
   kbnVersion: string;
+  log: ToolingLog;
 }
 
 export interface FakeSAMLSessionParams {
@@ -25,6 +30,7 @@ export interface FakeSAMLSessionParams {
   fullname: string;
   role: string;
   kbnHost: string;
+  log: ToolingLog;
 }
 
 const envHosts: { [key: string]: string } = {
@@ -122,40 +128,64 @@ const createSAMLResponse = async (url: string, ecSession: string) => {
   return value;
 };
 
-const finishSAMLHandshake = async (
-  kbnHost: string,
-  samlResponse: string,
-  cloudSessionSid?: string
-) => {
-  const encodedResponse = encodeURIComponent(samlResponse);
-  const headers = {
-    ...{ 'content-type': 'application/x-www-form-urlencoded' },
-    ...(cloudSessionSid ? { Cookie: `sid=${cloudSessionSid}` } : {}),
-  };
-  const authResponse: AxiosResponse = await axios.request({
-    url: kbnHost + '/api/security/saml/callback',
-    method: 'post',
-    data: `SAMLResponse=${encodedResponse}`,
-    headers,
-    validateStatus: () => true,
-    maxRedirects: 0,
-  });
+const finishSAMLHandshake = async ({
+  kbnHost,
+  samlResponse,
+  sid,
+  log,
+}: {
+  kbnHost: string;
+  samlResponse: string;
+  sid?: string;
+  log: ToolingLog;
+}) => {
+  let authResponse: AxiosResponse;
+  const url = kbnHost + '/api/security/saml/callback';
 
-  return getSessionCookie(authResponse.headers['set-cookie']![0])!;
+  try {
+    if (sid) {
+      // real SAML authentication
+      const encodedResponse = encodeURIComponent(samlResponse);
+      authResponse = await axios.post(url, {
+        data: `SAMLResponse=${encodedResponse}`,
+        headers: {
+          'content-type': 'application/x-www-form-urlencoded',
+          Cookie: `sid=${sid}`,
+        },
+        validateStatus: () => true,
+        maxRedirects: 0,
+      });
+    } else {
+      // Kibana is running in TLS mode and uses the self-signed dev certificate
+      const caCrt = fs.readFileSync(CA_CERT_PATH);
+      const httpsAgent = new https.Agent({ ca: caCrt, keepAlive: false });
+      authResponse = await axios.post(url, {
+        data: JSON.stringify({ SAMLResponse: samlResponse }),
+        httpsAgent,
+      });
+    }
+  } catch (err) {
+    if (axios.isAxiosError(err)) {
+      log.debug(JSON.stringify(err));
+    }
+    throw err;
+  }
+
+  return getSessionCookie(authResponse!.headers['set-cookie']![0])!;
 };
 
 export const createNewSAMLSession = async (params: SAMLSessionParams) => {
-  const { username, password, kbnHost, kbnVersion } = params;
+  const { username, password, kbnHost, kbnVersion, log } = params;
   const hostName = getCloudHostName();
   const { token, fullname } = await createCloudSession(hostName, username, password);
   const { location, sid } = await createSAMLRequest(kbnHost, kbnVersion);
   const samlResponse = await createSAMLResponse(location, token);
-  const cookie = await finishSAMLHandshake(kbnHost, samlResponse, sid);
+  const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, sid, log });
   return new Session(cookie, username, fullname);
 };
 
 export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParams) => {
-  const { username, email, fullname, role, kbnHost } = params;
+  const { username, email, fullname, role, kbnHost, log } = params;
   const samlResponse = await createMockedSAMLResponse({
     kibanaUrl: kbnHost,
     username,
@@ -163,6 +193,6 @@ export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParam
     email,
     roles: [role],
   });
-  const cookie = await finishSAMLHandshake(kbnHost, samlResponse);
+  const cookie = await finishSAMLHandshake({ kbnHost, samlResponse, log });
   return new Session(cookie, username, fullname);
 };

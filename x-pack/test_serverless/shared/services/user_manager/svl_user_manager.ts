@@ -111,6 +111,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
           ...this.getCloudUserByRole(role),
           kbnHost,
           kbnVersion,
+          log,
         });
       } else {
         log.debug(`new fake SAML authentication with '${role}' role`);
@@ -120,6 +121,7 @@ export function SvlUserManagerProvider({ getService }: FtrProviderContext) {
           fullname: `test ${role}`,
           role,
           kbnHost,
+          log,
         });
       }
 
