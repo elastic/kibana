@@ -604,15 +604,13 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                     env: cyCustomEnv,
                   },
                 });
+                // Delete serverless project
+                log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+                await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
               } catch (error) {
                 result = error;
               }
             }
-
-            // Delete serverless project
-            log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-            await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
-
             return result;
           });
           return result;
