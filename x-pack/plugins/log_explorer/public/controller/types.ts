@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import { QueryState } from '@kbn/data-plugin/public';
+import { DiscoverContainerProps } from '@kbn/discover-plugin/public';
 import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { Observable } from 'rxjs';
 import { DisplayOptions, PartialDisplayOptions } from '../../common';
@@ -26,11 +26,12 @@ export interface LogExplorerController {
   stateMachine: LogExplorerControllerStateMachine;
 }
 
-export interface LogExplorerDiscoverServices {
-  data: DataPublicPluginStart;
-  uiSettings: IUiSettingsClient;
+export type LogExplorerDiscoverServices = Pick<
+  Required<DiscoverContainerProps['overrideServices']>,
+  'data' | 'filterManager' | 'timefilter' | 'uiSettings' | 'history'
+> & {
   urlStateStorage: IKbnUrlStateStorage;
-}
+};
 
 export interface ControlOption {
   controlId: string;

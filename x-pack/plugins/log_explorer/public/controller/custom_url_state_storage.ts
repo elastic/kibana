@@ -8,19 +8,26 @@
 import { APP_STATE_URL_KEY } from '@kbn/discover-plugin/public';
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
+import { LogExplorerDiscoverServices } from './types';
+
+type DiscoverHistory = ReturnType<LogExplorerDiscoverServices['history']>;
+
+/**
+ * Create a MemoryHistory instance. It is initialized with an application state
+ * object, because Discover radically resets too much when the URL is "empty".
+ */
+export const createDiscoverMemoryHistory = (): DiscoverHistory =>
+  createMemoryHistory({
+    initialEntries: [{ search: `?${APP_STATE_URL_KEY}=()` }],
+  });
 
 /**
  * Create a url state storage that's not connected to the real browser location
  * to isolate the Discover component from these side-effects.
- *
- * It is initialized with an application state object, because Discover
- * radically resets too much when the URL is "empty".
  */
-export const createMemoryUrlStateStorage = () =>
+export const createMemoryUrlStateStorage = (memoryHistory: DiscoverHistory) =>
   createKbnUrlStateStorage({
-    history: createMemoryHistory({
-      initialEntries: [{ search: `?${APP_STATE_URL_KEY}=()` }],
-    }),
+    history: memoryHistory,
     useHash: false,
     useHashQuery: false,
   });

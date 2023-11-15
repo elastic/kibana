@@ -14,7 +14,10 @@ import { createLogExplorerControllerStateMachine } from '../state_machines/log_e
 import { LogExplorerStartDeps } from '../types';
 import { createDataServiceProxy } from './custom_data_service';
 import { createUiSettingsServiceProxy } from './custom_ui_settings_service';
-import { createMemoryUrlStateStorage } from './custom_url_state_storage';
+import {
+  createDiscoverMemoryHistory,
+  createMemoryUrlStateStorage,
+} from './custom_url_state_storage';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
 import {
   LogExplorerController,
@@ -36,15 +39,21 @@ export const createLogExplorerControllerFactory =
       http: core.http,
     }).client;
 
+    const customMemoryHistory = createDiscoverMemoryHistory();
+    const customMemoryUrlStateStorage = createMemoryUrlStateStorage(customMemoryHistory);
     const customUiSettings = createUiSettingsServiceProxy(core.uiSettings);
-    const discoverServices: LogExplorerDiscoverServices = {
-      data: createDataServiceProxy({
-        data,
-        http: core.http,
-        uiSettings: customUiSettings,
-      }),
+    const customData = createDataServiceProxy({
+      data,
+      http: core.http,
       uiSettings: customUiSettings,
-      urlStateStorage: createMemoryUrlStateStorage(),
+    });
+    const discoverServices: LogExplorerDiscoverServices = {
+      data: customData,
+      history: () => customMemoryHistory,
+      uiSettings: customUiSettings,
+      filterManager: customData.query.filterManager,
+      timefilter: customData.query.timefilter.timefilter,
+      urlStateStorage: customMemoryUrlStateStorage,
     };
 
     const initialContext = getContextFromPublicState(initialState ?? {});

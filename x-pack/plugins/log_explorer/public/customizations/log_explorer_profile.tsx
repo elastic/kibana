@@ -35,11 +35,12 @@ export const createLogExplorerProfileCustomizations =
     controller,
   }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
-    const { dataViews, discover, navigation, unifiedSearch } = plugins;
-    const {
-      discoverServices: { data },
-      service,
-    } = controller;
+    const { discoverServices, service } = controller;
+    const pluginsWithOverrides = {
+      ...plugins,
+      ...discoverServices,
+    };
+    const { data, dataViews, discover, navigation, unifiedSearch } = pluginsWithOverrides;
 
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
