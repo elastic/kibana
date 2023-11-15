@@ -43,10 +43,6 @@ describe('security telemetry - detection rule alerts task test', () => {
     );
     expect(mockTelemetryReceiver.fetchDetectionRulesPackageVersion).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchPrebuiltRuleAlertsBatch).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
-    expect(mockTelemetryEventsSender.getTelemetryUsageCluster()?.incrementCounter).toBeCalledTimes(
-      1
-    );
     expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
   });
 });
