@@ -23,4 +23,5 @@ export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiT
       type={customField?.value ? 'check' : 'cross'}
     />
   ),
+  'data-test-subj': 'toggle-custom-field-column',
 });

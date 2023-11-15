@@ -29,6 +29,7 @@ describe('getEuiTableColumn ', () => {
       name: label,
       render: expect.any(Function),
       width: '250px',
+      'data-test-subj': 'text-custom-field-column',
     });
   });
 

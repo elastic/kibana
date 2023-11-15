@@ -590,11 +590,13 @@ describe('useCasesColumns ', () => {
             "width": "90px",
           },
           Object {
+            "data-test-subj": "text-custom-field-column",
             "name": "Text Label",
             "render": [Function],
             "width": "250px",
           },
           Object {
+            "data-test-subj": "toggle-custom-field-column",
             "name": "Toggle Label",
             "render": [Function],
             "width": "100px",

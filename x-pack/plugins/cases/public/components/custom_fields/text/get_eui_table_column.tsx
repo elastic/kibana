@@ -21,4 +21,5 @@ export const getEuiTableColumn = ({ label }: { label: string }): CustomFieldEuiT
       {customField.value}
     </p>
   ),
+  'data-test-subj': 'text-custom-field-column',
 });
