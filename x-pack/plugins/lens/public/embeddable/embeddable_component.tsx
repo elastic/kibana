@@ -37,7 +37,6 @@ import type { DatatableVisualizationState } from '../visualizations/datatable/vi
 import type { MetricVisualizationState } from '../visualizations/metric/types';
 import type { HeatmapVisualizationState } from '../visualizations/heatmap/types';
 import type { GaugeVisualizationState } from '../visualizations/gauge/constants';
-import { ValueBasedPersistedState } from '../datasources/value_based/types';
 
 type LensAttributes<TVisType, TVisState> = Omit<
   Document,
@@ -48,7 +47,6 @@ type LensAttributes<TVisType, TVisState> = Omit<
     datasourceStates: {
       formBased: FormBasedPersistedState;
       textBased?: TextBasedPersistedState;
-      valueBased?: ValueBasedPersistedState;
     };
     visualization: TVisState;
   };

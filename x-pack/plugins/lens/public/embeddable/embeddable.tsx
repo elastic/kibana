@@ -84,7 +84,6 @@ import {
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
 import { useEuiFontSize, useEuiTheme, EuiEmptyPrompt } from '@elastic/eui';
-import { ValueBasedPersistedState } from '../datasources/value_based/types';
 import { getExecutionContextEvents, trackUiCounterEvents } from '../lens_ui_telemetry';
 import { Document } from '../persistence';
 import { ExpressionWrapper, ExpressionWrapperProps } from './expression_wrapper';
@@ -142,6 +141,7 @@ import type { LensPluginStartDependencies } from '../plugin';
 import { EmbeddableFeatureBadge } from './embeddable_info_badges';
 import { getDatasourceLayers } from '../state_management/utils';
 import type { EditLensConfigurationProps } from '../app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
+import { TextBasedPersistedState } from '../datasources/text_based/types';
 
 export type LensSavedObjectAttributes = Omit<Document, 'savedObjectId' | 'type'>;
 
@@ -1083,11 +1083,11 @@ export class Embeddable
 
     const getInternalTables = (states: Record<string, unknown>) => {
       const result: Record<string, Datatable> = {};
-      if ('valueBased' in states) {
-        const layers = (states.valueBased as ValueBasedPersistedState).layers;
+      if ('textBased' in states) {
+        const layers = (states.valueBased as TextBasedPersistedState).layers;
         for (const layer in layers) {
-          if (layers[layer]) {
-            result[layer] = layers[layer].table;
+          if (layers[layer] && layers[layer].table) {
+            result[layer] = layers[layer].table!;
           }
         }
       }
