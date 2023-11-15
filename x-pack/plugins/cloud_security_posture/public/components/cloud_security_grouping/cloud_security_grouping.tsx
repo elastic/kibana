@@ -35,6 +35,7 @@ export const CloudSecurityGrouping = ({
 }: CloudSecurityGroupingProps) => {
   return (
     <div
+      data-test-subj="cloudSecurityGrouping"
       css={css`
         && .euiAccordion__optionalAction {
           display: none;
