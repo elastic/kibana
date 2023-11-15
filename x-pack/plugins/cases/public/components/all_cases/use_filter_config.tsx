@@ -78,69 +78,67 @@ const useCustomFieldsFilterConfig = () => {
 
 export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: FilterConfig[] }) => {
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig();
-  const [config, setConfig] = useState<Map<string, FilterConfig>>(
+  const [filters, setFilters] = useState<Map<string, FilterConfig>>(
     () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
   );
-  const [storedOptions, setStoredOptions] = useLocalStorage<Map<string, FilterConfigState>>(
-    'filters',
-    new Map(),
-    {
-      raw: false,
-      serializer: (value) => {
-        return JSON.stringify(
-          Array.from(value.entries()).map(([key, filter]) => ({
-            key,
-            isActive: filter.isActive,
-          }))
-        );
-      },
-      deserializer: (value) => {
-        return new Map(
-          JSON.parse(value).map(({ key, isActive }: { key: string; isActive: boolean }) => [
-            key,
-            { key, isActive },
-          ])
-        );
-      },
-    }
-  );
+  const [filterVisibilityMap, setFilterVisibilityMap] = useLocalStorage<
+    Map<string, FilterConfigState>
+  >('filters', new Map(), {
+    raw: false,
+    serializer: (value) => {
+      return JSON.stringify(
+        Array.from(value.entries()).map(([key, filter]) => ({
+          key,
+          isActive: filter.isActive,
+        }))
+      );
+    },
+    deserializer: (value) => {
+      return new Map(
+        JSON.parse(value).map(({ key, isActive }: { key: string; isActive: boolean }) => [
+          key,
+          { key, isActive },
+        ])
+      );
+    },
+  });
 
   useEffect(() => {
-    const newConfig = new Map(
+    const newFilters = new Map(
       [...systemFilterConfig, ...customFieldsFilterConfig]
         .filter((filter) => filter.isAvailable)
         .map((filter) => [filter.key, filter])
     );
-    setConfig(newConfig);
+    setFilters(newFilters);
   }, [systemFilterConfig, customFieldsFilterConfig]);
 
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
-    const _storedOptions = new Map(storedOptions);
+    const newFilterVisibilityMap = new Map(filterVisibilityMap);
 
-    _storedOptions.forEach(({ key, isActive }) => {
+    newFilterVisibilityMap.forEach(({ key, isActive }) => {
       if (selectedOptionKeys.includes(key)) {
         if (!isActive) {
-          _storedOptions.delete(key);
-          _storedOptions.set(key, { key, isActive: true });
+          newFilterVisibilityMap.delete(key);
+          newFilterVisibilityMap.set(key, { key, isActive: true });
         }
       } else {
-        _storedOptions.set(key, { key, isActive: false });
+        newFilterVisibilityMap.set(key, { key, isActive: false });
       }
     });
 
-    config.forEach(({ key, isActive }) => {
-      if (!_storedOptions.has(key)) {
-        _storedOptions.set(key, {
+    filters.forEach(({ key, isActive }) => {
+      if (!newFilterVisibilityMap.has(key)) {
+        newFilterVisibilityMap.set(key, {
           key,
           isActive: selectedOptionKeys.includes(key),
         });
       }
     });
 
-    setStoredOptions(_storedOptions);
+    setFilterVisibilityMap(newFilterVisibilityMap);
   };
 
-  const availableConfigs = Array.from(config.values()).filter((filter) => filter.isAvailable);
+  const availableConfigs = Array.from(filters.values()).filter((filter) => filter.isAvailable);
   const selectableOptions = availableConfigs
     .map(({ key, label }) => ({
       key,
@@ -151,10 +149,11 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
       if (a.label < b.label) return -1;
       return a.key > b.key ? 1 : -1;
     });
-  const source = storedOptions && storedOptions.size > 0 ? storedOptions : config;
+  const source =
+    filterVisibilityMap && filterVisibilityMap.size > 0 ? filterVisibilityMap : filters;
   const activeFilters = Array.from(source.values())
-    .filter((filter) => filter.isActive && config.has(filter.key))
-    .map((filter) => config.get(filter.key)) as FilterConfig[];
+    .filter((filter) => filter.isActive && filters.has(filter.key))
+    .map((filter) => filters.get(filter.key)) as FilterConfig[];
   const activeFilterKeys = activeFilters.map((filter) => filter.key);
 
   return {
