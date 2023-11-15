@@ -314,13 +314,13 @@ yarn cypress:open:qa:serverless --tier <essentials|complete>
 The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment with the passed tier essentials or complete. If no flag is passed, the project will be cretaed as complete.
 
 ```
-yarn cypress:open:qa:serverless --ignoreEndpoint
+yarn cypress:open:qa:serverless --no-endpoint-addon
 ```
 
 The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment without the endpoint add-on.
 
 ```
-yarn cypress:open:qa:serverless --ignoreCloud
+yarn cypress:open:qa:serverless --no-cloud-addon
 ```
 
 The above command will open the Cypress UI with all tests in the `e2e` directory tagged as SERVERLESS. This also creates an MKI project in console.qa enviornment without the cloud add-on.
