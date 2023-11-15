@@ -14,7 +14,7 @@ import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 
 const statsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/data_streams/stats',
+  endpoint: 'GET /internal/dataset_quality/data_streams/stats',
   params: t.type({
     query: t.intersection([
       dataStreamTypesRt,
