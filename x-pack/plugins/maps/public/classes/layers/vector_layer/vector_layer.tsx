@@ -279,13 +279,13 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
     this.getValidJoins().forEach((join) => {
       const joinDataRequest = this.getDataRequest(join.getSourceDataRequestId());
-      const error = joinDataRequest?.getError();
-      if (error) {
+      const joinError = joinDataRequest?.renderError();
+      if (joinError) {
         errors.push({
           title: i18n.translate('xpack.maps.vectorLayer.joinFetchErrorTitle', {
             defaultMessage: `An error occurred when loading join metrics`,
           }),
-          body: error,
+          body: joinError,
         });
       }
     });
@@ -484,7 +484,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       stopLoading(dataRequestId, requestToken, styleMeta, { ...nextMeta, warnings });
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(dataRequestId, requestToken, error.message);
+        onLoadError(dataRequestId, requestToken, error);
       }
       throw error;
     }
@@ -554,7 +554,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
 
       stopLoading(dataRequestId, requestToken, formatters, nextMeta);
     } catch (error) {
-      onLoadError(dataRequestId, requestToken, error.message);
+      onLoadError(dataRequestId, requestToken, error);
       throw error;
     }
   }
@@ -627,7 +627,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       };
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {
-        onLoadError(sourceDataId, requestToken, `Join error: ${error.message}`);
+        onLoadError(sourceDataId, requestToken, error);
       }
       throw error;
     }
@@ -725,7 +725,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
       const supportsFeatureEditing = await source.supportsFeatureEditing();
       stopLoading(dataRequestId, requestToken, { supportsFeatureEditing });
     } catch (error) {
-      onLoadError(dataRequestId, requestToken, error.message);
+      onLoadError(dataRequestId, requestToken, error);
       throw error;
     }
   }

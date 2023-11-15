@@ -423,7 +423,7 @@ export class AbstractLayer implements ILayer {
   getErrors(): LayerMessage[] {
     const errors: LayerMessage[] = [];
 
-    const sourceError = this.getSourceDataRequest()?.getError();
+    const sourceError = this.getSourceDataRequest()?.renderError();
     if (sourceError) {
       errors.push({
         title: this._getSourceErrorTitle(),
