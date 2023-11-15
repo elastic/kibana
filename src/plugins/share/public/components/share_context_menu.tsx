@@ -100,8 +100,6 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     );
   };
 
-
-
   const getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
     const menuItems: ShareContextMenuPanelItem[] = [];
@@ -131,13 +129,11 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
 
     shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
-      console.log({shareMenuItem})
-      menuItems.push(
-        {
-          icon: 'document',
-          ...shareMenuItem,
-        }
-      )
+      console.log({ shareMenuItem });
+      menuItems.push({
+        icon: 'document',
+        ...shareMenuItem,
+      });
       panels.push({
         ...panels,
         id: panelId,
