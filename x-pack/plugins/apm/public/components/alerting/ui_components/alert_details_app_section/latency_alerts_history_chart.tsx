@@ -141,7 +141,7 @@ export function LatencyAlertsHistoryChart({
     isLoading,
   } = useAlertsHistory({
     http,
-    featureIds: [AlertConsumers.APM, AlertConsumers.OBSERVABILITY],
+    featureIds: [AlertConsumers.APM],
     ruleId,
     dateRange: { from: start, to: end },
   });

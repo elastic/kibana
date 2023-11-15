@@ -1010,7 +1010,6 @@ export class AlertsClient {
         operation: ReadOperations.Find,
         sort,
         lastSortIds: searchAfter,
-        featureIds,
       });
 
       if (alertsSearchResponse == null) {
