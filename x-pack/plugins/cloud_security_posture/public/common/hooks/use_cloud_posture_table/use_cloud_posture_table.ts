@@ -6,32 +6,35 @@
  */
 import { Dispatch, SetStateAction, useCallback } from 'react';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import { BoolQuery, Filter } from '@kbn/es-query';
+import { BoolQuery } from '@kbn/es-query';
 import { CriteriaWithPagination } from '@elastic/eui';
 import { DataTableRecord } from '@kbn/discover-utils/types';
 import { useUrlQuery } from '../use_url_query';
 import { usePageSize } from '../use_page_size';
 import { getDefaultQuery, useBaseEsQuery, usePersistedQuery } from './utils';
 import { LOCAL_STORAGE_DATA_TABLE_COLUMNS_KEY } from '../../constants';
-import { FindingsBaseURLQuery } from '../../types';
-
-type URLQuery = FindingsBaseURLQuery & Record<string, any>;
 
 export interface CloudPostureTableResult {
-  setUrlQuery: (query: Record<string, any>) => void;
-  sort: string[][];
-  filters: Filter[];
-  query: { bool: BoolQuery };
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  setUrlQuery: (query: any) => void;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  sort: any;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  filters: any[];
+  query?: { bool: BoolQuery };
   queryError?: Error;
   pageIndex: number;
-  urlQuery: URLQuery;
+  // TODO: remove any, urlQuery is an object with query fields but we also add custom fields to it, need to assert usages
+  urlQuery: any;
   setTableOptions: (options: CriteriaWithPagination<object>) => void;
-  handleUpdateQuery: (query: URLQuery) => void;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  handleUpdateQuery: (query: any) => void;
   pageSize: number;
   setPageSize: Dispatch<SetStateAction<number | undefined>>;
   onChangeItemsPerPage: (newPageSize: number) => void;
   onChangePage: (newPageIndex: number) => void;
-  onSort: (sort: string[]) => void;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  onSort: (sort: any) => void;
   onResetFilters: () => void;
   columnsLocalStorageKey: string;
   getRowsFromPages: (data: Array<{ page: DataTableRecord[] }> | undefined) => DataTableRecord[];
@@ -45,16 +48,15 @@ export const useCloudPostureTable = ({
   dataView,
   paginationLocalStorageKey,
   columnsLocalStorageKey,
-  nonPersistedFilters,
 }: {
-  defaultQuery?: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
+  // TODO: Remove any when all finding tables are converted to CloudSecurityDataTable
+  defaultQuery?: (params: any) => any;
   dataView: DataView;
   paginationLocalStorageKey: string;
   columnsLocalStorageKey?: string;
-  nonPersistedFilters?: Filter[];
 }): CloudPostureTableResult => {
   const getPersistedDefaultQuery = usePersistedQuery(defaultQuery);
-  const { urlQuery, setUrlQuery } = useUrlQuery<URLQuery>(getPersistedDefaultQuery);
+  const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
   const { pageSize, setPageSize } = usePageSize(paginationLocalStorageKey);
 
   const onChangeItemsPerPage = useCallback(
@@ -115,7 +117,6 @@ export const useCloudPostureTable = ({
     dataView,
     filters: urlQuery.filters,
     query: urlQuery.query,
-    ...(nonPersistedFilters ? { nonPersistedFilters } : {}),
   });
 
   const handleUpdateQuery = useCallback(
@@ -132,14 +133,12 @@ export const useCloudPostureTable = ({
       })
       .flat() || [];
 
-  const queryError = baseEsQuery instanceof Error ? baseEsQuery : undefined;
-
   return {
     setUrlQuery,
     sort: urlQuery.sort,
     filters: urlQuery.filters,
     query: baseEsQuery.query,
-    queryError,
+    queryError: baseEsQuery.error,
     pageIndex: urlQuery.pageIndex,
     urlQuery,
     setTableOptions,
