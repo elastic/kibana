@@ -15,10 +15,13 @@ import type {
   SearchRequest,
   SearchResponse,
   AggregateName,
+  EqlSearchRequest,
+  EqlSearchResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type {
   SearchRequest as SearchRequestWithBody,
   AggregationsAggregate,
+  EqlSearchRequest as EqlSearchRequestWithBody,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { IScopedClusterClient, ElasticsearchClient, Logger } from '@kbn/core/server';
 import { SearchMetrics, RuleInfo } from './types';
@@ -90,8 +93,67 @@ function wrapEsClient(opts: WrapEsClientOpts): ElasticsearchClient {
 
   // Mutating the functions we want to wrap
   wrappedClient.search = getWrappedSearchFn({ esClient: wrappedClient, ...rest });
+  wrappedClient.eql.search = getWrappedEqlSearchFn({ esClient: wrappedClient, ...rest });
 
   return wrappedClient;
+}
+
+function getWrappedEqlSearchFn(opts: WrapEsClientOpts) {
+  const originalEqlSearch = opts.esClient.eql.search;
+
+  // A bunch of overloads to make TypeScript happy
+  async function search<TEvent = unknown>(
+    params: EqlSearchRequest | EqlSearchRequestWithBody,
+    options?: TransportRequestOptionsWithOutMeta
+  ): Promise<EqlSearchResponse<TEvent>>;
+  async function search<TEvent = unknown>(
+    params: EqlSearchRequest | EqlSearchRequestWithBody,
+    options?: TransportRequestOptionsWithMeta
+  ): Promise<TransportResult<EqlSearchResponse<TEvent>, unknown>>;
+  async function search<TEvent = unknown>(
+    params: EqlSearchRequest | EqlSearchRequestWithBody,
+    options?: TransportRequestOptions
+  ): Promise<EqlSearchResponse<TEvent>>;
+  async function search<TEvent = unknown>(
+    params: EqlSearchRequest | EqlSearchRequestWithBody,
+    options?: TransportRequestOptions
+  ): Promise<EqlSearchResponse<TEvent> | TransportResult<EqlSearchResponse<TEvent>, unknown>> {
+    try {
+      const searchOptions = options ?? {};
+      const start = Date.now();
+      opts.logger.debug(
+        `executing eql query for rule ${opts.rule.alertTypeId}:${opts.rule.id} in space ${
+          opts.rule.spaceId
+        } - ${JSON.stringify(params)} - with options ${JSON.stringify(searchOptions)}`
+      );
+      const result = (await originalEqlSearch.call(opts.esClient, params, {
+        ...searchOptions,
+        signal: opts.abortController.signal,
+      })) as TransportResult<EqlSearchResponse<TEvent>, unknown> | EqlSearchResponse<TEvent>;
+
+      const end = Date.now();
+      const durationMs = end - start;
+
+      let took: number | undefined = 0;
+      if (searchOptions.meta) {
+        // when meta: true, response is TransportResult<EqlSearchResponse<TEvent>, unknown>
+        took = (result as TransportResult<EqlSearchResponse<TEvent>, unknown>).body.took;
+      } else {
+        // when meta: false, response is EqlSearchResponse<TEvent>
+        took = (result as EqlSearchResponse<TEvent>).took;
+      }
+
+      opts.logMetricsFn({ esSearchDuration: took ?? 0, totalSearchDuration: durationMs });
+      return result;
+    } catch (e) {
+      if (opts.abortController.signal.aborted) {
+        throw new Error('Search has been aborted due to cancelled execution');
+      }
+      throw e;
+    }
+  }
+
+  return search;
 }
 
 function getWrappedSearchFn(opts: WrapEsClientOpts) {
