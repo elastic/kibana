@@ -97,7 +97,7 @@ const InitializedContent = React.memo(
     logExplorerController: LogExplorerController;
   }) => (
     <ObservabilityLogExplorerPageTemplate>
-      <logExplorer.LogExplorer scopedHistory={history} controller={logExplorerController} />;
+      <logExplorer.LogExplorer scopedHistory={history} controller={logExplorerController} />
     </ObservabilityLogExplorerPageTemplate>
   )
 );
