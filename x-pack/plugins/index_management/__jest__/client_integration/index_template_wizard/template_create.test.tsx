@@ -90,8 +90,7 @@ const componentTemplate2 = {
 
 const componentTemplates = [componentTemplate1, componentTemplate2];
 
-// TODO: open an issue for the team to investigate and fix those tests
-describe.skip('<TemplateCreate />', () => {
+describe('<TemplateCreate />', () => {
   let testBed: TemplateFormTestBed;
 
   const { httpSetup, httpRequestsMockHelpers } = setupEnvironment();
