@@ -21,6 +21,7 @@ import { registerRoute as registerResetTransformsRoute } from './api/reset_trans
 import { registerRoute as registerTransformsPreviewRoute } from './api/transforms_preview/register_route';
 import { registerRoute as registerStartTransformsRoute } from './api/start_transforms/register_route';
 import { registerRoute as registerStopTransformsRoute } from './api/stop_transforms/register_route';
+import { registerRoute as registerDeleteTransformsRoute } from './api/delete_transforms/register_route';
 import { registerRoute as registerScheduleNowTransformsRoute } from './api/schedule_now_transforms/register_route';
 
 export function registerRoutes(dependencies: RouteDependencies) {
@@ -38,5 +39,6 @@ export function registerRoutes(dependencies: RouteDependencies) {
   registerTransformsPreviewRoute(dependencies);
   registerStartTransformsRoute(dependencies);
   registerStopTransformsRoute(dependencies);
+  registerDeleteTransformsRoute(dependencies);
   registerScheduleNowTransformsRoute(dependencies);
 }
