@@ -21,7 +21,7 @@ export function createTelemetryPrebuiltRuleAlertsTaskConfig(maxTelemetryBatch: n
   return {
     type: 'security:telemetry-prebuilt-rule-alerts',
     title: 'Security Solution - Prebuilt Rule and Elastic ML Alerts Telemetry',
-    interval: '2m',
+    interval: '1h',
     timeout: '15m',
     version: taskVersion,
     runTask: async (
