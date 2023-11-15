@@ -28,7 +28,7 @@ import {
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { getRiskEntityTranslation } from '../translations';
+
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
@@ -237,10 +237,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
           title={
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.learnMore"
-              defaultMessage="Learn more about {riskEntity} risk"
-              values={{
-                riskEntity: getRiskEntityTranslation(undefined, true),
-              }}
+              defaultMessage="Learn more about Entity risk"
             />
           }
         />
