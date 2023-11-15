@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './toolbar_button';
+export { plugin } from './plugin';

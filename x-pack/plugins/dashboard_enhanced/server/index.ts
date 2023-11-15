@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { DashboardEnhancedPlugin } from './plugin';
 
 export type {
   SetupContract as DashboardEnhancedSetupContract,
@@ -15,6 +14,7 @@ export type {
   StartDependencies as DashboardEnhancedStartDependencies,
 } from './plugin';
 
-export function plugin(context: PluginInitializerContext) {
+export async function plugin(context: PluginInitializerContext) {
+  const { DashboardEnhancedPlugin } = await import('./plugin');
   return new DashboardEnhancedPlugin(context);
 }
