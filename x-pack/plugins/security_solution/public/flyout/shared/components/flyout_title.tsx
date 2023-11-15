@@ -53,17 +53,17 @@ export const FlyoutTitle: FC<FlyoutTitleProps> = memo(
 
     const titleIcon = useMemo(() => {
       return iconType ? (
-        <>
-          <EuiIcon
-            type={iconType}
-            size="m"
-            className="eui-alignBaseline"
-            data-test-subj={TITLE_HEADER_ICON_TEST_ID}
-          />
-          &nbsp;
-        </>
+        <EuiIcon
+          type={iconType}
+          size="m"
+          className="eui-alignBaseline"
+          data-test-subj={TITLE_HEADER_ICON_TEST_ID}
+          css={css`
+            margin-right: ${euiTheme.size.xs};
+          `}
+        />
       ) : null;
-    }, [iconType]);
+    }, [iconType, euiTheme.size.xs]);
 
     const titleComponent = useMemo(() => {
       return (
