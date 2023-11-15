@@ -59,7 +59,7 @@ interface Credentials {
   password: string;
 }
 
-const DEFAULT_CONFIGURATION: ProductType[] = [
+const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
   { product_line: 'security', product_tier: 'complete' },
   { product_line: 'cloud', product_tier: 'complete' },
   { product_line: 'endpoint', product_tier: 'complete' },
@@ -335,7 +335,7 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 const getOverridedProductTypes = (
   projectConfigurationParameters: ProjectConfigurationParameters
 ): ProductType[] => {
-  let productTypes = DEFAULT_CONFIGURATION;
+  let productTypes: ProductType[] = [...DEFAULT_CONFIGURATION];
 
   if (projectConfigurationParameters.tier) {
     productTypes = productTypes.map((product) => ({
