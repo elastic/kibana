@@ -6,21 +6,35 @@
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationResultOfMap } from '@kbn/es-types';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from './create_es_client/document_type';
-import { TRANSACTION_DURATION_SUMMARY } from '../../../common/es_fields/apm';
+import {
+  SERVICE_ENVIRONMENT,
+  SERVICE_NAME,
+  TRANSACTION_DURATION_SUMMARY,
+} from '../../../common/es_fields/apm';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+
+type SummaryFieldAggregation = AggregationResultOfMap<
+  ReturnType<typeof getSummaryFieldAggregation>,
+  {}
+>;
 
 const getRequest = ({
   documentType,
   rollupInterval,
   filters,
+  aggregation,
 }: {
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
   filters: estypes.QueryDslQueryContainer[];
+  aggregation?: {
+    aggs: Record<string, estypes.AggregationsAggregationContainer>;
+  };
 }) => {
   const searchParams = {
     apm: {
@@ -46,6 +60,7 @@ const getRequest = ({
           filter: filters,
         },
       },
+      ...aggregation,
     },
   };
 };
@@ -113,16 +128,8 @@ export async function getDocumentSources({
         ? docTypeConfig.rollupIntervals
         : [RollupInterval.OneMinute]
     ).flatMap((rollupInterval) => {
-      const summaryExistsFilter = {
-        bool: {
-          filter: [
-            {
-              exists: {
-                field: TRANSACTION_DURATION_SUMMARY,
-              },
-            },
-          ],
-        },
+      const servicesWithSummary = {
+        aggs: getSummaryFieldAggregation(),
       };
 
       return {
@@ -134,12 +141,14 @@ export async function getDocumentSources({
         before: getRequest({
           documentType,
           rollupInterval,
-          filters: [...kql, ...beforeRange, summaryExistsFilter],
+          filters: [...kql, ...beforeRange],
+          aggregation: servicesWithSummary,
         }),
         current: getRequest({
           documentType,
           rollupInterval,
-          filters: [...kql, ...currentRange, summaryExistsFilter],
+          filters: [...kql, ...currentRange],
+          aggregation: servicesWithSummary,
         }),
       };
     });
@@ -164,12 +173,17 @@ export async function getDocumentSources({
     const hasDocBefore = responseBefore.hits.total.value > 0;
     const hasDocAfter = responseAfter.hits.total.value > 0;
 
+    const summaryFieldSupportedServices = getSummaryFieldSupportedServiceNames(
+      responseAfter.aggregations as SummaryFieldAggregation
+    );
+
     return {
       documentType,
       rollupInterval,
       hasDocBefore,
       hasDocAfter,
       checkSummaryFieldExists: source.meta.checkSummaryFieldExists,
+      summaryFieldSupportedServices,
     };
   });
 
@@ -184,6 +198,7 @@ export async function getDocumentSources({
       hasDocBefore,
       rollupInterval,
       checkSummaryFieldExists,
+      summaryFieldSupportedServices,
     } = checkedSource;
 
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
@@ -199,6 +214,7 @@ export async function getDocumentSources({
       rollupInterval,
       checkSummaryFieldExists,
       hasDocs,
+      summaryFieldSupportedServices,
     };
   });
 
@@ -206,6 +222,16 @@ export async function getDocumentSources({
     .filter((source) => !source.checkSummaryFieldExists)
     .map((checkedSource) => {
       const { documentType, hasDocs, rollupInterval } = checkedSource;
+
+      const summaryFieldSupportedServices =
+        sourcesWithHasDocs.find((eSource) => {
+          return (
+            eSource.documentType === documentType &&
+            eSource.rollupInterval === rollupInterval &&
+            eSource.checkSummaryFieldExists
+          );
+        })?.summaryFieldSupportedServices ?? [];
+
       return {
         documentType,
         rollupInterval,
@@ -221,6 +247,7 @@ export async function getDocumentSources({
               );
             })?.hasDocs
           ),
+        summaryFieldSupportedServices,
       };
     });
 
@@ -229,5 +256,90 @@ export async function getDocumentSources({
     rollupInterval: RollupInterval.None,
     hasDocs: true,
     hasDurationSummaryField: false,
+    summaryFieldSupportedServices: [],
   });
 }
+
+const getSummaryFieldSupportedServiceNames = (
+  aggregations?: SummaryFieldAggregation
+) => {
+  if (!aggregations) {
+    return [];
+  }
+
+  const supportedServices =
+    aggregations.supported_summary.service_name.buckets.map(({ key }) => {
+      const [serviceName, environment] = key;
+      return { serviceName, environment };
+    });
+
+  const unsupportedServices =
+    aggregations.unsupported_summary.service_name.buckets.map(({ key }) => {
+      const [serviceName, environment] = key;
+      return { serviceName, environment };
+    });
+
+  // if within the time range, the same service has documents that don't have the summary field
+  // we'll consider it as not supported
+  return supportedServices.filter(
+    ({ environment, serviceName }) =>
+      !unsupportedServices.some(
+        (service) =>
+          service.environment === environment &&
+          service.serviceName === serviceName
+      )
+  );
+};
+
+const getSummaryFieldAggregation = () => {
+  return {
+    supported_summary: {
+      filter: {
+        exists: {
+          field: TRANSACTION_DURATION_SUMMARY,
+        },
+      },
+      aggs: {
+        service_name: {
+          multi_terms: {
+            terms: [
+              {
+                field: SERVICE_NAME,
+              },
+              {
+                field: SERVICE_ENVIRONMENT,
+              },
+            ],
+          },
+        },
+      },
+    },
+    unsupported_summary: {
+      filter: {
+        bool: {
+          must_not: [
+            {
+              exists: {
+                field: TRANSACTION_DURATION_SUMMARY,
+              },
+            },
+          ],
+        },
+      },
+      aggs: {
+        service_name: {
+          multi_terms: {
+            terms: [
+              {
+                field: SERVICE_NAME,
+              },
+              {
+                field: SERVICE_ENVIRONMENT,
+              },
+            ],
+          },
+        },
+      },
+    },
+  };
+};

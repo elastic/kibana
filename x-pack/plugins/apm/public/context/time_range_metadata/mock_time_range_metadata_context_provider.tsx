@@ -18,24 +18,43 @@ const DEFAULTS = {
       hasDocs: true,
       rollupInterval: RollupInterval.OneMinute,
       hasDurationSummaryField: true,
+      summaryFieldSupportedServices: [
+        {
+          serviceName: 'java',
+          environment: 'production',
+        },
+      ],
     },
     {
       documentType: ApmDocumentType.TransactionMetric,
       hasDocs: true,
       rollupInterval: RollupInterval.OneMinute,
       hasDurationSummaryField: true,
+      summaryFieldSupportedServices: [
+        {
+          serviceName: 'java',
+          environment: 'production',
+        },
+      ],
     },
     {
       documentType: ApmDocumentType.TransactionEvent,
       hasDocs: true,
       rollupInterval: RollupInterval.None,
-      hasDurationSummaryField: false,
+      hasDurationSummaryField: true,
+      summaryFieldSupportedServices: [
+        {
+          serviceName: 'java',
+          environment: 'production',
+        },
+      ],
     },
     {
       documentType: ApmDocumentType.ServiceDestinationMetric,
       hasDocs: true,
       rollupInterval: RollupInterval.None,
       hasDurationSummaryField: false,
+      summaryFieldSupportedServices: [],
     },
   ],
 };

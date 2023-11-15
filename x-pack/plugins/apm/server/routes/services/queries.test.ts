@@ -71,7 +71,6 @@ describe('services queries', () => {
             seed: 0,
           },
           apmAlertsClient: mockApmAlertsClient,
-          useDurationSummary: false,
         })
     );
 

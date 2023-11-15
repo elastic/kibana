@@ -65,8 +65,6 @@ function useServicesMainStatisticsFetcher() {
     numBuckets: 20,
   });
 
-  const shouldUseDurationSummary = !!preferred?.source?.hasDurationSummaryField;
-
   const mainStatisticsFetch = useProgressiveFetcher(
     (callApmApi) => {
       if (preferred) {
@@ -78,7 +76,6 @@ function useServicesMainStatisticsFetcher() {
               start,
               end,
               serviceGroup,
-              useDurationSummary: shouldUseDurationSummary,
               documentType: preferred.source.documentType,
               rollupInterval: preferred.source.rollupInterval,
             },

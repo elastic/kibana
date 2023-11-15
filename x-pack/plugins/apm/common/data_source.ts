@@ -27,5 +27,9 @@ export type ApmDataSourceWithSummary<
   T extends AnyApmDocumentType = AnyApmDocumentType
 > = ApmDataSource<T> & {
   hasDurationSummaryField: boolean;
+  summaryFieldSupportedServices: Array<{
+    serviceName: string;
+    environment: string;
+  }>;
   hasDocs: boolean;
 };

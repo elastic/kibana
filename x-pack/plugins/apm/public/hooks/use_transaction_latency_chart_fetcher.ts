@@ -6,6 +6,7 @@
  */
 
 import { useMemo } from 'react';
+import { ENVIRONMENT_ALL } from '../../common/environment_filter_values';
 import { ApmDocumentType } from '../../common/document_type';
 import { LatencyAggregationType } from '../../common/latency_aggregation_types';
 import { isTimeComparison } from '../components/shared/time_comparison/get_comparison_options';
@@ -51,7 +52,12 @@ export function useTransactionLatencyChartsFetcher({
 
   const shouldUseDurationSummary =
     latencyAggregationType === 'avg' &&
-    preferred?.source?.hasDurationSummaryField;
+    preferred?.source?.summaryFieldSupportedServices.some(
+      (supported) =>
+        (environment === ENVIRONMENT_ALL.value ||
+          supported.environment === environment) &&
+        supported.serviceName === serviceName
+    );
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {

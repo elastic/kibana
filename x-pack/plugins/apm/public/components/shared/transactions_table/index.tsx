@@ -18,6 +18,7 @@ import { orderBy } from 'lodash';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
+import { ENVIRONMENT_ALL } from '../../../../common/environment_filter_values';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   getLatencyAggregationType,
@@ -153,7 +154,13 @@ export function TransactionsTable({
 
   const shouldUseDurationSummary =
     latencyAggregationType === 'avg' &&
-    preferred?.source?.hasDurationSummaryField;
+    (preferred?.source?.hasDurationSummaryField ||
+      preferred?.source?.summaryFieldSupportedServices.some(
+        (supported) =>
+          (environment === ENVIRONMENT_ALL.value ||
+            supported.environment === environment) &&
+          supported.serviceName === serviceName
+      ));
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
