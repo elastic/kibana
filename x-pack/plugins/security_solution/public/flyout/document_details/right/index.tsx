@@ -12,6 +12,7 @@ import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { EventKind } from '../shared/constants/event_kinds';
 import { getField } from '../shared/utils';
 import { useRightPanelContext } from './context';
+import { PanelNavigation } from './navigation';
 import { PanelHeader } from './header';
 import { PanelContent } from './content';
 import type { RightPanelTabsType } from './tabs';
@@ -64,8 +65,8 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   return (
     <>
+      <PanelNavigation flyoutIsExpandable={documentIsSignal} />
       <PanelHeader
-        flyoutIsExpandable={documentIsSignal}
         tabs={tabsDisplayed}
         selectedTabId={selectedTabId}
         setSelectedTabId={setSelectedTabId}

@@ -7,6 +7,7 @@
 
 import {
   HealthStatus,
+  IlmExplainLifecycleLifecycleExplain,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
@@ -56,6 +57,7 @@ export interface IndexSettings {
   analysis?: AnalysisModule;
   [key: string]: any;
 }
+
 export interface Index {
   name: string;
   primary?: number | string;
@@ -67,10 +69,7 @@ export interface Index {
 
   // The types below are added by extension services if corresponding plugins are enabled (ILM, Rollup, CCR)
   isRollupIndex?: boolean;
-  ilm?: {
-    index: string;
-    managed: boolean;
-  };
+  ilm?: IlmExplainLifecycleLifecycleExplain;
   isFollowerIndex?: boolean;
 
   // The types from here below represent information returned from the index stats API;

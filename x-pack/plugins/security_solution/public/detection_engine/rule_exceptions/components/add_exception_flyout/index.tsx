@@ -157,6 +157,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       selectedRulesToAddTo,
       exceptionListsToAddTo,
       newComment,
+      commentErrorExists,
       itemConditionValidationErrorExists,
       errorSubmitting,
       expireTime,
@@ -262,6 +263,16 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       dispatch({
         type: 'setComment',
         comment,
+      });
+    },
+    [dispatch]
+  );
+
+  const setCommentError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setCommentError',
+        errorExists,
       });
     },
     [dispatch]
@@ -445,6 +456,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       exceptionItemName.trim() === '' ||
       exceptionItems.every((item) => item.entries.length === 0) ||
       itemConditionValidationErrorExists ||
+      commentErrorExists ||
       expireErrorExists ||
       (addExceptionToRadioSelection === 'add_to_lists' && isEmpty(exceptionListsToAddTo)) ||
       (addExceptionToRadioSelection === 'select_rules_to_add_to' &&
@@ -462,6 +474,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
       expireErrorExists,
       selectedRulesToAddTo,
       listType,
+      commentErrorExists,
     ]
   );
 
@@ -555,6 +568,7 @@ export const AddExceptionFlyout = memo(function AddExceptionFlyout({
             initialIsOpen={!!newComment}
             newCommentValue={newComment}
             newCommentOnChange={setComment}
+            setCommentError={setCommentError}
           />
           {listType !== ExceptionListTypeEnum.ENDPOINT && (
             <>

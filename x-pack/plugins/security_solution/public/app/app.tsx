@@ -51,6 +51,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const services = useKibana().services;
   const {
     i18n,
+    analytics,
     application: { capabilities },
     uiActions,
     upselling,
@@ -59,7 +60,7 @@ const StartAppComponent: FC<StartAppComponent> = ({
   const [darkMode] = useUiSetting$<boolean>(DEFAULT_DARK_MODE);
 
   return (
-    <KibanaErrorBoundaryProvider>
+    <KibanaErrorBoundaryProvider analytics={analytics}>
       <KibanaErrorBoundary>
         <i18n.Context>
           <ManageGlobalToaster>

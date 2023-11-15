@@ -9,8 +9,7 @@ info:
     name: Elastic License 2.0
     url: https://www.elastic.co/licensing/elastic-license
 servers:
-  - url: http://localhost:5601
-    description: local
+  - url: /
 security:
   - basicAuth: []
   - apiKeyAuth: []
@@ -59,10 +58,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -85,8 +80,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnector
@@ -102,8 +95,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorId
@@ -140,8 +131,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnector
@@ -172,10 +161,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector/{connectorId}/_execute:
     post:
       summary: Runs a connector.
@@ -194,6 +179,8 @@ paths:
             schema:
               $ref: '#/components/schemas/run_connector_request'
             examples:
+              runEmailConnectorRequest:
+                $ref: '#/components/examples/run_email_connector_request'
               runIndexConnectorRequest:
                 $ref: '#/components/examples/run_index_connector_request'
               runJiraConnectorRequest:
@@ -234,6 +221,8 @@ paths:
                       - error
                       - ok
               examples:
+                runEmailConnectorResponse:
+                  $ref: '#/components/examples/run_email_connector_response'
                 runIndexConnectorResponse:
                   $ref: '#/components/examples/run_index_connector_response'
                 runJiraConnectorResponse:
@@ -246,10 +235,6 @@ paths:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -270,10 +255,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -337,10 +318,6 @@ paths:
                   $ref: '#/components/examples/get_connector_types_generativeai_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector:
     post:
       summary: Creates a connector.
@@ -385,10 +362,6 @@ paths:
                   $ref: '#/components/examples/create_xmatters_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector/{connectorId}:
     get:
       summary: Retrieves a connector by ID.
@@ -414,8 +387,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     delete:
       summary: Deletes a connector.
       operationId: deleteConnectorWithSpaceId
@@ -434,8 +405,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: createConnectorIdWithSpaceId
@@ -474,8 +443,6 @@ paths:
                   $ref: '#/components/examples/create_index_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: updateConnectorWithSpaceId
@@ -509,10 +476,6 @@ paths:
           $ref: '#/components/responses/401'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connectors:
     get:
       summary: Retrieves all connectors.
@@ -537,10 +500,6 @@ paths:
                   $ref: '#/components/examples/get_connectors_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -604,10 +563,6 @@ paths:
                   $ref: '#/components/examples/get_connector_types_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/connector/{connectorId}/_execute:
     post:
       summary: Runs a connector.
@@ -679,10 +634,6 @@ paths:
                   $ref: '#/components/examples/run_swimlane_connector_response'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/action/{actionId}:
     delete:
       summary: Deletes a connector.
@@ -701,8 +652,6 @@ paths:
           description: Indicates a successful call.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     get:
       summary: Retrieves a connector by ID.
       operationId: legacyGetConnector
@@ -718,8 +667,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     put:
       summary: Updates the attributes for a connector.
       operationId: legacyUpdateConnector
@@ -754,10 +701,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '404':
           $ref: '#/components/responses/404'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions:
     get:
       summary: Retrieves all connectors.
@@ -779,8 +722,6 @@ paths:
                   $ref: '#/components/schemas/action_response_properties'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
     post:
       summary: Creates a connector.
       operationId: legacyCreateConnector
@@ -817,10 +758,6 @@ paths:
           $ref: '#/components/responses/200_actions'
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/list_action_types:
     get:
       summary: Retrieves a list of all connector types.
@@ -864,10 +801,6 @@ paths:
                       description: The name of the connector type.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
   /s/{spaceId}/api/actions/action/{actionId}/_execute:
     post:
       summary: Runs a connector.
@@ -918,10 +851,6 @@ paths:
                     description: The status of the action.
         '401':
           $ref: '#/components/responses/401'
-      servers:
-        - url: https://localhost:5601
-    servers:
-      - url: https://localhost:5601
 components:
   securitySchemes:
     basicAuth:
@@ -3420,7 +3349,50 @@ components:
           items:
             type: object
             additionalProperties: true
-    run_connector_params_level_message:
+    run_connector_params_message_email:
+      title: Email connector parameters
+      description: |
+        Test an action that sends an email message. There must be at least one recipient in `to`, `cc`, or `bcc`.
+      type: object
+      anyOf:
+        - required:
+            - bcc
+            - message
+            - subject
+        - required:
+            - cc
+            - message
+            - subject
+        - required:
+            - to
+            - message
+            - subject
+      properties:
+        bcc:
+          type: array
+          items:
+            type: string
+          description: |
+            A list of "blind carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format
+        cc:
+          type: array
+          items:
+            type: string
+          description: |
+            A list of "carbon copy" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format 
+        message:
+          type: string
+          description: The email message text. Markdown format is supported.
+        subject:
+          type: string
+          description: The subject line of the email.
+        to:
+          type: array
+          description: |
+            A list of email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.
+          items:
+            type: string
+    run_connector_params_message_serverlog:
       title: Server log connector parameters
       description: Test an action that writes an entry to the Kibana server log.
       type: object
@@ -3906,7 +3878,8 @@ components:
         params:
           oneOf:
             - $ref: '#/components/schemas/run_connector_params_documents'
-            - $ref: '#/components/schemas/run_connector_params_level_message'
+            - $ref: '#/components/schemas/run_connector_params_message_email'
+            - $ref: '#/components/schemas/run_connector_params_message_serverlog'
             - title: Subaction parameters
               description: Test an action that involves a subaction.
               oneOf:
@@ -4111,6 +4084,19 @@ components:
         name: updated-connector
         config:
           index: updated-index
+    run_email_connector_request:
+      summary: Send an email message from an email connector.
+      value:
+        params:
+          bcc:
+            - user1@example.com
+          cc:
+            - user2@example.com
+            - user3@example.com
+          message: Test email message.
+          subject: Test message subject
+          to:
+            - user4@example.com
     run_index_connector_request:
       summary: Run an index connector.
       value:
@@ -4152,6 +4138,30 @@ components:
               caseId: '1000'
               caseName: Case name
               description: Description of the incident.
+    run_email_connector_response:
+      summary: Response for sending a message from an email connector.
+      value:
+        connector_id: 7fc7b9a0-ecc9-11ec-8736-e7d63118c907
+        data:
+          accepted:
+            - user1@example.com
+            - user2@example.com
+            - user3@example.com
+            - user4@example.com
+          envelope:
+            from: tester@example.com
+            to:
+              - user1@example.com
+              - user2@example.com
+              - user3@example.com
+              - user4@example.com
+          envelopeTime: 8
+          messageTime: 3
+          messageSize: 729
+          response: 250 Message queued as QzEXKcGJ
+          messageId: <08a92d29-642a-0706-750c-de5996bd5cf3@example.com>
+          rejected: []
+        status: ok
     run_index_connector_response:
       summary: Response from running an index connector.
       value:

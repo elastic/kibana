@@ -11,7 +11,7 @@ import { EuiDelayRender, EuiErrorBoundary, EuiSkeletonText, useEuiTheme } from '
 
 import type { Props } from './code_editor';
 
-export * from './languages/constants';
+export * from '@kbn/code-editor/languages/constants';
 
 const LazyBaseEditor = React.lazy(() => import('./code_editor'));
 const LazyCodeEditorField = React.lazy(() =>
