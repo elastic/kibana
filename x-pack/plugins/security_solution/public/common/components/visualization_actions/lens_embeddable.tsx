@@ -24,7 +24,7 @@ import { inputsSelectors } from '../../store';
 import { useDeepEqualSelector } from '../../hooks/use_selector';
 import { ModalInspectQuery } from '../inspect/modal';
 import { InputsModelId } from '../../store/inputs/constants';
-import { getRequestsAndResponses, showLegendActionsByActionId } from './utils';
+import { getRequestsAndResponses } from './utils';
 import { SourcererScopeName } from '../../store/sourcerer/model';
 import { VisualizationActions } from './actions';
 
