@@ -1291,6 +1291,61 @@ export default function (providerContext: FtrProviderContext) {
         expect(typeof agent1data.body.item.upgrade_started_at).to.be('string');
         expect(typeof agent2data.body.item.upgrade_started_at).to.be('string');
       });
+
+      it('should set a long expiration time when the start_time is set to now (immediate rollout period)', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await es.update({
+          id: 'agent2',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: { elastic: { agent: { upgradeable: true, version: '0.0.0' } } },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/bulk_upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            agents: ['agent1', 'agent2'],
+            start_time: new Date(Date.now()).toISOString(),
+          })
+          .expect(200);
+
+        const actionsRes = await es.search({
+          index: '.fleet-actions',
+          body: {
+            sort: [{ '@timestamp': { order: 'desc' } }],
+          },
+        });
+
+        const action: any = actionsRes.hits.hits[0]._source;
+        expect(action).to.have.keys(
+          'agents',
+          'start_time',
+          'minimum_execution_duration',
+          'expiration'
+        );
+        // calculate 1 month from now
+        const today = new Date();
+        const nextMonthUnixTime = today.setMonth(today.getMonth() + 1);
+        const nextMonth = new Date(nextMonthUnixTime).toISOString().slice(0, 10);
+
+        expect(action.expiration).contain(`${nextMonth}`);
+        expect(action.agents).contain('agent1');
+        expect(action.agents).contain('agent2');
+      });
     });
   });
 }
