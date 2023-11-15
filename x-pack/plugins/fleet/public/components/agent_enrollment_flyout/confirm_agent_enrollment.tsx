@@ -143,7 +143,7 @@ export const ConfirmAgentEnrollment: React.FunctionComponent<Props> = ({
           title={
             isLongEnrollment ? (
               <FormattedMessage
-                id="xpack.fleet.agentEnrollment.loading.listeningcsp"
+                id="xpack.fleet.agentEnrollment.loading.listeninglongenrollemnt"
                 defaultMessage="Listening for agent... this can take several minutes"
               />
             ) : (
