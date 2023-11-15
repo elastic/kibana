@@ -87,7 +87,6 @@ export const useLensAttributes = ({
     }
 
     const indexFilters = hasAdHocDataViews ? [] : getIndexFilters(selectedPatterns);
-
     return {
       ...attrs,
       ...(title != null ? { title } : {}),

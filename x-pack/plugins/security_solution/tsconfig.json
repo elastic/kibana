@@ -174,7 +174,6 @@
     "@kbn/core-application-common",
     "@kbn/openapi-generator",
     "@kbn/es",
-    "@kbn/subscription-tracking",
     "@kbn/react-kibana-mount",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/shared-ux-error-boundary",
