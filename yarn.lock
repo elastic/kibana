@@ -3000,6 +3000,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/analytics-collection-utils@link:packages/analytics/utils/analytics_collection_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/analytics-ftr-helpers-plugin@link:test/analytics/plugins/analytics_ftr_helpers":
   version "0.0.0"
   uid ""
@@ -5025,6 +5029,10 @@
   uid ""
 
 "@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
+  version "0.0.0"
+  uid ""
+
+"@kbn/mock-idp-plugin@link:packages/kbn-mock-idp-plugin":
   version "0.0.0"
   uid ""
 
