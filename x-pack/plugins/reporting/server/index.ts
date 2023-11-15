@@ -7,7 +7,6 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 import { ReportingConfigType } from './config';
-import { ReportingPlugin } from './plugin';
 
 export { config } from './config';
 
@@ -17,8 +16,10 @@ export { config } from './config';
 export type { ReportingSetup, ReportingStart } from './types';
 
 // @internal
-export const plugin = (initContext: PluginInitializerContext<ReportingConfigType>) =>
-  new ReportingPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext<ReportingConfigType>) => {
+  const { ReportingPlugin } = await import('./plugin');
+  return new ReportingPlugin(initContext);
+};
 
 // @internal
 export { ReportingCore } from './core';

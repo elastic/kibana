@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectsServerPlugin } from './plugin';
-
-export const plugin = () => new SavedObjectsServerPlugin();
+export const plugin = async () => {
+  const { SavedObjectsServerPlugin } = await import('./plugin');
+  return new SavedObjectsServerPlugin();
+};

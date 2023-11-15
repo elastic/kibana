@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { fireEvent, waitFor } from '@testing-library/dom';
-import { cleanup } from '@testing-library/react';
+import { fireEvent, waitFor, cleanup } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
 import React from 'react';
 import Router from 'react-router-dom';
