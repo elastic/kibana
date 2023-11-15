@@ -16,7 +16,7 @@ export type AzureCredentialsFields = Record<string, { label: string; type?: 'pas
 
 export interface AzureOptionValue {
   label: string;
-  info: React.ReactNode;
+  info?: React.ReactNode;
   fields: AzureCredentialsFields;
 }
 
@@ -35,18 +35,7 @@ export const getAzureCredentialsFormManualOptions = (): Array<{
 };
 
 export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCredentialsFields) =>
-  // Object.entries(input.streams[0].vars || {})
-  Object.entries(
-    {
-      'azure.credentials.tenant_id': { value: '' },
-      'azure.credentials.client_id': { value: '' },
-      'azure.credentials.client_secret': { value: '' },
-      'azure.credentials.client_certificate_path': { value: '' },
-      'azure.credentials.client_certificate_password': { value: '' },
-      'azure.credentials.client_username': { value: '' },
-      'azure.credentials.client_password': { value: '' },
-    } || {}
-  )
+  Object.entries(input.streams[0].vars || {})
     .filter(([id]) => id in fields)
     .map(([id, inputVar]) => {
       const field = fields[id];
@@ -71,6 +60,14 @@ const ManagedIdentityDescription = (
   </div>
 );
 
+const I18N_TENANT_ID = i18n.translate('xpack.csp.azureIntegration.tenantIdLabel', {
+  defaultMessage: 'Tenant ID',
+});
+
+const I18N_CLIENT_ID = i18n.translate('xpack.csp.azureIntegration.clientIdLabel', {
+  defaultMessage: 'Client ID',
+});
+
 export const getAzureCredentialsFormOptions = (): AzureOptions => ({
   arm_template: {
     label: 'ARM Template',
@@ -78,62 +75,63 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     fields: {},
   },
   service_principal_with_client_secret: {
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+    label: i18n.translate('xpack.csp.azureIntegration.servicePrincipalWithClientSecretLabel', {
       defaultMessage: 'Service principal with Client Secret',
     }),
     fields: {
-      'azure.credentials.tenant_id': { label: 'Tenant ID' },
-      'azure.credentials.client_id': { label: 'Client ID' },
+      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
+      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
       'azure.credentials.client_secret': {
         type: 'password',
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('xpack.csp.azureIntegration.clientSecretLabel', {
           defaultMessage: 'Client Secret',
         }),
       },
     },
   },
   service_principal_with_client_certificate: {
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
+    label: i18n.translate('xpack.csp.azureIntegration.servicePrincipalWithClientCertificateLabel', {
       defaultMessage: 'Service principal with Client Certificate',
     }),
     fields: {
-      'azure.credentials.tenant_id': { label: 'Tenant ID' },
-      'azure.credentials.client_id': { label: 'Client ID' },
+      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
+      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
       'azure.credentials.client_certificate_path': {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePathLabel', {
           defaultMessage: 'Client Certificate Path',
         }),
       },
       'azure.credentials.client_certificate_password': {
         type: 'password',
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('xpack.csp.azureIntegration.clientCertificatePasswordLabel', {
           defaultMessage: 'Client Certificate Password',
         }),
       },
     },
   },
   service_principal_with_client_username_and_password: {
-    label: i18n.translate('xpack.csp.awsIntegration.temporaryKeysLabel', {
-      defaultMessage: 'Service principal with Client Username and Password',
-    }),
+    label: i18n.translate(
+      'xpack.csp.azureIntegration.servicePrincipalWithClientUsernameAndPasswordLabel',
+      { defaultMessage: 'Service principal with Client Username and Password' }
+    ),
     fields: {
-      'azure.credentials.tenant_id': { label: 'Tenant ID' },
-      'azure.credentials.client_id': { label: 'Client ID' },
+      'azure.credentials.tenant_id': { label: I18N_TENANT_ID },
+      'azure.credentials.client_id': { label: I18N_CLIENT_ID },
       'azure.credentials.client_username': {
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('xpack.csp.azureIntegration.clientUsernameLabel', {
           defaultMessage: 'Client Username',
         }),
       },
       'azure.credentials.client_password': {
         type: 'password',
-        label: i18n.translate('xpack.csp.awsIntegration.sessionTokenLabel', {
+        label: i18n.translate('xpack.csp.azureIntegration.clientPasswordLabel', {
           defaultMessage: 'Client Password',
         }),
       },
     },
   },
   managed_identity: {
-    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualLabel', {
+    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualIdentityLabel', {
       defaultMessage: 'Managed Identity',
     }),
     info: [],
