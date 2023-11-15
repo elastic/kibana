@@ -8,7 +8,7 @@
 import type { Category } from './types';
 
 export const QUERY_MODE = {
-  INCLUDE: 'should',
+  INCLUDE: 'must',
   EXCLUDE: 'must_not',
 } as const;
 export type QueryMode = typeof QUERY_MODE[keyof typeof QUERY_MODE];
@@ -17,7 +17,7 @@ export const getCategoryQuery = (
   field: string,
   categories: Category[],
   mode: QueryMode = QUERY_MODE.INCLUDE
-) => ({
+): Record<string, any> => ({
   bool: {
     [mode]: categories.map(({ key: query }) => ({
       match: {

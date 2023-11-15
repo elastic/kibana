@@ -28,6 +28,7 @@ import {
   type MlCustomUrlAnomalyRecordDoc,
   type MlKibanaUrlConfig,
   type MlAnomaliesTableRecord,
+  MLCATEGORY,
 } from '@kbn/ml-anomaly-utils';
 import { formatHumanReadableDateTimeSeconds, timeFormatter } from '@kbn/ml-date-utils';
 import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
@@ -812,6 +813,7 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
           icon="machineLearningApp"
           onClick={() => {
             closePopover();
+            const additionalField = getAdditionalField(anomaly);
             uiActions.getTrigger(CATEGORIZE_FIELD_TRIGGER).exec({
               dataView: messageField.dataView,
               field: messageField.field,
@@ -819,10 +821,14 @@ export const LinksMenuUI = (props: LinksMenuProps) => {
               additionalFilter: {
                 from: anomaly.source.timestamp,
                 to: anomaly.source.timestamp + anomaly.source.bucket_span * 1000,
-                field: {
-                  name: anomaly.entityName,
-                  value: anomaly.entityValue,
-                },
+                ...(additionalField !== null
+                  ? {
+                      field: {
+                        name: additionalField.name,
+                        value: additionalField.value,
+                      },
+                    }
+                  : {}),
               },
             });
           }}
@@ -886,3 +892,19 @@ export const LinksMenu: FC<Omit<LinksMenuProps, 'onItemClick'>> = (props) => {
     </div>
   );
 };
+
+function getAdditionalField(anomaly: MlAnomaliesTableRecord) {
+  if (anomaly.entityName === MLCATEGORY) {
+    if (
+      anomaly.source.partition_field_name === undefined ||
+      anomaly.source.partition_field_value === undefined
+    ) {
+      return null;
+    }
+    return {
+      name: anomaly.source.partition_field_name,
+      value: anomaly.source.partition_field_value,
+    };
+  }
+  return { name: anomaly.entityName, value: anomaly.entityValue };
+}

@@ -137,7 +137,7 @@ export const fetchCategories = async (
       return {
         key: b.key,
         count: b.doc_count,
-        examples: b.hit.hits.hits.map((h) => get(h._source, fieldName)),
+        examples: b.examples.hits.hits.map((h) => get(h._source, fieldName)),
         sparkline,
       };
     });

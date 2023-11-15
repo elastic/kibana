@@ -207,6 +207,7 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
                 examples: category.subFieldExamples!,
                 sparkline: undefined,
               }))
+              .sort((a, b) => b.count - a.count)
           : null;
 
         setData({
@@ -360,12 +361,9 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
               onAddFilter={onAddFilter}
               onClose={onClose}
               enableRowActions={false}
-              discoverTimeRangeOverride={
+              additionalFilter={
                 selectedTab === SELECTED_TAB.BUCKET && additionalFilter !== undefined
-                  ? {
-                      from: additionalFilter.from,
-                      to: additionalFilter.to,
-                    }
+                  ? additionalFilter
                   : undefined
               }
               navigateToDiscover={additionalFilter !== undefined}

@@ -25,6 +25,10 @@ import { Filter } from '@kbn/es-query';
 import { useTableState } from '@kbn/ml-in-memory-table';
 
 import moment from 'moment';
+import {
+  type QueryMode,
+  QUERY_MODE,
+} from '../../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../../common/api/log_categorization/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
@@ -32,11 +36,12 @@ import type { LogCategorizationAppState } from '../../../application/utils/url_s
 
 import { MiniHistogram } from '../../mini_histogram';
 
-import { useDiscoverLinks, createFilter, QueryMode, QUERY_MODE } from '../use_discover_links';
+import { useDiscoverLinks, createFilter } from '../use_discover_links';
 import type { EventRate } from '../use_categorize_request';
 
 import { getLabels } from './labels';
 import { TableHeader } from './table_header';
+import { CategorizationAdditionalFilter } from '../log_categorization_for_flyout';
 
 interface Props {
   categories: Category[];
@@ -52,7 +57,7 @@ interface Props {
   onAddFilter?: (values: Filter, alias?: string) => void;
   onClose?: () => void;
   enableRowActions?: boolean;
-  discoverTimeRangeOverride?: { from: number; to: number };
+  additionalFilter?: CategorizationAdditionalFilter;
   navigateToDiscover?: boolean;
 }
 
@@ -70,7 +75,7 @@ export const CategoryTable: FC<Props> = ({
   onAddFilter,
   onClose = () => {},
   enableRowActions = true,
-  discoverTimeRangeOverride,
+  additionalFilter,
   navigateToDiscover = true,
 }) => {
   const euiTheme = useEuiTheme();
@@ -104,10 +109,10 @@ export const CategoryTable: FC<Props> = ({
     }
 
     const timefilterActiveBounds =
-      discoverTimeRangeOverride !== undefined
+      additionalFilter !== undefined
         ? {
-            min: moment(discoverTimeRangeOverride.from),
-            max: moment(discoverTimeRangeOverride.to),
+            min: moment(additionalFilter.from),
+            max: moment(additionalFilter.to),
           }
         : timefilter.getActiveBounds();
 
@@ -122,7 +127,8 @@ export const CategoryTable: FC<Props> = ({
       aiopsListState,
       timefilterActiveBounds,
       mode,
-      category
+      category,
+      additionalFilter?.field
     );
   };
 
