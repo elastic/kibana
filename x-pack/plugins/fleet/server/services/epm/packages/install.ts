@@ -461,7 +461,7 @@ function getElasticSubscription(packageInfo: ArchivePackage) {
 async function installPackageCommon(options: {
   pkgName: string;
   pkgVersion: string;
-  installSource: 'registry' | 'upload' | 'custom';
+  installSource: InstallSource;
   installedPkg?: SavedObject<Installation>;
   installType: InstallType;
   savedObjectsClient: SavedObjectsClientContract;

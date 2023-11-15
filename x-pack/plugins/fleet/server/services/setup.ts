@@ -14,11 +14,7 @@ import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
 import { AUTO_UPDATE_PACKAGES } from '../../common/constants';
 import type { PreconfigurationError } from '../../common/constants';
-import type {
-  DefaultPackagesInstallationError,
-  BundledPackage,
-  Installation,
-} from '../../common/types';
+import type { DefaultPackagesInstallationError } from '../../common/types';
 
 import { SO_SEARCH_LIMIT } from '../constants';
 
