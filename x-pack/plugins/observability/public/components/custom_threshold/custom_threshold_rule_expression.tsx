@@ -376,30 +376,10 @@ export default function Expressions(props: Props) {
         </EuiFormErrorText>
       )}
       <EuiSpacer size="l" />
-      <EuiTitle size="xs">
-        <h5>
-          <FormattedMessage
-            id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
-            defaultMessage="Set rule conditions"
-          />
-        </h5>
-      </EuiTitle>
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
             <div key={idx}>
-              {/* index has semantic meaning, we show the condition title starting from the 2nd one  */}
-              {idx >= 1 && (
-                <EuiTitle size="xs">
-                  <h5>
-                    <FormattedMessage
-                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
-                      defaultMessage="Condition {conditionNumber}"
-                      values={{ conditionNumber: idx + 1 }}
-                    />
-                  </h5>
-                </EuiTitle>
-              )}
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
                 fields={derivedIndexPattern.fields}
@@ -411,6 +391,20 @@ export default function Expressions(props: Props) {
                 errors={(errors[idx] as IErrorObject) || emptyError}
                 expression={e || {}}
                 dataView={derivedIndexPattern}
+                title={
+                  ruleParams.criteria.length === 1 ? (
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.setConditions"
+                      defaultMessage="Set rule conditions"
+                    />
+                  ) : (
+                    <FormattedMessage
+                      id="xpack.observability.customThreshold.rule.alertFlyout.condition"
+                      defaultMessage="Condition {conditionNumber}"
+                      values={{ conditionNumber: idx + 1 }}
+                    />
+                  )
+                }
               >
                 {/* Preview */}
                 <ExpressionChart
