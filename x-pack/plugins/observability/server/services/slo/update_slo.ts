@@ -56,6 +56,7 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
     await this.repository.save(updatedSlo);
+    await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     if (!requireRevisionBump) {
       return this.toResponse(updatedSlo);
@@ -65,6 +66,7 @@ export class UpdateSLO {
       await this.transformManager.install(updatedSlo);
     } catch (err) {
       await this.repository.save(originalSlo);
+      await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
       throw err;
     }
 
@@ -76,6 +78,7 @@ export class UpdateSLO {
       await Promise.all([
         this.transformManager.uninstall(updatedSloTransformId),
         this.repository.save(originalSlo),
+        this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME }),
       ]);
 
       throw err;
@@ -89,7 +92,6 @@ export class UpdateSLO {
     });
 
     await this.deleteOriginalSLO(originalSlo);
-    await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     return this.toResponse(updatedSlo);
   }

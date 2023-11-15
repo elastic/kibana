@@ -426,12 +426,12 @@ describe('UpdateSLO', () => {
       );
 
       expect(mockRepository.save).toHaveBeenCalledWith(slo);
+      expect(mockSystemEsClient.enrich.executePolicy).toHaveBeenCalled();
       expect(mockTransformManager.preview).not.toHaveBeenCalled();
       expect(mockTransformManager.start).not.toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockTransformManager.uninstall).not.toHaveBeenCalled();
       expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
-      expect(mockSystemEsClient.enrich.executePolicy).not.toHaveBeenCalled();
     });
   });
 
@@ -453,9 +453,9 @@ describe('UpdateSLO', () => {
         getSLOTransformId(slo.id, slo.revision + 1)
       );
       expect(mockRepository.save).toHaveBeenCalledWith(slo);
+      expect(mockSystemEsClient.enrich.executePolicy).toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
-      expect(mockSystemEsClient.enrich.executePolicy).not.toHaveBeenCalled();
     });
   });
 
@@ -466,7 +466,6 @@ describe('UpdateSLO', () => {
     expect(mockTransformManager.preview).not.toBeCalled();
     expect(mockTransformManager.start).not.toBeCalled();
     expect(mockEsClient.deleteByQuery).not.toBeCalled();
-    expect(mockSystemEsClient.enrich.executePolicy).not.toHaveBeenCalled();
   }
 
   function expectInstallationOfNewSLOTransform() {
