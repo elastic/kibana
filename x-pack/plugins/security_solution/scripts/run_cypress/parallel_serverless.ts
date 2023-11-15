@@ -48,12 +48,6 @@ interface Project {
   product: string;
 }
 
-interface ProjectConfigurationParameters {
-  tier: string;
-  endpointAddon: boolean;
-  cloudAddon: boolean;
-}
-
 interface Credentials {
   username: string;
   password: string;
@@ -332,21 +326,23 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
   return pRetry(fetchLoginStatusAttempt, retryOptions);
 }
 
-const getOverridedProductTypes = (
-  projectConfigurationParameters: ProjectConfigurationParameters
+const getProductTypes = (
+  tier: string,
+  endpointAddon: boolean,
+  cloudAddon: boolean
 ): ProductType[] => {
   let productTypes: ProductType[] = [...DEFAULT_CONFIGURATION];
 
-  if (projectConfigurationParameters.tier) {
+  if (tier) {
     productTypes = productTypes.map((product) => ({
       ...product,
-      product_tier: projectConfigurationParameters.tier,
+      product_tier: tier,
     }));
   }
-  if (!projectConfigurationParameters.cloudAddon) {
+  if (!cloudAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
   }
-  if (!projectConfigurationParameters.endpointAddon) {
+  if (!endpointAddon) {
     productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
   }
 
@@ -431,11 +427,9 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      const projectConfigurationParameters: ProjectConfigurationParameters = {
-        tier: argv.tier as string,
-        endpointAddon: argv.endpointAddon as boolean,
-        cloudAddon: argv.cloudAddon as boolean,
-      };
+      const tier: string = argv.tier;
+      const endpointAddon: boolean = argv.endpointAddon;
+      const cloudAddon: boolean = argv.cloudAddon;
 
       log.info(`
 ----------------------------------------------
@@ -507,7 +501,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
 
             const productTypes = isOpen
-              ? getOverridedProductTypes(projectConfigurationParameters)
+              ? getProductTypes(tier, endpointAddon, cloudAddon)
               : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
             if (!API_KEY) {
