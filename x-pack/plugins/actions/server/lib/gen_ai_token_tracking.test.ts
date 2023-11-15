@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getGenAiTokenTracking } from './gen_ai_token_tracking';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import { loggerMock } from '@kbn/logging-mocks';
 import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
@@ -167,5 +167,17 @@ describe('getGenAiTokenTracking', () => {
 
     expect(tokenTracking).toBeNull();
     expect(logger.error).toHaveBeenCalled();
+  });
+
+  describe('shouldTrackGenAiToken', () => {
+    it('should be true with OpenAI action', () => {
+      expect(shouldTrackGenAiToken('.gen-ai')).toEqual(true);
+    });
+    it('should be true with bedrock action', () => {
+      expect(shouldTrackGenAiToken('.bedrock')).toEqual(true);
+    });
+    it('should be false with any other action', () => {
+      expect(shouldTrackGenAiToken('.jira')).toEqual(false);
+    });
   });
 });
