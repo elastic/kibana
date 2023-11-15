@@ -9,9 +9,7 @@ import { FtrProviderContext } from '../../../../../../ftr_provider_context';
 
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection exceptions data types and operators', function () {
-    loadTestFile(require.resolve('./keyword'));
-    loadTestFile(require.resolve('./keyword_array'));
-    loadTestFile(require.resolve('./long'));
+    loadTestFile(require.resolve('./text_array'));
     loadTestFile(require.resolve('./text'));
   });
 };
