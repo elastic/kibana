@@ -330,7 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('creating and using Painless boolean scripted fields', function describeIndexTests() {
+    describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painBool';
 
       before(async () => {
