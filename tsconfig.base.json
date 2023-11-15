@@ -1526,6 +1526,8 @@
       "@kbn/test-jest-helpers/*": ["packages/kbn-test-jest-helpers/*"],
       "@kbn/test-subj-selector": ["packages/kbn-test-subj-selector"],
       "@kbn/test-subj-selector/*": ["packages/kbn-test-subj-selector/*"],
+      "@kbn/testapp-plugin": ["x-pack/plugins/testapp"],
+      "@kbn/testapp-plugin/*": ["x-pack/plugins/testapp/*"],
       "@kbn/testing-embedded-lens-plugin": ["x-pack/examples/testing_embedded_lens"],
       "@kbn/testing-embedded-lens-plugin/*": ["x-pack/examples/testing_embedded_lens/*"],
       "@kbn/text-based-editor": ["packages/kbn-text-based-editor"],

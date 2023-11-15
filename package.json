@@ -760,6 +760,7 @@
     "@kbn/telemetry-plugin": "link:src/plugins/telemetry",
     "@kbn/telemetry-test-plugin": "link:test/plugin_functional/plugins/telemetry",
     "@kbn/test-feature-usage-plugin": "link:x-pack/test/licensing_plugin/plugins/test_feature_usage",
+    "@kbn/testapp-plugin": "link:x-pack/plugins/testapp",
     "@kbn/testing-embedded-lens-plugin": "link:x-pack/examples/testing_embedded_lens",
     "@kbn/text-based-editor": "link:packages/kbn-text-based-editor",
     "@kbn/text-based-languages": "link:src/plugins/text_based_languages",
