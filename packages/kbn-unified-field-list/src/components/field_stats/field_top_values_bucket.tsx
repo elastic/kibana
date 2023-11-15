@@ -80,13 +80,15 @@ const FieldTopValuesBucket: React.FC<FieldTopValuesBucketProps> = ({
         grow={1}
         css={css`
           min-width: 0;
-          word-break: break-word;
         `}
       >
         <EuiFlexGroup alignItems="stretch" gutterSize="s" responsive={false}>
           <EuiFlexItem
             grow={true}
             data-test-subj={`${dataTestSubject}-topValues-formattedFieldValue`}
+            css={css`
+              overflow-wrap: break-word;
+            `}
           >
             {(formattedFieldValue?.length ?? 0) > 0 ? (
               <EuiToolTip content={formattedFieldValue} delay="long">
