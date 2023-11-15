@@ -97,8 +97,7 @@ class ReportListingUi extends Component<Props, State> {
     } = this.props;
     if (config.statefulSettings.enabled) {
       const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
-      // @ts-ignore
-      const hasIlmPolicy = ilmPolicyContextValue!.status !== 'policy-not-found';
+      const hasIlmPolicy = ilmPolicyContextValue?.status !== 'policy-not-found';
       const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
       return (
         <>

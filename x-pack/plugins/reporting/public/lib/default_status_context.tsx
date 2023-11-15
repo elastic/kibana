@@ -5,33 +5,23 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, FunctionComponent } from 'react';
-import { useCheckDefaultPolicyStatus } from './reporting_api_client';
+import React, { createContext, FunctionComponent } from 'react';
+import { ClientConfigType } from '../plugin';
+import { IlmPolicyStatusContextProvider } from './ilm_policy_status_context';
 
-type UseCheckDefaultPolicyStatusolicy = ReturnType<typeof useCheckDefaultPolicyStatus>;
+const PolicyStatusContext = createContext<undefined>(undefined);
 
-interface ContextValue {
-  recheckStatus: UseCheckDefaultPolicyStatusolicy['resendRequest'];
+interface PolicyStatusContextProviderProps {
+  config: ClientConfigType;
 }
 
-const PolicyStatusContext = createContext<undefined | ContextValue>(undefined);
-
-export const PolicyStatusContextProvider: FunctionComponent = ({ children }) => {
-  const { resendRequest: recheckStatus } = useCheckDefaultPolicyStatus();
-
-  return (
-    <PolicyStatusContext.Provider value={{ recheckStatus }}>
-      {children}
-    </PolicyStatusContext.Provider>
+export const PolicyStatusContextProvider: FunctionComponent<PolicyStatusContextProviderProps> = ({
+  children,
+  ...props
+}) => {
+  return props.config.statefulSettings.enabled ? (
+    <IlmPolicyStatusContextProvider>{children}</IlmPolicyStatusContextProvider>
+  ) : (
+    <PolicyStatusContext.Provider value={undefined}>{children}</PolicyStatusContext.Provider>
   );
-};
-
-export type UseDefaultPolicyStatusReturn = ReturnType<typeof useDefaultPolicyStatus>;
-
-export const useDefaultPolicyStatus = (): ContextValue => {
-  const ctx = useContext(PolicyStatusContext);
-  if (!ctx) {
-    throw new Error('"PolicyStatus" can only be used inside of "PolicyStatusContext"');
-  }
-  return ctx;
 };
