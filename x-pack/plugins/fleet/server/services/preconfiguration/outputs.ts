@@ -137,17 +137,26 @@ export async function createOrUpdatePreconfiguredOutputs(
   );
 }
 
+async function hash(str) {
+  argon2.hash(str, {
+    type: argon2.argon2id,
+    memoryCost: 19456,
+    timeCost: 2,
+    parallelism: 1,
+  });
+}
+
 async function hashSecrets(output: PreconfiguredOutput) {
   if (output.type === 'kafka') {
     const kafkaOutput = output as KafkaOutput;
     if (typeof kafkaOutput.secrets?.password === 'string') {
-      const password = await argon2.hash(kafkaOutput.secrets?.password);
+      const password = await hash(kafkaOutput.secrets?.password);
       return {
         password,
       };
     }
     if (typeof kafkaOutput.secrets?.ssl?.key === 'string') {
-      const key = await argon2.hash(kafkaOutput.secrets?.ssl?.key);
+      const key = await hash(kafkaOutput.secrets?.ssl?.key);
       return {
         ssl: {
           key,
@@ -159,7 +168,7 @@ async function hashSecrets(output: PreconfiguredOutput) {
     const logstashOutput = output as NewLogstashOutput;
 
     if (typeof logstashOutput.secrets?.ssl?.key === 'string') {
-      const key = await argon2.hash(logstashOutput.secrets?.ssl?.key);
+      const key = await hash(logstashOutput.secrets?.ssl?.key);
       return {
         ssl: {
           key,
