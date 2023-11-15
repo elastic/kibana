@@ -104,6 +104,9 @@ export class PluginsSystem<T extends PluginType> {
       `Setting up [${sortedPlugins.size}] plugins: [${[...sortedPlugins.keys()].join(',')}]`
     );
 
+    // Load all the plugins' code asynchronously and concurrently
+    await Promise.all([...sortedPlugins.values()].map((plugin) => plugin.init()));
+
     for (const [pluginName, plugin] of sortedPlugins) {
       this.log.debug(`Setting up plugin "${pluginName}"...`);
       const pluginDeps = new Set([...plugin.requiredPlugins, ...plugin.optionalPlugins]);
@@ -131,7 +134,6 @@ export class PluginsSystem<T extends PluginType> {
         });
       }
 
-      await plugin.init();
       let contract: unknown;
       const contractOrPromise = plugin.setup(pluginSetupContext, pluginDepContracts);
       if (isPromise(contractOrPromise)) {
