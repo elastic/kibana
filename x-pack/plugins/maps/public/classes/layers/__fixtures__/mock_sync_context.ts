@@ -13,7 +13,7 @@ import { DataRequestMeta, DataFilters } from '../../../../common/descriptor_type
 export class MockSyncContext implements DataRequestContext {
   dataFilters: DataFilters;
   isRequestStillActive: (dataId: string, requestToken: symbol) => boolean;
-  onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) => void;
+  onLoadError: (dataId: string, requestToken: symbol, error: Error) => void;
   registerCancelCallback: (requestToken: symbol, callback: () => void) => void;
   startLoading: (dataId: string, requestToken: symbol, meta: DataRequestMeta) => void;
   stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) => void;
