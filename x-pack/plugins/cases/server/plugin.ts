@@ -179,7 +179,12 @@ export class CasePlugin {
 
     plugins.licensing.featureUsage.register(LICENSING_CASE_ASSIGNMENT_FEATURE, 'platinum');
 
-    registerConnectorTypes({ actions: plugins.actions });
+    const getCasesClient = async (request: KibanaRequest): Promise<CasesClient> => {
+      const [coreStart] = await core.getStartServices();
+      return this.getCasesClientWithRequest(coreStart)(request);
+    };
+
+    registerConnectorTypes({ actions: plugins.actions, getCasesClient });
 
     return {
       attachmentFramework: {
@@ -232,18 +237,8 @@ export class CasePlugin {
       filesPluginStart: plugins.files,
     });
 
-    const client = core.elasticsearch.client;
-
-    const getCasesClientWithRequest = async (request: KibanaRequest): Promise<CasesClient> => {
-      return this.clientFactory.create({
-        request,
-        scopedClusterClient: client.asScoped(request).asCurrentUser,
-        savedObjectsService: core.savedObjects,
-      });
-    };
-
     return {
-      getCasesClientWithRequest,
+      getCasesClientWithRequest: this.getCasesClientWithRequest(core),
       getExternalReferenceAttachmentTypeRegistry: () =>
         this.externalReferenceAttachmentTypeRegistry,
       getPersistableStateAttachmentTypeRegistry: () => this.persistableStateAttachmentTypeRegistry,
@@ -274,4 +269,16 @@ export class CasePlugin {
       };
     };
   };
+
+  private getCasesClientWithRequest =
+    (core: CoreStart) =>
+    async (request: KibanaRequest): Promise<CasesClient> => {
+      const client = core.elasticsearch.client;
+
+      return this.clientFactory.create({
+        request,
+        scopedClusterClient: client.asScoped(request).asCurrentUser,
+        savedObjectsService: core.savedObjects,
+      });
+    };
 }

@@ -7,13 +7,39 @@
 
 import { schema } from '@kbn/config-schema';
 
+const AlertSchema = schema.recordOf(schema.string(), schema.any(), {
+  validate: (value) => {
+    if (!Object.hasOwn(value, '_id') || !Object.hasOwn(value, '_index')) {
+      return 'Alert ID and index must be defined';
+    }
+  },
+});
+
+/**
+ * At the moment only one field is supported for grouping
+ */
+const GroupingSchema = schema.arrayOf(schema.string(), { minSize: 0, maxSize: 1 });
+
+const RuleSchema = schema.object({
+  id: schema.string(),
+  name: schema.string(),
+  /**
+   * TODO: Verify limits
+   */
+  tags: schema.arrayOf(schema.string({ minLength: 1, maxLength: 50 }), { minSize: 0, maxSize: 10 }),
+  ruleUrl: schema.nullable(schema.string()),
+});
+
 /**
  * The case connector does not have any configuration
  * or secrets.
  */
 export const CasesConnectorConfigSchema = schema.object({});
 export const CasesConnectorSecretsSchema = schema.object({});
-/**
- * TODO: Add needed properties in the params schema.
- */
-export const CasesConnectorParamsSchema = schema.object({});
+
+export const CasesConnectorRunParamsSchema = schema.object({
+  alerts: schema.arrayOf(AlertSchema),
+  groupingBy: GroupingSchema,
+  owner: schema.string(),
+  rule: RuleSchema,
+});

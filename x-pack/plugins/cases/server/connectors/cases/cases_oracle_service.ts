@@ -7,13 +7,25 @@
 
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
+import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
+import { isSOError } from '../../common/utils';
 import { CryptoService } from './crypto_service';
-import type { OracleKey, OracleRecord, OracleRecordCreateRequest } from './types';
+import type {
+  BulkCreateOracleRecordRequest,
+  BulkGetOracleRecordsResponse,
+  OracleKey,
+  OracleRecord,
+  OracleRecordCreateRequest,
+} from './types';
 
 type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
 
 export class CasesOracleService {
   private readonly log: Logger;
+  /**
+   * TODO: Think about permissions etc.
+   * Should we authorize based on the owner?
+   */
   private readonly unsecuredSavedObjectsClient: SavedObjectsClientContract;
   private cryptoService: CryptoService;
 
@@ -57,6 +69,16 @@ export class CasesOracleService {
     return this.getRecordResponse(oracleRecord);
   }
 
+  public async bulkGetRecords(ids: string[]): Promise<BulkGetOracleRecordsResponse> {
+    this.log.debug(`Getting oracle records with IDs: ${ids}`);
+
+    const oracleRecords = (await this.unsecuredSavedObjectsClient.bulkGet<OracleRecordAttributes>(
+      ids.map((id) => ({ id, type: CASE_ORACLE_SAVED_OBJECT }))
+    )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
+
+    return this.getBulkRecordsResponse(oracleRecords);
+  }
+
   public async createRecord(
     recordId: string,
     payload: OracleRecordCreateRequest
@@ -79,6 +101,34 @@ export class CasesOracleService {
     );
 
     return this.getRecordResponse(oracleRecord);
+  }
+
+  public async bulkCreateRecord(
+    records: BulkCreateOracleRecordRequest
+  ): Promise<BulkGetOracleRecordsResponse> {
+    const recordIds = records.map((record) => record.recordId);
+
+    this.log.debug(`Creating oracle record with ID: ${recordIds}`);
+
+    const req = records.map((record) => ({
+      id: record.recordId,
+      type: CASE_ORACLE_SAVED_OBJECT,
+      attributes: {
+        counter: 1,
+        cases: record.payload.cases,
+        rules: record.payload.rules,
+        grouping: record.payload.grouping,
+        createdAt: new Date().toISOString(),
+        updatedAt: null,
+      },
+    }));
+
+    const oracleRecords =
+      (await this.unsecuredSavedObjectsClient.bulkCreate<OracleRecordAttributes>(
+        req
+      )) as SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>;
+
+    return this.getBulkRecordsResponse(oracleRecords);
   }
 
   public async increaseCounter(recordId: string): Promise<OracleRecord> {
@@ -115,4 +165,16 @@ export class CasesOracleService {
     createdAt: oracleRecord.attributes.createdAt,
     updatedAt: oracleRecord.attributes.updatedAt,
   });
+
+  private getBulkRecordsResponse(
+    oracleRecords: SavedObjectsBulkResponseWithErrors<OracleRecordAttributes>
+  ): BulkGetOracleRecordsResponse {
+    return oracleRecords.saved_objects.map((oracleRecord) => {
+      if (isSOError(oracleRecord)) {
+        return { ...oracleRecord.error, id: oracleRecord.id };
+      }
+
+      return this.getRecordResponse(oracleRecord);
+    });
+  }
 }
