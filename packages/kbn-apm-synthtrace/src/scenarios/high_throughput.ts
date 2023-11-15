@@ -19,7 +19,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
   const services = ['web', 'order-processing', 'api-backend'];
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.interval('1s');
 
       const instances = services.map((service, index) =>

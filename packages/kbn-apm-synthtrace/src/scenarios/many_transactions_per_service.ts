@@ -18,7 +18,7 @@ const scenario: Scenario<ApmFields> = async (runOptions) => {
   const numTransactions = 100;
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const urls = ['GET /order', 'POST /basket', 'DELETE /basket', 'GET /products'];
 
       const successfulTimestamps = range.ratePerMinute(180);

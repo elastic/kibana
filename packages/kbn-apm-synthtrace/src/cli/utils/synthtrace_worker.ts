@@ -57,7 +57,7 @@ async function start() {
   logger.debug('Generating scenario');
 
   const generatorsAndClients = logger.perf('generate_scenario', () =>
-    generate({ range: timerange(bucketFrom, bucketTo), client: { logsEsClient, apmEsClient } })
+    generate({ range: timerange(bucketFrom, bucketTo), clients: { logsEsClient, apmEsClient } })
   );
 
   const generatorsAndClientsArray = castArray(generatorsAndClients);

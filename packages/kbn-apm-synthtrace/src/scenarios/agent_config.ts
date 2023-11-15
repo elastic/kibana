@@ -11,7 +11,7 @@ import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<AgentConfigFields> = async ({ logger }) => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const agentConfig = observer().agentConfig();
 
       return withClient(

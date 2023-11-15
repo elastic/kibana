@@ -14,7 +14,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async () => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const withTx = apm
         .service('service-with-transactions', ENVIRONMENT, 'java')
         .instance('instance');

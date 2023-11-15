@@ -17,7 +17,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const { numServices = 3 } = scenarioOpts || {};
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'Azure-AWS-Transaction';
 
       const successfulTimestamps = range.ratePerMinute(60);

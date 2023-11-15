@@ -21,7 +21,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   return {
-    generate: ({ range, client: { logsEsClient, apmEsClient } }) => {
+    generate: ({ range, clients: { logsEsClient, apmEsClient } }) => {
       const { numServices = 3 } = runOptions.scenarioOpts || {};
       const { logger } = runOptions;
 

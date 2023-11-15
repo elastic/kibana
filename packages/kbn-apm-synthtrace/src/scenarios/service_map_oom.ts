@@ -21,7 +21,7 @@ const scenario: Scenario<ApmFields> = async () => {
   const tracesPerMinute = 10;
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const services = new Array(numServices)
         .fill(undefined)
         .map((_, idx) => {

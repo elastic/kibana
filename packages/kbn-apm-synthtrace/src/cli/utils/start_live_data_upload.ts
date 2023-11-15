@@ -32,12 +32,19 @@ export async function startLiveDataUpload({
   const bucketSizeInMs = 1000 * 60;
   let requestedUntil = start;
 
-  function closeStreams(streams: PassThrough[]) {
-    streams.forEach((stream) => {
+  let currentStreams: PassThrough[] = [];
+
+  process.on('SIGINT', () => closeStreams());
+  process.on('SIGTERM', () => closeStreams());
+  process.on('SIGQUIT', () => closeStreams());
+
+  function closeStreams() {
+    currentStreams.forEach((stream) => {
       stream.end(() => {
         process.exit(0);
       });
     });
+    currentStreams = []; // Reset the stream array
   }
 
   async function uploadNextBatch() {
@@ -53,7 +60,7 @@ export async function startLiveDataUpload({
 
       const generatorsAndClients = generate({
         range: timerange(bucketFrom.getTime(), bucketTo.getTime()),
-        client: { logsEsClient, apmEsClient },
+        clients: { logsEsClient, apmEsClient },
       });
 
       const generatorsAndClientsArray = castArray(generatorsAndClients);
@@ -64,9 +71,7 @@ export async function startLiveDataUpload({
         return stream;
       });
 
-      process.on('SIGINT', () => closeStreams(streams));
-      process.on('SIGTERM', () => closeStreams(streams));
-      process.on('SIGQUIT', () => closeStreams(streams));
+      currentStreams = streams;
 
       const promises = generatorsAndClientsArray.map(({ generator }, i) => {
         const concatenatedStream = castArray(generator)

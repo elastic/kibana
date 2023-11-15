@@ -18,7 +18,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const ratePerMinute = 1;
       const traceDuration = 1100;
       const rootTransactionName = `${ratePerMinute}rpm / ${traceDuration}ms`;

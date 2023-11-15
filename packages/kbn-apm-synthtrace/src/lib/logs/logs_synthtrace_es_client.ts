@@ -7,7 +7,7 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { dedot, ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
+import { ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
 import { pipeline, Readable, Transform } from 'stream';
 import { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
 import { SynthtraceEsClient, SynthtraceEsClientOptions } from '../shared/base_client';
@@ -32,7 +32,6 @@ function logsPipeline() {
       base,
       getSerializeTransform<LogDocument>(),
       getRoutingTransform(),
-      getDedotTransform(),
       (err: unknown) => {
         if (err) {
           throw err;
@@ -57,19 +56,6 @@ function getRoutingTransform() {
       }
 
       callback(null, document);
-    },
-  });
-}
-
-function getDedotTransform() {
-  return new Transform({
-    objectMode: true,
-    transform(document: LogDocument, encoding, callback) {
-      const target: Record<string, any> = dedot(document, {});
-      delete target.meta;
-      target['@timestamp'] = new Date(target['@timestamp']!).toISOString();
-
-      callback(null, target);
     },
   });
 }

@@ -329,7 +329,7 @@ const scenario: Scenario<ApmFields> = async ({ scenarioOpts, logger }) => {
   const { numDevices = 10 } = scenarioOpts || {};
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const androidDevices = [...Array(numDevices).keys()].map((index) => {
         const deviceMetadata = ANDROID_DEVICES[randomInt(ANDROID_DEVICES.length)];
         const geoNetwork = GEO_AND_NETWORK[randomInt(GEO_AND_NETWORK.length)];

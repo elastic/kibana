@@ -16,7 +16,7 @@ const environment = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       return withClient(
         apmEsClient,
         range

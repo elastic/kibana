@@ -17,7 +17,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = '240rpm/75% 1000ms';
       const successfulTimestamps = range.interval('1s').rate(3);
 

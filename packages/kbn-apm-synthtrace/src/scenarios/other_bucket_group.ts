@@ -19,7 +19,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
   const { services: numServices = 10, txGroups: numTxGroups = 10 } = scenarioOpts ?? {};
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const TRANSACTION_TYPES = ['request'];
 
       const MIN_DURATION = 10;

@@ -16,7 +16,7 @@ const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const timestamps = range.ratePerMinute(180);
 
       const cloudFields: ApmFields = {

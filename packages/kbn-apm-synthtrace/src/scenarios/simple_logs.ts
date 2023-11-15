@@ -11,7 +11,7 @@ import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   return {
-    generate: ({ range, client: { logsEsClient } }) => {
+    generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
 
       // Logs Data logic

@@ -26,7 +26,7 @@ const scenario: Scenario<ApmFields> = async ({ logger }) => {
   };
 
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.ratePerMinute(180);
 
       const instances = flatten(

@@ -41,7 +41,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, scenarioOpts }) => {
         }
       );
     },
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const TRANSACTION_TYPES = ['request', 'custom'];
 
       const MIN_DURATION = 10;

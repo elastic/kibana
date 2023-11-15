@@ -33,7 +33,7 @@ function getSpanLinksFromEvents(events: ApmFields[]) {
 
 const scenario: Scenario<ApmFields> = async () => {
   return {
-    generate: ({ range, client: { apmEsClient } }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const producerInternalOnlyInstance = apm
 
         .service({ name: 'producer-internal-only', environment: ENVIRONMENT, agentName: 'go' })

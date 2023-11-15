@@ -14,7 +14,7 @@ import { ScenarioReturnType } from '../lib/utils/with_client';
 
 type Generate<TFields> = (options: {
   range: Timerange;
-  client: {
+  clients: {
     apmEsClient: ApmSynthtraceEsClient;
     logsEsClient: LogsSynthtraceEsClient;
   };
