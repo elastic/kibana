@@ -376,7 +376,7 @@ class FilterEditorComponent extends Component<FilterEditorProps, State> {
               </strong>
             }
           >
-            <EuiText size="xs" data-test-subj="filter-preview">
+            <EuiText size="xs" data-test-subj="filter-preview" css={{ overflowWrap: 'break-word' }}>
               <FilterBadgeGroup
                 filters={[localFilter]}
                 dataViews={this.props.indexPatterns}

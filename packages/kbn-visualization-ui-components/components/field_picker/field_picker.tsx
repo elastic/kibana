@@ -77,31 +77,29 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
 
   const panelMinWidth = getPanelMinWidth(theLongestLabel.length);
   return (
-    <div>
-      <EuiComboBox
-        fullWidth
-        compressed
-        isClearable={false}
-        data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
-        placeholder={i18n.translate('visualizationUiComponents.fieldPicker.fieldPlaceholder', {
-          defaultMessage: 'Select a field',
-        })}
-        options={styledOptions}
-        isInvalid={fieldIsInvalid}
-        selectedOptions={selectedOptions}
-        singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
-        truncationProps={MIDDLE_TRUNCATION_PROPS}
-        inputPopoverProps={{ panelMinWidth }}
-        onChange={(choices) => {
-          if (choices.length === 0) {
-            onDelete?.();
-            return;
-          }
-          onChoose(choices[0].value);
-        }}
-        {...rest}
-      />
-    </div>
+    <EuiComboBox
+      fullWidth
+      compressed
+      isClearable={false}
+      data-test-subj={dataTestSub ?? 'indexPattern-dimension-field'}
+      placeholder={i18n.translate('visualizationUiComponents.fieldPicker.fieldPlaceholder', {
+        defaultMessage: 'Select a field',
+      })}
+      options={styledOptions}
+      isInvalid={fieldIsInvalid}
+      selectedOptions={selectedOptions}
+      singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
+      truncationProps={MIDDLE_TRUNCATION_PROPS}
+      inputPopoverProps={{ panelMinWidth }}
+      onChange={(choices) => {
+        if (choices.length === 0) {
+          onDelete?.();
+          return;
+        }
+        onChoose(choices[0].value);
+      }}
+      {...rest}
+    />
   );
 }
 
