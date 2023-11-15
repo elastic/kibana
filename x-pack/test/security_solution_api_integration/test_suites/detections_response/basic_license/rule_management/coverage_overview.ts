@@ -8,6 +8,8 @@
 import expect from '@kbn/expect';
 
 import {
+  CoverageOverviewRuleActivity,
+  CoverageOverviewRuleSource,
   RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
   ThreatArray,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -17,11 +19,12 @@ import {
   createRuleAssetSavedObject,
   createRule,
   deleteAllRules,
-  getSimpleRule,
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
   createNonSecurityRule,
+  getCustomQueryRuleParams,
 } from '../../utils';
+import { getCoverageOverview } from '../../utils/rules/get_coverage_overview';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
@@ -35,18 +38,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
     it('does NOT error when there are no security rules', async () => {
       await createNonSecurityRule(supertest);
-      const rule1 = await createRule(supertest, log, {
-        ...getSimpleRule(),
-        threat: generateThreatArray(1),
-      });
+      const rule1 = await createRule(
+        supertest,
+        log,
+        getCustomQueryRuleParams({ threat: generateThreatArray(1) })
+      );
 
-      const { body } = await supertest
-        .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '1')
-        .set('x-elastic-internal-origin', 'foo')
-        .send({})
-        .expect(200);
+      const body = getCoverageOverview(supertest);
 
       expect(body).to.eql({
         coverage: {
@@ -66,13 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('without filters', () => {
       it('returns an empty response if there are no rules', async () => {
-        const { body } = await supertest
-          .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
-          .set('x-elastic-internal-origin', 'foo')
-          .send({})
-          .expect(200);
+        const body = getCoverageOverview(supertest);
 
         expect(body).to.eql({
           coverage: {},
@@ -82,18 +74,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns response with a single rule mapped to MITRE categories', async () => {
-        const rule1 = await createRule(supertest, log, {
-          ...getSimpleRule(),
-          threat: generateThreatArray(1),
-        });
+        const rule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ threat: generateThreatArray(1) })
+        );
 
-        const { body } = await supertest
-          .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
-          .set('x-elastic-internal-origin', 'foo')
-          .send({})
-          .expect(200);
+        const body = getCoverageOverview(supertest);
 
         expect(body).to.eql({
           coverage: {
@@ -112,15 +99,13 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('returns response with an unmapped rule', async () => {
-        const rule1 = await createRule(supertest, log, { ...getSimpleRule(), threat: undefined });
+        const rule1 = await createRule(
+          supertest,
+          log,
+          getCustomQueryRuleParams({ threat: undefined })
+        );
 
-        const { body } = await supertest
-          .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '1')
-          .set('x-elastic-internal-origin', 'foo')
-          .send({})
-          .expect(200);
+        const body = getCoverageOverview(supertest);
 
         expect(body).to.eql({
           coverage: {},
@@ -138,26 +123,20 @@ export default ({ getService }: FtrProviderContext): void => {
     describe('with filters', () => {
       describe('search_term', () => {
         it('returns response filtered by tactic', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(1),
-          });
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2'),
-            threat: generateThreatArray(2),
-          });
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(1) })
+          );
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                search_term: 'TA002',
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            search_term: 'TA002',
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -176,26 +155,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns response filtered by technique', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(1),
-          });
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2'),
-            threat: generateThreatArray(2),
-          });
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(1) })
+          );
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                search_term: 'T002',
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            search_term: 'T002',
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -214,26 +187,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns response filtered by subtechnique', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(1),
-          });
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2'),
-            threat: generateThreatArray(2),
-          });
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(1) })
+          );
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                search_term: 'T002.002',
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            search_term: 'T002.002',
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -252,23 +219,16 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns response filtered by rule name', async () => {
-          await createRule(supertest, log, getSimpleRule('rule-1'));
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2'),
-            name: 'rule-2',
-          });
+          await createRule(supertest, log, getCustomQueryRuleParams({ rule_id: 'rule-1' }));
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'rule-2' })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                search_term: 'rule-2',
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            search_term: 'rule-2',
+          });
 
           expect(body).to.eql({
             coverage: {},
@@ -283,26 +243,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns response filtered by index pattern', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            index: ['index-pattern-1'],
-          });
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2'),
-            index: ['index-pattern-2'],
-          });
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', index: ['index-pattern-1'] })
+          );
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', index: ['index-pattern-2'] })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                search_term: 'index-pattern-2',
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            search_term: 'index-pattern-2',
+          });
 
           expect(body).to.eql({
             coverage: {},
@@ -319,26 +273,20 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('activity', () => {
         it('returns response filtered by disabled rules', async () => {
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(1),
-          });
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-2', true),
-            threat: generateThreatArray(2),
-          });
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(1) })
+          );
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                activity: ['disabled'],
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            activity: [CoverageOverviewRuleActivity.Disabled],
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -357,26 +305,20 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns response filtered by enabled rules', async () => {
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(1),
-          });
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2', true),
-            threat: generateThreatArray(2),
-          });
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(1) })
+          );
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                activity: ['enabled'],
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            activity: [CoverageOverviewRuleActivity.Enabled],
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -395,28 +337,30 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         it('returns all rules if both enabled and disabled filters are specified in the request', async () => {
-          const expectedRule1 = await createRule(supertest, log, {
-            ...getSimpleRule('rule-1', false),
-            name: 'Disabled rule',
-            threat: generateThreatArray(1),
-          });
-          const expectedRule2 = await createRule(supertest, log, {
-            ...getSimpleRule('rule-2', true),
-            name: 'Enabled rule',
-            threat: generateThreatArray(2),
-          });
-
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                activity: ['enabled', 'disabled'],
-              },
+          const expectedRule1 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: 'rule-1',
+              enabled: false,
+              name: 'Disabled rule',
+              threat: generateThreatArray(1),
             })
-            .expect(200);
+          );
+          const expectedRule2 = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({
+              rule_id: 'rule-2',
+              enabled: true,
+              name: 'Enabled rule',
+              threat: generateThreatArray(2),
+            })
+          );
+
+          const body = getCoverageOverview(supertest, {
+            activity: [CoverageOverviewRuleActivity.Enabled, CoverageOverviewRuleActivity.Disabled],
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -452,22 +396,15 @@ export default ({ getService }: FtrProviderContext): void => {
           ]);
           await installPrebuiltRulesAndTimelines(es, supertest);
 
-          const expectedRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(2),
-          });
+          const expectedRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                source: ['custom'],
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            source: [CoverageOverviewRuleSource.Custom],
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -497,22 +434,15 @@ export default ({ getService }: FtrProviderContext): void => {
           } = await installPrebuiltRules(es, supertest);
           const expectedRule = created[0];
 
-          await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(2),
-          });
+          await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                source: ['prebuilt'],
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            source: [CoverageOverviewRuleSource.Prebuilt],
+          });
 
           expect(body).to.eql({
             coverage: {
@@ -542,22 +472,15 @@ export default ({ getService }: FtrProviderContext): void => {
           } = await installPrebuiltRules(es, supertest);
           const expectedPrebuiltRule = created[0];
 
-          const expectedCustomRule = await createRule(supertest, log, {
-            ...getSimpleRule('rule-1'),
-            threat: generateThreatArray(2),
-          });
+          const expectedCustomRule = await createRule(
+            supertest,
+            log,
+            getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
+          );
 
-          const { body } = await supertest
-            .post(RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL)
-            .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '1')
-            .set('x-elastic-internal-origin', 'foo')
-            .send({
-              filter: {
-                source: ['prebuilt', 'custom'],
-              },
-            })
-            .expect(200);
+          const body = getCoverageOverview(supertest, {
+            source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
+          });
 
           expect(body).to.eql({
             coverage: {

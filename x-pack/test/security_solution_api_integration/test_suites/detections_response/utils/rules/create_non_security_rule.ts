@@ -26,7 +26,7 @@ const SIMPLE_APM_RULE_DATA = {
 };
 
 /**
- * Created a non security rule. Helpful in tests to verify functionality works with presence of non security rules.
+ * Creates an APM rule, which is not a security rule. Helpful in tests to verify functionality works with presence of non-security rules.
  * @param supertest The supertest deps
  */
 export async function createNonSecurityRule(
