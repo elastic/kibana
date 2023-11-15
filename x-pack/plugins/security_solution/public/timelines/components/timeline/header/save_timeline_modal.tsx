@@ -248,6 +248,7 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
                     label={i18n.SAVE_AS_NEW}
                     checked={saveAsNewTimeline}
                     onChange={onSaveAsNewChanged}
+                    data-test-subj="save-as-new-switch"
                   />
                 ) : null}
                 <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
