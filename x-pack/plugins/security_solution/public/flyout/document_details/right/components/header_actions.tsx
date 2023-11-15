@@ -7,11 +7,11 @@
 
 import type { VFC } from 'react';
 import React, { memo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiCopy, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NewChatById } from '@kbn/elastic-assistant';
+import { copyFunction } from '../../../shared/utils/copy_to_clipboard';
 import { FLYOUT_URL_PARAM } from '../../shared/hooks/url/use_sync_flyout_state_with_url';
-import { CopyToClipboard } from '../../../shared/components/copy_to_clipboard';
 import { useGetAlertDetailsFlyoutLink } from '../../../../timelines/components/side_panel/event_details/use_get_alert_details_flyout_link';
 import { useBasicDataFromDetailsData } from '../../../../timelines/components/side_panel/event_details/helpers';
 import { useAssistant } from '../hooks/use_assistant';
@@ -37,6 +37,11 @@ export const HeaderActions: VFC = memo(() => {
 
   const showShareAlertButton = isAlert && alertDetailsLink;
 
+  const modifier = (value: string) => {
+    const query = new URLSearchParams(window.location.search);
+    return `${value}&${FLYOUT_URL_PARAM}=${query.get(FLYOUT_URL_PARAM)}`;
+  };
+
   const { showAssistant, promptContextId } = useAssistant({
     dataFormattedForFieldBrowser,
     isAlert,
@@ -55,22 +60,23 @@ export const HeaderActions: VFC = memo(() => {
       )}
       {showShareAlertButton && (
         <EuiFlexItem grow={false}>
-          <CopyToClipboard
-            rawValue={alertDetailsLink}
-            modifier={(value: string) => {
-              const query = new URLSearchParams(window.location.search);
-              return `${value}&${FLYOUT_URL_PARAM}=${query.get(FLYOUT_URL_PARAM)}`;
-            }}
-            iconType={'share'}
-            color={'text'}
-            ariaLabel={i18n.translate(
-              'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
-              {
-                defaultMessage: 'Share Alert',
-              }
+          <EuiCopy textToCopy={alertDetailsLink}>
+            {(copy) => (
+              <EuiButtonIcon
+                iconType={'share'}
+                color={'text'}
+                aria-label={i18n.translate(
+                  'xpack.securitySolution.flyout.right.header.shareButtonAriaLabel',
+                  {
+                    defaultMessage: 'Share Alert',
+                  }
+                )}
+                data-test-subj={SHARE_BUTTON_TEST_ID}
+                onClick={() => copyFunction(copy, alertDetailsLink, modifier)}
+                onKeyDown={() => copyFunction(copy, alertDetailsLink, modifier)}
+              />
             )}
-            data-test-subj={SHARE_BUTTON_TEST_ID}
-          />
+          </EuiCopy>
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
