@@ -83,6 +83,7 @@ export function getHitsTileRequest({
   if (!requestBody) {
     throw new Error('Required requestBody parameter not provided');
   }
+  const size = typeof requestBody.size === 'number' ? requestBody.size : 10000;
   const tileRequestBody = {
     buffer,
     grid_precision: 0, // no aggs
@@ -91,11 +92,11 @@ export function getHitsTileRequest({
     query: requestBody.query,
     runtime_mappings: requestBody.runtime_mappings,
     // Number of hits matching the query to count accurately
-    // Used to notify users if all results could not be returned
-    track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+    // Used to notify users of truncated results
+    track_total_hits: size + 1,
     // Maximum number of features to return in the hits layer
-    // Used to fetch correct number of hits
-    size: typeof requestBody.size === 'number' ? requestBody.size : 10000,
+    // Used to fetch number of hits that correspondes with track_total_hits
+    size,
     with_labels: hasLabels,
   } as SearchMvtRequest['body'];
   if (requestBody.fields) {
