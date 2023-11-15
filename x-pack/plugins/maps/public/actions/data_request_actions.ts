@@ -62,7 +62,7 @@ export type DataRequestContext = {
     data: object,
     resultsMeta?: DataRequestMeta
   ): void;
-  onLoadError(dataId: string, requestToken: symbol, errorMessage: string): void;
+  onLoadError(dataId: string, requestToken: symbol, error: Error): void;
   setJoinError(joinIndex: number, errorMessage?: string): void;
   updateSourceData(newData: object): void;
   isRequestStillActive(dataId: string, requestToken: symbol): boolean;
@@ -132,8 +132,8 @@ function getDataRequestContext(
       dispatch(startDataLoad(layerId, dataId, requestToken, meta)),
     stopLoading: (dataId: string, requestToken: symbol, data: object, meta: DataRequestMeta) =>
       dispatch(endDataLoad(layerId, dataId, requestToken, data, meta)),
-    onLoadError: (dataId: string, requestToken: symbol, errorMessage: string) =>
-      dispatch(onDataLoadError(layerId, dataId, requestToken, errorMessage)),
+    onLoadError: (dataId: string, requestToken: symbol, error: Error) =>
+      dispatch(onDataLoadError(layerId, dataId, requestToken, error)),
     setJoinError: (joinIndex: number, errorMessage?: string) => {
       dispatch(setJoinError(layerId, joinIndex, errorMessage));
     },
@@ -312,12 +312,7 @@ function endDataLoad(
   };
 }
 
-function onDataLoadError(
-  layerId: string,
-  dataId: string,
-  requestToken: symbol,
-  errorMessage: string
-) {
+function onDataLoadError(layerId: string, dataId: string, requestToken: symbol, error: Error) {
   return async (
     dispatch: ThunkDispatch<MapStoreState, void, AnyAction>,
     getState: () => MapStoreState
@@ -329,7 +324,7 @@ function onDataLoadError(
       eventHandlers.onDataLoadError({
         layerId,
         dataId,
-        errorMessage,
+        errorMessage: error.message,
       });
     }
 
@@ -337,7 +332,7 @@ function onDataLoadError(
       type: LAYER_DATA_LOAD_ERROR,
       layerId,
       dataId,
-      errorMessage,
+      error,
       requestToken,
     });
   };

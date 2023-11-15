@@ -45,7 +45,7 @@ export class ClustersView extends Component<DetailViewProps> {
       <>
         <EuiSpacer size="m" />
         {Object.keys(clusters).length > 1 ? <ClustersHealth clusters={clusters} /> : null}
-        <ClustersTable clusters={clusters} />
+        <ClustersTable key={this.props.request.id} clusters={clusters} />
       </>
     ) : null;
   }
