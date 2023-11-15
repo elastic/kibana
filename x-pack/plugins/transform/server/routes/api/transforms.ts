@@ -86,12 +86,6 @@ enum TRANSFORM_ACTIONS {
   START = 'start',
 }
 
-function delay(ms = 1000) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
-}
-
 export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
   const { router, license, coreStart, dataViews, security: securityStart } = routeDependencies;
   /**
@@ -315,42 +309,14 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
 
         if (createDataView) {
           const { savedObjects, elasticsearch } = coreStart;
-          const scopedSavedObjectsClient = savedObjects.getScopedClient(req);
-          const scopedClient = elasticsearch.client.asScoped(req).asCurrentUser;
-
           const dataViewsService = await dataViews.dataViewsServiceFactory(
-            scopedSavedObjectsClient,
-            scopedClient,
+            savedObjects.getScopedClient(req),
+            elasticsearch.client.asScoped(req).asCurrentUser,
             req
           );
 
           const dataViewName = req.body.dest.index;
           const runtimeMappings = req.body.source.runtime_mappings as Record<string, RuntimeField>;
-
-          try {
-            let retryCount = 15;
-            let indexExists = false;
-            const indexHealthy = false;
-
-            while (retryCount > 1 && !indexHealthy) {
-              retryCount--;
-
-              indexExists = await scopedClient.indices.exists({ index: dataViewName });
-              console.log('indexExists', indexExists);
-
-              if (indexExists) {
-                const catIndicesResponse = await scopedClient.cat.indices({
-                  format: 'json',
-                  index: dataViewName,
-                });
-                console.log('catIndicesResponse', catIndicesResponse);
-              }
-
-              await delay(1000);
-            }
-          } catch (err) {
-            console.log('indexExists err', err);
-          }
 
           try {
             const dataViewsResp = await dataViewsService.createAndSave(
