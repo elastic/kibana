@@ -32,12 +32,14 @@ export async function getDataStreamsStats(options: {
   });
 
   const sortedDataStreams = mappedDataStreams.sort((a, b) => {
+    if (sortOrder === 'desc') {
+      return b.name.localeCompare(a.name);
+    }
+
     return a.name.localeCompare(b.name);
   });
 
-  const dataStreams = sortOrder === 'asc' ? sortedDataStreams : sortedDataStreams.reverse();
-
   return {
-    items: dataStreams,
+    items: sortedDataStreams,
   };
 }

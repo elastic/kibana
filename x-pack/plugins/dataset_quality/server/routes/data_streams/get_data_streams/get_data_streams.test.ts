@@ -179,7 +179,7 @@ describe('getDataStreams', () => {
       uncategorisedOnly: false,
     });
     expect(results.items).toEqual([
-      { name: 'logs-test.test-default', integration: {} },
+      { name: 'logs-test.test-default' },
       {
         name: 'logs-elastic_agent.metricbeat-default',
         integration: { name: 'elastic_agent', managed_by: 'fleet' },

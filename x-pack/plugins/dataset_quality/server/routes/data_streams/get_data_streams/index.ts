@@ -31,19 +31,25 @@ export async function getDataStreams(options: {
 
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
-    integration: {
-      name: dataStream._meta?.package?.name,
-      managed_by: dataStream._meta?.managed_by,
-    },
+    ...(dataStream._meta
+      ? {
+          integration: {
+            name: dataStream._meta?.package?.name,
+            managed_by: dataStream._meta?.managed_by,
+          },
+        }
+      : {}),
   }));
 
   const sortedDataStreams = mappedDataStreams.sort((a, b) => {
+    if (sortOrder === 'desc') {
+      return b.name.localeCompare(a.name);
+    }
+
     return a.name.localeCompare(b.name);
   });
 
-  const dataStreams = sortOrder === 'asc' ? sortedDataStreams : sortedDataStreams.reverse();
-
   return {
-    items: dataStreams,
+    items: sortedDataStreams,
   };
 }

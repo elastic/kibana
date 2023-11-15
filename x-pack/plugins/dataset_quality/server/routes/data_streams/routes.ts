@@ -39,7 +39,6 @@ const statsRoute = createDatasetQualityServerRoute({
         esClient,
         ...params.query,
         uncategorisedOnly: false,
-        extendedResponse: true,
       }),
       getDataStreamsStats({ esClient, ...params.query }),
     ]);

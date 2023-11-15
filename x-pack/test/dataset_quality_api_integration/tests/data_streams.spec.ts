@@ -17,7 +17,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
   async function callApiAs(user: DatasetQualityApiClientKey) {
     return await datasetQualityApiClient[user]({
-      endpoint: 'GET /internal/data_streams/stats',
+      endpoint: 'GET /internal/dataset_quality/data_streams/stats',
       params: {
         query: {
           type: 'logs',
@@ -36,6 +36,14 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expect(err.res.status).to.be(500);
         expect(err.res.body.message).to.contain('unauthorized');
+      });
+    });
+
+    describe('when required privileges are set', () => {
+      it('returns true when user has logMonitoring privileges', async () => {
+        const privileges = await callApiAs('datasetQualityLogsUser');
+
+        expect(privileges.body.items.length).to.be(0);
       });
     });
   });

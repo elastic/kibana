@@ -60,7 +60,7 @@ if (server) {
 
 const cmd = [
   'node',
-  `../../../scripts/${ftrScript}`,
+  `../../../../scripts/${ftrScript}`,
   ...(grep ? [`--grep "${grep}"`] : []),
   `--config ../../../test/dataset_quality_api_integration/${license}/config.ts`,
 ].join(' ');
