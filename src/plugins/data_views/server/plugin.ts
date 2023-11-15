@@ -6,15 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  CoreSetup,
-  CoreStart,
-  Logger,
-  Plugin,
-  PluginInitializerContext,
-  KibanaRequest,
-} from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
@@ -59,18 +51,6 @@ export class DataViewsServerPlugin
     core.capabilities.registerProvider(capabilitiesProvider);
     core.uiSettings.register(cacheMaxAge);
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
-    core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
-      if (security.found) {
-        const getUserId = async function getUserId(
-          request: KibanaRequest
-        ): Promise<string | undefined> {
-          return security.contract.authc.getCurrentUser(request)?.profile_uid;
-        };
-        this.getUserId = getUserId;
-      } else {
-        throw new Error('Security plugin is not available, but is required for Data Views plugin');
-      }
-    });
 
     registerRoutes({
       http: core.http,
@@ -97,6 +77,9 @@ export class DataViewsServerPlugin
 
     return {
       enableRollups: () => (this.rollupsEnabled = true),
+      setGetUserId: (getUserId: GetUserId) => {
+        this.getUserId = getUserId;
+      },
     };
   }
 
