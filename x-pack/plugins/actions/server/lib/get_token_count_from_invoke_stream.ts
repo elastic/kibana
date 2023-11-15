@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Logger } from '@kbn/logging';
 import { encode } from 'gpt-tokenizer';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
@@ -22,13 +23,16 @@ export interface InvokeBody {
  * Returns an object containing the total, prompt, and completion token counts.
  * @param responseStream the response stream from the `invokeStream` sub action
  * @param body the request messages array
+ * @param logger the logger
  */
 export async function getTokenCountFromInvokeStream({
   responseStream,
   body,
+  logger,
 }: {
   responseStream: Readable;
   body: InvokeBody;
+  logger: Logger;
 }): Promise<{
   total: number;
   prompt: number;
@@ -48,8 +52,11 @@ export async function getTokenCountFromInvokeStream({
   responseStream.on('data', (chunk: string) => {
     responseBody += chunk.toString();
   });
-
-  await finished(responseStream);
+  try {
+    await finished(responseStream);
+  } catch (e) {
+    logger.error('An error occurred while calculating streaming response tokens');
+  }
 
   const completionTokens = encode(responseBody).length;
 

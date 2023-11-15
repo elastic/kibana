@@ -6,6 +6,7 @@
  */
 import { Transform } from 'stream';
 import { getTokenCountFromInvokeStream } from './get_token_count_from_invoke_stream';
+import { loggerMock } from '@kbn/logging-mocks';
 
 interface StreamMock {
   write: (data: string) => void;
@@ -31,7 +32,7 @@ function createStreamMock(): StreamMock {
     },
   };
 }
-
+const logger = loggerMock.create();
 describe('getTokenCountFromInvokeStream', () => {
   let stream: StreamMock;
   const body = {
@@ -63,6 +64,7 @@ describe('getTokenCountFromInvokeStream', () => {
       const tokens = await getTokenCountFromInvokeStream({
         responseStream: stream.transform,
         body,
+        logger,
       });
       expect(tokens.prompt).toBe(PROMPT_TOKEN_COUNT);
       expect(tokens.completion).toBe(COMPLETION_TOKEN_COUNT);
@@ -75,6 +77,7 @@ describe('getTokenCountFromInvokeStream', () => {
       const tokenPromise = getTokenCountFromInvokeStream({
         responseStream: stream.transform,
         body,
+        logger,
       });
 
       stream.fail();
@@ -84,6 +87,7 @@ describe('getTokenCountFromInvokeStream', () => {
         total: PROMPT_TOKEN_COUNT + COMPLETION_TOKEN_COUNT,
         completion: COMPLETION_TOKEN_COUNT,
       });
+      expect(logger.error).toHaveBeenCalled();
     });
   });
 });

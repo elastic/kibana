@@ -43,6 +43,7 @@ export const getGenAiTokenTracking = async ({
       const { total, prompt, completion } = await getTokenCountFromInvokeStream({
         responseStream: result.data.pipe(new PassThrough()),
         body: (validatedParams as { subActionParams: InvokeBody }).subActionParams,
+        logger,
       });
       return {
         total_tokens: total,
@@ -61,6 +62,7 @@ export const getGenAiTokenTracking = async ({
       const { total, prompt, completion } = await getTokenCountFromOpenAIStream({
         responseStream: result.data.pipe(new PassThrough()),
         body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+        logger,
       });
       return {
         total_tokens: total,

@@ -10,13 +10,16 @@ import { isEmpty, omitBy } from 'lodash';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
 import { CreateChatCompletionRequest } from 'openai';
+import { Logger } from '@kbn/logging';
 
 export async function getTokenCountFromOpenAIStream({
   responseStream,
   body,
+  logger,
 }: {
   responseStream: Readable;
   body: string;
+  logger: Logger;
 }): Promise<{
   total: number;
   prompt: number;
@@ -63,7 +66,11 @@ export async function getTokenCountFromOpenAIStream({
     responseBody += chunk.toString();
   });
 
-  await finished(responseStream);
+  try {
+    await finished(responseStream);
+  } catch (e) {
+    logger.error('An error occurred while calculating streaming response tokens');
+  }
 
   const response = responseBody
     .split('\n')
