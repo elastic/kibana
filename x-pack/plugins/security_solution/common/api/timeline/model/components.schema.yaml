@@ -158,7 +158,7 @@ components:
           type: string
         operator:
           type: string
-    DataProviderResult:
+    BaseDataProviderResult:
       type: object
       properties:
         id:
@@ -173,12 +173,23 @@ components:
           type: string
         queryMatch:
           $ref: '#/components/schemas/QueryMatchResult'
-        # and:
-        #   type: array
-        #   items:
-        #     $ref: '#/components/schemas/DataProviderResult'
         type:
           $ref: '#/components/schemas/DataProviderType'
+    DataProviderResult:
+      x-recursive: true
+      x-recursive-prop: and
+      x-recursive-value: DataProviderResult[]
+      x-recursive-prop-optional: true
+      x-base-type: BaseDataProviderResult
+      allOf:
+        - $ref: '#/components/schemas/BaseDataProviderResult'
+        - type: object
+          properties:
+            and:
+              type: array
+              items:
+                x-lazy: true
+                $ref: '#/components/schemas/DataProviderResult'
     FavoriteTimelineResult:
       type: object
       properties:

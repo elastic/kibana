@@ -114,8 +114,8 @@ export const QueryMatchResult = z.object({
   operator: z.string().optional(),
 });
 
-export type DataProviderResult = z.infer<typeof DataProviderResult>;
-export const DataProviderResult = z.object({
+export type BaseDataProviderResult = z.infer<typeof BaseDataProviderResult>;
+export const BaseDataProviderResult = z.object({
   id: z.string().optional(),
   name: z.string().optional(),
   enabled: z.boolean().optional(),
@@ -124,6 +124,15 @@ export const DataProviderResult = z.object({
   queryMatch: QueryMatchResult.optional(),
   type: DataProviderType.optional(),
 });
+
+export type DataProviderResult = z.infer<typeof BaseDataProviderResult> & {
+  and?: DataProviderResult[];
+};
+export const DataProviderResult: z.ZodType<DataProviderResult> = BaseDataProviderResult.and(
+  z.object({
+    and: z.array(z.lazy(() => DataProviderResult)).optional(),
+  })
+);
 
 export type FavoriteTimelineResult = z.infer<typeof FavoriteTimelineResult>;
 export const FavoriteTimelineResult = z.object({
