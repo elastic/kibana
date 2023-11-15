@@ -6,7 +6,7 @@
  */
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
-import { createIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_index';
 import { getAssetCriticalityIndex } from '../../../../common/asset_criticality';
 import { assetCriticalityFieldMap } from './configurations';
 
@@ -20,7 +20,7 @@ export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
 
   public async init() {
-    await createIndex({
+    await createOrUpdateIndex({
       esClient: this.options.esClient,
       logger: this.options.logger,
       options: {

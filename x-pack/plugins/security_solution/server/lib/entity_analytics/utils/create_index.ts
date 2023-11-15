@@ -10,9 +10,13 @@ import type {
   IndicesCreateRequest,
   IndicesCreateResponse,
 } from '@elastic/elasticsearch/lib/api/types';
-import { updateIndexMappings } from './update_mappings';
+import { retryTransientEsErrors } from './retry_transient_es_errors';
 
-export const createIndex = async ({
+/**
+ * It's check for index existatnce, and create index
+ * or update existing index mappings
+ */
+export const createOrUpdateIndex = async ({
   esClient,
   logger,
   options,
@@ -29,13 +33,23 @@ export const createIndex = async ({
       const response = await esClient.indices.get({
         index: options.index,
       });
-      const indices = Object.keys(response?.indicies ?? {});
-      await updateIndexMappings({
-        esClient,
-        logger,
-        indices,
-      });
+      const indices = Object.keys(response ?? {});
       logger.info(`${options.index} already exist`);
+      if (options.mappings) {
+        await Promise.all(
+          indices.map(async (index) => {
+            try {
+              await retryTransientEsErrors(
+                () => esClient.indices.putMapping({ index, body: options.mappings }),
+                { logger }
+              );
+              logger.info(`Update mappings for ${index}`);
+            } catch (err) {
+              logger.error(`Failed to PUT mapping for index ${index}: ${err.message}`);
+            }
+          })
+        );
+      }
     } else {
       return esClient.indices.create(options);
     }

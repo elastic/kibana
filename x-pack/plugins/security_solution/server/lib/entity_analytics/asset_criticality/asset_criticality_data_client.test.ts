@@ -8,7 +8,7 @@
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 
-import { createIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_index';
 
 jest.mock('../utils/create_index', () => ({
   createIndex: jest.fn(),
@@ -27,7 +27,7 @@ describe('AssetCriticalityDataClient', () => {
 
       await assetCriticalityDataClient.init();
 
-      expect(createIndex).toHaveBeenCalledWith({
+      expect(createOrUpdateIndex).toHaveBeenCalledWith({
         esClient: esClientInternal,
         logger,
         options: {

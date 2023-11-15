@@ -47,7 +47,7 @@ import {
 } from './utils/saved_object_configuration';
 import { getRiskInputsIndex } from './get_risk_inputs_index';
 import { removeRiskScoringTask, startRiskScoringTask } from './tasks';
-import { createIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_index';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { AssetCriticalityDataClient } from '../asset_criticality/asset_criticality_data_client';
 
@@ -344,7 +344,7 @@ export class RiskEngineDataClient {
         indexPatterns,
       });
 
-      await createIndex({
+      await createOrUpdateIndex({
         esClient,
         logger: this.options.logger,
         options: {

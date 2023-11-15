@@ -21,7 +21,7 @@ import type { RiskEngineConfiguration } from './types';
 import { createDataStream } from '../utils/create_datastream';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from './utils/transforms';
-import { createIndex } from '../utils/create_index';
+import { createOrUpdateIndex } from '../utils/create_index';
 import { assetCriticalityDataClientMock } from '../asset_criticality/asset_criticality_data_client.mock';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
@@ -321,7 +321,7 @@ describe('RiskEngineDataClient', () => {
             },
           });
 
-          expect(createIndex).toHaveBeenCalledWith({
+          expect(createOrUpdateIndex).toHaveBeenCalledWith({
             logger,
             esClient,
             options: {
