@@ -309,7 +309,6 @@ test('format() meta can not override timestamp', () => {
   });
 });
 
-
 test('format() meta.toJSON() is used if own property', () => {
   const layout = new JsonLayout();
   expect(
@@ -327,7 +326,6 @@ test('format() meta.toJSON() is used if own property', () => {
           service: {
             version: '1',
           },
-          // @ts-expect-error cannot override @timestamp
           toJSON() {
             return {
               server: {
@@ -378,7 +376,6 @@ test('format() meta.toJSON() is used if present on prototype', () => {
         level: LogLevel.Debug,
         context: 'bar',
         pid: 3,
-        // @ts-expect-error meta is not of the correct type
         meta: someInstance,
       })
     )
