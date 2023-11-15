@@ -13,7 +13,7 @@ import type { UserProfileUserInfo } from '@kbn/user-profile-components';
 import { CASE_SAVED_OBJECT, MAX_CONCURRENT_SEARCHES } from '../../../common/constants';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
 import { getCaseViewPath } from '../../common/utils';
-import type { NotificationService, NotifyArgs } from './types';
+import type { NotificationService, NotifyAssigneesArgs } from './types';
 import { assigneesTemplateRenderer } from './templates/assignees/renderer';
 
 type WithRequiredProperty<T, K extends keyof T> = T & Required<Pick<T, K>>;
@@ -86,7 +86,7 @@ export class EmailNotificationService implements NotificationService {
     return assigneesTemplateRenderer(theCase, caseUrl);
   }
 
-  public async notifyAssignees({ assignees, theCase }: NotifyArgs) {
+  public async notifyAssignees({ assignees, theCase }: NotifyAssigneesArgs) {
     try {
       if (!this.notifications.isEmailServiceAvailable()) {
         this.logger.warn('Could not notifying assignees. Email service is not available.');
@@ -139,14 +139,14 @@ export class EmailNotificationService implements NotificationService {
     }
   }
 
-  public async bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment: NotifyArgs[]) {
+  public async bulkNotifyAssignees(casesAndAssigneesToNotifyForAssignment: NotifyAssigneesArgs[]) {
     if (casesAndAssigneesToNotifyForAssignment.length === 0) {
       return;
     }
 
     await pMap(
       casesAndAssigneesToNotifyForAssignment,
-      (args: NotifyArgs) => this.notifyAssignees(args),
+      (args: NotifyAssigneesArgs) => this.notifyAssignees(args),
       {
         concurrency: MAX_CONCURRENT_SEARCHES,
       }

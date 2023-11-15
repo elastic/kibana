@@ -95,7 +95,7 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: API_ERROR, isError: true });
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
     });
 
     it('returns API_ERROR when there are no choices', async () => {
@@ -109,7 +109,7 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: API_ERROR, isError: true });
+      expect(result).toEqual({ response: API_ERROR, isStream: false, isError: true });
     });
 
     it('returns the value of the action_input property when assistantLangChain is true, and `content` has properly prefixed and suffixed JSON with the action_input property', async () => {
@@ -129,7 +129,11 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response: 'value from action_input', isError: false });
+      expect(result).toEqual({
+        response: 'value from action_input',
+        isStream: false,
+        isError: false,
+      });
     });
 
     it('returns the original content when assistantLangChain is true, and `content` has properly formatted JSON WITHOUT the action_input property', async () => {
@@ -149,7 +153,7 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response, isError: false });
+      expect(result).toEqual({ response, isStream: false, isError: false });
     });
 
     it('returns the original when assistantLangChain is true, and `content` is not JSON', async () => {
@@ -169,7 +173,7 @@ describe('API tests', () => {
 
       const result = await fetchConnectorExecuteAction(testProps);
 
-      expect(result).toEqual({ response, isError: false });
+      expect(result).toEqual({ response, isStream: false, isError: false });
     });
   });
 

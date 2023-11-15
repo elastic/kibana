@@ -73,6 +73,10 @@ export type AlertsTableStateProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
   resolveRulePagePath?: (ruleId: string) => string;
   resolveAlertPagePath?: (alertId: string) => string;
 } & Partial<EuiDataGridProps>;
@@ -150,6 +154,7 @@ const AlertsTableStateWithQueryProvider = ({
   shouldHighlightRow,
   resolveRulePagePath,
   resolveAlertPagePath,
+  dynamicRowHeight,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
   const hasAlertsTableConfiguration =
@@ -399,6 +404,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
       featureIds,
     }),
     [
@@ -426,6 +432,7 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
       featureIds,
     ]
   );

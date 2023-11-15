@@ -244,9 +244,9 @@ export function useBulkActions({
   } = useContext(AlertsTableContext);
   const configBulkActionPanels = useBulkActionsConfig(query);
 
-  const clearSelection = () => {
+  const clearSelection = useCallback(() => {
     updateBulkActionsState({ action: BulkActionsVerbs.clear });
-  };
+  }, [updateBulkActionsState]);
   const setIsBulkActionsLoading = (isLoading: boolean = true) => {
     updateBulkActionsState({ action: BulkActionsVerbs.updateAllLoadingState, isLoading });
   };

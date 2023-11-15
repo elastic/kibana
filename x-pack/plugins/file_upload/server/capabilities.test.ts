@@ -26,6 +26,16 @@ describe('setupCapabilities', () => {
     `);
   });
 
+  it('registers a capabilities switcher with the correct options', async () => {
+    const coreSetup = coreMock.createSetup();
+    setupCapabilities(coreSetup);
+
+    expect(coreSetup.capabilities.registerSwitcher).toHaveBeenCalledTimes(1);
+    expect(coreSetup.capabilities.registerSwitcher).toHaveBeenCalledWith(expect.any(Function), {
+      capabilityPath: 'fileUpload.*',
+    });
+  });
+
   it('registers a capabilities switcher that returns unaltered capabilities when security is disabled', async () => {
     const coreSetup = coreMock.createSetup();
     setupCapabilities(coreSetup);

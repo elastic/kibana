@@ -105,7 +105,7 @@ export const FlyoutNavigation: FC<PanelNavigationProps> = memo(
           responsive={false}
           css={css`
             padding-left: ${euiTheme.size.s};
-            padding-right: ${euiTheme.size.l};
+            padding-right: ${euiTheme.size.xl};
             height: ${euiTheme.size.xxl};
           `}
         >
