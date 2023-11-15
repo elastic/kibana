@@ -21,7 +21,6 @@ import {
   manageSLOParamsSchema,
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
-import { SLO_SUMMARY_ENRICH_POLICY_NAME } from '../../assets/constants';
 import type { IndicatorTypes } from '../../domain/models';
 import {
   CreateSLO,
@@ -88,11 +87,9 @@ const createSLORoute = createObservabilityServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const createSLO = new CreateSLO(esClient, repository, transformManager);
+    const createSLO = new CreateSLO(esClient, systemEsClient, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
-
-    await systemEsClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     return response;
   },
@@ -114,11 +111,9 @@ const updateSLORoute = createObservabilityServerRoute({
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const updateSLO = new UpdateSLO(repository, transformManager, esClient);
+    const updateSLO = new UpdateSLO(repository, transformManager, esClient, systemEsClient);
 
     const response = await updateSLO.execute(params.path.id, params.body);
-
-    await systemEsClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     return response;
   },
@@ -148,10 +143,15 @@ const deleteSLORoute = createObservabilityServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
 
-    const deleteSLO = new DeleteSLO(repository, transformManager, esClient, rulesClient);
+    const deleteSLO = new DeleteSLO(
+      repository,
+      transformManager,
+      esClient,
+      rulesClient,
+      systemEsClient
+    );
 
     await deleteSLO.execute(params.path.id);
-    await systemEsClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
   },
 });
 
