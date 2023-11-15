@@ -15,18 +15,18 @@ steps:
         required: false
         options:
           - label: "Enable"
-            value: "True"
+            value: "1"
           - label: "Disable"
-            value: "False"
+            value: "0"
+
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless
     label: 'Serverless MKI QA Security Cypress Tests'
-    depends_on: configuration_pane
     agents:
       queue: n2-4-spot
     # TODO : Revise the timeout when the pipeline will be officially integrated with the quality gate.
     timeout_in_minutes: 300
-    parallelism: 6
+    parallelism: 1
     retry:
       automatic:
         - exit_status: '*'
