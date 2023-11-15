@@ -7,13 +7,14 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleNotifyWhenV1 } from '../../../response';
+import { filterStateStore } from '../../../response/constants/v1';
 import {
   validateNotifyWhenV1,
   validateDurationV1,
   validateHoursV1,
   validateTimezoneV1,
 } from '../../../validation';
-
+import {} from '../'
 export const notifyWhenSchema = schema.oneOf(
   [
     schema.literal(ruleNotifyWhenV1.CHANGE),
@@ -37,7 +38,14 @@ export const actionAlertsFilterSchema = schema.object({
         schema.object({
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
           meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
+          $state: schema.maybe(
+            schema.object({
+              store: schema.oneOf([
+                schema.literal(filterStateStore.APP_STATE),
+                schema.literal(filterStateStore.GLOBAL_STATE),
+              ]),
+            })
+          ),
         })
       ),
       dsl: schema.maybe(schema.string()),
