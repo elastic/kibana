@@ -49,7 +49,7 @@ export const registerUIActions = (
   registerLensEmbeddableActions(store, services);
   registerDiscoverCellActions(store, services);
   registerCellActions(store, history, services);
-  // TODO: Remove discover actions when timeline esql tab is extracted from discover
+  // TODO: Remove discover histogram actions when timeline esql tab is extracted from discover
   registerDiscoverHistogramActions(store, history, services);
 };
 
