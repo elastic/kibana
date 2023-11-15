@@ -12,7 +12,7 @@ import { useUrlQuery } from '../../common/hooks/use_url_query';
 import {
   useBaseEsQuery,
   usePersistedQuery,
-} from '../../common/hooks/use_cloud_posture_table/utils';
+} from '../../common/hooks/use_cloud_posture_data_table/utils';
 import { FindingsBaseURLQuery } from '../../common/types';
 
 const DEFAULT_PAGE_SIZE = 10;

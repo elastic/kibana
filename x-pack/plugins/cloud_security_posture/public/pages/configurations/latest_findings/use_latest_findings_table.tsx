@@ -11,7 +11,7 @@ import { useMemo } from 'react';
 import { FindingsBaseURLQuery } from '../../../common/types';
 import { Evaluation } from '../../../../common/types';
 import { LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY } from '../../../common/constants';
-import { useCloudPostureTable } from '../../../common/hooks/use_cloud_posture_table';
+import { useCloudPostureDataTable } from '../../../common/hooks/use_cloud_posture_data_table';
 import { getFilters } from '../utils/get_filters';
 import { useLatestFindings } from './use_latest_findings';
 
@@ -28,7 +28,7 @@ export const useLatestFindingsTable = ({
   nonPersistedFilters?: Filter[];
   showDistributionBar?: boolean;
 }) => {
-  const cloudPostureTable = useCloudPostureTable({
+  const cloudPostureTable = useCloudPostureDataTable({
     dataView,
     paginationLocalStorageKey: LOCAL_STORAGE_DATA_TABLE_PAGE_SIZE_KEY,
     columnsLocalStorageKey,
