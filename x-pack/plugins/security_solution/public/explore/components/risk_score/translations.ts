@@ -53,18 +53,18 @@ export const getRiskEntityTranslation = (
   lowercase = false,
   plural = false
 ) => {
-  const text = ((e) => {
-    if (!e && plural) return ENTITIES;
-    if (!e) return ENTITY;
+  const text = (() => {
+    if (!riskEntity && plural) return ENTITIES;
+    if (!riskEntity) return ENTITY;
 
-    if (e === RiskScoreEntity.host && plural) return HOSTS;
-    if (e === RiskScoreEntity.host) return HOST;
+    if (riskEntity === RiskScoreEntity.host && plural) return HOSTS;
+    if (riskEntity === RiskScoreEntity.host) return HOST;
 
-    if (e === RiskScoreEntity.user && plural) return USERS;
-    if (e === RiskScoreEntity.user) return USER;
+    if (riskEntity === RiskScoreEntity.user && plural) return USERS;
+    if (riskEntity === RiskScoreEntity.user) return USER;
 
     return '';
-  })(riskEntity);
+  })();
 
   return lowercase ? text.toLowerCase() : text;
 };
