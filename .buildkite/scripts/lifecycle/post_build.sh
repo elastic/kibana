@@ -9,7 +9,7 @@ if [[ "${GITHUB_BUILD_COMMIT_STATUS_ENABLED:-}" != "true" ]]; then
   "$(dirname "${0}")/commit_status_complete.sh"
 fi
 
-ts-node "$(dirname "${0}")/ci_stats_complete.ts" || true
+ts-node "$(dirname "${0}")/ci_stats_complete.ts"
 
 if [[ "${GITHUB_PR_NUMBER:-}" ]]; then
   DOCS_CHANGES_URL="https://kibana_$GITHUB_PR_NUMBER}.docs-preview.app.elstc.co/diff"
