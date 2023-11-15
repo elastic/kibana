@@ -48,7 +48,7 @@ interface Project {
   product: string;
 }
 
-interface ProjectConfigurationOverride {
+interface ProjectConfigurationParameters {
   tier: string;
   ignoreEndpoint: boolean;
   ignoreCloud: boolean;
@@ -58,6 +58,12 @@ interface Credentials {
   username: string;
   password: string;
 }
+
+const DEFAULT_CONFIGURATION: ProductType[] = [
+  { product_line: 'security', product_tier: 'complete' },
+  { product_line: 'cloud', product_tier: 'complete' },
+  { product_line: 'endpoint', product_tier: 'complete' },
+] as const;
 
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
@@ -326,21 +332,21 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
   return pRetry(fetchLoginStatusAttempt, retryOptions);
 }
 
-const getProductTypes = (
-  filePath: string,
-  projectConfigurationOverride: ProjectConfigurationOverride
+const getOverridedProductTypes = (
+  projectConfigurationParameters: ProjectConfigurationParameters
 ): ProductType[] => {
-  let productTypes = parseTestFileConfig(filePath).productTypes as ProductType[];
-  if (projectConfigurationOverride.tier) {
+  let productTypes = DEFAULT_CONFIGURATION;
+
+  if (projectConfigurationParameters.tier) {
     productTypes = productTypes.map((product) => ({
       ...product,
-      product_tier: projectConfigurationOverride.tier,
+      product_tier: projectConfigurationParameters.tier,
     }));
   }
-  if (projectConfigurationOverride.ignoreEndpoint) {
+  if (projectConfigurationParameters.ignoreEndpoint) {
     productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
   }
-  if (projectConfigurationOverride.ignoreCloud) {
+  if (projectConfigurationParameters.ignoreCloud) {
     productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
   }
   return productTypes;
@@ -409,10 +415,10 @@ ${JSON.stringify(argv, null, 2)}
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
 
-      const projectConfigurationOverride: ProjectConfigurationOverride = {
+      const projectConfigurationParameters: ProjectConfigurationParameters = {
         tier: argv.tier as string,
         ignoreEndpoint: argv.ignoreEndpoint as boolean,
-        ignoreCloud: argv.ignoreClous as boolean,
+        ignoreCloud: argv.ignoreCloud as boolean,
       };
 
       log.info(`
@@ -483,7 +489,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           await withProcRunner(log, async (procs) => {
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
-            const productTypes = getProductTypes(filePath, projectConfigurationOverride);
+
+            const productTypes = isOpen
+              ? getOverridedProductTypes(projectConfigurationParameters)
+              : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
             if (!API_KEY) {
               log.info('API KEY to create project could not be retrieved.');
