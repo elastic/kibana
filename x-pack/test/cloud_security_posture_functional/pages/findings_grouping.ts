@@ -120,6 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
+    let groupSelector: ReturnType<typeof findings.groupSelector>;
 
     before(async () => {
       findings = pageObjects.findings;
@@ -133,6 +134,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await findings.navigateToLatestFindingsPage();
 
+      groupSelector = await findings.groupSelector();
+
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await findings.latestFindingsTable.getRowsCount()) === data.length
@@ -141,12 +144,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
+      await groupSelector.openDropDown();
+      await groupSelector.setValue('None');
       await findings.index.remove();
     });
 
     describe('Default Grouping', async () => {
       it('groups findings by resource and sort case sensitive asc', async () => {
-        const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
@@ -166,7 +170,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(unitCount).to.be('4 findings');
       });
       it('groups findings by rule name and sort case sensitive asc', async () => {
-        const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Rule name');
 
@@ -191,7 +194,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
       it('groups findings by cloud account and sort case sensitive asc', async () => {
-        const groupSelector = await findings.groupSelector();
         await groupSelector.setValue('Cloud account');
 
         const grouping = await findings.findingsGrouping();
@@ -210,7 +212,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
       it('groups findings by Kubernetes cluster and sort case sensitive asc', async () => {
-        const groupSelector = await findings.groupSelector();
         await groupSelector.setValue('Kubernetes cluster');
 
         const grouping = await findings.findingsGrouping();
@@ -231,10 +232,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('SearchBar', () => {
       it('add filter', async () => {
-        // Filter bar uses the field's customLabel in the DataView
-        const groupSelector = await findings.groupSelector();
         await groupSelector.setValue('Resource');
 
+        // Filter bar uses the field's customLabel in the DataView
         await filterBar.addFilter({ field: 'Rule Name', operation: 'is', value: ruleName1 });
         expect(await filterBar.hasFilter('rule.name', ruleName1)).to.be(true);
 

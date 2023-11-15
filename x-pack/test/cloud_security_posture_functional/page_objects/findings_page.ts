@@ -410,7 +410,7 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
-  const groupSelector = async (testSubj = 'group-selector-dropdown') => ({
+  const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
       return await testSubjects.find(testSubj);
     },
