@@ -15,7 +15,7 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { useRiskInputActions } from './use_risk_input_actions';
-import type { AlertRawData } from '.';
+import type { AlertRawData } from '../content';
 
 export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: () => void) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
@@ -30,7 +30,7 @@ export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: 
     const timelinePanel = {
       name: (
         <FormattedMessage
-          id="xpack.securitySolution.flyout.riskInputs.actions.addToNewTimeline"
+          id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewTimeline"
           defaultMessage="Add to new timeline"
         />
       ),
@@ -38,20 +38,26 @@ export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: 
       onClick: addToNewTimeline,
     };
     const ruleName = get(['fields', ALERT_RULE_NAME], alerts[0]) ?? [''];
-    const title = i18n.translate('xpack.securitySolution.flyout.riskInputs.actions.title', {
-      defaultMessage: 'Risk input: {description}',
-      values: {
-        description:
-          alerts.length === 1
-            ? ruleName[0]
-            : i18n.translate('xpack.securitySolution.flyout.riskInputs.actions.titleDescription', {
-                defaultMessage: '{quantity} selected',
-                values: {
-                  quantity: alerts.length,
-                },
-              }),
-      },
-    });
+    const title = i18n.translate(
+      'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.title',
+      {
+        defaultMessage: 'Risk input: {description}',
+        values: {
+          description:
+            alerts.length === 1
+              ? ruleName[0]
+              : i18n.translate(
+                  'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.titleDescription',
+                  {
+                    defaultMessage: '{quantity} selected',
+                    values: {
+                      quantity: alerts.length,
+                    },
+                  }
+                ),
+        },
+      }
+    );
 
     return [
       {
@@ -68,7 +74,7 @@ export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: 
               {
                 name: (
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.riskInputs.actions.addToNewCase"
+                    id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToNewCase"
                     defaultMessage="Add to new case"
                   />
                 ),
@@ -79,7 +85,7 @@ export const useRiskInputActionsPanels = (alerts: AlertRawData[], closePopover: 
               {
                 name: (
                   <FormattedMessage
-                    id="xpack.securitySolution.flyout.riskInputs.actions.addToExistingCase"
+                    id="xpack.securitySolution.flyout.entityDetails.riskInputs.actions.addToExistingCase"
                     defaultMessage="Add to existing case"
                   />
                 ),

@@ -7,9 +7,9 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../../../common/mock';
 import { ActionColumn } from './action_column';
-import { alertDataMock } from './mocks';
+import { alertDataMock } from '../mocks';
 
 describe('ActionColumn', () => {
   it('renders', () => {

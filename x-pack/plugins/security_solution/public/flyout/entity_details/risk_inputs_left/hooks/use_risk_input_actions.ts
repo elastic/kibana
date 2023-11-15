@@ -11,11 +11,11 @@ import { get, noop } from 'lodash/fp';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { useGlobalTime } from '../../common/containers/use_global_time';
-import { SourcererScopeName } from '../../common/store/sourcerer/model';
-import { useAddBulkToTimelineAction } from '../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
-import { useKibana } from '../../common/lib/kibana/kibana_react';
-import type { AlertRawData } from '.';
+import { useGlobalTime } from '../../../../common/containers/use_global_time';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
+import { useAddBulkToTimelineAction } from '../../../../detections/components/alerts_table/timeline_actions/use_add_bulk_to_timeline';
+import { useKibana } from '../../../../common/lib/kibana/kibana_react';
+import type { AlertRawData } from '../content';
 
 /**
  * The returned actions only support alerts risk inputs.

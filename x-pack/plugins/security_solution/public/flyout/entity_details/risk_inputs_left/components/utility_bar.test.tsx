@@ -7,8 +7,8 @@
 
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../common/mock';
-import { alertDataMock } from './mocks';
+import { TestProviders } from '../../../../common/mock';
+import { alertDataMock } from '../mocks';
 import { RiskInputsUtilityBar } from './utility_bar';
 
 describe('RiskInputsPanel', () => {

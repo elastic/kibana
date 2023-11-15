@@ -11,7 +11,7 @@ import { useDispatch } from 'react-redux';
 import { isString } from 'lodash/fp';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
-import { UserDetailsPanelKey } from '../../../../../flyout/entity_details/user_details';
+import { UserPanelKey } from '../../../../../flyout/entity_details/user_right';
 import { useIsExperimentalFeatureEnabled } from '../../../../../common/hooks/use_experimental_features';
 import { StatefulEventContext } from '../../../../../common/components/events_viewer/stateful_event_context';
 import type { ExpandedDetailType } from '../../../../../../common/types';
@@ -70,7 +70,7 @@ const UserNameComponent: React.FC<Props> = ({
 
         if (isNewUserDetailsFlyoutEnable && !isTimelineScope(timelineID)) {
           openRightPanel({
-            id: UserDetailsPanelKey,
+            id: UserPanelKey,
             params: {
               userName,
               contextID: contextId,

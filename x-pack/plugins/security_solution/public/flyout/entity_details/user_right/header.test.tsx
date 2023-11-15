@@ -11,38 +11,33 @@ import { TestProviders } from '../../../common/mock';
 import {
   mockManagedUser,
   mockObservedUser,
-  mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { UserDetailsBody } from './user_details_body';
+import { UserPanelHeader } from './header';
 
 const mockProps = {
   userName: 'test',
   managedUser: mockManagedUser,
   observedUser: mockObservedUser,
-  riskScoreState: mockRiskScoreState,
-  contextID: 'test-user-details',
-  scopeId: 'test-scope-id',
-  isDraggable: false,
 };
 
 jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
 
-describe('UserDetailsBody', () => {
+describe('UserDetailsContent', () => {
   it('renders', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserDetailsBody {...mockProps} />
+        <UserPanelHeader {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-body-header')).toBeInTheDocument();
+    expect(getByTestId('user-panel-header')).toBeInTheDocument();
   });
 
   it('renders observed user date when it is bigger than managed user date', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <UserDetailsBody
+        <UserPanelHeader
           {...{
             ...mockProps,
             observedUser: {
@@ -57,14 +52,14 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-body-lastSeen').textContent).toContain('Mar 7, 2989');
+    expect(getByTestId('user-panel-header-lastSeen').textContent).toContain('Mar 7, 2989');
   });
 
   it('renders managed user date when it is bigger than observed user date', () => {
     const futureDay = '2989-03-07T20:00:00.000Z';
     const { getByTestId } = render(
       <TestProviders>
-        <UserDetailsBody
+        <UserPanelHeader
           {...{
             ...mockProps,
             managedUser: {
@@ -79,24 +74,24 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-body-lastSeen').textContent).toContain('Mar 7, 2989');
+    expect(getByTestId('user-panel-header-lastSeen').textContent).toContain('Mar 7, 2989');
   });
 
   it('renders observed and managed badges when lastSeen is defined', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <UserDetailsBody {...mockProps} />
+        <UserPanelHeader {...mockProps} />
       </TestProviders>
     );
 
-    expect(getByTestId('user-details-body-observed-badge')).toBeInTheDocument();
-    expect(getByTestId('user-details-body-managed-badge')).toBeInTheDocument();
+    expect(getByTestId('user-panel-header-observed-badge')).toBeInTheDocument();
+    expect(getByTestId('user-panel-header-managed-badge')).toBeInTheDocument();
   });
 
   it('does not render observed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserDetailsBody
+        <UserPanelHeader
           {...{
             ...mockProps,
             observedUser: {
@@ -111,13 +106,13 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('user-details-body-observed-badge')).not.toBeInTheDocument();
+    expect(queryByTestId('user-panel-header-observed-badge')).not.toBeInTheDocument();
   });
 
   it('does not render managed badge when lastSeen date is undefined', () => {
     const { queryByTestId } = render(
       <TestProviders>
-        <UserDetailsBody
+        <UserPanelHeader
           {...{
             ...mockProps,
             managedUser: {
@@ -132,6 +127,6 @@ describe('UserDetailsBody', () => {
       </TestProviders>
     );
 
-    expect(queryByTestId('user-details-body-managed-badge')).not.toBeInTheDocument();
+    expect(queryByTestId('user-panel-header-managed-badge')).not.toBeInTheDocument();
   });
 });

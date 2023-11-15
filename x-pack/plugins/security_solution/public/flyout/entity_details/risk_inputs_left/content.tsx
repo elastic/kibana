@@ -10,26 +10,18 @@ import { useEuiBackgroundColor, EuiSpacer, EuiInMemoryTable, EuiTitle } from '@e
 import React, { useCallback, useMemo, useState } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { get } from 'lodash/fp';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
-import type { RiskInputs } from '../../../common/risk_engine';
-import { ActionColumn } from './action_column';
-import { PreferenceFormattedDate } from '../../common/components/formatted_date';
-import { RiskInputsUtilityBar } from './utility_bar';
-import { useAlertsByIds } from '../../common/containers/alerts/use_alerts_by_ids';
-import { FlyoutBody } from '../shared/components/flyout_body';
+import type { RiskInputs } from '../../../../common/risk_engine';
+import { ActionColumn } from './components/action_column';
+import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
+import { RiskInputsUtilityBar } from './components/utility_bar';
+import { useAlertsByIds } from '../../../common/containers/alerts/use_alerts_by_ids';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
-export interface RiskInputsPanelProps extends Record<string, unknown> {
+export interface RiskInputsPanelContentProps extends Record<string, unknown> {
   riskInputs: RiskInputs;
 }
-
-export interface RiskInputsExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'all-risk-inputs';
-  params: RiskInputsPanelProps;
-}
-
-export const RiskInputsPanelKey: RiskInputsExpandableFlyoutProps['key'] = 'all-risk-inputs';
 
 export interface AlertRawData {
   fields: Record<string, string[]>;
@@ -37,7 +29,7 @@ export interface AlertRawData {
   _id: string;
 }
 
-export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
+export const RiskInputsPanelContent = ({ riskInputs }: RiskInputsPanelContentProps) => {
   const [selectedItems, setSelectedItems] = useState<AlertRawData[]>([]);
   const alertIds = useMemo(() => riskInputs.map(({ id }) => id), [riskInputs]);
   const { loading, data: alertsData } = useAlertsByIds({ alertIds });
@@ -58,7 +50,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
       {
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.riskInputs.actionsColumn"
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.actionsColumn"
             defaultMessage="Actions"
           />
         ),
@@ -71,7 +63,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
         field: 'fields.@timestamp',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.riskInputs.dateColumn"
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.dateColumn"
             defaultMessage="Date"
           />
         ),
@@ -86,7 +78,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
         'data-test-subj': 'risk-input-table-description-cell',
         name: (
           <FormattedMessage
-            id="xpack.securitySolution.flyout.riskInputs.riskInputColumn"
+            id="xpack.securitySolution.flyout.entityDetails.riskInputs.riskInputColumn"
             defaultMessage="Risk input"
           />
         ),
@@ -128,7 +120,7 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
         <EuiTitle>
           <h2>
             <FormattedMessage
-              id="xpack.securitySolution.flyout.riskInputs.title"
+              id="xpack.securitySolution.flyout.entityDetails.riskInputs.title"
               defaultMessage="Risk Inputs"
             />
           </h2>
@@ -153,4 +145,4 @@ export const RiskInputsPanel = ({ riskInputs }: RiskInputsPanelProps) => {
   );
 };
 
-RiskInputsPanel.displayName = 'RiskInputsPanel';
+RiskInputsPanelContent.displayName = 'RiskInputsPanelContent';

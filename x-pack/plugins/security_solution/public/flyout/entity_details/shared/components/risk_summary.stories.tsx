@@ -8,8 +8,8 @@
 import React from 'react';
 import type { Story } from '@storybook/react';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
-import { StorybookProviders } from '../../../common/mock/storybook_providers';
-import { mockRiskScoreState } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { StorybookProviders } from '../../../../common/mock/storybook_providers';
+import { mockRiskScoreState } from '../../../../timelines/components/side_panel/new_user_detail/__mocks__';
 import { RiskSummary } from './risk_summary';
 
 export default {

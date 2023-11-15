@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { RiskScoreState } from '../../../explore/containers/risk_score';
-import type { RiskScoreEntity, UserRiskScore } from '../../../../common/search_strategy';
-import { RiskSeverity } from '../../../../common/search_strategy';
-import { RiskCategories } from '../../../../common/risk_engine';
+import type { RiskScoreState } from '../../../../explore/containers/risk_score';
+import type { RiskScoreEntity, UserRiskScore } from '../../../../../common/search_strategy';
+import { RiskSeverity } from '../../../../../common/search_strategy';
+import { RiskCategories } from '../../../../../common/risk_engine';
 
 const userRiskScore: UserRiskScore = {
   '@timestamp': '626569200000',

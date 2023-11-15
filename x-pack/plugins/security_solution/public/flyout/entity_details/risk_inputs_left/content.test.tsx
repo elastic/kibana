@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import type { SimpleRiskInput } from '../../../common/risk_engine';
-import { RiskCategories } from '../../../common/risk_engine';
+import type { SimpleRiskInput } from '../../../../common/risk_engine';
+import { RiskCategories } from '../../../../common/risk_engine';
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { RiskInputsPanel } from '.';
-import { TestProviders } from '../../common/mock';
+import { TestProviders } from '../../../common/mock';
 import { times } from 'lodash/fp';
 import { alertDataMock } from './mocks';
 
 const mockUseAlertsByIds = jest.fn().mockReturnValue({ loading: false, data: [] });
 
-jest.mock('../../common/containers/alerts/use_alerts_by_ids', () => ({
+jest.mock('../../../common/containers/alerts/use_alerts_by_ids', () => ({
   useAlertsByIds: () => mockUseAlertsByIds(),
 }));
 

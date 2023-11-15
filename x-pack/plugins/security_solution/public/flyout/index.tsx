@@ -27,10 +27,10 @@ import {
 import type { PreviewPanelProps } from './document_details/preview';
 import { PreviewPanel, PreviewPanelKey } from './document_details/preview';
 import { PreviewPanelProvider } from './document_details/preview/context';
-import type { UserDetailsExpandableFlyoutProps } from './entity_details/user_details';
-import { UserDetailsPanel, UserDetailsPanelKey } from './entity_details/user_details';
-import type { RiskInputsExpandableFlyoutProps } from './risk_inputs';
-import { RiskInputsPanel, RiskInputsPanelKey } from './risk_inputs';
+import type { UserPanelExpandableFlyoutProps } from './entity_details/user_right';
+import { UserPanel, UserPanelKey } from './entity_details/user_right';
+import type { RiskInputsExpandableFlyoutProps } from './entity_details/risk_inputs_left';
+import { RiskInputsPanel, RiskInputsPanelKey } from './entity_details/risk_inputs_left';
 
 /**
  * List of all panels that will be used within the document details expandable flyout.
@@ -70,10 +70,8 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
     ),
   },
   {
-    key: UserDetailsPanelKey,
-    component: (props) => (
-      <UserDetailsPanel {...(props as UserDetailsExpandableFlyoutProps).params} />
-    ),
+    key: UserPanelKey,
+    component: (props) => <UserPanel {...(props as UserPanelExpandableFlyoutProps).params} />,
   },
   {
     key: RiskInputsPanelKey,

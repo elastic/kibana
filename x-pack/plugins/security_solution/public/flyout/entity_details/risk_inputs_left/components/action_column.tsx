@@ -8,8 +8,8 @@
 import { EuiButtonIcon, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
-import type { AlertRawData } from '.';
-import { useRiskInputActionsPanels } from './use_risk_input_actions_panels';
+import type { AlertRawData } from '../content';
+import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
 
 interface ActionColumnProps {
   alert: AlertRawData;
@@ -29,9 +29,12 @@ export const ActionColumn: React.FC<ActionColumnProps> = ({ alert }) => {
         <EuiButtonIcon
           onClick={togglePopover}
           iconType="boxesHorizontal"
-          aria-label={i18n.translate('xpack.securitySolution.flyout.riskInputs.actions.ariaLabel', {
-            defaultMessage: 'Actions',
-          })}
+          aria-label={i18n.translate(
+            'xpack.securitySolution.flyout.entityDetails.riskInputs.actions.ariaLabel',
+            {
+              defaultMessage: 'Actions',
+            }
+          )}
           color="text"
         />
       }

@@ -7,18 +7,17 @@
 
 import { render } from '@testing-library/react';
 import React from 'react';
-import { TestProviders } from '../../../common/mock';
-import { mockRiskScoreState } from '../mocks';
-
+import { TestProviders } from '../../../../common/mock';
+import { mockRiskScoreState } from '../../user_right/mocks';
 import { RiskSummary } from './risk_summary';
 
-jest.mock('../../../common/components/visualization_actions/visualization_embeddable');
+jest.mock('../../../../common/components/visualization_actions/visualization_embeddable');
 
 describe('RiskSummary', () => {
   it('renders risk summary table', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={mockRiskScoreState} />
+        <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
       </TestProviders>
     );
 
@@ -30,7 +29,10 @@ describe('RiskSummary', () => {
   it('renders risk summary table when riskScoreData is empty', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={{ ...mockRiskScoreState, data: undefined }} />
+        <RiskSummary
+          riskScoreData={{ ...mockRiskScoreState, data: undefined }}
+          queryId={'testQuery'}
+        />
       </TestProviders>
     );
     expect(getByTestId('risk-summary-table')).toBeInTheDocument();
@@ -39,7 +41,7 @@ describe('RiskSummary', () => {
   it('renders visualization embeddable', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={mockRiskScoreState} />
+        <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
       </TestProviders>
     );
 
@@ -49,7 +51,7 @@ describe('RiskSummary', () => {
   it('renders updated at', () => {
     const { getByTestId } = render(
       <TestProviders>
-        <RiskSummary riskScoreData={mockRiskScoreState} />
+        <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
       </TestProviders>
     );
 

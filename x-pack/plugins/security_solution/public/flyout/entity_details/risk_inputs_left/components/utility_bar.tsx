@@ -19,8 +19,8 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import { useRiskInputActionsPanels } from './use_risk_input_actions_panels';
-import type { AlertRawData } from '.';
+import { useRiskInputActionsPanels } from '../hooks/use_risk_input_actions_panels';
+import type { AlertRawData } from '../content';
 
 interface Props {
   selectedAlerts: AlertRawData[];
@@ -56,14 +56,14 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
             <EuiText size="xs">
               {pagination.totalItemCount <= 1 ? (
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.riskInputs.utilityBar.selectionTextSingle"
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectionTextSingle"
                   defaultMessage="Showing {totalInputs} {riskInputs}"
                   values={{
                     totalInputs: pagination.totalItemCount,
                     riskInputs: (
                       <b>
                         <FormattedMessage
-                          id="xpack.securitySolution.flyout.riskInputs.utilityBar.riskInput"
+                          id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.riskInput"
                           defaultMessage="Risk input"
                         />
                       </b>
@@ -72,7 +72,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                 />
               ) : (
                 <FormattedMessage
-                  id="xpack.securitySolution.flyout.riskInputs.utilityBar.selectionTextRange"
+                  id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.selectionTextRange"
                   defaultMessage="Showing {displayedRange} of {totalInputs} {riskInputs}"
                   values={{
                     displayedRange: <b>{`${fromItem}-${toItem}`}</b>,
@@ -80,7 +80,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                     riskInputs: (
                       <b>
                         <FormattedMessage
-                          id="xpack.securitySolution.flyout.riskInputs.utilityBar.riskInputs"
+                          id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.riskInputs"
                           defaultMessage="Risk inputs"
                         />
                       </b>
@@ -105,7 +105,7 @@ export const RiskInputsUtilityBar: FunctionComponent<Props> = React.memo(
                     flush="left"
                   >
                     <FormattedMessage
-                      id="xpack.securitySolution.flyout.riskInputs.utilityBar.text"
+                      id="xpack.securitySolution.flyout.entityDetails.riskInputs.utilityBar.text"
                       defaultMessage="{totalSelectedInputs} selected risk input"
                       values={{
                         totalSelectedInputs: selectedAlerts.length,

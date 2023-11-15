@@ -15,14 +15,14 @@ import {
   mockObservedUser,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
-import { UserDetailsContent } from './user_details_content';
+import { UserPanelContent } from './content';
 
 const flyoutContextValue = {
   openLeftPanel: () => window.alert('openLeftPanel called'),
   panels: {},
 } as unknown as ExpandableFlyoutContext;
 
-storiesOf('Components/UserDetailsContent', module)
+storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
@@ -33,8 +33,7 @@ storiesOf('Components/UserDetailsContent', module)
     </StorybookProviders>
   ))
   .add('default', () => (
-    <UserDetailsContent
-      userName="test"
+    <UserPanelContent
       managedUser={mockManagedUser}
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
@@ -44,8 +43,7 @@ storiesOf('Components/UserDetailsContent', module)
     />
   ))
   .add('integration disabled', () => (
-    <UserDetailsContent
-      userName="test"
+    <UserPanelContent
       managedUser={{
         details: undefined,
         isLoading: false,
@@ -67,8 +65,7 @@ storiesOf('Components/UserDetailsContent', module)
     />
   ))
   .add('no managed data', () => (
-    <UserDetailsContent
-      userName="test"
+    <UserPanelContent
       managedUser={{
         details: undefined,
         isLoading: false,
@@ -90,8 +87,7 @@ storiesOf('Components/UserDetailsContent', module)
     />
   ))
   .add('no observed data', () => (
-    <UserDetailsContent
-      userName="test"
+    <UserPanelContent
       managedUser={mockManagedUser}
       observedUser={{
         details: {
@@ -125,8 +121,7 @@ storiesOf('Components/UserDetailsContent', module)
     />
   ))
   .add('loading', () => (
-    <UserDetailsContent
-      userName="test"
+    <UserPanelContent
       managedUser={{
         details: undefined,
         isLoading: true,

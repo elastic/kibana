@@ -11,8 +11,8 @@ import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import React from 'react';
-import { TestProviders } from '../../common/mock';
-import { alertDataMock } from './mocks';
+import { TestProviders } from '../../../../common/mock';
+import { alertDataMock } from '../mocks';
 import { useRiskInputActionsPanels } from './use_risk_input_actions_panels';
 
 const casesServiceMock = casesPluginMock.createStartContract();

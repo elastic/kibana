@@ -21,20 +21,20 @@ import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
-import { InspectButton, InspectButtonContainer } from '../../../common/components/inspect';
-import { ONE_WEEK_IN_HOURS } from '../../../timelines/components/side_panel/new_user_detail/constants';
-import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
-import { RiskScoreEntity } from '../../../../common/risk_engine';
-import type { RiskScoreState } from '../../../explore/containers/risk_score';
-import { VisualizationEmbeddable } from '../../../common/components/visualization_actions/visualization_embeddable';
-import { getRiskScoreSummaryAttributes } from '../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
-import { USER_DETAILS_RISK_SCORE_QUERY_ID } from '../user_details';
-import { ExpandablePanel } from '../../shared/components/expandable_panel';
-import { RiskInputsPanelKey } from '../../risk_inputs';
-import { ALERTS } from './translations';
+import { i18n } from '@kbn/i18n';
+import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
+import { ONE_WEEK_IN_HOURS } from '../../../../timelines/components/side_panel/new_user_detail/constants';
+import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
+import { RiskScoreEntity } from '../../../../../common/risk_engine';
+import type { RiskScoreState } from '../../../../explore/containers/risk_score';
+import { VisualizationEmbeddable } from '../../../../common/components/visualization_actions/visualization_embeddable';
+import { getRiskScoreSummaryAttributes } from '../../../../common/components/visualization_actions/lens_attributes/common/risk_scores/risk_score_summary';
+import { ExpandablePanel } from '../../../shared/components/expandable_panel';
+import { RiskInputsPanelKey } from '../../risk_inputs_left';
 
 export interface RiskSummaryProps {
   riskScoreData: RiskScoreState<RiskScoreEntity.user>;
+  queryId: string;
 }
 
 interface TableItem {
@@ -44,7 +44,7 @@ interface TableItem {
 const LENS_VISUALIZATION_HEIGHT = 126; //  Static height in pixels specified by design
 const LAST_30_DAYS = { from: 'now-30d', to: 'now' };
 
-export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
+export const RiskSummary = React.memo(({ riskScoreData, queryId }: RiskSummaryProps) => {
   const { data: userRisk } = riskScoreData;
   const userRiskData = userRisk && userRisk.length > 0 ? userRisk[0] : undefined;
   const { euiTheme } = useEuiTheme();
@@ -104,7 +104,9 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
   const items: TableItem[] = useMemo(
     () => [
       {
-        category: ALERTS,
+        category: i18n.translate('xpack.securitySolution.flyout.entityDetails.alertsGroupLabel', {
+          defaultMessage: 'Alerts',
+        }),
         count: userRiskData?.user.risk.inputs?.length ?? 0,
       },
     ],
@@ -223,7 +225,7 @@ export const RiskSummary = React.memo(({ riskScoreData }: RiskSummaryProps) => {
                   `}
                 >
                   <InspectButton
-                    queryId={USER_DETAILS_RISK_SCORE_QUERY_ID}
+                    queryId={queryId}
                     title={
                       <FormattedMessage
                         id="xpack.securitySolution.flyout.entityDetails.inspectTableTitle"
