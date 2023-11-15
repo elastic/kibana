@@ -50,13 +50,13 @@ import {
   setChanged,
 } from './actions';
 import type { TimelineModel } from './model';
-import { epicPersistNote, timelineNoteActionsType } from './epic_note';
-import { epicPersistPinnedEvent, timelinePinnedEventActionsType } from './epic_pinned_event';
-import { epicPersistTimelineFavorite, timelineFavoriteActionsType } from './epic_favorite';
+import { epicPersistNote, isNoteAction } from './epic_note';
+import { epicPersistPinnedEvent, isPinnedEventAction } from './epic_pinned_event';
+import { epicPersistTimelineFavorite, isFavoriteTimelineAction } from './epic_favorite';
 import { isNotNull } from './helpers';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import { myEpicTimelineId } from './my_epic_timeline_id';
-import type { ActionTimeline, TimelineEpicDependencies } from './types';
+import type { TimelineEpicDependencies } from './types';
 import type { TimelineInput } from '../../../../common/search_strategy';
 
 const isItAtimelineAction = (timelineId: string | undefined) =>
@@ -133,13 +133,13 @@ export const createTimelineEpic =
       dispatcherTimelinePersistQueue.pipe(
         withLatestFrom(timeline$, notes$, timelineTimeRange$),
         concatMap(([objAction, timeline, notes, timelineTimeRange]) => {
-          const action: ActionTimeline = get('action', objAction);
+          const action: Action = get('action', objAction);
           const timelineId = myEpicTimelineId.getTimelineId();
           const version = myEpicTimelineId.getTimelineVersion();
           const templateTimelineId = myEpicTimelineId.getTemplateTimelineId();
           const templateTimelineVersion = myEpicTimelineId.getTemplateTimelineVersion();
 
-          if (timelineNoteActionsType.has(action.type)) {
+          if (isNoteAction(action)) {
             return epicPersistNote(
               action,
               timeline,
@@ -149,9 +149,9 @@ export const createTimelineEpic =
               notes$,
               allTimelineQuery$
             );
-          } else if (timelinePinnedEventActionsType.has(action.type)) {
+          } else if (isPinnedEventAction(action)) {
             return epicPersistPinnedEvent(action, timeline, action$, timeline$, allTimelineQuery$);
-          } else if (timelineFavoriteActionsType.has(action.type)) {
+          } else if (isFavoriteTimelineAction(action)) {
             return epicPersistTimelineFavorite(
               action,
               timeline,
@@ -159,10 +159,7 @@ export const createTimelineEpic =
               timeline$,
               allTimelineQuery$
             );
-          } else if (action.type === saveTimeline.type) {
-            // the type of `action` is completely wrong above.
-            // so we're casting to the correct type here.
-            // TODO: fix the ActionTimeline type above
+          } else if (isSaveTimelineAction(action)) {
             // - Add acceptance tests
             // - generate endpoint documentation and mark it as private
             // - Unit test the endpoint
@@ -300,6 +297,10 @@ export const createTimelineEpic =
       )
     );
   };
+
+function isSaveTimelineAction(action: Action): action is ReturnType<typeof saveTimeline> {
+  return action.type === saveTimeline.type;
+}
 
 const timelineInput: TimelineInput = {
   columns: null,

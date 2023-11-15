@@ -40,14 +40,6 @@ export interface TimelineState {
   insertTimeline: InsertTimeline | null;
 }
 
-export interface ActionTimeline extends Action<string> {
-  payload: {
-    id: string;
-    eventId: string;
-    noteId: string;
-  };
-}
-
 export interface TimelineEpicDependencies<State> {
   timelineByIdSelector: (state: State) => TimelineById;
   timelineTimeRangeSelector: (state: State) => inputsModel.TimeRange;
