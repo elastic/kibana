@@ -95,38 +95,8 @@ export class ActionsClientLlm extends LLM {
     stream.on('data', (chunk: string) => {
       responseBody += chunk.toString();
     });
-
-    try {
-      await finished(stream);
-    } catch {
-      // no need to handle this explicitly
-    }
-
-    const response = responseBody
-      .split('\n')
-      .filter((line) => {
-        return line.startsWith('data: ') && !line.endsWith('[DONE]');
-      })
-      .map((line) => {
-        return JSON.parse(line.replace('data: ', ''));
-      })
-      .filter(
-        (
-          line
-        ): line is {
-          choices: Array<{
-            delta: { content?: string };
-          }>;
-        } => {
-          return 'object' in line && line.object === 'chat.completion.chunk';
-        }
-      )
-      .reduce((prev, line) => {
-        const newChunk = getMessageFromChunks(line);
-        return prev + newChunk;
-      }, '');
-
-    return response;
+    await finished(stream);
+    return responseBody;
   }
   async _generate(
     prompts: string[],
@@ -162,22 +132,11 @@ export class ActionsClientLlm extends LLM {
     this.#logger.debug(
       `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
     );
-
-    const subActionParams =
-      // TODO: Remove in part 2 of streaming work for security solution
-      // tracked here: https://github.com/elastic/security-team/issues/7363
-      this.#request.body.params.subAction === 'invokeAI'
-        ? {
-            ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
-            messages: [assistantMessage], // the assistant message
-          }
-        : {
-            body: JSON.stringify({
-              ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
-              messages: [assistantMessage], // the assistant message
-            }),
-            stream: true,
-          };
+    console.log('subActionParams:::', this.#request.body.params.subActionParams);
+    const subActionParams = {
+      ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
+      messages: [assistantMessage], // the assistant message
+    };
 
     // create a new connector request body with the assistant message:
     const requestBody = {
@@ -196,52 +155,51 @@ export class ActionsClientLlm extends LLM {
     for (let i = 0; i < subPrompts.length; i += 1) {
       console.log('here 00');
       const data =
-        this.#request.body.params.subAction !== 'invokeAI'
+        this.#request.body.params.subAction === 'invokeStream'
           ? await (async () => {
               let response;
-              console.log('here 0');
+              console.log('streaming 0');
               const stream = await actionsClient.execute(requestBody);
-              console.log('here 1:');
+              console.log('streaming what is data from execute:', stream.data);
               this.#stream = (stream.data as unknown as Readable).pipe(new PassThrough());
-              console.log('here 2', this.#stream);
-              const whatIsThis = await this._getResponseFromStream(this.#stream);
-              console.log('whatIsThis', whatIsThis);
-
+              // console.log('streaming 2', this.#stream);
+              // const whatIsThis = await this._getResponseFromStream(this.#stream);
+              // console.log('whatIsThis', whatIsThis);
+              return this.#stream;
               for await (const message of this.#stream) {
                 //   // …
                 // }
                 //
                 // for await (const message of this.#stream) {
                 console.log('here 3', message);
-                // TODO: message is not what we are expecting
-
+                // TODO: not sure we need this stuff
                 // on the first message set the response properties
-                if (!response) {
-                  response = {
-                    id: message.id,
-                    object: message.object,
-                    created: message.created,
-                    model: message.model,
-                  };
-                }
-
-                // on all messages, update choice
-                for (const part of message.choices) {
-                  console.log('here 4');
-
-                  if (!choices[part.index]) {
-                    choices[part.index] = part;
-                  } else {
-                    const choice = choices[part.index];
-                    choice.text += part.text;
-                    choice.finish_reason = part.finish_reason;
-                    choice.logprobs = part.logprobs;
-                  }
-                  void runManager?.handleLLMNewToken(part.text, {
-                    prompt: Math.floor(part.index / 1),
-                    completion: part.index % 1,
-                  });
-                }
+                // if (!response) {
+                //   response = {
+                //     id: message.id,
+                //     object: message.object,
+                //     created: message.created,
+                //     model: message.model,
+                //   };
+                // }
+                //
+                // // on all messages, update choice
+                // for (const part of message.choices) {
+                //   console.log('here 4');
+                //
+                //   if (!choices[part.index]) {
+                //     choices[part.index] = part;
+                //   } else {
+                //     const choice = choices[part.index];
+                //     choice.text += part.text;
+                //     choice.finish_reason = part.finish_reason;
+                //     choice.logprobs = part.logprobs;
+                //   }
+                //   void runManager?.handleLLMNewToken(part.text, {
+                //     prompt: Math.floor(part.index / 1),
+                //     completion: part.index % 1,
+                //   });
+                // }
               }
               if (options.signal?.aborted) {
                 throw new Error('AbortError');
@@ -253,29 +211,6 @@ export class ActionsClientLlm extends LLM {
           : await actionsClient.execute(requestBody);
       console.log('datadatadata', data);
       choices.push(...data.choices);
-      // const {
-      //   completion_tokens: completionTokens,
-      //   prompt_tokens: promptTokens,
-      //   total_tokens: totalTokens,
-      // } = data.usage
-      //   ? data.usage
-      //   : {
-      //       completion_tokens: undefined,
-      //       prompt_tokens: undefined,
-      //       total_tokens: undefined,
-      //     };
-      //
-      // if (completionTokens) {
-      //   tokenUsage.completionTokens = (tokenUsage.completionTokens ?? 0) + completionTokens;
-      // }
-      //
-      // if (promptTokens) {
-      //   tokenUsage.promptTokens = (tokenUsage.promptTokens ?? 0) + promptTokens;
-      // }
-      //
-      // if (totalTokens) {
-      //   tokenUsage.totalTokens = (tokenUsage.totalTokens ?? 0) + totalTokens;
-      // }
     }
 
     const generations = chunkArray(choices, 1).map((promptChoices) =>
