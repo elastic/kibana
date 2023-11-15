@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import * as Rx from 'rxjs';
 import { catchError, filter, map, mergeMap, takeUntil } from 'rxjs/operators';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+
 import {
   CoreSetup,
   CoreStart,
@@ -19,18 +18,25 @@ import {
   PluginInitializerContext,
   ThemeServiceStart,
 } from '@kbn/core/public';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
-import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { durationToNumber } from '../common/schema_utils';
-import { JobId, JobSummarySet } from '../common/types';
-import { ReportingSetup, ReportingStart } from '.';
+import { ManagementSetup, ManagementStart } from '@kbn/management-plugin/public';
+import { ClientConfigType } from '@kbn/reporting-public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+
+import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY, durationToNumber } from '@kbn/reporting-common';
+import type { JobId } from '@kbn/reporting-common/types';
+
+import type { ReportingSetup, ReportingStart } from '.';
 import { ReportingAPIClient } from './lib/reporting_api_client';
 import { ReportingNotifierStreamHandler as StreamHandler } from './lib/stream_handler';
 import { getGeneralErrorToast } from './notifier';
 import { ReportingCsvPanelAction } from './panel_actions/get_csv_panel_action';
+import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
+import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
 import { getSharedComponents } from './shared';
 import type {
   SharePluginSetup,
@@ -39,17 +45,7 @@ import type {
   UiActionsStart,
 } from './shared_imports';
 import { AppNavLinkStatus } from './shared_imports';
-import { reportingCsvShareProvider } from './share_context_menu/register_csv_reporting';
-import { reportingScreenshotShareProvider } from './share_context_menu/register_pdf_png_reporting';
-import { JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY } from '../common/constants';
-
-export interface ClientConfigType {
-  poll: { jobsRefresh: { interval: number; intervalErrorMultiplier: number } };
-  roles: { enabled: boolean };
-  export_types: { pdf: { enabled: boolean }; png: { enabled: boolean }; csv: { enabled: boolean } };
-  statefulSettings: { enabled: boolean };
-}
-
+import type { JobSummarySet } from './types';
 function getStored(): JobId[] {
   const sessionValue = sessionStorage.getItem(JOB_COMPLETION_NOTIFICATIONS_SESSION_KEY);
   return sessionValue ? JSON.parse(sessionValue) : [];
@@ -73,7 +69,7 @@ function handleError(
   return Rx.of({ completed: [], failed: [] });
 }
 
-export interface ReportingPublicPluginSetupDendencies {
+export interface ReportingPublicPluginSetupDependencies {
   home: HomePublicPluginSetup;
   management: ManagementSetup;
   uiActions: UiActionsSetup;
@@ -81,7 +77,7 @@ export interface ReportingPublicPluginSetupDendencies {
   share: SharePluginSetup;
 }
 
-export interface ReportingPublicPluginStartDendencies {
+export interface ReportingPublicPluginStartDependencies {
   home: HomePublicPluginStart;
   data: DataPublicPluginStart;
   management: ManagementStart;
@@ -99,8 +95,8 @@ export class ReportingPublicPlugin
     Plugin<
       ReportingSetup,
       ReportingStart,
-      ReportingPublicPluginSetupDendencies,
-      ReportingPublicPluginStartDendencies
+      ReportingPublicPluginSetupDependencies,
+      ReportingPublicPluginStartDependencies
     >
 {
   private kibanaVersion: string;
@@ -146,8 +142,8 @@ export class ReportingPublicPlugin
   }
 
   public setup(
-    core: CoreSetup<ReportingPublicPluginStartDendencies>,
-    setupDeps: ReportingPublicPluginSetupDendencies
+    core: CoreSetup<ReportingPublicPluginStartDependencies>,
+    setupDeps: ReportingPublicPluginSetupDependencies
   ) {
     const { getStartServices, uiSettings } = core;
     const { home, management, screenshotMode, share, uiActions } = setupDeps;

@@ -173,6 +173,7 @@ export async function upgradeBatch(
 }
 
 export const MINIMUM_EXECUTION_DURATION_SECONDS = 60 * 60 * 2; // 2h
+export const EXPIRATION_DURATION_SECONDS = 60 * 60 * 24 * 30; // 1 month
 
 export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeconds?: number) => {
   const now = new Date().toISOString();
@@ -199,13 +200,12 @@ export const getRollingUpgradeOptions = (startTime?: string, upgradeDurationSeco
     };
   }
   // Schedule without rolling upgrade (Immediately after start_time)
+  // Expiration time is set to a very long value (1 month) to allow upgrading agents staying offline for long time
   if (startTime && !upgradeDurationSeconds) {
     return {
       start_time: startTime ?? now,
       minimum_execution_duration: MINIMUM_EXECUTION_DURATION_SECONDS,
-      expiration: moment(startTime)
-        .add(MINIMUM_EXECUTION_DURATION_SECONDS, 'seconds')
-        .toISOString(),
+      expiration: moment(startTime).add(EXPIRATION_DURATION_SECONDS, 'seconds').toISOString(),
     };
   } else {
     // Regular bulk upgrade (non scheduled, non rolling)
