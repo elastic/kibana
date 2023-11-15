@@ -139,12 +139,12 @@ Note:
 
 ### Scenario options
 
-| Option   | Type      | Default | Description                          |
-|----------|-----------|:--------|--------------------------------------|
-| `--from` | [date]    | `now()` | The start of the time window         |
-| `--to`   | [date]    |         | The end of the time window           |
-| `--live` | [boolean] |         | Generate and index data continuously |
-
+| Option           | Type      | Default | Description                          |
+|------------------|-----------|:--------|--------------------------------------|
+| `--from`         | [date]    | `now()` | The start of the time window         |
+| `--to`           | [date]    |         | The end of the time window           |
+| `--live`         | [boolean] |         | Generate and index data continuously |
+| `--scenarioOpts` |           |         | Raw options specific to the scenario |
 Note:
 
 - The default `--to` is `15m`.
