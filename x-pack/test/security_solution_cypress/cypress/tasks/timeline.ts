@@ -56,6 +56,7 @@ import {
   TIMELINE_SAVE_MODAL,
   TIMELINE_SAVE_MODAL_OPEN_BUTTON,
   TIMELINE_EDIT_MODAL_SAVE_BUTTON,
+  TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH,
   TIMELINE_PROGRESS_BAR,
   QUERY_TAB_BUTTON,
   CLOSE_OPEN_TIMELINE_MODAL_BTN,
@@ -359,6 +360,29 @@ export const saveTimeline = () => {
 
     cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).should('not.be.disabled');
     cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+
+    cy.get(TIMELINE_PROGRESS_BAR).should('exist');
+    cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
+  });
+};
+
+/**
+ * Saves the timeline as a new teimline. Make sure that the timeline
+ * has a title set and has been saved before, before you're using this task.
+ * Otherwise it will fail to save.
+ */
+export const saveTimelineAsNew = () => {
+  cy.get(TIMELINE_SAVE_MODAL_OPEN_BUTTON).first().click();
+
+  cy.get(TIMELINE_SAVE_MODAL).within(() => {
+    cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
+    cy.get(TIMELINE_TITLE_INPUT).should('not.be.disabled');
+
+    cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).should('not.be.disabled');
+    cy.get(TIMELINE_EDIT_MODAL_SAVE_BUTTON).click();
+
+    cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).should('exist');
+    cy.get(TIMELINE_EDIT_MODAL_SAVE_AS_NEW_SWITCH).click();
 
     cy.get(TIMELINE_PROGRESS_BAR).should('exist');
     cy.get(TIMELINE_PROGRESS_BAR).should('not.exist');
