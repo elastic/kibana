@@ -30,7 +30,6 @@ import {
   modelDownloadsQuery,
 } from './schemas/inference_schema';
 import {
-  isTrainedModelConfigResponse,
   PipelineDefinition,
   type TrainedModelConfigResponse,
 } from '../../common/types/trained_models';
@@ -40,10 +39,9 @@ import { modelsProvider } from '../models/model_management';
 
 export const DEFAULT_TRAINED_MODELS_PAGE_SIZE = 10000;
 
-export function filterForEnabledFeatureModels(
-  models: TrainedModelConfigResponse[] | estypes.MlTrainedModelConfig[],
-  enabledFeatures: MlFeatures
-) {
+export function filterForEnabledFeatureModels<
+  T extends TrainedModelConfigResponse | estypes.MlTrainedModelConfig
+>(models: T[], enabledFeatures: MlFeatures) {
   let filteredModels = models;
   if (enabledFeatures.nlp === false) {
     filteredModels = filteredModels.filter((m) => m.model_type === 'tree_ensemble');
@@ -195,24 +193,13 @@ export function trainedModelsRoutes(
           const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
 
           try {
-            // @ts-ignore
-            const jobIdsString = filteredModels.reduce(
-              (
-                jobIdsStr: string,
-                currentModel: TrainedModelConfigResponse | estypes.MlTrainedModelConfig,
-                idx: number
-              ) => {
-                if (isTrainedModelConfigResponse(currentModel)) {
-                  let id = currentModel.metadata?.analytics_config?.id ?? '';
-                  if (id !== '') {
-                    id = `${idx > 0 ? ',' : ''}${id}*`;
-                  }
-                  return `${jobIdsStr}${id}`;
-                }
-                return jobIdsStr;
-              },
-              ''
-            );
+            const jobIdsString = filteredModels.reduce((jobIdsStr, currentModel, idx) => {
+              let id = currentModel.metadata?.analytics_config?.id ?? '';
+              if (id !== '') {
+                id = `${idx > 0 ? ',' : ''}${id}*`;
+              }
+              return `${jobIdsStr}${id}`;
+            }, '');
 
             if (jobIdsString !== '') {
               const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
@@ -221,12 +208,10 @@ export function trainedModelsRoutes(
               });
 
               filteredModels.forEach((model) => {
-                if (isTrainedModelConfigResponse(model)) {
-                  const dfaId = model?.metadata?.analytics_config?.id;
-                  if (dfaId !== undefined) {
-                    // if this is a dfa model, set origin_job_exists
-                    model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
-                  }
+                const dfaId = model?.metadata?.analytics_config?.id;
+                if (dfaId !== undefined) {
+                  // if this is a dfa model, set origin_job_exists
+                  model.origin_job_exists = jobs.find((job) => job.id === dfaId) !== undefined;
                 }
               });
             }
