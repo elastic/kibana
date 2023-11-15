@@ -76,7 +76,6 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     perPage,
   });
 
-  const { agents, total, groups } = agentList ?? { agents: [], total: 0, groups: {} };
   // option related
   const [options, setOptions] = useState<GroupOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<GroupOption[]>([]);
@@ -96,7 +95,7 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
         selectedGroups: SelectedGroups;
       } = generateAgentSelection(selection);
       if (newAgentSelection.allAgentsSelected) {
-        setNumAgentsSelected(total ?? 0);
+        setNumAgentsSelected(agentList?.total ?? 0);
       } else {
         const checkAgent = generateAgentCheck(selectedGroups);
         setNumAgentsSelected(
@@ -105,14 +104,14 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
             // add the number of agents added via policy and platform groups
             getNumAgentsInGrouping(selectedGroups) -
             // subtract the number of agents double counted by policy/platform selections
-            getNumOverlapped(selectedGroups, groups?.overlap ?? {})
+            getNumOverlapped(selectedGroups, agentList?.groups?.overlap ?? {})
         );
       }
 
       onChange(newAgentSelection);
       setSelectedOptions(selection);
     },
-    [groups?.overlap, onChange, total]
+    [agentList?.groups?.overlap, agentList?.total, onChange]
   );
 
   useEffect(() => {
@@ -154,20 +153,23 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
   }, [agentSelection, onSelection, options, selectedOptions]);
 
   useEffect(() => {
-    if (agentsFetched && groups) {
+    if (agentsFetched && agentList?.groups) {
       // Cap policies to 10 on init dropdown
-      const policies = (groups?.policies || []).slice(0, searchValue === '' ? 10 : undefined);
+      const policies = (agentList.groups?.policies || []).slice(
+        0,
+        searchValue === '' ? 10 : undefined
+      );
 
       const grouper = new AgentGrouper();
       // update the groups when groups or agents have changed
-      grouper.setTotalAgents(total);
-      grouper.updateGroup(AGENT_GROUP_KEY.Platform, groups?.platforms ?? []);
+      grouper.setTotalAgents(agentList.total);
+      grouper.updateGroup(AGENT_GROUP_KEY.Platform, agentList?.groups?.platforms ?? []);
       grouper.updateGroup(AGENT_GROUP_KEY.Policy, policies);
-      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agents);
+      grouper.updateGroup(AGENT_GROUP_KEY.Agent, agentList?.agents);
       const newOptions = grouper.generateOptions();
       setOptions((prevOptions) => (!deepEqual(prevOptions, newOptions) ? newOptions : prevOptions));
     }
-  }, [agents, agentsFetched, groups, searchValue, total]);
+  }, [agentList?.agents, agentList?.groups, agentList?.total, agentsFetched, searchValue]);
 
   const renderOption = useCallback((option, searchVal, contentClassName) => {
     const { label, value } = option;
@@ -192,10 +194,9 @@ const AgentsTableComponent: React.FC<AgentsTableProps> = ({ agentSelection, onCh
     setModifyingSearch(v !== '');
     setSearchValue(v);
   }, []);
-  const isFetched = agentsFetched && groups;
 
   const renderNoAgentAvailableWarning = () => {
-    if (isFetched && !options.length) {
+    if (agentsFetched && agentList?.groups && !options.length) {
       return (
         <>
           <EuiCallOut color="danger" size="s" iconType="warning" title={NO_AGENT_AVAILABLE_TITLE}>

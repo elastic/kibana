@@ -268,8 +268,27 @@ export async function getAgentsByKuery(
     unenrolling: 0,
   };
 
-  const queryAgents = async (from: number, size: number) =>
-    esClient.search<
+  const queryAgents = async (from: number, size: number) => {
+    const aggs = {
+      ...(aggregations || getStatusSummary
+        ? {
+            aggs: {
+              ...(aggregations ? aggregations : {}),
+              ...(getStatusSummary
+                ? {
+                    status: {
+                      terms: {
+                        field: 'status',
+                      },
+                    },
+                  }
+                : {}),
+            },
+          }
+        : {}),
+    };
+
+    return esClient.search<
       FleetServerAgent,
       { status: { buckets: Array<{ key: AgentStatus; doc_count: number }> } }
     >({
@@ -293,9 +312,9 @@ export async function getAgentsByKuery(
             ignore_unavailable: true,
           }),
       ...(pitId && searchAfter ? { search_after: searchAfter, from: 0 } : {}),
-      ...(getStatusSummary && { aggs: { status: { terms: { field: 'status' } } } }),
-      ...(aggregations && { aggs: aggregations }),
+      ...aggs,
     });
+  };
   let res;
   try {
     res = await queryAgents((page - 1) * perPage, perPage);
