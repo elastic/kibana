@@ -7,10 +7,12 @@
 
 import type {
   ApplicationStart,
+  CoreStart,
   IUiSettingsClient,
   ThemeServiceSetup,
   ToastsSetup,
 } from '@kbn/core/public';
+import { OverlayStart } from '@kbn/core-overlays-browser';
 import { ILicense } from '@kbn/licensing-plugin/public';
 import type { LayoutParams } from '@kbn/screenshotting-plugin/common';
 import type { ReportingAPIClient } from '../lib/reporting_api_client';
@@ -25,6 +27,8 @@ export interface ExportPanelShareOpts {
   license: ILicense;
   application: ApplicationStart;
   theme: ThemeServiceSetup;
+  overlays: OverlayStart;
+  i18nStart: CoreStart['i18n'];
 }
 
 export interface ReportingSharingData {

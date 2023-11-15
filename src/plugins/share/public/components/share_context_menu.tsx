@@ -100,31 +100,8 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
     );
   };
 
-  const openReportModal = () => {};
 
-  const openCsvModal = () => {};
 
-  // private openCsvExportModal() {
-  //   const session = overlays.openModal(
-  //     toMountPoint(
-  //       <CsvModalContentUI
-  //         isEmbedded={false}
-  //         allowShortUrl={false}
-  //         onClose={() => {
-  //           onClose();
-  //           session.close();
-  //         }}
-  //         urlService={urlService}
-  //         objectType={objectType}
-  //       />,
-  //       { theme: theme, i18n: i18nStart }
-  //     ),
-  //     {
-  //       maxWidth: 400,
-  //       'data-test-subj': 'embed-modal',
-  //     }
-  //   );
-  // }
   const getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
     const menuItems: ShareContextMenuPanelItem[] = [];
@@ -154,23 +131,17 @@ export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextM
 
     shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
-      console.log({ objectType });
-      const imageReportingModal = {
-        icon: 'document',
-        onClick: openReportModal,
-        ...shareMenuItem,
-      };
-      const csvModal = {
-        icon: 'document',
-        onClick: openCsvModal,
-        ...shareMenuItem,
-      };
+      console.log({shareMenuItem})
+      menuItems.push(
+        {
+          icon: 'document',
+          ...shareMenuItem,
+        }
+      )
       panels.push({
         ...panels,
         id: panelId,
       });
-      if (objectType === 'dashboard') menuItems.push(imageReportingModal);
-      else if (objectType === 'search') menuItems.push(csvModal);
     });
 
     if (menuItems.length > 1) {

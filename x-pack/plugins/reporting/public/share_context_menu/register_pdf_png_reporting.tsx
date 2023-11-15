@@ -7,6 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
 import { isJobV2Params } from '../../common/job_utils';
 import { checkLicense } from '../lib/license_check';
@@ -21,6 +22,8 @@ export const reportingScreenshotShareProvider = ({
   application,
   usesUiCapabilities,
   theme,
+  overlays,
+  i18nStart,
 }: ExportPanelShareOpts): ShareMenuProvider => {
   const getShareMenuItems = ({
     objectType,
@@ -85,6 +88,32 @@ export const reportingScreenshotShareProvider = ({
       defaultMessage: 'Exports',
     });
 
+    const openImageModal = () => {
+      const session = overlays.openModal(
+        toMountPoint(
+          <ReportingModalContent
+            onClose={() => {
+              session.close();
+            }}
+            apiClient={apiClient}
+            toasts={toasts}
+            uiSettings={uiSettings}
+            objectId={objectId}
+            requiresSavedState={requiresSavedState}
+            isDirty={isDirty}
+            theme={theme}
+            jobProviderOptions={jobProviderOptions}
+            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
+          />,
+          { theme, i18n: i18nStart }
+        ),
+        {
+          maxWidth: 400,
+          'data-test-subj': 'export-image-modal',
+        }
+      );
+    };
+
     const reportingModal = {
       shareMenuItem: {
         name: reportingModalTitle,
@@ -92,24 +121,13 @@ export const reportingScreenshotShareProvider = ({
         disabled: licenseDisabled || sharingData.reportingDisabled,
         ['data-test-subj']: 'Exports',
         sortOrder: 10,
+        icon: 'document',
+        onClick: openImageModal,
       },
       panel: {
-        id: 'reportingModal',
+        id: 'exportImageModal',
         title: reportingModalTitle,
-        content: (
-          <ReportingModalContent
-            apiClient={apiClient}
-            toasts={toasts}
-            uiSettings={uiSettings}
-            objectId={objectId}
-            requiresSavedState={requiresSavedState}
-            isDirty={isDirty}
-            onClose={onClose}
-            theme={theme}
-            jobProviderOptions={jobProviderOptions}
-            layoutOption={objectType === 'dashboard' ? 'print' : undefined}
-          />
-        ),
+        content: openImageModal,
       },
     };
 
@@ -138,6 +156,6 @@ export const reportingScreenshotShareProvider = ({
   return {
     id: 'screenCaptureExports',
     getShareMenuItems,
-    jobProviderOptions,
+    jobProviderOptions: jobProviderOptions as unknown as JobParamsProviderOptions,
   };
 };

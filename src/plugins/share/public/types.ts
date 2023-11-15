@@ -13,6 +13,8 @@ import type { Capabilities, CoreStart } from '@kbn/core/public';
 import type { UrlService, LocatorPublic } from '../common/url_service';
 import type { BrowserShortUrlClientFactoryCreateParams } from './url_service/short_urls/short_url_client_factory';
 import type { BrowserShortUrlClient } from './url_service/short_urls/short_url_client';
+import type { JobParamsProviderOptions } from '@kbn/reporting-plugin/public/share_context_menu';
+import { SearchSourceFields } from '@kbn/data-plugin/common';
 
 export type BrowserUrlService = UrlService<
   BrowserShortUrlClientFactoryCreateParams,
@@ -87,7 +89,12 @@ export interface ShareMenuProvider {
 
   getShareMenuItems: (context: ShareContext) => ShareMenuItem[];
 
-  jobProviderOptions: any;
+  jobProviderOptions: JobParamsProviderOptions | ((forShareUrl?: boolean) => {
+    searchSource: SearchSourceFields;
+    title: string;
+    objectType: string;
+    columns: string[] | undefined;
+})
 }
 
 interface UrlParamExtensionProps {

@@ -12,8 +12,9 @@ import { CSV_JOB_TYPE } from '@kbn/reporting-export-types-csv-common';
 
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import { ShareContext, ShareMenuProvider } from '@kbn/share-plugin/public';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { checkLicense } from '../lib/license_check';
-import { ExportPanelShareOpts } from '.';
+import { ExportPanelShareOpts, JobParamsProviderOptions } from '.';
 import { CsvModalContent } from './csv_export_modal';
 
 export const reportingCsvShareProvider = ({
@@ -24,15 +25,10 @@ export const reportingCsvShareProvider = ({
   license,
   usesUiCapabilities,
   theme,
+  overlays,
+  i18nStart,
 }: ExportPanelShareOpts): ShareMenuProvider => {
-  const getShareMenuItems = ({
-    objectType,
-    objectId,
-    onClose,
-    shareableUrl,
-    sharingData,
-    ...shareOpts
-  }: ShareContext) => {
+  const getShareMenuItems = ({ objectType, objectId, sharingData }: ShareContext) => {
     if ('search' !== objectType) {
       return [];
     }
@@ -68,6 +64,30 @@ export const reportingCsvShareProvider = ({
     const licenseHasCsvReporting = licenseCheck.showLinks;
     const licenseDisabled = !licenseCheck.enableLinks;
 
+    const openCsvModal = () => {
+      const session = overlays.openModal(
+        toMountPoint(
+          <CsvModalContent
+            onClose={() => {
+              session.close();
+            }}
+            requiresSavedState={false}
+            apiClient={apiClient}
+            toasts={toasts}
+            uiSettings={uiSettings}
+            reportType={CSV_JOB_TYPE}
+            objectId={objectId}
+            getJobParams={getJobParams}
+            theme={theme}
+          />,
+          { theme, i18n: i18nStart }
+        ),
+        {
+          maxWidth: 400,
+          'data-test-subj': 'export-csv-modal',
+        }
+      );
+    };
     // TODO: add abstractions in ExportTypeRegistry to use here?
     let capabilityHasCsvReporting = false;
     if (usesUiCapabilities) {
@@ -89,23 +109,12 @@ export const reportingCsvShareProvider = ({
           disabled: licenseDisabled,
           ['data-test-subj']: 'CSVReports',
           sortOrder: 1,
+          onClick: openCsvModal,
         },
         panel: {
           id: 'csvReportingPanel',
           title: panelTitle,
-          content: (
-            <CsvModalContent
-              requiresSavedState={false}
-              apiClient={apiClient}
-              toasts={toasts}
-              uiSettings={uiSettings}
-              reportType={CSV_JOB_TYPE}
-              objectId={objectId}
-              onClose={onClose}
-              getJobParams={getJobParams}
-              theme={theme}
-            />
-          ),
+          content: openCsvModal,
         },
       });
     }
@@ -113,14 +122,7 @@ export const reportingCsvShareProvider = ({
     return shareActions;
   };
 
-  const getJobParams = ({
-    objectType,
-    objectId,
-    onClose,
-    shareableUrl,
-    sharingData,
-    ...shareOpts
-  }: ShareContext) => {
+  const getJobsParams = ({ objectType, sharingData }: ShareContext) => {
     const getSearchSource = sharingData.getSearchSource as ({
       addGlobalTimeFilter,
       absoluteTime,
@@ -144,13 +146,13 @@ export const reportingCsvShareProvider = ({
         }),
       };
     };
-
+    console.log({ getJobParams });
     return getJobParams;
   };
 
   return {
     id: 'csvReports',
     getShareMenuItems,
-    jobProviderOptions: getJobParams,
+    jobProviderOptions: getJobsParams as unknown as JobParamsProviderOptions,
   };
 };

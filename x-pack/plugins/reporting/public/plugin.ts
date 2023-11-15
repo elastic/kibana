@@ -147,7 +147,7 @@ export class ReportingPublicPlugin
   ) {
     const { getStartServices, uiSettings } = core;
     const { home, management, screenshotMode, share, uiActions } = setupDeps;
-
+    
     const startServices$ = Rx.from(getStartServices());
     const usesUiCapabilities = !this.config.roles.enabled;
 
@@ -220,7 +220,7 @@ export class ReportingPublicPlugin
     const reportingStart = this.getContract(share, core);
     const { toasts } = core.notifications;
 
-    startServices$.subscribe(([{ application }, { licensing }]) => {
+    startServices$.subscribe(([core, { licensing }]) => {
       licensing.license$.subscribe((license) => {
         share.register(
           reportingCsvShareProvider({
@@ -228,9 +228,11 @@ export class ReportingPublicPlugin
             toasts,
             uiSettings,
             license,
-            application,
+            application: core.application,
             usesUiCapabilities,
             theme: core.theme,
+            overlays: core.overlays,
+            i18nStart: core.i18n,
           })
         );
 
@@ -241,9 +243,11 @@ export class ReportingPublicPlugin
               toasts,
               uiSettings,
               license,
-              application,
+              application: core.application,
               usesUiCapabilities,
               theme: core.theme,
+              overlays: core.overlays,
+            i18nStart: core.i18n,
             })
           );
         }
