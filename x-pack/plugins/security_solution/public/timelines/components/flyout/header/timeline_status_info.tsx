@@ -20,7 +20,7 @@ export const TimelineStatusInfoComponent = React.memo<{
   const isUnsaved = status === TimelineStatus.draft;
 
   let statusContent: React.ReactNode = null;
-  if (isUnsaved) {
+  if (isUnsaved || !updated) {
     statusContent = <EuiTextColor color="warning">{i18n.UNSAVED}</EuiTextColor>;
   } else if (changed) {
     statusContent = <EuiTextColor color="warning">{i18n.UNSAVED_CHANGES}</EuiTextColor>;
@@ -31,8 +31,7 @@ export const TimelineStatusInfoComponent = React.memo<{
         <FormattedRelative
           data-test-subj="timeline-status"
           key="timeline-status-autosaved"
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          value={new Date(updated!)}
+          value={new Date(updated)}
         />
       </>
     );

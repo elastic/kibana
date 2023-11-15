@@ -11,6 +11,7 @@ import styled, { createGlobalStyle } from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import type { KqlMode } from '../../../store/timeline/model';
 import type { DispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
@@ -67,6 +68,7 @@ interface Props {
   updateReduxTime: DispatchUpdateReduxTime;
   isDataProviderVisible: boolean;
   toggleDataProviderVisibility: () => void;
+  timelineType: TimelineType;
 }
 
 const SearchOrFilterContainer = styled.div``;
@@ -96,10 +98,10 @@ export const SearchOrFilter = React.memo<Props>(
     setSavedQueryId,
     to,
     toStr,
-    updateKqlMode,
     updateReduxTime,
     isDataProviderVisible,
     toggleDataProviderVisibility,
+    timelineType,
   }) => {
     const isDataProviderEmpty = useMemo(() => dataProviders?.length === 0, [dataProviders]);
 
@@ -149,27 +151,28 @@ export const SearchOrFilter = React.memo<Props>(
                 updateReduxTime={updateReduxTime}
               />
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="none"
-                alignItems="center"
-                justifyContent="center"
-              >
-                <EuiToolTip content={dataProviderIconTooltipContent}>
-                  <EuiButtonIcon
-                    color={buttonColor}
-                    isSelected={isDataProviderVisible}
-                    iconType={'timeline'}
-                    data-test-subj="toggle-data-provider"
-                    size="m"
-                    display="base"
-                    aria-label={dataProviderIconTooltipContent}
-                    onClick={toggleDataProviderVisibility}
-                  />
-                </EuiToolTip>
-              </EuiFlexGroup>
-            </EuiFlexItem>
+            {
+              /*
+              DataProvider toggle is not needed in template timeline because
+              it is always visible
+              */
+              timelineType === TimelineType.default ? (
+                <EuiFlexItem grow={false}>
+                  <EuiToolTip content={dataProviderIconTooltipContent}>
+                    <EuiButtonIcon
+                      color={buttonColor}
+                      isSelected={isDataProviderVisible}
+                      iconType="timeline"
+                      data-test-subj="toggle-data-provider"
+                      size="m"
+                      display="base"
+                      aria-label={dataProviderIconTooltipContent}
+                      onClick={toggleDataProviderVisibility}
+                    />
+                  </EuiToolTip>
+                </EuiFlexItem>
+              ) : null
+            }
             <EuiFlexItem grow={false}>
               <TimelineDatePickerLock />
             </EuiFlexItem>

@@ -62,6 +62,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     toStr,
     updateKqlMode,
     updateReduxTime,
+    timelineType,
   }) => {
     const dispatch = useDispatch();
 
@@ -174,6 +175,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
                 updateReduxTime={updateReduxTime}
                 toggleDataProviderVisibility={toggleDataProviderVisibility}
                 isDataProviderVisible={isDataProviderVisible}
+                timelineType={timelineType}
               />
             </EuiFlexItem>
           </EuiFlexGroup>
@@ -213,7 +215,8 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
       deepEqual(prevProps.filterQuery, nextProps.filterQuery) &&
       deepEqual(prevProps.kqlMode, nextProps.kqlMode) &&
       deepEqual(prevProps.savedQueryId, nextProps.savedQueryId) &&
-      deepEqual(prevProps.timelineId, nextProps.timelineId)
+      deepEqual(prevProps.timelineId, nextProps.timelineId) &&
+      prevProps.timelineType === nextProps.timelineType
     );
   }
 );
@@ -244,6 +247,7 @@ const makeMapStateToProps = () => {
       to: input.timerange.to,
       // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
       toStr: input.timerange.toStr!,
+      timelineType: timeline.timelineType,
     };
   };
 

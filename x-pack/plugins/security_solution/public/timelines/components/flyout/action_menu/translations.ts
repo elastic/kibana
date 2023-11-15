@@ -156,12 +156,9 @@ export const SAVE_TOUR_CLOSE = i18n.translate(
   }
 );
 
-export const TITLE = i18n.translate(
-  'xpack.securitySolution.timeline.saveTimeline.modal.titleTitle',
-  {
-    defaultMessage: 'Title',
-  }
-);
+export const TITLE = i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.title', {
+  defaultMessage: 'Title',
+});
 
 export const SAVE_TOUR_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.flyout.saveTour.title',

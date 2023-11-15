@@ -41,18 +41,7 @@ export const TimelineKpisContainer = ({ timelineId }: KpiExpandedProps) => {
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const { dataProviders, filters, kqlMode } = useDeepEqualSelector((state) =>
     pick(
-      [
-        'activeTab',
-        'dataProviders',
-        'kqlQuery',
-        'status',
-        'title',
-        'timelineType',
-        'updated',
-        'show',
-        'filters',
-        'kqlMode',
-      ],
+      ['dataProviders', 'filters', 'kqlMode'],
       getTimeline(state, timelineId) ?? timelineDefaults
     )
   );
