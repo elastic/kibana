@@ -20,14 +20,17 @@ describe('PainlessError', () => {
   });
 
   it('Should show reason and code', () => {
-    const e = new PainlessError({
-      statusCode: 400,
-      message: 'search_phase_execution_exception',
-      attributes: {
-        error: searchPhaseException.error,
+    const e = new PainlessError(
+      {
+        statusCode: 400,
+        message: 'search_phase_execution_exception',
+        attributes: {
+          error: searchPhaseException.error,
+        },
       },
-    });
-    const component = mount(e.getErrorMessage(startMock.application));
+      () => {}
+    );
+    const component = mount(e.getErrorMessage());
 
     const failedShards = searchPhaseException.error.failed_shards![0];
 
@@ -41,6 +44,7 @@ describe('PainlessError', () => {
     ).getDOMNode();
     expect(humanReadableError.textContent).toBe(failedShards?.reason.caused_by?.reason);
 
-    expect(component.find('EuiButton').length).toBe(1);
+    const actions = e.getActions(startMock.application);
+    expect(actions.length).toBe(2);
   });
 });
