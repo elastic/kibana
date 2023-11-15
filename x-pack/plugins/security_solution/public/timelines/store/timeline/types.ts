@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { Action } from 'redux';
 import type { Observable } from 'rxjs';
 
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
