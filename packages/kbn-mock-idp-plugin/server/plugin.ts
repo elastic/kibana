@@ -16,7 +16,7 @@ import {
   parseSAMLAuthnRequest,
 } from '../common';
 
-export const plugin: PluginInitializer<void, void> = (): Plugin => ({
+export const plugin: PluginInitializer<void, void> = async (): Promise<Plugin> => ({
   setup(core) {
     core.http.resources.register(
       {
