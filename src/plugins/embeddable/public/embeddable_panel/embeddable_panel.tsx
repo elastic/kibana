@@ -51,6 +51,7 @@ const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
 export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
   const { hideHeader, showShadow, embeddable, hideInspector, onPanelStatusChange } = panelProps;
   const [node, setNode] = useState<ReactNode | undefined>();
+  const [initialRenderComplete, setInitialRenderComplete] = useState(false);
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -142,6 +143,9 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
     } else {
       setNode(nextNode);
     }
+
+    setInitialRenderComplete(true);
+
     const errorSubscription = embeddable.getOutput$().subscribe({
       next: (output) => {
         setOutputError(output.error);
@@ -208,7 +212,8 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
         </EuiFlexGroup>
       )}
       <div className="embPanel__content" ref={embeddableRoot} {...contentAttrs}>
-        {node ? node : <PanelLoader />}
+        <span>{!initialRenderComplete && <PanelLoader />}</span>
+        {node}
       </div>
     </EuiPanel>
   );
