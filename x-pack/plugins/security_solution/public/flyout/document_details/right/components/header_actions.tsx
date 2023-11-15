@@ -48,7 +48,13 @@ export const HeaderActions: VFC = memo(() => {
   });
 
   return (
-    <EuiFlexGroup direction="row" justifyContent="flexEnd" alignItems="center" gutterSize="none">
+    <EuiFlexGroup
+      direction="row"
+      justifyContent="flexEnd"
+      alignItems="center"
+      gutterSize="none"
+      responsive={false}
+    >
       {showAssistant && (
         <EuiFlexItem grow={false}>
           <NewChatById
