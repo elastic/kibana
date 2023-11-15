@@ -107,7 +107,11 @@ async function createSecurityProject(
   });
   if (productTypes.length > 0) body.product_types = productTypes;
 
+  log.info(`Kibana override flag equals to ${process.env.OVERRIDE_KIBANA}!`);
   if (process.env.OVERRIDE_KIBANA && process.env.OVERRIDE_KIBANA === '1') {
+    log.info(
+      'Overriding Kibana image in the MKI with docker.elastic.co/kibana-ci/kibana-serverless:latest'
+    );
     body.overrides = {
       kibana: {
         docker_image: 'docker.elastic.co/kibana-ci/kibana-serverless:latest',
