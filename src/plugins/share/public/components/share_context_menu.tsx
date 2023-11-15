@@ -6,15 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React, { Component } from 'react';
+import React, { FC } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { I18nProvider } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenu, EuiContextMenuPanelDescriptor } from '@elastic/eui';
-
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-
 import { Capabilities } from '@kbn/core-capabilities-common';
+import { OverlayStart } from '@kbn/core-overlays-browser';
 import type { LocatorPublic } from '../../common';
 import { ShareMenuItem, ShareContextMenuPanelItem, UrlParamExtension } from '../types';
 import { AnonymousAccessServiceContract } from '../../common/anonymous_access';
@@ -42,72 +41,82 @@ export interface ShareContextMenuProps {
   snapshotShareWarning?: string;
   objectTypeTitle?: string;
   disabledShareUrl?: boolean;
-  overlays: CoreStart['overlays'];
+  openModal: OverlayStart['openModal'];
   theme: CoreStart['theme'];
   i18nStart: CoreStart['i18n'];
 }
 
-export class ShareContextMenu extends Component<ShareContextMenuProps> {
-  constructor(props: ShareContextMenuProps) {
-    super(props);
-  }
-  private openLinkModal() {
-    const session = this.props.overlays.openModal(
+export const ShareContextMenu: FC<ShareContextMenuProps> = (props: ShareContextMenuProps) => {
+  const {
+    openModal,
+    onClose,
+    urlService,
+    theme,
+    i18nStart,
+    objectType,
+    disabledShareUrl,
+    allowEmbed,
+    shareMenuItems,
+    objectTypeTitle,
+  } = props;
+
+  const openLinkModal = () => {
+    const session = openModal(
       toMountPoint(
         <LinkModal
           isEmbedded={false}
           allowShortUrl={false}
           onClose={() => {
-            this.props.onClose;
+            onClose();
             session.close();
           }}
-          urlService={this.props.urlService}
+          urlService={urlService}
         />,
-        { theme: this.props.theme, i18n: this.props.i18nStart }
+        { theme, i18n: i18nStart }
       ),
       {
         maxWidth: 400,
         'data-test-subj': 'link-modal',
       }
     );
-  }
+  };
 
-  private openEmbedModal() {
-    const session = this.props.overlays.openModal(
+  const openEmbedModal = () => {
+    const session = openModal(
       toMountPoint(
         <EmbedModal
           isEmbedded={false}
           allowShortUrl={false}
           onClose={() => {
-            this.props.onClose;
+            onClose();
             session.close();
           }}
-          urlService={this.props.urlService}
-          objectType={this.props.objectType}
+          urlService={urlService}
+          objectType={objectType}
         />,
-        { theme: this.props.theme, i18n: this.props.i18nStart }
+        { theme, i18n: i18nStart }
       ),
       {
         maxWidth: 400,
         'data-test-subj': 'embed-modal',
       }
     );
-  }
+  };
 
   // private openCsvExportModal() {
-  //   const session = this.props.overlays.openModal(
+  //   const session = overlays.openModal(
   //     toMountPoint(
   //       <CsvModalContentUI
   //         isEmbedded={false}
   //         allowShortUrl={false}
   //         onClose={() => {
-  //           this.props.onClose();
+  //           onClose();
   //           session.close();
   //         }}
-  //         urlService={this.props.urlService}
-  //         objectType={this.props.objectType}
+  //         urlService={urlService}
+  //         objectType={objectType}
   //       />,
-  //       { theme: this.props.theme, i18n: this.props.i18nStart }
+  //       { theme: theme, i18n: i18nStart }
   //     ),
   //     {
   //       maxWidth: 400,
@@ -115,23 +124,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
   //     }
   //   );
   // }
-
-  public render() {
-    const { panels } = this.getPanels();
-    return (
-      <>
-        <I18nProvider>
-          <EuiContextMenu
-            initialPanelId={panels[panels.length - 1].id}
-            panels={panels}
-            data-test-subj="shareContextMenu"
-          />
-        </I18nProvider>
-      </>
-    );
-  }
-
-  private getPanels = () => {
+  const getPanels = () => {
     const panels: EuiContextMenuPanelDescriptor[] = [];
     const menuItems: ShareContextMenuPanelItem[] = [];
 
@@ -141,24 +134,24 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
       }),
       icon: 'link',
       sortOrder: 0,
-      disabled: Boolean(this.props.disabledShareUrl),
+      disabled: Boolean(disabledShareUrl),
       // do not break functional tests
       'data-test-subj': 'Permalinks',
-      onClick: this.openLinkModal,
+      onClick: openLinkModal,
     });
 
-    if (this.props.allowEmbed) {
+    if (allowEmbed) {
       menuItems.push({
         name: i18n.translate('share.contextMenu.embedCodeLabel', {
           defaultMessage: 'Embed',
         }),
         icon: 'console',
         sortOrder: 0,
-        onClick: this.openEmbedModal,
+        onClick: openEmbedModal,
       });
     }
 
-    this.props.shareMenuItems.forEach(({ shareMenuItem }) => {
+    shareMenuItems.forEach(({ shareMenuItem }) => {
       const panelId = panels.length + 1;
       panels.push({
         ...panels,
@@ -175,7 +168,7 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
         title: i18n.translate('share.contextMenuTitle', {
           defaultMessage: 'Share this {objectType}',
           values: {
-            objectType: this.props.objectTypeTitle || this.props.objectType,
+            objectType: objectTypeTitle || objectType,
           },
         }),
         items: menuItems
@@ -207,4 +200,17 @@ export class ShareContextMenu extends Component<ShareContextMenuProps> {
 
     return { panels };
   };
-}
+
+  const { panels } = getPanels();
+  return (
+    <>
+      <I18nProvider>
+        <EuiContextMenu
+          initialPanelId={panels[panels.length - 1].id}
+          panels={panels}
+          data-test-subj="shareContextMenu"
+        />
+      </I18nProvider>
+    </>
+  );
+};
