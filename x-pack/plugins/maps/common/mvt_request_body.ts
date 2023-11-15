@@ -90,7 +90,12 @@ export function getHitsTileRequest({
     extent: 4096, // full resolution,
     query: requestBody.query,
     runtime_mappings: requestBody.runtime_mappings,
+    // Number of hits matching the query to count accurately
+    // Used to notify users if all results could not be returned
     track_total_hits: typeof requestBody.size === 'number' ? requestBody.size + 1 : false,
+    // Maximum number of features to return in the hits layer
+    // Used to fetch correct number of hits
+    size: typeof requestBody.size === 'number' ? requestBody.size : 10000,
     with_labels: hasLabels,
   } as SearchMvtRequest['body'];
   if (requestBody.fields) {
