@@ -82,7 +82,8 @@ export const RowDetailsComponent: React.FC<Props> = ({ rowIndex, event }) => {
   );
 
   const containerRef = useRef<HTMLDivElement | null>(null);
-
+  // notes here
+  // console.log(eventIdToNoteIds, notesById, getNotes(event._id), notesMap);
   // The custom row details is actually a trailing control column cell with
   // a hidden header. This is important for accessibility and markup reasons
   // @see https://fuschia-stretch.glitch.me/ for more

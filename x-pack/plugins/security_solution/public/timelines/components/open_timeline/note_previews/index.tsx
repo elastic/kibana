@@ -107,7 +107,6 @@ function useDeleteNote(noteId: string | null | undefined, eventId: string | null
   } = useKibana();
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
-
   return useMutation({
     mutationFn: (id: string | null | undefined) => {
       return http.fetch('/api/note', {
@@ -117,7 +116,6 @@ function useDeleteNote(noteId: string | null | undefined, eventId: string | null
       });
     },
     onSuccess: () => {
-      console.log({noteId, eventId});
       if (noteId) {
         dispatch(
           appActions.deleteNote({
@@ -125,7 +123,6 @@ function useDeleteNote(noteId: string | null | undefined, eventId: string | null
           })
         );
         if (eventId) {
-          console.log({eventId});
           dispatch(
             timelineActions.unPinEvent({
               id: TimelineId.active,
@@ -190,15 +187,13 @@ const NoteActions = React.memo<{
   timelineId?: string;
   noteId?: string | null;
 }>(({ eventId, timelineId, noteId }) => {
-  console.log({eventId, timelineId, noteId});
-  debugger;
   return eventId && timelineId ? (
     <>
       <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
       <DeleteNoteButton noteId={noteId} eventId={eventId} />
     </>
   ) : (
-    <DeleteNoteButton noteId={noteId} />
+    <DeleteNoteButton noteId={noteId} eventId={eventId} />
   );
 });
 
