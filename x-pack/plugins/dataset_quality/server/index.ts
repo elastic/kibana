@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { PluginInitializerContext } from '@kbn/core-plugins-server';
 import { DatasetQualityServerPlugin } from './plugin';
 
-export const plugin = () => new DatasetQualityServerPlugin();
+export function plugin(initializerContext: PluginInitializerContext) {
+  return new DatasetQualityServerPlugin(initializerContext);
+}

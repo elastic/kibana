@@ -4,14 +4,15 @@
     "outDir": "target/types"
   },
   "include": [
-    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*.ts",
-    "../../typings/**/*"
+    "server/**/*",
+    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }

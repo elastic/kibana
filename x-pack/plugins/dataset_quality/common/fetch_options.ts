@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export type { DatasetQualityConfig } from './plugin_config';
-export type { FetchOptions } from './fetch_options';
+import type { HttpFetchOptions } from '@kbn/core/public';
+
+export type FetchOptions = Omit<HttpFetchOptions, 'body'> & {
+  pathname: string;
+  method?: string;
+  body?: any;
+};
