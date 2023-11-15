@@ -100,11 +100,19 @@ export default ({ getService }: FtrProviderContext) => {
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
   const security = getService('security');
 
-  const createRole = async ({ name, privileges }: Role) => {
+  const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
     return await security.role.create(name, privileges);
   };
 
-  const createUser = async ({ username, password, roles }: User) => {
+  const createUser = async ({
+    username,
+    password,
+    roles,
+  }: {
+    username: string;
+    password: string;
+    roles: string[];
+  }) => {
     return await security.user.create(username, {
       password,
       roles,
@@ -132,7 +140,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   describe('@ess @serverless privileges_apis', () => {
     before(async () => {
-      await createPrivilegeTestUsers(supertestWithoutAuth);
+      await createPrivilegeTestUsers();
     });
 
     describe('Risk engine privileges API', () => {
