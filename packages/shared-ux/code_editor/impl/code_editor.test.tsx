@@ -13,9 +13,27 @@ import { monaco } from '@kbn/monaco';
 
 import { keys } from '@elastic/eui';
 
-import { mockedEditorInstance } from './code_editor.test.helpers';
+import { MockedMonacoEditor, mockedEditorInstance } from '@kbn/code-editor-mock/monaco_mock';
 
 import { CodeEditor } from './code_editor';
+
+jest.mock('react-monaco-editor', () => {
+  return function JestMockEditor() {
+    return MockedMonacoEditor;
+  };
+});
+
+// Mock the htmlIdGenerator to generate predictable ids for snapshot tests
+jest.mock('@elastic/eui', () => {
+  const original = jest.requireActual('@elastic/eui');
+
+  return {
+    ...original,
+    htmlIdGenerator: () => {
+      return () => '1234';
+    },
+  };
+});
 
 // A sample language definition with a few example tokens
 const simpleLogLang: monaco.languages.IMonarchLanguage = {
