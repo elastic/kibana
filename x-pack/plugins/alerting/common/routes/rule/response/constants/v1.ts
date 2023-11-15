@@ -42,6 +42,11 @@ export const ruleExecutionStatusWarningReason = {
   MAX_ALERTS: 'maxAlerts',
 } as const;
 
+export const filterStateStore = {
+  APP_STATE: 'appState',
+  GLOBAL_STATE: 'globalState',
+} as const;
+
 export type RuleNotifyWhen = typeof ruleNotifyWhen[keyof typeof ruleNotifyWhen];
 export type RuleLastRunOutcomeValues =
   typeof ruleLastRunOutcomeValues[keyof typeof ruleLastRunOutcomeValues];
@@ -51,3 +56,4 @@ export type RuleExecutionStatusErrorReason =
   typeof ruleExecutionStatusErrorReason[keyof typeof ruleExecutionStatusErrorReason];
 export type RuleExecutionStatusWarningReason =
   typeof ruleExecutionStatusWarningReason[keyof typeof ruleExecutionStatusWarningReason];
+export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];

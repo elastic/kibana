@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { FilterStateStore } from '@kbn/es-query';
 import { validateTimezone } from './validate_timezone';
 import { validateDurationSchema } from '../../lib';
 import { validateHours } from './validate_hours';
@@ -36,7 +37,14 @@ export const actionsSchema = schema.arrayOf(
               schema.object({
                 query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
                 meta: schema.recordOf(schema.string(), schema.any()),
-                state$: schema.maybe(schema.object({ store: schema.string() })),
+                $state: schema.maybe(
+                  schema.object({
+                    store: schema.oneOf([
+                      schema.literal(FilterStateStore.APP_STATE),
+                      schema.literal(FilterStateStore.GLOBAL_STATE),
+                    ]),
+                  })
+                ),
               })
             ),
             dsl: schema.maybe(schema.string()),
