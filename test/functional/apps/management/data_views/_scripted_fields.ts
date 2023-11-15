@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.skip('discover scripted field', async () => {
+      describe('discover scripted field', async () => {
         before(async () => {
           const from = 'Sep 17, 2015 @ 06:31:44.000';
           const to = 'Sep 18, 2015 @ 18:31:44.000';
