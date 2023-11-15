@@ -19,6 +19,9 @@ const DEFAULT_PAGE_SIZE = 10;
 const GROUPING_ID = 'cspLatestFindings';
 const MAX_GROUPING_LEVELS = 1;
 
+/*
+ Utility hook to handle the grouping logic of the cloud security components
+*/
 export const useCloudSecurityGrouping = ({
   dataView,
   groupingTitle,
@@ -66,9 +69,12 @@ export const useCloudSecurityGrouping = ({
   });
 
   const selectedGroup = grouping.selectedGroups[0];
-  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
 
+  // This is recommended by the grouping component to cover an edge case
+  // where the selectedGroup has multiple values
   const uniqueValue = useMemo(() => `${selectedGroup}-${uuid.v4()}`, [selectedGroup]);
+
+  const isNoneSelected = isNoneGroup(grouping.selectedGroups);
 
   const onChangeGroupsItemsPerPage = (size: number) => {
     setActivePageIndex(0);

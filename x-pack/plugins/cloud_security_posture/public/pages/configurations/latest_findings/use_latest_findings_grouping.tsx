@@ -13,6 +13,10 @@ import { useGroupedFindings } from './use_grouped_findings';
 import { FINDINGS_UNIT, groupingTitle, defaultGroupingOptions, getDefaultQuery } from './constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 
+/**
+ * Utility hook to get the latest findings grouping data
+ * for the findings page
+ */
 export const useLatestFindingsGrouping = ({ dataView }: { dataView: DataView }) => {
   const {
     activePageIndex,
