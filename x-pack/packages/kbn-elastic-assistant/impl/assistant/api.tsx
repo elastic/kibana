@@ -152,7 +152,6 @@ export const fetchConnectorExecuteAction = async ({
       response: reader,
       isStream: true,
       isError: true,
-      isStream: false,
     };
   }
 };
