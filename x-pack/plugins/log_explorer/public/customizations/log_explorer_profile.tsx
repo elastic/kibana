@@ -15,6 +15,7 @@ import { LogExplorerController } from '../controller';
 import { LogExplorerStartDeps } from '../types';
 import { dynamic } from '../utils/dynamic';
 import { useKibanaContextForPluginProvider } from '../utils/use_kibana';
+import { createCustomSearchBar } from './custom_search_bar';
 
 const LazyCustomDatasetFilters = dynamic(() => import('./custom_dataset_filters'));
 const LazyCustomDatasetSelector = dynamic(() => import('./custom_dataset_selector'));
@@ -34,8 +35,11 @@ export const createLogExplorerProfileCustomizations =
     controller,
   }: CreateLogExplorerProfileCustomizationsDeps): CustomizationCallback =>
   async ({ customizations, stateContainer }) => {
-    const { data, dataViews, discover } = plugins;
-    const { service } = controller;
+    const { dataViews, discover, navigation, unifiedSearch } = plugins;
+    const {
+      discoverServices: { data },
+      service,
+    } = controller;
 
     service.send('RECEIVED_STATE_CONTAINER', { discoverStateContainer: stateContainer });
 
@@ -68,6 +72,11 @@ export const createLogExplorerProfileCustomizations =
       PrependFilterBar: () => (
         <LazyCustomDatasetFilters logExplorerControllerStateService={service} data={data} />
       ),
+      CustomSearchBar: createCustomSearchBar({
+        data,
+        navigation,
+        unifiedSearch,
+      }),
     });
 
     /**
