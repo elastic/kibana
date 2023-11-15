@@ -13,7 +13,6 @@ import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { MockCodeEditor } from '@kbn/triggers-actions-ui-plugin/public/application/code_editor.mock';
 import { OpsgenieSubActions } from '../../../common';
 import type { OpsgenieActionParams } from '../../../server/connector_types';
-
 const kibanaReactPath = '../../../../../../src/plugins/kibana_react/public';
 
 jest.mock(kibanaReactPath, () => {

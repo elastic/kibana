@@ -17,9 +17,10 @@ import {
 } from '@kbn/usage-collection-plugin/server/mocks';
 import { cloudDetailsMock, registerEbtCountersMock } from './plugin.test.mocks';
 import { plugin } from '.';
+import type { KibanaUsageCollectionPlugin } from './plugin';
 
 describe('kibana_usage_collection', () => {
-  const pluginInstance = plugin(coreMock.createPluginInitializerContext({}));
+  let pluginInstance: KibanaUsageCollectionPlugin;
 
   const usageCollectors: CollectorOptions[] = [];
 
@@ -31,6 +32,10 @@ describe('kibana_usage_collection', () => {
   usageCollection.makeStatsCollector.mockImplementation((opts) => {
     usageCollectors.push(opts);
     return createUsageCollectionSetupMock().makeStatsCollector(opts);
+  });
+
+  beforeAll(async () => {
+    pluginInstance = await plugin(coreMock.createPluginInitializerContext({}));
   });
 
   beforeEach(() => {
