@@ -92,7 +92,7 @@
     "@kbn/core-plugins-server",
     "@kbn/text-based-languages",
     "@kbn/field-utils",
-    "@kbn/discover-utils"
+    "@kbn/discover-utils",
     "@kbn/shared-ux-button-toolbar"
   ],
   "exclude": [
