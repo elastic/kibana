@@ -79,10 +79,6 @@ describe('PreviewSection', () => {
     expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerPanel`)).toHaveClass(
       `euiPanel--${banner.backgroundColor}`
     );
-    // expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerText`)).toHaveProperty(
-    //   'style',
-    //   `color: ${banner.textColor}`
-    // );
     expect(getByTestId(`${PREVIEW_SECTION_TEST_ID}BannerText`)).toHaveStyle(
       `color: ${banner.textColor}`
     );
