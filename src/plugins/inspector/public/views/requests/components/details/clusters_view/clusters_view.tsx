@@ -9,7 +9,6 @@
 import React, { Component } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { EuiSpacer } from '@elastic/eui';
-import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
@@ -34,7 +33,7 @@ export class ClustersView extends Component<DetailViewProps> {
     const clusters = rawResponse._clusters
       ? (
           rawResponse._clusters as estypes.ClusterStatistics & {
-            details: Record<string, ClusterDetails>;
+            details: Record<string, estypes.ClusterDetails>;
           }
         ).details
       : {

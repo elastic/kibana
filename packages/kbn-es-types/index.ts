@@ -18,5 +18,4 @@ export type {
   AggregationResultOfMap,
   ESFilter,
   MaybeReadonlyArray,
-  ClusterDetails,
 } from './src';

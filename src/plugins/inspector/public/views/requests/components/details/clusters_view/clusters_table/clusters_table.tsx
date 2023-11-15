@@ -7,14 +7,14 @@
  */
 
 import React, { useState, ReactNode } from 'react';
-import type { ClusterDetails } from '@kbn/es-types';
+import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';
 import { LOCAL_CLUSTER_KEY } from '../local_cluster';
 
-function getInitialExpandedRow(clusters: Record<string, ClusterDetails>) {
+function getInitialExpandedRow(clusters: Record<string, estypes.ClusterDetails>) {
   const clusterNames = Object.keys(clusters);
   return clusterNames.length === 1
     ? { [clusterNames[0]]: <ClusterView clusterDetails={clusters[clusterNames[0]]} /> }
@@ -28,7 +28,7 @@ interface ClusterColumn {
 }
 
 interface Props {
-  clusters: Record<string, ClusterDetails>;
+  clusters: Record<string, estypes.ClusterDetails>;
 }
 
 export function ClustersTable({ clusters }: Props) {
