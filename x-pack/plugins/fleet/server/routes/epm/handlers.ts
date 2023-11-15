@@ -12,7 +12,7 @@ import mime from 'mime-types';
 import semverValid from 'semver/functions/valid';
 import type { ResponseHeaders, KnownHeaders, HttpResponseOptions } from '@kbn/core/server';
 
-import { pick, unionBy } from 'lodash';
+import { pick } from 'lodash';
 
 import { HTTPAuthorizationHeader } from '../../../common/http_authorization_header';
 import { generateTransformSecondaryAuthHeaders } from '../../services/api_keys/transform_api_keys';
@@ -35,7 +35,6 @@ import type {
   GetInstalledPackagesResponse,
   GetEpmDataStreamsResponse,
   AssetSOObject,
-  GetEpmDataStreamsStatsResponse,
 } from '../../../common/types';
 import type {
   GetCategoriesRequestSchema,
@@ -55,7 +54,6 @@ import type {
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
   GetInputsRequestSchema,
-  GetDataStreamsStatsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -87,7 +85,7 @@ import type {
   PackageInfo,
   InstallationInfo,
 } from '../../types';
-import { getDataStreams, getDataStreamsStats } from '../../services/epm/data_streams';
+import { getDataStreams } from '../../services/epm/data_streams';
 import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
 import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 
@@ -175,37 +173,6 @@ export const getDataStreamsHandler: FleetRequestHandler<
 
     const body: GetEpmDataStreamsResponse = {
       ...res,
-    };
-
-    return response.ok({
-      body,
-    });
-  } catch (error) {
-    return defaultFleetErrorHandler({ error, response });
-  }
-};
-
-export const getDataStreamsStatsHandler: FleetRequestHandler<
-  undefined,
-  TypeOf<typeof GetDataStreamsStatsRequestSchema.query>
-> = async (context, request, response) => {
-  try {
-    const coreContext = await context.core;
-    // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
-    const esClient = coreContext.elasticsearch.client.asCurrentUser;
-
-    const [dataStreams, dataStreamsStats] = await Promise.all([
-      getDataStreams({
-        esClient,
-        ...request.query,
-        uncategorisedOnly: false,
-        extendedResponse: true,
-      }),
-      getDataStreamsStats({ esClient, ...request.query }),
-    ]);
-
-    const body: GetEpmDataStreamsStatsResponse = {
-      items: unionBy(dataStreams.items, dataStreamsStats.items, 'name'),
     };
 
     return response.ok({

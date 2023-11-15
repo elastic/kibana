@@ -6,4 +6,3 @@
  */
 
 export { getDataStreams } from './get';
-export * from './stats';

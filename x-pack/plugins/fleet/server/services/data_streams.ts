@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import type {
-  IndicesDataStream,
-  IndicesDataStreamsStatsDataStreamsStatsItem,
-  IndicesIndexTemplate,
-} from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesDataStream, IndicesIndexTemplate } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 const DATA_STREAM_INDEX_PATTERN = 'logs-*-*,metrics-*-*,traces-*-*,synthetics-*-*,profiling-*';
@@ -45,32 +41,10 @@ class DataStreamService {
   ): Promise<IndicesDataStream[]> {
     try {
       const { data_streams: dataStreamsInfo } = await esClient.indices.getDataStream({
-        name: `${dataStreamParts.type}-${dataStreamParts.dataset}`,
+        name: this.streamPartsToIndexPattern(dataStreamParts),
       });
 
       return dataStreamsInfo;
-    } catch (e) {
-      if (e.statusCode === 404) {
-        return [];
-      }
-      throw e;
-    }
-  }
-
-  public async getMatchingDataStreamsStats(
-    esClient: ElasticsearchClient,
-    dataStreamParts: {
-      dataset: string;
-      type: string;
-    }
-  ): Promise<IndicesDataStreamsStatsDataStreamsStatsItem[]> {
-    try {
-      const { data_streams: dataStreamsStats } = await esClient.indices.dataStreamsStats({
-        name: `${dataStreamParts.type}-${dataStreamParts.dataset}`,
-        human: true,
-      });
-
-      return dataStreamsStats;
     } catch (e) {
       if (e.statusCode === 404) {
         return [];
