@@ -9,6 +9,7 @@ module.exports = {
   preset: '@kbn/test',
   rootDir: '../../..',
   roots: ['<rootDir>/x-pack/plugins/index_management'],
+  testEnvironment: 'jsdom',
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/plugins/index_management',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
