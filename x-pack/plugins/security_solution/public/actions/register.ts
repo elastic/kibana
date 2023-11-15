@@ -37,7 +37,7 @@ import type {
   SecurityCellActions,
 } from './types';
 import { enhanceActionWithTelemetry } from './telemetry';
-import { registerDiscoverHistogramActions } from './discover_in_timeline/vis_apply_filter';
+import { registerDiscoverHistogramActions } from './register_discover_histogram_actions';
 import { createFilterInLensAction } from './filter/lens/filter_in';
 import { createFilterOutLensAction } from './filter/lens/filter_out';
 

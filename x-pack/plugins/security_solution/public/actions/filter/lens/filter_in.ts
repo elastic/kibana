@@ -10,6 +10,8 @@ import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
 import { createFilterLensAction } from './create_action';
 
+export const ACTION_ID = 'embeddable_filterIn';
+
 export const createFilterInLensAction = ({
   store,
   order,
@@ -20,7 +22,7 @@ export const createFilterInLensAction = ({
   services: StartServices;
 }) =>
   createFilterLensAction({
-    id: 'lensSecurityFilterInAction',
+    id: ACTION_ID,
     order,
     store,
     services,

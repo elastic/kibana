@@ -94,7 +94,7 @@ export const getLegendActions = (
     }
 
     const columnMeta = visData.columns[columnIndex].meta;
-    columnCellValueActions[columnIndex].forEach((action) => {
+    compatibleCellActions.forEach((action) => {
       panelItems.push({
         name: action.displayName,
         'data-test-subj': `legend-${title}-${action.id}`,
