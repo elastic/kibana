@@ -73,10 +73,21 @@ describe('Error logging', () => {
           .map((call) => call[0])
           .find((call) => call.includes('logging elasticsearch error'));
 
-        expect(ourCall).toBeDefined();
-        expect(ourCall).toMatchInlineSnapshot(
-          `"{\\"name\\":\\"ResponseError\\",\\"message\\":\\"logging elasticsearch error\\",\\"ecs\\":{\\"version\\":\\"8.6.1\\"},\\"@timestamp\\":\\"2023-11-15T09:05:28.771-05:00\\",\\"log\\":{\\"level\\":\\"INFO\\",\\"logger\\":\\"console-json\\"},\\"process\\":{\\"pid\\":21462}}"`
-        );
+        expect(JSON.parse(ourCall)).toEqual({
+          '@timestamp': expect.any(String),
+          ecs: {
+            version: expect.any(String),
+          },
+          log: {
+            level: 'INFO',
+            logger: 'console-json',
+          },
+          message: 'logging elasticsearch error',
+          name: 'ResponseError',
+          process: {
+            pid: expect.any(Number),
+          },
+        });
       }
     });
   });
