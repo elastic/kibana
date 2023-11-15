@@ -561,7 +561,8 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      describe('tests with auditbeat data', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/169664
+      describe.skip('tests with auditbeat data', () => {
         before(async () => {
           await esArchiver.load(path);
         });
