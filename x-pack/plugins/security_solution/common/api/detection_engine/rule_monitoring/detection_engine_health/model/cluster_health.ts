@@ -6,7 +6,7 @@
  */
 
 import type { HealthParameters, HealthSnapshot } from './health_metadata';
-import type { RuleStats, StatsHistory } from './health_stats';
+import type { HealthOverviewStats, HealthOverviewState, HealthHistory } from './health_stats';
 
 /**
  * Health calculation parameters for the whole cluster.
@@ -18,30 +18,27 @@ export type ClusterHealthParameters = HealthParameters;
  */
 export interface ClusterHealthSnapshot extends HealthSnapshot {
   /**
-   * Health stats at the moment of the calculation request.
+   * Health state at the moment of the calculation request.
    */
-  stats_at_the_moment: ClusterHealthStatsAtTheMoment;
+  state_at_the_moment: ClusterHealthState;
 
   /**
    * Health stats calculated over the interval specified in the health parameters.
    */
-  stats_over_interval: ClusterHealthStatsOverInterval;
+  stats_over_interval: ClusterHealthStats;
 
   /**
    * History of change of the same health stats during the interval.
    */
-  history_over_interval: StatsHistory<ClusterHealthStatsOverInterval>;
+  history_over_interval: HealthHistory<ClusterHealthStats>;
 }
 
 /**
- * Health stats at the moment of the calculation request.
+ * Health state at the moment of the calculation request.
  */
-export type ClusterHealthStatsAtTheMoment = RuleStats;
+export type ClusterHealthState = HealthOverviewState;
 
 /**
  * Health stats calculated over a given interval.
  */
-export interface ClusterHealthStatsOverInterval {
-  // TODO: https://github.com/elastic/kibana/issues/125642 Implement and delete this `message`
-  message: 'Not implemented';
-}
+export type ClusterHealthStats = HealthOverviewStats;

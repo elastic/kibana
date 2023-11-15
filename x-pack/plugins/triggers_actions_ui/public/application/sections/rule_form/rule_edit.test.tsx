@@ -219,9 +219,9 @@ describe('rule_edit', () => {
     await act(async () => {
       wrapper.find('[data-test-subj="saveEditedRuleButton"]').last().simulate('click');
     });
-    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith(
-      'Fail message'
-    );
+    expect(useKibanaMock().services.notifications.toasts.addDanger).toHaveBeenCalledWith({
+      title: 'Fail message',
+    });
   });
 
   it('should pass in the config into `getRuleErrors`', async () => {

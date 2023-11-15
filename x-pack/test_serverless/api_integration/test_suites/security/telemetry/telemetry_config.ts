@@ -25,7 +25,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
     it('GET should get the default config', async () => {
       await supertest
         .get('/api/telemetry/v2/config')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .expect(200, baseConfig);
     });
 
@@ -39,7 +39,7 @@ export default function telemetryConfigTest({ getService }: FtrProviderContext) 
 
       await supertest
         .get('/api/telemetry/v2/config')
-        .set(svlCommonApi.getInternalRequestHeader())
+        .set(svlCommonApi.getCommonRequestHeader())
         .expect(200, {
           ...baseConfig,
           labels: {

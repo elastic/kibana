@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import { getRuleTags, RuleTagsParams } from '../application/rule/methods/tags';
 import { MuteAlertParams } from '../application/rule/methods/mute_alert/types';
 import { SanitizedRule, RuleTypeParams } from '../types';
 import { parseDuration } from '../../common/parse_duration';
 import { RulesClientContext, BulkOptions } from './types';
 import { clone, CloneArguments } from './methods/clone';
 import { createRule, CreateRuleParams } from '../application/rule/methods/create';
+import { snoozeRule, SnoozeRuleOptions } from '../application/rule/methods/snooze';
+import { unsnoozeRule, UnsnoozeParams } from '../application/rule/methods/unsnooze';
 import { get, GetParams } from './methods/get';
-import { resolve, ResolveParams } from './methods/resolve';
+import { resolveRule, ResolveParams } from '../application/rule/methods/resolve';
 import { getAlertState, GetAlertStateParams } from './methods/get_alert_state';
 import { getAlertSummary, GetAlertSummaryParams } from './methods/get_alert_summary';
 import {
@@ -42,16 +45,17 @@ import {
   BulkDeleteRulesRequestBody,
 } from '../application/rule/methods/bulk_delete';
 import {
+  bulkDisableRules,
+  BulkDisableRulesRequestBody,
+} from '../application/rule/methods/bulk_disable';
+import {
   bulkEditRules,
   BulkEditOptions,
 } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import { bulkEnableRules } from './methods/bulk_enable';
-import { bulkDisableRules } from './methods/bulk_disable';
 import { updateApiKey } from './methods/update_api_key';
 import { enable } from './methods/enable';
 import { disable } from './methods/disable';
-import { snooze, SnoozeParams } from './methods/snooze';
-import { unsnooze, UnsnoozeParams } from './methods/unsnooze';
 import { clearExpiredSnoozes } from './methods/clear_expired_snoozes';
 import { muteInstance } from '../application/rule/methods/mute_alert/mute_instance';
 import { muteAll } from './methods/mute_all';
@@ -60,8 +64,11 @@ import { unmuteInstance } from './methods/unmute_instance';
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from './methods/list_rule_types';
 import { getAlertFromRaw, GetAlertFromRawParams } from './lib/get_alert_from_raw';
-import { getTags, GetTagsParams } from './methods/get_tags';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
+import {
+  bulkUntrackAlerts,
+  BulkUntrackBody,
+} from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -123,7 +130,7 @@ export class RulesClient {
   public get = <Params extends RuleTypeParams = never>(params: GetParams) =>
     get<Params>(this.context, params);
   public resolve = <Params extends RuleTypeParams = never>(params: ResolveParams) =>
-    resolve<Params>(this.context, params);
+    resolveRule<Params>(this.context, params);
   public update = <Params extends RuleTypeParams = never>(params: UpdateOptions<Params>) =>
     update<Params>(this.context, params);
 
@@ -147,15 +154,16 @@ export class RulesClient {
   public bulkEdit = <Params extends RuleTypeParams>(options: BulkEditOptions<Params>) =>
     bulkEditRules<Params>(this.context, options);
   public bulkEnableRules = (options: BulkOptions) => bulkEnableRules(this.context, options);
-  public bulkDisableRules = (options: BulkOptions) => bulkDisableRules(this.context, options);
+  public bulkDisableRules = (options: BulkDisableRulesRequestBody) =>
+    bulkDisableRules(this.context, options);
 
   public updateApiKey = (options: { id: string }) => updateApiKey(this.context, options);
 
   public enable = (options: { id: string }) => enable(this.context, options);
   public disable = (options: { id: string }) => disable(this.context, options);
 
-  public snooze = (options: SnoozeParams) => snooze(this.context, options);
-  public unsnooze = (options: UnsnoozeParams) => unsnooze(this.context, options);
+  public snooze = (options: SnoozeRuleOptions) => snoozeRule(this.context, options);
+  public unsnooze = (options: UnsnoozeParams) => unsnoozeRule(this.context, options);
 
   public clearExpiredSnoozes = (options: {
     rule: Pick<SanitizedRule<RuleTypeParams>, 'id' | 'snoozeSchedule'>;
@@ -166,6 +174,8 @@ export class RulesClient {
   public unmuteAll = (options: { id: string }) => unmuteAll(this.context, options);
   public muteInstance = (options: MuteAlertParams) => muteInstance(this.context, options);
   public unmuteInstance = (options: MuteAlertParams) => unmuteInstance(this.context, options);
+
+  public bulkUntrackAlerts = (options: BulkUntrackBody) => bulkUntrackAlerts(this.context, options);
 
   public runSoon = (options: { id: string }) => runSoon(this.context, options);
 
@@ -183,7 +193,7 @@ export class RulesClient {
     return this.context.auditLogger;
   }
 
-  public getTags = (params: GetTagsParams) => getTags(this.context, params);
+  public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 

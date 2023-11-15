@@ -10,13 +10,12 @@ import React, { useCallback, useMemo, useState } from 'react';
 
 import { ActionConnector, ActionType } from '@kbn/triggers-actions-ui-plugin/public';
 
-import { ConnectorAddModal } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { ActionTypeSelectorModal } from '../connector_selector_inline/action_type_selector_modal';
 import { useLoadConnectors } from '../use_load_connectors';
 import * as i18n from '../translations';
 import { useLoadActionTypes } from '../use_load_action_types';
 import { useAssistantContext } from '../../assistant_context';
 import { getActionTypeTitle, getGenAiConfig } from '../helpers';
+import { AddConnectorModal } from '../add_connector_modal';
 
 export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
 
@@ -105,6 +104,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
             : connectorTypeTitle;
           return {
             value: connector.id,
+            'data-test-subj': connector.id,
             inputDisplay: displayFancy ? displayFancy(connector.name) : connector.name,
             dropdownDisplay: (
               <React.Fragment key={connector.id}>
@@ -171,6 +171,7 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
         <EuiSuperSelect
           aria-label={i18n.CONNECTOR_SELECTOR_TITLE}
           compressed={true}
+          data-test-subj="connector-selector"
           disabled={localIsDisabled}
           hasDividers={true}
           isLoading={isLoading}
@@ -179,20 +180,14 @@ export const ConnectorSelector: React.FC<Props> = React.memo(
           options={allConnectorOptions}
           valueOfSelected={selectedConnectorId ?? ''}
         />
-        {isConnectorModalVisible && !selectedActionType && (
-          <ActionTypeSelectorModal
+        {isConnectorModalVisible && (
+          <AddConnectorModal
+            actionTypeRegistry={actionTypeRegistry}
             actionTypes={actionTypes}
-            actionTypeRegistry={actionTypeRegistry}
             onClose={() => setIsConnectorModalVisible(false)}
-            onSelect={(actionType: ActionType) => setSelectedActionType(actionType)}
-          />
-        )}
-        {isConnectorModalVisible && selectedActionType && (
-          <ConnectorAddModal
-            actionType={selectedActionType}
-            onClose={cleanupAndCloseModal}
-            postSaveEventHandler={onSaveConnector}
-            actionTypeRegistry={actionTypeRegistry}
+            onSaveConnector={onSaveConnector}
+            onSelectActionType={(actionType: ActionType) => setSelectedActionType(actionType)}
+            selectedActionType={selectedActionType}
           />
         )}
       </>

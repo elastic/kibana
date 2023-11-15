@@ -23,6 +23,9 @@
     "@kbn/apm-data-access-plugin",
     "@kbn/core-http-browser-mocks",
     "@kbn/logging",
-    "@kbn/metrics-data-access-plugin"
+    "@kbn/metrics-data-access-plugin",
+    "@kbn/core-elasticsearch-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-api-server-mocks"
   ]
 }

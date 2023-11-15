@@ -82,6 +82,35 @@ describe('setEndpointPackagePolicyServerlessFlag', () => {
     );
   });
 
+  it('updates serverless flag for endpoint policies with the flag already set', async () => {
+    const packagePolicy1 = generatePackagePolicy(
+      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
+    );
+    const packagePolicy2 = generatePackagePolicy(
+      policyFactory(undefined, undefined, undefined, undefined, undefined, true)
+    );
+    packagePolicyServiceMock.list.mockResolvedValue({
+      items: [packagePolicy1, packagePolicy2],
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      total: 2,
+    });
+    packagePolicyServiceMock.bulkCreate.mockImplementation();
+
+    await setEndpointPackagePolicyServerlessFlag(
+      soClientMock,
+      esClientMock,
+      packagePolicyServiceMock
+    );
+
+    expect(packagePolicyServiceMock.list).toBeCalledWith(soClientMock, {
+      page: 1,
+      perPage: SO_SEARCH_LIMIT,
+      kuery: `${PACKAGE_POLICY_SAVED_OBJECT_TYPE}.package.name:${FLEET_ENDPOINT_PACKAGE}`,
+    });
+    expect(packagePolicyServiceMock.bulkUpdate).not.toBeCalled();
+  });
+
   it('batches properly when over perPage', async () => {
     packagePolicyServiceMock.list
       .mockResolvedValueOnce({

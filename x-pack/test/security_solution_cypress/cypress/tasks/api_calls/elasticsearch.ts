@@ -32,7 +32,9 @@ export const deleteDataStream = (dataStreamName: string) => {
   });
 };
 
-export const deleteAllDocuments = (target: string) =>
+export const deleteAllDocuments = (target: string) => {
+  refreshIndex(target);
+
   rootRequest({
     method: 'POST',
     url: `${Cypress.env(
@@ -49,6 +51,7 @@ export const deleteAllDocuments = (target: string) =>
       },
     },
   });
+};
 
 export const createIndex = (indexName: string, properties: Record<string, unknown>) =>
   rootRequest({

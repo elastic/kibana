@@ -67,14 +67,17 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     describe('Canvas: Generate PDF', () => {
-      const esArchiver = getService('esArchiver');
       const reportingApi = getService('reportingAPI');
+      const kibanaServer = getService('kibanaServer');
+
       before('initialize tests', async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/canvas/reports');
+        await kibanaServer.importExport.load(
+          'test/functional/fixtures/kbn_archiver/canvas/workpad_pdf_test'
+        );
       });
 
       after('teardown tests', async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/canvas/reports');
+        await kibanaServer.savedObjects.cleanStandardList();
         await reportingApi.deleteAllReports();
         await reportingFunctional.initEcommerce();
       });

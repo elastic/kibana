@@ -16,6 +16,7 @@ import { getAccountsStats } from './accounts_stats_collector';
 import { getRulesStats } from './rules_stats_collector';
 import { getInstallationStats } from './installation_stats_collector';
 import { getAlertsStats } from './alert_stats_collector';
+import { getAllCloudAccountsStats } from './cloud_accounts_stats_collector';
 
 export function registerCspmUsageCollector(
   logger: Logger,
@@ -58,6 +59,7 @@ export function registerCspmUsageCollector(
         rulesStats,
         installationStats,
         alertsStats,
+        cloudAccountStats,
       ] = await Promise.all([
         awaitPromiseSafe('Indices', getIndicesStats(esClient, soClient, coreServices, logger)),
         awaitPromiseSafe('Accounts', getAccountsStats(esClient, logger)),
@@ -68,6 +70,7 @@ export function registerCspmUsageCollector(
           getInstallationStats(esClient, soClient, coreServices, logger)
         ),
         awaitPromiseSafe('Alerts', getAlertsStats(esClient, logger)),
+        awaitPromiseSafe('Cloud Accounts', getAllCloudAccountsStats(esClient, logger)),
       ]);
       return {
         indices: indicesStats,
@@ -76,6 +79,7 @@ export function registerCspmUsageCollector(
         rules_stats: rulesStats,
         installation_stats: installationStats,
         alerts_stats: alertsStats,
+        cloud_account_stats: cloudAccountStats,
       };
     },
     schema: cspmUsageSchema,

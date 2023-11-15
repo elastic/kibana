@@ -36,7 +36,7 @@ const DETAILS: DetailViewData[] = [
   {
     name: 'Clusters',
     label: i18n.translate('inspector.requests.clustersTabLabel', {
-      defaultMessage: 'Clusters',
+      defaultMessage: 'Clusters and shards',
     }),
     component: ClustersView,
   },

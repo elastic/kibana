@@ -12,7 +12,6 @@ import {
 } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -23,10 +22,9 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 // TODO enable once the visualize tabs are back
 describe.skip(
   'Alert details expandable flyout left panel session view',
-  { tags: ['@ess', '@brokenInServerless'] },
+  { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);

@@ -20,7 +20,7 @@ import {
   type LogRateAnalysisType,
   type WindowParameters,
 } from '@kbn/aiops-utils';
-import type { SignificantTerm } from '@kbn/ml-agg-utils';
+import type { SignificantItem } from '@kbn/ml-agg-utils';
 
 import { useData } from '../../../hooks/use_data';
 
@@ -35,11 +35,11 @@ import { useLogRateAnalysisResultsTableRowContext } from '../../log_rate_analysi
 const DEFAULT_SEARCH_QUERY = { match_all: {} };
 
 export function getDocumentCountStatsSplitLabel(
-  significantTerm?: SignificantTerm,
+  significantItem?: SignificantItem,
   group?: GroupTableItem
 ) {
-  if (significantTerm) {
-    return `${significantTerm?.fieldName}:${significantTerm?.fieldValue}`;
+  if (significantItem) {
+    return `${significantItem?.fieldName}:${significantItem?.fieldValue}`;
   } else if (group) {
     return i18n.translate('xpack.aiops.logRateAnalysis.page.documentCountStatsSplitGroupLabel', {
       defaultMessage: 'Selected group',
@@ -94,11 +94,11 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   }, [windowParameters]);
 
   const {
-    currentSelectedSignificantTerm,
+    currentSelectedSignificantItem,
     currentSelectedGroup,
-    setPinnedSignificantTerm,
+    setPinnedSignificantItem,
     setPinnedGroup,
-    setSelectedSignificantTerm,
+    setSelectedSignificantItem,
     setSelectedGroup,
   } = useLogRateAnalysisResultsTableRowContext();
 
@@ -107,7 +107,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     'log_rate_analysis',
     esSearchQuery,
     setGlobalState,
-    currentSelectedSignificantTerm,
+    currentSelectedSignificantItem,
     currentSelectedGroup,
     undefined,
     timeRange
@@ -132,9 +132,9 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
 
   function clearSelection() {
     setWindowParameters(undefined);
-    setPinnedSignificantTerm(null);
+    setPinnedSignificantItem(null);
     setPinnedGroup(null);
-    setSelectedSignificantTerm(null);
+    setSelectedSignificantItem(null);
     setSelectedGroup(null);
     setIsBrushCleared(true);
     setInitialAnalysisStart(undefined);
@@ -148,7 +148,7 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           documentCountStats={documentCountStats}
           documentCountStatsSplit={documentCountStatsCompare}
           documentCountStatsSplitLabel={getDocumentCountStatsSplitLabel(
-            currentSelectedSignificantTerm,
+            currentSelectedSignificantItem,
             currentSelectedGroup
           )}
           isBrushCleared={isBrushCleared}

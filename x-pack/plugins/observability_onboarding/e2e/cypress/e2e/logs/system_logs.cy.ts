@@ -11,6 +11,19 @@ describe('[Logs onboarding] System logs', () => {
       cy.deleteIntegration('system');
     });
 
+    describe('when user clicks on back button', () => {
+      beforeEach(() => {
+        cy.loginAsViewerUser();
+        cy.visitKibana('/app/observabilityOnboarding/systemLogs');
+      });
+
+      it('navigates to observability logs onboarding page', () => {
+        cy.getByTestSubj('observabilityOnboardingBackButtonBackButton').click();
+
+        cy.url().should('include', '/app/observabilityOnboarding');
+      });
+    });
+
     describe('when user is missing privileges', () => {
       beforeEach(() => {
         cy.loginAsViewerUser();

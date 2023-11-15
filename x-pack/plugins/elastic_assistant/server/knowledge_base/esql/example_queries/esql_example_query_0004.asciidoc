@@ -1,0 +1,15 @@
+[[esql-example-queries]]
+
+The following is an example ES|QL query:
+
+```
+from logs-*
+| where event.category == "file" and event.action == "creation"
+| stats filecount = count(file.name) by process.name,host.name
+| dissect process.name "%{process}.%{extension}"
+| eval proclength = length(process.name)
+| where proclength > 10
+| sort filecount,proclength desc
+| limit 10
+| keep host.name,process.name,filecount,process,extension,fullproc,proclength
+```

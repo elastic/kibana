@@ -46,7 +46,6 @@ export const TestProvidersComponent: React.FC<Props> = ({ children, isILMAvailab
         <AssistantProvider
           actionTypeRegistry={actionTypeRegistry}
           assistantAvailability={mockAssistantAvailability}
-          assistantLangChain={false}
           augmentMessageCodeBlocks={jest.fn()}
           baseAllow={[]}
           baseAllowReplacement={[]}

@@ -16,6 +16,9 @@ export const connectorResponseSchema = schema.object({
   is_preconfigured: schema.boolean(),
   is_deprecated: schema.boolean(),
   is_system_action: schema.boolean(),
+});
+
+export const allConnectorsResponseSchema = connectorResponseSchema.extends({
   referenced_by_count: schema.number(),
 });
 

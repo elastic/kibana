@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
-import type { GetElserOptions } from '@kbn/ml-trained-models-utils';
+import type { GetElserOptions, ModelDefinitionResponse } from '@kbn/ml-trained-models-utils';
 import type {
   MlInferTrainedModelRequest,
   MlStopTrainedModelDeploymentRequest,
@@ -47,6 +47,7 @@ export interface TrainedModelsProvider {
     putTrainedModel(
       params: estypes.MlPutTrainedModelRequest
     ): Promise<estypes.MlPutTrainedModelResponse>;
+    getELSER(params?: GetElserOptions): Promise<ModelDefinitionResponse>;
   };
 }
 
@@ -122,12 +123,12 @@ export function getTrainedModelsProvider(
               return mlClient.putTrainedModel(params);
             });
         },
-        async getELSER(params: GetElserOptions) {
+        async getELSER(params?: GetElserOptions) {
           return await guards
             .isFullLicense()
             .hasMlCapabilities(['canGetTrainedModels'])
-            .ok(async ({ scopedClient }) => {
-              return modelsProvider(scopedClient, cloud).getELSER(params);
+            .ok(async ({ scopedClient, mlClient }) => {
+              return modelsProvider(scopedClient, mlClient, cloud).getELSER(params);
             });
         },
       };

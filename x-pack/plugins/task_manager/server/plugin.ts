@@ -61,6 +61,7 @@ export type TaskManagerStartContract = Pick<
   | 'bulkEnable'
   | 'bulkDisable'
   | 'bulkSchedule'
+  | 'bulkUpdateState'
 > &
   Pick<TaskStore, 'fetch' | 'aggregate' | 'get' | 'remove' | 'bulkRemove'> & {
     removeIfExists: TaskStore['remove'];
@@ -178,7 +179,7 @@ export class TaskManagerPlugin
     core.status.set(
       combineLatest([core.status.derivedStatus$, serviceStatus$]).pipe(
         map(([derivedStatus, serviceStatus]) =>
-          serviceStatus.level > derivedStatus.level ? serviceStatus : derivedStatus
+          serviceStatus.level >= derivedStatus.level ? serviceStatus : derivedStatus
         )
       )
     );
@@ -325,6 +326,7 @@ export class TaskManagerPlugin
       supportsEphemeralTasks: () =>
         this.config.ephemeral_tasks.enabled && this.shouldRunBackgroundTasks,
       getRegisteredTypes: () => this.definitions.getAllTypes(),
+      bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
     };
   }
 }

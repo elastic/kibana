@@ -50,8 +50,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         to: 'Dec 3, 2018 @ 00:00:00.000',
       });
       await dashboard.navigateToApp();
-      await dashboardControls.enableControlsLab();
-      await dashboard.navigateToApp();
       await dashboard.preserveCrossAppState();
       await dashboard.gotoDashboardLandingPage();
       await dashboard.clickNewDashboard();

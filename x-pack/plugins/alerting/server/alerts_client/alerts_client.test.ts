@@ -63,6 +63,7 @@ import {
 import { getDataStreamAdapter } from '../alerts_service/lib/data_stream_adapter';
 
 const date = '2023-03-28T22:27:28.159Z';
+const startedAtDate = '2023-03-28T13:00:00.000Z';
 const maxAlerts = 1000;
 let logger: ReturnType<typeof loggingSystemMock['createLogger']>;
 const clusterClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
@@ -145,7 +146,7 @@ const fetchedAlert1 = {
   [EVENT_ACTION]: 'open',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
-  [ALERT_DURATION]: '0',
+  [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
@@ -175,7 +176,7 @@ const fetchedAlert2 = {
   [EVENT_ACTION]: 'active',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
-  [ALERT_DURATION]: '36000000000000',
+  [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_INSTANCE_ID]: '2',
@@ -205,7 +206,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
   [EVENT_ACTION]: 'open',
   [EVENT_KIND]: 'signal',
   [ALERT_ACTION_GROUP]: 'default',
-  [ALERT_DURATION]: '0',
+  [ALERT_DURATION]: 0,
   [ALERT_FLAPPING]: false,
   [ALERT_FLAPPING_HISTORY]: [true],
   [ALERT_INSTANCE_ID]: '1',
@@ -234,7 +235,7 @@ const getNewIndexedAlertDoc = (overrides = {}) => ({
 const getOngoingIndexedAlertDoc = (overrides = {}) => ({
   ...getNewIndexedAlertDoc(),
   [EVENT_ACTION]: 'active',
-  [ALERT_DURATION]: '36000000000000',
+  [ALERT_DURATION]: 36000000000,
   [ALERT_FLAPPING_HISTORY]: [true, false],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
   [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z' },
@@ -244,7 +245,7 @@ const getOngoingIndexedAlertDoc = (overrides = {}) => ({
 const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   ...getNewIndexedAlertDoc(),
   [EVENT_ACTION]: 'close',
-  [ALERT_DURATION]: '36000000000000',
+  [ALERT_DURATION]: 36000000000,
   [ALERT_ACTION_GROUP]: 'recovered',
   [ALERT_FLAPPING_HISTORY]: [true, true],
   [ALERT_START]: '2023-03-28T12:27:28.159Z',
@@ -253,6 +254,15 @@ const getRecoveredIndexedAlertDoc = (overrides = {}) => ({
   [ALERT_STATUS]: 'recovered',
   ...overrides,
 });
+
+const defaultExecutionOpts = {
+  maxAlerts,
+  ruleLabel: `test: rule-name`,
+  flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+  activeAlertsFromState: {},
+  recoveredAlertsFromState: {},
+  startedAt: null,
+};
 
 describe('Alerts Client', () => {
   let alertsClientParams: AlertsClientParams;
@@ -305,15 +315,10 @@ describe('Alerts Client', () => {
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(opts);
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
+            defaultExecutionOpts
+          );
 
           // no alerts to query for
           expect(clusterClient.search).not.toHaveBeenCalled();
@@ -338,15 +343,10 @@ describe('Alerts Client', () => {
             },
           });
 
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(opts);
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
+            defaultExecutionOpts
+          );
           expect(mockLegacyAlertsClient.getTrackedAlerts).not.toHaveBeenCalled();
           spy.mockRestore();
         });
@@ -362,15 +362,10 @@ describe('Alerts Client', () => {
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(opts);
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
+            defaultExecutionOpts
+          );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
             body: {
@@ -417,15 +412,10 @@ describe('Alerts Client', () => {
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(opts);
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
+            defaultExecutionOpts
+          );
 
           expect(clusterClient.search).toHaveBeenCalledTimes(2);
 
@@ -446,15 +436,10 @@ describe('Alerts Client', () => {
 
           const alertsClient = new AlertsClient(alertsClientParams);
 
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(opts);
+          await alertsClient.initializeExecution(defaultExecutionOpts);
+          expect(mockLegacyAlertsClient.initializeExecution).toHaveBeenCalledWith(
+            defaultExecutionOpts
+          );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
             body: {
@@ -489,13 +474,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           const alertExecutorService = alertsClient.factory();
@@ -552,13 +531,10 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report 1 new alert and 1 active alert
@@ -621,13 +597,10 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report 1 new alert and 1 active alert
@@ -669,7 +642,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
@@ -740,13 +713,10 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': activeAlert,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report 1 new alert and 1 active alert
@@ -814,14 +784,11 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
               '2': trackedAlert2Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report 1 new alert and 1 active alert, recover 1 alert
@@ -855,7 +822,7 @@ describe('Alerts Client', () => {
                 [ALERT_UUID]: 'def',
                 [ALERT_INSTANCE_ID]: '2',
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
-                [ALERT_DURATION]: '72000000000000',
+                [ALERT_DURATION]: 72000000000,
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
               }),
@@ -909,14 +876,11 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
               '2': trackedAlert2Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report 1 new alert and 1 active alert, recover 1 alert
@@ -958,7 +922,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'active',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '72000000000000',
+                [ALERT_DURATION]: 72000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
@@ -1005,7 +969,7 @@ describe('Alerts Client', () => {
                 [TIMESTAMP]: date,
                 [EVENT_ACTION]: 'close',
                 [ALERT_ACTION_GROUP]: 'recovered',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
                 [ALERT_MAINTENANCE_WINDOW_IDS]: [],
@@ -1032,18 +996,118 @@ describe('Alerts Client', () => {
           });
         });
 
-        test('should not try to index if no alerts', async () => {
+        test('should use startedAt time if provided', async () => {
+          clusterClient.search.mockResolvedValue({
+            took: 10,
+            timed_out: false,
+            _shards: { failed: 0, successful: 1, total: 1, skipped: 0 },
+            hits: {
+              total: { relation: 'eq', value: 2 },
+              hits: [
+                {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  _seq_no: 41,
+                  _primary_term: 665,
+                  _source: fetchedAlert1,
+                },
+                {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  _seq_no: 42,
+                  _primary_term: 666,
+                  _source: fetchedAlert2,
+                },
+              ],
+            },
+          });
           const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
             alertsClientParams
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
+            ...defaultExecutionOpts,
+            activeAlertsFromState: {
+              '1': trackedAlert1Raw,
+              '2': trackedAlert2Raw,
+            },
+            startedAt: new Date(startedAtDate),
           });
+
+          // Report 1 new alert and 1 active alert, recover 1 alert
+          const alertExecutorService = alertsClient.factory();
+          alertExecutorService.create('2').scheduleActions('default');
+          alertExecutorService.create('3').scheduleActions('default');
+
+          alertsClient.processAndLogAlerts(processAndLogAlertsOpts);
+
+          await alertsClient.persistAlerts();
+
+          const { alertsToReturn } = alertsClient.getAlertsToSerialize();
+          const uuid3 = alertsToReturn['3'].meta?.uuid;
+
+          expect(clusterClient.bulk).toHaveBeenCalledWith({
+            index: '.alerts-test.alerts-default',
+            refresh: true,
+            require_alias: !useDataStreamForAlerts,
+            body: [
+              {
+                index: {
+                  _id: 'def',
+                  _index: '.internal.alerts-test.alerts-default-000002',
+                  if_seq_no: 42,
+                  if_primary_term: 666,
+                  require_alias: false,
+                },
+              },
+              // ongoing alert doc
+              getOngoingIndexedAlertDoc({
+                [TIMESTAMP]: startedAtDate,
+                [ALERT_UUID]: 'def',
+                [ALERT_INSTANCE_ID]: '2',
+                [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
+                [ALERT_DURATION]: 37951841000,
+                [ALERT_START]: '2023-03-28T02:27:28.159Z',
+                [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
+              }),
+              {
+                create: { _id: uuid3, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
+              },
+              // new alert doc
+              getNewIndexedAlertDoc({
+                [TIMESTAMP]: startedAtDate,
+                [ALERT_UUID]: uuid3,
+                [ALERT_INSTANCE_ID]: '3',
+                [ALERT_START]: startedAtDate,
+                [ALERT_TIME_RANGE]: { gte: startedAtDate },
+              }),
+              {
+                index: {
+                  _id: 'abc',
+                  _index: '.internal.alerts-test.alerts-default-000001',
+                  if_seq_no: 41,
+                  if_primary_term: 665,
+                  require_alias: false,
+                },
+              },
+              // recovered alert doc
+              getRecoveredIndexedAlertDoc({
+                [TIMESTAMP]: startedAtDate,
+                [ALERT_DURATION]: 1951841000,
+                [ALERT_UUID]: 'abc',
+                [ALERT_END]: startedAtDate,
+                [ALERT_TIME_RANGE]: { gte: '2023-03-28T12:27:28.159Z', lte: startedAtDate },
+              }),
+            ],
+          });
+        });
+
+        test('should not try to index if no alerts', async () => {
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report no alerts
 
@@ -1087,13 +1151,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           const alertExecutorService = alertsClient.factory();
@@ -1140,14 +1198,11 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
               '2': trackedAlert2Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report 2 active alerts
@@ -1177,7 +1232,7 @@ describe('Alerts Client', () => {
               getOngoingIndexedAlertDoc({
                 [ALERT_UUID]: 'def',
                 [ALERT_INSTANCE_ID]: '2',
-                [ALERT_DURATION]: '72000000000000',
+                [ALERT_DURATION]: 72000000000,
                 [ALERT_FLAPPING_HISTORY]: [true, false, false, false],
                 [ALERT_START]: '2023-03-28T02:27:28.159Z',
                 [ALERT_TIME_RANGE]: { gte: '2023-03-28T02:27:28.159Z' },
@@ -1198,13 +1253,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           const alertExecutorService = alertsClient.factory();
@@ -1624,13 +1673,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           const { uuid: uuid1, start: start1 } = alertsClient.report({
@@ -1662,6 +1705,63 @@ describe('Alerts Client', () => {
           expect(start2).toBeNull();
         });
 
+        test('should use startedAt time if provided', async () => {
+          const mockGetUuidCurrent = jest
+            .fn()
+            .mockReturnValueOnce('uuid1')
+            .mockReturnValueOnce('uuid2');
+          const mockGetStartCurrent = jest.fn().mockReturnValue(null);
+          const mockScheduleActionsCurrent = jest.fn().mockImplementation(() => ({
+            replaceState: mockReplaceState,
+            getUuid: mockGetUuidCurrent,
+            getStart: mockGetStartCurrent,
+          }));
+          const mockCreateCurrent = jest.fn().mockImplementation(() => ({
+            scheduleActions: mockScheduleActionsCurrent,
+          }));
+          mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreateCurrent }));
+          const spy = jest
+            .spyOn(LegacyAlertsClientModule, 'LegacyAlertsClient')
+            .mockImplementation(() => mockLegacyAlertsClient);
+          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
+            alertsClientParams
+          );
+
+          await alertsClient.initializeExecution({
+            ...defaultExecutionOpts,
+            startedAt: new Date(startedAtDate),
+          });
+
+          // Report 2 new alerts
+          const { uuid: uuid1, start: start1 } = alertsClient.report({
+            id: '1',
+            actionGroup: 'default',
+            state: {},
+            context: {},
+          });
+          const { uuid: uuid2, start: start2 } = alertsClient.report({
+            id: '2',
+            actionGroup: 'default',
+            state: {},
+            context: {},
+          });
+
+          expect(mockCreateCurrent).toHaveBeenCalledTimes(2);
+          expect(mockCreateCurrent).toHaveBeenNthCalledWith(1, '1');
+          expect(mockCreateCurrent).toHaveBeenNthCalledWith(2, '2');
+          expect(mockScheduleActionsCurrent).toHaveBeenCalledTimes(2);
+          expect(mockScheduleActionsCurrent).toHaveBeenNthCalledWith(1, 'default', {});
+          expect(mockScheduleActionsCurrent).toHaveBeenNthCalledWith(2, 'default', {});
+
+          expect(mockReplaceState).not.toHaveBeenCalled();
+          spy.mockRestore();
+
+          expect(uuid1).toEqual('uuid1');
+          expect(uuid2).toEqual('uuid2');
+          expect(start1).toEqual(startedAtDate);
+          expect(start2).toEqual(startedAtDate);
+        });
+
         test('should set context if defined', async () => {
           mockLegacyAlertsClient.factory.mockImplementation(() => ({ create: mockCreate }));
           const spy = jest
@@ -1671,13 +1771,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           alertsClient.report({
@@ -1708,13 +1802,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           alertsClient.report({
@@ -1751,13 +1839,7 @@ describe('Alerts Client', () => {
             'recovered'
           >(alertsClientParams);
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report 2 new alerts
           alertsClient.report({
@@ -1799,7 +1881,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'open',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '0',
+                [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
@@ -1834,7 +1916,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'open',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '0',
+                [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '2',
@@ -1881,14 +1963,11 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
               '2': trackedAlert2Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Set context on 2 recovered alerts
@@ -1911,14 +1990,11 @@ describe('Alerts Client', () => {
           );
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
               '2': trackedAlert2Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Set context on 2 recovered alerts
@@ -1948,13 +2024,7 @@ describe('Alerts Client', () => {
             'recovered'
           >(alertsClientParams);
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           // Report new alert
           alertsClient.report({
@@ -1993,7 +2063,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'open',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '0',
+                [ALERT_DURATION]: 0,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true],
                 [ALERT_INSTANCE_ID]: '1',
@@ -2050,13 +2120,10 @@ describe('Alerts Client', () => {
           >(alertsClientParams);
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Report ongoing alert
@@ -2096,7 +2163,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'active',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'default',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, false],
                 [ALERT_INSTANCE_ID]: '1',
@@ -2155,13 +2222,10 @@ describe('Alerts Client', () => {
           >(alertsClientParams);
 
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // Don't report any alerts so existing alert recovers
@@ -2198,7 +2262,7 @@ describe('Alerts Client', () => {
                 [EVENT_ACTION]: 'close',
                 [EVENT_KIND]: 'signal',
                 [ALERT_ACTION_GROUP]: 'recovered',
-                [ALERT_DURATION]: '36000000000000',
+                [ALERT_DURATION]: 36000000000,
                 [ALERT_END]: date,
                 [ALERT_FLAPPING]: false,
                 [ALERT_FLAPPING_HISTORY]: [true, true],
@@ -2234,13 +2298,7 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
 
-          await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          });
+          await alertsClient.initializeExecution(defaultExecutionOpts);
 
           const publicAlertsClient = alertsClient.client();
 
@@ -2275,13 +2333,10 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // report no alerts to allow existing alert to recover
@@ -2310,13 +2365,10 @@ describe('Alerts Client', () => {
             alertsClientParams
           );
           await alertsClient.initializeExecution({
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
+            ...defaultExecutionOpts,
             activeAlertsFromState: {
               '1': trackedAlert1Raw,
             },
-            recoveredAlertsFromState: {},
           });
 
           // report no alerts to allow existing alert to recover
@@ -2329,53 +2381,6 @@ describe('Alerts Client', () => {
           expect(recoveredAlert.alert.getUuid()).toEqual('abc');
           expect(recoveredAlert.alert.getStart()).toEqual('2023-03-28T12:27:28.159Z');
           expect(recoveredAlert.hit).toBeUndefined();
-        });
-      });
-
-      describe('setAlertStatusToUntracked()', () => {
-        test('should call updateByQuery on provided ruleIds', async () => {
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-
-          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(1);
-        });
-
-        test('should retry updateByQuery on failure', async () => {
-          clusterClient.updateByQuery.mockResponseOnce({
-            total: 10,
-            updated: 8,
-          });
-          const alertsClient = new AlertsClient<{}, {}, {}, 'default', 'recovered'>(
-            alertsClientParams
-          );
-
-          const opts = {
-            maxAlerts,
-            ruleLabel: `test: rule-name`,
-            flappingSettings: DEFAULT_FLAPPING_SETTINGS,
-            activeAlertsFromState: {},
-            recoveredAlertsFromState: {},
-          };
-          await alertsClient.initializeExecution(opts);
-
-          await alertsClient.setAlertStatusToUntracked(['test-index'], ['test-rule']);
-
-          expect(clusterClient.updateByQuery).toHaveBeenCalledTimes(2);
-          expect(logger.warn).toHaveBeenCalledWith(
-            'Attempt 1: Failed to untrack 2 of 10; indices test-index, ruleIds test-rule'
-          );
         });
       });
     });

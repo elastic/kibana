@@ -46,7 +46,7 @@ export class SavedObjectsManagementActionService {
   }
 
   start(spacesApi?: SpacesApi): SavedObjectsManagementActionServiceStart {
-    if (spacesApi) {
+    if (spacesApi && !spacesApi.hasOnlyDefaultSpace) {
       registerSpacesApiActions(this, spacesApi);
     }
     return {

@@ -15,14 +15,17 @@
       ],
       "ignore_unavailable": "__flag__",
       "master_timeout": [
+        "30s",
         "-1",
         "0"
       ],
       "timeout": [
+        "30s",
         "-1",
         "0"
       ],
       "wait_for_active_shards": [
+        "1",
         "all",
         "index-setting"
       ]
@@ -33,7 +36,7 @@
     "patterns": [
       "{index}/_close"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-open-close.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-close.html",
     "availability": {
       "stack": true,
       "serverless": false

@@ -137,3 +137,6 @@ export {
 
 export { ObservabilityTriggerId } from './trigger_ids';
 export { getInspectResponse } from './utils/get_inspect_response';
+
+export const LOGS_ONBOARDING_FEEDBACK_LINK = 'https://ela.st/logs-onboarding-feedback';
+export const LOG_EXPLORER_FEEDBACK_LINK = 'https://ela.st/explorer-feedback';

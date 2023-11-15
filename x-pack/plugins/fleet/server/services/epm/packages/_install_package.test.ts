@@ -139,6 +139,7 @@ describe('_installPackage', () => {
           registry: {
             kibanaVersionCheckEnabled: true,
             capabilities: [],
+            excludePackages: [],
           },
         },
       })
@@ -197,6 +198,7 @@ describe('_installPackage', () => {
           registry: {
             kibanaVersionCheckEnabled: true,
             capabilities: [],
+            excludePackages: [],
           },
         },
       })
@@ -271,6 +273,7 @@ describe('_installPackage', () => {
             registry: {
               kibanaVersionCheckEnabled: true,
               capabilities: [],
+              excludePackages: [],
             },
           },
         })

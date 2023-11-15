@@ -28,6 +28,7 @@ import { getCapitalizedStatusText } from '../../../../detections/components/rule
 import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
 import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 const POPOVER_WIDTH = '340px';
 
@@ -43,12 +44,12 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   jobs,
 }) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
+  const jobIds = getMachineLearningJobId(rule);
 
-  if (!isMlRule(rule.type) || loadingJobs || !rule.machine_learning_job_id) {
+  if (!isMlRule(rule.type) || loadingJobs || !jobIds) {
     return null;
   }
 
-  const jobIds = rule.machine_learning_job_id;
   const notRunningJobs = jobs.filter(
     (job) => jobIds.includes(job.id) && !isJobStarted(job.jobState, job.datafeedState)
   );

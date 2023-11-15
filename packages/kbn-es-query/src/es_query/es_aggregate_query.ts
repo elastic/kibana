@@ -28,8 +28,9 @@ export function getAggregateQueryMode(query: AggregateQuery): Language {
   return Object.keys(query)[0] as Language;
 }
 
-export function getLanguageDisplayName(language: string): string {
-  return language === 'esql' ? 'es|ql' : language;
+export function getLanguageDisplayName(language?: string): string {
+  const displayName = language && language === 'esql' ? 'es|ql' : language ?? 'es|ql';
+  return displayName.toUpperCase();
 }
 
 // retrieves the index pattern from the aggregate query for SQL
@@ -58,10 +59,10 @@ export function getIndexPatternFromESQLQuery(esql?: string): string {
   }
   const parsedString = esql?.replaceAll('`', '');
   // case insensitive match for the index pattern
-  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;]+)/, 'i');
+  const regex = new RegExp(/FROM\s+([\w*-.!@$^()~;\s]+)/, 'i');
   const matches = parsedString?.match(regex);
   if (matches) {
-    return matches[1];
+    return matches[1]?.trim();
   }
   return '';
 }

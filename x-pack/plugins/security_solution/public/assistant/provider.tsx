@@ -55,9 +55,6 @@ export const AssistantProvider: React.FC = ({ children }) => {
       actionTypeRegistry={actionTypeRegistry}
       augmentMessageCodeBlocks={augmentMessageCodeBlocks}
       assistantAvailability={assistantAvailability}
-      // NOTE: `assistantLangChain` and `assistantModelEvaluation` experimental feature will be coupled until upcoming
-      // Knowledge Base UI updates, which will remove the `assistantLangChain` feature flag in favor of a UI feature toggle
-      assistantLangChain={isModelEvaluationEnabled}
       assistantTelemetry={assistantTelemetry}
       defaultAllow={defaultAllow}
       defaultAllowReplacement={defaultAllowReplacement}
@@ -71,6 +68,7 @@ export const AssistantProvider: React.FC = ({ children }) => {
       getInitialConversations={getInitialConversation}
       getComments={getComments}
       http={http}
+      modelEvaluatorEnabled={isModelEvaluationEnabled}
       nameSpace={nameSpace}
       setConversations={setConversations}
       setDefaultAllow={setDefaultAllow}

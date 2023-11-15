@@ -7,12 +7,12 @@
 
 import { IRouter, KibanaRequest, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-
 import { v4 as uuidv4 } from 'uuid';
+
+import { ESQL_RESOURCE } from '../knowledge_base/constants';
 import { buildResponse } from '../../lib/build_response';
 import { buildRouteValidation } from '../../schemas/common';
-
-import { ElasticAssistantRequestHandlerContext } from '../../types';
+import { ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
 import { EVALUATE } from '../../../common/constants';
 import { PostEvaluateBody, PostEvaluatePathQuery } from '../../schemas/evaluate/post_evaluate';
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
@@ -36,7 +36,10 @@ const AGENT_EXECUTOR_MAP: Record<string, AgentExecutor> = {
   OpenAIFunctionsExecutor: callOpenAIFunctionsExecutor,
 };
 
-export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandlerContext>) => {
+export const postEvaluateRoute = (
+  router: IRouter<ElasticAssistantRequestHandlerContext>,
+  getElser: GetElser
+) => {
   router.post(
     {
       path: EVALUATE,
@@ -89,6 +92,9 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
         // writing results to the output index
         const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
+        // Default ELSER model
+        const elserId = await getElser(request, (await context.core).savedObjects.getClient());
+
         // Skeleton request to satisfy `subActionParams` spread in `ActionsClientLlm`
         const skeletonRequest: KibanaRequest<unknown, unknown, RequestBody> = {
           ...request,
@@ -99,6 +105,7 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 messages: [],
               },
             },
+            assistantLangChain: true,
           },
         };
 
@@ -115,10 +122,12 @@ export const postEvaluateRoute = (router: IRouter<ElasticAssistantRequestHandler
                 actions,
                 connectorId,
                 esClient,
+                elserId,
                 langChainMessages,
                 llmType,
                 logger,
                 request: skeletonRequest,
+                kbResource: ESQL_RESOURCE,
               })
             );
           });

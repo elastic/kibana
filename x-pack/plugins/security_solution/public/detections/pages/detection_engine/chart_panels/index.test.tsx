@@ -253,7 +253,8 @@ describe('ChartPanels', () => {
           fireEvent.change(searchInput, { target: { value: invalidValue } });
 
           const afterInvalidInput = screen.getAllByTestId('comboBoxInput')[0];
-          expect(afterInvalidInput).toHaveTextContent(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+          expect(searchInput).toHaveValue(invalidValue); // the 'Group by' EuiComboBox is now in the "error state"
+          expect(afterInvalidInput).not.toHaveTextContent(invalidValue); // Value should not have been applied
 
           resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 
@@ -292,7 +293,8 @@ describe('ChartPanels', () => {
           fireEvent.change(searchInput, { target: { value: invalidValue } });
 
           const afterInvalidInput = screen.getAllByTestId('comboBoxInput')[1];
-          expect(afterInvalidInput).toHaveTextContent(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+          expect(searchInput).toHaveValue(invalidValue); // the 'Group by top' EuiComboBox is now in the "error state"
+          expect(afterInvalidInput).not.toHaveTextContent(invalidValue); // Value should not have been applied
 
           resetGroupByFields(); // invoke the `Reset group by fields` context menu action
 

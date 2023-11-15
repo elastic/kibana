@@ -65,7 +65,11 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
   describe('alerts as data', () => {
     afterEach(() => objectRemover.removeAll());
     after(async () => {
-      await es.deleteByQuery({ index: alertsAsDataIndex, query: { match_all: {} } });
+      await es.deleteByQuery({
+        index: alertsAsDataIndex,
+        query: { match_all: {} },
+        conflicts: 'proceed',
+      });
     });
 
     it('should write alert docs during rule execution', async () => {
@@ -130,8 +134,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         // alert UUID should equal doc id
         expect(source[ALERT_UUID]).to.equal(alertDocsRun1[i]._id);
 
-        // duration should be '0' since this is a new alert
-        expect(source[ALERT_DURATION]).to.equal('0');
+        // duration should be 0 since this is a new alert
+        expect(source[ALERT_DURATION]).to.equal(0);
 
         // start should be defined
         expect(source[ALERT_START]).to.match(timestampPattern);
@@ -210,8 +214,7 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
         expect(source[ALERT_UUID]).to.equal(alertDocsRun2[i]._id);
 
         // duration should be greater than 0 since these are not new alerts
-        const durationAsNumber = Number(source[ALERT_DURATION]);
-        expect(durationAsNumber).to.be.greaterThan(0);
+        expect(source[ALERT_DURATION]).to.be.greaterThan(0);
       }
 
       // alertA, run2
@@ -425,8 +428,8 @@ export default function createAlertsAsDataInstallResourcesTest({ getService }: F
       expect(alertCDocRun3[ALERT_START]).not.to.equal(alertCDocRun2[ALERT_START]);
       // timestamp should be defined and not the same as prior run
       expect(alertCDocRun3['@timestamp']).to.match(timestampPattern);
-      // duration should be '0' since this is a new alert
-      expect(alertCDocRun3[ALERT_DURATION]).to.equal('0');
+      // duration should be 0 since this is a new alert
+      expect(alertCDocRun3[ALERT_DURATION]).to.equal(0);
       // flapping false, flapping history should be history from prior run with additional entry
       expect(alertCDocRun3[ALERT_FLAPPING]).to.equal(false);
       expect(alertCDocRun3[ALERT_FLAPPING_HISTORY]).to.eql([

@@ -11,7 +11,7 @@ import path from 'path';
 import type { BundledPackage } from '../../../types';
 import { FleetError } from '../../../errors';
 import { appContextService } from '../../app_context';
-import { splitPkgKey } from '../registry';
+import { splitPkgKey, pkgToPkgKey } from '../registry';
 
 export async function getBundledPackages(): Promise<BundledPackage[]> {
   const config = appContextService.getConfig();
@@ -55,6 +55,21 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
 
     return [];
   }
+}
+
+export async function getBundledPackageByPkgKey(
+  pkgKey: string
+): Promise<BundledPackage | undefined> {
+  const bundledPackages = await getBundledPackages();
+  const bundledPackage = bundledPackages.find((pkg) => {
+    if (pkgKey.includes('-')) {
+      return pkgToPkgKey(pkg) === pkgKey;
+    } else {
+      return pkg.name === pkgKey;
+    }
+  });
+
+  return bundledPackage;
 }
 
 export async function getBundledPackageByName(name: string): Promise<BundledPackage | undefined> {

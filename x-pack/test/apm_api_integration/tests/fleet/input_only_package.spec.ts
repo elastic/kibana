@@ -189,6 +189,7 @@ function getApmServices(apmApiClient: ApmApiClient, start: string, end: string) 
           kuery: '',
           documentType: ApmDocumentType.TransactionMetric,
           rollupInterval: RollupInterval.OneMinute,
+          useDurationSummary: true,
         },
       },
     });

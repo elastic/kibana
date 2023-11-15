@@ -65,7 +65,7 @@ export const derivativeOperation: OperationDefinition<
       };
     }
   },
-  getDefaultLabel: (column, indexPattern, columns) => {
+  getDefaultLabel: (column, columns, indexPattern) => {
     return ofName(columns[column.references[0]]?.label, column.timeScale, column.timeShift);
   },
   toExpression: (layer, columnId) => {

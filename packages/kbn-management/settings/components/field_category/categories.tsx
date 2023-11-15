@@ -21,6 +21,7 @@ export interface FieldCategoriesProps
     Pick<FieldRowProps, 'onFieldChange' | 'isSavingEnabled'> {
   /** Categorized fields for display. */
   categorizedFields: CategorizedFields;
+  categoryCounts: { [category: string]: number };
   /** And unsaved changes currently managed by the parent component. */
   unsavedChanges?: UnsavedFieldChanges;
 }
@@ -33,6 +34,7 @@ export interface FieldCategoriesProps
  */
 export const FieldCategories = ({
   categorizedFields,
+  categoryCounts,
   unsavedChanges = {},
   onClearQuery,
   isSavingEnabled,
@@ -40,7 +42,11 @@ export const FieldCategories = ({
 }: FieldCategoriesProps) => (
   <>
     {Object.entries(categorizedFields).map(([category, { count, fields }]) => (
-      <FieldCategory key={category} fieldCount={count} {...{ category, onClearQuery }}>
+      <FieldCategory
+        key={category}
+        fieldCount={categoryCounts[category]}
+        {...{ category, onClearQuery }}
+      >
         {fields.map((field) => (
           <FieldRow
             key={field.id}

@@ -23,8 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
       await PageObjects.home.addSampleDataSet('flights');
       await PageObjects.common.navigateToApp('dashboard');
-      await testSubjects.click('dashboardListingTitleLink-[Flights]-Global-Flight-Dashboard');
-      await testSubjects.click('dashboardEditMode');
+      await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
+      await PageObjects.dashboard.switchToEditMode();
     });
 
     after(async () => {

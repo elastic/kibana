@@ -40,6 +40,18 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     });
   }
 
+  async function deleteConnectorByName(connectorName: string) {
+    const { body: connectors } = await supertest.get(`/api/actions/connectors`).expect(200);
+    const connector = connectors?.find((c: { name: string }) => c.name === connectorName);
+    if (!connector) {
+      return;
+    }
+    await supertest
+      .delete(`/api/actions/connector/${connector.id}`)
+      .set('kbn-xsrf', 'foo')
+      .expect(204, '');
+  }
+
   async function defineEsQueryAlert(alertName: string) {
     await pageObjects.triggersActionsUI.clickCreateAlertButton();
     await testSubjects.setValue('ruleNameInput', alertName);
@@ -115,6 +127,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const alertsToDelete = await getAlertsByName(ruleName);
       await deleteAlerts(alertsToDelete.map((rule: { id: string }) => rule.id));
       expect(true).to.eql(true);
+      // Additional cleanup step to prevent
+      // FLAKY: https://github.com/elastic/kibana/issues/167443
+      // FLAKY: https://github.com/elastic/kibana/issues/167444
+      await deleteConnectorByName('webhook-test');
     });
 
     it('should create an alert', async () => {
@@ -320,7 +336,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('should show all rule types on click euiFormControlLayoutClearButton', async () => {
       await pageObjects.triggersActionsUI.clickCreateAlertButton();
       await testSubjects.setValue('ruleNameInput', 'alertName');
-      const ruleTypeSearchBox = await find.byCssSelector('[data-test-subj="ruleSearchField"]');
+      const ruleTypeSearchBox = await testSubjects.find('ruleSearchField');
       await ruleTypeSearchBox.type('notexisting rule type');
       await ruleTypeSearchBox.pressKeys(browser.keys.ENTER);
 

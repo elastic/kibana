@@ -66,21 +66,30 @@ const ContextPillsComponent: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup gutterSize="none" wrap>
-      {sortedPromptContexts.map(({ description, id, getPromptContext, tooltip }) => (
-        <EuiFlexItem grow={false} key={id}>
-          <EuiToolTip content={tooltip}>
-            <PillButton
-              data-test-subj={`pillButton-${id}`}
-              disabled={selectedPromptContexts[id] != null}
-              iconSide="left"
-              iconType="plus"
-              onClick={() => selectPromptContext(id)}
-            >
-              {description}
-            </PillButton>
-          </EuiToolTip>
-        </EuiFlexItem>
-      ))}
+      {sortedPromptContexts.map(({ description, id, getPromptContext, tooltip }) => {
+        // Workaround for known issue where tooltip won't dismiss after button state is changed once clicked
+        // See: https://github.com/elastic/eui/issues/6488#issuecomment-1379656704
+        const button = (
+          <PillButton
+            data-test-subj={`pillButton-${id}`}
+            disabled={selectedPromptContexts[id] != null}
+            iconSide="left"
+            iconType="plus"
+            onClick={() => selectPromptContext(id)}
+          >
+            {description}
+          </PillButton>
+        );
+        return (
+          <EuiFlexItem grow={false} key={id}>
+            {selectedPromptContexts[id] != null ? (
+              button
+            ) : (
+              <EuiToolTip content={tooltip}>{button}</EuiToolTip>
+            )}
+          </EuiFlexItem>
+        );
+      })}
     </EuiFlexGroup>
   );
 };

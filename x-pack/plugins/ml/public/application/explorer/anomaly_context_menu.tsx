@@ -40,7 +40,7 @@ import { JobId } from '../../../common/types/anomaly_detection_jobs';
 import { getDefaultExplorerChartsPanelTitle } from '../../embeddables/anomaly_charts/anomaly_charts_embeddable';
 import { MAX_ANOMALY_CHARTS_ALLOWED } from '../../embeddables/anomaly_charts/anomaly_charts_initializer';
 import { useAnomalyExplorerContext } from './anomaly_explorer_context';
-import { escapeKueryForFieldValuePair } from '../util/string_utils';
+import { escapeKueryForEmbeddableFieldValuePair } from '../util/string_utils';
 import { useCasesModal } from '../contexts/kibana/use_cases_modal';
 import { DEFAULT_MAX_SERIES_TO_PLOT } from '../services/anomaly_explorer_charts_service';
 import {
@@ -154,7 +154,7 @@ export const AnomalyContextMenu: FC<AnomalyContextMenuProps> = ({
       const influencers = selectionInfluencers ?? [];
       const config = getDefaultEmbeddablePanelConfig(jobIds, queryString);
       const queryFromSelectedCells = influencers
-        .map((s) => escapeKueryForFieldValuePair(s.fieldName, s.fieldValue))
+        .map((s) => escapeKueryForEmbeddableFieldValuePair(s.fieldName, s.fieldValue))
         .join(' or ');
 
       // When adding anomaly charts to Dashboard, we want to respect the Dashboard's time range

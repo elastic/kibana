@@ -11,9 +11,10 @@ import React, { useContext } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiErrorBoundary, EuiHeaderLinks, EuiHeaderLink } from '@elastic/eui';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { useKibana, useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { HeaderMenuPortal, useLinkProps } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityAIAssistantActionMenuItem } from '@kbn/observability-ai-assistant-plugin/public';
+import { enableInfrastructureHostsView } from '@kbn/observability-plugin/common';
 import { MetricsSourceConfigurationProperties } from '../../../common/metrics_sources';
 import { HelpCenterContent } from '../../components/help_center_content';
 import { useReadOnlyBadge } from '../../hooks/use_readonly_badge';
@@ -23,7 +24,6 @@ import { MetricsExplorerPage } from './metrics_explorer';
 import { SnapshotPage } from './inventory_view';
 import { NodeDetail } from './metric_detail';
 import { MetricsSettingsPage } from './settings';
-import { HostsLandingPage } from './hosts/hosts_landing_page';
 import { SourceLoadingPage } from '../../components/source_loading_page';
 import { WaffleOptionsProvider } from './inventory_view/hooks/use_waffle_options';
 import { WaffleTimeProvider } from './inventory_view/hooks/use_waffle_time';
@@ -37,6 +37,7 @@ import { CreateDerivedIndexPattern, useSourceContext } from '../../containers/me
 import { NotFoundPage } from '../404';
 import { ReactQueryProvider } from '../../containers/react_query_provider';
 import { usePluginConfig } from '../../containers/plugin_config_context';
+import { HostsPage } from './hosts';
 
 const ADD_DATA_LABEL = i18n.translate('xpack.infra.metricsHeaderAddDataButtonLabel', {
   defaultMessage: 'Add data',
@@ -46,6 +47,7 @@ export const InfrastructurePage = () => {
   const config = usePluginConfig();
   const uiCapabilities = useKibana().services.application?.capabilities;
   const { setHeaderActionMenu, theme$ } = useContext(HeaderActionMenuContext);
+  const isHostsViewEnabled = useUiSetting(enableInfrastructureHostsView);
 
   const settingsTabTitle = i18n.translate('xpack.infra.metrics.settingsTabTitle', {
     defaultMessage: 'Settings',
@@ -83,7 +85,9 @@ export const InfrastructurePage = () => {
                           {settingsTabTitle}
                         </EuiHeaderLink>
                         <Route path={'/inventory'} component={AnomalyDetectionFlyout} />
-                        <MetricsAlertDropdown />
+                        {config.featureFlags.alertsAndRulesDropdownEnabled && (
+                          <MetricsAlertDropdown />
+                        )}
                         <EuiHeaderLink
                           href={kibana.services?.application?.getUrlForApp('/integrations/browse')}
                           color="primary"
@@ -113,7 +117,7 @@ export const InfrastructurePage = () => {
                       </Route>
                     )}
                     <Route path="/detail/:type/:node" component={NodeDetail} />
-                    <Route path={'/hosts'} component={HostsLandingPage} />
+                    {isHostsViewEnabled && <Route path={'/hosts'} component={HostsPage} />}
                     <Route path={'/settings'} component={MetricsSettingsPage} />
                     <Route render={() => <NotFoundPage title="Infrastructure" />} />
                   </Routes>

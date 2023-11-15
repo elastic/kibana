@@ -7,21 +7,36 @@
 
 import { sortBy } from 'lodash';
 
-import type { SignificantTermGroup } from '@kbn/ml-agg-utils';
+import type { SignificantItemGroup } from '@kbn/ml-agg-utils';
 
 import type { GroupTableItem, GroupTableItemGroup } from './types';
 
 export function getGroupTableItems(
-  significantTermsGroups: SignificantTermGroup[]
+  significantItemsGroups: SignificantItemGroup[]
 ): GroupTableItem[] {
-  const tableItems = significantTermsGroups.map(({ id, group, docCount, histogram, pValue }) => {
+  const tableItems = significantItemsGroups.map(({ id, group, docCount, histogram, pValue }) => {
     const sortedGroup = sortBy(group, [(d) => d.fieldName]);
     const dedupedGroup: GroupTableItemGroup[] = [];
 
     sortedGroup.forEach((pair) => {
-      const { fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue, duplicate } = pair;
+      const {
+        key,
+        type,
+        fieldName,
+        fieldValue,
+        docCount: pairDocCount,
+        pValue: pairPValue,
+        duplicate,
+      } = pair;
       if ((duplicate ?? 0) <= 1) {
-        dedupedGroup.push({ fieldName, fieldValue, docCount: pairDocCount, pValue: pairPValue });
+        dedupedGroup.push({
+          key,
+          type,
+          fieldName,
+          fieldValue,
+          docCount: pairDocCount,
+          pValue: pairPValue,
+        });
       }
     });
 

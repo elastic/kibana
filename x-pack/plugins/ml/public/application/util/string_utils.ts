@@ -140,6 +140,26 @@ export function escapeKueryForFieldValuePair(
   return `${escapeKuery(name)}:${escapeKuery(value.toString())}`;
 }
 
+const replaceEmptyStringWithQuotation = (s: string) => (s === '' ? '""' : s);
+
+/**
+ *
+ * Helper function to returns escaped combined field name and value
+ * which also replaces empty str with " to ensure compatability with kql queries
+ * @param name fieldName of selection
+ * @param value fieldValue of selection
+ * @returns {string} escaped `name:value` compatible with embeddable input
+ */
+export function escapeKueryForEmbeddableFieldValuePair(
+  name: string,
+  value: string | number | boolean | undefined
+): string {
+  if (!isDefined(name) || !isDefined(value)) return '';
+  return `${replaceEmptyStringWithQuotation(escapeKuery(name))}:${replaceEmptyStringWithQuotation(
+    escapeKuery(value.toString())
+  )}`;
+}
+
 export function calculateTextWidth(txt: string | number, isNumber: boolean) {
   txt = isNumber && typeof txt === 'number' ? d3.format(',')(txt) : txt;
 

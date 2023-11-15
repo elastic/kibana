@@ -8,11 +8,13 @@
 import React, { useCallback, useState } from 'react';
 import { Prompt, QuickPrompt } from '../../../..';
 import { UseAssistantContext, useAssistantContext } from '../../../assistant_context';
+import type { KnowledgeBaseConfig } from '../../types';
 
 interface UseSettingsUpdater {
   conversationSettings: UseAssistantContext['conversations'];
   defaultAllow: string[];
   defaultAllowReplacement: string[];
+  knowledgeBase: KnowledgeBaseConfig;
   quickPromptSettings: QuickPrompt[];
   resetSettings: () => void;
   systemPromptSettings: Prompt[];
@@ -21,6 +23,7 @@ interface UseSettingsUpdater {
   setUpdatedConversationSettings: React.Dispatch<
     React.SetStateAction<UseAssistantContext['conversations']>
   >;
+  setUpdatedKnowledgeBaseSettings: React.Dispatch<React.SetStateAction<KnowledgeBaseConfig>>;
   setUpdatedQuickPromptSettings: React.Dispatch<React.SetStateAction<QuickPrompt[]>>;
   setUpdatedSystemPromptSettings: React.Dispatch<React.SetStateAction<Prompt[]>>;
   saveSettings: () => void;
@@ -34,11 +37,13 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     conversations,
     defaultAllow,
     defaultAllowReplacement,
+    knowledgeBase,
     setAllQuickPrompts,
     setAllSystemPrompts,
     setConversations,
     setDefaultAllow,
     setDefaultAllowReplacement,
+    setKnowledgeBase,
   } = useAssistantContext();
 
   /**
@@ -57,6 +62,9 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const [updatedDefaultAllow, setUpdatedDefaultAllow] = useState<string[]>(defaultAllow);
   const [updatedDefaultAllowReplacement, setUpdatedDefaultAllowReplacement] =
     useState<string[]>(defaultAllowReplacement);
+  // Knowledge Base
+  const [updatedKnowledgeBaseSettings, setUpdatedKnowledgeBaseSettings] =
+    useState<KnowledgeBaseConfig>(knowledgeBase);
 
   /**
    * Reset all pending settings
@@ -64,10 +72,18 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
   const resetSettings = useCallback((): void => {
     setUpdatedConversationSettings(conversations);
     setUpdatedQuickPromptSettings(allQuickPrompts);
+    setUpdatedKnowledgeBaseSettings(knowledgeBase);
     setUpdatedSystemPromptSettings(allSystemPrompts);
     setUpdatedDefaultAllow(defaultAllow);
     setUpdatedDefaultAllowReplacement(defaultAllowReplacement);
-  }, [allQuickPrompts, allSystemPrompts, conversations, defaultAllow, defaultAllowReplacement]);
+  }, [
+    allQuickPrompts,
+    allSystemPrompts,
+    conversations,
+    defaultAllow,
+    defaultAllowReplacement,
+    knowledgeBase,
+  ]);
 
   /**
    * Save all pending settings
@@ -76,6 +92,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setAllQuickPrompts(updatedQuickPromptSettings);
     setAllSystemPrompts(updatedSystemPromptSettings);
     setConversations(updatedConversationSettings);
+    setKnowledgeBase(updatedKnowledgeBaseSettings);
     setDefaultAllow(updatedDefaultAllow);
     setDefaultAllowReplacement(updatedDefaultAllowReplacement);
   }, [
@@ -84,9 +101,11 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setConversations,
     setDefaultAllow,
     setDefaultAllowReplacement,
+    setKnowledgeBase,
     updatedConversationSettings,
     updatedDefaultAllow,
     updatedDefaultAllowReplacement,
+    updatedKnowledgeBaseSettings,
     updatedQuickPromptSettings,
     updatedSystemPromptSettings,
   ]);
@@ -95,6 +114,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     conversationSettings: updatedConversationSettings,
     defaultAllow: updatedDefaultAllow,
     defaultAllowReplacement: updatedDefaultAllowReplacement,
+    knowledgeBase: updatedKnowledgeBaseSettings,
     quickPromptSettings: updatedQuickPromptSettings,
     resetSettings,
     systemPromptSettings: updatedSystemPromptSettings,
@@ -102,6 +122,7 @@ export const useSettingsUpdater = (): UseSettingsUpdater => {
     setUpdatedDefaultAllow,
     setUpdatedDefaultAllowReplacement,
     setUpdatedConversationSettings,
+    setUpdatedKnowledgeBaseSettings,
     setUpdatedQuickPromptSettings,
     setUpdatedSystemPromptSettings,
   };

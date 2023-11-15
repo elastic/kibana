@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiFieldText,
   EuiFormRow,
@@ -16,15 +17,13 @@ import {
   EuiPopover,
 } from '@elastic/eui';
 import React, { useState, useCallback, useMemo } from 'react';
-import { omit, range, first, xor, debounce } from 'lodash';
+import { range, first, xor, debounce } from 'lodash';
 import { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import { OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS } from '../../../../../common/custom_threshold_rule/metrics_explorer';
 import {
   Aggregators,
-  CustomMetricAggTypes,
   CustomThresholdExpressionMetric,
 } from '../../../../../common/custom_threshold_rule/types';
 
@@ -43,7 +42,10 @@ export interface CustomEquationEditorProps {
   dataView: DataViewBase;
 }
 
-const NEW_METRIC = { name: 'A', aggType: Aggregators.AVERAGE as CustomMetricAggTypes };
+const NEW_METRIC = {
+  name: 'A',
+  aggType: Aggregators.COUNT as Aggregators,
+};
 const MAX_VARIABLES = 26;
 const CHAR_CODE_FOR_A = 65;
 const CHAR_CODE_FOR_Z = CHAR_CODE_FOR_A + MAX_VARIABLES;
@@ -108,14 +110,12 @@ export function CustomEquationEditor({
   const disableAdd = customMetrics?.length === MAX_VARIABLES;
   const disableDelete = customMetrics?.length === 1;
 
-  const filteredAggregationTypes = omit(aggregationTypes, OMITTED_AGGREGATIONS_FOR_CUSTOM_METRICS);
-
   const metricRows = customMetrics?.map((row) => (
     <MetricRowWithAgg
       key={row.name}
       name={row.name}
       aggType={row.aggType}
-      aggregationTypes={filteredAggregationTypes}
+      aggregationTypes={aggregationTypes}
       field={row.field}
       filter={row.filter}
       fields={fields}
@@ -158,13 +158,13 @@ export function CustomEquationEditor({
         <EuiPopover
           button={
             <EuiFormRow
+              data-test-subj="equationAndThreshold"
               fullWidth
               label={i18n.translate(
                 'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.equationAndThreshold',
                 { defaultMessage: 'Equation and threshold' }
               )}
               error={[errors.equation]}
-              isInvalid={errors.equation != null}
             >
               <>
                 <EuiSpacer size="xs" />
@@ -179,6 +179,7 @@ export function CustomEquationEditor({
                   onClick={() => {
                     setCustomEqPopoverOpen(true);
                   }}
+                  isInvalid={errors.equation != null}
                 />
               </>
             </EuiFormRow>

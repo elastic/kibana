@@ -18,11 +18,13 @@ describe('Post Knowledge Base Route', () => {
 
   clients.core.elasticsearch.client = elasticsearchServiceMock.createScopedClusterClient();
 
+  const mockGetElser = jest.fn().mockResolvedValue('.elser_model_2');
+
   beforeEach(() => {
     server = serverMock.create();
     ({ context } = requestContextMock.createTools());
 
-    postKnowledgeBaseRoute(server.router);
+    postKnowledgeBaseRoute(server.router, mockGetElser);
   });
 
   describe('Status codes', () => {

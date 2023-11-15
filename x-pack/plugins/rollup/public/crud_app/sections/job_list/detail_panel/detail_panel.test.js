@@ -321,9 +321,9 @@ describe('<DetailPanel />', () => {
       const { find } = initTestBed({ panelType });
       const tabContent = find('rollupJobDetailTabContent');
 
-      it('should render the "EuiCodeEditor" with the job "json" data', () => {
-        const euiCodeEditor = tabContent.find('[data-test-subj="jsonCodeBlock"]').at(0);
-        expect(JSON.parse(euiCodeEditor.text())).toEqual(defaultJob.json);
+      it('should render the "CodeEditor" with the job "json" data', () => {
+        const codeEditor = tabContent.find('[data-test-subj="jsonCodeBlock"]').at(0);
+        expect(JSON.parse(codeEditor.text())).toEqual(defaultJob.json);
       });
     });
   });

@@ -46,6 +46,11 @@ const mockSearchBarCustomizationWithCustomSearchBar: SearchBarCustomization = {
   CustomSearchBar: MockCustomSearchBar,
 };
 
+const mockSearchBarCustomizationWithHiddenDataViewPicker: SearchBarCustomization = {
+  id: 'search_bar',
+  hideDataViewPicker: true,
+};
+
 let mockUseCustomizations = false;
 
 jest.mock('../../../../customizations', () => ({
@@ -255,6 +260,24 @@ describe('Discover topnav component', () => {
         topNav.prop('dataViewPickerOverride') as ReactElement
       ).find(mockSearchBarCustomization.CustomDataViewPicker!);
       expect(dataViewPickerOverride.length).toBe(1);
+    });
+
+    it('should not render the dataView picker when hideDataViewPicker is true', () => {
+      (useDiscoverCustomization as jest.Mock).mockImplementation((id: DiscoverCustomizationId) => {
+        if (id === 'search_bar') {
+          return mockSearchBarCustomizationWithHiddenDataViewPicker;
+        }
+      });
+
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+
+      const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
     });
   });
 });

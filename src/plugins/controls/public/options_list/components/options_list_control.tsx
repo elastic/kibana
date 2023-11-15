@@ -21,6 +21,7 @@ import { useOptionsList } from '../embeddable/options_list_embeddable';
 import './options_list.scss';
 import { ControlError } from '../../control_group/component/control_error_component';
 import { MIN_POPOVER_WIDTH } from '../../constants';
+import { useFieldFormatter } from '../../hooks/use_field_formatter';
 
 export const OptionsListControl = ({
   typeaheadSubject,
@@ -35,6 +36,7 @@ export const OptionsListControl = ({
   const isPopoverOpen = optionsList.select((state) => state.componentState.popoverOpen);
   const validSelections = optionsList.select((state) => state.componentState.validSelections);
   const invalidSelections = optionsList.select((state) => state.componentState.invalidSelections);
+  const fieldSpec = optionsList.select((state) => state.componentState.field);
 
   const id = optionsList.select((state) => state.explicitInput.id);
   const exclude = optionsList.select((state) => state.explicitInput.exclude);
@@ -46,6 +48,8 @@ export const OptionsListControl = ({
   const selectedOptions = optionsList.select((state) => state.explicitInput.selectedOptions);
 
   const loading = optionsList.select((state) => state.output.loading);
+  const dataViewId = optionsList.select((state) => state.output.dataViewId);
+  const fieldFormatter = useFieldFormatter({ dataViewId, fieldSpec });
 
   useEffect(() => {
     return () => {
@@ -87,6 +91,8 @@ export const OptionsListControl = ({
   );
 
   const { hasSelections, selectionDisplayNode, validSelectionsCount } = useMemo(() => {
+    const delimiter = OptionsListStrings.control.getSeparator(fieldSpec?.type);
+
     return {
       hasSelections: !isEmpty(validSelections) || !isEmpty(invalidSelections),
       validSelectionsCount: validSelections?.length,
@@ -107,20 +113,30 @@ export const OptionsListControl = ({
             </span>
           ) : (
             <>
-              {validSelections && (
-                <span>{validSelections.join(OptionsListStrings.control.getSeparator())}</span>
-              )}
-              {invalidSelections && (
-                <span className="optionsList__filterInvalid">
-                  {invalidSelections.join(OptionsListStrings.control.getSeparator())}
+              {validSelections?.length ? (
+                <span className="optionsList__filterValid">
+                  {validSelections.map((value) => fieldFormatter(value)).join(delimiter)}
                 </span>
-              )}
+              ) : null}
+              {validSelections?.length && invalidSelections?.length ? delimiter : null}
+              {invalidSelections?.length ? (
+                <span className="optionsList__filterInvalid">
+                  {invalidSelections.map((value) => fieldFormatter(value)).join(delimiter)}
+                </span>
+              ) : null}
             </>
           )}
         </>
       ),
     };
-  }, [exclude, existsSelected, validSelections, invalidSelections]);
+  }, [
+    exclude,
+    existsSelected,
+    validSelections,
+    invalidSelections,
+    fieldFormatter,
+    fieldSpec?.type,
+  ]);
 
   const button = (
     <EuiFilterButton

@@ -62,7 +62,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       defaultMessage: 'Elastic Learned Sparse EncodeR v1 (Tech Preview)',
     }),
   },
-  '.elser_model_2_SNAPSHOT': {
+  '.elser_model_2': {
     modelName: 'elser',
     version: 2,
     default: true,
@@ -72,10 +72,10 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2Description', {
-      defaultMessage: 'Elastic Learned Sparse EncodeR v2 (Tech Preview)',
+      defaultMessage: 'Elastic Learned Sparse EncodeR v2',
     }),
   },
-  '.elser_model_2_linux-x86_64_SNAPSHOT': {
+  '.elser_model_2_linux-x86_64': {
     modelName: 'elser',
     version: 2,
     os: 'Linux',
@@ -86,8 +86,7 @@ export const ELASTIC_MODEL_DEFINITIONS: Record<string, ModelDefinition> = Object
       },
     },
     description: i18n.translate('xpack.ml.trainedModels.modelsList.elserV2x86Description', {
-      defaultMessage:
-        'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64 (Tech Preview)',
+      defaultMessage: 'Elastic Learned Sparse EncodeR v2, optimized for linux-x86_64',
     }),
   },
 } as const);

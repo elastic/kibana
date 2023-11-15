@@ -39,6 +39,8 @@ export const FailedTestsList = ({
 
   const formatter = useDateFormat();
 
+  // TODO: this is broken for ping monitors
+
   const columns = [
     {
       field: '@timestamp',

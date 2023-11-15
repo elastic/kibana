@@ -910,7 +910,7 @@
             "section": "def-common.RunFn",
             "text": "RunFn"
           },
-          ", options: ",
+          "<T>, options: ",
           {
             "pluginId": "@kbn/dev-cli-runner",
             "scope": "common",
@@ -918,7 +918,7 @@
             "section": "def-common.RunOptions",
             "text": "RunOptions"
           },
-          ") => Promise<void>"
+          ") => Promise<T | undefined>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,
@@ -938,7 +938,8 @@
                 "docId": "kibKbnDevCliRunnerPluginApi",
                 "section": "def-common.RunFn",
                 "text": "RunFn"
-              }
+              },
+              "<T>"
             ],
             "path": "packages/kbn-dev-cli-runner/src/run.ts",
             "deprecated": false,
@@ -1788,7 +1789,7 @@
             "section": "def-common.RunContext",
             "text": "RunContext"
           },
-          ") => void | Promise<void>"
+          ") => void | Promise<T>"
         ],
         "path": "packages/kbn-dev-cli-runner/src/run.ts",
         "deprecated": false,

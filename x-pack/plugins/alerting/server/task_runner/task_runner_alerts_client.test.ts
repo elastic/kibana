@@ -529,7 +529,7 @@ describe('Task Runner', () => {
               [EVENT_ACTION]: 'open',
               [EVENT_KIND]: 'signal',
               [ALERT_ACTION_GROUP]: 'default',
-              [ALERT_DURATION]: '0',
+              [ALERT_DURATION]: 0,
               [ALERT_FLAPPING]: false,
               [ALERT_FLAPPING_HISTORY]: [true],
               [ALERT_INSTANCE_ID]: '1',
@@ -767,6 +767,7 @@ describe('Task Runner', () => {
         maxAlerts: 1000,
         recoveredAlertsFromState: {},
         ruleLabel: "test:1: 'rule-name'",
+        startedAt: new Date(DATE_1970),
       });
       expect(alertsClientNotToUse.initializeExecution).not.toHaveBeenCalled();
 
