@@ -108,6 +108,7 @@ const AssistantTab: React.FC<{
     <AssistantTabContainer>
       <Assistant
         conversationId={TIMELINE_CONVERSATION_TITLE}
+        embeddedLayout
         setConversationId={setConversationId}
         shouldRefocusPrompt={shouldRefocusPrompt}
       />

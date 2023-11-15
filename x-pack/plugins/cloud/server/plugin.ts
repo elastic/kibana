@@ -153,6 +153,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
   public setup(core: CoreSetup, { usageCollection }: PluginsSetup): CloudSetup {
     const isCloudEnabled = getIsCloudEnabled(this.config.id);
     const projectId = this.config.serverless?.project_id;
+    const projectType = this.config.serverless?.project_type;
     const isServerlessEnabled = !!projectId;
     const deploymentId = parseDeploymentIdFromDeploymentUrl(this.config.deployment_url);
 
@@ -163,6 +164,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       isElasticStaffOwned: this.config.is_elastic_staff_owned,
       deploymentId,
       projectId,
+      projectType,
     });
 
     let decodedId: DecodedCloudId | undefined;
@@ -190,7 +192,7 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       serverless: {
         projectId,
         projectName: this.config.serverless?.project_name,
-        projectType: this.config.serverless?.project_type,
+        projectType,
       },
     };
   }

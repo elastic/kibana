@@ -180,7 +180,7 @@ image::images/custom-field.gif[An example of creating a custom case field in {ki
 [discrete]
 ==== Supporting multi levels of term aggregations in {es} rule type 
 
-The existing {es} alerting rule (KQL-based) is now supported by multiple selection when grouping by alert fields, which allows you to define multiple layers of term aggregations.
+The existing {es} alerting rule is now supported by multiple selection when grouping by alert fields, which allows you to define multiple layers of term aggregations.
 
 [role="screenshot"]
 image::images/term-aggs.png[An example of creating multiple layers of term aggregations]

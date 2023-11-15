@@ -55,7 +55,7 @@ const CodePanel: React.FC<ErrorCalloutProps & { onClose: () => void }> = (props)
         </EuiPanel>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiCodeBlock>
+        <EuiCodeBlock data-test-subj="errorBoundaryFatalDetailsErrorString">
           <p>{(error.stack ?? error.toString()) + '\n\n'}</p>
           <p>
             {errorName}
@@ -93,25 +93,29 @@ export const FatalPrompt: React.FC<ErrorCalloutProps> = (props) => {
 
   return (
     <EuiEmptyPrompt
-      title={<h2>{strings.fatal.callout.title()}</h2>}
+      title={<h2 data-test-subj="errorBoundaryFatalHeader">{strings.fatal.callout.title()}</h2>}
       color="danger"
       iconType="error"
       body={
         <>
-          <p>{strings.fatal.callout.body()}</p>
+          <p data-test-subj="errorBoundaryFatalPromptBody">{strings.fatal.callout.body()}</p>
           <p>
             <EuiButton
               color="danger"
               iconType="refresh"
               fill={true}
               onClick={onClickRefresh}
-              data-test-subj="fatalPromptReloadBtn"
+              data-test-subj="errorBoundaryFatalPromptReloadBtn"
             >
               {strings.fatal.callout.pageReloadButton()}
             </EuiButton>
           </p>
           <p>
-            <EuiLink color="danger" onClick={() => setIsFlyoutVisible(true)}>
+            <EuiLink
+              color="danger"
+              onClick={() => setIsFlyoutVisible(true)}
+              data-test-subj="errorBoundaryFatalShowDetailsBtn"
+            >
               {strings.fatal.callout.showDetailsButton()}
             </EuiLink>
             {isFlyoutVisible ? (
@@ -128,17 +132,25 @@ export const RecoverablePrompt = (props: ErrorCalloutProps) => {
   const { onClickRefresh } = props;
   return (
     <EuiEmptyPrompt
-      iconType="warning"
-      title={<h2>{strings.recoverable.callout.title()}</h2>}
-      body={<p>{strings.recoverable.callout.body()}</p>}
+      title={
+        <h2 data-test-subj="errorBoundaryRecoverableHeader">
+          {strings.recoverable.callout.title()}
+        </h2>
+      }
       color="warning"
+      iconType="warning"
+      body={
+        <p data-test-subj="errorBoundaryRecoverablePromptBody">
+          {strings.recoverable.callout.body()}
+        </p>
+      }
       actions={
         <EuiButton
           color="warning"
           iconType="refresh"
           fill={true}
           onClick={onClickRefresh}
-          data-test-subj="recoverablePromptReloadBtn"
+          data-test-subj="errorBoundaryRecoverablePromptReloadBtn"
         >
           {strings.recoverable.callout.pageReloadButton()}
         </EuiButton>

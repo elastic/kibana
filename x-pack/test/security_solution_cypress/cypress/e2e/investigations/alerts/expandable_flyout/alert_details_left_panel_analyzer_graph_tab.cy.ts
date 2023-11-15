@@ -17,7 +17,6 @@ import { openGraphAnalyzerTab } from '../../../../tasks/expandable_flyout/alert_
 import { expandDocumentDetailsExpandableFlyoutLeftSection } from '../../../../tasks/expandable_flyout/alert_details_right_panel';
 import { expandFirstAlertExpandableFlyout } from '../../../../tasks/expandable_flyout/common';
 import { ANALYZER_NODE } from '../../../../screens/alerts';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -31,7 +30,6 @@ describe.skip(
   { tags: ['@ess', '@brokenInServerless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);

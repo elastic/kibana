@@ -8,7 +8,6 @@
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/public/common';
 
 import { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-
 import type { Conversation, Message } from '../assistant_context/types';
 import { API_ERROR } from './translations';
 import { MODEL_GPT_3_5_TURBO } from '../connectorland/models/model_selector/model_selector';
@@ -24,8 +23,9 @@ export interface FetchConnectorExecuteAction {
 }
 
 export interface FetchConnectorExecuteResponse {
-  response: string;
+  response: string | ReadableStreamDefaultReader<Uint8Array>;
   isError: boolean;
+  isStream: boolean;
 }
 
 export const fetchConnectorExecuteAction = async ({
@@ -54,15 +54,60 @@ export const fetchConnectorExecuteAction = async ({
           messages: outboundMessages,
         };
 
-  const requestBody = {
-    params: {
-      subActionParams: body,
-      subAction: 'invokeAI',
-    },
-    assistantLangChain,
-  };
+  // TODO: Remove in part 2 of streaming work for security solution
+  // tracked here: https://github.com/elastic/security-team/issues/7363
+  // My "Feature Flag", turn to false before merging
+  // In part 2 I will make enhancements to invokeAI to make it work with both openA, but to keep it to a Security Soltuion only review on this PR,
+  // I'm calling the stream action directly
+  const isStream = !assistantLangChain && false;
+  const requestBody = isStream
+    ? {
+        params: {
+          subActionParams: body,
+          subAction: 'stream',
+        },
+        assistantLangChain,
+      }
+    : {
+        params: {
+          subActionParams: body,
+          subAction: 'invokeAI',
+        },
+        assistantLangChain,
+      };
 
   try {
+    if (isStream) {
+      const response = await http.fetch(
+        `/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`,
+        {
+          method: 'POST',
+          body: JSON.stringify(requestBody),
+          signal,
+          asResponse: isStream,
+          rawResponse: isStream,
+        }
+      );
+
+      const reader = response?.response?.body?.getReader();
+
+      if (!reader) {
+        return {
+          response: `${API_ERROR}\n\nCould not get reader from response`,
+          isError: true,
+          isStream: false,
+        };
+      }
+      return {
+        response: reader,
+        isStream: true,
+        isError: false,
+      };
+    }
+
+    // TODO: Remove in part 2 of streaming work for security solution
+    // tracked here: https://github.com/elastic/security-team/issues/7363
+    // This is a temporary code to support the non-streaming API
     const response = await http.fetch<{
       connector_id: string;
       status: string;
@@ -70,10 +115,8 @@ export const fetchConnectorExecuteAction = async ({
       service_message?: string;
     }>(`/internal/elastic_assistant/actions/connector/${apiConfig?.connectorId}/_execute`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(requestBody),
+      headers: { 'Content-Type': 'application/json' },
       signal,
     });
 
@@ -82,21 +125,25 @@ export const fetchConnectorExecuteAction = async ({
         return {
           response: `${API_ERROR}\n\n${response.service_message}`,
           isError: true,
+          isStream: false,
         };
       }
       return {
         response: API_ERROR,
         isError: true,
+        isStream: false,
       };
     }
     return {
       response: assistantLangChain ? getFormattedMessageContent(response.data) : response.data,
       isError: false,
+      isStream: false,
     };
   } catch (error) {
     return {
       response: `${API_ERROR}\n\n${error?.body?.message ?? error?.message}`,
       isError: true,
+      isStream: false,
     };
   }
 };

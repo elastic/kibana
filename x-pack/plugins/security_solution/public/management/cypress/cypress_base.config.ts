@@ -44,9 +44,6 @@ export const getCypressBaseConfig = (
       experimentalStudio: true,
 
       env: {
-        'cypress-react-selector': {
-          root: '#security-solution-app',
-        },
         KIBANA_URL: 'http://localhost:5601',
         ELASTICSEARCH_URL: 'http://localhost:9200',
         FLEET_SERVER_URL: 'https://localhost:8220',
@@ -58,6 +55,11 @@ export const getCypressBaseConfig = (
         // Default log level for instance of `ToolingLog` created via `crateToolingLog()`. Set this
         // to `debug` or `verbose` when wanting to debug tooling used by tests (ex. data indexer functions).
         TOOLING_LOG_LEVEL: 'info',
+
+        // Variable works in conjunction with the Cypress parallel runner. When set to true, fleet server
+        // will be setup right after the Kibana stack, so that by the time cypress tests `.run()`/`.open()`,
+        // the env. will be all setup and we don't have to explicitly setup fleet from a test file
+        WITH_FLEET_SERVER: true,
 
         // grep related configs
         grepFilterSpecs: true,
@@ -72,11 +74,12 @@ export const getCypressBaseConfig = (
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
-        setupNodeEvents: (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
+        setupNodeEvents: async (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
 
           dataLoaders(on, config);
+
           // Data loaders specific to "real" Endpoint testing
           dataLoadersForRealEndpoints(on, config);
 
