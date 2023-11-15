@@ -24,6 +24,7 @@ describe('DeleteSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
+  let mockSystemEsClient: jest.Mocked<ElasticsearchClient>;
   let mockRulesClient: jest.Mocked<RulesClientApi>;
   let deleteSLO: DeleteSLO;
 
@@ -31,8 +32,15 @@ describe('DeleteSLO', () => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
+    mockSystemEsClient = elasticsearchServiceMock.createElasticsearchClient();
     mockRulesClient = rulesClientMock.create();
-    deleteSLO = new DeleteSLO(mockRepository, mockTransformManager, mockEsClient, mockRulesClient);
+    deleteSLO = new DeleteSLO(
+      mockRepository,
+      mockTransformManager,
+      mockEsClient,
+      mockRulesClient,
+      mockSystemEsClient
+    );
   });
 
   describe('happy path', () => {
@@ -72,6 +80,7 @@ describe('DeleteSLO', () => {
           },
         })
       );
+      expect(mockSystemEsClient.enrich.executePolicy).toHaveBeenCalled();
       expect(mockRulesClient.bulkDeleteRules).toHaveBeenCalledWith({
         filter: `alert.attributes.params.sloId:${slo.id}`,
       });
