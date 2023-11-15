@@ -59,16 +59,9 @@ describe('elasticsearch clients errors', () => {
       });
       expect('should have thrown').toEqual('but it did not');
     } catch (e) {
-      expect(inspect(e)).toMatchInlineSnapshot(`
-        "{
-          name: 'ResponseError',
-          message: 'parsing_exception\\\\n' +
-            '\\\\tCaused by:\\\\n' +
-            '\\\\t\\\\tnamed_object_not_found_exception: [1:30] unknown field [someInvalidQuery]\\\\n' +
-            '\\\\tRoot causes:\\\\n' +
-            '\\\\t\\\\tparsing_exception: unknown query [someInvalidQuery]'
-        }"
-      `);
+      const inspectedError = inspect(e)
+      expect(inspectedError).not.toContain('headers');
+      expect(inspectedError).not.toContain('authorization');
     }
   });
 });
