@@ -96,6 +96,10 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess @serverless Query type rules', () => {
     before(async () => {
       await esArchiver.load(auditbeatPath);
+      await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.8.0', {
+        useCreate: true,
+        docsOnly: true,
+      });
       await esArchiver.load('x-pack/test/functional/es_archives/signals/severity_risk_overrides');
     });
 
@@ -194,9 +198,9 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should query and get back expected alert structure when it is a alert on a alert', async () => {
-      const alertId = 'BhbXBmkBR346wHgn4PeZ';
+      const alertId = 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1';
       const rule: QueryRuleCreateProps = {
-        ...getRuleForAlertTesting([`auditbeat-*`]),
+        ...getRuleForAlertTesting([`.alerts-security.alerts-default*`]),
         rule_id: 'signal-on-signal',
         query: `_id:${alertId}`,
       };
@@ -211,24 +215,29 @@ export default ({ getService }: FtrProviderContext) => {
       if (!alert) {
         return expect(alert).to.be.ok();
       }
+      expect(alert[ALERT_ANCESTORS]).eql([
+        {
+          id: 'vT9cwocBh3b8EMpD8lsi',
+          type: 'event',
+          index: '.ds-logs-endpoint.alerts-default-2023.04.27-000001',
+          depth: 0,
+        },
+        {
+          rule: '7015a3e2-e4ea-11ed-8c11-49608884878f',
+          id: 'eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1',
+          type: 'signal',
+          index: '.ds-.alerts-security.alerts-default-2023.11.15-000001',
+          depth: 1,
+        },
+      ]);
+      expect(alert[ALERT_WORKFLOW_STATUS]).eql('open');
+      expect(alert[ALERT_DEPTH]).eql(2);
 
-      expect(alert).eql({
-        ...alert,
-        [ALERT_ANCESTORS]: [
-          {
-            id: 'BhbXBmkBR346wHgn4PeZ',
-            type: 'event',
-            index: 'auditbeat-8.0.0-2019.02.19-000001',
-            depth: 0,
-          },
-        ],
-        [ALERT_WORKFLOW_STATUS]: 'open',
-        [ALERT_DEPTH]: 1,
-        [ALERT_ORIGINAL_TIME]: '2019-02-19T17:40:03.790Z',
-        ...flattenWithPrefix(ALERT_ORIGINAL_EVENT, {
-          dataset: 'socket',
-        }),
-      });
+      expect(alert[ALERT_ORIGINAL_TIME]).eql('2023-04-27T11:03:57.906Z');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.agent_id_status`]).eql('auth_metadata_missing');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).eql('2023-04-27T10:58:03Z');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.dataset`]).eql('endpoint');
+      expect(alert[`${ALERT_ORIGINAL_EVENT}.ingested`]).eql('2023-04-27T10:58:03Z');
     });
 
     it('should not have risk score fields without risk indices', async () => {
