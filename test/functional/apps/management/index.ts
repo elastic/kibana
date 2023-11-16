@@ -21,7 +21,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esArchiver.unload('test/functional/fixtures/es_archiver/makelogs');
     });
 
-    /*
     loadTestFile(require.resolve('./data_views/_create_index_pattern_wizard'));
     loadTestFile(require.resolve('./data_views/_data_view_create_delete'));
     loadTestFile(require.resolve('./data_views/_index_pattern_results_sort'));
@@ -30,10 +29,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views/_scripted_fields_preview'));
     loadTestFile(require.resolve('./_mgmt_import_saved_objects'));
     loadTestFile(require.resolve('./data_views/_index_patterns_empty'));
-    */
     loadTestFile(require.resolve('./data_views/_scripted_fields'));
-    loadTestFile(require.resolve('./data_views/_scripted_fields_classic_table'));
-    /*
     loadTestFile(require.resolve('./data_views/_runtime_fields'));
     loadTestFile(require.resolve('./data_views/_runtime_fields_composite'));
     loadTestFile(require.resolve('./data_views/_field_formatter'));
@@ -50,6 +46,5 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./data_views/_edit_field'));
     loadTestFile(require.resolve('./_files'));
     loadTestFile(require.resolve('./_data_view_field_filters'));
-    */
   });
 }
