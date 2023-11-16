@@ -7,6 +7,7 @@
  */
 
 import type { Logger } from '@kbn/logging';
+import { unsafeConsole } from '@kbn/security-hardening';
 
 /**
  * Create custom logger until we have a proper logging solution: https://github.com/elastic/kibana/issues/33796
@@ -22,14 +23,14 @@ export function createLogger(isDev: boolean): Logger {
     error: (...args) => (isDev ? console.error(...args) : void 0),
     // eslint-disable-next-line no-console
     warn: (...args) => (isDev ? console.warn(...args) : void 0),
-    // eslint-disable-next-line no-console
-    info: (...args) => (isDev ? console.info(...args) : void 0),
+    // // eslint-disable-next-line no-console
+    info: (...args) => (isDev ? unsafeConsole.info(...args) : void 0),
     // eslint-disable-next-line no-console
     debug: (...args) => (isDev ? console.debug(...args) : void 0),
     // eslint-disable-next-line no-console
     trace: (...args) => (isDev ? console.trace(...args) : void 0),
-    // eslint-disable-next-line no-console
-    log: (...args) => (isDev ? console.log(...args) : void 0),
+    // // eslint-disable-next-line no-console
+    log: (...args) => (isDev ? unsafeConsole.log(...args) : void 0),
     isLevelEnabled: () => true,
     get: () => logger,
   };

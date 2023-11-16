@@ -8,4 +8,3 @@
 
 require('./child_process');
 require('./lodash_template');
-require('./console');

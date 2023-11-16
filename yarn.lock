@@ -5412,6 +5412,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-hardening@link:packages/kbn-security-hardening":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-plugin@link:x-pack/plugins/security":
   version "0.0.0"
   uid ""

@@ -1254,6 +1254,8 @@
       "@kbn/searchprofiler-plugin/*": ["x-pack/plugins/searchprofiler/*"],
       "@kbn/security-api-integration-helpers": ["x-pack/test/security_api_integration/packages/helpers"],
       "@kbn/security-api-integration-helpers/*": ["x-pack/test/security_api_integration/packages/helpers/*"],
+      "@kbn/security-hardening": ["packages/kbn-security-hardening"],
+      "@kbn/security-hardening/*": ["packages/kbn-security-hardening/*"],
       "@kbn/security-plugin": ["x-pack/plugins/security"],
       "@kbn/security-plugin/*": ["x-pack/plugins/security/*"],
       "@kbn/security-solution-ess": ["x-pack/plugins/security_solution_ess"],

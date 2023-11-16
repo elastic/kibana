@@ -6,13 +6,8 @@
  * Side Public License, v 1.
  */
 
-// development env setup includes babel/register after the env is initialized
-require('./setup_env');
-
-// restore < Node 16 default DNS lookup behavior
-require('./dns_ipv4_first');
-
-require('@kbn/babel-register').install();
-require('./polyfill');
-
-require('@kbn/security-hardening');
+module.exports = {
+  preset: '@kbn/test',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-security-hardening'],
+};

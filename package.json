@@ -633,6 +633,7 @@
     "@kbn/search-examples-plugin": "link:examples/search_examples",
     "@kbn/search-response-warnings": "link:packages/kbn-search-response-warnings",
     "@kbn/searchprofiler-plugin": "link:x-pack/plugins/searchprofiler",
+    "@kbn/security-hardening": "link:packages/kbn-security-hardening",
     "@kbn/security-plugin": "link:x-pack/plugins/security",
     "@kbn/security-solution-ess": "link:x-pack/plugins/security_solution_ess",
     "@kbn/security-solution-features": "link:x-pack/packages/security-solution/features",
