@@ -39,9 +39,9 @@ import { useKibana } from '../../utils/kibana_react';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
-import { ExpressionChart } from './components/expression_chart';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
+import { PreviewChart } from './components/preview_chart/preview_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
@@ -316,7 +316,6 @@ export default function Expressions(props: Props) {
       defaultMessage: 'Search for observability data… (e.g. host.name:host-1)',
     }
   );
-
   return (
     <>
       <EuiTitle size="xs">
@@ -410,13 +409,12 @@ export default function Expressions(props: Props) {
                 expression={e || {}}
                 dataView={derivedIndexPattern}
               >
-                {/* Preview */}
-                <ExpressionChart
-                  expression={e}
-                  derivedIndexPattern={derivedIndexPattern}
+                <PreviewChart
+                  metricExpression={e}
+                  dataView={dataView}
                   filterQuery={(ruleParams.searchConfiguration?.query as Query)?.query as string}
                   groupBy={ruleParams.groupBy}
-                  timeFieldName={dataView?.timeFieldName}
+                  error={(errors[idx] as IErrorObject) || emptyError}
                 />
               </ExpressionRow>
             </div>
