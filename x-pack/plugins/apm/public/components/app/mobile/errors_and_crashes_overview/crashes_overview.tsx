@@ -232,7 +232,7 @@ export function MobileCrashesOverview() {
           <EuiTitle size="xs">
             <h3>
               {i18n.translate(
-                'xpack.apm.serviceDetails.metrics.errorsList.title',
+                'xpack.apm.serviceDetails.metricsn.crashes.title',
                 { defaultMessage: 'Crashes' }
               )}
             </h3>
