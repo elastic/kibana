@@ -5,19 +5,9 @@
  * 2.0.
  */
 
-import {
-  EuiSpacer,
-  EuiIcon,
-  EuiBadge,
-  EuiText,
-  EuiFlexItem,
-  EuiFlexGroup,
-  useEuiTheme,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiSpacer, EuiBadge, EuiText, EuiFlexItem, EuiFlexGroup } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import { max } from 'lodash/fp';
 import { SecurityPageName } from '@kbn/security-solution-navigation';
 import { getUsersDetailsUrl } from '../../../common/components/link_to/redirect_to_users';
@@ -29,6 +19,7 @@ import type {
 import { SecuritySolutionLinkAnchor } from '../../../common/components/links';
 import { PreferenceFormattedDate } from '../../../common/components/formatted_date';
 import { FlyoutHeader } from '../../shared/components/flyout_header';
+import { FlyoutTitle } from '../../shared/components/flyout_title';
 
 interface UserPanelHeaderProps {
   userName: string;
@@ -37,8 +28,6 @@ interface UserPanelHeaderProps {
 }
 
 export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPanelHeaderProps) => {
-  const { euiTheme } = useEuiTheme();
-
   const lastSeenDate = useMemo(
     () =>
       max([observedUser.lastSeen, managedUser.lastSeen].map((el) => el.date && new Date(el.date))),
@@ -55,27 +44,14 @@ export const UserPanelHeader = ({ userName, observedUser, managedUser }: UserPan
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem grow={false}>
-              <EuiIcon type="user" size="l" color="primary" />
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiTitle size="s">
-                <h2>
-                  <SecuritySolutionLinkAnchor
-                    deepLinkId={SecurityPageName.users}
-                    path={getUsersDetailsUrl(userName)}
-                    target={'_blank'}
-                    css={css`
-                      font-weight: ${euiTheme.font.weight.bold};
-                    `}
-                  >
-                    {userName}
-                  </SecuritySolutionLinkAnchor>
-                </h2>
-              </EuiTitle>
-            </EuiFlexItem>
-          </EuiFlexGroup>
+          <SecuritySolutionLinkAnchor
+            deepLinkId={SecurityPageName.users}
+            path={getUsersDetailsUrl(userName)}
+            target={'_blank'}
+            external={false}
+          >
+            <FlyoutTitle title={userName} iconType={'user'} isLink />
+          </SecuritySolutionLinkAnchor>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
