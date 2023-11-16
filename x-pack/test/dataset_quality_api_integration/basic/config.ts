@@ -5,5 +5,7 @@
  * 2.0.
  */
 
-export type { DatasetQualityConfig } from './plugin_config';
-export type { FetchOptions } from './fetch_options';
+import { configs } from '../configs';
+
+// eslint-disable-next-line import/no-default-export
+export default configs.basic;

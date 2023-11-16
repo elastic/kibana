@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export type { DatasetQualityConfig } from './plugin_config';
-export type { FetchOptions } from './fetch_options';
+export { joinByKey } from './join_by_key';
+export { maybe } from './maybe';
+export { expectToReject } from './expect_to_reject';
