@@ -57,6 +57,7 @@ export enum WriteOperations {
   BulkEnable = 'bulkEnable',
   BulkDisable = 'bulkDisable',
   Unsnooze = 'unsnooze',
+  DeleteBackfill = 'deleteBackfill',
 }
 
 export interface EnsureAuthorizedOpts {
