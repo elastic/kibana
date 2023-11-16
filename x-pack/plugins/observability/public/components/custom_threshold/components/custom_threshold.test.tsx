@@ -18,7 +18,7 @@ describe('Threshold', () => {
       chartProps: { baseTheme: LIGHT_THEME },
       comparator: Comparator.GT,
       id: 'componentId',
-      threshold: 90,
+      threshold: [90],
       title: 'Threshold breached',
       value: 93,
       valueFormatter: (d) => `${d}%`,
@@ -39,5 +39,13 @@ describe('Threshold', () => {
   it('shows component', () => {
     const component = renderComponent();
     expect(component.queryByTestId('thresholdRule-90-93')).toBeTruthy();
+  });
+
+  it('shows component for between', () => {
+    const component = renderComponent({
+      comparator: Comparator.BETWEEN,
+      threshold: [90, 95],
+    });
+    expect(component.queryByTestId('thresholdRule-90-95-93')).toBeTruthy();
   });
 });

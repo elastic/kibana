@@ -5,10 +5,11 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
+
 import { PluginConfigDescriptor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
-import { get } from 'lodash';
-import { ConfigSchema, ReportingConfigType } from './schema';
+import { ConfigSchema, ReportingConfigType } from '@kbn/reporting-server';
 
 export const config: PluginConfigDescriptor<ReportingConfigType> = {
   exposeToBrowser: { poll: true, roles: true, export_types: true, statefulSettings: true },
@@ -71,4 +72,3 @@ export const config: PluginConfigDescriptor<ReportingConfigType> = {
 export { createConfig } from './create_config';
 export { registerUiSettings } from './ui_settings';
 export { ConfigSchema };
-export type { ReportingConfigType };

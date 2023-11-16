@@ -90,7 +90,7 @@
     "randomSampling": "x-pack/packages/kbn-random-sampling",
     "reactPackages": "packages/react",
     "textBasedEditor": "packages/kbn-text-based-editor",
-    "reporting": "packages/kbn-reporting/common",
+    "reporting": "packages/kbn-reporting",
     "savedObjects": "src/plugins/saved_objects",
     "savedObjectsFinder": "src/plugins/saved_objects_finder",
     "savedObjectsManagement": "src/plugins/saved_objects_management",
@@ -132,7 +132,8 @@
     "unifiedSearch": "src/plugins/unified_search",
     "unifiedFieldList": "packages/kbn-unified-field-list",
     "unifiedHistogram": "src/plugins/unified_histogram",
-    "unifiedDataTable": "packages/kbn-unified-data-table"
+    "unifiedDataTable": "packages/kbn-unified-data-table",
+    "unsavedChangesBadge": "packages/kbn-unsaved-changes-badge"
   },
   "translations": []
 }
