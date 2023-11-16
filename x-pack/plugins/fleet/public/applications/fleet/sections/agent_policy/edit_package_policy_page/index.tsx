@@ -19,7 +19,8 @@ import {
   EuiErrorBoundary,
 } from '@elastic/eui';
 
-import type { PackageInfo } from '../../../types';
+import { isInputOnlyPolicyTemplate } from '../../../../../../common/services';
+
 import {
   useLink,
   useBreadcrumbs,
@@ -91,7 +92,6 @@ export const EditPackagePolicyForm = memo<{
   } = useConfig();
   const { getHref } = useLink();
 
-  const [] = useState<PackageInfo>();
   const {
     // data
     agentPolicy,
@@ -116,6 +116,44 @@ export const EditPackagePolicyForm = memo<{
   });
 
   const canWriteIntegrationPolicies = useAuthz().integrations.writeIntegrationPolicies;
+
+  const newSecrets = useMemo(() => {
+    const result = [];
+
+    for (const packageVar of packageInfo?.vars ?? []) {
+      const isVarSecretOnPolicy = packagePolicy.vars?.[packageVar.name]?.value?.isSecretRef;
+
+      if (packageVar.secret && !isVarSecretOnPolicy) {
+        result.push(packageVar);
+      }
+    }
+
+    for (const policyTemplate of packageInfo?.policy_templates ?? []) {
+      if (isInputOnlyPolicyTemplate(policyTemplate)) {
+        for (const packageVar of policyTemplate.vars ?? []) {
+          const isVarSecretOnPolicy =
+            packagePolicy.inputs?.[0]?.vars?.[packageVar.name]?.value?.isSecretRef;
+
+          if (packageVar.secret && !isVarSecretOnPolicy) {
+            result.push(packageVar);
+          }
+        }
+      } else {
+        for (const input of policyTemplate.inputs ?? []) {
+          for (const packageVar of input.vars ?? []) {
+            const isVarSecretOnPolicy =
+              packagePolicy.inputs?.[0]?.vars?.[packageVar.name]?.value?.isSecretRef;
+
+            if (packageVar.secret && !isVarSecretOnPolicy) {
+              result.push(packageVar);
+            }
+          }
+        }
+      }
+    }
+
+    return result;
+  }, [packageInfo, packagePolicy]);
 
   const policyId = agentPolicy?.id ?? '';
 
@@ -418,7 +456,7 @@ export const EditPackagePolicyForm = memo<{
             )}
             {isUpgrade && upgradeDryRunData && (
               <>
-                <UpgradeStatusCallout dryRunData={upgradeDryRunData} />
+                <UpgradeStatusCallout dryRunData={upgradeDryRunData} newSecrets={newSecrets} />
                 <EuiSpacer size="xxl" />
               </>
             )}

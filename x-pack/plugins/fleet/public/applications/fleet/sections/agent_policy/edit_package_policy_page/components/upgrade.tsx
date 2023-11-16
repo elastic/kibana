@@ -24,10 +24,14 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiTitle,
+  EuiSpacer,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
+import type { RegistryVarsEntry } from '../../../../../../../common';
+
 import type { UpgradePackagePolicyDryRunResponse } from '../../../../../../../common/types/rest_spec';
+import { useStartServices } from '../../../../hooks';
 
 const FlyoutBody = styled(EuiFlyoutBody)`
   .euiFlyoutBody__overflowContent {
@@ -37,16 +41,109 @@ const FlyoutBody = styled(EuiFlyoutBody)`
 
 export const UpgradeStatusCallout: React.FunctionComponent<{
   dryRunData: UpgradePackagePolicyDryRunResponse;
-}> = ({ dryRunData }) => {
+  newSecrets: RegistryVarsEntry[];
+}> = ({ dryRunData, newSecrets }) => {
+  const { docLinks } = useStartServices();
+
   const [isPreviousVersionFlyoutOpen, setIsPreviousVersionFlyoutOpen] = useState<boolean>(false);
 
   if (!dryRunData) {
     return null;
   }
 
-  const isReadyForUpgrade = !dryRunData[0].hasErrors;
-
+  const hasNewSecrets = newSecrets.length > 0;
   const [currentPackagePolicy, proposedUpgradePackagePolicy] = dryRunData[0].diff || [];
+  const isReadyForUpgrade = currentPackagePolicy && !dryRunData[0].hasErrors;
+
+  const HasNewSecretsCallOut = () => {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.hasNewSecretsTitle', {
+          defaultMessage: 'New secrets added',
+        })}
+        color="primary"
+        iconType="iInCircle"
+      >
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.statusCallout.hasNewSecrets"
+          defaultMessage="Some of this integration's form fields have been converted to secrets in this version. Your existing values are autofilled in each secret input during this upgrade, but you won't be able to view then again after saving. {learnMoreLink}"
+          values={{
+            learnMoreLink: (
+              <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+                Learn more.
+              </EuiLink>
+            ),
+          }}
+        />
+
+        <EuiSpacer size="s" />
+
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.statusCallout.hasNewSecretsList"
+          defaultMessage="New secrets: {secrets}"
+          values={{
+            secrets: (
+              <ul>
+                {newSecrets.map((secret) => (
+                  <li key={secret.title}>{secret.title}</li>
+                ))}
+              </ul>
+            ),
+          }}
+        />
+      </EuiCallOut>
+    );
+  };
+
+  const HasConflictsCallout = () => {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.errorTitle', {
+          defaultMessage: 'Review field conflicts',
+        })}
+        color="warning"
+        iconType="warning"
+      >
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
+          defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
+          values={{
+            currentVersion: currentPackagePolicy?.package?.version,
+            upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
+            previousConfigurationLink: (
+              <EuiLink onClick={() => setIsPreviousVersionFlyoutOpen(true)}>
+                <FormattedMessage
+                  id="xpack.fleet.upgradePackagePolicy.statusCallout.previousConfigurationLink"
+                  defaultMessage="previous configuration"
+                />
+              </EuiLink>
+            ),
+          }}
+        />
+      </EuiCallOut>
+    );
+  };
+
+  const ReadyToUpgradeCallOut = () => {
+    return (
+      <EuiCallOut
+        title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.successTitle', {
+          defaultMessage: 'Ready to upgrade',
+        })}
+        color="success"
+        iconType="checkInCircleFilled"
+      >
+        <FormattedMessage
+          id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
+          defaultMessage="This integration is ready to be upgraded from version {currentVersion} to {upgradeVersion}. Review the changes below and save to upgrade."
+          values={{
+            currentVersion: currentPackagePolicy?.package?.version,
+            upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
+          }}
+        />
+      </EuiCallOut>
+    );
+  };
 
   return (
     <>
@@ -73,48 +170,12 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
         </EuiPortal>
       )}
 
-      {isReadyForUpgrade && currentPackagePolicy ? (
-        <EuiCallOut
-          title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.successTitle', {
-            defaultMessage: 'Ready to upgrade',
-          })}
-          color="success"
-          iconType="checkInCircleFilled"
-        >
-          <FormattedMessage
-            id="xpack.fleet.upgradePackagePolicy.statusCallout.successContent"
-            defaultMessage="This integration is ready to be upgraded from version {currentVersion} to {upgradeVersion}. Review the changes below and save to upgrade."
-            values={{
-              currentVersion: currentPackagePolicy?.package?.version,
-              upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
-            }}
-          />
-        </EuiCallOut>
-      ) : (
-        <EuiCallOut
-          title={i18n.translate('xpack.fleet.upgradePackagePolicy.statusCallOut.errorTitle', {
-            defaultMessage: 'Review field conflicts',
-          })}
-          color="warning"
-          iconType="warning"
-        >
-          <FormattedMessage
-            id="xpack.fleet.upgradePackagePolicy.statusCallout.errorContent"
-            defaultMessage="This integration has conflicting fields from version {currentVersion} to {upgradeVersion} Review the configuration and save to perform the upgrade. You may reference your {previousConfigurationLink} for comparison."
-            values={{
-              currentVersion: currentPackagePolicy?.package?.version,
-              upgradeVersion: proposedUpgradePackagePolicy?.package?.version,
-              previousConfigurationLink: (
-                <EuiLink onClick={() => setIsPreviousVersionFlyoutOpen(true)}>
-                  <FormattedMessage
-                    id="xpack.fleet.upgradePackagePolicy.statusCallout.previousConfigurationLink"
-                    defaultMessage="previous configuration"
-                  />
-                </EuiLink>
-              ),
-            }}
-          />
-        </EuiCallOut>
+      {isReadyForUpgrade ? <ReadyToUpgradeCallOut /> : <HasConflictsCallout />}
+      {hasNewSecrets && (
+        <>
+          <EuiSpacer size="m" />
+          <HasNewSecretsCallOut />
+        </>
       )}
     </>
   );

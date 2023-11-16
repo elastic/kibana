@@ -96,13 +96,15 @@ export const PackagePolicyInputPanel: React.FunctionComponent<{
   }) => {
     const defaultDataStreamId = useDataStreamId();
     // Showing streams toggle state
-    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(() =>
-      shouldShowStreamsByDefault(
-        packageInput,
-        packageInputStreams,
-        packagePolicyInput,
-        defaultDataStreamId
-      )
+    const [isShowingStreams, setIsShowingStreams] = useState<boolean>(
+      () =>
+        isEditPage ||
+        shouldShowStreamsByDefault(
+          packageInput,
+          packageInputStreams,
+          packagePolicyInput,
+          defaultDataStreamId
+        )
     );
 
     // Errors state
