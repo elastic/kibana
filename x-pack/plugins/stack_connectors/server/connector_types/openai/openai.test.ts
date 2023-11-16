@@ -274,18 +274,22 @@ describe('OpenAIConnector', () => {
     });
 
     describe('invokeStream', () => {
-      let stream;
+      const mockStream = (
+        dataToStream: string[] = [
+          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}',
+        ]
+      ) => {
+        const streamMock = createStreamMock();
+        dataToStream.forEach((chunk) => {
+          streamMock.write(chunk);
+        });
+        streamMock.complete();
+        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
+        return mockRequest;
+      };
       beforeEach(() => {
-        const chunk1 =
-          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}';
-
-        stream = createStreamMock();
-        stream.write(chunk1);
-        // .write(`data: ${JSON.stringify(mockResponse.data)}`);
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
-        connector.request = mockRequest;
-        stream.complete();
+        connector.request = mockStream();
       });
 
       it('the API call is successful with correct request parameters', async () => {
@@ -312,6 +316,8 @@ describe('OpenAIConnector', () => {
       });
 
       it('transforms the response into a string', async () => {
+        // @ts-ignore
+        connector.request = mockStream();
         const response = await connector.invokeStream(sampleOpenAiBody);
 
         let responseBody: string = '';
@@ -323,17 +329,11 @@ describe('OpenAIConnector', () => {
         });
       });
       it('correctly buffers stream of json lines', async () => {
-        stream = createStreamMock();
-        const chunk1 =
-          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}';
-        const chunk2 =
-          '\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]';
+        const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
+        const chunk2 = `\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
 
-        stream.write(chunk1);
-        stream.write(chunk2);
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
-        connector.request = mockRequest;
+        connector.request = mockStream([chunk1, chunk2]);
 
         const response = await connector.invokeStream(sampleOpenAiBody);
 
@@ -346,17 +346,12 @@ describe('OpenAIConnector', () => {
         });
       });
       it('correctly buffers partial lines', async () => {
-        stream = createStreamMock();
-        const chunk1 =
-          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"';
-        const chunk2 =
-          '}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]';
+        const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"`;
 
-        stream.write(chunk1);
-        stream.write(chunk2);
-        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
+        const chunk2 = `}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
+
         // @ts-ignore
-        connector.request = mockRequest;
+        connector.request = mockStream([chunk1, chunk2]);
 
         const response = await connector.invokeStream(sampleOpenAiBody);
 
@@ -706,7 +701,7 @@ function createStreamMock() {
 
   return {
     write: (data: string) => {
-      transform.push(`${data}\n`);
+      transform.push(data);
     },
     fail: () => {
       transform.emit('error', new Error('Stream failed'));

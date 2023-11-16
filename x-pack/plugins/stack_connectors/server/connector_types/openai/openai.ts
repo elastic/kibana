@@ -238,46 +238,35 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
 const transformToString = () => {
   let lineBuffer: string = '';
   const decoder = new TextDecoder();
-  const encoder = new TextEncoder();
 
   return new Transform({
     transform(chunk, encoding, callback) {
       const chunks = decoder.decode(chunk);
       const lines = chunks.split('\n');
-      if (lines[lines.length - 1] === '') {
-        lines.pop();
-      }
       lines[0] = lineBuffer + lines[0];
       lineBuffer = lines.pop() || '';
-      const nextChunk = lines
-        .map((str) => str.substring(6))
-        .filter((str) => !!str && str !== '[DONE]')
-        .map((line) => {
-          const openaiResponse = JSON.parse(line);
-          return openaiResponse.choices[0]?.delta.content ?? '';
-        })
-        .join('');
-      const newChunk = encoder.encode(nextChunk);
-      callback(null, newChunk);
+      callback(null, getNextChunk(lines));
     },
     flush(callback) {
       // Emit an additional chunk with the content of lineBuffer if it has length
       if (lineBuffer.length > 0) {
-        const nextChunk = [lineBuffer]
-          .map((str) => str.substring(6))
-          .filter((str) => !!str && str !== '[DONE]')
-          .map((line) => {
-            const openaiResponse = JSON.parse(line);
-            return openaiResponse.choices[0]?.delta.content ?? '';
-          })
-          .join('');
-        const newChunk = encoder.encode(nextChunk);
-        callback(null, newChunk);
-        // const additionalChunk = encoder.encode(lineBuffer);
-        // callback(null, additionalChunk);
+        callback(null, getNextChunk([lineBuffer]));
       } else {
         callback();
       }
     },
   });
+};
+
+const getNextChunk = (lines: string[]) => {
+  const encoder = new TextEncoder();
+  const nextChunk = lines
+    .map((str) => str.substring(6))
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      const openaiResponse = JSON.parse(line);
+      return openaiResponse.choices[0]?.delta.content ?? '';
+    })
+    .join('');
+  return encoder.encode(nextChunk);
 };
