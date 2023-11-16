@@ -142,9 +142,16 @@ export class AppsMenuService extends FtrService {
         );
 
         // then, filter out those that don't have a matching text
-        const matchingLinks = allLinksTexts.filter(({ text }) => text === name);
+        const matchingLinks = allLinksTexts.filter(({ text }) => text.includes(name));
         if (matchingLinks.length === 0) {
-          throw new Error(`Could not find the '${name}' application on the side nav`);
+          this.log.debug(
+            `Found ${allLinks.length} links on the side nav: ${allLinksTexts.map(
+              ({ text }) => text
+            )}`
+          );
+          throw new Error(
+            `Could not find the '${name}' application on the side nav (${allLinks.length} links found)`
+          );
         } else if (matchingLinks.length > 1) {
           throw new Error(
             `Multiple apps exist in the side nav with the specified name: '${name}'. Consider using the "category" parameter to disambiguate`
