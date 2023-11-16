@@ -11,7 +11,11 @@ import type { Writable } from 'stream';
 
 import { errors as esErrors, estypes } from '@elastic/elasticsearch';
 import type { IScopedClusterClient, IUiSettingsClient, Logger } from '@kbn/core/server';
-import type { ISearchSource, ISearchStartSearchSource } from '@kbn/data-plugin/common';
+import type {
+  IEsSearchRequest,
+  ISearchSource,
+  ISearchStartSearchSource,
+} from '@kbn/data-plugin/common';
 import { ES_SEARCH_STRATEGY, cellHasFormulas, tabifyDocs } from '@kbn/data-plugin/common';
 import type { IScopedSearchClient } from '@kbn/data-plugin/server';
 import type { Datatable } from '@kbn/expressions-plugin/server';
@@ -122,11 +126,11 @@ export class CsvGenerator {
       throw new Error('Could not retrieve the search body!');
     }
 
-    const searchParams = {
+    const searchParams: IEsSearchRequest = {
       params: {
         body: searchBody,
+        max_concurrent_shard_requests: maxConcurrentShardRequests,
       },
-      maxConcurrentShardRequests,
     };
 
     let results: estypes.SearchResponse<unknown> | undefined;
