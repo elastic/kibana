@@ -47,6 +47,13 @@ export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
   };
 }
 
+export const isCompatibleFunctionName = (fnName: string, command: string) => {
+  const fnSupportedByCommand = allFunctions.filter(({ supportedCommands }) =>
+    supportedCommands.includes(command)
+  );
+  return fnSupportedByCommand.some(({ name }) => name === fnName);
+};
+
 export const getCompatibleFunctionDefinition = (
   command: string,
   returnTypes?: string[]
@@ -94,6 +101,17 @@ export const buildFieldsDefinitions = (fields: string[]): AutocompleteCommandDef
     sortText: 'D',
   }));
 
+export const buildVariablesDefinitions = (variables: string[]): AutocompleteCommandDefinition[] =>
+  variables.map((label) => ({
+    label,
+    insertText: label,
+    kind: 4,
+    detail: i18n.translate('monaco.esql.autocomplete.variableDefinition', {
+      defaultMessage: `Variable specified by the user within the ES|QL query`,
+    }),
+    sortText: 'D',
+  }));
+
 export const buildSourcesDefinitions = (sources: string[]): AutocompleteCommandDefinition[] =>
   sources.map((label) => ({
     label,
@@ -124,12 +142,12 @@ export const buildConstantsDefinitions = (
 export const buildNewVarDefinition = (label: string): AutocompleteCommandDefinition => {
   return {
     label,
-    insertText: label,
+    insertText: `${label} =`,
     kind: 21,
     detail: i18n.translate('monaco.esql.autocomplete.newVarDoc', {
       defaultMessage: 'Define a new variable',
     }),
-    sortText: 'A',
+    sortText: '1',
   };
 };
 

@@ -9,6 +9,8 @@
 import { ESQLCommandOption, ESQLMessage, ESQLSingleAstItem } from '../types';
 
 export interface FunctionDefinition {
+  builtin?: boolean;
+  ignoreAsSuggestion?: boolean;
   name: string;
   alias?: string[];
   description: string;
@@ -42,6 +44,7 @@ export interface CommandBaseDefinition {
       optional?: boolean;
       innerType?: string;
       values?: string[];
+      literalOnly?: boolean;
     }>;
   };
 }

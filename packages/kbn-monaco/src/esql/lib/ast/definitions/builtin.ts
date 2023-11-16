@@ -16,6 +16,7 @@ function createMathDefinition(
   warning?: FunctionDefinition['warning']
 ) {
   return {
+    builtin: true,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -52,6 +53,7 @@ function createComparisonDefinition(
   warning?: FunctionDefinition['warning']
 ) {
   return {
+    builtin: true,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -197,6 +199,8 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
     { name: 'not_rlike', description: '' },
   ].map(({ name, description }) => ({
+    builtin: true,
+    ignoreAsSuggestion: /not/.test(name),
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -220,6 +224,8 @@ export const builtinFunctions: FunctionDefinition[] = [
     },
     { name: 'not_in', description: '' },
   ].map(({ name, description }) => ({
+    builtin: true,
+    ignoreAsSuggestion: /not/.test(name),
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -268,6 +274,7 @@ export const builtinFunctions: FunctionDefinition[] = [
       }),
     },
   ].map(({ name, description }) => ({
+    builtin: true,
     name,
     description,
     supportedCommands: ['eval', 'where', 'row'],
@@ -282,6 +289,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   })),
   {
+    builtin: true,
     name: 'not',
     description: i18n.translate('monaco.esql.definition.notDoc', {
       defaultMessage: 'Not',
@@ -295,6 +303,7 @@ export const builtinFunctions: FunctionDefinition[] = [
     ],
   },
   {
+    builtin: true,
     name: '=',
     description: i18n.translate('monaco.esql.definition.assignDoc', {
       defaultMessage: 'Assign (=)',

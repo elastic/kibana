@@ -149,12 +149,18 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
 function visitLogicalNot(ctx: LogicalNotContext) {
   const fn = createFunction('not', ctx);
   fn.args.push(...collectBooleanExpression(ctx.booleanExpression()));
+  // update the location of the assign based on arguments
+  const argsLocationExtends = computeLocationExtends(fn);
+  fn.location = argsLocationExtends;
   return fn;
 }
 
 function visitLogicalAndsOrs(ctx: LogicalBinaryContext) {
   const fn = createFunction(ctx.AND() ? 'and' : 'or', ctx);
   fn.args.push(...collectBooleanExpression(ctx._left), ...collectBooleanExpression(ctx._right));
+  // update the location of the assign based on arguments
+  const argsLocationExtends = computeLocationExtends(fn);
+  fn.location = argsLocationExtends;
   return fn;
 }
 
@@ -168,6 +174,9 @@ function visitLogicalIns(ctx: LogicalInContext) {
       fn.args.push(filteredArgs);
     }
   }
+  // update the location of the assign based on arguments
+  const argsLocationExtends = computeLocationExtends(fn);
+  fn.location = argsLocationExtends;
   return fn;
 }
 
@@ -234,6 +243,9 @@ function visitOperatorExpression(
         fn.args.push(arg);
       }
     }
+    // update the location of the assign based on arguments
+    const argsLocationExtends = computeLocationExtends(fn);
+    fn.location = argsLocationExtends;
     return fn;
   }
   if (ctx instanceof OperatorExpressionDefaultContext) {

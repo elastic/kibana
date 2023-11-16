@@ -95,8 +95,8 @@ export const commandDefinitions: CommandDefinition[] = [
     }),
     examples: ['… | rename old as new', '… | rename old as new, a as b'],
     signature: {
-      multipleParams: false,
-      params: [{ name: 'renameClause', type: 'any' }],
+      multipleParams: true,
+      params: [{ name: 'renameClause', type: 'column' }],
     },
     options: [asOption],
   },
@@ -109,7 +109,7 @@ export const commandDefinitions: CommandDefinition[] = [
     examples: ['… | limit 100', '… | limit 0'],
     signature: {
       multipleParams: false,
-      params: [{ name: 'size', type: 'number' }],
+      params: [{ name: 'size', type: 'number', literalOnly: true }],
     },
     options: [],
   },
@@ -183,7 +183,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: false,
       params: [
         { name: 'column', type: 'column', innerType: 'string' },
-        { name: 'pattern', type: 'string' },
+        { name: 'pattern', type: 'string', literalOnly: true },
       ],
     },
   },
@@ -199,7 +199,7 @@ export const commandDefinitions: CommandDefinition[] = [
       multipleParams: false,
       params: [
         { name: 'column', type: 'column', innerType: 'string' },
-        { name: 'pattern', type: 'string' },
+        { name: 'pattern', type: 'string', literalOnly: true },
       ],
     },
   },

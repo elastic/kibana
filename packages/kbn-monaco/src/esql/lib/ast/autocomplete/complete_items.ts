@@ -32,14 +32,25 @@ export function getAssignmentDefinitionCompletitionItem() {
 
 export const getBuiltinCompatibleFunctionDefinition = (
   command: string,
-  argType: string
+  argType: string,
+  returnTypes?: string[]
 ): AutocompleteCommandDefinition[] => {
-  return builtinFunctions
-    .filter(
-      ({ name, supportedCommands, signatures }) =>
-        !/not_/.test(name) &&
-        supportedCommands.includes(command) &&
-        signatures.some(({ params }) => params.some((pArg) => pArg.type === argType))
+  const compatibleFunctions = builtinFunctions.filter(
+    ({ name, supportedCommands, signatures, ignoreAsSuggestion }) =>
+      !ignoreAsSuggestion &&
+      !/not_/.test(name) &&
+      supportedCommands.includes(command) &&
+      signatures.some(({ params }) => params.some((pArg) => pArg.type === argType))
+  );
+
+  if (!returnTypes) {
+    return compatibleFunctions.map(getAutocompleteBuiltinDefinition);
+  }
+  return compatibleFunctions
+    .filter((mathDefinition) =>
+      mathDefinition.signatures.some(
+        (signature) => returnTypes[0] === 'any' || returnTypes.includes(signature.returnType)
+      )
     )
     .map(getAutocompleteBuiltinDefinition);
 };
@@ -54,6 +65,16 @@ export const pipeCompleteItem: AutocompleteCommandDefinition = {
   kind: 1,
   detail: i18n.translate('monaco.esql.autocomplete.pipeDoc', {
     defaultMessage: 'Pipe (|)',
+  }),
+  sortText: 'B',
+};
+
+export const commaCompleteItem: AutocompleteCommandDefinition = {
+  label: ',',
+  insertText: ',',
+  kind: 1,
+  detail: i18n.translate('monaco.esql.autocomplete.commaDoc', {
+    defaultMessage: 'Comma (,)',
   }),
   sortText: 'B',
 };
