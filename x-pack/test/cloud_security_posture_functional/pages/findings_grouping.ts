@@ -22,7 +22,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
-      '@timestamp': '1695819664234',
+      '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       orchestrator: {
@@ -45,7 +45,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
-      '@timestamp': '1695819673242',
+      '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       cloud: {
@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
-      '@timestamp': '1695819676242',
+      '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       cloud: {
@@ -91,7 +91,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
-      '@timestamp': '1695819680202',
+      '@timestamp': new Date().toISOString(),
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       cloud: {
@@ -120,7 +120,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Findings Page - Grouping', function () {
     this.tags(['cloud_security_posture_findings_grouping']);
     let findings: typeof pageObjects.findings;
-    let groupSelector: ReturnType<typeof findings.groupSelector>;
+    // let groupSelector: ReturnType<typeof findings.groupSelector>;
 
     before(async () => {
       findings = pageObjects.findings;
@@ -133,17 +133,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
-
-      groupSelector = await findings.groupSelector();
-
-      await retry.waitFor(
-        'Findings table to be loaded',
-        async () => (await findings.latestFindingsTable.getRowsCount()) === data.length
-      );
-      pageObjects.header.waitUntilLoadingHasFinished();
+      await pageObjects.header.waitUntilLoadingHasFinished();
     });
 
     after(async () => {
+      const groupSelector = await findings.groupSelector();
       await groupSelector.openDropDown();
       await groupSelector.setValue('None');
       await findings.index.remove();
@@ -151,6 +145,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     describe('Default Grouping', async () => {
       it('groups findings by resource and sort case sensitive asc', async () => {
+        const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Resource');
 
@@ -170,6 +165,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(unitCount).to.be('4 findings');
       });
       it('groups findings by rule name and sort case sensitive asc', async () => {
+        const groupSelector = await findings.groupSelector();
         await groupSelector.openDropDown();
         await groupSelector.setValue('Rule name');
 
@@ -194,6 +190,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
       it('groups findings by cloud account and sort case sensitive asc', async () => {
+        const groupSelector = await findings.groupSelector();
+
         await groupSelector.setValue('Cloud account');
 
         const grouping = await findings.findingsGrouping();
@@ -212,6 +210,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
       });
       it('groups findings by Kubernetes cluster and sort case sensitive asc', async () => {
+        const groupSelector = await findings.groupSelector();
         await groupSelector.setValue('Kubernetes cluster');
 
         const grouping = await findings.findingsGrouping();
@@ -232,6 +231,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
     describe('SearchBar', () => {
       it('add filter', async () => {
+        const groupSelector = await findings.groupSelector();
         await groupSelector.setValue('Resource');
 
         // Filter bar uses the field's customLabel in the DataView

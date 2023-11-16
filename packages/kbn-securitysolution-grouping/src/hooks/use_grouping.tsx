@@ -19,7 +19,7 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 /** Interface for grouping object where T is the `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
-export interface Grouping<T> {
+interface Grouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   selectedGroups: string[];
