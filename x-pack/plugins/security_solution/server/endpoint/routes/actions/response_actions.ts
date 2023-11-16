@@ -7,7 +7,6 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
-import type { CreateActionPayload } from '../../services/actions/create/types';
 import { EndpointActionProvider } from '../../services/actions/providers';
 import type {
   ResponseActionBodySchema,
@@ -39,7 +38,6 @@ import type {
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
   ActionDetails,
-  HostMetadata,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -49,7 +47,7 @@ import type {
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 import { registerActionFileUploadRoute } from './file_upload_handler';
-import { updateCases } from '../../services/actions/create/update_cases';
+import { errorHandler } from '../error_handler';
 
 export function registerResponseActionRoutes(
   router: SecuritySolutionPluginRouter,
@@ -257,11 +255,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   TypeOf<typeof ResponseActionBodySchema>,
   SecuritySolutionRequestHandlerContext
 > {
+  const logger = endpointContext.logFactory.get('responseActionsHandler');
+
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
-    const isS1V1Enabled = endpointContext.experimentalFeatures.sentinelOneResponseActionsV1Enabled;
     const actionProvider = new EndpointActionProvider({
       esClient,
       casesClient,
@@ -269,47 +268,73 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
       username: user?.username ?? 'unknown',
     });
 
-    let action: ActionDetails;
-
     try {
-      if (isS1V1Enabled && (command === 'isolate' || command === 'unisolate')) {
-        switch (command) {
-          case 'isolate':
-            action = await actionProvider.isolate(req.body);
-            break;
+      let action: ActionDetails;
 
-          case 'unisolate':
-            action = await actionProvider.release(req.body);
-            break;
-        }
-      } else {
-        const createActionPayload: CreateActionPayload = { ...req.body, command, user };
-        const endpointData = await endpointContext.service
-          .getEndpointMetadataService()
-          .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
-        const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+      switch (command) {
+        case 'isolate':
+          action = await actionProvider.isolate(req.body);
+          break;
 
-        action = await endpointContext.service
-          .getActionCreateService()
-          .createAction(createActionPayload, agentIds);
+        case 'unisolate':
+          action = await actionProvider.release(req.body);
+          break;
 
-        // update cases
-        await updateCases({ casesClient, createActionPayload, endpointData });
+        case 'running-processes':
+          action = await actionProvider.runningProcesses(req.body);
+          break;
+
+        case 'execute':
+          action = await actionProvider.execute(req.body);
+          break;
+
+        case 'suspend-process':
+          action = await actionProvider.suspendProcess(req.body);
+          break;
+
+        case 'kill-process':
+          action = await actionProvider.killProcess(req.body);
+          break;
+
+        case 'get-file':
+          action = await actionProvider.getFile(req.body);
+          break;
+
+        default:
+          throw new Error(`No handler found for response action command: [${command}]`);
       }
-    } catch (err) {
-      return res.customError({
-        statusCode: 500,
-        body: err,
+
+      const { action: actionId, ...data } = action;
+
+      return res.ok({
+        body: {
+          action: actionId,
+          data,
+        },
       });
+    } catch (err) {
+      return errorHandler(logger, res, err);
     }
 
-    const { action: actionId, ...data } = action;
-    return res.ok({
-      body: {
-        action: actionId,
-        data,
-      },
-    });
+    // try {
+    //   const createActionPayload: CreateActionPayload = { ...req.body, command, user };
+    //   const endpointData = await endpointContext.service
+    //     .getEndpointMetadataService()
+    //     .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
+    //   const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+    //
+    //   action = await endpointContext.service
+    //     .getActionCreateService()
+    //     .createAction(createActionPayload, agentIds);
+    //
+    //   // update cases
+    //   await updateCases({ casesClient, createActionPayload, endpointData });
+    // } catch (err) {
+    //   return res.customError({
+    //     statusCode: 500,
+    //     body: err,
+    //   });
+    // }
   };
 }
 
