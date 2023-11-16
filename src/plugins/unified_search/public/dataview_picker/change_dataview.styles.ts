@@ -6,15 +6,37 @@
  * Side Public License, v 1.
  */
 
-export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 280;
+const MIN_POPOVER_CONTENT_WIDTH = 280;
+const MIN_POPOVER_CHAR_COUNT = 25;
+const MAX_POPOVER_CONTENT_WIDTH = 600;
+const MAX_POPOVER_CHAR_COUNT = 60;
 
-export const changeDataViewStyles = ({ fullWidth }: { fullWidth?: boolean }) => {
+const AVERAGE_CHAR_WIDTH = 7;
+
+function getPanelMinWidth(labelLength: number) {
+  if (labelLength > MAX_POPOVER_CHAR_COUNT) {
+    return MAX_POPOVER_CONTENT_WIDTH;
+  }
+  if (labelLength > MIN_POPOVER_CHAR_COUNT) {
+    const overflownChars = labelLength - MIN_POPOVER_CHAR_COUNT;
+    return MIN_POPOVER_CONTENT_WIDTH + overflownChars * AVERAGE_CHAR_WIDTH;
+  }
+  return MIN_POPOVER_CONTENT_WIDTH;
+}
+
+export const changeDataViewStyles = ({
+  fullWidth,
+  maxLabelLength,
+}: {
+  fullWidth?: boolean;
+  maxLabelLength: number;
+}) => {
   return {
     trigger: {
-      maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
+      maxWidth: fullWidth ? undefined : MIN_POPOVER_CONTENT_WIDTH,
     },
     popoverContent: {
-      width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+      width: getPanelMinWidth(maxLabelLength),
     },
   };
 };
