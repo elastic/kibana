@@ -9,14 +9,33 @@ import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { EndpointAppContext } from '../../types';
-import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { ResponseActionsProvider } from './types';
-import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
+import type {
+  ActionDetails,
+  GetProcessesActionOutputContent,
+  KillOrSuspendProcessRequestBody,
+  KillProcessActionOutputContent,
+  ResponseActionExecuteOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionsExecuteParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+  SuspendProcessActionOutputContent,
+} from '../../../../common/endpoint/types';
+import type {
+  IsolationRouteRequestBody,
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
 
 export interface BaseActionsProviderOptions {
   endpointContext: EndpointAppContext;
   esClient: ElasticsearchClient;
-  casesClient: CasesClient;
+  casesClient?: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
 }
@@ -28,6 +47,40 @@ export abstract class BaseActionsProvider implements ResponseActionsProvider {
     this.log = options.endpointContext.logFactory.get(this.constructor.name ?? 'ActionsProvider');
   }
 
+  // TODO:PT implement a generic way to update cases without relying on the Attachments being endpoint agents
+  // protected async updateCases(): Promise<void> {
+  //   throw new Error('Method not yet implemented');
+  // }
+
   public abstract isolate(options: IsolationRouteRequestBody): Promise<ActionDetails>;
+
   public abstract release(options: IsolationRouteRequestBody): Promise<ActionDetails>;
+
+  public abstract killProcess(
+    options: KillOrSuspendProcessRequestBody
+  ): Promise<
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  >;
+
+  public abstract suspendProcess(
+    options: KillOrSuspendProcessRequestBody
+  ): Promise<
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  >;
+
+  public abstract runningProcesses(
+    options: GetProcessesRequestBody
+  ): Promise<ActionDetails<GetProcessesActionOutputContent>>;
+
+  public abstract getFile(
+    options: ResponseActionGetFileRequestBody
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>>;
+
+  public abstract execute(
+    options: ExecuteActionRequestBody
+  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>>;
+
+  public abstract upload(
+    options: UploadActionApiRequestBody
+  ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
 }

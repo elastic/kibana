@@ -8,11 +8,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import type { CreateActionPayload } from '../../services/actions/create/types';
-import type { BaseActionsProviderOptions } from '../../lib/response_actions/base_actions_provider';
-import {
-  EndpointActionProvider,
-  SentinelOneActionProvider,
-} from '../../services/actions/providers';
+import { EndpointActionProvider } from '../../services/actions/providers';
 import type {
   ResponseActionBodySchema,
   NoParametersRequestSchema,
@@ -45,10 +41,7 @@ import type {
   ActionDetails,
   HostMetadata,
 } from '../../../../common/endpoint/types';
-import type {
-  ResponseActionsApiCommandNames,
-  ResponseActionAgentType,
-} from '../../../../common/endpoint/service/response_actions/constants';
+import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -269,23 +262,17 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
     const isS1V1Enabled = endpointContext.experimentalFeatures.sentinelOneResponseActionsV1Enabled;
+    const actionProvider = new EndpointActionProvider({
+      esClient,
+      casesClient,
+      endpointContext,
+      username: user?.username ?? 'unknown',
+    });
 
     let action: ActionDetails;
 
     try {
       if (isS1V1Enabled && (command === 'isolate' || command === 'unisolate')) {
-        const agentType: ResponseActionAgentType = req.body.agentType ?? 'endpoint';
-        const defaultProviderOptions: BaseActionsProviderOptions = {
-          esClient,
-          casesClient,
-          endpointContext,
-          username: user?.username ?? 'unknown',
-        };
-        const actionProvider =
-          agentType === 'sentinelone'
-            ? new SentinelOneActionProvider(defaultProviderOptions)
-            : new EndpointActionProvider(defaultProviderOptions);
-
         switch (command) {
           case 'isolate':
             action = await actionProvider.isolate(req.body);

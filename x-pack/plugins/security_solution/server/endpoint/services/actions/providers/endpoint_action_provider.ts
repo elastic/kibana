@@ -5,21 +5,46 @@
  * 2.0.
  */
 
-import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
-import type { ActionDetails, HostMetadata } from '../../../../../common/endpoint/types';
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import { updateCases } from '../create/update_cases';
+import type { CreateActionPayload } from '../create/types';
+import type {
+  ExecuteActionRequestBody,
+  GetProcessesRequestBody,
+  IsolationRouteRequestBody,
+  ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../../common/api/endpoint';
 import { BaseActionsProvider } from '../../../lib/response_actions/base_actions_provider';
+import type {
+  ActionDetails,
+  HostMetadata,
+  GetProcessesActionOutputContent,
+  KillOrSuspendProcessRequestBody,
+  KillProcessActionOutputContent,
+  ResponseActionExecuteOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ResponseActionParametersWithPidOrEntityId,
+  ResponseActionsExecuteParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+  SuspendProcessActionOutputContent,
+  HostMetadataInterface,
+  ImmutableObject,
+} from '../../../../../common/endpoint/types';
 
 export class EndpointActionProvider extends BaseActionsProvider {
   private async checkAgentIds(ids: string[]): Promise<{
     valid: string[];
     invalid: string[];
     allValid: boolean;
+    hosts: HostMetadata[];
   }> {
-    const validIds = (
-      await this.options.endpointContext.service
-        .getEndpointMetadataService()
-        .getMetadataForEndpoints(this.options.esClient, [...new Set(ids)])
-    ).map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+    const foundEndpointHosts = await this.options.endpointContext.service
+      .getEndpointMetadataService()
+      .getMetadataForEndpoints(this.options.esClient, [...new Set(ids)]);
+    const validIds = foundEndpointHosts.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
 
     const invalidIds = ids.filter((id) => !validIds.includes(id));
 
@@ -27,38 +52,96 @@ export class EndpointActionProvider extends BaseActionsProvider {
       valid: validIds,
       invalid: invalidIds,
       allValid: invalidIds.length === 0,
+      hosts: foundEndpointHosts,
     };
   }
 
-  private async hostIsolation(
-    command: 'isolate' | 'unisolate',
+  private async handleResponseAction(
+    command: ResponseActionsApiCommandNames,
     options: IsolationRouteRequestBody
   ): Promise<ActionDetails> {
     const agentIds = await this.checkAgentIds(options.endpoint_ids);
 
     if (!agentIds.allValid) {
-      this.log.info(
+      this.log.debug(
         `The following agent ids are not valid - will skip them: ${JSON.stringify(
           agentIds.invalid
         )}`
       );
     }
 
-    return this.options.endpointContext.service.getActionCreateService().createAction(
-      {
-        ...options,
-        command,
-        user: { username: this.options.username },
-      },
-      agentIds.valid
-    );
+    const createPayload: CreateActionPayload = {
+      ...options,
+      command,
+      user: { username: this.options.username },
+    };
+
+    const response = await this.options.endpointContext.service
+      .getActionCreateService()
+      .createAction(createPayload, agentIds.valid);
+
+    await this.updateCases(createPayload, agentIds.hosts);
+
+    return response;
+  }
+
+  protected async updateCases(
+    createActionPayload: CreateActionPayload,
+    endpointData: Array<ImmutableObject<HostMetadataInterface>>
+  ): Promise<void> {
+    return updateCases({
+      casesClient: this.options.casesClient,
+      createActionPayload,
+      endpointData,
+    });
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    return this.hostIsolation('isolate', options);
+    return this.handleResponseAction('isolate', options);
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    return this.hostIsolation('unisolate', options);
+    return this.handleResponseAction('unisolate', options);
+  }
+
+  async killProcess(
+    options: KillOrSuspendProcessRequestBody
+  ): Promise<
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  > {
+    return this.handleResponseAction('kill-process', options);
+  }
+
+  async suspendProcess(
+    options: KillOrSuspendProcessRequestBody
+  ): Promise<
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  > {
+    return this.handleResponseAction('suspend-process', options);
+  }
+
+  async runningProcesses(
+    options: GetProcessesRequestBody
+  ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
+    return this.handleResponseAction('running-processes', options);
+  }
+
+  async getFile(
+    options: ResponseActionGetFileRequestBody
+  ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
+    return this.handleResponseAction('get-file', options);
+  }
+
+  async execute(
+    options: ExecuteActionRequestBody
+  ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
+    return this.handleResponseAction('execute', options);
+  }
+
+  async upload(
+    options: UploadActionApiRequestBody
+  ): Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>> {
+    // FIXME:PT update is different due to use of a File buffer
+    return this.handleResponseAction('upload', options);
   }
 }

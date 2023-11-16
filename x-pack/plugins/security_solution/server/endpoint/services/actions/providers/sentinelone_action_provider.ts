@@ -9,7 +9,7 @@ import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoi
 import type { ActionDetails } from '../../../../../common/endpoint/types';
 import { BaseActionsProvider } from '../../../lib/response_actions/base_actions_provider';
 
-/** Supports sending response actions to sentinel one agents */
+/** Supports sending response actions to SentinelOne agent */
 export class SentinelOneActionProvider extends BaseActionsProvider {
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     // FIXME:PT implement

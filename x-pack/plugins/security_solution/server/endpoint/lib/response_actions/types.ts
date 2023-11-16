@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
 import type {
   ActionDetails,
   KillOrSuspendProcessRequestBody,
@@ -20,6 +19,13 @@ import type {
   ResponseActionUploadOutputContent,
   ResponseActionUploadParameters,
 } from '../../../../common/endpoint/types';
+import type {
+  IsolationRouteRequestBody,
+  GetProcessesRequestBody,
+  ResponseActionGetFileRequestBody,
+  ExecuteActionRequestBody,
+  UploadActionApiRequestBody,
+} from '../../../../common/api/endpoint';
 
 /**
  * The interface required for a Response Actions provider
@@ -41,17 +47,19 @@ export interface ResponseActionsProvider {
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   >;
 
-  runningProcesses: () => Promise<ActionDetails<GetProcessesActionOutputContent>>;
+  runningProcesses: (
+    options: GetProcessesRequestBody
+  ) => Promise<ActionDetails<GetProcessesActionOutputContent>>;
 
-  getFile: () => Promise<
-    ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
-  >;
+  getFile: (
+    options: ResponseActionGetFileRequestBody
+  ) => Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>>;
 
-  execute: () => Promise<
-    ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
-  >;
+  execute: (
+    options: ExecuteActionRequestBody
+  ) => Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>>;
 
-  upload: () => Promise<
-    ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>
-  >;
+  upload: (
+    options: UploadActionApiRequestBody
+  ) => Promise<ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>>;
 }
