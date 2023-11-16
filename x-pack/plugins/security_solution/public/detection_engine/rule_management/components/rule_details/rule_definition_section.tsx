@@ -676,18 +676,20 @@ const prepareDefinitionSectionListItems = (
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
     });
 
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
-        </span>
-      ),
-      description: (
-        <MissingFieldsStrategy
-          missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
-        />
-      ),
-    });
+    if (rule.alert_suppression.missing_fields_strategy) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESSION_FIELD_MISSING_FIELD_LABEL} />
+          </span>
+        ),
+        description: (
+          <MissingFieldsStrategy
+            missingFieldsStrategy={rule.alert_suppression.missing_fields_strategy}
+          />
+        ),
+      });
+    }
   }
 
   if ('new_terms_fields' in rule && rule.new_terms_fields && rule.new_terms_fields.length > 0) {
