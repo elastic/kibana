@@ -73,7 +73,7 @@ jest.mock('../../risk_score/transform/helpers/transforms', () => ({
 }));
 
 jest.mock('../utils/create_index', () => ({
-  createIndex: jest.fn(),
+  createOrUpdateIndex: jest.fn(),
 }));
 
 jest.spyOn(transforms, 'createTransform').mockResolvedValue(Promise.resolve());

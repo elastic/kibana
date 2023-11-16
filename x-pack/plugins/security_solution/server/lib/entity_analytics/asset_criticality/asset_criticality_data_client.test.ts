@@ -11,7 +11,7 @@ import { AssetCriticalityDataClient } from './asset_criticality_data_client';
 import { createOrUpdateIndex } from '../utils/create_index';
 
 jest.mock('../utils/create_index', () => ({
-  createIndex: jest.fn(),
+  createOrUpdateIndex: jest.fn(),
 }));
 
 describe('AssetCriticalityDataClient', () => {
