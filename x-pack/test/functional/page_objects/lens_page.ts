@@ -1332,6 +1332,11 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async getMetricTiles() {
       return findService.allByCssSelector('[data-test-subj="mtrVis"] .echChart li');
     },
+    async getChartBackground(): Promise<string> {
+      return await (
+        await findService.byCssSelector('[data-test-subj="mtrVis"] .echChart .echChartBackground')
+      )?.getComputedStyle('background-color')
+    },
 
     async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
       return (await findService.descendantExistsByCssSelector(selector, container))
@@ -1351,25 +1356,29 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         value: await (
           await this.getMetricElementIfExists('.echMetricText__value', tile)
         )?.getVisibleText(),
-        color: await (
+        foregroundColor: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
+        trendlineColor: await(
+          await this.getMetricElementIfExists('.echSingleMetricSparkline__svg > rect', tile)
+          )?.getAttribute('fill'),
         showingTrendline: Boolean(
           await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
         ),
-      };
+    };
     },
 
     async getMetricVisualizationData() {
       const tiles = await this.getMetricTiles();
       const showingBar = Boolean(await findService.existsByCssSelector('.echSingleMetricProgress'));
+      const backgroundColor = await this.getChartBackground();
 
       const metricDataPromises = [];
       for (const tile of tiles) {
         metricDataPromises.push(this.getMetricDatum(tile));
       }
       const metricData = await Promise.all(metricDataPromises);
-      return metricData.map((d) => ({ ...d, showingBar }));
+      return metricData.map((d) => ({ ...d, showingBar, backgroundColor }));
     },
 
     /**

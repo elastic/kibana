@@ -127,7 +127,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 19,755',
           value: '19,755',
-          color: 'rgba(245, 247, 250, 1)',
+          foregroundColor: 'rgba(0, 0, 0, 0)',
+          backgroundColor: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: true,
           showingBar: false,
         },
@@ -136,7 +138,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 18,994',
           value: '18,994',
-          color: 'rgba(245, 247, 250, 1)',
+          foregroundColor: 'rgba(0, 0, 0, 0)',
+          backgroundColor: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: true,
           showingBar: false,
         },
@@ -145,7 +149,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 17,246',
           value: '17,246',
-          color: 'rgba(245, 247, 250, 1)',
+          foregroundColor: 'rgba(0, 0, 0, 0)',
+          backgroundColor: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: true,
           showingBar: false,
         },
@@ -154,7 +160,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 15,687',
           value: '15,687',
-          color: 'rgba(245, 247, 250, 1)',
+          foregroundColor: 'rgba(0, 0, 0, 0)',
+          backgroundColor: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: true,
           showingBar: false,
         },
@@ -163,7 +171,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 15,614.333',
           value: '15,614.333',
-          color: 'rgba(245, 247, 250, 1)',
+          foregroundColor: 'rgba(0, 0, 0, 0)',
+          backgroundColor: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: true,
           showingBar: false,
         },
@@ -172,7 +182,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           subtitle: 'Average of bytes',
           extraText: 'Average of bytes 5,722.775',
           value: '5,722.775',
-          color: 'rgba(245, 247, 250, 1)',
+          foregroundColor: 'rgba(0, 0, 0, 0)',
+          backgroundColor: 'rgba(245, 247, 250, 1)',
+          trendlineColor: undefined,
           showingTrendline: true,
           showingBar: false,
         },
@@ -270,7 +282,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const data = await PageObjects.lens.getMetricVisualizationData();
 
-      expect(data.map(({ color }) => color)).to.be.eql(new Array(6).fill('rgba(0, 0, 0, 1)'));
+      expect(data.map(({ trendlineColor }) => trendlineColor)).to.be.eql(new Array(6).fill('rgba(0, 0, 0, 1)'));
     });
 
     const expectedDynamicColors = [
@@ -288,7 +300,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('mtrVis');
 
       const data = await PageObjects.lens.getMetricVisualizationData();
-      expect(data.map(({ color }) => color)).to.eql(expectedDynamicColors);
+      expect(data.map(({ trendlineColor }) => trendlineColor)).to.eql(expectedDynamicColors);
     });
 
     it('converts color stops to number', async () => {
@@ -303,7 +315,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('mtrVis');
 
       expect(
-        (await PageObjects.lens.getMetricVisualizationData()).map(({ color }) => color)
+        (await PageObjects.lens.getMetricVisualizationData()).map(({ trendlineColor }) => trendlineColor)
       ).to.eql(expectedDynamicColors); // colors shouldn't change
 
       await PageObjects.lens.closePaletteEditor();
