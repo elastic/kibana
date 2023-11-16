@@ -48,7 +48,7 @@ export const actionButtonCss = (euiTheme: EuiThemeComputed) => css`
 `;
 
 export const disabledDraggableCss = css`
-  &.euiDraggable .euiDraggable__item.euiDraggable__item--isDisabled {
+  &.euiDraggable .euiDraggable__item-isDisabled {
     cursor: unset;
   }
 `;
