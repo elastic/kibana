@@ -16,14 +16,32 @@ set +e
 
 QA_API_KEY=$(retry 5 5 vault read -field=qa_api_key secret/kibana-issues/dev/security-solution-qg-enc-key)
 
+if [ -z "${KIBANA_LATEST+x}" ]; then
+    KIBANA_OVERRIDE_FLAG=$(buildkite-agent meta-data get kibana_override --default 0)
+else
+    KIBANA_OVERRIDE_FLAG=$KIBANA_LATEST
+fi
+
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
+request_body='{
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1"}'
+
+if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
+  kbn_override='{ "overrides": {
+        "kibana": {
+            "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:latest"
+        }
+    }}'
+  request_body=$(echo $request_body | jq ". + $kbn_override")
+fi
+
 ENVIRONMENT_DETAILS=$(curl --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
     --header "Authorization: ApiKey $QA_API_KEY" \
     --header 'Content-Type: application/json' \
-    --data '{
-        "name": "ftr-integration-tests-'$random_number'",
-        "region_id": "aws-eu-west-1"}' | jq '.')
+    --data $request_body | jq '.')
+
 NAME=$(echo $ENVIRONMENT_DETAILS | jq -r '.name')
 ID=$(echo $ENVIRONMENT_DETAILS | jq -r '.id')
 ES_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.elasticsearch')
