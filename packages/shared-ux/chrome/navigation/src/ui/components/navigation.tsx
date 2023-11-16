@@ -12,12 +12,10 @@ import React, {
   useCallback,
   ReactNode,
   useMemo,
-  useEffect,
   useContext,
   useRef,
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
-import useDebounce from 'react-use/lib/useDebounce';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
@@ -37,10 +35,7 @@ interface Context {
 }
 
 const NavigationContext = createContext<Context>({
-  register: () => ({
-    unregister: () => {},
-    path: [],
-  }),
+  register: () => () => {},
   updateFooterChildren: () => {},
   unstyled: false,
   activeNodes: [],
@@ -77,41 +72,45 @@ export function Navigation({
   const idx = useRef(0);
 
   const activeNodes = useObservable(activeNodes$, []);
-  const [navigationItems, setNavigationItems] = useState<
-    Record<string, ChromeProjectNavigationNode>
-  >({});
-  const [debouncedNavigationItems, setDebouncedNavigationItems] = useState<
-    Record<string, ChromeProjectNavigationNode>
-  >({});
+  const navigationItemsRef = useRef<Record<string, ChromeProjectNavigationNode>>({});
   const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
 
-  const unregister: UnRegisterFunction = useCallback((id: string) => {
-    setNavigationItems((prevItems) => {
-      const updatedItems = { ...prevItems };
-      delete updatedItems[id];
-      return updatedItems;
+  const onNavigationItemsChange = useCallback(() => {
+    const navigationTree = Object.values(navigationItemsRef.current).sort((a, b) => {
+      const aOrder = orderChildrenRef.current[a.id];
+      const bOrder = orderChildrenRef.current[b.id];
+      return aOrder - bOrder;
     });
-  }, []);
+
+    // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
+    onProjectNavigationChange({ navigationTree });
+  }, [onProjectNavigationChange]);
+
+  const unregister = useCallback(
+    (id: string) => {
+      const updatedItems = { ...navigationItemsRef.current };
+      delete updatedItems[id];
+      navigationItemsRef.current = updatedItems;
+
+      onNavigationItemsChange();
+    },
+    [onNavigationItemsChange]
+  );
 
   const register = useCallback<RegisterFunction>(
-    (navNode) => {
+    (navNode): UnRegisterFunction => {
       if (orderChildrenRef.current[navNode.id] === undefined) {
         orderChildrenRef.current[navNode.id] = idx.current++;
       }
 
-      setNavigationItems((prevItems) => {
-        return {
-          ...prevItems,
-          [navNode.id]: navNode,
-        };
-      });
+      const updatedRef = { ...navigationItemsRef.current, [navNode.id]: navNode };
+      navigationItemsRef.current = updatedRef;
 
-      return {
-        unregister,
-        path: [navNode.id],
-      };
+      onNavigationItemsChange();
+
+      return () => unregister(navNode.id);
     },
-    [unregister]
+    [unregister, onNavigationItemsChange]
   );
 
   const contextValue = useMemo<Context>(
@@ -123,27 +122,6 @@ export function Navigation({
     }),
     [register, unstyled, activeNodes]
   );
-
-  useDebounce(
-    () => {
-      setDebouncedNavigationItems(navigationItems);
-    },
-    100,
-    [navigationItems]
-  );
-
-  useEffect(() => {
-    const navigationTree = Object.values(debouncedNavigationItems).sort((a, b) => {
-      const aOrder = orderChildrenRef.current[a.id];
-      const bOrder = orderChildrenRef.current[b.id];
-      return aOrder - bOrder;
-    });
-
-    // This will update the navigation tree in the Chrome service (calling the serverless.setNavigation())
-    onProjectNavigationChange({
-      navigationTree,
-    });
-  }, [debouncedNavigationItems, onProjectNavigationChange]);
 
   return (
     <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>

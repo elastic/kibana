@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useEffect, useMemo } from 'react';
-import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
+import React, { Fragment, useMemo } from 'react';
+import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
 import classNames from 'classnames';
+import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import { useInitNavNode } from '../hooks';
 import type { NodeProps, NodePropsEnhanced } from '../types';
 import { useNavigation } from './navigation';
 import { getNavigationNodeHref } from '../../utils';
+import { initNavNode } from '../../navnode_utils';
 
 export interface Props<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
@@ -30,9 +31,9 @@ function NavigationItemComp<
   Id extends string = string,
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
-  const { cloudLinks, navigateToUrl } = useNavigationServices();
+  const { cloudLinks, navigateToUrl, navLinks$ } = useNavigationServices();
   const navigationContext = useNavigation();
-  const navNodeRef = React.useRef<ChromeProjectNavigationNode | null>(null);
+  const deepLinks = useObservable(navLinks$, []);
 
   const { children, node } = useMemo(() => {
     const { children: _children, ...rest } = props;
@@ -50,11 +51,10 @@ function NavigationItemComp<
   }, [props]);
   const unstyled = props.unstyled ?? navigationContext.unstyled;
 
-  const { navNode } = useInitNavNode(node, { cloudLinks });
-
-  useEffect(() => {
-    navNodeRef.current = navNode;
-  }, [navNode]);
+  const navNode = useMemo(
+    () => initNavNode(node, { cloudLinks, deepLinks }),
+    [node, cloudLinks, deepLinks]
+  );
 
   if (!navNode) {
     return null;
@@ -75,8 +75,9 @@ function NavigationItemComp<
 
   if (isRootLevel) {
     const href = getNavigationNodeHref(navNode);
+    const { deepLink } = navNode;
     const dataTestSubj = classNames(`nav-item`, {
-      [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
+      [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
       [`nav-item-isActive`]: navNode.isActive,
     });
 

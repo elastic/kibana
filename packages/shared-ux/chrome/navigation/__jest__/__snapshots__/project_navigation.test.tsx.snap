@@ -5,12 +5,11 @@ Array [
   Object {
     "children": Array [
       Object {
-        "children": undefined,
         "deepLink": undefined,
         "href": undefined,
         "id": "item1",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "group1",
           "item1",
@@ -19,7 +18,6 @@ Array [
         "title": "Item 1",
       },
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "",
           "href": "",
@@ -29,8 +27,8 @@ Array [
         },
         "href": undefined,
         "id": "item2",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "group1",
           "item2",
@@ -39,7 +37,6 @@ Array [
         "title": "Title from deeplink!",
       },
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "",
           "href": "",
@@ -49,8 +46,8 @@ Array [
         },
         "href": undefined,
         "id": "item3",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "group1",
           "item3",
@@ -62,7 +59,7 @@ Array [
     "deepLink": undefined,
     "href": undefined,
     "id": "group1",
-    "isActive": false,
+    "isActive": undefined,
     "isGroup": true,
     "path": Array [
       "group1",
@@ -74,7 +71,6 @@ Array [
   Object {
     "children": Array [
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/discover",
@@ -84,8 +80,8 @@ Array [
         },
         "href": undefined,
         "id": "discover",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "rootNav:analytics",
           "discover",
@@ -94,7 +90,6 @@ Array [
         "title": "Deeplink discover",
       },
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/dashboards",
@@ -104,8 +99,8 @@ Array [
         },
         "href": undefined,
         "id": "dashboards",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "rootNav:analytics",
           "dashboards",
@@ -114,7 +109,6 @@ Array [
         "title": "Deeplink dashboards",
       },
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/visualize",
@@ -124,8 +118,8 @@ Array [
         },
         "href": undefined,
         "id": "visualize",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "rootNav:analytics",
           "visualize",
@@ -138,7 +132,7 @@ Array [
     "href": undefined,
     "icon": "stats",
     "id": "rootNav:analytics",
-    "isActive": false,
+    "isActive": undefined,
     "isGroup": true,
     "path": Array [
       "rootNav:analytics",
@@ -151,7 +145,6 @@ Array [
   Object {
     "children": Array [
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/ml:overview",
@@ -161,8 +154,8 @@ Array [
         },
         "href": undefined,
         "id": "ml:overview",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "ml:overview",
@@ -171,7 +164,6 @@ Array [
         "title": "Deeplink ml:overview",
       },
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/ml:notifications",
@@ -181,8 +173,8 @@ Array [
         },
         "href": undefined,
         "id": "ml:notifications",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "ml:notifications",
@@ -191,7 +183,6 @@ Array [
         "title": "Deeplink ml:notifications",
       },
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/ml:memoryUsage",
@@ -201,8 +192,8 @@ Array [
         },
         "href": undefined,
         "id": "ml:memoryUsage",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "rootNav:ml",
           "ml:memoryUsage",
@@ -214,7 +205,6 @@ Array [
         "children": Array [
           Object {
             "breadcrumbStatus": "hidden",
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:anomalyDetection",
@@ -224,18 +214,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:anomalyDetection",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:anomalyDetection",
+              "rootNav:ml.ml:anomalyDetection",
               "ml:anomalyDetection",
             ],
             "sideNavStatus": "visible",
             "title": "Jobs",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:anomalyExplorer",
@@ -245,18 +233,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:anomalyExplorer",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:anomalyDetection",
+              "rootNav:ml.ml:anomalyDetection",
               "ml:anomalyExplorer",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:anomalyExplorer",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:singleMetricViewer",
@@ -266,18 +252,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:singleMetricViewer",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:anomalyDetection",
+              "rootNav:ml.ml:anomalyDetection",
               "ml:singleMetricViewer",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:singleMetricViewer",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:settings",
@@ -287,11 +271,10 @@ Array [
             },
             "href": undefined,
             "id": "ml:settings",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:anomalyDetection",
+              "rootNav:ml.ml:anomalyDetection",
               "ml:settings",
             ],
             "sideNavStatus": "visible",
@@ -307,7 +290,7 @@ Array [
         },
         "href": undefined,
         "id": "ml:anomalyDetection",
-        "isActive": false,
+        "isActive": undefined,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
@@ -321,7 +304,6 @@ Array [
         "children": Array [
           Object {
             "breadcrumbStatus": "hidden",
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:dataFrameAnalytics",
@@ -331,18 +313,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:dataFrameAnalytics",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:dataFrameAnalytics",
+              "rootNav:ml.ml:dataFrameAnalytics",
               "ml:dataFrameAnalytics",
             ],
             "sideNavStatus": "visible",
             "title": "Jobs",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:resultExplorer",
@@ -352,18 +332,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:resultExplorer",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:dataFrameAnalytics",
+              "rootNav:ml.ml:dataFrameAnalytics",
               "ml:resultExplorer",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:resultExplorer",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:analyticsMap",
@@ -373,11 +351,10 @@ Array [
             },
             "href": undefined,
             "id": "ml:analyticsMap",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "ml:dataFrameAnalytics",
+              "rootNav:ml.ml:dataFrameAnalytics",
               "ml:analyticsMap",
             ],
             "sideNavStatus": "visible",
@@ -393,7 +370,7 @@ Array [
         },
         "href": undefined,
         "id": "ml:dataFrameAnalytics",
-        "isActive": false,
+        "isActive": undefined,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
@@ -406,7 +383,6 @@ Array [
       Object {
         "children": Array [
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:nodesOverview",
@@ -416,18 +392,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:nodesOverview",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "model_management",
+              "rootNav:ml.model_management",
               "ml:nodesOverview",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:nodesOverview",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:nodes",
@@ -437,11 +411,10 @@ Array [
             },
             "href": undefined,
             "id": "ml:nodes",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "model_management",
+              "rootNav:ml.model_management",
               "ml:nodes",
             ],
             "sideNavStatus": "visible",
@@ -451,7 +424,7 @@ Array [
         "deepLink": undefined,
         "href": undefined,
         "id": "model_management",
-        "isActive": false,
+        "isActive": undefined,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
@@ -464,7 +437,6 @@ Array [
       Object {
         "children": Array [
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:fileUpload",
@@ -474,18 +446,16 @@ Array [
             },
             "href": undefined,
             "id": "ml:fileUpload",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "data_visualizer",
+              "rootNav:ml.data_visualizer",
               "ml:fileUpload",
             ],
             "sideNavStatus": "visible",
             "title": "File",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:indexDataVisualizer",
@@ -496,18 +466,16 @@ Array [
             "getIsActive": [Function],
             "href": undefined,
             "id": "ml:indexDataVisualizer",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "data_visualizer",
+              "rootNav:ml.data_visualizer",
               "ml:indexDataVisualizer",
             ],
             "sideNavStatus": "visible",
             "title": "Data view",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:dataDrift",
@@ -518,11 +486,10 @@ Array [
             "getIsActive": [Function],
             "href": undefined,
             "id": "ml:dataDrift",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "data_visualizer",
+              "rootNav:ml.data_visualizer",
               "ml:dataDrift",
             ],
             "sideNavStatus": "visible",
@@ -532,7 +499,7 @@ Array [
         "deepLink": undefined,
         "href": undefined,
         "id": "data_visualizer",
-        "isActive": false,
+        "isActive": undefined,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
@@ -545,7 +512,6 @@ Array [
       Object {
         "children": Array [
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:logRateAnalysis",
@@ -556,18 +522,16 @@ Array [
             "getIsActive": [Function],
             "href": undefined,
             "id": "ml:logRateAnalysis",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "aiops_labs",
+              "rootNav:ml.aiops_labs",
               "ml:logRateAnalysis",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:logRateAnalysis",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:logPatternAnalysis",
@@ -578,18 +542,16 @@ Array [
             "getIsActive": [Function],
             "href": undefined,
             "id": "ml:logPatternAnalysis",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "aiops_labs",
+              "rootNav:ml.aiops_labs",
               "ml:logPatternAnalysis",
             ],
             "sideNavStatus": "visible",
             "title": "Deeplink ml:logPatternAnalysis",
           },
           Object {
-            "children": undefined,
             "deepLink": Object {
               "baseUrl": "/mocked",
               "href": "http://mocked/ml:changePointDetections",
@@ -600,11 +562,10 @@ Array [
             "getIsActive": [Function],
             "href": undefined,
             "id": "ml:changePointDetections",
-            "isActive": false,
-            "isGroup": false,
+            "isActive": undefined,
+            "isGroup": true,
             "path": Array [
-              "rootNav:ml",
-              "aiops_labs",
+              "rootNav:ml.aiops_labs",
               "ml:changePointDetections",
             ],
             "sideNavStatus": "visible",
@@ -614,7 +575,7 @@ Array [
         "deepLink": undefined,
         "href": undefined,
         "id": "aiops_labs",
-        "isActive": false,
+        "isActive": undefined,
         "isGroup": true,
         "path": Array [
           "rootNav:ml",
@@ -629,7 +590,7 @@ Array [
     "href": undefined,
     "icon": "machineLearningApp",
     "id": "rootNav:ml",
-    "isActive": false,
+    "isActive": undefined,
     "isGroup": true,
     "path": Array [
       "rootNav:ml",
@@ -639,31 +600,9 @@ Array [
     "type": "navGroup",
   },
   Object {
-    "children": undefined,
-    "deepLink": Object {
-      "baseUrl": "/mocked",
-      "href": "http://mocked/dev_tools",
-      "id": "dev_tools",
-      "title": "Deeplink dev_tools",
-      "url": "/mocked/dev_tools",
-    },
-    "href": undefined,
-    "icon": "editorCodeBlock",
-    "id": "devTools",
-    "isActive": false,
-    "isGroup": false,
-    "path": Array [
-      "devTools",
-    ],
-    "sideNavStatus": "visible",
-    "title": "Developer tools",
-    "type": "navItem",
-  },
-  Object {
     "breadcrumbStatus": "hidden",
     "children": Array [
       Object {
-        "children": undefined,
         "deepLink": Object {
           "baseUrl": "/mocked",
           "href": "http://mocked/management",
@@ -673,8 +612,8 @@ Array [
         },
         "href": undefined,
         "id": "management",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "project_settings_project_nav",
           "management",
@@ -683,12 +622,11 @@ Array [
         "title": "Management",
       },
       Object {
-        "children": undefined,
         "deepLink": undefined,
         "href": "https://cloud.elastic.co/deployments/123456789/security/users",
         "id": "cloudLinkUserAndRoles",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "project_settings_project_nav",
           "cloudLinkUserAndRoles",
@@ -697,12 +635,11 @@ Array [
         "title": "Mock Users & Roles",
       },
       Object {
-        "children": undefined,
         "deepLink": undefined,
         "href": "https://cloud.elastic.co/account/billing",
         "id": "cloudLinkBilling",
-        "isActive": false,
-        "isGroup": false,
+        "isActive": undefined,
+        "isGroup": true,
         "path": Array [
           "project_settings_project_nav",
           "cloudLinkBilling",
@@ -715,7 +652,7 @@ Array [
     "href": undefined,
     "icon": "gear",
     "id": "project_settings_project_nav",
-    "isActive": false,
+    "isActive": undefined,
     "isGroup": true,
     "path": Array [
       "project_settings_project_nav",

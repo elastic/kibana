@@ -1100,6 +1100,72 @@ export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
   );
 };
 
+export const WithUIComponentsTiny = (args: NavigationServices) => {
+  const services = storybookMock.getServices({
+    ...args,
+    navLinks$: of([...navLinksMock, ...deepLinks]),
+    onProjectNavigationChange: (updated) => {
+      action('Update chrome navigation')(JSON.stringify(updated, null, 2));
+    },
+    recentlyAccessed$: of([
+      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
+      { label: 'Another example', link: '/app/example/5235', id: '5235' },
+    ]),
+  });
+
+  return (
+    <NavigationWrapper>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <Navigation>
+            <Navigation.Group
+              id="example_projet"
+              title="Example project"
+              icon="logoObservability"
+              defaultIsCollapsed={false}
+              // isCollapsible={false}
+            >
+              {/* <Navigation.Item<any> id="item1" link="item1" />
+              <Navigation.Item<any> id="item2" link="item1" /> */}
+              <Navigation.Group
+                id="hello"
+                title="Hello"
+                renderAs="accordion"
+                defaultIsCollapsed={false}
+              >
+                <Navigation.Item<any> id="item1" link="item1" />
+                <Navigation.Item<any> id="item2" link="item1" />
+                {/* <Navigation.Item<any> id="item1" link="item1" />
+                <Navigation.Group title="Hello" renderAs="accordion">
+                  <Navigation.Item<any> id="item1" link="item1" />
+                  <Navigation.Item<any> id="item2" link="item1" />
+                </Navigation.Group> */}
+              </Navigation.Group>
+              {/* <Navigation.Item<any> id="item1" link="item1" />
+              <Navigation.Item<any> id="item2" link="item1" /> */}
+            </Navigation.Group>
+            <Navigation.Item<any> id="item2" link="item1" title="YEAH!!" icon="launch" />
+            {/* <Navigation.Footer>
+              <Navigation.Group link="dev_tools" icon="editorCodeBlock" title="Developer tools" />
+              <Navigation.Group
+                id="project_settings_project_nav"
+                title="Project settings"
+                breadcrumbStatus="hidden"
+                icon="gear"
+              >
+                <Navigation.Item link="management" title="Management" />
+                <Navigation.Item id="cloudLinkUserAndRoles" cloudLink="userAndRoles" />
+                <Navigation.Item id="cloudLinkPerformance" cloudLink="performance" />
+                <Navigation.Item id="cloudLinkBilling" cloudLink="billingAndSub" />
+              </Navigation.Group>
+            </Navigation.Footer> */}
+          </Navigation>
+        </NavigationProvider>
+      )}
+    </NavigationWrapper>
+  );
+};
+
 export const WithUIComponents = (args: NavigationServices) => {
   const services = storybookMock.getServices({
     ...args,
@@ -1127,7 +1193,7 @@ export const WithUIComponents = (args: NavigationServices) => {
               defaultIsCollapsed={false}
             >
               <Navigation.Item<any> id="item1" link="item1" />
-              <Navigation.Item id="item2" title="Alerts">
+              {/* <Navigation.Item id="item2" title="Alerts">
                 {(navNode) => {
                   return (
                     <div className="euiSideNavItemButton">
@@ -1135,7 +1201,7 @@ export const WithUIComponents = (args: NavigationServices) => {
                     </div>
                   );
                 }}
-              </Navigation.Item>
+              </Navigation.Item> */}
               <Navigation.Item id="item3" title="Title in ReactNode">
                 <div className="euiSideNavItemButton">
                   <EuiLink>Title in ReactNode</EuiLink>
@@ -1316,7 +1382,7 @@ export const CreativeUI = (args: NavigationServices) => {
                         </li>
                       </Navigation.Item>
 
-                      <Navigation.Item id="item2" title="My library">
+                      {/* <Navigation.Item id="item2" title="My library">
                         {(navNode) => {
                           return (
                             <li
@@ -1330,7 +1396,7 @@ export const CreativeUI = (args: NavigationServices) => {
                             </li>
                           );
                         }}
-                      </Navigation.Item>
+                      </Navigation.Item> */}
 
                       <Navigation.Item id="item3" title="You must see this">
                         <li

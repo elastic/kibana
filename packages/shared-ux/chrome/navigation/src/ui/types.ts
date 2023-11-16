@@ -30,7 +30,9 @@ export interface NodeProps<
    * Children of the node. For Navigation.Item (only) it allows a function to be set.
    * This function will receive the ChromeProjectNavigationNode object
    */
-  children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
+  children?: ReactNode;
+  // children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
+  parentNodePath?: string[];
 }
 
 /**
@@ -181,16 +183,11 @@ export interface ProjectNavigationDefinition<
  *
  * Function to unregister a navigation node from its parent.
  */
-export type UnRegisterFunction = (id: string) => void;
+export type UnRegisterFunction = () => void;
 
 /**
  * @internal
  *
  * A function to register a navigation node on its parent.
  */
-export type RegisterFunction = (navNode: ChromeProjectNavigationNode) => {
-  /** The function to unregister the node. */
-  unregister: UnRegisterFunction;
-  /** The full path of the node in the navigation tree. */
-  path: string[];
-};
+export type RegisterFunction = (navNode: ChromeProjectNavigationNode) => UnRegisterFunction;

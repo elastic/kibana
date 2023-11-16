@@ -110,12 +110,11 @@ describe('builds navigation tree', () => {
           Object {
             "children": Array [
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item1",
-                "isActive": false,
-                "isGroup": false,
+                "isActive": undefined,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "item1",
@@ -124,12 +123,11 @@ describe('builds navigation tree', () => {
                 "title": "Item 1",
               },
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item2",
-                "isActive": false,
-                "isGroup": false,
+                "isActive": undefined,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "item2",
@@ -140,15 +138,13 @@ describe('builds navigation tree', () => {
               Object {
                 "children": Array [
                   Object {
-                    "children": undefined,
                     "deepLink": undefined,
                     "href": "https://foo",
                     "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
+                    "isActive": undefined,
+                    "isGroup": true,
                     "path": Array [
-                      "group1",
-                      "group1A",
+                      "group1.group1A",
                       "item1",
                     ],
                     "sideNavStatus": "visible",
@@ -157,16 +153,13 @@ describe('builds navigation tree', () => {
                   Object {
                     "children": Array [
                       Object {
-                        "children": undefined,
                         "deepLink": undefined,
                         "href": "https://foo",
                         "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
+                        "isActive": undefined,
+                        "isGroup": true,
                         "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
+                          "group1.group1A.group1A_1",
                           "item1",
                         ],
                         "sideNavStatus": "visible",
@@ -176,11 +169,10 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": undefined,
                     "id": "group1A_1",
-                    "isActive": false,
+                    "isActive": undefined,
                     "isGroup": true,
                     "path": Array [
-                      "group1",
-                      "group1A",
+                      "group1.group1A",
                       "group1A_1",
                     ],
                     "sideNavStatus": "visible",
@@ -246,12 +238,11 @@ describe('builds navigation tree', () => {
           Object {
             "children": Array [
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item1",
-                "isActive": false,
-                "isGroup": false,
+                "isActive": undefined,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "item1",
@@ -260,12 +251,11 @@ describe('builds navigation tree', () => {
                 "title": "Item 1",
               },
               Object {
-                "children": undefined,
                 "deepLink": undefined,
                 "href": "https://foo",
                 "id": "item2",
-                "isActive": false,
-                "isGroup": false,
+                "isActive": undefined,
+                "isGroup": true,
                 "path": Array [
                   "group1",
                   "item2",
@@ -276,15 +266,13 @@ describe('builds navigation tree', () => {
               Object {
                 "children": Array [
                   Object {
-                    "children": undefined,
                     "deepLink": undefined,
                     "href": "https://foo",
                     "id": "item1",
-                    "isActive": false,
-                    "isGroup": false,
+                    "isActive": undefined,
+                    "isGroup": true,
                     "path": Array [
-                      "group1",
-                      "group1A",
+                      "group1.group1A",
                       "item1",
                     ],
                     "sideNavStatus": "visible",
@@ -293,16 +281,13 @@ describe('builds navigation tree', () => {
                   Object {
                     "children": Array [
                       Object {
-                        "children": undefined,
                         "deepLink": undefined,
                         "href": "https://foo",
                         "id": "item1",
-                        "isActive": false,
-                        "isGroup": false,
+                        "isActive": undefined,
+                        "isGroup": true,
                         "path": Array [
-                          "group1",
-                          "group1A",
-                          "group1A_1",
+                          "group1.group1A.group1A_1",
                           "item1",
                         ],
                         "sideNavStatus": "visible",
@@ -312,11 +297,10 @@ describe('builds navigation tree', () => {
                     "deepLink": undefined,
                     "href": undefined,
                     "id": "group1A_1",
-                    "isActive": false,
+                    "isActive": undefined,
                     "isGroup": true,
                     "path": Array [
-                      "group1",
-                      "group1A",
+                      "group1.group1A",
                       "group1A_1",
                     ],
                     "sideNavStatus": "visible",
@@ -326,7 +310,7 @@ describe('builds navigation tree', () => {
                 "deepLink": undefined,
                 "href": undefined,
                 "id": "group1A",
-                "isActive": false,
+                "isActive": undefined,
                 "isGroup": true,
                 "path": Array [
                   "group1",
@@ -663,11 +647,7 @@ describe('builds navigation tree', () => {
       const renderResult = renderNavigation({
         navigationElement: (
           <Navigation>
-            <Navigation.Group id="root">
-              <Navigation.Group id="group1">
-                <Navigation.RecentlyAccessed />
-              </Navigation.Group>
-            </Navigation.Group>
+            <Navigation.RecentlyAccessed />
           </Navigation>
         ),
         services: { recentlyAccessed$ },
