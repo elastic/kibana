@@ -1,6 +1,10 @@
 @import '../../mixins';
 @import '../../variables';
 
+.lnsSuggestionPanel .euiAccordion__buttonContent {
+  width: 100%;
+}
+
 .lnsSuggestionPanel__suggestions {
   @include euiScrollBar;
   @include lnsOverflowShadowHorizontal;

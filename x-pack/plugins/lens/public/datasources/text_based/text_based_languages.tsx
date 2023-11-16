@@ -42,7 +42,6 @@ import type {
 } from './types';
 import { FieldSelect } from './field_select';
 import type { Datasource } from '../../types';
-import { LayerPanel } from './layerpanel';
 import { getUniqueLabelGenerator, nonNullable } from '../../utils';
 import { onDrop, getDropProps } from './dnd';
 import { removeColumn } from './remove_column';
@@ -513,7 +512,7 @@ export function getTextBasedDatasource({
     },
 
     LayerPanelComponent: (props: DatasourceLayerPanelProps<TextBasedPrivateState>) => {
-      return <LayerPanel {...props} />;
+      return null;
     },
 
     uniqueLabels(state: TextBasedPrivateState) {

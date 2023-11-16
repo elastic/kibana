@@ -69,12 +69,7 @@ export function LayerConfiguration({
         framePublicAPI={framePublicAPI}
       />
       <EuiSpacer size="m" />
-      <ConfigPanelWrapper
-        {...layerPanelsProps}
-        css={css`
-          padding: ${euiTheme.size.s};
-        `}
-      />
+      <ConfigPanelWrapper {...layerPanelsProps} />
     </EuiFlexItem>
   );
 }

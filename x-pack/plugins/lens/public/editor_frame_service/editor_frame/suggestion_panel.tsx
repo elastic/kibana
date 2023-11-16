@@ -21,6 +21,8 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
@@ -195,8 +197,9 @@ const SuggestionPreview = ({
               css: css`
                 display: flex;
                 flex-direction: column;
-                flex-basis: calc(50% - 8px);
-                margin-right: 8px;
+                flex-basis: calc(50% - ${euiThemeVars.euiSize});
+                margin-right: ${euiThemeVars.euiSize};
+                margin-bottom: ${euiThemeVars.euiSize};
               `,
             }
           : undefined
@@ -518,6 +521,35 @@ export function SuggestionPanel({
       </>
     );
   };
+  const title = (
+    <EuiTitle size="xxs">
+      <h3>
+        <FormattedMessage
+          id="xpack.lens.editorFrame.suggestionPanelTitle"
+          defaultMessage="Suggestions"
+        />
+      </h3>
+    </EuiTitle>
+  );
+  const accordionWithSuggestionsCount = (
+    <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
+      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <div
+          css={css`
+            background-color: ${euiThemeVars.euiColorLightShade};
+            height: ${euiThemeVars.euiSizeL};
+            width: ${euiThemeVars.euiSizeL};
+            text-align: center;
+            border-radius: ${euiThemeVars.euiSizeXS};
+          `}
+        >
+          {suggestions.length + 1}
+        </div>
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+  const buttonContent = wrapSuggestions ? accordionWithSuggestionsCount : title;
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -529,16 +561,7 @@ export function SuggestionPanel({
       css={css`
         padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
       `}
-      buttonContent={
-        <EuiTitle size="xxs">
-          <h3>
-            <FormattedMessage
-              id="xpack.lens.editorFrame.suggestionPanelTitle"
-              defaultMessage="Suggestions"
-            />
-          </h3>
-        </EuiTitle>
-      }
+      buttonContent={buttonContent}
       forceState={hideSuggestions ? 'closed' : 'open'}
       onToggle={toggleSuggestions}
       extraAction={
