@@ -114,8 +114,6 @@ export const useLensSuggestions = ({
         histogramQuery.current = { esql: esqlQuery };
         return sug[0];
       }
-      histogramQuery.current = undefined;
-      return undefined;
     }
     histogramQuery.current = undefined;
     return undefined;

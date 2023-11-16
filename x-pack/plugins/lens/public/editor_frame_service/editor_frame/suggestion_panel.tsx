@@ -22,6 +22,7 @@ import {
   EuiAccordion,
   EuiText,
 } from '@elastic/eui';
+import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
 import { Ast, fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
@@ -517,12 +518,17 @@ export function SuggestionPanel({
       </>
     );
   };
-
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
-      buttonProps={{ 'data-test-subj': 'lensSuggestionsPanelToggleButton' }}
+      buttonProps={{
+        'data-test-subj': 'lensSuggestionsPanelToggleButton',
+        paddingSize: wrapSuggestions ? 'm' : 's',
+      }}
       className="lnsSuggestionPanel"
+      css={css`
+        padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
+      `}
       buttonContent={
         <EuiTitle size="xxs">
           <h3>

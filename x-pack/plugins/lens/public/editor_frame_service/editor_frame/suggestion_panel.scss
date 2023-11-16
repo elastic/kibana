@@ -16,10 +16,6 @@
   margin-right: -$euiSizeXS;
 }
 
-.lnsSuggestionPanel {
-  padding-bottom: $euiSizeS;
-}
-
 .lnsSuggestionPanel__button {
   position: relative; // Let the expression progress indicator position itself against the button
   flex: 0 0 auto;

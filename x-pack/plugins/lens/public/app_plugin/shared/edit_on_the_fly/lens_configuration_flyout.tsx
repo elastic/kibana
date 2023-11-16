@@ -62,6 +62,7 @@ export function LensEditConfigurationFlyout({
   const [errors, setErrors] = useState<Error[] | undefined>();
   const [isInlineFlyoutVisible, setIsInlineFlyoutVisible] = useState(true);
   const [isLayerAccordionOpen, setIsLayerAccordionOpen] = useState(true);
+  const [isSuggestionsAccordionOpen, setIsSuggestionsAccordionOpen] = useState(false);
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeVisualization = visualizationMap[attributes.visualizationType];
   const activeDatasource = datasourceMap[datasourceId];
@@ -321,7 +322,14 @@ export function LensEditConfigurationFlyout({
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={isLayerAccordionOpen ? 1 : false}>
+          <EuiFlexItem
+            grow={isLayerAccordionOpen ? 1 : false}
+            css={css`
+                padding-left: ${euiThemeVars.euiSize};
+                padding-right: ${euiThemeVars.euiSize};
+              }
+            `}
+          >
             <EuiAccordion
               id="layer-configuration"
               buttonContent={
@@ -333,17 +341,18 @@ export function LensEditConfigurationFlyout({
                   </h5>
                 </EuiTitle>
               }
+              buttonProps={{
+                paddingSize: 'm',
+              }}
               initialIsOpen={isLayerAccordionOpen}
               forceState={isLayerAccordionOpen ? 'open' : 'closed'}
-              onToggle={() => {
+              onToggle={(status) => {
+                if (status && isSuggestionsAccordionOpen) {
+                  setIsSuggestionsAccordionOpen(!status);
+                }
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
               paddingSize="none"
-              css={css`
-                margin-top: ${euiThemeVars.euiSizeS};
-                margin-bottom: ${euiThemeVars.euiSizeS};
-              }
-            `}
             >
               <LayerConfiguration
                 attributes={attributes}
@@ -359,8 +368,15 @@ export function LensEditConfigurationFlyout({
           </EuiFlexItem>
 
           <EuiFlexItem
-            grow={!isLayerAccordionOpen ? 1 : false}
+            grow={isSuggestionsAccordionOpen ? 1 : false}
             data-test-subj="InlineEditingSuggestions"
+            css={css`
+                border-top: ${euiThemeVars.euiBorderThin};
+                border-bottom: ${euiThemeVars.euiBorderThin};
+                padding-left: ${euiThemeVars.euiSize};
+                padding-right: ${euiThemeVars.euiSize};
+              }
+            `}
           >
             <SuggestionPanel
               ExpressionRenderer={startDependencies.expressions.ReactExpressionRenderer}
@@ -371,8 +387,13 @@ export function LensEditConfigurationFlyout({
               nowProvider={startDependencies.data.nowProvider}
               showOnlyIcons
               wrapSuggestions
-              isAccordionOpen={!isLayerAccordionOpen}
-              toggleAccordionCb={setIsLayerAccordionOpen}
+              isAccordionOpen={isSuggestionsAccordionOpen}
+              toggleAccordionCb={(status) => {
+                if (!status && isLayerAccordionOpen) {
+                  setIsLayerAccordionOpen(status);
+                }
+                setIsSuggestionsAccordionOpen(!isSuggestionsAccordionOpen);
+              }}
             />
           </EuiFlexItem>
         </EuiFlexGroup>

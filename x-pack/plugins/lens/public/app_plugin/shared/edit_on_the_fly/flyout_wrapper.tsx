@@ -42,6 +42,7 @@ export const FlyoutWrapper = ({
           hasBorder
           css={css`
             pointer-events: auto;
+            background-color: ${euiThemeVars.euiColorEmptyShade};
           `}
           data-test-subj="editFlyoutHeader"
         >
@@ -50,7 +51,7 @@ export const FlyoutWrapper = ({
               <EuiFlexGroup alignItems="center" gutterSize="xs">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="xs">
-                    <h2 id="Edit visualization">
+                    <h2>
                       {i18n.translate('xpack.lens.config.editVisualizationLabel', {
                         defaultMessage: 'Edit {lang} visualization',
                         values: { lang: language },
