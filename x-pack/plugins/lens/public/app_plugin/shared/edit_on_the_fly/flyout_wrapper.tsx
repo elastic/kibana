@@ -27,7 +27,6 @@ import type { FlyoutWrapperProps } from './types';
 
 export const FlyoutWrapper = ({
   children,
-  attributesChanged,
   isInlineFlyoutVisible,
   isScrollable,
   displayFlyoutHeader,
@@ -93,6 +92,7 @@ export const FlyoutWrapper = ({
           margin-left: -${euiThemeVars.euiFormMaxWidth};
           pointer-events: none;
           .euiFlyoutBody__overflow {
+            -webkit-mask-image: none;
             padding-left: inherit;
             margin-left: inherit;
             ${!isScrollable &&
@@ -137,7 +137,6 @@ export const FlyoutWrapper = ({
                   defaultMessage: 'Apply changes',
                 })}
                 iconType="check"
-                isDisabled={!attributesChanged}
                 data-test-subj="applyFlyoutButton"
               >
                 <FormattedMessage

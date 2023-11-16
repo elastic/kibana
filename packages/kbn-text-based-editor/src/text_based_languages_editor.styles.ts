@@ -34,6 +34,8 @@ export const textBasedLanguagedEditorStyles = (
       zIndex: isCompactFocused ? 4 : 0,
       height: `${editorHeight}px`,
       border: isCompactFocused ? euiTheme.border.thin : 'none',
+      borderLeft: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline || !isCompactFocused ? 'none' : euiTheme.border.thin,
       borderTopLeftRadius: isCodeEditorExpanded ? 0 : '6px',
       borderBottom: isCodeEditorExpanded
         ? 'none'
@@ -67,6 +69,8 @@ export const textBasedLanguagedEditorStyles = (
     },
     bottomContainer: {
       border: euiTheme.border.thin,
+      borderLeft: editorIsInline ? 'none' : euiTheme.border.thin,
+      borderRight: editorIsInline ? 'none' : euiTheme.border.thin,
       borderTop:
         isCodeEditorExpanded && !isCodeEditorExpandedFocused
           ? hasErrors
@@ -76,8 +80,8 @@ export const textBasedLanguagedEditorStyles = (
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: euiTheme.size.xs,
-      paddingBottom: euiTheme.size.xs,
+      paddingTop: editorIsInline ? '7px' : euiTheme.size.xs,
+      paddingBottom: editorIsInline ? '7px' : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginTop: 0,
@@ -87,14 +91,14 @@ export const textBasedLanguagedEditorStyles = (
       borderBottomRightRadius: editorIsInline ? 0 : '6px',
     },
     topContainer: {
-      border: euiTheme.border.thin,
+      border: editorIsInline ? 'none' : euiTheme.border.thin,
       borderTopLeftRadius: editorIsInline ? 0 : '6px',
       borderTopRightRadius: editorIsInline ? 0 : '6px',
       backgroundColor: euiTheme.colors.lightestShade,
       paddingLeft: euiTheme.size.base,
       paddingRight: euiTheme.size.base,
-      paddingTop: euiTheme.size.xs,
-      paddingBottom: euiTheme.size.xs,
+      paddingTop: editorIsInline ? '7px' : euiTheme.size.xs,
+      paddingBottom: editorIsInline ? '7px' : euiTheme.size.xs,
       width: 'calc(100% + 2px)',
       position: 'relative' as 'relative', // cast string to type 'relative',
       marginLeft: 0,

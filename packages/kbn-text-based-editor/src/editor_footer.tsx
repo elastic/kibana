@@ -201,9 +201,6 @@ export const EditorFooter = memo(function EditorFooter({
           <EuiFlexItem grow={false} style={{ marginRight: '16px' }}>
             <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
               <EuiFlexItem grow={false}>
-                <EuiIcon type={detectTimestamp ? 'check' : 'cross'} color="subdued" size="s" />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-date-info">
                   <p>
                     {isSpaceReduced

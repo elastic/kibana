@@ -136,7 +136,7 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onApply = useCallback(() => {
-    if (savedObjectId) {
+    if (savedObjectId && attributesChanged) {
       const dsStates = Object.fromEntries(
         Object.entries(datasourceStates).map(([id, ds]) => {
           const dsState = ds.state;
@@ -170,6 +170,7 @@ export function LensEditConfigurationFlyout({
     closeFlyout?.();
   }, [
     savedObjectId,
+    attributesChanged,
     closeFlyout,
     datasourceStates,
     visualization.state,
@@ -227,7 +228,6 @@ export function LensEditConfigurationFlyout({
   if (!canEditTextBasedQuery) {
     return (
       <FlyoutWrapper
-        attributesChanged={attributesChanged}
         isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}
         onCancel={onCancel}
@@ -252,7 +252,6 @@ export function LensEditConfigurationFlyout({
   return (
     <>
       <FlyoutWrapper
-        attributesChanged={attributesChanged}
         isInlineFlyoutVisible={isInlineFlyoutVisible}
         displayFlyoutHeader={displayFlyoutHeader}
         onCancel={onCancel}

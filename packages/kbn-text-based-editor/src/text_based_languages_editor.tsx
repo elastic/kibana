@@ -551,6 +551,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
               <EuiButtonIcon
                 iconType={isWordWrapped ? 'wordWrap' : 'wordWrapDisabled'}
                 color="text"
+                size="s"
                 data-test-subj="TextBasedLangEditor-toggleWordWrap"
                 aria-label={
                   isWordWrapped
@@ -605,6 +606,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                         }
                       )}
                       data-test-subj="TextBasedLangEditor-minimize"
+                      size="s"
                       onClick={() => {
                         expandCodeEditor(false);
                         updateLinesFromModel = false;
@@ -621,6 +623,7 @@ export const TextBasedLanguagesEditor = memo(function TextBasedLanguagesEditor({
                       sections={documentationSections}
                       buttonProps={{
                         color: 'text',
+                        size: 's',
                         'data-test-subj': 'TextBasedLangEditor-documentation',
                         'aria-label': i18n.translate(
                           'textBasedEditor.query.textBasedLanguagesEditor.documentationLabel',

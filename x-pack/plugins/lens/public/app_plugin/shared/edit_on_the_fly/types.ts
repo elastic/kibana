@@ -16,7 +16,6 @@ import type { Document } from '../../../persistence';
 export interface FlyoutWrapperProps {
   children: JSX.Element;
   isInlineFlyoutVisible: boolean;
-  attributesChanged: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
   language?: string;
