@@ -83,7 +83,6 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   onWindowParametersChange,
   embeddingOrigin,
 }) => {
-  const windowParametersTouched = useRef(false);
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
@@ -97,7 +96,17 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
     setIsBrushCleared(windowParameters === undefined);
   }, [windowParameters]);
 
+  // Window parameters stored in the url state use this components
+  // `initialAnalysisStart` prop to set the initial params restore from url state.
+  // To avoid a loop with window parameters being passed around on load,
+  // the following ref and useEffect are used to check wether it's safe to call
+  // the `onWindowParametersChange` callback.
+  const windowParametersTouched = useRef(false);
   useEffect(() => {
+    // Don't continue if window parameters were not touched yet.
+    // Because they can be reset to `undefined` at a later stage again when a user
+    // clears the selections, we cannot rely solely on checking if they are
+    // `undefined`, we need the additional ref to update on the first change.
     if (!windowParametersTouched.current && windowParameters === undefined) {
       return;
     }
