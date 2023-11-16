@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { RuleAction } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type SuperTest from 'supertest';
 
@@ -23,7 +24,7 @@ export const createWebHookRuleAction = async (
     await supertest
       .post('/api/actions/action')
       .set('kbn-xsrf', 'true')
-      .set('x-elastic-internal-origin', 'foo')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'foo')
       .send(getWebHookAction())
       .expect(200)
   ).body;

@@ -13,20 +13,24 @@ import {
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
 } from '@kbn/security-solution-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
+import {
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   getWebHookAction,
   getRuleWithWebHookAction,
   createRule,
   getSimpleRule,
-  getRule,
+  fetchRule,
   updateRule,
 } from '../../utils';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const log = getService('log');
@@ -45,10 +49,10 @@ export default ({ getService }: FtrProviderContext) => {
    * https://www.elastic.co/guide/en/kibana/current/mute-all-alerts-api.html
    * https://www.elastic.co/guide/en/security/current/rules-api-create.html
    */
-  describe('throttle', () => {
+  describe('@ess @serverless throttle', () => {
     describe('adding actions', () => {
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -62,13 +66,17 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
           const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen, actions },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(actions.length).to.eql(1);
           expect(actions[0].frequency).to.eql({
@@ -87,7 +95,9 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(notifyWhen).to.eql(null);
         });
@@ -97,6 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -107,7 +118,9 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(notifyWhen).to.eql(null);
         });
@@ -120,7 +133,9 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(notifyWhen).to.eql(null);
         });
@@ -140,6 +155,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -150,7 +167,9 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen, actions },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(actions.length).to.eql(1);
           expect(actions[0].frequency).to.eql({
@@ -169,7 +188,9 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(notifyWhen).to.eql(null);
         });
@@ -179,6 +200,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -189,7 +212,9 @@ export default ({ getService }: FtrProviderContext) => {
           const rule = await createRule(supertest, log, ruleWithThrottle);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen, actions },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(actions.length).to.eql(1);
           expect(actions[0].frequency).to.eql({
@@ -207,11 +232,13 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
           const rule = await createRule(supertest, log, getRuleWithWebHookAction(hookAction.id));
-          const readRule = await getRule(supertest, log, rule.rule_id);
+          const readRule = await fetchRule(supertest, { ruleId: rule.rule_id });
           expect(readRule.throttle).to.eql(undefined);
         });
 
@@ -221,7 +248,7 @@ export default ({ getService }: FtrProviderContext) => {
             throttle: NOTIFICATION_THROTTLE_NO_ACTIONS,
           };
           const rule = await createRule(supertest, log, ruleWithThrottle);
-          const readRule = await getRule(supertest, log, rule.rule_id);
+          const readRule = await fetchRule(supertest, { ruleId: rule.rule_id });
           expect(readRule.throttle).to.eql(undefined);
         });
 
@@ -232,7 +259,7 @@ export default ({ getService }: FtrProviderContext) => {
             throttle: NOTIFICATION_THROTTLE_RULE,
           };
           const rule = await createRule(supertest, log, ruleWithThrottle);
-          const readRule = await getRule(supertest, log, rule.rule_id);
+          const readRule = await fetchRule(supertest, { ruleId: rule.rule_id });
           expect(readRule.throttle).to.eql(undefined);
         });
 
@@ -241,6 +268,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -248,9 +277,11 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .post(`/api/alerting/rule/${rule.id}/_mute_all`)
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send()
             .expect(204);
-          const readRule = await getRule(supertest, log, rule.rule_id);
+          const readRule = await fetchRule(supertest, { ruleId: rule.rule_id });
           expect(readRule.throttle).to.eql(undefined);
         });
       });
@@ -261,13 +292,15 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
           await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.name = 'some other name';
-          const updated = await updateRule(supertest, log, ruleWithWebHookAction);
+          const updated = await updateRule(supertest, ruleWithWebHookAction);
           expect(updated.throttle).to.eql(undefined);
         });
 
@@ -276,16 +309,20 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
           await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.name = 'some other name';
-          const updated = await updateRule(supertest, log, ruleWithWebHookAction);
+          const updated = await updateRule(supertest, ruleWithWebHookAction);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
-          } = await supertest.get(`/api/alerting/rule/${updated.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${updated.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(notifyWhen).to.eql(null);
         });
@@ -296,13 +333,15 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
           const ruleWithWebHookAction = getRuleWithWebHookAction(hookAction.id);
           await createRule(supertest, log, ruleWithWebHookAction);
           ruleWithWebHookAction.actions = [];
-          const updated = await updateRule(supertest, log, ruleWithWebHookAction);
+          const updated = await updateRule(supertest, ruleWithWebHookAction);
           expect(updated.throttle).to.eql(undefined);
         });
       });
@@ -313,6 +352,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -322,10 +363,11 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ rule_id: rule.rule_id, name: 'some other name' })
             .expect(200);
-          const readRule = await getRule(supertest, log, rule.rule_id);
+          const readRule = await fetchRule(supertest, { ruleId: rule.rule_id });
           expect(readRule.throttle).to.eql(undefined);
         });
 
@@ -334,6 +376,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -343,12 +387,15 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ rule_id: rule.rule_id, name: 'some other name' })
             .expect(200);
           const {
             body: { mute_all: muteAll, notify_when: notifyWhen },
-          } = await supertest.get(`/api/alerting/rule/${rule.id}`);
+          } = await supertest
+            .get(`/api/alerting/rule/${rule.id}`)
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
           expect(muteAll).to.eql(false);
           expect(notifyWhen).to.eql(null);
         });
@@ -359,6 +406,8 @@ export default ({ getService }: FtrProviderContext) => {
           const { body: hookAction } = await supertest
             .post('/api/actions/action')
             .set('kbn-xsrf', 'true')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(getWebHookAction())
             .expect(200);
 
@@ -368,10 +417,11 @@ export default ({ getService }: FtrProviderContext) => {
           await supertest
             .patch(DETECTION_ENGINE_RULES_URL)
             .set('kbn-xsrf', 'true')
-            .set('elastic-api-version', '2023-10-31')
+            .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({ rule_id: rule.rule_id, actions: [] })
             .expect(200);
-          const readRule = await getRule(supertest, log, rule.rule_id);
+          const readRule = await fetchRule(supertest, { ruleId: rule.rule_id });
           expect(readRule.throttle).to.eql(undefined);
         });
       });

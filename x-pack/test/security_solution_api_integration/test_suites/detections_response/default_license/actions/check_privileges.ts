@@ -9,19 +9,22 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   waitForRulePartialFailure,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   createRuleWithAuth,
-  getThresholdRuleForSignalTesting,
+  getThresholdRuleForAlertTesting,
   deleteAllAlerts,
 } from '../../utils';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../common/services/security_solution';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -29,11 +32,11 @@ export default ({ getService }: FtrProviderContext) => {
   const log = getService('log');
   const es = getService('es');
 
-  describe('check_privileges', () => {
+  describe('@ess @serverless @brokenInServerless check_privileges', () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alias');
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     after(async () => {
@@ -60,7 +63,7 @@ export default ({ getService }: FtrProviderContext) => {
       indexTestCases.forEach((index) => {
         it(`for KQL rule with index param: ${index}`, async () => {
           const rule = {
-            ...getRuleForSignalTesting(index),
+            ...getRuleForAlertTesting(index),
             query: 'process.executable: "/usr/bin/sudo"',
           };
           await createUserAndRole(getService, ROLES.detections_admin);
@@ -96,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
       thresholdIndexTestCases.forEach((index) => {
         it(`for threshold rule with index param: ${index}`, async () => {
           const rule: ThresholdRuleCreateProps = {
-            ...getThresholdRuleForSignalTesting(index),
+            ...getThresholdRuleForAlertTesting(index),
             threshold: {
               field: [],
               value: 700,

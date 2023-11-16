@@ -9,15 +9,17 @@ import expect from '@kbn/expect';
 import { DETECTION_ENGINE_PRIVILEGES_URL } from '@kbn/security-solution-plugin/common/constants';
 
 import { ROLES } from '@kbn/security-solution-plugin/common/test';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { createUserAndRole, deleteUserAndRole } from '../../../common/services/security_solution';
+import {
+  createUserAndRole,
+  deleteUserAndRole,
+} from '../../../../../common/services/security_solution';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('read_privileges', () => {
+  describe('@ess @serverless @brokenInServerless read_privileges', () => {
     it('should return expected privileges for elastic admin', async () => {
       const { body } = await supertest.get(DETECTION_ENGINE_PRIVILEGES_URL).send().expect(200);
       expect(body).to.eql({
