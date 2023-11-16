@@ -53,7 +53,7 @@ import {
 import {
   OperatingSystem,
   WILDCARD_WARNING,
-  validateWildcardInput,
+  validatePotentialWildcardInput,
 } from '@kbn/securitysolution-utils';
 import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import type { AutocompleteStart } from '@kbn/unified-search-plugin/public';
@@ -431,7 +431,7 @@ export const BuilderEntryItem: React.FC<EntryItemProps> = ({
           if (osTypes) {
             [os] = osTypes as OperatingSystem[];
           }
-          const warning = validateWildcardInput({
+          const warning = validatePotentialWildcardInput({
             field: entry.field?.name,
             os,
             value: wildcardValue,
