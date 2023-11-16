@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { stringify } from 'querystring';
-
 import styled from 'styled-components';
 import React from 'react';
 import { encode } from '@kbn/rison';
@@ -33,28 +31,36 @@ const TruncatedEuiText = styled(EuiText)`
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
 
-  const logStreamQuery = (agentId: string) =>
-    buildQuery({
-      agentId,
-      datasets: ['elastic_agent'],
-      logLevels: ['error'],
-      userQuery: '',
-    });
-
-  const getErrorLogsUrl = (agentId: string, timestamp: string) => {
-    const queryParams = stringify({
-      logPosition: encode({
-        position: { time: Date.parse(timestamp) },
-        streamLive: false,
-      }),
-      logFilter: encode({
-        expression: logStreamQuery(agentId),
-        kind: 'kuery',
-      }),
-    });
-    return coreStart.http.basePath.prepend(`/app/logs/stream?${queryParams}`);
+  const addOrSubtractMinutes = (timestamp: string, interval: number, subtract?: boolean) => {
+    const date = new Date(timestamp);
+    if (!subtract) {
+      date.setMinutes(date.getMinutes() + interval);
+    } else {
+      date.setMinutes(date.getMinutes() - interval);
+    }
+    return date.toISOString();
   };
 
+  const viewInDiscoverUrl = (agentId: string, timestamp: string) => {
+    const index = 'logs-*';
+
+    const startTime = addOrSubtractMinutes(timestamp, 5, true);
+    const endTime = addOrSubtractMinutes(timestamp, 5);
+
+    const query = encode({
+      query: buildQuery({
+        agentId,
+        datasets: ['elastic_agent'],
+        logLevels: ['error'],
+        userQuery: '',
+      }),
+      language: 'kuery',
+    });
+
+    return coreStart.http.basePath.prepend(
+      `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'${startTime}',to:'${endTime}'))&_a=(columns:!(message,error.message,log.level),index:'${index}',query:${query})`
+    );
+  };
   const columns: EuiBasicTableProps<ActionErrorResult>['columns'] = [
     {
       field: 'hostname',
@@ -90,9 +96,9 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
         return (
           <RedirectAppLinks coreStart={coreStart}>
             <EuiButton
-              href={getErrorLogsUrl(agentId, errorItem!.timestamp)}
+              href={viewInDiscoverUrl(agentId, errorItem!.timestamp)}
               color="danger"
-              data-test-subj="viewLogsBtn"
+              data-test-subj="viewInDiscoverBtn"
             >
               <FormattedMessage
                 id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"

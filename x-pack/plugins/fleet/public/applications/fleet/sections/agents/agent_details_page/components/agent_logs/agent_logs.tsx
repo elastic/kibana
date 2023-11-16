@@ -242,12 +242,14 @@ export const AgentLogsUI: React.FunctionComponent<AgentLogsProps> = memo(
 
     const viewInDiscoverUrl = useMemo(() => {
       const index = 'logs-*';
-      const datasetQuery = 'data_stream.dataset:elastic_agent';
-      const agentIdQuery = `elastic_agent.id:${agent.id}`;
+      const query = encode({
+        query: logStreamQuery,
+        language: 'kuery',
+      });
       return http.basePath.prepend(
-        `/app/discover#/?_a=(index:'${index}',query:(language:kuery,query:'${datasetQuery}%20AND%20${agentIdQuery}'))`
+        `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'${state.start}',to:'${state.end}'))&_a=(columns:!(event.dataset,message),index:'${index}',query:${query})`
       );
-    }, [http.basePath, agent.id]);
+    }, [logStreamQuery, http.basePath, state.start, state.end]);
 
     const agentVersion = agent.local_metadata?.elastic?.agent?.version;
     const isLogFeatureAvailable = useMemo(() => {
