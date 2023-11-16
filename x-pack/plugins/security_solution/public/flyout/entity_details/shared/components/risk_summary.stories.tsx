@@ -27,7 +27,7 @@ export const Default: Story<void> = () => {
     <StorybookProviders>
       <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
         <div style={{ maxWidth: '300px' }}>
-          <RiskSummary riskScoreData={mockRiskScoreState} />
+          <RiskSummary riskScoreData={mockRiskScoreState} queryId={'testQuery'} />
         </div>
       </ExpandableFlyoutContext.Provider>
     </StorybookProviders>
