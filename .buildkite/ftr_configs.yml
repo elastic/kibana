@@ -450,10 +450,14 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/workflows/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/date_numeric_types/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword_text_long/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword_text_long/configs/ess.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/serverless.config.ts
-  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips_text_array/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/ips/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/keyword/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/long/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/long/configs/ess.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/text/configs/serverless.config.ts
+  - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/exceptions/operators_data_types/text/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions/configs/serverless.config.ts
@@ -462,7 +466,6 @@ enabled:
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/entity_analytics/default_license/risk_engine/configs/ess.config.ts
-
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/serverless.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/management/configs/ess.config.ts
   - x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/prebuilt_rules/bundled_prebuilt_rules_package/configs/serverless.config.ts

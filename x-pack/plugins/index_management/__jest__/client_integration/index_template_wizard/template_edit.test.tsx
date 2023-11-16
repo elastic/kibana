@@ -119,6 +119,11 @@ describe('<TemplateEdit />', () => {
         name: 'test',
         indexPatterns: ['myPattern*'],
         version: 1,
+        lifecycle: {
+          enabled: true,
+          value: 1,
+          unit: 'd',
+        },
       });
       // Component templates
       await actions.completeStepTwo();
@@ -149,6 +154,12 @@ describe('<TemplateEdit />', () => {
               type: 'default',
               hasDatastream: true,
               isLegacy: false,
+            },
+            template: {
+              lifecycle: {
+                enabled: true,
+                data_retention: '1d',
+              },
             },
           }),
         })

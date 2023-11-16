@@ -16,9 +16,9 @@ import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
@@ -149,46 +149,49 @@ export function ObservabilityOnboardingAppRoot({
   const renderFeedbackLinkAsPortal = !config.serverless.enabled;
 
   return (
-    <RedirectAppLinks
-      className={APP_WRAPPER_CLASS}
-      application={core.application}
-    >
-      <KibanaContextProvider
-        services={{
-          ...core,
-          ...plugins,
-          observability,
-          data,
-          config,
+    <div className={APP_WRAPPER_CLASS}>
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
         }}
       >
-        <KibanaThemeProvider
-          theme$={theme$}
-          modify={{
-            breakpoint: {
-              xxl: 1600,
-              xxxl: 2000,
-            },
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            observability,
+            data,
+            config,
           }}
         >
-          <i18nCore.Context>
-            <Router history={history}>
-              <EuiErrorBoundary>
-                {renderFeedbackLinkAsPortal && (
-                  <HeaderMenuPortal
-                    setHeaderActionMenu={setHeaderActionMenu}
-                    theme$={theme$}
-                  >
-                    <ObservabilityOnboardingHeaderActionMenu />
-                  </HeaderMenuPortal>
-                )}
-                <ObservabilityOnboardingApp />
-              </EuiErrorBoundary>
-            </Router>
-          </i18nCore.Context>
-        </KibanaThemeProvider>
-      </KibanaContextProvider>
-    </RedirectAppLinks>
+          <KibanaThemeProvider
+            theme$={theme$}
+            modify={{
+              breakpoint: {
+                xxl: 1600,
+                xxxl: 2000,
+              },
+            }}
+          >
+            <i18nCore.Context>
+              <Router history={history}>
+                <EuiErrorBoundary>
+                  {renderFeedbackLinkAsPortal && (
+                    <HeaderMenuPortal
+                      setHeaderActionMenu={setHeaderActionMenu}
+                      theme$={theme$}
+                    >
+                      <ObservabilityOnboardingHeaderActionMenu />
+                    </HeaderMenuPortal>
+                  )}
+                  <ObservabilityOnboardingApp />
+                </EuiErrorBoundary>
+              </Router>
+            </i18nCore.Context>
+          </KibanaThemeProvider>
+        </KibanaContextProvider>
+      </RedirectAppLinks>
+    </div>
   );
 }
 
