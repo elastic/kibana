@@ -83,6 +83,21 @@
     "prebuilt_rules_update_prebuilt_rules_package:runner:serverless": "npm run run-tests:dr:default prebuilt_rules/update_prebuilt_rules_package serverless serverlessEnv",
     "prebuilt_rules_update_prebuilt_rules_package:qa:serverless": "npm run run-tests:dr:default prebuilt_rules/update_prebuilt_rules_package serverless qaEnv",
     "prebuilt_rules_update_prebuilt_rules_package:server:ess": "npm run initialize-server:dr:default prebuilt_rules/update_prebuilt_rules_package ess",
-    "prebuilt_rules_update_prebuilt_rules_package:runner:ess": "npm run run-tests:dr:default prebuilt_rules/update_prebuilt_rules_package ess essEnvs"
+    "prebuilt_rules_update_prebuilt_rules_package:runner:ess": "npm run run-tests:dr:default prebuilt_rules/update_prebuilt_rules_package ess essEnvs",
+    "rule_execution_logic:server:serverless": "npm run initialize-server:dr:default rule_execution_logic serverless",
+    "rule_execution_logic:runner:serverless": "npm run run-tests:dr:default rule_execution_logic serverless serverlessEnv",
+    "rule_execution_logic:qa:serverless": "npm run run-tests:dr:default rule_execution_logic serverless qaEnv",
+    "rule_execution_logic:server:ess": "npm run initialize-server:dr:default rule_execution_logic ess",
+    "rule_execution_logic:runner:ess": "npm run run-tests:dr:default rule_execution_logic ess essEnv",
+    "user_roles:server:serverless": "npm run initialize-server:dr:default user_roles serverless",
+    "user_roles:runner:serverless": "npm run run-tests:dr:default user_roles serverless serverlessEnv",
+    "user_roles:qa:serverless": "npm run run-tests:dr:default user_roles serverless qaEnv",
+    "user_roles:server:ess": "npm run initialize-server:dr:default user_roles ess",
+    "user_roles:runner:ess": "npm run run-tests:dr:default user_roles ess essEnv",
+    "telemetry:server:serverless": "npm run initialize-server:dr:default telemetry serverless",
+    "telemetry:runner:serverless": "npm run run-tests:dr:default telemetry serverless serverlessEnv",
+    "telemetry:qa:serverless": "npm run run-tests:dr:default telemetry serverless qaEnv",
+    "telemetry:server:ess": "npm run initialize-server:dr:default telemetry ess",
+    "telemetry:runner:ess": "npm run run-tests:dr:default telemetry ess essEnv"
   }
 }

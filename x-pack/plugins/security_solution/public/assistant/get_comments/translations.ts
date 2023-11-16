@@ -20,3 +20,7 @@ export const AT = (timestamp: string) =>
 export const YOU = i18n.translate('xpack.securitySolution.assistant.getComments.you', {
   defaultMessage: 'You',
 });
+
+export const API_ERROR = i18n.translate('xpack.securitySolution.assistant.apiErrorTitle', {
+  defaultMessage: 'An error occurred sending your message.',
+});

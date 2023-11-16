@@ -57,7 +57,7 @@ export function mongodbMetricsSpecProvider(context: TutorialContext): TutorialSc
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/mongodb_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/mongodb_metrics/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),

@@ -63,6 +63,8 @@
     "@kbn/cloud-security-posture-plugin",
     "@kbn/reporting-plugin",
     "@kbn/management-settings-ids",
+    "@kbn/apm-synthtrace",
+    "@kbn/apm-synthtrace-client",
     "@kbn/reporting-export-types-csv-common",
   ]
 }
