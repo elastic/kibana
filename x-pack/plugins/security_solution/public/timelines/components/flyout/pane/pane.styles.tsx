@@ -58,7 +58,13 @@ export const usePaneStyles = () => {
     &:not(.timeline-wrapper--full-screen) .timeline-flyout {
       margin: ${euiTheme.size.m};
       border-radius: ${euiTheme.border.radius.medium};
-      padding: 0 ${euiTheme.size.s};
+
+      .timeline-template-badge {
+        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0; // top corners only
+      }
+      .timeline-body {
+        padding: 0 ${euiTheme.size.s};
+      }
     }
   `;
 };
