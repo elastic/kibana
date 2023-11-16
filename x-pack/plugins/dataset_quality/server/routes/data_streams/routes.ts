@@ -6,7 +6,7 @@
  */
 
 import * as t from 'io-ts';
-import { unionBy } from 'lodash';
+import { merge } from 'lodash';
 import { dataStreamTypesRt, sortOrderRt } from '../../types/api_types';
 import { DataStreamsStatResponse } from '../../types/data_stream';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -44,7 +44,7 @@ const statsRoute = createDatasetQualityServerRoute({
     ]);
 
     return {
-      items: unionBy(dataStreams.items, dataStreamsStats.items, 'name'),
+      items: merge(dataStreams.items, dataStreamsStats.items),
     };
   },
 });
