@@ -74,7 +74,9 @@ export default function AlertDetailsRelatedEvents({
   const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
     criterion.metrics?.some(
       (metric: CustomThresholdExpressionMetric) =>
-        metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
+        metric.field?.includes(cpuMetricPrefix) ||
+        metric.field?.includes(memoryMetricPrefix) ||
+        predefinedMetrics.includes(metric.field ?? '')
     );
 
   const relatedMetricsPerCriteria = useCallback(() => {
@@ -92,7 +94,9 @@ export default function AlertDetailsRelatedEvents({
       .find((criterion) => isCpuOrMemoryCriterion(criterion))
       ?.metrics?.find(
         (metric) =>
-          metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
+          metric.field?.includes(cpuMetricPrefix) ||
+          metric.field?.includes(memoryMetricPrefix) ||
+          predefinedMetrics.includes(metric.field ?? '')
       )?.aggType;
 
     setRelatedMetrics(relatedMetricsInDataView ?? []);
