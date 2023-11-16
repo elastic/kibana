@@ -74,36 +74,33 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
 }) => {
   const [isPopoverOpen, setPopover] = useState(false);
   const [isOsqueryFlyoutOpen, setOsqueryFlyoutOpen] = useState(false);
-  const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
-  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
-  const globalQuery = useSelector((state: State) => getGlobalQueries(state));
-  const timelineQuery = useSelector((state: State) => getTimelineQuery(state, scopeId));
 
   const onMenuItemClick = useCallback(() => {
     setPopover(false);
   }, []);
+
+  const getGlobalQueries = useMemo(() => inputsSelectors.globalQuery(), []);
+  const getTimelineQuery = useMemo(() => inputsSelectors.timelineQueryByIdSelector(), []);
+  const globalQuery = useSelector((state: State) => getGlobalQueries(state));
+  const timelineQuery = useSelector((state: State) => getTimelineQuery(state, scopeId));
 
   const getAlertId = () => (ecsRowData?.kibana?.alert ? ecsRowData?._id : null);
   const alertId = getAlertId();
   const ruleId = get(0, ecsRowData?.kibana?.alert?.rule?.uuid);
   const ruleRuleId = get(0, ecsRowData?.kibana?.alert?.rule?.rule_id);
   const ruleName = get(0, ecsRowData?.kibana?.alert?.rule?.name);
+  const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
+    scopeId as TableId
+  );
 
-  const addToCaseProps = useMemo(() => {
-    const isInDetections = [TableId.alertsOnAlertsPage, TableId.alertsOnRuleDetailsPage].includes(
-      scopeId as TableId
-    );
-    return {
-      ecsData: ecsRowData,
-      onMenuItemClick,
-      isActiveTimelines: isActiveTimeline(scopeId ?? ''),
-      ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
-      isInDetections,
-      refetch,
-    };
-  }, [ecsRowData, onMenuItemClick, scopeId, ariaRowindex, columnValues, refetch]);
-
-  const { addToCaseActionItems } = useAddToCaseActions(addToCaseProps);
+  const { addToCaseActionItems } = useAddToCaseActions({
+    ecsData: ecsRowData,
+    onMenuItemClick,
+    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
+    ariaLabel: ATTACH_ALERT_TO_CASE_FOR_ROW({ ariaRowindex, columnValues }),
+    isInDetections,
+    refetch,
+  });
 
   const { loading: endpointPrivilegesLoading, canWriteEventFilters } =
     useUserPrivileges().endpointPrivileges;
@@ -146,9 +143,9 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     );
   }, [disabled, onButtonClick, ariaLabel, isPopoverOpen]);
 
-  const refetchQuery = useCallback((newQueries: inputsModel.GlobalQuery[]) => {
+  const refetchQuery = (newQueries: inputsModel.GlobalQuery[]) => {
     newQueries.forEach((q) => q.refetch && (q.refetch as inputsModel.Refetch)());
-  }, []);
+  };
 
   const refetchAll = useCallback(() => {
     if (isActiveTimeline(scopeId ?? '')) {
@@ -157,7 +154,7 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
       refetchQuery(globalQuery);
       if (refetch) refetch();
     }
-  }, [scopeId, globalQuery, timelineQuery, refetch, refetchQuery]);
+  }, [scopeId, globalQuery, timelineQuery, refetch]);
 
   const ruleIndex =
     ecsRowData['kibana.alert.rule.parameters']?.index ?? ecsRowData?.signal?.rule?.index;
@@ -165,36 +162,28 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     ecsRowData['kibana.alert.rule.parameters']?.data_view_id ??
     ecsRowData?.signal?.rule?.data_view_id;
 
-  const exceptionFlyoutProps = useMemo(() => {
-    return {
-      refetch: refetchAll,
-      onRuleChange,
-      isActiveTimelines: isActiveTimeline(scopeId ?? ''),
-    };
-  }, [refetchAll, onRuleChange, scopeId]);
-
   const {
     exceptionFlyoutType,
     openAddExceptionFlyout,
     onAddExceptionCancel,
     onAddExceptionConfirm,
     onAddExceptionTypeClick,
-  } = useExceptionFlyout(exceptionFlyoutProps);
+  } = useExceptionFlyout({
+    refetch: refetchAll,
+    onRuleChange,
+    isActiveTimelines: isActiveTimeline(scopeId ?? ''),
+  });
 
   const { closeAddEventFilterModal, isAddEventFilterModalOpen, onAddEventFilterClick } =
     useEventFilterModal();
 
-  const alertActionProps = useMemo(() => {
-    return {
-      alertStatus,
-      eventId: ecsRowData?._id,
-      scopeId,
-      refetch: refetchAll,
-      closePopover,
-    };
-  }, [alertStatus, ecsRowData, scopeId, refetchAll, closePopover]);
-
-  const { actionItems: statusActionItems } = useAlertsActions(alertActionProps);
+  const { actionItems: statusActionItems } = useAlertsActions({
+    alertStatus,
+    eventId: ecsRowData?._id,
+    scopeId,
+    refetch: refetchAll,
+    closePopover,
+  });
 
   const handleOnAddExceptionTypeClick = useCallback(
     (type?: ExceptionListTypeEnum) => {
@@ -209,26 +198,17 @@ const AlertContextMenuComponent: React.FC<AlertContextMenuProps> = ({
     closePopover();
   }, [closePopover, onAddEventFilterClick]);
 
-  const alertExceptionProps = useMemo(() => {
-    return {
-      isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
-      onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
-    };
-  }, [ecsRowData, handleOnAddExceptionTypeClick]);
-
-  const { exceptionActionItems } = useAlertExceptionActions(alertExceptionProps);
-
-  const eventFilterActionProps = useMemo(() => {
-    return {
-      onAddEventFilterClick: handleOnAddEventFilterClick,
-      disabled: !isEndpointEvent || !scopeIdAllowsAddEndpointEventFilter,
-      tooltipMessage: !scopeIdAllowsAddEndpointEventFilter
-        ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
-        : undefined,
-    };
-  }, [handleOnAddEventFilterClick, isEndpointEvent, scopeIdAllowsAddEndpointEventFilter]);
-
-  const { eventFilterActionItems } = useEventFilterAction(eventFilterActionProps);
+  const { exceptionActionItems } = useAlertExceptionActions({
+    isEndpointAlert: isAlertFromEndpointAlert({ ecsData: ecsRowData }),
+    onAddExceptionTypeClick: handleOnAddExceptionTypeClick,
+  });
+  const { eventFilterActionItems } = useEventFilterAction({
+    onAddEventFilterClick: handleOnAddEventFilterClick,
+    disabled: !isEndpointEvent || !scopeIdAllowsAddEndpointEventFilter,
+    tooltipMessage: !scopeIdAllowsAddEndpointEventFilter
+      ? i18n.ACTION_ADD_EVENT_FILTER_DISABLED_TOOLTIP
+      : undefined,
+  });
   const agentId = useMemo(() => get(0, ecsRowData?.agent?.id), [ecsRowData]);
 
   const handleOnOsqueryClick = useCallback(() => {
