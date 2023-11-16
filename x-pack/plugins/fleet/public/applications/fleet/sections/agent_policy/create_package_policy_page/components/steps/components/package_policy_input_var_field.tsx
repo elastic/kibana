@@ -315,16 +315,27 @@ function getInputComponent({
 }
 
 const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
+  const { docLinks } = useStartServices();
+
   return (
-    <EuiPanel hasShadow={false} color="subdued" paddingSize="s">
+    <EuiPanel hasShadow={false} color="subdued" paddingSize="m">
       {children}
+
+      <EuiSpacer size="l" />
+
+      <EuiText size="xs">
+        <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMoreText"
+            defaultMessage="Learn more about policy secrets."
+          />
+        </EuiLink>
+      </EuiText>
     </EuiPanel>
   );
 };
 
 const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
-  const { docLinks } = useStartServices();
-
   return (
     <>
       <EuiFlexGroup alignItems="center" gutterSize="xs">
@@ -344,15 +355,6 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
           </EuiToolTip>
         </EuiFlexItem>
       </EuiFlexGroup>
-
-      <EuiText size="xs">
-        <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-          <FormattedMessage
-            id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMoreText"
-            defaultMessage="Learn more about policy secrets."
-          />
-        </EuiLink>
-      </EuiText>
 
       <EuiSpacer size="s" />
     </>
@@ -376,10 +378,12 @@ function SecretInputField({
 }: InputComponentProps) {
   const [editMode, setEditMode] = useState(isEditPage && !value);
   const valueOnFirstRender = useRef(value);
+
   const lowercaseTitle = varDef.title?.toLowerCase();
+
   if (isEditPage && !editMode) {
     return (
-      <SecretFieldWrapper>
+      <>
         <EuiText size="s" color="subdued">
           <FormattedMessage
             id="xpack.fleet.editPackagePolicy.stepConfigure.fieldSecretValueSet"
@@ -405,30 +409,26 @@ function SecretInputField({
             }}
           />
         </EuiButtonEmpty>
-      </SecretFieldWrapper>
+      </>
     );
   }
 
   const valueIsSecretRef = value && value?.isSecretRef;
-  const field = (
-    <SecretFieldWrapper>
-      {getInputComponent({
-        varDef,
-        value: editMode && valueIsSecretRef ? '' : value,
-        onChange,
-        frozen,
-        packageName,
-        packageType,
-        datastreams,
-        isEditPage,
-        isInvalid,
-        fieldLabel,
-        fieldTestSelector,
-        isDirty,
-        setIsDirty,
-      })}
-    </SecretFieldWrapper>
-  );
+  const field = getInputComponent({
+    varDef,
+    value: editMode && valueIsSecretRef ? '' : value,
+    onChange,
+    frozen,
+    packageName,
+    packageType,
+    datastreams,
+    isEditPage,
+    isInvalid,
+    fieldLabel,
+    fieldTestSelector,
+    isDirty,
+    setIsDirty,
+  });
 
   if (editMode) {
     const cancelButton = (
