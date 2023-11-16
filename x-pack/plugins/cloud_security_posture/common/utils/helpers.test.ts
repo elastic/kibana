@@ -6,7 +6,12 @@
  */
 
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
-import { getBenchmarkFromPackagePolicy, getBenchmarkFilter, cleanupCredentials } from './helpers';
+import {
+  getBenchmarkFromPackagePolicy,
+  getBenchmarkFilter,
+  cleanupCredentials,
+  mapCredentialsOptionsToFieldMap,
+} from './helpers';
 
 describe('test helper methods', () => {
   it('get default integration type from inputs with multiple enabled types', () => {
@@ -294,5 +299,52 @@ describe('test helper methods', () => {
         'gcp.credentials.json': { value: 'unused' },
       });
     });
+  });
+});
+
+describe('mapCredentialsOptionsToFieldMap', () => {
+  it('should return an empty object when given an empty object as input', () => {
+    const options = {};
+    const result = mapCredentialsOptionsToFieldMap(options);
+    expect(result).toEqual({});
+  });
+
+  it('should return a field map with the same keys as the input object', () => {
+    const options = {
+      option1: { fields: {} },
+      option2: { fields: {} },
+      option3: { fields: {} },
+    };
+    const result = mapCredentialsOptionsToFieldMap(options);
+    expect(Object.keys(result)).toEqual(Object.keys(options));
+  });
+
+  it('should return a field map with the correct fields for each option', () => {
+    const options = {
+      option1: { fields: { field1: 'value1', field2: 'value2' } },
+      option2: { fields: { field3: 'value3', field4: 'value4' } },
+      option3: { fields: { field5: 'value5', field6: 'value6', field7: 'value7' } },
+    };
+    const result = mapCredentialsOptionsToFieldMap(options);
+    expect(result).toEqual({
+      option1: ['field1', 'field2'],
+      option2: ['field3', 'field4'],
+      option3: ['field5', 'field6', 'field7'],
+    });
+  });
+
+  it('should return an empty object when given null as input', () => {
+    const options = null as any;
+    const result = mapCredentialsOptionsToFieldMap(options);
+    expect(result).toEqual({});
+  });
+
+  it('should return an empty object when given an object with null or undefined fields as input', () => {
+    const options = {
+      option1: { fields: null },
+      option2: { fields: undefined },
+    } as any;
+    const result = mapCredentialsOptionsToFieldMap(options);
+    expect(result).toEqual({});
   });
 });

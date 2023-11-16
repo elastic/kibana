@@ -124,7 +124,7 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
   const azureCredentialType: AzureCredentialsType | undefined =
     enabledInput?.streams?.[0].vars?.['azure.credentials.type']?.value;
 
-  if (awsCredentialType || gcpCredentialType) {
+  if (awsCredentialType || gcpCredentialType || azureCredentialType) {
     let credsToKeep: string[] = [' '];
     let credFields: string[] = [' '];
     if (awsCredentialType) {
