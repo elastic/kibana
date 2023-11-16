@@ -26,7 +26,8 @@ export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   .euiFormRow {
     max-width: 800px;
   }
-  &:focus-within {
+  // Expand the combobox if the dropdown is open or the input has focus
+  &:has(input[aria-expanded='true'], input:focus) {
     flex-grow: 4;
   }
 `;
