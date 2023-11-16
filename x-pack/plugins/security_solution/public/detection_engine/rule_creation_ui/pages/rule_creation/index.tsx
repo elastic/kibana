@@ -523,6 +523,7 @@ const CreateRulePageComponent: React.FC = () => {
             shouldLoadQueryDynamically={defineStepData.shouldLoadQueryDynamically}
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
+            thresholdFields={defineStepData.threshold.field}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -557,6 +558,7 @@ const CreateRulePageComponent: React.FC = () => {
       memoDefineStepReadOnly,
       setEqlOptionsSelected,
       threatIndicesConfig,
+      defineStepData.threshold.field,
     ]
   );
   const memoDefineStepExtraAction = useMemo(

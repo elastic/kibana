@@ -177,6 +177,7 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         savedId: params.saved_id,
         threshold: normalizeThresholdObject(params.threshold),
+        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
       };
     }
     case 'machine_learning': {
@@ -616,6 +617,7 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         saved_id: params.savedId,
         threshold: params.threshold,
+        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
       };
     }
     case 'machine_learning': {

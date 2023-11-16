@@ -358,6 +358,7 @@ export const ThresholdRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
+  alert_suppression: AlertSuppression.optional(),
 });
 
 export type ThresholdRuleDefaultableFields = z.infer<typeof ThresholdRuleDefaultableFields>;

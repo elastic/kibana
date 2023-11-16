@@ -9,6 +9,7 @@ import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { EuiText } from '@elastic/eui';
 import React from 'react';
+import fastDeepEqual from 'fast-deep-equal';
 
 import { fromKueryExpression } from '@kbn/es-query';
 import {
@@ -289,6 +290,7 @@ export const schema: FormSchema<DefineStepRule> = {
       }
     ),
     field: {
+      fieldsToValidateOnChange: ['threshold.field', 'groupByFields'],
       type: FIELD_TYPES.COMBO_BOX,
       label: i18n.translate(
         'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThresholdFieldLabel',
@@ -602,11 +604,27 @@ export const schema: FormSchema<DefineStepRule> = {
         validator: (
           ...args: Parameters<ValidationFunc>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
-          const [{ formData }] = args;
-          const needsValidation = isQueryRule(formData.ruleType);
+          const [{ formData, value, path }] = args;
+          const needsValidation =
+            isQueryRule(formData.ruleType) || isThresholdRule(formData.ruleType);
+
           if (!needsValidation) {
             return;
           }
+          console.log('>>>>> formData.threshold.field', formData['threshold.field']);
+          console.log('>>>>> value', value);
+          if (
+            isThresholdRule(formData.ruleType) &&
+            value.length &&
+            !fastDeepEqual(value, formData['threshold.field'])
+          ) {
+            return {
+              code: 'ERR_FIELD_VALUE',
+              path,
+              message: 'Suppress by fields must be equal to threshold Group by fields',
+            };
+          }
+
           return fieldValidators.maxLengthField({
             length: 3,
             message: i18n.translate(

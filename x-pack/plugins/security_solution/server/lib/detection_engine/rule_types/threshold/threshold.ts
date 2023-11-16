@@ -23,12 +23,14 @@ import { bulkCreateThresholdSignals } from './bulk_create_threshold_signals';
 import { findThresholdSignals } from './find_threshold_signals';
 import { getThresholdBucketFilters } from './get_threshold_bucket_filters';
 import { getThresholdSignalHistory } from './get_threshold_signal_history';
+import { bulkCreateSuppressedThresholdAlerts } from './bulk_create_suppressed_threshold_alerts';
 
 import type {
   BulkCreate,
   RuleRangeTuple,
   SearchAfterAndBulkCreateReturnType,
   WrapHits,
+  RunOpts,
 } from '../types';
 import type { ThresholdAlertState } from './types';
 import {
@@ -60,6 +62,8 @@ export const thresholdExecutor = async ({
   exceptionFilter,
   unprocessedExceptions,
   inputIndexFields,
+  spaceId,
+  runOpts,
 }: {
   inputIndex: string[];
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
@@ -79,6 +83,8 @@ export const thresholdExecutor = async ({
   exceptionFilter: Filter | undefined;
   unprocessedExceptions: ExceptionListItemSchema[];
   inputIndexFields: DataViewFieldBase[];
+  spaceId: string;
+  runOpts: RunOpts<ThresholdRuleParams>;
 }): Promise<SearchAfterAndBulkCreateReturnType & { state: ThresholdAlertState }> => {
   const result = createSearchAfterReturnType();
   const ruleParams = completeRule.ruleParams;
@@ -121,35 +127,51 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const { buckets, searchErrors, searchDurations, warnings } = await findThresholdSignals({
-      inputIndexPattern: inputIndex,
-      from: tuple.from.toISOString(),
-      to: tuple.to.toISOString(),
-      maxSignals: tuple.maxSignals,
-      services,
-      ruleExecutionLogger,
-      filter: esFilter,
-      threshold: ruleParams.threshold,
-      runtimeMappings,
-      primaryTimestamp,
-      secondaryTimestamp,
-      aggregatableTimestampField,
-    });
+    const { buckets, allBuckets, searchErrors, searchDurations, warnings } =
+      await findThresholdSignals({
+        inputIndexPattern: inputIndex,
+        from: tuple.from.toISOString(),
+        to: tuple.to.toISOString(),
+        maxSignals: tuple.maxSignals,
+        services,
+        ruleExecutionLogger,
+        filter: esFilter,
+        threshold: ruleParams.threshold,
+        runtimeMappings,
+        primaryTimestamp,
+        secondaryTimestamp,
+        aggregatableTimestampField,
+      });
 
-    const createResult = await bulkCreateThresholdSignals({
-      buckets,
-      completeRule,
-      filter: esFilter,
-      services,
-      inputIndexPattern: inputIndex,
-      signalsIndex: ruleParams.outputIndex,
-      startedAt,
-      from: tuple.from.toDate(),
-      signalHistory: validSignalHistory,
-      bulkCreate,
-      wrapHits,
-      ruleExecutionLogger,
-    });
+    const alertSuppression = completeRule.ruleParams.alertSuppression;
+    //   console.log('buckets', JSON.stringify(buckets, null, 2));
+    //    const createResult = alertSuppression?.groupBy.length ? : await bulkCreateThresholdSignals({
+    const createResult = alertSuppression?.groupBy.length
+      ? await bulkCreateSuppressedThresholdAlerts({
+          buckets: allBuckets,
+          completeRule,
+          services,
+          inputIndexPattern: inputIndex,
+          startedAt,
+          from: tuple.from.toDate(),
+          ruleExecutionLogger,
+          spaceId,
+          runOpts,
+        })
+      : await bulkCreateThresholdSignals({
+          buckets,
+          completeRule,
+          filter: esFilter,
+          services,
+          inputIndexPattern: inputIndex,
+          signalsIndex: ruleParams.outputIndex,
+          startedAt,
+          from: tuple.from.toDate(),
+          signalHistory: validSignalHistory,
+          bulkCreate,
+          wrapHits,
+          ruleExecutionLogger,
+        });
 
     addToSearchAfterReturn({
       current: result,

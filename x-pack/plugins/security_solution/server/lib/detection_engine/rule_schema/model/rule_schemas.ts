@@ -237,6 +237,7 @@ export const ThresholdSpecificRuleParams = z.object({
   savedId: SavedQueryId.optional(),
   threshold: ThresholdNormalized,
   dataViewId: DataViewId.optional(),
+  alertSuppression: AlertSuppressionCamel.optional(),
 });
 
 export type ThresholdRuleParams = BaseRuleParams & ThresholdSpecificRuleParams;

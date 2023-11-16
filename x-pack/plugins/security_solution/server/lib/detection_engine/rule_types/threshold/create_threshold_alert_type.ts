@@ -76,6 +76,7 @@ export const createThresholdAlertType = (
         services,
         startedAt,
         state,
+        spaceId,
       } = execOptions;
       const result = await thresholdExecutor({
         completeRule,
@@ -96,6 +97,8 @@ export const createThresholdAlertType = (
         exceptionFilter,
         unprocessedExceptions,
         inputIndexFields,
+        spaceId,
+        runOpts: execOptions.runOpts,
       });
       return result;
     },

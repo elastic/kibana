@@ -35,6 +35,7 @@ import type {
   AlertSuppressionMissingFieldsStrategy,
   InvestigationFields,
   RuleAction,
+  AlertSuppression,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { SortOrder } from '../../../../../common/api/detection_engine';
 import type { EqlOptionsSelected } from '../../../../../common/search_strategy';
@@ -174,7 +175,7 @@ export interface QueryDefineStep {
 
 export interface Duration {
   value: number;
-  unit: string;
+  unit: 's' | 'm' | 'h';
 }
 
 export interface ScheduleStepRule {
@@ -218,6 +219,7 @@ export interface DefineStepRuleJson {
   timestamp_field?: string;
   event_category_override?: string;
   tiebreaker_field?: string;
+  alert_suppression?: AlertSuppression;
 }
 
 export interface AboutStepRuleJson {
