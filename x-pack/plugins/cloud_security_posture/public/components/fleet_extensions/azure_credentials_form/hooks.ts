@@ -123,7 +123,6 @@ export const useAzureCredentialsForm = ({
 
   const hasArmTemplateUrl = !!getArmTemplateUrlFromCspmPackage(packageInfo);
 
-  // const setupFormat = azureCredentialsType;
   const setupFormat = getSetupFormatFromInput(input, hasArmTemplateUrl);
 
   const group = options[azureCredentialsType];
