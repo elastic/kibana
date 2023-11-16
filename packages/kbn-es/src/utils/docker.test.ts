@@ -441,7 +441,7 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    await expect(Fsp.access(serverlessObjectStorePath)).resolves.toBe(undefined);
+    await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
   });
 
   test('should use an existing object store', async () => {
