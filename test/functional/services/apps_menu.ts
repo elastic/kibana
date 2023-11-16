@@ -117,6 +117,8 @@ export class AppsMenuService extends FtrService {
       category,
     }: { closeCollapsibleNav?: boolean; category?: string } = {}
   ) {
+    await this.waitUntilLoadingHasFinished();
+
     try {
       this.log.debug(`click "${name}" app link`);
       await this.openCollapsibleNav();
