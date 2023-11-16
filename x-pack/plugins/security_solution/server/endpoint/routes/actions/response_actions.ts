@@ -268,11 +268,12 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
+    const isS1V1Enabled = endpointContext.experimentalFeatures.sentinelOneResponseActionsV1Enabled;
 
     let action: ActionDetails;
 
     try {
-      if (command === 'isolate' || command === 'unisolate') {
+      if (isS1V1Enabled && (command === 'isolate' || command === 'unisolate')) {
         const agentType: ResponseActionAgentType = req.body.agentType ?? 'endpoint';
         const defaultProviderOptions: BaseActionsProviderOptions = {
           esClient,

@@ -5,16 +5,53 @@
  * 2.0.
  */
 
-import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
+import type {
+  ActionDetails,
+  KillOrSuspendProcessRequestBody,
+  KillProcessActionOutputContent,
+  ResponseActionParametersWithPidOrEntityId,
+  SuspendProcessActionOutputContent,
+  GetProcessesActionOutputContent,
+  ResponseActionGetFileOutputContent,
+  ResponseActionGetFileParameters,
+  ResponseActionExecuteOutputContent,
+  ResponseActionsExecuteParameters,
+  ResponseActionUploadOutputContent,
+  ResponseActionUploadParameters,
+} from '../../../../common/endpoint/types';
 
 /**
  * The interface required for a Response Actions provider
  */
-export interface ResponseActionsProvider<TActionDetails extends ActionDetails = ActionDetails> {
-  /** Isolates the host */
-  isolate: (options: IsolationRouteRequestBody) => Promise<TActionDetails>;
+export interface ResponseActionsProvider {
+  isolate: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
 
-  /** Un-Isolates the host */
-  release: (options: IsolationRouteRequestBody) => Promise<TActionDetails>;
+  release: (options: IsolationRouteRequestBody) => Promise<ActionDetails>;
+
+  killProcess: (
+    options: KillOrSuspendProcessRequestBody
+  ) => Promise<
+    ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  >;
+
+  suspendProcess: (
+    options: KillOrSuspendProcessRequestBody
+  ) => Promise<
+    ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+  >;
+
+  runningProcesses: () => Promise<ActionDetails<GetProcessesActionOutputContent>>;
+
+  getFile: () => Promise<
+    ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
+  >;
+
+  execute: () => Promise<
+    ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
+  >;
+
+  upload: () => Promise<
+    ActionDetails<ResponseActionUploadOutputContent, ResponseActionUploadParameters>
+  >;
 }
