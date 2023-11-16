@@ -5,8 +5,8 @@
  * 2.0.
  */
 
+import { ClientConfigType } from '@kbn/reporting-public';
 import React, { createContext, FunctionComponent } from 'react';
-import { ClientConfigType } from '../plugin';
 import { IlmPolicyStatusContextProvider } from './ilm_policy_status_context';
 
 const PolicyStatusContext = createContext<undefined>(undefined);

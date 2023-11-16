@@ -42,7 +42,7 @@ export async function mountManagementSection(
       />
     </IlmPolicyStatusContextProvider>
   ) : (
-    <PolicyStatusContextProvider>
+    <PolicyStatusContextProvider config={config}>
       <ReportListing
         toasts={coreSetup.notifications.toasts}
         license$={license$}

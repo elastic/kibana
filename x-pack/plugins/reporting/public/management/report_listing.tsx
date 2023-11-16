@@ -45,7 +45,6 @@ import {
 import { guessAppIconTypeFromObjectType } from './utils';
 
 import './report_listing.scss';
-import { useDefaultPolicyStatus } from '../lib/default_status_context';
 
 type TableColumn = EuiBasicTableColumn<Job>;
 
@@ -576,14 +575,7 @@ const ReportListingDefault: FC<
   }
 > = (props) => {
   const { apiClient, capabilities, ...listingProps } = props;
-  return (
-    <ReportListingUi
-      {...listingProps}
-      apiClient={apiClient}
-      capabilities={capabilities}
-      policyContextValue={useDefaultPolicyStatus()}
-    />
-  );
+  return <ReportListingUi {...listingProps} apiClient={apiClient} capabilities={capabilities} />;
 };
 
 export const ReportListing = (props: ReportListingProps) => {
