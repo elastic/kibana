@@ -48,7 +48,7 @@ export function MobileErrorTreemap({
               },
               query: {
                 environment,
-                kuery,
+                kuery: `${kuery} and not error.type: crash`,
                 start,
                 end,
                 fieldName,

@@ -31,6 +31,7 @@ import { useApmParams } from '../../../../hooks/use_apm_params';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { ChartPointerEventContextProvider } from '../../../../context/chart_pointer_event/chart_pointer_event_context';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type MobileCrashGroupMainStatistics =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/crashes/groups/main_statistics'>;
@@ -67,15 +68,26 @@ export function MobileCrashesOverview() {
       comparisonEnabled,
       page = 0,
       pageSize = 25,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
     },
   } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes/');
 
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { crashDistributionData, status } = useCrashGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
     environment,
-    kuery,
+    kuery: kueryWithMobileFilters,
   });
 
   const {
@@ -95,7 +107,7 @@ export function MobileCrashesOverview() {
               },
               query: {
                 environment,
-                kuery,
+                kuery: kueryWithMobileFilters,
                 start,
                 end,
                 sortField,
@@ -124,7 +136,7 @@ export function MobileCrashesOverview() {
     },
     [
       environment,
-      kuery,
+      kueryWithMobileFilters,
       serviceName,
       start,
       end,
@@ -150,7 +162,7 @@ export function MobileCrashesOverview() {
               path: { serviceName },
               query: {
                 environment,
-                kuery,
+                kuery: kueryWithMobileFilters,
                 start,
                 end,
                 numBuckets: 20,
@@ -205,7 +217,7 @@ export function MobileCrashesOverview() {
             <EuiPanel hasBorder={true}>
               <MobileCrashesTreemap
                 serviceName={serviceName}
-                kuery={kuery}
+                kuery={kueryWithMobileFilters}
                 environment={environment}
                 start={start}
                 end={end}

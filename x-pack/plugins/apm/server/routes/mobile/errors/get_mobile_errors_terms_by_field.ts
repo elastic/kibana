@@ -56,9 +56,6 @@ export async function getMobileErrorsTermsByField({
               ...environmentQuery(environment),
               ...kqlQuery(kuery),
             ],
-            must_not: {
-              term: { 'error.type': 'crash' },
-            },
           },
         },
         aggs: {

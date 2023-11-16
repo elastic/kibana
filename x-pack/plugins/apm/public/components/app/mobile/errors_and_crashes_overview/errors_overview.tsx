@@ -32,6 +32,7 @@ import { HttpErrorRateChart } from '../charts/mobile_http_error_rate';
 import { ErrorDistribution } from '../error_group_details/distribution';
 import { MobileErrorGroupList } from './error_group_list';
 import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type MobileErrorGroupMainStatistics =
   APIReturnType<'GET /internal/apm/mobile-services/{serviceName}/errors/groups/main_statistics'>;
@@ -67,15 +68,25 @@ export function MobileErrorsOverview() {
       comparisonEnabled,
       page = 0,
       pageSize = 25,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
     },
   } = useApmParams('/mobile-services/{serviceName}/errors-and-crashes');
-
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
   const { errorDistributionData, status } = useErrorGroupDistributionFetcher({
     serviceName,
     groupId: undefined,
     environment,
-    kuery,
+    kuery: kueryWithMobileFilters,
   });
   const {
     data: errorGroupListData = INITIAL_STATE_MAIN_STATISTICS,
@@ -94,7 +105,7 @@ export function MobileErrorsOverview() {
               },
               query: {
                 environment,
-                kuery,
+                kuery: kueryWithMobileFilters,
                 start,
                 end,
                 sortField,
@@ -123,7 +134,7 @@ export function MobileErrorsOverview() {
     },
     [
       environment,
-      kuery,
+      kueryWithMobileFilters,
       serviceName,
       start,
       end,
@@ -148,7 +159,7 @@ export function MobileErrorsOverview() {
               path: { serviceName },
               query: {
                 environment,
-                kuery,
+                kuery: kueryWithMobileFilters,
                 start,
                 end,
                 numBuckets: 20,
@@ -199,7 +210,7 @@ export function MobileErrorsOverview() {
                 <EuiFlexItem>
                   <HttpErrorRateChart
                     height={150}
-                    kuery={kuery}
+                    kuery={kueryWithMobileFilters}
                     serviceName={serviceName}
                     comparisonEnabled={comparisonEnabled}
                     start={start}
@@ -215,7 +226,7 @@ export function MobileErrorsOverview() {
             <EuiPanel hasBorder={true}>
               <MobileErrorTreemap
                 serviceName={serviceName}
-                kuery={kuery}
+                kuery={kueryWithMobileFilters}
                 environment={environment}
                 start={start}
                 end={end}
