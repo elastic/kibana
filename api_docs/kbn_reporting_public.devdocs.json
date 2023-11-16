@@ -1,0 +1,98 @@
+{
+  "id": "@kbn/reporting-public",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/reporting-public",
+        "id": "def-public.ClientConfigType",
+        "type": "Interface",
+        "tags": [],
+        "label": "ClientConfigType",
+        "description": [],
+        "path": "packages/kbn-reporting/public/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.poll",
+            "type": "Object",
+            "tags": [],
+            "label": "poll",
+            "description": [],
+            "signature": [
+              "{ jobsRefresh: { interval: number; intervalErrorMultiplier: number; }; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.roles",
+            "type": "Object",
+            "tags": [],
+            "label": "roles",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.export_types",
+            "type": "Object",
+            "tags": [],
+            "label": "export_types",
+            "description": [],
+            "signature": [
+              "{ pdf: { enabled: boolean; }; png: { enabled: boolean; }; csv: { enabled: boolean; }; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/reporting-public",
+            "id": "def-public.ClientConfigType.statefulSettings",
+            "type": "Object",
+            "tags": [],
+            "label": "statefulSettings",
+            "description": [],
+            "signature": [
+              "{ enabled: boolean; }"
+            ],
+            "path": "packages/kbn-reporting/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
