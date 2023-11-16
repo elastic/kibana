@@ -120,12 +120,18 @@ const ArmTemplateSetup = ({
 
   return (
     <>
-      <EuiText color="text" size="s">
+      <EuiText color="subdued" size="s">
         <ol
           css={css`
             list-style: auto;
           `}
         >
+          <li>
+            <FormattedMessage
+              id="xpack.csp.azureIntegration.armTemplateSetupStep.hostRequirement"
+              defaultMessage='Ensure "New hosts" is selected in the "Where to add this integration?" section below'
+            />
+          </li>
           <li>
             <FormattedMessage
               id="xpack.csp.azureIntegration.armTemplateSetupStep.login"
@@ -198,7 +204,7 @@ const AzureCredentialTypeSelector = ({
 const ManualSetup = ({ integrationLink }: { integrationLink: string }) => {
   return (
     <>
-      <EuiText color="text" size="s">
+      <EuiText color="subdued" size="s">
         <FormattedMessage
           id="xpack.csp.azureIntegration.manualCredentialType.instructions"
           defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual Machines). No explicit credentials need to be provided; Azure handles the authentication. Refer to our {gettingStartedLink} for details."

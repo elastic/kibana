@@ -18,23 +18,23 @@ import {
   DataStream,
   DataStreamCodec,
   HTTPFieldsCodec,
-  ICMPSimpleFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
   SyntheticsMonitor,
   Locations,
+  ICMPFieldsCodec,
 } from '../../../common/runtime_types';
 
 import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
 
 type MonitorCodecType =
-  | typeof ICMPSimpleFieldsCodec
+  | typeof ICMPFieldsCodec
   | typeof TCPFieldsCodec
   | typeof HTTPFieldsCodec
   | typeof BrowserFieldsCodec;
 
 const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
-  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
+  [DataStream.ICMP]: ICMPFieldsCodec,
   [DataStream.TCP]: TCPFieldsCodec,
   [DataStream.HTTP]: HTTPFieldsCodec,
   [DataStream.BROWSER]: BrowserFieldsCodec,
@@ -67,7 +67,7 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
   }
 
   // Cast it to ICMPCodec to satisfy typing. During runtime, correct codec will be used to decode.
-  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPSimpleFieldsCodec;
+  const SyntheticsMonitorCodec = monitorTypeToCodecMap[monitorType] as typeof ICMPFieldsCodec;
 
   if (!SyntheticsMonitorCodec) {
     return {

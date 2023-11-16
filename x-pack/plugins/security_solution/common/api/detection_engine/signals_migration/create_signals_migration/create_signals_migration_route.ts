@@ -8,9 +8,6 @@
 import * as t from 'io-ts';
 
 import { PositiveInteger, PositiveIntegerGreaterThanZero } from '@kbn/securitysolution-io-ts-types';
-// TODO https://github.com/elastic/security-team/issues/7491
-// eslint-disable-next-line no-restricted-imports
-import { IndexPatternArray } from '../../model/rule_schema_legacy';
 
 export const signalsReindexOptions = t.partial({
   requests_per_second: t.number,
@@ -23,7 +20,7 @@ export type SignalsReindexOptions = t.TypeOf<typeof signalsReindexOptions>;
 export const createSignalsMigrationSchema = t.intersection([
   t.exact(
     t.type({
-      index: IndexPatternArray,
+      index: t.array(t.string),
     })
   ),
   t.exact(signalsReindexOptions),

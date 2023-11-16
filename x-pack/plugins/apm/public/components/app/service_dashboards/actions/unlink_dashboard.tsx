@@ -7,21 +7,26 @@
 import { EuiButtonEmpty, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import { MergedServiceDashboard } from '..';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 export function UnlinkDashboard({
   currentDashboard,
+  defaultDashboard,
   onRefresh,
 }: {
   currentDashboard: MergedServiceDashboard;
+  defaultDashboard: MergedServiceDashboard;
   onRefresh: () => void;
 }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
   const {
     core: { notifications },
   } = useApmPluginContext();
+  const history = useHistory();
 
   const onConfirm = useCallback(
     async function () {
@@ -29,6 +34,14 @@ export function UnlinkDashboard({
         await callApmApi('DELETE /internal/apm/custom-dashboard', {
           params: { query: { customDashboardId: currentDashboard.id } },
           signal: null,
+        });
+
+        history.push({
+          ...history.location,
+          search: fromQuery({
+            ...toQuery(location.search),
+            dashboardId: defaultDashboard.dashboardSavedObjectId,
+          }),
         });
 
         notifications.toasts.addSuccess({
@@ -63,6 +76,8 @@ export function UnlinkDashboard({
       setIsModalVisible,
       onRefresh,
       isModalVisible,
+      history,
+      defaultDashboard,
     ]
   );
   return (

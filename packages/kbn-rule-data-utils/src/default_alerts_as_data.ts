@@ -27,7 +27,7 @@ const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 // kibana.alert.case_ids - array of cases associated with the alert
 const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
 
-// kibana.alert.duration.us - alert duration in nanoseconds - updated each execution
+// kibana.alert.duration.us - alert duration in microseconds - updated each execution
 // that the alert is active
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 

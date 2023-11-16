@@ -37,6 +37,13 @@ export default {
         saveChanges={action('saveChanges')}
         showError={action('showError')}
         showReloadPagePrompt={action('showReloadPagePrompt')}
+        validateChange={async (key, value) => {
+          action(`validateChange`)({
+            key,
+            value,
+          });
+          return { successfulValidation: true, valid: true };
+        }}
       >
         <Story />
       </FormProvider>
