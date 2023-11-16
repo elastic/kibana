@@ -33,6 +33,7 @@ import { MobileCrashesTreemap } from '../charts/mobile_crashes_treemap';
 import { maybe } from '../../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
+import { ERROR_GROUP_ID } from '../../../../../common/es_fields/apm';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -246,7 +247,7 @@ export function CrashGroupDetails() {
           <EuiPanel hasBorder={true}>
             <MobileCrashesTreemap
               serviceName={serviceName}
-              kuery={kueryWithMobileFilters}
+              kuery={`${kueryWithMobileFilters} and ${ERROR_GROUP_ID}: ${groupId}`}
               environment={environment}
               start={start}
               end={end}
