@@ -33,6 +33,7 @@ export const getStreamObservable = (
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
+            console.log('reading', { done, value });
             if (done) {
               observer.next({
                 chunks,

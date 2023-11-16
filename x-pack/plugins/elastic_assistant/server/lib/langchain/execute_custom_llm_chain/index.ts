@@ -26,7 +26,14 @@ export const callAgentExecutor = async ({
   elserId,
   kbResource,
 }: AgentExecutorParams): AgentExecutorResponse => {
-  const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
+  const llm = new ActionsClientLlm({
+    actions,
+    connectorId,
+    request,
+    llmType,
+    logger,
+    streaming: true,
+  });
 
   const pastMessages = langChainMessages.slice(0, -1); // all but the last message
   const latestMessage = langChainMessages.slice(-1); // the last message
@@ -70,14 +77,49 @@ export const callAgentExecutor = async ({
   const executor = await initializeAgentExecutorWithOptions(tools, llm, {
     agentType: 'chat-conversational-react-description',
     memory,
-    verbose: false,
+    verbose: true,
+    callbacks: [
+      {
+        handleLLMNewToken(token: string) {
+          console.log('handleLLMNewToken in executor definition', token);
+        },
+      },
+    ],
   });
 
-  await executor.call({ input: latestMessage[0].content });
+  const resp = await executor.stream(
+    { input: latestMessage[0].content },
+    {
+      callbacks: [
+        {
+          handleLLMNewToken(token: string) {
+            console.log('handleLLMNewToken in stream call', token);
+            resp.next(token);
+          },
+        },
+      ],
+    }
+  );
 
-  return {
-    connector_id: connectorId,
-    data: llm.getActionResultData(), // the response from the actions framework
-    status: 'ok',
-  };
+  // await executor.call(
+  //   { input: latestMessage[0].content }
+  // {
+  //   callbacks: [
+  //     {
+  //       handleLLMNewToken(token: string) {
+  //         console.log('handleLLMNewToken in call', token);
+  //       },
+  //     },
+  //   ],
+  // }
+  // );
+  console.log('THIS SHOULD BE SECOND', resp);
+  console.log('THIS SHOULD BE SECOND ALSO', llm.getActionResultStream());
+  return resp; // llm.getActionResultStream().pipe(new PassThrough());
+  // return (resp as unknown as Readable).pipe(new PassThrough()); // llm.getActionResultStream();
+  // {
+  //   connector_id: connectorId,
+  //   data: llm.getActionResultStream(), // the response from the actions framework
+  //   status: 'ok',
+  // };
 };
