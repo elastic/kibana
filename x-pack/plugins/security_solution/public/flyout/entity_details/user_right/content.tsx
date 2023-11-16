@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHorizontalRule, EuiPanel, EuiFlyoutBody } from '@elastic/eui';
+import { EuiHorizontalRule } from '@elastic/eui';
 
 import React from 'react';
 import type {
@@ -18,6 +18,7 @@ import type { RiskScoreEntity } from '../../../../common/search_strategy';
 import type { RiskScoreState } from '../../../explore/containers/risk_score';
 import { RiskSummary } from '../shared/components/risk_summary';
 import { USER_PANEL_RISK_SCORE_QUERY_ID } from '.';
+import { FlyoutBody } from '../../shared/components/flyout_body';
 
 interface UserPanelContentProps {
   observedUser: ObservedUserData;
@@ -37,32 +38,26 @@ export const UserPanelContent = ({
   isDraggable,
 }: UserPanelContentProps) => {
   return (
-    <EuiFlyoutBody>
+    <FlyoutBody>
       {riskScoreState.isModuleEnabled && riskScoreState.data?.length !== 0 && (
         <>
-          <EuiPanel hasShadow={false}>
-            <RiskSummary riskScoreData={riskScoreState} queryId={USER_PANEL_RISK_SCORE_QUERY_ID} />
-          </EuiPanel>
-          <EuiHorizontalRule margin="none" />
+          <RiskSummary riskScoreData={riskScoreState} queryId={USER_PANEL_RISK_SCORE_QUERY_ID} />
+          <EuiHorizontalRule margin="m" />
         </>
       )}
-      <EuiPanel hasShadow={false}>
-        <ObservedUser
-          observedUser={observedUser}
-          contextID={contextID}
-          scopeId={scopeId}
-          isDraggable={isDraggable}
-        />
-      </EuiPanel>
-      <EuiHorizontalRule margin="none" />
-      <EuiPanel hasShadow={false}>
-        <ManagedUser
-          managedUser={managedUser}
-          contextID={contextID}
-          scopeId={scopeId}
-          isDraggable={isDraggable}
-        />
-      </EuiPanel>
-    </EuiFlyoutBody>
+      <ObservedUser
+        observedUser={observedUser}
+        contextID={contextID}
+        scopeId={scopeId}
+        isDraggable={isDraggable}
+      />
+      <EuiHorizontalRule margin="m" />
+      <ManagedUser
+        managedUser={managedUser}
+        contextID={contextID}
+        scopeId={scopeId}
+        isDraggable={isDraggable}
+      />
+    </FlyoutBody>
   );
 };
