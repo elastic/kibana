@@ -65,6 +65,7 @@ const RuleAdd = ({
   filteredRuleTypes,
   validConsumers,
   useRuleProducer,
+  initialSelectedConsumer = null,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;
@@ -99,7 +100,7 @@ const RuleAdd = ({
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
   const [selectedConsumer, setSelectedConsumer] = useState<
     RuleCreationValidConsumer | null | undefined
-  >();
+  >(initialSelectedConsumer);
 
   const setRule = (value: InitialRule) => {
     dispatch({ command: { type: 'setRule' }, payload: { key: 'rule', value } });
@@ -298,6 +299,7 @@ const RuleAdd = ({
                   }
                 )}
                 validConsumers={validConsumers}
+                selectedConsumer={selectedConsumer}
                 actionTypeRegistry={actionTypeRegistry}
                 ruleTypeRegistry={ruleTypeRegistry}
                 metadata={metadata}

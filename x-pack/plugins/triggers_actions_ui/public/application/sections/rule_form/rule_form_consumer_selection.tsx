@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState, useCallback, useEffect } from 'react';
+import React, { useMemo, useCallback, useEffect } from 'react';
 import { EuiComboBox, EuiFormRow, EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AlertConsumers } from '@kbn/rule-data-utils';
@@ -67,22 +67,20 @@ export interface RuleFormConsumerSelectionProps {
   consumers: RuleCreationValidConsumer[];
   onChange: (consumer: RuleCreationValidConsumer | null) => void;
   errors: IErrorObject;
+  selectedConsumer: RuleCreationValidConsumer | null | undefined;
 }
 
 const SINGLE_SELECTION = { asPlainText: true };
 
 export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps) => {
-  const { consumers, errors, onChange } = props;
-  const [selectedConsumer, setSelectedConsumer] = useState<RuleCreationValidConsumer | undefined>();
+  const { consumers, errors, onChange, selectedConsumer } = props;
   const isInvalid = errors?.consumer?.length > 0;
   const handleOnChange = useCallback(
     (selected: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>>) => {
       if (selected.length > 0) {
         const newSelectedConsumer = selected[0];
-        setSelectedConsumer(newSelectedConsumer.value);
         onChange(newSelectedConsumer.value!);
       } else {
-        setSelectedConsumer(undefined);
         onChange(null);
       }
     },
@@ -113,12 +111,6 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
           return a.value!.localeCompare(b.value!);
         });
     }, [consumers]);
-
-  useEffect(() => {
-    // At initialization we set to NULL to know that nobody selected anything
-    onChange(null);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
 
   useEffect(() => {
     if (consumers.length === 1) {

@@ -147,6 +147,7 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   setHasActionsDisabled?: (value: boolean) => void;
   setHasActionsWithBrokenConnector?: (value: boolean) => void;
   setConsumer?: (consumer: RuleCreationValidConsumer | null) => void;
+  selectedConsumer?: RuleCreationValidConsumer | null;
   metadata?: MetaData;
   filteredRuleTypes?: string[];
   hideGrouping?: boolean;
@@ -167,6 +168,7 @@ export const RuleForm = ({
   setHasActionsDisabled,
   setHasActionsWithBrokenConnector,
   setConsumer = NOOP,
+  selectedConsumer,
   operation,
   ruleTypeRegistry,
   actionTypeRegistry,
@@ -778,6 +780,7 @@ export const RuleForm = ({
               consumers={authorizedConsumers}
               onChange={setConsumer}
               errors={errors}
+              selectedConsumer={selectedConsumer}
             />
           </EuiFlexItem>
         </>

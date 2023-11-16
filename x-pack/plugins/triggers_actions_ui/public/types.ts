@@ -467,6 +467,7 @@ export interface RuleAddProps<MetaData = Record<string, any>> {
   filteredRuleTypes?: string[];
   validConsumers?: RuleCreationValidConsumer[];
   useRuleProducer?: boolean;
+  initialSelectedConsumer?: RuleCreationValidConsumer | null;
 }
 export interface RuleDefinitionProps {
   rule: Rule;
