@@ -38,7 +38,7 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
         learnMoreLink: '{config.docs.beats.metricbeat}/metricbeat-module-cockroachdb.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/cockroachdb.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/cockroachdb.svg'),
     artifacts: {
       dashboards: [
         {
@@ -57,7 +57,9 @@ export function cockroachdbMetricsSpecProvider(context: TutorialContext): Tutori
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/cockroachdb_metrics/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref(
+      '/cockroachdb_metrics/screenshot.webp'
+    ),
     onPrem: onPremInstructions(moduleName, context),
     elasticCloud: cloudInstructions(moduleName, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, context),
