@@ -60,8 +60,6 @@ export const wrapSuppressedThresholdALerts = ({
   from: Date;
   threshold: ThresholdNormalized;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  console.log('buckets', buckets.length);
-
   const bucketsMap = buckets.reduce<
     Record<string, WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>
   >((acc, bucket) => {
@@ -79,10 +77,6 @@ export const wrapSuppressedThresholdALerts = ({
       .filter(([key, value]) => suppressionFields.includes(key))
       .map(([key, value]) => value)
       .sort((a, b) => a.localeCompare(b));
-
-    // console.log('threshold', JSON.stringify(threshold, null, 2));
-    // console.log('bucket', JSON.stringify(bucket, null, 2));
-    // console.log('suppressedValues', JSON.stringify(suppressedValues, null, 2));
 
     const id = objectHash([
       hit._index,
