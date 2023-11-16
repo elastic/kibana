@@ -23,6 +23,8 @@ export default createTestConfig({
   kbnServerArgs: [
     '--xpack.observability.unsafe.thresholdRule.enabled=true',
     '--xpack.infra.enabled=true',
+    '--xpack.alerting.rules.overwriteProducer=observability',
+    '--xpack.observability.createO11yGenericFeatureId=true',
   ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
