@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import { ControlPanelRT, datasetSelectionFromUrlRT } from '@kbn/log-explorer-plugin/common';
+import { LogExplorerPublicStateUpdate } from '@kbn/log-explorer-plugin/public';
 import * as rt from 'io-ts';
+import { deepCompactObject } from '../../../utils/deep_compact_object';
 
-export const columnRT = rt.union([
-  rt.type({
+export const columnRT = rt.intersection([
+  rt.strict({
     field: rt.string,
   }),
-  rt.partial({
-    width: rt.number,
-  }),
+  rt.exact(
+    rt.partial({
+      width: rt.number,
+    })
+  ),
 ]);
 
 export const columnsRT = rt.array(columnRT);
@@ -34,12 +37,14 @@ export const filterMetaRT = rt.partial({
 });
 
 export const filterRT = rt.intersection([
-  rt.type({
+  rt.strict({
     meta: filterMetaRT,
   }),
-  rt.partial({
-    query: rt.UnknownRecord,
-  }),
+  rt.exact(
+    rt.partial({
+      query: rt.UnknownRecord,
+    })
+  ),
 ]);
 
 export const filtersRT = rt.array(filterRT);
@@ -67,15 +72,58 @@ const refreshIntervalRT = rt.strict({
   value: rt.number,
 });
 
-export const urlSchemaRT = rt.partial({
-  v: rt.literal(1),
-  query: queryRT,
-  filters: filtersRT,
-  time: timeRangeRT,
-  refreshInterval: refreshIntervalRT,
-  columns: columnsRT,
-  datasetSelection: datasetSelectionFromUrlRT,
-  controlPanels: ControlPanelRT,
-});
+export const urlSchemaRT = rt.exact(
+  rt.partial({
+    v: rt.literal(1),
+    query: queryRT,
+    filters: filtersRT,
+    time: timeRangeRT,
+    refreshInterval: refreshIntervalRT,
+    columns: columnsRT,
+    breakdownField: rt.string,
+    // datasetSelection: datasetSelectionFromUrlRT,
+    // controlPanels: ControlPanelRT,
+  })
+);
 
 export type UrlSchema = rt.TypeOf<typeof urlSchemaRT>;
+
+export const getStateFromUrlValue = (urlValue: UrlSchema): LogExplorerPublicStateUpdate =>
+  deepCompactObject<LogExplorerPublicStateUpdate>({
+    chart: {
+      breakdownField: urlValue.breakdownField,
+    },
+    filters: urlValue.filters,
+    grid: {
+      columns: urlValue.columns,
+      // TODO
+      // rows: {
+      //   rowHeight: urlValue.rowHeight,
+      //   rowsPerPage: urlValue.rowsPerPage,
+      // }
+    },
+    query: urlValue.query,
+    refreshInterval: urlValue.refreshInterval,
+    time: urlValue.time,
+  });
+
+export const getUrlValueFromState = (state: LogExplorerPublicStateUpdate): UrlSchema =>
+  deepCompactObject<UrlSchema>({
+    breakdownField: state.chart?.breakdownField,
+    columns: state.grid?.columns,
+    filters: state.filters,
+    query: state.query,
+    refreshInterval: state.refreshInterval,
+    // TODO: add other fields
+    time: state.time,
+    v: 1,
+  });
+
+const stateFromUrlSchemaRT = new rt.Type<LogExplorerPublicStateUpdate, UrlSchema, UrlSchema>(
+  'stateFromUrlSchemaRT',
+  rt.never.is,
+  (urlSchema, context) => rt.success(getStateFromUrlValue(urlSchema)),
+  getUrlValueFromState
+);
+
+export const stateFromUntrustedUrlRT = urlSchemaRT.pipe(stateFromUrlSchemaRT);

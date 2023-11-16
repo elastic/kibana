@@ -9,7 +9,12 @@ import type { PluginInitializerContext } from '@kbn/core/public';
 import type { LogExplorerConfig } from '../common/plugin_config';
 import { LogExplorerPlugin } from './plugin';
 export type { LogExplorerStateContainer } from './components/log_explorer';
-export type { CreateLogExplorerController, LogExplorerController } from './controller';
+export type {
+  CreateLogExplorerController,
+  LogExplorerController,
+  LogExplorerPublicState,
+  LogExplorerPublicStateUpdate,
+} from './controller';
 export type { LogExplorerControllerContext } from './state_machines/log_explorer_controller';
 export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
 export { getDiscoverColumnsFromDisplayOptions } from './utils/convert_discover_app_state';

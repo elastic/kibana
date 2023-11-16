@@ -10,10 +10,13 @@ import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
 import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { ControlPanels } from '@kbn/log-explorer-plugin/common';
 import * as Either from 'fp-ts/lib/Either';
+import * as rt from 'io-ts';
 import { mapValues } from 'lodash';
 import { InvokeCreator } from 'xstate';
 import type { ObservabilityLogExplorerContext, ObservabilityLogExplorerEvent } from './types';
 import * as urlSchemaV1 from './url_schema_v1';
+
+const URL_STATE_KEY = 'pageState';
 
 interface ObservabilityLogExplorerUrlStateDependencies {
   toastsService: IToasts;
@@ -27,26 +30,12 @@ export const updateUrlFromLogExplorerState =
       return;
     }
 
-    const { logExplorerState } = context;
-
     // we want to write in the newest schema
-    const encodedUrlStateValues = urlSchemaV1.urlSchemaRT.encode({
-      v: 1,
-      query: logExplorerState.query,
-      filters: logExplorerState.filters,
-      time: logExplorerState.time,
-      refreshInterval: logExplorerState.refreshInterval,
-      columns: logExplorerState.grid.columns,
-      // TODO: add other properties
-      // datasetSelection: logExplorerState.datasetSelection,
-      // controlPanels: logExplorerState.controlPanels
-      //   ? cleanControlPanels(logExplorerState.controlPanels)
-      //   : undefined,
-    });
-
-    Object.entries(encodedUrlStateValues).forEach(([stateKey, encodedValue]) =>
-      urlStateStorageContainer.set(stateKey, encodedValue, { replace: true })
+    const encodedUrlStateValues = urlSchemaV1.stateFromUntrustedUrlRT.encode(
+      context.logExplorerState
     );
+
+    urlStateStorageContainer.set(URL_STATE_KEY, encodedUrlStateValues);
   };
 
 export const initializeFromUrl =
@@ -59,15 +48,12 @@ export const initializeFromUrl =
   > =>
   (_context, _event) =>
   (send) => {
-    // in the future we'll have to distinguish between different schema versions
-    // here based on the "v" value
-    const urlStateValues = Object.fromEntries(
-      Object.keys(urlSchemaV1.urlSchemaRT.props)
-        .map((key) => [key, urlStateStorageContainer.get<unknown>(key)] as const)
-        .filter(([, value]) => value != null)
-    );
+    const urlStateValues = urlStateStorageContainer.get<unknown>(URL_STATE_KEY) ?? undefined;
 
-    const stateValuesE = urlSchemaV1.urlSchemaRT.decode(urlStateValues);
+    // in the future we'll have to more schema versions to the union
+    const stateValuesE = rt
+      .union([rt.undefined, urlSchemaV1.stateFromUntrustedUrlRT])
+      .decode(urlStateValues);
 
     if (Either.isLeft(stateValuesE)) {
       withNotifyOnErrors(toastsService).onGetError(
