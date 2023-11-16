@@ -8,7 +8,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-import type { BundledPackage } from '../../../types';
+import type { BundledPackage, Installation } from '../../../types';
 import { FleetError } from '../../../errors';
 import { appContextService } from '../../app_context';
 import { splitPkgKey, pkgToPkgKey } from '../registry';
@@ -57,24 +57,33 @@ export async function getBundledPackages(): Promise<BundledPackage[]> {
   }
 }
 
+export async function getBundledPackageForInstallation(
+  installation: Installation
+): Promise<BundledPackage | undefined> {
+  const bundledPackages = await getBundledPackages();
+
+  return bundledPackages.find(
+    (bundledPkg: BundledPackage) =>
+      bundledPkg.name === installation.name && bundledPkg.version === installation.version
+  );
+}
+
 export async function getBundledPackageByPkgKey(
   pkgKey: string
 ): Promise<BundledPackage | undefined> {
   const bundledPackages = await getBundledPackages();
-  const bundledPackage = bundledPackages.find((pkg) => {
+
+  return bundledPackages.find((pkg) => {
     if (pkgKey.includes('-')) {
       return pkgToPkgKey(pkg) === pkgKey;
     } else {
       return pkg.name === pkgKey;
     }
   });
-
-  return bundledPackage;
 }
 
 export async function getBundledPackageByName(name: string): Promise<BundledPackage | undefined> {
   const bundledPackages = await getBundledPackages();
-  const bundledPackage = bundledPackages.find((pkg) => pkg.name === name);
 
-  return bundledPackage;
+  return bundledPackages.find((pkg) => pkg.name === name);
 }

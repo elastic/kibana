@@ -127,7 +127,7 @@ xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.run.ruleTypeOverrides:
   - id: siem.indicatorRule
-    timeout: 1m
+    timeout: 10m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
