@@ -118,15 +118,26 @@ export class DefaultResourceInstaller implements ResourceInstaller {
 
   private async createOrUpdateEnrichPolicy(policy: EnrichPutPolicyRequest) {
     return this.execute(async () => {
-      const existingPolicy = await this.esClient.enrich.getPolicy({ name: policy.name });
-      if (existingPolicy.policies.some(({ config }) => config.match?.name === policy.name)) {
-        this.logger.info(`SLO summary erich policy [${policy.name}] already exists.`);
-        return;
+      try {
+        await this.esClient.enrich.putPolicy(policy);
+      } catch (err) {
+        if (err?.meta?.body?.error?.type === 'resource_already_exists_exception') {
+          this.logger.info(`Enrich SLO policy [${policy.name}] already exists`);
+          return;
+        }
+        throw err;
       }
-      this.logger.info(`Installing SLO summary erich policy [${policy.name}]`);
-      return this.esClient.enrich
-        .putPolicy(policy)
-        .then(() => this.esClient.enrich.executePolicy({ name: policy.name }));
+
+      this.logger.info(`Installing enrich SLO policy [${policy.name}]`);
+      try {
+        await this.esClient.enrich.executePolicy({ name: policy.name });
+      } catch (err) {
+        if (err?.meta?.body?.error?.type === 'es_rejected_execution_exception') {
+          this.logger.info(`Enrich SLO policy [${policy.name}] already executing`);
+          return;
+        }
+        throw err;
+      }
     });
   }
 
