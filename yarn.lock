@@ -4593,10 +4593,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-csv-types@link:packages/kbn-generate-csv-types":
-  version "0.0.0"
-  uid ""
-
 "@kbn/generate-csv@link:packages/kbn-generate-csv":
   version "0.0.0"
   uid ""
@@ -5293,7 +5289,43 @@
   version "0.0.0"
   uid ""
 
+"@kbn/reporting-export-types-csv-common@link:packages/kbn-reporting/export_types/csv_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-csv@link:packages/kbn-reporting/export_types/csv":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-pdf-common@link:packages/kbn-reporting/export_types/pdf_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-pdf@link:packages/kbn-reporting/export_types/pdf":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-png-common@link:packages/kbn-reporting/export_types/png_common":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-export-types-png@link:packages/kbn-reporting/export_types/png":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-mocks-server@link:packages/kbn-reporting/mocks_server":
+  version "0.0.0"
+  uid ""
+
 "@kbn/reporting-plugin@link:x-pack/plugins/reporting":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-public@link:packages/kbn-reporting/public":
+  version "0.0.0"
+  uid ""
+
+"@kbn/reporting-server@link:packages/kbn-reporting/server":
   version "0.0.0"
   uid ""
 
@@ -11506,10 +11538,15 @@ axe-core@^3.5.5:
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-3.5.6.tgz#e762a90d7f6dbd244ceacb4e72760ff8aad521b5"
   integrity sha512-LEUDjgmdJoA3LqklSTwKYqkjcZ4HKc4ddIYGSAiSkr46NTjzg2L9RNB+lekO9P7Dlpa87+hBtzc2Fzn/+GUWMQ==
 
-axe-core@^4.2.0, axe-core@^4.6.1, axe-core@^4.6.2:
+axe-core@^4.2.0, axe-core@^4.6.2:
   version "4.7.2"
   resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.7.2.tgz#040a7342b20765cb18bb50b628394c21bccc17a0"
   integrity sha512-zIURGIS1E1Q4pcrMjp+nnEh+16G56eG/MUllJH8yEvw7asDo7Ac9uhC9KIH5jzpITueEZolfYglnCGIuSBz39g==
+
+axe-core@^4.8.2:
+  version "4.8.2"
+  resolved "https://registry.yarnpkg.com/axe-core/-/axe-core-4.8.2.tgz#2f6f3cde40935825cf4465e3c1c9e77b240ff6ae"
+  integrity sha512-/dlp0fxyM3R8YW7MFzaHWXrf4zzbr0vaYb23VBFCl83R7nWNPg/yaQw2Dc8jzCMmDVLhSdzH8MjrsuIUuvX+6g==
 
 axios@^0.21.1:
   version "0.21.4"

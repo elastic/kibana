@@ -10,7 +10,7 @@ import { EuiSwitch, IconType, EuiFormRow, EuiButtonGroup, EuiSelect } from '@ela
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
-import { ToolbarButtonProps } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 import {
   EuiIconAxisBottom,
   EuiIconAxisLeft,
@@ -131,7 +131,7 @@ const popoverConfig = (
   isHorizontal: boolean
 ): {
   icon: IconType;
-  groupPosition: ToolbarButtonProps['groupPosition'];
+  groupPosition: ToolbarButtonProps<'iconButton'>['groupPosition'];
   popoverTitle: string;
   buttonDataTestSubj: string;
 } => {

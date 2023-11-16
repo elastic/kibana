@@ -30,7 +30,8 @@
     "@kbn/storybook",
     "@kbn/ui-actions-plugin",
     "@kbn/saved-objects-finder-plugin",
-    "@kbn/content-management-plugin"
+    "@kbn/content-management-plugin",
+    "@kbn/shared-ux-button-toolbar"
   ],
   "exclude": ["target/**/*"]
 }

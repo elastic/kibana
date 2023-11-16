@@ -365,3 +365,90 @@ test('format() meta can not override tracing properties', () => {
     transaction: { id: 'transaction_override' },
   });
 });
+
+test('format() meta.toJSON() is used if own property', () => {
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        meta: {
+          server: {
+            address: 'localhost',
+          },
+          service: {
+            version: '1',
+          },
+          // @ts-expect-error cannot override @timestamp
+          toJSON() {
+            return {
+              server: {
+                address: 'localhost',
+              },
+            };
+          },
+        },
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+    server: {
+      address: 'localhost',
+    },
+  });
+});
+
+test('format() meta.toJSON() is used if present on prototype', () => {
+  class SomeClass {
+    foo: string = 'bar';
+    hello: string = 'dolly';
+
+    toJSON() {
+      return {
+        foo: this.foo,
+      };
+    }
+  }
+
+  const someInstance = new SomeClass();
+
+  const layout = new JsonLayout();
+  expect(
+    JSON.parse(
+      layout.format({
+        message: 'foo',
+        timestamp,
+        level: LogLevel.Debug,
+        context: 'bar',
+        pid: 3,
+        // @ts-expect-error meta is not of the correct type
+        meta: someInstance,
+      })
+    )
+  ).toStrictEqual({
+    ecs: { version: expect.any(String) },
+    '@timestamp': '2012-02-01T09:30:22.011-05:00',
+    message: 'foo',
+    log: {
+      level: 'DEBUG',
+      logger: 'bar',
+    },
+    process: {
+      pid: 3,
+    },
+    foo: 'bar',
+  });
+});

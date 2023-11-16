@@ -338,7 +338,7 @@ export class ActionExecutor {
           })
             .then((tokenTracking) => {
               if (tokenTracking != null) {
-                set(event, 'kibana.action.execution.get_ai.usage', {
+                set(event, 'kibana.action.execution.gen_ai.usage', {
                   total_tokens: tokenTracking.total_tokens,
                   prompt_tokens: tokenTracking.prompt_tokens,
                   completion_tokens: tokenTracking.completion_tokens,
