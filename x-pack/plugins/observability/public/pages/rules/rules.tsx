@@ -10,10 +10,10 @@ import { useHistory } from 'react-router-dom';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useLoadRuleTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
+import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
@@ -56,7 +56,9 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
   ]);
 
   const filteredRuleTypes = useGetFilteredRuleTypes();
-  const { ruleTypes } = useLoadRuleTypes({
+  const {
+    ruleTypesState: { data: ruleTypes },
+  } = useLoadRuleTypesQuery({
     filteredRuleTypes,
   });
 

@@ -50,14 +50,17 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     );
   };
 
-  const { data, isSuccess, isFetching, isInitialLoading, isLoading } = useQuery({
+  const { data, isSuccess, isFetching, isInitialLoading, isLoading, error } = useQuery({
     queryKey: ['loadRuleTypes'],
     queryFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
+    staleTime: 60 * 1000,
   });
 
-  const filteredIndex = data ? getFilteredIndex(data, filteredRuleTypes) : new Map();
+  const filteredIndex = data
+    ? getFilteredIndex(data, filteredRuleTypes)
+    : new Map<string, RuleType>();
 
   const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
   const authorizedRuleTypes = [...filteredIndex.values()];
@@ -73,6 +76,7 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
       initialLoad: isLoading || isInitialLoading,
       isLoading: isLoading || isFetching,
       data: filteredIndex,
+      error,
     },
     hasAnyAuthorizedRuleType,
     authorizedRuleTypes,

@@ -90,8 +90,8 @@ import { VIEW_LICENSE_OPTIONS_LINK } from '../../../common/constants';
 import { MULTI_CONSUMER_RULE_TYPE_IDS } from '../../constants';
 import { SectionLoading } from '../../components/section_loading';
 import { RuleFormConsumerSelection, VALID_CONSUMERS } from './rule_form_consumer_selection';
-import { useLoadRuleTypes } from '../../hooks/use_load_rule_types';
 import { getInitialInterval } from './get_initial_interval';
+import { useLoadRuleTypesQuery } from '../../hooks/use_load_rule_types_query';
 
 const ENTER_KEY = 13;
 
@@ -172,7 +172,7 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  filteredRuleTypes: ruleTypeToFilter,
+  filteredRuleTypes: ruleTypeToFilter = [],
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,
@@ -219,11 +219,13 @@ export const RuleForm = ({
   const [solutionsFilter, setSolutionFilter] = useState<string[]>([]);
   let hasDisabledByLicenseRuleTypes: boolean = false;
   const {
-    ruleTypes,
-    error: loadRuleTypesError,
-    ruleTypeIndex,
-    ruleTypesIsLoading,
-  } = useLoadRuleTypes({ filteredRuleTypes: ruleTypeToFilter });
+    ruleTypesState: {
+      data: ruleTypeIndex,
+      error: loadRuleTypesError,
+      isLoading: ruleTypesIsLoading,
+    },
+  } = useLoadRuleTypesQuery({ filteredRuleTypes: ruleTypeToFilter });
+  const ruleTypes = useMemo(() => [...ruleTypeIndex.values()], [ruleTypeIndex]);
 
   // load rule types
   useEffect(() => {
