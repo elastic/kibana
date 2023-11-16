@@ -9,6 +9,10 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 
 import { SECURITY_TELEMETRY_URL } from '@kbn/security-solution-plugin/common/constants';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 
 /**
  * Gets the stats from the stats endpoint within specifically the security_solutions application.
@@ -23,7 +27,8 @@ export const getSecurityTelemetryStats = async (
   const response = await supertest
     .get(SECURITY_TELEMETRY_URL)
     .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '1')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '1')
+    .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
     .send({ unencrypted: true, refreshCache: true });
   if (response.status !== 200) {
     log.error(

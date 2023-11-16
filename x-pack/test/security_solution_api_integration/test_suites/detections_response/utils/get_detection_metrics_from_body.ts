@@ -6,7 +6,6 @@
  */
 
 import type { DetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/types';
-import type { RiskEngineMetrics } from '@kbn/security-solution-plugin/server/usage/risk_engine/types';
 
 /**
  * Given a body this will return the detection metrics from it.
@@ -23,21 +22,4 @@ export const getDetectionMetricsFromBody = (
   }>
 ): DetectionMetrics => {
   return body[0].stats.stack_stats.kibana.plugins.security_solution.detectionMetrics;
-};
-
-/**
- * Given a body this will return the risk engine metrics from it.
- * @param body The Stats body
- * @returns Detection metrics
- */
-export const getRiskEngineMetricsFromBody = (
-  body: Array<{
-    stats: {
-      stack_stats: {
-        kibana: { plugins: { security_solution: { riskEngineMetrics: {} } } };
-      };
-    };
-  }>
-): RiskEngineMetrics => {
-  return body[0].stats.stack_stats.kibana.plugins.security_solution.riskEngineMetrics;
 };

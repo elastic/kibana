@@ -4,14 +4,4 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export interface Paginated<T> {
-  total: number;
-  page: number;
-  perPage: number;
-  results: T[];
-}
-
-export interface Pagination {
-  page: number;
-  perPage: number;
-}
+export * from './delete_all_event_log_execution_events';

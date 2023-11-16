@@ -4,15 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-import { FtrProviderContext } from '../../../common/ftr_provider_context';
-
-// eslint-disable-next-line import/no-default-export
 export default ({ loadTestFile }: FtrProviderContext): void => {
   describe('Detection rule type telemetry', function () {
     loadTestFile(require.resolve('./usage_collector/all_types'));
     loadTestFile(require.resolve('./usage_collector/detection_rules'));
     loadTestFile(require.resolve('./usage_collector/detection_rule_status'));
+    loadTestFile(require.resolve('./usage_collector/detection_rules_legacy_action'));
 
     loadTestFile(require.resolve('./task_based/all_types'));
     loadTestFile(require.resolve('./task_based/detection_rules'));

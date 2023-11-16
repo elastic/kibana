@@ -1,6 +1,6 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
-exports[`UpdateSLO when the revision bumps indexes a temporary summary document 1`] = `
+exports[`UpdateSLO index a temporary summary document 1`] = `
 Array [
   Object {
     "document": Object {
@@ -44,7 +44,7 @@ Array [
       },
     },
     "id": "slo-unique-id",
-    "index": ".slo-observability.summary-v3.temp",
+    "index": ".slo-observability.summary-v2.temp",
     "refresh": true,
   },
 ]

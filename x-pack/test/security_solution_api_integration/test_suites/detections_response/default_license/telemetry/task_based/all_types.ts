@@ -6,17 +6,18 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../../../common/ftr_provider_context';
+
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   deleteAllAlerts,
   getSecurityTelemetryStats,
   removeTimeFieldsFromTelemetryStats,
-} from '../../../../utils';
-import { deleteAllExceptions } from '../../../../../lists_api_integration/utils';
+} from '../../../utils';
+import { deleteAllExceptions } from '../../../../../../lists_api_integration/utils';
 
-// eslint-disable-next-line import/no-default-export
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -24,7 +25,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('All task telemetry types generically', async () => {
+  describe('@ess @serverless All task telemetry types generically', async () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -34,7 +35,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
@@ -43,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllExceptions(supertest, log);
     });
 
-    it('should only have task metric values when no rules are running', async () => {
+    it('@skipInQA should only have task metric values when no rules are running', async () => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
         removeTimeFieldsFromTelemetryStats(stats);
