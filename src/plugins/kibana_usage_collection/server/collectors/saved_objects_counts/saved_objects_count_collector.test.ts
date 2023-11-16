@@ -16,15 +16,21 @@ import { registerSavedObjectsCountUsageCollector } from './saved_objects_count_c
 describe('saved_objects_count_collector', () => {
   const usageCollectionMock = createUsageCollectionSetupMock();
   const fetchContextMock = createCollectorFetchContextMock();
+  const mockGetSoClientWithHiddenIndices = jest.fn().mockResolvedValue(fetchContextMock.soClient);
 
   beforeAll(() =>
-    registerSavedObjectsCountUsageCollector(usageCollectionMock, () =>
-      Promise.resolve(['type_one', 'type_two', 'type-three', 'type-four'])
+    registerSavedObjectsCountUsageCollector(
+      usageCollectionMock,
+      () => Promise.resolve(['type_one', 'type_two', 'type-three', 'type-four']),
+      mockGetSoClientWithHiddenIndices
     )
   );
   afterAll(() => jest.clearAllTimers());
 
-  afterEach(() => getSavedObjectsCountsMock.mockReset());
+  afterEach(() => {
+    getSavedObjectsCountsMock.mockReset();
+    mockGetSoClientWithHiddenIndices.mockClear();
+  });
 
   test('registered collector is set', () => {
     expect(usageCollectionMock.makeUsageCollector).toHaveBeenCalled();
@@ -48,6 +54,8 @@ describe('saved_objects_count_collector', () => {
       non_registered_types: [],
       others: 0,
     });
+
+    expect(mockGetSoClientWithHiddenIndices).toBeCalledTimes(1);
   });
 
   test('should return some values when the aggregations return something', async () => {
@@ -78,10 +86,11 @@ describe('saved_objects_count_collector', () => {
       total: 153,
     });
 
+    expect(mockGetSoClientWithHiddenIndices).toBeCalledTimes(1);
     expect(getSavedObjectsCountsMock).toHaveBeenCalledWith(
       fetchContextMock.soClient,
       ['type_one', 'type_two', 'type-three', 'type-four'],
-      false
+      { exclusive: false, namespaces: ['*'] }
     );
   });
 });
