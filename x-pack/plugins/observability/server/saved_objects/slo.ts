@@ -17,7 +17,6 @@ type StoredSLOBefore890 = StoredSLO & {
     isCalendar?: boolean;
   };
 };
-
 const migrateSlo890: SavedObjectMigrationFn<StoredSLOBefore890, StoredSLO> = (doc) => {
   const { timeWindow, ...other } = doc.attributes;
   return {
@@ -38,6 +37,21 @@ export const slo: SavedObjectsType = {
   name: SO_SLO_TYPE,
   hidden: false,
   namespaceType: 'multiple-isolated',
+  switchToModelVersionAt: '8.10.0',
+  modelVersions: {
+    1: {
+      changes: [
+        { type: 'mappings_addition', addedMappings: { version: { type: 'long' } } },
+        {
+          type: 'data_backfill',
+          backfillFn: (doc) => {
+            // we explicitely set the version to 1, so we know which SLOs requires a migration to the following version.
+            return { attributes: { version: doc.attributes.version ?? 1 } };
+          },
+        },
+      ],
+    },
+  },
   mappings: {
     dynamic: false,
     properties: {
@@ -53,6 +67,7 @@ export const slo: SavedObjectsType = {
       budgetingMethod: { type: 'keyword' },
       enabled: { type: 'boolean' },
       tags: { type: 'keyword' },
+      version: { type: 'long' },
     },
   },
   management: {
