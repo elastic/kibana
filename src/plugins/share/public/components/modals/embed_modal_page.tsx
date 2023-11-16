@@ -13,6 +13,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiModal,
   EuiRadioGroup,
@@ -29,7 +30,6 @@ import { format as formatUrl, parse as parseUrl } from 'url';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService, UrlParamExtension } from '../../types';
 import { ExportUrlAsType } from '../url_panel_content';
-import { makeIframeTag, makeUrlEmbeddable, renderWithIconTip, UrlParams } from './helpers';
 
 interface EmbedModalPageProps {
   isEmbedded?: boolean;
@@ -73,6 +73,42 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
+
+  interface UrlParams {
+    [extensionName: string]: {
+      [queryParam: string]: boolean;
+    };
+  }
+
+  const makeUrlEmbeddable = (url: string): string => {
+    const embedParam = '?embed=true';
+    const urlHasQueryString = url.indexOf('?') !== -1;
+
+    if (urlHasQueryString) {
+      return url.replace('?', `${embedParam}&`);
+    }
+
+    return `${url}${embedParam}`;
+  };
+
+  const makeIframeTag = (url?: string) => {
+    if (!url) {
+      return;
+    }
+
+    return `<iframe src="${url}" height="600" width="800"></iframe>`;
+  };
+
+  const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+    return (
+      <EuiFlexGroup gutterSize="none" responsive={false}>
+        <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip content={tipContent} position="bottom" />
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    );
+  };
 
   const getUrlParamExtensions = (url: string): string => {
     return urlParams
@@ -234,14 +270,13 @@ export const EmbedModal: FC<EmbedModalPageProps> = (props: EmbedModalPageProps) 
     const shortUrlLabel = (
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
-    const switchLabel =
-      isCreatingShortUrl !== undefined ? (
-        <span>
-          <EuiLoadingSpinner size="s" /> {shortUrlLabel}
-        </span>
-      ) : (
-        shortUrlLabel
-      );
+    const switchLabel = Boolean(isCreatingShortUrl) ? (
+      <span>
+        <EuiLoadingSpinner size="s" /> {shortUrlLabel}
+      </span>
+    ) : (
+      shortUrlLabel
+    );
     const switchComponent = (
       <EuiSwitch
         label={switchLabel}

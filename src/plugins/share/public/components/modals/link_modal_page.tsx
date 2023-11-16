@@ -12,6 +12,7 @@ import {
   EuiFlexItem,
   EuiForm,
   EuiFormRow,
+  EuiIconTip,
   EuiLoadingSpinner,
   EuiModal,
   EuiRadioGroup,
@@ -27,7 +28,6 @@ import { i18n } from '@kbn/i18n';
 import { AnonymousAccessServiceContract, LocatorPublic } from '../../../common';
 import { BrowserUrlService } from '../../types';
 import { ExportUrlAsType } from '../url_panel_content';
-import { makeIframeTag, makeUrlEmbeddable, renderWithIconTip, UrlParams } from './helpers';
 
 interface LinksModalPageProps {
   isEmbedded: boolean;
@@ -58,7 +58,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   } = props;
 
   const isMounted = useMountedState();
-  const [, isCreatingShortUrl] = useState<boolean>(false);
+  let [shortUrl, isCreatingShortUrl] = useState<boolean | string>(false);
   const [urlParams] = useState<undefined | UrlParams>(undefined);
   const [, setShortUrl] = useState<EuiSwitchEvent | string | boolean>();
   const [shortUrlErrorMsg, setShortUrlErrorMsg] = useState<string | undefined>(undefined);
@@ -68,6 +68,42 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
   const [shortUrlCache, setShortUrlCache] = useState<undefined | string>(undefined);
   const [anonymousAccessParameters] = useState<null | AnonymousAccessServiceContract>(null);
   const [usePublicUrl] = useState<boolean>(false);
+
+interface UrlParams {
+  [extensionName: string]: {
+    [queryParam: string]: boolean;
+  };
+}
+
+const makeUrlEmbeddable = (url: string): string => {
+  const embedParam = '?embed=true';
+  const urlHasQueryString = url.indexOf('?') !== -1;
+
+  if (urlHasQueryString) {
+    return url.replace('?', `${embedParam}&`);
+  }
+
+  return `${url}${embedParam}`;
+};
+
+const makeIframeTag = (url?: string) => {
+  if (!url) {
+    return;
+  }
+
+  return `<iframe src="${shortUrl}" height="600" width="800"></iframe>`;
+};
+
+const renderWithIconTip = (child: React.ReactNode, tipContent: React.ReactNode) => {
+  return (
+    <EuiFlexGroup gutterSize="none" responsive={false}>
+      <EuiFlexItem grow={false}>{child}</EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiIconTip content={tipContent} position="bottom" />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+};
 
   const getUrlParamExtensions = (url: string): string => {
     return urlParams
@@ -89,7 +125,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
     url = isEmbedded ? makeUrlEmbeddable(url) : url;
     url = urlParams ? getUrlParamExtensions(url) : url;
 
-    return url;
+    return shortUrl = url;
   };
 
   const getSnapshotUrl = (forSavedObject?: boolean) => {
@@ -180,7 +216,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       }
 
       setShortUrlCache(undefined);
-      setShortUrl(false);
+      setShortUrl(true);
       isCreatingShortUrl(false);
       setShortUrlErrorMsg(
         i18n.translate('share.urlPanel.unableCreateShortUrlErrorMessage', {
@@ -191,7 +227,6 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
         })
       );
     }
-    setUrl();
   };
 
   const setUrl = () => {
@@ -199,7 +234,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
     if (exportUrlAs === ExportUrlAsType.EXPORT_URL_AS_SAVED_OBJECT) {
       url = getSavedObjectUrl();
-    } else if (setShortUrl !== undefined) {
+    } else if (shortUrl) {
       url = shortUrlCache;
     } else {
       url = getSnapshotUrl();
@@ -213,7 +248,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       url = makeIframeTag(url);
     }
 
-    setUrl();
+    setUrl(url)
   };
 
   const handleShortUrlChange = async (evt: EuiSwitchEvent) => {
@@ -221,7 +256,6 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
 
     if (!isChecked || shortUrlCache !== undefined) {
       setShortUrl(true);
-      setUrl();
       return;
     }
 
@@ -237,7 +271,7 @@ export const LinkModal: FC<LinksModalPageProps> = (props: LinksModalPageProps) =
       <FormattedMessage id="share.urlPanel.shortUrlLabel" defaultMessage="Short URL" />
     );
     const switchLabel =
-      isCreatingShortUrl !== undefined ? (
+     Boolean(isCreatingShortUrl) ? (
         <span>
           <EuiLoadingSpinner size="s" /> {shortUrlLabel}
         </span>
