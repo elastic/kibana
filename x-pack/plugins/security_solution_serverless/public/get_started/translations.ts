@@ -67,7 +67,7 @@ export const ADD_AND_VALIDATE_DATA_TITLE = i18n.translate(
 export const GET_STARTED_WITH_ALERTS_TITLE = i18n.translate(
   'xpack.securitySolutionServerless.getStarted.togglePanel.getSetUp.title',
   {
-    defaultMessage: 'Add and validate your data',
+    defaultMessage: 'Get started with alerts',
   }
 );
 

@@ -7,6 +7,7 @@
 
 import type { ProductLine } from '../../common/product';
 import type { CardId, StepId } from './types';
+
 import {
   QuickStartSectionCardsId,
   AddAndValidateYourDataCardsId,
@@ -15,6 +16,7 @@ import {
 
 import { storage } from '../common/lib/storage';
 import { defaultFinishedSteps, isDefaultFinishedCardStep } from './helpers';
+import { getSections } from './sections';
 
 export const ACTIVE_PRODUCTS_STORAGE_KEY = 'securitySolution.getStarted.activeProducts';
 export const FINISHED_STEPS_STORAGE_KEY = 'securitySolution.getStarted.finishedSteps';
@@ -30,6 +32,22 @@ export const defaultExpandedCards = {
 };
 
 export const getStartedStorage = {
+  setDefaultFinishedSteps: (cardId: CardId) => {
+    const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
+    const defaultFinishedStepsByCardId = defaultFinishedSteps[cardId];
+    const hasDefaultFinishedSteps = defaultFinishedStepsByCardId != null;
+    if (!hasDefaultFinishedSteps) {
+      return;
+    }
+
+    storage.set(FINISHED_STEPS_STORAGE_KEY, {
+      ...allFinishedSteps,
+      [cardId]: Array.from(
+        // dedupe card steps
+        new Set([...(defaultFinishedStepsByCardId ?? []), ...(allFinishedSteps[cardId] ?? [])])
+      ),
+    });
+  },
   getActiveProductsFromStorage: () => {
     const activeProducts: ProductLine[] = storage.get(ACTIVE_PRODUCTS_STORAGE_KEY);
     return activeProducts ?? [];
@@ -46,22 +64,20 @@ export const getStartedStorage = {
     return activeProducts;
   },
   getFinishedStepsFromStorageByCardId: (cardId: CardId) => {
-    const finishedSteps = storage.get(FINISHED_STEPS_STORAGE_KEY) ?? {};
-    const card: StepId[] = finishedSteps[cardId] ?? [];
-    return card;
+    const finishedSteps = getStartedStorage.getAllFinishedStepsFromStorage();
+    const steps: StepId[] = finishedSteps[cardId] ?? [];
+    return steps;
   },
   getAllFinishedStepsFromStorage: () => {
     const allFinishedSteps: Record<CardId, StepId[]> = storage.get(FINISHED_STEPS_STORAGE_KEY);
-
     if (allFinishedSteps == null) {
       storage.set(FINISHED_STEPS_STORAGE_KEY, defaultFinishedSteps);
     } else {
-      if (
-        allFinishedSteps[QuickStartSectionCardsId.createFirstProject] == null ||
-        allFinishedSteps[QuickStartSectionCardsId.createFirstProject].length === 0
-      ) {
-        storage.set(FINISHED_STEPS_STORAGE_KEY, { ...allFinishedSteps, ...defaultFinishedSteps });
-      }
+      getSections().forEach((section) => {
+        section.cards?.forEach((card) => {
+          getStartedStorage.setDefaultFinishedSteps(card.id);
+        });
+      });
     }
     return storage.get(FINISHED_STEPS_STORAGE_KEY);
   },
