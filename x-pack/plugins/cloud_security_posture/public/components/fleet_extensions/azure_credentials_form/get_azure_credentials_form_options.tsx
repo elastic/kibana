@@ -8,8 +8,6 @@
 import { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { AzureCredentialsType } from '../../../../common/types';
 
 export type AzureCredentialsFields = Record<string, { label: string; type?: 'password' | 'text' }>;
@@ -48,17 +46,6 @@ export const getInputVarsFields = (input: NewPackagePolicyInput, fields: AzureCr
     });
 
 export const DEFAULT_AZURE_MANUAL_CREDENTIALS_TYPE = 'service_principal_with_client_secret';
-
-const ManagedIdentityDescription = (
-  <div>
-    <EuiText color={'subdued'} size="s">
-      <FormattedMessage
-        id="xpack.csp.azureIntegration.managedIdentityDescription"
-        defaultMessage="Ensure the agent is deployed on a resource that supports managed identities (e.g., Azure Virtual). No explicit credentials need to be provided; Azure handles the authentication."
-      />
-    </EuiText>
-  </div>
-);
 
 const I18N_TENANT_ID = i18n.translate('xpack.csp.azureIntegration.tenantIdLabel', {
   defaultMessage: 'Tenant ID',

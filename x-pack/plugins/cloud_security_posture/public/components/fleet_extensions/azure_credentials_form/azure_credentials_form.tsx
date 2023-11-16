@@ -201,7 +201,7 @@ const AzureCredentialTypeSelector = ({
   </EuiFormRow>
 );
 
-const ManualSetup = ({ integrationLink }: { integrationLink: string }) => {
+const TemporaryManualSetup = ({ integrationLink }: { integrationLink: string }) => {
   return (
     <>
       <EuiText color="subdued" size="s">
@@ -246,6 +246,7 @@ const ManualSetup = ({ integrationLink }: { integrationLink: string }) => {
 };
 
 const AZURE_MINIMUM_PACKAGE_VERSION = '1.6.0';
+const AZURE_MANUAL_FIELDS_PACKAGE_VERSION = '1.7.0';
 
 const AzureInputVarFields = ({
   fields,
@@ -319,6 +320,10 @@ export const AzureCredentialsForm = ({
     cleanPackageVersion,
     AZURE_MINIMUM_PACKAGE_VERSION
   );
+  const isPackageVersionValidForManualFields = !semverLt(
+    cleanPackageVersion,
+    AZURE_MANUAL_FIELDS_PACKAGE_VERSION
+  );
 
   useEffect(() => {
     setIsValid(isPackageVersionValidForAzure);
@@ -361,7 +366,10 @@ export const AzureCredentialsForm = ({
       {setupFormat === AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE && (
         <ArmTemplateSetup hasArmTemplateUrl={hasArmTemplateUrl} input={input} />
       )}
-      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && (
+      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && !isPackageVersionValidForManualFields && (
+        <TemporaryManualSetup integrationLink={integrationLink} />
+      )}
+      {setupFormat === AZURE_MANUAL_CREDENTIAL_TYPE && isPackageVersionValidForManualFields && (
         <>
           <AzureCredentialTypeSelector
             type={azureCredentialsType}
