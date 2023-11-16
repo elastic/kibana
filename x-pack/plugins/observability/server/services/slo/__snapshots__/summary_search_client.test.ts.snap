@@ -3,7 +3,7 @@
 exports[`Summary Search Client returns the summary documents without duplicate temporary summary documents 1`] = `
 Array [
   Object {
-    "index": ".slo-observability.summary-v2*",
+    "index": ".slo-observability.summary-v3*",
     "query": Object {
       "bool": Object {
         "filter": Array [
