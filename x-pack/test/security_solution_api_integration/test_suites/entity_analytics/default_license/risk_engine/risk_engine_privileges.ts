@@ -96,49 +96,48 @@ const USERNAME_TO_ROLES = {
 };
 
 export default ({ getService }: FtrProviderContext) => {
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
-  const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
-  const security = getService('security');
+  describe('@ess privileges_apis', () => {
+    const supertestWithoutAuth = getService('supertestWithoutAuth');
+    const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
+    const security = getService('security');
 
-  const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
-    return await security.role.create(name, privileges);
-  };
+    const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
+      return await security.role.create(name, privileges);
+    };
 
-  const createUser = async ({
-    username,
-    password,
-    roles,
-  }: {
-    username: string;
-    password: string;
-    roles: string[];
-  }) => {
-    return await security.user.create(username, {
+    const createUser = async ({
+      username,
       password,
       roles,
-      full_name: username.replace('_', ' '),
-      email: `${username}@elastic.co`,
-    });
-  };
+    }: {
+      username: string;
+      password: string;
+      roles: string[];
+    }) => {
+      return await security.user.create(username, {
+        password,
+        roles,
+        full_name: username.replace('_', ' '),
+        email: `${username}@elastic.co`,
+      });
+    };
 
-  async function createPrivilegeTestUsers() {
-    const rolePromises = ROLES.map((role) => createRole(role));
+    async function createPrivilegeTestUsers() {
+      const rolePromises = ROLES.map((role) => createRole(role));
 
-    await Promise.all(rolePromises);
-    const userPromises = Object.entries(USERNAME_TO_ROLES).map(([username, roles]) =>
-      createUser({ username, roles, password: USER_PASSWORD })
-    );
+      await Promise.all(rolePromises);
+      const userPromises = Object.entries(USERNAME_TO_ROLES).map(([username, roles]) =>
+        createUser({ username, roles, password: USER_PASSWORD })
+      );
 
-    return Promise.all(userPromises);
-  }
+      return Promise.all(userPromises);
+    }
 
-  const getPrivilegesForUsername = async (username: string) =>
-    riskEngineRoutes.privilegesForUser({
-      username,
-      password: USER_PASSWORD,
-    });
-
-  describe('@ess @serverless privileges_apis', () => {
+    const getPrivilegesForUsername = async (username: string) =>
+      riskEngineRoutes.privilegesForUser({
+        username,
+        password: USER_PASSWORD,
+      });
     before(async () => {
       await createPrivilegeTestUsers();
     });
