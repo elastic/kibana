@@ -14,7 +14,6 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const queryBar = getService('queryBar');
   const filterBar = getService('filterBar');
-  const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
 
