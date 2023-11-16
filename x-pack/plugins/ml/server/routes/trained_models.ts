@@ -193,17 +193,18 @@ export function trainedModelsRoutes(
           const filteredModels = filterForEnabledFeatureModels(result, getEnabledFeatures());
 
           try {
-            const jobIdsString = filteredModels.reduce((jobIdsStr, currentModel, idx) => {
-              let id = currentModel.metadata?.analytics_config?.id ?? '';
-              if (id !== '') {
-                id = `${idx > 0 ? ',' : ''}${id}*`;
-              }
-              return `${jobIdsStr}${id}`;
-            }, '');
+            const jobIds = filteredModels
+              .map((model) => {
+                const id = model.metadata?.analytics_config?.id;
+                if (id) {
+                  return `${id}*`;
+                }
+              })
+              .filter((id) => id !== undefined);
 
-            if (jobIdsString !== '') {
+            if (jobIds.length) {
               const { data_frame_analytics: jobs } = await mlClient.getDataFrameAnalytics({
-                id: jobIdsString,
+                id: jobIds.join(','),
                 allow_no_match: true,
               });
 
