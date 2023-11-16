@@ -16,6 +16,7 @@ import type {
   XYState,
   FormulaPublicApi,
   XYLayerConfig,
+  FillStyle,
 } from '@kbn/lens-plugin/public';
 export type LensAttributes = TypedLensByValueInput['attributes'];
 
@@ -87,5 +88,6 @@ export type FormulaValueConfig = Omit<LensFormula, 'formula'> & {
 
 export type StaticValueConfig = Omit<LensFormula, 'formula'> & {
   color?: string;
+  fill?: FillStyle;
   value: string;
 };

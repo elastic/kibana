@@ -152,7 +152,7 @@ describe('Timelines', (): void => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
-      openTimelineUsingToggle();
+      createNewTimeline();
     });
 
     it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {

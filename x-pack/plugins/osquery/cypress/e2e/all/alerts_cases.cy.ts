@@ -71,6 +71,7 @@ describe('Alert Event Details - Cases', { tags: ['@ess', '@serverless'] }, () =>
       cy.contains(/^\d+ agen(t|ts) selected/);
       cy.contains('Run a set of queries in a pack').click();
       cy.get(OSQUERY_FLYOUT_BODY_EDITOR).should('not.exist');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('select-live-pack').click().type(`${packName}{downArrow}{enter}`);
       submitQuery();
       cy.get('[aria-label="Add to Case"]').first().click();
