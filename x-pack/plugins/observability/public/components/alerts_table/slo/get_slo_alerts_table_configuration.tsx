@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
 import type { GetRenderCellValue } from '@kbn/triggers-actions-ui-plugin/public';
 import { TIMESTAMP } from '@kbn/rule-data-utils';
 import { SortOrder } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import {
-  AlertsTableConfigurationRegistry,
-  RenderCustomActionsRowArgs,
-} from '@kbn/triggers-actions-ui-plugin/public/types';
+import { AlertsTableConfigurationRegistry } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { casesFeatureId, observabilityFeatureId } from '../../../../common';
 import { getRenderCellValue } from './render_cell_value';
 import { columns } from './default_columns';
-import {
-  AlertActions,
-  Props as AlertActionsProps,
-} from '../../../pages/alerts/components/alert_actions';
 import { useGetAlertFlyoutComponents } from '../../alerts_flyout/use_get_alert_flyout_components';
 import type { ObservabilityRuleTypeRegistry } from '../../../rules/create_observability_rule_type_registry';
 import type { ConfigSchema } from '../../../plugin';
