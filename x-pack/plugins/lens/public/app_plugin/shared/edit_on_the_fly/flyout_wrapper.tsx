@@ -14,10 +14,10 @@ import {
   EuiFlyoutFooter,
   EuiFlyoutHeader,
   EuiTitle,
-  EuiIcon,
   EuiToolTip,
   EuiButton,
   EuiLink,
+  EuiBetaBadge,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -31,6 +31,7 @@ export const FlyoutWrapper = ({
   isInlineFlyoutVisible,
   isScrollable,
   displayFlyoutHeader,
+  language,
   onCancel,
   navigateToLensEditor,
   onApply,
@@ -52,7 +53,8 @@ export const FlyoutWrapper = ({
                   <EuiTitle size="xs">
                     <h2 id="Edit visualization">
                       {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                        defaultMessage: 'Edit visualization',
+                        defaultMessage: 'Edit {lang} visualization',
+                        values: { lang: language },
                       })}
                     </h2>
                   </EuiTitle>
@@ -64,7 +66,7 @@ export const FlyoutWrapper = ({
                         'Technical preview, ES|QL currently offers limited configuration options',
                     })}
                   >
-                    <EuiIcon type="beaker" size="m" />
+                    <EuiBetaBadge label="Lab" iconType="beaker" />
                   </EuiToolTip>
                 </EuiFlexItem>
               </EuiFlexGroup>
@@ -107,7 +109,7 @@ export const FlyoutWrapper = ({
           }
         `}
       >
-        {children}`
+        {children}
       </EuiFlyoutBody>
       {isInlineFlyoutVisible && (
         <EuiFlyoutFooter>

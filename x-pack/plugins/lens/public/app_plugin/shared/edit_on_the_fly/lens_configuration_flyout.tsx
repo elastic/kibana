@@ -19,7 +19,11 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import { isOfAggregateQueryType } from '@kbn/es-query';
+import {
+  getAggregateQueryMode,
+  isOfAggregateQueryType,
+  getLanguageDisplayName,
+} from '@kbn/es-query';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { TextBasedLangEditor } from '@kbn/text-based-languages/public';
 import { useLensSelector, selectFramePublicAPI } from '../../../state_management';
@@ -216,6 +220,8 @@ export function LensEditConfigurationFlyout({
     return selectFramePublicAPI(newState, datasourceMap);
   });
 
+  const textBasedMode = isOfAggregateQueryType(query) ? getAggregateQueryMode(query) : undefined;
+
   if (isLoading) return null;
   // Example is the Discover editing where we dont want to render the text based editor on the panel
   if (!canEditTextBasedQuery) {
@@ -252,6 +258,7 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
+        language={getLanguageDisplayName(textBasedMode)}
         isScrollable={false}
       >
         <EuiFlexGroup

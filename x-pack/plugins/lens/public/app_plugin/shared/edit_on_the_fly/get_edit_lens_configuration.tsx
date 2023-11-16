@@ -166,6 +166,7 @@ export async function getEditLensConfiguration(
           <EuiFlyout
             type="push"
             ownFocus
+            paddingSize="m"
             onClose={() => {
               closeFlyout?.();
             }}

@@ -19,6 +19,7 @@ export interface FlyoutWrapperProps {
   attributesChanged: boolean;
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
+  language?: string;
   onCancel?: () => void;
   onApply?: () => void;
   navigateToLensEditor?: () => void;
