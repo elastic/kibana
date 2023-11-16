@@ -109,6 +109,7 @@ export const DocViewerTable = ({
   columnTypes,
   hit,
   dataView,
+  hideActionsColumn,
   filter,
   onAddColumn,
   onRemoveColumn,
@@ -282,21 +283,23 @@ export const DocViewerTable = ({
   );
 
   const headers = [
-    <EuiTableHeaderCell
-      key="header-cell-actions"
-      align="left"
-      width={showActionsInsideTableCell ? 150 : 62}
-      isSorted={false}
-    >
-      <EuiText size="xs">
-        <strong>
-          <FormattedMessage
-            id="unifiedDocViewer.fieldChooser.discoverField.actions"
-            defaultMessage="Actions"
-          />
-        </strong>
-      </EuiText>
-    </EuiTableHeaderCell>,
+    !hideActionsColumn && (
+      <EuiTableHeaderCell
+        key="header-cell-actions"
+        align="left"
+        width={showActionsInsideTableCell ? 150 : 62}
+        isSorted={false}
+      >
+        <EuiText size="xs">
+          <strong>
+            <FormattedMessage
+              id="unifiedDocViewer.fieldChooser.discoverField.actions"
+              defaultMessage="Actions"
+            />
+          </strong>
+        </EuiText>
+      </EuiTableHeaderCell>
+    ),
     <EuiTableHeaderCell key="header-cell-name" align="left" width="30%" isSorted={false}>
       <EuiText size="xs">
         <strong>
@@ -329,26 +332,28 @@ export const DocViewerTable = ({
         }: FieldRecord) => {
           return (
             <EuiTableRow key={field} className="kbnDocViewer__tableRow" isSelected={pinned}>
-              <EuiTableRowCell
-                key={field + '-actions'}
-                align={showActionsInsideTableCell ? 'left' : 'center'}
-                width={showActionsInsideTableCell ? undefined : 62}
-                className="kbnDocViewer__tableActionsCell"
-                textOnly={false}
-                mobileOptions={MOBILE_OPTIONS}
-              >
-                <TableActions
-                  mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
-                  field={field}
-                  pinned={pinned}
-                  fieldMapping={fieldMapping}
-                  flattenedField={flattenedField}
-                  onFilter={onFilter}
-                  onToggleColumn={onToggleColumn}
-                  ignoredValue={!!ignored}
-                  onTogglePinned={onTogglePinned}
-                />
-              </EuiTableRowCell>
+              {!hideActionsColumn && (
+                <EuiTableRowCell
+                  key={field + '-actions'}
+                  align={showActionsInsideTableCell ? 'left' : 'center'}
+                  width={showActionsInsideTableCell ? undefined : 62}
+                  className="kbnDocViewer__tableActionsCell"
+                  textOnly={false}
+                  mobileOptions={MOBILE_OPTIONS}
+                >
+                  <TableActions
+                    mode={showActionsInsideTableCell ? 'inline' : 'as_popover'}
+                    field={field}
+                    pinned={pinned}
+                    fieldMapping={fieldMapping}
+                    flattenedField={flattenedField}
+                    onFilter={onFilter}
+                    onToggleColumn={onToggleColumn}
+                    ignoredValue={!!ignored}
+                    onTogglePinned={onTogglePinned}
+                  />
+                </EuiTableRowCell>
+              )}
               <EuiTableRowCell
                 key={field + '-field-name'}
                 align="left"
@@ -387,7 +392,7 @@ export const DocViewerTable = ({
         }
       );
     },
-    [onToggleColumn, onTogglePinned, showActionsInsideTableCell, searchText]
+    [hideActionsColumn, showActionsInsideTableCell, onToggleColumn, onTogglePinned, searchText]
   );
 
   const rowElements = [

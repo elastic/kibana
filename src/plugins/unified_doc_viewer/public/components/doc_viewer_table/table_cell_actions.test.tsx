@@ -29,7 +29,7 @@ describe('TableActions', () => {
     expect(screen.getByTestId('addFilterOutValueButton-message')).toBeDisabled();
     expect(screen.getByTestId('addExistsFilterButton-message')).toBeDisabled();
     expect(screen.getByTestId('toggleColumnButton-message')).not.toBeDisabled();
-    expect(screen.getByTestId('togglePinFilterButton-message')).toBeDisabled();
+    expect(screen.getByTestId('togglePinFilterButton-message')).not.toBeDisabled();
   });
 
   it('should render the panels correctly for defined onFilter function', () => {

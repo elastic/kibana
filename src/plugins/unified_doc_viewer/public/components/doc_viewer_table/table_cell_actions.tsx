@@ -193,7 +193,6 @@ export const TableActions = ({
           'aria-label': pinnedAriaLabel,
           icon: pinnedIconType,
           'data-test-subj': `togglePinFilterButton-${field}`,
-          disabled: !onFilter,
           onClick: onClickAction(togglePinned),
         },
       ],
