@@ -19,8 +19,10 @@ import {
   SavedObjectReference,
 } from '@kbn/core/server';
 import {
+  createTaskRunError,
   LoadIndirectParamsResult,
   RunContext,
+  TaskErrorSource,
   throwRetryableError,
   throwUnrecoverableError,
 } from '@kbn/task-manager-plugin/server';
@@ -44,7 +46,7 @@ import {
 } from './action_execution_source';
 import { RelatedSavedObjects, validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
-import { InMemoryMetrics, IN_MEMORY_METRICS } from '../monitoring';
+import { IN_MEMORY_METRICS, InMemoryMetrics } from '../monitoring';
 import { ActionTypeDisabledError } from './errors';
 
 export interface TaskRunnerContext {
@@ -135,7 +137,8 @@ export class TaskRunnerFactory {
             },
           };
           return actionData;
-        } catch (error) {
+        } catch (err) {
+          const error = createTaskRunError(err, err.source || TaskErrorSource.FRAMEWORK);
           actionData = { error };
           return { error };
         }
@@ -187,9 +190,9 @@ export class TaskRunnerFactory {
           logger.error(`Action '${actionId}' failed: ${e.message}`);
           if (e instanceof ActionTypeDisabledError) {
             // We'll stop re-trying due to action being forbidden
-            throwUnrecoverableError(e);
+            throwUnrecoverableError(createTaskRunError(e, TaskErrorSource.USER));
           }
-          throw e;
+          throw createTaskRunError(e, e.source);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);
@@ -199,7 +202,7 @@ export class TaskRunnerFactory {
           // Task manager error handler only kicks in when an error thrown (at this time)
           // So what we have to do is throw when the return status is `error`.
           throw throwRetryableError(
-            new Error(executorResult.message),
+            createTaskRunError(new Error(executorResult.message), executorResult.errorSource),
             executorResult.retry as boolean | Date
           );
         }

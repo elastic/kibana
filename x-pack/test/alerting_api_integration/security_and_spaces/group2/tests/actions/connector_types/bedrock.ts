@@ -12,6 +12,7 @@ import {
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -263,6 +264,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
+            errorSource: TaskErrorSource.USER,
           });
         });
 
@@ -441,6 +443,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
           expect(body).to.eql({
             status: 'error',
             connector_id: bedrockActionId,
+            errorSource: TaskErrorSource.USER,
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,

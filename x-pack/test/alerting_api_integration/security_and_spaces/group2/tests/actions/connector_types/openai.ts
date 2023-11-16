@@ -11,6 +11,7 @@ import {
   OpenAISimulator,
   genAiSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/openai_simulation';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -248,6 +249,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
             message:
               'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
             retry: false,
+            errorSource: TaskErrorSource.USER,
           });
         });
 
@@ -461,6 +463,7 @@ export default function genAiTest({ getService }: FtrProviderContext) {
               message:
                 'error validating action params: [subAction]: expected value of type [string] but got [undefined]',
               retry: false,
+              errorSource: TaskErrorSource.USER,
             });
           });
 

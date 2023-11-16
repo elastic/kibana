@@ -22,6 +22,7 @@ import {
 import { securityMock } from '@kbn/security-plugin/server/mocks';
 import { finished } from 'stream/promises';
 import { PassThrough } from 'stream';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 
 const actionExecutor = new ActionExecutor({ isESOCanEncrypt: true });
 const services = actionsMock.createServices();
@@ -1016,6 +1017,7 @@ test('throws an error when config is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type config: [param1]: expected value of type [string] but got [undefined]`,
+    errorSource: TaskErrorSource.USER,
   });
 });
 
@@ -1055,6 +1057,7 @@ test('returns an error when connector is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action type connector: config must be defined`,
+    errorSource: TaskErrorSource.USER,
   });
 });
 
@@ -1093,6 +1096,7 @@ test('throws an error when params is invalid', async () => {
     status: 'error',
     retry: false,
     message: `error validating action params: [param1]: expected value of type [string] but got [undefined]`,
+    errorSource: TaskErrorSource.USER,
   });
 });
 

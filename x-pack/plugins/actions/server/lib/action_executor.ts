@@ -6,7 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import { Logger, KibanaRequest } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
@@ -14,23 +14,24 @@ import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { PassThrough, Readable } from 'stream';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import {
-  validateParams,
   validateConfig,
-  validateSecrets,
   validateConnector,
+  validateParams,
+  validateSecrets,
 } from './validate_with_schema';
 import {
   ActionType,
-  ActionTypeExecutorResult,
+  ActionTypeConfig,
   ActionTypeExecutorRawResult,
+  ActionTypeExecutorResult,
   ActionTypeRegistryContract,
+  ActionTypeSecrets,
   GetServicesFunction,
   InMemoryConnector,
   RawAction,
   ValidatorServices,
-  ActionTypeSecrets,
-  ActionTypeConfig,
 } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import { ActionExecutionSource } from './action_execution_source';
@@ -261,10 +262,7 @@ export class ActionExecutor {
             source,
           });
         } catch (err) {
-          if (
-            err.reason === ActionExecutionErrorReason.Validation ||
-            err.reason === ActionExecutionErrorReason.Authorization
-          ) {
+          if (err.reason === ActionExecutionErrorReason.Authorization) {
             rawResult = err.result;
           } else {
             rawResult = {
@@ -472,8 +470,11 @@ export class ActionExecutor {
     }
 
     if (!this.isESOCanEncrypt) {
-      throw new Error(
-        `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+      throw createTaskRunError(
+        new Error(
+          `Unable to execute action because the Encrypted Saved Objects plugin is missing encryption key. Please set xpack.encryptedSavedObjects.encryptionKey in the kibana.yml or use the bin/kibana-encryption-keys command.`
+        ),
+        TaskErrorSource.USER
       );
     }
 
@@ -561,6 +562,7 @@ function validateAction(
       status: 'error',
       message: err.message,
       retry: !!taskInfo,
+      errorSource: TaskErrorSource.USER,
     });
   }
 }
@@ -595,6 +597,7 @@ const ensureAuthorizedToExecute = async ({
       status: 'error',
       message: error.message,
       retry: false,
+      errorSource: TaskErrorSource.USER,
     });
   }
 };

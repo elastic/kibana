@@ -7,6 +7,7 @@
 
 import type SuperTest from 'supertest';
 import expect from '@kbn/expect';
+import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -192,6 +193,7 @@ export default function createActionTests({ getService }: FtrProviderContext) {
             status: 'error',
             retry: false,
             connector_id: res.body.id,
+            errorSource: TaskErrorSource.USER,
           });
         }
       });

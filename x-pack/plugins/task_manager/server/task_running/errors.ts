@@ -4,7 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import { TaskErrorSource } from '../../common';
 import { EphemeralTask } from '../task';
+
+export { TaskErrorSource };
 
 // Unrecoverable
 const CODE_UNRECOVERABLE = 'TaskManager/unrecoverable';
@@ -14,11 +17,6 @@ const CODE_SKIP = 'TaskManager/skip';
 const code = Symbol('TaskManagerErrorCode');
 const retry = Symbol('TaskManagerErrorRetry');
 const source = Symbol('TaskManagerErrorSource');
-
-export enum TaskErrorSource {
-  FRAMEWORK = 'framework',
-  USER = 'user',
-}
 
 export interface DecoratedError extends Error {
   [code]?: string;
@@ -47,9 +45,8 @@ export function isUnrecoverableError(error: Error | DecoratedError) {
   return isTaskManagerError(error) && error[code] === CODE_UNRECOVERABLE;
 }
 
-export function throwUnrecoverableError(error: Error, errorSource = TaskErrorSource.FRAMEWORK) {
+export function throwUnrecoverableError(error: Error) {
   (error as DecoratedError)[code] = CODE_UNRECOVERABLE;
-  (error as DecoratedError)[source] = errorSource;
   throw error;
 }
 
