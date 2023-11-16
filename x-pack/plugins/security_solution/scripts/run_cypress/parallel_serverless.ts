@@ -24,8 +24,8 @@ import pRetry from 'p-retry';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { INITIAL_REST_VERSION } from '@kbn/data-views-plugin/server/constants';
+import { exec } from 'child_process';
 import { renderSummaryTable } from './print_run';
-import type { SecuritySolutionDescribeBlockFtrConfig } from './utils';
 import { parseTestFileConfig, retrieveIntegrations } from './utils';
 
 interface ProductType {
@@ -65,6 +65,12 @@ interface Credentials {
   password: string;
 }
 
+const DEFAULT_CONFIGURATION: Readonly<ProductType[]> = [
+  { product_line: 'security', product_tier: 'complete' },
+  { product_line: 'cloud', product_tier: 'complete' },
+  { product_line: 'endpoint', product_tier: 'complete' },
+] as const;
+
 const DEFAULT_REGION = 'aws-eu-west-1';
 const PROJECT_NAME_PREFIX = 'kibana-cypress-security-solution-ephemeral';
 const BASE_ENV_URL = 'https://global.qa.cld.elstc.co';
@@ -94,18 +100,13 @@ const getApiKeyFromElasticCloudJsonFile = (): string | undefined => {
 async function createSecurityProject(
   projectName: string,
   apiKey: string,
-  ftrConfig: SecuritySolutionDescribeBlockFtrConfig
+  productTypes: ProductType[]
 ): Promise<Project | undefined> {
   const body: CreateProjectRequestBody = {
     name: projectName,
     region_id: DEFAULT_REGION,
+    product_types: productTypes,
   };
-
-  const productTypes: ProductType[] = [];
-  ftrConfig?.productTypes?.forEach((t) => {
-    productTypes.push(t as ProductType);
-  });
-  if (productTypes.length > 0) body.product_types = productTypes;
 
   log.info(`Kibana override flag equals to ${process.env.OVERRIDE_KIBANA}!`);
   if (process.env.OVERRIDE_KIBANA && process.env.OVERRIDE_KIBANA === '1') {
@@ -349,9 +350,32 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
   return pRetry(fetchLoginStatusAttempt, retryOptions);
 }
 
+const getProductTypes = (
+  tier: string,
+  endpointAddon: boolean,
+  cloudAddon: boolean
+): ProductType[] => {
+  let productTypes: ProductType[] = [...DEFAULT_CONFIGURATION];
+
+  if (tier) {
+    productTypes = productTypes.map((product) => ({
+      ...product,
+      product_tier: tier,
+    }));
+  }
+  if (!cloudAddon) {
+    productTypes = productTypes.filter((product) => product.product_line !== 'cloud');
+  }
+  if (!endpointAddon) {
+    productTypes = productTypes.filter((product) => product.product_line !== 'endpoint');
+  }
+
+  return productTypes;
+};
+
 export const cli = () => {
   run(
-    async () => {
+    async (context) => {
       log = new ToolingLog({
         level: 'info',
         writeTo: process.stdout,
@@ -395,7 +419,22 @@ export const cli = () => {
             }
             return acc;
           }, {} as Record<string, string | number>)
-        );
+        )
+        .option('tier', {
+          alias: 't',
+          type: 'string',
+          default: 'complete',
+        })
+        .option('endpointAddon', {
+          alias: 'ea',
+          type: 'boolean',
+          default: true,
+        })
+        .option('cloudAddon', {
+          alias: 'ca',
+          type: 'boolean',
+          default: true,
+        });
 
       log.info(`
 ----------------------------------------------
@@ -411,6 +450,10 @@ ${JSON.stringify(argv, null, 2)}
 
       const cypressConfigFilePath = require.resolve(`../../${argv.configFile}`) as string;
       const cypressConfigFile = await import(cypressConfigFilePath);
+
+      const tier: string = argv.tier;
+      const endpointAddon: boolean = argv.endpointAddon;
+      const cloudAddon: boolean = argv.cloudAddon;
 
       log.info(`
 ----------------------------------------------
@@ -480,7 +523,10 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
           await withProcRunner(log, async (procs) => {
             const id = crypto.randomBytes(8).toString('hex');
             const PROJECT_NAME = `${PROJECT_NAME_PREFIX}-${id}`;
-            const specFileFTRConfig = parseTestFileConfig(filePath);
+
+            const productTypes = isOpen
+              ? getProductTypes(tier, endpointAddon, cloudAddon)
+              : (parseTestFileConfig(filePath).productTypes as ProductType[]);
 
             if (!API_KEY) {
               log.info('API KEY to create project could not be retrieved.');
@@ -490,13 +536,18 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             log.info(`${id}: Creating project ${PROJECT_NAME}...`);
             // Creating project for the test to run
-            const project = await createSecurityProject(PROJECT_NAME, API_KEY, specFileFTRConfig);
+            const project = await createSecurityProject(PROJECT_NAME, API_KEY, productTypes);
 
             if (!project) {
               log.info('Failed to create project.');
               // eslint-disable-next-line no-process-exit
               return process.exit(1);
             }
+
+            context.addCleanupTask(() => {
+              const command = `curl -X DELETE ${BASE_ENV_URL}/api/v1/serverless/projects/security/${project.id} -H "Authorization: ApiKey ${API_KEY}"`;
+              exec(command);
+            });
 
             // Reset credentials for elastic user
             const credentials = await resetCredentials(project.id, id, API_KEY);
@@ -577,15 +628,13 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
                     env: cyCustomEnv,
                   },
                 });
+                // Delete serverless project
+                log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
+                await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
               } catch (error) {
                 result = error;
               }
             }
-
-            // Delete serverless project
-            log.info(`${id} : Deleting project ${PROJECT_NAME}...`);
-            await deleteSecurityProject(project.id, PROJECT_NAME, API_KEY);
-
             return result;
           });
           return result;
