@@ -190,9 +190,18 @@ Then only alerts with selected assignee in assignees field AND selected alert's 
 
 #### **Scenario: Viewer role**
 
-**Automation**: 2 e2e test + 1 unit test + 1 integration test.
+**Automation**: 1 e2e test + 1 unit test + 1 integration test.
 
 ```Gherkin
-Given user has VIEWER role
+Given user has "viewer/readonly" role
 Then there should not be a way to update assignees field for an alert
+```
+
+#### **Scenario: Serverless roles**
+
+**Automation**: 1 e2e test + 1 unit test + 1 integration test.
+
+```Gherkin
+Given users 't1_analyst', 't2_analyst', 't3_analyst', 'rule_author', 'soc_manager', 'detections_admin', 'platform_engineer' roles
+Then update assignees functionality should be available
 ```
