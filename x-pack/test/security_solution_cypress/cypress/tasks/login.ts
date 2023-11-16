@@ -216,7 +216,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       body: {
         providerType: basicProvider?.type,
         providerName: basicProvider?.name,
-        currentURL: '/',
+        currentURL: `${baseUrl}/internal/security/login`,
         params: { username, password },
       },
       headers: API_HEADERS,
