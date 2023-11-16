@@ -105,7 +105,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then((severityVal) => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           addAlertPropertyToTimeline(ALERT_TABLE_SEVERITY_VALUES, 0);
           openActiveTimeline();
           cy.get(PROVIDER_BADGE)
@@ -138,7 +138,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           showTopNAlertProperty(ALERT_TABLE_SEVERITY_VALUES, 0);
           cy.get(SHOW_TOP_N_HEADER).first().should('have.text', `Top kibana.alert.severity`);
         });
@@ -157,7 +157,7 @@ describe('Alerts cell actions', { tags: ['@ess', '@serverless'] }, () => {
         .first()
         .invoke('text')
         .then(() => {
-          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_VALUES);
+          scrollAlertTableColumnIntoView(ALERT_TABLE_SEVERITY_HEADER);
           cy.window().then((win) => {
             cy.stub(win, 'prompt').returns('DISABLED WINDOW PROMPT');
           });

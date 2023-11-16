@@ -1,0 +1,69 @@
+{
+  "id": "datasetQuality",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "datasetQuality",
+      "id": "def-public.DatasetQualityPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "DatasetQualityPluginSetup",
+      "description": [],
+      "path": "x-pack/plugins/dataset_quality/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "datasetQuality",
+      "id": "def-public.DatasetQualityPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "DatasetQualityPluginStart",
+      "description": [],
+      "path": "x-pack/plugins/dataset_quality/public/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "datasetQuality",
+        "id": "def-common.DatasetQualityConfig",
+        "type": "Interface",
+        "tags": [],
+        "label": "DatasetQualityConfig",
+        "description": [],
+        "path": "x-pack/plugins/dataset_quality/common/plugin_config.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}
