@@ -1481,7 +1481,13 @@ export const setInitializeTimelineSettings = ({
           initialized: true,
         },
       }
-    : timelineById;
+    : {
+        ...timelineById,
+        [id]: {
+          ...timeline,
+          ...timelineSettingsProps,
+        },
+      };
 };
 
 interface ApplyDeltaToTableColumnWidth {
