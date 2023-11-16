@@ -211,6 +211,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     await PageObjects.discover.clickNewSearchButton(); // reset params
 
     await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
+    await PageObjects.discover.refreshFieldList();
 
     let ruleId: string;
     if (type === 'name') {

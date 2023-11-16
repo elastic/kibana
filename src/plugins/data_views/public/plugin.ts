@@ -15,6 +15,7 @@ import {
   DataViewsPublicPluginStart,
   DataViewsPublicSetupDependencies,
   DataViewsPublicStartDependencies,
+  UserIdGetter,
 } from './types';
 
 import { DataViewsApiClient } from '.';
@@ -41,6 +42,7 @@ export class DataViewsPublicPlugin
 {
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
+  private userIdGetter: UserIdGetter = async () => undefined;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -62,6 +64,9 @@ export class DataViewsPublicPlugin
 
     return {
       enableRollups: () => (this.rollupsEnabled = true),
+      setUserIdGetter: (userIdGetter: UserIdGetter) => {
+        this.userIdGetter = userIdGetter;
+      },
     };
   }
 
@@ -86,7 +91,7 @@ export class DataViewsPublicPlugin
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http),
+      apiClient: new DataViewsApiClient(http, this.userIdGetter),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {
