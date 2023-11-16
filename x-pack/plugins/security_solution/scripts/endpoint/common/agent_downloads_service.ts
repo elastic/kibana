@@ -220,6 +220,7 @@ export interface DownloadAndStoreAgentResponse extends DownloadedAgentInfo {
  * already exists on disk, then no download is actually done - the information about the cached
  * version is returned instead
  * @param agentDownloadUrl
+ * @param agentFileName
  */
 export const downloadAndStoreAgent = async (
   agentDownloadUrl: string,

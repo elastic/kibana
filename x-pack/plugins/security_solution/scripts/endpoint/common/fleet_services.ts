@@ -425,8 +425,8 @@ export const getAgentDownloadUrl = async (
 ): Promise<GetAgentDownloadUrlResponse> => {
   const agentVersion = closestMatch ? await getLatestAgentDownloadVersion(version, log) : version;
 
-  const fileNameNoExtension = getAgentFileName(agentVersion);
-  const agentFile = `${fileNameNoExtension}.tar.gz`;
+  const fileNameWithoutExtension = getAgentFileName(agentVersion);
+  const agentFile = `${fileNameWithoutExtension}.tar.gz`;
   const artifactSearchUrl = `https://artifacts-api.elastic.co/v1/search/${agentVersion}/${agentFile}`;
 
   log?.verbose(`Retrieving elastic agent download URL from:\n    ${artifactSearchUrl}`);
@@ -452,7 +452,7 @@ export const getAgentDownloadUrl = async (
   return {
     url: searchResult.packages[agentFile].url,
     fileName: agentFile,
-    dirName: fileNameNoExtension,
+    dirName: fileNameWithoutExtension,
   };
 };
 
