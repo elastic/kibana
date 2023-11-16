@@ -49,6 +49,7 @@ import { StyledPageContentWrapper, StyledMainEuiPanel, StyledSplitFlexItem } fro
 import { DRAG_DROP_FIELD } from './translations';
 import { TimelineResizableLayout } from './resizable_layout';
 import TimelineDataTable from './data_table';
+import { TimelineKpi } from '../kpi';
 
 const TimelineBodyContainer = styled.div.attrs(({ className = '' }) => ({
   className: `${className}`,
@@ -428,6 +429,7 @@ export const UnifiedTimelineComponent: React.FC<Props> = ({
         sidebarPanel={sidebarPanel}
         mainPanel={
           <StyledPageContentWrapper>
+            <TimelineKpi timelineId={timelineId} />
             <StyledMainEuiPanel
               role="main"
               panelRef={setMainContainer}

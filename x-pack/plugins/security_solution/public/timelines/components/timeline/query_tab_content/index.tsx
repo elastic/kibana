@@ -64,7 +64,6 @@ import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
-import { TimelineKpi } from '../kpi';
 import { UnifiedTimelineComponent } from '../unified_components';
 import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../../common/constants';
 import { defaultUdtHeaders } from '../unified_components/default_headers';
@@ -394,9 +393,6 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 timelineId={timelineId}
               />
             </TimelineHeaderContainer>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TimelineKpi timelineId={timelineId} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </StyledEuiFlyoutHeader>
