@@ -19,8 +19,8 @@ steps:
           - label: "Disable"
             value: "0"
 
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/markdown.sh
-    label: "Upload markdown container info"
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
+    label: "Upload runtime info"
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 300
