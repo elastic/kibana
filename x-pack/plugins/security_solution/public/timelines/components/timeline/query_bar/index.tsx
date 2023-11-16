@@ -74,7 +74,7 @@ const SearchBarContainer = styled.div`
   *   -----------------------------------------------------------
   *
   * */
-  [data-test-subj='globalQueryBar'] [class$='filter_bar-styles--group'] {
+  [data-test-subj='globalQueryBar'] [data-test-subj='filter-items-group'] {
     display: none;
   }
 `;
