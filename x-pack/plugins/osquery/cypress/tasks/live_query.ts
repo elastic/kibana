@@ -25,10 +25,10 @@ export const selectAllAgents = () => {
 };
 
 export const clearInputQuery = () =>
-  cy.get(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
+  cy.getBySel(LIVE_QUERY_EDITOR).click().type(`{selectall}{backspace}`);
 
 export const inputQuery = (query: string, options?: { parseSpecialCharSequences: boolean }) =>
-  cy.get(LIVE_QUERY_EDITOR).type(query, options);
+  cy.getBySel(LIVE_QUERY_EDITOR).type(query, options);
 
 export const inputQueryInFlyout = (
   query: string,
@@ -38,6 +38,12 @@ export const inputQueryInFlyout = (
 export const submitQuery = () => {
   cy.wait(1000); // wait for the validation to trigger - cypress is way faster than users ;)
   cy.contains('Submit').click();
+};
+
+export const fillInQueryTimeout = (timeout: string) => {
+  cy.getBySel('advanced-accordion-content').within(() => {
+    cy.getBySel('timeout-input').clear().type(timeout);
+  });
 };
 
 // sometimes the results get stuck in the tests, this is a workaround

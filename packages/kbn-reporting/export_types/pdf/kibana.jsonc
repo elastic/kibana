@@ -1,0 +1,5 @@
+{
+    "type": "shared-server",
+    "id": "@kbn/reporting-export-types-pdf",
+    "owner": "@elastic/appex-sharedux"
+  }
