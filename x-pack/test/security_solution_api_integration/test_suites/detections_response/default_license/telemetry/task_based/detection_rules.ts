@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     describe('custom rules should never show any detection_rules telemetry data for each list type', () => {
-      it('should NOT give telemetry/stats for an exception list of type "detection"', async () => {
+      it('@skipInQA should NOT give telemetry/stats for an exception list of type "detection"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -109,7 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should NOT give telemetry/stats for an exception list of type "endpoint"', async () => {
+      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -165,7 +165,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should NOT give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
+      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint_trusted_apps"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -221,7 +221,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should NOT give telemetry/stats for an exception list of type "endpoint_events"', async () => {
+      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint_events"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -277,7 +277,7 @@ export default ({ getService }: FtrProviderContext) => {
         });
       });
 
-      it('should NOT give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
+      it('@skipInQA should NOT give telemetry/stats for an exception list of type "endpoint_host_isolation_exceptions"', async () => {
         const rule = getRuleForAlertTesting(['telemetry'], 'rule-1', false);
 
         // create an exception list container of type "detection"
@@ -334,7 +334,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
+    describe('@skipInQA pre-built/immutable/elastic rules should show detection_rules telemetry data for each list type', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
         await installMockPrebuiltRules(supertest, es);
@@ -787,7 +787,7 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
+    describe('@skipInQA pre-built/immutable/elastic rules should show detection_rules telemetry data for multiple list items and types', () => {
       beforeEach(async () => {
         // install prepackaged rules to get immutable rules for testing
         await installMockPrebuiltRules(supertest, es);

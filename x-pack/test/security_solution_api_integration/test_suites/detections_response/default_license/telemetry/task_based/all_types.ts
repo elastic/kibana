@@ -44,7 +44,7 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllExceptions(supertest, log);
     });
 
-    it('should only have task metric values when no rules are running', async () => {
+    it('@skipInQA should only have task metric values when no rules are running', async () => {
       await retry.try(async () => {
         const stats = await getSecurityTelemetryStats(supertest, log);
         removeTimeFieldsFromTelemetryStats(stats);

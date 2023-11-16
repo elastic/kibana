@@ -12,4 +12,7 @@ export default createTestConfig({
   junit: {
     reportName: 'Detection Engine API Integration Tests - Serverless - Telemetry',
   },
+  kbnTestServerArgs: [
+    `--xpack.securitySolution.enableExperimental=${JSON.stringify(['previewTelemetryUrlEnabled'])}`,
+  ],
 });
