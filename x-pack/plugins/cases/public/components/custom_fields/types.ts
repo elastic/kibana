@@ -35,7 +35,7 @@ export interface CustomFieldType<T extends CaseUICustomField> {
 
 export type CustomFieldEuiTableColumn = Pick<
   EuiTableComputedColumnType<CaseUI>,
-  'name' | 'width'
+  'name' | 'width' | 'data-test-subj'
 > & {
   render: (customField: CaseCustomField) => React.ReactNode;
 };
