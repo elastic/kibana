@@ -99,7 +99,16 @@ export default ({ getService }: FtrProviderContext) => {
   describe('@ess privileges_apis', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
-    const security = getService('security');
+    const logger = getService('log');
+    let security;
+    try {
+      security = getService('security');
+    } catch (e) {
+      logger.info(
+        'Skipping privileges test as security service not available (likely run with serverless config)'
+      );
+      return;
+    }
 
     const createRole = async ({ name, privileges }: { name: string; privileges: any }) => {
       return await security.role.create(name, privileges);
