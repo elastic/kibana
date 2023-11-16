@@ -199,7 +199,7 @@ export class HttpService
   // the `plugin` and `legacy` services.
   public getStartContract(): InternalHttpServiceStart {
     return {
-      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo']),
+      ...pick(this.internalSetup!, ['auth', 'basePath', 'getServerInfo', 'staticAssets']),
       isListening: () => this.httpServer.isListening(),
     };
   }

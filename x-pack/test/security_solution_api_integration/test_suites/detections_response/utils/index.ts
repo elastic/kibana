@@ -9,6 +9,7 @@ export * from './exception_list_and_item';
 export * from './alerts';
 export * from './actions';
 export * from './data_generator';
+export * from './machine_learning';
 
 export * from './rules/get_rule_so_by_id';
 export * from './rules/create_rule_saved_object';
