@@ -32,6 +32,7 @@ import { ChartPointerEventContextProvider } from '../../../../context/chart_poin
 import { MobileErrorTreemap } from '../charts/mobile_error_treemap';
 import { maybe } from '../../../../../common/utils/maybe';
 import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
+import { getKueryWithMobileFilters } from '../../../../../common/utils/get_kuery_with_mobile_filters';
 
 type ErrorSamplesAPIResponse =
   APIReturnType<'GET /internal/apm/services/{serviceName}/errors/{groupId}/samples'>;
@@ -98,11 +99,21 @@ export function ErrorGroupDetails() {
       serviceGroup,
       comparisonEnabled,
       errorId,
+      device,
+      osVersion,
+      appVersion,
+      netConnectionType,
     },
   } = useApmParams(
     '/mobile-services/{serviceName}/errors-and-crashes/errors/{groupId}'
   );
-
+  const kueryWithMobileFilters = getKueryWithMobileFilters({
+    device,
+    osVersion,
+    appVersion,
+    netConnectionType,
+    kuery,
+  });
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
 
   useBreadcrumb(
@@ -119,7 +130,7 @@ export function ErrorGroupDetails() {
             rangeFrom,
             rangeTo,
             environment,
-            kuery,
+            kuery: kueryWithMobileFilters,
             serviceGroup,
             comparisonEnabled,
           },
@@ -131,7 +142,7 @@ export function ErrorGroupDetails() {
       comparisonEnabled,
       environment,
       groupId,
-      kuery,
+      kueryWithMobileFilters,
       rangeFrom,
       rangeTo,
       serviceGroup,
@@ -155,7 +166,7 @@ export function ErrorGroupDetails() {
               },
               query: {
                 environment,
-                kuery,
+                kuery: kueryWithMobileFilters,
                 start,
                 end,
               },
@@ -164,7 +175,7 @@ export function ErrorGroupDetails() {
         );
       }
     },
-    [environment, kuery, serviceName, start, end, groupId]
+    [environment, kueryWithMobileFilters, serviceName, start, end, groupId]
   );
 
   const { errorDistributionData, status: errorDistributionStatus } =
@@ -172,7 +183,7 @@ export function ErrorGroupDetails() {
       serviceName,
       groupId,
       environment,
-      kuery,
+      kuery: kueryWithMobileFilters,
     });
 
   useEffect(() => {
@@ -235,7 +246,7 @@ export function ErrorGroupDetails() {
           <EuiPanel hasBorder={true}>
             <MobileErrorTreemap
               serviceName={serviceName}
-              kuery={kuery}
+              kuery={kueryWithMobileFilters}
               environment={environment}
               start={start}
               end={end}
