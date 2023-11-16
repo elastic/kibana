@@ -6,18 +6,24 @@
  */
 
 import { useMemo } from 'react';
-import { useListsConfig } from '../../../detections/containers/detection_engine/lists/use_lists_config';
+import { useListsPrivileges } from '../../../detections/containers/detection_engine/lists/use_lists_privileges';
 import { useHasSecurityCapability } from '../../../helper_hooks';
+import { useKibana } from '../../../common/lib/kibana';
 
 export const useEndpointExceptionsCapability = (
   capability: 'showEndpointExceptions' | 'crudEndpointExceptions'
-) => {
-  const { loading: listsConfigLoading, needsConfiguration: needsListsConfiguration } =
-    useListsConfig();
+): boolean => {
+  const { lists } = useKibana().services;
+  const { canManageIndex, loading: privilegesLoading } = useListsPrivileges();
+  const enabled = lists != null;
+  const needsIndexConfiguration = canManageIndex === false;
+  const needsConfiguration = !enabled || needsIndexConfiguration;
+  const hasAccessToLists = !(privilegesLoading || needsConfiguration);
+
   const hasEndpointExceptionCapability = useHasSecurityCapability(capability);
 
   return useMemo(
-    () => !listsConfigLoading && !needsListsConfiguration && hasEndpointExceptionCapability,
-    [hasEndpointExceptionCapability, listsConfigLoading, needsListsConfiguration]
+    () => hasAccessToLists && hasEndpointExceptionCapability,
+    [hasEndpointExceptionCapability, hasAccessToLists]
   );
 };
