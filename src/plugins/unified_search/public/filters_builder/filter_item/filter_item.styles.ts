@@ -30,6 +30,9 @@ export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   &:has(input[aria-expanded='true'], input:focus) {
     flex-grow: 4;
   }
+  input {
+    width: 100% !important; // TODO: Remove this once latest EUI upgrade merges
+  }
 `;
 
 export const operationCss = (euiTheme: EuiThemeComputed) => css`
