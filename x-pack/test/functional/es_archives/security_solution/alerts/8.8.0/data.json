@@ -1,0 +1,422 @@
+{
+  "type": "doc",
+  "value": {
+    "id": "eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1",
+    "index": ".alerts-security.alerts-default",
+    "source": {
+      "@timestamp": "2023-04-27T11:03:57.906Z",
+      "Endpoint": {
+        "capabilities": [
+          "isolation",
+          "kill_process",
+          "suspend_process",
+          "running_processes",
+          "get_file",
+          "execute"
+        ],
+        "configuration": {
+          "isolation": true
+        },
+        "policy": {
+          "applied": {
+            "endpoint_policy_version": 3,
+            "id": "C2A9093E-E289-4C0A-AA44-8C32A414FA7A",
+            "name": "With Eventing",
+            "status": "success",
+            "version": 5
+          }
+        },
+        "state": {
+          "isolation": true
+        },
+        "status": "enrolled"
+      },
+      "agent": {
+        "id": "b563ce99-e373-4a1f-a5fe-97e956140aeb",
+        "type": "endpoint",
+        "version": "8.8.0"
+      },
+      "data_stream": {
+        "dataset": "endpoint.alerts",
+        "namespace": "default",
+        "type": "logs"
+      },
+      "dll": [
+        {
+          "Ext": {
+            "compile_time": 1534424710,
+            "malware_classification": {
+              "identifier": "Whitelisted",
+              "score": 0,
+              "threshold": 0,
+              "version": "3.0.0"
+            },
+            "mapped_address": 5362483200,
+            "mapped_size": 0
+          },
+          "code_signature": {
+            "subject_name": "Cybereason Inc",
+            "trusted": true
+          },
+          "hash": {
+            "md5": "1f2d082566b0fc5f2c238a5180db7451",
+            "sha1": "ca85243c0af6a6471bdaa560685c51eefd6dbc0d",
+            "sha256": "8ad40c90a611d36eb8f9eb24fa04f7dbca713db383ff55a03aa0f382e92061a2"
+          },
+          "path": "C:\\Program Files\\Cybereason ActiveProbe\\AmSvc.exe",
+          "pe": {
+            "architecture": "x64"
+          }
+        }
+      ],
+      "ecs": {
+        "version": "1.4.0"
+      },
+      "elastic": {
+        "agent": {
+          "id": "b563ce99-e373-4a1f-a5fe-97e956140aeb"
+        }
+      },
+      "event.action": "creation",
+      "event.agent_id_status": "auth_metadata_missing",
+      "event.category": "malware",
+      "event.code": "malicious_file",
+      "event.dataset": "endpoint",
+      "event.id": "b28993d4-8b8a-4f0f-9f54-84a89bad66ae",
+      "event.ingested": "2023-04-27T10:58:03Z",
+      "event.kind": "signal",
+      "event.module": "endpoint",
+      "event.sequence": 5826,
+      "event.type": "creation",
+      "file": {
+        "Ext": {
+          "code_signature": [
+            {
+              "subject_name": "bad signer",
+              "trusted": false
+            }
+          ],
+          "malware_classification": {
+            "identifier": "endpointpe",
+            "score": 1,
+            "threshold": 0.66,
+            "version": "3.0.33"
+          },
+          "quarantine_message": "fake quarantine message",
+          "quarantine_result": true,
+          "temp_file_path": "C:/temp/fake_malware.exe"
+        },
+        "accessed": 1682752652103,
+        "created": 1682752652103,
+        "hash": {
+          "md5": "fake file md5",
+          "sha1": "fake file sha1",
+          "sha256": "fake file sha256"
+        },
+        "mtime": 1682752652103,
+        "name": "fake_malware.exe",
+        "owner": "SYSTEM",
+        "path": "C:/fake_malware.exe",
+        "size": 3456
+      },
+      "user": {
+        "name": "user1"
+      },
+      "host": {
+        "architecture": "wtnozeqvub",
+        "hostname": "Host-fwarau82er",
+        "id": "4260adf9-5e63-445d-92c6-e03359bcd342",
+        "ip": [
+          "10.249.37.72",
+          "10.150.39.243",
+          "10.186.17.170"
+        ],
+        "mac": [
+          "f5-f-97-dc-20-67",
+          "b5-56-ca-98-81-ca",
+          "22-86-39-4c-87-33"
+        ],
+        "name": "Host-fwarau82er",
+        "os": {
+          "Ext": {
+            "variant": "Darwin"
+          },
+          "family": "Darwin",
+          "full": "macOS Monterey",
+          "name": "macOS",
+          "platform": "macOS",
+          "version": "12.6.1"
+        }
+      },
+      "kibana.alert.ancestors": [
+        {
+          "depth": 0,
+          "id": "vT9cwocBh3b8EMpD8lsi",
+          "index": ".ds-logs-endpoint.alerts-default-2023.04.27-000001",
+          "type": "event"
+        }
+      ],
+      "kibana.alert.depth": 1,
+      "kibana.alert.last_detected": "2023-04-27T11:03:57.993Z",
+      "kibana.alert.original_event.action": "creation",
+      "kibana.alert.original_event.agent_id_status": "auth_metadata_missing",
+      "kibana.alert.original_event.category": "malware",
+      "kibana.alert.original_event.code": "malicious_file",
+      "kibana.alert.original_event.dataset": "endpoint",
+      "kibana.alert.original_event.id": "b28993d4-8b8a-4f0f-9f54-84a89bad66ae",
+      "kibana.alert.original_event.ingested": "2023-04-27T10:58:03Z",
+      "kibana.alert.original_event.kind": "alert",
+      "kibana.alert.original_event.module": "endpoint",
+      "kibana.alert.original_event.sequence": 5826,
+      "kibana.alert.original_event.type": "creation",
+      "kibana.alert.original_time": "2023-04-29T07:17:32.103Z",
+      "kibana.alert.reason": "malware event with process malware writer, file fake_malware.exe, on Host-fwarau82er created medium alert Endpoint Security.",
+      "kibana.alert.risk_score": 47,
+      "kibana.alert.rule.actions": [
+      ],
+      "kibana.alert.rule.author": [
+        "Elastic"
+      ],
+      "kibana.alert.rule.category": "Custom Query Rule",
+      "kibana.alert.rule.consumer": "siem",
+      "kibana.alert.rule.created_at": "2023-04-27T10:58:27.546Z",
+      "kibana.alert.rule.created_by": "elastic",
+      "kibana.alert.rule.description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+      "kibana.alert.rule.enabled": true,
+      "kibana.alert.rule.exceptions_list": [
+        {
+          "id": "endpoint_list",
+          "list_id": "endpoint_list",
+          "namespace_type": "agnostic",
+          "type": "endpoint"
+        }
+      ],
+      "kibana.alert.rule.execution.uuid": "ebf843ff-e0e1-47f8-9ed2-cc8066afbcef",
+      "kibana.alert.rule.false_positives": [
+      ],
+      "kibana.alert.rule.from": "now-10m",
+      "kibana.alert.rule.immutable": true,
+      "kibana.alert.rule.indices": [
+        "logs-endpoint.alerts-*"
+      ],
+      "kibana.alert.rule.interval": "5m",
+      "kibana.alert.rule.license": "Elastic License v2",
+      "kibana.alert.rule.max_signals": 10000,
+      "kibana.alert.rule.name": "Endpoint Security",
+      "kibana.alert.rule.parameters": {
+        "author": [
+          "Elastic"
+        ],
+        "description": "Generates a detection alert each time an Elastic Endpoint Security alert is received. Enabling this rule allows you to immediately begin investigating your Endpoint alerts.",
+        "exceptions_list": [
+          {
+            "id": "endpoint_list",
+            "list_id": "endpoint_list",
+            "namespace_type": "agnostic",
+            "type": "endpoint"
+          }
+        ],
+        "false_positives": [
+        ],
+        "from": "now-10m",
+        "immutable": true,
+        "index": [
+          "logs-endpoint.alerts-*"
+        ],
+        "language": "kuery",
+        "license": "Elastic License v2",
+        "max_signals": 10000,
+        "query": "event.kind:alert and event.module:(endpoint and not endgame)\n",
+        "references": [
+        ],
+        "related_integrations": [
+          {
+            "package": "endpoint",
+            "version": "^8.2.0"
+          }
+        ],
+        "required_fields": [
+          {
+            "ecs": true,
+            "name": "event.kind",
+            "type": "keyword"
+          },
+          {
+            "ecs": true,
+            "name": "event.module",
+            "type": "keyword"
+          }
+        ],
+        "risk_score": 47,
+        "risk_score_mapping": [
+          {
+            "field": "event.risk_score",
+            "operator": "equals",
+            "value": ""
+          }
+        ],
+        "rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+        "rule_name_override": "message",
+        "setup": "",
+        "severity": "medium",
+        "severity_mapping": [
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "low",
+            "value": "21"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "medium",
+            "value": "47"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "high",
+            "value": "73"
+          },
+          {
+            "field": "event.severity",
+            "operator": "equals",
+            "severity": "critical",
+            "value": "99"
+          }
+        ],
+        "threat": [
+        ],
+        "timestamp_override": "event.ingested",
+        "to": "now",
+        "type": "query",
+        "version": 101
+      },
+      "kibana.alert.rule.producer": "siem",
+      "kibana.alert.rule.references": [
+      ],
+      "kibana.alert.rule.revision": 0,
+      "kibana.alert.rule.risk_score": 47,
+      "kibana.alert.rule.risk_score_mapping": [
+        {
+          "field": "event.risk_score",
+          "operator": "equals",
+          "value": ""
+        }
+      ],
+      "kibana.alert.rule.rule_id": "9a1a2dae-0b5f-4c3d-8305-a268d404c306",
+      "kibana.alert.rule.rule_name_override": "message",
+      "kibana.alert.rule.rule_type_id": "siem.queryRule",
+      "kibana.alert.rule.severity": "medium",
+      "kibana.alert.rule.severity_mapping": [
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "low",
+          "value": "21"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "medium",
+          "value": "47"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "high",
+          "value": "73"
+        },
+        {
+          "field": "event.severity",
+          "operator": "equals",
+          "severity": "critical",
+          "value": "99"
+        }
+      ],
+      "kibana.alert.rule.tags": [
+        "Elastic",
+        "Endpoint Security"
+      ],
+      "kibana.alert.rule.threat": [
+      ],
+      "kibana.alert.rule.timestamp_override": "event.ingested",
+      "kibana.alert.rule.to": "now",
+      "kibana.alert.rule.type": "query",
+      "kibana.alert.rule.updated_at": "2023-04-27T10:58:27.546Z",
+      "kibana.alert.rule.updated_by": "elastic",
+      "kibana.alert.rule.uuid": "7015a3e2-e4ea-11ed-8c11-49608884878f",
+      "kibana.alert.rule.version": 101,
+      "kibana.alert.severity": "medium",
+      "kibana.alert.start": "2023-04-27T11:03:57.993Z",
+      "kibana.alert.status": "active",
+      "kibana.alert.url": "http://localhost:5601/app/security/alerts/redirect/eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1?index=.alerts-security.alerts-default&timestamp=2023-04-27T11:03:57.906Z",
+      "kibana.alert.uuid": "eabbdefc23da981f2b74ab58b82622a97bb9878caa11bc914e2adfacc94780f1",
+      "kibana.alert.workflow_status": "open",
+      "kibana.space_ids": [
+        "default"
+      ],
+      "kibana.version": "8.8.0",
+      "process": {
+        "Ext": {
+          "ancestry": [
+            "qa5jgw1wr7",
+            "5k1hclygc6"
+          ],
+          "code_signature": [
+            {
+              "subject_name": "bad signer",
+              "trusted": false
+            }
+          ],
+          "token": {
+            "domain": "NT AUTHORITY",
+            "integrity_level": 16384,
+            "integrity_level_name": "system",
+            "privileges": [
+              {
+                "description": "Replace a process level token",
+                "enabled": false,
+                "name": "SeAssignPrimaryTokenPrivilege"
+              }
+            ],
+            "sid": "S-1-5-18",
+            "type": "tokenPrimary",
+            "user": "SYSTEM"
+          },
+          "user": "SYSTEM"
+        },
+        "entity_id": "nqh8ts6ves",
+        "entry_leader": {
+          "entity_id": "jnm38bel0w",
+          "name": "fake entry",
+          "pid": 791
+        },
+        "executable": "C:/malware.exe",
+        "group_leader": {
+          "entity_id": "jnm38bel0w",
+          "name": "fake leader",
+          "pid": 848
+        },
+        "hash": {
+          "md5": "fake md5",
+          "sha1": "fake sha1",
+          "sha256": "fake sha256"
+        },
+        "name": "malware writer",
+        "parent": {
+          "entity_id": "qa5jgw1wr7",
+          "pid": 1
+        },
+        "pid": 2,
+        "session_leader": {
+          "entity_id": "jnm38bel0w",
+          "name": "fake session",
+          "pid": 909
+        },
+        "start": 1682752652103,
+        "uptime": 0
+      }
+    }
+  }
+}
