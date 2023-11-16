@@ -61,7 +61,7 @@ export const useLensSuggestions = ({
   const [allSuggestions, setAllSuggestions] = useState(suggestions.allSuggestions);
   const currentSuggestion = originalSuggestion ?? suggestions.firstSuggestion;
   const suggestionDeps = useRef(getSuggestionDeps({ dataView, query, columns }));
-  const histogramQuery = useRef<string>('');
+  const histogramQuery = useRef<AggregateQuery | undefined>();
   const histogramSuggestion = useMemo(() => {
     if (
       !currentSuggestion &&
@@ -111,13 +111,13 @@ export const useLensSuggestions = ({
       };
       const sug = lensSuggestionsApi(context, dataView, ['lnsDatatable']) ?? [];
       if (sug.length) {
-        histogramQuery.current = esqlQuery;
+        histogramQuery.current = { esql: esqlQuery };
         return sug[0];
       }
-      histogramQuery.current = '';
+      histogramQuery.current = undefined;
       return undefined;
     }
-    histogramQuery.current = '';
+    histogramQuery.current = undefined;
     return undefined;
   }, [currentSuggestion, dataView, query, timeRange, data, lensSuggestionsApi]);
 
@@ -144,7 +144,7 @@ export const useLensSuggestions = ({
     currentSuggestion: histogramSuggestion ?? currentSuggestion,
     suggestionUnsupported: !currentSuggestion && !histogramSuggestion && isPlainRecord,
     isOnHistogramMode: Boolean(histogramSuggestion),
-    histogramQuery: histogramQuery.current ? { esql: histogramQuery.current } : undefined,
+    histogramQuery: histogramQuery.current ? histogramQuery.current : undefined,
   };
 };
 
