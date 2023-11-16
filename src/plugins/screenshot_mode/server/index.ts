@@ -6,8 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { ScreenshotModePlugin } from './plugin';
-
 export {
   setScreenshotModeEnabled,
   KBN_SCREENSHOT_MODE_HEADER,
@@ -20,6 +18,7 @@ export type {
   ScreenshotModePluginStart,
 } from './types';
 
-export function plugin() {
+export async function plugin() {
+  const { ScreenshotModePlugin } = await import('./plugin');
   return new ScreenshotModePlugin();
 }
