@@ -69,12 +69,18 @@ in {kib} logs in the event of an error. The error message recorded in the log
 may contain account credentials for the `kibana_system` user, API Keys, and
 credentials of {kib} end users.
 +
-The issue impacts {kib} versions before 7.17.15 and {kib} versions on or after
-8.0.0 and before 8.11.1. The issue is resolved in {kib} 8.11.1 and {kib} 7.17.15.
-+
+--
+The issue impacts {kib} {kib} versions on or after 8.0.0 and before 8.11.1. The
+issue is resolved in {kib} 8.11.1.
+
+**Nov 15, 2023 Update:** After additional investigation, it has been determined
+that {kib} 7.x versions are not affected by this issue. We previously reported
+this issue impacted {kib} versions before 7.17.15.
+
 For more information, see our related
 https://discuss.elastic.co/t/8-11-1-7-17-15-security-update-esa-2023-25/347149[security
 announcement].
+--
 
 [float]
 [[fixes-v8.11.1]]
