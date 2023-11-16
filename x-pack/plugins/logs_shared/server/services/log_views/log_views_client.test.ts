@@ -253,6 +253,7 @@ describe('LogViewsClient class', () => {
           "allowNoIndex": false,
           "deleteFieldFormat": [Function],
           "deleteScriptedFieldInternal": [Function],
+          "etag": undefined,
           "fieldAttrs": Object {},
           "fieldFormatMap": Object {},
           "fieldFormats": Object {
@@ -276,6 +277,7 @@ describe('LogViewsClient class', () => {
           "fields": FldList [],
           "flattenHit": [Function],
           "getAllowHidden": [Function],
+          "getEtag": [Function],
           "getFieldAttrs": [Function],
           "getIndexPattern": [Function],
           "getName": [Function],
@@ -301,6 +303,7 @@ describe('LogViewsClient class', () => {
           },
           "scriptedFields": Array [],
           "setAllowHidden": [Function],
+          "setEtag": [Function],
           "setFieldFormat": [Function],
           "setIndexPattern": [Function],
           "shortDotsEnable": false,

@@ -284,7 +284,9 @@ export const Tabs: React.FC<TabsProps> = ({
 
     setIndexedFieldTypes(convertToEuiFilterOptions(tempIndexedFieldTypes));
     setScriptedFieldLanguages(convertToEuiFilterOptions(tempScriptedFieldLanguages));
-  }, [indexPattern]);
+    // need to reset based on changes to fields but indexPattern is the same
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [indexPattern, fields]);
 
   const closeFieldEditor = useCallback(() => {
     if (closeEditorHandler.current) {
