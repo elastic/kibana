@@ -2363,6 +2363,9 @@
       },
       "tags": {
         "type": "keyword"
+      },
+      "version": {
+        "type": "long"
       }
     }
   },
