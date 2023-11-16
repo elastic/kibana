@@ -1829,6 +1829,10 @@
             "properties": {
               "id": {
                 "type": "keyword"
+              },
+              "hash": {
+                "type": "keyword",
+                "index": false
               }
             }
           },
@@ -1840,6 +1844,10 @@
                 "properties": {
                   "id": {
                     "type": "keyword"
+                  },
+                  "hash": {
+                    "type": "keyword",
+                    "index": false
                   }
                 }
               }
