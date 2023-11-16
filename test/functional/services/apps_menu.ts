@@ -7,6 +7,7 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
+import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export class AppsMenuService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -121,12 +122,36 @@ export class AppsMenuService extends FtrService {
       await this.openCollapsibleNav();
       let nav;
       if (typeof category === 'string') {
+        // we can search within a specific section of the side nav
         nav = await this.testSubjects.find(`collapsibleNavGroup-${category}`);
+        const link = await nav.findByPartialLinkText(name);
+        await link.click();
       } else {
-        nav = await this.testSubjects.find('collapsibleNav');
+        // we need to search our app link in the whole side nav
+        // first, we get all the links, along with their inner text
+        const allLinks = await this.testSubjects.findAll('collapsibleNavAppLink');
+        const allLinksTexts = await Promise.all(
+          allLinks.map(
+            (link: WebElementWrapper): Promise<{ link: WebElementWrapper; text: string }> =>
+              new Promise((resolve) => {
+                link.getVisibleText().then((text: string) => resolve({ link, text }));
+              })
+          )
+        );
+
+        // then, filter out those that don't have a matching text
+        const matchingLinks = allLinksTexts.filter(({ text }) => text === name);
+        if (matchingLinks.length === 0) {
+          throw new Error(`Could not find the '${name}' application on the side nav`);
+        } else if (matchingLinks.length > 1) {
+          throw new Error(
+            `Multiple apps exist in the side nav with the specified name: '${name}'. Consider using the "category" parameter to disambiguate`
+          );
+        }
+
+        this.log.debug(`Found "${name}" app link on the side nav!`);
+        await matchingLinks.pop()!.link.click();
       }
-      const link = await nav.findByPartialLinkText(name);
-      await link.click();
 
       if (closeCollapsibleNav) {
         await this.closeCollapsibleNav();
