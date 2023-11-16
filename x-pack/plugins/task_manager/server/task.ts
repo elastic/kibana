@@ -8,6 +8,7 @@
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
+import { DecoratedError } from './task_running';
 
 /*
  * Type definitions and validations for tasks.
@@ -47,7 +48,7 @@ export type SuccessfulRunResult = {
    * recurring task). See the RunContext type definition for more details.
    */
   state: Record<string, unknown>;
-  hasError?: boolean;
+  taskRunError?: DecoratedError;
 } & (
   | // ensure a SuccessfulRunResult can either specify a new `runAt` or a new `schedule`, but not both
   {
@@ -75,7 +76,7 @@ export type FailedRunResult = SuccessfulRunResult & {
    * If specified, indicates that the task failed to accomplish its work. This is
    * logged out as a warning, and the task will be reattempted after a delay.
    */
-  error: Error;
+  error: DecoratedError;
 };
 
 export type RunResult = FailedRunResult | SuccessfulRunResult;
