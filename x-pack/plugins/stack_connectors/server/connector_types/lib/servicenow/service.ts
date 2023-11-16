@@ -6,6 +6,7 @@
  */
 
 import { AxiosResponse } from 'axios';
+import { orderBy } from 'lodash/fp';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -17,11 +18,13 @@ import {
   ServiceNowIncident,
   GetApplicationInfoResponse,
   ServiceFactory,
+  ExternalServiceParamsClose,
 } from './types';
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { createServiceError, getPushedDate, prepareIncident } from './utils';
+import { FIELD_PREFIX } from './config';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
@@ -69,11 +72,16 @@ export const createExternalService: ServiceFactory = ({
   const getCreateIncidentUrl = () => (useTableApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
     useTableApi ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
+  const getCloseIncidentUrl = () => importSetTableUrl;
 
   const getIncidentViewURL = (id: string) => {
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
     return `${urlWithoutTrailingSlash}/nav_to.do?uri=${table}.do?sys_id=${id}`;
   };
+
+  const getIncidentByCorrelationIdUrl = (correlationId: string) => {
+    return `${tableApiIncidentUrl}?sysparm_query=ORDERBYDESCsys_created_on^correlation_id=${correlationId}^state!=7`;
+  }
 
   const getChoicesURL = (fields: string[]) => {
     const elements = fields
@@ -169,6 +177,7 @@ export const createExternalService: ServiceFactory = ({
         params,
         configurationUtilities,
       });
+
       checkInstance(res);
       return res.data.result.length > 0 ? { ...res.data.result } : undefined;
     } catch (error) {
@@ -249,6 +258,91 @@ export const createExternalService: ServiceFactory = ({
     }
   };
 
+  const getIncidentByCorrelationId = async (correlationId: string): Promise<ServiceNowIncident> => {
+    try {
+      const res = await request({
+        axios: axiosInstance,
+        url: getIncidentByCorrelationIdUrl(correlationId),
+        method: 'get',
+        logger,
+        configurationUtilities
+      });
+
+      checkInstance(res); 
+
+      return res.data.result[0];
+
+    } catch(error) {
+      throw createServiceError(error, 'Unable to find incidents');
+    }
+  }
+
+  const closeIncident = async(params: ExternalServiceParamsClose) => {
+    try{
+      const {correlation_id, externalId, ...rest} = params;
+
+      await checkIfApplicationIsInstalled();
+  
+      if(correlation_id == null && externalId == null) {
+        throw new Error('No correlation_id or incident id found.');
+      }
+
+      console.log('STEP 1')
+
+      let incidentToBeClosed = null;
+
+      if(correlation_id && externalId == null) {
+        incidentToBeClosed = await getIncidentByCorrelationId(correlation_id);
+
+        if(!incidentToBeClosed) {  
+          throw new Error(`No incident found with correlation_id: ${correlation_id}.`)
+        }
+      }
+
+      console.log('STEP 2', {...rest})
+
+      const closeData = Object.entries({...rest}).reduce(
+        (acc, [key, value]) => {
+          if(!value) {
+            throw new Error(`Invalid value for ${key}`);
+          }
+          return key ? ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }) : {};
+        },
+        {}
+      );
+
+      console.log({externalId, incidentToBeClosed, correlation_id});
+
+      const resp = await request({
+        axios: axiosInstance,
+        url: getCloseIncidentUrl(),
+        method: 'post',
+        logger,
+        data: {
+          ...closeData,
+          'elastic_incident_id': !externalId ? externalId : incidentToBeClosed?.sys_id,
+        },
+        configurationUtilities
+      });
+
+      checkInstance(resp);
+
+      const closedIncident = resp.data.result[0];
+
+      console.log({closedIncident});
+
+      return {
+        title: closedIncident.display_value,
+        id: closedIncident.sys_id,
+        pushedDate: getPushedDate(closedIncident.sys_updated_on),
+        url: getIncidentViewURL(closedIncident.sys_id),
+      };
+
+    } catch (error) {
+      throw createServiceError(error, 'Unable to close incident');
+    }
+  }
+
   const getFields = async () => {
     try {
       const res = await request({
@@ -292,5 +386,6 @@ export const createExternalService: ServiceFactory = ({
     checkInstance,
     getApplicationInformation,
     checkIfApplicationIsInstalled,
+    closeIncident,
   };
 };

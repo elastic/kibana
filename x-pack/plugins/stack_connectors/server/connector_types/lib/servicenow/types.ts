@@ -26,6 +26,7 @@ import {
   ExecutorParamsSchemaITOM,
   ExecutorSubActionAddEventParamsSchema,
   ExternalIncidentServiceConfigurationBaseSchema,
+  ExecutorSubActionCloseIncidentParamsSchema,
 } from './schema';
 import { SNProductsConfigValue } from '../../../../common/servicenow_config';
 
@@ -104,12 +105,21 @@ export interface ExternalServiceParamsUpdate {
   incident: PartialIncident & Record<string, unknown>;
 }
 
+export interface ExternalServiceParamsClose {
+  externalId: string | null;
+  correlation_id: string | null;
+  close_notes: string;
+  close_code: string;
+  state: number;
+}
+
 export interface ExternalService {
   getChoices: (fields: string[]) => Promise<GetChoicesResponse>;
   getIncident: (id: string) => Promise<ServiceNowIncident>;
   getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
+  closeIncident: (params: ExternalServiceParamsClose) =>  Promise<ExternalServiceIncidentResponse>;
   findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
   getUrl: () => string;
   checkInstance: (res: AxiosResponse) => void;
@@ -134,6 +144,10 @@ export type ExecutorSubActionHandshakeParams = TypeOf<
   typeof ExecutorSubActionHandshakeParamsSchema
 >;
 
+export type ExecutorSubActionCloseIncidentParams = TypeOf<
+  typeof ExecutorSubActionCloseIncidentParamsSchema
+>;
+
 export type ServiceNowITSMIncident = Omit<
   TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>['incident'],
   'externalId'
@@ -153,6 +167,10 @@ export interface PushToServiceApiHandlerArgs extends ExternalServiceApiHandlerAr
 
 export interface GetIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
   params: ExecutorSubActionGetIncidentParams;
+}
+
+export interface CloseIncidentApiHandlerArgs extends ExternalServiceApiHandlerArgs {
+  params: ExecutorSubActionCloseIncidentParams;
 }
 
 export interface HandshakeApiHandlerArgs extends ExternalServiceApiHandlerArgs {
@@ -199,6 +217,7 @@ export interface ExternalServiceAPI {
   handshake: (args: HandshakeApiHandlerArgs) => Promise<void>;
   pushToService: (args: PushToServiceApiHandlerArgs) => Promise<PushToServiceResponse>;
   getIncident: (args: GetIncidentApiHandlerArgs) => Promise<ServiceNowIncident>;
+  closeIncident: (args: CloseIncidentApiHandlerArgs) => Promise<ExternalServiceIncidentResponse>;
 }
 
 export interface ExternalServiceCommentResponse {

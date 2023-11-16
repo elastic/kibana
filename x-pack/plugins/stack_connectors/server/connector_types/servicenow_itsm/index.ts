@@ -41,6 +41,7 @@ import {
   ServiceNowExecutorResultData,
   ServiceNowPublicConfigurationType,
   ServiceNowSecretConfigurationType,
+  ExecutorSubActionCloseIncidentParams,
 } from '../lib/servicenow/types';
 import {
   ServiceNowITSMConnectorTypeId,
@@ -102,7 +103,7 @@ export function getServiceNowITSMConnectorType(): ServiceNowConnectorType<
 }
 
 // action executor
-const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices', 'getIncident'];
+const supportedSubActions: string[] = ['getFields', 'pushToService', 'getChoices', 'getIncident', 'closeIncident'];
 async function executor(
   {
     actionTypeId,
@@ -171,6 +172,15 @@ async function executor(
       params: getChoicesParams,
       logger,
     });
+  }
+
+  if(subAction === 'closeIncident') {
+    const closeIncidentParams = subActionParams as ExecutorSubActionCloseIncidentParams;
+    data = await api.closeIncident({
+      externalService,
+      params: closeIncidentParams,
+      logger,
+    })
   }
 
   return { status: 'ok', data: data ?? {}, actionId };
