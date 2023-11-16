@@ -23,7 +23,7 @@ export async function redirectToADJobWizards(
   timeRange: TimeRange,
   share: SharePluginStart
 ) {
-  const locator = share.url.locators.get(ML_APP_LOCATOR);
+  const locator = share.url.locators.get(ML_APP_LOCATOR)!;
 
   const url = await locator?.getUrl({
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS,

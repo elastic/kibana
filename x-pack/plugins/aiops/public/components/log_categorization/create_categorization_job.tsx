@@ -61,7 +61,7 @@ export const CreateCategorizationJobButton: FC<Props> = ({
     <>
       <EuiButtonEmpty
         data-test-subj="aiopsLogCategorizationFlyoutAdJobButton"
-        onClick={() => createADJob()}
+        onClick={createADJob}
         flush="left"
         iconSide="left"
         iconType={'machineLearningApp'}

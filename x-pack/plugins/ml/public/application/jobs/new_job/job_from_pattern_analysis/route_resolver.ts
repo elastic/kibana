@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import rison from '@kbn/rison';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { DataPublicPluginStart, TimefilterContract } from '@kbn/data-plugin/public';
 import type { DashboardStart } from '@kbn/dashboard-plugin/public';
@@ -17,7 +16,7 @@ import {
 } from './quick_create_job';
 import type { MlApiServices } from '../../../services/ml_api_service';
 
-import { getDefaultDatafeedQuery } from '../utils/new_job_utils';
+import { getDefaultDatafeedQuery, getRisonValue } from '../utils/new_job_utils';
 
 interface Dependencies {
   kibanaConfig: IUiSettingsClient;
@@ -38,65 +37,19 @@ export async function resolver(
   queryRisonString: string
 ) {
   const { mlApiServices, timeFilter, kibanaConfig, dashboardService, data } = deps;
-  let query: QueryDslQueryContainer;
-  try {
-    const queryString = rison.decode(queryRisonString) as string;
-    query = JSON.parse(queryString) as QueryDslQueryContainer;
-  } catch (error) {
-    query = getDefaultDatafeedQuery();
-  }
 
-  let from: string;
-  let to: string;
-  try {
-    from = rison.decode(fromRisonString) as string;
-  } catch (error) {
-    from = '';
-  }
-  try {
-    to = rison.decode(toRisonString) as string;
-  } catch (error) {
-    to = '';
-  }
-
-  let categorizationType;
-  try {
-    categorizationType = rison.decode(categorizationTypeRisonString) as CategorizationType;
-  } catch (error) {
-    categorizationType = CATEGORIZATION_TYPE.COUNT;
-  }
-
-  let dataViewId;
-  try {
-    dataViewId = rison.decode(dataViewIdRisonString) as string;
-  } catch (error) {
-    dataViewId = '';
-  }
-
-  let field;
-  try {
-    field = rison.decode(fieldRisonString) as string;
-  } catch (error) {
-    field = '';
-  }
-
-  let partitionField;
-  try {
-    if (partitionFieldRisonString === null) {
-      partitionField = '';
-    } else {
-      partitionField = rison.decode(partitionFieldRisonString) as string;
-    }
-  } catch (error) {
-    partitionField = '';
-  }
-
-  let stopOnWarn;
-  try {
-    stopOnWarn = rison.decode(stopOnWarnRisonString) as boolean;
-  } catch (error) {
-    stopOnWarn = false;
-  }
+  const query = getRisonValue<QueryDslQueryContainer>(queryRisonString, getDefaultDatafeedQuery());
+  const from = getRisonValue<string>(fromRisonString, '');
+  const to = getRisonValue<string>(toRisonString, '');
+  const categorizationType = getRisonValue<CategorizationType>(
+    categorizationTypeRisonString,
+    CATEGORIZATION_TYPE.COUNT
+  );
+  const dataViewId = getRisonValue<string>(dataViewIdRisonString, '');
+  const field = getRisonValue<string>(fieldRisonString, '');
+  const partitionField =
+    partitionFieldRisonString === null ? '' : getRisonValue<string>(partitionFieldRisonString, '');
+  const stopOnWarn = getRisonValue<boolean>(stopOnWarnRisonString, false);
 
   const jobCreator = new QuickCategorizationJobCreator(
     kibanaConfig,
