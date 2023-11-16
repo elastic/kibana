@@ -23,9 +23,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonEmpty,
-  EuiPopover,
   EuiLink,
-  EuiButtonIcon,
   EuiToolTip,
   EuiIcon,
 } from '@elastic/eui';
@@ -146,9 +144,7 @@ export const PackagePolicyInputVarField: React.FunctionComponent<InputFieldProps
       <FormRow
         isInvalid={isInvalid}
         error={errors}
-        label={
-          varDef.secret && !isEditPage ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel
-        }
+        label={varDef.secret ? <SecretFieldLabel fieldLabel={fieldLabel} /> : fieldLabel}
         labelAppend={
           isOptional ? (
             <EuiText size="xs" color="subdued">
@@ -328,10 +324,6 @@ const SecretFieldWrapper = ({ children }: { children: React.ReactNode }) => {
 
 const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
   const { docLinks } = useStartServices();
-  const [isPopoverOpen, setIsPopoverOpen] = useState(false);
-
-  const onButtonClick = () => setIsPopoverOpen(!isPopoverOpen);
-  const closePopover = () => setIsPopoverOpen(false);
 
   return (
     <>
