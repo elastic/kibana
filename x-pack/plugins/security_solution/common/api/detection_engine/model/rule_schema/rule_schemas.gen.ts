@@ -310,12 +310,7 @@ export const SavedQueryRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   response_actions: z.array(ResponseAction).optional(),
-  alert_suppression: z
-    .object({
-      duration: AlertSuppressionDuration,
-      group_by: AlertSuppressionGroupBy,
-    })
-    .optional(),
+  alert_suppression: AlertSuppression.optional(),
   query: RuleQuery.optional(),
 });
 
@@ -367,7 +362,12 @@ export const ThresholdRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   saved_id: SavedQueryId.optional(),
-  alert_suppression: AlertSuppression.optional(),
+  alert_suppression: z
+    .object({
+      duration: AlertSuppressionDuration,
+      group_by: AlertSuppressionGroupBy,
+    })
+    .optional(),
 });
 
 export type ThresholdRuleDefaultableFields = z.infer<typeof ThresholdRuleDefaultableFields>;

@@ -10,15 +10,14 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
+import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
+
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
 import type { ThresholdBucket } from './types';
 import type { RunOpts } from '../types';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
-import type {
-  BaseFieldsLatest,
-  SuppressionFieldsLatest,
-} from '../../../../../common/api/detection_engine/model/alerts';
+import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';

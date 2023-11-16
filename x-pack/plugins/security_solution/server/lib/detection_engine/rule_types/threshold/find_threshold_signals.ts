@@ -116,21 +116,13 @@ export const findThresholdSignals = async ({
       } else if (searchResultHasAggs<ThresholdMultiBucketAggregationResult>(searchResult)) {
         const thresholdTerms = searchResult.aggregations?.thresholdTerms;
         sortKeys = thresholdTerms?.after_key;
-        //  console.log('thresholdTerms', JSON.stringify(thresholdTerms, null, 2));
         buckets.push(
           ...((searchResult.aggregations?.thresholdTerms.buckets as ThresholdBucket[]) ?? [])
-        );
-        console.log(
-          'searchResult.aggregations?.thresholdTerms.buckets',
-          searchResult.aggregations?.thresholdTerms.buckets.length
         );
       } else {
         throw new Error('Aggregations were missing on threshold rule search result');
       }
-      console.log('.... searchAfterResults', JSON.stringify(searchAfterResults, null, 2));
-      console.log('.... sortKeys', JSON.stringify(sortKeys, null, 2));
     } while (sortKeys && buckets.length <= maxSignals);
-    // } while (sortKeys);
   } else {
     const { searchResult, searchDuration, searchErrors } = await singleSearchAfter({
       aggregations: buildThresholdSingleBucketAggregation({
@@ -185,10 +177,8 @@ export const findThresholdSignals = async ({
     warnings.push(getMaxSignalsWarning());
   }
 
-  console.log('allBuackets. ', buckets.length);
   return {
     buckets: buckets.slice(0, maxSignals),
-    allBuckets: buckets,
     ...searchAfterResults,
     warnings,
   };

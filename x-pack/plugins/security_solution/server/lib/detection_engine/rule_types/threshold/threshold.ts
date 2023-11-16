@@ -127,28 +127,25 @@ export const thresholdExecutor = async ({
     });
 
     // Look for new events over threshold
-    const { buckets, allBuckets, searchErrors, searchDurations, warnings } =
-      await findThresholdSignals({
-        inputIndexPattern: inputIndex,
-        from: tuple.from.toISOString(),
-        to: tuple.to.toISOString(),
-        maxSignals: tuple.maxSignals,
-        services,
-        ruleExecutionLogger,
-        filter: esFilter,
-        threshold: ruleParams.threshold,
-        runtimeMappings,
-        primaryTimestamp,
-        secondaryTimestamp,
-        aggregatableTimestampField,
-      });
+    const { buckets, searchErrors, searchDurations, warnings } = await findThresholdSignals({
+      inputIndexPattern: inputIndex,
+      from: tuple.from.toISOString(),
+      to: tuple.to.toISOString(),
+      maxSignals: tuple.maxSignals,
+      services,
+      ruleExecutionLogger,
+      filter: esFilter,
+      threshold: ruleParams.threshold,
+      runtimeMappings,
+      primaryTimestamp,
+      secondaryTimestamp,
+      aggregatableTimestampField,
+    });
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
-    //   console.log('buckets', JSON.stringify(buckets, null, 2));
-    //    const createResult = alertSuppression?.groupBy.length ? : await bulkCreateThresholdSignals({
     const createResult = alertSuppression?.groupBy.length
       ? await bulkCreateSuppressedThresholdAlerts({
-          buckets: allBuckets,
+          buckets,
           completeRule,
           services,
           inputIndexPattern: inputIndex,
