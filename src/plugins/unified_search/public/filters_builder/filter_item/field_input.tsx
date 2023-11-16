@@ -74,8 +74,10 @@ export function FieldInput({ field, dataView, onHandleField }: FieldInputProps) 
     onFieldChange(newValues);
 
     setTimeout(() => {
-      // Note: requires a tick skip to correctly blur element focus
-      inputRef?.current?.blur();
+      // Note: requires a tick skip to correctly move focus from the input to the combobox toggle
+      comboBoxWrapperRef.current
+        ?.querySelector<HTMLButtonElement>('[data-test-subj="comboBoxToggleListButton"]')
+        ?.focus();
     });
   };
 

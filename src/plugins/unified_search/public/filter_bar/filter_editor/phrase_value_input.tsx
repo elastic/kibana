@@ -82,8 +82,10 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
           onChange={([newValue = '']) => {
             onChange(newValue);
             setTimeout(() => {
-              // Note: requires a tick skip to correctly blur element focus
-              this.inputRef?.blur();
+              // Note: requires a tick skip to correctly move focus from the input to the combobox toggle
+              this.comboBoxWrapperRef.current
+                ?.querySelector<HTMLButtonElement>('[data-test-subj="comboBoxToggleListButton"]')
+                ?.focus();
             });
           }}
           onSearchChange={this.onSearchChange}
