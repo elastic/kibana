@@ -66,12 +66,11 @@ export const getCategoryRequest = (
   const { index, timeFieldName } = params;
 
   const query = getQueryWithParams({
-    // Passing in an empty string for the time field name will avoid
-    // adding any range queries. We're enforcing this here since this
+    params,
+    // We're skipping the overall range query here since this
     // is covered by the filter which will match docs in both baseline
     // and deviation time range via `getBaselineOrDeviationFilter`.
-    params: { ...params, timeFieldName: '' },
-    termFilters: undefined,
+    skipRangeQuery: true,
     filter: getBaselineOrDeviationFilter(params),
   });
 
