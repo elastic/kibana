@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
+export const SLO_MODEL_VERSION = 2;
 export const SLO_RESOURCES_VERSION = 3;
 export const SLO_SUMMARY_TRANSFORMS_VERSION = 4;
 
