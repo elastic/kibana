@@ -351,7 +351,7 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
             >
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
-                defaultMessage="This value is a secret. Once you save this integration policy, you won't be able to view the value again. {learnMoreLink}."
+                defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again. {learnMoreLink}."
                 values={{
                   learnMoreLink: (
                     <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
