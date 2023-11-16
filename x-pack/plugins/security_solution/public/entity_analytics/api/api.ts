@@ -89,7 +89,7 @@ export const disableRiskEngine = async (): Promise<DisableRiskEngineResponse> =>
 };
 
 /**
- * Git risk engine privileges
+ * Get risk engine privileges
  */
 export const fetchRiskEnginePrivileges = async (): Promise<RiskEnginePrivilegesResponse> => {
   return KibanaServices.get().http.fetch<RiskEnginePrivilegesResponse>(RISK_ENGINE_PRIVILEGES_URL, {
