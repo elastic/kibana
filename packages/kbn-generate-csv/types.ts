@@ -15,5 +15,4 @@ export interface JobParamsCSV {
   browserTimezone?: string;
   searchSource: SerializedSearchSourceFields;
   columns?: string[];
-  maxConcurrentShardRequests: number;
 }

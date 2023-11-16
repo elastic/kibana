@@ -63,7 +63,7 @@ describe('getExportSettings', () => {
         "escapeFormulaValues": false,
         "escapeValue": [Function],
         "includeFrozen": false,
-        "maxConcurrentShardSize": 5,
+        "maxConcurrentShardRequests": 5,
         "maxSizeBytes": 180000,
         "scroll": Object {
           "duration": "30s",

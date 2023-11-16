@@ -61,12 +61,12 @@ export class CsvGenerator {
     private stream: Writable
   ) {}
 
-  private async openPointInTime(
-    indexPatternTitle: string,
-    settings: CsvExportSettings,
-    maxConcurrentShardRequests: number
-  ) {
-    const { duration } = settings.scroll;
+  private async openPointInTime(indexPatternTitle: string, settings: CsvExportSettings) {
+    const {
+      includeFrozen,
+      maxConcurrentShardRequests,
+      scroll: { duration },
+    } = settings;
     let pitId: string | undefined;
     this.logger.debug(`Requesting PIT for: [${indexPatternTitle}]...`);
     try {
@@ -77,7 +77,7 @@ export class CsvGenerator {
           keep_alive: duration,
           ignore_unavailable: true,
           // @ts-expect-error ignore_throttled is not in the type definition, but it is accepted by es
-          ignore_throttled: settings.includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
+          ignore_throttled: includeFrozen ? false : undefined, // "true" will cause deprecation warnings logged in ES
         },
         {
           requestTimeout: duration,
@@ -104,7 +104,7 @@ export class CsvGenerator {
     settings: CsvExportSettings,
     searchAfter?: estypes.SortResults
   ) {
-    const { scroll: scrollSettings } = settings;
+    const { scroll: scrollSettings, maxConcurrentShardRequests } = settings;
     searchSource.setField('size', scrollSettings.size);
 
     if (searchAfter) {
@@ -126,6 +126,7 @@ export class CsvGenerator {
       params: {
         body: searchBody,
       },
+      maxConcurrentShardRequests,
     };
 
     let results: estypes.SearchResponse<unknown> | undefined;
@@ -335,11 +336,7 @@ export class CsvGenerator {
     let totalRelation = 'eq';
     let searchAfter: estypes.SortResults | undefined;
 
-    let pitId = await this.openPointInTime(
-      indexPatternTitle,
-      settings,
-      this.config.maxConcurrentShardRequests
-    );
+    let pitId = await this.openPointInTime(indexPatternTitle, settings);
 
     // apply timezone from the job to all date field formatters
     try {

@@ -31,7 +31,7 @@ export interface CsvExportSettings {
   escapeFormulaValues: boolean;
   escapeValue: (value: string) => string;
   includeFrozen: boolean;
-  maxConcurrentShardSize: number;
+  maxConcurrentShardRequests: number;
 }
 
 export const getExportSettings = async (
@@ -83,6 +83,6 @@ export const getExportSettings = async (
     checkForFormulas: config.checkForFormulas,
     escapeFormulaValues,
     escapeValue,
-    maxConcurrentShardSize: config.maxConcurrentShardRequests,
+    maxConcurrentShardRequests: config.maxConcurrentShardRequests,
   };
 };

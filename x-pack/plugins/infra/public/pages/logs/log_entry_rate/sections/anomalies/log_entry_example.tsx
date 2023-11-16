@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo, useCallback, useState } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import { encode } from '@kbn/rison';
 import { i18n } from '@kbn/i18n';
@@ -301,7 +302,10 @@ export const LogEntryExampleMessageHeaders: React.FunctionComponent<{
                 data-test-subj="logColumnHeader messageLogColumnHeader"
                 key={columnConfiguration.messageColumn.id}
               >
-                Message
+                <FormattedMessage
+                  id="xpack.infra.logEntryExampleMessageHeaders.logColumnHeader.messageLabel"
+                  defaultMessage="Message"
+                />
               </LogColumnHeader>
             );
           } else if (isFieldLogColumnConfiguration(columnConfiguration)) {
