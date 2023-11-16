@@ -51,7 +51,7 @@ export async function inspectSearchParams(
 
   let response;
   let error;
-  const mockApmEventClient = { search: spy } as any;
+  const mockApmEventClient = { search: spy, msearch: spy } as any;
   const indices: {
     [Property in keyof APMIndices]: string;
   } = {

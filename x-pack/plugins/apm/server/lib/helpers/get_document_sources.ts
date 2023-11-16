@@ -6,35 +6,30 @@
  */
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { AggregationResultOfMap } from '@kbn/es-types';
+import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { Environment } from '../../../common/environment_rt';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from './create_es_client/document_type';
+import { TimeRangeMetadata } from '../../../common/time_range_metadata';
+import {
+  getDurationSummaryFilter,
+  getDurationLegacyFilter,
+} from './transactions';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
-  TRANSACTION_DURATION_SUMMARY,
 } from '../../../common/es_fields/apm';
-import { TimeRangeMetadata } from '../../../common/time_range_metadata';
-
-type SummaryFieldAggregation = AggregationResultOfMap<
-  ReturnType<typeof getSummaryFieldAggregation>,
-  {}
->;
 
 const getRequest = ({
   documentType,
   rollupInterval,
   filters,
-  aggregation,
 }: {
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
   filters: estypes.QueryDslQueryContainer[];
-  aggregation?: {
-    aggs: Record<string, estypes.AggregationsAggregationContainer>;
-  };
 }) => {
   const searchParams = {
     apm: {
@@ -60,7 +55,6 @@ const getRequest = ({
           filter: filters,
         },
       },
-      ...aggregation,
     },
   };
 };
@@ -72,6 +66,8 @@ export async function getDocumentSources({
   kuery,
   enableServiceTransactionMetrics,
   enableContinuousRollups,
+  environment,
+  serviceName,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -79,18 +75,41 @@ export async function getDocumentSources({
   kuery: string;
   enableServiceTransactionMetrics: boolean;
   enableContinuousRollups: boolean;
+  environment?: Environment;
+  serviceName?: string;
 }) {
   const currentRange = rangeQuery(start, end);
   const diff = end - start;
   const kql = kqlQuery(kuery);
   const beforeRange = rangeQuery(start - diff, end - diff);
+  const serviceFilter: QueryDslQueryContainer[] | undefined = serviceName
+    ? [
+        {
+          term: {
+            [SERVICE_NAME]: serviceName,
+          },
+        },
+        ...(environment &&
+        environment !== 'ENVIRONMENT_ALL' &&
+        environment !== 'ENVIRONMENT_NOT_DEFINED'
+          ? [
+              {
+                term: {
+                  [SERVICE_ENVIRONMENT]: environment,
+                },
+              },
+            ]
+          : []),
+      ]
+    : undefined;
 
-  const sourcesToCheck = [
+  const documentTypesToCheck = [
     ...(enableServiceTransactionMetrics
       ? [ApmDocumentType.ServiceTransactionMetric as const]
       : []),
     ApmDocumentType.TransactionMetric as const,
-  ].flatMap((documentType) => {
+  ];
+  const sourcesToCheck = documentTypesToCheck.flatMap((documentType) => {
     const docTypeConfig = getConfigForDocumentType(documentType);
 
     return (
@@ -118,41 +137,43 @@ export async function getDocumentSources({
     });
   });
 
-  const sourcesToCheckWithSummary = [
-    ApmDocumentType.TransactionMetric as const,
-  ].flatMap((documentType) => {
-    const docTypeConfig = getConfigForDocumentType(documentType);
+  const sourcesToCheckWithSummary = documentTypesToCheck.flatMap(
+    (documentType) => {
+      const docTypeConfig = getConfigForDocumentType(documentType);
 
-    return (
-      enableContinuousRollups
-        ? docTypeConfig.rollupIntervals
-        : [RollupInterval.OneMinute]
-    ).flatMap((rollupInterval) => {
-      const servicesWithSummary = {
-        aggs: getSummaryFieldAggregation(),
-      };
-
-      return {
-        documentType,
-        rollupInterval,
-        meta: {
-          checkSummaryFieldExists: true,
-        },
-        before: getRequest({
+      return (
+        enableContinuousRollups
+          ? docTypeConfig.rollupIntervals
+          : [RollupInterval.OneMinute]
+      ).flatMap((rollupInterval) => {
+        return {
           documentType,
           rollupInterval,
-          filters: [...kql, ...beforeRange],
-          aggregation: servicesWithSummary,
-        }),
-        current: getRequest({
-          documentType,
-          rollupInterval,
-          filters: [...kql, ...currentRange],
-          aggregation: servicesWithSummary,
-        }),
-      };
-    });
-  });
+          meta: {
+            checkSummaryFieldExists: true,
+          },
+          before: getRequest({
+            documentType,
+            rollupInterval,
+            filters: [
+              ...kql,
+              ...currentRange,
+              getDurationLegacyFilter(serviceFilter),
+            ],
+          }),
+          current: getRequest({
+            documentType,
+            rollupInterval,
+            filters: [
+              ...kql,
+              ...currentRange,
+              getDurationSummaryFilter(serviceFilter),
+            ],
+          }),
+        };
+      });
+    }
+  );
 
   const allSourcesToCheck = [...sourcesToCheck, ...sourcesToCheckWithSummary];
 
@@ -173,17 +194,12 @@ export async function getDocumentSources({
     const hasDocBefore = responseBefore.hits.total.value > 0;
     const hasDocAfter = responseAfter.hits.total.value > 0;
 
-    const summaryFieldSupportedServices = getSummaryFieldSupportedServiceNames(
-      responseAfter.aggregations as SummaryFieldAggregation
-    );
-
     return {
       documentType,
       rollupInterval,
       hasDocBefore,
       hasDocAfter,
       checkSummaryFieldExists: source.meta.checkSummaryFieldExists,
-      summaryFieldSupportedServices,
     };
   });
 
@@ -198,10 +214,10 @@ export async function getDocumentSources({
       hasDocBefore,
       rollupInterval,
       checkSummaryFieldExists,
-      summaryFieldSupportedServices,
     } = checkedSource;
 
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
+
     // If there is any data before, we require that data is available before
     // this time range to mark this source as available. If we don't do that,
     // users that upgrade to a version that starts generating service tx metrics
@@ -209,12 +225,13 @@ export async function getDocumentSources({
     // If we only check before, users with a new deployment will use raw transaction
     // events.
     const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
+    const hasOnlyDocsWithSummary = hasDocBefore ? false : hasDocAfter;
+
     return {
       documentType,
       rollupInterval,
       checkSummaryFieldExists,
-      hasDocs,
-      summaryFieldSupportedServices,
+      hasDocs: checkSummaryFieldExists ? hasOnlyDocsWithSummary : hasDocs,
     };
   });
 
@@ -223,31 +240,20 @@ export async function getDocumentSources({
     .map((checkedSource) => {
       const { documentType, hasDocs, rollupInterval } = checkedSource;
 
-      const summaryFieldSupportedServices =
-        sourcesWithHasDocs.find((eSource) => {
-          return (
-            eSource.documentType === documentType &&
-            eSource.rollupInterval === rollupInterval &&
-            eSource.checkSummaryFieldExists
-          );
-        })?.summaryFieldSupportedServices ?? [];
+      const hasDurationSummary = sourcesWithHasDocs.some((eSource) => {
+        return (
+          eSource.documentType === documentType &&
+          eSource.rollupInterval === rollupInterval &&
+          eSource.checkSummaryFieldExists &&
+          eSource.hasDocs
+        );
+      });
 
       return {
         documentType,
         rollupInterval,
         hasDocs,
-        hasDurationSummaryField:
-          documentType === ApmDocumentType.ServiceTransactionMetric ||
-          Boolean(
-            sourcesWithHasDocs.find((eSource) => {
-              return (
-                eSource.documentType === documentType &&
-                eSource.rollupInterval === rollupInterval &&
-                eSource.checkSummaryFieldExists
-              );
-            })?.hasDocs
-          ),
-        summaryFieldSupportedServices,
+        hasDurationSummary,
       };
     });
 
@@ -255,91 +261,6 @@ export async function getDocumentSources({
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
     hasDocs: true,
-    hasDurationSummaryField: false,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
   });
 }
-
-const getSummaryFieldSupportedServiceNames = (
-  aggregations?: SummaryFieldAggregation
-) => {
-  if (!aggregations) {
-    return [];
-  }
-
-  const supportedServices =
-    aggregations.supported_summary.service_name.buckets.map(({ key }) => {
-      const [serviceName, environment] = key;
-      return { serviceName, environment };
-    });
-
-  const unsupportedServices =
-    aggregations.unsupported_summary.service_name.buckets.map(({ key }) => {
-      const [serviceName, environment] = key;
-      return { serviceName, environment };
-    });
-
-  // if within the time range, the same service has documents that don't have the summary field
-  // we'll consider it as not supported
-  return supportedServices.filter(
-    ({ environment, serviceName }) =>
-      !unsupportedServices.some(
-        (service) =>
-          service.environment === environment &&
-          service.serviceName === serviceName
-      )
-  );
-};
-
-const getSummaryFieldAggregation = () => {
-  return {
-    supported_summary: {
-      filter: {
-        exists: {
-          field: TRANSACTION_DURATION_SUMMARY,
-        },
-      },
-      aggs: {
-        service_name: {
-          multi_terms: {
-            terms: [
-              {
-                field: SERVICE_NAME,
-              },
-              {
-                field: SERVICE_ENVIRONMENT,
-              },
-            ],
-          },
-        },
-      },
-    },
-    unsupported_summary: {
-      filter: {
-        bool: {
-          must_not: [
-            {
-              exists: {
-                field: TRANSACTION_DURATION_SUMMARY,
-              },
-            },
-          ],
-        },
-      },
-      aggs: {
-        service_name: {
-          multi_terms: {
-            terms: [
-              {
-                field: SERVICE_NAME,
-              },
-              {
-                field: SERVICE_ENVIRONMENT,
-              },
-            ],
-          },
-        },
-      },
-    },
-  };
-};

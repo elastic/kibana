@@ -24,7 +24,6 @@ import {
 import { useEuiTheme } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { filterNil } from '../../../shared/charts/latency_chart';
 import { TimeseriesChart } from '../../../shared/charts/timeseries_chart';
 import {
@@ -103,13 +102,7 @@ function LatencyChart({
                 rollupInterval: preferred.source.rollupInterval,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 useDurationSummary:
-                  (preferred.source.hasDurationSummaryField ||
-                    preferred.source.summaryFieldSupportedServices.some(
-                      (supported) =>
-                        (environment === ENVIRONMENT_ALL.value ||
-                          supported.environment === environment) &&
-                        supported.serviceName === serviceName
-                    )) &&
+                  preferred.source.hasDurationSummary &&
                   latencyAggregationType === LatencyAggregationType.avg,
               },
             },

@@ -12,11 +12,7 @@ export interface TimeRangeMetadata {
   sources: Array<
     ApmDataSource & {
       hasDocs: boolean;
-      hasDurationSummaryField: boolean;
-      summaryFieldSupportedServices: Array<{
-        serviceName: string;
-        environment: string;
-      }>;
+      hasDurationSummary: boolean;
     }
   >;
 }

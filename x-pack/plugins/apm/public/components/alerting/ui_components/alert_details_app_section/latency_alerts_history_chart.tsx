@@ -28,7 +28,6 @@ import moment from 'moment';
 import React, { useMemo } from 'react';
 import { useAlertsHistory } from '@kbn/observability-alert-details';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { ENVIRONMENT_ALL } from '../../../../../common/environment_filter_values';
 import { ApmDocumentType } from '../../../../../common/document_type';
 import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
 import { getDurationFormatter } from '../../../../../common/utils/formatters';
@@ -98,13 +97,7 @@ export function LatencyAlertsHistoryChart({
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
                 useDurationSummary:
-                  (preferred.source.hasDurationSummaryField ||
-                    preferred.source.summaryFieldSupportedServices.some(
-                      (supported) =>
-                        (environment === ENVIRONMENT_ALL.value ||
-                          supported.environment === environment) &&
-                        supported.serviceName === serviceName
-                    )) &&
+                  preferred.source.hasDurationSummary &&
                   latencyAggregationType === LatencyAggregationType.avg,
               },
             },

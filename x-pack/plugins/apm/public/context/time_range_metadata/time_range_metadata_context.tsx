@@ -16,6 +16,7 @@ import { useApmRoutePath } from '../../hooks/use_apm_route_path';
 import { FetcherResult, useFetcher } from '../../hooks/use_fetcher';
 import { useTimeRange } from '../../hooks/use_time_range';
 import { useApmPluginContext } from '../apm_plugin/use_apm_plugin_context';
+import { useEnvironmentsContext } from '../environments_context/use_environments_context';
 
 export const TimeRangeMetadataContext = createContext<
   FetcherResult<TimeRangeMetadata> | undefined
@@ -30,9 +31,11 @@ export function ApmTimeRangeMetadataContextProvider({
     core: { uiSettings },
   } = useApmPluginContext();
 
-  const { query } = useApmParams('/*');
+  const { query, path } = useApmParams('/*');
+  const { environment } = useEnvironmentsContext();
 
   const kuery = 'kuery' in query && query.kuery ? query.kuery : '';
+  const serviceName = 'serviceName' in path ? path.serviceName : undefined;
 
   const range =
     'rangeFrom' in query && 'rangeTo' in query
@@ -58,6 +61,8 @@ export function ApmTimeRangeMetadataContextProvider({
       start={start}
       end={end}
       kuery={kuery}
+      serviceName={serviceName}
+      environment={environment}
     >
       {children}
     </TimeRangeMetadataContextProvider>
@@ -71,6 +76,8 @@ export function TimeRangeMetadataContextProvider({
   start,
   end,
   kuery,
+  serviceName,
+  environment,
 }: {
   children?: React.ReactNode;
   uiSettings: IUiSettingsClient;
@@ -78,6 +85,8 @@ export function TimeRangeMetadataContextProvider({
   start: string;
   end: string;
   kuery: string;
+  serviceName?: string;
+  environment?: string;
 }) {
   const enableServiceTransactionMetrics = uiSettings.get<boolean>(
     apmEnableServiceMetrics,
@@ -100,6 +109,8 @@ export function TimeRangeMetadataContextProvider({
             useSpanName,
             enableServiceTransactionMetrics,
             enableContinuousRollups,
+            serviceName,
+            environment,
           },
         },
       });
@@ -111,6 +122,8 @@ export function TimeRangeMetadataContextProvider({
       useSpanName,
       enableServiceTransactionMetrics,
       enableContinuousRollups,
+      serviceName,
+      environment,
     ]
   );
 

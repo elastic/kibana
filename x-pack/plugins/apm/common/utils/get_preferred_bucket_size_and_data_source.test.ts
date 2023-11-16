@@ -16,22 +16,19 @@ const serviceTransactionMetricSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
-    hasDurationSummaryField: true,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: true,
   },
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
-    hasDurationSummaryField: true,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: true,
   },
   {
     documentType: ApmDocumentType.ServiceTransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
-    hasDurationSummaryField: true,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: true,
   },
 ];
@@ -40,22 +37,19 @@ const txMetricSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.OneMinute,
-    hasDurationSummaryField: true,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: true,
   },
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.TenMinutes,
-    hasDurationSummaryField: true,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: true,
   },
   {
     documentType: ApmDocumentType.TransactionMetric,
     rollupInterval: RollupInterval.SixtyMinutes,
-    hasDurationSummaryField: true,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: true,
   },
 ];
@@ -64,8 +58,7 @@ const txEventSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
-    hasDurationSummaryField: false,
-    summaryFieldSupportedServices: [],
+    hasDurationSummary: false,
     hasDocs: false,
   },
 ];

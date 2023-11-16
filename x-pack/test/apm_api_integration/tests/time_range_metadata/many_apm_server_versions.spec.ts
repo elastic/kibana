@@ -32,8 +32,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const baseTime = new Date('2023-10-01T00:00:00.000Z').getTime();
   const startLegacy = moment(baseTime).add(0, 'minutes');
   const start = moment(baseTime).add(5, 'minutes');
-  const end = moment(baseTime).add(15, 'minutes');
-  const endMigrated = moment(baseTime).add(5, 'minutes');
+  const end = moment(baseTime).add(10, 'minutes');
 
   registry.when(
     'Time range metadata when there are multiple APM Server versions',
@@ -53,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await generateTraceDataForService({
             serviceName: 'synth-java',
             start: startLegacy,
-            end: endMigrated,
+            end: start,
             isLegacy: true,
             synthtrace,
           });
@@ -87,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(20);
+          expect(res.hits.total.value).to.be(10);
         });
 
         it('ingests transaction metrics without transaction.duration.summary', async () => {
@@ -104,10 +103,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(40);
+          expect(res.hits.total.value).to.be(30);
         });
 
-        it('has transaction.duration.summary field for every document type', async () => {
+        it('has transaction.duration.summary field for every document type in the time range', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
@@ -118,49 +117,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 enableServiceTransactionMetrics: true,
                 useSpanName: false,
                 kuery: '',
+                serviceName: 'synth-java',
+                environment: 'production',
               },
             },
           });
 
-          const allHasSummaryField = response.body.sources.every((source) => {
-            if (source.documentType === 'transactionEvent') {
-              return true;
-            }
-
-            return source.hasDurationSummaryField;
-          });
+          const allHasSummaryField = response.body.sources
+            .filter((source) => source.documentType !== ApmDocumentType.TransactionEvent)
+            .every((source) => source.hasDurationSummary);
 
           expect(allHasSummaryField).to.eql(true);
         });
 
-        it('has transaction.duration.summary field for only services that support it', async () => {
-          const response = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/time_range_metadata',
-            params: {
-              query: {
-                start: start.toISOString(),
-                end: end.toISOString(),
-                enableContinuousRollups: true,
-                enableServiceTransactionMetrics: true,
-                useSpanName: false,
-                kuery: '',
-              },
-            },
-          });
-
-          const allSupportedSummaryFieldServices = response.body.sources.flatMap((source) => {
-            return source.summaryFieldSupportedServices;
-          });
-
-          expect(allSupportedSummaryFieldServices).to.eql([
-            {
-              environment: 'production',
-              serviceName: 'synth-java',
-            },
-          ]);
-        });
-
-        it('does not suppport transaction.duration.summary when the field is not present in all documents within the time range', async () => {
+        it('does not suppport transaction.duration.summary when the field is not present in all documents in the time range', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
@@ -171,15 +141,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 enableServiceTransactionMetrics: true,
                 useSpanName: false,
                 kuery: '',
+                serviceName: 'synth-java',
+                environment: 'production',
               },
             },
           });
 
-          const allSupportedSummaryFieldServices = response.body.sources.flatMap((source) => {
-            return source.summaryFieldSupportedServices;
+          const allHasSummaryField = response.body.sources.every((source) => {
+            return source.hasDurationSummary;
           });
 
-          expect(allSupportedSummaryFieldServices).to.be.empty();
+          expect(allHasSummaryField).to.eql(false);
         });
 
         it('does not have latency data for synth-java-legacy', async () => {
@@ -198,35 +170,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             null,
             null,
             null,
-            null,
-            null,
-            null,
-            null,
-            null,
-          ]);
-        });
-
-        it('does have latency data for synth-java-legacy', async () => {
-          const res = await getLatencyChartForService({
-            serviceName: 'synth-java-legacy',
-            start,
-            end,
-            apmApiClient,
-            useDurationSummary: false,
-          });
-
-          expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            null,
           ]);
         });
 
@@ -240,11 +183,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
-            1000000,
-            1000000,
-            1000000,
-            1000000,
-            1000000,
             1000000,
             1000000,
             1000000,

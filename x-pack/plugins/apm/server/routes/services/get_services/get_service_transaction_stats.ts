@@ -7,6 +7,7 @@
 
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import { estypes } from '@elastic/elasticsearch';
+import { AggregationResultOfMap } from '@kbn/es-types';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
   AGENT_NAME,
@@ -27,9 +28,9 @@ import { calculateThroughputWithRange } from '../../../lib/helpers/calculate_thr
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import {
+  getDurationLegacyFilter,
+  getDurationSummaryFilter,
   isSummaryFieldSupported,
-  getTransactionFilter,
-  getTransactionLegacyFilter,
 } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
@@ -67,13 +68,20 @@ export interface ServiceTransactionStatsResponse {
   serviceOverflowCount: number;
 }
 
+type DurationSummaryAggregation = ReturnType<
+  typeof getDurationSummaryAggregation
+>;
+type DurationAggregation = ReturnType<typeof getDurationAggregation>;
+type AvgLatencyAggregation = ReturnType<typeof getOutcomeAggregation> &
+  (DurationSummaryAggregation | DurationAggregation);
+
 interface SearchParams {
   documentType: ApmDocumentType;
   rollupInterval: RollupInterval;
   filters: estypes.QueryDslQueryContainer[];
   maxNumServices: number;
   randomSampler: RandomSampler;
-  metrics: ReturnType<typeof getMetricsAggregation>;
+  metrics: AvgLatencyAggregation;
 }
 
 export async function getServiceTransactionStats({
@@ -89,6 +97,7 @@ export async function getServiceTransactionStats({
   rollupInterval,
 }: AggregationParams): Promise<ServiceTransactionStatsResponse> {
   const summaryFieldSupported = isSummaryFieldSupported(documentType);
+  const outcomes = getOutcomeAggregation(documentType);
 
   const baseParams: SearchParams = {
     documentType,
@@ -102,105 +111,113 @@ export async function getServiceTransactionStats({
       ...serviceGroupWithOverflowQuery(serviceGroup),
     ],
     metrics: {
-      ...getMetricsAggregation(documentType, TRANSACTION_DURATION),
+      ...(summaryFieldSupported
+        ? getDurationSummaryAggregation()
+        : getDurationAggregation()),
+      ...outcomes,
     },
   };
 
-  const allRequestParams: SearchParams[] = summaryFieldSupported
-    ? [
-        {
-          ...baseParams,
-          filters: [...baseParams.filters, ...getTransactionFilter()],
-          metrics: {
-            ...getMetricsAggregation(
-              documentType,
-              TRANSACTION_DURATION_SUMMARY
-            ),
-          },
-        },
-        {
-          ...baseParams,
-          filters: [...baseParams.filters, ...getTransactionLegacyFilter()],
-          metrics: {
-            ...getMetricsAggregation(
-              documentType,
-              TRANSACTION_DURATION_HISTOGRAM
-            ),
-          },
-        },
-      ]
-    : [
-        {
-          ...baseParams,
-        },
-      ];
-
-  const allResponses = (
-    await apmEventClient.msearch(
-      'get_service_transaction_stats',
-      ...allRequestParams.map(getSearchRequest)
-    )
-  ).responses;
+  const response = await apmEventClient.search(
+    'get_service_transaction_stats',
+    getSearchRequest(baseParams)
+  );
 
   return {
-    serviceStats: allResponses.flatMap(
-      (response) =>
-        response.aggregations?.sample.services.buckets.map((bucket) => {
-          const topTransactionTypeBucket = maybe(
-            bucket.transactionType.buckets.find(({ key }) =>
-              isDefaultTransactionType(key as string)
-            ) ?? bucket.transactionType.buckets[0]
-          );
+    serviceStats:
+      response.aggregations?.sample.services.buckets.map((bucket) => {
+        const topTransactionTypeBucket = maybe(
+          bucket.transactionType.buckets.find(({ key }) =>
+            isDefaultTransactionType(key as string)
+          ) ?? bucket.transactionType.buckets[0]
+        );
 
-          return {
-            serviceName: bucket.key as string,
-            transactionType: topTransactionTypeBucket?.key as
-              | string
-              | undefined,
-            environments:
-              topTransactionTypeBucket?.environments.buckets.map(
-                (environmentBucket) => environmentBucket.key as string
-              ) ?? [],
-            agentName: topTransactionTypeBucket?.sample.top[0].metrics[
-              AGENT_NAME
-            ] as AgentName | undefined,
-            latency: topTransactionTypeBucket?.avg_duration.value,
-            transactionErrorRate: topTransactionTypeBucket
-              ? calculateFailedTransactionRate(topTransactionTypeBucket)
-              : undefined,
-            throughput: topTransactionTypeBucket
-              ? calculateThroughputWithRange({
-                  start,
-                  end,
-                  value: topTransactionTypeBucket?.doc_count,
-                })
-              : undefined,
-          };
-        }) ?? []
-    ),
-    serviceOverflowCount: allResponses.reduce(
-      (acc, curr) =>
-        acc + (curr.aggregations?.sample?.overflowCount?.value ?? 0),
-      0
-    ),
+        return {
+          serviceName: bucket.key as string,
+          transactionType: topTransactionTypeBucket?.key as string | undefined,
+          environments:
+            topTransactionTypeBucket?.environments.buckets.map(
+              (environmentBucket) => environmentBucket.key as string
+            ) ?? [],
+          agentName: topTransactionTypeBucket?.sample.top[0].metrics[
+            AGENT_NAME
+          ] as AgentName | undefined,
+          latency: topTransactionTypeBucket
+            ? getAvgDurationValue(topTransactionTypeBucket)
+            : undefined,
+          transactionErrorRate: topTransactionTypeBucket
+            ? calculateFailedTransactionRate(topTransactionTypeBucket)
+            : undefined,
+          throughput: topTransactionTypeBucket
+            ? calculateThroughputWithRange({
+                start,
+                end,
+                value: topTransactionTypeBucket?.doc_count,
+              })
+            : undefined,
+        };
+      }) ?? [],
+    serviceOverflowCount:
+      response.aggregations?.sample?.overflowCount?.value ?? 0,
   };
 }
 
-function getMetricsAggregation(
-  documentType: ApmDocumentType,
-  field:
-    | typeof TRANSACTION_DURATION_SUMMARY
-    | typeof TRANSACTION_DURATION_HISTOGRAM
-    | typeof TRANSACTION_DURATION
+function isDurationSummary(
+  outcome: any
+): outcome is AggregationResultOfMap<DurationSummaryAggregation, {}> {
+  const summaryAgg = outcome as AggregationResultOfMap<
+    DurationSummaryAggregation,
+    {}
+  >;
+  return !!summaryAgg.avg_duration_legacy || !!summaryAgg.avg_duration_summary;
+}
+
+function getAvgDurationValue(
+  outcomeResponse: AggregationResultOfMap<AvgLatencyAggregation, {}>
 ) {
-  const outcomes = getOutcomeAggregation(documentType);
+  if (isDurationSummary(outcomeResponse)) {
+    return (
+      outcomeResponse.avg_duration_summary.result.value ??
+      outcomeResponse.avg_duration_legacy.result.value
+    );
+  }
+
+  return outcomeResponse.avg_duration.value;
+}
+
+function getDurationAggregation() {
   return {
     avg_duration: {
       avg: {
-        field,
+        field: TRANSACTION_DURATION,
       },
     },
-    ...outcomes,
+  };
+}
+
+function getDurationSummaryAggregation() {
+  return {
+    avg_duration_summary: {
+      filter: { ...getDurationSummaryFilter() },
+
+      aggs: {
+        result: {
+          avg: {
+            field: TRANSACTION_DURATION_SUMMARY,
+          },
+        },
+      },
+    },
+    avg_duration_legacy: {
+      filter: { ...getDurationLegacyFilter() },
+      aggs: {
+        result: {
+          avg: {
+            field: TRANSACTION_DURATION_HISTOGRAM,
+          },
+        },
+      },
+    },
   };
 }
 
