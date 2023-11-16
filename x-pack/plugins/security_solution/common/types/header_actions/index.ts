@@ -10,6 +10,7 @@ import type {
   EuiDataGridColumn,
   EuiDataGridColumnCellActionProps,
   EuiDataGridControlColumn,
+  EuiDataGridSetCellProps,
 } from '@elastic/eui';
 import type { IFieldSubType } from '@kbn/es-query';
 import type { FieldBrowserOptions } from '@kbn/triggers-actions-ui-plugin/public';
@@ -141,6 +142,7 @@ export interface ActionProps {
   onRowSelected: OnRowSelected;
   onRuleChange?: () => void;
   refetch?: () => void;
+  setCellProps?: (props: EuiDataGridSetCellProps) => void;
   rowIndex: number;
   setEventsDeleted: SetEventsDeleted;
   setEventsLoading: SetEventsLoading;
@@ -150,6 +152,8 @@ export interface ActionProps {
   timelineId: string;
   toggleShowNotes?: () => void;
   width?: number;
+  // Till fully migrate to UnifiedDataTable
+  isUnifiedDataTable?: boolean;
 }
 
 interface AdditionalControlColumnProps {

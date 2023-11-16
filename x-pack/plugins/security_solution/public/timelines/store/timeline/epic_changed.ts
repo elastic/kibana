@@ -32,6 +32,8 @@ import {
   setFilters,
   setSavedQueryId,
   setChanged,
+  updateRowHeight,
+  updateSampleSize,
 } from './actions';
 
 /**
@@ -59,6 +61,8 @@ const timelineChangedTypes = new Set([
   updateSort.type,
   updateRange.type,
   upsertColumn.type,
+  updateRowHeight.type,
+  updateSampleSize.type,
 ]);
 
 /**

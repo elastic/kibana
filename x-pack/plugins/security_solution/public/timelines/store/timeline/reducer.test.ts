@@ -139,6 +139,7 @@ const basicTimeline: TimelineModel = {
   version: null,
   savedSearchId: null,
   isDataProviderVisible: true,
+  sampleSize: 550,
 };
 const timelineByIdMock: TimelineById = {
   foo: { ...basicTimeline },

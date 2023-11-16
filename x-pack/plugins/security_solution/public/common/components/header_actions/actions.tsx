@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useRef, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { EuiButtonIcon, EuiCheckbox, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import styled from 'styled-components';
 
 import { TimelineTabs, TableId } from '@kbn/securitysolution-data-table';
+import { NOTES_BUTTON_CLASS_NAME } from '../../../timelines/components/timeline/properties/helpers';
+import type { NotesMap } from '../../../timelines/components/timeline/unified_components/render_custom_body';
+import { TimelineDataTableContext } from '../../../timelines/components/timeline/unified_components/render_custom_body';
 import {
   eventHasNotes,
   getEventType,
   getPinOnClick,
+  isEvenEqlSequence,
+  isEventBuildingBlockType,
 } from '../../../timelines/components/timeline/body/helpers';
 import { getScopedActions, isTimelineScope } from '../../../helpers';
 import { isInvestigateInResolverActionEnabled } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
@@ -31,7 +36,6 @@ import { useGlobalFullScreen, useTimelineFullScreen } from '../../containers/use
 import { ALERTS_ACTIONS } from '../../lib/apm/user_actions';
 import { setActiveTabTimeline } from '../../../timelines/store/timeline/actions';
 import { EventsTdContent } from '../../../timelines/components/timeline/styles';
-import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_features';
 import { AlertContextMenu } from '../../../detections/components/alerts_table/timeline_actions/alert_context_menu';
 import { InvestigateInTimelineAction } from '../../../detections/components/alerts_table/timeline_actions/investigate_in_timeline_action';
 import * as i18n from './translations';
@@ -41,9 +45,17 @@ import { isDetectionsAlertsTable } from '../top_n/helpers';
 import { GuidedOnboardingTourStep } from '../guided_onboarding_tour/tour_step';
 import { DEFAULT_ACTION_BUTTON_WIDTH, isAlert } from './helpers';
 
-const ActionsContainer = styled.div`
+const ActionsContainer = styled.div.attrs(
+  ({ className = '', $ariaRowindex }: { className?: string; $ariaRowindex: number }) => ({
+    'aria-rowindex': `${$ariaRowindex}`,
+    className: `timeline__actionsGroup ${className}`,
+  })
+)<{
+  className?: string;
+}>`
   align-items: center;
   display: flex;
+  height: 25px;
 `;
 
 const ActionsComponent: React.FC<ActionProps> = ({
@@ -53,6 +65,8 @@ const ActionsComponent: React.FC<ActionProps> = ({
   ecsData,
   eventId,
   eventIdToNoteIds,
+  expandedDoc,
+  setCellProps,
   isEventPinned = false,
   isEventViewer = false,
   loadingEventIds,
@@ -65,9 +79,12 @@ const ActionsComponent: React.FC<ActionProps> = ({
   toggleShowNotes,
   refetch,
   setEventsLoading,
+  isUnifiedDataTable = false,
 }) => {
   const dispatch = useDispatch();
-  const tGridEnabled = useIsExperimentalFeatureEnabled('tGridEnabled');
+  const { notesMap, setNotesMap } = useContext(TimelineDataTableContext);
+  const trGroupRef = useRef<HTMLDivElement | null>(null);
+
   const emptyNotes: string[] = [];
   const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
   const timelineType = useShallowEqualSelector(
@@ -96,6 +113,37 @@ const ActionsComponent: React.FC<ActionProps> = ({
       }),
     [eventId, onRowSelected]
   );
+
+  useEffect(() => {
+    if (expandedDoc && expandedDoc.id === eventId && setCellProps) {
+      setCellProps({
+        className: 'dscDocsGrid__cell--expanded',
+      });
+    } else if (setCellProps) {
+      setCellProps({ style: undefined });
+    }
+  }, [eventId, expandedDoc, setCellProps]);
+
+  const toggleShowNotesEvent = useCallback(() => {
+    setNotesMap((prevShowNotes: NotesMap) => {
+      const row = notesMap[eventId];
+      if (row?.isAddingNote) return notesMap; // If we're already adding a note, no need to update
+
+      if (prevShowNotes[eventId]) {
+        // notes are closing, so focus the notes button on the next tick, after escaping the EuiFocusTrap
+        setTimeout(() => {
+          const notesButtonElement = trGroupRef.current?.querySelector<HTMLButtonElement>(
+            `.${NOTES_BUTTON_CLASS_NAME}`
+          );
+          notesButtonElement?.focus();
+        }, 0);
+      }
+      return {
+        ...prevShowNotes,
+        [eventId]: { ...row, isAddingNote: true },
+      };
+    });
+  }, [eventId, notesMap, setNotesMap]);
 
   const handlePinClicked = useCallback(
     () =>
@@ -226,45 +274,65 @@ const ActionsComponent: React.FC<ActionProps> = ({
     onEventDetailsPanelOpened();
   }, [activeStep, incrementStep, isTourAnchor, isTourShown, onEventDetailsPanelOpened]);
 
+  const evetTypeClassName = useMemo(
+    () =>
+      eventType === 'raw'
+        ? 'rawEvent'
+        : eventType === 'eql'
+        ? isEvenEqlSequence(ecsData)
+          ? 'eqlSequence'
+          : 'eqlNonSequence'
+        : 'nonRawEvent',
+    [ecsData, eventType]
+  );
+  const buildingBlockTypeClassName = useMemo(
+    () => (isEventBuildingBlockType(ecsData) ? 'buildingBlockType' : ''),
+    [ecsData]
+  );
+
   return (
-    <ActionsContainer>
-      {showCheckboxes && !tGridEnabled && (
-        <div key="select-event-container" data-test-subj="select-event-container">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            {loadingEventIds.includes(eventId) ? (
-              <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
-            ) : (
-              <EuiCheckbox
-                aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
-                data-test-subj="select-event"
-                id={eventId}
-                checked={checked}
-                onChange={handleSelectEvent}
-              />
-            )}
-          </EventsTdContent>
-        </div>
-      )}
-      <GuidedOnboardingTourStep
-        isTourAnchor={isTourAnchor}
-        onClick={onExpandEvent}
-        step={AlertsCasesTourSteps.expandEvent}
-        tourId={SecurityStepId.alertsCases}
-      >
-        <div key="expand-event">
-          <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
-            <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
-              <EuiButtonIcon
-                aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
-                data-test-subj="expand-event"
-                iconType="expand"
-                onClick={onExpandEvent}
-                size="s"
-              />
-            </EuiToolTip>
-          </EventsTdContent>
-        </div>
-      </GuidedOnboardingTourStep>
+    <ActionsContainer className={`${evetTypeClassName} ${buildingBlockTypeClassName}`}>
+      {!isUnifiedDataTable ? (
+        <>
+          {showCheckboxes && (
+            <div key="select-event-container" data-test-subj="select-event-container">
+              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+                {loadingEventIds.includes(eventId) ? (
+                  <EuiLoadingSpinner size="m" data-test-subj="event-loader" />
+                ) : (
+                  <EuiCheckbox
+                    aria-label={i18n.CHECKBOX_FOR_ROW({ ariaRowindex, columnValues, checked })}
+                    data-test-subj="select-event"
+                    id={eventId}
+                    checked={checked}
+                    onChange={handleSelectEvent}
+                  />
+                )}
+              </EventsTdContent>
+            </div>
+          )}
+          <GuidedOnboardingTourStep
+            isTourAnchor={isTourAnchor}
+            onClick={onExpandEvent}
+            step={AlertsCasesTourSteps.expandEvent}
+            tourId={SecurityStepId.alertsCases}
+          >
+            <div key="expand-event">
+              <EventsTdContent textAlign="center" width={DEFAULT_ACTION_BUTTON_WIDTH}>
+                <EuiToolTip data-test-subj="expand-event-tool-tip" content={i18n.VIEW_DETAILS}>
+                  <EuiButtonIcon
+                    aria-label={i18n.VIEW_DETAILS_FOR_ROW({ ariaRowindex, columnValues })}
+                    data-test-subj="expand-event"
+                    iconType="expand"
+                    onClick={onExpandEvent}
+                    size="s"
+                  />
+                </EuiToolTip>
+              </EventsTdContent>
+            </div>
+          </GuidedOnboardingTourStep>
+        </>
+      ) : null}
       <>
         {timelineId !== TimelineId.active && (
           <InvestigateInTimelineAction
@@ -274,13 +342,13 @@ const ActionsComponent: React.FC<ActionProps> = ({
           />
         )}
 
-        {!isEventViewer && toggleShowNotes && (
+        {!isEventViewer && (
           <>
             <AddEventNoteAction
               ariaLabel={i18n.ADD_NOTES_FOR_ROW({ ariaRowindex, columnValues })}
               key="add-event-note"
               showNotes={showNotes ?? false}
-              toggleShowNotes={toggleShowNotes}
+              toggleShowNotes={toggleShowNotesEvent}
               timelineType={timelineType}
             />
             <PinEventAction

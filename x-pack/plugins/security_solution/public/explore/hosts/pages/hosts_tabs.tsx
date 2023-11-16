@@ -57,6 +57,7 @@ export const HostsTabs = React.memo<HostsTabsProps>(
           <EventsQueryTabBody
             additionalFilters={hostNameExistsFilter}
             tableId={TableId.hostsPageEvents}
+            isEventViewer={true}
             {...tabProps}
           />
         </Route>

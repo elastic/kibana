@@ -23,6 +23,7 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 
 import { euiThemeVars } from '@kbn/ui-theme';
+import { DataLoadingState } from '@kbn/unified-data-table';
 import type { ControlColumnProps } from '../../../../../common/types';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -194,7 +195,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
   };
 
   const [
-    isQueryLoading,
+    dataLoadingState,
     { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
@@ -224,6 +225,13 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     }
   }, [onEventClosed, timelineId, expandedDetail, showExpandedDetails]);
 
+  const isQueryLoading = useMemo(() => {
+    return (
+      dataLoadingState === DataLoadingState.loading ||
+      dataLoadingState === DataLoadingState.loadingMore
+    );
+  }, [dataLoadingState]);
+
   useEffect(() => {
     dispatch(
       timelineActions.updateIsLoading({
@@ -231,7 +239,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         isLoading: isQueryLoading || loadingSourcerer,
       })
     );
-  }, [loadingSourcerer, timelineId, isQueryLoading, dispatch]);
+  }, [loadingSourcerer, timelineId, dispatch, dataLoadingState, isQueryLoading]);
 
   const leadingControlColumns = useMemo(
     () =>
@@ -251,7 +259,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
         id={`${timelineId}-${TimelineTabs.eql}`}
         inputId={InputsModelId.timeline}
         inspect={inspect}
-        loading={isQueryLoading}
+        loading={false}
         refetch={refetch}
       />
       <FullWidthFlexGroup>

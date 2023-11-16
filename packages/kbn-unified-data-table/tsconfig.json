@@ -16,7 +16,6 @@
     "@kbn/expressions-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/i18n-react",
-    "@kbn/ui-theme",
     "@kbn/field-types",
     "@kbn/kibana-utils-plugin",
     "@kbn/cell-actions",

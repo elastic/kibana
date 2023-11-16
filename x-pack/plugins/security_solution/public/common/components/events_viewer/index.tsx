@@ -472,6 +472,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
         setEventsLoading,
         setEventsDeleted,
         pageSize: itemsPerPage,
+        entityType,
       })
     );
   }, [
@@ -493,6 +494,7 @@ const StatefulEventsViewerComponent: React.FC<EventsViewerProps & PropsFromRedux
     setEventsLoading,
     setEventsDeleted,
     itemsPerPage,
+    entityType,
   ]);
 
   const alertBulkActions = useAlertBulkActions({

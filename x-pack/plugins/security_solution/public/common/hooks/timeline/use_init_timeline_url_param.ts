@@ -9,6 +9,7 @@ import { useCallback } from 'react';
 
 import { useDispatch } from 'react-redux';
 
+import { USE_DISCOVER_COMPONENTS_IN_TIMELINE } from '../../../../common/constants';
 import { useInitializeUrlParam } from '../../utils/global_query_string';
 import {
   dispatchUpdateTimeline,
@@ -17,9 +18,13 @@ import {
 import type { TimelineUrl } from '../../../timelines/store/timeline/model';
 import { timelineActions } from '../../../timelines/store/timeline';
 import { URL_PARAM_KEY } from '../use_url_state';
+import { useUiSetting$ } from '../../lib/kibana';
 
 export const useInitTimelineFromUrlParam = () => {
   const dispatch = useDispatch();
+  const [useDiscoverComponentsInTimeline] = useUiSetting$<boolean>(
+    USE_DISCOVER_COMPONENTS_IN_TIMELINE
+  );
 
   const onInitialize = useCallback(
     (initialState: TimelineUrl | null) => {
@@ -34,10 +39,11 @@ export const useInitTimelineFromUrlParam = () => {
             dispatch(timelineActions.updateIsLoading(status)),
           updateTimeline: dispatchUpdateTimeline(dispatch),
           savedSearchId: initialState.savedSearchId,
+          useDiscoverComponentsInTimeline,
         });
       }
     },
-    [dispatch]
+    [dispatch, useDiscoverComponentsInTimeline]
   );
 
   useInitializeUrlParam(URL_PARAM_KEY.timeline, onInitialize);

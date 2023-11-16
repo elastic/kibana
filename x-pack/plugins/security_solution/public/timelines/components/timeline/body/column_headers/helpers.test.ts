@@ -11,24 +11,9 @@ import type { BrowserFields } from '../../../../../../common/search_strategy';
 import type { ColumnHeaderOptions } from '../../../../../../common/types';
 import { DEFAULT_COLUMN_MIN_WIDTH, DEFAULT_DATE_COLUMN_MIN_WIDTH } from '../constants';
 import { defaultHeaders } from './default_headers';
-import {
-  getColumnWidthFromType,
-  getColumnHeaders,
-  getRootCategory,
-  getColumnHeader,
-} from './helpers';
+import { getColumnHeaders, getRootCategory, getColumnHeader } from './helpers';
 
 describe('helpers', () => {
-  describe('getColumnWidthFromType', () => {
-    test('it returns the expected width for a non-date column', () => {
-      expect(getColumnWidthFromType('keyword')).toEqual(DEFAULT_COLUMN_MIN_WIDTH);
-    });
-
-    test('it returns the expected width for a date column', () => {
-      expect(getColumnWidthFromType('date')).toEqual(DEFAULT_DATE_COLUMN_MIN_WIDTH);
-    });
-  });
-
   describe('getRootCategory', () => {
     const baseFields = ['@timestamp', '_id', 'message'];
 

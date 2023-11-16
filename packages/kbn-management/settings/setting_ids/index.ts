@@ -167,6 +167,8 @@ export const SECURITY_SOLUTION_DEFAULT_ALERT_TAGS_KEY = 'securitySolution:alertT
 /** This Kibana Advanced Setting allows users to enable/disable the Expandable Flyout */
 export const SECURITY_SOLUTION_ENABLE_EXPANDABLE_FLYOUT_SETTING =
   'securitySolution:enableExpandableFlyout' as const;
+export const SECURITY_SOLUTION_USE_DISCOVER_COMPONENTS_IN_TIMELINE =
+  'securitySolution:useDiscoverComponentsInTimeline';
 
 // Timelion settings
 export const TIMELION_ES_DEFAULT_INDEX_ID = 'timelion:es.default_index';

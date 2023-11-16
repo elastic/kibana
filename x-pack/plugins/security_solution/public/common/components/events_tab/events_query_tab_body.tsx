@@ -58,6 +58,7 @@ export type EventsQueryTabBodyComponentProps = QueryTabBodyProps & {
   indexNames: string[];
   setQuery: GlobalTimeArgs['setQuery'];
   tableId: TableId;
+  isEventViewer?: boolean;
 };
 
 const EXTERNAL_ALERTS_URL_PARAM = 'onlyExternalAlerts';
@@ -71,6 +72,7 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
   setQuery,
   startDate,
   tableId,
+  isEventViewer = false,
 }) => {
   const dispatch = useDispatch();
   const { globalFullScreen } = useGlobalFullScreen();
@@ -110,11 +112,11 @@ const EventsQueryTabBodyComponent: React.FC<EventsQueryTabBodyComponentProps> = 
             : c
         ),
         title: i18n.EVENTS_GRAPH_TITLE,
-        showCheckboxes: true,
-        selectAll: true,
+        showCheckboxes: !isEventViewer,
+        selectAll: !isEventViewer,
       })
     );
-  }, [dispatch, showExternalAlerts, tGridEnabled, tableId]);
+  }, [dispatch, showExternalAlerts, tGridEnabled, tableId, isEventViewer]);
 
   useEffect(() => {
     return () => {

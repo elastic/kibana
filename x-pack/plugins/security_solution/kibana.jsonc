@@ -51,6 +51,7 @@
       "stackConnectors",
       "discover",
       "notifications",
+      "charts",
       "savedObjects",
       "savedSearch",
       "unifiedDocViewer",

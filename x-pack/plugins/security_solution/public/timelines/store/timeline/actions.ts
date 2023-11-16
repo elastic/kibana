@@ -214,6 +214,12 @@ export const updateColumns = actionCreator<{
   columns: ColumnHeaderOptions[];
 }>('UPDATE_COLUMNS');
 
+export const updateColumnWidth = actionCreator<{
+  columnId: string;
+  id: string;
+  width: number;
+}>('UPDATE_COLUMN_WIDTH');
+
 export const updateSort = actionCreator<{ id: string; sort: SortColumnTimeline[] }>('UPDATE_SORT');
 
 export const upsertColumn = actionCreator<{
@@ -279,3 +285,13 @@ export const setDataProviderVisibility = actionCreator<{
 }>('SET_DATA_PROVIDER_VISIBLITY');
 
 export const setChanged = actionCreator<{ id: string; changed: boolean }>('SET_CHANGED');
+
+export const updateRowHeight = actionCreator<{
+  id: string;
+  rowHeight: number;
+}>('UPDATE_ROW_HEIGHT');
+
+export const updateSampleSize = actionCreator<{
+  id: string;
+  sampleSize: number;
+}>('UPDATE_SAMPLE_SIZE');

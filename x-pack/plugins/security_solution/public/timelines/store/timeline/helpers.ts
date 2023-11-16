@@ -1166,6 +1166,7 @@ export const unPinTimelineEvent = ({
     [id]: {
       ...timeline,
       pinnedEventIds: omit(eventId, timeline.pinnedEventIds),
+      eventIdToNoteIds: omit(eventId, timeline.eventIdToNoteIds),
     },
   };
 };
@@ -1524,6 +1525,33 @@ export const applyDeltaToTableColumnWidth = ({
     columnWithNewWidth,
     ...timeline.columns.slice(columnIndex + 1),
   ];
+
+  return {
+    ...timelineById,
+    [id]: {
+      ...timeline,
+      columns,
+    },
+  };
+};
+
+export const updateTimelineColumnWidth = ({
+  columnId,
+  id,
+  timelineById,
+  width,
+}: {
+  columnId: string;
+  id: string;
+  timelineById: TimelineById;
+  width: number;
+}): TimelineById => {
+  const timeline = timelineById[id];
+
+  const columns = timeline.columns.map((x) => ({
+    ...x,
+    initialWidth: x.id === columnId ? width : x.initialWidth,
+  }));
 
   return {
     ...timelineById,

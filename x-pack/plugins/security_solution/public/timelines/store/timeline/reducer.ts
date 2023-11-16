@@ -35,6 +35,8 @@ import {
   updateKqlMode,
   updateProviders,
   updateRange,
+  updateRowHeight,
+  updateSampleSize,
   updateTimeline,
   updateGraphEventId,
   updateTitleAndDescription,
@@ -57,6 +59,7 @@ import {
   applyDeltaToColumnWidth,
   clearEventsDeleted,
   clearEventsLoading,
+  updateColumnWidth,
   updateSavedSearchId,
   setIsDiscoverSavedSearchLoaded,
   setDataProviderVisibility,
@@ -100,6 +103,7 @@ import {
   applyDeltaToTableColumnWidth,
   updateTimelinePerPageOptions,
   updateTimelineItemsPerPage,
+  updateTimelineColumnWidth,
 } from './helpers';
 
 import type { TimelineState } from './types';
@@ -491,6 +495,15 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       timelineById: state.timelineById,
     }),
   }))
+  .case(updateColumnWidth, (state, { id, columnId, width }) => ({
+    ...state,
+    timelineById: updateTimelineColumnWidth({
+      columnId,
+      id,
+      timelineById: state.timelineById,
+      width,
+    }),
+  }))
   .case(clearEventsDeleted, (state, { id }) => ({
     ...state,
     timelineById: {
@@ -550,6 +563,26 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         changed,
+      },
+    },
+  }))
+  .case(updateSampleSize, (state, { id, sampleSize }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        sampleSize,
+      },
+    },
+  }))
+  .case(updateRowHeight, (state, { id, rowHeight }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        rowHeight,
       },
     },
   }))
