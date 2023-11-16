@@ -7,11 +7,11 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 3,
+        "version": 4,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 7 days rolling time window",
       "dest": Object {
-        "index": ".slo-observability.summary-v2",
+        "index": ".slo-observability.summary-v3",
         "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
@@ -50,6 +50,11 @@ Array [
           "goodEvents": Object {
             "sum": Object {
               "field": "slo.isGoodSlice",
+            },
+          },
+          "latestSliTimestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
             },
           },
           "sliValue": Object {
@@ -107,24 +112,9 @@ Array [
               "field": "slo.budgetingMethod",
             },
           },
-          "slo.description": Object {
-            "terms": Object {
-              "field": "slo.description",
-            },
-          },
-          "slo.groupBy": Object {
-            "terms": Object {
-              "field": "slo.groupBy",
-            },
-          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
-            },
-          },
-          "slo.indicator.type": Object {
-            "terms": Object {
-              "field": "slo.indicator.type",
             },
           },
           "slo.instanceId": Object {
@@ -132,19 +122,9 @@ Array [
               "field": "slo.instanceId",
             },
           },
-          "slo.name": Object {
-            "terms": Object {
-              "field": "slo.name",
-            },
-          },
           "slo.revision": Object {
             "terms": Object {
               "field": "slo.revision",
-            },
-          },
-          "slo.tags": Object {
-            "terms": Object {
-              "field": "slo.tags",
             },
           },
           "slo.timeWindow.duration": Object {
@@ -176,7 +156,7 @@ Array [
         "unattended": true,
       },
       "source": Object {
-        "index": ".slo-observability.sli-v2*",
+        "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -219,8 +199,8 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "125s",
-          "field": "@timestamp",
+          "delay": "65s",
+          "field": "event.ingested",
         },
       },
       "transform_id": "slo-summary-timeslices-7d-rolling",
@@ -236,11 +216,11 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 3,
+        "version": 4,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 30 days rolling time window",
       "dest": Object {
-        "index": ".slo-observability.summary-v2",
+        "index": ".slo-observability.summary-v3",
         "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
@@ -279,6 +259,11 @@ Array [
           "goodEvents": Object {
             "sum": Object {
               "field": "slo.isGoodSlice",
+            },
+          },
+          "latestSliTimestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
             },
           },
           "sliValue": Object {
@@ -336,24 +321,9 @@ Array [
               "field": "slo.budgetingMethod",
             },
           },
-          "slo.description": Object {
-            "terms": Object {
-              "field": "slo.description",
-            },
-          },
-          "slo.groupBy": Object {
-            "terms": Object {
-              "field": "slo.groupBy",
-            },
-          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
-            },
-          },
-          "slo.indicator.type": Object {
-            "terms": Object {
-              "field": "slo.indicator.type",
             },
           },
           "slo.instanceId": Object {
@@ -361,19 +331,9 @@ Array [
               "field": "slo.instanceId",
             },
           },
-          "slo.name": Object {
-            "terms": Object {
-              "field": "slo.name",
-            },
-          },
           "slo.revision": Object {
             "terms": Object {
               "field": "slo.revision",
-            },
-          },
-          "slo.tags": Object {
-            "terms": Object {
-              "field": "slo.tags",
             },
           },
           "slo.timeWindow.duration": Object {
@@ -405,7 +365,7 @@ Array [
         "unattended": true,
       },
       "source": Object {
-        "index": ".slo-observability.sli-v2*",
+        "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -448,8 +408,8 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "125s",
-          "field": "@timestamp",
+          "delay": "65s",
+          "field": "event.ingested",
         },
       },
       "transform_id": "slo-summary-timeslices-30d-rolling",
@@ -465,11 +425,11 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 3,
+        "version": 4,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a 90 days rolling time window",
       "dest": Object {
-        "index": ".slo-observability.summary-v2",
+        "index": ".slo-observability.summary-v3",
         "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
@@ -508,6 +468,11 @@ Array [
           "goodEvents": Object {
             "sum": Object {
               "field": "slo.isGoodSlice",
+            },
+          },
+          "latestSliTimestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
             },
           },
           "sliValue": Object {
@@ -565,24 +530,9 @@ Array [
               "field": "slo.budgetingMethod",
             },
           },
-          "slo.description": Object {
-            "terms": Object {
-              "field": "slo.description",
-            },
-          },
-          "slo.groupBy": Object {
-            "terms": Object {
-              "field": "slo.groupBy",
-            },
-          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
-            },
-          },
-          "slo.indicator.type": Object {
-            "terms": Object {
-              "field": "slo.indicator.type",
             },
           },
           "slo.instanceId": Object {
@@ -590,19 +540,9 @@ Array [
               "field": "slo.instanceId",
             },
           },
-          "slo.name": Object {
-            "terms": Object {
-              "field": "slo.name",
-            },
-          },
           "slo.revision": Object {
             "terms": Object {
               "field": "slo.revision",
-            },
-          },
-          "slo.tags": Object {
-            "terms": Object {
-              "field": "slo.tags",
             },
           },
           "slo.timeWindow.duration": Object {
@@ -634,7 +574,7 @@ Array [
         "unattended": true,
       },
       "source": Object {
-        "index": ".slo-observability.sli-v2*",
+        "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -677,8 +617,8 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "125s",
-          "field": "@timestamp",
+          "delay": "65s",
+          "field": "event.ingested",
         },
       },
       "transform_id": "slo-summary-timeslices-90d-rolling",
@@ -694,11 +634,11 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 3,
+        "version": 4,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a weekly calendar aligned time window",
       "dest": Object {
-        "index": ".slo-observability.summary-v2",
+        "index": ".slo-observability.summary-v3",
         "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
@@ -754,6 +694,11 @@ Array [
               "field": "slo.isGoodSlice",
             },
           },
+          "latestSliTimestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
+            },
+          },
           "sliValue": Object {
             "bucket_script": Object {
               "buckets_path": Object {
@@ -807,24 +752,9 @@ Array [
               "field": "slo.budgetingMethod",
             },
           },
-          "slo.description": Object {
-            "terms": Object {
-              "field": "slo.description",
-            },
-          },
-          "slo.groupBy": Object {
-            "terms": Object {
-              "field": "slo.groupBy",
-            },
-          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
-            },
-          },
-          "slo.indicator.type": Object {
-            "terms": Object {
-              "field": "slo.indicator.type",
             },
           },
           "slo.instanceId": Object {
@@ -832,19 +762,9 @@ Array [
               "field": "slo.instanceId",
             },
           },
-          "slo.name": Object {
-            "terms": Object {
-              "field": "slo.name",
-            },
-          },
           "slo.revision": Object {
             "terms": Object {
               "field": "slo.revision",
-            },
-          },
-          "slo.tags": Object {
-            "terms": Object {
-              "field": "slo.tags",
             },
           },
           "slo.timeWindow.duration": Object {
@@ -876,7 +796,7 @@ Array [
         "unattended": true,
       },
       "source": Object {
-        "index": ".slo-observability.sli-v2*",
+        "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -919,8 +839,8 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "125s",
-          "field": "@timestamp",
+          "delay": "65s",
+          "field": "event.ingested",
         },
       },
       "transform_id": "slo-summary-timeslices-weekly-aligned",
@@ -936,11 +856,11 @@ Array [
       "_meta": Object {
         "managed": true,
         "managed_by": "observability",
-        "version": 3,
+        "version": 4,
       },
       "description": "Summarize every SLO with timeslices budgeting method and a monthly calendar aligned time window",
       "dest": Object {
-        "index": ".slo-observability.summary-v2",
+        "index": ".slo-observability.summary-v3",
         "pipeline": ".slo-observability.summary.pipeline",
       },
       "frequency": "1m",
@@ -963,7 +883,7 @@ Array [
               },
               "script": Object {
                 "source": "
-              Date d = new Date(); 
+              Date d = new Date();
               Instant instant = Instant.ofEpochMilli(d.getTime());
               LocalDateTime now = LocalDateTime.ofInstant(instant, ZoneOffset.UTC);
               LocalDateTime startOfMonth = now
@@ -973,7 +893,7 @@ Array [
                 .withSecond(0);
               LocalDateTime startOfNextMonth = startOfMonth.plusMonths(1);
               double sliceDurationInMinutes = params.sliceDurationInSeconds / 60;
-              
+
               return Math.ceil(Duration.between(startOfMonth, startOfNextMonth).toMinutes() / sliceDurationInMinutes);
             ",
               },
@@ -1009,6 +929,11 @@ Array [
           "goodEvents": Object {
             "sum": Object {
               "field": "slo.isGoodSlice",
+            },
+          },
+          "latestSliTimestamp": Object {
+            "max": Object {
+              "field": "@timestamp",
             },
           },
           "sliValue": Object {
@@ -1064,24 +989,9 @@ Array [
               "field": "slo.budgetingMethod",
             },
           },
-          "slo.description": Object {
-            "terms": Object {
-              "field": "slo.description",
-            },
-          },
-          "slo.groupBy": Object {
-            "terms": Object {
-              "field": "slo.groupBy",
-            },
-          },
           "slo.id": Object {
             "terms": Object {
               "field": "slo.id",
-            },
-          },
-          "slo.indicator.type": Object {
-            "terms": Object {
-              "field": "slo.indicator.type",
             },
           },
           "slo.instanceId": Object {
@@ -1089,19 +999,9 @@ Array [
               "field": "slo.instanceId",
             },
           },
-          "slo.name": Object {
-            "terms": Object {
-              "field": "slo.name",
-            },
-          },
           "slo.revision": Object {
             "terms": Object {
               "field": "slo.revision",
-            },
-          },
-          "slo.tags": Object {
-            "terms": Object {
-              "field": "slo.tags",
             },
           },
           "slo.timeWindow.duration": Object {
@@ -1133,7 +1033,7 @@ Array [
         "unattended": true,
       },
       "source": Object {
-        "index": ".slo-observability.sli-v2*",
+        "index": ".slo-observability.sli-v3*",
         "query": Object {
           "bool": Object {
             "filter": Array [
@@ -1176,8 +1076,8 @@ Array [
       },
       "sync": Object {
         "time": Object {
-          "delay": "125s",
-          "field": "@timestamp",
+          "delay": "65s",
+          "field": "event.ingested",
         },
       },
       "transform_id": "slo-summary-timeslices-monthly-aligned",
