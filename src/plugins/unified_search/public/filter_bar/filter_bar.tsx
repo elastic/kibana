@@ -55,6 +55,7 @@ const FilterBarUI = React.memo(function FilterBarUI(props: Props) {
       gutterSize="none" // We use `gap` in the styles instead for better truncation of badges
       alignItems="center"
       tabIndex={-1}
+      data-test-subj="filter-items-group"
     >
       {props.prepend}
       <FilterItems
