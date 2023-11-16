@@ -8,4 +8,4 @@
 
 import { CorePluginRouteTimeoutsPlugin } from './plugin';
 
-export const plugin = () => new CorePluginRouteTimeoutsPlugin();
+export const plugin = async () => new CorePluginRouteTimeoutsPlugin();
