@@ -252,7 +252,7 @@ export class AdHocTaskRunner {
 
       const adHocRuleRunParams =
         await this.context.encryptedSavedObjectsClient.getDecryptedAsInternalUser<AdHocRuleRunParams>(
-          'ad_hoc_rule_run_params',
+          'backfill_params',
           adHocRuleRunParamsId,
           { namespace }
         );
@@ -331,7 +331,7 @@ export class AdHocTaskRunner {
         );
         // Update the SO with the new start time
         await this.internalSavedObjectsRepository.update<AdHocRuleRunParams>(
-          'ad_hoc_rule_run_params',
+          'backfill_params',
           this.taskInstance.params.adHocRuleRunParamsId,
           { intervalStart: newStart.toISOString() },
           { refresh: false }
@@ -477,11 +477,9 @@ export class AdHocTaskRunner {
     if (!this.shouldDeleteTask) return;
 
     try {
-      this.logger.info(
-        `Deleting ad_hoc_rule_run_params ${this.taskInstance.params.adHocRuleRunParamsId}`
-      );
+      this.logger.info(`Deleting backfill_params ${this.taskInstance.params.adHocRuleRunParamsId}`);
       await this.internalSavedObjectsRepository.delete(
-        'ad_hoc_rule_run_params',
+        'backfill_params',
         this.taskInstance.params.adHocRuleRunParamsId,
         {
           refresh: false,
@@ -491,7 +489,7 @@ export class AdHocTaskRunner {
     } catch (e) {
       // Log error only, we shouldn't fail the task because of an error here (if ever there's retry logic)
       this.logger.error(
-        `Failed to cleanup ad_hoc_rule_run_params object [id="${this.taskInstance.params.adHocRuleRunParamsId}"]: ${e.message}`
+        `Failed to cleanup backfill_params object [id="${this.taskInstance.params.adHocRuleRunParamsId}"]: ${e.message}`
       );
     }
   }

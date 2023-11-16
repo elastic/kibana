@@ -510,7 +510,7 @@ export interface AdHocRuleRunParams extends Record<string, unknown> {
   >;
   apiKeyToUse: string;
   enabled: boolean;
-  intervalStart: string;
-  intervalDuration: string;
-  intervalEnd?: string;
+  start: string;
+  duration: string;
+  end?: string;
 }

@@ -20,16 +20,16 @@ import { convertRuleIdsToKueryNode } from '../../../../../lib';
 import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../../rules_client';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../../rules_client/common/audit_events';
-import type { ScheduleAdHocRuleRunOptions } from './types';
-import { scheduleAdHocRuleRunOptionsSchema } from './schemas';
+import type { ScheduleBackfillOptions } from './types';
+import { scheduleBackfillOptionsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain } from '../../../transforms';
 
-export async function scheduleAdHocRuleRun(
+export async function scheduleBackfill(
   context: RulesClientContext,
-  options: ScheduleAdHocRuleRunOptions
+  options: ScheduleBackfillOptions
 ) {
   try {
-    scheduleAdHocRuleRunOptionsSchema.validate(options);
+    scheduleBackfillOptionsSchema.validate(options);
   } catch (error) {
     throw Boom.badRequest(`Error validating schedule data - ${error.message}`);
   }
@@ -99,7 +99,7 @@ export async function scheduleAdHocRuleRun(
         await context.authorization.ensureAuthorized({
           ruleTypeId: ruleType,
           consumer,
-          operation: ReadOperations.ScheduleAdHocRuleRun,
+          operation: ReadOperations.ScheduleBackfill,
           entity: AlertingAuthorizationEntity.Rule,
         });
       } catch (error) {
@@ -127,7 +127,7 @@ export async function scheduleAdHocRuleRun(
 
   const scheduleResponses = [];
   for await (const response of rulesFinder.find()) {
-    const scheduleResponse = await context.adHocRuleRunClient.bulkQueue({
+    const scheduleResponse = await context.backfillClient.bulkQueue({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
       rules: response.saved_objects.map(({ id, attributes, references }) => {
         const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);

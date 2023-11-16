@@ -86,7 +86,7 @@ export class TaskRunnerFactory {
       taskInstance,
       context: this.taskRunnerContext!,
       internalSavedObjectsRepository: this.taskRunnerContext!.savedObjects.createInternalRepository(
-        ['alert', 'ad_hoc_rule_run_params']
+        ['alert', 'backfill_params']
       ),
     });
   }

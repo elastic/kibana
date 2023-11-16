@@ -891,7 +891,7 @@
       }
     }
   },
-  "ad_hoc_rule_run_params": {
+  "backfill_params": {
     "dynamic": false,
     "properties": {
       "createdAt": {

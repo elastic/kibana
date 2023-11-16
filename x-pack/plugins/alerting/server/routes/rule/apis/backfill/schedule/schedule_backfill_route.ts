@@ -7,9 +7,9 @@
 
 import { IRouter } from '@kbn/core/server';
 import {
-  scheduleAdHocRuleRunRequestBodySchemaV1,
-  ScheduleAdHocRuleRunRequestBodyV1,
-} from '../../../../../../common/routes/rule/apis/ad_hoc_rule_runs/schedule';
+  scheduleBackfillRequestBodySchemaV1,
+  ScheduleBackfillRequestBodyV1,
+} from '../../../../../../common/routes/rule/apis/backfill/schedule';
 import { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import {
@@ -18,7 +18,7 @@ import {
 } from '../../../../../types';
 import { transformRequestV1 } from './transforms';
 
-export const scheduleAdHocRuleRun = (
+export const scheduleBackfill = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -26,15 +26,15 @@ export const scheduleAdHocRuleRun = (
     {
       path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/ad_hoc_run/_schedule`,
       validate: {
-        body: scheduleAdHocRuleRunRequestBodySchemaV1,
+        body: scheduleBackfillRequestBodySchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const body: ScheduleAdHocRuleRunRequestBodyV1 = req.body;
+        const body: ScheduleBackfillRequestBodyV1 = req.body;
 
-        const result = await rulesClient.scheduleAdHocRuleRun(transformRequestV1(body));
+        const result = await rulesClient.scheduleBackfill(transformRequestV1(body));
         // const response: ScheduleAdHocRuleRunResponseV1 = {
         //   body: transformListTypesResponseV1(result),
         // };

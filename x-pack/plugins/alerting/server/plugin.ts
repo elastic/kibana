@@ -101,7 +101,7 @@ import { getRulesSettingsFeature } from './rules_settings_feature';
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { DataStreamAdapter, getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { createGetAlertIndicesAliasFn, GetAlertIndicesAlias } from './lib';
-import { AdHocRuleRunClient } from './ad_hoc_runs/ad_hoc_rule_run_client';
+import { BackfillClient } from './backfill_client/backfill_client';
 
 export const EVENT_LOG_PROVIDER = 'alerting';
 export const EVENT_LOG_ACTIONS = {
@@ -216,7 +216,7 @@ export class AlertingPlugin {
   private alertsService: AlertsService | null;
   private pluginStop$: Subject<void>;
   private dataStreamAdapter?: DataStreamAdapter;
-  private adHocRuleRunClient?: AdHocRuleRunClient;
+  private backfillClient?: BackfillClient;
   private nodeRoles: PluginInitializerContext['node']['roles'];
 
   constructor(initializerContext: PluginInitializerContext) {
@@ -269,7 +269,7 @@ export class AlertingPlugin {
       );
     }
 
-    this.adHocRuleRunClient = new AdHocRuleRunClient({
+    this.backfillClient = new BackfillClient({
       taskManager: plugins.taskManager,
       logger: this.logger,
       taskRunnerFactory: this.taskRunnerFactory,
@@ -466,13 +466,13 @@ export class AlertingPlugin {
       maintenanceWindowClientFactory,
       security,
       licenseState,
-      adHocRuleRunClient,
+      backfillClient,
     } = this;
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
-      includedHiddenTypes: ['alert', 'ad_hoc_rule_run_params'],
+      includedHiddenTypes: ['alert', 'backfill_params'],
     });
 
     const spaceIdToNamespace = (spaceId?: string) => {
@@ -481,7 +481,7 @@ export class AlertingPlugin {
         : undefined;
     };
 
-    adHocRuleRunClient?.startCheck(plugins.taskManager);
+    backfillClient?.startCheck(plugins.taskManager);
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,
@@ -517,7 +517,7 @@ export class AlertingPlugin {
       maxScheduledPerMinute: this.config.rules.maxScheduledPerMinute,
       getAlertIndicesAlias: createGetAlertIndicesAliasFn(this.ruleTypeRegistry!),
       alertsService: this.alertsService,
-      adHocRuleRunClient: this.adHocRuleRunClient!,
+      backfillClient: this.backfillClient!,
     });
 
     rulesSettingsClientFactory.initialize({

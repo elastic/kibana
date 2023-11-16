@@ -36,7 +36,7 @@ interface BulkQueueOpts {
   options: ScheduleAdHocRuleRunOptions;
 }
 
-export class AdHocRuleRunClient {
+export class BackfillClient {
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
   private savedObjectsRepository?: ISavedObjectsRepository;
@@ -94,7 +94,7 @@ export class AdHocRuleRunClient {
   public async bulkQueue({ unsecuredSavedObjectsClient, rules, spaceId, options }: BulkQueueOpts) {
     const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRuleRunParams>(
       rules.map((rule: RuleDomain) => ({
-        type: 'ad_hoc_rule_run_params',
+        type: 'backfill_params',
         attributes: {
           createdAt: new Date().toISOString(),
           spaceId,
@@ -144,7 +144,7 @@ export class AdHocRuleRunClient {
 
     const [coreStart] = await this.coreStartServices;
     this.savedObjectsRepository = coreStart.savedObjects.createInternalRepository([
-      'ad_hoc_rule_run_params',
+      'backfill_params',
     ]);
     return this.savedObjectsRepository;
   }
@@ -167,14 +167,12 @@ export class AdHocRuleRunClient {
       // Check if there are any ad hoc rule runs queued up
       const savedObjectsRepository = await this.getSavedObjectsRepository();
       const findResponse = await savedObjectsRepository.find<AdHocRuleRunParams>({
-        type: 'ad_hoc_rule_run_params',
+        type: 'backfill_params',
         sortField: 'createdAt',
         sortOrder: 'asc',
         perPage: 1,
       });
-      this.logger.info(
-        `Find result for ad_hoc_rule_run_params SO: ${JSON.stringify(findResponse)}`
-      );
+      this.logger.info(`Find result for backfill_params SO: ${JSON.stringify(findResponse)}`);
 
       if (findResponse.saved_objects.length > 0) {
         const adHocRun = findResponse.saved_objects[0];

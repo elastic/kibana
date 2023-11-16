@@ -36,7 +36,7 @@ export enum ReadOperations {
   GetAuthorizedAlertsIndices = 'getAuthorizedAlertsIndices',
   RunSoon = 'runSoon',
   GetRuleExecutionKPI = 'getRuleExecutionKPI',
-  ScheduleAdHocRuleRun = 'scheduleAdHocRuleRun',
+  ScheduleBackfill = 'scheduleBackfill',
 }
 
 export enum WriteOperations {

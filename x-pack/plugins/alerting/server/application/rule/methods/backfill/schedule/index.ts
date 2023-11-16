@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { scheduleAdHocRuleRun } from './schedule_ad_hoc_rule_run';
+export { scheduleBackfill } from './schedule_backfill';

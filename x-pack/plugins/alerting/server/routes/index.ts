@@ -62,7 +62,7 @@ import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggest
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
-import { scheduleAdHocRuleRun } from './rule/apis/ad_hoc_runs/schedule/schedule_ad_hoc_run_route';
+import { scheduleBackfill } from './rule/apis/backfill/schedule/schedule_backfill_route';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
 
@@ -139,6 +139,6 @@ export function defineRoutes(opts: RouteOptions) {
   getQueryDelaySettingsRoute(router, licenseState);
   updateQueryDelaySettingsRoute(router, licenseState);
 
-  // ad-hoc rule executions
-  scheduleAdHocRuleRun(router, licenseState);
+  // backfill rule runs
+  scheduleBackfill(router, licenseState);
 }

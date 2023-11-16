@@ -6,9 +6,8 @@
  */
 import { schema } from '@kbn/config-schema';
 
-export const scheduleAdHocRuleRunOptionsSchema = schema.object({
+export const scheduleBackfillOptionsSchema = schema.object({
   ruleIds: schema.arrayOf(schema.string(), { minSize: 1 }),
-  intervalStart: schema.string(),
-  intervalDuration: schema.string(),
-  intervalEnd: schema.maybe(schema.string()),
+  start: schema.string(),
+  end: schema.maybe(schema.string()),
 });

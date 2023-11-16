@@ -4,4 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-export { scheduleAdHocRuleRunOptionsSchema } from './schedule_ad_hoc_rule_run_options_schema';
+import { TypeOf } from '@kbn/config-schema';
+import { scheduleBackfillOptionsSchema } from '../schemas';
+
+export type ScheduleBackfillOptions = TypeOf<typeof scheduleBackfillOptionsSchema>;

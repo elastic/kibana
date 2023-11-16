@@ -142,7 +142,7 @@ export function setupSavedObjects(
   });
 
   savedObjects.registerType({
-    name: 'ad_hoc_rule_run_params',
+    name: 'backfill_params',
     indexPattern: ALERTING_CASES_SAVED_OBJECT_INDEX,
     hidden: true,
     namespaceType: 'multiple-isolated',
@@ -164,13 +164,16 @@ export function setupSavedObjects(
         // spaceId: {
         //   type: 'keyword',
         // },
-        // intervalStart: {
+        // start: {
         //   type: 'date',
         // },
-        // intervalEnd: {
+        // end: {
         //   type: 'date',
         // },
-        // intervalDuration: {
+        // currentStart: {
+        //   type: 'date',
+        // },
+        // status: {
         //   type: 'keyword',
         // },
       },
@@ -195,8 +198,8 @@ export function setupSavedObjects(
 
   // Encrypted attributes
   encryptedSavedObjects.registerType({
-    type: 'ad_hoc_rule_run_params',
+    type: 'backfill_params',
     attributesToEncrypt: new Set(['apiKeyToUse']),
-    attributesToExcludeFromAAD: new Set(['intervalStart']),
+    attributesToExcludeFromAAD: new Set(['currentStart']),
   });
 }

@@ -7,11 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
-export const scheduleAdHocRuleRunRequestBodySchema = schema.object({
+export const scheduleBackfillRequestBodySchema = schema.object({
   rule_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
-  interval_start: schema.string(),
-  interval_duration: schema.string(),
-  interval_end: schema.maybe(schema.string()),
+  start: schema.string(),
+  end: schema.maybe(schema.string()),
 });
 
-export const scheduleAdHocRuleRunResponseBodySchema = schema.object({});
+export const scheduleBackfillResponseBodySchema = schema.object({});
