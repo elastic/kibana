@@ -7,6 +7,7 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
+import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
@@ -58,3 +59,20 @@ export const KillOrSuspendProcessRequestSchema = {
     ]),
   }),
 };
+
+/**
+ * v2 base request for response actions. It adds the `agentType` property in order to handle
+ * sending actions to 3rd party systems
+ */
+export const BaseActionV2RequestSchema = {
+  ...BaseActionRequestSchema,
+  agentType: schema.maybe(
+    // @ts-expect-error TS2769: No overload matches this call
+    schema.oneOf(RESPONSE_ACTION_AGENT_TYPE.map((type) => schema.literal(type)))
+  ),
+};
+
+export const NoParametersV2RequestSchema = {
+  body: schema.object({ ...BaseActionV2RequestSchema }),
+};
+export type BaseActionV2RequestBody = TypeOf<typeof NoParametersV2RequestSchema.body>;

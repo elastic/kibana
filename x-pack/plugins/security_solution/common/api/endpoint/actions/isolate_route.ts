@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-import { NoParametersRequestSchema } from './common/base';
+import { BaseActionV2RequestSchema, NoParametersRequestSchema } from './common/base';
 
 export const IsolateRouteRequestSchema = NoParametersRequestSchema;
+
+export const IsolateRouteV2RequestSchema = BaseActionV2RequestSchema;
