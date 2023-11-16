@@ -25,6 +25,8 @@ import { AlertingPluginsStart } from '../plugin';
 import { TaskRunnerFactory } from '../task_runner';
 import { AdHocRuleRunParams } from '../types';
 
+const BACKFILL_CONCURRENCY = 1;
+
 interface ConstructorOpts {
   taskManager: TaskManagerSetupContract;
   logger: Logger;
@@ -44,8 +46,8 @@ export class BackfillClient {
   private taskManager?: TaskManagerStartContract;
   private savedObjectsRepository?: ISavedObjectsRepository;
   private coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
-  private readonly checkerTaskType = 'Ad-Hoc-Rule-Run-Check';
-  private readonly adHocRuleRunTaskType = 'Ad-Hoc-Rule-Run';
+  private readonly checkerTaskType = 'Backfill-Check';
+  private readonly backfillTaskType = 'Backfill';
   private readonly checkerTaskTimeout = '1m';
   private readonly checkerTaskInterval = '1m';
 
@@ -53,24 +55,22 @@ export class BackfillClient {
     this.logger = opts.logger;
     this.coreStartServices = opts.coreStartServices;
 
-    // Register the task that checks if there are any ad hoc rule
-    // runs in the queue and schedules the run if there are
+    // Register the task that checks if there are any backfills
+    // in the queue and schedules the run if there are
     opts.taskManager.registerTaskDefinitions({
       [this.checkerTaskType]: {
-        title: 'Alerting Ad Hoc Rule Run Check',
+        title: 'Alerting Backfill Check',
         timeout: this.checkerTaskTimeout,
-        createTaskRunner: () => {
-          return {
-            run: async () => this.runCheckTask(),
-          };
-        },
+        createTaskRunner: () => ({
+          run: async () => this.runCheckTask(),
+        }),
       },
     });
 
-    // Registers the task that handles the ad hoc rule run
+    // Registers the task that handles the backfill using the ad hoc task runner
     opts.taskManager.registerTaskDefinitions({
-      [this.adHocRuleRunTaskType]: {
-        title: 'Alerting Ad Hoc Rule Run',
+      [this.backfillTaskType]: {
+        title: 'Alerting Backfill',
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
@@ -156,18 +156,18 @@ export class BackfillClient {
   }
 
   private runCheckTask = async () => {
-    this.logger.info(`Running ad hoc rule run check task`);
+    this.logger.info(`Running backfill check task`);
     try {
-      // Ensure no ad hoc task is currently running
+      // Ensure no backfill task is currently running
       try {
-        this.logger.info(`Trying to get task with ID ${this.adHocRuleRunTaskType}`);
-        await this.taskManager?.get(this.adHocRuleRunTaskType);
+        this.logger.info(`Trying to get task with ID ${this.backfillTaskType}`);
+        await this.taskManager?.get(this.backfillTaskType);
         this.logger.info(`Found existing task, not scheduling another`);
-        // found an ad hoc rule run task, don't schedule another one
+        // found a backfill task, don't schedule another one
         return;
       } catch (err) {
-        this.logger.info(`No current ad hoc rule run task found - proceeding`);
-        // no ad hoc rule run task found, proceed
+        this.logger.info(`No current backfill task found - proceeding`);
+        // no backfill task found, proceed
       }
 
       // Check if there are any ad hoc rule runs queued up
@@ -181,34 +181,34 @@ export class BackfillClient {
       this.logger.info(`Find result for backfill_params SO: ${JSON.stringify(findResponse)}`);
 
       if (findResponse.saved_objects.length > 0) {
-        const adHocRun = findResponse.saved_objects[0];
+        const backfillRun = findResponse.saved_objects[0];
 
         this.logger.info(
           `Scheduling task ${JSON.stringify({
-            id: this.adHocRuleRunTaskType,
-            taskType: this.adHocRuleRunTaskType,
+            id: this.backfillTaskType,
+            taskType: this.backfillTaskType,
             state: {},
             params: {
-              adHocRuleRunParamsId: adHocRun.id,
-              spaceId: adHocRun.attributes.spaceId,
+              adHocRuleRunParamsId: backfillRun.id,
+              spaceId: backfillRun.attributes.spaceId,
             },
           })}`
         );
-        // Schedule the ad hoc rule run
+        // Schedule the backfill
         await this.taskManager?.schedule({
-          id: this.adHocRuleRunTaskType,
-          taskType: this.adHocRuleRunTaskType,
+          id: this.backfillTaskType,
+          taskType: this.backfillTaskType,
           state: {},
           params: {
-            adHocRuleRunParamsId: adHocRun.id,
-            spaceId: adHocRun.attributes.spaceId,
+            adHocRuleRunParamsId: backfillRun.id,
+            spaceId: backfillRun.attributes.spaceId,
           },
         });
       } else {
-        this.logger.info(`No ad hoc rule runs queued`);
+        this.logger.info(`No backfills queued`);
       }
     } catch (error) {
-      this.logger.warn(`Error running ad hoc rule run check task: ${error}`);
+      this.logger.warn(`Error running backfill check task: ${error}`);
     }
   };
 }

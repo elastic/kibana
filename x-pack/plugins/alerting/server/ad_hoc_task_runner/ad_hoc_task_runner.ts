@@ -111,7 +111,7 @@ export class AdHocTaskRunner {
     ruleRunParams,
     validatedParams: params,
   }: RunRuleParams): Promise<void> {
-    const { rule, intervalDuration, intervalStart } = ruleRunParams;
+    const { rule, duration, start } = ruleRunParams;
     const {
       params: { ruleId, spaceId },
     } = this.taskInstance;
@@ -196,7 +196,7 @@ export class AdHocTaskRunner {
       },
     });
 
-    const nowDate = new Date(new Date(intervalStart).valueOf() + parseDuration(intervalDuration));
+    const nowDate = new Date(new Date(start).valueOf() + parseDuration(duration));
 
     await this.ruleRunner.run({
       alertingEventLogger: this.alertingEventLogger,
@@ -208,7 +208,7 @@ export class AdHocTaskRunner {
           getTimeRange({
             logger: this.logger,
             nowDate: nowDate.toISOString(),
-            window: intervalDuration,
+            window: duration,
           }),
       },
       fakeRequest,
@@ -228,10 +228,7 @@ export class AdHocTaskRunner {
         updatedBy: rule.updatedBy,
         createdAt: rule.createdAt,
         updatedAt: rule.updatedAt,
-        throttle: rule.throttle,
-        notifyWhen: rule.notifyWhen,
-        muteAll: rule.muteAll,
-        snoozeSchedule: rule.snoozeSchedule,
+        muteAll: false,
       },
       ruleId,
       ruleLabel,
@@ -312,16 +309,16 @@ export class AdHocTaskRunner {
     this.logger.info(`Finished running rule ad hoc`);
     // If no intervalEnd is specified, this is a one time ad hoc rule run
     // Delete the ad hoc rule run param SO
-    if (!adHocRuleRunParams.intervalEnd) {
+    if (!adHocRuleRunParams.end) {
       this.logger.info(`No intervalEnd specified - one time run`);
       this.shouldDeleteTask = true;
     } else {
       // If the current start + interval > end, we've finished the execution set
       const newStart = new Date(
-        new Date(adHocRuleRunParams.intervalStart).valueOf() +
-          parseDuration(adHocRuleRunParams.intervalDuration)
+        new Date(adHocRuleRunParams.currentStart).valueOf() +
+          parseDuration(adHocRuleRunParams.duration)
       );
-      const endAsMillis = new Date(adHocRuleRunParams.intervalEnd).valueOf();
+      const endAsMillis = new Date(adHocRuleRunParams.end).valueOf();
       if (newStart.valueOf() > endAsMillis) {
         this.logger.info(`Completed ad hoc execution sequence`);
         this.shouldDeleteTask = true;
@@ -333,7 +330,7 @@ export class AdHocTaskRunner {
         await this.internalSavedObjectsRepository.update<AdHocRuleRunParams>(
           'backfill_params',
           this.taskInstance.params.adHocRuleRunParamsId,
-          { intervalStart: newStart.toISOString() },
+          { currentStart: newStart.toISOString() },
           { refresh: false }
         );
       }
