@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState, type FC } from 'react';
+import React, { useEffect, useRef, useState, type FC } from 'react';
 import { EuiEmptyPrompt, EuiHorizontalRule, EuiPanel } from '@elastic/eui';
 import type { Moment } from 'moment';
 
@@ -64,6 +64,8 @@ export interface LogRateAnalysisContentProps {
   barHighlightColorOverride?: string;
   /** Optional callback that exposes data of the completed analysis */
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
+  /** Optional callback that exposes current window parameters */
+  onWindowParametersChange?: (wp?: WindowParameters) => void;
   /** Identifier to indicate the plugin utilizing the component */
   embeddingOrigin: string;
 }
@@ -78,8 +80,10 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barColorOverride,
   barHighlightColorOverride,
   onAnalysisCompleted,
+  onWindowParametersChange,
   embeddingOrigin,
 }) => {
+  const windowParametersTouched = useRef(false);
   const [windowParameters, setWindowParameters] = useState<WindowParameters | undefined>();
   const [initialAnalysisStart, setInitialAnalysisStart] = useState<
     number | WindowParameters | undefined
@@ -92,6 +96,18 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   useEffect(() => {
     setIsBrushCleared(windowParameters === undefined);
   }, [windowParameters]);
+
+  useEffect(() => {
+    if (!windowParametersTouched.current && windowParameters === undefined) {
+      return;
+    }
+
+    windowParametersTouched.current = true;
+
+    if (onWindowParametersChange) {
+      onWindowParametersChange(windowParameters);
+    }
+  }, [onWindowParametersChange, windowParameters]);
 
   const {
     currentSelectedSignificantItem,
