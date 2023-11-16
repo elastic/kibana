@@ -29,6 +29,7 @@ export interface SelectClientPanelProps {
   http: HttpStart;
   isPanelLeft?: boolean;
   overviewPanelProps?: Partial<EuiPanelProps>;
+  callout?: React.ReactNode;
 }
 
 export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
@@ -37,6 +38,7 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
   http,
   isPanelLeft = true,
   overviewPanelProps,
+  callout,
 }) => {
   const panelContent = (
     <>
@@ -56,28 +58,30 @@ export const SelectClientPanel: React.FC<SelectClientPanelProps> = ({
         {children}
       </EuiFlexGroup>
       <EuiSpacer size="l" />
-      <EuiCallOut
-        title={i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.title', {
-          defaultMessage: 'Try it now in Console',
-        })}
-        size="m"
-        iconType="iInCircle"
-      >
-        <p>
-          {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.description', {
-            defaultMessage:
-              'With Console, you can get started right away with our REST APIs. No installation required.',
+      {callout || (
+        <EuiCallOut
+          title={i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.title', {
+            defaultMessage: 'Try it now in Console',
           })}
+          size="m"
+          iconType="iInCircle"
+        >
+          <p>
+            {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.description', {
+              defaultMessage:
+                'With Console, you can get started right away with our REST APIs. No installation required.',
+            })}
 
-          <span>
-            <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
-              {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.link', {
-                defaultMessage: 'Try Console now',
-              })}
-            </EuiLink>
-          </span>
-        </p>
-      </EuiCallOut>
+            <span>
+              <EuiLink target="_blank" href={http.basePath.prepend(`/app/dev_tools#/console`)}>
+                {i18n.translate('searchApiPanels.welcomeBanner.selectClient.callout.link', {
+                  defaultMessage: 'Try Console now',
+                })}
+              </EuiLink>
+            </span>
+          </p>
+        </EuiCallOut>
+      )}
     </>
   );
   return (
