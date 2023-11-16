@@ -56,6 +56,7 @@ export class LifecycleQuery extends BaseResolverQuery {
                 should: [
                   { term: { 'event.category': 'process' } },
                   { term: { 'event.category': 'malware' } },
+                  // { term: { 'event.category': 'dns' } },
                 ],
               },
             },

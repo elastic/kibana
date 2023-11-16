@@ -68,8 +68,6 @@ export class Fetcher {
       this.retrieveDescendants(options, isInternalRequest),
     ]);
 
-    console.log({ treeParts });
-
     const tree = treeParts.reduce((results, partArray) => {
       results.push(...partArray);
       return results;
@@ -84,7 +82,6 @@ export class Fetcher {
     isInternalRequest: boolean
   ): TreeResponse {
     const statsIDs: NodeID[] = [];
-    console.log({ treeNodes });
     for (const node of treeNodes) {
       const id = getIDField(node, options.schema);
       if (id) {

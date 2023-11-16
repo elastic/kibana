@@ -94,9 +94,10 @@ export const supportedSchemas: SupportedSchema[] = [
       },
     ],
     schema: {
-      id: 'process.entity_id',
-      parent: 'process.parent.entity_id',
-      name: 'process.name',
+      // could be changed to [below value] if we get the tgt values to become a separate document
+      id: 'sentinel_one_cloud_funnel.event.tgt.process.uid', // sentinel_one_cloud_funnel.event.src.process.uid
+      parent: 'sentinel_one_cloud_funnel.event.src.process.uid', // sentinel_one_cloud_funnel.event.src.process.parent.uid
+      name: 'sentinel_one_cloud_funnel.event.tgt.process.name', // sentinel_one_cloud_funnel.event.src.process.name
     },
   },
   {
@@ -139,7 +140,6 @@ export const supportedSchemas: SupportedSchema[] = [
 
 export function getFieldAsString(doc: unknown, field: string): string | undefined {
   const value = _.get(doc, field);
-  console.log({ field, value });
   if (value === undefined) {
     return undefined;
   }
