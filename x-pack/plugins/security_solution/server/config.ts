@@ -114,6 +114,7 @@ export const configSchema = schema.object({
    */
   prebuiltRulesPackageVersion: schema.maybe(schema.string()),
   enabled: schema.boolean({ defaultValue: true }),
+  enableUiSettingsValidations: schema.boolean({ defaultValue: false }),
 
   /**
    * The Max number of Bytes allowed for the `upload` endpoint response action
@@ -140,6 +141,7 @@ export type ConfigSchema = TypeOf<typeof configSchema>;
 export type ConfigType = Omit<ConfigSchema, 'offeringSettings'> & {
   experimentalFeatures: ExperimentalFeatures;
   settings: ConfigSettings;
+  enableUiSettingsValidations: boolean;
 };
 
 export const createConfig = (context: PluginInitializerContext): ConfigType => {
