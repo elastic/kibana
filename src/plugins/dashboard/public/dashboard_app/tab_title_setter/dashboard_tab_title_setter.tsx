@@ -29,6 +29,7 @@ export const DashboardTabTitleSetter = ({
    * Set chrome tab title when dashboard's title changes
    */
   useEffect(() => {
+    /** We do not want the tab title to include the "Editing" prefix, so always send in view mode */
     chromeDocTitle.change(getDashboardTitle(title, ViewMode.VIEW, !lastSavedId));
   }, [title, chromeDocTitle, lastSavedId]);
 
