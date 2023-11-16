@@ -49,18 +49,18 @@ export default ({ getService }: FtrProviderContext) => {
   const config = getService('config');
   const isServerless = config.get('serverless');
   const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const path = dataPathBuilder.getPath('auditbeat/hosts');
+  const auditPath = dataPathBuilder.getPath('auditbeat/hosts');
 
   describe('@ess @serverless EQL type rules', () => {
     before(async () => {
-      await esArchiver.load(path);
+      await esArchiver.load(auditPath);
       await esArchiver.load(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
     });
 
     after(async () => {
-      await esArchiver.unload(path);
+      await esArchiver.unload(auditPath);
       await esArchiver.unload(
         'x-pack/test/functional/es_archives/security_solution/timestamp_override_6'
       );
@@ -531,9 +531,9 @@ export default ({ getService }: FtrProviderContext) => {
       // alert for each event in the sequence, so max_alerts=200 results in 400 building blocks in addition to
       // 200 regular alerts
       expect(previewAlerts.length).eql(maxAlerts * 3);
-      const shellalerts = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 2);
+      const shellAlerts = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 2);
       const buildingBlocks = previewAlerts.filter((alert) => alert._source?.[ALERT_DEPTH] === 1);
-      expect(shellalerts.length).eql(maxAlerts);
+      expect(shellAlerts.length).eql(maxAlerts);
       expect(buildingBlocks.length).eql(maxAlerts * 2);
     });
 
