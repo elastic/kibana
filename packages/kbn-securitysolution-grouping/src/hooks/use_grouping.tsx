@@ -19,7 +19,7 @@ import { Grouping as GroupingComponent } from '../components/grouping';
 /** Interface for grouping object where T is the `GroupingAggregation`
  *  @interface GroupingArgs<T>
  */
-interface Grouping<T> {
+export interface UseGrouping<T> {
   getGrouping: (props: DynamicGroupingProps<T>) => React.ReactElement;
   groupSelector: React.ReactElement<GroupSelectorProps>;
   selectedGroups: string[];
@@ -99,7 +99,7 @@ export const useGrouping = <T,>({
   onOptionsChange,
   tracker,
   title,
-}: GroupingArgs<T>): Grouping<T> => {
+}: GroupingArgs<T>): UseGrouping<T> => {
   const [groupingState, dispatch] = useReducer(groupsReducerWithStorage, initialState);
   const { activeGroups: selectedGroups } = useMemo(
     () => groupByIdSelector({ groups: groupingState }, groupingId) ?? defaultGroup,
