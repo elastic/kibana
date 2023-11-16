@@ -21,17 +21,12 @@ var unsafeConsole = {
 
 module.exports = { unsafeConsole };
 
-console.log = function (data) {
-  var cleanedData;
-  if (Array.isArray(data)) {
-    cleanedData = data.map(function (element) {
-      return escapeControlChars(element);
-    });
-  } else {
-    cleanedData = [escapeControlChars(data)];
-  }
-
-  unsafeConsole.log.apply(this, cleanedData);
+console.log = function () {
+  var args = Array.from(arguments);
+  var cleanedArgs = args.map(function (element) {
+    return escapeControlChars(element);
+  });
+  unsafeConsole.log.apply(this, cleanedArgs);
 };
 
 function escapeControlChars(input) {
