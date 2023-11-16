@@ -6,7 +6,7 @@
  */
 
 import expect from 'expect';
-
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   deleteAllRules,
@@ -55,7 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(
             getCustomQueryRuleParams({
               actions: [ruleAction],
@@ -74,7 +74,7 @@ export default ({ getService }: FtrProviderContext) => {
         } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(
             getCustomQueryRuleParams({
               index: ['logs-test'],
@@ -108,7 +108,7 @@ export default ({ getService }: FtrProviderContext) => {
         } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(
             getCustomQueryRuleParams({
               index: ['logs-test'],
