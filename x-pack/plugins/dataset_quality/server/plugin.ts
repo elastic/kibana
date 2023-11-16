@@ -5,10 +5,54 @@
  * 2.0.
  */
 
-import { Plugin } from '@kbn/core/server';
+import { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { mapValues } from 'lodash';
+import { getDatasetQualityServerRouteRepository } from './routes';
+import { registerRoutes } from './routes/register_routes';
+import { DatasetQualityRouteHandlerResources } from './routes/types';
+import {
+  DatasetQualityPluginSetupDependencies,
+  DatasetQualityPluginStart,
+  DatasetQualityPluginStartDependencies,
+} from './types';
 
 export class DatasetQualityServerPlugin implements Plugin {
-  setup() {}
+  private readonly logger: Logger;
 
-  start() {}
+  constructor(initializerContext: PluginInitializerContext) {
+    this.logger = initializerContext.logger.get();
+  }
+
+  setup(
+    core: CoreSetup<DatasetQualityPluginStartDependencies, DatasetQualityPluginStart>,
+    plugins: DatasetQualityPluginSetupDependencies
+  ) {
+    this.logger.debug('dataset_quality: Setup');
+
+    const resourcePlugins = mapValues(plugins, (value, key) => {
+      return {
+        setup: value,
+        start: () =>
+          core.getStartServices().then((services) => {
+            const [, pluginsStartContracts] = services;
+            return pluginsStartContracts[key as keyof DatasetQualityPluginStartDependencies];
+          }),
+      };
+    }) as DatasetQualityRouteHandlerResources['plugins'];
+
+    registerRoutes({
+      core,
+      logger: this.logger,
+      repository: getDatasetQualityServerRouteRepository(),
+      plugins: resourcePlugins,
+    });
+
+    return {};
+  }
+
+  start() {
+    this.logger.debug('dataset_quality: Started');
+
+    return {};
+  }
 }
