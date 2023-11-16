@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import * as uuid from 'uuid';
+import { v4 as uuidv4 } from 'uuid';
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
@@ -99,7 +99,7 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
   const [currentJumpToOutputEntityId, setCurrentJumpToOutputEntityId] = useState('');
-  const [sessionViewId, setSessionViewId] = useState('');
+  const sessionViewId = useMemo(() => `session-view-uuid-${uuidv4()}`, []);
 
   const styles = useStyles({ height, isFullScreen });
 
@@ -240,10 +240,6 @@ export const SessionView = ({
   useEffect(() => {
     onSearchIndexChange(0);
   }, [onSearchIndexChange, searchResults]);
-
-  useEffect(() => {
-    setSessionViewId('session-view-uuid-' + uuid.v4());
-  }, []);
 
   const handleOnAlertDetailsClosed = useCallback((alertUuid: string) => {
     setFetchAlertStatus([alertUuid]);
