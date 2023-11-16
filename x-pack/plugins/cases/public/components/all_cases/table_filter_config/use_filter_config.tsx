@@ -5,75 +5,28 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { CustomFieldTypes } from '../../../common/types/domain';
-import { builderMap as customFieldsBuilder } from '../custom_fields/builder';
-import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
-import type { MultiSelectFilterOption } from './multi_select_filter';
-import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
-import type { FilterConfig, FilterConfigState } from './use_system_filter_config';
-import { MORE_FILTERS_LABEL } from './translations';
+import type { FilterConfig, FilterConfigState } from './types';
+import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
+import { MoreFiltersSelectable } from './more_filters_selectable';
 
-const MoreFiltersSelectable = ({
-  options,
-  activeFilters,
-  onChange,
-}: {
-  options: Array<MultiSelectFilterOption<string>>;
-  activeFilters: string[];
-  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
-}) => {
-  return (
-    <MultiSelectFilter
-      buttonLabel={MORE_FILTERS_LABEL}
-      buttonIconType="plus"
-      hideActiveOptionsNumber
-      id="filters"
-      onChange={onChange}
-      options={options}
-      selectedOptionKeys={activeFilters}
-    />
+const serializeFilterVisibilityMap = (value: Map<string, FilterConfigState>) => {
+  return JSON.stringify(
+    Array.from(value.entries()).map(([key, filter]) => ({
+      key,
+      isActive: filter.isActive,
+    }))
   );
 };
-MoreFiltersSelectable.displayName = 'MoreFiltersSelectable';
 
-const useCustomFieldsFilterConfig = () => {
-  const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
-
-  const {
-    data: { customFields },
-  } = useGetCaseConfiguration();
-
-  useEffect(() => {
-    const customFieldsFilterConfig: FilterConfig[] = [];
-    for (const { key, type, label } of customFields ?? []) {
-      if (customFieldsBuilder[type]) {
-        const customField = customFieldsBuilder[type]();
-        customFieldsFilterConfig.push({
-          key,
-          isActive: false,
-          isAvailable: type === CustomFieldTypes.TOGGLE,
-          label,
-          render: ({ filterOptions, onChange }) => {
-            return (
-              <MultiSelectFilter
-                buttonLabel={label}
-                id={key}
-                onChange={onChange}
-                options={mapToMultiSelectOption(customField.filterOptions || [])}
-                selectedOptionKeys={filterOptions[key]}
-              />
-            );
-          },
-        });
-      }
-    }
-
-    setFilterConfig(customFieldsFilterConfig);
-  }, [customFields]);
-
-  return { customFieldsFilterConfig: filterConfig };
+const deserializeFilterVisibilityMap = (value: string): Map<string, FilterConfigState> => {
+  return new Map(
+    JSON.parse(value).map(({ key, isActive }: { key: string; isActive: boolean }) => [
+      key,
+      { key, isActive },
+    ])
+  );
 };
 
 export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: FilterConfig[] }) => {
@@ -85,22 +38,8 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
     Map<string, FilterConfigState>
   >('filters', new Map(), {
     raw: false,
-    serializer: (value) => {
-      return JSON.stringify(
-        Array.from(value.entries()).map(([key, filter]) => ({
-          key,
-          isActive: filter.isActive,
-        }))
-      );
-    },
-    deserializer: (value) => {
-      return new Map(
-        JSON.parse(value).map(({ key, isActive }: { key: string; isActive: boolean }) => [
-          key,
-          { key, isActive },
-        ])
-      );
-    },
+    serializer: serializeFilterVisibilityMap,
+    deserializer: deserializeFilterVisibilityMap,
   });
 
   useEffect(() => {

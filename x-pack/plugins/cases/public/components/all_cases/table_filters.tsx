@@ -16,8 +16,8 @@ import { useGetCategories } from '../../containers/use_get_categories';
 import type { CurrentUserProfile } from '../types';
 import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
-import { useSystemFilterConfig } from './use_system_filter_config';
-import { useFilterConfig } from './use_filter_config';
+import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
+import { useFilterConfig } from './table_filter_config/use_filter_config';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -51,23 +51,6 @@ const CasesTableFiltersComponent = ({
   const { data: tags = [] } = useGetTags();
   const { data: categories = [] } = useGetCategories();
   const { caseAssignmentAuthorized } = useCasesFeatures();
-
-  const onChange = ({
-    filterId,
-    selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
-  }) => {
-    const newFilters = {
-      ...filterOptions,
-      [filterId]: selectedOptionKeys,
-    };
-
-    if (!isEqual(newFilters, filterOptions)) {
-      onFilterChanged(newFilters);
-    }
-  };
 
   const handleSelectedAssignees = useCallback(
     (newAssignees: AssigneesFilteringSelection[]) => {
@@ -164,10 +147,12 @@ const CasesTableFiltersComponent = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiFilterGroup>
-          {activeFilters.map((filter) =>
-            filter.render({ filterOptions, onChange: onFilterOptionChange })
-          )}
+        <EuiFilterGroup data-test-subj="cases-table-filters-group">
+          {activeFilters.map((filter) => (
+            <React.Fragment key={filter.key}>
+              {filter.render({ filterOptions, onChange: onFilterOptionChange })}
+            </React.Fragment>
+          ))}
           <MoreFiltersSelectable
             options={selectableOptions}
             activeFilters={activeSelectableOptionKeys}

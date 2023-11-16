@@ -7,17 +7,17 @@
 
 import React, { useState, useEffect } from 'react';
 
-import type { CaseStatuses } from '../../../common/types/domain';
-import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
-import { MultiSelectFilter, mapToMultiSelectOption } from './multi_select_filter';
-import { SolutionFilter } from './solution_filter';
-import { StatusFilter } from './status_filter';
-import * as i18n from './translations';
-import { SeverityFilter } from './severity_filter';
-import { AssigneesFilterPopover } from './assignees_filter';
-import type { CurrentUserProfile } from '../types';
-import type { AssigneesFilteringSelection } from '../user_profiles/types';
-import type { FilterOptions } from '../../containers/types';
+import type { CaseStatuses } from '../../../../common/types/domain';
+import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../../common/constants';
+import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
+import { SolutionFilter } from '../solution_filter';
+import { StatusFilter } from '../status_filter';
+import * as i18n from '../translations';
+import { SeverityFilter } from '../severity_filter';
+import { AssigneesFilterPopover } from '../assignees_filter';
+import type { CurrentUserProfile } from '../../types';
+import type { AssigneesFilteringSelection } from '../../user_profiles/types';
+import type { FilterConfig } from './types';
 
 interface UseFilterConfigProps {
   availableSolutions: string[];
@@ -33,25 +33,6 @@ interface UseFilterConfigProps {
   isSelectorView?: boolean;
   selectedAssignees: AssigneesFilteringSelection[];
   tags: string[];
-}
-
-export interface FilterConfigState {
-  key: string;
-  isActive: boolean;
-}
-
-export interface FilterConfig {
-  key: string;
-  label: string;
-  isActive: boolean;
-  isAvailable: boolean;
-  render: ({
-    filterOptions,
-    onChange,
-  }: {
-    filterOptions: FilterOptions;
-    onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
-  }) => React.ReactNode;
 }
 
 export const getSystemFilterConfig = ({
