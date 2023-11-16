@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import * as uuid from 'uuid';
 import React, { useState, useCallback, useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
@@ -98,6 +99,7 @@ export const SessionView = ({
   const [currentJumpToCursor, setCurrentJumpToCursor] = useState(jumpToCursor);
   const [currentJumpToEntityId, setCurrentJumpToEntityId] = useState(jumpToEntityId);
   const [currentJumpToOutputEntityId, setCurrentJumpToOutputEntityId] = useState('');
+  const [sessionViewId, setSessionViewId] = useState('');
 
   const styles = useStyles({ height, isFullScreen });
 
@@ -238,6 +240,10 @@ export const SessionView = ({
   useEffect(() => {
     onSearchIndexChange(0);
   }, [onSearchIndexChange, searchResults]);
+
+  useEffect(() => {
+    setSessionViewId('session-view-uuid-' + uuid.v4());
+  }, []);
 
   const handleOnAlertDetailsClosed = useCallback((alertUuid: string) => {
     setFetchAlertStatus([alertUuid]);
@@ -399,7 +405,7 @@ export const SessionView = ({
       <EuiResizableContainer>
         {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
           detailPanelCollapseFn.current = () => {
-            togglePanel?.('session-detail-panel', { direction: 'left' });
+            togglePanel?.(sessionViewId, { direction: 'left' });
           };
 
           return (
@@ -458,7 +464,7 @@ export const SessionView = ({
 
               <EuiResizableButton css={styles.resizeHandle} />
               <EuiResizablePanel
-                id="session-detail-panel"
+                id={sessionViewId}
                 initialSize={30}
                 minSize="320px"
                 paddingSize="none"
