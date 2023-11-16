@@ -33,6 +33,8 @@
 
 import 'cypress-file-upload';
 import 'cypress-recurse/commands';
+import { login, logout } from '../tasks/login';
+
 
 Cypress.Commands.add(
   'attachFile',
@@ -82,5 +84,9 @@ const waitUntil = (subject, fn, options = {}) => {
 
   return evaluate();
 };
+
+beforeEach(() => {
+  logout();
+});
 
 Cypress.Commands.add('waitUntil', { prevSubject: 'optional' }, waitUntil);
