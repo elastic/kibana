@@ -871,7 +871,7 @@ export const buildRuleExceptionWithConditions = ({
 };
 
 /**
- Generate exception conditions based on the highlighted fields of the alert that 
+ Generate exception conditions based on the highlighted fields of the alert that
  have corresponding values in the alert data.
  For the initial implementation the nested conditions are not considered
  Converting a singular value to a string or an array of strings
@@ -939,10 +939,10 @@ export const getPrepopulatedRuleExceptionWithHighlightFields = ({
 };
 
 /**
-  Filters out the irrelevant highlighted fields for Rule exceptions using 
+  Filters out the irrelevant highlighted fields for Rule exceptions using
   1. The "highlightedFieldsPrefixToExclude" array
   2. Agent.id field in case the alert was not generated from Endpoint
-  3. Threshold Rule 
+  3. Threshold Rule
 */
 export const filterHighlightedFields = (
   fields: EventSummaryField[],

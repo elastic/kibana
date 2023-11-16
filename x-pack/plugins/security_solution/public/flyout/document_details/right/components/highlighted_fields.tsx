@@ -71,6 +71,7 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
       field: string;
       values: string[] | null | undefined;
       scopeId: string;
+      originalField: string;
     }) => (
       <SecurityCellActions
         data={{
@@ -83,7 +84,11 @@ const columns: Array<EuiBasicTableColumn<HighlightedFieldsTableRow>> = [
         sourcererScopeId={getSourcererScopeId(description.scopeId)}
         metadata={{ scopeId: description.scopeId }}
       >
-        <HighlightedFieldsCell values={description.values} field={description.field} />
+        <HighlightedFieldsCell
+          values={description.values}
+          field={description.field}
+          originalField={description.originalField}
+        />
       </SecurityCellActions>
     ),
   },

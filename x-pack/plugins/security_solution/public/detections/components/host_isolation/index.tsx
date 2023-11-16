@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+import { getSentinelOneAgentId } from '../../../common/utils/sentinelone_alert_check';
 import { useCasesFromAlerts } from '../../containers/detection_engine/alerts/use_cases_from_alerts';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { IsolateSentinelOneHost } from './isolate_sentinelone';
@@ -31,16 +32,7 @@ export const HostIsolationPanel = React.memo(
       [details]
     );
 
-    const sentinelOneAgentId = useMemo(
-      () =>
-        getFieldValue({ category: 'sentinel_one', field: 'sentinel_one.agent.uuid' }, details) ||
-        getFieldValue(
-          { category: 'sentinel_one', field: 'sentinel_one.activity.data.uuid' },
-          details
-        ) ||
-        undefined,
-      [details]
-    );
+    const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(details), [details]);
 
     const hostName = useMemo(
       () => getFieldValue({ category: 'host', field: 'host.name' }, details),

@@ -7,7 +7,10 @@
 import { useCallback, useMemo } from 'react';
 import type { SentinelOneAgent } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
-import { isAlertFromSentinelOneEvent } from '../../../common/utils/sentinelone_alert_check';
+import {
+  getSentinelOneAgentId,
+  isAlertFromSentinelOneEvent,
+} from '../../../common/utils/sentinelone_alert_check';
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
 import { isIsolationSupported } from '../../../../common/endpoint/service/host_isolation/utils';
 import { HostStatus } from '../../../../common/endpoint/types';
@@ -52,16 +55,7 @@ export const useHostIsolationAction = ({
     [detailsData]
   );
 
-  const sentinelOneAgentId = useMemo(
-    () =>
-      getFieldValue({ category: 'sentinel_one', field: 'sentinel_one.agent.uuid' }, detailsData) ||
-      getFieldValue(
-        { category: 'sentinel_one', field: 'sentinel_one.activity.data.uuid' },
-        detailsData
-      ) ||
-      undefined,
-    [detailsData]
-  );
+  const sentinelOneAgentId = useMemo(() => getSentinelOneAgentId(detailsData), [detailsData]);
 
   const hostOsFamily = useMemo(
     () => getFieldValue({ category: 'host', field: 'host.os.name' }, detailsData),

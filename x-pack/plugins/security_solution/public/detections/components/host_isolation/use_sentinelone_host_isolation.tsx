@@ -14,6 +14,7 @@ import { SENTINELONE_CONNECTOR_ID, SUB_ACTION } from '@kbn/stack-connectors-plug
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import { useSubAction } from '../../../timelines/components/side_panel/event_details/flyout/use_sub_action';
 import { useLoadConnectors } from '../../../common/components/response_actions/use_load_connectors';
+import { SENTINEL_ONE_NETWORK_STATUS } from './sentinel_one_agent_status';
 
 export const useSentinelOneAgentData = ({ agentId }: { agentId?: string }) => {
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
@@ -28,5 +29,17 @@ export const useSentinelOneAgentData = ({ agentId }: { agentId?: string }) => {
       uuid: agentId,
     },
     disabled: !sentinelOneManualHostActionsEnabled || isEmpty(agentId),
+    // @ts-expect-error update types
+    refetchInterval: (lastResponse: { data: SentinelOneGetAgentsResponse }) => {
+      const networkStatus = lastResponse?.data?.data?.[0]
+        .networkStatus as SENTINEL_ONE_NETWORK_STATUS;
+
+      return [
+        SENTINEL_ONE_NETWORK_STATUS.CONNECTING,
+        SENTINEL_ONE_NETWORK_STATUS.DISCONNECTING,
+      ].includes(networkStatus)
+        ? 5000
+        : false;
+    },
   });
 };

@@ -303,14 +303,14 @@ export const dataLoadersForRealEndpoints = (
 
   on('task', {
     createSentinelOneHost: async () => {
-      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+      if (!process.env.SENTINELONE_URL || !process.env.SENTINELONE_TOKEN) {
         throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
       }
 
       const { log } = await stackServicesPromise;
       const s1Client = new S1Client({
-        url: process.env.CYPRESS_SENTINELONE_URL,
-        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+        url: process.env.SENTINELONE_URL,
+        apiToken: process.env.SENTINELONE_TOKEN,
         log,
       });
 
@@ -344,7 +344,7 @@ ${s1Info.status}
     },
 
     createSentinelOneAgentPolicy: async () => {
-      if (!process.env.CYPRESS_SENTINELONE_URL || !process.env.CYPRESS_SENTINELONE_TOKEN) {
+      if (!process.env.SENTINELONE_URL || !process.env.SENTINELONE_TOKEN) {
         throw new Error('CYPRESS_SENTINELONE_URL and CYPRESS_SENTINELONE_TOKEN must be set');
       }
 
@@ -355,8 +355,8 @@ ${s1Info.status}
         kbnClient,
         log,
         agentPolicyId,
-        consoleUrl: process.env.CYPRESS_SENTINELONE_URL,
-        apiToken: process.env.CYPRESS_SENTINELONE_TOKEN,
+        consoleUrl: process.env.SENTINELONE_URL,
+        apiToken: process.env.SENTINELONE_TOKEN,
       });
 
       const enrollmentToken = await fetchAgentPolicyEnrollmentKey(kbnClient, agentPolicyId);

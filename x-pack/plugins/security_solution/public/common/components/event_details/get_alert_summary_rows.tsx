@@ -44,7 +44,14 @@ const THRESHOLD_COUNT = `${ALERT_THRESHOLD_RESULT}.count`;
 /** Always show these fields */
 const alwaysDisplayedFields: EventSummaryField[] = [
   { id: 'host.name' },
+  // ENDPOINT-related field //
   { id: 'agent.id', overrideField: AGENT_STATUS_FIELD_NAME, label: i18n.AGENT_STATUS },
+  {
+    id: 'observer.serial_number',
+    overrideField: AGENT_STATUS_FIELD_NAME,
+    label: i18n.AGENT_STATUS,
+  },
+  // ** //
   { id: 'user.name' },
   { id: 'rule.name' },
   { id: 'cloud.provider' },

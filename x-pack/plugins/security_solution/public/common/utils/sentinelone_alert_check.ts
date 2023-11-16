@@ -8,6 +8,7 @@
 import { find, getOr, some } from 'lodash/fp';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { getFieldValue } from '../../detections/components/host_isolation/helpers';
 
 /**
  * Check to see if a timeline event item is an Alert (vs an event)
@@ -18,6 +19,11 @@ export const isTimelineEventItemAnAlert = (
 ): boolean => {
   return some({ category: 'kibana', field: 'kibana.alert.rule.uuid' }, timelineEventItem);
 };
+
+export const SENTINEL_ONE_AGENT_ID_FIELD = 'observer.serial_number';
+
+export const getSentinelOneAgentId = (data: TimelineEventsDetailsItem[] | null) =>
+  getFieldValue({ category: 'observer', field: SENTINEL_ONE_AGENT_ID_FIELD }, data) || undefined;
 
 /**
  * Checks to see if the given set of Timeline event detail items includes data that indicates its

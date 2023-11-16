@@ -15,7 +15,7 @@ import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
 // Currently it supports only Multipass, so it's not possible to test it on CI, Vagrant support will be added later.
-describe.skip(
+describe(
   'Isolate command',
   {
     tags: [
@@ -41,10 +41,10 @@ describe.skip(
               name: 'preconfigured-sentinelone',
               actionTypeId: '.sentinelone',
               config: {
-                url: process.env.CYPRESS_SENTINELONE_URL,
+                url: process.env.SENTINELONE_URL,
               },
               secrets: {
-                token: process.env.CYPRESS_SENTINELONE_TOKEN,
+                token: process.env.SENTINELONE_TOKEN,
               },
             },
           })}`,
@@ -89,8 +89,8 @@ describe.skip(
         cy.dataSession('SENTINELONE_HOST').then((createdHost) =>
           loadRule(
             {
-              index: ['logs-sentinel_one*'],
-              query: `host.name: ${createdHost.name} and (sentinel_one.agent.uuid:* or sentinel_one.activity.data.uuid:*)`,
+              index: ['logs-sentinel_one.alert*'],
+              query: `host.name: ${createdHost.name} and observer.serial_number:*`,
               from: 'now-3660s',
             },
             false
