@@ -14,6 +14,8 @@ import {
   SELECTED_ALERTS,
   TAKE_ACTION_POPOVER_BTN,
   TIMELINE_CONTEXT_MENU_BTN,
+  ALERT_TABLE_ROW,
+  SECURITY_SOLUTION_USERS_AVATAR,
 } from '../../../screens/alerts';
 
 import {
@@ -30,6 +32,7 @@ import {
   openFirstAlert,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
+import { addsFieldsToTimeline } from '../../../tasks/rule_details';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import { login } from '../../../tasks/login';
@@ -39,6 +42,7 @@ import { ALERTS_URL } from '../../../urls/navigation';
 
 // FLAKY: https://github.com/elastic/kibana/issues/169091
 describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => {
+  const user = 'system_indices_superuser';
   before(() => {
     cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
   });
@@ -58,6 +62,7 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
       cy.get(SELECTED_ALERTS).should('have.text', `Selected 3 alerts`);
       closeAlerts();
       waitForAlerts();
+      addsFieldsToTimeline('kibana.alert.workflow_user', ['kibana.alert.workflow_user']);
     });
 
     it('can mark a closed alert as open', () => {
@@ -84,6 +89,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
               waitForAlerts();
 
               cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
+              cy.get(ALERT_TABLE_ROW(0))
+                .eq(3)
+                .get(SECURITY_SOLUTION_USERS_AVATAR(user))
+                .should('exist');
             });
         });
     });
@@ -119,6 +128,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
               waitForAlerts();
 
               cy.get(ALERTS_COUNT).contains(`${numberOfOpenedAlerts + numberOfAlertsToBeOpened}`);
+              cy.get(ALERT_TABLE_ROW(0))
+                .eq(3)
+                .get(SECURITY_SOLUTION_USERS_AVATAR(user))
+                .should('exist');
             });
         });
     });
@@ -149,6 +162,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).contains(`${numberOfAlertsToBeMarkedAcknowledged}`);
+          cy.get(ALERT_TABLE_ROW(0))
+            .eq(3)
+            .get(SECURITY_SOLUTION_USERS_AVATAR(user))
+            .should('exist');
         });
     });
 
@@ -171,6 +188,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeMarkedAcknowledged);
+          cy.get(ALERT_TABLE_ROW(0))
+            .eq(3)
+            .get(SECURITY_SOLUTION_USERS_AVATAR(user))
+            .should('exist');
         });
     });
   });
@@ -205,6 +226,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
+          cy.get(ALERT_TABLE_ROW(0))
+            .eq(3)
+            .get(SECURITY_SOLUTION_USERS_AVATAR(user))
+            .should('exist');
         });
     });
 
@@ -233,6 +258,10 @@ describe.skip('Changing alert status', { tags: ['@ess', '@serverless'] }, () => 
           waitForAlerts();
 
           cy.get(ALERTS_COUNT).contains(numberOfAlertsToBeClosed);
+          cy.get(ALERT_TABLE_ROW(0))
+            .eq(3)
+            .get(SECURITY_SOLUTION_USERS_AVATAR(user))
+            .should('exist');
         });
     });
   });

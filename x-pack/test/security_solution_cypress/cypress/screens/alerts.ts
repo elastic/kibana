@@ -33,6 +33,9 @@ export const ALERT_SEVERITY = '[data-test-subj="formatted-field-kibana.alert.sev
 
 export const ALERT_DATA_GRID = '[data-test-subj="euiDataGridBody"]';
 
+export const ALERT_TABLE_ROW = (rowIndex: number) =>
+  `[data-grid-row-index="${rowIndex}"] [data-test-subj="dataGridRowCell"]`;
+
 export const ALERTS_COUNT = '[data-test-subj="toolbar-alerts-count"]';
 
 export const CLOSE_ALERT_BTN = '[data-test-subj="close-alert-status"]';
@@ -180,3 +183,6 @@ export const ALERT_RENDERER_HOST_NAME =
   '[data-test-subj="alertFieldBadge"] [data-test-subj="render-content-host.name"]';
 
 export const HOVER_ACTIONS_CONTAINER = getDataTestSubjectSelector('hover-actions-container');
+
+export const SECURITY_SOLUTION_USERS_AVATAR = (user: string) =>
+  `[data-test-subj="securitySolutionUsersAvatar-${user}"]`;
