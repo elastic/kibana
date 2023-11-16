@@ -44,9 +44,9 @@ export const NoDataViewsPrompt = ({
       return await showESQLViewLocator.navigate({
         query: {
           // esql: “from <one es index> | limit 10”
-     }
-    });
-  }
+        },
+      });
+    };
 
     actions = (
       <>
