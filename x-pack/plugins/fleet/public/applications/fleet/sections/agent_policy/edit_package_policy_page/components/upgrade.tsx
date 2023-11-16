@@ -66,7 +66,7 @@ export const UpgradeStatusCallout: React.FunctionComponent<{
       >
         <FormattedMessage
           id="xpack.fleet.upgradePackagePolicy.statusCallout.hasNewSecrets"
-          defaultMessage="Some of this integration's form fields have been converted to secrets in this version. Your existing values are autofilled in each secret input during this upgrade, but you won't be able to view then again after saving. {learnMoreLink}"
+          defaultMessage="Some of this integration's form fields have been converted to secrets in this version. Your existing values are autofilled in each secret input during this upgrade, but you won't be able to view them again after saving. {learnMoreLink}"
           values={{
             learnMoreLink: (
               <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
