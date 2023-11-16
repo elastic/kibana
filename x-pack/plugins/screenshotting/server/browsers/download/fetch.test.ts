@@ -38,13 +38,7 @@ describe('fetch', () => {
   test('downloads the url to the path', async () => {
     await fetch('url', TEMP_FILE);
 
-    let tempFile = null;
-    try {
-      tempFile = (await readFile(TEMP_FILE)).toString();
-    } catch (e) {
-      // assertion will error
-    }
-    expect(tempFile).toEqual('foobar');
+    await expect(readFile(TEMP_FILE, 'utf8')).resolves.toBe('foobar');
   });
 
   test('returns the md5 hex hash of the http body', async () => {
