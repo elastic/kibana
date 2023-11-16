@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -197,6 +197,9 @@ export default function ({ getService }: FtrProviderContext) {
             testData.job as DataFrameAnalyticsConfig
           );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
+          // open the dest index input
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setDestIndexSameAsIdCheckState(false);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
 
           await ml.testExecution.logTestStep('should continue to the validation step');

@@ -15,6 +15,7 @@ import {
 import { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { FieldFormatsSetup, FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
 import { DataViewsService } from '../common';
 
 /**
@@ -47,13 +48,18 @@ export interface DataViewsServerPluginStart {
    * Returns a DataViews service instance
    */
   dataViewsServiceFactory: ServiceFactory;
+  /**
+   *
+   */
+  getScriptedFieldsEnabled: () => boolean;
 }
 
 /**
  * DataViews server plugin setup api
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-interface
-export interface DataViewsServerPluginSetup {}
+export interface DataViewsServerPluginSetup {
+  enableRollups: () => void;
+}
 
 /**
  * Data Views server setup dependencies
@@ -72,6 +78,10 @@ export interface DataViewsServerPluginSetupDependencies {
    * Usage collection
    */
   usageCollection?: UsageCollectionSetup;
+  /**
+   * Content management
+   */
+  contentManagement: ContentManagementServerSetup;
 }
 
 /**

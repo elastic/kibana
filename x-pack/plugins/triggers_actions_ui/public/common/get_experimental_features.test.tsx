@@ -16,11 +16,14 @@ describe('getIsExperimentalFeatureEnabled', () => {
     ExperimentalFeaturesService.init({
       experimentalFeatures: {
         rulesListDatagrid: true,
+        // @ts-expect-error ts upgrade v4.7.4
         internalAlertsTable: true,
         rulesDetailLogs: true,
         ruleTagFilter: true,
         ruleStatusFilter: true,
         ruleUseExecutionStatus: false,
+        // @ts-expect-error ts upgrade v4.7.4
+        ruleKqlBar: true,
       },
     });
 
@@ -47,6 +50,10 @@ describe('getIsExperimentalFeatureEnabled', () => {
     result = getIsExperimentalFeatureEnabled('ruleUseExecutionStatus');
 
     expect(result).toEqual(false);
+
+    result = getIsExperimentalFeatureEnabled('ruleKqlBar');
+
+    expect(result).toEqual(true);
 
     expect(() => getIsExperimentalFeatureEnabled('doesNotExist' as any)).toThrowError(
       `Invalid enable value doesNotExist. Allowed values are: ${allowedExperimentalValueKeys.join(

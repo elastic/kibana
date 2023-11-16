@@ -73,7 +73,8 @@ describe('useEuiComboBoxReset', () => {
     fireEvent.change(searchInput, { target: { value: invalidValue } });
 
     const afterInvalidInput = screen.getByTestId('comboBoxInput');
-    expect(afterInvalidInput).toHaveTextContent(invalidValue); // the EuiComboBox is now in the "error state"
+    expect(searchInput).toHaveValue(invalidValue); // the EuiComboBox is now in the "error state"
+    expect(afterInvalidInput).not.toHaveTextContent(invalidValue); // Value should not have been applied
 
     const resetButton = screen.getByRole('button', { name: 'Reset' });
     fireEvent.click(resetButton); // clicking invokes onReset()

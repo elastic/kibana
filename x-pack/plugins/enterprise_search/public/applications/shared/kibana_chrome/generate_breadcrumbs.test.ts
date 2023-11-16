@@ -20,6 +20,7 @@ import {
   useEuiBreadcrumbs,
   useEnterpriseSearchBreadcrumbs,
   useAppSearchBreadcrumbs,
+  useSearchBreadcrumbs,
   useWorkplaceSearchBreadcrumbs,
 } from './generate_breadcrumbs';
 
@@ -139,6 +140,49 @@ describe('useEuiBreadcrumbs', () => {
       expect(breadcrumb.href).toBeUndefined();
       expect(breadcrumb.onClick).toBeUndefined();
     });
+  });
+});
+
+describe('useSearchBreadcrumbs', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('builds a chain of breadcrumbs with Search at the root', () => {
+    const breadcrumbs = [
+      {
+        text: 'Page 1',
+        path: '/page1',
+      },
+      {
+        text: 'Page 2',
+        path: '/page2',
+      },
+    ];
+
+    expect(useSearchBreadcrumbs(breadcrumbs)).toEqual([
+      {
+        text: 'Search',
+        href: '/app/enterprise_search/overview',
+        onClick: expect.any(Function),
+      },
+      {
+        text: 'Page 1',
+        href: '/app/enterprise_search/page1',
+        onClick: expect.any(Function),
+      },
+      {
+        text: 'Page 2',
+      },
+    ]);
+  });
+
+  it('shows just the root if breadcrumbs is empty', () => {
+    expect(useSearchBreadcrumbs()).toEqual([
+      {
+        text: 'Search',
+      },
+    ]);
   });
 });
 

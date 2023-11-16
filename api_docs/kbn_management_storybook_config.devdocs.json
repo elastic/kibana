@@ -1,0 +1,62 @@
+{
+  "id": "@kbn/management-storybook-config",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/management-storybook-config",
+        "id": "def-common.TITLE",
+        "type": "string",
+        "tags": [],
+        "label": "TITLE",
+        "description": [
+          "The title of the Storybook."
+        ],
+        "signature": [
+          "\"kbn-management storybook\""
+        ],
+        "path": "packages/kbn-management/storybook/config/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/management-storybook-config",
+        "id": "def-common.URL",
+        "type": "string",
+        "tags": [],
+        "label": "URL",
+        "description": [
+          "The remote URL of the root from which Storybook loads stories for kbn-management."
+        ],
+        "signature": [
+          "\"https://github.com/elastic/kibana/tree/main/packages/kbn-management\""
+        ],
+        "path": "packages/kbn-management/storybook/config/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

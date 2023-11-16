@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { runtimeMappingsSchema } from './runtime_mappings_schema';
 import { anomalyDetectionJobSchema } from './anomaly_detectors_schema';
 import { datafeedConfigSchema, indicesOptionsSchema } from './datafeeds_schema';
-import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
-export const categorizationFieldExamplesSchema = {
+export const categorizationFieldValidationSchema = {
   indexPatternTitle: schema.string(),
   query: schema.any(),
   size: schema.number(),

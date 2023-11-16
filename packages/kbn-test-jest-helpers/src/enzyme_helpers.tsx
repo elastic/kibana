@@ -15,7 +15,7 @@
 
 import { I18nProvider, InjectedIntl, intlShape, __IntlProvider } from '@kbn/i18n-react';
 import { mount, ReactWrapper, render, shallow } from 'enzyme';
-import React, { ReactElement, ValidationMap } from 'react';
+import React, { ComponentType, ReactElement, ValidationMap } from 'react';
 import { act as reactAct } from 'react-dom/test-utils';
 
 // Use fake component to extract `intl` property to use in tests.
@@ -94,6 +94,8 @@ export function mountWithIntl<T>(
     attachTo?: HTMLElement;
     context?: any;
     childContextTypes?: ValidationMap<any>;
+    wrappingComponent?: ComponentType<any> | undefined;
+    wrappingComponentProps?: {} | undefined;
   } = {}
 ) {
   const options = getOptions(context, childContextTypes, props);

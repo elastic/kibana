@@ -65,11 +65,11 @@ describe('<FindingsFlyout/>', () => {
     });
   });
 
-  describe('Resource Tab', () => {
+  describe('Table Tab', () => {
     it('displays resource name and id', () => {
       const { getAllByText } = render(<TestComponent />);
 
-      userEvent.click(screen.getByTestId('findings_flyout_tab_resource'));
+      userEvent.click(screen.getByTestId('findings_flyout_tab_table'));
 
       getAllByText(mockFindingsHit.resource.name);
       getAllByText(mockFindingsHit.resource.id);

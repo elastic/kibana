@@ -23,6 +23,7 @@ export class FleetAgentPolicyGenerator extends BaseDataGenerator<GetAgentPolicie
       updated_at: '2020-07-22T16:36:49.196Z',
       updated_by: this.randomUser(),
       agents: 0,
+      is_protected: false,
       ...overrides,
     };
   }

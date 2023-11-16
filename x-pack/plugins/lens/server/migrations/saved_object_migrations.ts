@@ -62,6 +62,7 @@ import {
   commonMigratePartitionChartGroups,
   commonMigratePartitionMetrics,
   commonMigrateIndexPatternDatasource,
+  commonMigrateMetricFormatter,
 } from './common_migrations';
 
 interface LensDocShapePre710<VisualizationState = unknown> {
@@ -562,6 +563,11 @@ const migratePartitionMetrics: SavedObjectMigrationFn<LensDocShape860, LensDocSh
   attributes: commonMigratePartitionMetrics(doc.attributes),
 });
 
+const migrateMetricFormatter: SavedObjectMigrationFn<LensDocShape860, LensDocShape860> = (doc) => ({
+  ...doc,
+  attributes: commonMigrateMetricFormatter(doc.attributes),
+});
+
 const lensMigrations: SavedObjectMigrationMap = {
   '7.7.0': removeInvalidAccessors,
   // The order of these migrations matter, since the timefield migration relies on the aggConfigs
@@ -584,6 +590,7 @@ const lensMigrations: SavedObjectMigrationMap = {
   '8.3.0': flow(lockOldMetricVisSettings, preserveOldLegendSizeDefault, fixValueLabelsInXY),
   '8.5.0': flow(migrateMetricIds, enrichAnnotationLayers, migratePartitionChartGroups),
   '8.6.0': flow(migrateIndexPatternDatasource, migratePartitionMetrics),
+  '8.9.0': migrateMetricFormatter,
   // FOLLOW THESE GUIDELINES IF YOU ARE ADDING A NEW MIGRATION!
   // 1. Make sure you are applying migrations for a given version in the same order here as they are applied in x-pack/plugins/lens/server/embeddable/make_lens_embeddable_factory.ts
 };

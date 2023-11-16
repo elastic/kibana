@@ -125,7 +125,7 @@ function formatResultData(
 ): AnomaliesCount[] {
   const unsortedAnomalies: AnomaliesCount[] = anomaliesJobs.map((job) => {
     const bucket = buckets.find(({ key }) => key === job?.id);
-    const hasUserName = has("entity.hits.hits[0]._source['user.name']", bucket);
+    const hasUserName = has("entity.hits.hits[0].fields['user.name']", bucket);
 
     return {
       name: job?.customSettings?.security_app_display_name ?? job.id,

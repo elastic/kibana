@@ -7,6 +7,8 @@
 
 import { combineReducers } from '@reduxjs/toolkit';
 
+import { certsListReducer, CertsListState } from './certs';
+import { certificatesReducer, CertificatesState } from './certificates/certificates';
 import { globalParamsReducer, GlobalParamsState } from './global_params';
 import { overviewStatusReducer, OverviewStatusStateReducer } from './overview_status';
 import { browserJourneyReducer } from './browser_journey';
@@ -37,12 +39,14 @@ export interface SyntheticsAppState {
   elasticsearch: QueriesState;
   monitorList: MonitorListState;
   overview: MonitorOverviewState;
+  certificates: CertificatesState;
   globalParams: GlobalParamsState;
   networkEvents: NetworkEventsState;
   agentPolicies: AgentPoliciesState;
   manualTestRuns: ManualTestRunsState;
   monitorDetails: MonitorDetailsState;
   browserJourney: BrowserJourneyState;
+  certsList: CertsListState;
   defaultAlerting: DefaultAlertingState;
   dynamicSettings: DynamicSettingsState;
   serviceLocations: ServiceLocationsState;
@@ -68,4 +72,6 @@ export const rootReducer = combineReducers<SyntheticsAppState>({
   dynamicSettings: dynamicSettingsReducer,
   serviceLocations: serviceLocationsReducer,
   syntheticsEnablement: syntheticsEnablementReducer,
+  certificates: certificatesReducer,
+  certsList: certsListReducer,
 });

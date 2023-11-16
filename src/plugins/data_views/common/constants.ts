@@ -51,3 +51,15 @@ export const DATA_VIEW_SAVED_OBJECT_TYPE = 'index-pattern';
  * @public
  */
 export const PLUGIN_NAME = 'DataViews';
+
+/**
+ * Fields for wildcard path.
+ * @public
+ */
+export const FIELDS_FOR_WILDCARD_PATH = '/internal/data_views/_fields_for_wildcard';
+
+/**
+ * Existing indices path
+ * @public
+ */
+export const EXISTING_INDICES_PATH = '/internal/data_views/_existing_indices';

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../functional/services/ml/common_api';
 import { USER } from '../../../functional/services/transform/security_common';
 
 import { generateTransformConfig } from './common';
@@ -17,7 +17,7 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
   const transform = getService('transform');
 
-  describe('/api/transform/transforms/{transformId}/ create', function () {
+  describe('/internal/transform/transforms/{transformId}/ create', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
       await transform.testResources.setKibanaTimeZoneToUTC();
@@ -31,12 +31,12 @@ export default ({ getService }: FtrProviderContext) => {
       const transformId = 'test_transform_id';
 
       const { body, status } = await supertest
-        .put(`/api/transform/transforms/${transformId}`)
+        .put(`/internal/transform/transforms/${transformId}`)
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send({
           ...generateTransformConfig(transformId),
           latest: {
@@ -55,12 +55,12 @@ export default ({ getService }: FtrProviderContext) => {
       const { pivot, ...config } = generateTransformConfig(transformId);
 
       const { body, status } = await supertest
-        .put(`/api/transform/transforms/${transformId}`)
+        .put(`/internal/transform/transforms/${transformId}`)
         .auth(
           USER.TRANSFORM_POWERUSER,
           transform.securityCommon.getPasswordForUser(USER.TRANSFORM_POWERUSER)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(config);
       transform.api.assertResponseStatusCode(400, status, body);
 

@@ -9,9 +9,9 @@ import { useCallback, useRef } from 'react';
 import type { Subscription } from 'rxjs';
 import { useDispatch } from 'react-redux';
 import memoizeOne from 'memoize-one';
-import type { BrowserField } from '@kbn/timelines-plugin/common';
+import type { BrowserField, BrowserFields } from '@kbn/timelines-plugin/common';
 import { getCategory } from '@kbn/triggers-actions-ui-plugin/public';
-import type { DataViewFieldBase } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
 
 import { useKibana } from '../../lib/kibana';
 import { sourcererActions } from '../../store/sourcerer';
@@ -48,37 +48,27 @@ interface DataViewInfo {
  * VERY mutatious on purpose to improve the performance of the transform.
  */
 export const getDataViewStateFromIndexFields = memoizeOne(
-  (
-    _title: string,
-    fields: DataViewFieldBase[],
-    _includeUnmapped: boolean = false
-  ): DataViewInfo => {
+  (_title: string, fields: DataViewSpec['fields']): DataViewInfo => {
     // Adds two dangerous casts to allow for mutations within this function
     type DangerCastForMutation = Record<string, {}>;
-
-    return fields.reduce<DataViewInfo>(
-      (acc, field) => {
-        // mutate browserFields
-        const category = getCategory(field.name);
-        if (acc.browserFields[category] == null) {
-          (acc.browserFields as DangerCastForMutation)[category] = {};
+    if (fields == null) {
+      return { browserFields: {} };
+    } else {
+      const browserFields: BrowserFields = {};
+      for (const [name, field] of Object.entries(fields)) {
+        const category = getCategory(name);
+        if (browserFields[category] == null) {
+          (browserFields as DangerCastForMutation)[category] = { fields: {} };
         }
-        if (acc.browserFields[category].fields == null) {
-          acc.browserFields[category].fields = {};
+        const categoryFields = browserFields[category].fields;
+        if (categoryFields) {
+          categoryFields[name] = field as BrowserField;
         }
-        acc.browserFields[category].fields[field.name] = field as unknown as BrowserField;
-
-        return acc;
-      },
-      {
-        browserFields: {},
       }
-    );
+      return { browserFields: browserFields as DangerCastForBrowserFieldsMutation };
+    }
   },
-  (newArgs, lastArgs) =>
-    newArgs[0] === lastArgs[0] &&
-    newArgs[1].length === lastArgs[1].length &&
-    newArgs[2] === lastArgs[2]
+  (newArgs, lastArgs) => newArgs[0] === lastArgs[0] && newArgs[1]?.length === lastArgs[1]?.length
 );
 
 export const useDataView = (): {
@@ -89,7 +79,6 @@ export const useDataView = (): {
   const searchSubscription$ = useRef<Record<string, Subscription>>({});
   const dispatch = useDispatch();
   const { addError } = useAppToasts();
-
   const setLoading = useCallback(
     ({ id, loading }: { id: string; loading: boolean }) => {
       dispatch(sourcererActions.setDataViewLoading({ id, loading }));
@@ -113,7 +102,6 @@ export const useDataView = (): {
           setLoading({ id: dataViewId, loading: true });
 
           const dataView = await getSourcererDataView(dataViewId, data.dataViews, cleanCache);
-
           if (needToBeInit && scopeId && !skipScopeUpdate) {
             dispatch(
               sourcererActions.setSelectedDataView({

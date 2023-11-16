@@ -11,7 +11,7 @@ import { EuiTitle, EuiLink, EuiText, EuiSpacer, EuiButtonEmpty } from '@elastic/
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { FleetServerHost } from '../../../../types';
-import { useLink, useStartServices } from '../../../../hooks';
+import { useLink, useStartServices, useConfig } from '../../../../hooks';
 import { FleetServerHostsTable } from '../fleet_server_hosts_table';
 
 export interface FleetServerHostsSectionProps {
@@ -25,6 +25,7 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
 }) => {
   const { docLinks } = useStartServices();
   const { getHref } = useLink();
+  const showAddButton = useConfig().internal?.fleetServerStandalone !== true;
 
   return (
     <>
@@ -58,17 +59,21 @@ export const FleetServerHostsSection: React.FunctionComponent<FleetServerHostsSe
         fleetServerHosts={fleetServerHosts}
         deleteFleetServerHost={deleteFleetServerHost}
       />
-      <EuiSpacer size="s" />
-      <EuiButtonEmpty
-        iconType="plusInCircle"
-        href={getHref('settings_create_fleet_server_hosts')}
-        data-test-subj="settings.fleetServerHosts.addFleetServerHostBtn"
-      >
-        <FormattedMessage
-          id="xpack.fleet.settings.fleetServerHostCreateButtonLabel"
-          defaultMessage="Add Fleet Server"
-        />
-      </EuiButtonEmpty>
+      {showAddButton && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiButtonEmpty
+            iconType="plusInCircle"
+            href={getHref('settings_create_fleet_server_hosts')}
+            data-test-subj="settings.fleetServerHosts.addFleetServerHostBtn"
+          >
+            <FormattedMessage
+              id="xpack.fleet.settings.fleetServerHostCreateButtonLabel"
+              defaultMessage="Add Fleet Server"
+            />
+          </EuiButtonEmpty>
+        </>
+      )}
       <EuiSpacer size="m" />
     </>
   );

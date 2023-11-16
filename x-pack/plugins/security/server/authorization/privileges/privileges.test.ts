@@ -8,11 +8,11 @@
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { privilegesFactory } from './privileges';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { Actions } from '../actions';
-import { privilegesFactory } from './privileges';
 
-const actions = new Actions('1.0.0-zeta1');
+const actions = new Actions();
 
 const mockLicenseServiceBasic = licenseMock.create({ allowSubFeaturePrivileges: false }, 'basic');
 const mockLicenseServiceGold = licenseMock.create({ allowSubFeaturePrivileges: true }, 'gold');
@@ -59,10 +59,10 @@ describe('features', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('features.foo-feature', {
-      all: [actions.login, actions.version],
-      read: [actions.login, actions.version],
-      minimal_all: [actions.login, actions.version],
-      minimal_read: [actions.login, actions.version],
+      all: [actions.login],
+      read: [actions.login],
+      minimal_all: [actions.login],
+      minimal_read: [actions.login],
     });
   });
 
@@ -98,7 +98,6 @@ describe('features', () => {
 
     const expectedAllPrivileges = [
       actions.login,
-      actions.version,
       actions.savedObject.get('all-savedObject-all-1', 'bulk_get'),
       actions.savedObject.get('all-savedObject-all-1', 'get'),
       actions.savedObject.get('all-savedObject-all-1', 'find'),
@@ -139,7 +138,6 @@ describe('features', () => {
 
     const expectedReadPrivileges = [
       actions.login,
-      actions.version,
       actions.savedObject.get('read-savedObject-all-1', 'bulk_get'),
       actions.savedObject.get('read-savedObject-all-1', 'get'),
       actions.savedObject.get('read-savedObject-all-1', 'find'),
@@ -281,7 +279,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
@@ -424,7 +421,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
           actions.ui.get('catalogue', 'read-catalogue-1'),
@@ -507,7 +503,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
@@ -525,7 +520,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
@@ -577,7 +571,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
@@ -595,7 +588,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
@@ -648,7 +640,6 @@ describe('features', () => {
         const actual = privileges.get();
         expect(actual).toHaveProperty(`${group}.all`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGetFeatures ? [actions.api.get('features')] : []),
           ...(expectGetFeatures ? [actions.api.get('taskManager')] : []),
@@ -666,7 +657,6 @@ describe('features', () => {
         ]);
         expect(actual).toHaveProperty(`${group}.read`, [
           actions.login,
-          actions.version,
           ...(expectDecryptedTelemetry ? [actions.api.get('decryptedTelemetry')] : []),
           ...(expectGlobalSettings ? [actions.ui.get('globalSettings', 'show')] : []),
         ]);
@@ -711,7 +701,7 @@ describe('reserved', () => {
     const privileges = privilegesFactory(actions, mockFeaturesPlugin, mockLicenseServiceBasic);
 
     const actual = privileges.get();
-    expect(actual).toHaveProperty('reserved.foo', [actions.version]);
+    expect(actual).toHaveProperty('reserved.foo');
   });
 
   test(`actions only specified at the privilege are alright too`, () => {
@@ -746,7 +736,6 @@ describe('reserved', () => {
 
     const actual = privileges.get();
     expect(actual).toHaveProperty('reserved.foo', [
-      actions.version,
       actions.savedObject.get('savedObject-all-1', 'bulk_get'),
       actions.savedObject.get('savedObject-all-1', 'get'),
       actions.savedObject.get('savedObject-all-1', 'find'),
@@ -878,7 +867,6 @@ describe('subFeatures', () => {
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -901,29 +889,24 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty('foo.all', [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
       expect(actual.features).toHaveProperty('foo.minimal_all', [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty('foo.read', [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
       expect(actual.features).toHaveProperty('foo.minimal_read', [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -938,22 +921,13 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
       ]);
 
-      expect(actual).toHaveProperty('space.all', [
-        actions.login,
-        actions.version,
-        actions.ui.get('foo', 'foo'),
-      ]);
-      expect(actual).toHaveProperty('space.read', [
-        actions.login,
-        actions.version,
-        actions.ui.get('foo', 'foo'),
-      ]);
+      expect(actual).toHaveProperty('space.all', [actions.login, actions.ui.get('foo', 'foo')]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
     });
   });
 
@@ -1013,7 +987,6 @@ describe('subFeatures', () => {
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1036,7 +1009,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1060,13 +1032,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1090,13 +1060,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -1129,7 +1097,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
@@ -1155,7 +1122,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1178,7 +1144,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1257,7 +1222,6 @@ describe('subFeatures', () => {
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1280,7 +1244,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1304,13 +1267,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1334,13 +1295,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -1354,13 +1313,12 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
       ]);
 
-      expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
-      expect(actual).toHaveProperty('space.read', [actions.login, actions.version]);
+      expect(actual).toHaveProperty('space.all', [actions.login]);
+      expect(actual).toHaveProperty('space.read', [actions.login]);
     });
   });
 
@@ -1420,7 +1378,6 @@ describe('subFeatures', () => {
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1443,7 +1400,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1467,25 +1423,21 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -1518,7 +1470,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.ui.get('foo', 'foo'),
@@ -1526,7 +1477,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1547,11 +1497,7 @@ describe('subFeatures', () => {
         actions.ui.get('foo', 'foo'),
         actions.ui.get('foo', 'sub-feature-ui'),
       ]);
-      expect(actual).toHaveProperty('space.read', [
-        actions.login,
-        actions.version,
-        actions.ui.get('foo', 'foo'),
-      ]);
+      expect(actual).toHaveProperty('space.read', [actions.login, actions.ui.get('foo', 'foo')]);
     });
 
     test(`should augment the primary 'all' feature privileges, but not the base privileges if the feature is excluded from them`, () => {
@@ -1610,7 +1556,6 @@ describe('subFeatures', () => {
       const actual = privileges.get();
       expect(actual.features).toHaveProperty(`foo.subFeaturePriv1`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1633,7 +1578,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1657,25 +1601,21 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -1689,13 +1629,12 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
       ]);
 
-      expect(actual).toHaveProperty('space.all', [actions.login, actions.version]);
-      expect(actual).toHaveProperty('space.read', [actions.login, actions.version]);
+      expect(actual).toHaveProperty('space.all', [actions.login]);
+      expect(actual).toHaveProperty('space.read', [actions.login]);
     });
   });
 
@@ -1757,7 +1696,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1781,13 +1719,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1811,13 +1747,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -1850,7 +1784,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
@@ -1876,7 +1809,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1899,7 +1831,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -1979,7 +1910,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2003,13 +1933,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2033,13 +1961,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -2072,7 +1998,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
@@ -2098,7 +2023,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2121,7 +2045,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2220,7 +2143,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2244,13 +2166,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2274,13 +2194,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -2313,7 +2231,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
@@ -2339,7 +2256,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2362,7 +2278,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2461,7 +2376,6 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.all`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2503,13 +2417,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_all`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual.features).toHaveProperty(`foo.read`, [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2551,13 +2463,11 @@ describe('subFeatures', () => {
 
       expect(actual.features).toHaveProperty(`foo.minimal_read`, [
         actions.login,
-        actions.version,
         actions.ui.get('foo', 'foo'),
       ]);
 
       expect(actual).toHaveProperty('global.all', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.api.get('features'),
         actions.api.get('taskManager'),
@@ -2608,7 +2518,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('global.read', [
         actions.login,
-        actions.version,
         actions.api.get('decryptedTelemetry'),
         actions.ui.get('globalSettings', 'show'),
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
@@ -2652,7 +2561,6 @@ describe('subFeatures', () => {
 
       expect(actual).toHaveProperty('space.all', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),
@@ -2693,7 +2601,6 @@ describe('subFeatures', () => {
       ]);
       expect(actual).toHaveProperty('space.read', [
         actions.login,
-        actions.version,
         actions.savedObject.get('all-sub-feature-type', 'bulk_get'),
         actions.savedObject.get('all-sub-feature-type', 'get'),
         actions.savedObject.get('all-sub-feature-type', 'find'),

@@ -6,12 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import { isRight } from 'fp-ts/lib/Either';
-import {
-  MonitorSummariesResult,
-  MonitorSummariesResultType,
-} from '@kbn/synthetics-plugin/common/runtime_types';
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { MonitorSummariesResult } from '@kbn/synthetics-plugin/common/runtime_types';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 interface ExpectedMonitorStatesPage {
@@ -36,22 +32,17 @@ const checkMonitorStatesResponse = ({
   prevPagination,
   nextPagination,
 }: ExpectedMonitorStatesPage) => {
-  const decoded = MonitorSummariesResultType.decode(response);
-  expect(isRight(decoded)).to.be.ok();
-  if (isRight(decoded)) {
-    const { summaries, prevPagePagination, nextPagePagination } =
-      decoded.right as MonitorSummariesResult;
-    expect(summaries).to.have.length(size);
-    expect(summaries?.map((s) => s.monitor_id)).to.eql(statesIds);
-    expect(
-      summaries?.map((s) => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
-    ).to.eql(statuses);
-    (summaries ?? []).forEach((s) => {
-      expect(s.state.url.full).to.be.ok();
-    });
-    expect(prevPagePagination).to.be(prevPagination);
-    expect(nextPagePagination).to.eql(nextPagination);
-  }
+  const { summaries, prevPagePagination, nextPagePagination } = response as MonitorSummariesResult;
+  expect(summaries).to.have.length(size);
+  expect(summaries?.map((s) => s.monitor_id)).to.eql(statesIds);
+  expect(
+    summaries?.map((s) => (s.state.summary?.up && !s.state.summary?.down ? 'up' : 'down'))
+  ).to.eql(statuses);
+  (summaries ?? []).forEach((s) => {
+    expect(s.state.url.full).to.be.ok();
+  });
+  expect(prevPagePagination).to.be(prevPagination);
+  expect(nextPagePagination).to.eql(nextPagination);
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -85,7 +76,7 @@ export default function ({ getService }: FtrProviderContext) {
         `${API_URLS.MONITOR_LIST}?dateRangeStart=${from}&dateRangeEnd=${to}&statusFilter=${statusFilter}&pageSize=${size}`
       );
 
-      expectSnapshot(body).toMatch();
+      expectSnapshot(body.summaries).toMatch();
     });
 
     it('can navigate forward and backward using pagination', async () => {

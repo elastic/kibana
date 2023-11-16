@@ -12,6 +12,7 @@ import { SavedObjectsType } from '@kbn/core/server';
 import { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
 import { CONTENT_ID } from '../../common/content_management';
 import { getAllMigrations } from '../migrations/visualization_saved_object_migrations';
+import { getInAppUrl } from './get_in_app_url';
 
 export const getVisualizationSavedObjectType = (
   getSearchSourceMigrations: () => MigrateFunctionsObject
@@ -28,12 +29,7 @@ export const getVisualizationSavedObjectType = (
     getTitle(obj) {
       return obj.attributes.title;
     },
-    getInAppUrl(obj) {
-      return {
-        path: `/app/visualize#/edit/${encodeURIComponent(obj.id)}`,
-        uiCapabilitiesPath: 'visualize.show',
-      };
-    },
+    getInAppUrl,
   },
   mappings: {
     dynamic: false, // declared here to prevent indexing root level attribute fields

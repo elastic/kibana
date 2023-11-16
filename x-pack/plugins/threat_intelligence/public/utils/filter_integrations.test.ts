@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { Integration } from '../hooks';
-import { filterIntegrations, THREAT_INTELLIGENCE_CATEGORY, THREAT_INTELLIGENCE_UTILITIES } from '.';
+import { Integration } from '../hooks/use_integrations';
+import {
+  filterIntegrations,
+  THREAT_INTELLIGENCE_CATEGORY,
+  THREAT_INTELLIGENCE_UTILITIES,
+} from './filter_integrations';
 
 describe('filterIntegrations', () => {
   it('should empty array', async () => {

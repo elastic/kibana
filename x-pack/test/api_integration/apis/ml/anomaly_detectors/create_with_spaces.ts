@@ -7,7 +7,7 @@
 
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const ml = getService('ml');
@@ -38,12 +38,12 @@ export default ({ getService }: FtrProviderContext) => {
 
       await ml.testExecution.logTestStep('should create job');
       const { body, status } = await supertest
-        .put(`/s/${idSpace1}/api/ml/anomaly_detectors/${jobIdSpace1}`)
+        .put(`/s/${idSpace1}/internal/ml/anomaly_detectors/${jobIdSpace1}`)
         .auth(
           USER.ML_POWERUSER_ALL_SPACES,
           ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
         )
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(jobConfig);
       ml.api.assertResponseStatusCode(200, status, body);
 

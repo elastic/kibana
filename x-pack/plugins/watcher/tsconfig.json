@@ -34,6 +34,8 @@
     "@kbn/shared-ux-router",
     "@kbn/license-management-plugin",
     "@kbn/share-plugin",
+    "@kbn/core-ui-settings-browser",
+    "@kbn/core-ui-settings-browser-mocks",
   ],
   "exclude": [
     "target/**/*",

@@ -15,9 +15,9 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
   if (type === SurrDocType.PREDECESSORS) {
     return (
       <EuiCallOut
-        color="warning"
+        color="primary"
         data-test-subj="predecessorsWarningMsg"
-        iconType="bolt"
+        iconType="iInCircle"
         title={
           docCount === 0 ? (
             <FormattedMessage
@@ -39,9 +39,9 @@ export function ActionBarWarning({ docCount, type }: { docCount: number; type: S
 
   return (
     <EuiCallOut
-      color="warning"
+      color="primary"
       data-test-subj="successorsWarningMsg"
-      iconType="bolt"
+      iconType="iInCircle"
       title={
         docCount === 0 ? (
           <FormattedMessage

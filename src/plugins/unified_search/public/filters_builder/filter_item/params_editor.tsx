@@ -36,7 +36,7 @@ export function ParamsEditor({
   timeRangeForSuggestionsOverride,
   filtersForSuggestions,
 }: ParamsEditorProps) {
-  const { disabled } = useContext(FiltersBuilderContextType);
+  const { disabled, suggestionsAbstraction } = useContext(FiltersBuilderContextType);
   const onParamsChange = useCallback(
     (selectedParams) => {
       onHandleParamsChange(selectedParams);
@@ -70,6 +70,7 @@ export function ParamsEditor({
           onParamsUpdate={onParamsUpdate}
           timeRangeForSuggestionsOverride={timeRangeForSuggestionsOverride}
           filtersForSuggestions={filtersForSuggestions}
+          suggestionsAbstraction={suggestionsAbstraction}
         />
       </EuiToolTip>
     </EuiFormRow>

@@ -13,6 +13,7 @@ import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
 import { timelineActions } from '../../../timelines/store/timeline';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
@@ -25,7 +26,12 @@ const store = {
 const value = 'the-value';
 
 const context = {
-  field: { name: 'user.name', value, type: 'text' },
+  data: [
+    {
+      field: { name: 'user.name', type: 'string' },
+      value,
+    },
+  ],
 } as CellActionExecutionContext;
 
 const defaultAddProviderAction = {
@@ -73,11 +79,31 @@ describe('createAddToNewTimelineCellAction', () => {
     it('should return true if everything is okay', async () => {
       expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
     });
+
     it('should return false if field not allowed', async () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    it('should return false if Kbn type is unsupported', async () => {
+      expect(
+        await addToTimelineAction.isCompatible({
+          ...context,
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, type: KBN_FIELD_TYPES.NESTED },
+            },
+          ],
         })
       ).toEqual(false);
     });
@@ -93,10 +119,26 @@ describe('createAddToNewTimelineCellAction', () => {
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
         ...context,
-        field: {
-          ...context.field,
-          type: GEO_FIELD_TYPE,
-        },
+        data: [
+          {
+            ...context.data[0],
+            field: { ...context.data[0].field, type: GEO_FIELD_TYPE },
+          },
+        ],
+      });
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockWarningToast).toHaveBeenCalled();
+    });
+
+    it('should show warning if value type is unsupported', async () => {
+      await addToTimelineAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: [[[]]],
+          },
+        ],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();

@@ -12,6 +12,7 @@ export {
   CasesConnectorFeatureId,
   UptimeConnectorFeatureId,
   SecurityConnectorFeatureId,
+  GenerativeAIConnectorFeatureId,
 } from './connector_feature_config';
 export interface ActionType {
   id: string;
@@ -21,6 +22,7 @@ export interface ActionType {
   enabledInLicense: boolean;
   minimumLicenseRequired: LicenseType;
   supportedFeatureIds: string[];
+  isSystemActionType: boolean;
 }
 
 export enum InvalidEmailReason {

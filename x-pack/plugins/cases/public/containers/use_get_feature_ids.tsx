@@ -18,10 +18,9 @@ export const useGetFeatureIds = (alertRegistrationContexts: string[]) => {
 
   return useQuery<ValidFeatureId[], ServerError>(
     casesQueriesKeys.alertFeatureIds(alertRegistrationContexts),
-    () => {
-      const abortCtrlRef = new AbortController();
+    ({ signal }) => {
       const query = { registrationContext: alertRegistrationContexts };
-      return getFeatureIds(query, abortCtrlRef.signal);
+      return getFeatureIds({ query, signal });
     },
     {
       onError: (error: ServerError) => {

@@ -440,7 +440,9 @@ image::maps/images/asset-tracking-tutorial/construction_zones.png[]
 [float]
 ==== Step 2. Configure an alert
 
-Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the Kibana log.
+Create a new alert by defining a rule and a connector. The rule includes the conditions that will trigger the alert, and the connector defines what action takes place once the alert is triggered. In this case, each alert will log a message to the {kib} log. 
+
+NOTE: For this example, you will set the rule to check every 5 seconds. However, when running in production, consider setting a higher check interval (such as 1 minute) to avoid performance issues. Refer to <<alerting-production-considerations,Alerting production considerations>> for more information.
 
 . Open *{stack-manage-app}*, and then click *{rules-ui}*.
 . Click *Create rule*.

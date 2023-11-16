@@ -6,3 +6,4 @@
  */
 
 export const SLO_RULE_REGISTRATION_CONTEXT = 'observability.slo';
+export const THRESHOLD_RULE_REGISTRATION_CONTEXT = 'observability.threshold';

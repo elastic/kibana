@@ -1,8 +1,20 @@
 {
   "cluster.delete_component_template": {
     "url_params": {
-      "timeout": "",
-      "master_timeout": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "master_timeout": [
+        "30s",
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "30s",
+        "-1",
+        "0"
+      ]
     },
     "methods": [
       "DELETE"
@@ -10,6 +22,10 @@
     "patterns": [
       "_component_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-component-template.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-component-template.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

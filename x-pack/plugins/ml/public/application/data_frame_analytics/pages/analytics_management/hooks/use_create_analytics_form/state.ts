@@ -5,23 +5,24 @@
  * 2.0.
  */
 
-import { RuntimeMappings } from '../../../../../../../common/types/fields';
-import { DataFrameAnalyticsMeta } from '../../../../../../../common/types/data_frame_analytics';
+import { isRuntimeMappings, type RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import {
+  getAnalysisType,
+  isClassificationAnalysis,
+  ANALYSIS_CONFIG_TYPE,
+  type DataFrameAnalyticsMeta,
+  type DataFrameAnalyticsConfig,
+  type DataFrameAnalyticsId,
+  type DataFrameAnalysisConfigType,
+  type FeatureProcessor,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial, DeepReadonly } from '../../../../../../../common/types/common';
 import { checkPermission } from '../../../../../capabilities/check_capabilities';
 import { mlNodesAvailable } from '../../../../../ml_nodes_check';
-import { isRuntimeMappings } from '../../../../../../../common/util/runtime_field_utils';
 
-import { defaultSearchQuery, getAnalysisType } from '../../../../common/analytics';
+import { defaultSearchQuery } from '../../../../common/analytics';
 import { CloneDataFrameAnalyticsConfig } from '../../components/action_clone';
-import {
-  DataFrameAnalyticsConfig,
-  DataFrameAnalyticsId,
-  DataFrameAnalysisConfigType,
-  FeatureProcessor,
-} from '../../../../../../../common/types/data_frame_analytics';
-import { isClassificationAnalysis } from '../../../../../../../common/util/analytics_utils';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../../../../common/constants/data_frame_analytics';
+
 export enum DEFAULT_MODEL_MEMORY_LIMIT {
   regression = '100mb',
   outlier_detection = '50mb',

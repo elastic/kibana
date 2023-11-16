@@ -6,7 +6,6 @@
  * Side Public License, v 1.
  */
 
-import { deepFreeze } from '@kbn/std';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   CapabilitiesStart,
@@ -14,11 +13,11 @@ import type {
 } from '@kbn/core-capabilities-browser-internal';
 
 const createStartContractMock = (): jest.Mocked<CapabilitiesStart> => ({
-  capabilities: deepFreeze({
+  capabilities: {
     catalogue: {},
     management: {},
     navLinks: {},
-  }),
+  },
 });
 
 const createMock = (): jest.Mocked<PublicMethodsOf<CapabilitiesService>> => ({

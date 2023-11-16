@@ -22,6 +22,7 @@ import { getShardMock } from '../common/get_shard.mock';
 import { SearchEsListItemSchema } from './search_es_list_item_schema';
 
 export const getSearchEsListItemsAsAllUndefinedMock = (): SearchEsListItemSchema => ({
+  '@timestamp': DATE_NOW,
   binary: undefined,
   boolean: undefined,
   byte: undefined,

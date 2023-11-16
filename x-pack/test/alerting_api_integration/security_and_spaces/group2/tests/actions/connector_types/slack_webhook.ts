@@ -58,6 +58,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(createdAction).to.eql({
         id: createdAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         is_missing_secrets: false,
         name: 'A slack action',
@@ -74,6 +75,7 @@ export default function slackTest({ getService }: FtrProviderContext) {
       expect(fetchedAction).to.eql({
         id: fetchedAction.id,
         is_preconfigured: false,
+        is_system_action: false,
         is_deprecated: false,
         is_missing_secrets: false,
         name: 'A slack action',

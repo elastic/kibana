@@ -69,6 +69,15 @@ NOTE: This option cannot be used with the `createNewCopies` option.
 +
 NOTE: This option cannot be used with the `createNewCopies` option.
 
+[[spaces-api-copy-saved-objects-response-codes]]
+==== Response codes
+
+`200`::
+    Indicates a successful call.
+
+`404`::
+    Indicates that the request failed because one or more of the objects specified could not be found. A list of the unresolved objects are included in the 404 response attributes.
+
 [role="child_attributes"]
 [[spaces-api-copy-saved-objects-response-body]]
 ==== {api-response-body-title}
@@ -131,7 +140,7 @@ refer to the <<spaces-api-copy-saved-objects-example,examples>>.
 ===== Successful copy (with `createNewCopies` enabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization, and that has a reference to {a-data-source}:
+the dashboard has a reference to a visualization, and that has a reference to a {data-source}:
 
 [source,sh]
 ----
@@ -195,7 +204,7 @@ The result indicates a successful copy, and all three objects are created. Since
 ===== Successful copy (with `createNewCopies` disabled)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization, and that has a reference to {a-data-source}:
+the dashboard has a reference to a visualization, and that has a reference to a {data-source}:
 
 [source,sh]
 ----
@@ -409,7 +418,7 @@ API>>.
 ===== Failed copy (with missing reference errors)
 
 Copy a dashboard with the `my-dashboard` ID, including all references from the `default` space to the `marketing` space. In this example,
-the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to {a-data-source}:
+the dashboard has a reference to a visualization and a *Canvas* workpad, and the visualization has a reference to a {data-source}:
 
 [source,sh]
 ----

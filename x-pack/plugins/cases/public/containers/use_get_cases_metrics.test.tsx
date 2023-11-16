@@ -12,6 +12,7 @@ import { createAppMockRenderer } from '../common/mock';
 import { useGetCasesMetrics } from './use_get_cases_metrics';
 import { SECURITY_SOLUTION_OWNER } from '../../common/constants';
 import { useToasts } from '../common/lib/kibana';
+import { CaseMetricsFeature } from '../../common/types/api';
 
 jest.mock('../api');
 jest.mock('../common/lib/kibana');
@@ -41,7 +42,7 @@ describe('useGetCasesMetrics', () => {
     expect(spy).toHaveBeenCalledWith({
       http: expect.anything(),
       signal: abortCtrl.signal,
-      query: { owner: [SECURITY_SOLUTION_OWNER], features: ['mttr'] },
+      query: { owner: [SECURITY_SOLUTION_OWNER], features: [CaseMetricsFeature.MTTR] },
     });
   });
 

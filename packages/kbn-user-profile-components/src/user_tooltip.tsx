@@ -11,9 +11,10 @@ import { EuiToolTip, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type { UserProfileUserInfo, UserProfileAvatarData } from './user_profile';
+import type { UserProfileUserInfo } from './user_profile';
 import { UserAvatar } from './user_avatar';
 import { getUserDisplayName } from './user_profile';
+import { UserProfileAvatarData } from './types';
 
 /**
  * Props of {@link UserToolTip} component

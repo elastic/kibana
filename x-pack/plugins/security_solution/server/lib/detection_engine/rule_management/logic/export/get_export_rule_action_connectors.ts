@@ -14,7 +14,7 @@ import type {
   SavedObject,
 } from '@kbn/core-saved-objects-server';
 import { createConcatStream, createMapStream, createPromiseFromStreams } from '@kbn/utils';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 
 export interface DefaultActionConnectorDetails {
   exported_action_connector_count: number;

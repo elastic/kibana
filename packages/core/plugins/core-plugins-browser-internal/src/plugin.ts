@@ -32,6 +32,7 @@ export class PluginWrapper<
   public readonly configPath: DiscoveredPlugin['configPath'];
   public readonly requiredPlugins: DiscoveredPlugin['requiredPlugins'];
   public readonly optionalPlugins: DiscoveredPlugin['optionalPlugins'];
+  public readonly runtimePluginDependencies: DiscoveredPlugin['runtimePluginDependencies'];
   private instance?: Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
 
   private readonly startDependencies$ = new Subject<[CoreStart, TPluginsStart, TStart]>();
@@ -46,6 +47,7 @@ export class PluginWrapper<
     this.configPath = discoveredPlugin.configPath;
     this.requiredPlugins = discoveredPlugin.requiredPlugins;
     this.optionalPlugins = discoveredPlugin.optionalPlugins;
+    this.runtimePluginDependencies = discoveredPlugin.runtimePluginDependencies;
   }
 
   /**

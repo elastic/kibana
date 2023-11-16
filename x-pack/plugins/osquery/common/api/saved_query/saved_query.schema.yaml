@@ -1,0 +1,72 @@
+openapi: 3.0.0
+info:
+  title: Saved Queries Schema
+  version: '2023-10-31'
+paths:
+  /api/osquery/saved_queries:
+    get:
+      summary: Find saved queries
+      parameters:
+          - $ref: './find_saved_query.schema.yaml#/components/parameters/FindSavedQueryRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+    post:
+      summary: Create a saved query
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: './create_saved_query.schema.yaml#/components/schemas/CreateSavedQueryRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './create_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+  /api/osquery/saved_queries/{id}:
+    get:
+      summary: Get saved query details
+      parameters:
+        - $ref: './read_saved_query.schema.yaml#/components/parameters/ReadSavedQueryRequestQueryParameter'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: './read_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+    delete:
+          summary: Delete saved query
+          parameters:
+            - $ref: './delete_saved_query.schema.yaml#/components/parameters/DeleteSavedQueryRequestQueryParameter'
+          responses:
+            '200':
+              description: OK
+              content:
+                application/json:
+                  schema:
+                    $ref: './find_saved_query.schema.yaml#/components/schemas/SuccessResponse'
+    put:
+          summary: Update saved query
+          requestBody:
+            required: true
+            content:
+              application/json:
+                schema:
+                  $ref: './update_saved_query.schema.yaml#/components/schemas/UpdateSavedQueryRequestBody'
+          parameters:
+            - $ref: './update_saved_query.schema.yaml#/components/parameters/UpdateSavedQueryRequestQueryParameter'
+          responses:
+            '200':
+              description: OK
+              content:
+                application/json:
+                  schema:
+                    $ref: './update_saved_query.schema.yaml#/components/schemas/SuccessResponse'

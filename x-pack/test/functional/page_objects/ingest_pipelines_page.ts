@@ -35,8 +35,8 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
       processors?: string;
       onFailureProcessors?: string;
     }) {
-      await testSubjects.click('emptyStateCreatePipelineDropdown');
-      await testSubjects.click('emptyStateCreatePipelineButton');
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createNewPipeline');
 
       await testSubjects.exists('pipelineForm');
 
@@ -73,8 +73,8 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
     },
 
     async navigateToCreateFromCsv() {
-      await testSubjects.click('emptyStateCreatePipelineDropdown');
-      await testSubjects.click('emptyStatecreatePipelineFromCsvButton');
+      await testSubjects.click('createPipelineDropdown');
+      await testSubjects.click('createPipelineFromCsv');
 
       await testSubjects.exists('createFromCsvInstructions');
     },
@@ -99,6 +99,11 @@ export function IngestPipelinesPageProvider({ getService, getPageObjects }: FtrP
 
     async closePipelineDetailsFlyout() {
       await testSubjects.click('euiFlyoutCloseButton');
+    },
+
+    async increasePipelineListPageSize() {
+      await testSubjects.click('tablePaginationPopoverButton');
+      await testSubjects.click(`tablePagination-50-rows`);
     },
   };
 }

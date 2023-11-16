@@ -46,7 +46,7 @@ function getFilterExpression(
     ]);
   }
 
-  return ['all', ...allFilters];
+  return ['all', ...allFilters] as FilterSpecification;
 }
 
 export function getFillFilterExpression(
@@ -91,7 +91,7 @@ const IS_POINT_FEATURE = [
   'any',
   ['==', ['geometry-type'], GEO_JSON_TYPE.POINT],
   ['==', ['geometry-type'], GEO_JSON_TYPE.MULTI_POINT],
-];
+] as FilterSpecification;
 
 export function getPointFilterExpression(
   isSourceGeoJson: boolean,

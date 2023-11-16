@@ -9,29 +9,6 @@
 import { i18n } from '@kbn/i18n';
 
 export const ControlGroupStrings = {
-  emptyState: {
-    getBadge: () =>
-      i18n.translate('controls.controlGroup.emptyState.badgeText', {
-        defaultMessage: 'New',
-      }),
-    getCallToAction: () =>
-      i18n.translate('controls.controlGroup.emptyState.callToAction', {
-        defaultMessage:
-          'Filtering your data just got better with Controls, letting you display only the data you want to explore.',
-      }),
-    getAddControlButtonTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.addControlButtonTitle', {
-        defaultMessage: 'Add control',
-      }),
-    getTwoLineLoadingTitle: () =>
-      i18n.translate('controls.controlGroup.emptyState.twoLineLoadingTitle', {
-        defaultMessage: '...',
-      }),
-    getDismissButton: () =>
-      i18n.translate('controls.controlGroup.emptyState.dismissButton', {
-        defaultMessage: 'Dismiss',
-      }),
-  },
   manageControl: {
     getFlyoutCreateTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.createFlyoutTitle', {
@@ -41,30 +18,73 @@ export const ControlGroupStrings = {
       i18n.translate('controls.controlGroup.manageControl.editFlyoutTitle', {
         defaultMessage: 'Edit control',
       }),
-    getDataViewTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.dataViewTitle', {
-        defaultMessage: 'Data view',
-      }),
-    getFieldTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.fielditle', {
-        defaultMessage: 'Field',
-      }),
-    getTitleInputTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.titleInputTitle', {
-        defaultMessage: 'Label',
-      }),
-    getControlTypeTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.controlTypesTitle', {
-        defaultMessage: 'Control type',
-      }),
-    getWidthInputTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.widthInputTitle', {
-        defaultMessage: 'Minimum width',
-      }),
-    getControlSettingsTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.controlSettingsTitle', {
-        defaultMessage: 'Additional settings',
-      }),
+    dataSource: {
+      getFormGroupTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.formGroupTitle', {
+          defaultMessage: 'Data source',
+        }),
+      getFormGroupDescription: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.formGroupDescription', {
+          defaultMessage: 'Select the data view and field that you want to create a control for.',
+        }),
+      getSelectDataViewMessage: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.selectDataViewMessage', {
+          defaultMessage: 'Please select a data view',
+        }),
+      getDataViewTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.dataViewTitle', {
+          defaultMessage: 'Data view',
+        }),
+      noControlTypeMessage: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.noControlTypeMessage', {
+          defaultMessage: 'No field selected yet',
+        }),
+      getFieldTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.fieldTitle', {
+          defaultMessage: 'Field',
+        }),
+      getControlTypeTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.dataSource.controlTypesTitle', {
+          defaultMessage: 'Control type',
+        }),
+    },
+    displaySettings: {
+      getFormGroupTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.displaySettings.formGroupTitle', {
+          defaultMessage: 'Display settings',
+        }),
+      getFormGroupDescription: () =>
+        i18n.translate('controls.controlGroup.manageControl.displaySettings.formGroupDescription', {
+          defaultMessage: 'Change how the control appears on your dashboard.',
+        }),
+      getTitleInputTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.displaySettings.titleInputTitle', {
+          defaultMessage: 'Label',
+        }),
+      getWidthInputTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.displaySettings.widthInputTitle', {
+          defaultMessage: 'Minimum width',
+        }),
+      getGrowSwitchTitle: () =>
+        i18n.translate('controls.controlGroup.manageControl.displaySettings.growSwitchTitle', {
+          defaultMessage: 'Expand width to fit available space',
+        }),
+    },
+    controlTypeSettings: {
+      getFormGroupTitle: (type: string) =>
+        i18n.translate('controls.controlGroup.manageControl.controlTypeSettings.formGroupTitle', {
+          defaultMessage: '{controlType} settings',
+          values: { controlType: type },
+        }),
+      getFormGroupDescription: (type: string) =>
+        i18n.translate(
+          'controls.controlGroup.manageControl.controlTypeSettings.formGroupDescription',
+          {
+            defaultMessage: 'Custom settings for your {controlType} control.',
+            values: { controlType: type.toLocaleLowerCase() },
+          }
+        ),
+    },
     getSaveChangesTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.saveChangesTitle', {
         defaultMessage: 'Save and close',
@@ -72,18 +92,6 @@ export const ControlGroupStrings = {
     getCancelTitle: () =>
       i18n.translate('controls.controlGroup.manageControl.cancelTitle', {
         defaultMessage: 'Cancel',
-      }),
-    getSelectFieldMessage: () =>
-      i18n.translate('controls.controlGroup.manageControl.selectFieldMessage', {
-        defaultMessage: 'Please select a field',
-      }),
-    getSelectDataViewMessage: () =>
-      i18n.translate('controls.controlGroup.manageControl.selectDataViewMessage', {
-        defaultMessage: 'Please select a data view',
-      }),
-    getGrowSwitchTitle: () =>
-      i18n.translate('controls.controlGroup.manageControl.growSwitchTitle', {
-        defaultMessage: 'Expand width to fit available space',
       }),
   },
   management: {
@@ -254,11 +262,16 @@ export const ControlGroupStrings = {
   floatingActions: {
     getEditButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.editTitle', {
-        defaultMessage: 'Edit control',
+        defaultMessage: 'Edit',
       }),
     getRemoveButtonTitle: () =>
       i18n.translate('controls.controlGroup.floatingActions.removeTitle', {
-        defaultMessage: 'Remove control',
+        defaultMessage: 'Delete',
+      }),
+
+    getClearButtonTitle: () =>
+      i18n.translate('controls.controlGroup.floatingActions.clearTitle', {
+        defaultMessage: 'Clear',
       }),
   },
   ariaActions: {

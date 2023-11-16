@@ -6,8 +6,9 @@
  */
 
 import React, { useContext, useEffect } from 'react';
+import useObservable from 'react-use/lib/useObservable';
 import { EuiDataGridCellValueElementProps, EuiLink } from '@elastic/eui';
-import type { IUiSettingsClient } from '@kbn/core/public';
+import type { CoreSetup } from '@kbn/core/public';
 import classNames from 'classnames';
 import type { FormatFactory } from '../../../../common/types';
 import { getOriginalId } from '../../../../common/expressions/datatable/transpose_helpers';
@@ -19,14 +20,14 @@ export const createGridCell = (
   formatters: Record<string, ReturnType<FormatFactory>>,
   columnConfig: ColumnConfig,
   DataContext: React.Context<DataContextType>,
-  uiSettings: IUiSettingsClient,
+  theme: CoreSetup['theme'],
   fitRowToContent?: boolean
 ) => {
-  // Changing theme requires a full reload of the page, so we can cache here
-  const IS_DARK_THEME = uiSettings.get('theme:darkMode');
   return ({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) => {
     const { table, alignments, minMaxByColumnId, getColorForValue, handleFilterClick } =
       useContext(DataContext);
+    const IS_DARK_THEME: boolean = useObservable(theme.theme$, { darkMode: false }).darkMode;
+
     const rowValue = table?.rows[rowIndex]?.[columnId];
 
     const colIndex = columnConfig.columns.findIndex(({ columnId: id }) => id === columnId);
@@ -69,7 +70,16 @@ export const createGridCell = (
           });
         }
       };
-    }, [rowValue, columnId, setCellProps, colorMode, palette, minMaxByColumnId, getColorForValue]);
+    }, [
+      rowValue,
+      columnId,
+      setCellProps,
+      colorMode,
+      palette,
+      minMaxByColumnId,
+      getColorForValue,
+      IS_DARK_THEME,
+    ]);
 
     if (filterOnClick) {
       return (

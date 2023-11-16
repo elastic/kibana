@@ -76,6 +76,12 @@ export const CONDITION_FIELD_TITLE: { [K in BlocklistConditionEntryField]: strin
   'file.path': i18n.translate('xpack.securitySolution.blocklist.entry.field.path', {
     defaultMessage: 'Path',
   }),
+  'file.path.caseless': i18n.translate(
+    'xpack.securitySolution.blocklist.entry.field.path.caseless',
+    {
+      defaultMessage: 'Path',
+    }
+  ),
   'file.Ext.code_signature': i18n.translate(
     'xpack.securitySolution.blocklist.entry.field.signature',
     { defaultMessage: 'Signature' }
@@ -89,6 +95,12 @@ export const CONDITION_FIELD_DESCRIPTION: { [K in BlocklistConditionEntryField]:
   'file.path': i18n.translate('xpack.securitySolution.blocklist.entry.field.description.path', {
     defaultMessage: 'The full path of the application',
   }),
+  'file.path.caseless': i18n.translate(
+    'xpack.securitySolution.blocklist.entry.field.description.path.caseless',
+    {
+      defaultMessage: 'The full path of the application (case insenstive)',
+    }
+  ),
   'file.Ext.code_signature': i18n.translate(
     'xpack.securitySolution.blocklist.entry.field.description.signature',
     { defaultMessage: 'The signer of the application' }

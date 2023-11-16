@@ -8,42 +8,33 @@
 import { EuiErrorBoundary } from '@elastic/eui';
 import { Theme, ThemeProvider } from '@emotion/react';
 import {
-  APP_WRAPPER_CLASS,
   AppMountParameters,
+  APP_WRAPPER_CLASS,
   CoreStart,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import {
   KibanaContextProvider,
   KibanaThemeProvider,
-  RedirectAppLinks,
   useUiSetting$,
 } from '@kbn/kibana-react-plugin/public';
-import { Route } from '@kbn/shared-ux-router';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { euiDarkVars, euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import {
-  Router,
-  Switch,
-  RouteComponentProps,
-  RouteProps,
-} from 'react-router-dom';
+import { ConfigSchema } from '..';
+import { customLogsRoutes } from '../components/app/custom_logs';
+import { systemLogsRoutes } from '../components/app/system_logs';
+import { ObservabilityOnboardingHeaderActionMenu } from '../components/app/header_action_menu';
 import {
   ObservabilityOnboardingPluginSetupDeps,
   ObservabilityOnboardingPluginStartDeps,
 } from '../plugin';
-import { routes } from '../routes';
-
-export type BreadcrumbTitle<
-  T extends { [K in keyof T]?: string | undefined } = {}
-> = string | ((props: RouteComponentProps<T>) => string) | null;
-
-export interface RouteDefinition<
-  T extends { [K in keyof T]?: string | undefined } = any
-> extends RouteProps {
-  breadcrumb: BreadcrumbTitle<T>;
-}
+import { baseRoutes, routes } from '../routes';
+import { CustomLogs } from '../routes/templates/custom_logs';
+import { SystemLogs } from '../routes/templates/system_logs';
 
 export const onBoardingTitle = i18n.translate(
   'xpack.observability_onboarding.breadcrumbs.onboarding',
@@ -58,20 +49,64 @@ export const breadcrumbsApp = {
 };
 
 function App() {
+  const customLogRoutesPaths = Object.keys(customLogsRoutes);
+  const systemLogRoutesPaths = Object.keys(systemLogsRoutes);
+
   return (
     <>
-      <Switch>
-        {Object.keys(routes).map((key) => {
+      <Routes>
+        {Object.keys(baseRoutes).map((key) => {
           const path = key as keyof typeof routes;
           const { handler, exact } = routes[path];
           const Wrapper = () => {
             return handler();
           };
+
           return (
             <Route key={path} path={path} exact={exact} component={Wrapper} />
           );
         })}
-      </Switch>
+        <Route exact path={customLogRoutesPaths}>
+          <CustomLogs>
+            {customLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return (
+                <Route
+                  key={path}
+                  path={path}
+                  exact={exact}
+                  component={Wrapper}
+                />
+              );
+            })}
+          </CustomLogs>
+        </Route>
+        <Route exact path={systemLogRoutesPaths}>
+          <SystemLogs>
+            {systemLogRoutesPaths.map((key) => {
+              const path = key as keyof typeof routes;
+              const { handler, exact } = routes[path];
+              const Wrapper = () => {
+                return handler();
+              };
+
+              return (
+                <Route
+                  key={path}
+                  path={path}
+                  exact={exact}
+                  component={Wrapper}
+                />
+              );
+            })}
+          </SystemLogs>
+        </Route>
+      </Routes>
     </>
   );
 }
@@ -99,48 +134,64 @@ export function ObservabilityOnboardingAppRoot({
   core,
   deps,
   corePlugins: { observability, data },
+  config,
 }: {
   appMountParameters: AppMountParameters;
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
+  config: ConfigSchema;
 }) {
-  const { history } = appMountParameters;
+  const { history, setHeaderActionMenu, theme$ } = appMountParameters;
   const i18nCore = core.i18n;
   const plugins = { ...deps };
 
+  const renderFeedbackLinkAsPortal = !config.serverless.enabled;
+
   return (
-    <RedirectAppLinks
-      className={APP_WRAPPER_CLASS}
-      application={core.application}
-    >
-      <KibanaContextProvider
-        services={{
-          ...core,
-          ...plugins,
-          observability,
-          data,
+    <div className={APP_WRAPPER_CLASS}>
+      <RedirectAppLinks
+        coreStart={{
+          application: core.application,
         }}
       >
-        <KibanaThemeProvider
-          theme$={appMountParameters.theme$}
-          modify={{
-            breakpoint: {
-              xxl: 1600,
-              xxxl: 2000,
-            },
+        <KibanaContextProvider
+          services={{
+            ...core,
+            ...plugins,
+            observability,
+            data,
+            config,
           }}
         >
-          <i18nCore.Context>
-            <Router history={history}>
-              <EuiErrorBoundary>
-                <ObservabilityOnboardingApp />
-              </EuiErrorBoundary>
-            </Router>
-          </i18nCore.Context>
-        </KibanaThemeProvider>
-      </KibanaContextProvider>
-    </RedirectAppLinks>
+          <KibanaThemeProvider
+            theme$={theme$}
+            modify={{
+              breakpoint: {
+                xxl: 1600,
+                xxxl: 2000,
+              },
+            }}
+          >
+            <i18nCore.Context>
+              <Router history={history}>
+                <EuiErrorBoundary>
+                  {renderFeedbackLinkAsPortal && (
+                    <HeaderMenuPortal
+                      setHeaderActionMenu={setHeaderActionMenu}
+                      theme$={theme$}
+                    >
+                      <ObservabilityOnboardingHeaderActionMenu />
+                    </HeaderMenuPortal>
+                  )}
+                  <ObservabilityOnboardingApp />
+                </EuiErrorBoundary>
+              </Router>
+            </i18nCore.Context>
+          </KibanaThemeProvider>
+        </KibanaContextProvider>
+      </RedirectAppLinks>
+    </div>
   );
 }
 
@@ -153,11 +204,13 @@ export const renderApp = ({
   deps,
   appMountParameters,
   corePlugins,
+  config,
 }: {
   core: CoreStart;
   deps: ObservabilityOnboardingPluginSetupDeps;
   appMountParameters: AppMountParameters;
   corePlugins: ObservabilityOnboardingPluginStartDeps;
+  config: ConfigSchema;
 }) => {
   const { element } = appMountParameters;
 
@@ -167,6 +220,7 @@ export const renderApp = ({
       core={core}
       deps={deps}
       corePlugins={corePlugins}
+      config={config}
     />,
     element
   );

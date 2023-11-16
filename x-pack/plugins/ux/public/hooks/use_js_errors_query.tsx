@@ -6,7 +6,7 @@
  */
 
 import datemath from '@kbn/datemath';
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
 import { useDataView } from '../components/app/rum_dashboard/local_uifilters/use_data_view';
 import { jsErrorsQuery } from '../services/data/js_errors_query';

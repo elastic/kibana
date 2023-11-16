@@ -11,6 +11,7 @@ import { useCallback, useEffect } from 'react';
 import { catchError, map, Observable, of, startWith } from 'rxjs';
 import createContainer from 'constate';
 import type { QueryDslQueryContainer, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { decodeOrThrow } from '../../../../../common/runtime_types';
 import { useDataSearch, useLatestPartialDataSearchResponse } from '../../../../utils/data_search';
 import { useMetricsDataViewContext } from './use_data_view';
@@ -18,12 +19,14 @@ import { useUnifiedSearchContext } from './use_unified_search';
 
 export const useHostCount = () => {
   const { dataView, metricAlias } = useMetricsDataViewContext();
-  const { buildQuery, getParsedDateRange } = useUnifiedSearchContext();
+  const {
+    services: { telemetry },
+  } = useKibanaContextForPlugin();
+  const { buildQuery, searchCriteria } = useUnifiedSearchContext();
 
   const { search: fetchHostCount, requests$ } = useDataSearch({
     getRequest: useCallback(() => {
       const query = buildQuery();
-      const dateRange = getParsedDateRange();
 
       const filters: QueryDslQueryContainer = {
         bool: {
@@ -38,9 +41,8 @@ export const useHostCount = () => {
             {
               range: {
                 [dataView?.timeFieldName ?? '@timestamp']: {
-                  gte: dateRange.from,
-                  lte: dateRange.to,
-                  format: 'strict_date_optional_time',
+                  gte: searchCriteria.dateRange.from,
+                  lte: searchCriteria.dateRange.to,
                 },
               },
             },
@@ -70,7 +72,13 @@ export const useHostCount = () => {
         },
         options: { strategy: ES_SEARCH_STRATEGY },
       };
-    }, [buildQuery, dataView, getParsedDateRange, metricAlias]),
+    }, [
+      buildQuery,
+      dataView?.timeFieldName,
+      metricAlias,
+      searchCriteria.dateRange.from,
+      searchCriteria.dateRange.to,
+    ]),
     parseResponses: normalizeDataSearchResponse,
   });
 
@@ -80,6 +88,14 @@ export const useHostCount = () => {
   useEffect(() => {
     fetchHostCount();
   }, [fetchHostCount]);
+
+  useEffect(() => {
+    if (latestResponseData) {
+      telemetry.reportHostsViewTotalHostCountRetrieved({
+        total: latestResponseData.count.value,
+      });
+    }
+  }, [latestResponseData, telemetry]);
 
   return {
     errors: latestResponseErrors,

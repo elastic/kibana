@@ -9,26 +9,25 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo } from 'react';
 import { ReportTypes } from '@kbn/exploratory-view-plugin/public';
 import { i18n } from '@kbn/i18n';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useSelectedLocation } from '../hooks/use_selected_location';
 
 interface MonitorErrorsCountProps {
   from: string;
   to: string;
-  monitorId: string[];
   id: string;
 }
 
-export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCountProps) => {
+export const MonitorErrorsCount = ({ from, to, id }: MonitorErrorsCountProps) => {
   const {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const selectedLocation = useSelectedLocation();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const time = useMemo(() => ({ from, to }), [from, to]);
 
-  if (!selectedLocation || !monitorId) {
+  if (!queryIdFilter) {
     return null;
   }
 
@@ -41,13 +40,11 @@ export const MonitorErrorsCount = ({ monitorId, from, to, id }: MonitorErrorsCou
       attributes={[
         {
           time,
-          reportDefinitions: {
-            'monitor.id': monitorId,
-            'observer.geo.name': [selectedLocation?.label],
-          },
+          reportDefinitions: queryIdFilter,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_errors',
           name: ERRORS_LABEL,
+          filters: locationFilter,
         },
       ]}
     />

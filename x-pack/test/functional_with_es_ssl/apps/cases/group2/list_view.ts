@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { SeverityAll } from '@kbn/cases-plugin/common/ui';
 import { UserProfile } from '@kbn/user-profile-components';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -22,6 +21,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
   const browser = getService('browser');
+  const toasts = getService('toasts');
 
   describe('cases list', () => {
     before(async () => {
@@ -279,8 +279,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/152925
-    describe.skip('filtering', () => {
+    describe('filtering', () => {
       const caseTitle = 'matchme';
       const caseIds: string[] = [];
 
@@ -293,6 +292,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         const case1 = await cases.api.createCase({
           title: caseTitle,
           tags: ['one'],
+          category: 'foobar',
           description: 'lots of information about an incident',
         });
         const case2 = await cases.api.createCase({ title: 'test2', tags: ['two'] });
@@ -428,6 +428,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await tags.getVisibleText()).to.be('one');
       });
 
+      it('filters cases by category', async () => {
+        await cases.casesTable.filterByCategory('foobar');
+        await cases.casesTable.refreshTable();
+        await cases.casesTable.validateCasesTableHasNthRows(1);
+        const row = await cases.casesTable.getCaseByIndex(0);
+        const category = await row.findByTestSubject('case-table-column-category-foobar');
+        expect(await category.getVisibleText()).to.be('foobar');
+      });
+
       it('filters cases by status', async () => {
         await cases.casesTable.changeStatus(CaseStatuses['in-progress'], 0);
         await testSubjects.existOrFail(`case-status-badge-${CaseStatuses['in-progress']}`);
@@ -449,8 +458,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await testSubjects.existOrFail(`case-table-column-severity-${CaseSeverity.MEDIUM}`);
       });
 
-      // FLAKY: https://github.com/elastic/kibana/issues/152928
-      describe.skip('assignees filtering', () => {
+      describe('assignees filtering', () => {
         it('filters cases by the first cases all user assignee', async () => {
           await cases.casesTable.filterByAssignee('all');
           await cases.casesTable.validateCasesTableHasNthRows(1);
@@ -564,6 +572,10 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
 
     describe('row actions', () => {
+      afterEach(async () => {
+        await toasts.dismissAllToastsWithChecks();
+      });
+
       describe('Status', () => {
         before(async () => {
           await cases.api.createNthRandomCases(1);

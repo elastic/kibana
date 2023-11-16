@@ -12,10 +12,11 @@ import {
   description,
   deserializerOrUndefined,
   immutable,
-  metaOrUndefined,
   name,
+  nullableMetaOrUndefined,
   serializerOrUndefined,
   tie_breaker_id,
+  timestampOrUndefined,
   type,
   updated_at,
   updated_by,
@@ -24,12 +25,13 @@ import { version } from '@kbn/securitysolution-io-ts-types';
 
 export const searchEsListSchema = t.exact(
   t.type({
+    '@timestamp': timestampOrUndefined,
     created_at,
     created_by,
     description,
     deserializer: deserializerOrUndefined,
     immutable,
-    meta: metaOrUndefined,
+    meta: nullableMetaOrUndefined,
     name,
     serializer: serializerOrUndefined,
     tie_breaker_id,

@@ -9,8 +9,18 @@
 import { fromEvent } from 'rxjs';
 import type { AnalyticsClient } from '@kbn/analytics-client';
 
-/** HTML attributes that should be skipped from reporting because they might contain user data */
-const POTENTIAL_PII_HTML_ATTRIBUTES = ['value'];
+/** HTML attributes that should be skipped from reporting because they might contain data we do not wish to collect */
+const HTML_ATTRIBUTES_TO_REMOVE = [
+  'data-href',
+  'data-ech-series-name',
+  'data-provider-id',
+  'data-rfd-drag-handle-draggable-id',
+  'data-rfd-droppable-id',
+  'data-rfd-draggable-id',
+  'href',
+  'value',
+  'title',
+];
 
 /**
  * Registers the event type "click" in the analytics client.
@@ -71,7 +81,7 @@ function getTargetDefinition(target: HTMLElement): string[] {
     ...(target.parentElement ? getTargetDefinition(target.parentElement) : []),
     target.tagName,
     ...[...target.attributes]
-      .filter((attr) => !POTENTIAL_PII_HTML_ATTRIBUTES.includes(attr.name))
-      .map((attr) => `${attr.name}=${attr.value}`),
+      .filter((attr) => !HTML_ATTRIBUTES_TO_REMOVE.includes(attr.name))
+      .map((attr) => `${attr.name}=${attr.value}`.slice(0, 256)),
   ];
 }

@@ -6,27 +6,17 @@
  */
 
 import path, { join, resolve } from 'path';
-import * as rt from 'io-ts';
-import type { TimelineSavedObject } from '../../../../common/types/timeline';
-import { TimelineSavedToReturnObjectRuntimeType } from '../../../../common/types/timeline';
-
-import type { ImportTimelinesSchema } from '../schemas/timelines/import_timelines_schema';
-import { ImportTimelinesSchemaRt } from '../schemas/timelines/import_timelines_schema';
-import { unionWithNullType } from '../../../../common/utility_types';
+import type {
+  CheckTimelineStatusRt,
+  TimelineSavedObject,
+  ImportTimelinesSchema,
+} from '../../../../common/api/timeline';
 
 import type { FrameworkRequest } from '../../framework';
 
 import { getExistingPrepackagedTimelines } from '../saved_object/timelines';
 
 import { loadData, getReadables } from './common';
-
-export const checkTimelineStatusRt = rt.type({
-  timelinesToInstall: rt.array(unionWithNullType(ImportTimelinesSchemaRt)),
-  timelinesToUpdate: rt.array(unionWithNullType(ImportTimelinesSchemaRt)),
-  prepackagedTimelines: rt.array(unionWithNullType(TimelineSavedToReturnObjectRuntimeType)),
-});
-
-export type CheckTimelineStatusRt = rt.TypeOf<typeof checkTimelineStatusRt>;
 
 export const getTimelinesToUpdate = (
   timelinesFromFileSystem: ImportTimelinesSchema[],

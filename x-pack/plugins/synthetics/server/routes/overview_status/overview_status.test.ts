@@ -6,56 +6,89 @@
  */
 import { SavedObjectsFindResult } from '@kbn/core-saved-objects-api-server';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
-import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
 import { periodToMs } from './overview_status';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { RouteContext } from '../../legacy_uptime/routes';
 import { getStatus } from './overview_status';
 import times from 'lodash/times';
 import * as monitorsFns from '../../saved_objects/synthetics_monitor/get_all_monitors';
-import { EncryptedSyntheticsMonitor } from '../../../common/runtime_types';
+import { EncryptedSyntheticsMonitorAttributes } from '../../../common/runtime_types';
+import { RouteContext } from '../types';
+import { getUptimeESMockClient } from '../../legacy_uptime/lib/requests/test_helpers';
+
+import * as commonLibs from '../common';
+import { SyntheticsServerSetup } from '../../types';
+import { mockEncryptedSO } from '../../synthetics_service/utils/mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import * as allLocationsFn from '../../synthetics_service/get_all_locations';
+const allLocations: any = [
+  {
+    id: 'us_central_qa',
+    label: 'US Central QA',
+  },
+  {
+    id: 'us_central',
+    label: 'North America - US Central',
+  },
+];
+jest.spyOn(allLocationsFn, 'getAllLocations').mockResolvedValue({
+  publicLocations: allLocations,
+  privateLocations: [],
+  allLocations,
+});
 
 jest.mock('../../saved_objects/synthetics_monitor/get_all_monitors', () => ({
   ...jest.requireActual('../../saved_objects/synthetics_monitor/get_all_monitors'),
   getAllMonitors: jest.fn(),
 }));
 
-jest.mock('../common', () => ({
-  getMonitors: jest.fn().mockReturnValue({
-    per_page: 10,
-    saved_objects: [
-      {
-        id: 'mon-1',
-        attributes: {
-          enabled: false,
-          locations: ['us-east1', 'us-west1', 'japan'],
+jest.spyOn(commonLibs, 'getMonitors').mockResolvedValue({
+  per_page: 10,
+  saved_objects: [
+    {
+      id: 'mon-1',
+      attributes: {
+        enabled: false,
+        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
+      },
+    },
+    {
+      id: 'mon-2',
+      attributes: {
+        enabled: true,
+        locations: [{ id: 'us-east1' }, { id: 'us-west1' }, { id: 'japan' }],
+        schedule: {
+          number: '10',
+          unit: 'm',
         },
       },
-      {
-        id: 'mon-2',
-        attributes: {
-          enabled: true,
-          locations: ['us-east1', 'us-west1', 'japan'],
-          schedule: {
-            number: '10',
-            unit: 'm',
-          },
-        },
-      },
-    ],
-  }),
-  getMonitorFilters: () => '',
-}));
-
-jest.mock('../../legacy_uptime/lib/requests/get_snapshot_counts', () => ({
-  getSnapshotCount: jest.fn().mockReturnValue({
-    up: 2,
-    down: 1,
-    total: 3,
-  }),
-}));
+    },
+  ],
+} as any);
 
 describe('current status route', () => {
+  const logger = loggerMock.create();
+
+  const serverMock: SyntheticsServerSetup = {
+    logger,
+    config: {
+      service: {
+        username: 'dev',
+        password: '12345',
+        manifestUrl: 'http://localhost:8080/api/manifest',
+      },
+    },
+    spaces: {
+      spacesService: {
+        getSpaceId: jest.fn().mockReturnValue('test-space'),
+      },
+    },
+    encryptedSavedObjects: mockEncryptedSO(),
+    coreStart: {
+      savedObjects: savedObjectsServiceMock.createStartContract(),
+    },
+  } as unknown as SyntheticsServerSetup;
+
   describe('periodToMs', () => {
     it('returns 0 for unsupported unit type', () => {
       // @ts-expect-error Providing invalid value to test handler in function
@@ -198,7 +231,7 @@ describe('current status route', () => {
           'id1-Asia/Pacific - Japan': {
             configId: 'id1',
             monitorQueryId: 'id1',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -206,7 +239,7 @@ describe('current status route', () => {
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
             monitorQueryId: 'id2',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -216,7 +249,7 @@ describe('current status route', () => {
           'id2-Europe - Germany': {
             configId: 'id2',
             monitorQueryId: 'id2',
-            location: 'Europe - Germany',
+            locationId: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -363,7 +396,7 @@ describe('current status route', () => {
           'id1-Asia/Pacific - Japan': {
             configId: 'id1',
             monitorQueryId: 'id1',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -371,7 +404,7 @@ describe('current status route', () => {
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
             monitorQueryId: 'id2',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -381,7 +414,7 @@ describe('current status route', () => {
           'id2-Europe - Germany': {
             configId: 'id2',
             monitorQueryId: 'id2',
-            location: 'Europe - Germany',
+            locationId: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -533,7 +566,7 @@ describe('current status route', () => {
           'id1-Asia/Pacific - Japan': {
             configId: 'id1',
             monitorQueryId: 'id1',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -541,7 +574,7 @@ describe('current status route', () => {
           'id2-Asia/Pacific - Japan': {
             configId: 'id2',
             monitorQueryId: 'id2',
-            location: 'Asia/Pacific - Japan',
+            locationId: 'Asia/Pacific - Japan',
             status: 'up',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -551,7 +584,7 @@ describe('current status route', () => {
           'id2-Europe - Germany': {
             configId: 'id2',
             monitorQueryId: 'id2',
-            location: 'Europe - Germany',
+            locationId: 'Europe - Germany',
             status: 'down',
             ping: expect.any(Object),
             timestamp: expect.any(String),
@@ -632,7 +665,7 @@ describe('current status route', () => {
           namespaces: ['default'],
           score: null,
           sort: ['a', 3013],
-        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(
@@ -737,17 +770,17 @@ describe('current status route', () => {
           },
         ])
       );
-      expect(
-        await getStatus(
-          {
-            uptimeEsClient,
-            savedObjectsClient: savedObjectsClientMock.create(),
-          } as unknown as RouteContext,
-          {
-            locations,
-          }
-        )
-      ).toEqual(
+      const result = await getStatus(
+        {
+          uptimeEsClient,
+          savedObjectsClient: savedObjectsClientMock.create(),
+          server: serverMock,
+        } as unknown as RouteContext,
+        {
+          locations,
+        }
+      );
+      expect(result).toEqual(
         expect.objectContaining({
           disabledCount,
         })
@@ -798,7 +831,7 @@ describe('current status route', () => {
           namespaces: ['default'],
           score: null,
           sort: ['a', 3013],
-        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitor>,
+        } as unknown as SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>,
       ]);
       const { esClient, uptimeEsClient } = getUptimeESMockClient();
       esClient.search.mockResponseOnce(getEsResponse([]));

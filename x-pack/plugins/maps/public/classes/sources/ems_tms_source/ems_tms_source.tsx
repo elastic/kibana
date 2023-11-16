@@ -15,7 +15,6 @@ import { getDataSourceLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
 import { EMSTMSSourceDescriptor } from '../../../../common/descriptor_types';
 import { getEmsTileLayerId, getIsDarkMode, getEMSSettings } from '../../../kibana_services';
-import { registerSource } from '../source_registry';
 import { getEmsUnavailableMessage } from '../../../components/ems_unavailable_message';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
@@ -169,8 +168,3 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
     return emsSettings.isEMSUrlSet() ? [LICENSED_FEATURES.ON_PREM_EMS] : [];
   }
 }
-
-registerSource({
-  ConstructorFunction: EMSTMSSource,
-  type: SOURCE_TYPES.EMS_TMS,
-});

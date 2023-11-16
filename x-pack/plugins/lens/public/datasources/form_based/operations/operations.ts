@@ -164,6 +164,7 @@ export type OperationFieldTuple =
   | {
       type: 'managedReference';
       operationType: OperationType;
+      usedInMath?: boolean;
     };
 
 /**
@@ -203,7 +204,11 @@ export function getAvailableOperationsByMetadata(
 ) {
   const operationByMetadata: Record<
     string,
-    { operationMetaData: OperationMetadata; operations: OperationFieldTuple[] }
+    {
+      operationMetaData: OperationMetadata;
+      operations: OperationFieldTuple[];
+      usedInMath?: boolean;
+    }
   > = {};
 
   const addToMap = (
@@ -255,7 +260,10 @@ export function getAvailableOperationsByMetadata(
         const validOperation = operationDefinition.getPossibleOperation(indexPattern);
         if (validOperation) {
           addToMap(
-            { type: 'fullReference', operationType: operationDefinition.type },
+            {
+              type: 'fullReference',
+              operationType: operationDefinition.type,
+            },
             validOperation
           );
         }
@@ -263,7 +271,11 @@ export function getAvailableOperationsByMetadata(
         const validOperation = operationDefinition.getPossibleOperation();
         if (validOperation) {
           addToMap(
-            { type: 'managedReference', operationType: operationDefinition.type },
+            {
+              type: 'managedReference',
+              operationType: operationDefinition.type,
+              usedInMath: operationDefinition.usedInMath,
+            },
             validOperation
           );
         }

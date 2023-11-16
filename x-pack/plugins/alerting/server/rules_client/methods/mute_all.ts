@@ -11,8 +11,9 @@ import { retryIfConflicts } from '../../lib/retry_if_conflicts';
 import { partiallyUpdateAlert } from '../../saved_objects';
 import { ruleAuditEvent, RuleAuditAction } from '../common/audit_events';
 import { RulesClientContext } from '../types';
-import { updateMeta } from '../lib';
-import { clearUnscheduledSnooze } from '../common';
+import { updateMetaAttributes } from '../lib';
+import { clearUnscheduledSnoozeAttributes } from '../common';
+import { RuleAttributes } from '../../data/rule/types';
 
 export async function muteAll(context: RulesClientContext, { id }: { id: string }): Promise<void> {
   return await retryIfConflicts(
@@ -37,7 +38,7 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
     });
 
     if (attributes.actions.length) {
-      await context.actionsAuthorization.ensureAuthorized('execute');
+      await context.actionsAuthorization.ensureAuthorized({ operation: 'execute' });
     }
   } catch (error) {
     context.auditLogger?.log(
@@ -60,10 +61,10 @@ async function muteAllWithOCC(context: RulesClientContext, { id }: { id: string 
 
   context.ruleTypeRegistry.ensureRuleTypeEnabled(attributes.alertTypeId);
 
-  const updateAttributes = updateMeta(context, {
+  const updateAttributes = updateMetaAttributes(context, {
     muteAll: true,
     mutedInstanceIds: [],
-    snoozeSchedule: clearUnscheduledSnooze(attributes),
+    snoozeSchedule: clearUnscheduledSnoozeAttributes(attributes as RuleAttributes),
     updatedBy: await context.getUserName(),
     updatedAt: new Date().toISOString(),
   });

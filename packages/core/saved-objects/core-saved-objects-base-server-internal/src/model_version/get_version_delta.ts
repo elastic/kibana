@@ -25,10 +25,16 @@ interface ModelVersionDeltaResult {
 interface ModelVersionDeltaTypeResult {
   /** the name of the type */
   name: string;
-  /** the current version the type is at */
-  current: VirtualVersion;
-  /** the target version the type should go to */
-  target: VirtualVersion;
+  /**
+   * the current version the type is at,
+   * or undefined if the type is not present in the current versions
+   */
+  current: VirtualVersion | undefined;
+  /**
+   * the target version the type should go to,
+   * or undefined if the type is not present in the target versions
+   * */
+  target: VirtualVersion | undefined;
 }
 
 /**
@@ -81,18 +87,9 @@ const getTypeDelta = ({
   currentVersions: VirtualVersionMap;
   targetVersions: VirtualVersionMap;
 }): ModelVersionDeltaTypeResult => {
-  const currentVersion = currentVersions[type];
-  const targetVersion = targetVersions[type];
-  if (currentVersion === undefined || targetVersion === undefined) {
-    // should never occur given we've been checking consistency numerous times before getting there
-    // but better safe than sorry.
-    throw new Error(
-      `Consistency error: trying to generate delta with missing entry for type ${type}`
-    );
-  }
   return {
     name: type,
-    current: currentVersion,
-    target: targetVersion,
+    current: currentVersions[type],
+    target: targetVersions[type],
   };
 };

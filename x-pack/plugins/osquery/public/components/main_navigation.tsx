@@ -9,9 +9,9 @@ import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { navCss } from './layouts/default';
 import { useRouterNavigate } from '../common/lib/kibana';
 import { ManageIntegrationLink } from './manage_integration_link';
-import { Nav } from './layouts';
 
 enum Section {
   LiveQueries = 'live_queries',
@@ -24,7 +24,7 @@ export const MainNavigation = () => {
   const section = useMemo(() => location.pathname.split('/')[1] ?? 'overview', [location.pathname]);
 
   return (
-    <Nav>
+    <div css={navCss}>
       <EuiFlexGroup gutterSize="l" alignItems="center">
         <EuiFlexItem>
           <EuiTabs bottomBorder={false}>
@@ -72,6 +72,6 @@ export const MainNavigation = () => {
           </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </Nav>
+    </div>
   );
 };

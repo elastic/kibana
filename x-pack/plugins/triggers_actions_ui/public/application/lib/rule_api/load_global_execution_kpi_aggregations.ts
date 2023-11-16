@@ -17,6 +17,7 @@ export interface LoadGlobalExecutionKPIAggregationsProps {
   dateStart: string;
   dateEnd?: string;
   namespaces?: Array<string | undefined>;
+  ruleTypeIds?: string[];
 }
 
 export const loadGlobalExecutionKPIAggregations = ({
@@ -27,8 +28,9 @@ export const loadGlobalExecutionKPIAggregations = ({
   dateStart,
   dateEnd,
   namespaces,
+  ruleTypeIds,
 }: LoadGlobalExecutionKPIAggregationsProps & { http: HttpSetup }) => {
-  const filter = getFilter({ outcomeFilter, message });
+  const filter = getFilter({ outcomeFilter, message, ruleTypeIds });
 
   return http.get<IExecutionKPIResult>(`${INTERNAL_BASE_ALERTING_API_PATH}/_global_execution_kpi`, {
     query: {

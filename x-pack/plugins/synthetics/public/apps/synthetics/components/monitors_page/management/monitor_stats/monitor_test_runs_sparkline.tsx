@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme } from '@kbn/observability-shared-plugin/public';
 
 import { useRefreshedRange } from '../../../../hooks';
 import { ClientPluginsStart } from '../../../../../../plugin';
@@ -32,11 +32,11 @@ export const MonitorTestRunsSparkline = ({ monitorIds }: { monitorIds: string[] 
           'monitor.id': monitorIds.length > 0 ? monitorIds : ['false-monitor-id'], // Show no data when monitorIds is empty
         },
         dataType: 'synthetics' as const,
-        selectedMetricField: 'monitor.check_group',
+        selectedMetricField: 'total_test_runs',
         filters: [],
         name: labels.TEST_RUNS_LABEL,
         color: theme.eui.euiColorVis1,
-        operationType: 'unique_count',
+        operationType: 'count',
       },
     ];
     // eslint-disable-next-line react-hooks/exhaustive-deps

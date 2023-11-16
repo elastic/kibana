@@ -232,14 +232,6 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
       : displayName;
   }
 
-  showJoinEditor() {
-    return true;
-  }
-
-  getJoinsDisabledReason() {
-    return this._documentSource.getJoinsDisabledReason();
-  }
-
   getJoins() {
     return [];
   }
@@ -328,7 +320,7 @@ export class BlendedVectorLayer extends GeoJsonVectorLayer implements IVectorLay
         syncContext.stopLoading(dataRequestId, requestToken, { isSyncClustered }, requestMeta);
       } catch (error) {
         if (!(error instanceof DataRequestAbortError) || !isSearchSourceAbortError(error)) {
-          syncContext.onLoadError(dataRequestId, requestToken, error.message);
+          syncContext.onLoadError(dataRequestId, requestToken, error);
         }
         return;
       }

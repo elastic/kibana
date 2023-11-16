@@ -16,7 +16,7 @@ export interface ListingProps {
   apiClient: ReportingAPIClient;
   capabilities: ApplicationStart['capabilities'];
   license$: LicensingPluginStart['license$'];
-  pollConfig: ClientConfigType['poll'];
+  config: ClientConfigType;
   redirect: ApplicationStart['navigateToApp'];
   navigateToUrl: ApplicationStart['navigateToUrl'];
   toasts: ToastsSetup;

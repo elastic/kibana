@@ -6,7 +6,6 @@
  */
 
 import React from 'react';
-import { NativeRenderer } from '../../../native_renderer';
 import { Visualization, VisualizationLayerWidgetProps } from '../../../types';
 import { StaticHeader } from '../../../shared_components';
 
@@ -17,15 +16,10 @@ export function LayerSettings({
   activeVisualization: Visualization;
   layerConfigProps: VisualizationLayerWidgetProps;
 }) {
-  if (!activeVisualization.renderLayerHeader) {
+  if (!activeVisualization.LayerHeaderComponent) {
     const description = activeVisualization.getDescription(layerConfigProps.state);
-    if (!description) {
-      return null;
-    }
     return <StaticHeader label={description.label} icon={description.icon} />;
   }
 
-  return (
-    <NativeRenderer render={activeVisualization.renderLayerHeader} nativeProps={layerConfigProps} />
-  );
+  return <activeVisualization.LayerHeaderComponent {...layerConfigProps} />;
 }

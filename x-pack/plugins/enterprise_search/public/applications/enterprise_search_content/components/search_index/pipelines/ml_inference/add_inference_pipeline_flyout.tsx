@@ -23,6 +23,7 @@ import {
   EuiStepsHorizontalProps,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiStepStatus,
   EuiTitle,
 } from '@elastic/eui';
 
@@ -46,6 +47,7 @@ import { TestPipeline } from './test_pipeline';
 import { AddInferencePipelineSteps } from './types';
 
 import './add_inference_pipeline_flyout.scss';
+import { UpdateMappings } from './update_mappings';
 
 export interface AddInferencePipelineFlyoutProps {
   onClose: () => void;
@@ -130,6 +132,7 @@ export const AddInferencePipelineContent = ({ onClose }: AddInferencePipelineFly
         <EuiSpacer size="m" />
         {step === AddInferencePipelineSteps.Configuration && <ConfigurePipeline />}
         {step === AddInferencePipelineSteps.Fields && <ConfigureFields />}
+        {step === AddInferencePipelineSteps.Mappings && <UpdateMappings />}
         {step === AddInferencePipelineSteps.Test && <TestPipeline />}
         {step === AddInferencePipelineSteps.Review && <ReviewPipeline />}
       </EuiFlyoutBody>
@@ -146,12 +149,25 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
     isConfigureStepValid,
     isPipelineDataValid,
   } = useValues(MLInferenceLogic);
-  const { setAddInferencePipelineStep } = useActions(MLInferenceLogic);
+  const { onAddInferencePipelineStepChange } = useActions(MLInferenceLogic);
+
+  /**
+   * Convenience function for determining the status of a step in the horizontal nav.
+   * @param currentStep The current step in the pipeline.
+   * @param otherStep The step to compare against.
+   * @returns The status of the step.
+   */
+  const getStepStatus = (
+    currentStep: AddInferencePipelineSteps,
+    otherStep: AddInferencePipelineSteps
+  ): EuiStepStatus =>
+    currentStep > otherStep ? 'complete' : currentStep === otherStep ? 'current' : 'incomplete';
+
   const navSteps: EuiStepsHorizontalProps['steps'] = [
     {
       // Configure
-      onClick: () => setAddInferencePipelineStep(AddInferencePipelineSteps.Configuration),
-      status: isConfigureStepValid ? 'complete' : 'disabled',
+      onClick: () => onAddInferencePipelineStepChange(AddInferencePipelineSteps.Configuration),
+      status: step > AddInferencePipelineSteps.Configuration ? 'complete' : 'current',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.configure.title',
         {
@@ -163,9 +179,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       // Fields
       onClick: () => {
         if (!isConfigureStepValid) return;
-        setAddInferencePipelineStep(AddInferencePipelineSteps.Fields);
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Fields);
       },
-      status: isConfigureStepValid ? (isPipelineDataValid ? 'complete' : 'incomplete') : 'disabled',
+      status: isConfigureStepValid
+        ? getStepStatus(step, AddInferencePipelineSteps.Fields)
+        : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.fields.title',
         {
@@ -174,12 +192,30 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       ),
     },
     {
+      // Mappings
+      onClick: () => {
+        if (!isPipelineDataValid) return;
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Mappings);
+      },
+      status: isPipelineDataValid
+        ? getStepStatus(step, AddInferencePipelineSteps.Mappings)
+        : 'disabled',
+      title: i18n.translate(
+        'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.updateMappings.title',
+        {
+          defaultMessage: 'Mappings',
+        }
+      ),
+    },
+    {
       // Test
       onClick: () => {
         if (!isPipelineDataValid) return;
-        setAddInferencePipelineStep(AddInferencePipelineSteps.Test);
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Test);
       },
-      status: isPipelineDataValid ? 'incomplete' : 'disabled',
+      status: isPipelineDataValid
+        ? getStepStatus(step, AddInferencePipelineSteps.Test)
+        : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.test.title',
         {
@@ -191,9 +227,11 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       // Review
       onClick: () => {
         if (!isPipelineDataValid) return;
-        setAddInferencePipelineStep(AddInferencePipelineSteps.Review);
+        onAddInferencePipelineStepChange(AddInferencePipelineSteps.Review);
       },
-      status: isPipelineDataValid ? 'incomplete' : 'disabled',
+      status: isPipelineDataValid
+        ? getStepStatus(step, AddInferencePipelineSteps.Review)
+        : 'disabled',
       title: i18n.translate(
         'xpack.enterpriseSearch.content.indices.transforms.addInferencePipelineModal.steps.review.title',
         {
@@ -202,20 +240,7 @@ export const AddInferencePipelineHorizontalSteps: React.FC = () => {
       ),
     },
   ];
-  switch (step) {
-    case AddInferencePipelineSteps.Configuration:
-      navSteps[0].status = isConfigureStepValid ? 'complete' : 'current';
-      break;
-    case AddInferencePipelineSteps.Fields:
-      navSteps[1].status = isPipelineDataValid ? 'complete' : 'current';
-      break;
-    case AddInferencePipelineSteps.Test:
-      navSteps[2].status = 'current';
-      break;
-    case AddInferencePipelineSteps.Review:
-      navSteps[3].status = 'current';
-      break;
-  }
+
   return <EuiStepsHorizontal steps={navSteps} />;
 };
 
@@ -227,7 +252,7 @@ export const AddInferencePipelineFooter: React.FC<
     isPipelineDataValid,
     isConfigureStepValid,
   } = useValues(MLInferenceLogic);
-  const { attachPipeline, createPipeline, setAddInferencePipelineStep } =
+  const { attachPipeline, createPipeline, onAddInferencePipelineStepChange } =
     useActions(MLInferenceLogic);
 
   const attachExistingPipeline = Boolean(modal.configuration.existingPipeline);
@@ -240,13 +265,18 @@ export const AddInferencePipelineFooter: React.FC<
       isContinueButtonEnabled = isConfigureStepValid;
       break;
     case AddInferencePipelineSteps.Fields:
-      nextStep = AddInferencePipelineSteps.Test;
+      nextStep = AddInferencePipelineSteps.Mappings;
       previousStep = AddInferencePipelineSteps.Configuration;
       isContinueButtonEnabled = isPipelineDataValid;
       break;
+    case AddInferencePipelineSteps.Mappings:
+      nextStep = AddInferencePipelineSteps.Test;
+      previousStep = AddInferencePipelineSteps.Fields;
+      isContinueButtonEnabled = true;
+      break;
     case AddInferencePipelineSteps.Test:
       nextStep = AddInferencePipelineSteps.Review;
-      previousStep = AddInferencePipelineSteps.Fields;
+      previousStep = AddInferencePipelineSteps.Mappings;
       isContinueButtonEnabled = true;
       break;
     case AddInferencePipelineSteps.Review:
@@ -270,7 +300,9 @@ export const AddInferencePipelineFooter: React.FC<
           <EuiButtonEmpty
             flush="both"
             iconType="arrowLeft"
-            onClick={() => setAddInferencePipelineStep(previousStep as AddInferencePipelineSteps)}
+            onClick={() =>
+              onAddInferencePipelineStepChange(previousStep as AddInferencePipelineSteps)
+            }
           >
             {BACK_BUTTON_LABEL}
           </EuiButtonEmpty>
@@ -282,7 +314,7 @@ export const AddInferencePipelineFooter: React.FC<
             data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-addMlInference-continue`}
             iconType="arrowRight"
             iconSide="right"
-            onClick={() => setAddInferencePipelineStep(nextStep as AddInferencePipelineSteps)}
+            onClick={() => onAddInferencePipelineStepChange(nextStep as AddInferencePipelineSteps)}
             disabled={!isContinueButtonEnabled}
             fill
           >

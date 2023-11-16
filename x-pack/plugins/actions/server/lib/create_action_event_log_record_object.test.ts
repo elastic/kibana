@@ -413,7 +413,7 @@ describe('createActionEventLogRecordObject', () => {
     });
   });
 
-  test('created action event "execute" for preconfigured connector with space_agnostic true', async () => {
+  test('created action event "execute" for in-memory connector with space_agnostic true', async () => {
     expect(
       createActionEventLogRecordObject({
         actionId: '1',
@@ -432,7 +432,7 @@ describe('createActionEventLogRecordObject', () => {
           },
         ],
         actionExecutionId: '123abc',
-        isPreconfigured: true,
+        isInMemory: true,
       })
     ).toStrictEqual({
       event: {

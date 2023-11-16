@@ -38,6 +38,7 @@ export const httpConfigSchema = schema.object(
       }),
     }),
     ssl: sslSchema,
+    restrictInternalApis: schema.boolean({ defaultValue: false }),
   },
   { unknowns: 'ignore' }
 );
@@ -54,6 +55,7 @@ export class HttpConfig implements IHttpConfig {
   socketTimeout: number;
   cors: ICorsConfig;
   ssl: ISslConfig;
+  restrictInternalApis: boolean;
 
   constructor(rawConfig: HttpConfigType) {
     this.basePath = rawConfig.basePath;
@@ -65,5 +67,6 @@ export class HttpConfig implements IHttpConfig {
     this.socketTimeout = rawConfig.socketTimeout;
     this.cors = rawConfig.cors;
     this.ssl = new SslConfig(rawConfig.ssl);
+    this.restrictInternalApis = rawConfig.restrictInternalApis;
   }
 }

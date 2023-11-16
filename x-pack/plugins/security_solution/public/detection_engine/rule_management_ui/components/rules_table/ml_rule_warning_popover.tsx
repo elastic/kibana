@@ -15,7 +15,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 
-import { RuleExecutionStatus } from '../../../../../common/detection_engine/rule_monitoring';
+import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_engine/rule_monitoring';
 import type { SecurityJob } from '../../../../common/components/ml_popover/types';
 import * as i18n from './translations';
 
@@ -27,7 +27,8 @@ import { isMlRule } from '../../../../../common/detection_engine/utils';
 import { getCapitalizedStatusText } from '../../../../detections/components/rules/rule_execution_status/utils';
 import type { Rule } from '../../../rule_management/logic';
 import { isJobStarted } from '../../../../../common/machine_learning/helpers';
-import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details';
+import { RuleDetailTabs } from '../../../rule_details_ui/pages/rule_details/use_rule_details_tabs';
+import { getMachineLearningJobId } from '../../../../detections/pages/detection_engine/rules/helpers';
 
 const POPOVER_WIDTH = '340px';
 
@@ -43,12 +44,12 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
   jobs,
 }) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
+  const jobIds = getMachineLearningJobId(rule);
 
-  if (!isMlRule(rule.type) || loadingJobs || !rule.machine_learning_job_id) {
+  if (!isMlRule(rule.type) || loadingJobs || !jobIds) {
     return null;
   }
 
-  const jobIds = rule.machine_learning_job_id;
   const notRunningJobs = jobs.filter(
     (job) => jobIds.includes(job.id) && !isJobStarted(job.jobState, job.datafeedState)
   );
@@ -64,7 +65,7 @@ const MlRuleWarningPopoverComponent: React.FC<MlRuleWarningPopoverComponentProps
       onClick={togglePopover}
     />
   );
-  const popoverTitle = getCapitalizedStatusText(RuleExecutionStatus['partial failure']);
+  const popoverTitle = getCapitalizedStatusText(RuleExecutionStatusEnum['partial failure']);
 
   return (
     <EuiPopover

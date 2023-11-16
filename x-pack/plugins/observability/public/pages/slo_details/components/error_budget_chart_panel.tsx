@@ -8,12 +8,11 @@
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiStat, EuiText, EuiTitle } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { rollingTimeWindowTypeSchema, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
-
-import { useKibana } from '../../../utils/kibana_react';
-import { toDurationLabel } from '../../../utils/slo/labels';
 import { ChartData } from '../../../typings/slo';
+import { useKibana } from '../../../utils/kibana_react';
+import { toDurationAdverbLabel, toDurationLabel } from '../../../utils/slo/labels';
 import { WideChart } from './wide_chart';
 
 export interface Props {
@@ -43,10 +42,15 @@ export function ErrorBudgetChartPanel({ data, isLoading, slo }: Props) {
           </EuiFlexItem>
           <EuiFlexItem>
             <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration', {
-                defaultMessage: 'Last {duration}',
-                values: { duration: toDurationLabel(slo.timeWindow.duration) },
-              })}
+              {rollingTimeWindowTypeSchema.is(slo.timeWindow.type)
+                ? i18n.translate(
+                    'xpack.observability.slo.sloDetails.errorBudgetChartPanel.duration',
+                    {
+                      defaultMessage: 'Last {duration}',
+                      values: { duration: toDurationLabel(slo.timeWindow.duration) },
+                    }
+                  )
+                : toDurationAdverbLabel(slo.timeWindow.duration)}
             </EuiText>
           </EuiFlexItem>
         </EuiFlexGroup>

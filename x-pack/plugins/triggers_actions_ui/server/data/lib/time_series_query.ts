@@ -33,12 +33,19 @@ export interface TimeSeriesQueryParameters {
   esClient: ElasticsearchClient;
   query: TimeSeriesQuery;
   condition?: TimeSeriesCondition;
+  useCalculatedDateRange?: boolean;
 }
 
 export async function timeSeriesQuery(
   params: TimeSeriesQueryParameters
 ): Promise<TimeSeriesResult> {
-  const { logger, esClient, query: queryParams, condition: conditionParams } = params;
+  const {
+    logger,
+    esClient,
+    query: queryParams,
+    condition: conditionParams,
+    useCalculatedDateRange = true,
+  } = params;
   const {
     index,
     timeWindowSize,
@@ -67,8 +74,8 @@ export async function timeSeriesQuery(
             {
               range: {
                 [timeField]: {
-                  gte: dateRangeInfo.dateStart,
-                  lt: dateRangeInfo.dateEnd,
+                  gte: useCalculatedDateRange ? dateRangeInfo.dateStart : dateStart,
+                  lt: useCalculatedDateRange ? dateRangeInfo.dateEnd : dateEnd,
                   format: 'strict_date_time',
                 },
               },

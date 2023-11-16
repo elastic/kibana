@@ -6,17 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { flow } from 'lodash';
-import get from 'lodash/fp/get';
-import { TransformFn } from '../types';
+import type { SavedObjectMigrationMap } from '@kbn/core-saved-objects-server';
+import { mergeSavedObjectMigrations } from '@kbn/core-saved-objects-utils-server';
 import { transformMigrationVersion } from './transform_migration_version';
 import { transformSetManagedDefault } from './transform_set_managed_default';
 
-export const migrations = {
-  '8.8.0': flow(
-    transformMigrationVersion,
-    // extract transformedDoc from TransformResult as input to next transform
-    get('transformedDoc'),
-    transformSetManagedDefault
-  ),
-} as Record<string, TransformFn>;
+export const migrations: SavedObjectMigrationMap = {
+  '8.8.0': mergeSavedObjectMigrations(transformMigrationVersion, transformSetManagedDefault),
+};

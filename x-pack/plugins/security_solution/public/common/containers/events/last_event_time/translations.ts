@@ -7,13 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const ERROR_LAST_EVENT_TIME = i18n.translate(
-  'xpack.securitySolution.lastEventTime.errorSearchDescription',
-  {
-    defaultMessage: `An error has occurred on last event time search`,
-  }
-);
-
 export const FAIL_LAST_EVENT_TIME = i18n.translate(
   'xpack.securitySolution.lastEventTime.failSearchDescription',
   {

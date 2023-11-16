@@ -7,8 +7,8 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { POLICIES_ROUTE_PATH, INTEGRATION_PACKAGE_NAME } from '../../../common/constants';
-import { policiesQueryParamsSchema } from '../../../common/schemas/policy';
-import type { CloudDefendPolicy } from '../../../common/types';
+import { policiesQueryParamsSchema } from '../../../common';
+import type { CloudDefendPolicy } from '../../../common';
 import { isNonNullable } from '../../../common/utils/helpers';
 import { CloudDefendRouter } from '../../types';
 import {
@@ -55,61 +55,66 @@ const createPolicies = (
   );
 };
 
-export const defineGetPoliciesRoute = (router: CloudDefendRouter): void =>
-  router.get(
-    {
+export const defineGetPoliciesRoute = (router: CloudDefendRouter) =>
+  router.versioned
+    .get({
+      access: 'internal',
       path: POLICIES_ROUTE_PATH,
-      validate: { query: policiesQueryParamsSchema },
       options: {
         tags: ['access:cloud-defend-read'],
       },
-    },
-    async (context, request, response) => {
-      if (!(await context.fleet).authz.fleet.all) {
-        return response.forbidden();
+    })
+    .addVersion(
+      {
+        version: '1',
+        validate: { request: { query: policiesQueryParamsSchema } },
+      },
+      async (context, request, response) => {
+        if (!(await context.fleet).authz.fleet.all) {
+          return response.forbidden();
+        }
+
+        const cloudDefendContext = await context.cloudDefend;
+
+        try {
+          const cloudDefendPackagePolicies = await getCloudDefendPackagePolicies(
+            cloudDefendContext.soClient,
+            cloudDefendContext.packagePolicyService,
+            INTEGRATION_PACKAGE_NAME,
+            request.query
+          );
+
+          const agentPolicies = await getCloudDefendAgentPolicies(
+            cloudDefendContext.soClient,
+            cloudDefendPackagePolicies.items,
+            cloudDefendContext.agentPolicyService
+          );
+
+          const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
+            cloudDefendContext.agentService,
+            agentPolicies,
+            cloudDefendContext.logger
+          );
+
+          const policies = await createPolicies(
+            agentPolicies,
+            agentStatusesByAgentPolicyId,
+            cloudDefendPackagePolicies.items
+          );
+
+          return response.ok({
+            body: {
+              ...cloudDefendPackagePolicies,
+              items: policies,
+            },
+          });
+        } catch (err) {
+          const error = transformError(err);
+          cloudDefendContext.logger.error(`Failed to fetch policies ${err}`);
+          return response.customError({
+            body: { message: error.message },
+            statusCode: error.statusCode,
+          });
+        }
       }
-
-      const cloudDefendContext = await context.cloudDefend;
-
-      try {
-        const cloudDefendPackagePolicies = await getCloudDefendPackagePolicies(
-          cloudDefendContext.soClient,
-          cloudDefendContext.packagePolicyService,
-          INTEGRATION_PACKAGE_NAME,
-          request.query
-        );
-
-        const agentPolicies = await getCloudDefendAgentPolicies(
-          cloudDefendContext.soClient,
-          cloudDefendPackagePolicies.items,
-          cloudDefendContext.agentPolicyService
-        );
-
-        const agentStatusesByAgentPolicyId = await getAgentStatusesByAgentPolicies(
-          cloudDefendContext.agentService,
-          agentPolicies,
-          cloudDefendContext.logger
-        );
-
-        const policies = await createPolicies(
-          agentPolicies,
-          agentStatusesByAgentPolicyId,
-          cloudDefendPackagePolicies.items
-        );
-
-        return response.ok({
-          body: {
-            ...cloudDefendPackagePolicies,
-            items: policies,
-          },
-        });
-      } catch (err) {
-        const error = transformError(err);
-        cloudDefendContext.logger.error(`Failed to fetch policies ${err}`);
-        return response.customError({
-          body: { message: error.message },
-          statusCode: error.statusCode,
-        });
-      }
-    }
-  );
+    );

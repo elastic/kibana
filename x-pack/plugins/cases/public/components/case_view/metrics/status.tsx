@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import prettyMilliseconds from 'pretty-ms';
 import { EuiFlexGrid, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { CaseMetricsFeature } from '../../../../common/types/api';
 import type { SingleCaseMetrics, SingleCaseMetricsFeature } from '../../../../common/ui';
 import {
   CASE_CREATED,
@@ -100,7 +101,7 @@ const useGetLifespanMetrics = (
       statusInfo: { inProgressDuration: 0, reopenDates: [], openDuration: 0 },
     };
 
-    if (!features.includes('lifespan')) {
+    if (!features.includes(CaseMetricsFeature.LIFESPAN)) {
       return;
     }
 

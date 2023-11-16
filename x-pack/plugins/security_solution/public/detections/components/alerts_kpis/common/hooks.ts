@@ -5,15 +5,18 @@
  * 2.0.
  */
 
-import { useEffect, useState, useMemo } from 'react';
+import { useCallback, useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import type { IFieldSubTypeNested } from '@kbn/es-query';
 
 import type { BrowserField } from '@kbn/timelines-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { GlobalTimeArgs } from '../../../../common/containers/use_global_time';
 import { getScopeFromPath, useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { getAllFieldsByName } from '../../../../common/containers/source';
+import { isLensSupportedType } from '../../../../common/utils/lens';
 
 export interface UseInspectButtonParams extends Pick<GlobalTimeArgs, 'setQuery' | 'deleteQuery'> {
   response: string;
@@ -65,11 +68,6 @@ export function isDataViewFieldSubtypeNested(field: Partial<BrowserField>) {
   return !!subTypeNested?.nested?.path;
 }
 
-export function isLensSupportedType(fieldType: string | undefined) {
-  const supportedTypes = new Set(['string', 'boolean', 'number', 'ip']);
-  return fieldType ? supportedTypes.has(fieldType) : false;
-}
-
 export interface GetAggregatableFields {
   [fieldName: string]: Partial<BrowserField>;
 }
@@ -99,14 +97,22 @@ export function getAggregatableFields(
 
 export const useStackByFields = (useLensCompatibleFields?: boolean) => {
   const { pathname } = useLocation();
-
+  const { addError } = useAppToasts();
   const { browserFields } = useSourcererDataView(getScopeFromPath(pathname));
-  const allFields = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
-  const [stackByFieldOptions, setStackByFieldOptions] = useState(() =>
-    getAggregatableFields(allFields, useLensCompatibleFields)
-  );
-  useEffect(() => {
-    setStackByFieldOptions(getAggregatableFields(allFields, useLensCompatibleFields));
-  }, [allFields, useLensCompatibleFields]);
-  return useMemo(() => stackByFieldOptions, [stackByFieldOptions]);
+
+  return useCallback(() => {
+    try {
+      return getAggregatableFields(getAllFieldsByName(browserFields), useLensCompatibleFields);
+    } catch (err) {
+      addError(err, {
+        title: i18n.translate('xpack.securitySolution.useStackByFields.error.title', {
+          defaultMessage: 'Error fetching fields',
+        }),
+        toastMessage: i18n.translate('xpack.securitySolution.useStackByFields.error.toastMessage', {
+          defaultMessage: 'This error indicates an exceedingly large number of fields in an index',
+        }),
+      });
+      return [];
+    }
+  }, [addError, browserFields, useLensCompatibleFields]);
 };

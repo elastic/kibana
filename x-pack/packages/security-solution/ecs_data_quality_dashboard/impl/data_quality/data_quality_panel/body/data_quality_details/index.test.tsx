@@ -55,11 +55,12 @@ const defaultProps: Props = {
   formatNumber,
   getGroupByFieldsOnClick: jest.fn(),
   ilmPhases,
+  isAssistantEnabled: true,
   openCreateCaseFlyout: jest.fn(),
   patternIndexNames,
   patternRollups,
   patterns,
-  theme: DARK_THEME,
+  baseTheme: DARK_THEME,
   updatePatternIndexNames: jest.fn(),
   updatePatternRollup: jest.fn(),
 };

@@ -250,10 +250,10 @@ async function fetchMetricsHostsAnomalies(
       typical: typical[0],
       actual: actual[0],
       jobId: job_id,
-      influencers: hostInfluencers.reduce(
-        (acc: string[], i) => [...acc, ...i.influencer_field_values],
-        []
-      ),
+      influencers: hostInfluencers.reduce((acc: string[], i) => {
+        acc.push(...i.influencer_field_values);
+        return acc;
+      }, []),
       startTime: anomalyStartTime,
       duration: duration * 1000,
       categoryId,

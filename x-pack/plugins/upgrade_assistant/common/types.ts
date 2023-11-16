@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { SavedObject } from '@kbn/core/types';
 
@@ -205,12 +206,25 @@ export interface ClusterSettingAction {
   deprecatedSettings: string[];
 }
 
+export interface HealthIndicatorAction {
+  type: 'healthIndicator';
+  cause: string;
+  action: string;
+  impacts: HealthReportImpact[];
+}
+
 export interface EnrichedDeprecationInfo
   extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
-  type: keyof estypes.MigrationDeprecationsResponse;
+  type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator';
   isCritical: boolean;
+  status?: estypes.HealthReportIndicatorHealthStatus;
   index?: string;
-  correctiveAction?: ReindexAction | MlAction | IndexSettingAction | ClusterSettingAction;
+  correctiveAction?:
+    | ReindexAction
+    | MlAction
+    | IndexSettingAction
+    | ClusterSettingAction
+    | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
 }
 

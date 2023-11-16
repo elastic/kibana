@@ -160,13 +160,11 @@ export const IntegrationPreference = ({
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      {prereleaseIntegrationsEnabled !== undefined && (
-        <EuiSwitchNoWrap
-          label="Display beta integrations"
-          checked={prereleaseIntegrationsEnabled}
-          onChange={onPrereleaseSwitchChange}
-        />
-      )}
+      <EuiSwitchNoWrap
+        label="Display beta integrations"
+        checked={!!prereleaseIntegrationsEnabled}
+        onChange={onPrereleaseSwitchChange}
+      />
       <EuiSpacer size="l" />
       <EuiText size="s">{title}</EuiText>
       <EuiSpacer size="m" />

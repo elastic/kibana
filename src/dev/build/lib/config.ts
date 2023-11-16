@@ -229,6 +229,13 @@ export class Config {
   }
 
   /**
+   * Get the ISO 8601 date for this build
+   */
+  getBuildDate() {
+    return this.versionInfo.buildDate;
+  }
+
+  /**
    * Resolve a set of paths based from the target directory for this build.
    */
   resolveFromTarget(...subPaths: string[]) {

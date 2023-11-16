@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-jest.mock('../security');
+jest.mock('../security', () => {
+  return {
+    ...jest.requireActual('../security'),
+    getAuthzFromRequest: jest.fn(),
+  };
+});
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 
@@ -20,6 +25,8 @@ import {
 import { FleetUnauthorizedError } from '../../errors';
 import type { InstallablePackage } from '../../types';
 
+import { getAuthzFromRequest } from '../security';
+
 import type { PackageClient, PackageService } from './package_service';
 import { PackageServiceImpl } from './package_service';
 import * as epmPackagesGet from './packages/get';
@@ -28,6 +35,7 @@ import * as epmRegistry from './registry';
 import * as epmTransformsInstall from './elasticsearch/transform/install';
 import * as epmArchiveParse from './archive/parse';
 
+const mockGetAuthzFromRequest = getAuthzFromRequest as jest.Mock;
 const testKeys = [
   'getInstallation',
   'ensureInstalledPackage',
@@ -206,6 +214,14 @@ describe('PackageService', () => {
       const unauthError = new FleetUnauthorizedError(
         `User does not have adequate permissions to access Fleet packages.`
       );
+      beforeEach(() => {
+        mockGetAuthzFromRequest.mockResolvedValueOnce({
+          integrations: {
+            installPackages: false,
+            readPackageInfo: false,
+          },
+        });
+      });
 
       it(`rejects on ${testKey}`, async () => {
         const { method, args } = getTest(
@@ -217,6 +233,14 @@ describe('PackageService', () => {
     });
 
     describe.each(testKeys)('with required privileges', (testKey: string) => {
+      beforeEach(() => {
+        mockGetAuthzFromRequest.mockResolvedValueOnce({
+          integrations: {
+            installPackages: true,
+            readPackageInfo: true,
+          },
+        });
+      });
       it(`calls ${testKey} and returns results`, async () => {
         const mockClients = {
           packageClient: mockPackageService.asInternalUser,

@@ -66,9 +66,9 @@ export class HealthGatewayService extends FtrService {
     this.port = undefined;
   }
 
-  poll() {
+  poll(path: string) {
     this.assertRunning();
 
-    return supertest(`http://${this.host}:${this.port}`).get('/').send();
+    return supertest(`http://${this.host}:${this.port}`).get(path).send();
   }
 }

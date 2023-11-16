@@ -24,3 +24,5 @@ export interface DataStream {
     serviceName: string;
   } | null;
 }
+
+export type PackageDataStreamTypes = 'logs' | 'metrics' | 'traces' | 'synthetics' | 'profiling';

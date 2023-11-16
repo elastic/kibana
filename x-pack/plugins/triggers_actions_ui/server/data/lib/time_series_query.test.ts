@@ -713,6 +713,28 @@ describe('timeSeriesQuery', () => {
       { ignore: [404], meta: true }
     );
   });
+
+  it('uses the passed in date parms when useCalculatedDateRange = false param is passed', async () => {
+    await timeSeriesQuery({
+      ...params,
+      useCalculatedDateRange: false,
+      query: {
+        ...params.query,
+        dateStart: '2023-10-12T00:00:00Z',
+        dateEnd: '2023-10-12T00:00:00Z',
+      },
+    });
+    // @ts-ignore
+    expect(esClient.search.mock.calls[0]![0].body.query.bool.filter[0]).toEqual({
+      range: {
+        'time-field': {
+          format: 'strict_date_time',
+          gte: '2023-10-12T00:00:00Z',
+          lt: '2023-10-12T00:00:00Z',
+        },
+      },
+    });
+  });
 });
 
 describe('getResultFromEs', () => {

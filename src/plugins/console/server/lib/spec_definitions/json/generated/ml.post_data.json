@@ -1,8 +1,12 @@
 {
   "ml.post_data": {
     "url_params": {
-      "reset_start": "",
-      "reset_end": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "reset_end": [],
+      "reset_start": []
     },
     "methods": [
       "POST"
@@ -10,6 +14,10 @@
     "patterns": [
       "_ml/anomaly_detectors/{job_id}/_data"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-data.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ml-post-data.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

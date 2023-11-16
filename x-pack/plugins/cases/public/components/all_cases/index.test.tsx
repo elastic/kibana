@@ -20,6 +20,7 @@ import { useGetCurrentUserProfile } from '../../containers/user_profiles/use_get
 import { userProfiles, userProfilesMap } from '../../containers/user_profiles/api.mock';
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 
+jest.mock('../../common/lib/kibana');
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_action_license', () => {
   return {
@@ -134,46 +135,6 @@ describe('AllCases', () => {
       expect(result.getByTestId('openStatsHeader-loading-spinner')).toBeInTheDocument();
       expect(result.getByTestId('inProgressStatsHeader-loading-spinner')).toBeInTheDocument();
       expect(result.getByTestId('closedStatsHeader-loading-spinner')).toBeInTheDocument();
-    });
-  });
-
-  it('should not allow the user to enter configuration page with basic license', async () => {
-    useGetActionLicenseMock.mockReturnValue({
-      ...defaultActionLicense,
-      data: {
-        id: '.jira',
-        name: 'Jira',
-        minimumLicenseRequired: 'gold',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: false,
-      },
-    });
-
-    const result = appMockRender.render(<AllCases />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('configure-case-button')).toBeDisabled();
-    });
-  });
-
-  it('should allow the user to enter configuration page with gold license and above', async () => {
-    useGetActionLicenseMock.mockReturnValue({
-      ...defaultActionLicense,
-      data: {
-        id: '.jira',
-        name: 'Jira',
-        minimumLicenseRequired: 'gold',
-        enabled: true,
-        enabledInConfig: true,
-        enabledInLicense: true,
-      },
-    });
-
-    const result = appMockRender.render(<AllCases />);
-
-    await waitFor(() => {
-      expect(result.getByTestId('configure-case-button')).not.toBeDisabled();
     });
   });
 

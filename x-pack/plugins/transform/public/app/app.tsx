@@ -5,77 +5,71 @@
  * 2.0.
  */
 
-import React, { useContext, FC } from 'react';
+import React, { type FC } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
-import { ScopedHistory } from '@kbn/core/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { EuiErrorBoundary } from '@elastic/eui';
 
-import { FormattedMessage } from '@kbn/i18n-react';
-
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
+import { ScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider, KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 
-import { API_BASE_PATH } from '../../common/constants';
-
-import { SectionError } from './components';
-import { SECTION_SLUG } from './constants';
-import { AuthorizationContext, AuthorizationProvider } from './lib/authorization';
+import { SECTION_SLUG } from './common/constants';
 import { AppDependencies } from './app_dependencies';
-
 import { CloneTransformSection } from './sections/clone_transform';
 import { CreateTransformSection } from './sections/create_transform';
 import { TransformManagementSection } from './sections/transform_management';
+import {
+  EnabledFeaturesContextProvider,
+  type TransformEnabledFeatures,
+} from './serverless_context';
 
-export const App: FC<{ history: ScopedHistory }> = ({ history }) => {
-  const { apiError } = useContext(AuthorizationContext);
-  if (apiError !== null) {
-    return (
-      <SectionError
-        title={
-          <FormattedMessage
-            id="xpack.transform.app.checkingPrivilegesErrorMessage"
-            defaultMessage="Error fetching user privileges from the server"
-          />
-        }
-        error={apiError}
+export const App: FC<{ history: ScopedHistory }> = ({ history }) => (
+  <Router history={history}>
+    <Routes>
+      <Route
+        path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
+        component={CloneTransformSection}
       />
-    );
-  }
+      <Route
+        path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
+        component={CreateTransformSection}
+      />
+      <Route path={`/`} component={TransformManagementSection} />
+    </Routes>
+  </Router>
+);
 
-  return (
-    <Router history={history}>
-      <Switch>
-        <Route
-          path={`/${SECTION_SLUG.CLONE_TRANSFORM}/:transformId`}
-          component={CloneTransformSection}
-        />
-        <Route
-          path={`/${SECTION_SLUG.CREATE_TRANSFORM}/:savedObjectId`}
-          component={CreateTransformSection}
-        />
-        <Route path={`/`} component={TransformManagementSection} />
-      </Switch>
-    </Router>
-  );
-};
-
-export const renderApp = (element: HTMLElement, appDependencies: AppDependencies) => {
+export const renderApp = (
+  element: HTMLElement,
+  appDependencies: AppDependencies,
+  enabledFeatures: TransformEnabledFeatures
+) => {
   const I18nContext = appDependencies.i18n.Context;
+
+  const queryClient = new QueryClient({
+    defaultOptions: {
+      queries: {
+        staleTime: Infinity,
+        retry: false,
+      },
+    },
+  });
 
   render(
     <EuiErrorBoundary>
-      <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
-        <KibanaContextProvider services={appDependencies}>
-          <AuthorizationProvider privilegesEndpoint={`${API_BASE_PATH}privileges`}>
+      <QueryClientProvider client={queryClient}>
+        <KibanaThemeProvider theme$={appDependencies.theme.theme$}>
+          <KibanaContextProvider services={appDependencies}>
             <I18nContext>
-              <App history={appDependencies.history} />
+              <EnabledFeaturesContextProvider enabledFeatures={enabledFeatures}>
+                <App history={appDependencies.history} />
+              </EnabledFeaturesContextProvider>
             </I18nContext>
-          </AuthorizationProvider>
-        </KibanaContextProvider>
-      </KibanaThemeProvider>
+          </KibanaContextProvider>
+        </KibanaThemeProvider>
+      </QueryClientProvider>
     </EuiErrorBoundary>,
     element
   );

@@ -9,9 +9,11 @@ import { EuiButton, EuiCallOut, EuiLink } from '@elastic/eui';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import { FrameType, getLanguageType } from '../../../common/profiling';
+import { FrameType, getLanguageType } from '@kbn/profiling-utils';
 import { PROFILING_FEEDBACK_LINK } from '../profiling_app_page_template';
 import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
+import { useProfilingRouter } from '../../hooks/use_profiling_router';
+import { AddDataTabs } from '../../views/add_data_view';
 
 interface Props {
   frameType: FrameType;
@@ -19,6 +21,7 @@ interface Props {
 
 export function MissingSymbolsCallout({ frameType }: Props) {
   const languageType = getLanguageType({ frameType });
+  const router = useProfilingRouter();
   const { docLinks } = useProfilingDependencies().start.core;
 
   if (languageType === 'NATIVE') {
@@ -38,6 +41,7 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             values={{
               readMore: (
                 <EuiLink
+                  data-test-subj="profilingMissingSymbolsCalloutReadMoreLink"
                   href={`${docLinks.ELASTIC_WEBSITE_URL}/guide/en/observability/${docLinks.DOC_LINK_VERSION}/profiling-add-symbols.html`}
                   target="_blank"
                 >
@@ -51,13 +55,15 @@ export function MissingSymbolsCallout({ frameType }: Props) {
           />
         </p>
         <EuiButton
-          href="https://container-library.elastic.co/r/observability/profiling-agent"
-          target="_blank"
+          data-test-subj="profilingMissingSymbolsCalloutUploadSymbolsButton"
+          href={router.link('/add-data-instructions', {
+            query: { selectedTab: AddDataTabs.Symbols },
+          })}
           color="warning"
         >
           {i18n.translate(
             'xpack.profiling.frameInformationWindow.missingSymbols.native.downloadBinary',
-            { defaultMessage: 'Download elastic-profiling binary' }
+            { defaultMessage: 'Upload Symbols' }
           )}
         </EuiButton>
       </EuiCallOut>
@@ -79,7 +85,12 @@ export function MissingSymbolsCallout({ frameType }: Props) {
             'Symbols are not available because of an error in the unwinder for this language or an unknown error with the interpreter.',
         })}
       </p>
-      <EuiButton href={PROFILING_FEEDBACK_LINK} target="_blank" color="warning">
+      <EuiButton
+        data-test-subj="profilingMissingSymbolsCalloutReportAProblemButton"
+        href={PROFILING_FEEDBACK_LINK}
+        target="_blank"
+        color="warning"
+      >
         {i18n.translate(
           'xpack.profiling.frameInformationWindow.missingSymbols.interpreted.reportProblem',
           { defaultMessage: 'Report a problem' }

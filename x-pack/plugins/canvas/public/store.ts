@@ -32,7 +32,10 @@ export async function createFreshStore(core: CoreSetup) {
   const basePath = core.http.basePath.get();
 
   // Retrieve server functions
-  const serverFunctionsResponse = await core.http.get<Record<string, unknown>>(API_ROUTE_FUNCTIONS);
+  const serverFunctionsResponse = await core.http.get<Record<string, unknown>>(
+    API_ROUTE_FUNCTIONS,
+    { version: '1' }
+  );
   const serverFunctions = Object.values(serverFunctionsResponse);
 
   initialState.app = {

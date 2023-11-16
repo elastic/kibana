@@ -11,8 +11,8 @@ import { noop } from 'lodash';
 import { coreMock, scopedHistoryMock, themeServiceMock } from '@kbn/core/public/mocks';
 import type { Unmount } from '@kbn/management-plugin/public/types';
 
-import { securityMock } from '../../mocks';
 import { usersManagementApp } from './users_management_app';
+import { securityMock } from '../../mocks';
 
 const element = document.body.appendChild(document.createElement('div'));
 

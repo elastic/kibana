@@ -134,6 +134,13 @@ describe('check deprecations when security is disabled', () => {
 
     expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
   });
+
+  test('logs no deprecations on serverless', async () => {
+    reportingCore = await createMockReportingCore(
+      createMockConfigSchema({ statefulSettings: { enabled: false } })
+    );
+    expect(await getDeprecationsInfo(context, { reportingCore })).toMatchInlineSnapshot(`Array []`);
+  });
 });
 
 it('insufficient permissions', async () => {

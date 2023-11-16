@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { mapValues } from 'lodash';
-import { SnapshotMetricType } from './inventory_models/types';
+import { SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
 
 // Lowercase versions of all metrics, for when they need to be used in the middle of a sentence;
 // these may need to be translated differently depending on language, e.g. still capitalizing "CPU"

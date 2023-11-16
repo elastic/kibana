@@ -7,8 +7,12 @@
 import { useQuery } from '@tanstack/react-query';
 import { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { QUERY_KEY_PERCENT_WIDGET, AGGREGATE_ROUTE } from '../../../common/constants';
-import { AggregateResult } from '../../../common/types/aggregate';
+import {
+  QUERY_KEY_PERCENT_WIDGET,
+  AGGREGATE_ROUTE,
+  CURRENT_API_VERSION,
+} from '../../../common/constants';
+import { AggregateResult } from '../../../common/types';
 
 export const useFetchPercentWidgetData = (
   onReduce: (result: AggregateResult) => Record<string, number>,
@@ -22,6 +26,7 @@ export const useFetchPercentWidgetData = (
   const cachingKeys = [QUERY_KEY_PERCENT_WIDGET, widgetKey, filterQuery, groupBy, countBy, index];
   const query = useQuery(cachingKeys, async (): Promise<Record<string, number>> => {
     const res = await http.get<AggregateResult>(AGGREGATE_ROUTE, {
+      version: CURRENT_API_VERSION,
       query: {
         query: filterQuery,
         groupBy,

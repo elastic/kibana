@@ -14,13 +14,14 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiBadge,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiCallOut,
   EuiSpacer,
   EuiButtonEmpty,
   EuiButton,
   EuiIcon,
   EuiLink,
+  EuiIconTip,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
@@ -367,6 +368,20 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
                   <EuiFlexItem grow={false}>
                     <EuiText size="s" data-test-subj="apiKeyOwnerLabel">
                       <b>{rule.apiKeyOwner}</b>
+                      {rule.apiKeyCreatedByUser ? (
+                        <>
+                          &nbsp;
+                          <EuiIconTip
+                            position="right"
+                            content={i18n.translate(
+                              'xpack.triggersActionsUI.sections.ruleDetails.userManagedApikey',
+                              {
+                                defaultMessage: 'This rule is associated with an API key.',
+                              }
+                            )}
+                          />
+                        </>
+                      ) : null}
                     </EuiText>
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -411,8 +426,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
           <ViewInApp rule={rule} />,
         ]}
       />
-      <EuiSpacer size="l" />
-      <EuiPageContentBody>
+      <EuiPageSection>
         {rule.enabled &&
         rule.executionStatus.error?.reason === RuleExecutionStatusErrorReasons.License ? (
           <EuiFlexGroup>
@@ -504,7 +518,7 @@ export const RuleDetails: React.FunctionComponent<RuleDetailsProps> = ({
             />
           </EuiFlexItem>
         </EuiFlexGroup>
-      </EuiPageContentBody>
+      </EuiPageSection>
     </>
   );
 };

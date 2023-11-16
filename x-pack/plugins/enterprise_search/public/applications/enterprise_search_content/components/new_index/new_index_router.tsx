@@ -6,9 +6,8 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   NEW_INDEX_PATH,
@@ -22,7 +21,7 @@ import { SelectConnector } from './select_connector/select_connector';
 
 export const NewIndexRouter: React.FC = () => {
   return (
-    <Switch>
+    <Routes>
       <Route path={NEW_INDEX_PATH} exact>
         <NewIndex />
       </Route>
@@ -32,6 +31,6 @@ export const NewIndexRouter: React.FC = () => {
       <Route path={NEW_INDEX_METHOD_PATH} exact>
         <NewSearchIndexPage />
       </Route>
-    </Switch>
+    </Routes>
   );
 };

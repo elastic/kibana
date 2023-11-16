@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-
+import classNames from 'classnames';
 import { EuiButtonIcon, EuiPanel } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -31,6 +31,9 @@ export function FitToData(props: Props) {
   return (
     <EuiPanel paddingSize="none" className="mapToolbarOverlay__button">
       <EuiButtonIcon
+        className={classNames({
+          'mapToolbarOverlay__buttonIcon-empty': !props.autoFitToDataBounds,
+        })}
         size="s"
         onClick={props.fitToBounds}
         data-test-subj="fitToData"

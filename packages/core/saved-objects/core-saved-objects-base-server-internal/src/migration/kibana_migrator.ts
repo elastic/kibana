@@ -49,7 +49,22 @@ export interface IKibanaMigrator {
    * @param doc - The saved object to migrate
    * @returns `doc` with all registered migrations applied.
    */
-  migrateDocument(doc: SavedObjectUnsanitizedDoc): SavedObjectUnsanitizedDoc;
+  migrateDocument(
+    doc: SavedObjectUnsanitizedDoc,
+    options?: MigrateDocumentOptions
+  ): SavedObjectUnsanitizedDoc;
+}
+
+/**
+ * Options for {@link IKibanaMigrator.migrateDocument}
+ * @internal
+ */
+export interface MigrateDocumentOptions {
+  /**
+   * Defines whether it is allowed to convert documents from an higher version or not.
+   * Defaults to `false`.
+   */
+  allowDowngrade?: boolean;
 }
 
 /** @internal */

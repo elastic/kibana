@@ -6,7 +6,11 @@
  */
 
 import * as t from 'io-ts';
-import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { ALERT_STATUS_ALL } from './constants';
 
 export type Maybe<T> = T | null | undefined;
@@ -29,6 +33,7 @@ export interface ApmIndicesConfig {
 export type AlertStatus =
   | typeof ALERT_STATUS_ACTIVE
   | typeof ALERT_STATUS_RECOVERED
+  | typeof ALERT_STATUS_UNTRACKED
   | typeof ALERT_STATUS_ALL;
 
 export interface AlertStatusFilter {

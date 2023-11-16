@@ -7,6 +7,7 @@
  */
 
 import { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getAllMigrations, searchMigrations } from './search_migrations';
 
 const savedObjectMigrationContext = null as unknown as SavedObjectMigrationContext;
@@ -369,7 +370,12 @@ Object {
       [versionToTest]: (state) => ({ ...state, migrated: true }),
     });
 
-    expect(migrations[versionToTest](savedSearch, {} as SavedObjectMigrationContext)).toEqual({
+    expect(
+      SavedObjectsUtils.getMigrationFunction(migrations[versionToTest])(
+        savedSearch,
+        {} as SavedObjectMigrationContext
+      )
+    ).toEqual({
       attributes: {
         kibanaSavedObjectMeta: {
           searchSourceJSON: JSON.stringify({
@@ -395,7 +401,12 @@ Object {
       [versionToTest]: (state) => ({ ...state, migrated: true }),
     });
 
-    expect(migrations[versionToTest](savedSearch, {} as SavedObjectMigrationContext)).toEqual({
+    expect(
+      SavedObjectsUtils.getMigrationFunction(migrations[versionToTest])(
+        savedSearch,
+        {} as SavedObjectMigrationContext
+      )
+    ).toEqual({
       attributes: {
         kibanaSavedObjectMeta: {
           searchSourceJSON: '5',

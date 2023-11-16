@@ -106,19 +106,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.navigateToApp('dashboard');
-      await PageObjects.dashboard.preserveCrossAppState();
-      await PageObjects.dashboard.loadSavedDashboard('few panels');
-
-      await PageObjects.dashboard.switchToEditMode();
       const from = 'Sep 19, 2017 @ 06:31:44.000';
       const to = 'Sep 23, 2018 @ 18:31:44.000';
-      await PageObjects.timePicker.setAbsoluteRange(from, to);
+      await PageObjects.common.setTime({ from, to });
+      await PageObjects.dashboard.navigateToApp();
+      await PageObjects.dashboard.preserveCrossAppState();
+      await PageObjects.dashboard.loadSavedDashboard('few panels');
+      await PageObjects.dashboard.switchToEditMode();
       await PageObjects.dashboard.waitForRenderComplete();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await PageObjects.common.unsetTime();
     });
 
     describe('snapshot share', async () => {

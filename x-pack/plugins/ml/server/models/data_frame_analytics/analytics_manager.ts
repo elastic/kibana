@@ -7,43 +7,61 @@
 
 import Boom from '@hapi/boom';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { IScopedClusterClient } from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import {
+  getAnalysisType,
   INDEX_CREATED_BY,
   JOB_MAP_NODE_TYPES,
-  JobMapNodeTypes,
-} from '../../../common/constants/data_frame_analytics';
+  type JobMapNodeTypes,
+  type AnalyticsMapEdgeElement,
+  type AnalyticsMapReturnType,
+  type AnalyticsMapNodeElement,
+  type MapElements,
+} from '@kbn/ml-data-frame-analytics-utils';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { MlFeatures } from '../../../common/constants/app';
+import type { ModelService } from '../model_management/models_provider';
+import { modelsProvider } from '../model_management';
 import {
-  AnalyticsMapEdgeElement,
-  AnalyticsMapReturnType,
-  AnalyticsMapNodeElement,
-  MapElements,
-} from '../../../common/types/data_frame_analytics';
-import { getAnalysisType } from '../../../common/util/analytics_utils';
-import {
-  ExtendAnalyticsMapArgs,
-  GetAnalyticsMapArgs,
-  InitialElementsReturnType,
+  type ExtendAnalyticsMapArgs,
+  type GetAnalyticsMapArgs,
+  type InitialElementsReturnType,
+  type NextLinkReturnType,
+  type GetAnalyticsJobIdArg,
+  type GetAnalyticsModelIdArg,
   isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
   isIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
-  NextLinkReturnType,
 } from './types';
 import type { MlClient } from '../../lib/ml_client';
+import { DEFAULT_TRAINED_MODELS_PAGE_SIZE } from '../../routes/trained_models';
 
 export class AnalyticsManager {
   private _trainedModels: estypes.MlTrainedModelConfig[] = [];
   private _jobs: estypes.MlDataframeAnalyticsSummary[] = [];
+  private _modelsProvider: ModelService;
 
-  constructor(private _mlClient: MlClient, private _client: IScopedClusterClient) {}
+  constructor(
+    private readonly _mlClient: MlClient,
+    private readonly _client: IScopedClusterClient,
+    private readonly _enabledFeatures: MlFeatures,
+    cloud: CloudSetup
+  ) {
+    this._modelsProvider = modelsProvider(this._client, this._mlClient, cloud);
+  }
 
   private async initData() {
     const [models, jobs] = await Promise.all([
-      this._mlClient.getTrainedModels(),
-      this._mlClient.getDataFrameAnalytics({ size: 1000 }),
+      this._enabledFeatures.nlp || this._enabledFeatures.dfa
+        ? this._mlClient.getTrainedModels({ size: DEFAULT_TRAINED_MODELS_PAGE_SIZE })
+        : { trained_model_configs: [] },
+      this._enabledFeatures.dfa
+        ? this._mlClient.getDataFrameAnalytics({ size: 1000 })
+        : { data_frame_analytics: [] },
     ]);
     this._trainedModels = models.trained_model_configs;
     this._jobs = jobs.data_frame_analytics;
@@ -312,7 +330,7 @@ export class AnalyticsManager {
    * @param jobId (optional)
    * @param modelId (optional)
    */
-  public async getAnalyticsMap({
+  private async getAnalyticsMap({
     analyticsId,
     modelId,
   }: GetAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
@@ -527,6 +545,71 @@ export class AnalyticsManager {
       result.error = error.message || 'An error occurred fetching map';
       return result;
     }
+  }
+
+  /**
+   * Expanded wrapper of getAnalyticsMap, which also handles generic models that are not tied to an analytics job
+   * Retrieves info about model and ingest pipeline, index, and transforms associated with the model
+   * @param analyticsId
+   * @param modelId
+   */
+  public async extendModelsMap({
+    analyticsId,
+    modelId,
+  }: {
+    analyticsId?: string;
+    modelId?: string;
+  }): Promise<AnalyticsMapReturnType> {
+    const result: AnalyticsMapReturnType = {
+      elements: [],
+      details: {},
+      error: null,
+    };
+    try {
+      if (analyticsId && !modelId) {
+        return this.getAnalyticsMap({
+          analyticsId,
+          modelId,
+        } as GetAnalyticsJobIdArg);
+      }
+
+      await this.initData();
+
+      const modelNodeId = `${modelId}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
+      const model = modelId ? this.findTrainedModel(modelId) : undefined;
+
+      const isDFAModel = isPopulatedObject(model?.metadata, ['analytics_config']);
+      if (isDFAModel) {
+        return this.getAnalyticsMap({
+          analyticsId,
+          modelId,
+        } as GetAnalyticsModelIdArg);
+      }
+
+      if (modelId && model) {
+        const pipelinesAndIndicesResults =
+          await this._modelsProvider.getModelsPipelinesAndIndicesMap(modelId, {
+            withIndices: true,
+          });
+        // Adding information about the trained model
+        pipelinesAndIndicesResults.elements.push({
+          data: {
+            id: modelNodeId,
+            label: modelId,
+            type: JOB_MAP_NODE_TYPES.TRAINED_MODEL,
+            isRoot: true,
+          },
+        });
+        pipelinesAndIndicesResults.details[modelNodeId] = model;
+
+        return pipelinesAndIndicesResults;
+      }
+    } catch (error) {
+      result.error = error.message || 'An error occurred fetching map';
+      return result;
+    }
+
+    return result;
   }
 
   public async extendAnalyticsMapForAnalyticsJob({

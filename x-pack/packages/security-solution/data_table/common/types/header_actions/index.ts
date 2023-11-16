@@ -36,6 +36,7 @@ export type ColumnHeaderOptions = Pick<
   | 'isResizable'
 > & {
   aggregatable?: boolean;
+  searchable?: boolean;
   category?: string;
   columnHeaderType: ColumnHeaderType;
   description?: string | null;

@@ -147,7 +147,10 @@ Object {
           </span>
         </h2>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -169,7 +172,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                   data-test-subj="actionConnectorsWarningsCallOutButton"
                   type="button"
                 >
@@ -211,7 +214,10 @@ Object {
         </span>
       </h2>
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -233,7 +239,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                 data-test-subj="actionConnectorsWarningsCallOutButton"
                 type="button"
               >
@@ -332,7 +338,10 @@ Object {
           </span>
         </h2>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -354,7 +363,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                   data-test-subj="actionConnectorsWarningsCallOutButton"
                   type="button"
                 >
@@ -396,7 +405,10 @@ Object {
         </span>
       </h2>
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -418,7 +430,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                 data-test-subj="actionConnectorsWarningsCallOutButton"
                 type="button"
               >
@@ -517,7 +529,10 @@ Object {
           </span>
         </h2>
         <div
-          class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+          class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+        />
+        <div
+          class="euiText emotion-euiText-s-euiTextColor-default"
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -539,7 +554,7 @@ Object {
                 class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
               >
                 <button
-                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                   data-test-subj="actionConnectorsWarningsCallOutButton"
                   type="button"
                 >
@@ -581,7 +596,10 @@ Object {
         </span>
       </h2>
       <div
-        class="euiText emotion-euiText-s-euiTextColor-default-euiCallOut__description"
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
       >
         <div
           class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
@@ -603,7 +621,7 @@ Object {
               class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
             >
               <button
-                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-m-base-warning"
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
                 data-test-subj="actionConnectorsWarningsCallOutButton"
                 type="button"
               >

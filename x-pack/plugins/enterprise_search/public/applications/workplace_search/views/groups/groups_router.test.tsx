@@ -9,11 +9,10 @@ import '../../../__mocks__/shallow_useeffect.mock';
 import { setMockActions } from '../../../__mocks__/kea_logic';
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
 
 import { shallow } from 'enzyme';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { GroupRouter } from './group_router';
 import { Groups } from './groups';
@@ -29,7 +28,7 @@ describe('GroupsRouter', () => {
   it('renders', () => {
     const wrapper = shallow(<GroupsRouter />);
 
-    expect(wrapper.find(Switch)).toHaveLength(1);
+    expect(wrapper.find(Routes)).toHaveLength(1);
     expect(wrapper.find(Route)).toHaveLength(2);
     expect(wrapper.find(GroupRouter)).toHaveLength(1);
     expect(wrapper.find(Groups)).toHaveLength(1);

@@ -28,12 +28,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Add to Dashboard', function describeIndexTests() {
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+    });
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
     it('adding a new metric to a new dashboard by value', async function () {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -57,7 +60,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -83,7 +85,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -122,7 +123,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -158,7 +158,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a new metric to an existing dashboard by value', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -169,7 +169,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -189,7 +188,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a new metric to an existing dashboard by reference', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -200,7 +199,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -222,7 +220,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a existing metric to an existing dashboard by value', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -233,7 +231,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 
@@ -268,7 +265,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('adding a existing metric to an existing dashboard by reference', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
 
       await PageObjects.dashboard.clickNewDashboard();
       await PageObjects.dashboard.addVisualizations(['Visualization AreaChart']);
@@ -279,7 +276,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visualize.navigateToNewAggBasedVisualization();
       await PageObjects.visualize.clickMetric();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
 
       await testSubjects.click('visualizeSaveButton');
 

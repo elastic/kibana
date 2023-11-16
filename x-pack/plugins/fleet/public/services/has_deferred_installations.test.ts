@@ -32,23 +32,16 @@ const createPackage = ({
   policy_templates: [],
   // @ts-ignore
   assets: {},
-  savedObject: {
-    id: '1234',
+  installationInfo: {
     type: 'epm-package',
-    references: [],
-    attributes: {
-      installed_kibana: [],
-      installed_es: installedEs ?? [],
-      es_index_patterns: {},
-      name: 'test-package',
-      version: '0.0.1',
-      install_status: 'installed',
-      install_version: '0.0.1',
-      install_started_at: new Date().toString(),
-      install_source: 'registry',
-      verification_status: 'verified',
-      verification_key_id: '',
-    },
+    installed_kibana: [],
+    installed_es: installedEs ?? [],
+    name: 'test-package',
+    version: '0.0.1',
+    install_status: 'installed',
+    install_source: 'registry',
+    verification_status: 'verified',
+    verification_key_id: '',
   },
 });
 
@@ -61,10 +54,10 @@ describe('isPackageUnverified', () => {
       } as ReturnType<typeof ExperimentalFeaturesService['get']>);
     });
 
-    it('Should return false for a package with no saved object', () => {
+    it('Should return false for a package with no installationInfo', () => {
       const noSoPkg = createPackage();
-      // @ts-ignore we know pkg has savedObject but ts doesn't
-      delete noSoPkg.savedObject;
+      // @ts-ignore we know pkg has installationInfo but ts doesn't
+      delete noSoPkg.installationInfo;
       expect(hasDeferredInstallations(noSoPkg)).toEqual(false);
     });
 
@@ -75,7 +68,7 @@ describe('isPackageUnverified', () => {
           { id: '', type: ElasticsearchAssetType.transform, deferred: true },
         ],
       });
-      // @ts-ignore we know pkg has savedObject but ts doesn't
+
       expect(hasDeferredInstallations(pkgWithDeferredInstallations)).toEqual(true);
     });
 

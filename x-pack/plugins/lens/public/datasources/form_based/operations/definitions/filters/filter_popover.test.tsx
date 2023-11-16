@@ -13,7 +13,7 @@ import { createMockedIndexPattern } from '../../../mocks';
 import { FilterPopover } from './filter_popover';
 import { LabelInput } from '../shared_components';
 import { QueryStringInput } from '@kbn/unified-search-plugin/public';
-import { QueryInput } from '@kbn/visualization-ui-components/public';
+import { QueryInput } from '@kbn/visualization-ui-components';
 
 jest.mock('.', () => ({
   isQueryValid: () => true,

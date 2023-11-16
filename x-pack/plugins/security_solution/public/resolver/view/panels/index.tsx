@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import React, { memo } from 'react';
 import { useSelector } from 'react-redux';
 import * as selectors from '../../store/selectors';
@@ -16,20 +14,24 @@ import { NodeDetail } from './node_detail';
 import { NodeList } from './node_list';
 import { EventDetail } from './event_detail';
 import type { PanelViewAndParameters } from '../../types';
-
+import type { State } from '../../../common/store/types';
 /**
  * Show the panel that matches the `panelViewAndParameters` (derived from the browser's location.search)
  */
 
-export const PanelRouter = memo(function () {
-  const params: PanelViewAndParameters = useSelector(selectors.panelViewAndParameters);
+// eslint-disable-next-line react/display-name
+export const PanelRouter = memo(function ({ id }: { id: string }) {
+  const params: PanelViewAndParameters = useSelector((state: State) =>
+    selectors.panelViewAndParameters(state.analyzer[id])
+  );
   if (params.panelView === 'nodeDetail') {
-    return <NodeDetail nodeID={params.panelParameters.nodeID} />;
+    return <NodeDetail id={id} nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEvents') {
-    return <NodeEvents nodeID={params.panelParameters.nodeID} />;
+    return <NodeEvents id={id} nodeID={params.panelParameters.nodeID} />;
   } else if (params.panelView === 'nodeEventsInCategory') {
     return (
       <NodeEventsInCategory
+        id={id}
         nodeID={params.panelParameters.nodeID}
         eventCategory={params.panelParameters.eventCategory}
       />
@@ -37,12 +39,13 @@ export const PanelRouter = memo(function () {
   } else if (params.panelView === 'eventDetail') {
     return (
       <EventDetail
+        id={id}
         nodeID={params.panelParameters.nodeID}
         eventCategory={params.panelParameters.eventCategory}
       />
     );
   } else {
     /* The default 'Event List' / 'List of all processes' view */
-    return <NodeList />;
+    return <NodeList id={id} />;
   }
 });

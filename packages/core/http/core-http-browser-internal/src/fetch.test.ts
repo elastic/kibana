@@ -29,6 +29,7 @@ describe('Fetch', () => {
   const fetchInstance = new Fetch({
     basePath: new BasePath(BASE_PATH),
     kibanaVersion: 'VERSION',
+    buildNumber: 1234,
     executionContext: executionContextMock,
   });
   afterEach(() => {
@@ -160,6 +161,8 @@ describe('Fetch', () => {
       expect(fetchMock.lastOptions()!.headers).toMatchObject({
         'content-type': 'application/json',
         'kbn-version': 'VERSION',
+        'kbn-build-number': '1234',
+        'x-elastic-internal-origin': 'Kibana',
         myheader: 'foo',
       });
     });
@@ -168,10 +171,40 @@ describe('Fetch', () => {
       fetchMock.get('*', {});
       await expect(
         fetchInstance.fetch('/my/path', {
-          headers: { myHeader: 'foo', 'kbn-version': 'CUSTOM!' },
+          headers: {
+            myHeader: 'foo',
+            'kbn-version': 'CUSTOM!',
+          },
         })
       ).rejects.toThrowErrorMatchingInlineSnapshot(
         `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-version]"`
+      );
+    });
+    it('should not allow overwriting of kbn-build-number header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: {
+            myHeader: 'foo',
+            'kbn-build-number': 4321,
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"kbn-\\" are not allowed: [kbn-build-number]"`
+      );
+    });
+
+    it('should not allow overwriting of x-elastic-internal-origin header', async () => {
+      fetchMock.get('*', {});
+      await expect(
+        fetchInstance.fetch('/my/path', {
+          headers: {
+            myHeader: 'foo',
+            'x-elastic-internal-origin': 'anything',
+          },
+        })
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Invalid fetch headers, headers beginning with \\"x-elastic-internal-\\" are not allowed: [x-elastic-internal-origin]"`
       );
     });
 
@@ -310,6 +343,7 @@ describe('Fetch', () => {
         headers: {
           'content-type': 'application/json',
           'kbn-version': 'VERSION',
+          'x-elastic-internal-origin': 'Kibana',
         },
       });
     });
@@ -830,6 +864,55 @@ describe('Fetch', () => {
 
       await expect(fetchInstance.fetch('/my/path')).resolves.toEqual({ foo: 'bar' });
       expect(usedSpy).toHaveBeenCalledTimes(2);
+    });
+  });
+
+  describe('rawResponse', () => {
+    it("throws if rawResponse is set to true but asResponse isn't", async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      await expect(async () =>
+        fetchInstance.fetch('/my/path', {
+          rawResponse: true,
+        })
+      ).rejects.toThrowError(
+        'Invalid fetch arguments, rawResponse = true is only supported when asResponse = true'
+      );
+    });
+
+    it('immediately returns an unawaited Response object if rawResponse = true', async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      const response = await fetchInstance.fetch('/my/path', {
+        rawResponse: true,
+        asResponse: true,
+      });
+
+      expect(response.response).toBeInstanceOf(Response);
+      expect(response.body).toEqual(null);
+
+      const body = await response.response?.json();
+
+      expect(body).toEqual({ foo: 'bar' });
+    });
+
+    it('calls the request/response interceptors if rawResponse = true', async () => {
+      fetchMock.get('*', { foo: 'bar' });
+
+      const requestSpy = jest.fn();
+
+      const responseSpy = jest.fn();
+
+      fetchInstance.intercept({ request: requestSpy, response: responseSpy });
+
+      await fetchInstance.fetch('/my/path', {
+        rawResponse: true,
+        asResponse: true,
+      });
+
+      expect(requestSpy).toHaveBeenCalled();
+
+      expect(responseSpy).toHaveBeenCalled();
     });
   });
 });

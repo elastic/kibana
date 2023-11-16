@@ -27,14 +27,13 @@ const docIdSelector = (state: PreviewState) => {
     customId: state.customId,
   };
 };
+const fetchDocErrorSelector = (state: PreviewState) => state.fetchDocError;
 
 export const DocumentsNavPreview = () => {
-  const {
-    documents: { loadSingle, loadFromCluster, fetchDocError },
-    controller,
-  } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
   const { goToPreviousDocument: prev, goToNextDocument: next } = controller;
   const { documentId, customId } = useStateSelector(controller.state$, docIdSelector);
+  const fetchDocError = useStateSelector(controller.state$, fetchDocErrorSelector);
 
   const isInvalid = fetchDocError?.code === 'DOC_NOT_FOUND';
 
@@ -45,9 +44,9 @@ export const DocumentsNavPreview = () => {
   const onDocumentIdChange = useCallback(
     (e: React.SyntheticEvent<HTMLInputElement>) => {
       const nextId = (e.target as HTMLInputElement).value;
-      loadSingle(nextId);
+      controller.setCustomDocIdToLoad(nextId);
     },
-    [loadSingle]
+    [controller]
   );
 
   return (
@@ -75,7 +74,7 @@ export const DocumentsNavPreview = () => {
                 color="primary"
                 size="xs"
                 flush="left"
-                onClick={() => loadFromCluster()}
+                onClick={() => controller.fetchSampleDocuments()}
                 data-test-subj="loadDocsFromClusterButton"
               >
                 {i18n.translate(

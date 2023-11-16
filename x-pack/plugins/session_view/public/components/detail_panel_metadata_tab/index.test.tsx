@@ -7,12 +7,12 @@
 
 import React from 'react';
 import { AppContextTestRender, createAppRootMockRenderer } from '../../test';
-import {
+import type {
   ProcessEventHost,
   ProcessEventContainer,
   ProcessEventOrchestrator,
   ProcessEventCloud,
-} from '../../../common/types/process_tree';
+} from '../../../common';
 import { DetailPanelMetadataTab } from '.';
 
 const TEST_ARCHITECTURE = 'x86_64';

@@ -41,10 +41,7 @@ export class SavedObjectsImporter implements ISavedObjectsImporter {
     this.#importSizeLimit = importSizeLimit;
     this.#importHooks = typeRegistry.getAllTypes().reduce((hooks, type) => {
       if (type.management?.onImport) {
-        return {
-          ...hooks,
-          [type.name]: [type.management.onImport],
-        };
+        hooks[type.name] = [type.management.onImport];
       }
       return hooks;
     }, {} as Record<string, SavedObjectsImportHook[]>);

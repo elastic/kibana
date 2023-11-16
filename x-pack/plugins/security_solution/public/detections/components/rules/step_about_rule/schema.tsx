@@ -160,6 +160,16 @@ export const schema: FormSchema<AboutStepRule> = {
     ),
     labelAppend: OptionalFieldLabel,
   },
+  investigationFields: {
+    type: FIELD_TYPES.COMBO_BOX,
+    label: i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldCustomHighlightedFieldsLabel',
+      {
+        defaultMessage: 'Custom highlighted fields',
+      }
+    ),
+    labelAppend: OptionalFieldLabel,
+  },
   license: {
     type: FIELD_TYPES.TEXT,
     label: i18n.translate(
@@ -297,7 +307,7 @@ export const schema: FormSchema<AboutStepRule> = {
   },
 };
 
-export const threatIndicatorPathRequiredSchemaValue = {
+const threatIndicatorPathRequiredSchemaValue = {
   type: FIELD_TYPES.TEXT,
   label: i18n.translate(
     'xpack.securitySolution.detectionEngine.createRule.stepAboutRule.fieldThreatIndicatorPathLabel',
@@ -325,4 +335,9 @@ export const threatIndicatorPathRequiredSchemaValue = {
       type: VALIDATION_TYPES.FIELD,
     },
   ],
+};
+
+export const threatMatchAboutSchema = {
+  ...schema,
+  threatIndicatorPath: threatIndicatorPathRequiredSchemaValue,
 };

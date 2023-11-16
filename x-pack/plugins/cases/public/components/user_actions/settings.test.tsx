@@ -7,7 +7,7 @@
 
 import { EuiCommentList } from '@elastic/eui';
 import React from 'react';
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import { getUserAction } from '../../containers/mock';
@@ -34,7 +34,7 @@ describe('createStatusUserActionBuilder ', () => {
   it.each(tests)(
     'renders correctly when changed setting sync-alerts to %s',
     async (syncAlerts, label) => {
-      const userAction = getUserAction('settings', Actions.update, {
+      const userAction = getUserAction('settings', UserActionActions.update, {
         payload: { settings: { syncAlerts } },
       });
       const builder = createSettingsUserActionBuilder({

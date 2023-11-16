@@ -7,6 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import type { AsApiContract } from '@kbn/actions-plugin/common';
+import { KueryNode } from '@kbn/es-query';
 import type { Rule, Pagination, Sorting, RuleStatus } from '../../../types';
 import { transformRule } from './common_transformations';
 
@@ -22,6 +23,8 @@ export interface LoadRulesProps {
   ruleParamsFilter?: Record<string, string | number | object>;
   ruleStatusesFilter?: RuleStatus[];
   sort?: Sorting;
+  kueryNode?: KueryNode;
+  filterConsumers?: string[];
 }
 
 export const rewriteRulesResponseRes = (results: Array<AsApiContract<Rule>>): Rule[] => {

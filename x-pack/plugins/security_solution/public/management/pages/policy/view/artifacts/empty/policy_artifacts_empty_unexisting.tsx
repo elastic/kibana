@@ -6,11 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiPageTemplate_Deprecated as EuiPageTemplate,
-} from '@elastic/eui';
+import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { useGetLinkTo } from './use_policy_artifacts_empty_hooks';
 import type { POLICY_ARTIFACT_EMPTY_UNEXISTING_LABELS } from './translations';
 import type { ArtifactListPageUrlParams } from '../../../../../components/artifact_list_page';
@@ -43,28 +39,27 @@ export const PolicyArtifactsEmptyUnexisting = memo<CommonProps>(
       }
     );
     return (
-      <EuiPageTemplate template="centeredContent">
-        <EuiEmptyPrompt
-          iconType="plusInCircle"
-          data-test-subj="policy-artifacts-empty-unexisting"
-          title={<h2>{labels.emptyUnexistingTitle}</h2>}
-          body={labels.emptyUnexistingMessage}
-          actions={
-            canWriteArtifact ? (
-              // eslint-disable-next-line @elastic/eui/href-or-on-click
-              <EuiButton
-                color="primary"
-                fill
-                onClick={onClickHandler}
-                href={toRouteUrl}
-                data-test-subj="unexisting-manage-artifacts-button"
-              >
-                {labels.emptyUnexistingPrimaryActionButtonTitle}
-              </EuiButton>
-            ) : null
-          }
-        />
-      </EuiPageTemplate>
+      <EuiPageTemplate.EmptyPrompt
+        color="subdued"
+        iconType="plusInCircle"
+        data-test-subj="policy-artifacts-empty-unexisting"
+        title={<h2>{labels.emptyUnexistingTitle}</h2>}
+        body={labels.emptyUnexistingMessage}
+        actions={
+          canWriteArtifact ? (
+            // eslint-disable-next-line @elastic/eui/href-or-on-click
+            <EuiButton
+              color="primary"
+              fill
+              onClick={onClickHandler}
+              href={toRouteUrl}
+              data-test-subj="unexisting-manage-artifacts-button"
+            >
+              {labels.emptyUnexistingPrimaryActionButtonTitle}
+            </EuiButton>
+          ) : null
+        }
+      />
     );
   }
 );

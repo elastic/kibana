@@ -68,32 +68,32 @@ export function getJobDetailsFromTrainedModel(
  * we return null.
  */
 
-function mlFunctionsFactory(client: IScopedClusterClient) {
+export function mlFunctionsFactory(client: IScopedClusterClient) {
   return {
     async getJobs() {
       try {
-        return client.asInternalUser.ml.getJobs();
+        return await client.asInternalUser.ml.getJobs();
       } catch (error) {
         return null;
       }
     },
     async getDatafeeds() {
       try {
-        return client.asInternalUser.ml.getDatafeeds();
+        return await client.asInternalUser.ml.getDatafeeds();
       } catch (error) {
         return null;
       }
     },
     async getTrainedModels() {
       try {
-        return client.asInternalUser.ml.getTrainedModels();
+        return await client.asInternalUser.ml.getTrainedModels();
       } catch (error) {
         return null;
       }
     },
     async getDataFrameAnalytics() {
       try {
-        return client.asInternalUser.ml.getDataFrameAnalytics();
+        return await client.asInternalUser.ml.getDataFrameAnalytics();
       } catch (error) {
         return null;
       }

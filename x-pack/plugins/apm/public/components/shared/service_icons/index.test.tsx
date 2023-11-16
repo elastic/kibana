@@ -64,6 +64,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -87,6 +88,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -112,6 +114,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -138,6 +141,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -165,6 +169,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -212,6 +217,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -256,6 +262,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -308,6 +315,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />
@@ -366,6 +374,7 @@ describe('ServiceIcons', () => {
           <EuiThemeProvider>
             <ServiceIcons
               serviceName="foo"
+              environment="dev"
               start="2021-08-20T10:00:00.000Z"
               end="2021-08-20T10:15:00.000Z"
             />

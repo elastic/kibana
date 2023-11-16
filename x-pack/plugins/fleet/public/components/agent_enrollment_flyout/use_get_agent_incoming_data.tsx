@@ -44,7 +44,7 @@ export const useGetAgentIncomingData = (
   }
 
   if (installedPolicy?.name === 'apm') {
-    href = getAbsolutePath('/app/home#/tutorial/apm');
+    href = getAbsolutePath('/app/apm/tutorial');
     text = i18n.translate('xpack.fleet.confirmIncomingData.installApmAgentButtonText', {
       defaultMessage: 'Install APM Agent',
     });

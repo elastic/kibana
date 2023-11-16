@@ -22,10 +22,7 @@ import {
   FLEET_FINAL_PIPELINE_ID,
   FLEET_FINAL_PIPELINE_VERSION,
 } from '../../../../constants';
-import {
-  getCustomPipelineNameForDatastream,
-  getPipelineNameForDatastream,
-} from '../../../../../common/services';
+import { getPipelineNameForDatastream } from '../../../../../common/services';
 
 import { appendMetadataToIngestPipeline } from '../meta';
 import { retryTransientEsErrors } from '../retry';
@@ -34,7 +31,7 @@ import {
   getPipelineNameForInstallation,
   rewriteIngestPipeline,
   isTopLevelPipeline,
-  addCustomPipelineProcessor,
+  addCustomPipelineAndLocalRoutingRulesProcessor,
 } from './helpers';
 import type { PipelineInstall, RewriteSubstitution } from './types';
 
@@ -152,12 +149,9 @@ export async function installAllPipelines({
   const pipelinePaths = dataStream
     ? paths.filter((path) => isDataStreamPipeline(path, dataStream.path))
     : paths;
-  const pipelinesInfos: Array<{
-    nameForInstallation: string;
-    customIngestPipelineNameForInstallation?: string;
-    content: string;
-    extension: string;
-  }> = [];
+  const pipelinesInfos: Array<
+    Omit<PipelineInstall, 'contentForInstallation'> & { content: string }
+  > = [];
   const substitutions: RewriteSubstitution[] = [];
 
   let datastreamPipelineCreated = false;
@@ -175,8 +169,8 @@ export async function installAllPipelines({
     const content = getAsset(path).toString('utf-8');
     pipelinesInfos.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation:
-        dataStream && isMainPipeline ? getCustomPipelineNameForDatastream(dataStream) : undefined,
+      shouldInstallCustomPipelines: dataStream && isMainPipeline,
+      dataStream,
       content,
       extension,
     });
@@ -202,7 +196,8 @@ export async function installAllPipelines({
 
     pipelinesToInstall.push({
       nameForInstallation,
-      customIngestPipelineNameForInstallation: getCustomPipelineNameForDatastream(dataStream),
+      shouldInstallCustomPipelines: true,
+      dataStream,
       contentForInstallation: 'processors: []',
       extension: 'yml',
     });
@@ -234,7 +229,7 @@ async function installPipeline({
   });
 
   if (shouldAddCustomPipelineProcessor) {
-    pipelineToInstall = addCustomPipelineProcessor(pipelineToInstall);
+    pipelineToInstall = addCustomPipelineAndLocalRoutingRulesProcessor(pipelineToInstall);
   }
 
   const esClientParams = {

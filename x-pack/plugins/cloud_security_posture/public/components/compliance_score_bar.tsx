@@ -45,7 +45,7 @@ export const ComplianceScoreBar = ({
         gutterSize="none"
         alignItems="center"
         justifyContent="flexEnd"
-        style={{ gap: euiTheme.size.s }}
+        style={{ gap: euiTheme.size.xs }}
       >
         <EuiFlexItem>
           <EuiFlexGroup
@@ -57,14 +57,6 @@ export const ComplianceScoreBar = ({
               gap: 1,
             }}
           >
-            {!!totalFailed && (
-              <EuiFlexItem
-                style={{
-                  flex: totalFailed,
-                  background: statusColors.failed,
-                }}
-              />
-            )}
             {!!totalPassed && (
               <EuiFlexItem
                 style={{
@@ -73,9 +65,17 @@ export const ComplianceScoreBar = ({
                 }}
               />
             )}
+            {!!totalFailed && (
+              <EuiFlexItem
+                style={{
+                  flex: totalFailed,
+                  background: statusColors.failed,
+                }}
+              />
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexItem grow={false} style={{ width: euiTheme.size.xxl, textAlign: 'right' }}>
           <EuiText
             size="xs"
             style={{ fontWeight: euiTheme.font.weight.bold }}

@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { IconChartBarReferenceLine } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
-import type { AccessorConfig } from '@kbn/visualization-ui-components/public';
+import type { AccessorConfig } from '@kbn/visualization-ui-components';
 import type { DatasourceLayers, FramePublicAPI, Visualization } from '../../types';
 import { groupAxesByType } from './axes_configuration';
 import { isHorizontalChart, isPercentageSeries, isStackedChart } from './state_helpers';

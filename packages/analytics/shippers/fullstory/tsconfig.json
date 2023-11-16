@@ -12,7 +12,8 @@
   ],
   "kbn_references": [
     "@kbn/analytics-client",
-    "@kbn/logging-mocks"
+    "@kbn/logging-mocks",
+    "@kbn/safer-lodash-set"
   ],
   "exclude": [
     "target/**/*",

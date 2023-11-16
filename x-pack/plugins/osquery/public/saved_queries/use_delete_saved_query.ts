@@ -8,6 +8,7 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { PLUGIN_ID } from '../../common';
 import { pagePathGetters } from '../common/page_paths';
@@ -27,21 +28,27 @@ export const useDeleteSavedQuery = ({ savedQueryId }: UseDeleteSavedQueryProps) 
   } = useKibana().services;
   const setErrorToast = useErrorToast();
 
-  return useMutation(() => http.delete(`/api/osquery/saved_queries/${savedQueryId}`), {
-    onError: (error: { body: { error: string; message: string } }) => {
-      setErrorToast(error, {
-        title: error.body.error,
-        toastMessage: error.body.message,
-      });
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries([SAVED_QUERIES_ID]);
-      navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
-      toasts.addSuccess(
-        i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
-          defaultMessage: 'Successfully deleted saved query',
-        })
-      );
-    },
-  });
+  return useMutation(
+    () =>
+      http.delete(`/api/osquery/saved_queries/${savedQueryId}`, {
+        version: API_VERSIONS.public.v1,
+      }),
+    {
+      onError: (error: { body: { error: string; message: string } }) => {
+        setErrorToast(error, {
+          title: error.body.error,
+          toastMessage: error.body.message,
+        });
+      },
+      onSuccess: () => {
+        queryClient.invalidateQueries([SAVED_QUERIES_ID]);
+        navigateToApp(PLUGIN_ID, { path: pagePathGetters.saved_queries() });
+        toasts.addSuccess(
+          i18n.translate('xpack.osquery.editSavedQuery.deleteSuccessToastMessageText', {
+            defaultMessage: 'Successfully deleted saved query',
+          })
+        );
+      },
+    }
+  );
 };

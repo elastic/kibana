@@ -136,7 +136,7 @@ interface ActionNotifyWhenProps {
   onNotifyWhenChange: (notifyWhen: RuleNotifyWhenType) => void;
   onThrottleChange: (throttle: number | null, throttleUnit: string) => void;
   onSummaryChange: (summary: boolean) => void;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   showMinimumThrottleWarning?: boolean;
   showMinimumThrottleUnitWarning?: boolean;
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
@@ -144,7 +144,7 @@ interface ActionNotifyWhenProps {
 }
 
 export const ActionNotifyWhen = ({
-  hasSummary,
+  hasAlertsMappings,
   frequency = DEFAULT_FREQUENCY,
   throttle,
   throttleUnit,
@@ -308,7 +308,7 @@ export const ActionNotifyWhen = ({
         <EuiFlexItem>
           <EuiSuperSelect
             fullWidth
-            prepend={hasSummary ? summaryOrPerRuleSelect : <></>}
+            prepend={hasAlertsMappings ? summaryOrPerRuleSelect : <></>}
             data-test-subj="notifyWhenSelect"
             options={notifyWhenOptions}
             valueOfSelected={notifyWhenValue}
@@ -330,7 +330,7 @@ export const ActionNotifyWhen = ({
                       prepend={i18n.translate(
                         'xpack.triggersActionsUI.sections.ruleForm.frequencyNotifyWhen.label',
                         {
-                          defaultMessage: 'Run action every',
+                          defaultMessage: 'Run every',
                         }
                       )}
                       onChange={(e) => {

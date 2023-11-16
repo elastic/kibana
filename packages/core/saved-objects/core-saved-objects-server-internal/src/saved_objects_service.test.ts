@@ -16,8 +16,9 @@ import {
   migratorInstanceMock,
   registerRoutesMock,
   typeRegistryInstanceMock,
+  applyTypeDefaultsMock,
 } from './saved_objects_service.test.mocks';
-import { BehaviorSubject, firstValueFrom } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, EMPTY } from 'rxjs';
 import { skip } from 'rxjs/operators';
 import { type RawPackageInfo, Env } from '@kbn/config';
 import { ByteSizeValue } from '@kbn/config-schema';
@@ -69,6 +70,7 @@ describe('SavedObjectsService', () => {
 
   beforeEach(() => {
     deprecationsSetup = createDeprecationRegistryProviderMock();
+    applyTypeDefaultsMock.mockReset().mockImplementation((type: unknown) => type);
   });
 
   const createCoreContext = ({
@@ -330,22 +332,50 @@ describe('SavedObjectsService', () => {
     });
 
     describe('#registerType', () => {
-      it('registers the type to the internal typeRegistry', async () => {
+      it('calls `applyTypeDefaults` with the correct parameters', async () => {
         // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
         const coreContext = createCoreContext();
         const soService = new SavedObjectsService(coreContext);
         const setup = await soService.setup(createSetupDeps());
 
-        const type = {
+        const inputType = {
           name: 'someType',
           hidden: false,
           namespaceType: 'single' as 'single',
           mappings: { properties: {} },
         };
-        setup.registerType(type);
+
+        applyTypeDefaultsMock.mockReturnValue(inputType);
+
+        setup.registerType(inputType);
+
+        expect(applyTypeDefaultsMock).toHaveBeenCalledTimes(1);
+        expect(applyTypeDefaultsMock).toHaveBeenCalledWith(inputType);
+      });
+
+      it('registers the type returned by `applyTypeDefaults` to the internal typeRegistry', async () => {
+        // we mocked registerCoreObjectTypes above, so this test case only reflects direct calls to the registerType method
+        const coreContext = createCoreContext();
+        const soService = new SavedObjectsService(coreContext);
+        const setup = await soService.setup(createSetupDeps());
+
+        const inputType = {
+          name: 'someType',
+          hidden: false,
+          namespaceType: 'single' as 'single',
+          mappings: { properties: {} },
+        };
+        const returnedType = {
+          ...inputType,
+          switchToModelVersionAt: '9.9.9',
+        };
+
+        applyTypeDefaultsMock.mockReturnValue(returnedType);
+
+        setup.registerType(inputType);
 
         expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledTimes(1);
-        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(type);
+        expect(typeRegistryInstanceMock.registerType).toHaveBeenCalledWith(returnedType);
       });
     });
 
@@ -517,6 +547,24 @@ describe('SavedObjectsService', () => {
 
       await setImmediate();
       expect(migratorInstanceMock.runMigrations).toHaveBeenCalledTimes(1);
+    });
+
+    it('does not start the migration if esNodesCompatibility$ is closed before calling `start`', async () => {
+      expect.assertions(2);
+      const coreContext = createCoreContext({ skipMigration: false });
+      const soService = new SavedObjectsService(coreContext);
+      const setupDeps = createSetupDeps();
+      // Create an new subject so that we can control when isCompatible=true
+      // is emitted.
+      setupDeps.elasticsearch.esNodesCompatibility$ = EMPTY;
+      await soService.setup(setupDeps);
+      await expect(() =>
+        soService.start(createStartDeps())
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"esNodesCompatibility$ was closed before emitting"`
+      );
+
+      expect(migratorInstanceMock.runMigrations).not.toHaveBeenCalled();
     });
 
     it('resolves with KibanaMigrator after waiting for migrations to complete', async () => {

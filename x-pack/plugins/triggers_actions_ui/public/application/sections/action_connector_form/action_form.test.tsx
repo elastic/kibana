@@ -314,6 +314,7 @@ describe('action_form', () => {
           context: [{ name: 'contextVar', description: 'context var1' }],
         }}
         featureId="alerting"
+        producerId="alerting"
         defaultActionGroupId={'default'}
         isActionGroupDisabledForActionType={(actionGroupId: string, actionTypeId: string) => {
           const recoveryActionGroupId = customRecoveredActionGroup

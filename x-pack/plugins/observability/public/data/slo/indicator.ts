@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { KQLCustomIndicator, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
 export const buildApmAvailabilityIndicator = (
   params: Partial<SLOWithSummaryResponse['indicator']['params']> = {}
@@ -17,7 +17,6 @@ export const buildApmAvailabilityIndicator = (
       service: 'o11y-app',
       transactionType: 'request',
       transactionName: 'GET /flaky',
-      goodStatusCodes: ['2xx', '3xx', '4xx'],
       index: 'metrics-apm*',
       ...params,
     },
@@ -54,5 +53,5 @@ export const buildCustomKqlIndicator = (
       timestampField: '@timestamp',
       ...params,
     },
-  };
+  } as KQLCustomIndicator;
 };

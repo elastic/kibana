@@ -7,6 +7,11 @@
 experimental[] Update part of an data view. Only the specified fields are updated in the
 data view. Unspecified fields stay as they are persisted.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-update-request]]
 ==== Request

@@ -10,13 +10,14 @@ import { KibanaServices } from '../../../common/lib/kibana';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../common/detection_engine/rule_monitoring';
+} from '../../../../common/api/detection_engine/rule_monitoring';
 import {
-  LogLevel,
-  RuleExecutionEventType,
-} from '../../../../common/detection_engine/rule_monitoring';
+  LogLevelEnum,
+  RuleExecutionEventTypeEnum,
+} from '../../../../common/api/detection_engine/rule_monitoring';
 
 import { api } from './api_client';
+import type { FetchRuleExecutionEventsArgs } from './api_client_interface';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -25,7 +26,25 @@ describe('Rule Monitoring API Client', () => {
   const mockKibanaServices = KibanaServices.get as jest.Mock;
   mockKibanaServices.mockReturnValue({ http: { fetch: fetchMock } });
 
-  const signal = new AbortController().signal;
+  describe('setupDetectionEngineHealthApi', () => {
+    const responseMock = {};
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(responseMock);
+    });
+
+    it('calls API with correct parameters', async () => {
+      await api.setupDetectionEngineHealthApi();
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        '/internal/detection_engine/health/_setup',
+        expect.objectContaining({
+          method: 'POST',
+        })
+      );
+    });
+  });
 
   describe('fetchRuleExecutionEvents', () => {
     const responseMock: GetRuleExecutionEventsResponse = {
@@ -43,42 +62,72 @@ describe('Rule Monitoring API Client', () => {
     });
 
     it('calls API correctly with only rule id specified', async () => {
-      await api.fetchRuleExecutionEvents({ ruleId: '42', signal });
+      await api.fetchRuleExecutionEvents({ ruleId: '42' });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/events',
-        {
+        expect.objectContaining({
           method: 'GET',
           query: {},
-          signal,
-        }
+        })
       );
     });
 
-    it('calls API correctly with filter and pagination options', async () => {
+    const ISO_PATTERN = /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/;
+
+    it.each<[string, Omit<FetchRuleExecutionEventsArgs, 'ruleId'>, Record<string, unknown>]>([
+      [
+        'search term filter',
+        { searchTerm: 'something to search' },
+        { search_term: 'something to search' },
+      ],
+      [
+        'event types filter',
+        { eventTypes: [RuleExecutionEventTypeEnum.message] },
+        { event_types: 'message' },
+      ],
+      [
+        'log level filter',
+        { logLevels: [LogLevelEnum.warn, LogLevelEnum.error] },
+        { log_levels: 'warn,error' },
+      ],
+      [
+        'start date filter in relative format',
+        { dateRange: { start: 'now-1d/d' } },
+        { date_start: expect.stringMatching(ISO_PATTERN) },
+      ],
+      [
+        'end date filter',
+        { dateRange: { end: 'now-3d/d' } },
+        { date_end: expect.stringMatching(ISO_PATTERN) },
+      ],
+      [
+        'date range filter in relative format',
+        { dateRange: { start: new Date().toISOString(), end: new Date().toISOString() } },
+        {
+          date_start: expect.stringMatching(ISO_PATTERN),
+          date_end: expect.stringMatching(ISO_PATTERN),
+        },
+      ],
+      [
+        'pagination',
+        { sortOrder: 'asc', page: 42, perPage: 146 } as const,
+        { sort_order: 'asc', page: 42, per_page: 146 },
+      ],
+    ])('calls API correctly with %s', async (_, params, expectedParams) => {
       await api.fetchRuleExecutionEvents({
         ruleId: '42',
-        eventTypes: [RuleExecutionEventType.message],
-        logLevels: [LogLevel.warn, LogLevel.error],
-        sortOrder: 'asc',
-        page: 42,
-        perPage: 146,
-        signal,
+        ...params,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/events',
-        {
+        expect.objectContaining({
           method: 'GET',
           query: {
-            event_types: 'message',
-            log_levels: 'warn,error',
-            sort_order: 'asc',
-            page: 42,
-            per_page: 146,
+            ...expectedParams,
           },
-          signal,
-        }
+        })
       );
     });
   });
@@ -101,12 +150,11 @@ describe('Rule Monitoring API Client', () => {
         end: '2001-01-02T17:00:00.000Z',
         queryText: '',
         statusFilters: [],
-        signal,
       });
 
       expect(fetchMock).toHaveBeenCalledWith(
         '/internal/detection_engine/rules/42/execution/results',
-        {
+        expect.objectContaining({
           method: 'GET',
           query: {
             end: '2001-01-02T17:00:00.000Z',
@@ -118,8 +166,7 @@ describe('Rule Monitoring API Client', () => {
             start: '2001-01-01T17:00:00.000Z',
             status_filters: '',
           },
-          signal,
-        }
+        })
       );
     });
 
@@ -130,7 +177,6 @@ describe('Rule Monitoring API Client', () => {
         end: 'now',
         queryText: '',
         statusFilters: [],
-        signal,
       });
       expect(response).toEqual(responseMock);
     });

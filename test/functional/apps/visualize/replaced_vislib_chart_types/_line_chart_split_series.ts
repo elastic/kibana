@@ -32,7 +32,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       log.debug('clickLineChart');
       await PageObjects.visualize.clickLineChart();
       await PageObjects.visualize.clickNewSearch();
-      await PageObjects.timePicker.setDefaultAbsoluteRange();
       log.debug('Bucket = Split chart');
       await PageObjects.visEditor.clickBucket('Split series');
       log.debug('Aggregation = Terms');
@@ -44,7 +43,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     before(async () => {
       await PageObjects.visualize.initTests();
+      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await initLineChart();
+    });
+
+    after(async () => {
+      await PageObjects.common.unsetTime();
     });
 
     afterEach(async () => {
@@ -202,18 +206,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, false);
         await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -221,18 +214,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -242,18 +224,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
         log.debug(labels);
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
 
@@ -261,18 +232,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.visEditor.changeYAxisFilterLabelsCheckbox(axisId, true);
         await PageObjects.visEditor.clickGo(true);
         const labels = await PageObjects.visChart.getYAxisLabels(xyChartSelector);
-        const expectedLabels = [
-          '0',
-          '1,000',
-          '2,000',
-          '3,000',
-          '4,000',
-          '5,000',
-          '6,000',
-          '7,000',
-          '8,000',
-          '9,000',
-        ];
+        const expectedLabels = ['0', '2,000', '4,000', '6,000', '8,000'];
         expect(labels).to.eql(expectedLabels);
       });
     });
@@ -284,7 +244,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         log.debug('clickLineChart');
         await PageObjects.visualize.clickLineChart();
         await PageObjects.visualize.clickNewSearch();
-        await PageObjects.timePicker.setDefaultAbsoluteRange();
       });
 
       describe('parent pipeline', () => {

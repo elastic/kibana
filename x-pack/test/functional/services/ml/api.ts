@@ -12,10 +12,12 @@ import type { TypeOf } from '@kbn/config-schema';
 import fs from 'fs';
 import { Calendar } from '@kbn/ml-plugin/server/models/calendar';
 import { Annotation } from '@kbn/ml-plugin/common/types/annotations';
-import { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
 import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common/constants/states';
-import { DataFrameTaskStateType } from '@kbn/ml-plugin/common/types/data_frame_analytics';
-import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
+import {
+  type DataFrameAnalyticsConfig,
+  type DataFrameTaskStateType,
+  DATA_FRAME_TASK_STATE,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { Datafeed, Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { JobType } from '@kbn/ml-plugin/common/types/saved_objects';
 import { setupModuleBodySchema } from '@kbn/ml-plugin/server/routes/schemas/modules';
@@ -24,7 +26,7 @@ import {
   ML_ANNOTATIONS_INDEX_ALIAS_WRITE,
 } from '@kbn/ml-plugin/common/constants/index_patterns';
 import { PutTrainedModelConfig } from '@kbn/ml-plugin/common/types/trained_models';
-import { COMMON_REQUEST_HEADERS } from './common_api';
+import { getCommonRequestHeader } from './common_api';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type MlApi = ProvidedType<typeof MachineLearningAPIProvider>;
@@ -221,7 +223,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async createIndex(
       indices: string,
-      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping
+      mappings?: Record<string, estypes.MappingTypeMapping> | estypes.MappingTypeMapping,
+      settings?: Record<string, estypes.IndicesIndexSettings> | estypes.IndicesIndexSettings
     ) {
       log.debug(`Creating indices: '${indices}'...`);
       if ((await es.indices.exists({ index: indices, allow_no_indices: false })) === true) {
@@ -231,7 +234,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
       const body = await es.indices.create({
         index: indices,
-        ...(mappings ? { body: { mappings } } : {}),
+        body: {
+          ...(mappings ? { mappings } : {}),
+          ...(settings ? { settings } : {}),
+        },
       });
       expect(body)
         .to.have.property('acknowledged')
@@ -680,8 +686,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       );
 
       const { body, status } = await kbnSupertest
-        .put(`${space ? `/s/${space}` : ''}/api/ml/anomaly_detectors/${jobId}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .put(`${space ? `/s/${space}` : ''}/internal/ml/anomaly_detectors/${jobId}`)
+        .set(getCommonRequestHeader('1'))
         .send(jobConfig);
       this.assertResponseStatusCode(200, status, body);
 
@@ -765,8 +771,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         `Creating datafeed with id '${datafeedId}' ${space ? `in space '${space}' ` : ''}...`
       );
       const { body, status } = await kbnSupertest
-        .put(`${space ? `/s/${space}` : ''}/api/ml/datafeeds/${datafeedId}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .put(`${space ? `/s/${space}` : ''}/internal/ml/datafeeds/${datafeedId}`)
+        .set(getCommonRequestHeader('1'))
         .send(datafeedConfig);
       this.assertResponseStatusCode(200, status, body);
 
@@ -918,8 +924,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         }...`
       );
       const { body, status } = await kbnSupertest
-        .put(`${space ? `/s/${space}` : ''}/api/ml/data_frame/analytics/${analyticsId}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .put(`${space ? `/s/${space}` : ''}/internal/ml/data_frame/analytics/${analyticsId}`)
+        .set(getCommonRequestHeader('1'))
         .send(analyticsConfig);
       this.assertResponseStatusCode(200, status, body);
 
@@ -932,7 +938,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       log.debug(`Creating data frame analytic job with id '${analyticsId}' via ES API...`);
       const { body, status } = await esSupertest
         .put(`/_ml/data_frame/analytics/${analyticsId}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .set(getCommonRequestHeader('1'))
         .send(analyticsConfig);
       this.assertResponseStatusCode(200, status, body);
 
@@ -1063,6 +1069,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       });
     },
 
+    async getGroups(space?: string) {
+      const { body, status } = await kbnSupertest
+        .get(`${space ? `/s/${space}` : ''}/internal/ml/jobs/groups`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
+
+      return body;
+    },
+
     async getAnnotations(jobId: string) {
       log.debug(`Fetching annotations for job '${jobId}'...`);
 
@@ -1177,8 +1192,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       space?: string
     ) {
       const { body, status } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_jobs_spaces`)
-        .set(COMMON_REQUEST_HEADERS)
+        .post(`${space ? `/s/${space}` : ''}/internal/ml/saved_objects/update_jobs_spaces`)
+        .set(getCommonRequestHeader('1'))
         .send({ jobType, jobIds: [jobId], spacesToAdd, spacesToRemove });
       this.assertResponseStatusCode(200, status, body);
 
@@ -1187,8 +1202,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertJobSpaces(jobId: string, jobType: JobType, expectedSpaces: string[]) {
       const { body, status } = await kbnSupertest
-        .get('/api/ml/saved_objects/jobs_spaces')
-        .set(COMMON_REQUEST_HEADERS);
+        .get('/internal/ml/saved_objects/jobs_spaces')
+        .set(getCommonRequestHeader('1'));
       this.assertResponseStatusCode(200, status, body);
 
       if (expectedSpaces.length > 0) {
@@ -1212,8 +1227,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       space?: string
     ) {
       const { body, status } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/update_trained_models_spaces`)
-        .set(COMMON_REQUEST_HEADERS)
+        .post(
+          `${space ? `/s/${space}` : ''}/internal/ml/saved_objects/update_trained_models_spaces`
+        )
+        .set(getCommonRequestHeader('1'))
         .send({ modelIds: [modelId], spacesToAdd, spacesToRemove });
       this.assertResponseStatusCode(200, status, body);
 
@@ -1224,8 +1241,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async assertTrainedModelSpaces(modelId: string, expectedSpaces: string[]) {
       const { body, status } = await kbnSupertest
-        .get('/api/ml/saved_objects/trained_models_spaces')
-        .set(COMMON_REQUEST_HEADERS);
+        .get('/internal/ml/saved_objects/trained_models_spaces')
+        .set(getCommonRequestHeader('1'));
       this.assertResponseStatusCode(200, status, body);
       if (expectedSpaces.length > 0) {
         // Should list expected spaces correctly
@@ -1244,7 +1261,7 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async syncSavedObjects(simulate: boolean = false, space?: string) {
       const { body, status } = await kbnSupertest
         .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/sync?simulate=${simulate}`)
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('2023-10-31'));
       this.assertResponseStatusCode(200, status, body);
 
       return body;
@@ -1252,8 +1269,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async initSavedObjects(simulate: boolean = false, space?: string) {
       const { body, status } = await kbnSupertest
-        .get(`${space ? `/s/${space}` : ''}/api/ml/saved_objects/initialize?simulate=${simulate}`)
-        .set(COMMON_REQUEST_HEADERS);
+        .get(
+          `${space ? `/s/${space}` : ''}/internal/ml/saved_objects/initialize?simulate=${simulate}`
+        )
+        .set(getCommonRequestHeader('1'));
       this.assertResponseStatusCode(200, status, body);
       return body;
     },
@@ -1261,8 +1280,8 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     async createTrainedModel(modelId: string, body: PutTrainedModelConfig, space?: string) {
       log.debug(`Creating trained model with id "${modelId}"`);
       const { body: model, status } = await kbnSupertest
-        .put(`${space ? `/s/${space}` : ''}/api/ml/trained_models/${modelId}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .put(`${space ? `/s/${space}` : ''}/internal/ml/trained_models/${modelId}`)
+        .set(getCommonRequestHeader('1'))
         .send(body);
       this.assertResponseStatusCode(200, status, model);
 
@@ -1322,6 +1341,15 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       return body;
     },
 
+    async getTrainedModelStatsES(): Promise<estypes.MlGetTrainedModelsStatsResponse> {
+      log.debug(`Getting trained models stats`);
+      const { body, status } = await esSupertest.get(`/_ml/trained_models/_stats`);
+      this.assertResponseStatusCode(200, status, body);
+
+      log.debug('> Trained model stats fetched');
+      return body;
+    },
+
     async deleteTrainedModelES(modelId: string) {
       log.debug(`Deleting trained model with id "${modelId}"`);
       const { body, status } = await esSupertest
@@ -1344,10 +1372,10 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
       }
     },
 
-    async stopTrainedModelDeploymentES(modelId: string) {
-      log.debug(`Stopping trained model deployment with id "${modelId}"`);
+    async stopTrainedModelDeploymentES(deploymentId: string) {
+      log.debug(`Stopping trained model deployment with id "${deploymentId}"`);
       const { body, status } = await esSupertest.post(
-        `/_ml/trained_models/${modelId}/deployment/_stop`
+        `/_ml/trained_models/${deploymentId}/deployment/_stop`
       );
       this.assertResponseStatusCode(200, status, body);
 
@@ -1356,13 +1384,17 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
 
     async stopAllTrainedModelDeploymentsES() {
       log.debug(`Stopping all trained model deployments`);
-      const getModelsRsp = await this.getTrainedModelsES();
-      for (const model of getModelsRsp.trained_model_configs) {
-        if (this.isInternalModelId(model.model_id)) {
-          log.debug(`> Skipping internal ${model.model_id}`);
+      const getModelsRsp = await this.getTrainedModelStatsES();
+      for (const modelStats of getModelsRsp.trained_model_stats) {
+        if (this.isInternalModelId(modelStats.model_id)) {
+          log.debug(`> Skipping internal ${modelStats.model_id}`);
           continue;
         }
-        await this.stopTrainedModelDeploymentES(model.model_id);
+        if (modelStats.deployment_stats === undefined) {
+          log.debug(`> Skipping, no deployment stats for ${modelStats.model_id} found`);
+          continue;
+        }
+        await this.stopTrainedModelDeploymentES(modelStats.deployment_stats.deployment_id);
       }
     },
 
@@ -1479,16 +1511,43 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
         });
       this.assertResponseStatusCode(200, status, ingestPipeline);
 
-      log.debug('> Ingest pipeline crated');
+      log.debug('> Ingest pipeline created');
       return ingestPipeline;
     },
 
-    async deleteIngestPipeline(modelId: string) {
+    async deleteIngestPipeline(modelId: string, usePrefix: boolean = true) {
       log.debug(`Deleting ingest pipeline for trained model with id "${modelId}"`);
-      const { body, status } = await esSupertest.delete(`/_ingest/pipeline/pipeline_${modelId}`);
+      const { body, status } = await esSupertest.delete(
+        `/_ingest/pipeline/${usePrefix ? 'pipeline_' : ''}${modelId}`
+      );
       this.assertResponseStatusCode(200, status, body);
 
       log.debug('> Ingest pipeline deleted');
+    },
+
+    async assureMlStatsIndexExists(timeout: number = 60 * 1000) {
+      const params = {
+        index: '.ml-stats-000001',
+        id: 'noop_job_test_id',
+        body: {
+          type: 'analytics_memory_usage',
+          job_id: 'noop_job',
+          timestamp: 1687437633705,
+          peak_usage_bytes: 148148,
+          status: 'ok',
+        },
+        refresh: 'wait_for',
+      } as const;
+      await es.index(params);
+
+      await retry.waitForWithTimeout(`Stats index to exist`, timeout, async () => {
+        const statsIndices = await es.cat.indices({ format: 'json', index: '.ml-stats*' });
+        if (statsIndices[0]?.health === 'green') {
+          return true;
+        } else {
+          throw new Error(`expected stats index to exist`);
+        }
+      });
     },
 
     async setupModule(
@@ -1498,12 +1557,21 @@ export function MachineLearningAPIProvider({ getService }: FtrProviderContext) {
     ) {
       log.debug(`Setting up module with ID: "${moduleId}"`);
       const { body: module, status } = await kbnSupertest
-        .post(`${space ? `/s/${space}` : ''}/api/ml/modules/setup/${moduleId}`)
-        .set(COMMON_REQUEST_HEADERS)
+        .post(`${space ? `/s/${space}` : ''}/internal/ml/modules/setup/${moduleId}`)
+        .set(getCommonRequestHeader('1'))
         .send(body);
       this.assertResponseStatusCode(200, status, module);
 
       log.debug('Module set up');
+      return module;
+    },
+
+    async getModule(moduleId: string) {
+      log.debug(`Get module with ID: "${moduleId}"`);
+      const { body: module, status } = await kbnSupertest
+        .get(`/internal/ml/modules/get_module/${moduleId}`)
+        .set(getCommonRequestHeader('1'));
+      this.assertResponseStatusCode(200, status, module);
       return module;
     },
   };

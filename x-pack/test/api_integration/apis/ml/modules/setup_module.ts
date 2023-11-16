@@ -12,7 +12,7 @@ import { JOB_STATE, DATAFEED_STATE } from '@kbn/ml-plugin/common/constants/state
 import { Job } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
@@ -681,9 +681,9 @@ export default ({ getService }: FtrProviderContext) => {
     rspCode: number
   ) {
     const { body, status } = await supertest
-      .post(`/api/ml/modules/setup/${module}`)
+      .post(`/internal/ml/modules/setup/${module}`)
       .auth(user, ml.securityCommon.getPasswordForUser(user))
-      .set(COMMON_REQUEST_HEADERS)
+      .set(getCommonRequestHeader('1'))
       .send(rqBody);
     ml.api.assertResponseStatusCode(rspCode, status, body);
 

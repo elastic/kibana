@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { InventoryColorPalette, InfraWaffleMapSteppedGradientLegend } from '../../../../lib/lib';
+import type {
+  InventoryColorPalette,
+  InfraWaffleMapSteppedGradientLegend,
+} from '../../../../lib/lib';
 import { getColorPalette } from './get_color_palette';
 
 export const createLegend = (

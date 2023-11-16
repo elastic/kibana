@@ -12,14 +12,15 @@ import type { SecurityPageName } from '../../app/types';
 import type { AppLinkItems, NavigationLink } from './types';
 
 export const formatNavigationLinks = (appLinks: AppLinkItems): NavigationLink[] =>
-  appLinks.map((link) => ({
+  appLinks.map<NavigationLink>((link) => ({
     id: link.id,
     title: link.title,
     ...(link.categories != null ? { categories: link.categories } : {}),
     ...(link.description != null ? { description: link.description } : {}),
     ...(link.sideNavDisabled === true ? { disabled: true } : {}),
-    ...(link.landingIcon != null ? { icon: link.landingIcon } : {}),
-    ...(link.landingImage != null ? { image: link.landingImage } : {}),
+    ...(link.landingIcon != null ? { landingIcon: link.landingIcon } : {}),
+    ...(link.landingImage != null ? { landingImage: link.landingImage } : {}),
+    ...(link.sideNavIcon != null ? { sideNavIcon: link.sideNavIcon } : {}),
     ...(link.skipUrlState != null ? { skipUrlState: link.skipUrlState } : {}),
     ...(link.isBeta != null ? { isBeta: link.isBeta } : {}),
     ...(link.betaOptions != null ? { betaOptions: link.betaOptions } : {}),

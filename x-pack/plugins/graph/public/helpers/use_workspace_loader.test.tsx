@@ -10,9 +10,8 @@ import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { createMockGraphStore } from '../state_management/mocks';
 import { Workspace } from '../types';
-import { SavedObjectsClientCommon } from '@kbn/data-views-plugin/public';
 import { renderHook, act, RenderHookOptions } from '@testing-library/react-hooks';
-import type { SavedObjectsClientContract } from '@kbn/core/public';
+import { ContentClient } from '@kbn/content-management-plugin/public';
 
 jest.mock('react-router-dom', () => {
   const useLocation = () => ({
@@ -33,19 +32,19 @@ jest.mock('react-router-dom', () => {
   };
 });
 
-const mockSavedObjectsClient = {
-  resolve: jest.fn().mockResolvedValue({
-    saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
-    outcome: 'exactMatch',
+const mockContentClient = {
+  get: jest.fn().mockResolvedValue({
+    item: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
+    meta: { outcome: 'exactMatch' },
   }),
-  find: jest.fn().mockResolvedValue({ title: 'test', perPage: 1, total: 1, page: 1 }),
-} as unknown as SavedObjectsClientCommon;
+  search: jest.fn().mockResolvedValue({ title: 'test', perPage: 1, total: 1, page: 1 }),
+} as unknown as ContentClient;
 
 describe('use_workspace_loader', () => {
   const defaultProps: UseWorkspaceLoaderProps = {
     workspaceRef: { current: {} as Workspace },
     store: createMockGraphStore({}).store,
-    savedObjectsClient: mockSavedObjectsClient as unknown as SavedObjectsClientContract,
+    contentClient: mockContentClient as unknown as ContentClient,
     coreStart: coreMock.createStart(),
     spaces: spacesPluginMock.createStartContract(),
     data: dataPluginMock.createStartContract(),
@@ -65,13 +64,15 @@ describe('use_workspace_loader', () => {
     const props = {
       ...defaultProps,
       spaces: spacesPluginMock.createStartContract(),
-      savedObjectsClient: {
-        ...mockSavedObjectsClient,
-        resolve: jest.fn().mockResolvedValue({
-          saved_object: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
-          outcome: 'aliasMatch',
-          alias_target_id: 'aliasTargetId',
-          alias_purpose: 'savedObjectConversion',
+      contentClient: {
+        ...mockContentClient,
+        get: jest.fn().mockResolvedValue({
+          item: { id: 10, _version: '7.15.0', attributes: { wsState: '{}' } },
+          meta: {
+            outcome: 'aliasMatch',
+            aliasTargetId: 'aliasTargetId',
+            aliasPurpose: 'savedObjectConversion',
+          },
         }),
       },
     } as unknown as UseWorkspaceLoaderProps;

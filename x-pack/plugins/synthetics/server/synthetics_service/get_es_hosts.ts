@@ -12,8 +12,7 @@
  * 2.0.
  */
 
-import { CloudSetup } from '@kbn/cloud-plugin/server';
-import { decodeCloudId } from '@kbn/fleet-plugin/common';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { ServiceConfig } from '../../common/config';
 
 export function getEsHosts({
@@ -23,8 +22,7 @@ export function getEsHosts({
   cloud?: CloudSetup;
   config: ServiceConfig;
 }): string[] {
-  const cloudId = cloud?.isCloudEnabled && cloud.cloudId;
-  const cloudUrl = cloudId && decodeCloudId(cloudId)?.elasticsearchUrl;
+  const cloudUrl = cloud?.isCloudEnabled && cloud?.elasticsearchUrl;
   const cloudHosts = cloudUrl ? [cloudUrl] : undefined;
   if (cloudHosts && cloudHosts.length > 0) {
     return cloudHosts;

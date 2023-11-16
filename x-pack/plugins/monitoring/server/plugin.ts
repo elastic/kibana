@@ -35,7 +35,7 @@ import { configSchema, createConfig, MonitoringConfig } from './config';
 import { instantiateClient } from './es_client/instantiate_client';
 import { initBulkUploader } from './kibana_monitoring';
 import { registerCollectors } from './kibana_monitoring/collectors';
-import { initInfraSource } from './lib/logs/init_infra_source';
+import { initLogView } from './lib/logs/init_log_view';
 import { LicenseService } from './license_service';
 import { requireUIRoutes } from './routes';
 import { EndpointTypes, Globals } from './static_globals';
@@ -202,7 +202,7 @@ export class MonitoringPlugin
         alerting: plugins.alerting,
         logger: this.log,
       });
-      initInfraSource(config, plugins.infra);
+      initLogView(config, plugins.logsShared);
     }
   }
 

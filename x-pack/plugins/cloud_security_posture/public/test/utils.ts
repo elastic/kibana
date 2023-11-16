@@ -5,13 +5,21 @@
  * 2.0.
  */
 
-import { screen } from '@testing-library/react';
+import { Matcher, screen } from '@testing-library/react';
 
-export const expectIdsInDoc = ({ be = [], notToBe = [] }: { be: string[]; notToBe?: string[] }) => {
+export const expectIdsInDoc = ({
+  be = [],
+  notToBe = [],
+}: {
+  be: Matcher[];
+  notToBe?: Matcher[];
+}) => {
+  const filteredNotToBe = notToBe.filter((testId) => !be.includes(testId));
+
   be.forEach((testId) => {
     expect(screen.getByTestId(testId)).toBeInTheDocument();
   });
-  notToBe.forEach((testId) => {
+  filteredNotToBe.forEach((testId) => {
     expect(screen.queryByTestId(testId)).not.toBeInTheDocument();
   });
 };

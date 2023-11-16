@@ -52,7 +52,7 @@ export const FleetProxiesSection: React.FunctionComponent<FleetProxiesSectionPro
       <EuiText color="subdued" size="m">
         <FormattedMessage
           id="xpack.fleet.settings.fleetProxiesSection.subtitle"
-          defaultMessage="Specify any proxy URLs to be used in Fleet servers or Outputs."
+          defaultMessage="Specify any proxy URLs to be used in Fleet servers, Outputs or Agent binary download sources."
         />
       </EuiText>
       <EuiSpacer size="m" />

@@ -6,7 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { UMElasticsearchQueryFn } from '../adapters/framework';
+import { UptimeEsClient } from '../../../lib';
 import { Ping } from '../../../../common/runtime_types/ping';
 
 export interface GetStepScreenshotParams {
@@ -80,10 +80,14 @@ export const getLastSuccessfulStepParams = ({
   };
 };
 
-export const getLastSuccessfulCheck: UMElasticsearchQueryFn<
-  GetStepScreenshotParams,
-  Ping | null
-> = async ({ uptimeEsClient, monitorId, timestamp, location }) => {
+export const getLastSuccessfulCheck = async ({
+  uptimeEsClient,
+  monitorId,
+  timestamp,
+  location,
+}: GetStepScreenshotParams & {
+  uptimeEsClient: UptimeEsClient;
+}): Promise<Ping | null> => {
   const lastSuccessCheckParams = getLastSuccessfulStepParams({
     monitorId,
     timestamp,

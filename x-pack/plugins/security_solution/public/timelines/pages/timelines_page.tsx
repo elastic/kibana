@@ -10,7 +10,8 @@ import React, { useCallback, useState } from 'react';
 import styled from 'styled-components';
 import { useParams } from 'react-router-dom';
 
-import { TimelineId, TimelineType } from '../../../common/types/timeline';
+import { TimelineId } from '../../../common/types/timeline';
+import { TimelineType } from '../../../common/api/timeline';
 import { HeaderPage } from '../../common/components/header_page';
 import { SecuritySolutionPageWrapper } from '../../common/components/page_wrapper';
 import { useKibana } from '../../common/lib/kibana';

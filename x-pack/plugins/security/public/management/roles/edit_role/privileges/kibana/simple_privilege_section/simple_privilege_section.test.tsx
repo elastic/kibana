@@ -11,10 +11,10 @@ import React from 'react';
 
 import { mountWithIntl, shallowWithIntl } from '@kbn/test-jest-helpers';
 
-import type { Role } from '../../../../../../../common/model';
-import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 import { SimplePrivilegeSection } from './simple_privilege_section';
 import { UnsupportedSpacePrivilegesWarning } from './unsupported_space_privileges_warning';
+import type { Role } from '../../../../../../../common/model';
+import { KibanaPrivileges, SecuredFeature } from '../../../../model';
 
 const buildProps = (customProps: any = {}) => {
   const features = [

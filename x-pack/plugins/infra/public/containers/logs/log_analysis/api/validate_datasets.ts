@@ -37,6 +37,7 @@ export const callValidateDatasetsAPI = async (requestArgs: RequestArgs, fetch: H
         },
       })
     ),
+    version: '1',
   });
 
   return decodeOrThrow(validateLogEntryDatasetsResponsePayloadRT)(response);

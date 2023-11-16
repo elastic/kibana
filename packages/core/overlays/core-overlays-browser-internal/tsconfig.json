@@ -15,7 +15,6 @@
   "kbn_references": [
     "@kbn/i18n-react",
     "@kbn/core-theme-browser",
-    "@kbn/core-theme-browser-internal",
     "@kbn/core-mount-utils-browser-internal",
     "@kbn/core-i18n-browser",
     "@kbn/core-ui-settings-browser",
@@ -25,6 +24,9 @@
     "@kbn/core-mount-utils-browser",
     "@kbn/core-theme-browser-mocks",
     "@kbn/i18n",
+    "@kbn/react-kibana-context-render",
+    "@kbn/core-analytics-browser-mocks",
+    "@kbn/core-analytics-browser",
   ],
   "exclude": [
     "target/**/*",

@@ -7,21 +7,22 @@
 
 export const ROOT_PATH = '/';
 
-export const ENGINES_PATH = `${ROOT_PATH}search_applications`;
+export const SEARCH_APPLICATIONS_PATH = `${ROOT_PATH}search_applications`;
 
-export enum EngineViewTabs {
-  PREVIEW = 'preview',
+export enum SearchApplicationViewTabs {
+  DOCS_EXPLORER = 'docs_explorer',
   CONTENT = 'content',
   CONNECT = 'connect',
 }
-export const ENGINE_CREATION_PATH = `${ENGINES_PATH}/new`;
-export const ENGINE_PATH = `${ENGINES_PATH}/:engineName`;
-export const ENGINE_TAB_PATH = `${ENGINE_PATH}/:tabId`;
-export const SEARCH_APPLICATION_CONNECT_PATH = `${ENGINE_PATH}/${EngineViewTabs.CONNECT}/:connectTabId`;
+export const SEARCH_APPLICATION_CREATION_PATH = `${SEARCH_APPLICATIONS_PATH}/new`;
+export const SEARCH_APPLICATION_PATH = `${SEARCH_APPLICATIONS_PATH}/:searchApplicationName`;
+export const SEARCH_APPLICATION_TAB_PATH = `${SEARCH_APPLICATION_PATH}/:tabId`;
+export const SEARCH_APPLICATION_CONNECT_PATH = `${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONNECT}/:connectTabId`;
 export enum SearchApplicationConnectTabs {
-  API = 'api',
+  SEARCHAPI = 'search_api',
+  DOCUMENTATION = 'documentation',
 }
-export const SEARCH_APPLICATION_CONTENT_PATH = `${ENGINE_PATH}/${EngineViewTabs.CONTENT}/:contentTabId`;
+export const SEARCH_APPLICATION_CONTENT_PATH = `${SEARCH_APPLICATION_PATH}/${SearchApplicationViewTabs.CONTENT}/:contentTabId`;
 export enum SearchApplicationContentTabs {
   INDICES = 'indices',
   SCHEMA = 'schema',

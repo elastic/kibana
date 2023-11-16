@@ -5,12 +5,22 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import { i18n } from '@kbn/i18n';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
-import { discoverRouter } from './discover_router';
-import { DiscoverServices } from '../build_services';
 
-export const renderApp = (element: HTMLElement, services: DiscoverServices, isDev: boolean) => {
+import React from 'react';
+import { i18n } from '@kbn/i18n';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { DiscoverRouter } from './discover_router';
+import { DiscoverServices } from '../build_services';
+import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
+
+export interface RenderAppProps {
+  element: HTMLElement;
+  services: DiscoverServices;
+  profileRegistry: DiscoverProfileRegistry;
+  isDev: boolean;
+}
+
+export const renderApp = ({ element, services, profileRegistry, isDev }: RenderAppProps) => {
   const { history: getHistory, capabilities, chrome, data, core } = services;
 
   const history = getHistory();
@@ -26,7 +36,16 @@ export const renderApp = (element: HTMLElement, services: DiscoverServices, isDe
     });
   }
   const unmount = toMountPoint(
-    wrapWithTheme(discoverRouter(services, history, isDev), core.theme.theme$)
+    <DiscoverRouter
+      services={services}
+      profileRegistry={profileRegistry}
+      history={history}
+      isDev={isDev}
+    />,
+    {
+      theme: core.theme,
+      i18n: core.i18n,
+    }
   )(element);
 
   return () => {

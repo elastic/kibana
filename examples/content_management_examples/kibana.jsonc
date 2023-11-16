@@ -12,6 +12,7 @@
       "developerExamples",
       "kibanaReact",
       "savedObjectsTaggingOss"
-    ]
+    ],
+    "requiredBundles": ["savedObjectsFinder"]
   }
 }

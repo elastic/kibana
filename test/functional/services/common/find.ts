@@ -195,7 +195,7 @@ export class FindService extends FtrService {
   ): Promise<WebElementWrapper[]> {
     this.log.debug(`Find.allDescendantDisplayedByTagName('${tagName}')`);
     const allElements = await this.wrapAll(
-      await parentElement._webElement.findElements(By.tagName(tagName))
+      await parentElement._webElement.findElements(By.css(tagName))
     );
     return await this.filterElementIsDisplayed(allElements);
   }
@@ -307,6 +307,16 @@ export class FindService extends FtrService {
     }, timeout);
   }
 
+  public async existsByXpath(
+    selector: string,
+    timeout: number = this.WAIT_FOR_EXISTS_TIME
+  ): Promise<boolean> {
+    this.log.debug(`Find.existsByXpath('${selector}') with timeout=${timeout}`);
+    return await this.exists(async (drive) => {
+      return this.wrapAll(await drive.findElements(By.xpath(selector)));
+    }, timeout);
+  }
+
   public async clickByCssSelectorWhenNotDisabled(selector: string, opts?: TimeoutOpt) {
     const timeout = opts?.timeout ?? this.defaultFindTimeout;
 
@@ -372,7 +382,7 @@ export class FindService extends FtrService {
     return await this.retry.tryForTime(timeout, async () => {
       // tslint:disable-next-line:variable-name
       const _element = element instanceof WebElementWrapper ? element._webElement : element;
-      const allButtons = this.wrapAll(await _element.findElements(By.tagName('button')));
+      const allButtons = this.wrapAll(await _element.findElements(By.css('button')));
       const buttonTexts = await Promise.all(
         allButtons.map(async (el) => {
           return el.getVisibleText();

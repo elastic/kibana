@@ -19,19 +19,22 @@ import { rollupDataEnricher } from './rollup_data_enricher';
 import { IndexPatternsFetcher } from './shared_imports';
 import { handleEsError } from './shared_imports';
 import { formatEsError } from './lib/format_es_error';
+import { RollupConfig } from './config';
 
 export class RollupPlugin implements Plugin<void, void, any, any> {
+  private readonly config: RollupConfig;
   private readonly logger: Logger;
   private readonly license: License;
 
   constructor(initializerContext: PluginInitializerContext) {
+    this.config = initializerContext.config.get();
     this.logger = initializerContext.logger.get();
     this.license = new License();
   }
 
   public setup(
-    { http, uiSettings, savedObjects, getStartServices }: CoreSetup,
-    { features, licensing, indexManagement, visTypeTimeseries, usageCollection }: Dependencies
+    { http, uiSettings, getStartServices }: CoreSetup,
+    { features, licensing, indexManagement, usageCollection, dataViews, data }: Dependencies
   ) {
     this.license.setup(
       {
@@ -100,8 +103,13 @@ export class RollupPlugin implements Plugin<void, void, any, any> {
       }
     }
 
-    if (indexManagement && indexManagement.indexDataEnricher) {
-      indexManagement.indexDataEnricher.add(rollupDataEnricher);
+    if (this.config.ui.enabled) {
+      if (indexManagement && indexManagement.indexDataEnricher) {
+        indexManagement.indexDataEnricher.add(rollupDataEnricher);
+      }
+
+      dataViews.enableRollups();
+      data.search.enableRollups();
     }
   }
 

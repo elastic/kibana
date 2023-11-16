@@ -95,7 +95,7 @@ export const AlertHistoryDocumentTemplate = Object.freeze(
       spaceId: '{{rule.spaceId}}',
     },
     context: '{{context}}',
-    params: '{{params}}',
+    params: '{{rule.params}}',
     tags: '{{rule.tags}}',
     alert: {
       id: '{{alert.id}}',

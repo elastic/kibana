@@ -12,6 +12,8 @@ import {
   LatencyAggregationType,
   latencyAggregationTypeRt,
 } from '../../../common/latency_aggregation_types';
+import { joinByKey } from '../../../common/utils/join_by_key';
+import { getApmAlertsClient } from '../../lib/helpers/get_apm_alerts_client';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getSearchTransactionsEvents } from '../../lib/helpers/transactions';
 import {
@@ -30,6 +32,7 @@ import {
   getServiceTransactionGroups,
   ServiceTransactionGroupsResponse,
 } from '../services/get_service_transaction_groups';
+import { getServiceTransactionGroupsAlerts } from '../services/get_service_transaction_groups_alerts';
 import {
   getServiceTransactionGroupDetailedStatisticsPeriods,
   ServiceTransactionGroupDetailedStatisticsResponse,
@@ -51,6 +54,19 @@ import {
   TransactionTraceSamplesResponse,
 } from './trace_samples';
 
+export interface MergedServiceTransactionGroupsResponse
+  extends Omit<ServiceTransactionGroupsResponse, 'transactionGroups'> {
+  transactionGroups: Array<{
+    alertsCount: number;
+    name: string;
+    transactionType?: string;
+    latency?: number | null;
+    throughput?: number;
+    errorRate?: number;
+    impact?: number;
+  }>;
+}
+
 const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   endpoint:
     'GET /internal/apm/services/{serviceName}/transactions/groups/main_statistics',
@@ -71,9 +87,13 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
   options: {
     tags: ['access:apm'],
   },
-  handler: async (resources): Promise<ServiceTransactionGroupsResponse> => {
+  handler: async (
+    resources
+  ): Promise<MergedServiceTransactionGroupsResponse> => {
     const { params } = resources;
     const apmEventClient = await getApmEventClient(resources);
+    const apmAlertsClient = await getApmAlertsClient(resources);
+
     const {
       path: { serviceName },
       query: {
@@ -89,19 +109,48 @@ const transactionGroupsMainStatisticsRoute = createApmServerRoute({
       },
     } = params;
 
-    return getServiceTransactionGroups({
+    const commonProps = {
       environment,
       kuery,
-      apmEventClient,
       serviceName,
       transactionType,
       latencyAggregationType,
       start,
       end,
-      documentType,
-      rollupInterval,
-      useDurationSummary,
-    });
+    };
+
+    const [serviceTransactionGroups, serviceTransactionGroupsAlerts] =
+      await Promise.all([
+        getServiceTransactionGroups({
+          apmEventClient,
+          documentType,
+          rollupInterval,
+          useDurationSummary,
+          ...commonProps,
+        }),
+        getServiceTransactionGroupsAlerts({
+          apmAlertsClient,
+          ...commonProps,
+        }),
+      ]);
+
+    const {
+      transactionGroups,
+      maxTransactionGroupsExceeded,
+      transactionOverflowCount,
+    } = serviceTransactionGroups;
+
+    const transactionGroupsWithAlerts = joinByKey(
+      [...transactionGroups, ...serviceTransactionGroupsAlerts],
+      'name'
+    );
+
+    return {
+      transactionGroups: transactionGroupsWithAlerts,
+      maxTransactionGroupsExceeded,
+      transactionOverflowCount,
+      hasActiveAlerts: !!serviceTransactionGroupsAlerts.length,
+    };
   },
 });
 
@@ -187,8 +236,9 @@ const transactionLatencyChartsRoute = createApmServerRoute({
         transactionType: t.string,
         latencyAggregationType: latencyAggregationTypeRt,
         bucketSizeInSeconds: toNumberRt,
+        useDurationSummary: toBooleanRt,
       }),
-      t.partial({ transactionName: t.string, useDurationSummary: toBooleanRt }),
+      t.partial({ transactionName: t.string }),
       t.intersection([environmentRt, kueryRt, rangeRt, offsetRt]),
       serviceTransactionDataSourceRt,
     ]),

@@ -42,6 +42,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           is_preconfigured: false,
           is_deprecated: false,
           is_missing_secrets: false,
+          is_system_action: false,
           connector_type_id: 'test.index-record',
           name: 'My action',
           config: {
@@ -76,25 +77,37 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should handle get action request from preconfigured list', async () => {
+    it('should handle get a preconfigured connector', async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-slack1`)
         .expect(200, {
           id: 'my-slack1',
           is_preconfigured: true,
           is_deprecated: false,
+          is_system_action: false,
           connector_type_id: '.slack',
           name: 'Slack#xyz',
         });
     });
 
-    it('should handle get action request for deprecated connectors from preconfigured list', async () => {
+    it('should return 404 when trying to get a system connector', async () => {
+      await supertest
+        .get(
+          `${getUrlPrefix(
+            Spaces.space1.id
+          )}/api/actions/connector/system-connector-test.system-action`
+        )
+        .expect(404);
+    });
+
+    it('should handle get a deprecated connector', async () => {
       await supertest
         .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/my-deprecated-servicenow`)
         .expect(200, {
           id: 'my-deprecated-servicenow',
           is_preconfigured: true,
           is_deprecated: true,
+          is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
         });
@@ -107,6 +120,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           id: 'my-deprecated-servicenow-default',
           is_preconfigured: true,
           is_deprecated: true,
+          is_system_action: false,
           connector_type_id: '.servicenow',
           name: 'ServiceNow#xyz',
         });
@@ -136,6 +150,7 @@ export default function getActionTests({ getService }: FtrProviderContext) {
             id: createdAction.id,
             isPreconfigured: false,
             isDeprecated: false,
+            isSystemAction: false,
             actionTypeId: 'test.index-record',
             isMissingSecrets: false,
             name: 'My action',
@@ -171,16 +186,27 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should handle get action request from preconfigured list', async () => {
+      it('should handle get a preconfigured connector', async () => {
         await supertest
           .get(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/my-slack1`)
           .expect(200, {
             id: 'my-slack1',
             isPreconfigured: true,
             isDeprecated: false,
+            isSystemAction: false,
             actionTypeId: '.slack',
             name: 'Slack#xyz',
           });
+      });
+
+      it('should return 404 when trying to get a system connector', async () => {
+        await supertest
+          .get(
+            `${getUrlPrefix(
+              Spaces.space1.id
+            )}/api/actions/action/system-connector-test.system-action`
+          )
+          .expect(404);
       });
     });
   });

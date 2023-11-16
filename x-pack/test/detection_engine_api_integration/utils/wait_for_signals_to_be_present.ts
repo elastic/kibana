@@ -21,11 +21,18 @@ export const waitForSignalsToBePresent = async (
   supertest: SuperTest.SuperTest<SuperTest.Test>,
   log: ToolingLog,
   numberOfSignals = 1,
-  signalIds: string[]
+  signalIds: string[],
+  namespace?: string
 ): Promise<void> => {
   await waitFor(
     async () => {
-      const signalsOpen = await getSignalsByIds(supertest, log, signalIds, numberOfSignals);
+      const signalsOpen = await getSignalsByIds(
+        supertest,
+        log,
+        signalIds,
+        numberOfSignals,
+        namespace
+      );
       return signalsOpen.hits.hits.length >= numberOfSignals;
     },
     'waitForSignalsToBePresent',

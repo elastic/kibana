@@ -6,13 +6,13 @@
  */
 
 import { SecurityIndexPrivilege } from '@elastic/elasticsearch/lib/api/types';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
+import { UptimeEsClient } from '../../lib';
+import { SyntheticsServerSetup } from '../../types';
 import { getFakeKibanaRequest } from '../utils/fake_kibana_request';
 import { serviceApiKeyPrivileges, syntheticsIndex } from '../get_api_key';
-import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 
 export const checkHasPrivileges = async (
-  server: UptimeServerSetup,
+  server: SyntheticsServerSetup,
   apiKey: { id: string; apiKey: string }
 ) => {
   return await server.coreStart.elasticsearch.client

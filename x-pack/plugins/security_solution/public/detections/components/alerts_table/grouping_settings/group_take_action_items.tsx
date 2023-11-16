@@ -8,14 +8,14 @@
 import React, { useCallback, useMemo } from 'react';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { Status } from '../../../../../common/detection_engine/schemas/common';
+import type { Status } from '../../../../../common/api/detection_engine';
 import type { inputsModel } from '../../../../common/store';
 import { inputsSelectors } from '../../../../common/store';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import type { AlertWorkflowStatus } from '../../../../common/types';
 import { APM_USER_INTERACTIONS } from '../../../../common/lib/apm/constants';
-import { useUpdateAlertsStatus } from '../../../../common/components/toolbar/bulk_actions/use_update_alerts';
+import { updateAlertStatus } from '../../../../common/components/toolbar/bulk_actions/update_alerts';
 import {
   BULK_ACTION_ACKNOWLEDGED_SELECTED,
   BULK_ACTION_CLOSE_SELECTED,
@@ -33,16 +33,13 @@ import type { StartServices } from '../../../../types';
 
 export interface TakeActionsProps {
   currentStatus?: Status[];
-  indexName: string;
   showAlertStatusActions?: boolean;
 }
 
 export const useGroupTakeActionsItems = ({
   currentStatus,
-  indexName,
   showAlertStatusActions = true,
 }: TakeActionsProps) => {
-  const { updateAlertStatus } = useUpdateAlertsStatus();
   const { addSuccess, addError, addWarning } = useAppToasts();
   const { startTransaction } = useStartTransaction();
   const getGlobalQuerySelector = inputsSelectors.globalQuery();
@@ -163,7 +160,6 @@ export const useGroupTakeActionsItems = ({
 
       try {
         const response = await updateAlertStatus({
-          index: indexName,
           status,
           query: query ? JSON.parse(query) : {},
         });
@@ -176,8 +172,6 @@ export const useGroupTakeActionsItems = ({
     [
       startTransaction,
       reportAlertsGroupingTakeActionClick,
-      updateAlertStatus,
-      indexName,
       onAlertStatusUpdateSuccess,
       onAlertStatusUpdateFailure,
     ]

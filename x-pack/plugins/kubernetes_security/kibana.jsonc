@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/kubernetes-security-plugin",
-  "owner": "@elastic/sec-cloudnative-integrations",
+  "owner": "@elastic/kibana-cloud-security-posture",
   "plugin": {
     "id": "kubernetesSecurity",
     "server": true,

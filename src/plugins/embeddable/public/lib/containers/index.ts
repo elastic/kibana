@@ -14,4 +14,3 @@ export type {
   EmbeddableContainerSettings,
 } from './i_container';
 export { Container } from './container';
-export * from './embeddable_child_panel';

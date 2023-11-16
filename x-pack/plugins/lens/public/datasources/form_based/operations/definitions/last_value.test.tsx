@@ -10,7 +10,7 @@ import { shallow, ShallowWrapper } from 'enzyme';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { IUiSettingsClient, SavedObjectsClientContract, HttpSetup } from '@kbn/core/public';
+import { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
@@ -27,7 +27,6 @@ const uiSettingsMock = {} as IUiSettingsClient;
 const defaultProps = {
   storage: {} as IStorageWrapper,
   uiSettings: uiSettingsMock,
-  savedObjectsClient: {} as SavedObjectsClientContract,
   dateRange: { fromDate: 'now-1d', toDate: 'now' },
   fieldFormats: fieldFormatsServiceMock.createStartContract(),
   unifiedSearch: unifiedSearchPluginMock.createStartContract(),
@@ -176,7 +175,7 @@ describe('last_value', () => {
 
       expect(column).toEqual(
         expect.objectContaining({
-          filter: { language: 'kuery', query: 'bytes: *' },
+          filter: { language: 'kuery', query: '"bytes": *' },
         })
       );
     });
@@ -443,7 +442,7 @@ describe('last_value', () => {
         },
         layer: { columns: {}, columnOrder: [], indexPatternId: '' },
       });
-      expect(lastValueColumn.filter).toEqual({ language: 'kuery', query: 'test: *' });
+      expect(lastValueColumn.filter).toEqual({ language: 'kuery', query: '"test": *' });
     });
 
     it('should use indexPattern timeFieldName as a default sortField', () => {

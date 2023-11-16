@@ -70,7 +70,8 @@ export class NodeService {
 
     // We assume the combination of node roles has been validated and avoid doing additional checks here.
     this.roles = NODE_ALL_ROLES.reduce((acc, curr) => {
-      return { ...acc, [camelCase(curr)]: (roles as string[]).includes(curr) };
+      acc[camelCase(curr) as keyof NodeRoles] = (roles as string[]).includes(curr);
+      return acc;
     }, {} as NodeRoles);
 
     return {

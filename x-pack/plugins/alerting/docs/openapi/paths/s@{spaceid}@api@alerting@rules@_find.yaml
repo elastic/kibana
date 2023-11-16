@@ -113,13 +113,11 @@ get:
           examples:
             findRulesResponse:
               $ref: '../components/examples/find_rules_response.yaml'
+            findConditionalActionRulesResponse:
+              $ref: '../components/examples/find_rules_response_conditional_action.yaml'
     '401':
       description: Authorization information is missing or invalid.
       content:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

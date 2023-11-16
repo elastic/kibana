@@ -6,31 +6,44 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FrameSymbolStatus, getFrameSymbolStatus } from '@kbn/profiling-utils';
 import React from 'react';
-import { FrameSymbolStatus, getFrameSymbolStatus } from '../../../common/profiling';
+import { FrameInformationAIAssistant } from './frame_information_ai_assistant';
 import { FrameInformationPanel } from './frame_information_panel';
 import { getImpactRows } from './get_impact_rows';
 import { getInformationRows } from './get_information_rows';
 import { KeyValueList } from './key_value_list';
 import { MissingSymbolsCallout } from './missing_symbols_callout';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
-export interface Props {
-  frame?: {
-    fileID: string;
-    frameType: number;
-    exeFileName: string;
-    addressOrLine: number;
-    functionName: string;
-    sourceFileName: string;
-    sourceLine: number;
-    countInclusive: number;
-    countExclusive: number;
-  };
-  totalSamples: number;
-  totalSeconds: number;
+export interface Frame {
+  fileID: string;
+  frameType: number;
+  exeFileName: string;
+  addressOrLine: number;
+  functionName: string;
+  sourceFileName: string;
+  sourceLine: number;
+  countInclusive: number;
+  countExclusive: number;
 }
 
-export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Props) {
+export interface Props {
+  frame?: Frame;
+  totalSamples: number;
+  totalSeconds: number;
+  showAIAssistant?: boolean;
+  showSymbolsStatus?: boolean;
+}
+
+export function FrameInformationWindow({
+  frame,
+  totalSamples,
+  totalSeconds,
+  showSymbolsStatus = true,
+}: Props) {
+  const calculateImpactEstimates = useCalculateImpactEstimate();
+
   if (!frame) {
     return (
       <FrameInformationPanel>
@@ -76,19 +89,23 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
     countExclusive,
     totalSamples,
     totalSeconds,
+    calculateImpactEstimates,
   });
 
   return (
     <FrameInformationPanel>
       <EuiFlexGroup direction="column">
         <EuiFlexItem>
-          <KeyValueList rows={informationRows} />
+          <KeyValueList data-test-subj="informationRows" rows={informationRows} />
         </EuiFlexItem>
-        {symbolStatus !== FrameSymbolStatus.SYMBOLIZED && (
+        <EuiFlexItem>
+          <FrameInformationAIAssistant frame={frame} />
+        </EuiFlexItem>
+        {showSymbolsStatus && symbolStatus !== FrameSymbolStatus.SYMBOLIZED ? (
           <EuiFlexItem>
             <MissingSymbolsCallout frameType={frame.frameType} />
           </EuiFlexItem>
-        )}
+        ) : null}
         <EuiFlexItem>
           <EuiFlexGroup direction="column">
             <EuiFlexItem>
@@ -101,7 +118,7 @@ export function FrameInformationWindow({ frame, totalSamples, totalSeconds }: Pr
               </EuiTitle>
             </EuiFlexItem>
             <EuiFlexItem>
-              <KeyValueList rows={impactRows} />
+              <KeyValueList data-test-subj="impactEstimates" rows={impactRows} />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

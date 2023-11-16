@@ -5,18 +5,18 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
+import { deepExactRt, mergeRt } from '@kbn/io-ts-utils';
 import { isLeft } from 'fp-ts/lib/Either';
 import { Location } from 'history';
 import { PathReporter } from 'io-ts/lib/PathReporter';
+import { compact, findLastIndex, merge, orderBy } from 'lodash';
+import qs from 'query-string';
 import {
   MatchedRoute,
   matchRoutes as matchRoutesConfig,
   RouteConfig as ReactRouterConfig,
 } from 'react-router-config';
-import qs from 'query-string';
-import { findLastIndex, merge, compact } from 'lodash';
-import { mergeRt, deepExactRt } from '@kbn/io-ts-utils';
-import { FlattenRoutesOf, Route, RouteWithPath, Router, RouteMap } from './types';
+import { FlattenRoutesOf, Route, RouteMap, Router, RouteWithPath } from './types';
 
 function toReactRouterPath(path: string) {
   return path.replace(/(?:{([^\/]+)})/g, ':$1');
@@ -87,8 +87,18 @@ export function createRouter<TRoutes extends RouteMap>(routes: TRoutes): Router<
     let matches: Array<MatchedRoute<{}, ReactRouterConfig>> = [];
     let matchIndex: number = -1;
 
-    for (const path of paths) {
-      const greedy = path.endsWith('/*') || args.length === 0;
+    const pathsWithScore = paths.map((path) => {
+      const greedy = path.endsWith('/*') || args.length === 0 ? 1 : 0;
+      return {
+        length: path.length,
+        greedy,
+        path,
+      };
+    });
+
+    const sortedPaths = orderBy(pathsWithScore, ['greedy', 'length'], ['desc', 'desc']);
+
+    for (const { path, greedy } of sortedPaths) {
       matches = matchRoutesConfig(reactRouterConfigs, toReactRouterPath(location.pathname));
 
       matchIndex = greedy

@@ -7,6 +7,7 @@
     "common/**/*",
     "public/**/*",
     "server/**/*",
+    "*.ts",
     "public/fixtures/dispatch_heatmap_d3.json",
     "public/fixtures/dispatch_heatmap_config.json",
     "public/fixtures/dispatch_heatmap_data_point.json",

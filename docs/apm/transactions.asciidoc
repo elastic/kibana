@@ -162,12 +162,7 @@ This means you can select "Actions - View transaction in Discover" to see the ac
 
 The *Logs* tab displays logs related to the sampled trace.
 
-Logs provide detailed information about specific events,
-and are crucial to successfully debugging slow or erroneous transactions.
-
-If you've correlated your application's logs and traces, you never have to search for relevant data;
-it's all provided on this. Viewing log and trace data together allows you to quickly diagnose
-and solve problems.
+include::./logs.asciidoc[tag=log-overview]
 
 [role="screenshot"]
 image::apm/images/apm-logs-tab.png[APM logs tab]

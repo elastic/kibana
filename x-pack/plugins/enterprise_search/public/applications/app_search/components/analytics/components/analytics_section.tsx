@@ -11,7 +11,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageSection,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -19,9 +19,9 @@ import {
 } from '@elastic/eui';
 
 interface Props {
-  title: string;
-  subtitle: string;
   iconType?: IconType;
+  subtitle: string;
+  title: string;
 }
 export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, children }) => (
   <section>
@@ -49,6 +49,6 @@ export const AnalyticsSection: React.FC<Props> = ({ title, subtitle, iconType, c
       </EuiText>
     </header>
     <EuiSpacer size="m" />
-    <EuiPageContentBody>{children}</EuiPageContentBody>
+    <EuiPageSection paddingSize="none">{children}</EuiPageSection>
   </section>
 );

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { CommentType } from '@kbn/cases-plugin/common/api';
+import { AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
@@ -50,7 +50,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               alertId: ['alert-id'],
               index: ['.internal.alerts-observability.alerts-default-000001'],
               rule: { id: 'rule-id', name: 'My rule name' },
-              type: CommentType.alert,
+              type: AttachmentType.alert,
               owner,
             },
           });

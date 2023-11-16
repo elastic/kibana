@@ -42,13 +42,6 @@ export const SHOW_TIME_FIELD_TOGGLE_TOOLTIP = i18n.translate(
   }
 );
 
-export const REFRESH_FIELD_TOGGLE_TOOLTIP = i18n.translate(
-  'xpack.stackConnectors.components.index.refreshTooltip',
-  {
-    defaultMessage: 'Refresh the affected shards to make this operation visible to search.',
-  }
-);
-
 export const INDEX_LABEL = i18n.translate(
   'xpack.stackConnectors.components.index.indicesToQueryLabel',
   {

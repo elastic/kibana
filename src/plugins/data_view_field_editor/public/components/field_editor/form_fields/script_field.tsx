@@ -58,6 +58,8 @@ const mapReturnTypeToPainlessContext = (runtimeType: RuntimeType): PainlessConte
 const currentDocumentSelector = (state: PreviewState) => state.documents[state.currentIdx];
 const currentDocumentIsLoadingSelector = (state: PreviewState) => state.isLoadingDocuments;
 const currentErrorSelector = (state: PreviewState) => state.previewResponse?.error;
+const isLoadingPreviewSelector = (state: PreviewState) => state.isLoadingPreview;
+const isPreviewAvailableSelector = (state: PreviewState) => state.isPreviewAvailable;
 
 const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Props) => {
   const {
@@ -67,10 +69,12 @@ const ScriptFieldComponent = ({ existingConcreteFields, links, placeholder }: Pr
   const editorValidationSubscription = useRef<Subscription>();
   const fieldCurrentValue = useRef<string>('');
 
-  const { isLoadingPreview, isPreviewAvailable, controller } = useFieldPreviewContext();
+  const { controller } = useFieldPreviewContext();
   const error = useStateSelector(controller.state$, currentErrorSelector);
   const currentDocument = useStateSelector(controller.state$, currentDocumentSelector);
   const isFetchingDoc = useStateSelector(controller.state$, currentDocumentIsLoadingSelector);
+  const isLoadingPreview = useStateSelector(controller.state$, isLoadingPreviewSelector);
+  const isPreviewAvailable = useStateSelector(controller.state$, isPreviewAvailableSelector);
   const [validationData$, nextValidationData$] = useBehaviorSubject<
     | {
         isFetchingDoc: boolean;

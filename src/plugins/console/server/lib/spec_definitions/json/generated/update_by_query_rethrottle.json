@@ -1,7 +1,13 @@
 {
   "update_by_query_rethrottle": {
     "url_params": {
-      "requests_per_second": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "requests_per_second": [
+        "-1"
+      ]
     },
     "methods": [
       "POST"
@@ -9,6 +15,10 @@
     "patterns": [
       "_update_by_query/{task_id}/_rethrottle"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-update-by-query.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

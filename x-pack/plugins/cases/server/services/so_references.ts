@@ -12,10 +12,10 @@ import type {
 } from '@kbn/core/server';
 import { isEqual, uniqWith } from 'lodash';
 import type {
-  CommentAttributes,
-  CommentAttributesNoSO,
-  CommentPatchAttributes,
-} from '../../common/api';
+  AttachmentAttributes,
+  AttachmentAttributesNoSO,
+  AttachmentPatchAttributes,
+} from '../../common/types/domain';
 import type { PersistableStateAttachmentTypeRegistry } from '../attachment_framework/persistable_state_registry';
 import {
   injectPersistableReferencesToSO,
@@ -29,8 +29,8 @@ import type {
   AttachmentSavedObjectTransformed,
 } from '../common/types/attachments';
 import { isCommentRequestTypeExternalReferenceSO } from './type_guards';
-import type { PartialField } from '../types';
 import { SOReferenceExtractor } from './so_reference_extractor';
+import type { OptionalAttributes } from './types';
 
 export const getAttachmentSOExtractor = (
   attachment: Partial<AttachmentRequestAttributes>
@@ -47,8 +47,6 @@ export const getAttachmentSOExtractor = (
 
   return new SOReferenceExtractor(fieldsToExtract);
 };
-
-type OptionalAttributes<T> = PartialField<SavedObject<T>, 'attributes'>;
 
 /**
  * This function should be used when the attributes field could be undefined. Specifically when
@@ -86,7 +84,7 @@ export const injectAttachmentSOAttributesFromRefs = (
 };
 
 export const injectAttachmentSOAttributesFromRefsForPatch = (
-  updatedAttributes: CommentPatchAttributes,
+  updatedAttributes: AttachmentPatchAttributes,
   savedObject: SavedObjectsUpdateResponse<AttachmentPersistedAttributes>,
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): SavedObjectsUpdateResponse<AttachmentTransformedAttributes> => {
@@ -117,7 +115,7 @@ interface ExtractionResults {
 }
 
 export const extractAttachmentSORefsFromAttributes = (
-  attributes: CommentAttributes | CommentPatchAttributes,
+  attributes: AttachmentAttributes | AttachmentPatchAttributes,
   references: SavedObjectReference[],
   persistableStateAttachmentTypeRegistry: PersistableStateAttachmentTypeRegistry
 ): ExtractionResults => {
@@ -127,7 +125,7 @@ export const extractAttachmentSORefsFromAttributes = (
     transformedFields,
     references: refsWithExternalRefId,
     didDeleteOperation,
-  } = soExtractor.extractFieldsToReferences<CommentAttributesNoSO>({
+  } = soExtractor.extractFieldsToReferences<AttachmentAttributesNoSO>({
     data: attributes,
     existingReferences: references,
   });

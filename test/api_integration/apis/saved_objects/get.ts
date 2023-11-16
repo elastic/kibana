@@ -6,10 +6,12 @@
  * Side Public License, v 1.
  */
 
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
 
@@ -78,10 +80,10 @@ export default function ({ getService }: FtrProviderContext) {
             type: 'dashboard',
             namespaces: ['default'],
             migrationVersion: {
-              dashboard: '8.7.0',
+              dashboard: '8.9.0',
             },
             coreMigrationVersion: '8.8.0',
-            typeMigrationVersion: '8.7.0',
+            typeMigrationVersion: '8.9.0',
             updated_at: resp.body.updated_at,
             created_at: resp.body.created_at,
             version: resp.body.version,
@@ -111,6 +113,24 @@ export default function ({ getService }: FtrProviderContext) {
           expect(resp.body.typeMigrationVersion).to.be.ok();
           expect(resp.body.managed).to.be.ok();
         });
+    });
+
+    it('should migrate saved object before returning', async () => {
+      await es.update({
+        index: MAIN_SAVED_OBJECT_INDEX,
+        id: 'config:7.0.0-alpha1',
+        doc: {
+          coreMigrationVersion: '7.0.0',
+          typeMigrationVersion: '7.0.0',
+        },
+      });
+
+      const { body } = await supertest.get(`/api/saved_objects/config/7.0.0-alpha1`).expect(200);
+
+      expect(body.coreMigrationVersion).to.be.ok();
+      expect(body.coreMigrationVersion).not.to.be('7.0.0');
+      expect(body.typeMigrationVersion).to.be.ok();
+      expect(body.typeMigrationVersion).not.to.be('7.0.0');
     });
 
     describe('doc does not exist', () => {

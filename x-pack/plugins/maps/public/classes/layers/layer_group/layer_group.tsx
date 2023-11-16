@@ -25,10 +25,10 @@ import {
   StyleDescriptor,
   StyleMetaDescriptor,
 } from '../../../../common/descriptor_types';
-import { ImmutableSourceProperty, ISource, SourceEditorArgs } from '../../sources/source';
+import { ISource, SourceEditorArgs } from '../../sources/source';
 import { type DataRequestContext } from '../../../actions';
 import { getLayersExtent } from '../../../actions/get_layers_extent';
-import { ILayer, LayerIcon } from '../layer';
+import { ILayer, LayerIcon, LayerError } from '../layer';
 import { IStyle } from '../../styles/style';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
@@ -58,7 +58,7 @@ export class LayerGroup implements ILayer {
     };
   }
 
-  constructor({ layerDescriptor }: { layerDescriptor: LayerGroupDescriptor }) {
+  constructor({ layerDescriptor }: { layerDescriptor: Partial<LayerGroupDescriptor> }) {
     this._descriptor = LayerGroup.createDescriptor(layerDescriptor);
   }
 
@@ -263,10 +263,6 @@ export class LayerGroup implements ILayer {
     return null;
   }
 
-  async getImmutableSourceProperties(): Promise<ImmutableSourceProperty[]> {
-    return [];
-  }
-
   renderSourceSettingsEditor(sourceEditorArgs: SourceEditorArgs) {
     return null;
   }
@@ -287,9 +283,13 @@ export class LayerGroup implements ILayer {
     return undefined;
   }
 
-  isLayerLoading(): boolean {
+  isLayerLoading(zoom: number): boolean {
+    if (!this.isVisible()) {
+      return false;
+    }
+
     return this._children.some((child) => {
-      return child.isLayerLoading();
+      return child.isLayerLoading(zoom);
     });
   }
 
@@ -299,11 +299,17 @@ export class LayerGroup implements ILayer {
     });
   }
 
-  getErrors(): string {
-    const firstChildWithError = this._children.find((child) => {
-      return child.hasErrors();
-    });
-    return firstChildWithError ? firstChildWithError.getErrors() : '';
+  getErrors(): LayerError[] {
+    return this.hasErrors()
+      ? [
+          {
+            title: i18n.translate('xpack.maps.layerGroup.childrenErrorMessage', {
+              defaultMessage: `An error occurred when loading nested layers`,
+            }),
+            error: '',
+          },
+        ]
+      : [];
   }
 
   async syncData(syncContext: DataRequestContext) {

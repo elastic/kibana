@@ -6,21 +6,23 @@
  * Side Public License, v 1.
  */
 
-import { SerializableRecord } from '@kbn/utility-types';
 import deepEqual from 'fast-deep-equal';
+import { SerializableRecord } from '@kbn/utility-types';
 
+import { v4 } from 'uuid';
 import { pick, omit, xor } from 'lodash';
-import { ControlGroupInput } from '..';
+
 import {
   DEFAULT_CONTROL_GROW,
   DEFAULT_CONTROL_STYLE,
   DEFAULT_CONTROL_WIDTH,
 } from './control_group_constants';
-import { PersistableControlGroupInput, RawControlGroupAttributes } from './types';
 import {
   ControlPanelDiffSystems,
   genericControlPanelDiffSystem,
 } from './control_group_panel_diff_system';
+import { ControlGroupInput } from '..';
+import { ControlsPanels, PersistableControlGroupInput, RawControlGroupAttributes } from './types';
 
 const safeJSONParse = <OutType>(jsonString?: string): OutType | undefined => {
   if (!jsonString && typeof jsonString !== 'string') return;
@@ -103,9 +105,23 @@ export const controlGroupInputToRawControlGroupAttributes = (
   };
 };
 
+export const generateNewControlIds = (controlGroupInput?: PersistableControlGroupInput) => {
+  if (!controlGroupInput?.panels) return;
+
+  const newPanelsMap: ControlsPanels = {};
+  for (const panel of Object.values(controlGroupInput.panels)) {
+    const newId = v4();
+    newPanelsMap[newId] = {
+      ...panel,
+      explicitInput: { ...panel.explicitInput, id: newId },
+    };
+  }
+  return { ...controlGroupInput, panels: newPanelsMap };
+};
+
 export const rawControlGroupAttributesToControlGroupInput = (
   rawControlGroupAttributes: RawControlGroupAttributes
-): Omit<ControlGroupInput, 'id'> | undefined => {
+): PersistableControlGroupInput | undefined => {
   const defaultControlGroupInput = getDefaultControlGroupInput();
   const { chainingSystem, controlStyle, ignoreParentSettingsJSON, panelsJSON } =
     rawControlGroupAttributes;

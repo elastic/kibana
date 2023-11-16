@@ -4,7 +4,7 @@ There are several steps required to set up geo containment alerts for testing in
 that allows you to view triggered alerts as they happen. These instructions outline
 how to load test data, but really these steps can be used to load any data for geo
 containment alerts so long as you have the following data:
-- An index containing a`geo_point` field and a `date` field. This data is presumed to
+- An index containing a`geo_point` or `geo_shape` field and a `date` field. This data is presumed to
 be dynamic (updated).
 - An index containing `geo_shape` data, such as boundary data, bounding box data, etc.
 This data is presumed to be static (not updated). Shape data matching the query is

@@ -121,15 +121,6 @@ export const javascriptClientEmbedSteps = (analyticsConfig: AnalyticsConfig) => 
         <EuiText grow={false}>
           <p>
             {i18n.translate(
-              'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.description',
-              {
-                defaultMessage:
-                  'Once you have called createTracker, you can use the tracker methods such as trackPageView to send events to Behavioral Analytics.',
-              }
-            )}
-          </p>
-          <p>
-            {i18n.translate(
               'xpack.enterpriseSearch.analytics.collections.collectionsView.integrateTab.javascriptClientEmbed.stepFour.descriptionTwo',
               {
                 defaultMessage:

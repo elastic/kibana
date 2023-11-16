@@ -28,7 +28,7 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, LayerIcon } from '../../layer';
+import { AbstractLayer, LayerError, LayerIcon } from '../../layer';
 import {
   AbstractVectorLayer,
   noResultsIcon,
@@ -58,6 +58,27 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     }
 
     return layerDescriptor;
+  }
+
+  isLayerLoading(zoom: number) {
+    if (!this.isVisible() || !this.showAtZoomLevel(zoom)) {
+      return false;
+    }
+
+    const isSourceLoading = super.isLayerLoading(zoom);
+    if (isSourceLoading) {
+      return true;
+    }
+
+    // Do not check join loading status when there are no source features. Why?
+    // syncMeta short circuits join loading when there are no source features
+    // because there is no reason to fetch join results when there is nothing to join with
+    const featureCollection = this._getSourceFeatureCollection();
+    if (!featureCollection || featureCollection?.features?.length === 0) {
+      return false;
+    }
+
+    return this._isLoadingJoins();
   }
 
   _isTiled(): boolean {
@@ -135,6 +156,24 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
       await this.getSource().getSupportedShapeTypes(),
       this.getCurrentStyle().getDynamicPropertiesArray()
     );
+  }
+
+  getErrors(): LayerError[] {
+    const errors = super.getErrors();
+
+    this.getValidJoins().forEach((join) => {
+      const joinDescriptor = join.toDescriptor();
+      if (joinDescriptor.error) {
+        errors.push({
+          title: i18n.translate('xpack.maps.geojsonVectorLayer.joinErrorTitle', {
+            defaultMessage: `An error occurred when adding join metrics to layer features`,
+          }),
+          error: joinDescriptor.error,
+        });
+      }
+    });
+
+    return errors;
   }
 
   _requiresPrevSourceCleanup(mbMap: MbMap) {
@@ -266,12 +305,12 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
         return;
       }
 
-      const joinStates = await this._syncJoins(syncContext, style);
+      const joinStates = await this._syncJoins(syncContext, style, sourceResult.featureCollection);
       await performInnerJoins(
         sourceResult,
         joinStates,
         syncContext.updateSourceData,
-        syncContext.onJoinError
+        syncContext.setJoinError
       );
     } catch (error) {
       if (!(error instanceof DataRequestAbortError)) {

@@ -8,21 +8,10 @@
 import type { IconType } from '@elastic/eui';
 import type React from 'react';
 
-import type {
-  ActionType as ThirdPartySupportedActions,
-  CaseField,
-  ConnectorTypeFields,
-} from '../../../common/api';
+import type { ConnectorTypeFields } from '../../../common/types/domain';
 import type { CaseActionConnector } from '../types';
 
-export type { ThirdPartyField as AllThirdPartyFields } from '../../../common/api';
-
-export interface ThirdPartyField {
-  label: string;
-  validSourceFields: CaseField[];
-  defaultSourceField: CaseField;
-  defaultActionType: ThirdPartySupportedActions;
-}
+export type { ConnectorMappingTarget } from '../../../common/types/domain';
 
 export interface ConnectorConfiguration {
   name: string;
@@ -31,8 +20,9 @@ export interface ConnectorConfiguration {
 
 export interface CaseConnector<UIProps = unknown> {
   id: string;
-  fieldsComponent: React.LazyExoticComponent<
-    React.ComponentType<ConnectorFieldsProps<UIProps>>
+  fieldsComponent: React.LazyExoticComponent<React.ComponentType<ConnectorFieldsProps>> | null;
+  previewComponent: React.LazyExoticComponent<
+    React.ComponentType<ConnectorFieldsPreviewProps<UIProps>>
   > | null;
 }
 
@@ -45,9 +35,11 @@ export interface CaseConnectorsRegistry {
   list: () => CaseConnector[];
 }
 
-export interface ConnectorFieldsProps<TFields> {
-  isEdit?: boolean;
+export interface ConnectorFieldsProps {
+  connector: CaseActionConnector;
+}
+
+export interface ConnectorFieldsPreviewProps<TFields> {
   connector: CaseActionConnector;
   fields: TFields;
-  onChange: (fields: TFields) => void;
 }

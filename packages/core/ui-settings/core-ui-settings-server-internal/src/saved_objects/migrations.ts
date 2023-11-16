@@ -183,4 +183,25 @@ export const migrations = {
     }),
     references: doc.references || [],
   }),
+  '8.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
+    ...doc,
+    ...(doc.attributes && {
+      attributes: Object.keys(doc.attributes).reduce(
+        (acc, key) =>
+          [
+            // owner: Team:Visualizations
+            'visualize:enableLabs',
+          ].includes(key)
+            ? {
+                ...acc,
+              }
+            : {
+                ...acc,
+                [key]: doc.attributes[key],
+              },
+        {}
+      ),
+    }),
+    references: doc.references || [],
+  }),
 };

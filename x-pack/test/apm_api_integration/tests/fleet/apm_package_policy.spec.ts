@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import * as Url from 'url';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   AGENT_CONFIG_PATH,
@@ -17,11 +16,11 @@ import expect from '@kbn/expect';
 import { get } from 'lodash';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
 import { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
+import { createEsClientForFtrConfig } from '@kbn/test';
 import {
   APM_AGENT_CONFIGURATION_INDEX,
   APM_SOURCE_MAP_INDEX,
-} from '@kbn/apm-plugin/server/routes/settings/apm_indices/get_apm_indices';
-import { createEsClientForTesting } from '@kbn/test';
+} from '@kbn/apm-plugin/server/routes/settings/apm_indices/apm_system_index_constants';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createAgentPolicy,
@@ -30,7 +29,7 @@ import {
   deletePackagePolicy,
   getPackagePolicy,
   setupFleet,
-} from './apm_package_policy_setup';
+} from './helpers';
 import { getBettertest } from '../../common/bettertest';
 import { expectToReject } from '../../common/utils/expect_to_reject';
 
@@ -41,26 +40,22 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const bettertest = getBettertest(supertest);
+  const configService = getService('config');
 
   function createEsClientWithApiKeyAuth({ id, apiKey }: { id: string; apiKey: string }) {
-    const config = getService('config');
-    return createEsClientForTesting({
-      esUrl: Url.format(config.get('servers.elasticsearch')),
-      requestTimeout: config.get('timeouts.esRequestTimeout'),
-      auth: { apiKey: { id, api_key: apiKey } },
-    });
+    return createEsClientForFtrConfig(configService, { auth: { apiKey: { id, api_key: apiKey } } });
   }
 
   async function createConfiguration(configuration: any) {
     return apmApiClient.writeUser({
-      endpoint: 'PUT /api/apm/settings/agent-configuration',
+      endpoint: 'PUT /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: configuration },
     });
   }
 
   async function deleteConfiguration(configuration: any) {
     return apmApiClient.writeUser({
-      endpoint: 'DELETE /api/apm/settings/agent-configuration',
+      endpoint: 'DELETE /api/apm/settings/agent-configuration 2023-10-31',
       params: { body: { service: configuration.service } },
     });
   }
@@ -77,7 +72,7 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
     sourcemap: SourceMap;
   }) {
     const response = await apmApiClient.writeUser({
-      endpoint: 'POST /api/apm/sourcemaps',
+      endpoint: 'POST /api/apm/sourcemaps 2023-10-31',
       type: 'form-data',
       params: {
         body: {
@@ -120,8 +115,8 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
 
     before(async () => {
       await setupFleet(bettertest);
-      agentPolicyId = await createAgentPolicy(bettertest);
-      packagePolicyId = await createPackagePolicy(bettertest, agentPolicyId);
+      agentPolicyId = await createAgentPolicy({ bettertest });
+      packagePolicyId = await createPackagePolicy({ bettertest, agentPolicyId });
       apmPackagePolicy = await getPackagePolicy(bettertest, packagePolicyId); // make sure to get the latest package policy
     });
 
@@ -202,11 +197,11 @@ export default function ApiTest(ftrProviderContext: FtrProviderContext) {
       });
 
       describe('Source maps', () => {
-        let resp: APIReturnType<'POST /api/apm/sourcemaps'>;
+        let resp: APIReturnType<'POST /api/apm/sourcemaps 2023-10-31'>;
 
         after(async () => {
           await apmApiClient.writeUser({
-            endpoint: 'DELETE /api/apm/sourcemaps/{id}',
+            endpoint: 'DELETE /api/apm/sourcemaps/{id} 2023-10-31',
             params: { path: { id: resp.id } },
           });
         });

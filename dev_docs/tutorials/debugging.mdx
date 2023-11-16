@@ -85,7 +85,7 @@ Backend (APM Node):
 In some cases, it is beneficial to enable APM on a local development environment to get an initial undesrtanding of a feature's performance during manual or automatic tests.
 
  1. Create a secondary monitoring deployment to collect APM data. The easiest option is to use [Elastic Cloud](https://cloud.elastic.co/deployments) to create a new deployment.
- 2. Open Kibana, go to `Integrations` and enable the Elastic APM integration.
+ 2. Open the Kibana from the monitoring deployment (_not_ your local Kibana), go to `Integrations` and enable the Elastic APM integration.
  3. Scroll down and copy the server URL and secret token. You may also find them in your cloud console under APM & Fleet.
  4. Create or open `config\kibana.dev.yml` on your local development environment.
  5. Add the following settings: 
@@ -106,4 +106,4 @@ Set the following environment variables to enable APM:
 
  * ELASTIC_APM_ACTIVE
  * ELASTIC_APM_SERVER_URL
- * ELASTIC_APM_SECRET_TOKEN
+ * ELASTIC_APM_SECRET_TOKEN or ELASTIC_APM_API_KEY

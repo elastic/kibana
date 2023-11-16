@@ -7,8 +7,11 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
+import { VisTypeTimeseriesPublicConfig } from '../config';
 import { MetricsPlugin as Plugin } from './plugin';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export function plugin(
+  initializerContext: PluginInitializerContext<VisTypeTimeseriesPublicConfig>
+) {
   return new Plugin(initializerContext);
 }

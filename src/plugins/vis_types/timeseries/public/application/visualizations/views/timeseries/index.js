@@ -9,6 +9,7 @@
 import React, { useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import classNames from 'classnames';
+import { i18n } from '@kbn/i18n';
 import {
   MULTILAYER_TIME_AXIS_STYLE,
   renderEndzoneTooltip,
@@ -24,6 +25,7 @@ import {
   TooltipType,
   StackMode,
   Placement,
+  Tooltip,
 } from '@elastic/charts';
 import { EuiIcon } from '@elastic/eui';
 import { getTimezone } from '../../../lib/get_timezone';
@@ -170,6 +172,16 @@ export const TimeSeries = ({
 
   return (
     <Chart ref={chartRef} renderer="canvas" className={classes}>
+      <Tooltip
+        snap
+        type={
+          tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
+            ? TooltipType.Follow
+            : TooltipType.VerticalCursor
+        }
+        boundary={document.getElementById('app-fixed-viewport') ?? undefined}
+        headerFormatter={tooltipFormatter}
+      />
       <Settings
         debugState={window._echDebugStateFlag ?? false}
         showLegend={legend}
@@ -217,18 +229,10 @@ export const TimeSeries = ({
           chartTheme,
         ]}
         baseTheme={baseTheme}
-        tooltip={{
-          snap: true,
-          type:
-            tooltipMode === TOOLTIP_MODES.SHOW_FOCUSED
-              ? TooltipType.Follow
-              : TooltipType.VerticalCursor,
-          boundary: document.getElementById('app-fixed-viewport') ?? undefined,
-          headerFormatter: tooltipFormatter,
-        }}
         externalPointerEvents={{
           tooltip: { visible: syncTooltips, placement: Placement.Right },
         }}
+        locale={i18n.getLocale()}
       />
 
       {annotations.map(({ id, data, icon, color }) => {
@@ -249,29 +253,26 @@ export const TimeSeries = ({
       })}
 
       {series.map(
-        (
-          {
-            id,
-            seriesId,
-            label,
-            bars,
-            lines,
-            data,
-            hideInLegend,
-            truncateLegend,
-            xScaleType,
-            yScaleType,
-            groupId,
-            color,
-            isSplitByTerms,
-            stack,
-            points,
-            y1AccessorFormat,
-            y0AccessorFormat,
-            tickFormat,
-          },
-          sortIndex
-        ) => {
+        ({
+          id,
+          seriesId,
+          label,
+          bars,
+          lines,
+          data,
+          hideInLegend,
+          truncateLegend,
+          xScaleType,
+          yScaleType,
+          groupId,
+          color,
+          isSplitByTerms,
+          stack,
+          points,
+          y1AccessorFormat,
+          y0AccessorFormat,
+          tickFormat,
+        }) => {
           const stackAccessors = getStackAccessors(stack);
           const isPercentage = stack === STACKED_OPTIONS.PERCENT;
           const isStacked = stack !== STACKED_OPTIONS.NONE;
@@ -299,7 +300,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
                 tickFormat={tickFormat}
@@ -326,7 +326,6 @@ export const TimeSeries = ({
                 yScaleType={yScaleType}
                 timeZone={timeZone}
                 enableHistogramMode={isStacked}
-                sortIndex={sortIndex}
                 y1AccessorFormat={y1AccessorFormat}
                 y0AccessorFormat={y0AccessorFormat}
                 tickFormat={tickFormat}

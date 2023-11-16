@@ -21,6 +21,7 @@ jest.mock('../app_context', () => {
     appContextService: {
       getLogger: () => loggerMock.create(),
       getConfig: () => {},
+      getMessageSigningService: jest.fn(),
     },
   };
 });

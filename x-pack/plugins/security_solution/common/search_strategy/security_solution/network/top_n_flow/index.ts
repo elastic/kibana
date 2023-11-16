@@ -6,12 +6,7 @@
  */
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
-import type {
-  GeoItem,
-  FlowTargetSourceDest,
-  TopNetworkTablesEcsField,
-  NetworkTopTablesFields,
-} from '../common';
+import type { GeoItem, TopNetworkTablesEcsField } from '../common';
 import type {
   CursorType,
   Inspect,
@@ -20,13 +15,6 @@ import type {
   TotalValue,
   GenericBuckets,
 } from '../../../common';
-import type { RequestOptionsPaginated } from '../..';
-
-export interface NetworkTopNFlowRequestOptions
-  extends RequestOptionsPaginated<NetworkTopTablesFields> {
-  flowTarget: FlowTargetSourceDest;
-  ip?: Maybe<string>;
-}
 
 export interface NetworkTopNFlowStrategyResponse extends IEsSearchResponse {
   edges: NetworkTopNFlowEdges[];

@@ -25,6 +25,7 @@ const rt = {
   body: schema.object({
     status: schema.maybe(stringOrArrayOfStrings),
     extension: schema.maybe(stringOrArrayOfStrings),
+    mimeType: schema.maybe(stringOrArrayOfStrings),
     name: schema.maybe(nameStringOrArrayOfNameStrings),
     meta: commonSchemas.fileMeta,
   }),
@@ -42,7 +43,7 @@ export type Endpoint<M = unknown> = CreateRouteDefinition<
 
 export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req, res) => {
   const {
-    body: { name, status, extension, meta },
+    body: { name, status, extension, mimeType, meta },
     query: { page, perPage },
   } = req;
   const { fileService } = await files;
@@ -51,6 +52,7 @@ export const handler: CreateHandler<Endpoint> = async ({ files, fileKind }, req,
     name: toArrayOrUndefined(name),
     status: toArrayOrUndefined(status),
     extension: toArrayOrUndefined(extension),
+    mimeType: toArrayOrUndefined(mimeType),
     page,
     perPage,
     meta: meta as Record<string, string>,

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import { renderHook } from '@testing-library/react-hooks';
-import { useLastXChecks } from './use_last_x_checks';
+import { getTimeRangeFilter, useLastXChecks } from './use_last_x_checks';
 import { WrappedHelper } from '../utils/testing';
 import * as searchHooks from './use_redux_es_search';
 import { SYNTHETICS_INDEX_PATTERN } from '../../../../common/constants';
@@ -40,6 +40,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '10',
         }),
       { wrapper: WrappedHelper }
     );
@@ -95,6 +96,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size,
           fields,
+          schedule: '120',
         }),
       { wrapper: WrappedHelper }
     );
@@ -118,6 +120,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '240',
         }),
       { wrapper: WrappedHelper }
     );
@@ -136,6 +139,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '1',
         }),
       { wrapper: WrappedHelper }
     );
@@ -164,6 +168,7 @@ describe('useLastXChecks', () => {
           locationId: 'loc',
           size: 30,
           fields: ['monitor.duration.us'],
+          schedule: '3',
         }),
       { wrapper: WrapperWithState }
     );
@@ -172,5 +177,27 @@ describe('useLastXChecks', () => {
       expect.anything(),
       expect.anything()
     );
+  });
+});
+
+describe('getTimeRangeFilter', () => {
+  it.each([
+    [1, 'now-1h'],
+    [3, 'now-3h'],
+    [5, 'now-5h'],
+    [10, 'now-9h'],
+    [60, 'now-50h'],
+    [120, 'now-100h'],
+    [240, 'now-200h'],
+  ])('returns expected filter', (val, res) => {
+    const filter = getTimeRangeFilter(String(val));
+    expect(filter).toEqual({
+      range: {
+        '@timestamp': {
+          gte: res,
+          lte: 'now',
+        },
+      },
+    });
   });
 });

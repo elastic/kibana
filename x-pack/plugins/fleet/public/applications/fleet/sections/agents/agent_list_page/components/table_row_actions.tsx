@@ -11,8 +11,10 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { isAgentRequestDiagnosticsSupported } from '../../../../../../../common/services';
 
+import { isStuckInUpdating } from '../../../../../../../common/services/agent_status';
+
 import type { Agent, AgentPolicy } from '../../../../types';
-import { useAuthz, useLink, useKibanaVersion } from '../../../../hooks';
+import { useAuthz, useLink, useAgentVersion } from '../../../../hooks';
 import { ContextMenuActions } from '../../../../components';
 import { isAgentUpgradeable } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
@@ -22,6 +24,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy?: AgentPolicy;
   onReassignClick: () => void;
   onUnenrollClick: () => void;
+  onGetUninstallCommandClick: () => void;
   onUpgradeClick: () => void;
   onAddRemoveTagsClick: (button: HTMLElement) => void;
   onRequestDiagnosticsClick: () => void;
@@ -30,6 +33,7 @@ export const TableRowActions: React.FunctionComponent<{
   agentPolicy,
   onReassignClick,
   onUnenrollClick,
+  onGetUninstallCommandClick,
   onUpgradeClick,
   onAddRemoveTagsClick,
   onRequestDiagnosticsClick,
@@ -38,9 +42,10 @@ export const TableRowActions: React.FunctionComponent<{
   const hasFleetAllPrivileges = useAuthz().fleet.all;
 
   const isUnenrolling = agent.status === 'unenrolling';
-  const kibanaVersion = useKibanaVersion();
+  const latestAgentVersion = useAgentVersion();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const { diagnosticFileUploadEnabled } = ExperimentalFeaturesService.get();
+  const { diagnosticFileUploadEnabled, agentTamperProtectionEnabled } =
+    ExperimentalFeaturesService.get();
   const menuItems = [
     <EuiContextMenuItem
       icon="inspect"
@@ -102,10 +107,11 @@ export const TableRowActions: React.FunctionComponent<{
       <EuiContextMenuItem
         key="agentUpgradeBtn"
         icon="refresh"
-        disabled={!isAgentUpgradeable(agent, kibanaVersion)}
+        disabled={!!latestAgentVersion && !isAgentUpgradeable(agent, latestAgentVersion)}
         onClick={() => {
           onUpgradeClick();
         }}
+        data-test-subj="upgradeBtn"
       >
         <FormattedMessage
           id="xpack.fleet.agentList.upgradeOneButton"
@@ -113,6 +119,44 @@ export const TableRowActions: React.FunctionComponent<{
         />
       </EuiContextMenuItem>
     );
+
+    if (isStuckInUpdating(agent)) {
+      menuItems.push(
+        <EuiContextMenuItem
+          key="agentRestartUpgradeBtn"
+          icon="refresh"
+          onClick={() => {
+            onUpgradeClick();
+          }}
+          data-test-subj="restartUpgradeBtn"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.restartUpgradeOneButton"
+            defaultMessage="Restart upgrade"
+          />
+        </EuiContextMenuItem>
+      );
+    }
+
+    if (agentTamperProtectionEnabled && agent.policy_id) {
+      menuItems.push(
+        <EuiContextMenuItem
+          icon="minusInCircle"
+          onClick={() => {
+            onGetUninstallCommandClick();
+            setIsMenuOpen(false);
+          }}
+          disabled={!agent.active}
+          key="getUninstallCommand"
+          data-test-subj="uninstallAgentMenuItem"
+        >
+          <FormattedMessage
+            id="xpack.fleet.agentList.getUninstallCommand"
+            defaultMessage="Uninstall agent"
+          />
+        </EuiContextMenuItem>
+      );
+    }
   }
 
   if (diagnosticFileUploadEnabled) {

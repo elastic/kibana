@@ -8,11 +8,11 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { Router, Redirect } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Redirect } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { I18nProvider } from '@kbn/i18n-react';
 import { AppMountParameters, CoreStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { AppPluginStartDependencies } from './types';
 import { SearchExamplePage, ExampleLink } from './common/example_page';
 import { SearchExamplesApp } from './search/app';
@@ -45,33 +45,39 @@ export const renderApp = (
 ) => {
   ReactDOM.render(
     <I18nProvider>
-      <RedirectAppLinks application={application}>
+      <RedirectAppLinks
+        coreStart={{
+          application,
+        }}
+      >
         <SearchExamplePage exampleLinks={LINKS} basePath={http.basePath}>
           <Router history={history}>
-            <Route path={LINKS[0].path}>
-              <SearchExamplesApp
-                notifications={notifications}
-                navigation={navigation}
-                data={data}
-                http={http}
-                unifiedSearch={unifiedSearch}
-              />
-            </Route>
-            <Route path={LINKS[1].path}>
-              <SqlSearchExampleApp notifications={notifications} data={data} />
-            </Route>
-            <Route path={LINKS[2].path}>
-              <SearchSessionsExampleApp
-                navigation={navigation}
-                notifications={notifications}
-                data={data}
-                unifiedSearch={unifiedSearch}
-              />
-            </Route>
+            <Routes>
+              <Route path={LINKS[0].path}>
+                <SearchExamplesApp
+                  notifications={notifications}
+                  navigation={navigation}
+                  data={data}
+                  http={http}
+                  unifiedSearch={unifiedSearch}
+                />
+              </Route>
+              <Route path={LINKS[1].path}>
+                <SqlSearchExampleApp notifications={notifications} data={data} />
+              </Route>
+              <Route path={LINKS[2].path}>
+                <SearchSessionsExampleApp
+                  navigation={navigation}
+                  notifications={notifications}
+                  data={data}
+                  unifiedSearch={unifiedSearch}
+                />
+              </Route>
 
-            <Route path="/" exact={true}>
-              <Redirect to={LINKS[0].path} />
-            </Route>
+              <Route path="/" exact={true}>
+                <Redirect to={LINKS[0].path} />
+              </Route>
+            </Routes>
           </Router>
         </SearchExamplePage>
       </RedirectAppLinks>

@@ -8,7 +8,7 @@
 import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useCallback } from 'react';
 import type { EuiTableSelectionType, EuiBasicTableProps, Pagination } from '@elastic/eui';
-import { EuiEmptyPrompt, EuiLoadingContent, EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt, EuiSkeletonText, EuiBasicTable } from '@elastic/eui';
 import classnames from 'classnames';
 import styled from 'styled-components';
 
@@ -74,11 +74,12 @@ export const CasesTable: FunctionComponent<CasesTableProps> = ({
 
   return isCasesLoading && isDataEmpty ? (
     <Div>
-      <EuiLoadingContent data-test-subj="initialLoadingPanelAllCases" lines={10} />
+      <EuiSkeletonText data-test-subj="initialLoadingPanelAllCases" lines={10} />
     </Div>
   ) : (
     <>
       <CasesTableUtilityBar
+        pagination={pagination}
         isSelectorView={isSelectorView}
         totalCases={data.total ?? 0}
         selectedCases={selectedCases}

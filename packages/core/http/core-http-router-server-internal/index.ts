@@ -7,7 +7,8 @@
  */
 
 export { filterHeaders } from './src/headers';
-export { Router } from './src/router';
+export { Router, type RouterOptions } from './src/router';
+export type { HandlerResolutionStrategy } from './src/versioned_router';
 export { isKibanaRequest, isRealRequest, ensureRawRequest, CoreKibanaRequest } from './src/request';
 export { isSafeMethod } from './src/route';
 export { HapiResponseAdapter } from './src/response_adapter';

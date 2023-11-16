@@ -73,6 +73,11 @@ Array [
     "validationName": "(\\"true\\" | \\"false\\")",
   },
   Object {
+    "key": "context_propagation_only",
+    "type": "boolean",
+    "validationName": "(\\"true\\" | \\"false\\")",
+  },
+  Object {
     "key": "dedot_custom_metrics",
     "type": "boolean",
     "validationName": "(\\"true\\" | \\"false\\")",
@@ -249,6 +254,11 @@ Array [
       "m",
     ],
     "validationName": "durationRt",
+  },
+  Object {
+    "key": "session_sample_rate",
+    "type": "float",
+    "validationName": "floatRt",
   },
   Object {
     "key": "span_compression_enabled",

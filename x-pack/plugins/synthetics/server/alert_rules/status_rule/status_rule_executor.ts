@@ -4,28 +4,28 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import moment from 'moment';
 import {
   SavedObjectsClientContract,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { getAllLocations } from '../../synthetics_service/get_all_locations';
+import { SyntheticsServerSetup } from '../../types';
+import { UptimeEsClient } from '../../lib';
+import { SYNTHETICS_INDEX_PATTERN } from '../../../common/constants';
 import {
   getAllMonitors,
   processMonitors,
 } from '../../saved_objects/synthetics_monitor/get_all_monitors';
 import { queryMonitorStatus } from '../../queries/query_monitor_status';
-import { UptimeEsClient } from '../../legacy_uptime/lib/lib';
 import { StatusRuleParams } from '../../../common/rules/status_rule';
 import {
   ConfigKey,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   OverviewStatus,
   OverviewStatusMetaData,
 } from '../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
-import { UptimeServerSetup } from '../../legacy_uptime/lib/adapters';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';
 
@@ -44,50 +44,29 @@ export class StatusRuleExecutor {
   params: StatusRuleParams;
   esClient: UptimeEsClient;
   soClient: SavedObjectsClientContract;
-  server: UptimeServerSetup;
+  server: SyntheticsServerSetup;
   syntheticsMonitorClient: SyntheticsMonitorClient;
-  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitor>> = [];
-
-  public locationIdNameMap: Record<string, string> = {};
+  monitors: Array<SavedObjectsFindResult<EncryptedSyntheticsMonitorAttributes>> = [];
 
   constructor(
     previousStartedAt: Date | null,
     p: StatusRuleParams,
     soClient: SavedObjectsClientContract,
     scopedClient: ElasticsearchClient,
-    server: UptimeServerSetup,
+    server: SyntheticsServerSetup,
     syntheticsMonitorClient: SyntheticsMonitorClient
   ) {
     this.previousStartedAt = previousStartedAt;
     this.params = p;
     this.soClient = soClient;
-    this.esClient = new UptimeEsClient(this.soClient, scopedClient);
+    this.esClient = new UptimeEsClient(this.soClient, scopedClient, {
+      heartbeatIndices: SYNTHETICS_INDEX_PATTERN,
+    });
     this.server = server;
     this.syntheticsMonitorClient = syntheticsMonitorClient;
   }
 
-  async getAllLocationNames() {
-    const { publicLocations, privateLocations } = await getAllLocations({
-      server: this.server,
-      syntheticsMonitorClient: this.syntheticsMonitorClient,
-      savedObjectsClient: this.soClient,
-    });
-
-    publicLocations.forEach((loc) => {
-      this.locationIdNameMap[loc.label] = loc.id;
-    });
-
-    privateLocations.forEach((loc) => {
-      this.locationIdNameMap[loc.label] = loc.id;
-    });
-  }
-
-  getLocationId(name: string) {
-    return this.locationIdNameMap[name];
-  }
-
   async getMonitors() {
-    await this.getAllLocationNames();
     this.monitors = await getAllMonitors({
       soClient: this.soClient,
       filter: `${monitorAttributes}.${AlertConfigKey.STATUS_ENABLED}: true`,
@@ -96,20 +75,15 @@ export class StatusRuleExecutor {
     const {
       allIds,
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
-    } = await processMonitors(
-      this.monitors,
-      this.server,
-      this.soClient,
-      this.syntheticsMonitorClient
-    );
+    } = processMonitors(this.monitors, this.server, this.soClient, this.syntheticsMonitorClient);
 
     return {
       enabledMonitorQueryIds,
-      listOfLocations,
+      monitorLocationIds,
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
@@ -121,21 +95,24 @@ export class StatusRuleExecutor {
     prevDownConfigs: OverviewStatus['downConfigs'] = {}
   ): Promise<AlertOverviewStatus> {
     const {
-      listOfLocations,
+      monitorLocationIds,
       enabledMonitorQueryIds,
       allIds,
       monitorLocationMap,
       projectMonitorsCount,
       monitorQueryIdToConfigIdMap,
     } = await this.getMonitors();
+    const from = this.previousStartedAt
+      ? moment(this.previousStartedAt).subtract(1, 'minute').toISOString()
+      : 'now-2m';
 
     if (enabledMonitorQueryIds.length > 0) {
       const currentStatus = await queryMonitorStatus(
         this.esClient,
-        listOfLocations,
+        monitorLocationIds,
         {
           to: 'now',
-          from: this.previousStartedAt?.toISOString() ?? 'now-1m',
+          from,
         },
         enabledMonitorQueryIds,
         monitorLocationMap,
@@ -195,9 +172,7 @@ export class StatusRuleExecutor {
         delete downConfigs[locPlusId];
       } else {
         const { locations } = monitor.attributes;
-        const isLocationRemoved = !locations.some(
-          (l) => l.id === this.getLocationId(downConfig.location)
-        );
+        const isLocationRemoved = !locations.some((l) => l.id === downConfig.locationId);
         if (isLocationRemoved) {
           staleDownConfigs[locPlusId] = { ...downConfig, isLocationRemoved: true };
           delete downConfigs[locPlusId];

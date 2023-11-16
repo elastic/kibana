@@ -17,15 +17,19 @@ const OverlayText = () => (
   // in this case
   //
   <>
-    <EuiText size="s">Press Enter to start editing.</EuiText>
+    <EuiText size="s" data-test-subj="a11y-overlay">
+      Press Enter to start editing.
+    </EuiText>
     <EuiText size="s">When you&rsquo;re done, press Escape to stop editing.</EuiText>
   </>
 );
 
-export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | null) {
+export function useUIAceKeyboardMode(
+  aceTextAreaElement: HTMLTextAreaElement | null,
+  isAccessibilityOverlayEnabled: boolean = true
+) {
   const overlayMountNode = useRef<HTMLDivElement | null>(null);
   const autoCompleteVisibleRef = useRef<boolean>(false);
-
   useEffect(() => {
     function onDismissOverlay(event: KeyboardEvent) {
       if (event.key === keys.ENTER) {
@@ -60,7 +64,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
         enableOverlay();
       }
     };
-    if (aceTextAreaElement) {
+    if (aceTextAreaElement && isAccessibilityOverlayEnabled) {
       // We don't control HTML elements inside of ace so we imperatively create an element
       // that acts as a container and insert it just before ace's textarea element
       // so that the overlay lives at the correct spot in the DOM hierarchy.
@@ -86,7 +90,7 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
       aceTextAreaElement.addEventListener('keydown', aceKeydownListener);
     }
     return () => {
-      if (aceTextAreaElement) {
+      if (aceTextAreaElement && isAccessibilityOverlayEnabled) {
         document.removeEventListener('keydown', documentKeyDownListener, { capture: true });
         aceTextAreaElement.removeEventListener('keydown', aceKeydownListener);
         const textAreaContainer = aceTextAreaElement.parentElement;
@@ -95,5 +99,5 @@ export function useUIAceKeyboardMode(aceTextAreaElement: HTMLTextAreaElement | n
         }
       }
     };
-  }, [aceTextAreaElement]);
+  }, [aceTextAreaElement, isAccessibilityOverlayEnabled]);
 }

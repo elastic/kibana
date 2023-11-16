@@ -8,7 +8,7 @@
 import React from 'react';
 import { useInventoryViews } from '../../../../hooks/use_inventory_views';
 import { SavedViewsToolbarControls } from '../../../../components/saved_views/toolbar_control';
-import { useWaffleViewState, WaffleViewState } from '../hooks/use_waffle_view_state';
+import { useWaffleViewState } from '../hooks/use_waffle_view_state';
 
 export const SavedViews = () => {
   const { viewState } = useWaffleViewState();
@@ -28,7 +28,7 @@ export const SavedViews = () => {
   } = useInventoryViews();
 
   return (
-    <SavedViewsToolbarControls<WaffleViewState>
+    <SavedViewsToolbarControls
       currentView={currentView}
       views={views}
       isFetchingViews={isFetchingViews}

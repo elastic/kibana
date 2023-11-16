@@ -17,6 +17,10 @@ export default function ({ getService }: FtrProviderContext) {
     describe('with no data loaded', function () {
       before(async () => {
         await transform.securityUI.loginAsTransformPowerUser();
+
+        // For this test to work, make sure there are no pre-existing transform present.
+        // For example, solutions might set up transforms automatically.
+        await transform.api.cleanTransformIndices();
       });
 
       after(async () => {

@@ -6,7 +6,8 @@
  */
 
 import type { Query } from '@elastic/eui';
-import type { ExportRulesDetails } from '../../../../../common/detection_engine/rule_management';
+import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
+import type { ExportRulesDetails } from '../../../../../common/api/detection_engine/rule_management';
 import type { BulkActionSummary } from '../../../rule_management/logic';
 
 export const caseInsensitiveSort = (tags: string[]): string[] => {
@@ -74,4 +75,15 @@ export const getExportedRulesCounts = async (blob: Blob): Promise<BulkActionSumm
     failed: details.missing_rules_count,
     total: details.exported_rules_count + details.missing_rules_count,
   };
+};
+
+const NormalizedSeverity: Record<Severity, number> = {
+  low: 0,
+  medium: 1,
+  high: 2,
+  critical: 3,
+};
+
+export const getNormalizedSeverity = (severity: Severity): number => {
+  return NormalizedSeverity[severity] ?? -1;
 };

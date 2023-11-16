@@ -6,7 +6,7 @@
  */
 
 import { euiLightVars } from '@kbn/ui-theme';
-import { CaseSeverity } from '../../../common/api';
+import { CaseSeverity } from '../../../common/types/domain';
 import { SeverityAll } from '../../containers/types';
 import { ALL_SEVERITIES, CRITICAL, HIGH, LOW, MEDIUM } from './translations';
 

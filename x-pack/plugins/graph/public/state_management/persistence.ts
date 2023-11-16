@@ -231,7 +231,7 @@ function showModal(
     workspace: savedWorkspace,
     saveWorkspace: saveWorkspaceHandler,
     services: {
-      savedObjectsClient: deps.savedObjectsClient,
+      contentClient: deps.contentClient,
       overlays: deps.overlays,
     },
   });

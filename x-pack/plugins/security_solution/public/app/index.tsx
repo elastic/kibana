@@ -7,23 +7,21 @@
 
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-
-import { NotFoundPage } from './404';
+import { SubscriptionTrackingProvider } from '@kbn/subscription-tracking';
 import { SecurityApp } from './app';
 import type { RenderAppProps } from './types';
+import { AppRoutes } from './app_routes';
 
 export const renderApp = ({
   element,
   history,
   onAppLeave,
-  setHeaderActionMenu,
   services,
   store,
   usageCollection,
   subPluginRoutes,
   theme$,
+  subscriptionTrackingServices,
 }: RenderAppProps): (() => void) => {
   const ApplicationUsageTrackingProvider =
     usageCollection?.components.ApplicationUsageTrackingProvider ?? React.Fragment;
@@ -32,19 +30,16 @@ export const renderApp = ({
       history={history}
       onAppLeave={onAppLeave}
       services={services}
-      setHeaderActionMenu={setHeaderActionMenu}
       store={store}
       theme$={theme$}
     >
       <ApplicationUsageTrackingProvider>
-        <Switch>
-          {subPluginRoutes.map((route, index) => {
-            return <Route key={`route-${index}`} {...route} />;
-          })}
-          <Route>
-            <NotFoundPage />
-          </Route>
-        </Switch>
+        <SubscriptionTrackingProvider
+          analyticsClient={subscriptionTrackingServices.analyticsClient}
+          navigateToApp={subscriptionTrackingServices.navigateToApp}
+        >
+          <AppRoutes subPluginRoutes={subPluginRoutes} services={services} />
+        </SubscriptionTrackingProvider>
       </ApplicationUsageTrackingProvider>
     </SecurityApp>,
     element

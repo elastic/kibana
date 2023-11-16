@@ -19,12 +19,14 @@ import {
   DragDropBuckets,
   DraggableBucketContainer,
   isQueryValid,
-} from '@kbn/visualization-ui-components/public';
+} from '@kbn/visualization-ui-components';
 import { IndexPattern } from '../../../../../types';
 import { updateColumnParam } from '../../layer_helpers';
 import type { OperationDefinition } from '..';
 import type { BaseIndexPatternColumn } from '../column_types';
 import { FilterPopover } from './filter_popover';
+import { TermsIndexPatternColumn } from '../terms';
+import { isColumnOfType } from '../helpers';
 
 const generateId = htmlIdGenerator();
 const OPERATION_NAME = 'filters';
@@ -79,13 +81,13 @@ export const filtersOperation: OperationDefinition<
   getDefaultLabel: () => filtersLabel,
   buildColumn({ previousColumn }, columnParams) {
     let params = { filters: columnParams?.filters ?? [defaultFilter] };
-    if (previousColumn?.operationType === 'terms' && 'sourceField' in previousColumn) {
+    if (previousColumn && isColumnOfType<TermsIndexPatternColumn>('terms', previousColumn)) {
       params = {
         filters: columnParams?.filters ?? [
           {
             label: '',
             input: {
-              query: `${previousColumn.sourceField} : *`,
+              query: `"${previousColumn.sourceField}" : *`,
               language: 'kuery',
             },
           },
@@ -94,7 +96,7 @@ export const filtersOperation: OperationDefinition<
           ).params?.secondaryFields?.map((field) => ({
             label: '',
             input: {
-              query: `${field} : *`,
+              query: `"${field}" : *`,
               language: 'kuery',
             },
           })) ?? []),

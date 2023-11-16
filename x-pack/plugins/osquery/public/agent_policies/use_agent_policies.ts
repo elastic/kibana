@@ -10,6 +10,7 @@ import { useQuery } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
 import type { GetAgentPoliciesResponseItem } from '@kbn/fleet-plugin/common';
+import { API_VERSIONS } from '../../common/constants';
 import { useKibana } from '../common/lib/kibana';
 import { useErrorToast } from '../common/hooks/use_error_toast';
 
@@ -24,19 +25,26 @@ export const useAgentPolicies = () => {
       agentPoliciesById: Record<string, GetAgentPoliciesResponseItem>;
       agentPolicies: GetAgentPoliciesResponseItem[];
     }
-  >(['agentPolicies'], () => http.get('/internal/osquery/fleet_wrapper/agent_policies'), {
-    initialData: [],
-    keepPreviousData: true,
-    select: (response) => ({
-      agentPoliciesById: mapKeys(response, 'id'),
-      agentPolicies: response,
-    }),
-    onSuccess: () => setErrorToast(),
-    onError: (error) =>
-      setErrorToast(error as Error, {
-        title: i18n.translate('xpack.osquery.agent_policies.fetchError', {
-          defaultMessage: 'Error while fetching agent policies',
-        }),
+  >(
+    ['agentPolicies'],
+    () =>
+      http.get('/internal/osquery/fleet_wrapper/agent_policies', {
+        version: API_VERSIONS.internal.v1,
       }),
-  });
+    {
+      initialData: [],
+      keepPreviousData: true,
+      select: (response) => ({
+        agentPoliciesById: mapKeys(response, 'id'),
+        agentPolicies: response,
+      }),
+      onSuccess: () => setErrorToast(),
+      onError: (error) =>
+        setErrorToast(error as Error, {
+          title: i18n.translate('xpack.osquery.agent_policies.fetchError', {
+            defaultMessage: 'Error while fetching agent policies',
+          }),
+        }),
+    }
+  );
 };

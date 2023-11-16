@@ -8,21 +8,11 @@ import expect from '@kbn/expect';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 
 import { RuleRegistrySearchResponse } from '@kbn/rule-registry-plugin/common/search_strategy';
-import { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import {
-  deleteSignalsIndex,
-  createSignalsIndex,
-  deleteAllRules,
-  getRuleForSignalTesting,
-  createRule,
-  waitForSignalsToBePresent,
-  waitForRuleSuccess,
-} from '../../../../detection_engine_api_integration/utils';
-import {
-  obsOnlySpacesAllEsRead,
   obsOnlySpacesAll,
   logsOnlySpacesAll,
+  secOnlySpacesAllEsReadAll,
 } from '../../../common/lib/authentication/users';
 
 type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
@@ -30,18 +20,12 @@ type RuleRegistrySearchResponseWithErrors = RuleRegistrySearchResponse & {
   message: string;
 };
 
-const ID = 'BhbXBmkBR346wHgn4PeZ';
-
 // eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
-  const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const secureBsearch = getService('secureBsearch');
-  const log = getService('log');
   const kbnClient = getService('kibanaServer');
-
-  const SPACE1 = 'space1';
 
   describe('ruleRegistryAlertsSearchStrategy', () => {
     let kibanaVersion: string;
@@ -66,6 +50,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
           },
@@ -87,6 +72,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.LOGS],
             pagination: {
@@ -113,23 +99,14 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('siem', () => {
       before(async () => {
-        await createSignalsIndex(supertest, log);
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
         await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
-
-        const rule: QueryRuleCreateProps = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
-          query: `_id:${ID}`,
-        };
-        const { id: createdId } = await createRule(supertest, log, rule);
-        await waitForRuleSuccess({ supertest, log, id: createdId });
-        await waitForSignalsToBePresent(supertest, log, 1, [createdId]);
+        await esArchiver.load('x-pack/test/functional/es_archives/security_solution/alerts/8.1.0');
       });
 
       after(async () => {
-        await deleteSignalsIndex(supertest, log);
-        await deleteAllRules(supertest, log);
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(
+          'x-pack/test/functional/es_archives/security_solution/alerts/8.1.0'
+        );
         await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
 
@@ -137,17 +114,18 @@ export default ({ getService }: FtrProviderContext) => {
         const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
-            username: obsOnlySpacesAllEsRead.username,
-            password: obsOnlySpacesAllEsRead.password,
+            username: secOnlySpacesAllEsReadAll.username,
+            password: secOnlySpacesAllEsReadAll.password,
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
-        expect(result.rawResponse.hits.total).to.eql(1);
+        expect(result.rawResponse.hits.total).to.eql(50);
         const consumers = result.rawResponse.hits.hits.map(
           (hit) => hit.fields?.['kibana.alert.rule.consumer']
         );
@@ -158,11 +136,12 @@ export default ({ getService }: FtrProviderContext) => {
         const result = await secureBsearch.send<RuleRegistrySearchResponseWithErrors>({
           supertestWithoutAuth,
           auth: {
-            username: obsOnlySpacesAllEsRead.username,
-            password: obsOnlySpacesAllEsRead.password,
+            username: secOnlySpacesAllEsReadAll.username,
+            password: secOnlySpacesAllEsReadAll.password,
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM, AlertConsumers.LOGS],
           },
@@ -180,11 +159,12 @@ export default ({ getService }: FtrProviderContext) => {
         const result = await secureBsearch.send<RuleRegistrySearchResponse>({
           supertestWithoutAuth,
           auth: {
-            username: obsOnlySpacesAllEsRead.username,
-            password: obsOnlySpacesAllEsRead.password,
+            username: secOnlySpacesAllEsReadAll.username,
+            password: secOnlySpacesAllEsReadAll.password,
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.SIEM],
             runtimeMappings: {
@@ -198,7 +178,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
         });
-        expect(result.rawResponse.hits.total).to.eql(1);
+        expect(result.rawResponse.hits.total).to.eql(50);
         const runtimeFields = result.rawResponse.hits.hits.map(
           (hit) => hit.fields?.[runtimeFieldKey]
         );
@@ -208,10 +188,10 @@ export default ({ getService }: FtrProviderContext) => {
 
     describe('apm', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await esArchiver.load('x-pack/test/functional/es_archives/observability/alerts');
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/rule_registry/alerts');
+        await esArchiver.unload('x-pack/test/functional/es_archives/observability/alerts');
       });
 
       it('should return alerts from apm rules', async () => {
@@ -223,13 +203,14 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [AlertConsumers.APM],
           },
           strategy: 'privateRuleRegistryAlertsSearchStrategy',
-          space: SPACE1,
+          space: 'default',
         });
-        expect(result.rawResponse.hits.total).to.eql(2);
+        expect(result.rawResponse.hits.total).to.eql(9);
         const consumers = result.rawResponse.hits.hits.map(
           (hit) => hit.fields?.['kibana.alert.rule.consumer']
         );
@@ -247,6 +228,7 @@ export default ({ getService }: FtrProviderContext) => {
           },
           referer: 'test',
           kibanaVersion,
+          internalOrigin: 'Kibana',
           options: {
             featureIds: [],
           },

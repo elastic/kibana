@@ -12,7 +12,6 @@ import {
   switchAndCleanDatasource,
   switchVisualization,
   setState,
-  updateState,
   updateDatasourceState,
   updateVisualizationState,
   removeOrClearLayer,
@@ -102,12 +101,6 @@ describe('lensSlice', () => {
       });
     });
 
-    it('updateState: updates state with updater', () => {
-      const customUpdater = jest.fn((state) => ({ ...state, query: customQuery }));
-      store.dispatch(updateState({ updater: customUpdater }));
-      const changedState = store.getState().lens;
-      expect(changedState).toEqual({ ...defaultState, query: customQuery });
-    });
     it('should update the corresponding visualization state on update', () => {
       const newVisState = {};
       store.dispatch(
@@ -119,25 +112,12 @@ describe('lensSlice', () => {
 
       expect(store.getState().lens.visualization.state).toEqual(newVisState);
     });
-    it('should update the datasource state with passed in reducer', () => {
-      const datasourceUpdater = jest.fn(() => ({ changed: true }));
-      store.dispatch(
-        updateDatasourceState({
-          datasourceId: 'testDatasource',
-          updater: datasourceUpdater,
-        })
-      );
-      expect(store.getState().lens.datasourceStates.testDatasource.state).toStrictEqual({
-        changed: true,
-      });
-      expect(datasourceUpdater).toHaveBeenCalledTimes(1);
-    });
     it('should update the layer state with passed in reducer', () => {
       const newDatasourceState = {};
       store.dispatch(
         updateDatasourceState({
           datasourceId: 'testDatasource',
-          updater: newDatasourceState,
+          newDatasourceState,
         })
       );
       expect(store.getState().lens.datasourceStates.testDatasource.state).toStrictEqual(
@@ -362,6 +342,7 @@ describe('lensSlice', () => {
           addLayer({
             layerId: 'foo',
             layerType: LayerTypes.DATA,
+            extraArg: 'some arg',
           })
         );
         const state = customStore.getState().lens;
@@ -405,6 +386,7 @@ describe('lensSlice', () => {
           addLayer({
             layerId: 'foo',
             layerType: layerTypes.DATA,
+            extraArg: undefined,
           })
         );
 

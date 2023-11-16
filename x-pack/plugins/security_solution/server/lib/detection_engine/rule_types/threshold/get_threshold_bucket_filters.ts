@@ -49,7 +49,8 @@ export const getThresholdBucketFilters = async ({
         }
       });
 
-      return [...acc, filter];
+      acc.push(filter);
+      return acc;
     },
     [] as ESFilter[]
   );

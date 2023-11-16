@@ -22,7 +22,7 @@ import { EmbeddedMap } from '../components/embeddables/embedded_map';
 import { FiltersGlobal } from '../../../common/components/filters_global';
 import { HeaderPage } from '../../../common/components/header_page';
 import { LastEventTime } from '../../../common/components/last_event_time';
-import { TabNavigationWithBreadcrumbs } from '../../../common/components/navigation/tab_navigation_with_breadcrumbs';
+import { TabNavigation } from '../../../common/components/navigation/tab_navigation';
 
 import { NetworkKpiComponent } from '../components/kpi_network';
 import { SiemSearchBar } from '../../../common/components/search_bar';
@@ -109,7 +109,8 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
       [dispatch]
     );
 
-    const { indicesExist, indexPattern, selectedPatterns } = useSourcererDataView();
+    const { indicesExist, indexPattern, selectedPatterns, sourcererDataView } =
+      useSourcererDataView();
 
     const onSkipFocusBeforeEventsTable = useCallback(() => {
       containerElement.current
@@ -157,7 +158,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
           <StyledFullHeightContainer onKeyDown={onKeyDown} ref={containerElement}>
             <EuiWindowEvent event="resize" handler={noop} />
             <FiltersGlobal show={showGlobalFilters({ globalFullScreen, graphEventId })}>
-              <SiemSearchBar indexPattern={indexPattern} id={InputsModelId.global} />
+              <SiemSearchBar sourcererDataView={sourcererDataView} id={InputsModelId.global} />
             </FiltersGlobal>
 
             <SecuritySolutionPageWrapper noPadding={globalFullScreen}>
@@ -207,7 +208,7 @@ const NetworkComponent = React.memo<NetworkComponentProps>(
                 <>
                   <Display show={!globalFullScreen}>
                     <EuiSpacer />
-                    <TabNavigationWithBreadcrumbs navTabs={navTabsNetwork(hasMlUserPermissions)} />
+                    <TabNavigation navTabs={navTabsNetwork(hasMlUserPermissions)} />
                     <EuiSpacer />
                   </Display>
 

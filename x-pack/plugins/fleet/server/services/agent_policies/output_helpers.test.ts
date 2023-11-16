@@ -196,7 +196,7 @@ describe('validateOutputForPolicy', () => {
       );
     });
 
-    it('should not allow logstash output to be used with a policy using fleet server or APM', async () => {
+    it('should not allow logstash output to be used with a policy using fleet server, synthetics or APM', async () => {
       mockHasLicence(true);
       mockedOutputService.get.mockResolvedValue({
         type: 'logstash',
@@ -217,7 +217,7 @@ describe('validateOutputForPolicy', () => {
       );
     });
 
-    it('should allow elasticsearch output to be used with a policy using fleet server or APM', async () => {
+    it('should allow elasticsearch output to be used with a policy using fleet server, synthetics or APM', async () => {
       mockHasLicence(true);
       mockedOutputService.get.mockResolvedValue({
         type: 'elasticsearch',

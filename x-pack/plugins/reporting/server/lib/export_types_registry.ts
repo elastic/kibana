@@ -6,24 +6,16 @@
  */
 
 import { isString } from 'lodash';
-import { getExportType as getTypeCsvFromSavedObject } from '../export_types/csv_v2';
-import { getExportType as getTypeCsvFromSavedObjectImmediate } from '../export_types/csv_searchsource_immediate';
-import { getExportType as getTypeCsv } from '../export_types/csv_searchsource';
-import { getExportType as getTypePng } from '../export_types/png';
-import { getExportType as getTypePngV2 } from '../export_types/png_v2';
-import { getExportType as getTypePrintablePdf } from '../export_types/printable_pdf';
-import { getExportType as getTypePrintablePdfV2 } from '../export_types/printable_pdf_v2';
+import { ExportType } from '../export_types/common';
 
-import { CreateJobFn, ExportTypeDefinition } from '../types';
-
-type GetCallbackFn = (item: ExportTypeDefinition) => boolean;
+type GetCallbackFn = (item: ExportType) => boolean;
 
 export class ExportTypesRegistry {
-  private _map: Map<string, ExportTypeDefinition> = new Map();
+  private _map: Map<string, ExportType> = new Map();
 
   constructor() {}
 
-  register(item: ExportTypeDefinition): void {
+  register(item: ExportType): void {
     if (!isString(item.id)) {
       throw new Error(`'item' must have a String 'id' property `);
     }
@@ -43,21 +35,43 @@ export class ExportTypesRegistry {
     return this._map.size;
   }
 
-  getById(id: string): ExportTypeDefinition {
+  getById(id: string): ExportType {
     if (!this._map.has(id)) {
       throw new Error(`Unknown id ${id}`);
     }
 
-    return this._map.get(id) as ExportTypeDefinition;
+    return this._map.get(id) as ExportType;
   }
 
-  get(findType: GetCallbackFn): ExportTypeDefinition {
+  getByJobType(jobType: ExportType['jobType']): ExportType {
+    let result;
+    for (const value of this._map.values()) {
+      if (value.jobType !== jobType) {
+        continue;
+      }
+      const foundJobType = value;
+
+      if (result) {
+        throw new Error('Found multiple items matching predicate.');
+      }
+
+      result = foundJobType;
+    }
+
+    if (!result) {
+      throw new Error('Found no items matching predicate');
+    }
+
+    return result;
+  }
+
+  get(findType: GetCallbackFn): ExportType {
     let result;
     for (const value of this._map.values()) {
       if (!findType(value)) {
         continue; // try next value
       }
-      const foundResult: ExportTypeDefinition = value;
+      const foundResult: ExportType = value;
 
       if (result) {
         throw new Error('Found multiple items matching predicate.');
@@ -72,31 +86,4 @@ export class ExportTypesRegistry {
 
     return result;
   }
-}
-
-// TODO: Define a 2nd ExportTypeRegistry instance for "immediate execute" report job types only.
-// It should not require a `CreateJobFn` for its ExportTypeDefinitions, which only makes sense for async.
-// Once that is done, the `any` types below can be removed.
-
-/*
- * @return ExportTypeRegistry: the ExportTypeRegistry instance that should be
- * used to register async export type definitions
- */
-export function getExportTypesRegistry(): ExportTypesRegistry {
-  const registry = new ExportTypesRegistry();
-  type CreateFnType = CreateJobFn<any, any>; // can not specify params types because different type of params are not assignable to each other
-  type RunFnType = any; // can not specify because ImmediateExecuteFn is not assignable to RunTaskFn
-  const getTypeFns: Array<() => ExportTypeDefinition<CreateFnType | null, RunFnType>> = [
-    getTypeCsv,
-    getTypeCsvFromSavedObject,
-    getTypeCsvFromSavedObjectImmediate,
-    getTypePng,
-    getTypePngV2,
-    getTypePrintablePdf,
-    getTypePrintablePdfV2,
-  ];
-  getTypeFns.forEach((getType) => {
-    registry.register(getType());
-  });
-  return registry;
 }

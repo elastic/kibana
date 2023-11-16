@@ -86,7 +86,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             rule_id: { type: 'text' },
             rule_name: { type: 'text' },
             alert_id: { type: 'text' },
-            context_message: { type: 'text' },
+            context_link: { type: 'text' },
           },
         },
       },
@@ -171,10 +171,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     await monacoEditor.setCodeEditorValue(`{
-      "rule_id": "{{ruleId}}",
-      "rule_name": "{{ruleName}}",
-      "alert_id": "{{alertId}}",
-      "context_message": "{{context.message}}"
+      "rule_id": "{{rule.id}}",
+      "rule_name": "{{rule.name}}",
+      "alert_id": "{{alert.id}}",
+      "context_link": "{{context.link}}"
     }`);
   };
 
@@ -199,12 +199,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const getResultsLink = async () => {
     // getting the link
     await dataGrid.clickRowToggle();
-    await testSubjects.click('collapseBtn');
-    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_message-value');
+    const contextMessageElement = await testSubjects.find('tableDocViewRow-context_link-value');
     const contextMessage = await contextMessageElement.getVisibleText();
-    const [, link] = contextMessage.split(`Link\: `);
 
-    return link;
+    return contextMessage;
   };
 
   const openAlertResults = async (value: string, type: 'id' | 'name' = 'name') => {
@@ -214,19 +212,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     await PageObjects.discover.selectIndexPattern(OUTPUT_DATA_VIEW);
 
-    let alertId: string;
+    let ruleId: string;
     if (type === 'name') {
       const [{ id }] = await getAlertsByName(value);
-      alertId = id;
+      ruleId = id;
     } else {
-      alertId = value;
+      ruleId = value;
     }
 
-    await filterBar.addFilter({ field: 'alert_id', operation: 'is', value: alertId });
+    await filterBar.addFilter({ field: 'rule_id', operation: 'is', value: ruleId });
     await PageObjects.discover.waitUntilSearchingHasFinished();
 
     const link = await getResultsLink();
-    await filterBar.removeFilter('alert_id'); // clear filter bar
+    await filterBar.removeFilter('rule_id'); // clear filter bar
 
     // follow url provided by alert to see documents triggered the alert
     const baseUrl = deployment.getHostPort();
@@ -490,7 +488,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const documentCell = await dataGrid.getCellElement(0, 3);
       const firstRowContent = await documentCell.getVisibleText();
-      expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
 
       expect(await dataGrid.getDocCount()).to.be(5);
     });
@@ -504,7 +502,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const documentCell = await dataGrid.getCellElement(0, 3);
       const firstRowContent = await documentCell.getVisibleText();
-      expect(firstRowContent.includes('runtime-message-fieldmock-message_id')).to.be.equal(true);
+      expect(firstRowContent.includes('runtime-message-fieldmock-message')).to.be.equal(true);
     });
 
     it('should display results after data view removal on clicking prev generated link', async () => {

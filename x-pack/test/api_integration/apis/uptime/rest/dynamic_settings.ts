@@ -7,8 +7,8 @@
 
 import expect from '@kbn/expect';
 import { isRight } from 'fp-ts/lib/Either';
-import { DynamicSettingsType, DynamicSettings } from '@kbn/synthetics-plugin/common/runtime_types';
-import { DYNAMIC_SETTINGS_DEFAULTS, API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { DynamicSettingsCodec, DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
+import { DYNAMIC_SETTINGS_DEFAULTS, API_URLS } from '@kbn/uptime-plugin/common/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     it('returns the defaults when no user settings have been saved', async () => {
       const apiResponse = await supertest.get(API_URLS.DYNAMIC_SETTINGS);
       expect(apiResponse.body).to.eql(DYNAMIC_SETTINGS_DEFAULTS);
-      expect(isRight(DynamicSettingsType.decode(apiResponse.body))).to.be.ok();
+      expect(isRight(DynamicSettingsCodec.decode(apiResponse.body))).to.be.ok();
     });
 
     it('can change the settings', async () => {
@@ -29,16 +29,25 @@ export default function ({ getService }: FtrProviderContext) {
         defaultConnectors: [],
       };
       const postResponse = await supertest
-        .post(API_URLS.DYNAMIC_SETTINGS)
+        .put(API_URLS.DYNAMIC_SETTINGS)
         .set('kbn-xsrf', 'true')
         .send(newSettings);
 
-      expect(postResponse.body).to.eql({ success: true });
+      expect(postResponse.body).to.eql({
+        heartbeatIndices: 'myIndex1*',
+        certExpirationThreshold: 5,
+        certAgeThreshold: 15,
+        defaultConnectors: [],
+        defaultEmail: { to: [], cc: [], bcc: [] },
+      });
       expect(postResponse.status).to.eql(200);
 
       const getResponse = await supertest.get(API_URLS.DYNAMIC_SETTINGS);
-      expect(getResponse.body).to.eql(newSettings);
-      expect(isRight(DynamicSettingsType.decode(getResponse.body))).to.be.ok();
+      expect(getResponse.body).to.eql({
+        ...newSettings,
+        defaultEmail: { to: [], cc: [], bcc: [] },
+      });
+      expect(isRight(DynamicSettingsCodec.decode(getResponse.body))).to.be.ok();
     });
   });
 }

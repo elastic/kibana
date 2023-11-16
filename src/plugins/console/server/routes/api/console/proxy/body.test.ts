@@ -90,5 +90,11 @@ describe('Console Proxy Route', () => {
         });
       });
     });
+    describe('PATCH request', () => {
+      it('returns the exact body', async () => {
+        const { payload } = await request('PATCH', '/', 'foobar');
+        expect(await readStream(payload)).toBe('foobar');
+      });
+    });
   });
 });

@@ -22,6 +22,13 @@ export const cursorOrCss = css`
 
 export const fieldAndParamCss = (euiTheme: EuiThemeComputed) => css`
   min-width: calc(${euiTheme.size.xl} * 5);
+  flex-grow: 1;
+  .euiFormRow {
+    max-width: 800px;
+  }
+  &:focus-within {
+    flex-grow: 4;
+  }
 `;
 
 export const operationCss = (euiTheme: EuiThemeComputed) => css`
@@ -36,10 +43,8 @@ export const getGrabIconCss = (euiTheme: EuiThemeComputed) => css`
   margin: 0 ${euiTheme.size.xxs};
 `;
 
-export const actionButtonCss = css`
-  &.euiButtonEmpty .euiButtonEmpty__content {
-    padding: 0 4px;
-  }
+export const actionButtonCss = (euiTheme: EuiThemeComputed) => css`
+  padding-inline: ${euiTheme.size.xs};
 `;
 
 export const disabledDraggableCss = css`

@@ -6,13 +6,14 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart } from '@kbn/core/public';
+import { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/public';
 import type { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import { HeatmapPublicConfig } from '../config';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
 import { heatmapVisType } from './vis_type';
 import { setDataViewsStart } from './services';
@@ -36,17 +37,26 @@ export interface VisTypeHeatmapStartDependencies {
 }
 
 export class VisTypeHeatmapPlugin {
+  private readonly initializerContext: PluginInitializerContext<HeatmapPublicConfig>;
+
+  constructor(initializerContext: PluginInitializerContext<HeatmapPublicConfig>) {
+    this.initializerContext = initializerContext;
+  }
+
   setup(
     core: CoreSetup<VisTypeHeatmapPluginStartDependencies>,
     { visualizations, charts, usageCollection }: VisTypeHeatmapSetupDependencies
   ) {
     if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
-      visualizations.createBaseVisualization(
-        heatmapVisType({
+      const { readOnly } = this.initializerContext.config.get<HeatmapPublicConfig>();
+      visualizations.createBaseVisualization({
+        ...heatmapVisType({
           showElasticChartsOptions: true,
           palettes: charts.palettes,
-        })
-      );
+        }),
+        disableCreate: Boolean(readOnly),
+        disableEdit: Boolean(readOnly),
+      });
     }
     return {};
   }

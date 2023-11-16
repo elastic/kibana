@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import type SuperTest from 'supertest';
-import { MAX_DOCS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
+import { MAX_COMMENTS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
 import {
   Alerts,
   createCaseAttachAlertAndDeleteCase,
@@ -36,6 +36,7 @@ import {
   listFiles,
   findAttachments,
   bulkCreateAttachments,
+  getAllComments,
 } from '../../../../common/lib/api';
 import {
   secOnly,
@@ -65,7 +66,7 @@ import { User } from '../../../../common/lib/authentication/types';
 import {
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
 } from '../../../../../detection_engine_api_integration/utils';
 
 // eslint-disable-next-line import/no-default-export
@@ -142,6 +143,22 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteCases({ supertest, caseIDs: ['fake-id'], expectedHttpCode: 404 });
     });
 
+    it('unhappy path - 400s when trying to delete more than 100 cases at a time', async () => {
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: new Array(101).fill('id'),
+        expectedHttpCode: 400,
+      });
+    });
+
+    it('unhappy path - 400s when trying to delete 0 cases at a time', async () => {
+      await deleteCases({
+        supertest: supertestWithoutAuth,
+        caseIDs: [],
+        expectedHttpCode: 400,
+      });
+    });
+
     describe('files', () => {
       afterEach(async () => {
         await deleteAllFiles({
@@ -169,7 +186,7 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
             query: {
-              perPage: MAX_DOCS_PER_PAGE,
+              perPage: MAX_COMMENTS_PER_PAGE,
             },
           }),
         ]);
@@ -209,14 +226,14 @@ export default ({ getService }: FtrProviderContext): void => {
               supertest: supertestWithoutAuth,
               caseId: postedCase1.id,
               query: {
-                perPage: MAX_DOCS_PER_PAGE,
+                perPage: MAX_COMMENTS_PER_PAGE,
               },
             }),
             findAttachments({
               supertest: supertestWithoutAuth,
               caseId: postedCase2.id,
               query: {
-                perPage: MAX_DOCS_PER_PAGE,
+                perPage: MAX_COMMENTS_PER_PAGE,
               },
             }),
           ]);
@@ -249,7 +266,7 @@ export default ({ getService }: FtrProviderContext): void => {
         });
 
         afterEach(async () => {
-          await deleteSignalsIndex(supertest, log);
+          await deleteAllAlerts(supertest, log, es);
           await deleteAllRules(supertest, log);
           await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
         });
@@ -456,7 +473,7 @@ export default ({ getService }: FtrProviderContext): void => {
               supertest: supertestWithoutAuth,
               caseId: postedCase.id,
               query: {
-                perPage: MAX_DOCS_PER_PAGE,
+                perPage: MAX_COMMENTS_PER_PAGE,
               },
               auth: { user: secAllUser, space: 'space1' },
             }),
@@ -516,18 +533,15 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               auth: { user: superUser, space: 'space1' },
             }),
-            findAttachments({
+            getAllComments({
               supertest: supertestWithoutAuth,
               caseId: postedCase.id,
-              query: {
-                perPage: MAX_DOCS_PER_PAGE,
-              },
               auth: { user: secAllUser, space: 'space1' },
             }),
           ]);
 
           expect(filesAfterDelete.total).to.be(1);
-          expect(attachmentsAfterDelete.comments.length).to.be(1);
+          expect(attachmentsAfterDelete.length).to.be(1);
         });
       });
 

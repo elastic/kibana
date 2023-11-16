@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import { useIndicatorById, UseIndicatorByIdValue } from './use_indicator_by_id';
-import { TestProvidersComponent } from '../../../common/mocks/test_providers';
+import { TestProvidersComponent } from '../../../mocks/test_providers';
 import { createFetchIndicatorById } from '../services/fetch_indicator_by_id';
 import { Indicator } from '../../../../common/types/indicator';
 

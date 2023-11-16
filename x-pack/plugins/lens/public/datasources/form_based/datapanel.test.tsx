@@ -7,16 +7,15 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { createMockedDragDropContext } from './mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import {
   dataViewPluginMocks,
   Start as DataViewPublicStart,
 } from '@kbn/data-views-plugin/public/mocks';
 import { InnerFormBasedDataPanel, FormBasedDataPanel } from './datapanel';
-import { FieldListGrouped } from '@kbn/unified-field-list-plugin/public';
-import * as UseExistingFieldsApi from '@kbn/unified-field-list-plugin/public/hooks/use_existing_fields';
-import * as ExistingFieldsServiceApi from '@kbn/unified-field-list-plugin/public/services/field_existing/load_field_existing';
+import { FieldListGrouped } from '@kbn/unified-field-list';
+import * as UseExistingFieldsApi from '@kbn/unified-field-list/src/hooks/use_existing_fields';
+import * as ExistingFieldsServiceApi from '@kbn/unified-field-list/src/services/field_existing/load_field_existing';
 import { FieldItem } from '../common/field_item';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
@@ -336,7 +335,6 @@ describe('FormBased Data Panel', () => {
       fieldFormats: fieldFormatsServiceMock.createStartContract(),
       indexPatternFieldEditor: indexPatternFieldEditorPluginMock.createStartContract(),
       onIndexPatternRefresh: jest.fn(),
-      dragDropContext: createMockedDragDropContext(),
       currentIndexPatternId: '1',
       core,
       dateRange: {
@@ -387,10 +385,6 @@ describe('FormBased Data Panel', () => {
           currentIndexPatternId: '',
         }}
         setState={jest.fn()}
-        dragDropContext={{
-          ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        }}
         frame={createMockFramePublicAPI()}
       />
     );
@@ -413,10 +407,6 @@ describe('FormBased Data Panel', () => {
           dataViews,
         }),
         setState: jest.fn(),
-        dragDropContext: {
-          ...createMockedDragDropContext(),
-          dragging: { id: '1', humanData: { label: 'Label' } },
-        },
         dateRange: { fromDate: '2019-01-01', toDate: '2020-01-01' },
         frame: getFrameAPIMock({
           indexPatterns: indexPatterns as unknown as DataViewsState['indexPatterns'],

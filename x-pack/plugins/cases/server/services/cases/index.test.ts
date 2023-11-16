@@ -13,9 +13,10 @@
  * connector.id.
  */
 
-import type { CaseAttributes, CaseConnector, CaseFullExternalService } from '../../../common/api';
-import { CaseSeverity, CaseStatuses } from '../../../common/api';
-import { CASE_SAVED_OBJECT } from '../../../common/constants';
+import { omit, unset } from 'lodash';
+import type { CaseAttributes, ExternalService, CaseConnector } from '../../../common/types/domain';
+import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
+import { CASE_SAVED_OBJECT, SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type {
   SavedObject,
@@ -40,11 +41,20 @@ import {
   createCaseSavedObjectResponse,
   basicCaseFields,
   createSOFindResponse,
+  createErrorSO,
 } from '../test_utils';
 import { AttachmentService } from '../attachments';
 import { PersistableStateAttachmentTypeRegistry } from '../../attachment_framework/persistable_state_registry';
-import type { CaseSavedObjectTransformed, CasePersistedAttributes } from '../../common/types/case';
-import { CasePersistedSeverity, CasePersistedStatus } from '../../common/types/case';
+import type {
+  CaseSavedObjectTransformed,
+  CasePersistedAttributes,
+  CaseTransformedAttributes,
+} from '../../common/types/case';
+import {
+  CasePersistedSeverity,
+  CasePersistedStatus,
+  CaseTransformedAttributesRt,
+} from '../../common/types/case';
 
 const createUpdateSOResponse = ({
   connector,
@@ -53,7 +63,7 @@ const createUpdateSOResponse = ({
   status,
 }: {
   connector?: ESCaseConnectorWithId;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CasePersistedSeverity;
   status?: CasePersistedStatus;
 } = {}): SavedObjectsUpdateResponse<CasePersistedAttributes> => {
@@ -93,8 +103,9 @@ const createUpdateSOResponse = ({
 const createFindSO = (
   params: {
     connector?: ESCaseConnectorWithId;
-    externalService?: CaseFullExternalService;
+    externalService?: ExternalService | null;
     overrides?: Partial<CasePersistedAttributes>;
+    caseId?: string;
   } = {}
 ): SavedObjectsFindResult<CasePersistedAttributes> => ({
   ...createCaseSavedObjectResponse(params),
@@ -108,7 +119,7 @@ const createCaseUpdateParams = ({
   status,
 }: {
   connector?: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CaseSeverity;
   status?: CaseStatuses;
 }): Partial<CaseAttributes> => ({
@@ -125,7 +136,7 @@ const createCasePostParams = ({
   status,
 }: {
   connector: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
   severity?: CaseSeverity;
   status?: CaseStatuses;
 }): CaseAttributes => ({
@@ -141,7 +152,7 @@ const createCasePatchParams = ({
   externalService,
 }: {
   connector?: CaseConnector;
-  externalService?: CaseFullExternalService;
+  externalService?: ExternalService | null;
 } = {}): Partial<CaseAttributes> => ({
   ...basicCaseFields,
   connector,
@@ -166,6 +177,101 @@ describe('CasesService', () => {
       log: mockLogger,
       unsecuredSavedObjectsClient,
       attachmentService,
+    });
+  });
+
+  describe('execution', () => {
+    describe('bulkCreateCases', () => {
+      it('return cases with the SO errors correctly', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          // @ts-expect-error: SO client types are not correct
+          saved_objects: [createCaseSavedObjectResponse(), createErrorSO('cases')],
+        });
+
+        const res = await service.bulkCreateCases({
+          cases: [
+            {
+              ...createCasePostParams({
+                connector: getNoneCaseConnector(),
+                severity: CaseSeverity.MEDIUM,
+              }),
+              id: '1',
+            },
+          ],
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+              Object {
+                "error": Object {
+                  "error": "error",
+                  "message": "message",
+                  "statusCode": 500,
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
     });
   });
 
@@ -195,6 +301,7 @@ describe('CasesService', () => {
         expect(restUpdateAttributes).toMatchInlineSnapshot(`
           Object {
             "assignees": Array [],
+            "category": null,
             "closed_at": null,
             "closed_by": null,
             "created_at": "2019-11-25T21:54:48.952Z",
@@ -203,6 +310,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "owner": "securitySolution",
@@ -655,13 +763,11 @@ describe('CasesService', () => {
       });
     });
 
-    describe('post', () => {
+    describe('createCase', () => {
       it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({ connector: createJiraConnector() }),
           id: '1',
         });
@@ -672,11 +778,9 @@ describe('CasesService', () => {
       });
 
       it('includes the creation attributes excluding the connector.id and connector_id', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: createJiraConnector(),
             externalService: createExternalService(),
@@ -691,6 +795,7 @@ describe('CasesService', () => {
         expect(creationAttributes).toMatchInlineSnapshot(`
           Object {
             "assignees": Array [],
+            "category": null,
             "closed_at": null,
             "closed_by": null,
             "connector": Object {
@@ -717,6 +822,7 @@ describe('CasesService', () => {
               "full_name": "elastic",
               "username": "elastic",
             },
+            "customFields": Array [],
             "description": "This is a brand new case of a bad meanie defacing data",
             "duration": null,
             "external_service": Object {
@@ -772,11 +878,9 @@ describe('CasesService', () => {
       });
 
       it('includes default values for total_alerts and total_comments', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: getNoneCaseConnector(),
           }),
@@ -791,11 +895,9 @@ describe('CasesService', () => {
       });
 
       it('moves the connector.id and connector_id to the references', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: createJiraConnector(),
             externalService: createExternalService(),
@@ -822,11 +924,9 @@ describe('CasesService', () => {
       });
 
       it('sets fields to an empty array when it is not included with the connector', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({
             connector: createJiraConnector({ setFieldsToNull: true }),
             externalService: createExternalService(),
@@ -840,11 +940,9 @@ describe('CasesService', () => {
       });
 
       it('does not create a reference for a none connector', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -855,11 +953,9 @@ describe('CasesService', () => {
       });
 
       it('does not create a reference for an external_service field that is null', async () => {
-        unsecuredSavedObjectsClient.create.mockResolvedValue(
-          {} as SavedObject<CasePersistedAttributes>
-        );
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-        await service.postNewCase({
+        await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -877,11 +973,9 @@ describe('CasesService', () => {
       ])(
         'properly converts "%s" severity to corresponding ES value on creating SO',
         async (postParamsSeverity, expectedSeverity) => {
-          unsecuredSavedObjectsClient.create.mockResolvedValue(
-            {} as SavedObject<CasePersistedAttributes>
-          );
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-          await service.postNewCase({
+          await service.createCase({
             attributes: createCasePostParams({
               connector: getNoneCaseConnector(),
               severity: postParamsSeverity,
@@ -902,11 +996,9 @@ describe('CasesService', () => {
       ])(
         'properly converts "%s" status to corresponding ES value on creating SO',
         async (postParamsStatus, expectedStatus) => {
-          unsecuredSavedObjectsClient.create.mockResolvedValue(
-            {} as SavedObject<CasePersistedAttributes>
-          );
+          unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
 
-          await service.postNewCase({
+          await service.createCase({
             attributes: createCasePostParams({
               connector: getNoneCaseConnector(),
               status: postParamsStatus,
@@ -920,6 +1012,103 @@ describe('CasesService', () => {
         }
       );
     });
+
+    describe('bulkCreateCases', () => {
+      it('creates a null external_service field when the attribute was null in the creation parameters', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse()],
+        });
+
+        await service.bulkCreateCases({
+          cases: [
+            {
+              ...createCasePostParams({
+                connector: getNoneCaseConnector(),
+                severity: CaseSeverity.MEDIUM,
+              }),
+              id: '1',
+            },
+          ],
+        });
+
+        const bulkCreateRequest = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0];
+
+        expect(bulkCreateRequest).toMatchInlineSnapshot(`
+          Array [
+            Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": Array [],
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": null,
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": 10,
+                  "status": 0,
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "total_alerts": -1,
+                  "total_comments": -1,
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+            Object {
+              "refresh": undefined,
+            },
+          ]
+        `);
+      });
+    });
+
+    it('includes default values for total_alerts and total_comments', async () => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [createCaseSavedObjectResponse({})],
+      });
+
+      await service.bulkCreateCases({
+        cases: [
+          {
+            ...createCasePostParams({ connector: getNoneCaseConnector() }),
+            id: '1',
+          },
+        ],
+      });
+
+      const postAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0]
+        .attributes as CasePersistedAttributes;
+
+      expect(postAttributes.total_alerts).toEqual(-1);
+      expect(postAttributes.total_comments).toEqual(-1);
+    });
   });
 
   describe('transforms the Elasticsearch model to the external model', () => {
@@ -928,10 +1117,12 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               connector: createESJiraConnector(),
               externalService: createExternalService(),
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               connector: createESJiraConnector({ id: '2' }),
               externalService: createExternalService({ connector_id: '200' }),
             }),
@@ -987,14 +1178,20 @@ describe('CasesService', () => {
       it('properly converts the severity field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { severity: CasePersistedSeverity.LOW } }),
             createCaseSavedObjectResponse({
+              caseId: '1',
+              overrides: { severity: CasePersistedSeverity.LOW },
+            }),
+            createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { severity: CasePersistedSeverity.MEDIUM },
             }),
             createCaseSavedObjectResponse({
+              caseId: '3',
               overrides: { severity: CasePersistedSeverity.HIGH },
             }),
             createCaseSavedObjectResponse({
+              caseId: '4',
               overrides: { severity: CasePersistedSeverity.CRITICAL },
             }),
           ],
@@ -1018,11 +1215,18 @@ describe('CasesService', () => {
       it('properly converts the status field to the corresponding external value in the bulkPatch response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({ overrides: { status: CasePersistedStatus.OPEN } }),
             createCaseSavedObjectResponse({
+              caseId: '1',
+              overrides: { status: CasePersistedStatus.OPEN },
+            }),
+            createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { status: CasePersistedStatus.IN_PROGRESS },
             }),
-            createCaseSavedObjectResponse({ overrides: { status: CasePersistedStatus.CLOSED } }),
+            createCaseSavedObjectResponse({
+              caseId: '3',
+              overrides: { status: CasePersistedStatus.CLOSED },
+            }),
           ],
         });
 
@@ -1043,9 +1247,9 @@ describe('CasesService', () => {
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
           ],
         });
 
@@ -1081,15 +1285,15 @@ describe('CasesService', () => {
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "connector": Object {
-                "fields": null,
-                "id": "none",
-                "name": "none",
-                "type": ".none",
-              },
-            }
-          `);
+          Object {
+            "connector": Object {
+              "fields": null,
+              "id": "none",
+              "name": "none",
+              "type": ".none",
+            },
+          }
+        `);
         expect(res.references).toMatchInlineSnapshot(`Array []`);
       });
 
@@ -1105,10 +1309,10 @@ describe('CasesService', () => {
         });
 
         expect(res.attributes).toMatchInlineSnapshot(`
-            Object {
-              "external_service": null,
-            }
-          `);
+          Object {
+            "external_service": null,
+          }
+        `);
         expect(res.references).toMatchInlineSnapshot(`Array []`);
       });
 
@@ -1137,10 +1341,10 @@ describe('CasesService', () => {
         });
 
         expect(res).toMatchInlineSnapshot(`
-            Object {
-              "attributes": Object {},
-            }
-          `);
+          Object {
+            "attributes": Object {},
+          }
+        `);
       });
 
       it('returns the default none connector when it cannot find the reference', async () => {
@@ -1357,7 +1561,7 @@ describe('CasesService', () => {
       });
     });
 
-    describe('post', () => {
+    describe('createCase', () => {
       it('includes the connector.id and connector_id fields in the response', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(
           createCaseSavedObjectResponse({
@@ -1366,7 +1570,7 @@ describe('CasesService', () => {
           })
         );
 
-        const res = await service.postNewCase({
+        const res = await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -1387,7 +1591,7 @@ describe('CasesService', () => {
             createCaseSavedObjectResponse({ overrides: { severity: internalSeverityValue } })
           );
 
-          const res = await service.postNewCase({
+          const res = await service.createCase({
             attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
             id: '1',
           });
@@ -1407,7 +1611,7 @@ describe('CasesService', () => {
             createCaseSavedObjectResponse({ overrides: { status: internalStatusValue } })
           );
 
-          const res = await service.postNewCase({
+          const res = await service.createCase({
             attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
             id: '1',
           });
@@ -1419,7 +1623,7 @@ describe('CasesService', () => {
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse({}));
 
-        const res = await service.postNewCase({
+        const res = await service.createCase({
           attributes: createCasePostParams({ connector: getNoneCaseConnector() }),
           id: '1',
         });
@@ -1429,14 +1633,120 @@ describe('CasesService', () => {
       });
     });
 
+    describe('bulkCreateCases', () => {
+      it('includes the connector.id and connector_id fields in the response', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({
+              overrides: { severity: CasePersistedSeverity.MEDIUM },
+            }),
+          ],
+        });
+
+        const res = await service.bulkCreateCases({
+          cases: [
+            {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              id: '1',
+            },
+          ],
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "medium",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('does not include total_alerts and total_comments fields in the response', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse({})],
+        });
+
+        const res = await service.bulkCreateCases({
+          cases: [
+            {
+              ...createCasePostParams({ connector: getNoneCaseConnector() }),
+              id: '1',
+            },
+          ],
+        });
+
+        const theCase = res.saved_objects[0] as SavedObject<CaseTransformedAttributes>;
+
+        expect(theCase.attributes).not.toHaveProperty('total_alerts');
+        expect(theCase.attributes).not.toHaveProperty('total_comments');
+      });
+    });
+
     describe('find', () => {
       it('includes the connector.id and connector_id field in the response', async () => {
         const findMockReturn = createSOFindResponse([
           createFindSO({
+            caseId: '1',
             connector: createESJiraConnector(),
             externalService: createExternalService(),
           }),
-          createFindSO(),
+          createFindSO({
+            caseId: '2',
+          }),
         ]);
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1450,10 +1760,11 @@ describe('CasesService', () => {
       it('includes the saved object find response fields in the result', async () => {
         const findMockReturn = createSOFindResponse([
           createFindSO({
+            caseId: '1',
             connector: createESJiraConnector(),
             externalService: createExternalService(),
           }),
-          createFindSO(),
+          createFindSO({ caseId: '2' }),
         ]);
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1477,8 +1788,8 @@ describe('CasesService', () => {
         'includes the properly converted "%s" severity field in the result',
         async (severity, expectedSeverity) => {
           const findMockReturn = createSOFindResponse([
-            createFindSO({ overrides: { severity } }),
-            createFindSO(),
+            createFindSO({ caseId: '1', overrides: { severity } }),
+            createFindSO({ caseId: '2' }),
           ]);
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1495,8 +1806,8 @@ describe('CasesService', () => {
         'includes the properly converted "%s" status field in the result',
         async (status, expectedStatus) => {
           const findMockReturn = createSOFindResponse([
-            createFindSO({ overrides: { status } }),
-            createFindSO(),
+            createFindSO({ caseId: '1', overrides: { status } }),
+            createFindSO({ caseId: '2' }),
           ]);
           unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
@@ -1506,7 +1817,10 @@ describe('CasesService', () => {
       );
 
       it('does not include total_alerts and total_comments fields in the response', async () => {
-        const findMockReturn = createSOFindResponse([createFindSO(), createFindSO()]);
+        const findMockReturn = createSOFindResponse([
+          createFindSO({ caseId: '1' }),
+          createFindSO({ caseId: '2' }),
+        ]);
         unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
 
         const res = await service.findCases();
@@ -1521,10 +1835,12 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               connector: createESJiraConnector(),
               externalService: createExternalService(),
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               connector: createESJiraConnector({ id: '2' }),
               externalService: createExternalService({ connector_id: '200' }),
             }),
@@ -1548,15 +1864,19 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               overrides: { severity: CasePersistedSeverity.LOW },
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { severity: CasePersistedSeverity.MEDIUM },
             }),
             createCaseSavedObjectResponse({
+              caseId: '3',
               overrides: { severity: CasePersistedSeverity.HIGH },
             }),
             createCaseSavedObjectResponse({
+              caseId: '4',
               overrides: { severity: CasePersistedSeverity.CRITICAL },
             }),
           ],
@@ -1573,12 +1893,15 @@ describe('CasesService', () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
             createCaseSavedObjectResponse({
+              caseId: '1',
               overrides: { status: CasePersistedStatus.OPEN },
             }),
             createCaseSavedObjectResponse({
+              caseId: '2',
               overrides: { status: CasePersistedStatus.IN_PROGRESS },
             }),
             createCaseSavedObjectResponse({
+              caseId: '3',
               overrides: { status: CasePersistedStatus.CLOSED },
             }),
           ],
@@ -1593,9 +1916,9 @@ describe('CasesService', () => {
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
           saved_objects: [
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
-            createCaseSavedObjectResponse({}),
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+            createCaseSavedObjectResponse({ caseId: '3' }),
           ],
         });
 
@@ -1670,6 +1993,12 @@ describe('CasesService', () => {
 
       it('defaults to the none connector and null external_services when attributes is undefined', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
+          ...createCaseSavedObjectResponse(),
+          attributes: {
+            ...createCaseSavedObjectResponse().attributes,
+            external_service: undefined,
+            connector: undefined,
+          },
           references: [
             {
               id: '1',
@@ -1694,8 +2023,9 @@ describe('CasesService', () => {
 
       it('returns a null external_services when it is already null', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
-          attributes: { external_service: null },
-        } as SavedObject<CasePersistedAttributes>);
+          ...createCaseSavedObjectResponse(),
+          attributes: { ...createCaseSavedObjectResponse().attributes, external_service: null },
+        });
         const res = await service.getCase({ id: 'a' });
 
         expect(res.attributes.connector).toMatchInlineSnapshot(`
@@ -1719,7 +2049,11 @@ describe('CasesService', () => {
         'includes the properly converted "%s" severity field in the result',
         async (internalSeverityValue, expectedSeverity) => {
           unsecuredSavedObjectsClient.get.mockResolvedValue({
-            attributes: { severity: internalSeverityValue },
+            ...createCaseSavedObjectResponse(),
+            attributes: {
+              ...createCaseSavedObjectResponse().attributes,
+              severity: internalSeverityValue,
+            },
           } as SavedObject<CasePersistedAttributes>);
 
           const res = await service.getCase({ id: 'a' });
@@ -1736,7 +2070,11 @@ describe('CasesService', () => {
         'includes the properly converted "%s" status field in the result',
         async (internalStatusValue, expectedStatus) => {
           unsecuredSavedObjectsClient.get.mockResolvedValue({
-            attributes: { status: internalStatusValue },
+            ...createCaseSavedObjectResponse(),
+            attributes: {
+              ...createCaseSavedObjectResponse().attributes,
+              status: internalStatusValue,
+            },
           } as SavedObject<CasePersistedAttributes>);
 
           const res = await service.getCase({ id: 'a' });
@@ -1747,7 +2085,9 @@ describe('CasesService', () => {
 
       it('does not include total_alerts and total_comments fields in the response', async () => {
         unsecuredSavedObjectsClient.get.mockResolvedValue({
+          ...createCaseSavedObjectResponse(),
           attributes: {
+            ...createCaseSavedObjectResponse().attributes,
             total_alerts: -1,
             total_comments: -1,
           },
@@ -1824,6 +2164,1161 @@ describe('CasesService', () => {
       await expect(service.executeAggregations({ aggregationBuilders })).rejects.toThrow(
         'Failed to execute aggregations [avg-test-builder,min-test-builder]: Error: Aggregation error'
       );
+    });
+  });
+
+  describe('Decoding responses', () => {
+    const caseTransformedAttributesProps = CaseTransformedAttributesRt.types.reduce(
+      (acc, type) => ({ ...acc, ...type.type.props }),
+      {}
+    );
+
+    /**
+     * The following fields are set to a default value if missing:
+     * - status
+     * - severity
+     * - connector
+     * - external_service
+     * - category
+     *
+     * Decode is not expected to throw an error as they are defined.
+     */
+    const attributesToValidateIfMissing = omit(
+      caseTransformedAttributesProps,
+      'status',
+      'severity',
+      'connector',
+      'external_service',
+      'category',
+      'customFields'
+    );
+
+    describe('getCaseIdsByAlertId', () => {
+      it('strips excess fields', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO({ caseId: '2' })]);
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        const res = await service.getCaseIdsByAlertId({ alertId: '1' });
+        expect(res).toStrictEqual({
+          saved_objects: [
+            {
+              id: '2',
+              score: 0,
+              references: [],
+              type: CASE_SAVED_OBJECT,
+              attributes: { owner: SECURITY_SOLUTION_OWNER },
+            },
+          ],
+          total: 1,
+          per_page: 1,
+          page: 1,
+        });
+      });
+
+      it('throws an error when the owner field is not present', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO({ caseId: '2' })]);
+        unset(findMockReturn, 'saved_objects[0].attributes.owner');
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(
+          service.getCaseIdsByAlertId({ alertId: '1' })
+        ).rejects.toThrowErrorMatchingInlineSnapshot(
+          `"Invalid value \\"undefined\\" supplied to \\"owner\\""`
+        );
+      });
+
+      it('does not throw an error when the owner field exists', async () => {
+        const findMockReturn = createSOFindResponse([createFindSO({ caseId: '2' })]);
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(service.getCaseIdsByAlertId({ alertId: '1' })).resolves.not.toThrow();
+      });
+    });
+
+    describe('getCase', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.get.mockResolvedValue(createCaseSavedObjectResponse());
+
+        await expect(service.getCase({ id: 'a' })).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
+
+          await expect(service.getCase({ id: 'a' })).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse({
+          connector: createESJiraConnector(),
+          externalService: null,
+        });
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.get.mockResolvedValue({ ...theCase, attributes });
+
+        await expect(service.getCase({ id: 'a' })).resolves.toMatchInlineSnapshot(`
+          Object {
+            "attributes": Object {
+              "assignees": Array [],
+              "category": null,
+              "closed_at": null,
+              "closed_by": null,
+              "connector": Object {
+                "fields": Object {
+                  "issueType": "bug",
+                  "parent": "2",
+                  "priority": "high",
+                },
+                "id": "1",
+                "name": ".jira",
+                "type": ".jira",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "customFields": Array [],
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
+              "external_service": null,
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "status": "open",
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            },
+            "id": "1",
+            "references": Array [
+              Object {
+                "id": "1",
+                "name": "connectorId",
+                "type": "action",
+              },
+            ],
+            "type": "cases",
+          }
+        `);
+      });
+    });
+
+    describe('getResolveCase', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+          saved_object: createCaseSavedObjectResponse(),
+          outcome: 'exactMatch',
+        });
+
+        await expect(service.getResolveCase({ id: 'a' })).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+            saved_object: { ...theCase, attributes },
+            outcome: 'exactMatch',
+          });
+
+          await expect(service.getResolveCase({ id: 'a' })).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.resolve.mockResolvedValue({
+          saved_object: { ...theCase, attributes },
+          outcome: 'exactMatch',
+        });
+
+        await expect(service.getResolveCase({ id: 'a' })).resolves.toMatchInlineSnapshot(`
+          Object {
+            "outcome": "exactMatch",
+            "saved_object": Object {
+              "attributes": Object {
+                "assignees": Array [],
+                "category": null,
+                "closed_at": null,
+                "closed_by": null,
+                "connector": Object {
+                  "fields": null,
+                  "id": "none",
+                  "name": "none",
+                  "type": ".none",
+                },
+                "created_at": "2019-11-25T21:54:48.952Z",
+                "created_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+                "customFields": Array [],
+                "description": "This is a brand new case of a bad meanie defacing data",
+                "duration": null,
+                "external_service": Object {
+                  "connector_id": "none",
+                  "connector_name": ".jira",
+                  "external_id": "100",
+                  "external_title": "awesome",
+                  "external_url": "http://www.google.com",
+                  "pushed_at": "2019-11-25T21:54:48.952Z",
+                  "pushed_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "owner": "securitySolution",
+                "settings": Object {
+                  "syncAlerts": true,
+                },
+                "severity": "low",
+                "status": "open",
+                "tags": Array [
+                  "defacement",
+                ],
+                "title": "Super Bad Security Issue",
+                "updated_at": "2019-11-25T21:54:48.952Z",
+                "updated_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+              },
+              "id": "1",
+              "references": Array [],
+              "type": "cases",
+            },
+          }
+        `);
+      });
+    });
+
+    describe('getCases', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+          ],
+        });
+
+        await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.not.toThrow();
+      });
+
+      it('do not decodes errors', async () => {
+        const errorSO = {
+          ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
+          error: {
+            statusCode: 404,
+          },
+        };
+
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            // @ts-expect-error: bulkUpdate type expects attributes to be defined
+            errorSO,
+          ],
+        });
+
+        const res = await service.getCases({ caseIds: ['a', 'b'] });
+
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+              Object {
+                "error": Object {
+                  "statusCode": 404,
+                },
+                "id": "2",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+            saved_objects: [{ ...theCase, attributes }, createCaseSavedObjectResponse()],
+          });
+
+          await expect(service.getCases({ caseIds: ['a', 'b'] })).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({
+          saved_objects: [{ ...theCase, attributes }],
+        });
+
+        await expect(service.getCases({ caseIds: ['a', 'b'] })).resolves.toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
+    });
+
+    describe('findCases', () => {
+      it('decodes correctly', async () => {
+        const findMockReturn = createSOFindResponse([
+          createFindSO({ caseId: '1' }),
+          createFindSO({ caseId: '2' }),
+        ]);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(service.findCases()).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          const findMockReturn = createSOFindResponse([
+            { ...theCase, attributes, score: 0 },
+            createFindSO(),
+          ]);
+
+          unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+          await expect(service.findCases()).rejects.toThrow(
+            `Invalid value "undefined" supplied to "${key}"`
+          );
+        }
+      );
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        const findMockReturn = createSOFindResponse([
+          { ...theCase, attributes, score: 0 },
+          createFindSO(),
+        ]);
+
+        unsecuredSavedObjectsClient.find.mockResolvedValue(findMockReturn);
+
+        await expect(service.findCases()).resolves.toMatchInlineSnapshot(`
+          Object {
+            "page": 1,
+            "per_page": 2,
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "score": 0,
+                "type": "cases",
+              },
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "score": 0,
+                "type": "cases",
+              },
+            ],
+            "total": 2,
+          }
+        `);
+      });
+    });
+
+    describe('createCase', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+
+        await expect(
+          service.createCase({
+            attributes: createCasePostParams({ connector: createJiraConnector() }),
+            id: '1',
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
+
+          await expect(
+            service.createCase({
+              attributes: createCasePostParams({ connector: createJiraConnector() }),
+              id: '1',
+            })
+          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+        }
+      );
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.create.mockResolvedValue({ ...theCase, attributes });
+
+        await expect(
+          service.createCase({
+            attributes: createCasePostParams({ connector: createJiraConnector() }),
+            id: '1',
+          })
+        ).resolves.toMatchInlineSnapshot(`
+          Object {
+            "attributes": Object {
+              "assignees": Array [],
+              "category": null,
+              "closed_at": null,
+              "closed_by": null,
+              "connector": Object {
+                "fields": null,
+                "id": "none",
+                "name": "none",
+                "type": ".none",
+              },
+              "created_at": "2019-11-25T21:54:48.952Z",
+              "created_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+              "customFields": Array [],
+              "description": "This is a brand new case of a bad meanie defacing data",
+              "duration": null,
+              "external_service": Object {
+                "connector_id": "none",
+                "connector_name": ".jira",
+                "external_id": "100",
+                "external_title": "awesome",
+                "external_url": "http://www.google.com",
+                "pushed_at": "2019-11-25T21:54:48.952Z",
+                "pushed_by": Object {
+                  "email": "testemail@elastic.co",
+                  "full_name": "elastic",
+                  "username": "elastic",
+                },
+              },
+              "owner": "securitySolution",
+              "settings": Object {
+                "syncAlerts": true,
+              },
+              "severity": "low",
+              "status": "open",
+              "tags": Array [
+                "defacement",
+              ],
+              "title": "Super Bad Security Issue",
+              "updated_at": "2019-11-25T21:54:48.952Z",
+              "updated_by": Object {
+                "email": "testemail@elastic.co",
+                "full_name": "elastic",
+                "username": "elastic",
+              },
+            },
+            "id": "1",
+            "references": Array [],
+            "type": "cases",
+          }
+        `);
+      });
+    });
+
+    describe('bulkCreateCases', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse()],
+        });
+
+        await expect(
+          service.bulkCreateCases({
+            cases: [
+              {
+                ...createCasePostParams({ connector: createJiraConnector() }),
+                id: '1',
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it.each(Object.keys(attributesToValidateIfMissing))(
+        'throws if %s is omitted',
+        async (key) => {
+          const theCase = createCaseSavedObjectResponse();
+          const attributes = omit({ ...theCase.attributes }, key);
+          unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+            saved_objects: [{ ...theCase, attributes }],
+          });
+
+          await expect(
+            service.bulkCreateCases({
+              cases: [
+                {
+                  ...createCasePostParams({ connector: createJiraConnector() }),
+                  id: '1',
+                },
+              ],
+            })
+          ).rejects.toThrow(`Invalid value "undefined" supplied to "${key}"`);
+        }
+      );
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [{ ...theCase, attributes }],
+        });
+
+        await expect(
+          service.bulkCreateCases({
+            cases: [
+              {
+                ...createCasePostParams({ connector: createJiraConnector() }),
+                id: '1',
+              },
+            ],
+          })
+        ).resolves.toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "assignees": Array [],
+                  "category": null,
+                  "closed_at": null,
+                  "closed_by": null,
+                  "connector": Object {
+                    "fields": null,
+                    "id": "none",
+                    "name": "none",
+                    "type": ".none",
+                  },
+                  "created_at": "2019-11-25T21:54:48.952Z",
+                  "created_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                  "customFields": Array [],
+                  "description": "This is a brand new case of a bad meanie defacing data",
+                  "duration": null,
+                  "external_service": Object {
+                    "connector_id": "none",
+                    "connector_name": ".jira",
+                    "external_id": "100",
+                    "external_title": "awesome",
+                    "external_url": "http://www.google.com",
+                    "pushed_at": "2019-11-25T21:54:48.952Z",
+                    "pushed_by": Object {
+                      "email": "testemail@elastic.co",
+                      "full_name": "elastic",
+                      "username": "elastic",
+                    },
+                  },
+                  "owner": "securitySolution",
+                  "settings": Object {
+                    "syncAlerts": true,
+                  },
+                  "severity": "low",
+                  "status": "open",
+                  "tags": Array [
+                    "defacement",
+                  ],
+                  "title": "Super Bad Security Issue",
+                  "updated_at": "2019-11-25T21:54:48.952Z",
+                  "updated_by": Object {
+                    "email": "testemail@elastic.co",
+                    "full_name": "elastic",
+                    "username": "elastic",
+                  },
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
+    });
+
+    describe('patchCase', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(createUpdateSOResponse());
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes: createCaseUpdateParams({}),
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('strips out excess attributes', async () => {
+        const theCase = createUpdateSOResponse();
+        const attributes = { ...theCase.attributes, 'not-exists': 'not-exists' };
+        unsecuredSavedObjectsClient.update.mockResolvedValue({ ...theCase, attributes });
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes: {},
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.toEqual({
+          attributes: {},
+          id: '1',
+          references: [],
+          type: 'cases',
+        });
+      });
+    });
+
+    describe('patchCases', () => {
+      it('decodes correctly', async () => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            createCaseSavedObjectResponse({ caseId: '1' }),
+            createCaseSavedObjectResponse({ caseId: '2' }),
+          ],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes: createCasePostParams({
+                  connector: getNoneCaseConnector(),
+                }),
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('do not decodes errors', async () => {
+        const errorSO = {
+          ...omit(createCaseSavedObjectResponse({ caseId: '2' }), 'attributes'),
+          error: {
+            statusCode: 404,
+          },
+        };
+
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              ...createCaseSavedObjectResponse({ caseId: '1' }),
+              attributes: { description: 'updated desc' },
+            },
+            // @ts-expect-error: bulkUpdate type expects attributes to be defined
+            errorSO,
+          ],
+        });
+
+        const res = await service.patchCases({
+          cases: [
+            {
+              caseId: '1',
+              updatedAttributes: createCasePostParams({
+                connector: getNoneCaseConnector(),
+              }),
+              originalCase: {} as CaseSavedObjectTransformed,
+            },
+          ],
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+          Object {
+            "saved_objects": Array [
+              Object {
+                "attributes": Object {
+                  "description": "updated desc",
+                },
+                "id": "1",
+                "references": Array [],
+                "type": "cases",
+              },
+              Object {
+                "error": Object {
+                  "statusCode": 404,
+                },
+                "id": "2",
+                "references": Array [],
+                "type": "cases",
+              },
+            ],
+          }
+        `);
+      });
+
+      it('strips out excess attributes', async () => {
+        const theCase = createCaseSavedObjectResponse();
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [
+            {
+              ...theCase,
+              id: '1',
+              attributes: { description: 'update desc', 'not-exists': 'not-exists' },
+            },
+            { ...theCase, id: '2', attributes: { title: 'update title' } },
+          ],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes: { description: 'update desc' },
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+              {
+                caseId: '2',
+                updatedAttributes: { title: 'update title' },
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.toEqual({
+          saved_objects: [
+            {
+              attributes: {
+                description: 'update desc',
+              },
+              id: '1',
+              references: [],
+              type: 'cases',
+            },
+            {
+              attributes: {
+                title: 'update title',
+              },
+              id: '2',
+              references: [],
+              type: 'cases',
+            },
+          ],
+        });
+      });
+    });
+  });
+
+  describe('Decoding requests', () => {
+    describe('createCase', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.create.mockResolvedValue(createCaseSavedObjectResponse());
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
+      });
+
+      it('throws if title is omitted', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+        unset(attributes, 'title');
+
+        await expect(
+          service.createCase({
+            attributes,
+            id: '1',
+          })
+        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+      });
+
+      it('remove excess fields', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(service.createCase({ id: 'a', attributes })).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.create.mock.calls[0][1];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('bulkCreateCases', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse()],
+        });
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+
+        await expect(
+          service.bulkCreateCases({ cases: [{ id: 'a', ...attributes }] })
+        ).resolves.not.toThrow();
+      });
+
+      it('throws if title is omitted', async () => {
+        const attributes = createCasePostParams({ connector: createJiraConnector() });
+        unset(attributes, 'title');
+
+        await expect(
+          service.bulkCreateCases({ cases: [{ id: '1', ...attributes }] })
+        ).rejects.toThrow(`Invalid value "undefined" supplied to "title"`);
+      });
+
+      it('remove excess fields', async () => {
+        const attributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.bulkCreateCases({ cases: [{ id: 'a', ...attributes }] })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0].attributes;
+
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch case', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.update.mockResolvedValue(
+          {} as SavedObjectsUpdateResponse<CasePersistedAttributes>
+        );
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createCasePostParams({
+          connector: createJiraConnector(),
+          status: CaseStatuses['in-progress'],
+        });
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('remove excess fields', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.patchCase({
+            caseId: '1',
+            updatedAttributes,
+            originalCase: {} as CaseSavedObjectTransformed,
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.update.mock.calls[0][2];
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('patch cases', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.bulkUpdate.mockResolvedValue({
+          saved_objects: [createCaseSavedObjectResponse({ caseId: '1' })],
+        });
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        const updatedAttributes = createCasePostParams({
+          connector: createJiraConnector(),
+          status: CaseStatuses['in-progress'],
+        });
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('remove excess fields', async () => {
+        const updatedAttributes = {
+          ...createCasePostParams({ connector: createJiraConnector() }),
+          foo: 'bar',
+        };
+
+        await expect(
+          service.patchCases({
+            cases: [
+              {
+                caseId: '1',
+                updatedAttributes,
+                originalCase: {} as CaseSavedObjectTransformed,
+              },
+            ],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes =
+          unsecuredSavedObjectsClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        expect(persistedAttributes).not.toHaveProperty('foo');
+      });
     });
   });
 });

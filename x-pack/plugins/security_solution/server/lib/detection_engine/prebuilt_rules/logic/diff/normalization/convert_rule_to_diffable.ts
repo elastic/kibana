@@ -5,11 +5,14 @@
  * 2.0.
  */
 
+import type { RuleActionArray } from '@kbn/securitysolution-io-ts-alerting-types';
 import { DEFAULT_MAX_SIGNALS } from '../../../../../../../common/constants';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import type {
   EqlRule,
   EqlRuleCreateProps,
+  EsqlRule,
+  EsqlRuleCreateProps,
   MachineLearningRule,
   MachineLearningRuleCreateProps,
   NewTermsRule,
@@ -23,23 +26,25 @@ import type {
   ThreatMatchRuleCreateProps,
   ThresholdRule,
   ThresholdRuleCreateProps,
-} from '../../../../../../../common/detection_engine/rule_schema';
+} from '../../../../../../../common/api/detection_engine/model/rule_schema';
 import type { PrebuiltRuleAsset } from '../../../model/rule_assets/prebuilt_rule_asset';
 import type {
   DiffableCommonFields,
   DiffableCustomQueryFields,
   DiffableEqlFields,
+  DiffableEsqlFields,
   DiffableMachineLearningFields,
   DiffableNewTermsFields,
   DiffableRule,
   DiffableSavedQueryFields,
   DiffableThreatMatchFields,
   DiffableThresholdFields,
-} from '../../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
+} from '../../../../../../../common/api/detection_engine/prebuilt_rules';
 import { extractBuildingBlockObject } from './extract_building_block_object';
 import {
   extractInlineKqlQuery,
   extractRuleEqlQuery,
+  extractRuleEsqlQuery,
   extractRuleKqlQuery,
 } from './extract_rule_data_query';
 import { extractRuleDataSource } from './extract_rule_data_source';
@@ -91,6 +96,11 @@ export const convertRuleToDiffable = (rule: RuleResponse | PrebuiltRuleAsset): D
         ...commonFields,
         ...extractDiffableNewTermsFieldsFromRuleObject(rule),
       };
+    case 'esql':
+      return {
+        ...commonFields,
+        ...extractDiffableEsqlFieldsFromRuleObject(rule),
+      };
     default:
       return assertUnreachable(rule, 'Unhandled rule type');
   }
@@ -128,7 +138,7 @@ const extractDiffableCommonFields = (
 
     // Other domain fields
     rule_schedule: extractRuleSchedule(rule),
-    actions: rule.actions ?? [],
+    actions: (rule.actions ?? []) as RuleActionArray,
     throttle: rule.throttle ?? 'no_actions',
     exceptions_list: rule.exceptions_list ?? [],
     max_signals: rule.max_signals ?? DEFAULT_MAX_SIGNALS,
@@ -146,7 +156,7 @@ const extractDiffableCustomQueryFields = (
 ): DiffableCustomQueryFields => {
   return {
     type: rule.type,
-    data_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
+    kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     alert_suppression: rule.alert_suppression,
   };
@@ -157,7 +167,7 @@ const extractDiffableSavedQueryFieldsFromRuleObject = (
 ): DiffableSavedQueryFields => {
   return {
     type: rule.type,
-    data_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
+    kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     alert_suppression: rule.alert_suppression,
   };
@@ -168,11 +178,20 @@ const extractDiffableEqlFieldsFromRuleObject = (
 ): DiffableEqlFields => {
   return {
     type: rule.type,
-    data_query: extractRuleEqlQuery(rule.query, rule.language, rule.filters),
+    eql_query: extractRuleEqlQuery(rule.query, rule.language, rule.filters),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     event_category_override: rule.event_category_override,
     timestamp_field: rule.timestamp_field,
     tiebreaker_field: rule.tiebreaker_field,
+  };
+};
+
+const extractDiffableEsqlFieldsFromRuleObject = (
+  rule: EsqlRule | EsqlRuleCreateProps
+): DiffableEsqlFields => {
+  return {
+    type: rule.type,
+    esql_query: extractRuleEsqlQuery(rule.query, rule.language),
   };
 };
 
@@ -181,7 +200,7 @@ const extractDiffableThreatMatchFieldsFromRuleObject = (
 ): DiffableThreatMatchFields => {
   return {
     type: rule.type,
-    data_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
+    kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     threat_query: extractInlineKqlQuery(
       rule.threat_query,
@@ -201,7 +220,7 @@ const extractDiffableThresholdFieldsFromRuleObject = (
 ): DiffableThresholdFields => {
   return {
     type: rule.type,
-    data_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
+    kql_query: extractRuleKqlQuery(rule.query, rule.language, rule.filters, rule.saved_id),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     threshold: rule.threshold,
   };
@@ -222,7 +241,7 @@ const extractDiffableNewTermsFieldsFromRuleObject = (
 ): DiffableNewTermsFields => {
   return {
     type: rule.type,
-    data_query: extractInlineKqlQuery(rule.query, rule.language, rule.filters),
+    kql_query: extractInlineKqlQuery(rule.query, rule.language, rule.filters),
     data_source: extractRuleDataSource(rule.index, rule.data_view_id),
     new_terms_fields: rule.new_terms_fields,
     history_window_start: rule.history_window_start,

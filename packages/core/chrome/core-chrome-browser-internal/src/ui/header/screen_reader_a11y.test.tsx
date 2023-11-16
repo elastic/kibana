@@ -24,7 +24,7 @@ describe('ScreenReaderRouteAnnouncements', () => {
     expect(component).toMatchSnapshot();
   });
 
-  it('does not set the focusOnRegionOnTextChange for canvas or discover', () => {
+  it('does not set the focusOnRegionOnTextChange for canvas', () => {
     const noFocusComponentCanvas = mount(
       <ScreenReaderRouteAnnouncements
         appId$={new BehaviorSubject('canvas')}
@@ -32,22 +32,9 @@ describe('ScreenReaderRouteAnnouncements', () => {
         breadcrumbs$={new BehaviorSubject([])}
       />
     );
-    const noFocusComponentDiscover = mount(
-      <ScreenReaderRouteAnnouncements
-        appId$={new BehaviorSubject('discover')}
-        customBranding$={new BehaviorSubject({})}
-        breadcrumbs$={new BehaviorSubject([])}
-      />
-    );
 
     expect(
       noFocusComponentCanvas
-        .debug()
-        .includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
-    ).toBeTruthy();
-
-    expect(
-      noFocusComponentDiscover
         .debug()
         .includes('<EuiScreenReaderLive focusRegionOnTextChange={false}>')
     ).toBeTruthy();

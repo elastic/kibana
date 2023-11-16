@@ -16,11 +16,32 @@ import type {
 import {
   modelVersionToVirtualVersion,
   assertValidModelVersion,
+  buildModelVersionTransformFn,
+  convertModelVersionBackwardConversionSchema,
 } from '@kbn/core-saved-objects-base-server-internal';
 import { TransformSavedObjectDocumentError } from '../core';
-import { type Transform, type TransformFn, TransformType } from './types';
+import { type Transform, type TransformFn, TransformType, type TypeVersionSchema } from './types';
 
-const noopTransform: TransformFn = (doc) => ({ transformedDoc: doc, additionalDocs: [] });
+export const getModelVersionSchemas = ({
+  typeDefinition,
+}: {
+  typeDefinition: SavedObjectsType;
+}): Record<string, TypeVersionSchema> => {
+  const modelVersionMap =
+    typeof typeDefinition.modelVersions === 'function'
+      ? typeDefinition.modelVersions()
+      : typeDefinition.modelVersions ?? {};
+
+  return Object.entries(modelVersionMap).reduce((map, [rawModelVersion, versionDefinition]) => {
+    const schema = versionDefinition.schemas?.forwardCompatibility;
+    if (schema) {
+      const modelVersion = assertValidModelVersion(rawModelVersion);
+      const virtualVersion = modelVersionToVirtualVersion(modelVersion);
+      map[virtualVersion] = convertModelVersionBackwardConversionSchema(schema);
+    }
+    return map;
+  }, {} as Record<string, TypeVersionSchema>);
+};
 
 export const getModelVersionTransforms = ({
   typeDefinition,
@@ -40,18 +61,11 @@ export const getModelVersionTransforms = ({
     return {
       version: virtualVersion,
       transform: convertModelVersionTransformFn({
+        typeDefinition,
         log,
         modelVersion,
         virtualVersion,
-        definition,
-        type: 'up',
-      }),
-      transformDown: convertModelVersionTransformFn({
-        log,
-        modelVersion,
-        virtualVersion,
-        definition,
-        type: 'down',
+        modelVersionDefinition: definition,
       }),
       transformType: TransformType.Migrate,
     };
@@ -59,29 +73,24 @@ export const getModelVersionTransforms = ({
 };
 
 export const convertModelVersionTransformFn = ({
+  typeDefinition,
   virtualVersion,
   modelVersion,
-  definition,
-  type,
+  modelVersionDefinition,
   log,
 }: {
+  typeDefinition: SavedObjectsType;
   virtualVersion: string;
   modelVersion: number;
-  definition: SavedObjectsModelVersion;
-  type: 'up' | 'down';
+  modelVersionDefinition: SavedObjectsModelVersion;
   log: Logger;
 }): TransformFn => {
-  if (!definition.modelChange.transformation) {
-    return noopTransform;
-  }
   const context: SavedObjectModelTransformationContext = {
     log,
     modelVersion,
+    namespaceType: typeDefinition.namespaceType,
   };
-  const modelTransformFn =
-    type === 'up'
-      ? definition.modelChange.transformation.up
-      : definition.modelChange.transformation.down;
+  const modelTransformFn = buildModelVersionTransformFn(modelVersionDefinition.changes);
 
   return function convertedTransform(doc: SavedObjectUnsanitizedDoc) {
     try {

@@ -20,28 +20,17 @@ import {
   KubernetesCollection,
   TreeViewIconProps,
   KubernetesTreeViewLevels,
-  ResponseActionButtonProps,
 } from '../../../types';
 import { useStyles } from './styles';
 import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
-import { RESPONSE_ACTION_BUTTON } from './translations';
 import { showBreadcrumbDisplayText } from './helper';
 import { BREADCRUMBS_CLUSTER_TREE_VIEW_LEVELS } from '../translations';
 interface BreadcrumbDeps {
   treeNavSelection: Partial<KubernetesCollectionMap>;
   onSelect: (selection: Partial<KubernetesCollectionMap>) => void;
-  responseActionClick: () => void;
-  treeNavResponseActionDisabled: boolean;
-  responseActionButtonProps: ResponseActionButtonProps;
 }
 
-export const Breadcrumb = ({
-  treeNavSelection,
-  onSelect,
-  treeNavResponseActionDisabled,
-  responseActionButtonProps,
-  responseActionClick,
-}: BreadcrumbDeps) => {
+export const Breadcrumb = ({ treeNavSelection, onSelect }: BreadcrumbDeps) => {
   const styles = useStyles();
   const { euiVars } = useEuiTheme();
   const onBreadCrumbClick = useCallback(
@@ -73,8 +62,6 @@ export const Breadcrumb = ({
     },
     [onSelect, treeNavSelection]
   );
-  const isResponseActionDisabled =
-    (responseActionButtonProps?.isDisabled ?? false) || treeNavResponseActionDisabled;
 
   const renderBreadcrumbLink = useCallback(
     (
@@ -160,19 +147,6 @@ export const Breadcrumb = ({
               KUBERNETES_COLLECTION_ICONS_PROPS.containerImage,
               true
             )}
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          {responseActionButtonProps?.canAccessResponseConsole && (
-            <EuiToolTip content={responseActionButtonProps?.tooltip ?? null}>
-              <EuiButtonEmpty
-                data-test-subj={`kubernetesSecurity:kubernetesSecurityResponseAction`}
-                isDisabled={isResponseActionDisabled}
-                onClick={responseActionClick}
-              >
-                {RESPONSE_ACTION_BUTTON}
-              </EuiButtonEmpty>
-            </EuiToolTip>
-          )}
         </EuiFlexItem>
       </EuiFlexGroup>
     </div>

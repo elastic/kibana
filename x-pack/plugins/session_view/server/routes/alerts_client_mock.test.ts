@@ -57,12 +57,15 @@ const getResponse = async () => {
 };
 
 const esClientMock = elasticsearchServiceMock.createElasticsearchClient(getResponse());
+const getAlertIndicesAliasMock = jest.fn();
 const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   logger: loggingSystemMock.create().get(),
   authorization: alertingAuthMock,
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   esClient: esClientMock,
+  getRuleType: jest.fn(),
+  getAlertIndicesAlias: getAlertIndicesAliasMock,
 };
 
 export function getAlertsClientMockInstance(esClient?: ElasticsearchClient) {
@@ -85,6 +88,20 @@ export function resetAlertingAuthMock() {
     authorizedRuleTypes.add({ producer: 'apm' });
     return Promise.resolve({ authorizedRuleTypes });
   });
+  // @ts-expect-error
+  alertingAuthMock.getAuthorizedRuleTypes.mockImplementation(async () => {
+    const authorizedRuleTypes = [
+      {
+        producer: 'apm',
+        id: 'apm.error_rate',
+        alerts: {
+          context: 'observability.apm',
+        },
+      },
+    ];
+    return Promise.resolve(authorizedRuleTypes);
+  });
+  getAlertIndicesAliasMock.mockReturnValue(['.alerts-observability.apm-default']);
 
   alertingAuthMock.ensureAuthorized.mockImplementation(
     // @ts-expect-error

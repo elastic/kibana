@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { RouteDefinitionParams } from '../..';
 import { defineDeleteRolesRoutes } from './delete';
 import { defineGetRolesRoutes } from './get';
 import { defineGetAllRolesRoutes } from './get_all';
 import { definePutRolesRoutes } from './put';
+import type { RouteDefinitionParams } from '../..';
 
 export function defineRolesRoutes(params: RouteDefinitionParams) {
   defineGetRolesRoutes(params);

@@ -23,10 +23,12 @@ import { OBSERVED_USER_QUERY_ID } from '../../../../explore/users/containers/use
 export const ObservedUser = ({
   observedUser,
   contextID,
+  scopeId,
   isDraggable,
 }: {
   observedUser: ObservedUserData;
   contextID: string;
+  scopeId: string;
   isDraggable: boolean;
 }) => {
   const { euiTheme } = useEuiTheme();
@@ -36,8 +38,8 @@ export const ObservedUser = ({
     setObservedDataToggleOpen((isOpen) => !isOpen);
   }, [setObservedDataToggleOpen]);
   const observedUserTableColumns = useMemo(
-    () => getObservedUserTableColumns(contextID, isDraggable),
-    [contextID, isDraggable]
+    () => getObservedUserTableColumns(contextID, scopeId, isDraggable),
+    [contextID, scopeId, isDraggable]
   );
 
   return (

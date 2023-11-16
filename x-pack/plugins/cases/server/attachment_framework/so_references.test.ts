@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CommentType, SECURITY_SOLUTION_OWNER } from '../../common';
+import { AttachmentType, SECURITY_SOLUTION_OWNER } from '../../common';
 import {
   createPersistableStateAttachmentTypeRegistryMock,
   persistableStateAttachment,
@@ -142,7 +142,7 @@ describe('Persistable state SO references', () => {
     it('does not extract references for other attachments', async () => {
       const comment = {
         comment: 'a comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         owner: SECURITY_SOLUTION_OWNER,
       };
 
@@ -179,7 +179,7 @@ describe('Persistable state SO references', () => {
     it('does not inject references for other attachments', async () => {
       const comment = {
         comment: 'a comment',
-        type: CommentType.user as const,
+        type: AttachmentType.user as const,
         owner: SECURITY_SOLUTION_OWNER,
       };
 

@@ -70,9 +70,9 @@ export const USER_RISK_SCORE = i18n.translate(
   }
 );
 
-export const USER_RISK_CLASSIFICATION = i18n.translate(
-  'xpack.securitySolution.user.details.overview.userRiskClassification',
+export const USER_RISK_LEVEL = i18n.translate(
+  'xpack.securitySolution.user.details.overview.userRiskLevel',
   {
-    defaultMessage: 'User risk classification',
+    defaultMessage: 'User risk level',
   }
 );

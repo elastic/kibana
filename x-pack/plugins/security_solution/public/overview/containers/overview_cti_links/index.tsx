@@ -4,92 +4,70 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { useState, useEffect, useCallback } from 'react';
-import type { SavedObjectAttributes } from '@kbn/securitysolution-io-ts-alerting-types';
+import { useEffect, useMemo } from 'react';
 import type { TiDataSources } from './use_ti_data_sources';
-import type { LinkPanelListItem } from '../../components/link_panel';
 import { useKibana } from '../../../common/lib/kibana';
+import { getDashboardsByTagIds } from '../../../common/containers/dashboards/api';
+import { getTagsByName } from '../../../common/containers/tags/api';
+import { useFetch, REQUEST_NAMES } from '../../../common/hooks/use_fetch';
+import { SecurityPageName } from '../../../../common/constants';
+import { useGetSecuritySolutionUrl } from '../../../common/components/link_to';
 
-const TAG_REQUEST_BODY_SEARCH = 'threat intel';
-export const TAG_REQUEST_BODY = {
-  type: 'tag',
-  search: TAG_REQUEST_BODY_SEARCH,
-  searchFields: ['name'],
+const CTI_TAG_NAME = 'threat intel';
+
+const useCtiInstalledDashboards = () => {
+  const { http } = useKibana().services;
+
+  const {
+    data: ctiTags,
+    isLoading: isLoadingTags,
+    error: errorTags,
+  } = useFetch(REQUEST_NAMES.CTI_TAGS, getTagsByName, {
+    initialParameters: { http, tagName: CTI_TAG_NAME },
+  });
+
+  const {
+    fetch: fetchDashboards,
+    data: dashboards,
+    isLoading: isLoadingDashboards,
+  } = useFetch(REQUEST_NAMES.CTI_TAGS, getDashboardsByTagIds);
+
+  useEffect(() => {
+    if (!isLoadingTags && !errorTags && ctiTags?.length) {
+      fetchDashboards({ http, tagIds: ctiTags.map((tag) => tag.id) });
+    }
+  }, [errorTags, fetchDashboards, http, isLoadingTags, ctiTags]);
+
+  return { dashboards, isLoading: isLoadingDashboards || isLoadingTags };
 };
 
 export const useCtiDashboardLinks = ({
-  to,
-  from,
   tiDataSources = [],
 }: {
-  to: string;
-  from: string;
   tiDataSources?: TiDataSources[];
 }) => {
-  const [installedDashboardIds, setInstalledDashboardIds] = useState<string[]>([]);
-  const dashboardLocator = useKibana().services.dashboard?.locator;
-  const savedObjectsClient = useKibana().services.savedObjects.client;
+  const { dashboards } = useCtiInstalledDashboards();
+  const getSecuritySolutionUrl = useGetSecuritySolutionUrl();
 
-  const handleTagsReceived = useCallback(
-    (TagsSO?) => {
-      if (TagsSO?.savedObjects?.length) {
-        return savedObjectsClient.find<SavedObjectAttributes>({
-          type: 'dashboard',
-          hasReference: { id: TagsSO.savedObjects[0].id, type: 'tag' },
-        });
+  const listItems = useMemo(() => {
+    const installedDashboardIds = dashboards?.map(({ id }) => id) ?? [];
+
+    return tiDataSources.map((tiDataSource) => {
+      let path = '';
+      if (tiDataSource.dashboardId && installedDashboardIds.includes(tiDataSource.dashboardId)) {
+        path = `${getSecuritySolutionUrl({
+          deepLinkId: SecurityPageName.dashboards,
+          path: tiDataSource.dashboardId,
+        })}`;
       }
-      return undefined;
-    },
-    [savedObjectsClient]
-  );
 
-  useEffect(() => {
-    if (savedObjectsClient) {
-      savedObjectsClient
-        .find<SavedObjectAttributes>(TAG_REQUEST_BODY)
-        .then(handleTagsReceived)
-        .then(
-          async (DashboardsSO?: {
-            savedObjects?: Array<{
-              attributes?: SavedObjectAttributes;
-              id?: string;
-            }>;
-          }) => {
-            if (DashboardsSO?.savedObjects?.length) {
-              setInstalledDashboardIds(
-                DashboardsSO.savedObjects.map((SO) => SO.id ?? '').filter(Boolean)
-              );
-            }
-          }
-        );
-    }
-  }, [handleTagsReceived, savedObjectsClient]);
+      return {
+        title: tiDataSource.name,
+        count: tiDataSource.count,
+        path,
+      };
+    });
+  }, [dashboards, tiDataSources, getSecuritySolutionUrl]);
 
-  const listItems = tiDataSources.map((tiDataSource) => {
-    const listItem: LinkPanelListItem = {
-      title: tiDataSource.name,
-      count: tiDataSource.count,
-      path: '',
-    };
-
-    if (
-      tiDataSource.dashboardId &&
-      installedDashboardIds.includes(tiDataSource.dashboardId) &&
-      dashboardLocator
-    ) {
-      listItem.path = dashboardLocator.getRedirectUrl({
-        dashboardId: tiDataSource.dashboardId,
-        timeRange: {
-          to,
-          from,
-        },
-      });
-    }
-
-    return listItem;
-  });
-
-  return {
-    listItems,
-  };
+  return { listItems };
 };

@@ -6,9 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SavedObjectUnsanitizedDoc } from '@kbn/core-saved-objects-server';
+import type { SavedObjectMigration } from '@kbn/core-saved-objects-server';
 
-export const transformSetManagedDefault = (doc: SavedObjectUnsanitizedDoc) => ({
-  transformedDoc: { ...doc, managed: doc.managed ?? false },
-  additionalDocs: [],
-});
+export const transformSetManagedDefault: SavedObjectMigration = {
+  // @todo Remove when deferred migrations are publicly available.
+  // @ts-expect-error
+  deferred: true,
+  transform: ({ managed, ...doc }) => ({ ...doc, managed: managed ?? false }),
+};

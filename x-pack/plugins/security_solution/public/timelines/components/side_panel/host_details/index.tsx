@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
 import {
   EuiFlexGroup,
   EuiFlyoutHeader,
@@ -58,14 +56,16 @@ const StyledPanelContent = styled.div`
 
 interface HostDetailsProps {
   contextID: string;
+  scopeId: string;
   expandedHost: { hostName: string };
   handleOnHostClosed: () => void;
   isFlyoutView?: boolean;
   isDraggable?: boolean;
 }
 
+// eslint-disable-next-line react/display-name
 export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
-  ({ contextID, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
+  ({ contextID, scopeId, expandedHost, handleOnHostClosed, isDraggable, isFlyoutView }) => {
     const { hostName } = expandedHost;
 
     if (!hostName) {
@@ -81,7 +81,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
           <EuiSpacer size="m" />
           <ExpandableHostDetailsPageLink hostName={hostName} />
           <EuiSpacer size="m" />
-          <ExpandableHostDetails contextID={contextID} hostName={hostName} />
+          <ExpandableHostDetails contextID={contextID} scopeId={scopeId} hostName={hostName} />
         </StyledEuiFlyoutBody>
       </>
     ) : (
@@ -111,6 +111,7 @@ export const HostDetailsPanel: React.FC<HostDetailsProps> = React.memo(
         <StyledPanelContent>
           <ExpandableHostDetails
             contextID={contextID}
+            scopeId={scopeId}
             hostName={hostName}
             isDraggable={isDraggable}
           />

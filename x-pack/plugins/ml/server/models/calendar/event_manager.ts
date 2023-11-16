@@ -28,6 +28,7 @@ export class EventManager {
     const body = await this._mlClient.getCalendarEvents({
       calendar_id: calendarId,
       job_id: jobId,
+      size: 10000,
     });
 
     return body.events;

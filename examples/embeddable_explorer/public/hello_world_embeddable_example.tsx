@@ -8,14 +8,12 @@
 
 import React from 'react';
 import {
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
-  EuiPageHeader,
-  EuiPageHeaderSection,
+  EuiPageTemplate,
   EuiPanel,
   EuiText,
   EuiTitle,
+  EuiCodeBlock,
+  EuiSpacer,
 } from '@elastic/eui';
 import { EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import {
@@ -29,40 +27,46 @@ interface Props {
 
 export function HelloWorldEmbeddableExample({ helloWorldEmbeddableFactory }: Props) {
   return (
-    <EuiPageBody>
-      <EuiPageHeader>
-        <EuiPageHeaderSection>
-          <EuiTitle size="l">
-            <h1>Hello world example</h1>
+    <>
+      <EuiPageTemplate.Header pageTitle="Render embeddable" />
+      <EuiPageTemplate.Section grow={false} bottomBorder="extended">
+        <>
+          <EuiTitle size="xs">
+            <h2>Embeddable prop</h2>
           </EuiTitle>
-        </EuiPageHeaderSection>
-      </EuiPageHeader>
-      <EuiPageContent>
-        <EuiPageContentBody>
           <EuiText>
-            Here the embeddable is rendered without the factory. A developer may use this method if
-            they want to statically embed a single embeddable into their application or page. Also
-            `input` prop may be used to declaratively update current embeddable input
+            Use embeddable constructor to pass embeddable directly to{' '}
+            <strong>EmbeddableRenderer</strong>. Use <strong>input</strong> prop to declaratively
+            update embeddable input.
           </EuiText>
-          <EuiPanel data-test-subj="helloWorldEmbeddablePanel" paddingSize="none" role="figure">
+          <EuiSpacer />
+          <EuiPanel data-test-subj="helloWorldEmbeddablePanel" role="figure">
             <EmbeddableRenderer embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />
           </EuiPanel>
-
+          <EuiSpacer />
+          <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
+            {`<EmbeddableRenderer embeddable={new HelloWorldEmbeddable({ id: 'hello' })} />`}
+          </EuiCodeBlock>
+        </>
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section grow={false}>
+        <>
+          <EuiTitle size="xs">
+            <h2>Factory prop</h2>
+          </EuiTitle>
           <EuiText>
-            Here the embeddable is rendered using the factory. Internally it creates embeddable
-            using factory.create(). This method is used programatically when a container embeddable
-            attempts to initialize it&#39;s children embeddables. This method can be used when you
-            only have a access to a factory.
+            Use <strong>factory</strong> prop to programatically instantiate embeddable.
           </EuiText>
-          <EuiPanel
-            data-test-subj="helloWorldEmbeddableFromFactory"
-            paddingSize="none"
-            role="figure"
-          >
+          <EuiSpacer />
+          <EuiPanel data-test-subj="helloWorldEmbeddableFromFactory" role="figure">
             <EmbeddableRenderer factory={helloWorldEmbeddableFactory} input={{ id: '1234' }} />
           </EuiPanel>
-        </EuiPageContentBody>
-      </EuiPageContent>
-    </EuiPageBody>
+          <EuiSpacer />
+          <EuiCodeBlock language="jsx" fontSize="m" paddingSize="m">
+            {`<EmbeddableRenderer factory={helloWorldEmbeddableFactory} input={{ id: '1234' }} />`}
+          </EuiCodeBlock>
+        </>
+      </EuiPageTemplate.Section>
+    </>
   );
 }

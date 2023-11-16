@@ -7,8 +7,8 @@
 
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
-// eslint-disable-next-line no-restricted-imports
-import { Router, Switch, Route, Redirect, withRouter } from 'react-router-dom';
+import { Redirect, withRouter } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { UIM_APP_LOAD } from '../../common';
 import { registerRouter, setUserHasLeftApp, METRIC_TYPE } from './services';
@@ -56,11 +56,11 @@ export class App extends Component {
     return (
       <Router history={this.props.history}>
         <ShareRouter>
-          <Switch>
+          <Routes>
             <Redirect exact from="/" to="/job_list" />
             <Route exact path="/job_list" component={JobList} />
             <Route exact path="/create" component={JobCreate} />
-          </Switch>
+          </Routes>
         </ShareRouter>
       </Router>
     );

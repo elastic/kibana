@@ -8,17 +8,19 @@ import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
   DETECTION_ENGINE_RULES_URL,
 } from '@kbn/security-solution-plugin/common/constants';
+import { getCreateEsqlRulesSchemaMock } from '@kbn/security-solution-plugin/common/api/detection_engine/model/rule_schema/mocks';
+
 import expect from 'expect';
 import {
-  BulkActionType,
-  BulkActionEditType,
-} from '@kbn/security-solution-plugin/common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+  BulkActionTypeEnum,
+  BulkActionEditTypeEnum,
+} from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management';
 import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
   createRule,
   createSignalsIndex,
   deleteAllRules,
-  deleteSignalsIndex,
+  deleteAllAlerts,
   getSimpleMlRule,
   getSimpleRule,
   installMockPrebuiltRules,
@@ -34,13 +36,20 @@ export default ({ getService }: FtrProviderContext): void => {
     supertest
       .post(DETECTION_ENGINE_RULES_BULK_ACTION)
       .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
       .query({ dry_run: true });
 
   const fetchRule = (ruleId: string) =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}?rule_id=${ruleId}`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   const findRules = () =>
-    supertest.get(`${DETECTION_ENGINE_RULES_URL}/_find`).set('kbn-xsrf', 'true');
+    supertest
+      .get(`${DETECTION_ENGINE_RULES_URL}/_find`)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31');
 
   describe('perform_bulk_action dry_run', () => {
     beforeEach(async () => {
@@ -48,7 +57,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     afterEach(async () => {
-      await deleteSignalsIndex(supertest, log);
+      await deleteAllAlerts(supertest, log, es);
       await deleteAllRules(supertest, log);
     });
 
@@ -56,7 +65,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule());
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.export })
+        .send({ action: BulkActionTypeEnum.export })
         .expect(400);
 
       expect(body).toEqual({
@@ -71,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, testRule);
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.delete })
+        .send({ action: BulkActionTypeEnum.delete })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -92,7 +101,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId));
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.enable })
+        .send({ action: BulkActionTypeEnum.enable })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -114,7 +123,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, getSimpleRule(ruleId, true));
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.disable })
+        .send({ action: BulkActionTypeEnum.disable })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -137,7 +146,7 @@ export default ({ getService }: FtrProviderContext): void => {
       await createRule(supertest, log, ruleToDuplicate);
 
       const { body } = await postDryRunBulkAction()
-        .send({ action: BulkActionType.disable })
+        .send({ action: BulkActionTypeEnum.disable })
         .expect(200);
 
       expect(body.attributes.summary).toEqual({ failed: 0, skipped: 0, succeeded: 1, total: 1 });
@@ -163,10 +172,10 @@ export default ({ getService }: FtrProviderContext): void => {
 
         const { body } = await postDryRunBulkAction()
           .send({
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_tags,
+                type: BulkActionEditTypeEnum.set_tags,
                 value: ['reset-tag'],
               },
             ],
@@ -199,10 +208,10 @@ export default ({ getService }: FtrProviderContext): void => {
         const { body } = await postDryRunBulkAction()
           .send({
             ids: [immutableRule.id],
-            action: BulkActionType.edit,
-            [BulkActionType.edit]: [
+            action: BulkActionTypeEnum.edit,
+            [BulkActionTypeEnum.edit]: [
               {
-                type: BulkActionEditType.set_tags,
+                type: BulkActionEditTypeEnum.set_tags,
                 value: ['reset-tag'],
               },
             ],
@@ -233,9 +242,9 @@ export default ({ getService }: FtrProviderContext): void => {
 
       describe('validate updating index pattern for machine learning rule', () => {
         const actions = [
-          BulkActionEditType.add_index_patterns,
-          BulkActionEditType.set_index_patterns,
-          BulkActionEditType.delete_index_patterns,
+          BulkActionEditTypeEnum.add_index_patterns,
+          BulkActionEditTypeEnum.set_index_patterns,
+          BulkActionEditTypeEnum.delete_index_patterns,
         ];
 
         actions.forEach((editAction) => {
@@ -245,8 +254,8 @@ export default ({ getService }: FtrProviderContext): void => {
             const { body } = await postDryRunBulkAction()
               .send({
                 ids: [mlRule.id],
-                action: BulkActionType.edit,
-                [BulkActionType.edit]: [
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
                   {
                     type: editAction,
                     value: [],
@@ -277,6 +286,59 @@ export default ({ getService }: FtrProviderContext): void => {
                 {
                   id: mlRule.id,
                   name: mlRule.name,
+                },
+              ],
+            });
+          });
+        });
+      });
+
+      describe('validate updating index pattern for ES|QL rule', () => {
+        const actions = [
+          BulkActionEditTypeEnum.add_index_patterns,
+          BulkActionEditTypeEnum.set_index_patterns,
+          BulkActionEditTypeEnum.delete_index_patterns,
+        ];
+
+        actions.forEach((editAction) => {
+          it(`should return error if ${editAction} action is applied to ES|QL rule`, async () => {
+            const esqlRule = await createRule(supertest, log, getCreateEsqlRulesSchemaMock());
+
+            const { body } = await postDryRunBulkAction()
+              .send({
+                ids: [esqlRule.id],
+                action: BulkActionTypeEnum.edit,
+                [BulkActionTypeEnum.edit]: [
+                  {
+                    type: editAction,
+                    value: [],
+                  },
+                ],
+              })
+              .expect(500);
+
+            expect(body.attributes.summary).toEqual({
+              failed: 1,
+              skipped: 0,
+              succeeded: 0,
+              total: 1,
+            });
+            expect(body.attributes.results).toEqual({
+              updated: [],
+              skipped: [],
+              created: [],
+              deleted: [],
+            });
+
+            expect(body.attributes.errors).toHaveLength(1);
+            expect(body.attributes.errors[0]).toEqual({
+              err_code: 'ESQL_INDEX_PATTERN',
+              message: "ES|QL rule doesn't have index patterns",
+              status_code: 500,
+              rules: [
+                {
+                  id: esqlRule.id,
+                  name: esqlRule.name,
                 },
               ],
             });

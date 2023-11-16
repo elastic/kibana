@@ -25,6 +25,13 @@ const coreMock = {
   },
 } as unknown as Partial<CoreStart>;
 
+const configMock = {
+  featureFlags: {
+    agentConfigurationAvailable: true,
+    configurableIndicesAvailable: true,
+  },
+};
+
 const stories: Meta<Args> = {
   title: 'routing/templates/SettingsTemplate',
   component: SettingsTemplate,
@@ -36,7 +43,12 @@ const stories: Meta<Args> = {
 
       return (
         <MockApmPluginStorybook
-          apmContext={{ core: coreMock } as unknown as ApmPluginContextValue}
+          apmContext={
+            {
+              core: coreMock,
+              config: configMock,
+            } as unknown as ApmPluginContextValue
+          }
         >
           <StoryComponent />
         </MockApmPluginStorybook>

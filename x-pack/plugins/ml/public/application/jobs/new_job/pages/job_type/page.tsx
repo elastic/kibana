@@ -20,7 +20,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import { useMlKibana, useNavigateToPath } from '../../../../contexts/kibana';
 
-import { useMlContext } from '../../../../contexts/ml';
+import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { timeBasedIndexCheck } from '../../../../util/index_utils';
@@ -37,7 +37,7 @@ export const Page: FC = () => {
     services: { share },
   } = useMlKibana();
 
-  const mlContext = useMlContext();
+  const dataSourceContext = useDataSource();
   const navigateToPath = useNavigateToPath();
   const onSelectDifferentIndex = useCreateAndNavigateToMlLink(
     ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_SELECT_INDEX
@@ -45,16 +45,16 @@ export const Page: FC = () => {
 
   const [recognizerResultsCount, setRecognizerResultsCount] = useState(0);
 
-  const { currentDataView, selectedSavedSearch } = mlContext;
+  const { selectedDataView, selectedSavedSearch } = dataSourceContext;
 
-  const isTimeBasedIndex = timeBasedIndexCheck(currentDataView);
+  const isTimeBasedIndex = timeBasedIndexCheck(selectedDataView);
   const hasGeoFields = useMemo(
     () =>
       [
-        ...currentDataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
-        ...currentDataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
+        ...selectedDataView.fields.getByType(ES_FIELD_TYPES.GEO_POINT),
+        ...selectedDataView.fields.getByType(ES_FIELD_TYPES.GEO_SHAPE),
       ].length > 0,
-    [currentDataView]
+    [selectedDataView]
   );
   const indexWarningTitle =
     !isTimeBasedIndex && selectedSavedSearch
@@ -65,13 +65,13 @@ export const Page: FC = () => {
               '{savedSearchTitle} uses data view {dataViewName} which is not time based',
             values: {
               savedSearchTitle: selectedSavedSearch.title ?? '',
-              dataViewName: currentDataView.getName(),
+              dataViewName: selectedDataView.getName(),
             },
           }
         )
       : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewNotTimeBasedMessage', {
           defaultMessage: 'Data view {dataViewName} is not time based',
-          values: { dataViewName: currentDataView.getName() },
+          values: { dataViewName: selectedDataView.getName() },
         });
 
   const pageTitleLabel = selectedSavedSearch
@@ -81,7 +81,7 @@ export const Page: FC = () => {
       })
     : i18n.translate('xpack.ml.newJob.wizard.jobType.dataViewPageTitleLabel', {
         defaultMessage: 'data view {dataViewName}',
-        values: { dataViewName: currentDataView.getName() },
+        values: { dataViewName: selectedDataView.getName() },
       });
 
   const recognizerResults = {
@@ -93,13 +93,13 @@ export const Page: FC = () => {
 
   const getUrlParams = () => {
     return !selectedSavedSearch
-      ? `?index=${currentDataView.id}`
+      ? `?index=${selectedDataView.id}`
       : `?savedSearchId=${selectedSavedSearch.id}`;
   };
 
   const addSelectionToRecentlyAccessed = async () => {
     const title = !selectedSavedSearch
-      ? currentDataView.getName()
+      ? selectedDataView.getName()
       : selectedSavedSearch.title ?? '';
     const mlLocator = share.url.locators.get(ML_APP_LOCATOR)!;
 
@@ -109,7 +109,7 @@ export const Page: FC = () => {
         pageState: {
           ...(selectedSavedSearch?.id
             ? { savedSearchId: selectedSavedSearch.id }
-            : { index: currentDataView.id }),
+            : { index: selectedDataView.id }),
         },
       },
       { absolute: true }
@@ -293,7 +293,7 @@ export const Page: FC = () => {
 
         <EuiFlexGrid gutterSize="l" columns={4}>
           <DataRecognizer
-            indexPattern={currentDataView}
+            indexPattern={selectedDataView}
             savedSearch={selectedSavedSearch}
             results={recognizerResults}
           />

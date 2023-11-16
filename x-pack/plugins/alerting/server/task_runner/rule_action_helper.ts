@@ -58,7 +58,7 @@ export const isSummaryActionThrottled = ({
     logger.debug(`Action'${action?.actionTypeId}:${action?.id}', has an invalid throttle interval`);
   }
 
-  const throttled = throttledAction.date.getTime() + throttleMills > Date.now();
+  const throttled = new Date(throttledAction.date).getTime() + throttleMills > Date.now();
 
   if (throttled) {
     logger.debug(
@@ -87,11 +87,11 @@ export const getSummaryActionsFromTaskState = ({
         action.frequency?.summary && (action.uuid === key || generateActionHash(action) === key)
     );
     if (actionExists) {
-      return { ...newObj, [actionExists.uuid!]: val }; // replace hash with uuid
-    } else {
-      return newObj;
+      // replace hash with uuid
+      newObj[actionExists.uuid!] = val;
     }
-  }, {});
+    return newObj;
+  }, {} as ThrottledActions);
 };
 
 export const getSummaryActionTimeBounds = (

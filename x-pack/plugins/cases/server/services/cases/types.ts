@@ -7,7 +7,7 @@
 
 import type { KueryNode } from '@kbn/es-query';
 import type { SavedObjectsClientContract } from '@kbn/core/server';
-import type { Case } from '../../../common/api';
+import type { Case } from '../../../common/types/domain';
 import type { IndexRefresh } from '../types';
 import type { User } from '../../common/types/user';
 import type {
@@ -34,7 +34,6 @@ export interface DeleteCaseArgs extends GetCaseArgs, IndexRefresh {}
 
 export interface GetCasesArgs {
   caseIds: string[];
-  fields?: string[];
 }
 
 export interface FindCommentsArgs {
@@ -47,9 +46,13 @@ export interface FindCaseCommentsArgs {
   options?: SavedObjectFindOptionsKueryNode;
 }
 
-export interface PostCaseArgs extends IndexRefresh {
+export interface CreateCaseArgs extends IndexRefresh {
   attributes: CaseTransformedAttributes;
   id: string;
+}
+
+export interface BulkCreateCasesArgs extends IndexRefresh {
+  cases: Array<{ id: string } & CaseTransformedAttributes>;
 }
 
 export interface PatchCase extends IndexRefresh {
@@ -78,6 +81,11 @@ export interface GetTagsArgs {
 }
 
 export interface GetReportersArgs {
+  unsecuredSavedObjectsClient: SavedObjectsClientContract;
+  filter?: KueryNode;
+}
+
+export interface GetCategoryArgs {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   filter?: KueryNode;
 }

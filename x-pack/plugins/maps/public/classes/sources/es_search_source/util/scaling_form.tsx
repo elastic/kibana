@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { Component, Fragment } from 'react';
+import React, { Component, Fragment, ReactNode } from 'react';
 import {
   EuiConfirmModal,
   EuiFormRow,
@@ -35,6 +35,7 @@ interface Props {
   scalingType: SCALING_TYPES;
   supportsClustering: boolean;
   clusteringDisabledReason?: string | null;
+  hasSpatialJoins: boolean;
   numberOfJoins: number;
 }
 
@@ -42,13 +43,13 @@ interface State {
   nextScalingType?: SCALING_TYPES;
   maxResultWindow: string;
   showModal: boolean;
-  modalMsg: string | null;
+  modalContent: ReactNode;
 }
 
 export class ScalingForm extends Component<Props, State> {
   state: State = {
     maxResultWindow: DEFAULT_MAX_RESULT_WINDOW.toLocaleString(),
-    modalMsg: null,
+    modalContent: null,
     showModal: false,
   };
   _isMounted = false;
@@ -76,25 +77,42 @@ export class ScalingForm extends Component<Props, State> {
 
   _onScalingTypeSelect = (optionId: SCALING_TYPES): void => {
     if (this.props.numberOfJoins > 0 && optionId === SCALING_TYPES.CLUSTERS) {
-      this._openModal(
-        optionId,
+      this._openModal(optionId, [
         i18n.translate('xpack.maps.source.esSearch.clusterScalingJoinMsg', {
-          defaultMessage: `Scaling with clusters does not support term joins. Switching to clusters will remove all term joins from your layer configuration.`,
-        })
-      );
-    } else if (this.props.numberOfJoins > 1 && optionId === SCALING_TYPES.MVT) {
-      this._openModal(
-        optionId,
-        i18n.translate('xpack.maps.source.esSearch.mvtScalingJoinMsg', {
-          defaultMessage: `Vector tiles support one term join. Your layer has {numberOfJoins} term joins. Switching to vector tiles will keep the first term join and remove all other term joins from your layer configuration.`,
-          values: {
-            numberOfJoins: this.props.numberOfJoins,
-          },
-        })
-      );
-    } else {
-      this._onScalingTypeChange(optionId);
+          defaultMessage: `Scaling with clusters does not support joins. Switching to clusters will remove all joins from your layer configuration.`,
+        }),
+      ]);
+      return;
     }
+
+    if (optionId === SCALING_TYPES.MVT) {
+      const messages: string[] = [];
+      if (this.props.hasSpatialJoins) {
+        messages.push(
+          i18n.translate('xpack.maps.source.esSearch.mvtNoSpatialJoinMsg', {
+            defaultMessage: `Vector tiles do not support spatial joins. Switching to vector tiles will remove all spatial joins from your layer configuration.`,
+          })
+        );
+      }
+
+      if (this.props.numberOfJoins > 1) {
+        messages.push(
+          i18n.translate('xpack.maps.source.esSearch.mvtScalingJoinMsg', {
+            defaultMessage: `Vector tiles support one term join. Your layer has {numberOfJoins} joins. Switching to vector tiles will keep the first term join and remove all other joins from your layer configuration.`,
+            values: {
+              numberOfJoins: this.props.numberOfJoins,
+            },
+          })
+        );
+      }
+
+      if (messages.length) {
+        this._openModal(optionId, messages);
+        return;
+      }
+    }
+
+    this._onScalingTypeChange(optionId);
   };
 
   _onScalingTypeChange = (optionId: SCALING_TYPES): void => {
@@ -114,9 +132,13 @@ export class ScalingForm extends Component<Props, State> {
     this.props.onChange({ propName: 'filterByMapBounds', value: event.target.checked });
   };
 
-  _openModal = (optionId: SCALING_TYPES, modalMsg: string) => {
+  _openModal = (optionId: SCALING_TYPES, messages: string[]) => {
     this.setState({
-      modalMsg,
+      modalContent: messages.length
+        ? messages.map((message, index) => {
+            return <p key={index}>{message}</p>;
+          })
+        : null,
       nextScalingType: optionId,
       showModal: true,
     });
@@ -124,7 +146,7 @@ export class ScalingForm extends Component<Props, State> {
 
   _closeModal = () => {
     this.setState({
-      modalMsg: null,
+      modalContent: null,
       nextScalingType: undefined,
       showModal: false,
     });
@@ -158,7 +180,11 @@ export class ScalingForm extends Component<Props, State> {
   }
 
   _renderModal() {
-    if (!this.state.showModal || !this.state.modalMsg || this.state.nextScalingType === undefined) {
+    if (
+      !this.state.showModal ||
+      !this.state.modalContent ||
+      this.state.nextScalingType === undefined
+    ) {
       return null;
     }
 
@@ -181,7 +207,7 @@ export class ScalingForm extends Component<Props, State> {
         buttonColor="danger"
         defaultFocusedButton="cancel"
       >
-        <p>{this.state.modalMsg}</p>
+        {this.state.modalContent}
       </EuiConfirmModal>
     );
   }

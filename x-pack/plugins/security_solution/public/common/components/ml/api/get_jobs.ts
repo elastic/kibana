@@ -28,8 +28,9 @@ export const getJobs = async ({
   jobIds,
   signal,
 }: GetJobsArgs): Promise<CombinedJobWithStats[]> =>
-  http.fetch<CombinedJobWithStats[]>('/api/ml/jobs/jobs', {
+  http.fetch<CombinedJobWithStats[]>('/internal/ml/jobs/jobs', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify({ jobIds }),
     asSystemRequest: true,
     signal,

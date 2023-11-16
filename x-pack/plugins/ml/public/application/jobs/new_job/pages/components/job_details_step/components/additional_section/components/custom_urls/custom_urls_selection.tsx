@@ -7,6 +7,7 @@
 
 import React, { FC, useContext } from 'react';
 import type { MlUrlConfig } from '@kbn/ml-anomaly-utils';
+import { useDashboardService } from '../../../../../../../../../services/dashboard_service';
 import { CustomUrls } from '../../../../../../../../../components/custom_urls/custom_urls';
 import { JobCreatorContext } from '../../../../../job_creator_context';
 import { Description } from './description';
@@ -24,6 +25,7 @@ export const CustomUrlsSelection: FC = () => {
     ...jobCreator.jobConfig,
     datafeed_config: jobCreator.datafeedConfig,
   };
+  const dashboardService = useDashboardService();
 
   return (
     <Description>
@@ -32,6 +34,7 @@ export const CustomUrlsSelection: FC = () => {
         jobCustomUrls={jobCreator.customUrls ?? []}
         setCustomUrls={setCustomUrls}
         editMode="modal"
+        dashboardService={dashboardService}
       />
     </Description>
   );

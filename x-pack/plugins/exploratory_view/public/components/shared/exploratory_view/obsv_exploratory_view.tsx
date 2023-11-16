@@ -47,6 +47,10 @@ export const dataTypes: Array<{ id: AppDataType; label: string }> = [
     label: DataTypesLabels[DataTypes.SYNTHETICS],
   },
   {
+    id: DataTypes.UPTIME,
+    label: DataTypesLabels[DataTypes.UPTIME],
+  },
+  {
     id: DataTypes.UX,
     label: DataTypesLabels[DataTypes.UX],
   },

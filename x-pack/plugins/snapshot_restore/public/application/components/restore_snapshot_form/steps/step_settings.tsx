@@ -189,6 +189,7 @@ export const RestoreSnapshotStepSettings: React.FunctionComponent<StepProps> = (
                       }}
                     />
                   }
+                  data-test-subj="indexSettingsEditor"
                 >
                   <CodeEditor
                     languageId="json"

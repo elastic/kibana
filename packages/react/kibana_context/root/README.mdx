@@ -1,0 +1,52 @@
+---
+id: react/context/root
+slug: /react/context/root
+title: React Context - Root
+description: This context provider is used only used by the very base root of Kibana.  Unless you're writing tests, a Storybook, or working in core code, you likely don't need this.
+tags: ['shared-ux', 'react', 'context']
+date: 2023-07-25
+---
+
+## Description
+
+This package contains a root context provider for Kibana rendering.  It handles operations that should only happen _once_ when the browser loads a page.
+
+While it would be safer to isolate this in a `core` package, we need to use it in other contexts-- like Storybook and Jest.
+
+```ts
+import React, { useEffect } from 'react';
+import { BehaviorSubject } from 'rxjs';
+
+import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaRootContextProvider } from '@kbn/react-kibana-context-root';
+import { action } from '@storybook/addon-actions';
+
+import type { DecoratorFn } from '@storybook/react';
+import type { CoreTheme } from '@kbn/core-theme-browser';
+import type { I18nStart } from '@kbn/core-i18n-browser';
+
+const theme$ = new BehaviorSubject<CoreTheme>({ darkMode: false });
+
+const analytics = {
+  reportEvent: action('telemetry-report-event'),
+};
+
+const i18n: I18nStart = {
+  Context: ({ children }) => <I18nProvider>{children}</I18nProvider>,
+};
+
+export const KibanaContextDecorator: DecoratorFn = (storyFn, { globals }) => {
+  const colorMode = globals.euiTheme === 'v8.dark' ? 'dark' : 'light';
+
+  useEffect(() => {
+    theme$.next({ darkMode: colorMode === 'dark' });
+  }, [colorMode]);
+
+  return (
+    <KibanaRootContextProvider {...{ theme: { theme$ }, analytics, i18n }}>
+      {storyFn()}
+    </KibanaRootContextProvider>
+  );
+};
+```
+

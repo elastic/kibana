@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/detection_engine/rule_schema';
+import type { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 /**
  * This will return a complex rule with all the outputs possible

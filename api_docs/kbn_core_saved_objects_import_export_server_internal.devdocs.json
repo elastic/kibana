@@ -547,7 +547,25 @@
     "functions": [],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-import-export-server-internal",
+        "id": "def-common.EXPORT_ALL_TYPES_TOKEN",
+        "type": "string",
+        "tags": [],
+        "label": "EXPORT_ALL_TYPES_TOKEN",
+        "description": [
+          "\nToken used for the `type` option when exporting by type\nto specify that all (importable and exportable) types should be exported."
+        ],
+        "signature": [
+          "\"*\""
+        ],
+        "path": "packages/core/saved-objects/core-saved-objects-import-export-server-internal/src/export/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": []
   }
 }

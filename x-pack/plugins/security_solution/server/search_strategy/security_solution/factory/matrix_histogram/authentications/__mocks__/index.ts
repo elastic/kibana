@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import type { MatrixHistogramRequestOptions } from '../../../../../../../common/api/search_strategy';
+import { MatrixHistogramQuery } from '../../../../../../../common/api/search_strategy';
 import { MatrixHistogramType } from '../../../../../../../common/search_strategy';
 
-export const mockOptions = {
+export const mockOptions: MatrixHistogramRequestOptions = {
   defaultIndex: [
     'apm-*-transaction*',
     'traces-apm*',
@@ -22,6 +24,9 @@ export const mockOptions = {
   histogramType: MatrixHistogramType.authentications,
   timerange: { interval: '12h', from: '2020-09-08T15:22:00.325Z', to: '2020-09-09T15:22:00.325Z' },
   stackByField: 'event.outcome',
+  includeMissingData: false,
+  isPtrIncluded: false,
+  factoryQueryType: MatrixHistogramQuery,
 };
 
 export const expectedDsl = {

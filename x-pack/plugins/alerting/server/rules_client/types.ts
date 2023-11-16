@@ -6,7 +6,12 @@
  */
 
 import { KueryNode } from '@kbn/es-query';
-import { Logger, SavedObjectsClientContract, PluginInitializerContext } from '@kbn/core/server';
+import {
+  Logger,
+  SavedObjectsClientContract,
+  PluginInitializerContext,
+  ISavedObjectsRepository,
+} from '@kbn/core/server';
 import { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import {
   GrantAPIKeyResult as SecurityPluginGrantAPIKeyResult,
@@ -23,19 +28,17 @@ import {
   IntervalSchedule,
   SanitizedRule,
   RuleSnoozeSchedule,
-  RawAlertsFilter,
+  RawRuleAlertsFilter,
 } from '../types';
 import { AlertingAuthorization } from '../authorization';
 import { AlertingRulesConfig } from '../config';
+import { GetAlertIndicesAlias } from '../lib';
+import { AlertsService } from '../alerts_service';
 
 export type {
   BulkEditOperation,
   BulkEditFields,
-  BulkEditOptions,
-  BulkEditOptionsFilter,
-  BulkEditOptionsIds,
-} from './methods/bulk_edit';
-export type { CreateOptions } from './methods/create';
+} from '../application/rule/methods/bulk_edit/types';
 export type { FindOptions, FindResult } from './methods/find';
 export type { UpdateOptions } from './methods/update';
 export type { GetAlertSummaryParams } from './methods/get_alert_summary';
@@ -59,11 +62,13 @@ export interface RulesClientContext {
   readonly authorization: AlertingAuthorization;
   readonly ruleTypeRegistry: RuleTypeRegistry;
   readonly minimumScheduleInterval: AlertingRulesConfig['minimumScheduleInterval'];
+  readonly maxScheduledPerMinute: AlertingRulesConfig['maxScheduledPerMinute'];
   readonly minimumScheduleIntervalInMs: number;
   readonly createAPIKey: (name: string) => Promise<CreateAPIKeyResult>;
   readonly getActionsClient: () => Promise<ActionsClient>;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
+  readonly internalSavedObjectsRepository: ISavedObjectsRepository;
   readonly encryptedSavedObjectsClient: EncryptedSavedObjectsClient;
   readonly kibanaVersion: PluginInitializerContext['env']['packageInfo']['version'];
   readonly auditLogger?: AuditLogger;
@@ -71,6 +76,8 @@ export interface RulesClientContext {
   readonly fieldsToExcludeFromPublicApi: Array<keyof SanitizedRule>;
   readonly isAuthenticationTypeAPIKey: () => boolean;
   readonly getAuthenticationAPIKey: (name: string) => CreateAPIKeyResult;
+  readonly getAlertIndicesAlias: GetAlertIndicesAlias;
+  readonly alertsService: AlertsService | null;
 }
 
 export type NormalizedAlertAction = Omit<RuleAction, 'actionTypeId'>;
@@ -80,7 +87,7 @@ export type NormalizedAlertActionWithGeneratedValues = Omit<
   'uuid' | 'alertsFilter'
 > & {
   uuid: string;
-  alertsFilter?: RawAlertsFilter;
+  alertsFilter?: RawRuleAlertsFilter;
 };
 
 export interface RegistryAlertTypeWithAuth extends RegistryRuleType {
@@ -118,6 +125,7 @@ export interface IndexType {
   [key: string]: unknown;
 }
 
+// TODO: remove once all mute endpoints have been migrated to RuleMuteAlertOptions
 export interface MuteOptions extends IndexType {
   alertId: string;
   alertInstanceId: string;

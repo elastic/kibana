@@ -6,15 +6,23 @@
  * Side Public License, v 1.
  */
 
+import Url from 'url';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import { cloneDeepWith } from 'lodash';
-import { Key, Origin, WebDriver } from 'selenium-webdriver';
+import { cloneDeepWith, isString } from 'lodash';
+import { Key, Origin, type WebDriver } from 'selenium-webdriver';
+import { Driver as ChromiumWebDriver } from 'selenium-webdriver/chrome';
 import { modifyUrl } from '@kbn/std';
 
 import sharp from 'sharp';
+import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
 import { WebElementWrapper } from '../lib/web_element_wrapper';
-import { FtrProviderContext, FtrService } from '../../ftr_provider_context';
+import { type FtrProviderContext, FtrService } from '../../ftr_provider_context';
 import { Browsers } from '../remote/browsers';
+import {
+  type NetworkOptions,
+  type NetworkProfile,
+  NETWORK_PROFILES,
+} from '../remote/network_profiles';
 
 export type Browser = BrowserService;
 
@@ -24,19 +32,20 @@ class BrowserService extends FtrService {
    */
   public readonly keys = Key;
   public readonly isFirefox: boolean;
-  public readonly isChromium: boolean;
 
   private readonly log = this.ctx.getService('log');
 
   constructor(
     ctx: FtrProviderContext,
     public readonly browserType: string,
-    private readonly driver: WebDriver
+    protected readonly driver: WebDriver | ChromiumWebDriver
   ) {
     super(ctx);
     this.isFirefox = this.browserType === Browsers.Firefox;
-    this.isChromium =
-      this.browserType === Browsers.Chrome || this.browserType === Browsers.ChromiumEdge;
+  }
+
+  public isChromium(): this is { driver: ChromiumWebDriver } {
+    return this.driver instanceof ChromiumWebDriver;
   }
 
   /**
@@ -67,6 +76,11 @@ class BrowserService extends FtrService {
    */
   public async getWindowSize(): Promise<{ height: number; width: number; x: number; y: number }> {
     return await this.driver.manage().window().getRect();
+  }
+
+  public async getWindowInnerSize(): Promise<{ height: number; width: number }> {
+    const JS_GET_INNER_WIDTH = 'return { width: window.innerWidth, height: window.innerHeight };';
+    return await this.driver.executeScript(JS_GET_INNER_WIDTH);
   }
 
   /**
@@ -155,17 +169,53 @@ class BrowserService extends FtrService {
   /**
    * Gets the URL that is loaded in the focused window/frame.
    * https://seleniumhq.github.io/selenium/docs/api/javascript/module/selenium-webdriver/lib/webdriver_exports_WebDriver.html#getCurrentUrl
-   *
+   * @param relativeUrl (optional) set to true to return the relative URL (without the hostname and protocol)
    * @return {Promise<string>}
    */
-  public async getCurrentUrl() {
+  public async getCurrentUrl(relativeUrl: boolean = false): Promise<string> {
     // strip _t=Date query param when url is read
     const current = await this.driver.getCurrentUrl();
     const currentWithoutTime = modifyUrl(current, (parsed) => {
       delete (parsed.query as any)._t;
       return void 0;
     });
-    return currentWithoutTime;
+
+    if (relativeUrl) {
+      const { path } = Url.parse(currentWithoutTime);
+      return path!; // this property includes query params and anchors
+    } else {
+      return currentWithoutTime;
+    }
+  }
+
+  /**
+   * Uses the 'retry' service and waits for the current browser URL to match the provided path.
+   * NB the provided path can contain query params as well as hash anchors.
+   * Using retry logic makes URL assertions less flaky
+   * @param expectedPath The relative path that we are expecting the browser to be on
+   * @returns a Promise that will reject if the browser URL does not match the expected one
+   */
+  public async waitForUrlToBe(expectedPath: string) {
+    const retry = await this.ctx.getService('retry');
+    const log = this.ctx.getService('log');
+
+    await retry.waitForWithTimeout(`URL to be ${expectedPath}`, 5000, async () => {
+      const currentPath = await this.getCurrentUrl(true);
+
+      if (currentPath !== expectedPath) {
+        log.debug(`Expected URL to be ${expectedPath}, got ${currentPath}`);
+      }
+      return currentPath === expectedPath;
+    });
+
+    // wait some time before checking the URL again
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
+    // ensure the URL stays the same and we did not go through any redirects
+    const currentPath = await this.getCurrentUrl(true);
+    if (currentPath !== expectedPath) {
+      throw new Error(`Expected URL to continue to be ${expectedPath}, got ${currentPath}`);
+    }
   }
 
   /**
@@ -632,8 +682,101 @@ class BrowserService extends FtrService {
     return Boolean(result?.state === 'granted');
   }
 
-  public getClipboardValue(): Promise<string> {
-    return this.driver.executeAsyncScript('navigator.clipboard.readText().then(arguments[0])');
+  public async getClipboardValue(): Promise<string> {
+    return await this.driver.executeAsyncScript(
+      'navigator.clipboard.readText().then(arguments[0])'
+    );
+  }
+
+  /**
+   * Checks if browser session is active and any browser window exists
+   * @returns {Promise<boolean>}
+   */
+  public async hasOpenWindow(): Promise<boolean> {
+    if (this.driver == null) {
+      return false;
+    } else {
+      try {
+        const windowHandles = await this.driver.getAllWindowHandles();
+        return windowHandles.length > 0;
+      } catch (err) {
+        if (err instanceof NoSuchSessionError) {
+          // https://developer.mozilla.org/en-US/docs/Web/WebDriver/Errors/InvalidSessionID
+          this.log.error(
+            `WebDriver session is no longer valid.\nProbably Chrome process crashed when it tried to use more memory than what was available.`
+          );
+          // TODO: Remove this after a while. We are enabling richer logs in order to try catch the real error cause.
+          this.log.error(
+            `Original Error Logging.\n Name: ${err.name};\n Message: ${err.message};\n Stack: ${
+              err.stack
+            }\n RemoteStack: ${(err as NoSuchSessionError).remoteStacktrace}`
+          );
+        }
+        return false;
+      }
+    }
+  }
+
+  /**
+   * Get the network simulation for chromium browsers if available.
+   * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#getNetworkConditions
+   *
+   * @return {Promise<NetworkOptions>}
+   */
+  public async getNetworkConditions() {
+    if (this.isChromium()) {
+      return this.driver.getNetworkConditions().catch(() => undefined); // Return undefined instead of throwing if no conditions are set.
+    } else {
+      const message =
+        'WebDriver does not support the .getNetworkConditions method.\nProbably the browser in used is not chromium based.';
+      this.log.error(message);
+      throw new Error(message);
+    }
+  }
+
+  /**
+   * Delete the network simulation for chromium browsers if available.
+   *
+   * @return {Promise<void>}
+   */
+  public async restoreNetworkConditions() {
+    this.log.debug('Restore network conditions simulation.');
+    return this.setNetworkConditions('NO_THROTTLING');
+  }
+
+  /**
+   * Set the network conditions for chromium browsers if available.
+   *
+   * __Sample Usage:__
+   *
+   * browser.setNetworkConditions('FAST_3G')
+   * browser.setNetworkConditions('SLOW_3G')
+   * browser.setNetworkConditions('OFFLINE')
+   * browser.setNetworkConditions({
+   *   offline: false,
+   *   latency: 5, // Additional latency (ms).
+   *   download_throughput: 500 * 1024, // Maximal aggregated download throughput.
+   *   upload_throughput: 500 * 1024, // Maximal aggregated upload throughput.
+   * });
+   *
+   * https://www.selenium.dev/selenium/docs/api/javascript/module/selenium-webdriver/chrome_exports_Driver.html#setNetworkConditions
+   *
+   * @return {Promise<void>}
+   */
+  public async setNetworkConditions(profileOrOptions: NetworkProfile | NetworkOptions) {
+    const networkOptions = isString(profileOrOptions)
+      ? NETWORK_PROFILES[profileOrOptions]
+      : profileOrOptions;
+
+    if (this.isChromium()) {
+      this.log.debug(`Set network conditions with profile "${profileOrOptions}".`);
+      return this.driver.setNetworkConditions(networkOptions);
+    } else {
+      const message =
+        'WebDriver does not support the .setNetworkCondition method.\nProbably the browser in used is not chromium based.';
+      this.log.error(message);
+      throw new Error(message);
+    }
   }
 }
 

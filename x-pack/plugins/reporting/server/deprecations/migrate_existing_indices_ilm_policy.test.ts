@@ -52,7 +52,7 @@ describe("Migrate existing indices' ILM policy deprecations", () => {
           "correctiveActions": Object {
             "api": Object {
               "method": "PUT",
-              "path": "/api/reporting/deprecations/migrate_ilm_policy",
+              "path": "/internal/reporting/deprecations/migrate_ilm_policy",
             },
             "manualSteps": Array [
               "Update all reporting indices to use the \\"kibana-reporting\\" policy using the index settings API.",

@@ -38,7 +38,7 @@ export function handleLocalStats<ClusterStats extends estypes.ClusterStatsRespon
     timestamp: new Date().toISOString(),
     cluster_uuid,
     cluster_name,
-    version: version.number,
+    version: version?.number || context.version,
     cluster_stats: clusterStats,
     collection: 'local',
     stack_stats: {

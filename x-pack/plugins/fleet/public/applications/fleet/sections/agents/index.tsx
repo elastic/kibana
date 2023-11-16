@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Router, Switch, useHistory } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
@@ -24,7 +23,6 @@ import { NoAccessPage } from './error_pages/no_access';
 
 export const AgentsApp: React.FunctionComponent = () => {
   useBreadcrumbs('agent_list');
-  const history = useHistory();
   const { agents } = useConfig();
   const hasFleetAllPrivileges = useAuthz().fleet.all;
   const fleetStatus = useFleetStatus();
@@ -87,21 +85,19 @@ export const AgentsApp: React.FunctionComponent = () => {
   ) : undefined;
 
   return (
-    <Router history={history}>
-      <Switch>
-        <Route path={FLEET_ROUTING_PATHS.agent_details}>
-          <AgentDetailsPage />
-        </Route>
-        <Route path={FLEET_ROUTING_PATHS.agents}>
-          <DefaultLayout section="agents" rightColumn={rightColumn}>
-            {displayInstructions ? (
-              <FleetServerRequirementPage showEnrollmentRecommendation={false} />
-            ) : (
-              <AgentListPage />
-            )}
-          </DefaultLayout>
-        </Route>
-      </Switch>
-    </Router>
+    <Routes>
+      <Route path={FLEET_ROUTING_PATHS.agent_details}>
+        <AgentDetailsPage />
+      </Route>
+      <Route path={FLEET_ROUTING_PATHS.agents}>
+        <DefaultLayout section="agents" rightColumn={rightColumn}>
+          {displayInstructions ? (
+            <FleetServerRequirementPage showEnrollmentRecommendation={false} />
+          ) : (
+            <AgentListPage />
+          )}
+        </DefaultLayout>
+      </Route>
+    </Routes>
   );
 };

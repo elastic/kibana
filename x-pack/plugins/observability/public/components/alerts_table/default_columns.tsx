@@ -37,6 +37,7 @@ export const columns: Array<
     }),
     id: TIMESTAMP,
     initialWidth: 230,
+    schema: 'datetime',
   },
   {
     columnHeaderType: 'not-filtered',

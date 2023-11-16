@@ -101,7 +101,7 @@ const serviceMapRoute = createApmServerRoute({
       serviceName,
       environment,
       searchAggregatedTransactions,
-      logger,
+      logger: logger.get('serviceMap'),
       start,
       end,
       maxNumberOfServices,

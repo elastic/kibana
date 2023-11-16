@@ -39,6 +39,7 @@ import {
   SecurityCellActionsTrigger,
 } from '../../../../common/components/cell_actions';
 import { useGlobalFilterQuery } from '../../../../common/hooks/use_global_filter_query';
+import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 
 interface HostAlertsTableProps {
   signalIndexName: string | null;
@@ -152,14 +153,13 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     'data-test-subj': 'hostSeverityAlertsTable-totalAlerts',
     render: (totalAlerts: number, { hostName }) => (
       <SecurityCellActions
-        field={{
-          name: 'host.name',
+        data={{
           value: hostName,
-          type: 'keyword',
-          aggregatable: true,
+          field: 'host.name',
         }}
         mode={CellActionsMode.HOVER_RIGHT}
         triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+        sourcererScopeId={SourcererScopeName.detections}
         metadata={{
           andFilters: [{ field: 'kibana.alert.workflow_status', value: 'open' }],
         }}
@@ -179,30 +179,32 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_CRITICAL_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-critical" color={SEVERITY_COLOR.critical}>
-        <SecurityCellActions
-          field={{
-            name: 'host.name',
-            value: hostName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            andFilters: [
-              { field: 'kibana.alert.severity', value: 'critical' },
-              { field: 'kibana.alert.workflow_status', value: 'open' },
-            ],
-          }}
-        >
-          <EuiLink
-            data-test-subj="hostSeverityAlertsTable-criticalLink"
-            disabled={count === 0}
-            onClick={() => handleClick({ hostName, severity: 'critical' })}
+        {count > 0 ? (
+          <SecurityCellActions
+            data={{
+              value: hostName,
+              field: 'host.name',
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'critical' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
           >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+            <EuiLink
+              data-test-subj="hostSeverityAlertsTable-criticalLink"
+              onClick={() => handleClick({ hostName, severity: 'critical' })}
+            >
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
+          <FormattedCount count={count} />
+        )}
       </EuiHealth>
     ),
   },
@@ -211,29 +213,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_HIGH_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-high" color={SEVERITY_COLOR.high}>
-        <SecurityCellActions
-          field={{
-            name: 'host.name',
-            value: hostName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            andFilters: [
-              { field: 'kibana.alert.severity', value: 'high' },
-              { field: 'kibana.alert.workflow_status', value: 'open' },
-            ],
-          }}
-        >
-          <EuiLink
-            disabled={count === 0}
-            onClick={() => handleClick({ hostName, severity: 'high' })}
+        {count > 0 ? (
+          <SecurityCellActions
+            data={{
+              value: hostName,
+              field: 'host.name',
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'high' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
           >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+            <EuiLink onClick={() => handleClick({ hostName, severity: 'high' })}>
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
+          <FormattedCount count={count} />
+        )}
       </EuiHealth>
     ),
   },
@@ -242,29 +244,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_MEDIUM_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-medium" color={SEVERITY_COLOR.medium}>
-        <SecurityCellActions
-          field={{
-            name: 'host.name',
-            value: hostName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            andFilters: [
-              { field: 'kibana.alert.severity', value: 'medium' },
-              { field: 'kibana.alert.workflow_status', value: 'open' },
-            ],
-          }}
-        >
-          <EuiLink
-            disabled={count === 0}
-            onClick={() => handleClick({ hostName, severity: 'medium' })}
+        {count > 0 ? (
+          <SecurityCellActions
+            data={{
+              value: hostName,
+              field: 'host.name',
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'medium' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
           >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+            <EuiLink onClick={() => handleClick({ hostName, severity: 'medium' })}>
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
+          <FormattedCount count={count} />
+        )}
       </EuiHealth>
     ),
   },
@@ -273,29 +275,29 @@ const getTableColumns: GetTableColumns = (handleClick) => [
     name: i18n.STATUS_LOW_LABEL,
     render: (count: number, { hostName }) => (
       <EuiHealth data-test-subj="hostSeverityAlertsTable-low" color={SEVERITY_COLOR.low}>
-        <SecurityCellActions
-          field={{
-            name: 'host.name',
-            value: hostName,
-            type: 'keyword',
-            aggregatable: true,
-          }}
-          mode={CellActionsMode.HOVER_RIGHT}
-          triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
-          metadata={{
-            andFilters: [
-              { field: 'kibana.alert.severity', value: 'low' },
-              { field: 'kibana.alert.workflow_status', value: 'open' },
-            ],
-          }}
-        >
-          <EuiLink
-            disabled={count === 0}
-            onClick={() => handleClick({ hostName, severity: 'low' })}
+        {count > 0 ? (
+          <SecurityCellActions
+            data={{
+              value: hostName,
+              field: 'host.name',
+            }}
+            mode={CellActionsMode.HOVER_RIGHT}
+            triggerId={SecurityCellActionsTrigger.ALERTS_COUNT}
+            sourcererScopeId={SourcererScopeName.detections}
+            metadata={{
+              andFilters: [
+                { field: 'kibana.alert.severity', value: 'low' },
+                { field: 'kibana.alert.workflow_status', value: 'open' },
+              ],
+            }}
           >
-            <FormattedCount count={count} />
-          </EuiLink>
-        </SecurityCellActions>
+            <EuiLink onClick={() => handleClick({ hostName, severity: 'low' })}>
+              <FormattedCount count={count} />
+            </EuiLink>
+          </SecurityCellActions>
+        ) : (
+          <FormattedCount count={count} />
+        )}
       </EuiHealth>
     ),
   },

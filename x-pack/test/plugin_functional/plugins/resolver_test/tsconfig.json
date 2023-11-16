@@ -16,5 +16,6 @@
     "@kbn/security-solution-plugin",
     "@kbn/i18n",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
   ]
 }

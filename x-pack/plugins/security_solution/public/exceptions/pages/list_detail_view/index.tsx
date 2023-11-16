@@ -12,7 +12,7 @@ import {
   ExceptionListHeader,
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
-import { EuiLoadingContent } from '@elastic/eui';
+import { EuiSkeletonText } from '@elastic/eui';
 import { useParams } from 'react-router-dom';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { SecurityPageName } from '../../../../common/constants';
@@ -22,7 +22,7 @@ import type { Rule } from '../../../detection_engine/rule_management/logic/types
 import { MissingPrivilegesCallOut } from '../../../detections/components/callouts/missing_privileges_callout';
 import { NotFoundPage } from '../../../app/404';
 import { AutoDownload } from '../../../common/components/auto_download/auto_download';
-import { ListWithSearch, ManageRules, ListDetailsLinkAnchor } from '../../components';
+import { ListWithSearch, ManageRules, LinkToRuleDetails } from '../../components';
 import { useListDetailsView } from '../../hooks';
 import * as i18n from '../../translations';
 import type { CheckExceptionTtlActionTypes } from '../../components/expired_exceptions_list_items_modal';
@@ -95,7 +95,7 @@ export const ListsDetailViewComponent: FC = () => {
     if (viewerStatus === ViewerStatus.ERROR)
       return <EmptyViewerState isReadOnly={isReadOnly} viewerStatus={viewerStatus} />;
 
-    if (isLoading) return <EuiLoadingContent lines={4} data-test-subj="loading" />;
+    if (isLoading) return <EuiSkeletonText lines={4} data-test-subj="loading" />;
 
     if (invalidListId || !listName || !list) return <NotFoundPage />;
     return (
@@ -109,7 +109,7 @@ export const ListsDetailViewComponent: FC = () => {
           isReadonly={isReadOnly}
           canUserEditList={canUserEditList}
           backOptions={headerBackOptions}
-          securityLinkAnchorComponent={ListDetailsLinkAnchor}
+          securityLinkAnchorComponent={LinkToRuleDetails}
           onEditListDetails={onEditListDetails}
           onExportList={handleExportList}
           onDeleteList={handleDelete}

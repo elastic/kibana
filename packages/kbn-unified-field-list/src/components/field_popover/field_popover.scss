@@ -1,0 +1,7 @@
+/* 1 - `important` is to ensure that even if styles ordering is different (like for some reason on Developer Examples page),
+  this one will be used instead of eui defaults */
+
+.unifiedFieldList__fieldPopover__fieldPopoverPanel {
+  min-width: $euiSizeXXL * 6.5 !important; /* 1 */
+  max-width: $euiSizeXXL * 10 !important;
+}

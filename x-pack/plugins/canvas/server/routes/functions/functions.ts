@@ -17,19 +17,18 @@ interface FunctionCall {
 
 export function initializeGetFunctionsRoute(deps: RouteInitializerDeps) {
   const { router, expressions } = deps;
-  router.get(
-    {
+  router.versioned
+    .get({
       path: API_ROUTE_FUNCTIONS,
-      validate: false,
-    },
-    async (context, request, response) => {
+      access: 'internal',
+    })
+    .addVersion({ version: '1', validate: false }, async (context, request, response) => {
       const functions = expressions.getFunctions('canvas');
       const body = JSON.stringify(functions);
       return response.ok({
         body,
       });
-    }
-  );
+    });
 }
 
 export function initializeBatchFunctionsRoute(deps: RouteInitializerDeps) {

@@ -9,7 +9,7 @@ import { rulesClientMock } from '@kbn/alerting-plugin/server/mocks';
 import {
   getUpdateMachineLearningSchemaMock,
   getUpdateRulesSchemaMock,
-} from '../../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { getRuleMock } from '../../../routes/__mocks__/request_responses';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 

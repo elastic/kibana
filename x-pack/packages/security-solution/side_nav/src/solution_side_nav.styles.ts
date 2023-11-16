@@ -9,20 +9,18 @@ import { transparentize, type EuiThemeComputed } from '@elastic/eui';
 import { css } from '@emotion/css';
 
 export const SolutionSideNavItemStyles = (euiTheme: EuiThemeComputed<{}>) => css`
-  font-weight: ${euiTheme.font.weight.regular};
-  &.solutionSideNavItem--isPrimary * {
-    font-weight: ${euiTheme.font.weight.bold};
+  * {
+    // EuiListGroupItem changes the links font-weight, we need to override it
+    font-weight: ${euiTheme.font.weight.regular};
   }
-  &:focus,
-  &:focus-within,
-  &:hover,
-  &.solutionSideNavItem--isActive {
-    background-color: ${transparentize(euiTheme.colors.primary, 0.1)};
+  &.solutionSideNavItem--isSelected {
+    background-color: ${transparentize(euiTheme.colors.lightShade, 0.5)};
+    & * {
+      font-weight: ${euiTheme.font.weight.medium};
+    }
   }
-  .solutionSideNavItemButton:focus,
-  .solutionSideNavItemButton:focus-within,
-  .solutionSideNavItemButton:hover {
-    transform: none; /* prevent translationY transform that causes misalignment within the list item */
-    background-color: ${transparentize(euiTheme.colors.primary, 0.2)};
+  // Needed to place the icon on the right side
+  span.euiListGroupItem__label {
+    width: 100%;
   }
 `;

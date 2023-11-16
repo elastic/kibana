@@ -23,6 +23,7 @@ export const kpiTotalUsersMetricLensAttributes: LensAttributes = {
                 operationType: 'unique_count',
                 scale: 'ratio',
                 sourceField: 'user.name',
+                customLabel: true,
               },
             },
             incompleteColumns: {},

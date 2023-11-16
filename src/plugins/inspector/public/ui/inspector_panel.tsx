@@ -18,9 +18,15 @@ import {
   EuiFlyoutBody,
   EuiLoadingSpinner,
 } from '@elastic/eui';
-import { ApplicationStart, HttpStart, IUiSettingsClient } from '@kbn/core/public';
+import {
+  ApplicationStart,
+  HttpStart,
+  IUiSettingsClient,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
+import type { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { InspectorViewDescription } from '../types';
 import { Adapters } from '../../common';
 import { InspectorViewChooser } from './inspector_view_chooser';
@@ -46,6 +52,8 @@ interface InspectorPanelProps {
     http: HttpStart;
     uiSettings: IUiSettingsClient;
     share: SharePluginStart;
+    settings: SettingsStart;
+    theme: ThemeServiceStart;
   };
 }
 

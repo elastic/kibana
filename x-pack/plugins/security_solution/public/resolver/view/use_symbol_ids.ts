@@ -7,18 +7,13 @@
 
 import { useMemo } from 'react';
 
-import { useSelector } from 'react-redux';
-
-import * as selectors from '../store/selectors';
-
 /**
  * Access the HTML IDs for this Resolver's reusable SVG symbols.
  * In the future these IDs may come from an outside provider (and may be shared by multiple Resolver instances.)
  */
-export function useSymbolIDs() {
-  const resolverComponentInstanceID = useSelector(selectors.resolverComponentInstanceID);
+export function useSymbolIDs({ id }: { id: string }) {
   return useMemo(() => {
-    const prefix = `${resolverComponentInstanceID}-symbols`;
+    const prefix = `${id}-symbols`;
     return {
       processNodeLabel: `${prefix}-nodeSymbol`,
       runningProcessCube: `${prefix}-runningCube`,
@@ -29,5 +24,5 @@ export function useSymbolIDs() {
       loadingCube: `${prefix}-loadingCube`,
       errorCube: `${prefix}-errorCube`,
     };
-  }, [resolverComponentInstanceID]);
+  }, [id]);
 }

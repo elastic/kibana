@@ -10,6 +10,7 @@ import { getRouteRequiredAuthz } from '../../services/security';
 import type { FleetAuthzRouter } from '../../services/security';
 
 import type { FleetAuthz } from '../../../common';
+import { API_VERSIONS } from '../../../common/constants';
 import { PACKAGE_POLICY_API_ROUTES } from '../../constants';
 import {
   GetPackagePoliciesRequestSchema,
@@ -39,125 +40,166 @@ import {
 
 export const registerRoutes = (router: FleetAuthzRouter) => {
   // List
-  router.get(
-    {
+  router.versioned
+    .get({
       path: PACKAGE_POLICY_API_ROUTES.LIST_PATTERN,
-      validate: GetPackagePoliciesRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.LIST_PATTERN)
         ).granted,
-    },
-    getPackagePoliciesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetPackagePoliciesRequestSchema },
+      },
+      getPackagePoliciesHandler
+    );
 
   // Get bulk
-  router.post(
-    {
+  router.versioned
+    .post({
       path: PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN,
-      validate: BulkGetPackagePoliciesRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('post', PACKAGE_POLICY_API_ROUTES.BULK_GET_PATTERN)
         ).granted,
-    },
-    bulkGetPackagePoliciesHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: BulkGetPackagePoliciesRequestSchema },
+      },
+      bulkGetPackagePoliciesHandler
+    );
 
   // Get one
-  router.get(
-    {
+  router.versioned
+    .get({
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
-      validate: GetOnePackagePolicyRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('get', PACKAGE_POLICY_API_ROUTES.INFO_PATTERN)
         ).granted,
-    },
-    getOnePackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: GetOnePackagePolicyRequestSchema },
+      },
+      getOnePackagePolicyHandler
+    );
 
-  router.get(
-    {
+  router.versioned
+    .get({
       path: PACKAGE_POLICY_API_ROUTES.ORPHANED_INTEGRATION_POLICIES,
-      validate: {},
       fleetAuthz: {
         integrations: { readIntegrationPolicies: true },
       },
-    },
-    getOrphanedPackagePolicies
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: {},
+      },
+      getOrphanedPackagePolicies
+    );
 
   // Create
-  router.post(
-    {
+  router.versioned
+    .post({
       path: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
-      validate: CreatePackagePolicyRequestSchema,
-    },
-    createPackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: CreatePackagePolicyRequestSchema },
+      },
+      createPackagePolicyHandler
+    );
 
   // Update
-  router.put(
-    {
+  router.versioned
+    .put({
       path: PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN,
-      validate: UpdatePackagePolicyRequestSchema,
       fleetAuthz: (fleetAuthz: FleetAuthz): boolean =>
         calculateRouteAuthz(
           fleetAuthz,
           getRouteRequiredAuthz('put', PACKAGE_POLICY_API_ROUTES.UPDATE_PATTERN)
         ).granted,
-    },
-    updatePackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: UpdatePackagePolicyRequestSchema },
+      },
+
+      updatePackagePolicyHandler
+    );
 
   // Delete (bulk)
-  router.post(
-    {
+  router.versioned
+    .post({
       path: PACKAGE_POLICY_API_ROUTES.DELETE_PATTERN,
-      validate: DeletePackagePoliciesRequestSchema,
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-    },
-    deletePackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeletePackagePoliciesRequestSchema },
+      },
+      deletePackagePolicyHandler
+    );
 
-  router.delete(
-    {
+  router.versioned
+    .delete({
       path: PACKAGE_POLICY_API_ROUTES.INFO_PATTERN,
-      validate: DeleteOnePackagePolicyRequestSchema,
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-    },
-    deleteOnePackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DeleteOnePackagePolicyRequestSchema },
+      },
+      deleteOnePackagePolicyHandler
+    );
 
   // Upgrade
-  router.post(
-    {
+  router.versioned
+    .post({
       path: PACKAGE_POLICY_API_ROUTES.UPGRADE_PATTERN,
-      validate: UpgradePackagePoliciesRequestSchema,
       fleetAuthz: {
         integrations: { writeIntegrationPolicies: true },
       },
-    },
-    upgradePackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: UpgradePackagePoliciesRequestSchema },
+      },
+      upgradePackagePolicyHandler
+    );
 
   // Upgrade - DryRun
-  router.post(
-    {
+  router.versioned
+    .post({
       path: PACKAGE_POLICY_API_ROUTES.DRYRUN_PATTERN,
-      validate: DryRunPackagePoliciesRequestSchema,
       fleetAuthz: {
         integrations: { readIntegrationPolicies: true },
       },
-    },
-    dryRunUpgradePackagePolicyHandler
-  );
+    })
+    .addVersion(
+      {
+        version: API_VERSIONS.public.v1,
+        validate: { request: DryRunPackagePoliciesRequestSchema },
+      },
+      dryRunUpgradePackagePolicyHandler
+    );
 };

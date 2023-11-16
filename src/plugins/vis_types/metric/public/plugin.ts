@@ -10,7 +10,7 @@ import { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/cor
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
 import { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createMetricVisTypeDefinition } from './metric_vis_type';
-import { ConfigSchema } from '../config';
+import { MetricPublicConfig } from '../config';
 import { setDataViewsStart } from './services';
 
 /** @internal */
@@ -27,14 +27,19 @@ export interface MetricVisPluginStartDependencies {
 export class MetricVisPlugin
   implements Plugin<void, void, MetricVisPluginSetupDependencies, MetricVisPluginStartDependencies>
 {
-  initializerContext: PluginInitializerContext<ConfigSchema>;
+  initializerContext: PluginInitializerContext<MetricPublicConfig>;
 
-  constructor(initializerContext: PluginInitializerContext<ConfigSchema>) {
+  constructor(initializerContext: PluginInitializerContext<MetricPublicConfig>) {
     this.initializerContext = initializerContext;
   }
 
   public setup(core: CoreSetup, { visualizations }: MetricVisPluginSetupDependencies) {
-    visualizations.createBaseVisualization(createMetricVisTypeDefinition());
+    const { readOnly } = this.initializerContext.config.get<MetricPublicConfig>();
+    visualizations.createBaseVisualization({
+      ...createMetricVisTypeDefinition(),
+      disableCreate: Boolean(readOnly),
+      disableEdit: Boolean(readOnly),
+    });
   }
 
   public start(core: CoreStart, { dataViews }: MetricVisPluginStartDependencies) {

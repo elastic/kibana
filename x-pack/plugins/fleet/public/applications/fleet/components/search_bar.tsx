@@ -35,6 +35,41 @@ interface Props {
   dataTestSubj?: string;
 }
 
+/** Exported for testing only **/
+export const filterAndConvertFields = (
+  fields: FieldSpec[],
+  indexPattern?: string,
+  fieldPrefix?: string
+) => {
+  if (!fields) return {};
+  let filteredFields: FieldSpec[] = [];
+
+  if (fieldPrefix) {
+    // exclude fields from different indices
+    if (indexPattern === INDEX_NAME) {
+      filteredFields = fields.filter((field) => field.name.startsWith(fieldPrefix));
+    } else {
+      // filter out fields that have names to be hidden
+      filteredFields = fields.filter((field) => {
+        for (const hiddenField of HIDDEN_FIELDS) {
+          if (field.name.includes(hiddenField)) {
+            return false;
+          }
+        }
+        return true;
+      });
+    }
+  } else {
+    filteredFields = fields;
+  }
+
+  const fieldsMap = filteredFields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
+    acc[curr.name] = curr;
+    return acc;
+  }, {});
+  return fieldsMap;
+};
+
 export const SearchBar: React.FunctionComponent<Props> = ({
   value,
   fieldPrefix,
@@ -73,24 +108,17 @@ export const SearchBar: React.FunctionComponent<Props> = ({
   useEffect(() => {
     const fetchFields = async () => {
       try {
-        const _fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
+        const fields: FieldSpec[] = await data.dataViews.getFieldsForWildcard({
           pattern: indexPattern,
         });
-        const fields = (_fields || []).filter((field) => {
-          if (!fieldPrefix || field.name.startsWith(fieldPrefix)) {
-            for (const hiddenField of HIDDEN_FIELDS) {
-              if (field.name.startsWith(hiddenField)) {
-                return false;
-              }
-            }
-            return true;
-          }
-        });
-        const fieldsMap = fields.reduce((acc: Record<string, FieldSpec>, curr: FieldSpec) => {
-          acc[curr.name] = curr;
-          return acc;
-        }, {});
-        const newDataView = await data.dataViews.create({ title: indexPattern, fields: fieldsMap });
+        const fieldsMap = filterAndConvertFields(fields, indexPattern, fieldPrefix);
+        // Refetch only if fieldsMap is empty
+        const skipFetchField = !!fieldsMap;
+
+        const newDataView = await data.dataViews.create(
+          { title: indexPattern, fields: fieldsMap },
+          skipFetchField
+        );
         setDataView(newDataView);
       } catch (err) {
         setDataView(undefined);

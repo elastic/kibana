@@ -8,7 +8,6 @@ import React, { useMemo, useReducer } from 'react';
 
 import { render, screen, within, fireEvent, waitFor } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-
 import { BulkActionsContext } from './context';
 import { AlertsTable } from '../alerts_table';
 import {
@@ -24,6 +23,7 @@ import {
 import { bulkActionsReducer } from './reducer';
 import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
+import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
 
 jest.mock('@kbn/data-plugin/public');
@@ -49,6 +49,12 @@ const mockCaseService = createCasesServiceMock();
 const mockKibana = jest.fn().mockReturnValue({
   services: {
     cases: mockCaseService,
+    notifications: {
+      toasts: {
+        addDanger: jest.fn(),
+        addSuccess: jest.fn(),
+      },
+    },
   },
 });
 
@@ -151,16 +157,18 @@ describe('AlertsTable.BulkActions', () => {
 
   const casesMap = getCasesMockMap();
 
+  const maintenanceWindowsMap = getMaintenanceWindowMockMap();
+
   const tableProps: AlertsTableProps = {
     alertsTableConfiguration,
     cases: { data: casesMap, isLoading: false },
+    maintenanceWindows: { data: maintenanceWindowsMap, isLoading: false },
     columns,
     deletedEventIds: [],
     disabledCellActions: [],
     pageSize: 2,
     pageSizeOptions: [2, 4],
     leadingControlColumns: [],
-    showExpandToDetails: true,
     trailingControlColumns: [],
     useFetchAlertsData: () => alertsData,
     visibleColumns: columns.map((c) => c.id),
@@ -168,7 +176,6 @@ describe('AlertsTable.BulkActions', () => {
     updatedAt: Date.now(),
     onToggleColumn: () => {},
     onResetColumns: () => {},
-    onColumnsChange: () => {},
     onChangeVisibleColumns: () => {},
     browserFields: {},
     query: {},
@@ -179,43 +186,51 @@ describe('AlertsTable.BulkActions', () => {
     alertsTableConfiguration: {
       ...alertsTableConfiguration,
 
-      useBulkActions: () =>
-        [
-          {
-            label: 'Fake Bulk Action',
-            key: 'fakeBulkAction',
-            'data-test-subj': 'fake-bulk-action',
-            disableOnQuery: false,
-            onClick: () => {},
-          },
-          {
-            label: 'Fake Bulk Action with clear selection',
-            key: 'fakeBulkActionClear',
-            'data-test-subj': 'fake-bulk-action-clear',
-            disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-              clearSelection();
+      useBulkActions: () => [
+        {
+          id: 0,
+          items: [
+            {
+              label: 'Fake Bulk Action',
+              key: 'fakeBulkAction',
+              'data-test-subj': 'fake-bulk-action',
+              disableOnQuery: false,
+              onClick: () => {},
             },
-          },
-          {
-            label: 'Fake Bulk Action with loading and clear selection',
-            key: 'fakeBulkActionLoadingClear',
-            'data-test-subj': 'fake-bulk-action-loading',
-            disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-              setIsBulkActionLoading(true);
+            {
+              label: 'Fake Bulk Action with clear selection',
+              key: 'fakeBulkActionClear',
+              'data-test-subj': 'fake-bulk-action-clear',
+              disableOnQuery: false,
+              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+                clearSelection();
+              },
             },
-          },
-          {
-            label: 'Fake Bulk Action with refresh Action',
-            key: 'fakeBulkActionRefresh',
-            'data-test-subj': 'fake-bulk-action-refresh',
-            disableOnQuery: false,
-            onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
-              refresh();
+            {
+              label: 'Fake Bulk Action with loading and clear selection',
+              key: 'fakeBulkActionLoadingClear',
+              'data-test-subj': 'fake-bulk-action-loading',
+              disableOnQuery: false,
+              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+                setIsBulkActionLoading(true);
+              },
             },
-          },
-        ] as BulkActionsConfig[],
+            {
+              label: 'Fake Bulk Action with refresh Action',
+              key: 'fakeBulkActionRefresh',
+              'data-test-subj': 'fake-bulk-action-refresh',
+              disableOnQuery: false,
+              onClick: (ids, isSelectAll, setIsBulkActionLoading, clearSelection, refresh) => {
+                refresh();
+              },
+            },
+          ] as BulkActionsConfig[],
+        },
+        {
+          id: 1,
+          renderContent: () => <></>,
+        },
+      ],
     },
   };
 
@@ -334,11 +349,16 @@ describe('AlertsTable.BulkActions', () => {
           ...alertsTableConfiguration,
           useBulkActions: () => [
             {
-              label: 'Fake Bulk Action',
-              key: 'fakeBulkAction',
-              'data-test-subj': 'fake-bulk-action',
-              disableOnQuery: false,
-              onClick: mockedFn,
+              id: 0,
+              items: [
+                {
+                  label: 'Fake Bulk Action',
+                  key: 'fakeBulkAction',
+                  'data-test-subj': 'fake-bulk-action',
+                  disableOnQuery: false,
+                  onClick: mockedFn,
+                },
+              ],
             },
           ],
         },
@@ -367,6 +387,10 @@ describe('AlertsTable.BulkActions', () => {
             {
               field: 'kibana.alert.case_ids',
               value: ['test-case'],
+            },
+            {
+              field: 'kibana.alert.workflow_tags',
+              value: [],
             },
           ],
           ecs: {
@@ -573,11 +597,16 @@ describe('AlertsTable.BulkActions', () => {
               ...alertsTableConfiguration,
               useBulkActions: () => [
                 {
-                  label: 'Fake Bulk Action',
-                  key: 'fakeBulkAction',
-                  'data-test-subj': 'fake-bulk-action',
-                  disableOnQuery: false,
-                  onClick: mockedFn,
+                  id: 0,
+                  items: [
+                    {
+                      label: 'Fake Bulk Action',
+                      key: 'fakeBulkAction',
+                      'data-test-subj': 'fake-bulk-action',
+                      disableOnQuery: false,
+                      onClick: mockedFn,
+                    },
+                  ],
                 },
               ],
             },
@@ -606,6 +635,10 @@ describe('AlertsTable.BulkActions', () => {
                   field: 'kibana.alert.case_ids',
                   value: [],
                 },
+                {
+                  field: 'kibana.alert.workflow_tags',
+                  value: [],
+                },
               ],
               ecs: {
                 _id: 'alert1',
@@ -629,11 +662,16 @@ describe('AlertsTable.BulkActions', () => {
                 ...alertsTableConfiguration,
                 useBulkActions: () => [
                   {
-                    label: 'Fake Bulk Action',
-                    key: 'fakeBulkAction',
-                    'data-test-subj': 'fake-bulk-action',
-                    disableOnQuery: false,
-                    onClick: mockedFn,
+                    id: 0,
+                    items: [
+                      {
+                        label: 'Fake Bulk Action',
+                        key: 'fakeBulkAction',
+                        'data-test-subj': 'fake-bulk-action',
+                        disableOnQuery: false,
+                        onClick: mockedFn,
+                      },
+                    ],
                   },
                 ],
               },
@@ -667,8 +705,8 @@ describe('AlertsTable.BulkActions', () => {
             expect(within(selectedOptions[0]).getByRole('checkbox')).toBeDefined();
 
             // second row, first column
-            expect(within(selectedOptions[4]).getByLabelText('Loading')).toBeDefined();
-            expect(within(selectedOptions[4]).queryByRole('checkbox')).not.toBeInTheDocument();
+            expect(within(selectedOptions[3]).getByLabelText('Loading')).toBeDefined();
+            expect(within(selectedOptions[3]).queryByRole('checkbox')).not.toBeInTheDocument();
           });
 
           it('should hide the loading state on each selected row', async () => {
@@ -785,11 +823,16 @@ describe('AlertsTable.BulkActions', () => {
                 ...alertsTableConfiguration,
                 useBulkActions: () => [
                   {
-                    label: 'Fake Bulk Action',
-                    key: 'fakeBulkAction',
-                    'data-test-subj': 'fake-bulk-action',
-                    disableOnQuery: false,
-                    onClick: mockedFn,
+                    id: 0,
+                    items: [
+                      {
+                        label: 'Fake Bulk Action',
+                        key: 'fakeBulkAction',
+                        'data-test-subj': 'fake-bulk-action',
+                        disableOnQuery: false,
+                        onClick: mockedFn,
+                      },
+                    ],
                   },
                 ],
               },
@@ -820,6 +863,10 @@ describe('AlertsTable.BulkActions', () => {
                     field: 'kibana.alert.case_ids',
                     value: [],
                   },
+                  {
+                    field: 'kibana.alert.workflow_tags',
+                    value: [],
+                  },
                 ],
                 ecs: {
                   _id: 'alert0',
@@ -840,6 +887,10 @@ describe('AlertsTable.BulkActions', () => {
                   },
                   {
                     field: 'kibana.alert.case_ids',
+                    value: [],
+                  },
+                  {
+                    field: 'kibana.alert.workflow_tags',
                     value: [],
                   },
                 ],

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { RuleResponse } from '../../../../../common/detection_engine/rule_schema';
-import { getRulesSchemaMock } from '../../../../../common/detection_engine/rule_schema/mocks';
+import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
+import { getRulesSchemaMock } from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 import { savedRuleMock, rulesMock } from '../../logic/mock';
 
 import type {
@@ -15,7 +15,6 @@ import type {
   UpdateRulesProps,
   PrePackagedRulesStatusResponse,
   BasicFetchProps,
-  Rule,
   FetchRuleProps,
   FetchRulesResponse,
   FetchRulesProps,
@@ -51,7 +50,7 @@ export const createPrepackagedRules = async ({ signal }: BasicFetchProps): Promi
   Promise.resolve(true);
 
 export const fetchRuleById = jest.fn(
-  async ({ id, signal }: FetchRuleProps): Promise<Rule> => savedRuleMock
+  async ({ id, signal }: FetchRuleProps): Promise<RuleResponse> => savedRuleMock
 );
 
 export const fetchRules = async (_: FetchRulesProps): Promise<FetchRulesResponse> =>

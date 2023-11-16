@@ -15,12 +15,13 @@ import type { SavedObjectsFindOptions } from '@kbn/core/server';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common/model';
 import { UNAUTHENTICATED_USER } from '../../../../../common/constants';
 import type {
-  PinnedEventSavedObject,
-  SavedPinnedEvent,
-  PinnedEvent as PinnedEventResponse,
-  PinnedEventWithoutExternalRefs,
-} from '../../../../../common/types/timeline/pinned_event';
-import { PinnedEventSavedObjectRuntimeType } from '../../../../../common/types/timeline/pinned_event';
+  BarePinnedEvent,
+  PinnedEvent,
+  PinnedEventResponse,
+  BarePinnedEventWithoutExternalRefs,
+} from '../../../../../common/api/timeline';
+import { SavedObjectPinnedEventRuntimeType } from '../../../../../common/types/timeline/pinned_event/saved_object';
+import type { SavedObjectPinnedEventWithoutExternalRefs } from '../../../../../common/types/timeline/pinned_event/saved_object';
 import type { FrameworkRequest } from '../../../framework';
 
 import { createTimeline } from '../timelines';
@@ -64,7 +65,7 @@ export const PINNED_EVENTS_PER_PAGE = 10000; // overrides the saved object clien
 export const getAllPinnedEventsByTimelineId = async (
   request: FrameworkRequest,
   timelineId: string
-): Promise<PinnedEventSavedObject[]> => {
+): Promise<PinnedEvent[]> => {
   const options: SavedObjectsFindOptions = {
     type: pinnedEventSavedObjectType,
     hasReference: { type: timelineSavedObjectType, id: timelineId },
@@ -99,7 +100,7 @@ export const persistPinnedEventOnTimeline = async (
 
     // we already had this event pinned so let's just return the one we already had
     if (pinnedEvents.length > 0) {
-      return pinnedEvents[0];
+      return { ...pinnedEvents[0], code: 200 };
     }
 
     return await createPinnedEvent({
@@ -124,6 +125,8 @@ export const persistPinnedEventOnTimeline = async (
             pinnedEventId: eventId,
             timelineId: '',
             timelineVersion: '',
+            version: '',
+            eventId: '',
           }
         : null;
     }
@@ -161,7 +164,7 @@ const getPinnedEventsInTimelineWithEventId = async (
   request: FrameworkRequest,
   timelineId: string,
   eventId: string
-): Promise<PinnedEventSavedObject[]> => {
+): Promise<PinnedEvent[]> => {
   const allPinnedEventId = await getAllPinnedEventsByTimelineId(request, timelineId);
   const pinnedEvents = allPinnedEventId.filter((pinnedEvent) => pinnedEvent.eventId === eventId);
 
@@ -178,10 +181,10 @@ const createPinnedEvent = async ({
   eventId: string;
   timelineId: string;
   timelineVersion?: string;
-}) => {
+}): Promise<PinnedEventResponse> => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
 
-  const savedPinnedEvent: SavedPinnedEvent = {
+  const savedPinnedEvent: BarePinnedEvent = {
     eventId,
     timelineId,
   };
@@ -189,21 +192,33 @@ const createPinnedEvent = async ({
   const pinnedEventWithCreator = pickSavedPinnedEvent(null, savedPinnedEvent, request.user);
 
   const { transformedFields: migratedAttributes, references } =
-    pinnedEventFieldsMigrator.extractFieldsToReferences<PinnedEventWithoutExternalRefs>({
+    pinnedEventFieldsMigrator.extractFieldsToReferences<BarePinnedEventWithoutExternalRefs>({
       data: pinnedEventWithCreator,
     });
 
-  const createdPinnedEvent = await savedObjectsClient.create<PinnedEventWithoutExternalRefs>(
-    pinnedEventSavedObjectType,
-    migratedAttributes,
-    { references }
-  );
+  const pinnedEventAttributes: SavedObjectPinnedEventWithoutExternalRefs = {
+    eventId: migratedAttributes.eventId,
+    created: migratedAttributes.created,
+    createdBy: migratedAttributes.createdBy,
+    updated: migratedAttributes.updated,
+    updatedBy: migratedAttributes.updatedBy,
+  };
+
+  const createdPinnedEvent =
+    await savedObjectsClient.create<SavedObjectPinnedEventWithoutExternalRefs>(
+      pinnedEventSavedObjectType,
+      pinnedEventAttributes,
+      { references }
+    );
 
   const repopulatedSavedObject =
     pinnedEventFieldsMigrator.populateFieldsFromReferences(createdPinnedEvent);
 
   // create Pinned Event on Timeline
-  return convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion);
+  return {
+    ...convertSavedObjectToSavedPinnedEvent(repopulatedSavedObject, timelineVersion),
+    code: 200,
+  };
 };
 
 const getAllSavedPinnedEvents = async (
@@ -211,7 +226,9 @@ const getAllSavedPinnedEvents = async (
   options: SavedObjectsFindOptions
 ) => {
   const savedObjectsClient = (await request.context.core).savedObjects.client;
-  const savedObjects = await savedObjectsClient.find<PinnedEventWithoutExternalRefs>(options);
+  const savedObjects = await savedObjectsClient.find<SavedObjectPinnedEventWithoutExternalRefs>(
+    options
+  );
 
   return savedObjects.saved_objects.map((savedObject) => {
     const populatedPinnedEvent =
@@ -240,15 +257,22 @@ export const savePinnedEvents = (
 export const convertSavedObjectToSavedPinnedEvent = (
   savedObject: unknown,
   timelineVersion?: string | undefined | null
-): PinnedEventSavedObject =>
+): PinnedEvent =>
   pipe(
-    PinnedEventSavedObjectRuntimeType.decode(savedObject),
-    map((savedPinnedEvent) => ({
-      pinnedEventId: savedPinnedEvent.id,
-      version: savedPinnedEvent.version,
-      timelineVersion,
-      ...savedPinnedEvent.attributes,
-    })),
+    SavedObjectPinnedEventRuntimeType.decode(savedObject),
+    map((savedPinnedEvent) => {
+      return {
+        pinnedEventId: savedPinnedEvent.id,
+        version: savedPinnedEvent.version,
+        timelineVersion,
+        timelineId: savedPinnedEvent.attributes.timelineId,
+        created: savedPinnedEvent.attributes.created,
+        createdBy: savedPinnedEvent.attributes.createdBy,
+        eventId: savedPinnedEvent.attributes.eventId,
+        updated: savedPinnedEvent.attributes.updated,
+        updatedBy: savedPinnedEvent.attributes.updatedBy,
+      };
+    }),
     fold((errors) => {
       throw new Error(failure(errors).join('\n'));
     }, identity)
@@ -256,7 +280,7 @@ export const convertSavedObjectToSavedPinnedEvent = (
 
 export const pickSavedPinnedEvent = (
   pinnedEventId: string | null,
-  savedPinnedEvent: SavedPinnedEvent,
+  savedPinnedEvent: BarePinnedEvent,
   userInfo: AuthenticatedUser | null
 ) => {
   const dateNow = new Date().valueOf();

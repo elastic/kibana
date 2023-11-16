@@ -48,6 +48,7 @@ describe('useGetEndpointsList hook', () => {
     expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
       path: HOST_METADATA_LIST_ROUTE,
       query: { page: 0, pageSize: 50, kuery: 'united.endpoint.host.hostname:*' },
+      version: '2023-10-31',
     });
   });
 
@@ -57,6 +58,7 @@ describe('useGetEndpointsList hook', () => {
     expect(apiMocks.responseProvider.metadataList).toHaveBeenCalledWith({
       path: HOST_METADATA_LIST_ROUTE,
       query: { page: 0, pageSize: 50, kuery: 'united.endpoint.host.hostname:*xyz*' },
+      version: '2023-10-31',
     });
   });
 
@@ -73,6 +75,7 @@ describe('useGetEndpointsList hook', () => {
         kuery:
           'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*',
       },
+      version: '2023-10-31',
     });
   });
 
@@ -89,6 +92,7 @@ describe('useGetEndpointsList hook', () => {
         kuery:
           'united.endpoint.agent.id:"agent-a" or united.endpoint.agent.id:"agent-b" or united.endpoint.host.hostname:*xyz*',
       },
+      version: '2023-10-31',
     });
   });
 
@@ -138,6 +142,7 @@ describe('useGetEndpointsList hook', () => {
                     : item.metadata.Endpoint.status,
                 },
               },
+              last_checkin: item.last_checkin,
             };
           }),
         };
@@ -160,9 +165,11 @@ describe('useGetEndpointsList hook', () => {
         const generator = new EndpointDocGenerator('seed');
         const total = 60;
         const data = Array.from({ length: total }, () => {
+          const newDate = new Date();
           const endpoint = {
-            metadata: generator.generateHostMetadata(),
+            metadata: generator.generateHostMetadata(newDate.getTime()),
             host_status: HostStatus.UNHEALTHY,
+            last_checkin: newDate.toISOString(),
           };
 
           generator.updateCommonInfo();
@@ -196,9 +203,11 @@ describe('useGetEndpointsList hook', () => {
         const generator = new EndpointDocGenerator('seed');
         const total = 61;
         const data = Array.from({ length: total }, () => {
+          const newDate = new Date();
           const endpoint = {
-            metadata: generator.generateHostMetadata(),
+            metadata: generator.generateHostMetadata(newDate.getTime()),
             host_status: HostStatus.UNHEALTHY,
+            last_checkin: newDate.toISOString(),
           };
 
           generator.updateCommonInfo();
@@ -225,7 +234,7 @@ describe('useGetEndpointsList hook', () => {
       .data.map((d) => d.metadata.agent.id)
       .slice(0, 50);
 
-    // call useGetEndpointsList  with all 50 agents selected
+    // call useGetEndpointsList with all 50 agents selected
     const res = await renderReactQueryHook(() =>
       useGetEndpointsList({ searchString: '', selectedAgentIds: agentIdsToSelect })
     );

@@ -8,6 +8,12 @@ deprecated::[8.7.0, To be removed in an upcoming version]
 
 Retrieve multiple {kib} saved objects by ID.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 [[saved-objects-api-bulk-get-request]]
 ==== Request
 

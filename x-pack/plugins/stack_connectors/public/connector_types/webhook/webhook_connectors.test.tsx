@@ -11,6 +11,7 @@ import WebhookActionConnectorFields from './webhook_connectors';
 import { ConnectorFormTestProvider, waitForComponentToUpdate } from '../lib/test_utils';
 import { act, render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { WebhookAuthType, SSLCertType } from '../../../common/webhook/constants';
 
 describe('WebhookActionConnectorFields renders', () => {
   test('all connector fields is rendered', async () => {
@@ -22,6 +23,7 @@ describe('WebhookActionConnectorFields renders', () => {
         url: 'https://test.com',
         headers: [{ key: 'content-type', value: 'text' }],
         hasAuth: true,
+        authType: WebhookAuthType.Basic,
       },
       secrets: {
         user: 'user',
@@ -102,6 +104,7 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: true,
+            authType: WebhookAuthType.Basic,
           },
           secrets: {
             user: 'user',
@@ -109,6 +112,7 @@ describe('WebhookActionConnectorFields renders', () => {
           },
           __internal__: {
             hasHeaders: true,
+            hasCA: false,
           },
           isDeprecated: false,
         },
@@ -148,9 +152,11 @@ describe('WebhookActionConnectorFields renders', () => {
             url: 'https://test.com',
             headers: [{ key: 'content-type', value: 'text' }],
             hasAuth: false,
+            authType: null,
           },
           __internal__: {
             hasHeaders: true,
+            hasCA: false,
           },
           isDeprecated: false,
         },
@@ -165,6 +171,7 @@ describe('WebhookActionConnectorFields renders', () => {
           method: 'PUT',
           url: 'https://test.com',
           hasAuth: true,
+          authType: WebhookAuthType.Basic,
         },
       };
 
@@ -190,6 +197,7 @@ describe('WebhookActionConnectorFields renders', () => {
             method: 'PUT',
             url: 'https://test.com',
             hasAuth: true,
+            authType: WebhookAuthType.Basic,
           },
           secrets: {
             user: 'user',
@@ -197,6 +205,7 @@ describe('WebhookActionConnectorFields renders', () => {
           },
           __internal__: {
             hasHeaders: false,
+            hasCA: false,
           },
           isDeprecated: false,
         },
@@ -260,6 +269,196 @@ describe('WebhookActionConnectorFields renders', () => {
       });
 
       expect(onSubmit).toHaveBeenCalledWith({ data: {}, isValid: false });
+    });
+
+    it('validates correctly with a CA and verificationMode', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          ca: Buffer.from('some binary string').toString('base64'),
+          verificationMode: 'full',
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <WebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          config: {
+            method: 'PUT',
+            url: 'https://test.com',
+            hasAuth: true,
+            authType: WebhookAuthType.Basic,
+            ca: Buffer.from('some binary string').toString('base64'),
+            verificationMode: 'full',
+            headers: [{ key: 'content-type', value: 'text' }],
+          },
+          secrets: {
+            user: 'user',
+            password: 'pass',
+          },
+          __internal__: {
+            hasHeaders: true,
+            hasCA: true,
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it('validates correctly with a CRT and KEY', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          authType: WebhookAuthType.SSL,
+          certType: SSLCertType.CRT,
+        },
+        secrets: {
+          crt: Buffer.from('some binary string').toString('base64'),
+          key: Buffer.from('some binary string').toString('base64'),
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <WebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          config: {
+            method: 'PUT',
+            url: 'https://test.com',
+            hasAuth: true,
+            authType: WebhookAuthType.SSL,
+            certType: SSLCertType.CRT,
+            headers: [{ key: 'content-type', value: 'text' }],
+          },
+          secrets: {
+            crt: Buffer.from('some binary string').toString('base64'),
+            key: Buffer.from('some binary string').toString('base64'),
+          },
+          __internal__: {
+            hasHeaders: true,
+            hasCA: false,
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it('validates correctly with a PFX', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          authType: WebhookAuthType.SSL,
+          certType: SSLCertType.PFX,
+        },
+        secrets: {
+          pfx: Buffer.from('some binary string').toString('base64'),
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <WebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {
+          actionTypeId: '.webhook',
+          name: 'webhook',
+          config: {
+            method: 'PUT',
+            url: 'https://test.com',
+            hasAuth: true,
+            authType: WebhookAuthType.SSL,
+            certType: SSLCertType.PFX,
+            headers: [{ key: 'content-type', value: 'text' }],
+          },
+          secrets: {
+            pfx: Buffer.from('some binary string').toString('base64'),
+          },
+          __internal__: {
+            hasHeaders: true,
+            hasCA: false,
+          },
+          isDeprecated: false,
+        },
+        isValid: true,
+      });
+    });
+
+    it('fails to validate with a CRT but no KEY', async () => {
+      const connector = {
+        ...actionConnector,
+        config: {
+          ...actionConnector.config,
+          authType: WebhookAuthType.SSL,
+          certType: SSLCertType.CRT,
+        },
+        secrets: {
+          crt: Buffer.from('some binary string').toString('base64'),
+        },
+      };
+
+      const res = render(
+        <ConnectorFormTestProvider connector={connector} onSubmit={onSubmit}>
+          <WebhookActionConnectorFields
+            readOnly={false}
+            isEdit={false}
+            registerPreSubmitValidator={() => {}}
+          />
+        </ConnectorFormTestProvider>
+      );
+
+      await act(async () => {
+        userEvent.click(res.getByTestId('form-test-provide-submit'));
+      });
+
+      expect(onSubmit).toHaveBeenCalledWith({
+        data: {},
+        isValid: false,
+      });
     });
   });
 });

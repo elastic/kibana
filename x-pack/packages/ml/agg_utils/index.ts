@@ -8,6 +8,7 @@
 export { buildSamplerAggregation } from './src/build_sampler_aggregation';
 export { fetchAggIntervals } from './src/fetch_agg_intervals';
 export { fetchHistogramsForFields } from './src/fetch_histograms_for_fields';
+export { DEFAULT_SAMPLER_SHARD_SIZE } from './src/field_histograms';
 export { getSamplerAggregationsResponsePath } from './src/get_sampler_aggregations_response_path';
 export { numberValidator } from './src/validate_number';
 
@@ -16,15 +17,18 @@ export type {
   NumericChartData,
   NumericHistogramField,
 } from './src/fetch_histograms_for_fields';
-export { isSignificantTerm } from './src/type_guards';
+export { isMultiBucketAggregate } from './src/is_multi_bucket_aggregate';
+export { isSignificantItem } from './src/type_guards';
+export { SIGNIFICANT_ITEM_TYPE } from './src/types';
 export type {
   AggCardinality,
-  SignificantTerm,
-  SignificantTermGroup,
-  SignificantTermGroupItem,
-  SignificantTermGroupHistogram,
-  SignificantTermHistogram,
-  SignificantTermHistogramItem,
+  SignificantItem,
+  SignificantItemGroup,
+  SignificantItemGroupItem,
+  SignificantItemGroupHistogram,
+  SignificantItemHistogram,
+  SignificantItemHistogramItem,
+  SignificantItemType,
   HistogramField,
   NumericColumnStats,
   NumericColumnStatsMap,

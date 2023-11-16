@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import type { BulkActionEditPayload } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type {
+  BulkActionEditPayload,
+  BulkActionEditType,
+} from '../../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 
 /**
@@ -17,9 +20,9 @@ import { assertUnreachable } from '../../../../../../../common/utility_types';
  */
 export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkActionEditPayload[] {
   switch (editAction) {
-    case BulkActionEditType.add_index_patterns:
-    case BulkActionEditType.delete_index_patterns:
-    case BulkActionEditType.set_index_patterns:
+    case BulkActionEditTypeEnum.add_index_patterns:
+    case BulkActionEditTypeEnum.delete_index_patterns:
+    case BulkActionEditTypeEnum.set_index_patterns:
       return [
         {
           type: editAction,
@@ -27,9 +30,9 @@ export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkAc
         },
       ];
 
-    case BulkActionEditType.add_tags:
-    case BulkActionEditType.delete_tags:
-    case BulkActionEditType.set_tags:
+    case BulkActionEditTypeEnum.add_tags:
+    case BulkActionEditTypeEnum.delete_tags:
+    case BulkActionEditTypeEnum.set_tags:
       return [
         {
           type: editAction,
@@ -37,7 +40,7 @@ export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkAc
         },
       ];
 
-    case BulkActionEditType.set_timeline:
+    case BulkActionEditTypeEnum.set_timeline:
       return [
         {
           type: editAction,
@@ -45,15 +48,15 @@ export function computeDryRunEditPayload(editAction: BulkActionEditType): BulkAc
         },
       ];
 
-    case BulkActionEditType.add_rule_actions:
-    case BulkActionEditType.set_rule_actions:
+    case BulkActionEditTypeEnum.add_rule_actions:
+    case BulkActionEditTypeEnum.set_rule_actions:
       return [
         {
           type: editAction,
           value: { actions: [] },
         },
       ];
-    case BulkActionEditType.set_schedule:
+    case BulkActionEditTypeEnum.set_schedule:
       return [
         {
           type: editAction,

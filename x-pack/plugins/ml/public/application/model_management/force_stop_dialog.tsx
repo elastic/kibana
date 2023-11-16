@@ -15,10 +15,10 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { OverlayStart, ThemeServiceStart } from '@kbn/core/public';
-import { toMountPoint, wrapWithTheme } from '@kbn/kibana-react-plugin/public';
+import type { I18nStart, OverlayStart, ThemeServiceStart } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ModelItem } from './models_list';
 
 interface ForceStopModelConfirmDialogProps {
@@ -150,13 +150,13 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
             color="warning"
             iconType="warning"
           >
-            <p>
+            <div>
               <ul>
                 {pipelineWarning.map((pipelineName) => {
                   return <li key={pipelineName}>{pipelineName}</li>;
                 })}
               </ul>
-            </p>
+            </div>
           </EuiCallOut>
         </>
       ) : null}
@@ -165,26 +165,24 @@ export const StopModelDeploymentsConfirmDialog: FC<ForceStopModelConfirmDialogPr
 };
 
 export const getUserConfirmationProvider =
-  (overlays: OverlayStart, theme: ThemeServiceStart) =>
+  (overlays: OverlayStart, theme: ThemeServiceStart, i18nStart: I18nStart) =>
   async (forceStopModel: ModelItem): Promise<string[]> => {
     return new Promise(async (resolve, reject) => {
       try {
         const modalSession = overlays.openModal(
           toMountPoint(
-            wrapWithTheme(
-              <StopModelDeploymentsConfirmDialog
-                model={forceStopModel}
-                onCancel={() => {
-                  modalSession.close();
-                  reject();
-                }}
-                onConfirm={(deploymentIds: string[]) => {
-                  modalSession.close();
-                  resolve(deploymentIds);
-                }}
-              />,
-              theme.theme$
-            )
+            <StopModelDeploymentsConfirmDialog
+              model={forceStopModel}
+              onCancel={() => {
+                modalSession.close();
+                reject();
+              }}
+              onConfirm={(deploymentIds: string[]) => {
+                modalSession.close();
+                resolve(deploymentIds);
+              }}
+            />,
+            { theme, i18n: i18nStart }
           )
         );
       } catch (e) {

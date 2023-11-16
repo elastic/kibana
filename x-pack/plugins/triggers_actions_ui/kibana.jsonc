@@ -21,13 +21,17 @@
       "dataViews",
       "dataViewEditor",
       "alerting",
-      "actions"
+      "actions",
+      "dashboard",
+      "licensing",
+      "expressions"
     ],
     "optionalPlugins": [
       "cloud",
       "features",
       "home",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
     "requiredBundles": [
       "alerting",

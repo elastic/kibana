@@ -118,14 +118,6 @@ const ScrollableFlexItem = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-const DatePicker = styled(EuiFlexItem)`
-  .euiSuperDatePicker__flexWrapper {
-    max-width: none;
-    width: auto;
-  }
-`;
-DatePicker.displayName = 'DatePicker';
-
 const SourcererFlex = styled(EuiFlexItem)`
   align-items: flex-end;
 `;
@@ -286,24 +278,26 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         id: timelineId,
       })
     );
-  }, [activeFilterManager, currentTimeline, dispatch, filterManager, timelineId, uiSettings]);
+  }, [dispatch, filterManager, timelineId]);
 
-  const [isQueryLoading, { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch }] =
-    useTimelineEvents({
-      dataViewId,
-      endDate: end,
-      fields: getTimelineQueryFields(),
-      filterQuery: combinedQueries?.filterQuery,
-      id: timelineId,
-      indexNames: selectedPatterns,
-      language: kqlQuery.language,
-      limit: itemsPerPage,
-      runtimeMappings,
-      skip: !canQueryTimeline,
-      sort: timelineQuerySortField,
-      startDate: start,
-      timerangeKind,
-    });
+  const [
+    isQueryLoading,
+    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
+  ] = useTimelineEvents({
+    dataViewId,
+    endDate: end,
+    fields: getTimelineQueryFields(),
+    filterQuery: combinedQueries?.filterQuery,
+    id: timelineId,
+    indexNames: selectedPatterns,
+    language: kqlQuery.language,
+    limit: itemsPerPage,
+    runtimeMappings,
+    skip: !canQueryTimeline,
+    sort: timelineQuerySortField,
+    startDate: start,
+    timerangeKind,
+  });
 
   const handleOnPanelClosed = useCallback(() => {
     onEventClosed({ tabType: TimelineTabs.query, id: timelineId });
@@ -369,13 +363,14 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   setFullScreen={setTimelineFullScreen}
                 />
               )}
-              <DatePicker grow={10}>
+              <EuiFlexItem grow={10}>
                 <SuperDatePicker
+                  width="auto"
                   id={InputsModelId.timeline}
                   timelineId={timelineId}
                   disabled={isDatePickerDisabled}
                 />
-              </DatePicker>
+              </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TimelineDatePickerLock />
               </EuiFlexItem>
@@ -428,7 +423,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
                   data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
+                  updatedAt={refreshedAt}
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}

@@ -39,6 +39,7 @@ const connector = {
   actionTypeId: '.test',
   name: 'Test',
   isPreconfigured: false,
+  isSystemAction: false as const,
   isDeprecated: false,
 };
 

@@ -11,8 +11,7 @@ import React, { memo, FC } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { CodeEditor } from '@kbn/kibana-react-plugin/public';
-
-import { isRuntimeMappings } from '../../../../../../common/shared_imports';
+import { isRuntimeMappings } from '@kbn/ml-runtime-field-utils';
 
 import { StepDefineFormHook } from '../step_define';
 

@@ -33,7 +33,6 @@ interface FactoryGroup {
 
 interface Props {
   factories: EmbeddableFactoryDefinition[];
-  isDarkThemeEnabled?: boolean;
   promotedVisTypes: BaseVisType[];
   visTypeAliases: VisTypeAlias[];
   createNewVisType: (visType?: BaseVisType | VisTypeAlias) => () => void;
@@ -42,7 +41,6 @@ interface Props {
 
 export const EditorMenu: FC<Props> = ({
   factories,
-  isDarkThemeEnabled,
   promotedVisTypes,
   visTypeAliases,
   createNewVisType,
@@ -155,11 +153,6 @@ export const EditorMenu: FC<Props> = ({
         <EuiContextMenu
           initialPanelId={0}
           panels={editorMenuPanels}
-          className={`canvasSolutionToolbar__editorContextMenu ${
-            isDarkThemeEnabled
-              ? 'canvasSolutionToolbar__editorContextMenu--dark'
-              : 'canvasSolutionToolbar__editorContextMenu--light'
-          }`}
           data-test-subj="canvasEditorContextMenu"
         />
       )}

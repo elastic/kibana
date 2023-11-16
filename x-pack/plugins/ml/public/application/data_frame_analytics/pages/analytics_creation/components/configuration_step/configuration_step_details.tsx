@@ -14,12 +14,12 @@ import {
   EuiFlexItem,
   EuiSpacer,
 } from '@elastic/eui';
+import { ANALYSIS_CONFIG_TYPE } from '@kbn/ml-data-frame-analytics-utils';
+import { useDataSource } from '../../../../../contexts/ml/data_source_context';
 import {
   State,
   UNSET_CONFIG_ITEM,
 } from '../../../analytics_management/hooks/use_create_analytics_form/state';
-import { ANALYSIS_CONFIG_TYPE } from '../../../../common/analytics';
-import { useMlContext } from '../../../../../contexts/ml';
 import { ANALYTICS_STEPS } from '../../page';
 
 const MAX_INCLUDES_LENGTH = 5;
@@ -30,8 +30,7 @@ interface Props {
 }
 
 export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) => {
-  const mlContext = useMlContext();
-  const { currentDataView } = mlContext;
+  const { selectedDataView } = useDataSource();
   const { form, isJobCreated } = state;
   const { dependentVariable, includes, jobConfigQueryString, jobType, trainingPercent } = form;
 
@@ -43,7 +42,7 @@ export const ConfigurationStepDetails: FC<Props> = ({ setCurrentStep, state }) =
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.sourceIndex', {
         defaultMessage: 'Source index',
       }),
-      description: currentDataView.title || UNSET_CONFIG_ITEM,
+      description: selectedDataView.title || UNSET_CONFIG_ITEM,
     },
     {
       title: i18n.translate('xpack.ml.dataframe.analytics.create.configDetails.Query', {

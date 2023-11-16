@@ -49,6 +49,14 @@ export const DATA_COLLECTION = i18n.translate(
   }
 );
 
+export const DATA_COLLECTION_HELP_TEXT = i18n.translate(
+  'xpack.securitySolution.createPackagePolicy.stepConfigure.packagePolicyTypeEndpointDataCollection',
+  {
+    defaultMessage:
+      'Augment your existing anti-virus solution with advanced data collection and detection',
+  }
+);
+
 export const ENDPOINT = i18n.translate(
   'xpack.securitySolution.createPackagePolicy.stepConfigure.endpointDropdownOption',
   {

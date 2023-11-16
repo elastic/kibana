@@ -25,7 +25,10 @@ import { showMemoizedErrorNotification } from '../lens_ui_errors';
 import { TableInspectorAdapter } from '../editor_frame_service/types';
 import { Datasource, DatasourcePublicAPI, IndexPatternMap } from '../types';
 import { Visualization } from '..';
-import { getLayerType } from '../editor_frame_service/editor_frame/config_panel/add_layer';
+
+function getLayerType(visualization: Visualization, state: unknown, layerId: string) {
+  return visualization.getLayerType(layerId, state) || LayerTypes.DATA;
+}
 
 /**
  * Joins a series of queries.

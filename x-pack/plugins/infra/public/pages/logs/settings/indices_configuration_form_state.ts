@@ -7,12 +7,12 @@
 
 import { useMemo } from 'react';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/common';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import {
   LogDataViewReference,
   LogIndexNameReference,
   logIndexNameReferenceRT,
-} from '../../../../common/log_views';
+} from '@kbn/logs-shared-plugin/common';
 import { useKibanaIndexPatternService } from '../../../hooks/use_kibana_index_patterns';
 import { useFormElement } from './form_elements';
 import {

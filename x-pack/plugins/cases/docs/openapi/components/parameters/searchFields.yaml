@@ -1,0 +1,9 @@
+in: query
+name: searchFields
+description: The fields to perform the simple_query_string parsed query against.
+schema:
+  oneOf:
+    - $ref: 'searchFieldsType.yaml'
+    - type: array
+      items:
+        $ref: 'searchFieldsType.yaml'

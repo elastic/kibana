@@ -18,6 +18,7 @@ test('should sort enabled action types first', async () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
     {
       id: '2',
@@ -27,6 +28,7 @@ test('should sort enabled action types first', async () => {
       enabled: false,
       enabledInConfig: true,
       enabledInLicense: false,
+      isSystemActionType: false,
     },
     {
       id: '3',
@@ -36,6 +38,7 @@ test('should sort enabled action types first', async () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
     {
       id: '4',
@@ -45,6 +48,7 @@ test('should sort enabled action types first', async () => {
       enabled: true,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
   ];
   const result = [...actionTypes].sort(actionTypeCompare);
@@ -64,6 +68,7 @@ test('should sort by name when all enabled', async () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
     {
       id: '2',
@@ -73,6 +78,7 @@ test('should sort by name when all enabled', async () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
     {
       id: '3',
@@ -82,6 +88,7 @@ test('should sort by name when all enabled', async () => {
       enabled: true,
       enabledInConfig: true,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
     {
       id: '4',
@@ -91,6 +98,7 @@ test('should sort by name when all enabled', async () => {
       enabled: true,
       enabledInConfig: false,
       enabledInLicense: true,
+      isSystemActionType: false,
     },
   ];
   const result = [...actionTypes].sort(actionTypeCompare);

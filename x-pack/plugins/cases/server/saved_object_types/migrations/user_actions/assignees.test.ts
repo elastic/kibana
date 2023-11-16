@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ActionTypes } from '../../../../common/api';
+import { UserActionTypes } from '../../../../common/types/domain';
 import { CASE_USER_ACTION_SAVED_OBJECT } from '../../../../common/constants';
 import { addAssigneesToCreateUserAction } from './assignees';
 
@@ -21,7 +21,7 @@ describe('assignees migration', () => {
         username: 'elastic',
       },
       payload: {},
-      type: ActionTypes.create_case,
+      type: UserActionTypes.create_case,
     },
   };
 
@@ -48,8 +48,8 @@ describe('assignees migration', () => {
   });
 
   it('does NOT add the assignees field non-create_case user actions', () => {
-    Object.keys(ActionTypes)
-      .filter((type) => type !== ActionTypes.create_case)
+    Object.keys(UserActionTypes)
+      .filter((type) => type !== UserActionTypes.create_case)
       .forEach((type) => {
         const migratedUserAction = addAssigneesToCreateUserAction({
           ...userAction,

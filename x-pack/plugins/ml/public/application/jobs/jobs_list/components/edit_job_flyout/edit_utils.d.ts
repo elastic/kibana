@@ -7,5 +7,4 @@
 
 import type { DataViewListItem } from '@kbn/data-views-plugin/common';
 
-export function loadSavedDashboards(maxNumber: number): Promise<any[]>;
 export function loadDataViewListItems(): Promise<DataViewListItem[]>;

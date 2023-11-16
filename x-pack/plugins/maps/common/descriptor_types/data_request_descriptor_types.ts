@@ -46,6 +46,9 @@ export type SourceRequestMeta = DataFilters & {
 };
 
 export type VectorSourceRequestMeta = SourceRequestMeta & {
+  /*
+   * List of feature property keys used in client for data driven styling, join keys, and feature masking
+   */
   fieldNames: string[];
   timesliceMaskField?: string;
   sourceMeta: object | null;
@@ -120,4 +123,5 @@ export type DataRequestDescriptor = {
   dataRequestToken?: symbol;
   data?: object;
   dataRequestMeta?: DataRequestMeta;
+  error?: Error;
 };

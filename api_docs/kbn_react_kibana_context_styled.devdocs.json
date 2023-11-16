@@ -1,0 +1,471 @@
+{
+  "id": "@kbn/react-kibana-context-styled",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.createGlobalStyle",
+        "type": "Function",
+        "tags": [],
+        "label": "createGlobalStyle",
+        "description": [
+          "/** see https://styled-components.com/docs/api#createglobalstyle */"
+        ],
+        "signature": [
+          "<P extends object = {}>(first: TemplateStringsArray | ",
+          "CSSObject",
+          " | ",
+          "InterpolationFunction",
+          "<",
+          "ThemedStyledProps",
+          "<P, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">>, ...interpolations: ",
+          "Interpolation",
+          "<",
+          "ThemedStyledProps",
+          "<P, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">>[]) => ",
+          "GlobalStyleComponent",
+          "<P, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.createGlobalStyle.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "first",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray | ",
+              "CSSObject",
+              " | ",
+              "InterpolationFunction",
+              "<",
+              "ThemedStyledProps",
+              "<P, T>>"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.createGlobalStyle.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "interpolations",
+            "description": [],
+            "signature": [
+              "Interpolation",
+              "<",
+              "ThemedStyledProps",
+              "<P, T>>[]"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.css",
+        "type": "Function",
+        "tags": [],
+        "label": "css",
+        "description": [
+          "/** see https://styled-components.com/docs/api#css-prop */"
+        ],
+        "signature": [
+          "BaseThemedCssFunction",
+          "<",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.euiStyled",
+        "type": "Function",
+        "tags": [],
+        "label": "euiStyled",
+        "description": [
+          "/** see https://styled-components.com/docs/api#styled */"
+        ],
+        "signature": [
+          "ThemedBaseStyledInterface",
+          "<",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.keyframes",
+        "type": "Function",
+        "tags": [],
+        "label": "keyframes",
+        "description": [
+          "/** see https://styled-components.com/docs/api#keyframes */"
+        ],
+        "signature": [
+          "(strings: TemplateStringsArray | ",
+          "CSSKeyframes",
+          ", ...interpolations: ",
+          "SimpleInterpolation",
+          "[]) => ",
+          "Keyframes"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.keyframes.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "strings",
+            "description": [],
+            "signature": [
+              "TemplateStringsArray | ",
+              "CSSKeyframes"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.keyframes.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "interpolations",
+            "description": [],
+            "signature": [
+              "SimpleInterpolation",
+              "[]"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.KibanaStyledComponentsThemeProvider",
+        "type": "Function",
+        "tags": [],
+        "label": "KibanaStyledComponentsThemeProvider",
+        "description": [
+          "\nA `styled-components` `ThemeProvider` that incorporates EUI dark mode."
+        ],
+        "signature": [
+          "<OuterTheme extends ",
+          "DefaultTheme",
+          " = ",
+          "DefaultTheme",
+          ">({ darkMode, ...otherProps }: Omit<",
+          "ThemeProviderProps",
+          "<OuterTheme, OuterTheme & ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">, \"theme\"> & { darkMode?: boolean | undefined; }) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.KibanaStyledComponentsThemeProvider.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{\n  darkMode = false,\n  ...otherProps\n}",
+            "description": [],
+            "signature": [
+              "Omit<",
+              "ThemeProviderProps",
+              "<OuterTheme, OuterTheme & ",
+              {
+                "pluginId": "@kbn/react-kibana-context-styled",
+                "scope": "common",
+                "docId": "kibKbnReactKibanaContextStyledPluginApi",
+                "section": "def-common.EuiTheme",
+                "text": "EuiTheme"
+              },
+              ">, \"theme\"> & { darkMode?: boolean | undefined; }"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.KibanaStyledComponentsThemeProviderDecorator",
+        "type": "Function",
+        "tags": [
+          "deprecated"
+        ],
+        "label": "KibanaStyledComponentsThemeProviderDecorator",
+        "description": [
+          "\nStorybook decorator using the EUI theme provider. Uses the value from\n`globals` provided by the Storybook theme switcher.\n"
+        ],
+        "signature": [
+          "(storyFn: ",
+          "PartialStoryFn",
+          "<ReturnTypeFramework<",
+          "StoryFnReactReturnType",
+          ">, ",
+          "Args",
+          ">, { globals }: ",
+          "StoryContext",
+          "<ReturnTypeFramework<",
+          "StoryFnReactReturnType",
+          ">, ",
+          "Args",
+          ">) => JSX.Element"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": true,
+        "trackAdoption": false,
+        "references": [
+          {
+            "plugin": "kibanaReact",
+            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx"
+          },
+          {
+            "plugin": "kibanaReact",
+            "path": "src/plugins/kibana_react/common/eui_styled_components.tsx"
+          },
+          {
+            "plugin": "kibanaReact",
+            "path": "src/plugins/kibana_react/common/index.ts"
+          }
+        ],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.KibanaStyledComponentsThemeProviderDecorator.$1",
+            "type": "Function",
+            "tags": [],
+            "label": "storyFn",
+            "description": [],
+            "signature": [
+              "PartialStoryFn",
+              "<ReturnTypeFramework<",
+              "StoryFnReactReturnType",
+              ">, ",
+              "Args",
+              ">"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.KibanaStyledComponentsThemeProviderDecorator.$2",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ globals }",
+            "description": [],
+            "signature": [
+              "StoryContext",
+              "<ReturnTypeFramework<",
+              "StoryFnReactReturnType",
+              ">, ",
+              "Args",
+              ">"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.withTheme",
+        "type": "Function",
+        "tags": [],
+        "label": "withTheme",
+        "description": [
+          "/** see https://styled-components.com/docs/api#withtheme */"
+        ],
+        "signature": [
+          "<C extends React.ComponentType<any>>(component: React.ComponentProps<C> extends { theme?: ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          " | undefined; } ? C : never) => React.ForwardRefExoticComponent<WithOptionalTheme<React.ComponentPropsWithRef<C>, ",
+          {
+            "pluginId": "@kbn/react-kibana-context-styled",
+            "scope": "common",
+            "docId": "kibKbnReactKibanaContextStyledPluginApi",
+            "section": "def-common.EuiTheme",
+            "text": "EuiTheme"
+          },
+          ">>"
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.withTheme.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "component",
+            "description": [],
+            "signature": [
+              "React.ComponentProps<C> extends { theme?: T | undefined; } ? C : never"
+            ],
+            "path": "node_modules/@types/styled-components/ts3.7/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/react-kibana-context-styled",
+        "id": "def-common.EuiTheme",
+        "type": "Interface",
+        "tags": [],
+        "label": "EuiTheme",
+        "description": [
+          "\nA `deprecated` structure representing a Kibana theme containing variables from the current EUI theme."
+        ],
+        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.EuiTheme.eui",
+            "type": "Object",
+            "tags": [],
+            "label": "eui",
+            "description": [
+              "EUI theme vars that automaticall adjust to light and dark mode."
+            ],
+            "signature": [
+              "{ euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; }"
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/react-kibana-context-styled",
+            "id": "def-common.EuiTheme.darkMode",
+            "type": "boolean",
+            "tags": [],
+            "label": "darkMode",
+            "description": [
+              "True if the theme is in \"dark\" mode, false otherwise."
+            ],
+            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

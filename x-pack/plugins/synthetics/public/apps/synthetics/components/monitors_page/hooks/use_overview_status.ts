@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useSyntheticsRefreshContext } from '../../../contexts/synthetics_refresh_context';
 import { selectOverviewPageState } from '../../../state';
@@ -23,21 +23,19 @@ export function useOverviewStatus({ scopeStatusByLocation }: { scopeStatusByLoca
   const { lastRefresh } = useSyntheticsRefreshContext();
 
   const dispatch = useDispatch();
-  const reload = useCallback(() => {
-    dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
-  }, [dispatch, pageState, scopeStatusByLocation]);
 
   useEffect(() => {
     if (loaded) {
       dispatch(quietFetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
     } else {
-      reload();
+      dispatch(fetchOverviewStatusAction.get({ pageState, scopeStatusByLocation }));
     }
-  }, [dispatch, reload, lastRefresh, pageState, loaded, scopeStatusByLocation]);
+    // loaded is omitted from the dependency array because it is not used in the callback
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [dispatch, lastRefresh, pageState, scopeStatusByLocation]);
 
   return {
     status,
     error,
-    reload,
   };
 }

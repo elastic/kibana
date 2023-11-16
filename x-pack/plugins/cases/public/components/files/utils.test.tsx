@@ -8,12 +8,14 @@ import type { JsonValue } from '@kbn/utility-types';
 
 import {
   compressionMimeTypes,
-  imageMimeTypes,
+  IMAGE_MIME_TYPES,
   pdfMimeTypes,
   textMimeTypes,
 } from '../../../common/constants/mime_types';
 import { basicFileMock } from '../../containers/mock';
 import { isImage, isValidFileExternalReferenceMetadata, parseMimeType } from './utils';
+
+const imageMimeTypes = Array.from(IMAGE_MIME_TYPES);
 
 describe('isImage', () => {
   it.each(imageMimeTypes)('should return true for image mime type: %s', (mimeType) => {

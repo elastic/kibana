@@ -10,7 +10,7 @@ import { useDetailPanel } from './use_detail_panel';
 import { timelineActions } from '../../../store/timeline';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
-import { TimelineId, TimelineTabs } from '../../../../../common/types';
+import { TimelineId, TimelineTabs } from '../../../../../common/types/timeline';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy';
 
 const mockDispatch = jest.fn();

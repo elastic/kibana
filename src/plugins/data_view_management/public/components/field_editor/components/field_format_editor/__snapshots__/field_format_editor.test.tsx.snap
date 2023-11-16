@@ -15,7 +15,7 @@ exports[`FieldFormatEditor should render normally 1`] = `
         <EuiDelayRender
           delay={500}
         >
-          <EuiLoadingContent
+          <EuiSkeletonText
             lines={4}
           />
         </EuiDelayRender>
@@ -48,7 +48,7 @@ exports[`FieldFormatEditor should render nothing if there is no editor for the f
         <EuiDelayRender
           delay={500}
         >
-          <EuiLoadingContent
+          <EuiSkeletonText
             lines={4}
           />
         </EuiDelayRender>

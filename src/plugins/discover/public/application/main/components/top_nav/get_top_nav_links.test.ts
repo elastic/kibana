@@ -7,16 +7,13 @@
  */
 
 import { getTopNavLinks } from './get_top_nav_links';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverServices } from '../../../../build_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 
 const services = {
   capabilities: {
     discover: {
-      save: true,
-    },
-    advancedSettings: {
       save: true,
     },
   },
@@ -27,23 +24,15 @@ const state = {} as unknown as DiscoverStateContainer;
 test('getTopNavLinks result', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     services,
     state,
     isPlainRecord: false,
-    persistDataView: jest.fn(),
     adHocDataViews: [],
+    topNavCustomization: undefined,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
       Object {
         "description": "New Search",
         "id": "new",
@@ -85,26 +74,18 @@ test('getTopNavLinks result', () => {
   `);
 });
 
-test('getTopNavLinks result for sql mode', () => {
+test('getTopNavLinks result for ES|QL mode', () => {
   const topNavLinks = getTopNavLinks({
     dataView: dataViewMock,
-    navigateTo: jest.fn(),
     onOpenInspector: jest.fn(),
     services,
     state,
     isPlainRecord: true,
-    persistDataView: jest.fn(),
     adHocDataViews: [],
+    topNavCustomization: undefined,
   });
   expect(topNavLinks).toMatchInlineSnapshot(`
     Array [
-      Object {
-        "description": "Options",
-        "id": "options",
-        "label": "Options",
-        "run": [Function],
-        "testId": "discoverOptionsButton",
-      },
       Object {
         "description": "New Search",
         "id": "new",

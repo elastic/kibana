@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-/* eslint-disable react/button-has-type */
-
 import React, { useCallback, useMemo, useContext, useState } from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
@@ -27,11 +24,18 @@ import { useSelector, useDispatch } from 'react-redux';
 import { SideEffectContext } from './side_effect_context';
 import type { Vector2 } from '../types';
 import * as selectors from '../store/selectors';
-import type { ResolverAction } from '../store/actions';
 import { useColors } from './use_colors';
 import { StyledDescriptionList } from './panels/styles';
 import { CubeForProcess } from './panels/cube_for_process';
 import { GeneratedText } from './generated_text';
+import {
+  userClickedZoomIn,
+  userClickedZoomOut,
+  userSetZoomLevel,
+  userNudgedCamera,
+  userSetPositionOfCamera,
+} from '../store/camera/action';
+import type { State } from '../../common/store/types';
 
 // EuiRange is currently only horizontally positioned. This reorients the track to a vertical position
 const StyledEuiRange = styled(EuiRange)<EuiRangeProps>`
@@ -116,17 +120,25 @@ const StyledGraphControls = styled.div<Partial<StyledGraphControlProps>>`
  * Controls for zooming, panning, and centering in Resolver
  */
 
+// eslint-disable-next-line react/display-name
 export const GraphControls = React.memo(
   ({
+    id,
     className,
   }: {
+    /**
+     * Id that identify the scope of analyzer
+     */
+    id: string;
     /**
      * A className string provided by `styled`
      */
     className?: string;
   }) => {
-    const dispatch: (action: ResolverAction) => unknown = useDispatch();
-    const scalingFactor = useSelector(selectors.scalingFactor);
+    const dispatch = useDispatch();
+    const scalingFactor = useSelector((state: State) =>
+      selectors.scalingFactor(state.analyzer[id])
+    );
     const { timestamp } = useContext(SideEffectContext);
     const [activePopover, setPopover] = useState<null | 'schemaInfo' | 'nodeLegend'>(null);
     const colorMap = useColors();
@@ -150,33 +162,28 @@ export const GraphControls = React.memo(
           (event as React.ChangeEvent<HTMLInputElement>).target.value
         );
         if (isNaN(valueAsNumber) === false) {
-          dispatch({
-            type: 'userSetZoomLevel',
-            payload: valueAsNumber,
-          });
+          dispatch(
+            userSetZoomLevel({
+              id,
+              zoomLevel: valueAsNumber,
+            })
+          );
         }
       },
-      [dispatch]
+      [dispatch, id]
     );
 
     const handleCenterClick = useCallback(() => {
-      dispatch({
-        type: 'userSetPositionOfCamera',
-        payload: [0, 0],
-      });
-    }, [dispatch]);
+      dispatch(userSetPositionOfCamera({ id, cameraView: [0, 0] }));
+    }, [dispatch, id]);
 
     const handleZoomOutClick = useCallback(() => {
-      dispatch({
-        type: 'userClickedZoomOut',
-      });
-    }, [dispatch]);
+      dispatch(userClickedZoomOut({ id }));
+    }, [dispatch, id]);
 
     const handleZoomInClick = useCallback(() => {
-      dispatch({
-        type: 'userClickedZoomIn',
-      });
-    }, [dispatch]);
+      dispatch(userClickedZoomIn({ id }));
+    }, [dispatch, id]);
 
     const [handleNorth, handleEast, handleSouth, handleWest] = useMemo(() => {
       const directionVectors: readonly Vector2[] = [
@@ -187,15 +194,12 @@ export const GraphControls = React.memo(
       ];
       return directionVectors.map((direction) => {
         return () => {
-          const action: ResolverAction = {
-            type: 'userNudgedCamera',
-            payload: { direction, time: timestamp() },
-          };
-          dispatch(action);
+          dispatch(userNudgedCamera({ id, direction, time: timestamp() }));
         };
       });
-    }, [dispatch, timestamp]);
+    }, [dispatch, timestamp, id]);
 
+    /* eslint-disable react/button-has-type */
     return (
       <StyledGraphControls
         className={className}
@@ -204,11 +208,13 @@ export const GraphControls = React.memo(
       >
         <StyledGraphControlsColumn>
           <SchemaInformation
+            id={id}
             closePopover={closePopover}
             isOpen={activePopover === 'schemaInfo'}
             setActivePopover={setActivePopover}
           />
           <NodeLegend
+            id={id}
             closePopover={closePopover}
             isOpen={activePopover === 'nodeLegend'}
             setActivePopover={setActivePopover}
@@ -305,20 +311,25 @@ export const GraphControls = React.memo(
         </StyledGraphControlsColumn>
       </StyledGraphControls>
     );
+    /* eslint-enable react/button-has-type */
   }
 );
 
 const SchemaInformation = ({
+  id,
   closePopover,
   setActivePopover,
   isOpen,
 }: {
+  id: string;
   closePopover: () => void;
   setActivePopover: (value: 'schemaInfo' | null) => void;
   isOpen: boolean;
 }) => {
   const colorMap = useColors();
-  const sourceAndSchema = useSelector(selectors.resolverTreeSourceAndSchema);
+  const sourceAndSchema = useSelector((state: State) =>
+    selectors.resolverTreeSourceAndSchema(state.analyzer[id])
+  );
   const setAsActivePopover = useCallback(() => setActivePopover('schemaInfo'), [setActivePopover]);
 
   const schemaInfoButtonTitle = i18n.translate(
@@ -431,10 +442,12 @@ const SchemaInformation = ({
 // This component defines the cube legend that allows users to identify the meaning of the cubes
 // Should be updated to be dynamic if and when non process based resolvers are possible
 const NodeLegend = ({
+  id,
   closePopover,
   setActivePopover,
   isOpen,
 }: {
+  id: string;
   closePopover: () => void;
   setActivePopover: (value: 'nodeLegend') => void;
   isOpen: boolean;
@@ -489,6 +502,7 @@ const NodeLegend = ({
               style={{ width: '20% ' }}
             >
               <CubeForProcess
+                id={id}
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="running"
@@ -512,6 +526,7 @@ const NodeLegend = ({
               style={{ width: '20% ' }}
             >
               <CubeForProcess
+                id={id}
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="terminated"
@@ -535,6 +550,7 @@ const NodeLegend = ({
               style={{ width: '20% ' }}
             >
               <CubeForProcess
+                id={id}
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="loading"
@@ -558,6 +574,7 @@ const NodeLegend = ({
               style={{ width: '20% ' }}
             >
               <CubeForProcess
+                id={id}
                 size="2.5em"
                 data-test-subj="resolver:node-detail:title-icon"
                 state="error"

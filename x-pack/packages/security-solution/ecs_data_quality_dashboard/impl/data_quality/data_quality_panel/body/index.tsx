@@ -9,6 +9,7 @@ import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -23,7 +24,9 @@ import { useResultsRollup } from '../../use_results_rollup';
 
 interface Props {
   addSuccessToast: (toast: { title: string }) => void;
+  baseTheme: Theme;
   canUserCreateAndReadCases: () => boolean;
+  endDate?: string | null;
   formatBytes: (value: number | undefined) => string;
   formatNumber: (value: number | undefined) => string;
   getGroupByFieldsOnClick: (
@@ -40,6 +43,7 @@ interface Props {
     groupByField1: string;
   };
   ilmPhases: string[];
+  isAssistantEnabled: boolean;
   lastChecked: string;
   openCreateCaseFlyout: ({
     comments,
@@ -50,21 +54,26 @@ interface Props {
   }) => void;
   patterns: string[];
   setLastChecked: (lastChecked: string) => void;
-  theme: Theme;
+  startDate?: string | null;
+  theme?: PartialTheme;
 }
 
 const BodyComponent: React.FC<Props> = ({
   addSuccessToast,
   canUserCreateAndReadCases,
+  endDate,
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick,
   ilmPhases,
+  isAssistantEnabled,
   lastChecked,
   openCreateCaseFlyout,
   patterns,
   setLastChecked,
+  startDate,
   theme,
+  baseTheme,
 }) => {
   const {
     onCheckCompleted,
@@ -77,7 +86,10 @@ const BodyComponent: React.FC<Props> = ({
     totalSizeInBytes,
     updatePatternIndexNames,
     updatePatternRollup,
-  } = useResultsRollup({ ilmPhases, patterns });
+  } = useResultsRollup({
+    ilmPhases,
+    patterns,
+  });
 
   return (
     <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
@@ -107,15 +119,19 @@ const BodyComponent: React.FC<Props> = ({
       <EuiFlexItem>
         <DataQualityDetails
           addSuccessToast={addSuccessToast}
+          baseTheme={baseTheme}
           canUserCreateAndReadCases={canUserCreateAndReadCases}
+          endDate={endDate}
           formatBytes={formatBytes}
           formatNumber={formatNumber}
           getGroupByFieldsOnClick={getGroupByFieldsOnClick}
           ilmPhases={ilmPhases}
+          isAssistantEnabled={isAssistantEnabled}
           openCreateCaseFlyout={openCreateCaseFlyout}
           patterns={patterns}
           patternIndexNames={patternIndexNames}
           patternRollups={patternRollups}
+          startDate={startDate}
           theme={theme}
           updatePatternIndexNames={updatePatternIndexNames}
           updatePatternRollup={updatePatternRollup}

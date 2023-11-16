@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import type { Observable } from 'rxjs';
-import { from, empty } from 'rxjs';
+import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { addError } from '../../../common/store/app/actions';
@@ -24,11 +24,11 @@ import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persi
 import { myEpicTimelineId } from './my_epic_timeline_id';
 import type { ActionTimeline, TimelineById } from './types';
 import type { inputsModel } from '../../../common/store/inputs';
-import type { ResponseFavoriteTimeline } from '../../../../common/types/timeline';
-import { TimelineType } from '../../../../common/types/timeline';
+import type { ResponseFavoriteTimeline } from '../../../../common/api/timeline';
+import { TimelineType } from '../../../../common/api/timeline';
 import { persistFavorite } from '../../containers/api';
 
-export const timelineFavoriteActionsType = [updateIsFavorite.type];
+export const timelineFavoriteActionsType = new Set([updateIsFavorite.type]);
 
 export const epicPersistTimelineFavorite = (
   action: ActionTimeline,
@@ -70,7 +70,7 @@ export const epicPersistTimelineFavorite = (
         endTimelineSaving({
           id: action.payload.id,
         }),
-      ];
+      ].filter(Boolean);
     }),
     startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
@@ -108,10 +108,10 @@ export const createTimelineFavoriteEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) => {
     return action$.pipe(
-      filter((action) => timelineFavoriteActionsType.includes(action.type)),
+      filter((action) => timelineFavoriteActionsType.has(action.type)),
       mergeMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
-        return empty();
+        return EMPTY;
       })
     );
   };

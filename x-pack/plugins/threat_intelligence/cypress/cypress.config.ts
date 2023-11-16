@@ -29,7 +29,7 @@ export default defineCypressConfig({
   execTimeout: 120000,
   pageLoadTimeout: 120000,
   retries: {
-    runMode: 2,
+    runMode: 1,
   },
   screenshotsFolder: '../../../target/kibana-threat-intelligence/cypress/screenshots',
   trashAssetsBeforeRuns: false,
@@ -38,11 +38,19 @@ export default defineCypressConfig({
   viewportHeight: 946,
   viewportWidth: 1680,
   env: {
+    grepFilterSpecs: true,
+    grepTags: '@ess',
     protocol: 'http',
     hostname: 'localhost',
     configport: '5601',
   },
   e2e: {
     baseUrl: 'http://localhost:5601',
+    experimentalMemoryManagement: true,
+    setupNodeEvents(on, config) {
+      // eslint-disable-next-line @typescript-eslint/no-var-requires
+      require('@cypress/grep/src/plugin')(config);
+      return config;
+    },
   },
 });

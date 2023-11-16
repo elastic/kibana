@@ -60,7 +60,7 @@ export interface CreateDataProviderParams {
   field?: string;
   fieldFormat?: string;
   fieldType?: string;
-  values: string | string[] | null | undefined;
+  values: string | string[] | number | number[] | boolean | boolean[];
   sourceParamType?: Serializable;
   negate?: boolean;
 }
@@ -77,10 +77,15 @@ export const createDataProviders = ({
 }: CreateDataProviderParams) => {
   if (field == null) return null;
 
-  const arrayValues = Array.isArray(values) ? (values.length > 0 ? values : [null]) : [values];
+  const arrayValues: Array<string | number | boolean | null> = Array.isArray(values)
+    ? values.length > 0
+      ? values
+      : [null]
+    : [values];
 
-  return arrayValues.reduce<DataProvider[]>((dataProviders, value, index) => {
+  return arrayValues.reduce<DataProvider[]>((dataProviders, rawValue, index) => {
     let id: string = '';
+    const value = rawValue != null ? rawValue.toString() : rawValue;
     const appendedUniqueId = `${contextId}${eventId ? `-${eventId}` : ''}-${field}-${index}${
       value ? `-${value}` : ''
     }`;

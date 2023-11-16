@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { $Values } from '@kbn/utility-types';
-import type { PaletteOutput } from '@kbn/coloring';
+import type { ColorMapping, PaletteOutput } from '@kbn/coloring';
 import type {
   LegendConfig,
   AxisExtentConfig,
@@ -21,7 +21,7 @@ import type {
   FillStyle,
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
-import { EventAnnotationConfig } from '@kbn/event-annotation-plugin/common';
+import { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,
@@ -35,7 +35,6 @@ import {
   IconChartBarHorizontal,
 } from '@kbn/chart-icons';
 
-import { DistributiveOmit } from '@elastic/eui';
 import { CollapseFunction } from '../../../common/expressions';
 import type { VisualizationType } from '../../types';
 import type { ValueLabelConfig } from '../../../common/types';
@@ -104,6 +103,7 @@ export interface XYDataLayerConfig {
   xScaleType?: XScaleType;
   isHistogram?: boolean;
   columnToLabel?: string;
+  colorMapping?: ColorMapping.Config;
 }
 
 export interface XYReferenceLineLayerConfig {
@@ -113,15 +113,72 @@ export interface XYReferenceLineLayerConfig {
   layerType: 'referenceLine';
 }
 
-export interface XYAnnotationLayerConfig {
+export interface XYByValueAnnotationLayerConfig {
   layerId: string;
   layerType: 'annotations';
   annotations: EventAnnotationConfig[];
-  hide?: boolean;
   indexPatternId: string;
-  simpleView?: boolean;
   ignoreGlobalFilters: boolean;
+  // populated only when the annotation has been forked from the
+  // version saved in the library (persisted as XYPersistedLinkedByValueAnnotationLayerConfig)
+  cachedMetadata?: {
+    title: string;
+    description: string;
+    tags: string[];
+  };
 }
+
+export type XYPersistedByValueAnnotationLayerConfig = Omit<
+  XYByValueAnnotationLayerConfig,
+  'indexPatternId' | 'hide' | 'simpleView'
+> & { persistanceType?: 'byValue'; hide?: boolean; simpleView?: boolean }; // props made optional for backwards compatibility since this is how the existing saved objects are
+
+export type XYByReferenceAnnotationLayerConfig = XYByValueAnnotationLayerConfig & {
+  annotationGroupId: string;
+  __lastSaved: EventAnnotationGroupConfig;
+};
+
+export type XYPersistedByReferenceAnnotationLayerConfig = Pick<
+  XYByValueAnnotationLayerConfig,
+  'layerId' | 'layerType'
+> & {
+  persistanceType: 'byReference';
+  annotationGroupRef: string;
+};
+
+/**
+ * This is the type of hybrid layer we get after the user has made a change to
+ * a by-reference annotation layer and saved the visualization without
+ * first saving the changes to the library annotation layer.
+ *
+ * We maintain the link to the library annotation group, but allow the users
+ * changes (persisted in the visualization state) to override the attributes in
+ * the library version until the user
+ * - saves the changes to the library annotation group
+ * - reverts the changes
+ * - unlinks the layer from the library annotation group
+ */
+export type XYPersistedLinkedByValueAnnotationLayerConfig = Omit<
+  XYPersistedByValueAnnotationLayerConfig,
+  'persistanceType'
+> &
+  Omit<XYPersistedByReferenceAnnotationLayerConfig, 'persistanceType'> & {
+    persistanceType: 'linked';
+  };
+
+export type XYAnnotationLayerConfig =
+  | XYByReferenceAnnotationLayerConfig
+  | XYByValueAnnotationLayerConfig;
+
+export type XYPersistedAnnotationLayerConfig =
+  | XYPersistedByReferenceAnnotationLayerConfig
+  | XYPersistedByValueAnnotationLayerConfig
+  | XYPersistedLinkedByValueAnnotationLayerConfig;
+
+export type XYPersistedLayerConfig =
+  | XYDataLayerConfig
+  | XYReferenceLineLayerConfig
+  | XYPersistedAnnotationLayerConfig;
 
 export type XYLayerConfig =
   | XYDataLayerConfig
@@ -166,7 +223,7 @@ export interface XYState {
 export type State = XYState;
 
 export type XYPersistedState = Omit<XYState, 'layers'> & {
-  layers: Array<DistributiveOmit<XYLayerConfig, 'indexPatternId'>>;
+  layers: XYPersistedLayerConfig[];
 };
 
 export type PersistedState = XYPersistedState;

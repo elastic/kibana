@@ -6,11 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { Env } from '@kbn/config';
-import type { OnPostAuthHandler, OnPreResponseHandler } from '@kbn/core-http-server';
+import type {
+  OnPostAuthHandler,
+  OnPreResponseHandler,
+  OnPreResponseInfo,
+  KibanaRequest,
+} from '@kbn/core-http-server';
 import { isSafeMethod } from '@kbn/core-http-router-server-internal';
+import { Logger } from '@kbn/logging';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpConfig } from './http_config';
-import { LifecycleRegistrar } from './http_server';
 
 const VERSION_HEADER = 'kbn-version';
 const XSRF_HEADER = 'kbn-xsrf';
@@ -39,6 +44,23 @@ export const createXsrfPostAuthHandler = (config: HttpConfig): OnPostAuthHandler
   };
 };
 
+export const createRestrictInternalRoutesPostAuthHandler = (
+  config: HttpConfig
+): OnPostAuthHandler => {
+  const isRestrictionEnabled = config.restrictInternalApis;
+
+  return (request, response, toolkit) => {
+    const isInternalRoute = request.route.options.access === 'internal';
+    if (isRestrictionEnabled && isInternalRoute && !request.isInternalApiRequest) {
+      // throw 400
+      return response.badRequest({
+        body: `uri [${request.url}] with method [${request.route.method}] exists but is not available with the current configuration`,
+      });
+    }
+    return toolkit.next();
+  };
+};
+
 export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPostAuthHandler => {
   return (request, response, toolkit) => {
     const requestVersion = request.headers[VERSION_HEADER];
@@ -55,12 +77,10 @@ export const createVersionCheckPostAuthHandler = (kibanaVersion: string): OnPost
         },
       });
     }
-
     return toolkit.next();
   };
 };
 
-// TODO: implement header required for accessing internal routes. See https://github.com/elastic/kibana/issues/151940
 export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPreResponseHandler => {
   const {
     name: serverName,
@@ -69,24 +89,55 @@ export const createCustomHeadersPreResponseHandler = (config: HttpConfig): OnPre
     csp: { header: cspHeader },
   } = config;
 
-  return (request, response, toolkit) => {
-    const additionalHeaders = {
-      ...securityResponseHeaders,
-      ...customResponseHeaders,
-      'Content-Security-Policy': cspHeader,
-      [KIBANA_NAME_HEADER]: serverName,
-    };
+  const additionalHeaders = {
+    ...securityResponseHeaders,
+    ...customResponseHeaders,
+    'Content-Security-Policy': cspHeader,
+    [KIBANA_NAME_HEADER]: serverName,
+  };
 
-    return toolkit.next({ headers: additionalHeaders });
+  return (request, response, toolkit) => {
+    return toolkit.next({ headers: { ...additionalHeaders } });
   };
 };
 
-export const registerCoreHandlers = (
-  registrar: LifecycleRegistrar,
-  config: HttpConfig,
-  env: Env
-) => {
-  registrar.registerOnPreResponse(createCustomHeadersPreResponseHandler(config));
-  registrar.registerOnPostAuth(createXsrfPostAuthHandler(config));
-  registrar.registerOnPostAuth(createVersionCheckPostAuthHandler(env.packageInfo.version));
+const shouldLogBuildNumberMismatch = (
+  serverBuild: { number: number; string: string },
+  request: KibanaRequest,
+  response: OnPreResponseInfo
+): { log: true; clientBuild: number } | { log: false } => {
+  if (
+    response.statusCode >= 400 &&
+    request.headers[KIBANA_BUILD_NR_HEADER] !== serverBuild.string
+  ) {
+    const clientBuildNumber = parseInt(String(request.headers[KIBANA_BUILD_NR_HEADER]), 10);
+    if (!isNaN(clientBuildNumber)) {
+      return { log: true, clientBuild: clientBuildNumber };
+    }
+  }
+  return { log: false };
+};
+
+/**
+ * This should remain part of the logger prefix so that we can notify/track
+ * when we see this logged for observability purposes.
+ */
+const BUILD_NUMBER_MISMATCH_LOGGER_NAME = 'kbn-build-number-mismatch';
+export const createBuildNrMismatchLoggerPreResponseHandler = (
+  serverBuildNumber: number,
+  log: Logger
+): OnPreResponseHandler => {
+  const serverBuild = { number: serverBuildNumber, string: String(serverBuildNumber) };
+  log = log.get(BUILD_NUMBER_MISMATCH_LOGGER_NAME);
+
+  return (request, response, toolkit) => {
+    const result = shouldLogBuildNumberMismatch(serverBuild, request, response);
+    if (result.log === true) {
+      const clientCompAdjective = result.clientBuild > serverBuildNumber ? 'newer' : 'older';
+      log.warn(
+        `Client build (${result.clientBuild}) is ${clientCompAdjective} than this Kibana server build (${serverBuildNumber}). The [${response.statusCode}] error status in req id [${request.id}] may be due to client-server incompatibility!`
+      );
+    }
+    return toolkit.next();
+  };
 };

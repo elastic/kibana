@@ -33,9 +33,9 @@
       "expressionMetricVis",
       "expressionHeatmap",
       "expressionXY",
+      "expressionTagcloud",
       "eventAnnotation",
       "unifiedSearch",
-      "unifiedFieldList",
       "contentManagement"
     ],
     "optionalPlugins": [
@@ -45,7 +45,8 @@
       "taskManager",
       "globalSearch",
       "savedObjectsTagging",
-      "spaces"
+      "spaces",
+      "serverless"
     ],
     "requiredBundles": [
       "unifiedSearch",
@@ -55,7 +56,6 @@
       "embeddable",
       "fieldFormats",
       "charts",
-      "visualizationUiComponents"
     ],
     "extraPublicDirs": [
       "common/constants"

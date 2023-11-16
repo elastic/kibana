@@ -359,11 +359,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await PageObjects.lens.createLayer('data');
 
+        // here the editor will error out as the mandatory vertical axis is missing
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_xDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-1 > lnsXY_xDimensionPanel',
           'duplicate',
-          xyChartContainer
+          'workspace-error-message'
         );
 
         await PageObjects.lens.assertFocusedDimension('@timestamp [1]');
@@ -379,7 +380,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
           '@timestamp',
           'Average of bytes',
-          'Top values of ip',
+          'Top 3 values of ip',
         ]);
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-1')).to.eql([
           '@timestamp [1]',
@@ -446,11 +447,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           'lns-layerPanel-1 > lnsXY_splitDimensionPanel > lns-empty-dimension'
         );
 
+        // here the editor will error out as the mandatory vertical axis is missing
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-1 > lnsXY_splitDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-0 > lnsXY_splitDimensionPanel',
           'swap',
-          xyChartContainer
+          'workspace-error-message'
         );
 
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([
@@ -464,11 +466,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         ]);
       });
       it('can combine dimensions', async () => {
+        // here the editor will error out as the mandatory vertical axis is missing
         await PageObjects.lens.dragDimensionToExtraDropType(
           'lns-layerPanel-0 > lnsXY_splitDimensionPanel  > lns-dimensionTrigger',
           'lns-layerPanel-1 > lnsXY_splitDimensionPanel',
           'combine',
-          xyChartContainer
+          'workspace-error-message'
         );
 
         expect(await PageObjects.lens.getDimensionTriggersTexts('lns-layerPanel-0')).to.eql([

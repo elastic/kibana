@@ -9,18 +9,18 @@ import { computeSLI } from './compute_sli';
 
 describe('computeSLI', () => {
   it('returns -1 when no total events', () => {
-    expect(computeSLI({ good: 100, total: 0 })).toEqual(-1);
+    expect(computeSLI(100, 0)).toEqual(-1);
   });
 
   it('returns the sli value', () => {
-    expect(computeSLI({ good: 100, total: 1000 })).toEqual(0.1);
+    expect(computeSLI(100, 1000)).toEqual(0.1);
   });
 
   it('returns 1 when good is greater than total events', () => {
-    expect(computeSLI({ good: 9999, total: 9 })).toEqual(1);
+    expect(computeSLI(9999, 9)).toEqual(1);
   });
 
   it('returns rounds the value to 6 digits', () => {
-    expect(computeSLI({ good: 33, total: 90 })).toEqual(0.366667);
+    expect(computeSLI(33, 90)).toEqual(0.366667);
   });
 });

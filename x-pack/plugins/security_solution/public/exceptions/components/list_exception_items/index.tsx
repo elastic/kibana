@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useMemo } from 'react';
 import type { FC } from 'react';
+import React, { useMemo } from 'react';
 import type {
   ExceptionListItemIdentifiers,
   GetExceptionItemProps,
@@ -13,22 +13,23 @@ import type {
   ViewerStatus,
 } from '@kbn/securitysolution-exception-list-components';
 import { ExceptionItems } from '@kbn/securitysolution-exception-list-components';
-import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
 import type { Pagination } from '@elastic/eui';
 import { FormattedDate } from '../../../common/components/formatted_date';
 import { getFormattedComments } from '../../utils/ui.helpers';
-import { ListDetailsLinkAnchor } from '../list_details_link_anchor';
+import { LinkToRuleDetails } from '../link_to_rule_details';
 import { ExceptionsUtility } from '../exceptions_utility';
 import * as i18n from '../../translations/list_exception_items';
+import { useEndpointExceptionsCapability } from '../../hooks/use_endpoint_exceptions_capability';
 
 interface ListExceptionItemsProps {
   isReadOnly: boolean;
   exceptions: ExceptionListItemSchema[];
   listType: ExceptionListTypeEnum;
   lastUpdated: string | number | null;
-  pagination: Pagination;
+  pagination: Pagination & { pageSize: number };
   emptyViewerTitle?: string;
   emptyViewerBody?: string;
   emptyViewerButtonText?: string;
@@ -58,6 +59,8 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
   onPaginationChange,
   onCreateExceptionListItem,
 }) => {
+  const canWriteEndpointExceptions = useEndpointExceptionsCapability('crudEndpointExceptions');
+
   const editButtonText = useMemo(() => {
     return listType === ExceptionListTypeEnum.ENDPOINT
       ? i18n.EXCEPTION_ITEM_CARD_EDIT_ENDPOINT_LABEL
@@ -76,7 +79,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         viewerStatus={viewerStatus as ViewerStatus}
         listType={listType as ExceptionListTypeEnum}
         ruleReferences={ruleReferences}
-        isReadOnly={isReadOnly}
+        isReadOnly={isReadOnly || !canWriteEndpointExceptions}
         exceptions={exceptions}
         emptyViewerTitle={emptyViewerTitle}
         emptyViewerBody={emptyViewerBody}
@@ -89,7 +92,7 @@ const ListExceptionItemsComponent: FC<ListExceptionItemsProps> = ({
         onEditExceptionItem={onEditExceptionItem}
         onDeleteException={onDeleteException}
         getFormattedComments={getFormattedComments}
-        securityLinkAnchorComponent={ListDetailsLinkAnchor}
+        securityLinkAnchorComponent={LinkToRuleDetails}
         formattedDateComponent={FormattedDate}
         onCreateExceptionListItem={onCreateExceptionListItem}
         exceptionsUtilityComponent={() =>

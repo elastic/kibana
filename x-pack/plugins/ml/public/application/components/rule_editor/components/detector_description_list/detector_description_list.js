@@ -69,6 +69,7 @@ export function DetectorDescriptionList({ job, detector, anomaly }) {
     <EuiDescriptionList
       className="rule-detector-description-list"
       type="column"
+      columnWidths={[15, 85]}
       listItems={listItems}
     />
   );

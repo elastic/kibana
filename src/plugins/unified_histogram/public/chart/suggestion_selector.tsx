@@ -67,7 +67,7 @@ export const SuggestionSelector = ({
   const { euiTheme } = useEuiTheme();
   const suggestionComboCss = css`
     width: 100%;
-    max-width: ${euiTheme.base * 22}px;
+    max-width: ${euiTheme.base * 15}px;
   `;
 
   return (
@@ -78,9 +78,7 @@ export const SuggestionSelector = ({
     >
       <EuiComboBox
         data-test-subj="unifiedHistogramSuggestionSelector"
-        prepend={i18n.translate('unifiedHistogram.suggestionSelectorLabel', {
-          defaultMessage: 'Visualization',
-        })}
+        prepend={<EuiIcon type={activeSuggestion?.previewIcon ?? 'empty'} />}
         placeholder={i18n.translate('unifiedHistogram.suggestionSelectorPlaceholder', {
           defaultMessage: 'Select visualization',
         })}
@@ -88,9 +86,9 @@ export const SuggestionSelector = ({
         options={suggestionOptions}
         selectedOptions={selectedSuggestion}
         onChange={onSelectionChange}
-        compressed
         fullWidth={true}
         isClearable={false}
+        compressed
         onFocus={disableFieldPopover}
         onBlur={enableFieldPopover}
         renderOption={(option) => {

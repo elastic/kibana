@@ -75,6 +75,26 @@ NOTE: {kib} automatically surrounds your DLS query with a `query` block, so you 
 [role="screenshot"]
 image::security/images/create-role-dls-example.png[Create role with DLS index privileges]
 
+[[adding_remote_index_privileges]]
+==== Remote index privileges
+
+If you have at least a platinum license, you can manage access to indices in remote clusters. 
+
+You can assign the same privileges, document-level, and field-level as for <<adding_index_privileges,local index privileges>>. 
+
+[[remote_index_privilege_example_1]]
+===== Example: Grant access to indices in remote clusters
+
+. Go to **Stack Management > Roles**, and then click **Create role**.
+. In **Remote index privileges**, enter:
+.. The name of your remote cluster in the **Remote clusters** field.
+.. The name of the index in your remote cluster in the **Remote indices** field.
+.. The allowed actions in the **Privileges** field. (e.g. `read` and `view_index_metadata`)
+
+[role="screenshot"]
+image::security/images/create-role-remote-index-example.png[Create role with remote index privileges]
+
+
 [[adding_kibana_privileges]]
 ==== {kib} privileges
 

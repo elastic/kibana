@@ -70,7 +70,7 @@ export async function loadDataView({
   let fetchedDataView: DataView | null = null;
   // try to fetch adhoc data view first
   try {
-    fetchedDataView = fetchId ? await dataViews.get(fetchId, false) : null;
+    fetchedDataView = fetchId ? await dataViews.get(fetchId, false, true) : null;
     if (fetchedDataView && !fetchedDataView.isPersisted()) {
       return {
         list: dataViewList || [],
@@ -88,7 +88,10 @@ export async function loadDataView({
   let defaultDataView: DataView | null = null;
   if (!fetchedDataView) {
     try {
-      defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
+      defaultDataView = await dataViews.getDefaultDataView({
+        displayErrors: false,
+        refreshFields: true,
+      });
     } catch (e) {
       //
     }
@@ -123,7 +126,8 @@ export function resolveDataView(
     return ownDataView;
   }
 
-  if (stateVal && !stateValFound) {
+  // no warnings for text based mode
+  if (stateVal && !stateValFound && !Boolean(isTextBasedQuery)) {
     const warningTitle = i18n.translate('discover.valueIsNotConfiguredDataViewIDWarningTitle', {
       defaultMessage: '{stateVal} is not a configured data view ID',
       values: {
@@ -146,20 +150,18 @@ export function resolveDataView(
       });
       return ownDataView;
     }
-    if (!Boolean(isTextBasedQuery)) {
-      toastNotifications.addWarning({
-        title: warningTitle,
-        text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
-          defaultMessage:
-            'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
-          values: {
-            loadedDataViewTitle: loadedDataView.getIndexPattern(),
-            loadedDataViewId: loadedDataView.id,
-          },
-        }),
-        'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
-      });
-    }
+    toastNotifications.addWarning({
+      title: warningTitle,
+      text: i18n.translate('discover.showingDefaultDataViewWarningDescription', {
+        defaultMessage:
+          'Showing the default data view: "{loadedDataViewTitle}" ({loadedDataViewId})',
+        values: {
+          loadedDataViewTitle: loadedDataView.getIndexPattern(),
+          loadedDataViewId: loadedDataView.id,
+        },
+      }),
+      'data-test-subj': 'dscDataViewNotFoundShowDefaultWarning',
+    });
   }
 
   return loadedDataView;

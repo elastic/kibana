@@ -25,14 +25,11 @@ import {
   EuiTitle,
   useIsWithinMaxBreakpoint,
 } from '@elastic/eui';
-import { SavedObject } from '@kbn/core/public';
-import { FetcherResult } from '@kbn/observability-plugin/public/hooks/use_fetcher';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { FETCH_STATUS, useFetcher } from '@kbn/observability-plugin/public';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { useTheme } from '@kbn/observability-plugin/public';
+import { useTheme, FETCH_STATUS, useFetcher } from '@kbn/observability-shared-plugin/public';
 import { MonitorDetailsPanel } from '../../../common/components/monitor_details_panel';
 import { ClientPluginsStart } from '../../../../../../plugin';
 import { LocationsStatus, useStatusByLocation } from '../../../../hooks/use_status_by_location';
@@ -45,16 +42,11 @@ import {
   setFlyoutConfig,
 } from '../../../../state';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
-import {
-  ConfigKey,
-  EncryptedSyntheticsMonitor,
-  MonitorOverviewItem,
-  SyntheticsMonitor,
-} from '../types';
+import { ConfigKey, EncryptedSyntheticsMonitor, MonitorOverviewItem } from '../types';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import { fetchSyntheticsMonitor } from '../../../../state/overview/api';
 import { MonitorStatus } from '../../../common/components/monitor_status';
 import { MonitorLocationSelect } from '../../../common/components/monitor_location_select';
+import { fetchSyntheticsMonitor } from '../../../../state/monitor_details/api';
 
 interface Props {
   configId: string;
@@ -259,21 +251,18 @@ export function MonitorDetailFlyout(props: Props) {
   const upsertSuccess = upsertStatus?.status === 'success';
 
   const {
-    data: monitorSavedObject,
+    data: monitorObject,
     error,
     status,
     loading,
-  }: FetcherResult<SavedObject<SyntheticsMonitor>> = useFetcher(
-    () => fetchSyntheticsMonitor(configId),
-    [configId, upsertSuccess]
-  );
+  } = useFetcher(() => fetchSyntheticsMonitor({ monitorId: configId }), [configId, upsertSuccess]);
 
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
 
   const monitorDetail = useMonitorDetail(configId, props.location);
   const { locations } = useStatusByLocation({
     configId,
-    monitorLocations: monitorSavedObject?.attributes.locations,
+    monitorLocations: monitorObject?.locations,
   });
 
   const isOverlay = useIsWithinMaxBreakpoint('xl');
@@ -287,14 +276,14 @@ export function MonitorDetailFlyout(props: Props) {
     >
       {status === FETCH_STATUS.FAILURE && <EuiErrorBoundary>{error?.message}</EuiErrorBoundary>}
       {status === FETCH_STATUS.LOADING && <LoadingState />}
-      {status === FETCH_STATUS.SUCCESS && monitorSavedObject && (
+      {status === FETCH_STATUS.SUCCESS && monitorObject && (
         <>
           <EuiFlyoutHeader hasBorder>
             <EuiPanel hasBorder={false} hasShadow={false} paddingSize="l">
               <EuiFlexGroup responsive={false} gutterSize="s">
                 <EuiFlexItem grow={false}>
                   <EuiTitle size="s">
-                    <h2>{monitorSavedObject?.attributes[ConfigKey.NAME]}</h2>
+                    <h2>{monitorObject?.[ConfigKey.NAME]}</h2>
                   </EuiTitle>
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
@@ -318,7 +307,7 @@ export function MonitorDetailFlyout(props: Props) {
                 locations={locations}
                 setCurrentLocation={setLocation}
                 configId={configId}
-                monitor={monitorSavedObject.attributes}
+                monitor={monitorObject}
                 onEnabledChange={props.onEnabledChange}
               />
             </EuiPanel>
@@ -331,10 +320,8 @@ export function MonitorDetailFlyout(props: Props) {
               latestPing={monitorDetail.data}
               configId={configId}
               monitor={{
-                ...monitorSavedObject.attributes,
+                ...monitorObject,
                 id,
-                updated_at: monitorSavedObject.updated_at!,
-                created_at: monitorSavedObject.created_at!,
               }}
               loading={Boolean(loading)}
             />

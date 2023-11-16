@@ -137,7 +137,7 @@
             "label": "humanFriendlyMessage",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "packages/kbn-reporting/common/errors.ts",
             "deprecated": false,
@@ -593,7 +593,7 @@
             "label": "humanFriendlyMessage",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "packages/kbn-reporting/common/errors.ts",
             "deprecated": false,
@@ -879,7 +879,7 @@
             "label": "humanFriendlyMessage",
             "description": [],
             "signature": [
-              "() => any"
+              "() => string"
             ],
             "path": "packages/kbn-reporting/common/errors.ts",
             "deprecated": false,

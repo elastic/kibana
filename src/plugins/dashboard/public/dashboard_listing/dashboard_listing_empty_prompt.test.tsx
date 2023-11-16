@@ -34,6 +34,7 @@ const makeDefaultProps = (): DashboardListingEmptyPromptProps => ({
   goToDashboard: jest.fn(),
   setUnsavedDashboardIds: jest.fn(),
   useSessionStorageIntegration: true,
+  disableCreateDashboardButton: false,
 });
 
 function mountWith({
@@ -73,6 +74,21 @@ test('renders empty prompt with link when showWriteControls is on', async () => 
 
   component!.update();
   expect(component!.find('EuiLink').length).toBe(1);
+});
+
+test('renders disabled action button when disableCreateDashboardButton is true', async () => {
+  pluginServices.getServices().dashboardCapabilities.showWriteControls = true;
+
+  let component: ReactWrapper;
+  await act(async () => {
+    ({ component } = mountWith({ props: { disableCreateDashboardButton: true } }));
+  });
+
+  component!.update();
+
+  expect(component!.find(`[data-test-subj="newItemButton"]`).first().prop('disabled')).toEqual(
+    true
+  );
 });
 
 test('renders continue button when no dashboards exist but one is in progress', async () => {

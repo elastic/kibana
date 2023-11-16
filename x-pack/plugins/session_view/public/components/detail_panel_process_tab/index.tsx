@@ -7,7 +7,7 @@
 import React, { ReactNode, useCallback, useMemo } from 'react';
 import { EuiTextColor } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Process } from '../../../common/types/process_tree';
+import type { Process } from '../../../common';
 import { DetailPanelAccordion } from '../detail_panel_accordion';
 import { DetailPanelCopy } from '../detail_panel_copy';
 import { DetailPanelDescriptionList } from '../detail_panel_description_list';

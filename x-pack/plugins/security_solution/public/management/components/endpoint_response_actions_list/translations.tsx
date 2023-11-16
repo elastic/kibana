@@ -71,6 +71,12 @@ export const OUTPUT_MESSAGES = Object.freeze({
         defaultMessage: 'Comment',
       }
     ),
+    hostname: i18n.translate(
+      'xpack.securitySolution.responseActionsList.list.item.expandSection.hostname',
+      {
+        defaultMessage: 'Hostname',
+      }
+    ),
   },
 });
 
@@ -188,8 +194,8 @@ export const FILTER_NAMES = Object.freeze({
   users: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.users', {
     defaultMessage: 'Filter by username',
   }),
-  automated: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.automated', {
-    defaultMessage: 'Automated',
+  type: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.type', {
+    defaultMessage: 'Type',
   }),
 });
 
@@ -209,3 +215,12 @@ export const EXECUTE_FILE_LINK_TITLE = i18n.translate(
   'xpack.securitySolution.responseActionExecuteDownloadLink.downloadButtonLabel',
   { defaultMessage: 'Click here to download full output' }
 );
+
+export const FILTER_TYPE_OPTIONS = Object.freeze({
+  manual: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.manual', {
+    defaultMessage: 'Triggered manually',
+  }),
+  automated: i18n.translate('xpack.securitySolution.responseActionsList.list.filter.automated', {
+    defaultMessage: 'Triggered by rule',
+  }),
+});

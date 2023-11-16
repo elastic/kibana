@@ -38,7 +38,7 @@ export class SessionViewPlugin implements Plugin {
 
     // Register server routes
     if (this.router) {
-      registerRoutes(this.router, plugins.ruleRegistry);
+      registerRoutes(this.router, this.logger, plugins.ruleRegistry);
     }
   }
 

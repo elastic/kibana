@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertestWithoutAuth');
@@ -47,9 +47,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch all calendars', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars`)
+          .get(`/internal/ml/calendars`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).to.have.length(testCalendars.length);
@@ -59,9 +59,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch all calendars for user with view permission', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars`)
+          .get(`/internal/ml/calendars`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body).to.have.length(testCalendars.length);
@@ -71,9 +71,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not fetch calendars for unauthorized user', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars`)
+          .get(`/internal/ml/calendars`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
@@ -99,9 +99,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch calendar & associated events by id', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars/${calendarId}`)
+          .get(`/internal/ml/calendars/${calendarId}`)
           .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.job_ids).to.eql(testCalendar.job_ids);
@@ -112,9 +112,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should fetch calendar & associated events by id for user with view permission', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars/${calendarId}`)
+          .get(`/internal/ml/calendars/${calendarId}`)
           .auth(USER.ML_VIEWER, ml.securityCommon.getPasswordForUser(USER.ML_VIEWER))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(200, status, body);
 
         expect(body.job_ids).to.eql(testCalendar.job_ids);
@@ -125,9 +125,9 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('should not fetch calendars for unauthorized user', async () => {
         const { body, status } = await supertest
-          .get(`/api/ml/calendars/${calendarId}`)
+          .get(`/internal/ml/calendars/${calendarId}`)
           .auth(USER.ML_UNAUTHORIZED, ml.securityCommon.getPasswordForUser(USER.ML_UNAUTHORIZED))
-          .set(COMMON_REQUEST_HEADERS);
+          .set(getCommonRequestHeader('1'));
         ml.api.assertResponseStatusCode(403, status, body);
 
         expect(body.error).to.eql('Forbidden');
@@ -136,9 +136,9 @@ export default ({ getService }: FtrProviderContext) => {
 
     it('should return 404 if invalid calendar id', async () => {
       const { body, status } = await supertest
-        .get(`/api/ml/calendars/calendar_id_dne`)
+        .get(`/internal/ml/calendars/calendar_id_dne`)
         .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
-        .set(COMMON_REQUEST_HEADERS);
+        .set(getCommonRequestHeader('1'));
       ml.api.assertResponseStatusCode(404, status, body);
 
       expect(body.error).to.eql('Not Found');

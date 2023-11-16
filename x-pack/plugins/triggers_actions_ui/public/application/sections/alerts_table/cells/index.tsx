@@ -6,18 +6,27 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { ALERT_STATUS, ALERT_CASE_IDS } from '@kbn/rule-data-utils';
+import { ALERT_STATUS, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import { CellComponentProps, SystemCellComponentMap, SystemCellId } from '../types';
 import { DefaultCell } from './default_cell';
 import { AlertLifecycleStatusCell } from './alert_lifecycle_status_cell';
 import { CasesCell } from '../cases/cell';
+import { MaintenanceWindowCell } from '../maintenance_windows/cell';
 
-export const systemCells: SystemCellId[] = [ALERT_STATUS, ALERT_CASE_IDS];
+export const systemCells: SystemCellId[] = [
+  ALERT_STATUS,
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+];
 
 const SystemCellFactoryComponent: React.FC<CellComponentProps> = (props) => {
   const { columnId } = props;
   const cellComponents: SystemCellComponentMap = useMemo(
-    () => ({ [ALERT_STATUS]: AlertLifecycleStatusCell, [ALERT_CASE_IDS]: CasesCell }),
+    () => ({
+      [ALERT_STATUS]: AlertLifecycleStatusCell,
+      [ALERT_CASE_IDS]: CasesCell,
+      [ALERT_MAINTENANCE_WINDOW_IDS]: MaintenanceWindowCell,
+    }),
     []
   );
 

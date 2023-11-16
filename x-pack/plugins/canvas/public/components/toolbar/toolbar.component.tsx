@@ -106,6 +106,7 @@ export const Toolbar: FC<Props> = ({
                   iconType="arrowLeft"
                   isDisabled={selectedPageNumber <= 1}
                   aria-label={strings.getPreviousPageAriaLabel()}
+                  data-test-subj="previousPageButton"
                 />
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
@@ -124,6 +125,7 @@ export const Toolbar: FC<Props> = ({
                   iconType="arrowRight"
                   isDisabled={selectedPageNumber >= totalPages}
                   aria-label={strings.getNextPageAriaLabel()}
+                  data-test-subj="nextPageButton"
                 />
               </EuiFlexItem>
               <EuiFlexItem />

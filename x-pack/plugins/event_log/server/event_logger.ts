@@ -95,7 +95,7 @@ export class EventLogger implements IEventLogger {
     }
 
     const doc: Doc = {
-      index: this.esContext.esNames.alias,
+      index: this.esContext.esNames.dataStream,
       body: validatedEvent,
     };
 

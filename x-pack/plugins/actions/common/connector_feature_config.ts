@@ -25,6 +25,14 @@ export const AlertingConnectorFeatureId = 'alerting';
 export const CasesConnectorFeatureId = 'cases';
 export const UptimeConnectorFeatureId = 'uptime';
 export const SecurityConnectorFeatureId = 'siem';
+export const GenerativeAIConnectorFeatureId = 'generativeAI';
+
+const compatibilityGenerativeAI = i18n.translate(
+  'xpack.actions.availableConnectorFeatures.compatibility.generativeAI',
+  {
+    defaultMessage: 'Generative AI',
+  }
+);
 
 const compatibilityAlertingRules = i18n.translate(
   'xpack.actions.availableConnectorFeatures.compatibility.alertingRules',
@@ -72,11 +80,18 @@ export const SecuritySolutionFeature: ConnectorFeatureConfig = {
   compatibility: compatibilityAlertingRules,
 };
 
+export const GenerativeAIFeature: ConnectorFeatureConfig = {
+  id: GenerativeAIConnectorFeatureId,
+  name: compatibilityGenerativeAI,
+  compatibility: compatibilityGenerativeAI,
+};
+
 const AllAvailableConnectorFeatures = {
   [AlertingConnectorFeature.id]: AlertingConnectorFeature,
   [CasesConnectorFeature.id]: CasesConnectorFeature,
   [UptimeConnectorFeature.id]: UptimeConnectorFeature,
   [SecuritySolutionFeature.id]: SecuritySolutionFeature,
+  [GenerativeAIFeature.id]: GenerativeAIFeature,
 };
 
 export function areValidFeatures(ids: string[]) {

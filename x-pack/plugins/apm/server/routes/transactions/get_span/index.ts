@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { termQuery } from '@kbn/observability-plugin/server';
+import { rangeQuery, termQuery } from '@kbn/observability-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { SPAN_ID, TRACE_ID } from '../../../../common/es_fields/apm';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -19,11 +19,15 @@ export async function getSpan({
   traceId,
   parentTransactionId,
   apmEventClient,
+  start,
+  end,
 }: {
   spanId: string;
   traceId: string;
   parentTransactionId?: string;
   apmEventClient: APMEventClient;
+  start: number;
+  end: number;
 }): Promise<{ span?: Span; parentTransaction?: Transaction }> {
   const [spanResp, parentTransaction] = await Promise.all([
     apmEventClient.search('get_span', {
@@ -33,11 +37,13 @@ export async function getSpan({
       body: {
         track_total_hits: false,
         size: 1,
+        terminate_after: 1,
         query: {
           bool: {
             filter: asMutableArray([
               { term: { [SPAN_ID]: spanId } },
               ...termQuery(TRACE_ID, traceId),
+              ...rangeQuery(start, end),
             ]),
           },
         },
@@ -48,6 +54,8 @@ export async function getSpan({
           apmEventClient,
           transactionId: parentTransactionId,
           traceId,
+          start,
+          end,
         })
       : undefined,
   ]);

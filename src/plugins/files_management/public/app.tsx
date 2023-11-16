@@ -9,7 +9,7 @@
 import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list';
+import { TableListView, UserContentCommonSchema } from '@kbn/content-management-table-list-view';
 import numeral from '@elastic/numeral';
 import type { FileJSON } from '@kbn/files-plugin/common';
 
@@ -42,8 +42,8 @@ export const App: FunctionComponent = () => {
   return (
     <div data-test-subj="filesManagementApp">
       <TableListView<FilesUserContentSchema>
-        tableListTitle={i18nTexts.tableListTitle}
-        tableListDescription={i18nTexts.tableListDescription}
+        title={i18nTexts.tableListTitle}
+        description={i18nTexts.tableListDescription}
         titleColumnName={i18nTexts.titleColumnName}
         emptyPrompt={<EmptyPrompt />}
         entityName={i18nTexts.entityName}

@@ -23,6 +23,7 @@ export const getSecurityTelemetryStats = async (
   const response = await supertest
     .get(SECURITY_TELEMETRY_URL)
     .set('kbn-xsrf', 'true')
+    .set('elastic-api-version', '1')
     .send({ unencrypted: true, refreshCache: true });
   if (response.status !== 200) {
     log.error(

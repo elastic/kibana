@@ -19,12 +19,14 @@ const rewriteBodyReq: RewriteRequestCase<ActionType> = ({
   enabled_in_license: enabledInLicense,
   minimum_license_required: minimumLicenseRequired,
   supported_feature_ids: supportedFeatureIds,
+  is_system_action_type: isSystemActionType,
   ...res
 }: AsApiContract<ActionType>) => ({
   enabledInConfig,
   enabledInLicense,
   minimumLicenseRequired,
   supportedFeatureIds,
+  isSystemActionType,
   ...res,
 });
 

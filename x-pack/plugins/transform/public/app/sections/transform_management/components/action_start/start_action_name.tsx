@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import React, { FC, useContext } from 'react';
+import React, { type FC } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiToolTip } from '@elastic/eui';
 
+import { createNoStatsTooltipMessage } from '../../../../../../common/utils/create_stats_unknown_message';
+import { missingTransformStats } from '../../../../common/transform_list';
 import { TRANSFORM_STATE } from '../../../../../../common/constants';
+import { createCapabilityFailureMessage } from '../../../../../../common/utils/create_capability_failure_message';
 
-import {
-  createCapabilityFailureMessage,
-  AuthorizationContext,
-} from '../../../../lib/authorization';
+import { useTransformCapabilities } from '../../../../hooks';
 import { TransformListRow, isCompletedBatchTransform } from '../../../../common';
 
 export const startActionNameText = i18n.translate(
@@ -33,7 +33,7 @@ export const isStartActionDisabled = (
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
   // Disable start action if one of the transforms is already started or trying to restart will throw error
   const startedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
+    (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STARTED
   );
 
   return (
@@ -41,7 +41,8 @@ export const isStartActionDisabled = (
     completedBatchTransform ||
     startedTransform ||
     items.length === 0 ||
-    transformNodes === 0
+    transformNodes === 0 ||
+    missingTransformStats(items)
   );
 };
 
@@ -55,14 +56,14 @@ export const StartActionName: FC<StartActionNameProps> = ({
   forceDisable,
   transformNodes,
 }) => {
-  const { canStartStopTransform } = useContext(AuthorizationContext).capabilities;
+  const { canStartStopTransform } = useTransformCapabilities();
   const isBulkAction = items.length > 1;
 
   // Disable start for batch transforms which have completed.
   const completedBatchTransform = items.some((i: TransformListRow) => isCompletedBatchTransform(i));
-  // Disable start action if one of the transforms is already started or trying to restart will throw error
+  // Disable if one of the transforms is already started or trying to restart will throw error
   const startedTransform = items.some(
-    (i: TransformListRow) => i.stats.state === TRANSFORM_STATE.STARTED
+    (i: TransformListRow) => i.stats?.state === TRANSFORM_STATE.STARTED
   );
 
   let startedTransformMessage;
@@ -109,6 +110,11 @@ export const StartActionName: FC<StartActionNameProps> = ({
       content = completedBatchTransformMessage;
     } else if (startedTransform) {
       content = startedTransformMessage;
+    } else if (missingTransformStats(items)) {
+      content = createNoStatsTooltipMessage({
+        actionName: startActionNameText,
+        count: items.length,
+      });
     }
   }
 

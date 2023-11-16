@@ -1,0 +1,196 @@
+{
+  "id": "@kbn/ml-runtime-field-utils",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/ml-runtime-field-utils",
+        "id": "def-common.getCombinedRuntimeMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "getCombinedRuntimeMappings",
+        "description": [
+          "\nReturn a map of runtime_mappings for each of the data view field provided\nto provide in ES search queries"
+        ],
+        "signature": [
+          "(dataView: ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataView",
+            "text": "DataView"
+          },
+          " | undefined, runtimeMappings: ",
+          "MappingRuntimeFields",
+          " | undefined) => ",
+          "MappingRuntimeFields",
+          " | undefined"
+        ],
+        "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-runtime-field-utils",
+            "id": "def-common.getCombinedRuntimeMappings.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [
+              "- The Kibana data view."
+            ],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-runtime-field-utils",
+            "id": "def-common.getCombinedRuntimeMappings.$2",
+            "type": "Object",
+            "tags": [],
+            "label": "runtimeMappings",
+            "description": [
+              "- Optional runtime mappings."
+            ],
+            "signature": [
+              "MappingRuntimeFields",
+              " | undefined"
+            ],
+            "path": "x-pack/packages/ml/runtime_field_utils/src/get_combined_runtime_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-runtime-field-utils",
+        "id": "def-common.isRuntimeField",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuntimeField",
+        "description": [
+          "\nType guard for a runtime field\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_field.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-runtime-field-utils",
+            "id": "def-common.isRuntimeField.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- The item to be checked"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_field.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-runtime-field-utils",
+        "id": "def-common.isRuntimeMappings",
+        "type": "Function",
+        "tags": [],
+        "label": "isRuntimeMappings",
+        "description": [
+          "\nType guard for runtime mappings\n"
+        ],
+        "signature": [
+          "(arg: unknown) => boolean"
+        ],
+        "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-runtime-field-utils",
+            "id": "def-common.isRuntimeMappings.$1",
+            "type": "Unknown",
+            "tags": [],
+            "label": "arg",
+            "description": [
+              "- The item to be checked"
+            ],
+            "signature": [
+              "unknown"
+            ],
+            "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-runtime-field-utils",
+        "id": "def-common.RuntimeMappings",
+        "type": "Type",
+        "tags": [],
+        "label": "RuntimeMappings",
+        "description": [
+          "\nAlias for `estypes.MappingRuntimeFields`."
+        ],
+        "signature": [
+          "{ [x: string]: ",
+          "MappingRuntimeField",
+          "; }"
+        ],
+        "path": "x-pack/packages/ml/runtime_field_utils/src/is_runtime_mappings.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}

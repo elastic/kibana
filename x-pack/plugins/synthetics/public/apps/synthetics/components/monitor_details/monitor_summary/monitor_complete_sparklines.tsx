@@ -10,8 +10,7 @@ import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { SUCCESSFUL_LABEL } from './monitor_complete_count';
 import { ClientPluginsStart } from '../../../../../plugin';
-import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
-import { useSelectedLocation } from '../hooks/use_selected_location';
+import { useMonitorQueryFilters } from '../hooks/use_monitor_query_filters';
 
 interface Props {
   from: string;
@@ -22,12 +21,11 @@ export const MonitorCompleteSparklines = (props: Props) => {
     exploratoryView: { ExploratoryViewEmbeddable },
   } = useKibana<ClientPluginsStart>().services;
 
-  const monitorId = useMonitorQueryId();
-  const selectedLocation = useSelectedLocation();
+  const { queryIdFilter, locationFilter } = useMonitorQueryFilters();
 
   const { euiTheme } = useEuiTheme();
 
-  if (!monitorId || !selectedLocation) {
+  if (!queryIdFilter) {
     return null;
   }
 
@@ -42,10 +40,8 @@ export const MonitorCompleteSparklines = (props: Props) => {
         {
           seriesType: 'area',
           time: props,
-          reportDefinitions: {
-            'monitor.id': [monitorId],
-            'observer.geo.name': [selectedLocation.label],
-          },
+          reportDefinitions: queryIdFilter,
+          filters: locationFilter,
           dataType: 'synthetics',
           selectedMetricField: 'monitor_successful',
           name: SUCCESSFUL_LABEL,

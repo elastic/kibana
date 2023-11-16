@@ -28,8 +28,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'settings',
     'dashboard',
     'header',
+    'unifiedFieldList',
   ]);
-  const defaultSettings = { defaultIndex: 'logstash-*' };
+  const defaultSettings = {
+    defaultIndex: 'logstash-*',
+    'discover:rowHeightOption': 0, // single line
+  };
   const kibanaServer = getService('kibanaServer');
   const esArchiver = getService('esArchiver');
   const dashboardAddPanel = getService('dashboardAddPanel');
@@ -47,12 +51,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.common.navigateToApp('discover');
 
       for (const columnName of TEST_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItemAdd(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListItemAdd(columnName);
       }
 
       for (const [columnName, value] of TEST_FILTER_COLUMN_NAMES) {
-        await PageObjects.discover.clickFieldListItem(columnName);
-        await PageObjects.discover.clickFieldListPlusFilter(columnName, value);
+        await PageObjects.unifiedFieldList.clickFieldListItem(columnName);
+        await PageObjects.unifiedFieldList.clickFieldListPlusFilter(columnName, value);
       }
     });
     after(async () => {
@@ -93,12 +97,16 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(disabledFilterCounter).to.be(TEST_FILTER_COLUMN_NAMES.length);
     });
 
+    it('should show the the grid toolbar', async () => {
+      await testSubjects.existOrFail('dscGridToolbar');
+    });
+
     it('navigates to context view from embeddable', async () => {
       await PageObjects.common.navigateToApp('discover');
       await PageObjects.discover.saveSearch('my search');
       await PageObjects.header.waitUntilLoadingHasFinished();
 
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.gotoDashboardLandingPage();
       await PageObjects.dashboard.clickNewDashboard();
 

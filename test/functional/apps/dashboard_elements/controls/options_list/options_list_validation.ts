@@ -64,9 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       after(async () => {
-        await dashboardControls.optionsListOpenPopover(controlId);
-        await dashboardControls.optionsListPopoverClearSelections();
-        await dashboardControls.optionsListEnsurePopoverIsClosed(controlId);
+        await dashboardControls.clearControlSelections(controlId);
         await filterBar.removeAllFilters();
         await queryBar.clickQuerySubmitButton();
       });

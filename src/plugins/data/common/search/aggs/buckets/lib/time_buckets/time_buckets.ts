@@ -17,6 +17,7 @@ import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,
   EsInterval,
+  getPreciseDurationDescription,
 } from './calc_es_interval';
 import { autoInterval } from '../../_interval_options';
 
@@ -272,22 +273,19 @@ export class TimeBuckets {
           ? convertDurationToNormalizedEsInterval(interval, originalUnit)
           : convertIntervalToEsInterval(this._originalInterval);
 
-      const prettyUnits = moment.normalizeUnits(esInterval.unit);
+      const prettyUnits = moment.normalizeUnits(esInterval.unit) as moment.unitOfTime.Base;
+      const durationDescription = getPreciseDurationDescription(esInterval.value, prettyUnits);
 
       return Object.assign(interval, {
-        description:
-          esInterval.value === 1 ? prettyUnits : esInterval.value + ' ' + prettyUnits + 's',
+        description: durationDescription,
         esValue: esInterval.value,
         esUnit: esInterval.unit,
         expression: esInterval.expression,
       });
     };
-
-    if (useNormalizedEsInterval) {
-      return decorateInterval(maybeScaleInterval(parsedInterval));
-    } else {
-      return decorateInterval(parsedInterval);
-    }
+    return decorateInterval(
+      useNormalizedEsInterval ? maybeScaleInterval(parsedInterval) : parsedInterval
+    );
   }
 
   /**

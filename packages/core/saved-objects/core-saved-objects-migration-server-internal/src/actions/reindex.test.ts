@@ -18,19 +18,18 @@ describe('reindex', () => {
     jest.clearAllMocks();
   });
 
-  // Create a mock client that rejects all methods with a 503 status code
-  // response.
-  const retryableError = new EsErrors.ResponseError(
-    elasticsearchClientMock.createApiResponse({
-      statusCode: 503,
-      body: { error: { type: 'es_type', reason: 'es_reason' } },
-    })
-  );
-  const client = elasticsearchClientMock.createInternalClient(
-    elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
-  );
-
   it('calls catchRetryableEsClientErrors when the promise rejects', async () => {
+    // Create a mock client that rejects all methods with a 503 status code
+    // response.
+    const retryableError = new EsErrors.ResponseError(
+      elasticsearchClientMock.createApiResponse({
+        statusCode: 503,
+        body: { error: { type: 'es_type', reason: 'es_reason' } },
+      })
+    );
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createErrorTransportRequestPromise(retryableError)
+    );
     const task = reindex({
       client,
       sourceIndex: 'my_source_index',
@@ -38,6 +37,7 @@ describe('reindex', () => {
       reindexScript: Option.none,
       requireAlias: false,
       excludeOnUpgradeQuery: {},
+      batchSize: 1000,
     });
     try {
       await task();
@@ -45,5 +45,48 @@ describe('reindex', () => {
       /** ignore */
     }
     expect(catchRetryableEsClientErrors).toHaveBeenCalledWith(retryableError);
+  });
+
+  it('passes options to Elasticsearch client', async () => {
+    const client = elasticsearchClientMock.createInternalClient(
+      elasticsearchClientMock.createSuccessTransportRequestPromise({
+        hits: {
+          total: 0,
+          hits: [],
+        },
+      })
+    );
+    const task = reindex({
+      client,
+      sourceIndex: 'my_source_index',
+      targetIndex: 'my_target_index',
+      reindexScript: Option.some('my script'),
+      requireAlias: false,
+      excludeOnUpgradeQuery: { match_all: {} },
+      batchSize: 99,
+    });
+    try {
+      await task();
+    } catch (e) {
+      /** ignore */
+    }
+    expect(client.reindex).toHaveBeenCalledTimes(1);
+    expect(client.reindex).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: {
+          conflicts: 'proceed',
+          source: {
+            index: 'my_source_index',
+            size: 99,
+            query: { match_all: {} },
+          },
+          dest: {
+            index: 'my_target_index',
+            op_type: 'create',
+          },
+          script: { lang: 'painless', source: 'my script' },
+        },
+      })
+    );
   });
 });

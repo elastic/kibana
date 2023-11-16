@@ -19,20 +19,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const comboBox = getService('comboBox');
   const FIELD_NAME = 'machine.os.raw';
 
-  const from = 'Jan 1, 2017 @ 00:00:00.000';
-  const to = 'Jan 1, 2017 @ 00:00:00.000';
-
   describe('input control options', () => {
     before(async () => {
       await PageObjects.visualize.initTests();
-      await PageObjects.common.setTime({ from, to });
-      await PageObjects.visualize.navigateToNewVisualization();
-      await PageObjects.visualize.clickInputControlVis();
-      await PageObjects.visEditor.clickVisEditorTab('controls');
-      await PageObjects.visEditor.addInputControl();
-      await comboBox.set('indexPatternSelect-0', 'logstash-');
-      await comboBox.set('fieldSelect-0', FIELD_NAME);
-      await PageObjects.visEditor.clickGo();
+      await PageObjects.common.navigateToApp('visualize');
+      await PageObjects.visualize.loadSavedVisualization('input control options', {
+        navigateToVisualize: false,
+      });
     });
 
     it('should not have inspector enabled', async function () {

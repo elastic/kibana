@@ -6,6 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import { UploadActionResult } from '../command_render_components/upload_action';
+import { ArgumentFileSelector } from '../../console_argument_selectors';
 import type { ParsedArgData } from '../../console/service/types';
 import { ExperimentalFeaturesService } from '../../../../common/experimental_features_service';
 import type {
@@ -32,6 +34,10 @@ import {
 import { getCommandAboutInfo } from './get_command_about_info';
 
 import { validateUnitOfTime } from './utils';
+import {
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ,
+} from '../../../../../common/endpoint/service/response_actions/constants';
 
 const emptyArgumentValidator = (argData: ParsedArgData): true | string => {
   if (argData?.length > 0 && typeof argData[0] === 'string' && argData[0]?.trim().length > 0) {
@@ -67,61 +73,6 @@ const executeTimeoutValidator = (argData: ParsedArgData): true | string => {
   }
 };
 
-const commandToCapabilitiesPrivilegesMap = new Map<
-  ConsoleResponseActionCommands,
-  { capability: EndpointCapabilities; privilege: (privileges: EndpointPrivileges) => boolean }
->([
-  [
-    'isolate',
-    {
-      capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canIsolateHost,
-    },
-  ],
-  [
-    'release',
-    {
-      capability: 'isolation',
-      privilege: (privileges: EndpointPrivileges) => privileges.canUnIsolateHost,
-    },
-  ],
-  [
-    'kill-process',
-    {
-      capability: 'kill_process',
-      privilege: (privileges: EndpointPrivileges) => privileges.canKillProcess,
-    },
-  ],
-  [
-    'suspend-process',
-    {
-      capability: 'suspend_process',
-      privilege: (privileges: EndpointPrivileges) => privileges.canSuspendProcess,
-    },
-  ],
-  [
-    'processes',
-    {
-      capability: 'running_processes',
-      privilege: (privileges: EndpointPrivileges) => privileges.canGetRunningProcesses,
-    },
-  ],
-  [
-    'get-file',
-    {
-      capability: 'get_file',
-      privilege: (privileges: EndpointPrivileges) => privileges.canWriteFileOperations,
-    },
-  ],
-  [
-    'execute',
-    {
-      capability: 'execute',
-      privilege: (privileges: EndpointPrivileges) => privileges.canWriteExecuteOperations,
-    },
-  ],
-]);
-
 export const getRbacControl = ({
   commandName,
   privileges,
@@ -129,14 +80,14 @@ export const getRbacControl = ({
   commandName: ConsoleResponseActionCommands;
   privileges: EndpointPrivileges;
 }): boolean => {
-  return Boolean(commandToCapabilitiesPrivilegesMap.get(commandName)?.privilege(privileges));
+  return Boolean(privileges[RESPONSE_CONSOLE_ACTION_COMMANDS_TO_REQUIRED_AUTHZ[commandName]]);
 };
 
 const capabilitiesAndPrivilegesValidator = (command: Command): true | string => {
   const privileges = command.commandDefinition.meta.privileges;
   const endpointCapabilities: EndpointCapabilities[] = command.commandDefinition.meta.capabilities;
   const commandName = command.commandDefinition.name as ConsoleResponseActionCommands;
-  const responderCapability = commandToCapabilitiesPrivilegesMap.get(commandName)?.capability;
+  const responderCapability = RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
   let errorMessage = '';
   if (!responderCapability) {
     errorMessage = errorMessage.concat(UPGRADE_ENDPOINT_FOR_RESPONDER);
@@ -190,11 +141,13 @@ export const getEndpointConsoleCommands = ({
   endpointCapabilities: ImmutableArray<string>;
   endpointPrivileges: EndpointPrivileges;
 }): CommandDefinition[] => {
-  const isGetFileEnabled = ExperimentalFeaturesService.get().responseActionGetFileEnabled;
-  const isExecuteEnabled = ExperimentalFeaturesService.get().responseActionExecuteEnabled;
+  const featureFlags = ExperimentalFeaturesService.get();
+
+  const isUploadEnabled = featureFlags.responseActionUploadEnabled;
 
   const doesEndpointSupportCommand = (commandName: ConsoleResponseActionCommands) => {
-    const responderCapability = commandToCapabilitiesPrivilegesMap.get(commandName)?.capability;
+    const responderCapability =
+      RESPONSE_CONSOLE_ACTION_COMMANDS_TO_ENDPOINT_CAPABILITY[commandName];
     if (responderCapability) {
       return endpointCapabilities.includes(responderCapability);
     }
@@ -424,11 +377,7 @@ export const getEndpointConsoleCommands = ({
       helpDisabled: doesEndpointSupportCommand('processes') === false,
       helpHidden: !getRbacControl({ commandName: 'processes', privileges: endpointPrivileges }),
     },
-  ];
-
-  // `get-file` is currently behind feature flag
-  if (isGetFileEnabled) {
-    consoleCommands.push({
+    {
       name: 'get-file',
       about: getCommandAboutInfo({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.getFile.about', {
@@ -474,13 +423,8 @@ export const getEndpointConsoleCommands = ({
         commandName: 'get-file',
         privileges: endpointPrivileges,
       }),
-    });
-  }
-
-  // `execute` is currently behind feature flag
-  // planned for 8.8
-  if (isExecuteEnabled) {
-    consoleCommands.push({
+    },
+    {
       name: 'execute',
       about: getCommandAboutInfo({
         aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.execute.about', {
@@ -532,7 +476,71 @@ export const getEndpointConsoleCommands = ({
         commandName: 'execute',
         privileges: endpointPrivileges,
       }),
+    },
+  ];
+
+  // `upload` command
+  // planned for 8.9
+  if (isUploadEnabled) {
+    consoleCommands.push({
+      name: 'upload',
+      about: getCommandAboutInfo({
+        aboutInfo: i18n.translate('xpack.securitySolution.endpointConsoleCommands.upload.about', {
+          defaultMessage: 'Upload a file to the host',
+        }),
+        isSupported: doesEndpointSupportCommand('upload'),
+      }),
+      RenderComponent: UploadActionResult,
+      meta: {
+        endpointId: endpointAgentId,
+        capabilities: endpointCapabilities,
+        privileges: endpointPrivileges,
+      },
+      exampleUsage: 'upload --file --overwrite --comment "script to fix registry"',
+      exampleInstruction: ENTER_OR_ADD_COMMENT_ARG_INSTRUCTION,
+      validate: capabilitiesAndPrivilegesValidator,
+      mustHaveArgs: true,
+      args: {
+        file: {
+          required: true,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.upload.args.file.about',
+            {
+              defaultMessage: 'The file that will be sent to the host',
+            }
+          ),
+          mustHaveValue: 'truthy',
+          SelectorComponent: ArgumentFileSelector,
+        },
+        overwrite: {
+          required: false,
+          allowMultiples: false,
+          about: i18n.translate(
+            'xpack.securitySolution.endpointConsoleCommands.upload.args.overwrite.about',
+            {
+              defaultMessage: 'Overwrite the file on the host if it already exists',
+            }
+          ),
+          mustHaveValue: false,
+        },
+        comment: {
+          required: false,
+          allowMultiples: false,
+          mustHaveValue: 'non-empty-string',
+          about: COMMENT_ARG_ABOUT,
+        },
+      },
+      helpGroupLabel: HELP_GROUPS.responseActions.label,
+      helpGroupPosition: HELP_GROUPS.responseActions.position,
+      helpCommandPosition: 7,
+      helpDisabled: !doesEndpointSupportCommand('upload'),
+      helpHidden: !getRbacControl({
+        commandName: 'upload',
+        privileges: endpointPrivileges,
+      }),
     });
   }
+
   return consoleCommands;
 };

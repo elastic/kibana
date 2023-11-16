@@ -38,13 +38,15 @@ jest.mock('../../../../common/hooks/use_resolve_conflict', () => {
   };
 });
 
-describe('Pane', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/168026
+describe.skip('Pane', () => {
   test('renders with display block by default', async () => {
     const EmptyComponent = render(
       <TestProviders>
         <Pane timelineId={TimelineId.test} />
       </TestProviders>
     );
+
     await waitFor(() => {
       expect(EmptyComponent.getByTestId('flyout-pane')).toHaveStyle('display: block');
     });

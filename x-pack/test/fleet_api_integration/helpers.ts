@@ -5,7 +5,12 @@
  * 2.0.
  */
 
+import * as uuid from 'uuid';
 import { ToolingLog } from '@kbn/tooling-log';
+import { agentPolicyRouteService } from '@kbn/fleet-plugin/common/services';
+import { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import { KbnClient } from '@kbn/test';
+import { UNINSTALL_TOKENS_SAVED_OBJECT_TYPE } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../api_integration/ftr_provider_context';
 
 export function warnAndSkipTest(mochaContext: Mocha.Context, log: ToolingLog) {
@@ -114,3 +119,39 @@ export function setPrereleaseSetting(supertest: any) {
       .send({ prerelease_integrations_enabled: false });
   });
 }
+
+export const generateNPolicies = async (supertest: any, number: number) => {
+  const promises = [];
+
+  for (let i = 0; i < number; i++) {
+    promises.push(
+      supertest
+        .post(agentPolicyRouteService.getCreatePath())
+        .set('kbn-xsrf', 'xxxx')
+        .send({ name: `Agent Policy ${uuid.v4()}`, namespace: 'default' })
+        .expect(200)
+    );
+  }
+
+  const responses = await Promise.all(promises);
+  const policyIds = responses.map(({ body }) => (body as CreateAgentPolicyResponse).item.id);
+
+  return policyIds;
+};
+
+export const addUninstallTokenToPolicy = async (
+  kibanaServer: KbnClient,
+  policyId: string,
+  token: string
+) => {
+  const savedObject = await kibanaServer.savedObjects.create({
+    type: UNINSTALL_TOKENS_SAVED_OBJECT_TYPE,
+    attributes: {
+      policy_id: policyId,
+      token,
+    },
+    overwrite: false,
+  });
+
+  return savedObject.id;
+};

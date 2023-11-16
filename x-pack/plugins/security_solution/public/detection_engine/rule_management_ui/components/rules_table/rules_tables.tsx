@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  EuiBasicTable,
-  EuiConfirmModal,
-  EuiEmptyPrompt,
-  EuiLoadingContent,
-  EuiProgress,
-} from '@elastic/eui';
+import { EuiBasicTable, EuiConfirmModal, EuiEmptyPrompt, EuiProgress } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo, useRef } from 'react';
 import { Loader } from '../../../../common/components/loader';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
@@ -30,7 +25,7 @@ import { useRulesTableContext } from './rules_table/rules_table_context';
 import { useAsyncConfirmation } from './rules_table/use_async_confirmation';
 import { RulesTableFilters } from './rules_table_filters/rules_table_filters';
 import { AllRulesTabs } from './rules_table_toolbar';
-import { RulesTableUtilityBar } from './rules_table_utility_bar';
+import { RulesTableUtilityBar } from '../rules_table_utility_bar/rules_table_utility_bar';
 import { useMonitoringColumns, useRulesColumns } from './use_columns';
 import { useUserData } from '../../../../detections/components/user_info';
 import { hasUserCRUDPermission } from '../../../../common/utils/privileges';
@@ -39,7 +34,7 @@ import { BulkActionDuplicateExceptionsConfirmation } from './bulk_actions/bulk_d
 import { useStartMlJobs } from '../../../rule_management/logic/use_start_ml_jobs';
 import { RULES_TABLE_PAGE_SIZE_OPTIONS } from './constants';
 import { useRuleManagementFilters } from '../../../rule_management/logic/use_rule_management_filters';
-import type { FindRulesSortField } from '../../../../../common/detection_engine/rule_management';
+import type { FindRulesSortField } from '../../../../../common/api/detection_engine/rule_management';
 import { useIsUpgradingSecurityPackages } from '../../../rule_management/logic/use_upgrade_security_packages';
 
 const INITIAL_SORT_FIELD = 'enabled';
@@ -96,6 +91,9 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     onFinish: hideDeleteConfirmation,
   });
 
+  // If no rules are selected, we are deleting a single rule
+  const rulesToDeleteCount = isAllSelected ? pagination.total : selectedRuleIds.length || 1;
+
   const {
     bulkActionsDryRunResult,
     bulkAction,
@@ -131,15 +129,14 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     executeBulkActionsDryRun,
   });
 
-  const paginationMemo = useMemo(
-    () => ({
+  const paginationMemo = useMemo(() => {
+    return {
       pageIndex: pagination.page - 1,
       pageSize: pagination.perPage,
       totalItemCount: pagination.total,
       pageSizeOptions: RULES_TABLE_PAGE_SIZE_OPTIONS,
-    }),
-    [pagination]
-  );
+    };
+  }, [pagination.page, pagination.perPage, pagination.total]);
 
   const tableOnChangeCallback = useCallback(
     ({ page, sort }: EuiBasicTableOnChange) => {
@@ -160,13 +157,16 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
     mlJobs,
     startMlJobs,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    confirmDeletion,
   });
+
   const monitoringColumns = useMonitoringColumns({
     hasCRUDPermissions: hasPermissions,
     isLoadingJobs,
     mlJobs,
     startMlJobs,
     showExceptionsDuplicateConfirmation: showBulkDuplicateConfirmation,
+    confirmDeletion,
   });
 
   const isSelectAllCalled = useRef(false);
@@ -178,6 +178,10 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
       tableRef.current.setSelection(rules.filter((rule) => ruleIds.includes(rule.id)));
     }
   }, selectedRuleIds);
+
+  const isTableSelectable =
+    hasPermissions &&
+    (selectedTab === AllRulesTabs.management || selectedTab === AllRulesTabs.monitoring);
 
   const euiBasicTableSelectionProps = useMemo(
     () => ({
@@ -221,17 +225,31 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
 
   const shouldShowRulesTable = !isLoading && !isTableEmpty;
 
-  const tableProps =
-    selectedTab === AllRulesTabs.management
-      ? {
-          'data-test-subj': 'rules-management-table',
-          columns: rulesColumns,
-        }
-      : { 'data-test-subj': 'rules-monitoring-table', columns: monitoringColumns };
+  let tableProps;
+  switch (selectedTab) {
+    case AllRulesTabs.management:
+      tableProps = {
+        'data-test-subj': 'rules-management-table',
+        columns: rulesColumns,
+      };
+      break;
+    case AllRulesTabs.monitoring:
+      tableProps = {
+        'data-test-subj': 'rules-monitoring-table',
+        columns: monitoringColumns,
+      };
+      break;
+    default:
+      tableProps = {
+        'data-test-subj': 'rules-management-table',
+        columns: rulesColumns,
+      };
+      break;
+  }
 
   const shouldShowLinearProgress = (isFetched && isRefetching) || isUpgradingSecurityPackages;
   const shouldShowLoadingOverlay = (!isFetched && isRefetching) || isPreflightInProgress;
-  const numberOfSelectedRules = isAllSelected ? pagination.total : selectedRuleIds?.length ?? 1;
+  const rulesCount = Math.max(isAllSelected ? pagination.total : selectedRuleIds?.length ?? 0, 1);
 
   return (
     <>
@@ -247,21 +265,29 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <Loader data-test-subj="loadingPanelAllRulesTable" overlay size="xl" />
       )}
       {isTableEmpty && <PrePackagedRulesPrompt />}
-      {isLoading && (
-        <EuiLoadingContent data-test-subj="initialLoadingPanelAllRulesTable" lines={10} />
-      )}
       {isDeleteConfirmationVisible && (
         <EuiConfirmModal
-          title={i18n.DELETE_CONFIRMATION_TITLE}
+          title={
+            rulesToDeleteCount === 1
+              ? i18n.SINGLE_DELETE_CONFIRMATION_TITLE
+              : i18n.BULK_DELETE_CONFIRMATION_TITLE
+          }
           onCancel={handleDeletionCancel}
           onConfirm={handleDeletionConfirm}
           confirmButtonText={i18n.DELETE_CONFIRMATION_CONFIRM}
           cancelButtonText={i18n.DELETE_CONFIRMATION_CANCEL}
           buttonColor="danger"
           defaultFocusedButton="confirm"
-          data-test-subj="allRulesDeleteConfirmationModal"
+          data-test-subj="deleteRulesConfirmationModal"
         >
-          <p>{i18n.DELETE_CONFIRMATION_BODY}</p>
+          <FormattedMessage
+            id="xpack.securitySolution.detectionEngine.components.allRules.deleteConfirmationModalBody"
+            defaultMessage='This action will delete {rulesToDeleteCount, plural, one {the chosen rule} other {{rulesToDeleteCountStrong} rules}}. Click "Delete" to continue.'
+            values={{
+              rulesToDeleteCount,
+              rulesToDeleteCountStrong: <strong>{rulesToDeleteCount}</strong>,
+            }}
+          />
         </EuiConfirmModal>
       )}
       {isBulkActionConfirmationVisible && bulkAction && (
@@ -276,7 +302,7 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
         <BulkActionDuplicateExceptionsConfirmation
           onCancel={cancelRuleDuplication}
           onConfirm={confirmRuleDuplication}
-          rulesCount={numberOfSelectedRules > 0 ? numberOfSelectedRules : 1}
+          rulesCount={rulesCount}
         />
       )}
       {isBulkEditFlyoutVisible && bulkEditActionType !== undefined && (
@@ -299,12 +325,12 @@ export const RulesTables = React.memo<RulesTableProps>(({ selectedTab }) => {
           <EuiBasicTable
             itemId="id"
             items={rules}
-            isSelectable={hasPermissions}
+            isSelectable={isTableSelectable}
             noItemsMessage={NO_ITEMS_MESSAGE}
             onChange={tableOnChangeCallback}
             pagination={paginationMemo}
             ref={tableRef}
-            selection={hasPermissions ? euiBasicTableSelectionProps : undefined}
+            selection={isTableSelectable ? euiBasicTableSelectionProps : undefined}
             sorting={{
               sort: {
                 // EuiBasicTable has incorrect `sort.field` types which accept only `keyof Item` and reject fields in dot notation

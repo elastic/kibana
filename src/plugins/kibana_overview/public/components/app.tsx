@@ -6,15 +6,16 @@
  * Side Public License, v 1.
  */
 
-import React, { useEffect, useState } from 'react';
-import { Observable } from 'rxjs';
+import type { CoreStart } from '@kbn/core/public';
+import type { FeatureCatalogueEntry, FeatureCatalogueSolution } from '@kbn/home-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
-import { HashRouter as Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
-import { CoreStart } from '@kbn/core/public';
-import { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { FetchResult } from '@kbn/newsfeed-plugin/public';
-import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '@kbn/home-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
+import type { FetchResult } from '@kbn/newsfeed-plugin/public';
+import { Route, Routes } from '@kbn/shared-ux-router';
+import React, { useEffect, useState } from 'react';
+import { HashRouter as Router } from 'react-router-dom';
+import useObservable from 'react-use/lib/useObservable';
+import type { Observable } from 'rxjs';
 import { Overview } from './overview';
 
 interface KibanaOverviewAppDeps {
@@ -23,16 +24,17 @@ interface KibanaOverviewAppDeps {
   http: CoreStart['http'];
   navigation: NavigationPublicPluginStart;
   newsfeed$?: Observable<FetchResult | null | void>;
+  features$: Observable<FeatureCatalogueEntry[]>;
   solutions: FeatureCatalogueSolution[];
-  features: FeatureCatalogueEntry[];
 }
 
 export const KibanaOverviewApp = ({
   basename,
   newsfeed$,
+  features$,
   solutions,
-  features,
 }: KibanaOverviewAppDeps) => {
+  const features = useObservable(features$, []);
   const [newsFetchResult, setNewsFetchResult] = useState<FetchResult | null | void>(null);
 
   useEffect(() => {
@@ -48,11 +50,11 @@ export const KibanaOverviewApp = ({
   return (
     <Router basename={basename}>
       <I18nProvider>
-        <Switch>
+        <Routes>
           <Route exact path="/">
             <Overview {...{ newsFetchResult, solutions, features }} />
           </Route>
-        </Switch>
+        </Routes>
       </I18nProvider>
     </Router>
   );

@@ -1,0 +1,44 @@
+openapi: 3.0.0
+info:
+  title: File Upload Schema
+  version: '2023-10-31'
+paths:
+  /api/endpoint/action/upload:
+    post:
+      summary: Upload Action
+      operationId: EndpointUploadAction
+      x-codegen-enabled: false
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FileUploadActionRequestBody'
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+components:
+  schemas:
+    FileUploadActionRequestBody:
+      allOf:
+        - $ref: '../model/schema/common.schema.yaml#/components/schemas/BaseActionSchema'
+        - type: object
+          required:
+            - parameters
+            - file
+          properties:
+            parameters:
+              type: object
+              properties:
+                overwrite:
+                  type: boolean
+                  default: false
+            # File extends Blob - any binary data will be base-64 encoded
+            file:
+              type: string
+              format: binary

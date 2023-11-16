@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../../common/inventory_models/types';
+import { MetricsUIAggregation } from '@kbn/metrics-data-access-plugin/common';
 import { MetricsAPIRequest } from '../../../../common/http_api/metrics_api';
 
 export const createMetricsAggregations = (options: MetricsAPIRequest): MetricsUIAggregation => {
   const { metrics } = options;
   return metrics.reduce((aggs, metric) => {
-    return { ...aggs, ...metric.aggregations };
+    return Object.assign(aggs, metric.aggregations);
   }, {});
 };

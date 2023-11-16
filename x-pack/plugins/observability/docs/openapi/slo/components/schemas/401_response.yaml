@@ -1,0 +1,16 @@
+title: Unauthorized
+type: object
+required:
+  - statusCode
+  - error
+  - message
+properties:
+  statusCode:
+    type: number
+    example: 401
+  error:
+    type: string
+    example: Unauthorized
+  message:
+    type: string
+    example: "[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastics] for REST request [/_security/_authenticate]]: unable to authenticate user [elastics] for REST request [/_security/_authenticate]"

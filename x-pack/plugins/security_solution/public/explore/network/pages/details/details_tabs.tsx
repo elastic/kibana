@@ -6,11 +6,10 @@
  */
 
 import React from 'react';
-import { Switch } from 'react-router-dom';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import { EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import type { DataViewBase, Filter } from '@kbn/es-query';
-import { Route } from '@kbn/kibana-react-plugin/public';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { AnomaliesNetworkTable } from '../../../../common/components/ml/tables/anomalies_network_table';
 import { FlowTargetSourceDest } from '../../../../../common/search_strategy/security_solution/network';
@@ -54,7 +53,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
     const commonPropsWithFlowTarget = { ...commonProps, flowTarget };
 
     return (
-      <Switch>
+      <Routes>
         <Route
           path={`${NETWORK_DETAILS_PAGE_PATH}/:flowTarget/:tabName(${NetworkDetailsRouteType.flows})`}
         >
@@ -116,7 +115,7 @@ export const NetworkDetailsTabs = React.memo<NetworkDetailTabsProps>(
             tableId={TableId.networkPageEvents}
           />
         </Route>
-      </Switch>
+      </Routes>
     );
   }
 );

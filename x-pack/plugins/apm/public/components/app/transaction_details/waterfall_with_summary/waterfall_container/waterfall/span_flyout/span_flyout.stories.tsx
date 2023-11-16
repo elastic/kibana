@@ -101,6 +101,8 @@ export const TransactionSpan: Story<Args> = () => {
       spanLinksCount={{ linkedChildren: 0, linkedParents: 0 }}
       parentTransactionId={data.spanEvent['parent.id']}
       onClose={() => {}}
+      start="fake-time"
+      end="fake-time"
     />
   );
 };

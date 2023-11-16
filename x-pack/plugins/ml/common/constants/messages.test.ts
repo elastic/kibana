@@ -63,6 +63,7 @@ describe('Constants: Messages parseMessages()', () => {
       {
         id: 'job_id_invalid',
         status: 'error',
+        heading: 'Job ID',
         text: 'Job ID is invalid. It can contain lowercase alphanumeric (a-z and 0-9) characters, hyphens or underscores and must start and end with an alphanumeric character.',
         url: 'https://www.elastic.co/guide/en/elasticsearch/reference/mocked-test-branch/ml-put-job.html#ml-put-job-path-parms',
       },
@@ -114,6 +115,7 @@ describe('Constants: Messages parseMessages()', () => {
         fieldName: 'order_id',
         id: 'cardinality_partition_field',
         status: 'warning',
+        heading: 'Partition field cardinality',
         text: 'Cardinality of partition_field "order_id" is above 1000 and might result in high memory usage.',
         url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-cardinality',
       },
@@ -135,13 +137,15 @@ describe('Constants: Messages parseMessages()', () => {
       {
         id: 'success_influencers',
         status: 'success',
-        text: 'Influencer configuration passed the validation checks.',
+        heading: 'Influencer configuration',
+        text: 'Passed the validation checks.',
         url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-influencers',
       },
       {
         id: 'half_estimated_mml_greater_than_mml',
         mml: '1MB',
         status: 'warning',
+        heading: 'Model memory limit',
         text: 'The specified model memory limit is less than half of the estimated model memory limit and will likely hit the hard limit.',
         url: 'https://www.elastic.co/guide/en/machine-learning/mocked-test-branch/ml-ad-run-jobs.html#ml-ad-model-memory-limits',
       },

@@ -13,10 +13,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   ResponseActionsApiCommandNames,
   ResponseActionStatus,
+  ResponseActionType,
 } from '../../../../common/endpoint/service/response_actions/constants';
 
 import type { ActionListApiResponse } from '../../../../common/endpoint/types';
-import type { EndpointActionListRequestQuery } from '../../../../common/endpoint/schema/actions';
+import type { EndpointActionListRequestQuery } from '../../../../common/api/endpoint';
 import { ManagementEmptyStateWrapper } from '../management_empty_state_wrapper';
 import { useGetEndpointActionList } from '../../hooks';
 import { UX_MESSAGES } from './translations';
@@ -50,10 +51,8 @@ export const ResponseActionsLog = memo<
       commands: commandsFromUrl,
       hosts: agentIdsFromUrl,
       statuses: statusesFromUrl,
-      startDate: startDateFromUrl,
-      endDate: endDateFromUrl,
       users: usersFromUrl,
-      withAutomatedActions: withAutomatedActionsFromUrl,
+      types: typesFromUrl,
       withOutputs: withOutputsFromUrl,
       setUrlWithOutputs,
     } = useActionHistoryUrlParams();
@@ -71,7 +70,7 @@ export const ResponseActionsLog = memo<
       statuses: [],
       userIds: [],
       withOutputs: [],
-      withAutomatedActions: true,
+      types: [],
     });
 
     // update query state from URL params
@@ -88,7 +87,7 @@ export const ResponseActionsLog = memo<
             : prevState.statuses,
           userIds: usersFromUrl?.length ? usersFromUrl : prevState.userIds,
           withOutputs: withOutputsFromUrl?.length ? withOutputsFromUrl : prevState.withOutputs,
-          withAutomatedActions: !!withAutomatedActionsFromUrl,
+          types: typesFromUrl?.length ? (typesFromUrl as ResponseActionType[]) : prevState.types,
         }));
       }
     }, [
@@ -99,7 +98,7 @@ export const ResponseActionsLog = memo<
       setQueryParams,
       usersFromUrl,
       withOutputsFromUrl,
-      withAutomatedActionsFromUrl,
+      typesFromUrl,
     ]);
 
     // date range picker state and handlers
@@ -115,8 +114,8 @@ export const ResponseActionsLog = memo<
     } = useGetEndpointActionList(
       {
         ...queryParams,
-        startDate: isFlyout ? dateRangePickerState.startDate : startDateFromUrl,
-        endDate: isFlyout ? dateRangePickerState.endDate : endDateFromUrl,
+        startDate: dateRangePickerState.startDate,
+        endDate: dateRangePickerState.endDate,
       },
       { retry: false }
     );
@@ -175,6 +174,16 @@ export const ResponseActionsLog = memo<
       [setQueryParams]
     );
 
+    const onChangeTypeFilter = useCallback(
+      (selectedTypes: string[]) => {
+        setQueryParams((prevState) => ({
+          ...prevState,
+          types: selectedTypes as ResponseActionType[],
+        }));
+      },
+      [setQueryParams]
+    );
+
     // handle on change hosts filter
     const onChangeHostsFilter = useCallback(
       (selectedAgentIds: string[]) => {
@@ -226,7 +235,7 @@ export const ResponseActionsLog = memo<
           setUrlWithOutputs(actionIds.join());
         }
       },
-      [isFlyout, setUrlWithOutputs]
+      [isFlyout, setUrlWithOutputs, setQueryParams]
     );
 
     if (error?.body?.statusCode === 404 && error?.body?.message === 'index_not_found_exception') {
@@ -245,6 +254,7 @@ export const ResponseActionsLog = memo<
           onChangeCommandsFilter={onChangeCommandsFilter}
           onChangeStatusesFilter={onChangeStatusesFilter}
           onChangeUsersFilter={onChangeUsersFilter}
+          onChangeTypeFilter={onChangeTypeFilter}
           onRefresh={onRefresh}
           onRefreshChange={onRefreshChange}
           onTimeChange={onTimeChange}

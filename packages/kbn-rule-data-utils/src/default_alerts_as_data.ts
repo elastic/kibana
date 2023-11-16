@@ -27,7 +27,7 @@ const ALERT_ACTION_GROUP = `${ALERT_NAMESPACE}.action_group` as const;
 // kibana.alert.case_ids - array of cases associated with the alert
 const ALERT_CASE_IDS = `${ALERT_NAMESPACE}.case_ids` as const;
 
-// kibana.alert.duration.us - alert duration in nanoseconds - updated each execution
+// kibana.alert.duration.us - alert duration in microseconds - updated each execution
 // that the alert is active
 const ALERT_DURATION = `${ALERT_NAMESPACE}.duration.us` as const;
 
@@ -66,6 +66,9 @@ const ALERT_UUID = `${ALERT_NAMESPACE}.uuid` as const;
 
 // kibana.alert.workflow_status - open/closed status of alert
 const ALERT_WORKFLOW_STATUS = `${ALERT_NAMESPACE}.workflow_status` as const;
+
+// kibana.alert.workflow_tags - user workflow alert tags
+const ALERT_WORKFLOW_TAGS = `${ALERT_NAMESPACE}.workflow_tags` as const;
 
 // kibana.alert.rule.category - rule type name for rule that generated this alert
 const ALERT_RULE_CATEGORY = `${ALERT_RULE_NAMESPACE}.category` as const;
@@ -133,6 +136,7 @@ const fields = {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,
@@ -171,6 +175,7 @@ export {
   ALERT_URL,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
+  ALERT_WORKFLOW_TAGS,
   SPACE_IDS,
   TIMESTAMP,
   VERSION,

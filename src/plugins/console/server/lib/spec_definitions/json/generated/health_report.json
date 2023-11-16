@@ -1,9 +1,18 @@
 {
   "health_report": {
     "url_params": {
-      "timeout": "",
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "timeout": [
+        "-1",
+        "0"
+      ],
       "verbose": "__flag__",
-      "size": 0
+      "size": [
+        "1000"
+      ]
     },
     "methods": [
       "GET"
@@ -12,6 +21,10 @@
       "_health_report",
       "_health_report/{feature}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/health-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/health-api.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

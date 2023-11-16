@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { setTimeout } from 'timers/promises';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function upgradeAssistantFunctionalTests({
@@ -20,49 +19,28 @@ export default function upgradeAssistantFunctionalTests({
   const security = getService('security');
   const log = getService('log');
 
-  describe('Deprecation pages', function () {
-    this.tags('skipFirefox');
+  // Failing: See https://github.com/elastic/kibana/issues/167090
+  describe.skip('Deprecation pages', function () {
+    this.tags(['skipFirefox', 'upgradeAssistant']);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
-
-      // Cluster readiness checks
       try {
-        // Trigger "Total shards" ES Upgrade readiness check
+        /**
+         * Trigger "Total shards" ES Upgrade readiness check
+         * the number of shards in the test cluster is 25-29
+         * so 5 max shards per node should trigger this check
+         * on both local and CI environments.
+         */
         await es.cluster.putSettings({
           body: {
             persistent: {
               cluster: {
-                max_shards_per_node: '9',
+                max_shards_per_node: 5,
               },
             },
           },
         });
-
-        // Trigger "Low disk watermark" ES Upgrade readiness check
-        await es.cluster.putSettings({
-          body: {
-            persistent: {
-              cluster: {
-                // push allocation changes to nodes quickly during tests
-                info: {
-                  update: { interval: '10s' },
-                },
-                routing: {
-                  allocation: {
-                    disk: {
-                      threshold_enabled: true,
-                      watermark: { low: '30%' },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        });
-
-        // Wait for the cluster settings to be reflected to the ES nodes
-        await setTimeout(12000);
       } catch (e) {
         log.debug('[Setup error] Error updating cluster settings');
         throw e;
@@ -75,18 +53,8 @@ export default function upgradeAssistantFunctionalTests({
           body: {
             persistent: {
               cluster: {
-                info: {
-                  update: { interval: null },
-                },
-                max_shards_per_node: null,
-                routing: {
-                  allocation: {
-                    disk: {
-                      threshold_enabled: false,
-                      watermark: { low: null },
-                    },
-                  },
-                },
+                // initial cluster setting from x-pack/test/functional/config.upgrade_assistant.js
+                max_shards_per_node: 29,
               },
             },
           },
@@ -95,7 +63,6 @@ export default function upgradeAssistantFunctionalTests({
         log.debug('[Cleanup error] Error reseting cluster settings');
         throw e;
       }
-
       await security.testUser.restoreDefaults();
     });
 
@@ -110,10 +77,13 @@ export default function upgradeAssistantFunctionalTests({
 
     it('renders the Elasticsearch upgrade readiness deprecations', async () => {
       const deprecationMessages = await testSubjects.getVisibleTextAll('defaultTableCell-message');
+      const healthIndicatorsCriticalMessages = await testSubjects.getVisibleTextAll(
+        'healthIndicatorTableCell-message'
+      );
 
       expect(deprecationMessages).to.contain('Disk usage exceeds low watermark');
-      expect(deprecationMessages).to.contain(
-        'The cluster has too many shards to be able to upgrade'
+      expect(healthIndicatorsCriticalMessages).to.contain(
+        'Elasticsearch is about to reach the maximum number of shards it can host, based on your current settings.'
       );
     });
 

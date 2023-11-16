@@ -6,10 +6,10 @@
  */
 
 import React from 'react';
-import { EuiIconTip, EuiLink, EuiLoadingContent, EuiToolTip, EuiText } from '@elastic/eui';
+import { EuiIconTip, EuiLink, EuiSkeletonText, EuiToolTip, EuiText } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-plugin/public';
-import { useFetcher } from '@kbn/observability-plugin/public';
+import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useSyntheticsSettingsContext } from '../../contexts';
 import { ClientPluginsStart } from '../../../../plugin';
@@ -27,7 +27,7 @@ export const PolicyLink = ({ name }: { name: string }) => {
   }, [name]);
 
   if (!data) {
-    return <EuiLoadingContent lines={1} />;
+    return <EuiSkeletonText lines={1} />;
   }
 
   if (!name) {

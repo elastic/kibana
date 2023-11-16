@@ -24,7 +24,6 @@ import { DEFAULT_ACTION_BUTTON_WIDTH } from '.';
 import { EventsTh, EventsThContent } from '../../../timelines/components/timeline/styles';
 import { StatefulRowRenderersBrowser } from '../../../timelines/components/row_renderers_browser';
 import { EXIT_FULL_SCREEN } from '../exit_full_screen/translations';
-import { FULL_SCREEN_TOGGLED_CLASS_NAME } from '../../../../common/constants';
 import { EventsSelect } from '../../../timelines/components/timeline/body/column_headers/events_select';
 import * as i18n from './translations';
 
@@ -33,7 +32,7 @@ const SortingColumnsContainer = styled.div`
     color: ${({ theme }) => theme.eui.euiColorPrimary};
   }
 
-  .euiPopover .euiButtonEmpty .euiButtonContent {
+  .euiPopover .euiButtonEmpty {
     padding: 0;
 
     .euiButtonEmpty__text {
@@ -243,8 +242,8 @@ const HeaderActionsComponent: React.FC<HeaderActionProps> = ({
                   ? EXIT_FULL_SCREEN
                   : i18n.FULL_SCREEN
               }
-              className={fullScreen ? FULL_SCREEN_TOGGLED_CLASS_NAME : ''}
-              color={fullScreen ? 'ghost' : 'primary'}
+              display={fullScreen ? 'fill' : 'empty'}
+              color="primary"
               data-test-subj={
                 // a full screen button gets created for timeline and for the host page
                 // this sets the data-test-subj for each case so that tests can differentiate between them

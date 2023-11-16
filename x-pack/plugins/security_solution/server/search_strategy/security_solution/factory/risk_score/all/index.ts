@@ -11,7 +11,6 @@ import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { AggregationsMinAggregate } from '@elastic/elasticsearch/lib/api/types';
 import type { SecuritySolutionFactory } from '../../types';
 import type {
-  RiskScoreRequestOptions,
   RiskQueries,
   BucketItem,
   HostRiskScore,
@@ -26,7 +25,7 @@ import { getTotalCount } from '../../cti/event_enrichment/helpers';
 export const riskScore: SecuritySolutionFactory<
   RiskQueries.hostsRiskScore | RiskQueries.usersRiskScore
 > = {
-  buildDsl: (options: RiskScoreRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
@@ -34,7 +33,7 @@ export const riskScore: SecuritySolutionFactory<
     return buildRiskScoreQuery(options);
   },
   parse: async (
-    options: RiskScoreRequestOptions,
+    options,
     response: IEsSearchResponse,
     deps?: {
       spaceId?: string;
@@ -89,16 +88,12 @@ async function enhanceData(
   const response = await ruleDataReader?.search(query);
   const buckets: EnhancedDataBucket[] = getOr([], 'aggregations.alertsByEntity.buckets', response);
 
-  const enhancedAlertsDataByEntityName: Record<
-    string,
-    { count: number; oldestAlertTimestamp: string }
-  > = buckets.reduce(
-    (acc, { key, doc_count: count, oldestAlertTimestamp }) => ({
-      ...acc,
-      [key]: { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string },
-    }),
-    {}
-  );
+  const enhancedAlertsDataByEntityName = buckets.reduce<
+    Record<string, { count: number; oldestAlertTimestamp: string }>
+  >((acc, { key, doc_count: count, oldestAlertTimestamp }) => {
+    acc[key] = { count, oldestAlertTimestamp: oldestAlertTimestamp.value_as_string as string };
+    return acc;
+  }, {});
 
   return data.map((risk) => ({
     ...risk,

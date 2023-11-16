@@ -6,8 +6,13 @@
  */
 
 import moment, { Moment } from 'moment';
+import { Frequency } from '@kbn/rrule';
 import * as i18n from '../translations';
-import { Frequency, ISO_WEEKDAYS_TO_RRULE, RRULE_WEEKDAYS_TO_ISO_WEEKDAYS } from '../constants';
+import {
+  MaintenanceWindowFrequency,
+  ISO_WEEKDAYS_TO_RRULE,
+  RRULE_WEEKDAYS_TO_ISO_WEEKDAYS,
+} from '../constants';
 import { monthDayDate } from './month_day_date';
 import { getNthByWeekday } from './get_nth_by_weekday';
 import { RecurringScheduleFormProps } from '../components/schema';
@@ -15,7 +20,7 @@ import { RecurringScheduleFormProps } from '../components/schema';
 export const recurringSummary = (
   startDate: Moment,
   recurringSchedule: RecurringScheduleFormProps | undefined,
-  presets: Record<Frequency, Partial<RecurringScheduleFormProps>>
+  presets: Record<MaintenanceWindowFrequency, Partial<RecurringScheduleFormProps>>
 ) => {
   if (!recurringSchedule) return '';
 
@@ -25,9 +30,8 @@ export const recurringSummary = (
       schedule = { ...recurringSchedule, ...presets[recurringSchedule.frequency] };
     }
 
-    const frequency = schedule.customFrequency
-      ? schedule.customFrequency
-      : (schedule.frequency as Frequency);
+    const frequency =
+      schedule.customFrequency ?? (schedule.frequency as MaintenanceWindowFrequency);
     const interval = schedule.interval || 1;
     const frequencySummary = i18n.CREATE_FORM_FREQUENCY_SUMMARY(interval)[frequency];
 

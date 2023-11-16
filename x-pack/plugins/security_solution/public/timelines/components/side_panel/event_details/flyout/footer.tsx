@@ -19,18 +19,13 @@ import { AddExceptionFlyoutWrapper } from '../../../../../detections/components/
 import { EventFiltersFlyout } from '../../../../../management/pages/event_filters/view/components/event_filters_flyout';
 import { useEventFilterModal } from '../../../../../detections/components/alerts_table/timeline_actions/use_event_filter_modal';
 import { getFieldValue } from '../../../../../detections/components/host_isolation/helpers';
-import type { Status } from '../../../../../../common/detection_engine/schemas/common/schemas';
+import type { Status } from '../../../../../../common/api/detection_engine';
 import type { inputsModel, State } from '../../../../../common/store';
 import { inputsSelectors } from '../../../../../common/store';
 import { OsqueryFlyout } from '../../../../../detections/components/osquery/osquery_flyout';
 interface FlyoutFooterProps {
   detailsData: TimelineEventsDetailsItem[] | null;
   detailsEcsData: Ecs | null;
-  expandedEvent: {
-    eventId: string;
-    indexName: string;
-    refetch?: () => void;
-  };
   handleOnEventClosed: () => void;
   isHostIsolationPanelOpen: boolean;
   isReadOnly?: boolean;
@@ -48,11 +43,11 @@ interface AddExceptionModalWrapperData {
   ruleName: string;
 }
 
+// eslint-disable-next-line react/display-name
 export const FlyoutFooterComponent = React.memo(
   ({
     detailsData,
     detailsEcsData,
-    expandedEvent,
     handleOnEventClosed,
     isHostIsolationPanelOpen,
     isReadOnly,
@@ -162,7 +157,6 @@ export const FlyoutFooterComponent = React.memo(
                   onAddIsolationStatusClick={onAddIsolationStatusClick}
                   refetchFlyoutData={refetchFlyoutData}
                   refetch={refetchAll}
-                  indexName={expandedEvent.indexName}
                   scopeId={scopeId}
                   onOsqueryClick={setOsqueryFlyoutOpenWithAgentId}
                 />

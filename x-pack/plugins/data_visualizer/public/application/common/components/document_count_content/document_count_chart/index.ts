@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export type { DocumentCountChartPoint } from './document_count_chart';
 export { DocumentCountChart } from './document_count_chart';

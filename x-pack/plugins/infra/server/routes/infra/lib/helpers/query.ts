@@ -9,7 +9,7 @@ import { estypes } from '@elastic/elasticsearch';
 import { ISearchClient } from '@kbn/data-plugin/common';
 import { ESSearchRequest } from '@kbn/es-types';
 import { catchError, map, Observable } from 'rxjs';
-import { findInventoryModel } from '../../../../../common/inventory_models';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import {
   GetInfraMetricsRequestBodyPayload,
   InfraAssetMetricType,
@@ -91,10 +91,7 @@ export const getInventoryModelAggregations = (
 ): Record<string, estypes.AggregationsAggregationContainer> => {
   const inventoryModel = findInventoryModel(INVENTORY_MODEL_NODE_TYPE);
   return metrics.reduce(
-    (acc, metric) => ({
-      ...acc,
-      ...inventoryModel.metrics.snapshot?.[metric],
-    }),
+    (acc, metric) => Object.assign(acc, inventoryModel.metrics.snapshot?.[metric]),
     {}
   );
 };

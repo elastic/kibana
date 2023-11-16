@@ -6,22 +6,25 @@
  */
 
 import type { SearchHit } from '@kbn/es-types';
+import { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { AgentConfiguration } from '../../../../common/agent_configuration/configuration_types';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
 } from '../../../../common/es_fields/apm';
 import { APMInternalESClient } from '../../../lib/helpers/create_es_client/create_internal_es_client';
-import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/get_apm_indices';
+import { APM_AGENT_CONFIGURATION_INDEX } from '../apm_indices/apm_system_index_constants';
 import { convertConfigSettingsToString } from './convert_settings_to_string';
 import { getConfigsAppliedToAgentsThroughFleet } from './get_config_applied_to_agent_through_fleet';
 
 export async function findExactConfiguration({
   service,
   internalESClient,
+  apmIndices,
 }: {
   service: AgentConfiguration['service'];
   internalESClient: APMInternalESClient;
+  apmIndices: APMIndices;
 }) {
   const serviceNameFilter = service.name
     ? { term: { [SERVICE_NAME]: service.name } }
@@ -45,7 +48,7 @@ export async function findExactConfiguration({
       'find_exact_agent_configuration',
       params
     ),
-    getConfigsAppliedToAgentsThroughFleet(internalESClient),
+    getConfigsAppliedToAgentsThroughFleet(internalESClient, apmIndices),
   ]);
 
   const hit = agentConfig.hits.hits[0] as

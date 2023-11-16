@@ -14,6 +14,7 @@ import {
   setMetaDocMigrationStarted,
   setMetaDocMigrationComplete,
   setMetaMappingMigrationComplete,
+  removePropertiesFromV2,
 } from './update_index_meta';
 
 const getDefaultMeta = (): IndexMappingMeta => ({
@@ -78,5 +79,22 @@ describe('setMetaDocMigrationComplete', () => {
         convertingDocuments: false,
       },
     });
+  });
+});
+
+describe('removePropertiesFromV2', () => {
+  it('removes meta properties used by the v2 algorithm', () => {
+    const meta: IndexMappingMeta = {
+      ...getDefaultMeta(),
+      indexTypesMap: {
+        '.kibana': ['foo'],
+      },
+      migrationMappingPropertyHashes: {
+        foo: 'someHash',
+      },
+    };
+
+    const output = removePropertiesFromV2(meta);
+    expect(output).toEqual(getDefaultMeta());
   });
 });

@@ -5,14 +5,10 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import {
-  DataStream,
-  Locations,
-  LocationStatus,
-  PrivateLocation,
-} from '../../../../common/runtime_types';
+import { DataStream, Locations, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
+import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 
 describe('tcp normalizers', () => {
   describe('normalize push monitors', () => {
@@ -36,12 +32,11 @@ describe('tcp normalizers', () => {
         status: LocationStatus.GA,
       },
     ];
-    const privateLocations: PrivateLocation[] = [
+    const privateLocations: PrivateLocationAttributes[] = [
       {
         id: 'germany',
         label: 'Germany',
         isServiceManaged: false,
-        concurrentMonitors: 1,
         agentPolicyId: 'germany',
       },
     ];

@@ -14,7 +14,11 @@ import { EuiPanel, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { FILTER_DEBUGGER_EMBEDDABLE } from '@kbn/embeddable-examples-plugin/public';
-import { AwaitingDashboardAPI, DashboardRenderer } from '@kbn/dashboard-plugin/public';
+import {
+  AwaitingDashboardAPI,
+  DashboardRenderer,
+  DashboardCreationOptions,
+} from '@kbn/dashboard-plugin/public';
 
 export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView }) => {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
@@ -48,7 +52,7 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
       <EuiSpacer size="m" />
       <EuiPanel hasBorder={true}>
         <DashboardRenderer
-          getCreationOptions={async () => {
+          getCreationOptions={async (): Promise<DashboardCreationOptions> => {
             const builder = controlGroupInputBuilder;
             const controlGroupInput = getDefaultControlGroupInput();
             await builder.addDataControlFromField(controlGroupInput, {
@@ -68,11 +72,11 @@ export const DashboardWithControlsExample = ({ dataView }: { dataView: DataView 
 
             return {
               useControlGroupIntegration: true,
-              initialInput: {
+              getInitialInput: () => ({
                 timeRange: { from: 'now-30d', to: 'now' },
                 viewMode: ViewMode.VIEW,
                 controlGroupInput,
-              },
+              }),
             };
           }}
           ref={setDashboard}

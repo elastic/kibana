@@ -6,7 +6,7 @@
  */
 
 export interface SessionViewConfig {
-  processIndex: string;
+  index: string;
   sessionEntityId: string;
   sessionStartTime: string;
   jumpToEntityId?: string;

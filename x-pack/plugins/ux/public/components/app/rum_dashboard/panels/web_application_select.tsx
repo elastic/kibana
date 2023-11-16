@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { useEsSearch } from '@kbn/observability-plugin/public';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { serviceNameQuery } from '../../../../services/data/service_name_query';
 import { ServiceNameFilter } from '../url_filter/service_name_filter';
 import { useLegacyUrlParams } from '../../../../context/url_params_context/use_url_params';

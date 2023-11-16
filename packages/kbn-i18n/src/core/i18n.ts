@@ -165,7 +165,7 @@ export interface TranslateArguments {
  * @param [options.values] - values to pass into translation
  * @param [options.defaultMessage] - will be used unless translation was successful
  */
-export function translate(id: string, { values = {}, defaultMessage }: TranslateArguments) {
+export function translate(id: string, { values = {}, defaultMessage }: TranslateArguments): string {
   const shouldUsePseudoLocale = isPseudoLocale(currentLocale);
 
   if (!id || !isString(id)) {

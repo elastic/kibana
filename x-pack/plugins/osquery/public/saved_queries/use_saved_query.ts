@@ -7,6 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
+import { API_VERSIONS } from '../../common/constants';
 import { PLUGIN_ID } from '../../common';
 import { useKibana } from '../common/lib/kibana';
 import { pagePathGetters } from '../common/page_paths';
@@ -33,10 +34,11 @@ export const useSavedQuery = ({ savedQueryId }: UseSavedQueryProps) => {
       };
     },
     { body: { error: string; message: string } },
-    SavedQuerySO
+    SavedQuerySO & { error?: { error: string; message: string } }
   >(
     [SAVED_QUERY_ID, { savedQueryId }],
-    () => http.get(`/api/osquery/saved_queries/${savedQueryId}`),
+    () =>
+      http.get(`/api/osquery/saved_queries/${savedQueryId}`, { version: API_VERSIONS.public.v1 }),
     {
       keepPreviousData: true,
       refetchOnWindowFocus: false,

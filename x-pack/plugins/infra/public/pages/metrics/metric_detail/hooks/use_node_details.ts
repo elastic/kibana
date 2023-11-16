@@ -8,13 +8,13 @@
 import { fold } from 'fp-ts/lib/Either';
 import { identity } from 'fp-ts/lib/function';
 import { pipe } from 'fp-ts/lib/pipeable';
+import { InventoryMetric, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { throwErrors, createPlainError } from '../../../../../common/runtime_types';
 import { useHTTPRequest } from '../../../../hooks/use_http_request';
 import {
   NodeDetailsMetricDataResponseRT,
   NodeDetailsMetricDataResponse,
 } from '../../../../../common/http_api/node_details_api';
-import { InventoryMetric, InventoryItemType } from '../../../../../common/inventory_models/types';
 import { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 
 export function useNodeDetails(

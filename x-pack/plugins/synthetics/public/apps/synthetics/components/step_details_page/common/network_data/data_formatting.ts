@@ -6,9 +6,9 @@
  */
 
 import { euiPaletteColorBlind } from '@elastic/eui';
-import moment from 'moment';
 
 import { MarkerItems } from '../../step_waterfall_chart/waterfall/context/waterfall_context';
+import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import { NetworkEvent } from '../../../../../../../common/runtime_types';
 import { WaterfallData, WaterfallMetadata } from './types';
 import {
@@ -128,6 +128,7 @@ export const getFilterMatcher = (filters: string[] | undefined): ItemMatcher => 
 export const getSeriesAndDomain = (
   items: NetworkEvent[],
   onlyHighlighted = false,
+  dateFormatter: DateFormatter,
   query?: string,
   activeFilters?: string[],
   markerItems?: MarkerItems
@@ -159,7 +160,7 @@ export const getSeriesAndDomain = (
     const mimeTypeColour = getColourForMimeType(item.mimeType);
     const offsetValue = getValueForOffset(item);
     let currentOffset = offsetValue - zeroOffset;
-    metadata.push(formatMetadata({ item, index, requestStart: currentOffset }));
+    metadata.push(formatMetadata({ item, index, requestStart: currentOffset, dateFormatter }));
     const isHighlighted = isHighlightedItem(item, queryMatcher, filterMatcher);
     if (isHighlighted) {
       totalHighlightedRequests++;
@@ -270,10 +271,12 @@ const formatMetadata = ({
   item,
   index,
   requestStart,
+  dateFormatter,
 }: {
   item: NetworkEvent;
   index: number;
   requestStart: number;
+  dateFormatter: DateFormatter;
 }) => {
   const {
     certificates,
@@ -301,13 +304,11 @@ const formatMetadata = ({
           },
           {
             name: FriendlyFlyoutLabels[Metadata.CertificateIssueDate],
-            value: certificates.validFrom
-              ? moment(certificates.validFrom).format('L LT')
-              : undefined,
+            value: certificates.validFrom ? dateFormatter(certificates.validFrom) : undefined,
           },
           {
             name: FriendlyFlyoutLabels[Metadata.CertificateExpiryDate],
-            value: certificates.validTo ? moment(certificates.validTo).format('L LT') : undefined,
+            value: certificates.validTo ? dateFormatter(certificates.validTo) : undefined,
           },
           {
             name: FriendlyFlyoutLabels[Metadata.CertificateSubject],

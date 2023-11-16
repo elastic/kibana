@@ -58,6 +58,16 @@ export class ChartsServerPlugin implements Plugin<object, object> {
               'Enables the legacy time axis for charts in Lens, Discover, Visualize and TSVB',
           }
         ),
+        deprecation: {
+          message: i18n.translate(
+            'charts.advancedSettings.visualization.useLegacyTimeAxis.deprecation',
+            {
+              defaultMessage:
+                'This setting is deprecated and will not be supported in a future version.',
+            }
+          ),
+          docLinksKey: 'visualizationSettings',
+        },
         category: ['visualization'],
         schema: schema.boolean(),
       },

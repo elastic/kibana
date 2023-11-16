@@ -9,7 +9,7 @@ import { useAddToCase } from './use_add_to_case';
 import React, { useEffect } from 'react';
 import { render } from '../rtl_helpers';
 import { EuiButton } from '@elastic/eui';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import { act } from '@testing-library/react';
 
 describe('useAddToCase', function () {
@@ -75,7 +75,7 @@ describe('useAddToCase', function () {
 
     expect(core.http?.post).toHaveBeenCalledTimes(1);
     expect(core.http?.post).toHaveBeenCalledWith('/api/cases/test/comments', {
-      body: '{"comment":"!{lens{\\"attributes\\":{\\"title\\":\\"Test lens attributes\\"},\\"timeRange\\":{\\"to\\":\\"now\\",\\"from\\":\\"now-5m\\"}}}","type":"user","owner":"observability"}',
+      body: '{"persistableStateAttachmentState":{"attributes":{"title":"Test lens attributes"},"timeRange":{"to":"now","from":"now-5m"}},"persistableStateAttachmentTypeId":".lens","type":"persistableState","owner":"observability"}',
     });
   });
 });

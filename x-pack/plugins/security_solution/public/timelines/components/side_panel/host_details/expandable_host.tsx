@@ -21,6 +21,7 @@ import { AnomalyTableProvider } from '../../../../common/components/ml/anomaly/a
 import { hostToCriteria } from '../../../../common/components/ml/criteria/host_to_criteria';
 import { scoreIntervalToDateTime } from '../../../../common/components/ml/score/score_interval_to_datetime';
 import { useHostDetails, ID } from '../../../../explore/hosts/containers/hosts/details';
+import { getSourcererScopeId } from '../../../../helpers';
 
 interface ExpandableHostProps {
   hostName: string;
@@ -53,9 +54,10 @@ export const ExpandableHostDetailsPageLink = ({ hostName }: ExpandableHostProps)
 
 export const ExpandableHostDetails = ({
   contextID,
+  scopeId,
   hostName,
   isDraggable = false,
-}: ExpandableHostProps & { contextID: string; isDraggable?: boolean }) => {
+}: ExpandableHostProps & { contextID: string; scopeId: string; isDraggable?: boolean }) => {
   const { to, from, isInitializing } = useGlobalTime();
   /*
     Normally `selectedPatterns` from useSourcererDataView would be where we obtain the indices,
@@ -98,6 +100,7 @@ export const ExpandableHostDetails = ({
       {({ isLoadingAnomaliesData, anomaliesData, jobNameById }) => (
         <HostOverview
           contextID={contextID}
+          sourcererScopeId={getSourcererScopeId(scopeId)}
           id={ID}
           isInDetailsSidePanel
           data={hostOverview as HostItem}

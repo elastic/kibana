@@ -110,7 +110,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.clickDataTab('table');
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await lens.openDimensionEditor('lnsDatatable_metrics > lns-dimensionTrigger');
       await testSubjects.click('indexPattern-advanced-accordion');
@@ -131,7 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -149,7 +149,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setFunctionForAggregateFunction('Sum');
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -169,7 +169,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColumnLabelValue('test');
       await header.waitUntilLoadingHasFinished();
 
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
         const layerCount = await lens.getLayerCount();
@@ -193,7 +193,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await visualBuilder.setColorPickerValue('#54A000', 1);
 
       await header.waitUntilLoadingHasFinished();
-      await visualize.navigateToLensFromAnotherVisulization();
+      await visualize.navigateToLensFromAnotherVisualization();
 
       await lens.waitForVisualization('lnsDataTable');
       await retry.try(async () => {
@@ -216,6 +216,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           { stop: '', color: undefined },
         ]);
       });
+    });
+
+    it('should bring the ignore global filters configured at panel level over', async () => {
+      await visualBuilder.clickPanelOptions('table');
+      await visualBuilder.setIgnoreFilters(true);
+      await header.waitUntilLoadingHasFinished();
+      await visualize.navigateToLensFromAnotherVisualization();
+      await lens.waitForVisualization('lnsDataTable');
+      expect(await testSubjects.exists('lnsChangeIndexPatternIgnoringFilters')).to.be(true);
     });
   });
 }

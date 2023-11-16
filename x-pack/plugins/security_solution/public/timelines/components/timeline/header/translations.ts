@@ -6,8 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { TimelineTypeLiteral } from '../../../../../common/types/timeline';
-import { TimelineType } from '../../../../../common/types/timeline';
+import type { TimelineTypeLiteral } from '../../../../../common/api/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 export const CALL_OUT_UNAUTHORIZED_MSG = i18n.translate(
   'xpack.securitySolution.timeline.callOut.unauthorized.message.description',
@@ -24,10 +24,6 @@ export const CALL_OUT_IMMUTABLE = i18n.translate(
       'This prebuilt timeline template cannot be modified. To make changes, please duplicate this template and make modifications to the duplicate template.',
   }
 );
-
-export const EDIT = i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.button', {
-  defaultMessage: 'Edit timeline name and description',
-});
 
 export const SAVE_TIMELINE = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.header',
@@ -46,13 +42,6 @@ export const SAVE_TIMELINE_TEMPLATE = i18n.translate(
 export const SAVE = i18n.translate('xpack.securitySolution.timeline.nameTimeline.save.title', {
   defaultMessage: 'Save',
 });
-
-export const NAME_TIMELINE = i18n.translate(
-  'xpack.securitySolution.timeline.nameTimeline.modal.header',
-  {
-    defaultMessage: 'Name Timeline',
-  }
-);
 
 export const NAME_TIMELINE_TEMPLATE = i18n.translate(
   'xpack.securitySolution.timeline.nameTimelineTemplate.modal.header',
@@ -84,7 +73,9 @@ export const CLOSE_MODAL = i18n.translate(
 
 export const UNSAVED_TIMELINE_WARNING = (timelineType: TimelineTypeLiteral) =>
   i18n.translate('xpack.securitySolution.timeline.saveTimeline.modal.warning.title', {
-    values: { timeline: timelineType === TimelineType.template ? 'timeline template' : 'timeline' },
+    values: {
+      timeline: timelineType === TimelineType.template ? 'timeline template' : 'timeline',
+    },
     defaultMessage: 'You have an unsaved {timeline}. Do you wish to save it?',
   });
 
@@ -113,5 +104,19 @@ export const OPTIONAL = i18n.translate(
   'xpack.securitySolution.timeline.saveTimeline.modal.optionalLabel',
   {
     defaultMessage: 'Optional',
+  }
+);
+
+export const SAVE_TOUR_CLOSE = i18n.translate(
+  'xpack.securitySolution.timeline.flyout.saveTour.closeButton',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
+export const SAVE_TOUR_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.flyout.saveTour.title',
+  {
+    defaultMessage: 'Timeline changes now require manual saves',
   }
 );

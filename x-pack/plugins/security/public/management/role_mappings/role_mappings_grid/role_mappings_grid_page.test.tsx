@@ -14,11 +14,11 @@ import { coreMock, scopedHistoryMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { findTestSubject, mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 
+import { EmptyPrompt } from './empty_prompt';
+import { RoleMappingsGridPage } from './role_mappings_grid_page';
 import { rolesAPIClientMock } from '../../roles/index.mock';
 import { NoCompatibleRealms, PermissionDenied, SectionLoading } from '../components';
 import { roleMappingsAPIClientMock } from '../role_mappings_api_client.mock';
-import { EmptyPrompt } from './empty_prompt';
-import { RoleMappingsGridPage } from './role_mappings_grid_page';
 
 describe('RoleMappingsGridPage', () => {
   let history: ReturnType<typeof scopedHistoryMock.create>;

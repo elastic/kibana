@@ -18,7 +18,6 @@ interface OwnProps {
   tableId: TableId;
   data: TimelineItem[];
   totalItems: number;
-  indexNames: string[];
   hasAlertsCrud: boolean;
   showCheckboxes: boolean;
   filterStatus?: AlertWorkflowStatus;
@@ -31,7 +30,6 @@ export const useAlertBulkActions = ({
   tableId,
   data,
   totalItems,
-  indexNames,
   hasAlertsCrud,
   showCheckboxes,
   filterStatus,
@@ -102,7 +100,6 @@ export const useAlertBulkActions = ({
               totalItems={totalItems}
               filterStatus={filterStatus}
               query={filterQuery}
-              indexName={indexNames.join()}
               onActionSuccess={onAlertStatusActionSuccess}
               onActionFailure={onAlertStatusActionFailure}
               customBulkActions={additionalBulkActions}
@@ -115,7 +112,6 @@ export const useAlertBulkActions = ({
       additionalBulkActions,
       filterQuery,
       filterStatus,
-      indexNames,
       onAlertStatusActionFailure,
       onAlertStatusActionSuccess,
       showAlertStatusActions,

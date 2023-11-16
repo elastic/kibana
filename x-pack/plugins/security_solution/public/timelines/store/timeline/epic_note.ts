@@ -9,7 +9,7 @@ import { get } from 'lodash/fp';
 import type { Action } from 'redux';
 import type { Epic } from 'redux-observable';
 import type { Observable } from 'rxjs';
-import { from, empty } from 'rxjs';
+import { from, EMPTY } from 'rxjs';
 import { filter, mergeMap, switchMap, withLatestFrom, startWith, takeUntil } from 'rxjs/operators';
 
 import { updateNote, addError } from '../../../common/store/app/actions';
@@ -28,9 +28,9 @@ import { myEpicTimelineId } from './my_epic_timeline_id';
 import { dispatcherTimelinePersistQueue } from './epic_dispatcher_timeline_persistence_queue';
 import type { ActionTimeline, TimelineById } from './types';
 import { persistNote } from '../../containers/notes/api';
-import type { ResponseNote } from '../../../../common/types/timeline/note';
+import type { ResponseNote } from '../../../../common/api/timeline';
 
-export const timelineNoteActionsType = [addNote.type, addNoteToEvent.type];
+export const timelineNoteActionsType = new Set([addNote.type, addNoteToEvent.type]);
 
 export const epicPersistNote = (
   action: ActionTimeline,
@@ -93,7 +93,7 @@ export const epicPersistNote = (
         endTimelineSaving({
           id: action.payload.id,
         }),
-      ].filter((item) => item != null);
+      ].filter(Boolean);
     }),
     startWith(startTimelineSaving({ id: action.payload.id })),
     takeUntil(
@@ -125,10 +125,10 @@ export const createTimelineNoteEpic =
   <State>(): Epic<Action, Action, State> =>
   (action$) =>
     action$.pipe(
-      filter((action) => timelineNoteActionsType.includes(action.type)),
+      filter((action) => timelineNoteActionsType.has(action.type)),
       switchMap((action) => {
         dispatcherTimelinePersistQueue.next({ action });
-        return empty();
+        return EMPTY;
       })
     );
 

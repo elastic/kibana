@@ -8,7 +8,7 @@
 import axios from 'axios';
 import { Logger } from '@kbn/core/server';
 import { Services } from '@kbn/actions-plugin/server/types';
-import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
+import { validateConfig, validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import { getConnectorType } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -32,6 +32,10 @@ const requestMock = utils.request as jest.Mock;
 
 const services: Services = actionsMock.createServices();
 const mockedLogger: jest.Mocked<Logger> = loggerMock.create();
+const headers = {
+  Authorization: 'Bearer some token',
+  'Content-type': 'application/json; charset=UTF-8',
+};
 
 let connectorType: SlackApiConnectorType;
 let configurationUtilities: jest.Mocked<ActionsConfigurationUtilities>;
@@ -45,6 +49,22 @@ describe('connector registration', () => {
   test('returns connector type', () => {
     expect(connectorType.id).toEqual(SLACK_API_CONNECTOR_ID);
     expect(connectorType.name).toEqual(SLACK_CONNECTOR_NAME);
+  });
+});
+
+describe('validate config', () => {
+  test('should throw error when config are invalid', () => {
+    expect(() => {
+      validateConfig(connectorType, { message: 1 }, { configurationUtilities });
+    }).toThrowErrorMatchingInlineSnapshot(
+      `"error validating action type config: [message]: definition for this key is missing"`
+    );
+  });
+
+  test('should validate when config are valid', () => {
+    expect(() => {
+      validateConfig(connectorType, {}, { configurationUtilities });
+    }).not.toThrow();
   });
 });
 
@@ -63,7 +83,7 @@ describe('validate params', () => {
     );
   });
 
-  test('should validate and pass when params are valid for post message', () => {
+  test('should validate and pass when channels is used as a valid params for post message', () => {
     expect(
       validateParams(
         connectorType,
@@ -76,11 +96,32 @@ describe('validate params', () => {
     });
   });
 
-  test('should validate and pass when params are valid for get channels', () => {
+  test('should validate and pass when channelIds is used as a valid params for post message', () => {
     expect(
-      validateParams(connectorType, { subAction: 'getChannels' }, { configurationUtilities })
+      validateParams(
+        connectorType,
+        {
+          subAction: 'postMessage',
+          subActionParams: { channelIds: ['LKJHGF345'], text: 'a text' },
+        },
+        { configurationUtilities }
+      )
     ).toEqual({
-      subAction: 'getChannels',
+      subAction: 'postMessage',
+      subActionParams: { channelIds: ['LKJHGF345'], text: 'a text' },
+    });
+  });
+
+  test('should validate and pass when params are valid for validChannelIds', () => {
+    expect(
+      validateParams(
+        connectorType,
+        { subAction: 'validChannelId', subActionParams: { channelId: 'KJHGFD867' } },
+        { configurationUtilities }
+      )
+    ).toEqual({
+      subAction: 'validChannelId',
+      subActionParams: { channelId: 'KJHGFD867' },
     });
   });
 });
@@ -163,7 +204,7 @@ describe('execute', () => {
     );
   });
 
-  test('should fail if subAction is not postMessage/getChannels', async () => {
+  test('should fail if subAction is not postMessage/validChannelId', async () => {
     requestMock.mockImplementation(() => ({
       data: {
         ok: true,
@@ -179,7 +220,8 @@ describe('execute', () => {
         config: {},
         secrets: { token: 'some token' },
         params: {
-          subAction: 'getMessage' as 'getChannels',
+          subAction: 'getMessage' as 'validChannelId',
+          subActionParams: {},
         },
         configurationUtilities,
         logger: mockedLogger,
@@ -228,9 +270,10 @@ describe('execute', () => {
     expect(requestMock).toHaveBeenCalledWith({
       axios,
       configurationUtilities,
+      headers,
       logger: mockedLogger,
       method: 'post',
-      url: 'chat.postMessage',
+      url: 'https://slack.com/api/chat.postMessage',
       data: { channel: 'general', text: 'some text' },
     });
 
@@ -248,19 +291,17 @@ describe('execute', () => {
     });
   });
 
-  test('should execute with success for get channels', async () => {
+  test('should execute with success for validChannelId', async () => {
     requestMock.mockImplementation(() => ({
       data: {
         ok: true,
-        channels: [
-          {
-            id: 'id',
-            name: 'general',
-            is_channel: true,
-            is_archived: false,
-            is_private: true,
-          },
-        ],
+        channel: {
+          id: 'ZXCVBNM567',
+          name: 'general',
+          is_channel: true,
+          is_archived: false,
+          is_private: true,
+        },
       },
     }));
     const response = await connectorType.executor({
@@ -269,7 +310,10 @@ describe('execute', () => {
       config: {},
       secrets: { token: 'some token' },
       params: {
-        subAction: 'getChannels',
+        subAction: 'validChannelId',
+        subActionParams: {
+          channelId: 'ZXCVBNM567',
+        },
       },
       configurationUtilities,
       logger: mockedLogger,
@@ -278,23 +322,22 @@ describe('execute', () => {
     expect(requestMock).toHaveBeenCalledWith({
       axios,
       configurationUtilities,
+      headers,
       logger: mockedLogger,
       method: 'get',
-      url: 'conversations.list?types=public_channel,private_channel',
+      url: 'https://slack.com/api/conversations.info?channel=ZXCVBNM567',
     });
 
     expect(response).toEqual({
       actionId: SLACK_API_CONNECTOR_ID,
       data: {
-        channels: [
-          {
-            id: 'id',
-            is_archived: false,
-            is_channel: true,
-            is_private: true,
-            name: 'general',
-          },
-        ],
+        channel: {
+          id: 'ZXCVBNM567',
+          is_archived: false,
+          is_channel: true,
+          is_private: true,
+          name: 'general',
+        },
         ok: true,
       },
       status: 'ok',

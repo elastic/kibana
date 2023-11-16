@@ -13,16 +13,20 @@ import {
   Plugin,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { NavigationSection } from '@kbn/observability-plugin/public';
-import { Location } from 'history';
+import type { NavigationSection } from '@kbn/observability-shared-plugin/public';
+import type { Location } from 'history';
 import { BehaviorSubject, combineLatest, from, map } from 'rxjs';
+import { registerEmbeddables } from './embeddables/register_embeddables';
 import { getServices } from './services';
 import type { ProfilingPluginPublicSetupDeps, ProfilingPluginPublicStartDeps } from './types';
+import { ProfilingEmbeddablesDependencies } from './embeddables/profiling_embeddable_provider';
+
+export type ProfilingPluginSetup = void;
+export type ProfilingPluginStart = void;
 
 export class ProfilingPlugin implements Plugin {
   public setup(coreSetup: CoreSetup, pluginsSetup: ProfilingPluginPublicSetupDeps) {
     // Register an application into the side navigation menu
-
     const links = [
       {
         id: 'stacktraces',
@@ -57,7 +61,6 @@ export class ProfilingPlugin implements Plugin {
               label: i18n.translate('xpack.profiling.navigation.sectionLabel', {
                 defaultMessage: 'Universal Profiling',
               }),
-              isBetaFeature: true,
               entries: links.map((link) => {
                 return {
                   app: 'profiling',
@@ -79,6 +82,8 @@ export class ProfilingPlugin implements Plugin {
 
     pluginsSetup.observabilityShared.navigation.registerSections(section$);
 
+    const profilingFetchServices = getServices();
+
     coreSetup.application.register({
       id: 'profiling',
       title: 'Universal Profiling',
@@ -93,7 +98,6 @@ export class ProfilingPlugin implements Plugin {
           unknown
         ];
 
-        const profilingFetchServices = getServices();
         const { renderApp } = await import('./app');
 
         function pushKueryToSubject(location: Location) {
@@ -125,6 +129,26 @@ export class ProfilingPlugin implements Plugin {
         };
       },
     });
+
+    const getProfilingEmbeddableDependencies =
+      async (): Promise<ProfilingEmbeddablesDependencies> => {
+        const [coreStart, pluginsStart] = (await coreSetup.getStartServices()) as [
+          CoreStart,
+          ProfilingPluginPublicStartDeps,
+          unknown
+        ];
+        return {
+          coreStart,
+          coreSetup,
+          pluginsStart,
+          pluginsSetup,
+          profilingFetchServices,
+        };
+      };
+
+    registerEmbeddables(pluginsSetup.embeddable, getProfilingEmbeddableDependencies);
+
+    return {};
   }
 
   public start(core: CoreStart) {

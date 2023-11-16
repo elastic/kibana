@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiButtonGroup,
   EuiButtonGroupOptionProps,
@@ -26,6 +26,14 @@ interface Props {
 }
 
 export const LimitOptions = ({ limit, onChange }: Props) => {
+  const [idSelected, setIdSelected] = useState(limit as number);
+  const onSelected = useCallback(
+    (_id: string, value: number) => {
+      setIdSelected(value);
+      onChange(value);
+    },
+    [onChange]
+  );
   return (
     <EuiFlexGroup
       direction="row"
@@ -63,9 +71,9 @@ export const LimitOptions = ({ limit, onChange }: Props) => {
           legend={i18n.translate('xpack.infra.hostsViewPage.tabs.alerts.alertStatusFilter.legend', {
             defaultMessage: 'Filter by',
           })}
-          idSelected={buildId(limit)}
+          idSelected={buildId(idSelected)}
           options={options}
-          onChange={(_, value: number) => onChange(value)}
+          onChange={onSelected}
         />
       </EuiFlexItem>
     </EuiFlexGroup>
@@ -77,5 +85,5 @@ const options: EuiButtonGroupOptionProps[] = HOST_LIMIT_OPTIONS.map((option) => 
   id: buildId(option),
   label: `${option}`,
   value: option,
-  'data-test-subj': `hostsViewLimitSelection${option}button`,
+  'data-test-subj': `hostsViewLimitSelection${option}Button`,
 }));

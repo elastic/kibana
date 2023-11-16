@@ -128,7 +128,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should launch sample flights data set dashboard', async () => {
-      await appMenu.clickLink('Dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.loadSavedDashboard('[Flights] Global Flight Dashboard');
       await PageObjects.header.waitUntilLoadingHasFinished();
       await PageObjects.timePicker.setCommonlyUsedTime('sample_data range');
@@ -144,7 +144,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
-      await appMenu.clickLink('Dashboard');
+      await appMenu.clickLink('Dashboard', {
+        category: 'recentlyViewed',
+        closeCollapsibleNav: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
@@ -157,7 +160,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
-      await appMenu.clickLink('Dashboard');
+      await appMenu.clickLink('Dashboard', {
+        category: 'recentlyViewed',
+        closeCollapsibleNav: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');
@@ -170,7 +176,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         const hitCount = parseInt(await PageObjects.discover.getHitCount(), 10);
         expect(hitCount).to.be.greaterThan(0);
       });
-      await appMenu.clickLink('Dashboard');
+      await appMenu.clickLink('Dashboard', {
+        category: 'recentlyViewed',
+        closeCollapsibleNav: true,
+      });
       await PageObjects.header.waitUntilLoadingHasFinished();
       await renderable.waitForRender();
       log.debug('Checking charts rendered');

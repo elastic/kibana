@@ -148,6 +148,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.visEditor.selectAggregation('Percentiles', 'metrics');
       log.debug('Field =  machine.ram');
       await PageObjects.visEditor.selectField('machine.ram', 'metrics');
+      await PageObjects.visEditor.toggleAdvancedParams('1');
+      await PageObjects.visEditor.inputValueInCodeEditor('{ "tdigest": { "compression": 1000 } }');
       await PageObjects.visEditor.clickGo();
       await retry.try(async function tryingForTime() {
         const metricValue = await PageObjects.visChart.getMetric();

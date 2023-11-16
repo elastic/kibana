@@ -16,25 +16,80 @@ describe('getSortForSearchSource function', function () {
 
   test('should return an object to use for searchSource when columns are given', function () {
     const cols = [['bytes', 'desc']] as SortOrder[];
-    expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ bytes: 'desc' }]);
-    expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ bytes: 'desc' }]);
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataView,
+        defaultSortDir: 'desc',
+        includeTieBreaker: true,
+      })
+    ).toEqual([{ bytes: 'desc' }, { _doc: 'desc' }]);
 
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField)).toEqual([{ bytes: 'desc' }]);
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField, 'asc')).toEqual([
-      { bytes: 'desc' },
-    ]);
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataView,
+        defaultSortDir: 'asc',
+        includeTieBreaker: true,
+      })
+    ).toEqual([{ bytes: 'desc' }, { _doc: 'desc' }]);
+
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataView,
+        defaultSortDir: 'asc',
+      })
+    ).toEqual([{ bytes: 'desc' }]);
+
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataViewWithoutTimeField,
+        defaultSortDir: 'desc',
+        includeTieBreaker: true,
+      })
+    ).toEqual([{ bytes: 'desc' }]);
+
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataViewWithoutTimeField,
+        defaultSortDir: 'asc',
+      })
+    ).toEqual([{ bytes: 'desc' }]);
   });
 
   test('should return an object to use for searchSource when no columns are given', function () {
     const cols = [] as SortOrder[];
-    expect(getSortForSearchSource(cols, stubDataView)).toEqual([{ _doc: 'desc' }]);
-    expect(getSortForSearchSource(cols, stubDataView, 'asc')).toEqual([{ _doc: 'asc' }]);
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataView,
+        defaultSortDir: 'desc',
+      })
+    ).toEqual([{ _doc: 'desc' }]);
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataView,
+        defaultSortDir: 'asc',
+      })
+    ).toEqual([{ _doc: 'asc' }]);
 
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField)).toEqual([
-      { _score: 'desc' },
-    ]);
-    expect(getSortForSearchSource(cols, stubDataViewWithoutTimeField, 'asc')).toEqual([
-      { _score: 'asc' },
-    ]);
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataViewWithoutTimeField,
+        defaultSortDir: 'desc',
+      })
+    ).toEqual([{ _score: 'desc' }]);
+    expect(
+      getSortForSearchSource({
+        sort: cols,
+        dataView: stubDataViewWithoutTimeField,
+        defaultSortDir: 'asc',
+      })
+    ).toEqual([{ _score: 'asc' }]);
   });
 });

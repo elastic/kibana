@@ -22,8 +22,9 @@ export const callJobsSummaryAPI = async <JobType extends string>(
   fetch: HttpHandler
 ) => {
   const { spaceId, logViewId, jobTypes } = requestArgs;
-  const response = await fetch('/api/ml/jobs/jobs_summary', {
+  const response = await fetch('/internal/ml/jobs/jobs_summary', {
     method: 'POST',
+    version: '1',
     body: JSON.stringify(
       fetchJobStatusRequestPayloadRT.encode({
         jobIds: jobTypes.map((jobType) => getJobId(spaceId, logViewId, jobType)),

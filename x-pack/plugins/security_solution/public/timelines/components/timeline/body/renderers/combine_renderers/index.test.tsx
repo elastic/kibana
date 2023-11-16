@@ -6,7 +6,8 @@
  */
 
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
-import { RowRendererId, TimelineId } from '../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../common/types/timeline';
+import { RowRendererId } from '../../../../../../../common/api/timeline';
 import { combineRenderers } from '.';
 
 describe('combineRenderers', () => {

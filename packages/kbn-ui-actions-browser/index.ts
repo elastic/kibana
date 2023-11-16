@@ -6,4 +6,16 @@
  * Side Public License, v 1.
  */
 
-export * from './src';
+export * from './src/types';
+export type { Trigger, RowClickContext } from './src/triggers';
+export {
+  VISUALIZE_FIELD_TRIGGER,
+  visualizeFieldTrigger,
+  VISUALIZE_GEO_FIELD_TRIGGER,
+  visualizeGeoFieldTrigger,
+  ROW_CLICK_TRIGGER,
+  rowClickTrigger,
+  CATEGORIZE_FIELD_TRIGGER,
+  categorizeFieldTrigger,
+  defaultTrigger,
+} from './src/triggers';

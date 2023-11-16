@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { schema, TypeOf } from '@kbn/config-schema';
+import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor } from '@kbn/core/server';
 
 // -------------------------------
@@ -15,7 +15,11 @@ const configSchema = schema.object({
   /**
    * Disables the plugin.
    */
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: offeringBasedSchema({
+    // Upgrade Assistant is disabled in serverless; refer to the serverless.yml file as the source of truth
+    // We take this approach in order to have a central place (serverless.yml) to view disabled plugins across Kibana
+    serverless: schema.boolean({ defaultValue: true }),
+  }),
 
   featureSet: schema.object({
     /**

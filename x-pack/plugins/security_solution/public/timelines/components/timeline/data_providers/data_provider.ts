@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import type { QueryType } from '@kbn/elastic-assistant';
+
 import type { PrimitiveOrArrayOfPrimitives } from '../../../../common/lib/kuery';
 /** Represents the Timeline data providers */
 
@@ -67,6 +69,8 @@ export interface DataProvider {
    * Array of multiple values for a field
    */
   valueArray?: string[] | null;
+
+  queryType?: QueryType;
 }
 
 export type DataProvidersAnd = Pick<DataProvider, Exclude<keyof DataProvider, 'and'>>;

@@ -23,7 +23,7 @@ export const snapshot: Command = {
     return dedent`
     Options:
 
-      --license         Run with a 'oss', 'basic', or 'trial' license [default: ${license}]
+      --license         Run with a 'basic' or 'trial' license [default: ${license}]
       --version         Version of ES to download [default: ${defaults.version}]
       --base-path       Path containing cache/installations [default: ${basePath}]
       --install-path    Installation path, defaults to 'source' within base-path
@@ -73,16 +73,30 @@ export const snapshot: Command = {
 
     const cluster = new Cluster({ ssl: options.ssl });
     if (options['download-only']) {
-      await cluster.downloadSnapshot(options);
+      await cluster.downloadSnapshot({
+        version: options.version,
+        license: options.license,
+        basePath: options.basePath,
+        log,
+        useCached: options.useCached,
+      });
     } else {
       const installStartTime = Date.now();
-      const { installPath } = await cluster.installSnapshot(options);
+      const { installPath } = await cluster.installSnapshot({
+        version: options.version,
+        license: options.license,
+        basePath: options.basePath,
+        log,
+        useCached: options.useCached,
+        password: options.password,
+        esArgs: options.esArgs,
+      });
 
       if (options.dataArchive) {
         await cluster.extractDataDirectory(installPath, options.dataArchive);
       }
       if (options.plugins) {
-        await cluster.installPlugins(installPath, options.plugins, options);
+        await cluster.installPlugins(installPath, options.plugins, options.esJavaOpts);
       }
       if (typeof options.secureFiles === 'string' && options.secureFiles) {
         const pairs = options.secureFiles

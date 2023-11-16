@@ -14,6 +14,7 @@ import {
   PartialTheme,
   ScaleType,
   Settings,
+  Tooltip,
 } from '@elastic/charts';
 import {
   EuiFlexGroup,
@@ -22,7 +23,8 @@ import {
   EuiLoadingChart,
 } from '@elastic/eui';
 import React from 'react';
-import { useChartTheme } from '@kbn/observability-plugin/public';
+import { useChartTheme } from '@kbn/observability-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { Coordinate } from '../../../../../typings/timeseries';
 import { useTheme } from '../../../../hooks/use_theme';
 import { unit } from '../../../../utils/style';
@@ -142,8 +144,9 @@ function SparkPlotItem({
         <Settings
           theme={[sparkplotChartTheme, ...defaultChartTheme]}
           showLegend={false}
-          tooltip="none"
+          locale={i18n.getLocale()}
         />
+        <Tooltip type="none" />
         {type && type === 'bar' ? (
           <>
             <BarSeries

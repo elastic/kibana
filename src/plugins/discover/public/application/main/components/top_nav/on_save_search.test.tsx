@@ -9,7 +9,7 @@
 import * as savedObjectsPlugin from '@kbn/saved-objects-plugin/public';
 jest.mock('@kbn/saved-objects-plugin/public');
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { dataViewMock } from '../../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { onSaveSearch } from './on_save_search';
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
@@ -39,7 +39,6 @@ function getStateContainer({ dataView }: { dataView?: DataView } = {}) {
 describe('onSaveSearch', () => {
   it('should call showSaveModal', async () => {
     await onSaveSearch({
-      navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       state: getStateContainer(),
@@ -55,7 +54,6 @@ describe('onSaveSearch', () => {
     });
 
     await onSaveSearch({
-      navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       state: getStateContainer({ dataView: dataViewMock }),
@@ -64,7 +62,6 @@ describe('onSaveSearch', () => {
     expect(saveModal?.props.isTimeBased).toBe(false);
 
     await onSaveSearch({
-      navigateTo: jest.fn(),
       savedSearch: savedSearchMock,
       services: discoverServiceMock,
       state: getStateContainer({ dataView: dataViewWithTimefieldMock }),
@@ -79,7 +76,6 @@ describe('onSaveSearch', () => {
       saveModal = modal;
     });
     await onSaveSearch({
-      navigateTo: jest.fn(),
       savedSearch: {
         ...savedSearchMock,
         tags: ['tag1', 'tag2'],
@@ -101,7 +97,6 @@ describe('onSaveSearch', () => {
     };
     const state = getStateContainer();
     await onSaveSearch({
-      navigateTo: jest.fn(),
       savedSearch,
       services: discoverServiceMock,
       state,
@@ -135,7 +130,6 @@ describe('onSaveSearch', () => {
     };
     const state = getStateContainer();
     await onSaveSearch({
-      navigateTo: jest.fn(),
       savedSearch,
       services: {
         ...serviceMock,

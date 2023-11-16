@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiCommentList } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 
-import { Actions } from '../../../common/api';
+import { UserActionActions } from '../../../common/types/domain';
 import { elasticUser, getUserAction } from '../../containers/mock';
 import { TestProviders } from '../../common/mock';
 import { createAssigneesUserActionBuilder, shouldAddAnd, shouldAddComma } from './assignees';
@@ -47,7 +47,7 @@ describe('createAssigneesUserActionBuilder', () => {
     });
 
     it('renders assigned users', () => {
-      const userAction = getUserAction('assignees', Actions.add, {
+      const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           // damaged_raccoon uid
           profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -75,7 +75,7 @@ describe('createAssigneesUserActionBuilder', () => {
     });
 
     it('renders assigned users with a comma', () => {
-      const userAction = getUserAction('assignees', Actions.add, {
+      const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           // damaged_raccoon uid
           profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -114,7 +114,7 @@ describe('createAssigneesUserActionBuilder', () => {
     });
 
     it('renders unassigned users', () => {
-      const userAction = getUserAction('assignees', Actions.delete, {
+      const userAction = getUserAction('assignees', UserActionActions.delete, {
         createdBy: {
           // damaged_raccoon uid
           profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -142,7 +142,7 @@ describe('createAssigneesUserActionBuilder', () => {
     });
 
     it('renders a single assigned user', () => {
-      const userAction = getUserAction('assignees', Actions.add, {
+      const userAction = getUserAction('assignees', UserActionActions.add, {
         payload: {
           assignees: [
             // only render the physical dinosaur
@@ -168,7 +168,7 @@ describe('createAssigneesUserActionBuilder', () => {
     });
 
     it('renders a single assigned user that is themselves using matching profile uids', () => {
-      const userAction = getUserAction('assignees', Actions.add, {
+      const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           ...elasticUser,
           profileUid: 'u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0',
@@ -198,7 +198,7 @@ describe('createAssigneesUserActionBuilder', () => {
     });
 
     it('renders a single assigned user that is themselves using matching usernames', () => {
-      const userAction = getUserAction('assignees', Actions.add, {
+      const userAction = getUserAction('assignees', UserActionActions.add, {
         createdBy: {
           ...elasticUser,
           username: 'damaged_raccoon',

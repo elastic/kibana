@@ -1,0 +1,16 @@
+{
+  "cluster.state": {
+    "url_components": {
+      "metrics": [
+        "_all",
+        "blocks",
+        "master_node",
+        "metadata",
+        "nodes",
+        "routing_nodes",
+        "routing_table",
+        "version"
+      ]
+    }
+  }
+}

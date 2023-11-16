@@ -1,0 +1,101 @@
+{
+  "id": "elasticAssistant",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": [],
+    "setup": {
+      "parentPluginId": "elasticAssistant",
+      "id": "def-server.ElasticAssistantPluginSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "ElasticAssistantPluginSetup",
+      "description": [
+        "The plugin setup interface"
+      ],
+      "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginSetup.actions",
+          "type": "Object",
+          "tags": [],
+          "label": "actions",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.PluginSetupContract",
+              "text": "PluginSetupContract"
+            }
+          ],
+          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    },
+    "start": {
+      "parentPluginId": "elasticAssistant",
+      "id": "def-server.ElasticAssistantPluginStart",
+      "type": "Interface",
+      "tags": [],
+      "label": "ElasticAssistantPluginStart",
+      "description": [
+        "The plugin start interface"
+      ],
+      "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "elasticAssistant",
+          "id": "def-server.ElasticAssistantPluginStart.actions",
+          "type": "Object",
+          "tags": [],
+          "label": "actions",
+          "description": [],
+          "signature": [
+            {
+              "pluginId": "actions",
+              "scope": "server",
+              "docId": "kibActionsPluginApi",
+              "section": "def-server.PluginStartContract",
+              "text": "PluginStartContract"
+            }
+          ],
+          "path": "x-pack/plugins/elastic_assistant/server/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        }
+      ],
+      "lifecycle": "start",
+      "initialIsOpen": true
+    }
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

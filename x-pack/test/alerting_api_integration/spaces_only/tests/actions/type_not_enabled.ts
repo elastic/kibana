@@ -63,6 +63,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         id: 'uuid-actionId',
         isPreconfigured: false,
         isDeprecated: false,
+        isSystemAction: false,
         isMissingSecrets: false,
         name: 'an action created before test.not-enabled was disabled',
       });
@@ -93,6 +94,7 @@ export default function typeNotEnabledTests({ getService }: FtrProviderContext) 
         isPreconfigured: false,
         isDeprecated: false,
         isMissingSecrets: false,
+        isSystemAction: false,
         name: 'an action created before test.not-enabled was disabled',
       });
     });

@@ -125,7 +125,9 @@ describe('incompatible_cluster_routing_allocation', () => {
     await root.preboot();
     await root.setup();
 
-    root.start();
+    root.start().catch(() => {
+      // Silent catch because the test might be done and call shutdown before starting is completed, causing unwanted thrown errors.
+    });
 
     // Wait for the INIT -> INIT action retry
     await retryAsync(
@@ -161,7 +163,7 @@ describe('incompatible_cluster_routing_allocation', () => {
           .map((str) => JSON5.parse(str)) as LogRecord[];
 
         expect(
-          records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY -> DONE'))
+          records.find((rec) => rec.message.includes('MARK_VERSION_INDEX_READY_SYNC -> DONE'))
         ).toBeDefined();
       },
       { retryAttempts: 100, retryDelayMs: 500 }

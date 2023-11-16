@@ -14,6 +14,7 @@ export { startServersCli, startServers } from './src/functional_tests/start_serv
 // @internal
 export { runTestsCli, runTests } from './src/functional_tests/run_tests';
 
+export { runElasticsearch, runKibanaServer } from './src/functional_tests/lib';
 export { getKibanaCliArg, getKibanaCliLoggers } from './src/functional_tests/lib/kibana_cli_args';
 
 export type {
@@ -37,6 +38,7 @@ export {
   kibanaTestUser,
   adminTestUser,
   systemIndicesSuperuser,
+  kibanaTestSuperuserServerless,
 } from './src/kbn';
 
 // @internal
@@ -57,3 +59,5 @@ export * from './src/kbn_archiver_cli';
 export * from './src/kbn_client';
 
 export * from './src/find_test_plugin_paths';
+
+export { getDockerFileMountPath } from '@kbn/es';

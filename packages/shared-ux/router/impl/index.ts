@@ -6,4 +6,6 @@
  * Side Public License, v 1.
  */
 
-export { Route } from './router';
+export { Route } from './route';
+export { HashRouter, BrowserRouter, MemoryRouter, Router } from './router';
+export { Routes } from './routes';

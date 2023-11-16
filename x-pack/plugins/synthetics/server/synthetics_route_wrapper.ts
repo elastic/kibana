@@ -6,11 +6,12 @@
  */
 import { KibanaResponse } from '@kbn/core-http-router-server-internal';
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
+import { isEmpty } from 'lodash';
+import { isTestUser, UptimeEsClient } from './lib';
 import { checkIndicesReadPrivileges } from './synthetics_service/authentication/check_has_privilege';
 import { SYNTHETICS_INDEX_PATTERN } from '../common/constants';
-import { isTestUser, UptimeEsClient } from './legacy_uptime/lib/lib';
-import { syntheticsServiceApiKey } from './legacy_uptime/lib/saved_objects/service_api_key';
-import { SyntheticsRouteWrapper, SyntheticsStreamingRouteHandler } from './legacy_uptime/routes';
+import { syntheticsServiceApiKey } from './saved_objects/service_api_key';
+import { SyntheticsRouteWrapper } from './routes/types';
 
 export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   uptimeRoute,
@@ -21,39 +22,6 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
   options: {
     tags: ['access:uptime-read', ...(uptimeRoute?.writeAccess ? ['access:uptime-write'] : [])],
     ...(uptimeRoute.options ?? {}),
-  },
-  streamHandler: async (context, request, subject) => {
-    const coreContext = await context.core;
-    const { client: esClient } = coreContext.elasticsearch;
-    const savedObjectsClient = coreContext.savedObjects.getClient({
-      includedHiddenTypes: [syntheticsServiceApiKey.name],
-    });
-
-    // specifically needed for the synthetics service api key generation
-    server.authSavedObjectsClient = savedObjectsClient;
-
-    const uptimeEsClient = new UptimeEsClient(savedObjectsClient, esClient.asCurrentUser, {
-      request,
-      isDev: false,
-      uiSettings: coreContext.uiSettings,
-    });
-
-    server.uptimeEsClient = uptimeEsClient;
-
-    const spaceId = server.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-
-    const res = await (uptimeRoute.handler as SyntheticsStreamingRouteHandler)({
-      uptimeEsClient,
-      savedObjectsClient,
-      context,
-      request,
-      server,
-      syntheticsMonitorClient,
-      subject,
-      spaceId,
-    });
-
-    return res;
   },
   handler: async (context, request, response) => {
     const { elasticsearch, savedObjects, uiSettings } = await context.core;
@@ -90,6 +58,23 @@ export const syntheticsRouteWrapper: SyntheticsRouteWrapper = (
       });
       if (res instanceof KibanaResponse) {
         return res;
+      }
+
+      const inspectData = await uptimeEsClient.getInspectData(uptimeRoute.path);
+
+      if (Array.isArray(res)) {
+        if (isEmpty(inspectData)) {
+          return response.ok({
+            body: res,
+          });
+        } else {
+          return response.ok({
+            body: {
+              result: res,
+              ...inspectData,
+            },
+          });
+        }
       }
 
       return response.ok({

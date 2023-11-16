@@ -24,6 +24,7 @@ export async function runKibanaServer(options: {
   extraKbnOpts?: string[];
   logsDir?: string;
   onEarlyExit?: (msg: string) => void;
+  inspect?: boolean;
 }) {
   const { config, procs } = options;
   const runOptions = options.config.get('kbnTestServer.runOptions');
@@ -50,6 +51,10 @@ export async function runKibanaServer(options: {
   const prefixArgs = devMode
     ? [Path.relative(procRunnerOpts.cwd, Path.resolve(REPO_ROOT, 'scripts/kibana'))]
     : [];
+
+  if (options.inspect) {
+    prefixArgs.unshift('--inspect');
+  }
 
   const buildArgs: string[] = config.get('kbnTestServer.buildArgs') || [];
   const sourceArgs: string[] = config.get('kbnTestServer.sourceArgs') || [];

@@ -6,22 +6,26 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Moment } from 'moment';
+import moment, { type Moment } from 'moment';
+import { cloneDeep } from 'lodash';
 import type { SerializableRecord } from '@kbn/utility-types';
 import rison from '@kbn/rison';
 import url from 'url';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { cleanEmptyKeys } from '@kbn/dashboard-plugin/public';
+import { cleanEmptyKeys, DashboardStart } from '@kbn/dashboard-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { isFilterPinned, Filter } from '@kbn/es-query';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
 import { TimeRange as EsQueryTimeRange } from '@kbn/es-query';
 import type { MlKibanaUrlConfig, MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { DEFAULT_RESULTS_FIELD } from '../../../../../common/constants/data_frame_analytics';
 import {
   isDataFrameAnalyticsConfigs,
   type DataFrameAnalyticsConfig,
-} from '../../../../../common/types/data_frame_analytics';
+  DEFAULT_RESULTS_FIELD,
+} from '@kbn/ml-data-frame-analytics-utils';
+
+import { isDefined } from '@kbn/ml-is-defined';
+import { DashboardItems } from '../../../services/dashboard_service';
 import { categoryFieldTypes } from '../../../../../common/util/fields_utils';
 import { TIME_RANGE_TYPE, URL_TYPE } from './constants';
 
@@ -30,6 +34,7 @@ import {
   getFiltersForDSLQuery,
 } from '../../../../../common/util/job_utils';
 import { parseInterval } from '../../../../../common/util/parse_interval';
+import { replaceStringTokens } from '../../../util/string_utils';
 import {
   replaceTokensInUrlValue,
   replaceTokensInDFAUrlValue,
@@ -37,7 +42,6 @@ import {
 } from '../../../util/custom_url_utils';
 import { ml } from '../../../services/ml_api_service';
 import { escapeForElasticsearchQuery } from '../../../util/string_utils';
-import { getSavedObjectsClient, getDashboard } from '../../../util/dependency_cache';
 
 import {
   CombinedJob,
@@ -71,8 +75,9 @@ export interface CustomUrlSettings {
 
 export function getNewCustomUrlDefaults(
   job: Job | DataFrameAnalyticsConfig,
-  dashboards: Array<{ id: string; title: string }>,
-  dataViews: DataViewListItem[]
+  dashboards: DashboardItems,
+  dataViews: DataViewListItem[],
+  isPartialDFAJob?: boolean
 ): CustomUrlSettings {
   // Returns the settings object in the format used by the custom URL editor
   // for a new custom URL.
@@ -108,11 +113,21 @@ export function getNewCustomUrlDefaults(
     indicesName = job.datafeed_config.indices.join();
     query = job.datafeed_config?.query ?? {};
     jobId = job.job_id;
-  } else if (isDataFrameAnalyticsConfigs(job) && dataViews !== undefined && dataViews.length > 0) {
-    indicesName = job.dest.index;
-    backupIndicesName = job.source.index[0];
-    query = job.source?.query ?? {};
-    jobId = job.id;
+  } else if (
+    (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) &&
+    dataViews !== undefined &&
+    dataViews.length > 0
+  ) {
+    // Ensure cast as dfaJob if it's just a partial from the wizard
+    const dfaJob = job as DataFrameAnalyticsConfig;
+    const sourceIndex = Array.isArray(dfaJob.source.index)
+      ? dfaJob.source.index.join()
+      : dfaJob.source.index;
+
+    indicesName = isPartialDFAJob ? sourceIndex : dfaJob.dest.index;
+    backupIndicesName = sourceIndex;
+    query = dfaJob.source?.query ?? {};
+    jobId = dfaJob.id;
   }
 
   const defaultDataViewId = dataViews.find((dv) => dv.title === indicesName)?.id;
@@ -205,17 +220,21 @@ export function isValidCustomUrlSettings(
   return isValid;
 }
 
-export function buildCustomUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
+export function buildCustomUrlFromSettings(
+  dashboardService: DashboardStart,
+  settings: CustomUrlSettings
+): Promise<MlUrlConfig> {
   // Dashboard URL returns a Promise as a query is made to obtain the full dashboard config.
   // So wrap the other two return types in a Promise for consistent return type.
   if (settings.type === URL_TYPE.KIBANA_DASHBOARD) {
-    return buildDashboardUrlFromSettings(settings);
+    return buildDashboardUrlFromSettings(dashboardService, settings);
   } else if (settings.type === URL_TYPE.KIBANA_DISCOVER) {
     return Promise.resolve(buildDiscoverUrlFromSettings(settings));
   } else {
     const urlToAdd = {
       url_name: settings.label,
       url_value: settings.otherUrlSettings?.urlValue ?? '',
+      ...(settings.customTimeRange ? { is_custom_time_range: true } : {}),
     };
 
     return Promise.resolve(urlToAdd);
@@ -236,13 +255,28 @@ function getUrlRangeFromSettings(settings: CustomUrlSettings) {
   };
 }
 
-async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promise<MlUrlConfig> {
+async function buildDashboardUrlFromSettings(
+  dashboardService: DashboardStart,
+  settings: CustomUrlSettings,
+  isPartialDFAJob?: boolean
+): Promise<MlUrlConfig> {
   // Get the complete list of attributes for the selected dashboard (query, filters).
   const { dashboardId, queryFieldNames } = settings.kibanaSettings ?? {};
 
-  const savedObjectsClient = getSavedObjectsClient();
+  if (!dashboardService) {
+    throw Error(`Missing dashboard service (got ${dashboardService})`);
+  }
+  if (!isDefined(dashboardId)) {
+    throw Error(`DashboardId is invalid (got ${dashboardId})`);
+  }
 
-  const response = await savedObjectsClient.get('dashboard', dashboardId ?? '');
+  const findDashboardsService = await dashboardService.findDashboardsService();
+  const responses = await findDashboardsService.findByIds([dashboardId]);
+
+  if (!responses || responses.length === 0 || responses[0].status === 'error') {
+    throw Error(`Unable to find dashboard with id ${dashboardId} (got ${responses})`);
+  }
+  const dashboard = responses[0];
 
   // Query from the datafeed config will be saved as custom filters
   // Use them if there are set.
@@ -252,7 +286,7 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
   let query;
 
   // Override with filters and queries from saved dashboard if they are available.
-  const searchSourceJSON = response.get('kibanaSavedObjectMeta.searchSourceJSON');
+  const searchSourceJSON = dashboard.attributes.kibanaSavedObjectMeta.searchSourceJSON;
   if (searchSourceJSON !== undefined) {
     const searchSourceData = JSON.parse(searchSourceJSON);
     if (Array.isArray(searchSourceData.filter) && searchSourceData.filter.length > 0) {
@@ -266,11 +300,9 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
     query = queryFromEntityFieldNames;
   }
 
-  const dashboard = getDashboard();
-
   const { from, to } = getUrlRangeFromSettings(settings);
 
-  const location = await dashboard?.locator?.getLocation({
+  const location = await dashboardService.locator?.getLocation({
     dashboardId,
     timeRange: {
       from,
@@ -297,7 +329,7 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
     location?.path
   );
 
-  const urlToAdd = {
+  const urlToAdd: MlUrlConfig = {
     url_name: settings.label,
     url_value: decodeURIComponent(`dashboards${url.parse(resultPath).hash}`),
     time_range: TIME_RANGE_TYPE.AUTO as string,
@@ -305,6 +337,10 @@ async function buildDashboardUrlFromSettings(settings: CustomUrlSettings): Promi
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
     urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  if (settings.customTimeRange) {
+    urlToAdd.is_custom_time_range = true;
   }
 
   return urlToAdd;
@@ -331,7 +367,6 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
     index: discoverIndexPatternId,
     filters,
   };
-
   // If partitioning field entities have been configured add tokens
   // to the URL to use in the Discover page search.
 
@@ -359,6 +394,10 @@ function buildDiscoverUrlFromSettings(settings: CustomUrlSettings) {
 
   if (settings.timeRange.type === TIME_RANGE_TYPE.INTERVAL) {
     urlToAdd.time_range = settings.timeRange.interval;
+  }
+
+  if (settings.customTimeRange) {
+    urlToAdd.is_custom_time_range = true;
   }
 
   return urlToAdd;
@@ -389,7 +428,7 @@ function buildAppStateQueryParam(queryFieldNames: string[]) {
 // may contain dollar delimited partition / influencer entity tokens and
 // drilldown time range settings.
 async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): Promise<string> {
-  const interval = parseInterval(job.analysis_config.bucket_span);
+  const interval = parseInterval(job.analysis_config.bucket_span!);
   const bucketSpanSecs = interval !== null ? interval.asSeconds() : 0;
 
   // By default, return configured url_value. Look to substitute any dollar-delimited
@@ -432,8 +471,8 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
     // No anomalies yet for this job, so do a preview of the search
     // configured in the job datafeed to obtain sample docs.
 
-    let { datafeed_config: datafeedConfig } = job;
-    let jobConfig = job;
+    let jobConfig = cloneDeep(job);
+    let { datafeed_config: datafeedConfig } = jobConfig;
     try {
       // attempt load the non-combined job and datafeed so they can be used in the datafeed preview
       const [{ jobs }, { datafeeds }] = await Promise.all([
@@ -462,6 +501,7 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
       undefined,
       jobConfig,
       datafeedConfig
+      // @ts-expect-error TODO: fix after elasticsearch-js bump
     )) as unknown as estypes.MlPreviewDatafeedResponse<Record<string, unknown>>['data'];
 
     const docTimeFieldName = job.data_description.time_field;
@@ -478,27 +518,31 @@ async function getAnomalyDetectionJobTestUrl(job: Job, customUrl: MlUrlConfig): 
 
 async function getDataFrameAnalyticsTestUrl(
   job: DataFrameAnalyticsConfig,
-  customUrl: MlUrlConfig,
-  currentTimeFilter?: EsQueryTimeRange
+  customUrl: MlKibanaUrlConfig,
+  timeFieldName: string | null,
+  currentTimeFilter?: EsQueryTimeRange,
+  isPartialDFAJob?: boolean
 ): Promise<string> {
   // By default, return configured url_value. Look to substitute any dollar-delimited
   // tokens with values from a sample doc in the destination index
+  const sourceIndex = Array.isArray(job.source.index) ? job.source.index.join() : job.source.index;
   let testUrl = customUrl.url_value;
   let record;
   let resp;
 
   try {
-    resp = await ml.esSearch({
-      index: job.dest.index,
+    const body = {
+      // Use source index for partial job as there is no dest index yet
+      index: isPartialDFAJob ? sourceIndex : job.dest.index,
       body: {
         size: 1,
       },
-    });
+    };
+
+    resp = await ml.esSearch(body);
 
     if (resp && resp.hits.total.value > 0) {
       record = resp.hits.hits[0]._source;
-      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
-      return testUrl;
     } else {
       // No results for this job yet so use source index for example doc.
       resp = await ml.esSearch({
@@ -509,8 +553,34 @@ async function getDataFrameAnalyticsTestUrl(
       });
 
       record = resp?.hits?.hits[0]._source;
-      testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
     }
+
+    if (record) {
+      const timeRangeInterval =
+        customUrl.time_range !== undefined ? parseInterval(customUrl.time_range) : null;
+
+      if (timeRangeInterval !== null && timeFieldName !== null) {
+        const timestamp = record[timeFieldName];
+        const configuredUrlValue = customUrl.url_value;
+
+        if (configuredUrlValue.includes('$earliest$')) {
+          const earliestMoment = moment(timestamp);
+          earliestMoment.subtract(timeRangeInterval);
+          record.earliest = earliestMoment.toISOString(); // e.g. 2016-02-08T16:00:00.000Z
+        }
+
+        if (configuredUrlValue.includes('$latest$')) {
+          const latestMoment = moment(timestamp);
+          latestMoment.add(timeRangeInterval);
+          record.latest = latestMoment.toISOString();
+        }
+
+        testUrl = replaceStringTokens(customUrl.url_value, record, true);
+      } else {
+        testUrl = replaceTokensInDFAUrlValue(customUrl, record, currentTimeFilter);
+      }
+    }
+    return testUrl;
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast
@@ -522,10 +592,18 @@ async function getDataFrameAnalyticsTestUrl(
 export function getTestUrl(
   job: Job | DataFrameAnalyticsConfig,
   customUrl: MlUrlConfig,
-  currentTimeFilter?: EsQueryTimeRange
+  timeFieldName: string | null,
+  currentTimeFilter?: EsQueryTimeRange,
+  isPartialDFAJob?: boolean
 ) {
-  if (isDataFrameAnalyticsConfigs(job)) {
-    return getDataFrameAnalyticsTestUrl(job, customUrl, currentTimeFilter);
+  if (isDataFrameAnalyticsConfigs(job) || isPartialDFAJob) {
+    return getDataFrameAnalyticsTestUrl(
+      job as DataFrameAnalyticsConfig,
+      customUrl,
+      timeFieldName,
+      currentTimeFilter,
+      isPartialDFAJob
+    );
   }
 
   return getAnomalyDetectionJobTestUrl(job, customUrl);

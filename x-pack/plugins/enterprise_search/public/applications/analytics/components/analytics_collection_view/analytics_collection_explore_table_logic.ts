@@ -11,7 +11,7 @@ import {
   DataView,
   IKibanaSearchRequest,
   IKibanaSearchResponse,
-  isCompleteResponse,
+  isRunningResponse,
   TimeRange,
 } from '@kbn/data-plugin/common';
 
@@ -237,7 +237,7 @@ const tablesParams: {
     requestParams: (
       dataView,
       { timeRange, sorting, pageIndex, pageSize, search },
-      aggregationFieldName = 'page.referrer'
+      aggregationFieldName = 'page.referrer.original'
     ) =>
       getBaseSearchTemplate(
         dataView,
@@ -415,7 +415,7 @@ export const AnalyticsCollectionExploreTableLogic = kea<
             KibanaLogic.values.data.search.showError(e);
           },
           next: (response) => {
-            if (isCompleteResponse(response)) {
+            if (!isRunningResponse(response)) {
               const { items, totalCount } = parseResponse(response);
 
               actions.setItems(items);

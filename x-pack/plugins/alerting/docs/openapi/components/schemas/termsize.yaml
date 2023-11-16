@@ -1,0 +1,4 @@
+description: >
+  This property is required when `groupBy` is `top`.
+  It specifies the number of groups to check against the threshold and therefore limits the number of alerts on high cardinality fields.
+type: integer

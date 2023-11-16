@@ -14,8 +14,10 @@ import {
   TooltipType,
   BrushEndListener,
   PartialTheme,
+  Tooltip,
 } from '@elastic/charts';
 import { css } from '@emotion/react';
+import { i18n } from '@kbn/i18n';
 import { Axes } from '../common/axes';
 import { LineChartPoint } from '../../../../common/chart_loader';
 import { Anomaly } from '../../../../common/results_loader';
@@ -72,11 +74,12 @@ export const EventRateChart: FC<Props> = ({
       <LoadingWrapper height={height} hasData={eventRateChartData.length > 0} loading={loading}>
         <Chart css={overlayRanges !== undefined ? cssOverride : undefined}>
           {showAxis === true && <Axes />}
+          <Tooltip type={TooltipType.None} />
           <Settings
-            tooltip={TooltipType.None}
             onBrushEnd={onBrushEnd}
             // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
             theme={theme}
+            locale={i18n.getLocale()}
           />
 
           {overlayRanges &&

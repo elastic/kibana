@@ -9,15 +9,14 @@ import { i18n } from '@kbn/i18n';
 import type { SecurityPageName } from '../../common/constants';
 import { SERVER_APP_ID } from '../../common/constants';
 import type { LinkItem } from '../common/links/types';
-import { IconCloudDefend } from '../management/icons/cloud_defend';
+import { IconCloudDefend } from '../common/icons/cloud_defend';
 
 const commonLinkProperties: Partial<LinkItem> = {
-  isBeta: true,
   hideTimeline: true,
   capabilities: [`${SERVER_APP_ID}.show`],
 };
 
-export const manageLinks: LinkItem = {
+export const cloudDefendLink: LinkItem = {
   ...getSecuritySolutionLink<SecurityPageName>('policies'),
   description: i18n.translate('xpack.securitySolution.appLinks.cloudDefendPoliciesDescription', {
     defaultMessage:

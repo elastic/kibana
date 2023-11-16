@@ -16,5 +16,6 @@
     "@kbn/lens-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/i18n-react",
+    "@kbn/shared-ux-router",
   ]
 }

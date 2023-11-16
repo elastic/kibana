@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { SavedObjectReference } from '@kbn/core-saved-objects-common';
-import { logViewSavedObjectName } from '../../../saved_objects';
+import type { SavedObjectReference } from '@kbn/core/server';
+import { logViewReferenceRT } from '@kbn/logs-shared-plugin/common';
+import { logViewSavedObjectName } from '@kbn/logs-shared-plugin/server';
 import { RuleParams, ruleParamsRT } from '../../../../common/alerting/logs/log_threshold';
-import { logViewReferenceRT } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 
 export const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';

@@ -45,6 +45,7 @@ export interface RawPackageInfo {
     distributable?: boolean;
     number: number;
     sha: string;
+    date: string;
   };
 }
 
@@ -122,6 +123,8 @@ export class Env {
       buildSha: isKibanaDistributable ? pkg.build.sha : 'XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX',
       version: pkg.version,
       dist: isKibanaDistributable,
+      buildDate: isKibanaDistributable ? new Date(pkg.build.date) : new Date(),
+      buildFlavor: this.cliArgs.serverless ? 'serverless' : 'traditional',
     });
   }
 }

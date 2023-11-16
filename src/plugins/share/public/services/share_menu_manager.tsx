@@ -28,6 +28,7 @@ export class ShareMenuManager {
     core: CoreStart,
     urlService: BrowserUrlService,
     shareRegistry: ShareMenuRegistryStart,
+    disableEmbed: boolean,
     anonymousAccessServiceProvider?: () => AnonymousAccessServiceContract
   ) {
     return {
@@ -45,6 +46,7 @@ export class ShareMenuManager {
         const anonymousAccess = anonymousAccessServiceProvider?.();
         this.toggleShareContextMenu({
           ...options,
+          allowEmbed: disableEmbed ? false : options.allowEmbed,
           onClose,
           menuItems,
           urlService,
@@ -70,6 +72,7 @@ export class ShareMenuManager {
     menuItems,
     shareableUrl,
     shareableUrlForSavedObject,
+    shareableUrlLocatorParams,
     embedUrlParamExtensions,
     theme,
     showPublicUrlSwitch,
@@ -115,6 +118,7 @@ export class ShareMenuManager {
               sharingData={sharingData}
               shareableUrl={shareableUrl}
               shareableUrlForSavedObject={shareableUrlForSavedObject}
+              shareableUrlLocatorParams={shareableUrlLocatorParams}
               onClose={onClose}
               embedUrlParamExtensions={embedUrlParamExtensions}
               anonymousAccess={anonymousAccess}

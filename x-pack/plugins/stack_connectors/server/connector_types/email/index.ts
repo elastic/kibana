@@ -26,6 +26,7 @@ import {
   renderMustacheObject,
   renderMustacheString,
 } from '@kbn/actions-plugin/server/lib/mustache_renderer';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 import { AdditionalEmailServices } from '../../../common';
 import { sendEmail, JSON_TRANSPORT_SERVICE, SendEmailOptions, Transport } from './send_email';
 import { portSchema } from '../lib/schemas';
@@ -154,6 +155,7 @@ const ParamsSchemaProps = {
   bcc: schema.arrayOf(schema.string(), { defaultValue: [] }),
   subject: schema.string(),
   message: schema.string(),
+  messageHTML: schema.nullable(schema.string()),
   // kibanaFooterLink isn't inteded for users to set, this is here to be able to programatically
   // provide a more contextual URL in the footer (ex: URL to the alert details page)
   kibanaFooterLink: schema.object({
@@ -284,6 +286,16 @@ async function executor(
     return { status: 'error', actionId, message: `[from]: ${invalidEmailsMessage}` };
   }
 
+  if (params.messageHTML != null) {
+    if (execOptions.source?.type !== ActionExecutionSourceType.NOTIFICATION) {
+      return {
+        status: 'error',
+        actionId,
+        message: `HTML email can only be sent via notifications`,
+      };
+    }
+  }
+
   const transport: Transport = {};
 
   if (secrets.user != null) {
@@ -320,6 +332,8 @@ async function executor(
   }
 
   let actualMessage = params.message;
+  const actualHTMLMessage = params.messageHTML;
+
   if (configurationUtilities.enableFooterInEmail()) {
     const footerMessage = getFooterMessage({
       publicBaseUrl,
@@ -340,6 +354,7 @@ async function executor(
     content: {
       subject: params.subject,
       message: actualMessage,
+      messageHTML: actualHTMLMessage,
     },
     hasAuth: config.hasAuth,
     configurationUtilities,

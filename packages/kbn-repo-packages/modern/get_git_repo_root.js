@@ -26,6 +26,7 @@ function getGitRepoRootSync(repoRoot) {
       cwd: repoRoot,
       encoding: 'utf8',
       maxBuffer: Infinity,
+      stdio: 'pipe',
     });
 
     const firstLine = stdout.split('\n')[0];

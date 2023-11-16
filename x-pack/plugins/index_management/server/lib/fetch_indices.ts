@@ -9,9 +9,11 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { IndexDataEnricher } from '../services';
 import { Index } from '..';
+import { RouteDependencies } from '../types';
 
 async function fetchIndicesCall(
   client: IScopedClusterClient,
+  config: RouteDependencies['config'],
   indexNames?: string[]
 ): Promise<Index[]> {
   const indexNamesString = indexNames && indexNames.length ? indexNames.join(',') : '*';
@@ -38,41 +40,77 @@ async function fetchIndicesCall(
     return [];
   }
 
-  const { indices: indicesStats = {} } = await client.asCurrentUser.indices.stats({
+  const indicesNames = Object.keys(indices);
+
+  // Return response without index stats, if isIndexStatsEnabled === false
+  if (config.isIndexStatsEnabled === false) {
+    return indicesNames.map((indexName: string) => {
+      const indexData = indices[indexName];
+      const aliases = Object.keys(indexData.aliases!);
+      return {
+        name: indexName,
+        primary: indexData.settings?.index?.number_of_shards,
+        replica: indexData.settings?.index?.number_of_replicas,
+        isFrozen: indexData.settings?.index?.frozen === 'true',
+        aliases: aliases.length ? aliases : 'none',
+        hidden: indexData.settings?.index?.hidden === 'true',
+        data_stream: indexData.data_stream,
+      };
+    });
+  }
+
+  const { indices: indicesStats } = await client.asCurrentUser.indices.stats({
     index: indexNamesString,
     expand_wildcards: ['hidden', 'all'],
     forbid_closed_indices: false,
     metric: ['docs', 'store'],
   });
-  const indicesNames = Object.keys(indices);
+
   return indicesNames.map((indexName: string) => {
     const indexData = indices[indexName];
-    const indexStats = indicesStats[indexName];
     const aliases = Object.keys(indexData.aliases!);
-    return {
-      health: indexStats?.health,
-      status: indexStats?.status,
+    const baseResponse = {
       name: indexName,
-      uuid: indexStats?.uuid,
       primary: indexData.settings?.index?.number_of_shards,
       replica: indexData.settings?.index?.number_of_replicas,
-      documents: indexStats?.primaries?.docs?.count ?? 0,
-      documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
-      size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
-      primary_size: new ByteSizeValue(indexStats?.primaries?.store?.size_in_bytes ?? 0).toString(),
       isFrozen: indexData.settings?.index?.frozen === 'true',
       aliases: aliases.length ? aliases : 'none',
       hidden: indexData.settings?.index?.hidden === 'true',
       data_stream: indexData.data_stream,
     };
+
+    if (indicesStats) {
+      const indexStats = indicesStats[indexName];
+
+      return {
+        ...baseResponse,
+        health: indexStats?.health,
+        status: indexStats?.status,
+        uuid: indexStats?.uuid,
+        documents: indexStats?.primaries?.docs?.count ?? 0,
+        documents_deleted: indexStats?.primaries?.docs?.deleted ?? 0,
+        size: new ByteSizeValue(indexStats?.total?.store?.size_in_bytes ?? 0).toString(),
+        primary_size: new ByteSizeValue(
+          indexStats?.primaries?.store?.size_in_bytes ?? 0
+        ).toString(),
+      };
+    }
+
+    return baseResponse;
   });
 }
 
-export const fetchIndices = async (
-  client: IScopedClusterClient,
-  indexDataEnricher: IndexDataEnricher,
-  indexNames?: string[]
-) => {
-  const indices = await fetchIndicesCall(client, indexNames);
+export const fetchIndices = async ({
+  client,
+  indexDataEnricher,
+  config,
+  indexNames,
+}: {
+  client: IScopedClusterClient;
+  indexDataEnricher: IndexDataEnricher;
+  config: RouteDependencies['config'];
+  indexNames?: string[];
+}) => {
+  const indices = await fetchIndicesCall(client, config, indexNames);
   return await indexDataEnricher.enrichIndices(indices, client);
 };

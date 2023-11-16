@@ -8,8 +8,7 @@
 import React from 'react';
 import { waitFor } from '@testing-library/react';
 import { render } from '../../../utils/testing/rtl_helpers';
-import { AlertingCallout } from './alerting_callout';
-import * as alertingHooks from '../../settings/alerting_defaults/hooks/use_alerting_defaults';
+import { AlertingCallout, MISSING_RULES_PRIVILEGES_LABEL } from './alerting_callout';
 
 jest.mock('../../../contexts', () => ({
   ...jest.requireActual('../../../contexts'),
@@ -33,34 +32,28 @@ describe('AlertingCallout', () => {
     [true, false, false],
     [true, true, false],
   ])('renders correctly', async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
-    jest.spyOn(alertingHooks, 'useAlertingDefaults').mockReturnValue({
-      settingsLoading: false,
-      connectorsLoading: false,
-      connectors: [],
-      defaultConnectors: hasConnectors ? ['default-connector'] : [],
-      actionTypes: [],
-      options: [
-        {
-          value: 'test',
-          label: 'test',
-          'data-test-subj': 'test',
-        },
-      ],
-    });
-
     const { getByText, queryByText } = render(<AlertingCallout />, {
       state: {
+        dynamicSettings: {
+          ...(shouldShowCallout ? { settings: {} } : {}),
+        },
+        defaultAlerting: {
+          data: {
+            statusRule: {},
+            tlsRule: {},
+          },
+          loading: false,
+          success: true,
+        },
         monitorList: {
           loaded: true,
           data: {
             total: 1,
             monitors: [
               {
-                attributes: {
-                  alert: {
-                    status: {
-                      enabled: statusAlertEnabled,
-                    },
+                alert: {
+                  status: {
+                    enabled: statusAlertEnabled,
                   },
                 },
               },
@@ -87,23 +80,23 @@ describe('AlertingCallout', () => {
   ])(
     'overwrites rendering with isAlertingEnabled prop',
     async (hasConnectors, statusAlertEnabled, shouldShowCallout) => {
-      jest.spyOn(alertingHooks, 'useAlertingDefaults').mockReturnValue({
-        settingsLoading: false,
-        connectorsLoading: false,
-        defaultConnectors: hasConnectors ? ['default-connector'] : [],
-        connectors: [],
-        actionTypes: [],
-        options: [
-          {
-            value: 'test',
-            label: 'test',
-            'data-test-subj': 'test',
-          },
-        ],
-      });
-
       const { getByText, queryByText } = render(
-        <AlertingCallout isAlertingEnabled={statusAlertEnabled} />
+        <AlertingCallout isAlertingEnabled={statusAlertEnabled} />,
+        {
+          state: {
+            dynamicSettings: {
+              ...(shouldShowCallout ? { settings: {} } : {}),
+            },
+            defaultAlerting: {
+              data: {
+                statusRule: {},
+                tlsRule: {},
+              },
+              loading: false,
+              success: true,
+            },
+          },
+        }
       );
 
       await waitFor(() => {
@@ -115,4 +108,21 @@ describe('AlertingCallout', () => {
       });
     }
   );
+
+  it('show call out for missing privileges rules', async () => {
+    const { getByText } = render(<AlertingCallout />, {
+      state: {
+        defaultAlerting: {
+          data: {},
+          loading: false,
+          success: true,
+        },
+      },
+    });
+
+    await waitFor(() => {
+      expect(getByText(/Alerts are not being sent/)).toBeInTheDocument();
+      expect(getByText(MISSING_RULES_PRIVILEGES_LABEL)).toBeInTheDocument();
+    });
+  });
 });

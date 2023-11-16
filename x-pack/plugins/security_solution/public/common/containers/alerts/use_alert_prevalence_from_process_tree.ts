@@ -42,7 +42,6 @@ interface EntityResponse {
 }
 
 interface UseAlertPrevalenceFromProcessTree {
-  processEntityId: string;
   documentId: string;
   isActiveTimeline: boolean;
   indices: string[];
@@ -96,7 +95,6 @@ function useAlertDocumentAnalyzerSchema({ documentId, indices }: UseAlertDocumen
 }
 
 export function useAlertPrevalenceFromProcessTree({
-  processEntityId,
   documentId,
   isActiveTimeline,
   indices,

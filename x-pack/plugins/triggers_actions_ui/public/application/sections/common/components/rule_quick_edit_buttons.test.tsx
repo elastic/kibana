@@ -77,7 +77,7 @@ describe('rule_quick_edit_buttons', () => {
     expect(wrapper.find('[data-test-subj="bulkDisable"]').exists()).toBeTruthy();
   });
 
-  it('disables the disable/enable/delete bulk actions if in select all mode', async () => {
+  it('removes the snooze bulk actions if in select all mode', async () => {
     const mockRule: RuleTableItem = {
       id: '1',
       enabled: true,
@@ -99,14 +99,10 @@ describe('rule_quick_edit_buttons', () => {
     expect(wrapper.find('[data-test-subj="bulkEnable"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="bulkDelete"]').first().prop('isDisabled')).toBeFalsy();
     expect(wrapper.find('[data-test-subj="updateAPIKeys"]').first().prop('isDisabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkSnooze"]').first().prop('isDisabled')).toBeFalsy();
-    expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').first().prop('isDisabled')).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').first().prop('isDisabled')
-    ).toBeFalsy();
-    expect(
-      wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').first().prop('isDisabled')
-    ).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkSnooze"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkUnsnooze"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkSnoozeSchedule"]').exists()).toBeFalsy();
+    expect(wrapper.find('[data-test-subj="bulkRemoveSnoozeSchedule"]').exists()).toBeFalsy();
   });
 
   it('properly sets rules or filters to delete when not selecting all', async () => {
@@ -119,30 +115,6 @@ describe('rule_quick_edit_buttons', () => {
     const wrapper = mountWithIntl(
       <RuleQuickEditButtons
         isAllSelected={false}
-        getFilter={() => null}
-        selectedItems={[mockRule]}
-        onPerformingAction={() => {}}
-        onActionPerformed={() => {}}
-        onEnable={async () => {}}
-        onDisable={async () => {}}
-        updateRulesToBulkEdit={updateRulesToBulkEdit}
-      />
-    );
-
-    wrapper.find('[data-test-subj="bulkSnooze"]').first().simulate('click');
-    expect(updateRulesToBulkEdit).toHaveBeenCalledTimes(1);
-  });
-
-  it('properly sets rules or filters to delete when selecting all', async () => {
-    const mockRule: RuleTableItem = {
-      id: '1',
-      enabled: true,
-      enabledInLicense: true,
-    } as RuleTableItem;
-
-    const wrapper = mountWithIntl(
-      <RuleQuickEditButtons
-        isAllSelected={true}
         getFilter={() => null}
         selectedItems={[mockRule]}
         onPerformingAction={() => {}}

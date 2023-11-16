@@ -52,7 +52,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
   {
     type: 'formula',
     displayName: defaultLabel,
-    getDefaultLabel: (column, indexPattern) => column.params.formula ?? defaultLabel,
+    getDefaultLabel: (column) => column.params.formula ?? defaultLabel,
     input: 'managedReference',
     hidden: true,
     filterable: {
@@ -68,7 +68,7 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
     getDisabledStatus(indexPattern: IndexPattern) {
       return undefined;
     },
-    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap) {
+    getErrorMessage(layer, columnId, indexPattern, dateRange, operationDefinitionMap, targetBars) {
       const column = layer.columns[columnId] as FormulaIndexPatternColumn;
       if (!column.params.formula || !operationDefinitionMap) {
         return;
@@ -110,7 +110,8 @@ export const formulaOperation: OperationDefinition<FormulaIndexPatternColumn, 'm
                 id,
                 indexPattern,
                 dateRange,
-                visibleOperationsMap
+                visibleOperationsMap,
+                targetBars
               );
               return messages || [];
             }

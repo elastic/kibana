@@ -29,7 +29,7 @@ beforeEach(() => {
 });
 
 afterEach(() => {
-  jest.restoreAllMocks();
+  jest.clearAllMocks();
   logger.asLoggerFactory.mockClear();
   logger.stop.mockClear();
   rawConfigService.getConfig$.mockClear();
@@ -136,6 +136,21 @@ test('stops services on "shutdown" an calls `onShutdown` with error passed to `s
   expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockOnShutdown).toHaveBeenCalledWith(someFatalError);
   expect(logger.stop).toHaveBeenCalledTimes(1);
+  expect(mockServer.stop).toHaveBeenCalledTimes(1);
+});
+
+test('only shutdowns once', async () => {
+  const mockOnShutdown = jest.fn();
+  const root = new Root(rawConfigService, env, mockOnShutdown);
+
+  await root.preboot();
+  await root.setup();
+  await root.start();
+
+  await root.shutdown();
+  await root.shutdown();
+
+  expect(mockOnShutdown).toHaveBeenCalledTimes(1);
   expect(mockServer.stop).toHaveBeenCalledTimes(1);
 });
 

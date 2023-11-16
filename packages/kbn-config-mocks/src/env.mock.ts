@@ -45,6 +45,7 @@ export const createTestPackageInfo = ({ dist = true }: { dist?: boolean } = {}):
       distributable: dist,
       number: 123456789,
       sha: 'XXXXXX',
+      date: '2023-05-15T23:12:09+0000',
     },
   };
 };

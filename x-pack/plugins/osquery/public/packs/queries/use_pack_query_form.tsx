@@ -11,7 +11,8 @@ import type { Draft } from 'immer';
 import { produce } from 'immer';
 import { useMemo } from 'react';
 import type { ECSMapping } from '@kbn/osquery-io-ts-types';
-import type { Shard } from '../../../common/schemas/common/utils';
+import { QUERY_TIMEOUT } from '../../../common/constants';
+import type { Shard } from '../../../common/utils/converters';
 
 export interface UsePackQueryFormProps {
   uniqueQueryIds: string[];
@@ -22,6 +23,7 @@ export interface PackSOQueryFormData {
   id: string;
   query: string;
   interval: string;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string | undefined;
@@ -37,6 +39,7 @@ export interface PackQueryFormData {
   description?: string;
   query: string;
   interval: number;
+  timeout?: number;
   snapshot?: boolean;
   removed?: boolean;
   platform?: string | undefined;
@@ -48,6 +51,7 @@ const deserializer = (payload: PackSOQueryFormData): PackQueryFormData => ({
   id: payload.id,
   query: payload.query,
   interval: payload.interval ? parseInt(payload.interval, 10) : 3600,
+  timeout: payload.timeout || QUERY_TIMEOUT.DEFAULT,
   snapshot: payload.snapshot,
   removed: payload.removed,
   platform: payload.platform,

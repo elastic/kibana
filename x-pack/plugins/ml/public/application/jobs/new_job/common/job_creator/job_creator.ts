@@ -11,14 +11,17 @@ import { ES_FIELD_TYPES } from '@kbn/field-types';
 import type { Query } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { addExcludeFrozenToQuery } from '@kbn/ml-query-utils';
-import { MlUrlConfig } from '@kbn/ml-anomaly-utils';
-import { SavedSearchSavedObject } from '../../../../../../common/types/kibana';
-import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import {
+  type Aggregation,
+  type Field,
+  type MlUrlConfig,
   ML_JOB_AGGREGATION,
-  aggregations,
-  mlOnlyAggregations,
-} from '../../../../../../common/constants/aggregation_types';
+  mlJobAggregations,
+  mlJobAggregationsWithoutEsEquivalent,
+} from '@kbn/ml-anomaly-utils';
+import type { RuntimeMappings } from '@kbn/ml-runtime-field-utils';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
+import { IndexPatternTitle } from '../../../../../../common/types/kibana';
 import { getQueryFromSavedSearchObject } from '../../../../util/index_utils';
 import type {
   Job,
@@ -29,7 +32,6 @@ import type {
   BucketSpan,
   CustomSettings,
 } from '../../../../../../common/types/anomaly_detection_jobs';
-import type { Aggregation, Field, RuntimeMappings } from '../../../../../../common/types/fields';
 import { combineFieldsAndAggs } from '../../../../../../common/util/fields_utils';
 import { createEmptyJob, createEmptyDatafeed } from './util/default_configs';
 import { mlJobService } from '../../../../services/job_service';
@@ -51,7 +53,7 @@ import { ml } from '../../../../services/ml_api_service';
 export class JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.SINGLE_METRIC;
   protected _indexPattern: DataView;
-  protected _savedSearch: SavedSearchSavedObject | null;
+  protected _savedSearch: SavedSearch | null;
   protected _indexPatternTitle: IndexPatternTitle = '';
   protected _indexPatternDisplayName: string = '';
   protected _job_config: Job;
@@ -79,7 +81,7 @@ export class JobCreator {
   protected _wizardInitialized$ = new BehaviorSubject<boolean>(false);
   public wizardInitialized$ = this._wizardInitialized$.asObservable();
 
-  constructor(indexPattern: DataView, savedSearch: SavedSearchSavedObject | null, query: object) {
+  constructor(indexPattern: DataView, savedSearch: SavedSearch | null, query: object) {
     this._indexPattern = indexPattern;
     this._savedSearch = savedSearch;
 
@@ -107,7 +109,7 @@ export class JobCreator {
     return this._type;
   }
 
-  public get savedSearch(): SavedSearchSavedObject | null {
+  public get savedSearch(): SavedSearch | null {
     return this._savedSearch;
   }
 
@@ -191,7 +193,7 @@ export class JobCreator {
   }
 
   public get bucketSpan(): BucketSpan {
-    return this._job_config.analysis_config.bucket_span;
+    return this._job_config.analysis_config.bucket_span!;
   }
 
   protected _setBucketSpanMs(bucketSpan: BucketSpan) {
@@ -803,7 +805,7 @@ export class JobCreator {
           } as Field)
       );
 
-      const aggs = cloneDeep([...aggregations, ...mlOnlyAggregations]);
+      const aggs = cloneDeep([...mlJobAggregations, ...mlJobAggregationsWithoutEsEquivalent]);
       this._runtimeFields = combineFieldsAndAggs(tempRuntimeFields, aggs, {}).fields;
     }
   }

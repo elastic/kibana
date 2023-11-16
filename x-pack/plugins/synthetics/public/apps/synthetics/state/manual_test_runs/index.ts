@@ -10,16 +10,18 @@ import { createReducer, PayloadAction } from '@reduxjs/toolkit';
 import { WritableDraft } from 'immer/dist/types/types-external';
 import { IHttpFetchError } from '@kbn/core-http-browser';
 
+import { ActionPayload } from '../utils/actions';
 import { TestNowResponse } from '../../../../../common/types';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
   manualTestMonitorAction,
   manualTestRunUpdateAction,
+  TestNowPayload,
   toggleTestNowFlyoutAction,
 } from './actions';
 import {
-  Locations,
+  MonitorFields,
   ScheduleUnit,
   ServiceLocationErrors,
   SyntheticsMonitorSchedule,
@@ -40,7 +42,7 @@ export interface ManualTestRun {
   testRunId?: string;
   status: TestRunStatus;
   schedule: SyntheticsMonitorSchedule;
-  locations: Locations;
+  locations: MonitorFields['locations'];
   errors?: ServiceLocationErrors;
   fetchError?: { name: string; message: string };
   isTestNowFlyoutOpen: boolean;
@@ -57,10 +59,7 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
   builder
     .addCase(
       String(manualTestMonitorAction.get),
-      (
-        state: WritableDraft<ManualTestRunsState>,
-        action: PayloadAction<{ configId: string; name: string }>
-      ) => {
+      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<TestNowPayload>) => {
         state = Object.values(state).reduce((acc, curr) => {
           acc[curr.configId] = {
             ...curr,
@@ -98,9 +97,12 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
     )
     .addCase(
       String(manualTestMonitorAction.fail),
-      (state: WritableDraft<ManualTestRunsState>, action: PayloadAction<TestNowResponse>) => {
+      (
+        state: WritableDraft<ManualTestRunsState>,
+        action: ActionPayload<TestNowResponse, TestNowPayload>
+      ) => {
         const fetchError = action.payload as unknown as IHttpFetchError;
-        if (fetchError?.request.url) {
+        if (fetchError?.request?.url) {
           const { name, message } = fetchError;
 
           const [, errorMonitor] =
@@ -117,10 +119,10 @@ export const manualTestRunsReducer = createReducer(initialState, (builder) => {
             };
           }
         }
-
-        if (action.payload.configId) {
-          state[action.payload.configId] = {
-            ...state[action.payload.configId],
+        const configId = action.payload.configId ?? action.payload.getPayload?.configId;
+        if (configId) {
+          state[configId] = {
+            ...state[configId],
             status: TestRunStatus.COMPLETED,
             errors: action.payload.errors,
             fetchError: undefined,

@@ -10,7 +10,6 @@ import { ReactElement } from 'react';
 import { RasterTileSource } from 'maplibre-gl';
 import { getDataSourceLabel, getUrlLabel } from '../../../../common/i18n_getters';
 import { SOURCE_TYPES } from '../../../../common/constants';
-import { registerSource } from '../source_registry';
 import {
   XYZTMSSourceDescriptor,
   DataRequestMeta,
@@ -89,8 +88,3 @@ export class XYZTMSSource extends AbstractSource implements IRasterSource {
     return canSkip;
   }
 }
-
-registerSource({
-  ConstructorFunction: XYZTMSSource,
-  type: SOURCE_TYPES.EMS_XYZ,
-});

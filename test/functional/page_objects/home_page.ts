@@ -53,7 +53,9 @@ export class HomePageObject extends FtrService {
   }
 
   async isWelcomeInterstitialDisplayed() {
-    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial');
+    // give the interstitial enough time to fade in
+    await new Promise((resolve) => setTimeout(resolve, 500));
+    return await this.testSubjects.isDisplayed('homeWelcomeInterstitial', 2000);
   }
 
   async isGuidedOnboardingLandingDisplayed() {

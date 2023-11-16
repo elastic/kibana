@@ -17,6 +17,7 @@ import { INGESTION_METHOD_IDS } from '../../../../../common/constants';
 import { getIngestionMethodIconType } from './utils';
 
 export interface NewIndexCardProps {
+  disabled: boolean;
   isSelected?: boolean;
   onSelect?: MouseEventHandler<HTMLButtonElement>;
   type: INGESTION_METHOD_IDS;
@@ -34,7 +35,8 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     description: i18n.translate(
       'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.description',
       {
-        defaultMessage: 'Discover, extract, index, and sync all of your website content',
+        defaultMessage:
+          'Discover, extract, and index searchable content from websites and knowledge bases',
       }
     ),
     footer: {
@@ -42,6 +44,12 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
         'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.label',
         {
           defaultMessage: 'Use a web crawler',
+        }
+      ),
+      label: i18n.translate(
+        'xpack.enterpriseSearch.content.newIndex.methodCard.crawler.nocodeLabel',
+        {
+          defaultMessage: 'No code',
         }
       ),
     },
@@ -55,7 +63,7 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
       'xpack.enterpriseSearch.content.newIndex.methodCard.connector.description',
       {
         defaultMessage:
-          'Use the connector framework to quickly build connectors for custom data sources',
+          'Extract, transform, index and sync data from a data source via native or customized connectors',
       }
     ),
     footer: {
@@ -89,7 +97,12 @@ const METHOD_CARD_OPTIONS: Record<INGESTION_METHOD_IDS, MethodCardOptions> = {
     }),
   },
 };
-export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected, type }) => {
+export const NewIndexCard: React.FC<NewIndexCardProps> = ({
+  disabled,
+  onSelect,
+  isSelected,
+  type,
+}) => {
   if (!METHOD_CARD_OPTIONS[type]) {
     return null;
   }
@@ -97,6 +110,7 @@ export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected
 
   return (
     <EuiCard
+      isDisabled={disabled}
       data-test-subj="entSearch-content-newIndexCard-cardBody"
       hasBorder
       icon={<EuiIcon type={icon} size="xxl" />}
@@ -111,6 +125,7 @@ export const NewIndexCard: React.FC<NewIndexCardProps> = ({ onSelect, isSelected
             </>
           )}
           <EuiButton
+            isDisabled={disabled}
             data-test-subj={`entSearchContent-newIndexCard-button-${type}`}
             fullWidth
             onClick={onSelect}

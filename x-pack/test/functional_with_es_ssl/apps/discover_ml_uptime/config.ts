@@ -13,6 +13,13 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
 
   return {
     ...baseConfig.getAll(),
+    kbnTestServer: {
+      ...baseConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseConfig.get('kbnTestServer.serverArgs'),
+        '--uiSettings.overrides.observability:enableLegacyUptimeApp=true',
+      ],
+    },
     testFiles: [
       resolve(__dirname, './discover'),
       resolve(__dirname, './uptime'),

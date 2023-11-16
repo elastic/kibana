@@ -23,6 +23,7 @@ interface Props {
   hidden?: boolean;
   showUnifiedSearchBar?: boolean;
   showTimeComparison?: boolean;
+  showQueryInput?: boolean;
   showTransactionTypeSelector?: boolean;
   searchBarPlaceholder?: string;
   searchBarBoolFilter?: QueryDslQueryContainer[];
@@ -33,6 +34,7 @@ export function SearchBar({
   showUnifiedSearchBar = true,
   showTimeComparison = false,
   showTransactionTypeSelector = false,
+  showQueryInput = true,
   searchBarPlaceholder,
   searchBarBoolFilter,
 }: Props) {
@@ -49,7 +51,7 @@ export function SearchBar({
     isXXXL || (!isXl && !showTimeComparison) ? 'row' : 'column';
 
   return (
-    <>
+    <EuiFlexItem grow={false}>
       <EuiFlexGroup
         gutterSize="s"
         responsive={false}
@@ -72,6 +74,7 @@ export function SearchBar({
                 <UnifiedSearchBar
                   placeholder={searchBarPlaceholder}
                   boolFilter={searchBarBoolFilter}
+                  showQueryInput={showQueryInput}
                 />
               </EuiFlexItem>
             )}
@@ -93,6 +96,6 @@ export function SearchBar({
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size={isMobileAgent ? 's' : 'm'} />
-    </>
+    </EuiFlexItem>
   );
 }

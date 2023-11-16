@@ -1,6 +1,10 @@
 {
   "security.suggest_user_profiles": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "data": []
     },
     "methods": [
@@ -10,6 +14,10 @@
     "patterns": [
       "_security/profile/_suggest"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-suggest-user-profile.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/security-api-suggest-user-profile.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

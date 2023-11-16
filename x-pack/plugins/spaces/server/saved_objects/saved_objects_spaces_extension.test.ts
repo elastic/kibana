@@ -9,8 +9,8 @@ import { mockSpaceIdToNamespace } from './saved_objects_spaces_extension.test.mo
 
 import Boom from '@hapi/boom';
 
-import { spacesClientMock } from '../mocks';
 import { SavedObjectsSpacesExtension } from './saved_objects_spaces_extension';
+import { spacesClientMock } from '../mocks';
 
 const ACTIVE_SPACE_ID = 'active-spaceId';
 function setup() {

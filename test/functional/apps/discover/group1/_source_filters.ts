@@ -15,7 +15,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['common', 'timePicker', 'discover', 'header', 'settings']);
+  const PageObjects = getPageObjects([
+    'common',
+    'timePicker',
+    'discover',
+    'header',
+    'settings',
+    'unifiedFieldList',
+  ]);
 
   describe('source filters', function () {
     before(async function () {
@@ -51,7 +58,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('should not get the field referer', async function () {
-      const fieldNames = await PageObjects.discover.getAllFieldNames();
+      const fieldNames = await PageObjects.unifiedFieldList.getAllFieldNames();
       expect(fieldNames).to.not.contain('referer');
       const relatedContentFields = fieldNames.filter(
         (fieldName) => fieldName.indexOf('relatedContent') === 0

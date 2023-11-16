@@ -9,21 +9,19 @@ import React from 'react';
 import styled from 'styled-components';
 import { EuiFlyout, EuiFlyoutHeader, EuiTitle, EuiFlyoutBody } from '@elastic/eui';
 
-import { QueryClientProvider } from '@tanstack/react-query';
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { noop } from 'lodash';
-import type { CasePostRequest } from '../../../../common/api';
+import type { CasePostRequest } from '../../../../common/types/api';
 import * as i18n from '../translations';
 import type { CaseUI } from '../../../../common/ui/types';
 import { CreateCaseForm } from '../form';
 import type { UseCreateAttachments } from '../../../containers/use_create_attachments';
 import type { CaseAttachmentsWithoutOwner } from '../../../types';
-import { casesQueryClient } from '../../cases_context/query_client';
 
 export interface CreateCaseFlyoutProps {
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutate']
   ) => Promise<void>;
   onClose?: () => void;
   onSuccess?: (theCase: CaseUI) => void;
@@ -65,7 +63,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
     const handleOnSuccess = onSuccess || noop;
 
     return (
-      <QueryClientProvider client={casesQueryClient}>
+      <>
         <ReactQueryDevtools initialIsOpen={false} />
         <StyledFlyout
           onClose={onClose}
@@ -91,7 +89,7 @@ export const CreateCaseFlyout = React.memo<CreateCaseFlyoutProps>(
             </FormWrapper>
           </StyledEuiFlyoutBody>
         </StyledFlyout>
-      </QueryClientProvider>
+      </>
     );
   }
 );

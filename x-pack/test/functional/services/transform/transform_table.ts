@@ -7,14 +7,25 @@
 
 import expect from '@kbn/expect';
 
+import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
+
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-type TransformRowActionName = 'Clone' | 'Delete' | 'Discover' | 'Edit' | 'Reset' | 'Start' | 'Stop';
+type TransformRowActionName =
+  | 'Clone'
+  | 'Delete'
+  | 'Discover'
+  | 'Edit'
+  | 'Reset'
+  | 'Start'
+  | 'Stop'
+  | 'Reauthorize';
 
-export function TransformTableProvider({ getService }: FtrProviderContext) {
+export function TransformTableProvider({ getPageObject, getService }: FtrProviderContext) {
   const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
+  const commonPage = getPageObject('common');
   const browser = getService('browser');
   const ml = getService('ml');
 
@@ -81,20 +92,47 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await this.waitForRefreshButtonLoaded();
       await testSubjects.click('~transformRefreshTransformListButton');
       await this.waitForRefreshButtonLoaded();
-      await this.waitForTransformsToLoad();
+      await this.waitForTransformsTableToLoad();
     }
 
-    public async waitForTransformsToLoad() {
+    public async waitForTransformsTableToStartLoading() {
+      await testSubjects.existOrFail(`~transformListTable`, { timeout: 60 * 1000 });
+
+      // After invoking an action that caused the table to start loading, the loading
+      // should start quickly after the table exists. Sometimes it is even so quick that
+      // the loading is already done when we try to check for it, so we're not failing
+      // in that case and just move on.
+      await testSubjects.exists(`transformListTable loading`, { timeout: 3 * 1000 });
+    }
+
+    public async waitForTransformsTableToLoad() {
       await testSubjects.existOrFail('~transformListTable', { timeout: 60 * 1000 });
       await testSubjects.existOrFail('transformListTable loaded', { timeout: 30 * 1000 });
     }
 
-    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
-      await this.waitForTransformsToLoad();
+    async getSearchInput(): Promise<WebElementWrapper> {
       const tableListContainer = await testSubjects.find('transformListTableContainer');
-      const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
+      return await tableListContainer.findByClassName('euiFieldSearch');
+    }
+
+    public async assertSearchInputValue(expectedSearchValue: string) {
+      const searchBarInput = await this.getSearchInput();
+      const actualSearchValue = await searchBarInput.getAttribute('value');
+      expect(actualSearchValue).to.eql(
+        expectedSearchValue,
+        `Search input value should be '${expectedSearchValue}' (got '${actualSearchValue}')`
+      );
+    }
+
+    public async filterWithSearchString(filter: string, expectedRowCount: number = 1) {
+      await this.waitForTransformsTableToLoad();
+      const searchBarInput = await this.getSearchInput();
       await searchBarInput.clearValueWithKeyboard();
       await searchBarInput.type(filter);
+      await commonPage.pressEnterKey();
+      await this.assertSearchInputValue(filter);
+      await this.waitForTransformsTableToStartLoading();
+      await this.waitForTransformsTableToLoad();
 
       const rows = await this.parseTransformTable();
       const filteredRows = rows.filter((row) => row.id === filter);
@@ -105,7 +143,7 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
     }
 
     public async clearSearchString(expectedRowCount: number = 1) {
-      await this.waitForTransformsToLoad();
+      await this.waitForTransformsTableToLoad();
       const tableListContainer = await testSubjects.find('transformListTableContainer');
       const searchBarInput = await tableListContainer.findByClassName('euiFieldSearch');
       await searchBarInput.clearValueWithKeyboard();
@@ -464,6 +502,21 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       });
     }
 
+    public async assertTransformRowActionMissing(
+      transformId: string,
+      action: TransformRowActionName
+    ) {
+      const selector = `transformAction${action}`;
+      await retry.tryForTime(60 * 1000, async () => {
+        await this.refreshTransformList();
+
+        await this.ensureTransformActionsMenuOpen(transformId);
+
+        await testSubjects.missingOrFail(selector, { timeout: 1000 });
+        await this.ensureTransformActionsMenuClosed();
+      });
+    }
+
     public async assertTransformRowActionEnabled(
       transformId: string,
       action: TransformRowActionName,
@@ -516,6 +569,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
       await testSubjects.missingOrFail('transformDeleteModal', { timeout: 60 * 1000 });
     }
 
+    public async assertTransformReauthorizeModalExists() {
+      await testSubjects.existOrFail('transformReauthorizeModal', { timeout: 60 * 1000 });
+    }
+
+    public async assertTransformReauthorizeModalNotExists() {
+      await testSubjects.missingOrFail('transformReauthorizeModal', { timeout: 60 * 1000 });
+    }
+
     public async assertTransformResetModalExists() {
       await testSubjects.existOrFail('transformResetModal', { timeout: 60 * 1000 });
     }
@@ -561,6 +622,14 @@ export function TransformTableProvider({ getService }: FtrProviderContext) {
           // Checks that the tranform was deleted
           await this.filterWithSearchString(transformId, 0);
         }
+      });
+    }
+
+    public async confirmReauthorizeTransform() {
+      await retry.tryForTime(30 * 1000, async () => {
+        await this.assertTransformReauthorizeModalExists();
+        await testSubjects.click('transformReauthorizeModal > confirmModalConfirmButton');
+        await this.assertTransformReauthorizeModalNotExists();
       });
     }
 

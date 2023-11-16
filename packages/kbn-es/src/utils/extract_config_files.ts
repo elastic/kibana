@@ -29,6 +29,7 @@ export function extractConfigFiles(
     if (isFile(value)) {
       const filename = path.basename(value);
       const destPath = path.resolve(dest, 'config', filename);
+
       copyFileSync(value, destPath);
 
       options?.log.info('moved %s in config to %s', value, destPath);
@@ -43,7 +44,7 @@ export function extractConfigFiles(
 }
 
 function isFile(dest = '') {
-  return path.isAbsolute(dest) && path.extname(dest).length > 0 && fs.existsSync(dest);
+  return fs.existsSync(dest) && fs.statSync(dest).isFile();
 }
 
 function copyFileSync(src: string, dest: string) {

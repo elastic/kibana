@@ -16,6 +16,7 @@ import {
   useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { MonitorListSortField } from '../../../../../../../common/runtime_types/monitor_management/sort_field';
 import { DeleteMonitor } from './delete_monitor';
 import { IHttpSerializedFetchError } from '../../../../state/utils/http_error';
 import { MonitorListPageState } from '../../../../state';
@@ -66,7 +67,7 @@ export const MonitorList = ({
       loadPage({
         pageIndex: index,
         pageSize: size,
-        sortField: field === 'enabled' ? field : `${field}.keyword`,
+        sortField: (field === 'enabled' ? field : `${field}.keyword`) as MonitorListSortField,
         sortOrder: direction,
       });
     },
@@ -82,7 +83,7 @@ export const MonitorList = ({
 
   const sorting: EuiTableSortingType<EncryptedSyntheticsSavedMonitor> = {
     sort: {
-      field: sortField.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
+      field: sortField?.replace('.keyword', '') as keyof EncryptedSyntheticsSavedMonitor,
       direction: sortOrder,
     },
   };

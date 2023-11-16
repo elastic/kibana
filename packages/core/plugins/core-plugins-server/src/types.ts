@@ -8,7 +8,7 @@
 
 import { Observable } from 'rxjs';
 import { Type } from '@kbn/config-schema';
-import type { RecursiveReadonly } from '@kbn/utility-types';
+import type { RecursiveReadonly, MaybePromise } from '@kbn/utility-types';
 import type { PathConfigType } from '@kbn/utils';
 import type { LoggerFactory } from '@kbn/logging';
 import type {
@@ -34,7 +34,7 @@ export type PluginConfigSchema<T> = Type<T>;
 
 /**
  * Type defining the list of configuration properties that will be exposed on the client-side
- * Object properties can either be fully exposed
+ * Object properties can either be fully exposed or narrowed down to specific keys.
  *
  * @public
  */
@@ -45,6 +45,23 @@ export type ExposedToBrowserDescriptor<T> = {
     : T[Key] extends Maybe<object>
     ? // can be nested for objects
       ExposedToBrowserDescriptor<T[Key]> | boolean
+    : // primitives
+      boolean;
+};
+
+/**
+ * Type defining the list of configuration properties that can be dynamically updated
+ * Object properties can either be fully exposed or narrowed down to specific keys.
+ *
+ * @public
+ */
+export type DynamicConfigDescriptor<T> = {
+  [Key in keyof T]?: T[Key] extends Maybe<any[]>
+    ? // handles arrays as primitive values
+      boolean
+    : T[Key] extends Maybe<object>
+    ? // can be nested for objects
+      DynamicConfigDescriptor<T[Key]> | boolean
     : // primitives
       boolean;
 };
@@ -88,6 +105,10 @@ export interface PluginConfigDescriptor<T = any> {
    * List of configuration properties that will be available on the client-side plugin.
    */
   exposeToBrowser?: ExposedToBrowserDescriptor<T>;
+  /**
+   * List of configuration properties that can be dynamically changed via the PUT /_settings API.
+   */
+  dynamicConfig?: DynamicConfigDescriptor<T>;
   /**
    * Schema to use to validate the plugin configuration.
    *
@@ -195,6 +216,12 @@ export interface PluginManifest {
   readonly optionalPlugins: readonly PluginName[];
 
   /**
+   * An optional list of plugin dependencies that can be resolved dynamically at runtime
+   * using the dynamic contract resolving capabilities from the plugin service.
+   */
+  readonly runtimePluginDependencies: readonly string[];
+
+  /**
    * Specifies whether plugin includes some client/browser specific functionality
    * that should be included into client bundle via `public/ui_plugin.js` file.
    */
@@ -270,7 +297,7 @@ export interface Plugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart;
 
-  stop?(): void;
+  stop?(): MaybePromise<void>;
 }
 
 /**
@@ -290,7 +317,7 @@ export interface AsyncPlugin<
 
   start(core: CoreStart, plugins: TPluginsStart): TStart | Promise<TStart>;
 
-  stop?(): void;
+  stop?(): MaybePromise<void>;
 }
 
 /**
@@ -446,7 +473,8 @@ export type PluginInitializer<
   TPluginsStart extends object = object
 > = (
   core: PluginInitializerContext
-) =>
+) => Promise<
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
   | PrebootPlugin<TSetup, TPluginsSetup>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+>;

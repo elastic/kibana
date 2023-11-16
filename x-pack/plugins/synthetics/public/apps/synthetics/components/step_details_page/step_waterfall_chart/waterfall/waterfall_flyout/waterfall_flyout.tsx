@@ -18,7 +18,7 @@ import {
   EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { METRIC_TYPE, useUiTracker } from '@kbn/observability-plugin/public';
+import { METRIC_TYPE, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { Table } from './waterfall_flyout_table';
 import { MiddleTruncatedText } from '../middle_truncated_text';
 import { WaterfallMetadataEntry } from '../../../common/network_data/types';
@@ -83,7 +83,7 @@ export const WaterfallFlyout = ({
 
   return (
     <div
-      tab-index={-1}
+      tabIndex={-1}
       ref={flyoutRef}
       data-test-subj="waterfallFlyout"
       aria-labelledby="flyoutTitle"

@@ -54,7 +54,10 @@ describe('Http server', () => {
       const { registerRouter, server: innerServer } = await server.setup(config);
       innerServerListener = innerServer.listener;
 
-      const router = new Router('', logger, enhanceWithContext);
+      const router = new Router('', logger, enhanceWithContext, {
+        isDev: false,
+        versionedRouteResolution: 'oldest',
+      });
       router.post(
         {
           path: '/',

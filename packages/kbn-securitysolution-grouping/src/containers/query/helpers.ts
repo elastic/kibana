@@ -6,32 +6,82 @@
  * Side Public License, v 1.
  */
 
-import { ES_FIELD_TYPES } from '@kbn/field-types';
-/**
- * Returns a tuple of values according to the `esType` param, these values are meant to be applied in the _missing_
- * property of the query aggregation of the grouping, to look up for missing values in the response buckets.
- * These values do not need to be anything in particular, the only requirement is they have to be 2 different values that validate against the field type.
- */
-export function getFieldTypeMissingValues(esType: string[]): [number, number] | [string, string] {
-  const knownType: ES_FIELD_TYPES = esType[0] as ES_FIELD_TYPES;
-  switch (knownType) {
-    case ES_FIELD_TYPES.BYTE:
-    case ES_FIELD_TYPES.DOUBLE:
-    case ES_FIELD_TYPES.INTEGER:
-    case ES_FIELD_TYPES.LONG:
-    case ES_FIELD_TYPES.FLOAT:
-    case ES_FIELD_TYPES.HALF_FLOAT:
-    case ES_FIELD_TYPES.SCALED_FLOAT:
-    case ES_FIELD_TYPES.SHORT:
-    case ES_FIELD_TYPES.UNSIGNED_LONG:
-    case ES_FIELD_TYPES.DATE:
-    case ES_FIELD_TYPES.DATE_NANOS:
-      return [0, 1];
-    case ES_FIELD_TYPES.IP:
-      return ['0.0.0.0', '::'];
-    default:
-      return ['-', '--'];
-  }
-}
-
+import { Filter, FILTERS } from '@kbn/es-query';
 export const getEmptyValue = () => '—';
+
+type StrictFilter = Filter & {
+  query: Record<string, any>;
+};
+
+export const createGroupFilter = (
+  selectedGroup: string,
+  values?: string[] | null
+): StrictFilter[] =>
+  values != null && values.length > 0
+    ? values.reduce(
+        (acc: StrictFilter[], query) => [
+          ...acc,
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              key: selectedGroup,
+              negate: false,
+              params: {
+                query,
+              },
+              type: 'phrase',
+            },
+            query: {
+              match_phrase: {
+                [selectedGroup]: {
+                  query,
+                },
+              },
+            },
+          },
+        ],
+        [
+          {
+            meta: {
+              alias: null,
+              disabled: false,
+              type: FILTERS.CUSTOM,
+              negate: false,
+              key: selectedGroup,
+            },
+            query: {
+              script: {
+                script: {
+                  // this will give us an exact match for events with multiple values on the group field
+                  // for example, when values === ['a'], we match events with ['a'], but not ['a', 'b', 'c']
+                  source: "doc[params['field']].size()==params['size']",
+                  params: {
+                    field: selectedGroup,
+                    size: values.length,
+                  },
+                },
+              },
+            },
+          },
+        ]
+      )
+    : [];
+
+export const getNullGroupFilter = (selectedGroup: string): StrictFilter[] => [
+  {
+    meta: {
+      disabled: false,
+      negate: true,
+      alias: null,
+      key: selectedGroup,
+      value: 'exists',
+      type: 'exists',
+    },
+    query: {
+      exists: {
+        field: selectedGroup,
+      },
+    },
+  },
+];

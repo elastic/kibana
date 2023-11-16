@@ -7,7 +7,6 @@
 
 // Extend jest with a custom matcher
 import '../test_utilities/extend_jest';
-
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
@@ -20,15 +19,18 @@ import { SideEffectContext } from './side_effect_context';
 import { applyMatrix3 } from '../models/vector2';
 import { sideEffectSimulatorFactory } from './side_effect_simulator_factory';
 import { mock as mockResolverTree } from '../models/resolver_tree';
-import type { ResolverAction } from '../store/actions';
-import { createStore } from 'redux';
-import { resolverReducer } from '../store/reducer';
+import { createStore, combineReducers } from 'redux';
 import { mockTreeFetcherParameters } from '../mocks/tree_fetcher_parameters';
 import * as nodeModel from '../../../common/endpoint/models/node';
 import { act } from 'react-dom/test-utils';
 import { mockResolverNode } from '../mocks/resolver_node';
 import { endpointSourceSchema } from '../mocks/tree_schema';
 import { panAnimationDuration } from '../store/camera/scaling_constants';
+import { serverReturnedResolverData } from '../store/data/action';
+import { userSelectedResolverNode } from '../store/actions';
+import { mockReducer } from '../store/helpers';
+
+const id = 'test-id';
 
 describe('useCamera on an unpainted element', () => {
   /** Enzyme full DOM wrapper for the element the camera is attached to. */
@@ -108,7 +110,7 @@ describe('useCamera on an unpainted element', () => {
      */
     useAlternateElement?: boolean;
   }) {
-    const camera = useCamera();
+    const camera = useCamera({ id });
     const { ref, onMouseDown } = camera;
     projectionMatrix = camera.projectionMatrix;
     return useAlternateElement ? (
@@ -125,7 +127,8 @@ describe('useCamera on an unpainted element', () => {
   }
 
   beforeEach(async () => {
-    store = createStore(resolverReducer);
+    const outerReducer = combineReducers({ analyzer: mockReducer(id) });
+    store = createStore(outerReducer, undefined);
 
     simulator = sideEffectSimulatorFactory();
 
@@ -263,21 +266,20 @@ describe('useCamera on an unpainted element', () => {
         const tree = mockResolverTree({ nodes });
         if (tree !== null) {
           const { schema, dataSource } = endpointSourceSchema();
-          const serverResponseAction: ResolverAction = {
-            type: 'serverReturnedResolverData',
-            payload: {
+          store.dispatch(
+            serverReturnedResolverData({
+              id,
               result: tree,
               dataSource,
               schema,
               parameters: mockTreeFetcherParameters(),
-            },
-          };
-          store.dispatch(serverResponseAction);
+            })
+          );
         } else {
           throw new Error('failed to create tree');
         }
         const resolverNodes: ResolverNode[] = [
-          ...selectors.layout(store.getState()).processNodePositions.keys(),
+          ...selectors.layout(store.getState().analyzer[id]).processNodePositions.keys(),
         ];
         node = resolverNodes[resolverNodes.length - 1];
         if (!process) {
@@ -288,14 +290,7 @@ describe('useCamera on an unpainted element', () => {
         if (!nodeID) {
           throw new Error('could not find nodeID for process');
         }
-        const cameraAction: ResolverAction = {
-          type: 'userSelectedResolverNode',
-          payload: {
-            time: simulator.controls.time,
-            nodeID,
-          },
-        };
-        store.dispatch(cameraAction);
+        store.dispatch(userSelectedResolverNode({ id, time: simulator.controls.time, nodeID }));
       });
 
       it('should request animation frames in a loop', () => {

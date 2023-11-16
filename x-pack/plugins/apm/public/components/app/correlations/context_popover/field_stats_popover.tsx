@@ -9,18 +9,21 @@ import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
-  FieldPopover,
   FieldStats,
-  FieldPopoverHeader,
   FieldStatsServices,
   FieldStatsProps,
   FieldStatsState,
-} from '@kbn/unified-field-list-plugin/public';
+} from '@kbn/unified-field-list/src/components/field_stats';
+import {
+  FieldPopover,
+  FieldPopoverHeader,
+} from '@kbn/unified-field-list/src/components/field_popover';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import { FieldTopValuesBucket } from '@kbn/unified-field-list-plugin/public';
-
-import type { FieldTopValuesBucketParams } from '@kbn/unified-field-list-plugin/public';
+import {
+  FieldTopValuesBucket,
+  type FieldTopValuesBucketParams,
+} from '@kbn/unified-field-list/src/components/field_stats';
 import {
   EuiHorizontalRule,
   EuiText,

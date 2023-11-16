@@ -8,16 +8,16 @@
 import type React from 'react';
 import type { AllTimelinesVariables } from '../../containers/all';
 import type { TimelineModel } from '../../store/timeline/model';
-import type { NoteResult } from '../../../../common/types/timeline/note';
 import type {
+  RowRendererId,
+  SingleTimelineResolveResponse,
   TimelineTypeLiteral,
   TimelineTypeLiteralWithNull,
   TimelineStatus,
   TemplateTimelineTypeLiteral,
-  RowRendererId,
   TimelineStatusLiteralWithNull,
-  SingleTimelineResolveResponse,
-} from '../../../../common/types/timeline';
+  Note,
+} from '../../../../common/api/timeline';
 
 /** The users who added a timeline to favorites */
 export interface FavoriteTimelineResult {
@@ -219,25 +219,16 @@ export interface UpdateTimeline {
   id: string;
   forceNotes?: boolean;
   from: string;
-  notes: NoteResult[] | null | undefined;
+  notes: Note[] | null | undefined;
   resolveTimelineConfig?: ResolveTimelineConfig;
   timeline: TimelineModel;
   to: string;
   ruleNote?: string;
   ruleAuthor?: string;
+  preventSettingQuery?: boolean;
 }
 
-export type DispatchUpdateTimeline = ({
-  duplicate,
-  id,
-  from,
-  notes,
-  resolveTimelineConfig,
-  timeline,
-  to,
-  ruleNote,
-  ruleAuthor,
-}: UpdateTimeline) => () => void;
+export type DispatchUpdateTimeline = (args: UpdateTimeline) => () => void;
 
 export enum TimelineTabsStyle {
   tab = 'tab',

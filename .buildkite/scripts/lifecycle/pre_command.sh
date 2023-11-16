@@ -115,6 +115,12 @@ export KIBANA_DOCKER_PASSWORD
 EC_API_KEY="$(vault_get kibana-ci-cloud-deploy pr_deploy_api_key)"
 export EC_API_KEY
 
+PROJECT_API_KEY="$(vault_get kibana-ci-project-deploy pr_deploy_api_key)"
+export PROJECT_API_KEY
+
+PROJECT_API_DOMAIN="$(vault_get kibana-ci-project-deploy pr_deploy_domain)"
+export PROJECT_API_DOMAIN
+
 SYNTHETICS_SERVICE_USERNAME="$(vault_get kibana-ci-synthetics-credentials username)"
 export SYNTHETICS_SERVICE_USERNAME
 

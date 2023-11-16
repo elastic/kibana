@@ -89,7 +89,7 @@
     "NewJobPopulationChart",
     "GetAllJobAndGroupIds",
     "GetLookBackProgress",
-    "ValidateCategoryExamples",
+    "ValidateCategoryValidation",
     "TopCategories",
     "DatafeedPreview",
     "UpdateGroups",
@@ -123,6 +123,7 @@
     "MlInfo",
     "MlEsSearch",
     "MlIndexExists",
+    "MlReindexWithPipeline",
     "MlSpecificIndexExists",
 
     "JobAuditMessages",
@@ -177,6 +178,11 @@
     "DeleteTrainedModel",
     "SimulateIngestPipeline",
     "InferTrainedModelDeployment",
+    "CreateInferencePipeline",
+    "GetIngestPipelines",
+    "GetTrainedModelDownloadList",
+    "GetElserConfig",
+    "InstallElasticTrainedModel",
 
     "Alerting",
     "PreviewAlert",

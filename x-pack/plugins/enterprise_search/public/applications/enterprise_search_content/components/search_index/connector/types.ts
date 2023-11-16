@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { ConnectorServerSideDefinition } from '../../../../../../common/connectors/connectors';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 export interface ConnectorClientSideDefinition {
   docsUrl?: string;
   externalAuthDocsUrl?: string;
   externalDocsUrl: string;
   icon: string;
+  platinumOnly?: boolean;
 }
 
 export type ConnectorDefinition = ConnectorClientSideDefinition & ConnectorServerSideDefinition;

@@ -1,7 +1,10 @@
 {
   "indices.analyze": {
     "url_params": {
-      "index": ""
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
     },
     "methods": [
       "GET",
@@ -9,8 +12,12 @@
     ],
     "patterns": [
       "_analyze",
-      "{indices}/_analyze"
+      "{index}/_analyze"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-analyze.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-analyze.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

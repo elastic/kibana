@@ -5,9 +5,10 @@
  * in compliance with, at your election, the Elastic License 2.0 or the Server
  * Side Public License, v 1.
  */
-import type { FilterManager } from '@kbn/data-plugin/public';
+import { FilterManager, KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import { createFilterInActionFactory } from './filter_in';
 import { makeActionContext } from '../../mocks/helpers';
+import { NotificationsStart } from '@kbn/core-notifications-browser';
 
 const mockFilterManager = { addFilters: jest.fn() } as unknown as FilterManager;
 
@@ -20,13 +21,21 @@ jest.mock('./create_filter', () => ({
 const fieldName = 'user.name';
 const value = 'the value';
 
+const mockWarningToast = jest.fn();
+
 describe('createFilterInActionFactory', () => {
   const filterInActionFactory = createFilterInActionFactory({
     filterManager: mockFilterManager,
+    notifications: { toasts: { addWarning: mockWarningToast } } as unknown as NotificationsStart,
   });
   const filterInAction = filterInActionFactory({ id: 'testAction' });
   const context = makeActionContext({
-    field: { name: fieldName, value, type: 'text' },
+    data: [
+      {
+        field: { name: fieldName, type: 'string', searchable: true, aggregatable: true },
+        value,
+      },
+    ],
   });
 
   beforeEach(() => {
@@ -50,7 +59,26 @@ describe('createFilterInActionFactory', () => {
       expect(
         await filterInAction.isCompatible({
           ...context,
-          field: { ...context.field, name: '' },
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, name: '' },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    it('should return false if Kbn type is unsupported', async () => {
+      expect(
+        await filterInAction.isCompatible({
+          ...context,
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, type: KBN_FIELD_TYPES.MISSING },
+            },
+          ],
         })
       ).toEqual(false);
     });
@@ -66,7 +94,7 @@ describe('createFilterInActionFactory', () => {
       await filterInAction.execute(context);
       expect(mockCreateFilter).toHaveBeenCalledWith({
         key: fieldName,
-        value,
+        value: [value],
         negate: false,
       });
     });
@@ -74,7 +102,12 @@ describe('createFilterInActionFactory', () => {
     it('should create filter query with array value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: [value] },
+        data: [
+          {
+            ...context.data[0],
+            value: [value],
+          },
+        ],
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({
         key: fieldName,
@@ -86,19 +119,29 @@ describe('createFilterInActionFactory', () => {
     it('should create negate filter query with null value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: null },
+        data: [
+          {
+            ...context.data[0],
+            value: null,
+          },
+        ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: null, negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
     });
 
     it('should create negate filter query with undefined value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: undefined },
+        data: [
+          {
+            ...context.data[0],
+            value: undefined,
+          },
+        ],
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({
         key: fieldName,
-        value: undefined,
+        value: [],
         negate: true,
       });
     });
@@ -106,17 +149,41 @@ describe('createFilterInActionFactory', () => {
     it('should create negate filter query with empty string value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: '' },
+        data: [
+          {
+            ...context.data[0],
+            value: '',
+          },
+        ],
       });
-      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: '', negate: true });
+      expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [''], negate: true });
     });
 
     it('should create negate filter query with empty array value', async () => {
       await filterInAction.execute({
         ...context,
-        field: { ...context.field, value: [] },
+        data: [
+          {
+            ...context.data[0],
+            value: [],
+          },
+        ],
       });
       expect(mockCreateFilter).toHaveBeenCalledWith({ key: fieldName, value: [], negate: true });
+    });
+
+    it('should notify the user when value type is unsupported', async () => {
+      await filterInAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: [{}, {}, {}],
+          },
+        ],
+      });
+      expect(mockCreateFilter).not.toHaveBeenCalled();
+      expect(mockWarningToast).toHaveBeenCalled();
     });
   });
 });

@@ -67,8 +67,12 @@ export const tagcloudRenderer: (
     };
 
     const palettesRegistry = await plugins.charts.palettes.getPalettes();
-
-    const showNoResult = config.visData.rows.length === 0;
+    let isDarkMode = false;
+    plugins.charts.theme.darkModeEnabled$
+      .subscribe((val) => {
+        isDarkMode = val.darkMode;
+      })
+      .unsubscribe();
 
     render(
       <KibanaThemeProvider theme$={core.theme.theme$}>
@@ -81,7 +85,6 @@ export const tagcloudRenderer: (
                 // It is used for rendering at `Canvas`.
                 className={cx('tagCloudContainer', css(tagCloudVisClass))}
                 renderComplete={renderComplete}
-                showNoResult={showNoResult}
               >
                 <TagCloudChart
                   {...config}
@@ -89,6 +92,8 @@ export const tagcloudRenderer: (
                   renderComplete={renderComplete}
                   fireEvent={handlers.event}
                   syncColors={config.syncColors}
+                  overrides={config.overrides}
+                  isDarkMode={isDarkMode}
                 />
               </VisualizationContainer>
             )}

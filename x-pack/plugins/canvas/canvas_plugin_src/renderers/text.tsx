@@ -9,7 +9,7 @@ import ReactDOM from 'react-dom';
 import React from 'react';
 import { CoreTheme } from '@kbn/core/public';
 import { Observable } from 'rxjs';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
+import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { defaultTheme$ } from '@kbn/presentation-util-plugin/common';
 import { StartInitializer } from '../plugin';
 import { RendererStrings } from '../../i18n';
@@ -26,7 +26,7 @@ export const getTextRenderer =
     reuseDomNode: true,
     render(domNode, { text: textString }, handlers) {
       ReactDOM.render(
-        <KibanaThemeProvider theme$={theme$}>
+        <KibanaThemeProvider theme={{ theme$ }}>
           <div>{textString}</div>
         </KibanaThemeProvider>,
         domNode,

@@ -10,6 +10,8 @@ import { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/publ
 import { embeddablePluginMock } from '@kbn/embeddable-plugin/public/mocks';
 import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
+import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
+import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EditorFrameSetupPlugins, EditorFrameStartPlugins } from './service';
 
@@ -57,5 +59,7 @@ export function createMockStartDependencies() {
     embeddable: embeddablePluginMock.createStartContract(),
     expressions: expressionsPluginMock.createStartContract(),
     charts: chartPluginMock.createStartContract(),
+    uiActions: uiActionsPluginMock.createStartContract(),
+    dataViews: dataViewPluginMocks.createStartContract(),
   } as unknown as MockedStartDependencies;
 }

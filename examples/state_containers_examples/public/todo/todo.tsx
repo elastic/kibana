@@ -7,16 +7,16 @@
  */
 
 import React, { useEffect, useMemo } from 'react';
-import { Link, Router, Switch, useLocation } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { Link, useLocation } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 import { History } from 'history';
 import {
   EuiButton,
   EuiCheckbox,
   EuiFieldText,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiPageContentBody_Deprecated as EuiPageContentBody,
+  EuiPageTemplate,
+  EuiPageSection,
   EuiPageHeader,
   EuiPageHeaderSection,
   EuiSpacer,
@@ -202,9 +202,9 @@ export const TodoAppPage: React.FC<{
             </EuiText>
           </EuiPageHeaderSection>
         </EuiPageHeader>
-        <EuiPageContent>
-          <EuiPageContentBody>
-            <Switch>
+        <EuiPageTemplate.Section>
+          <EuiPageSection>
+            <Routes>
               <Route path={'/completed'}>
                 <TodoApp filter={'completed'} stateContainer={stateContainer} />
               </Route>
@@ -214,7 +214,7 @@ export const TodoAppPage: React.FC<{
               <Route path={'/'}>
                 <TodoApp filter={null} stateContainer={stateContainer} />
               </Route>
-            </Switch>
+            </Routes>
             <EuiSpacer size={'xxl'} />
             <EuiText size={'s'}>
               <p>Most of kibana apps persist state in the URL in two ways:</p>
@@ -233,8 +233,8 @@ export const TodoAppPage: React.FC<{
             <EuiButton onClick={() => setUseHashedUrl(!useHashedUrl)}>
               {useHashedUrl ? 'Use Expanded State' : 'Use Hashed State'}
             </EuiButton>
-          </EuiPageContentBody>
-        </EuiPageContent>
+          </EuiPageSection>
+        </EuiPageTemplate.Section>
       </EuiPageBody>
     </Router>
   );

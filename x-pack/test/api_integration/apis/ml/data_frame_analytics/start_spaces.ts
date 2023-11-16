@@ -7,9 +7,9 @@
 
 import expect from '@kbn/expect';
 
-import { DATA_FRAME_TASK_STATE } from '@kbn/ml-plugin/common/constants/data_frame_analytics';
+import { DATA_FRAME_TASK_STATE } from '@kbn/ml-data-frame-analytics-utils';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import { COMMON_REQUEST_HEADERS } from '../../../../functional/services/ml/common_api';
+import { getCommonRequestHeader } from '../../../../functional/services/ml/common_api';
 import { USER } from '../../../../functional/services/ml/security_common';
 
 export default ({ getService }: FtrProviderContext) => {
@@ -27,12 +27,12 @@ export default ({ getService }: FtrProviderContext) => {
 
   async function runStartRequest(jobId: string, space: string, expectedStatusCode: number) {
     const { body, status } = await supertest
-      .post(`/s/${space}/api/ml/data_frame/analytics/${jobId}/_start`)
+      .post(`/s/${space}/internal/ml/data_frame/analytics/${jobId}/_start`)
       .auth(
         USER.ML_POWERUSER_ALL_SPACES,
         ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER_ALL_SPACES)
       )
-      .set(COMMON_REQUEST_HEADERS);
+      .set(getCommonRequestHeader('1'));
     ml.api.assertResponseStatusCode(expectedStatusCode, status, body);
 
     return body;

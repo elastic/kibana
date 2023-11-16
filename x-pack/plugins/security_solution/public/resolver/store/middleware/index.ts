@@ -5,20 +5,40 @@
  * 2.0.
  */
 
-import type { Dispatch, MiddlewareAPI } from 'redux';
-import type { ResolverState, DataAccessLayer } from '../../types';
+import type { Dispatch, MiddlewareAPI, AnyAction } from 'redux';
+import type { DataAccessLayer } from '../../types';
 import { ResolverTreeFetcher } from './resolver_tree_fetcher';
-
-import type { ResolverAction } from '../actions';
+import type { State } from '../../../common/store/types';
 import { RelatedEventsFetcher } from './related_events_fetcher';
 import { CurrentRelatedEventFetcher } from './current_related_event_fetcher';
 import { NodeDataFetcher } from './node_data_fetcher';
+import * as Actions from '../actions';
+import * as DataActions from '../data/action';
+import * as CameraActions from '../camera/action';
 
-type MiddlewareFactory<S = ResolverState> = (
+type MiddlewareFactory<S = State> = (
   dataAccessLayer: DataAccessLayer
 ) => (
-  api: MiddlewareAPI<Dispatch<ResolverAction>, S>
-) => (next: Dispatch<ResolverAction>) => (action: ResolverAction) => unknown;
+  api: MiddlewareAPI<Dispatch<AnyAction>, S>
+) => (next: Dispatch<AnyAction>) => (action: AnyAction) => unknown;
+
+const resolverActions = [
+  ...Object.values(Actions).map((action) => action.type),
+  ...Object.values(DataActions).map((action) => action.type),
+  ...Object.values(CameraActions).map((action) => action.type),
+];
+
+/**
+ * Helper function to determine if analyzer is active (resolver middleware should be run)
+ * analyzer is considered active if: action is not clean up
+ * @param state analyzer state
+ * @param action dispatched action
+ * @returns boolean of whether the analyzer of id has an store in redux
+ */
+function isAnalyzerActive(action: AnyAction): boolean {
+  // middleware shouldn't run after clear resolver
+  return !Actions.clearResolver.match(action) && resolverActions.includes(action.type);
+}
 
 /**
  * The `redux` middleware that the application uses to trigger side effects.
@@ -32,13 +52,16 @@ export const resolverMiddlewareFactory: MiddlewareFactory = (dataAccessLayer: Da
     const relatedEventsFetcher = RelatedEventsFetcher(dataAccessLayer, api);
     const currentRelatedEventFetcher = CurrentRelatedEventFetcher(dataAccessLayer, api);
     const nodeDataFetcher = NodeDataFetcher(dataAccessLayer, api);
-    return async (action: ResolverAction) => {
+
+    return async (action: AnyAction) => {
       next(action);
 
-      resolverTreeFetcher();
-      relatedEventsFetcher();
-      nodeDataFetcher();
-      currentRelatedEventFetcher();
+      if (action.payload?.id && isAnalyzerActive(action)) {
+        resolverTreeFetcher(action.payload.id);
+        relatedEventsFetcher(action.payload.id);
+        nodeDataFetcher(action.payload.id);
+        currentRelatedEventFetcher(action.payload.id);
+      }
     };
   };
 };

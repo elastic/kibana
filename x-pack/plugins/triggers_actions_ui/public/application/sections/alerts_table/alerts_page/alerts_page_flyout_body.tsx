@@ -12,7 +12,7 @@ import {
   EuiTitle,
   EuiFlexItem,
   EuiSpacer,
-  EuiLoadingContent,
+  EuiSkeletonText,
   EuiText,
 } from '@elastic/eui';
 import { AlertsField, AlertsTableFlyoutBaseProps } from '../../../../types';
@@ -41,7 +41,7 @@ const AlertsFlyoutBody = ({ alert, isLoading }: Props) => {
         </EuiTitle>
         <EuiSpacer size="s" />
         {isLoading ? (
-          <EuiLoadingContent lines={1} />
+          <EuiSkeletonText lines={1} />
         ) : (
           <EuiText size="s" data-test-subj="alertsFlyoutName">
             {get(alert as any, AlertsField.name, [])[0]}
@@ -53,13 +53,11 @@ const AlertsFlyoutBody = ({ alert, isLoading }: Props) => {
           <h4>{REASON_LABEL}</h4>
         </EuiTitle>
         <EuiSpacer size="s" />
-        {isLoading ? (
-          <EuiLoadingContent lines={3} />
-        ) : (
+        <EuiSkeletonText lines={3} isLoading={isLoading}>
           <EuiText size="s" data-test-subj="alertsFlyoutReason">
             {get(alert as any, AlertsField.reason, [])[0]}
           </EuiText>
-        )}
+        </EuiSkeletonText>
       </EuiFlexItem>
     </EuiFlexGroup>
   );

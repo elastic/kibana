@@ -11,6 +11,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { isEmpty } from 'lodash';
 
 import { throwErrors } from '@kbn/cases-plugin/common';
+
 import type {
   TimelineResponse,
   TimelineErrorResponse,
@@ -20,7 +21,7 @@ import type {
   SingleTimelineResponse,
   SingleTimelineResolveResponse,
   GetTimelinesArgs,
-} from '../../../common/types/timeline';
+} from '../../../common/api/timeline';
 import {
   TimelineResponseType,
   TimelineStatus,
@@ -31,7 +32,7 @@ import {
   SingleTimelineResponseType,
   TimelineType,
   ResolvedSingleTimelineResponseType,
-} from '../../../common/types/timeline';
+} from '../../../common/api/timeline';
 import {
   TIMELINE_URL,
   TIMELINE_DRAFT_URL,
@@ -119,6 +120,7 @@ const postTimeline = async ({
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_URL, {
     method: 'POST',
     body: requestBody,
+    version: '2023-10-31',
   });
 
   return decodeTimelineResponse(response);
@@ -140,6 +142,7 @@ const patchTimeline = async ({
     response = await KibanaServices.get().http.patch<TimelineResponse>(TIMELINE_URL, {
       method: 'PATCH',
       body: requestBody,
+      version: '2023-10-31',
     });
   } catch (err) {
     // For Future developer
@@ -228,6 +231,7 @@ export const importTimelines = async ({
     headers: { 'Content-Type': undefined },
     body: formData,
     signal,
+    version: '2023-10-31',
   });
 };
 
@@ -249,6 +253,7 @@ export const exportSelectedTimeline = ({
       file_name: filename,
     },
     signal,
+    version: '2023-10-31',
   });
 };
 
@@ -261,6 +266,7 @@ export const getDraftTimeline = async ({
     query: {
       timelineType,
     },
+    version: '2023-10-31',
   });
 
   return decodeTimelineResponse(response);
@@ -293,6 +299,7 @@ export const cleanDraftTimeline = async ({
   }
   const response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_DRAFT_URL, {
     body: requestBody,
+    version: '2023-10-31',
   });
 
   return decodeTimelineResponse(response);
@@ -301,7 +308,9 @@ export const cleanDraftTimeline = async ({
 export const installPrepackedTimelines = async (): Promise<ImportTimelineResultSchema> => {
   const response = await KibanaServices.get().http.post<ImportTimelineResultSchema>(
     TIMELINE_PREPACKAGED_URL,
-    {}
+    {
+      version: '2023-10-31',
+    }
   );
 
   return decodePrepackedTimelineResponse(response);
@@ -312,6 +321,7 @@ export const getTimeline = async (id: string) => {
     query: {
       id,
     },
+    version: '2023-10-31',
   });
 
   return decodeSingleTimelineResponse(response);
@@ -324,6 +334,7 @@ export const resolveTimeline = async (id: string) => {
       query: {
         id,
       },
+      version: '2023-10-31',
     }
   );
 
@@ -335,6 +346,7 @@ export const getTimelineTemplate = async (templateTimelineId: string) => {
     query: {
       template_timeline_id: templateTimelineId,
     },
+    version: '2023-10-31',
   });
 
   return decodeSingleTimelineResponse(response);
@@ -354,6 +366,7 @@ export const getAllTimelines = async (args: GetTimelinesArgs, abortSignal: Abort
       ...(args.timelineType ? { timeline_type: args.timelineType } : {}),
     },
     signal: abortSignal,
+    version: '2023-10-31',
   });
 
   return decodeAllTimelinesResponse(response);
@@ -388,6 +401,7 @@ export const persistFavorite = async ({
     {
       method: 'PATCH',
       body: requestBody,
+      version: '2023-10-31',
     }
   );
 
@@ -407,6 +421,7 @@ export const deleteTimelinesByIds = async (savedObjectIds: string[]) => {
   const response = await KibanaServices.get().http.delete<boolean>(TIMELINE_URL, {
     method: 'DELETE',
     body: requestBody,
+    version: '2023-10-31',
   });
   return response;
 };

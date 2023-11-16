@@ -9,28 +9,14 @@ import React, { useMemo } from 'react';
 import { EuiCallOut } from '@elastic/eui';
 import * as i18n from './translations';
 
-import type { SwimlaneFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
 import type { ConnectorFieldsProps } from '../types';
-import { ConnectorCard } from '../card';
 import { connectorValidator } from './validator';
 
-const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFieldsType>> = ({
-  connector,
-  isEdit = true,
-}) => {
+const SwimlaneFieldsComponent: React.FunctionComponent<ConnectorFieldsProps> = ({ connector }) => {
   const showMappingWarning = useMemo(() => connectorValidator(connector) != null, [connector]);
 
   return (
     <>
-      {!isEdit && (
-        <ConnectorCard
-          connectorType={ConnectorTypes.swimlane}
-          isLoading={false}
-          listItems={[]}
-          title={connector.name}
-        />
-      )}
       {showMappingWarning && (
         <EuiCallOut
           title={i18n.EMPTY_MAPPING_WARNING_TITLE}
@@ -44,7 +30,8 @@ const SwimlaneComponent: React.FunctionComponent<ConnectorFieldsProps<SwimlaneFi
     </>
   );
 };
-SwimlaneComponent.displayName = 'Swimlane';
+
+SwimlaneFieldsComponent.displayName = 'SwimlaneFields';
 
 // eslint-disable-next-line import/no-default-export
-export { SwimlaneComponent as default };
+export { SwimlaneFieldsComponent as default };

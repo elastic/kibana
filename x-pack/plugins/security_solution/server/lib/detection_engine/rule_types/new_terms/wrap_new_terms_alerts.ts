@@ -11,7 +11,7 @@ import type {
   BaseFieldsLatest,
   NewTermsFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../common/api/detection_engine/model/alerts';
 import { ALERT_NEW_TERMS } from '../../../../../common/field_maps/field_names';
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, RuleParams } from '../../rule_schema';

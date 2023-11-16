@@ -23,7 +23,12 @@ import {
   DataPublicPluginSetup,
   DataPublicPluginStart,
 } from '@kbn/data-plugin/public';
+import { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
+import { PLUGIN_ID } from '../common';
+import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';
+import { ObservabilityOnboardingPluginLocators } from './locators';
+import { ConfigSchema } from '.';
 
 export type ObservabilityOnboardingPluginSetup = void;
 export type ObservabilityOnboardingPluginStart = void;
@@ -31,12 +36,21 @@ export type ObservabilityOnboardingPluginStart = void;
 export interface ObservabilityOnboardingPluginSetupDeps {
   data: DataPublicPluginSetup;
   observability: ObservabilityPublicSetup;
+  share: SharePluginSetup;
 }
 
 export interface ObservabilityOnboardingPluginStartDeps {
   http: HttpStart;
   data: DataPublicPluginStart;
   observability: ObservabilityPublicStart;
+}
+
+export interface ObservabilityOnboardingPluginContextValue {
+  core: CoreStart;
+  plugins: ObservabilityOnboardingPluginSetupDeps;
+  data: DataPublicPluginStart;
+  observability: ObservabilityPublicStart;
+  config: ConfigSchema;
 }
 
 export class ObservabilityOnboardingPlugin
@@ -46,15 +60,19 @@ export class ObservabilityOnboardingPlugin
       ObservabilityOnboardingPluginStart
     >
 {
+  private locators?: ObservabilityOnboardingPluginLocators;
+
   constructor(private ctx: PluginInitializerContext) {}
 
   public setup(
     core: CoreSetup,
     plugins: ObservabilityOnboardingPluginSetupDeps
   ) {
+    const config = this.ctx.config.get<ObservabilityOnboardingConfig>();
     const {
       ui: { enabled: isObservabilityOnboardingUiEnabled },
-    } = this.ctx.config.get<ObservabilityOnboardingConfig>();
+      serverless: { enabled: isServerlessEnabled },
+    } = config;
 
     const pluginSetupDeps = plugins;
 
@@ -62,14 +80,16 @@ export class ObservabilityOnboardingPlugin
     // and go to /app/observabilityOnboarding
     if (isObservabilityOnboardingUiEnabled) {
       core.application.register({
-        navLinkStatus: AppNavLinkStatus.hidden,
-        id: 'observabilityOnboarding',
+        navLinkStatus: isServerlessEnabled
+          ? AppNavLinkStatus.visible
+          : AppNavLinkStatus.hidden,
+        id: PLUGIN_ID,
         title: 'Observability Onboarding',
         order: 8500,
         euiIconType: 'logoObservability',
         category: DEFAULT_APP_CATEGORIES.observability,
         keywords: [],
-        async mount(appMountParameters: AppMountParameters<unknown>) {
+        async mount(appMountParameters: AppMountParameters) {
           // Load application bundle and Get start service
           const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
             import('./application/app'),
@@ -87,13 +107,28 @@ export class ObservabilityOnboardingPlugin
             deps: pluginSetupDeps,
             appMountParameters,
             corePlugins: corePlugins as ObservabilityOnboardingPluginStartDeps,
+            config,
           });
         },
       });
     }
+
+    this.locators = {
+      onboarding: plugins.share.url.locators.create(
+        new ObservabilityOnboardingLocatorDefinition()
+      ),
+    };
+
+    return {
+      locators: this.locators,
+    };
   }
   public start(
     core: CoreStart,
     plugins: ObservabilityOnboardingPluginStartDeps
-  ) {}
+  ) {
+    return {
+      locators: this.locators,
+    };
+  }
 }

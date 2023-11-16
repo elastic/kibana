@@ -29,7 +29,7 @@ describe('callout', () => {
   });
 
   afterEach(() => {
-    jest.resetAllMocks();
+    jest.clearAllMocks();
   });
 
   test('renders the callout data-test-subj from the given id', () => {

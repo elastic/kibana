@@ -136,6 +136,7 @@ describe('When using execute action from response actions console', () => {
       expect(apiMocks.responseProvider.execute).toHaveBeenCalledWith({
         body: '{"endpoint_ids":["a.b.c"],"parameters":{"command":"ls -al"}}',
         path: EXECUTE_ROUTE,
+        version: '2023-10-31',
       });
     });
   });

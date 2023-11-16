@@ -30,7 +30,7 @@ import { useGetSupportedActionConnectors } from '../../containers/configure/use_
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
 import CaseView from '.';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { useGetTags } from '../../containers/use_get_tags';
 import { casesQueriesKeys } from '../../containers/constants';
 import {
@@ -96,7 +96,7 @@ describe('CaseView', () => {
     useFindCaseUserActionsMock.mockReturnValue(defaultUseFindCaseUserActions);
     usePostPushToServiceMock.mockReturnValue({
       isLoading: false,
-      pushCaseToExternalService: jest.fn(),
+      mutateAsync: jest.fn(),
     });
     useGetConnectorsMock.mockReturnValue({ data: connectorsMock, isLoading: false });
     useGetTagsMock.mockReturnValue({ data: [], isLoading: false });

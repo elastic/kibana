@@ -9,15 +9,7 @@ import React, { useContext, useState, useCallback, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { find } from 'lodash';
-import {
-  EuiPage,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiSpacer,
-  EuiFlexGrid,
-  EuiFlexItem,
-  EuiPanel,
-} from '@elastic/eui';
+import { EuiPage, EuiPageBody, EuiPanel, EuiSpacer, EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { ComponentProps } from '../../route_init';
 import { GlobalStateContext } from '../../contexts/global_state_context';
@@ -47,7 +39,7 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
         </EuiPanel>
         <EuiSpacer size="m" />
         <AlertsCallout alerts={alerts} />
-        <EuiPageContent>
+        <EuiPanel>
           <EuiFlexGrid columns={2} gutterSize="s">
             <EuiFlexItem grow={true}>
               <MonitoringTimeseriesContainer
@@ -134,7 +126,7 @@ const KibanaInstance = ({ data, alerts }: { data: any; alerts: any }) => {
               </>
             )}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPanel>
       </EuiPageBody>
     </EuiPage>
   );

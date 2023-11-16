@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { LogViewAttributes } from '../../../../common/log_views';
+import { LogViewAttributes } from '@kbn/logs-shared-plugin/common';
 import { useCompositeFormElement } from './form_elements';
 import { useLogIndicesFormElement } from './indices_configuration_form_state';
 import { useLogColumnsFormElement } from './log_columns_configuration_form_state';

@@ -26,7 +26,7 @@ function transformProvidedActionVariables(
       : pick(actionVariables, [...REQUIRED_ACTION_VARIABLES, ...CONTEXT_ACTION_VARIABLES])
     : actionVariables;
 
-  const paramsVars = prefixKeys(filteredActionVariables.params, 'params.');
+  const paramsVars = prefixKeys(filteredActionVariables.params, 'rule.params.');
   const contextVars = filteredActionVariables.context
     ? prefixKeys(filteredActionVariables.context, 'context.')
     : [];
@@ -68,6 +68,7 @@ export enum AlertProvidedActionVariables {
   ruleTags = 'rule.tags',
   ruleType = 'rule.type',
   ruleUrl = 'rule.url',
+  ruleParams = 'rule.params',
   date = 'date',
   alertId = 'alert.id',
   alertActionGroup = 'alert.actionGroup',
@@ -86,6 +87,7 @@ export enum LegacyAlertProvidedActionVariables {
   alertActionSubgroup = 'alertActionSubgroup',
   tags = 'tags',
   spaceId = 'spaceId',
+  params = 'params',
 }
 
 export enum SummaryAlertProvidedActionVariables {
@@ -320,6 +322,17 @@ function getAlwaysProvidedActionVariables(): ActionVariable[] {
       defaultMessage: 'This has been deprecated in favor of {variable}.',
       values: {
         variable: AlertProvidedActionVariables.ruleTags,
+      },
+    }),
+  });
+
+  result.push({
+    name: LegacyAlertProvidedActionVariables.params,
+    deprecated: true,
+    description: i18n.translate('xpack.triggersActionsUI.actionVariables.legacyParamsLabel', {
+      defaultMessage: 'This has been deprecated in favor of {variable}.',
+      values: {
+        variable: AlertProvidedActionVariables.ruleParams,
       },
     }),
   });

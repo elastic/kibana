@@ -51,18 +51,18 @@ describe('Saved Objects type validator', () => {
 
     it('should log when a validation fails', () => {
       const data = createMockObject({ attributes: { foo: false } });
-      expect(() => validator.validate(data, '1.0.0')).toThrowError();
+      expect(() => validator.validate(data)).toThrowError();
       expect(logger.warn).toHaveBeenCalledTimes(1);
     });
 
     it('should work when given valid values', () => {
       const data = createMockObject({ attributes: { foo: 'hi' } });
-      expect(() => validator.validate(data, '1.0.0')).not.toThrowError();
+      expect(() => validator.validate(data)).not.toThrowError();
     });
 
     it('should throw an error when given invalid values', () => {
       const data = createMockObject({ attributes: { foo: false } });
-      expect(() => validator.validate(data, '1.0.0')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
         `"[attributes.foo]: expected value of type [string] but got [boolean]"`
       );
     });
@@ -71,7 +71,7 @@ describe('Saved Objects type validator', () => {
       const data = createMockObject({ attributes: { foo: 'hi' } });
       // @ts-expect-error Intentionally malformed object
       data.updated_at = false;
-      expect(() => validator.validate(data, '1.0.0')).toThrowErrorMatchingInlineSnapshot(
+      expect(() => validator.validate(data)).toThrowErrorMatchingInlineSnapshot(
         `"[updated_at]: expected value of type [string] but got [boolean]"`
       );
     });
@@ -86,7 +86,7 @@ describe('Saved Objects type validator', () => {
       });
 
       const data = createMockObject({ attributes: { foo: 'hi' } });
-      expect(() => validator.validate(data, '1.0.0')).not.toThrowError();
+      expect(() => validator.validate(data)).not.toThrowError();
     });
   });
 
@@ -97,8 +97,8 @@ describe('Saved Objects type validator', () => {
         '2.7.0': createStubSpec(),
         '3.0.0': createStubSpec(),
         '3.5.0': createStubSpec(),
-        '4.0.0': createStubSpec(),
-        '4.3.0': createStubSpec(),
+        // we're intentionally leaving out 10.1.0 to test model version selection
+        '10.2.0': createStubSpec(),
       };
       validator = new SavedObjectsTypeValidator({ logger, type, validationMap, defaultVersion });
     });
@@ -118,51 +118,58 @@ describe('Saved Objects type validator', () => {
       return undefined;
     };
 
-    it('should use the correct schema when specifying the version', () => {
-      let data = createMockObject({ typeMigrationVersion: '2.2.0' });
-      validator.validate(data, '3.2.0');
+    it('should use the correct schema for documents with typeMigrationVersion', () => {
+      const data = createMockObject({ typeMigrationVersion: '3.0.0' });
+      validator.validate(data);
       expect(getCalledVersion()).toEqual('3.0.0');
-
-      jest.clearAllMocks();
-
-      data = createMockObject({ typeMigrationVersion: '3.5.0' });
-      validator.validate(data, '4.5.0');
-      expect(getCalledVersion()).toEqual('4.3.0');
     });
 
-    it('should use the correct schema for documents with typeMigrationVersion', () => {
-      let data = createMockObject({ typeMigrationVersion: '3.2.0' });
+    it('should use the correct schema for documents with typeMigrationVersion greater than default version', () => {
+      const data = createMockObject({ typeMigrationVersion: '3.5.0' });
       validator.validate(data);
       expect(getCalledVersion()).toEqual('3.0.0');
-
-      jest.clearAllMocks();
-
-      data = createMockObject({ typeMigrationVersion: '3.5.0' });
-      validator.validate(data);
-      expect(getCalledVersion()).toEqual('3.5.0');
     });
 
     it('should use the correct schema for documents with migrationVersion', () => {
-      let data = createMockObject({
+      const data = createMockObject({
+        migrationVersion: {
+          [type]: '3.0.0',
+        },
+      });
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('3.0.0');
+    });
+
+    it('should use the correct schema for documents with migrationVersion higher than default', () => {
+      const data = createMockObject({
         migrationVersion: {
           [type]: '4.6.0',
         },
       });
       validator.validate(data);
-      expect(getCalledVersion()).toEqual('4.3.0');
+      // 4.6.0 > 3.3.0 (default), is not a valid virtual model and there aren't migrations for the type in the default version
+      expect(getCalledVersion()).toEqual('3.0.0');
+    });
+
+    it("should use the correct schema for documents with virtualModelVersion that isn't registered", () => {
+      let data = createMockObject({ typeMigrationVersion: '10.1.0' });
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('3.5.0');
 
       jest.clearAllMocks();
 
-      data = createMockObject({
-        migrationVersion: {
-          [type]: '4.0.0',
-        },
-      });
+      data = createMockObject({ typeMigrationVersion: '10.3.0' });
       validator.validate(data);
-      expect(getCalledVersion()).toEqual('4.0.0');
+      expect(getCalledVersion()).toEqual('10.2.0');
     });
 
-    it('should use the correct schema for documents without a version specified', () => {
+    it('should use the correct schema for documents with virtualModelVersion that is registered', () => {
+      const data = createMockObject({ typeMigrationVersion: '10.2.0' });
+      validator.validate(data);
+      expect(getCalledVersion()).toEqual('10.2.0');
+    });
+
+    it('should use the correct schema for documents without a version', () => {
       const data = createMockObject({});
       validator.validate(data);
       expect(getCalledVersion()).toEqual('3.0.0');

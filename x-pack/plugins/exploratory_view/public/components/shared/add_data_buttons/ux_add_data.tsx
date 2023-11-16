@@ -8,7 +8,7 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useKibana } from '../../../utils/kibana_react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
 
 export function UXAddData() {
   const kibana = useKibana();
@@ -18,7 +18,7 @@ export function UXAddData() {
       aria-label={i18n.translate('xpack.exploratoryView.page_header.addUXDataLink.label', {
         defaultMessage: 'Navigate to a tutorial about adding user experience APM data',
       })}
-      href={kibana.services?.application?.getUrlForApp('/home#/tutorial/apm')}
+      href={kibana.services?.application?.getUrlForApp('/apm/tutorial')}
       color="primary"
       iconType="indexOpen"
     >

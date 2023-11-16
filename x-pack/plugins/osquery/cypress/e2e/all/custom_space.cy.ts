@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ROLE, login } from '../../tasks/login';
+import { initializeDataViews } from '../../tasks/login';
 import { navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
@@ -15,18 +15,24 @@ import {
   submitQuery,
 } from '../../tasks/live_query';
 import { loadSpace, loadPack, cleanupPack, cleanupSpace } from '../../tasks/api_fixtures';
+import { ServerlessRoleName } from '../../support/roles';
 
+const testSpaces = [
+  { name: 'default', tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  { name: 'custom-spaces', tags: ['@ess'] },
+];
 describe('ALL - Custom space', () => {
-  ['default', 'custom-space'].forEach((spaceName) => {
-    describe(`[${spaceName}]`, () => {
+  testSpaces.forEach((testSpace) => {
+    describe(`[${testSpace.name}]`, { tags: testSpace.tags }, () => {
       let packName: string;
       let packId: string;
       let spaceId: string;
 
       before(() => {
+        initializeDataViews();
         cy.wrap(
           new Promise<string>((resolve) => {
-            if (spaceName !== 'default') {
+            if (testSpace.name !== 'default') {
               loadSpace().then((space) => {
                 spaceId = space.id;
                 resolve(spaceId);
@@ -49,25 +55,25 @@ describe('ALL - Custom space', () => {
             },
             space as string
           ).then((data) => {
-            packId = data.id;
-            packName = data.attributes.name;
+            packId = data.saved_object_id;
+            packName = data.name;
           });
         });
       });
 
       beforeEach(() => {
-        login(ROLE.soc_manager);
+        cy.login(ServerlessRoleName.SOC_MANAGER);
         navigateTo(`/s/${spaceId}/app/osquery`);
       });
 
       after(() => {
         cleanupPack(packId, spaceId);
-        if (spaceName !== 'default') {
+        if (testSpace.name !== 'default') {
           cleanupSpace(spaceId);
         }
       });
 
-      it('Discover should be opened in new tab in results table', () => {
+      it('Discover should be opened in new tab in results table', { tags: testSpace.tags }, () => {
         cy.contains('New live query').click();
         selectAllAgents();
         inputQuery('select * from uptime;');
@@ -85,9 +91,8 @@ describe('ALL - Custom space', () => {
           .then(($href) => {
             // @ts-expect-error-next-line href string - check types
             cy.visit($href);
-            cy.getBySel('breadcrumbs').contains('Discover').should('exist');
             cy.getBySel('discoverDocTable', { timeout: 60000 }).within(() => {
-              cy.contains('action_data.queryselect * from uptime');
+              cy.contains('action_data{ "query": "select * from uptime;"');
             });
           });
       });
@@ -95,9 +100,7 @@ describe('ALL - Custom space', () => {
       it('runs packs normally', () => {
         cy.contains('Packs').click();
         cy.contains('Create pack').click();
-        cy.react('CustomItemAction', {
-          props: { item: { attributes: { name: packName } } },
-        }).click();
+        cy.getBySel(`play-${packName}-button`).click();
         selectAllAgents();
         cy.contains('Submit').click();
         checkResults();

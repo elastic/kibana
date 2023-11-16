@@ -23,4 +23,15 @@ export const getOsqueryTables = () => {
   return osqueryTables;
 };
 
-export const getOsqueryTableNames = () => flatMap(getOsqueryTables(), 'name');
+const normalizedOsqueryTables = getOsqueryTables();
+
+export const osqueryTablesRecord: Record<string, { columns: Array<{ name: string }> }> =
+  normalizedOsqueryTables.reduce(
+    (acc, table) => ({
+      ...acc,
+      [table.name]: table,
+    }),
+    {}
+  );
+
+export const getOsqueryTableNames = () => flatMap(normalizedOsqueryTables, 'name');

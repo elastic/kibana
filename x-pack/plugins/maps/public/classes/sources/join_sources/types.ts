@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { GeoJsonProperties } from 'geojson';
+import { FeatureCollection, GeoJsonProperties } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { Query } from '@kbn/data-plugin/common/query';
 import { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { IField } from '../../fields/field';
-import { VectorSourceRequestMeta } from '../../../../common/descriptor_types';
+import { DataFilters, VectorSourceRequestMeta } from '../../../../common/descriptor_types';
 import { PropertiesMap } from '../../../../common/elasticsearch_util';
 import { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { ISource } from '../source';
@@ -23,14 +23,14 @@ export interface IJoinSource extends ISource {
     leftSourceName: string,
     leftFieldName: string,
     registerCancelCallback: (callback: () => void) => void,
-    inspectorAdapters: Adapters
+    inspectorAdapters: Adapters,
+    featureCollection?: FeatureCollection
   ): Promise<PropertiesMap>;
 
   /*
-   * Vector layer avoids unnecessarily re-fetching join data.
-   * Use getSyncMeta to expose fields that require join data re-fetch when changed.
+   * Use getSyncMeta to expose join configurations that require join data re-fetch when changed.
    */
-  getSyncMeta(): object | null;
+  getSyncMeta(dataFilters: DataFilters): object | null;
 
   getId(): string;
   getRightFields(): IField[];

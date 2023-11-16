@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
-import type { StartServices } from '../../types';
+import type { CoreStart } from '@kbn/core/public';
 import type { DataAccessLayer, TimeRange } from '../types';
 import type {
   ResolverNode,
@@ -31,9 +30,7 @@ function getRangeFilter(timeRange: TimeRange | undefined) {
 /**
  * The data access layer for resolver. All communication with the Kibana server is done through this object. This object is provided to Resolver. In tests, a mock data access layer can be used instead.
  */
-export function dataAccessLayerFactory(
-  context: KibanaReactContextValue<StartServices>
-): DataAccessLayer {
+export function dataAccessLayerFactory(context: CoreStart): DataAccessLayer {
   const dataAccessLayer: DataAccessLayer = {
     /**
      * Used to get non-process related events for a node.
@@ -48,7 +45,7 @@ export function dataAccessLayerFactory(
       timeRange?: TimeRange;
       indexPatterns: string[];
     }): Promise<ResolverRelatedEvents> {
-      const response: ResolverPaginatedEvents = await context.services.http.post(
+      const response: ResolverPaginatedEvents = await context.http.post(
         '/api/endpoint/resolver/events',
         {
           query: {},
@@ -95,7 +92,7 @@ export function dataAccessLayerFactory(
         },
       };
       if (category === 'alert') {
-        return context.services.http.post('/api/endpoint/resolver/events', {
+        return context.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
             ...commonFields.body,
@@ -104,7 +101,7 @@ export function dataAccessLayerFactory(
           }),
         });
       } else {
-        return context.services.http.post('/api/endpoint/resolver/events', {
+        return context.http.post('/api/endpoint/resolver/events', {
           query: commonFields.query,
           body: JSON.stringify({
             ...commonFields.body,
@@ -151,7 +148,7 @@ export function dataAccessLayerFactory(
           }),
         }),
       };
-      const response: ResolverPaginatedEvents = await context.services.http.post(
+      const response: ResolverPaginatedEvents = await context.http.post(
         '/api/endpoint/resolver/events',
         query
       );
@@ -197,7 +194,7 @@ export function dataAccessLayerFactory(
               },
             };
       if (eventCategory.includes('alert') === false) {
-        const response: ResolverPaginatedEvents = await context.services.http.post(
+        const response: ResolverPaginatedEvents = await context.http.post(
           '/api/endpoint/resolver/events',
           {
             query: { limit: 1 },
@@ -211,7 +208,7 @@ export function dataAccessLayerFactory(
         const [oneEvent] = response.events;
         return oneEvent ?? null;
       } else {
-        const response: ResolverPaginatedEvents = await context.services.http.post(
+        const response: ResolverPaginatedEvents = await context.http.post(
           '/api/endpoint/resolver/events',
           {
             query: { limit: 1 },
@@ -252,7 +249,7 @@ export function dataAccessLayerFactory(
       ancestors: number;
       descendants: number;
     }): Promise<ResolverNode[]> {
-      return context.services.http.post('/api/endpoint/resolver/tree', {
+      return context.http.post('/api/endpoint/resolver/tree', {
         body: JSON.stringify({
           ancestors,
           descendants,
@@ -276,7 +273,7 @@ export function dataAccessLayerFactory(
       indices: string[];
       signal: AbortSignal;
     }): Promise<ResolverEntityIndex> {
-      return context.services.http.get('/api/endpoint/resolver/entity', {
+      return context.http.get('/api/endpoint/resolver/entity', {
         signal,
         query: {
           _id,

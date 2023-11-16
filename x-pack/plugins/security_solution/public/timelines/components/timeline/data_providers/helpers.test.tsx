@@ -181,8 +181,8 @@ describe('helpers', () => {
   });
 
   describe('isValidDestination', () => {
-    test('it returns false when destination is undefined', () => {
-      expect(isValidDestination(undefined)).toBe(false);
+    test('it returns false when destination is null', () => {
+      expect(isValidDestination(null)).toBe(false);
     });
 
     test('it returns true when the type guard matches as DraggableLocation ', () => {
@@ -861,7 +861,7 @@ describe('helpers', () => {
 
       addProviderToGroup({
         dataProviders,
-        destination: undefined,
+        destination: null,
         dispatch,
         onAddedToTimeline,
         providerToAdd,
@@ -877,7 +877,7 @@ describe('helpers', () => {
 
       addProviderToGroup({
         dataProviders,
-        destination: undefined,
+        destination: null,
         dispatch,
         onAddedToTimeline,
         providerToAdd,

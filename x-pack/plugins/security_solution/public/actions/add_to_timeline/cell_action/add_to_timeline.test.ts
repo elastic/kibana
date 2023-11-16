@@ -12,6 +12,8 @@ import { createAddToTimelineCellActionFactory } from './add_to_timeline';
 import type { CellActionExecutionContext } from '@kbn/cell-actions';
 import { GEO_FIELD_TYPE } from '../../../timelines/components/timeline/body/renderers/constants';
 import { createStartServicesMock } from '../../../common/lib/kibana/kibana_react.mock';
+import { set } from 'lodash/fp';
+import { KBN_FIELD_TYPES } from '@kbn/field-types';
 
 const services = createStartServicesMock();
 const mockWarningToast = services.notifications.toasts.addWarning;
@@ -24,28 +26,33 @@ const store = {
 const value = 'the-value';
 
 const context = {
-  field: { name: 'user.name', value, type: 'text' },
+  data: [
+    {
+      field: { name: 'user.name', type: 'string' },
+      value,
+    },
+  ],
 } as CellActionExecutionContext;
 
 const defaultDataProvider = {
+  and: [],
+  enabled: true,
+  excluded: false,
+  id: 'event-field-default-timeline-1-user_name-0-the-value',
+  kqlQuery: '',
+  name: 'user.name',
+  queryMatch: {
+    field: 'user.name',
+    operator: ':',
+    value: 'the-value',
+  },
+};
+
+const defaultDataProviderAction = {
   type: addProvider.type,
   payload: {
     id: TimelineId.active,
-    providers: [
-      {
-        and: [],
-        enabled: true,
-        excluded: false,
-        id: 'event-field-default-timeline-1-user_name-0-the-value',
-        kqlQuery: '',
-        name: 'user.name',
-        queryMatch: {
-          field: 'user.name',
-          operator: ':',
-          value: 'the-value',
-        },
-      },
-    ],
+    providers: [defaultDataProvider],
   },
 };
 
@@ -69,30 +76,145 @@ describe('createAddToTimelineCellAction', () => {
     it('should return true if everything is okay', async () => {
       expect(await addToTimelineAction.isCompatible(context)).toEqual(true);
     });
+
     it('should return false if field not allowed', async () => {
       expect(
         await addToTimelineAction.isCompatible({
           ...context,
-          field: { ...context.field, name: 'signal.reason' },
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, name: 'signal.reason' },
+            },
+          ],
+        })
+      ).toEqual(false);
+    });
+
+    it('should return false if Kbn type is unsupported', async () => {
+      expect(
+        await addToTimelineAction.isCompatible({
+          ...context,
+          data: [
+            {
+              ...context.data[0],
+              field: { ...context.data[0].field, type: KBN_FIELD_TYPES.DATE_RANGE },
+            },
+          ],
         })
       ).toEqual(false);
     });
   });
 
   describe('execute', () => {
-    it('should execute normally', async () => {
+    it('should execute with default value', async () => {
       await addToTimelineAction.execute(context);
-      expect(mockDispatch).toHaveBeenCalledWith(defaultDataProvider);
+      expect(mockDispatch).toHaveBeenCalledWith(defaultDataProviderAction);
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
+    it('should execute with number value', async () => {
+      await addToTimelineAction.execute({
+        data: [{ field: { name: 'process.parent.pid', type: 'number' }, value: 12345 }],
+      } as CellActionExecutionContext);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        set(
+          'payload.providers[0]',
+          {
+            ...defaultDataProvider,
+            id: 'event-field-default-timeline-1-process_parent_pid-0-12345',
+            name: 'process.parent.pid',
+            queryMatch: {
+              field: 'process.parent.pid',
+              value: '12345',
+              operator: ':',
+            },
+          },
+          defaultDataProviderAction
+        )
+      );
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
+    it('should execute with null value', async () => {
+      await addToTimelineAction.execute({
+        data: [{ field: { name: 'user.name', type: 'text' }, value: null }],
+      } as unknown as CellActionExecutionContext);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        set(
+          'payload.providers[0]',
+          {
+            ...defaultDataProvider,
+            id: 'empty-value-timeline-1-user_name-0',
+            excluded: true,
+            queryMatch: {
+              field: 'user.name',
+              value: '',
+              operator: ':*',
+            },
+          },
+          defaultDataProviderAction
+        )
+      );
+      expect(mockWarningToast).not.toHaveBeenCalled();
+    });
+
+    it('should execute with multiple values', async () => {
+      const value2 = 'value2';
+      const value3 = 'value3';
+      await addToTimelineAction.execute({
+        data: [{ field: { name: 'user.name', type: 'text' }, value: [value, value2, value3] }],
+      } as unknown as CellActionExecutionContext);
+      expect(mockDispatch).toHaveBeenCalledWith(
+        set(
+          'payload.providers[0]',
+          {
+            ...defaultDataProvider,
+            and: [
+              {
+                ...defaultDataProvider,
+                id: 'event-field-default-timeline-1-user_name-0-value2',
+                queryMatch: { ...defaultDataProvider.queryMatch, value: value2 },
+              },
+              {
+                ...defaultDataProvider,
+                id: 'event-field-default-timeline-1-user_name-0-value3',
+                queryMatch: { ...defaultDataProvider.queryMatch, value: value3 },
+              },
+            ],
+          },
+          defaultDataProviderAction
+        )
+      );
       expect(mockWarningToast).not.toHaveBeenCalled();
     });
 
     it('should show warning if no provider added', async () => {
       await addToTimelineAction.execute({
         ...context,
-        field: {
-          ...context.field,
-          type: GEO_FIELD_TYPE,
-        },
+        data: [
+          {
+            ...context.data[0],
+            field: {
+              ...context.data[0].field,
+              type: GEO_FIELD_TYPE,
+            },
+          },
+        ],
+      });
+      expect(mockDispatch).not.toHaveBeenCalled();
+      expect(mockWarningToast).toHaveBeenCalled();
+    });
+
+    it('should show warning if value type is unsupported', async () => {
+      await addToTimelineAction.execute({
+        ...context,
+        data: [
+          {
+            ...context.data[0],
+            value: {},
+          },
+        ],
       });
       expect(mockDispatch).not.toHaveBeenCalled();
       expect(mockWarningToast).toHaveBeenCalled();
@@ -106,7 +228,7 @@ describe('createAddToTimelineCellAction', () => {
             negateFilters: false,
           },
         });
-        expect(mockDispatch).toHaveBeenCalledWith(defaultDataProvider);
+        expect(mockDispatch).toHaveBeenCalledWith(defaultDataProviderAction);
         expect(mockWarningToast).not.toHaveBeenCalled();
       });
 
@@ -118,10 +240,10 @@ describe('createAddToTimelineCellAction', () => {
           },
         });
         expect(mockDispatch).toHaveBeenCalledWith({
-          ...defaultDataProvider,
+          ...defaultDataProviderAction,
           payload: {
-            ...defaultDataProvider.payload,
-            providers: [{ ...defaultDataProvider.payload.providers[0], excluded: true }],
+            ...defaultDataProviderAction.payload,
+            providers: [{ ...defaultDataProviderAction.payload.providers[0], excluded: true }],
           },
         });
         expect(mockWarningToast).not.toHaveBeenCalled();

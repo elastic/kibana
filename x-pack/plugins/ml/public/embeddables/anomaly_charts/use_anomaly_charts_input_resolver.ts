@@ -9,6 +9,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { combineLatest, Observable, of, Subject } from 'rxjs';
 import { catchError, debounceTime, skipWhile, startWith, switchMap, tap } from 'rxjs/operators';
 import { CoreStart } from '@kbn/core/public';
+import type { InfluencersFilterQuery } from '@kbn/ml-anomaly-utils';
 import { MlStartDependencies } from '../../plugin';
 import {
   AppStateSelectedCells,
@@ -24,7 +25,6 @@ import {
 } from '..';
 import type { ExplorerChartsData } from '../../application/explorer/explorer_charts/explorer_charts_container_service';
 import { processFilters } from '../common/process_filters';
-import { InfluencersFilterQuery } from '../../../common/types/es_client';
 import { getJobsObservable } from '../common/get_jobs_observable';
 
 const FETCH_RESULTS_DEBOUNCE_MS = 500;

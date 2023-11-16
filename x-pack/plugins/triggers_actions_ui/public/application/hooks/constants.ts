@@ -11,4 +11,12 @@ export const triggersActionsUiQueriesKeys = {
   cases: () => [...triggersActionsUiQueriesKeys.alertsTable(), 'cases'] as const,
   casesBulkGet: (caseIds: string[]) =>
     [...triggersActionsUiQueriesKeys.cases(), 'bulkGet', caseIds] as const,
+  maintenanceWindows: () =>
+    [...triggersActionsUiQueriesKeys.alertsTable(), 'maintenanceWindows'] as const,
+  maintenanceWindowsBulkGet: (maintenanceWindowIds: string[]) =>
+    [
+      ...triggersActionsUiQueriesKeys.maintenanceWindows(),
+      'bulkGet',
+      maintenanceWindowIds,
+    ] as const,
 };

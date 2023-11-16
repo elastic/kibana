@@ -21,7 +21,11 @@ export const resultToOption = (
   const { id, title, url, icon, type, meta = {} } = result;
   const { tagIds = [], categoryLabel = '' } = meta as { tagIds: string[]; categoryLabel: string };
   // only displaying icons for applications and integrations
-  const useIcon = type === 'application' || type === 'integration';
+  const useIcon =
+    type === 'application' ||
+    type === 'integration' ||
+    type.toLowerCase() === 'enterprise search' ||
+    type.toLowerCase() === 'search';
   const option: EuiSelectableTemplateSitewideOption = {
     key: id,
     label: title,
@@ -37,11 +41,22 @@ export const resultToOption = (
       : [{ text: cleanMeta((meta.displayName as string) ?? type) }];
 
   if (getTag && tagIds.length) {
-    // TODO #85189 - refactor to use TagList instead of getTag
-    // Casting to Tag[] because we know all our IDs will be valid here, no need to check for undefined
-    option.append = (
-      <ResultTagList tags={tagIds.map(getTag) as Tag[]} searchTagIds={searchTagIds} />
-    );
+    const tags = tagIds.map(getTag).filter((tag, index) => {
+      if (!tag) {
+        // eslint-disable-next-line no-console
+        console.warn(
+          `SearchBar: Tag with id "${tagIds[index]}" not found. Tag "${tagIds[index]}" is referenced by the search result "${result.type}:${result.id}". Skipping displaying the missing tag.`
+        );
+        return false;
+      }
+
+      return true;
+    }) as Tag[];
+
+    if (tags.length) {
+      // TODO #85189 - refactor to use TagList instead of getTag
+      option.append = <ResultTagList tags={tags} searchTagIds={searchTagIds} />;
+    }
   }
 
   return option;

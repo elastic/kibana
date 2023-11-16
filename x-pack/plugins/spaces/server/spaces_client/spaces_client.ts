@@ -6,20 +6,19 @@
  */
 
 import Boom from '@hapi/boom';
-import { omit } from 'lodash';
 
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   SavedObject,
 } from '@kbn/core/server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 
-import type { GetAllSpacesOptions, GetAllSpacesPurpose, GetSpaceResult, Space } from '../../common';
 import { isReservedSpace } from '../../common';
+import type { spaceV1 as v1 } from '../../common';
 import type { ConfigType } from '../config';
 
-const SUPPORTED_GET_SPACE_PURPOSES: GetAllSpacesPurpose[] = [
+const SUPPORTED_GET_SPACE_PURPOSES: v1.GetAllSpacesPurpose[] = [
   'any',
   'copySavedObjectsIntoSpace',
   'findSavedObjects',
@@ -36,26 +35,26 @@ export interface ISpacesClient {
    * Retrieve all available spaces.
    * @param options controls which spaces are retrieved.
    */
-  getAll(options?: GetAllSpacesOptions): Promise<GetSpaceResult[]>;
+  getAll(options?: v1.GetAllSpacesOptions): Promise<v1.GetSpaceResult[]>;
 
   /**
    * Retrieve a space by its id.
    * @param id the space id.
    */
-  get(id: string): Promise<Space>;
+  get(id: string): Promise<v1.Space>;
 
   /**
    * Creates a space.
    * @param space the space to create.
    */
-  create(space: Space): Promise<Space>;
+  create(space: v1.Space): Promise<v1.Space>;
 
   /**
    * Updates a space.
    * @param id  the id of the space to update.
    * @param space the updated space.
    */
-  update(id: string, space: Space): Promise<Space>;
+  update(id: string, space: v1.Space): Promise<v1.Space>;
 
   /**
    * Returns a {@link ISavedObjectsPointInTimeFinder} to help page through
@@ -88,7 +87,7 @@ export class SpacesClient implements ISpacesClient {
     private readonly nonGlobalTypeNames: string[]
   ) {}
 
-  public async getAll(options: GetAllSpacesOptions = {}): Promise<GetSpaceResult[]> {
+  public async getAll(options: v1.GetAllSpacesOptions = {}): Promise<v1.GetSpaceResult[]> {
     const { purpose = DEFAULT_PURPOSE } = options;
     if (!SUPPORTED_GET_SPACE_PURPOSES.includes(purpose)) {
       throw Boom.badRequest(`unsupported space purpose: ${purpose}`);
@@ -113,7 +112,7 @@ export class SpacesClient implements ISpacesClient {
     return this.transformSavedObjectToSpace(savedObject);
   }
 
-  public async create(space: Space) {
+  public async create(space: v1.Space) {
     const { total } = await this.repository.find({
       type: 'space',
       page: 1,
@@ -125,10 +124,16 @@ export class SpacesClient implements ISpacesClient {
       );
     }
 
+    if (space.disabledFeatures.length > 0 && !this.config.allowFeatureVisibility) {
+      throw Boom.badRequest(
+        'Unable to create Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled'
+      );
+    }
+
     this.debugLogger(`SpacesClient.create(), using RBAC. Attempting to create space`);
 
-    const attributes = omit(space, ['id', '_reserved']);
     const id = space.id;
+    const attributes = this.generateSpaceAttributes(space);
     const createdSavedObject = await this.repository.create('space', attributes, { id });
 
     this.debugLogger(`SpacesClient.create(), created space object`);
@@ -136,8 +141,14 @@ export class SpacesClient implements ISpacesClient {
     return this.transformSavedObjectToSpace(createdSavedObject);
   }
 
-  public async update(id: string, space: Space) {
-    const attributes = omit(space, 'id', '_reserved');
+  public async update(id: string, space: v1.Space) {
+    if (space.disabledFeatures.length > 0 && !this.config.allowFeatureVisibility) {
+      throw Boom.badRequest(
+        'Unable to update Space, the disabledFeatures array must be empty when xpack.spaces.allowFeatureVisibility setting is disabled'
+      );
+    }
+
+    const attributes = this.generateSpaceAttributes(space);
     await this.repository.update('space', id, attributes);
     const updatedSavedObject = await this.repository.get('space', id);
     return this.transformSavedObjectToSpace(updatedSavedObject);
@@ -170,10 +181,27 @@ export class SpacesClient implements ISpacesClient {
     await this.repository.bulkUpdate(objectsToUpdate);
   }
 
-  private transformSavedObjectToSpace(savedObject: SavedObject<any>) {
+  private transformSavedObjectToSpace(savedObject: SavedObject<any>): v1.Space {
     return {
       id: savedObject.id,
-      ...savedObject.attributes,
-    } as Space;
+      name: savedObject.attributes.name ?? '',
+      description: savedObject.attributes.description,
+      color: savedObject.attributes.color,
+      initials: savedObject.attributes.initials,
+      imageUrl: savedObject.attributes.imageUrl,
+      disabledFeatures: savedObject.attributes.disabledFeatures ?? [],
+      _reserved: savedObject.attributes._reserved,
+    } as v1.Space;
+  }
+
+  private generateSpaceAttributes(space: v1.Space) {
+    return {
+      name: space.name,
+      description: space.description,
+      color: space.color,
+      initials: space.initials,
+      imageUrl: space.imageUrl,
+      disabledFeatures: space.disabledFeatures,
+    };
   }
 }

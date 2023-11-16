@@ -20,11 +20,11 @@ import type { UploadedFile } from '@kbn/shared-ux-file-upload/src/file_upload';
 import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
 
+import { FILE_ATTACHMENT_TYPE } from '../../../common/constants';
 import { constructFileKindIdByOwner } from '../../../common/files';
 import type { Owner } from '../../../common/constants/types';
 
-import { CommentType, ExternalReferenceStorageType } from '../../../common';
-import { FILE_ATTACHMENT_TYPE } from '../../../common/api';
+import { AttachmentType, ExternalReferenceStorageType } from '../../../common';
 import { useCasesToast } from '../../common/use_cases_toast';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
@@ -39,7 +39,7 @@ interface AddFileProps {
 const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
   const { owner, permissions } = useCasesContext();
   const { showDangerToast, showErrorToast, showSuccessToast } = useCasesToast();
-  const { isLoading, createAttachments } = useCreateAttachments();
+  const { isLoading, mutateAsync: createAttachments } = useCreateAttachments();
   const refreshAttachmentsTable = useRefreshCaseViewPage();
   const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -68,9 +68,9 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
         await createAttachments({
           caseId,
           caseOwner: owner[0],
-          data: [
+          attachments: [
             {
-              type: CommentType.externalReference,
+              type: AttachmentType.externalReference,
               externalReferenceId: file.id,
               externalReferenceStorage: {
                 type: ExternalReferenceStorageType.savedObject,
@@ -89,17 +89,16 @@ const AddFileComponent: React.FC<AddFileProps> = ({ caseId }) => {
               },
             },
           ],
-          updateCase: refreshAttachmentsTable,
-          throwOnError: true,
         });
+
+        refreshAttachmentsTable();
 
         showSuccessToast(i18n.SUCCESSFUL_UPLOAD_FILE_NAME(file.fileJSON.name));
       } catch (error) {
         // error toast is handled inside  createAttachments
 
         // we need to delete the file if attachment creation failed
-        const abortCtrlRef = new AbortController();
-        return deleteFileAttachments({ caseId, fileIds: [file.id], signal: abortCtrlRef.signal });
+        return deleteFileAttachments({ caseId, fileIds: [file.id] });
       }
 
       closeModal();

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { Plugin } from './plugin';
+import { config } from './plugin';
 
-export function plugin(initializerContext) {
-  return new Plugin(initializerContext);
+export async function plugin() {
+  const { Plugin } = await import('./plugin');
+  return new Plugin();
 }
+
+export { config };

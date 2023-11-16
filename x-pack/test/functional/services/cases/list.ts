@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
-import { CaseStatuses } from '@kbn/cases-plugin/common';
 import { CaseSeverityWithAll } from '@kbn/cases-plugin/common/ui';
-import { CaseSeverity } from '@kbn/cases-plugin/common/api';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { CasesCommon } from './common';
@@ -86,15 +84,17 @@ export function CasesTableServiceProvider(
     },
 
     async validateCasesTableHasNthRows(nrRows: number) {
-      await retry.tryForTime(3000, async () => {
+      await retry.waitFor(`the cases table to have ${nrRows} cases`, async () => {
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"');
-        expect(rows.length).equal(nrRows);
+        return rows.length === nrRows;
       });
+
+      await header.waitUntilLoadingHasFinished();
     },
 
     async waitForCasesToBeListed() {
       await retry.waitFor('cases to appear on the all cases table', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         return await testSubjects.exists('case-details-link');
       });
       await header.waitUntilLoadingHasFinished();
@@ -102,7 +102,7 @@ export function CasesTableServiceProvider(
 
     async waitForCasesToBeDeleted() {
       await retry.waitFor('the cases table to be empty', async () => {
-        this.refreshTable();
+        await this.refreshTable();
         const rows = await find.allByCssSelector('[data-test-subj*="cases-table-row-"', 100);
         return rows.length === 0;
       });
@@ -140,6 +140,15 @@ export function CasesTableServiceProvider(
       );
 
       await testSubjects.click(`options-filter-popover-item-${tag}`);
+    },
+
+    async filterByCategory(category: string) {
+      await common.clickAndValidate(
+        'options-filter-popover-button-Categories',
+        `options-filter-popover-item-${category}`
+      );
+
+      await testSubjects.click(`options-filter-popover-item-${category}`);
     },
 
     async filterByStatus(status: CaseStatuses) {
@@ -183,7 +192,10 @@ export function CasesTableServiceProvider(
 
       const row = rows[index];
       await row.click();
-      await find.existsByCssSelector('[data-test-subj*="case-action-popover-"');
+      await retry.waitFor(
+        'popover-action-exists',
+        async () => await find.existsByCssSelector('[data-test-subj*="case-action-popover-"')
+      );
     },
 
     async openAssigneesPopover() {
@@ -214,6 +226,7 @@ export function CasesTableServiceProvider(
 
       await testSubjects.existOrFail(`cases-bulk-action-status-${status}`);
       await testSubjects.click(`cases-bulk-action-status-${status}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async changeSeverity(severity: CaseSeverity, index: number) {
@@ -231,6 +244,7 @@ export function CasesTableServiceProvider(
 
       await testSubjects.existOrFail(`cases-bulk-action-severity-${severity}`);
       await testSubjects.click(`cases-bulk-action-severity-${severity}`);
+      await header.waitUntilLoadingHasFinished();
     },
 
     async bulkChangeStatusCases(status: CaseStatuses) {

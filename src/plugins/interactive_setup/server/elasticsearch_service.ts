@@ -30,10 +30,10 @@ import type {
 } from '@kbn/core/server';
 import { pollEsNodesVersion } from '@kbn/core/server';
 
-import { ElasticsearchConnectionStatus } from '../common';
-import type { Certificate, PingResult } from '../common';
 import { CompatibilityError } from './compatibility_error';
 import { getDetailedErrorMessage, getErrorStatusCode } from './errors';
+import { ElasticsearchConnectionStatus } from '../common';
+import type { Certificate, PingResult } from '../common';
 
 export interface EnrollParameters {
   apiKey: string;

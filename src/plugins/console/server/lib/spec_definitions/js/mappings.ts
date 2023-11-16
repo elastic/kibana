@@ -34,12 +34,6 @@ export const mappings = (specService: SpecDefinitionsService) => {
       _index: {
         enabled: BOOLEAN,
       },
-      _parent: {
-        __template: {
-          type: '',
-        },
-        type: '{type}',
-      },
       _timestamp: {
         enabled: BOOLEAN,
         format: 'YYYY-MM-dd',
@@ -224,7 +218,7 @@ export const mappings = (specService: SpecDefinitionsService) => {
 
           // objects
           properties: {
-            __scope_link: 'put_mapping.{type}.properties',
+            __scope_link: 'put_mapping.type.properties',
           },
 
           // multi_field

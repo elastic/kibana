@@ -23,10 +23,12 @@ import React, { ComponentProps } from 'react';
 import { UseQueryResult } from '@tanstack/react-query';
 import { CloudPosturePage } from './cloud_posture_page';
 import { NoDataPage } from '@kbn/kibana-react-plugin/public';
+import { useLicenseManagementLocatorApi } from '../common/api/use_license_management_locator_api';
 
 const chance = new Chance();
 
 jest.mock('../common/api/use_setup_status_api');
+jest.mock('../common/api/use_license_management_locator_api');
 jest.mock('../common/hooks/use_subscription_status');
 jest.mock('../common/navigation/use_csp_integration_link');
 
@@ -35,6 +37,13 @@ describe('<CloudPosturePage />', () => {
     jest.resetAllMocks();
 
     (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: true,
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
       createReactQueryResponse({
         status: 'success',
         data: true,
@@ -67,6 +76,37 @@ describe('<CloudPosturePage />', () => {
       </TestProvider>
     );
   };
+
+  it('renders with license url locator', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    renderCloudPosturePage();
+    expect(screen.getByTestId('has_locator')).toBeInTheDocument();
+  });
+
+  it('renders no license url locator', () => {
+    (useSubscriptionStatus as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: false,
+      })
+    );
+
+    (useLicenseManagementLocatorApi as jest.Mock).mockImplementation(() =>
+      createReactQueryResponse({
+        status: 'success',
+        data: undefined,
+      })
+    );
+
+    renderCloudPosturePage();
+    expect(screen.getByTestId('no_locator')).toBeInTheDocument();
+  });
 
   it('renders children if setup status is indexed', () => {
     const children = chance.sentence();

@@ -14,6 +14,7 @@ import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import { EventHit, TimelineEventsDetailsItem } from '../search_strategy';
 import { toObjectArrayOfStrings, toStringArray } from './to_array';
 import { ENRICHMENT_DESTINATION_PATH } from '../constants';
+
 export const baseCategoryFields = ['@timestamp', 'labels', 'message', 'tags'];
 const nonFlattenedFormatParamsFields = ['related_integrations', 'threat_mapping'];
 
@@ -115,13 +116,19 @@ export const getDataFromFieldsHits = (
     if (isRuleParametersFieldOrSubfield(field, prependField)) {
       nestedFields = Array.isArray(item)
         ? item
-            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .reduce((acc, i) => {
+              acc.push(getDataFromFieldsHits(i, dotField, fieldCategory));
+              return acc;
+            }, [])
             .flat()
         : getDataFromFieldsHits(item, dotField, fieldCategory);
     } else {
       nestedFields = Array.isArray(item)
         ? item
-            .reduce((acc, i) => [...acc, getDataFromFieldsHits(i, dotField, fieldCategory)], [])
+            .reduce((acc, i) => {
+              acc.push(getDataFromFieldsHits(i, dotField, fieldCategory));
+              return acc;
+            }, [])
             .flat()
         : getDataFromFieldsHits(item, prependField, fieldCategory);
     }

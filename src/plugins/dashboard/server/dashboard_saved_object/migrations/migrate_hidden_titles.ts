@@ -12,8 +12,8 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import {
   convertSavedDashboardPanelToPanelState,
   convertPanelStateToSavedDashboardPanel,
-  SavedDashboardPanel,
 } from '../../../common';
+import { SavedDashboardPanel } from '../../../common/content_management';
 
 /**
  * Before 7.10, hidden panel titles were stored as a blank string on the title attribute. In 7.10, this was replaced
@@ -37,19 +37,16 @@ export const migrateExplicitlyHiddenTitles: SavedObjectMigrationFn<any, any> = (
       // Convert each panel into the dashboard panel state
       const originalPanelState = convertSavedDashboardPanelToPanelState<EmbeddableInput>(panel);
       newPanels.push(
-        convertPanelStateToSavedDashboardPanel(
-          {
-            ...originalPanelState,
-            explicitInput: {
-              ...originalPanelState.explicitInput,
-              ...(originalPanelState.explicitInput.title === '' &&
-              !originalPanelState.explicitInput.hidePanelTitles
-                ? { hidePanelTitles: true }
-                : {}),
-            },
+        convertPanelStateToSavedDashboardPanel({
+          ...originalPanelState,
+          explicitInput: {
+            ...originalPanelState.explicitInput,
+            ...(originalPanelState.explicitInput.title === '' &&
+            !originalPanelState.explicitInput.hidePanelTitles
+              ? { hidePanelTitles: true }
+              : {}),
           },
-          panel.version
-        )
+        })
       );
     });
     return {

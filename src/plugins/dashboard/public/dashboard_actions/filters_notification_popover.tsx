@@ -40,6 +40,7 @@ export function FiltersNotificationPopover({
 }: FiltersNotificationProps) {
   const { embeddable } = context;
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [disableEditbutton, setDisableEditButton] = useState(false);
 
   return (
     <EuiPopover
@@ -57,26 +58,31 @@ export function FiltersNotificationPopover({
       anchorPosition="upCenter"
     >
       <EuiPopoverTitle>{displayName}</EuiPopoverTitle>
-      <FiltersNotificationPopoverContents context={context} />
+      <FiltersNotificationPopoverContents
+        context={context}
+        setDisableEditButton={setDisableEditButton}
+      />
       <EuiPopoverFooter>
-        <EuiFlexGroup
-          gutterSize="s"
-          alignItems="center"
-          justifyContent="flexEnd"
-          responsive={false}
-          wrap={true}
-        >
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              data-test-subj={'filtersNotificationModal__editButton'}
-              size="s"
-              fill
-              onClick={() => editPanelAction.execute({ embeddable })}
-            >
-              {dashboardFilterNotificationActionStrings.getEditButtonTitle()}
-            </EuiButton>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        {!disableEditbutton && (
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            justifyContent="flexEnd"
+            responsive={false}
+            wrap={true}
+          >
+            <EuiFlexItem grow={false}>
+              <EuiButton
+                data-test-subj={'filtersNotificationModal__editButton'}
+                size="s"
+                fill
+                onClick={() => editPanelAction.execute({ embeddable })}
+              >
+                {dashboardFilterNotificationActionStrings.getEditButtonTitle()}
+              </EuiButton>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        )}
       </EuiPopoverFooter>
     </EuiPopover>
   );

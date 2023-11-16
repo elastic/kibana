@@ -6,16 +6,16 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { Logger } from '@kbn/core/server';
+import { Logger, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type {
   ActionGroup,
   AlertInstanceContext,
   AlertInstanceState,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import { RuleType } from '@kbn/alerting-plugin/server';
+import type { RuleType } from '@kbn/alerting-plugin/server';
 import type { PluginSetupContract as AlertingSetup } from '@kbn/alerting-plugin/server';
-import { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
+import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import { PLUGIN, type TransformHealth, TRANSFORM_RULE_TYPE } from '../../../../common/constants';
 import { transformHealthRuleParams, TransformHealthRuleParams } from './schema';
 import { transformHealthServiceProvider } from './transform_health_service';
@@ -105,6 +105,7 @@ export function getTransformHealthRuleType(
         },
       ],
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: 'stackAlerts',
     minimumLicenseRequired: PLUGIN.MINIMUM_LICENSE_REQUIRED,
     isExportable: true,

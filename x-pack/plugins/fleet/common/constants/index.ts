@@ -22,6 +22,8 @@ export * from './authz';
 export * from './file_storage';
 export * from './message_signing_keys';
 export * from './locators';
+export * from './secrets';
+export * from './uninstall_token';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates
 // the maximum amount of results allowed to be returned from a search. It's possible
@@ -47,3 +49,9 @@ export const FLEET_SERVER_INDICES = [
   '.fleet-policies-leader',
   FLEET_SERVER_SERVERS_INDEX,
 ];
+
+// Nodes that can be queried by datastreams API
+// Warm and cold nodes have been excluded because of performance issues
+export const DATA_TIERS = ['data_hot'];
+
+export const FLEET_ENROLLMENT_API_PREFIX = 'fleet-enrollment-api-keys';

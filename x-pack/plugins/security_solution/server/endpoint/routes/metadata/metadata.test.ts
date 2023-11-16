@@ -8,7 +8,7 @@
 import type {
   KibanaResponseFactory,
   RequestHandler,
-  RouteConfig,
+  RouteMethod,
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import {
@@ -25,6 +25,7 @@ import {
   createMockEndpointAppContextServiceSetupContract,
   createMockEndpointAppContextServiceStartContract,
   createRouteHandlerContext,
+  getRegisteredVersionedRouteMock,
 } from '../../mocks';
 import type { EndpointAppContextServiceStartContract } from '../../endpoint_app_context_services';
 import { EndpointAppContextService } from '../../endpoint_app_context_services';
@@ -40,13 +41,14 @@ import type {
   PackagePolicyClient,
 } from '@kbn/fleet-plugin/server';
 import {
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_GET_ROUTE,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
 } from '../../../../common/endpoint/constants';
 import { TRANSFORM_STATES } from '../../../../common/constants';
-import type { SecuritySolutionPluginRouter } from '../../../types';
 import { AgentNotFoundError } from '@kbn/fleet-plugin/server';
 import type {
   ClusterClientMock,
@@ -56,17 +58,18 @@ import { EndpointHostNotFoundError } from '../../services/metadata';
 import { FleetAgentGenerator } from '../../../../common/endpoint/data_generators/fleet_agent_generator';
 import type { TransformGetTransformStatsResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/service/authz/mocks';
+import type { VersionedRouteConfig } from '@kbn/core-http-server';
+import type { SecuritySolutionPluginRouterMock } from '../../../mocks';
 
 describe('test endpoint routes', () => {
-  let routerMock: jest.Mocked<SecuritySolutionPluginRouter>;
+  let routerMock: SecuritySolutionPluginRouterMock;
   let mockResponse: jest.Mocked<KibanaResponseFactory>;
   let mockClusterClient: ClusterClientMock;
   let mockScopedClient: ScopedClusterClientMock;
   let mockSavedObjectClient: jest.Mocked<SavedObjectsClientContract>;
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   let routeHandler: RequestHandler<any, any, any, any>;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  let routeConfig: RouteConfig<any, any, any, any>;
+  let routeConfig: VersionedRouteConfig<RouteMethod>;
   let mockAgentPolicyService: jest.Mocked<AgentPolicyServiceInterface>;
   let mockAgentClient: jest.Mocked<AgentClient>;
   let endpointAppContextService: EndpointAppContextService;
@@ -138,9 +141,13 @@ describe('test endpoint routes', () => {
       const metadata = new EndpointDocGenerator().generateHostMetadata();
       const esSearchMock = mockScopedClient.asInternalUser.search;
       esSearchMock.mockResponseOnce(unitedMetadataSearchResponseMock(metadata));
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_LIST_ROUTE)
-      )!;
+
+      ({ routeHandler, routeConfig } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_LIST_ROUTE,
+        '2023-10-31'
+      ));
 
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -221,14 +228,19 @@ describe('test endpoint routes', () => {
       expect(endpointResultList.total).toEqual(1);
       expect(endpointResultList.page).toEqual(0);
       expect(endpointResultList.pageSize).toEqual(10);
+      expect(endpointResultList.sortField).toEqual(ENDPOINT_DEFAULT_SORT_FIELD);
+      expect(endpointResultList.sortDirection).toEqual(ENDPOINT_DEFAULT_SORT_DIRECTION);
     });
 
     it('should get forbidden if no security solution access', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_LIST_ROUTE)
-      )!;
+      ({ routeHandler, routeConfig } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_LIST_ROUTE,
+        '2023-10-31'
+      ));
 
       const contextOverrides = {
         endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
@@ -255,9 +267,13 @@ describe('test endpoint routes', () => {
         active: true,
       } as unknown as Agent);
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
+
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,
@@ -285,9 +301,12 @@ describe('test endpoint routes', () => {
       mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
       esSearchMock.mockResponseOnce(response);
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
 
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -319,9 +338,12 @@ describe('test endpoint routes', () => {
 
       esSearchMock.mockResponseOnce(response);
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
 
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -355,9 +377,12 @@ describe('test endpoint routes', () => {
       );
       esSearchMock.mockResponseOnce(response);
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
 
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -389,9 +414,12 @@ describe('test endpoint routes', () => {
         active: false,
       } as unknown as Agent);
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
 
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
@@ -415,9 +443,12 @@ describe('test endpoint routes', () => {
       mockAgentClient.getAgent.mockResolvedValue(agentGenerator.generate({ status: 'online' }));
       esSearchMock.mockResponseOnce(response);
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
 
       const contextOverrides = {
         endpointAuthz: getEndpointAuthzInitialStateMock({
@@ -436,9 +467,12 @@ describe('test endpoint routes', () => {
     it('should get forbidden if no security solution or fleet access', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(HOST_METADATA_GET_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        HOST_METADATA_GET_ROUTE,
+        '2023-10-31'
+      ));
 
       const contextOverrides = {
         endpointAuthz: getEndpointAuthzInitialStateMock({
@@ -460,9 +494,12 @@ describe('test endpoint routes', () => {
     it('should get forbidden if no security solution access', async () => {
       const mockRequest = httpServerMock.createKibanaRequest();
 
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(METADATA_TRANSFORMS_STATUS_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        METADATA_TRANSFORMS_STATUS_ROUTE,
+        '2023-10-31'
+      ));
 
       const contextOverrides = {
         endpointAuthz: getEndpointAuthzInitialStateMock({ canReadSecuritySolution: false }),
@@ -490,9 +527,12 @@ describe('test endpoint routes', () => {
       const esClientMock = mockScopedClient.asInternalUser;
       // @ts-expect-error incomplete type
       esClientMock.transform.getTransformStats.mockResponseOnce(expectedResponse);
-      [routeConfig, routeHandler] = routerMock.get.mock.calls.find(([{ path }]) =>
-        path.startsWith(METADATA_TRANSFORMS_STATUS_ROUTE)
-      )!;
+      ({ routeConfig, routeHandler } = getRegisteredVersionedRouteMock(
+        routerMock,
+        'get',
+        METADATA_TRANSFORMS_STATUS_ROUTE,
+        '2023-10-31'
+      ));
       await routeHandler(
         createRouteHandlerContext(mockScopedClient, mockSavedObjectClient),
         mockRequest,

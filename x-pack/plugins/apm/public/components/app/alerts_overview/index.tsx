@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ObservabilityAlertSearchBar } from '@kbn/observability-plugin/public';
 import { AlertStatus } from '@kbn/observability-plugin/common/typings';
@@ -72,6 +72,11 @@ export function AlertsOverview() {
     ];
   }, [serviceName, environment]);
 
+  const onKueryChange = useCallback(
+    (value) => push(history, { query: { kuery: value } }),
+    [history]
+  );
+
   return (
     <EuiPanel borderRadius="none" hasShadow={false}>
       <EuiFlexGroup direction="column" gutterSize="s">
@@ -86,9 +91,7 @@ export function AlertsOverview() {
               onRangeToChange={(value) =>
                 push(history, { query: { rangeTo: value } })
               }
-              onKueryChange={(value) =>
-                push(history, { query: { kuery: value } })
-              }
+              onKueryChange={onKueryChange}
               defaultSearchQueries={apmQueries}
               onStatusChange={setAlertStatusFilter}
               onEsQueryChange={setEsQuery}
@@ -107,10 +110,9 @@ export function AlertsOverview() {
               }
               id={'service-overview-alerts'}
               configurationId={AlertConsumers.OBSERVABILITY}
-              featureIds={[AlertConsumers.APM]}
+              featureIds={[AlertConsumers.APM, AlertConsumers.OBSERVABILITY]}
               query={esQuery}
               showAlertStatusWithFlapping
-              showExpandToDetails={false}
             />
           )}
         </EuiFlexItem>

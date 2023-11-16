@@ -17,10 +17,11 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
+import { EnabledFeatures } from './enabled_features';
+import { ManageSpacePage } from './manage_space_page';
 import type { SpacesManager } from '../../spaces_manager';
 import { spacesManagerMock } from '../../spaces_manager/mocks';
-import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
-import { ManageSpacePage } from './manage_space_page';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712
@@ -74,6 +75,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowFeatureVisibility
       />
     );
 
@@ -101,6 +103,64 @@ describe('ManageSpacePage', () => {
       imageUrl: '',
       disabledFeatures: [],
     });
+  });
+
+  it('shows feature visibility controls when allowed', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowFeatureVisibility
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
+
+    expect(wrapper.find(EnabledFeatures)).toHaveLength(1);
+  });
+
+  it('hides feature visibility controls when not allowed', async () => {
+    const spacesManager = spacesManagerMock.create();
+    spacesManager.createSpace = jest.fn(spacesManager.createSpace);
+    spacesManager.getActiveSpace = jest.fn().mockResolvedValue(space);
+
+    const wrapper = mountWithIntl(
+      <ManageSpacePage
+        spacesManager={spacesManager as unknown as SpacesManager}
+        getFeatures={featuresStart.getFeatures}
+        notifications={notificationServiceMock.createStartContract()}
+        history={history}
+        capabilities={{
+          navLinks: {},
+          management: {},
+          catalogue: {},
+          spaces: { manage: true },
+        }}
+        allowFeatureVisibility={false}
+      />
+    );
+
+    await waitFor(() => {
+      wrapper.update();
+      expect(wrapper.find('input[name="name"]')).toHaveLength(1);
+    });
+
+    expect(wrapper.find(EnabledFeatures)).toHaveLength(0);
   });
 
   it('allows a space to be updated', async () => {
@@ -135,6 +195,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowFeatureVisibility
       />
     );
 
@@ -202,6 +263,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowFeatureVisibility
       />
     );
 
@@ -250,6 +312,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowFeatureVisibility
       />
     );
 
@@ -286,6 +349,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowFeatureVisibility
       />
     );
 
@@ -346,6 +410,7 @@ describe('ManageSpacePage', () => {
           catalogue: {},
           spaces: { manage: true },
         }}
+        allowFeatureVisibility
       />
     );
 

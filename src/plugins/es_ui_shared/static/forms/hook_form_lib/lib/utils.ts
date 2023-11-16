@@ -67,10 +67,11 @@ export const stripOutUndefinedValues = <R>(obj: GenericObject): R => {
     .filter(({ 1: value }) => value !== undefined)
     .reduce((acc, [key, value]) => {
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-        return { ...acc, [key]: stripOutUndefinedValues(value) };
+        acc[key as keyof R] = stripOutUndefinedValues(value);
+      } else {
+        acc[key as keyof R] = value;
       }
-
-      return { ...acc, [key]: value };
+      return acc;
     }, {} as R);
 };
 

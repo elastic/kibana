@@ -21,7 +21,7 @@ const defaultProps = {
   inspect: null,
   refetch: () => {},
   isModuleEnabled: true,
-  isLicenseValid: true,
+  isAuthorized: true,
   loading: false,
 };
 
@@ -101,7 +101,7 @@ describe('User Summary Component', () => {
       data: [
         {
           user: {
-            name: 'testUsermame',
+            name: 'testUsername',
             risk: {
               rule_risks: [],
               calculated_level: risk,

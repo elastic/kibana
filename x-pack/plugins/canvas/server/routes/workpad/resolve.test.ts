@@ -26,7 +26,8 @@ describe('RESOLVE workpad', () => {
     const routerDeps = getMockedRouterDeps();
     initializeResolveWorkpadRoute(routerDeps);
 
-    routeHandler = routerDeps.router.get.mock.calls[0][1];
+    routeHandler =
+      routerDeps.router.versioned.get.mock.results[0].value.addVersion.mock.calls[0][1];
   });
 
   afterEach(() => {

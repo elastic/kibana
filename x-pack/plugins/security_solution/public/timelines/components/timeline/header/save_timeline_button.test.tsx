@@ -7,36 +7,41 @@
 
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
-import type { SaveTimelineComponentProps } from './save_timeline_button';
+import type { SaveTimelineButtonProps } from './save_timeline_button';
 import { SaveTimelineButton } from './save_timeline_button';
 import { TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
+import { TimelineStatus } from '../../../../../common/api/timeline';
 
 const TEST_ID = {
   SAVE_TIMELINE_MODAL: 'save-timeline-modal',
-  SAVE_TIMELINE_BTN: 'save-timeline-button-icon',
-  SAVE_TIMELINE_TOOLTIP: 'save-timeline-tooltip',
 };
 
 jest.mock('react-redux', () => {
   const actual = jest.requireActual('react-redux');
   return {
     ...actual,
-    useDispatch: jest.fn(),
+    useDispatch: jest.fn().mockImplementation(() => () => {}),
   };
 });
 
 jest.mock('../../../../common/lib/kibana');
-
 jest.mock('../../../../common/components/user_privileges');
+jest.mock('../../flyout/header/selectors', () => {
+  return {
+    getTimelineStatusByIdSelector: jest.fn().mockReturnValue(() => ({
+      status: 'draft',
+      isSaving: false,
+    })),
+  };
+});
 
-const props = {
-  initialFocus: 'title' as const,
+const props: SaveTimelineButtonProps = {
   timelineId: 'timeline-1',
-  toolTip: 'tooltip message',
 };
 
-const TestSaveTimelineButton = (_props: SaveTimelineComponentProps) => (
+const TestSaveTimelineButton = (_props: SaveTimelineButtonProps) => (
   <TestProviders>
     <SaveTimelineButton {..._props} />
   </TestProviders>
@@ -47,36 +52,7 @@ jest.mock('raf', () => {
 });
 
 describe('SaveTimelineButton', () => {
-  beforeEach(() => {
-    jest.clearAllMocks();
-  });
-
-  // skipping this test because popover is not getting visible by RTL gestures.
-  //
-  // Raised a bug with eui team: https://github.com/elastic/eui/issues/6065
-  xit('Show tooltip', async () => {
-    render(<TestSaveTimelineButton {...props} />);
-    const saveTimelineIcon = screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_BTN)[0];
-
-    fireEvent.mouseOver(saveTimelineIcon);
-
-    jest.runAllTimers();
-
-    await waitFor(() => {
-      expect(screen.getByRole('tooltip')).toBeVisible();
-    });
-  });
-
-  it('should show a button with pencil icon', () => {
-    render(<TestSaveTimelineButton {...props} />);
-
-    expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN).firstChild).toHaveAttribute(
-      'data-euiicon-type',
-      'pencil'
-    );
-  });
-
-  it('should have edit timeline btn disabled with tooltip if user does not have write access', () => {
+  it('should disable the save timeline button when the user does not have write acceess', () => {
     (useUserPrivileges as jest.Mock).mockReturnValue({
       kibanaSecuritySolutionsPrivileges: { crud: false },
     });
@@ -85,40 +61,65 @@ describe('SaveTimelineButton', () => {
         <SaveTimelineButton {...props} />
       </TestProviders>
     );
-    expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN)).toBeDisabled();
+    expect(screen.getByRole('button')).toBeDisabled();
   });
 
-  it('should not show modal if user does not have write access', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false },
+  describe('with draft timeline', () => {
+    it('should not show the save modal if user does not have write access', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: false },
+      });
+      render(<TestSaveTimelineButton {...props} />);
+
+      expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
+
+      const saveTimelineBtn = screen.getByRole('button');
+
+      fireEvent.click(saveTimelineBtn);
+
+      await waitFor(() => {
+        expect(screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toHaveLength(0);
+      });
     });
-    render(<TestSaveTimelineButton {...props} />);
 
-    expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
+    it('should show the save modal when user has crud privileges', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: true },
+      });
+      render(<TestSaveTimelineButton {...props} />);
+      expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
 
-    const saveTimelineIcon = screen.getByTestId(TEST_ID.SAVE_TIMELINE_BTN);
+      const saveTimelineBtn = screen.getByRole('button');
 
-    fireEvent.click(saveTimelineIcon);
+      fireEvent.click(saveTimelineBtn);
 
-    await waitFor(() => {
-      expect(screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toHaveLength(0);
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toBeVisible();
+      });
     });
   });
 
-  it('should show a modal when user has crud privileges', async () => {
-    (useUserPrivileges as jest.Mock).mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+  describe('with active timeline', () => {
+    beforeAll(() => {
+      (getTimelineStatusByIdSelector as jest.Mock).mockReturnValue(() => ({
+        status: TimelineStatus.active,
+        isSaving: false,
+      }));
     });
-    render(<TestSaveTimelineButton {...props} />);
-    expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).not.toBeInTheDocument();
 
-    const saveTimelineIcon = screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_BTN)[0];
+    it('should open the timeline save modal', async () => {
+      (useUserPrivileges as jest.Mock).mockReturnValue({
+        kibanaSecuritySolutionsPrivileges: { crud: true },
+      });
+      render(<TestSaveTimelineButton {...props} />);
 
-    fireEvent.click(saveTimelineIcon);
+      const saveTimelineBtn = screen.getByRole('button');
 
-    await waitFor(() => {
-      expect(screen.queryByTestId(TEST_ID.SAVE_TIMELINE_TOOLTIP)).not.toBeInTheDocument();
-      expect(screen.queryAllByTestId(TEST_ID.SAVE_TIMELINE_MODAL)[0]).toBeVisible();
+      fireEvent.click(saveTimelineBtn);
+
+      await waitFor(() => {
+        expect(screen.getByTestId(TEST_ID.SAVE_TIMELINE_MODAL)).toBeInTheDocument();
+      });
     });
   });
 });

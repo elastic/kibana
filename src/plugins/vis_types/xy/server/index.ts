@@ -6,12 +6,17 @@
  * Side Public License, v 1.
  */
 
-import { PluginConfigDescriptor } from '@kbn/core/server';
-import { configSchema, ConfigSchema } from '../config';
-import { VisTypeXYServerPlugin } from './plugin';
+import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
+import { configSchema, XyConfig } from '../config';
 
-export const config: PluginConfigDescriptor<ConfigSchema> = {
+export const config: PluginConfigDescriptor<XyConfig> = {
+  exposeToBrowser: {
+    readOnly: true,
+  },
   schema: configSchema,
 };
 
-export const plugin = () => new VisTypeXYServerPlugin();
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { VisTypeXYServerPlugin } = await import('./plugin');
+  return new VisTypeXYServerPlugin(initializerContext);
+};

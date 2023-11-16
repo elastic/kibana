@@ -13,7 +13,7 @@ import path from 'path';
 
 import type { JobType, MlSavedObjectType } from '@kbn/ml-plugin/common/types/saved_objects';
 import type { Job, Datafeed } from '@kbn/ml-plugin/common/types/anomaly_detection_jobs';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-plugin/public/application/data_frame_analytics/common';
+import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
 import { WebElementWrapper } from '../../../../../test/functional/services/lib/web_element_wrapper';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -27,7 +27,6 @@ export function MachineLearningStackManagementJobsProvider({
   getService,
   getPageObjects,
 }: FtrProviderContext) {
-  const find = getService('find');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const toasts = getService('toasts');
@@ -144,11 +143,14 @@ export function MachineLearningStackManagementJobsProvider({
     },
 
     async selectShareToSpacesMode(inputTestSubj: 'shareToExplicitSpacesId' | 'shareToAllSpacesId') {
+      // The input element can not be clicked directly.
+      // Instead, we need to click the parent label
+      const getInputLabel = async () => {
+        const input = await testSubjects.find(inputTestSubj, 1000);
+        return await input.findByXpath('./../../..'); // Clicks the parent label 3 levels up
+      };
       await retry.tryForTime(5000, async () => {
-        // The input element can not be clicked directly.
-        // Instead, we need to click the corresponding label
-        const inputId = await testSubjects.getAttribute(inputTestSubj, 'id', 1000);
-        const labelElement = await find.byCssSelector(`[for="${inputId}"]`, 1000);
+        const labelElement = await getInputLabel();
         await labelElement.click();
 
         const checked = await testSubjects.getAttribute(inputTestSubj, 'checked', 1000);
@@ -156,7 +158,7 @@ export function MachineLearningStackManagementJobsProvider({
 
         // sometimes the checked attribute of the input is set but it's not actually
         // selected, so we're also checking the class of the corresponding label
-        const updatedLabelElement = await find.byCssSelector(`[for="${inputId}"]`, 1000);
+        const updatedLabelElement = await getInputLabel();
         const labelClasses = await updatedLabelElement.getAttribute('class');
         expect(labelClasses).to.contain(
           'euiButtonGroupButton-isSelected',
@@ -176,7 +178,7 @@ export function MachineLearningStackManagementJobsProvider({
     async isSpaceSelectionRowSelected(spaceId: string): Promise<boolean> {
       const state = await testSubjects.getAttribute(
         `sts-space-selector-row-${spaceId}`,
-        'data-test-selected',
+        'aria-checked',
         1000
       );
       return state === 'true';

@@ -6,8 +6,8 @@
  * Side Public License, v 1.
  */
 
-import type { Presentable } from '@kbn/ui-actions-browser';
-import type { Trigger } from '../triggers';
+import type { Presentable } from '@kbn/ui-actions-browser/src/types';
+import type { Trigger } from '@kbn/ui-actions-browser/src/triggers';
 
 /**
  * During action execution we can provide additional information,

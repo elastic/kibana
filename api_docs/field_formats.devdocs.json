@@ -53,13 +53,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-public.DateFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/public/lib/converters/date.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -196,13 +193,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-public.DateNanosFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/date_nanos_shared.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -454,13 +448,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-server.DateFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/server/lib/converters/date_server.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -939,13 +930,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.BoolFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/boolean.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1081,13 +1069,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.BytesFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1115,13 +1100,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.BytesFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/bytes.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1191,13 +1173,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.ColorFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/color.tsx",
             "deprecated": false,
             "trackAdoption": false
@@ -1387,13 +1366,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.DurationFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -1426,7 +1402,7 @@
             "label": "inputFormats",
             "description": [],
             "signature": [
-              "{ text: any; kind: string; }[]"
+              "{ text: string; kind: string; }[]"
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
@@ -1440,7 +1416,7 @@
             "label": "outputFormats",
             "description": [],
             "signature": [
-              "({ text: any; method: string; shortText?: undefined; } | { text: any; shortText: any; method: string; })[]"
+              "({ text: string; method: string; shortText?: undefined; } | { text: string; shortText: string; method: string; })[]"
             ],
             "path": "src/plugins/field_formats/common/converters/duration.ts",
             "deprecated": false,
@@ -3613,13 +3589,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.GeoPointFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3653,7 +3626,7 @@
             "label": "transformOptions",
             "description": [],
             "signature": [
-              "{ kind: string; text: any; }[]"
+              "{ kind: string; text: string; }[]"
             ],
             "path": "src/plugins/field_formats/common/converters/geo_point.ts",
             "deprecated": false,
@@ -3811,13 +3784,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.HistogramFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3845,13 +3815,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.HistogramFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/histogram.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -3999,13 +3966,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.IpFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/ip.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4110,13 +4074,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.NumberFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4144,13 +4105,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.NumberFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/number.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4214,13 +4172,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.PercentFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4248,13 +4203,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.PercentFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/percent.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4380,13 +4332,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.RelativeDateFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/relative_date.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4497,13 +4446,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.StaticLookupFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/static_lookup.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4631,13 +4577,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.StringFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4671,7 +4614,7 @@
             "label": "transformOptions",
             "description": [],
             "signature": [
-              "({ kind: boolean; text: any; } | { kind: string; text: any; })[]"
+              "({ kind: boolean; text: string; } | { kind: string; text: string; })[]"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
@@ -4709,7 +4652,7 @@
                 "section": "def-common.TextContextTypeOptions",
                 "text": "TextContextTypeOptions"
               },
-              " | undefined) => any"
+              " | undefined) => string"
             ],
             "path": "src/plugins/field_formats/common/converters/string.ts",
             "deprecated": false,
@@ -4871,13 +4814,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.TruncateFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/truncate.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -4988,13 +4928,10 @@
           {
             "parentPluginId": "fieldFormats",
             "id": "def-common.UrlFormat.title",
-            "type": "Any",
+            "type": "string",
             "tags": [],
             "label": "title",
             "description": [],
-            "signature": [
-              "any"
-            ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
             "trackAdoption": false
@@ -5028,7 +4965,7 @@
             "label": "urlTypes",
             "description": [],
             "signature": [
-              "{ kind: string; text: any; }[]"
+              "{ kind: string; text: string; }[]"
             ],
             "path": "src/plugins/field_formats/common/converters/url.ts",
             "deprecated": false,
@@ -5536,6 +5473,36 @@
       },
       {
         "parentPluginId": "fieldFormats",
+        "id": "def-common.DURATION_INPUT_FORMATS",
+        "type": "Array",
+        "tags": [],
+        "label": "DURATION_INPUT_FORMATS",
+        "description": [],
+        "signature": [
+          "{ text: string; kind: string; }[]"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.DURATION_OUTPUT_FORMATS",
+        "type": "Array",
+        "tags": [],
+        "label": "DURATION_OUTPUT_FORMATS",
+        "description": [],
+        "signature": [
+          "({ text: string; method: string; shortText?: undefined; } | { text: string; shortText: string; method: string; })[]"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
         "id": "def-common.FieldFormatConfig",
         "type": "Type",
         "tags": [],
@@ -5571,16 +5538,16 @@
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.HtmlContextTypeConvert",
-            "text": "HtmlContextTypeConvert"
+            "section": "def-common.TextContextTypeConvert",
+            "text": "TextContextTypeConvert"
           },
           " | ",
           {
             "pluginId": "fieldFormats",
             "scope": "common",
             "docId": "kibFieldFormatsPluginApi",
-            "section": "def-common.TextContextTypeConvert",
-            "text": "TextContextTypeConvert"
+            "section": "def-common.HtmlContextTypeConvert",
+            "text": "HtmlContextTypeConvert"
           }
         ],
         "path": "src/plugins/field_formats/common/types.ts",
@@ -6612,6 +6579,36 @@
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.DEFAULT_DURATION_INPUT_FORMAT",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DURATION_INPUT_FORMAT",
+        "description": [],
+        "signature": [
+          "{ text: string; kind: string; }"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "fieldFormats",
+        "id": "def-common.DEFAULT_DURATION_OUTPUT_FORMAT",
+        "type": "Object",
+        "tags": [],
+        "label": "DEFAULT_DURATION_OUTPUT_FORMAT",
+        "description": [],
+        "signature": [
+          "{ text: string; method: string; }"
+        ],
+        "path": "src/plugins/field_formats/common/constants/duration_formats.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       },
       {

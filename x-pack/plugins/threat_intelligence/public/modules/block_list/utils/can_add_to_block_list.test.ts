@@ -11,7 +11,7 @@ import {
   RawIndicatorFieldId,
 } from '../../../../common/types/indicator';
 import { canAddToBlockList } from './can_add_to_block_list';
-import { getIndicatorFieldAndValue } from '../../indicators';
+import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 
 describe('canAddToBlockList', () => {
   it('should return null if indicator has none of required fields', () => {

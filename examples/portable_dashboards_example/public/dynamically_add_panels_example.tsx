@@ -136,10 +136,10 @@ export const DynamicByReferenceExample = () => {
           getCreationOptions={async () => {
             const persistedInput = getPersistableInput();
             return {
-              initialInput: {
+              getInitialInput: () => ({
                 ...persistedInput,
                 timeRange: { from: 'now-30d', to: 'now' }, // need to set the time range for the by value vis
-              },
+              }),
             };
           }}
           ref={setdashboard}

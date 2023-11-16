@@ -48,7 +48,8 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
       const { transientCount = 0, persistedCount = 0 } = buckets.reduce(
         (usage: Partial<ReportedUsage>, bucket: SessionPersistedTermsBucket) => {
           const key = bucket.key_as_string === 'false' ? 'transientCount' : 'persistedCount';
-          return { ...usage, [key]: bucket.doc_count };
+          usage[key] = bucket.doc_count;
+          return usage;
         },
         {}
       );

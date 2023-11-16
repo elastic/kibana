@@ -24,12 +24,12 @@ import { EuiBasicTableColumn } from '@elastic/eui/src/components/basic_table/bas
 import { useDebounce } from 'react-use';
 import { TableTitle } from '../../common/components/table_title';
 import { ParamsText } from './params_text';
-import { SyntheticsParamSO } from '../../../../../../common/runtime_types';
+import { SyntheticsParams } from '../../../../../../common/runtime_types';
 import { useParamsList } from '../hooks/use_params_list';
 import { AddParamFlyout } from './add_param_flyout';
 import { DeleteParam } from './delete_param';
 
-export interface ListParamItem extends SyntheticsParamSO {
+export interface ListParamItem extends SyntheticsParams {
   id: string;
 }
 
@@ -170,7 +170,10 @@ export const ParamsList = () => {
           setIsDeleteModalVisible(true);
         }}
       >
-        Delete {selectedItems.length} params
+        {i18n.translate('xpack.synthetics.settingsRoute.params.deleteCount', {
+          defaultMessage: 'Delete {count} params',
+          values: { count: selectedItems.length },
+        })}
       </EuiButton>
     );
   };
@@ -237,7 +240,7 @@ export const ParamsList = () => {
         items={filteredItems}
         columns={columns}
         tableLayout="auto"
-        isSelectable={true}
+        isSelectable={canSave}
         pagination={true}
         sorting={{
           sort: { field: 'key', direction: 'asc' },
@@ -255,7 +258,7 @@ export const ParamsList = () => {
           setPageSize(page?.size ?? 10);
         }}
         selection={{
-          selectable: () => true,
+          selectable: () => canSave,
           onSelectionChange: (sItems) => {
             setSelectedItems(sItems);
           },

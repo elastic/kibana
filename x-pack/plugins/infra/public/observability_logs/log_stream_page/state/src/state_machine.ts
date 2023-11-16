@@ -8,15 +8,15 @@
 import { RefreshInterval } from '@kbn/data-plugin/public';
 import { TimeRange } from '@kbn/es-query';
 import { actions, ActorRefFrom, createMachine, EmittedFrom } from 'xstate';
+import { DEFAULT_REFRESH_INTERVAL } from '@kbn/logs-shared-plugin/common';
+import type { LogViewNotificationChannel } from '@kbn/logs-shared-plugin/public';
 import { datemathToEpochMillis } from '../../../../utils/datemath';
 import { createLogStreamPositionStateMachine } from '../../../log_stream_position_state/src/state_machine';
 import {
   createLogStreamQueryStateMachine,
-  DEFAULT_REFRESH_INTERVAL,
   DEFAULT_TIMERANGE,
   LogStreamQueryStateMachineDependencies,
 } from '../../../log_stream_query_state';
-import type { LogViewNotificationChannel } from '../../../log_view_state';
 import { OmitDeprecatedState } from '../../../xstate_helpers';
 import {
   waitForInitialQueryParameters,

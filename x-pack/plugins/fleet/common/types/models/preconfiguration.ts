@@ -37,4 +37,5 @@ export type PreconfiguredPackage = Omit<PackagePolicyPackage, 'title'>;
 
 export interface PreconfiguredOutput extends Omit<Output, 'config_yaml'> {
   config?: Record<string, unknown>;
+  allow_edit?: string[];
 }

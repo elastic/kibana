@@ -470,6 +470,7 @@ export class MapEmbeddable
         timeslice: this.input.timeslice
           ? { from: this.input.timeslice[0], to: this.input.timeslice[1] }
           : undefined,
+        clearTimeslice: this.input.timeslice === undefined,
         forceRefresh,
         searchSessionId: this._getSearchSessionId(),
         searchSessionMapBuffer: getIsRestore(this._getSearchSessionId())

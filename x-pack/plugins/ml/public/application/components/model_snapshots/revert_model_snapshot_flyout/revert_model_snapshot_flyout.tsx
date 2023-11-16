@@ -6,8 +6,7 @@
  */
 
 import React, { FC, useState, useCallback, useMemo, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -28,6 +27,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { timeFormatter } from '@kbn/ml-date-utils';
+
 import {
   ModelSnapshot,
   CombinedJobWithStats,
@@ -41,7 +44,7 @@ import { EventRateChart } from '../../../jobs/new_job/pages/components/charts/ev
 import { Anomaly } from '../../../jobs/new_job/common/results_loader/results_loader';
 import { parseInterval } from '../../../../../common/util/parse_interval';
 import { CreateCalendar, CalendarEvent } from './create_calendar';
-import { timeFormatter } from '../../../../../common/util/date_utils';
+
 import { toastNotificationServiceProvider } from '../../../services/toast_notification_service';
 
 interface Props {
@@ -102,7 +105,7 @@ export const RevertModelSnapshotFlyout: FC<Props> = ({
   }, [calendarEvents]);
 
   const createChartData = useCallback(async () => {
-    const bucketSpanMs = parseInterval(job.analysis_config.bucket_span)!.asMilliseconds();
+    const bucketSpanMs = parseInterval(job.analysis_config.bucket_span!)!.asMilliseconds();
     const eventRate = await loadEventRateForJob(job, bucketSpanMs, 100);
     const anomalyData = await loadAnomalyDataForJob(job, bucketSpanMs, 100);
     setEventRateData(eventRate);

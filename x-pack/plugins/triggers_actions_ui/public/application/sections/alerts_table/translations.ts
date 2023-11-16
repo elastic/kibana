@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-export { CASES } from '../translations';
+export { CASES, MAINTENANCE_WINDOWS } from '../translations';
 
 export const ALERTS_TABLE_CONF_ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.configuration.errorTitle',
@@ -26,13 +26,6 @@ export const ALERTS_TABLE_CONTROL_COLUMNS_ACTIONS_LABEL = i18n.translate(
   'xpack.triggersActionsUI.sections.alertsTable.column.actions',
   {
     defaultMessage: 'Actions',
-  }
-);
-
-export const ALERTS_TABLE_CONTROL_COLUMNS_VIEW_DETAILS_LABEL = i18n.translate(
-  'xpack.triggersActionsUI.sections.alertsTable.leadingControl.viewDetails',
-  {
-    defaultMessage: 'View details',
   }
 );
 

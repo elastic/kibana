@@ -56,5 +56,10 @@ export function InfraMetricsExplorerProvider({ getService }: FtrProviderContext)
       const radioInput = await chartRadio.findByCssSelector(`label[for="${type}"]`);
       return await radioInput.click();
     },
+
+    async ensureMetricsExplorerFeedbackLinkIsVisible() {
+      await testSubjects.missingOrFail('loadingMessage', { timeout: 20000 });
+      await testSubjects.existOrFail('infraMetricsExplorerFeedbackLink');
+    },
   };
 }

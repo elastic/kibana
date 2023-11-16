@@ -8,20 +8,37 @@
 
 import * as Either from 'fp-ts/lib/Either';
 import * as TaskEither from 'fp-ts/lib/TaskEither';
-import type { Defer } from '../kibana_migrator_utils';
+import type { WaitGroup } from '../kibana_migrator_utils';
 
-export interface SyncFailed {
-  type: 'sync_failed';
+/** @internal */
+export interface SynchronizationFailed {
+  type: 'synchronization_failed';
   error: Error;
 }
 
-export function synchronizeMigrators(
-  defer: Defer<void>
-): TaskEither.TaskEither<SyncFailed, 'synchronized_successfully'> {
+/** @internal */
+export interface SynchronizationSuccessful<T> {
+  type: 'synchronization_successful';
+  data: T[];
+}
+
+/** @internal */
+export interface SynchronizeMigratorsParams<T> {
+  waitGroup: WaitGroup<T>;
+  payload?: T;
+}
+
+export function synchronizeMigrators<T>({
+  waitGroup,
+  payload,
+}: SynchronizeMigratorsParams<T>): TaskEither.TaskEither<
+  SynchronizationFailed,
+  SynchronizationSuccessful<T>
+> {
   return () => {
-    defer.resolve();
-    return defer.promise
-      .then(() => Either.right('synchronized_successfully' as const))
-      .catch((error) => Either.left({ type: 'sync_failed' as const, error }));
+    waitGroup.resolve(payload);
+    return waitGroup.promise
+      .then((data: T[]) => Either.right({ type: 'synchronization_successful' as const, data }))
+      .catch((error) => Either.left({ type: 'synchronization_failed' as const, error }));
   };
 }

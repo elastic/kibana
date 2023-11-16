@@ -86,5 +86,5 @@ export function startDashboardSearchSessionIntegration(
       }
     });
 
-  this.subscriptions.add(searchSessionIdChangeSubscription);
+  this.integrationSubscriptions.add(searchSessionIdChangeSubscription);
 }

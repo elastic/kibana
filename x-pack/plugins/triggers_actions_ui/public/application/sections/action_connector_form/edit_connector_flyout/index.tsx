@@ -6,18 +6,12 @@
  */
 
 import React, { memo, ReactNode, useCallback, useEffect, useRef, useState } from 'react';
-import {
-  EuiFlyout,
-  EuiText,
-  EuiFlyoutBody,
-  EuiLink,
-  EuiButton,
-  EuiConfirmModal,
-} from '@elastic/eui';
+import { EuiFlyout, EuiFlyoutBody, EuiButton, EuiConfirmModal } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { ActionTypeExecutorResult, isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { Option, none, some } from 'fp-ts/lib/Option';
+import { ReadOnlyConnectorMessage } from './read_only';
 import {
   ActionConnector,
   ActionTypeModel,
@@ -50,24 +44,6 @@ const getConnectorWithoutSecrets = (
   isMissingSecrets: connector.isMissingSecrets ?? false,
   secrets: {},
 });
-
-const ReadOnlyConnectorMessage: React.FC<{ href: string }> = ({ href }) => {
-  return (
-    <>
-      <EuiText>
-        {i18n.translate('xpack.triggersActionsUI.sections.editConnectorForm.descriptionText', {
-          defaultMessage: 'This connector is readonly.',
-        })}
-      </EuiText>
-      <EuiLink href={href} target="_blank">
-        <FormattedMessage
-          id="xpack.triggersActionsUI.sections.editConnectorForm.preconfiguredHelpLabel"
-          defaultMessage="Learn more about preconfigured connectors."
-        />
-      </EuiLink>
-    </>
-  );
-};
 
 const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
   actionTypeRegistry,
@@ -260,7 +236,7 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
         />
         <EuiFlyoutBody>
           {selectedTab === EditConnectorTabs.Configuration ? (
-            !connector.isPreconfigured ? (
+            !connector.isPreconfigured && !connector.isSystemAction ? (
               <>
                 {isEdit && (
                   <>
@@ -299,7 +275,12 @@ const EditConnectorFlyoutComponent: React.FC<EditConnectorFlyoutProps> = ({
                 )}
               </>
             ) : (
-              <ReadOnlyConnectorMessage href={docLinks.links.alerting.preconfiguredConnectors} />
+              <ReadOnlyConnectorMessage
+                href={docLinks.links.alerting.preconfiguredConnectors}
+                extraComponent={actionTypeModel?.actionReadOnlyExtraComponent}
+                connectorId={connector.id}
+                connectorName={connector.name}
+              />
             )
           ) : (
             <TestConnectorForm

@@ -6,7 +6,11 @@
  * Side Public License, v 1.
  */
 
-import { SYSTEM_INDICES_SUPERUSER } from '@kbn/es';
+import {
+  SYSTEM_INDICES_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER,
+  ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
+} from '@kbn/es';
 
 const env = process.env;
 
@@ -31,4 +35,9 @@ export const adminTestUser = {
 export const systemIndicesSuperuser = {
   username: SYSTEM_INDICES_SUPERUSER,
   password: env.TEST_ES_PASS || 'changeme',
+};
+
+export const kibanaTestSuperuserServerless = {
+  username: ELASTIC_SERVERLESS_SUPERUSER,
+  password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
 };

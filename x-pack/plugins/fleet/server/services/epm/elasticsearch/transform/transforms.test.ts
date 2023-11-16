@@ -107,7 +107,34 @@ _meta:
   type: date
 - name: updated_at
   type: alias
-  path: event.ingested`,
+  path: event.ingested
+- external: ecs
+  name: ecs.version
+- external: ecs
+  name: message`,
+      BEATS_FIELDS: `- name: input.type
+  type: keyword
+  description: Type of Filebeat input.
+- name: log.flags
+  type: keyword
+  description: Flags for the log file.
+- name: log.offset
+  type: long
+  description: Offset of the entry in the log file.
+- name: log.file.path
+  type: keyword
+  description: Path to the log file.`,
+      AGENT_FIELDS: `- name: instance.name
+  level: extended
+  type: keyword
+  ignore_above: 1024
+  description: Instance name of the host machine.
+- name: machine.type
+  level: extended
+  type: keyword
+  ignore_above: 1024
+  description: Machine type of the host machine.
+  example: t2.medium`,
     };
   };
   const getExpectedData = (transformVersion: string) => {
@@ -210,6 +237,8 @@ _meta:
       ],
     } as unknown as Installation;
     (getAsset as jest.MockedFunction<typeof getAsset>)
+      .mockReturnValueOnce(Buffer.from(sourceData.BEATS_FIELDS, 'utf8'))
+      .mockReturnValueOnce(Buffer.from(sourceData.AGENT_FIELDS, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.FIELDS, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.MANIFEST, 'utf8'))
       .mockReturnValueOnce(Buffer.from(sourceData.TRANSFORM, 'utf8'));
@@ -247,6 +276,8 @@ _meta:
         version: '0.16.0-dev.0',
       } as unknown as RegistryPackage,
       paths: [
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/beats.yml',
+        'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/agent.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/fields/fields.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/manifest.yml',
         'endpoint-0.16.0-dev.0/elasticsearch/transform/metadata_current/transform.yml',
@@ -272,6 +303,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          delete_dest_index: false,
         },
         { ignore: [404] },
       ],
@@ -298,7 +330,21 @@ _meta:
                 },
               },
               mappings: {
-                properties: { '@timestamp': { type: 'date' } },
+                properties: {
+                  input: { properties: { type: { type: 'keyword', ignore_above: 1024 } } },
+                  log: {
+                    properties: {
+                      flags: { type: 'keyword', ignore_above: 1024 },
+                      offset: { type: 'long' },
+                      file: { properties: { path: { type: 'keyword', ignore_above: 1024 } } },
+                    },
+                  },
+                  instance: { properties: { name: { type: 'keyword', ignore_above: 1024 } } },
+                  machine: { properties: { type: { type: 'keyword', ignore_above: 1024 } } },
+                  '@timestamp': { ignore_malformed: false, type: 'date' },
+                  ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
+                  message: { type: 'keyword', ignore_above: 1024 },
+                },
                 dynamic_templates: [
                   {
                     strings_as_keyword: {
@@ -547,17 +593,7 @@ _meta:
         {
           transform_id: 'endpoint.metadata_current-default-0.1.0',
           force: true,
-        },
-        { ignore: [404] },
-      ],
-    ]);
-
-    // Destination index from previous version using legacy schema should be deleted
-    expect(esClient.transport.request.mock.calls).toEqual([
-      [
-        {
-          method: 'DELETE',
-          path: '/mock-old-destination-index',
+          delete_dest_index: true,
         },
         { ignore: [404] },
       ],
@@ -581,7 +617,14 @@ _meta:
                 },
               },
               mappings: {
-                properties: { '@timestamp': { type: 'date' } },
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                  ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
+                  message: { type: 'keyword', ignore_above: 1024 },
+                },
                 dynamic_templates: [
                   {
                     strings_as_keyword: {
@@ -828,6 +871,7 @@ _meta:
         {
           transform_id: 'logs-endpoint.metadata_current-default-0.1.0',
           force: true,
+          delete_dest_index: false,
         },
         { ignore: [404] },
       ],
@@ -844,7 +888,16 @@ _meta:
           body: {
             template: {
               settings: { index: { mapping: { total_fields: { limit: '10000' } } } },
-              mappings: { properties: { '@timestamp': { type: 'date' } } },
+              mappings: {
+                properties: {
+                  '@timestamp': {
+                    ignore_malformed: false,
+                    type: 'date',
+                  },
+                  ecs: { properties: { version: { type: 'keyword', ignore_above: 1024 } } },
+                  message: { type: 'keyword', ignore_above: 1024 },
+                },
+              },
             },
             _meta: meta,
           },
@@ -1131,7 +1184,11 @@ _meta:
 
     expect(esClient.transform.deleteTransform.mock.calls).toEqual([
       [
-        { force: true, transform_id: 'logs-endpoint.metadata_current-default-0.2.0' },
+        {
+          force: true,
+          transform_id: 'logs-endpoint.metadata_current-default-0.2.0',
+          delete_dest_index: false,
+        },
         { ignore: [404] },
       ],
     ]);

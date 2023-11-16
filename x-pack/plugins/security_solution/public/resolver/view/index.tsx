@@ -5,40 +5,28 @@
  * 2.0.
  */
 
-/* eslint-disable react/display-name */
-
-import React, { useMemo, useState, useEffect } from 'react';
-import { Provider } from 'react-redux';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { resolverStoreFactory } from '../store';
-import type { StartServices } from '../../types';
-import type { DataAccessLayer, ResolverProps } from '../types';
-import { dataAccessLayerFactory } from '../data_access_layer/factory';
+import React, { useEffect } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import type { ResolverProps } from '../types';
 import { ResolverWithoutProviders } from './resolver_without_providers';
-
+import { createResolver } from '../store/actions';
+import type { State } from '../../common/store/types';
 /**
  * The `Resolver` component to use. This sets up the DataAccessLayer provider. Use `ResolverWithoutProviders` in tests or in other scenarios where you want to provide a different (or fake) data access layer.
  */
+// eslint-disable-next-line react/display-name
 export const Resolver = React.memo((props: ResolverProps) => {
-  const context = useKibana<StartServices>();
-  const dataAccessLayer: DataAccessLayer = useMemo(
-    () => dataAccessLayerFactory(context),
-    [context]
-  );
+  const store = useSelector((state: State) => state.analyzer[props.resolverComponentInstanceID]);
 
-  const store = useMemo(() => resolverStoreFactory(dataAccessLayer), [dataAccessLayer]);
-
-  const [activeStore, updateActiveStore] = useState(store);
+  const dispatch = useDispatch();
+  if (!store) {
+    dispatch(createResolver({ id: props.resolverComponentInstanceID }));
+  }
 
   useEffect(() => {
     if (props.shouldUpdate) {
-      updateActiveStore(resolverStoreFactory(dataAccessLayer));
+      dispatch(createResolver({ id: props.resolverComponentInstanceID }));
     }
-  }, [dataAccessLayer, props.shouldUpdate]);
-
-  return (
-    <Provider store={activeStore}>
-      <ResolverWithoutProviders {...props} />
-    </Provider>
-  );
+  }, [dispatch, props.shouldUpdate, props.resolverComponentInstanceID]);
+  return <ResolverWithoutProviders {...props} />;
 });

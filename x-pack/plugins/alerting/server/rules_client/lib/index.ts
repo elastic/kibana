@@ -6,15 +6,19 @@
  */
 
 export { createRuleSavedObject } from './create_rule_saved_object';
+export { resolveRuleSavedObject } from './resolve_rule_saved_object';
+export { getRuleSavedObject } from './get_rule_saved_object';
+
 export { extractReferences } from './extract_references';
 export { validateActions } from './validate_actions';
 export { updateMeta } from './update_meta';
+export { updateMetaAttributes } from './update_meta_attributes';
 export * from './get_alert_from_raw';
 export { getAuthorizationFilter } from './get_authorization_filter';
 export { checkAuthorizationAndGetTotal } from './check_authorization_and_get_total';
 export { scheduleTask } from './schedule_task';
 export { createNewAPIKeySet } from './create_new_api_key_set';
-export { recoverRuleAlerts } from './recover_rule_alerts';
+export { untrackRuleAlerts } from './untrack_rule_alerts';
 export { migrateLegacyActions } from './siem_legacy_actions/migrate_legacy_actions';
 export { formatLegacyActions } from './siem_legacy_actions/format_legacy_actions';
 export { addGeneratedActionValues } from './add_generated_action_values';

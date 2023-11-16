@@ -26,13 +26,12 @@ export default function findMaintenanceWindowTests({ getService }: FtrProviderCo
         freq: 2, // weekly
       },
     };
-    after(() => objectRemover.removeAll());
+    afterEach(() => objectRemover.removeAll());
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
       describe(scenario.id, () => {
-        afterEach(() => objectRemover.removeAll());
-        it('should handle update maintenance window request appropriately', async () => {
+        it('should handle find maintenance window request appropriately', async () => {
           const { body: createdMaintenanceWindow1 } = await supertest
             .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/maintenance_window`)
             .set('kbn-xsrf', 'foo')

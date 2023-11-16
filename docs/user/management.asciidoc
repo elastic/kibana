@@ -50,7 +50,7 @@ because you can put data in different resource tiers.
 have backups of your cluster in case something goes wrong.
 
 | <<data-rollups, Rollup Jobs>>
-|Create a job that periodically aggregates data from one or more indices, and then
+| deprecated:[8.11.0,'Rollups are deprecated and will be removed in a future version. Use downsampling instead.'] Create a job that periodically aggregates data from one or more indices, and then
 rolls it into a new, compact index. Rollup indices are a good way to store months or
 years of historical data in combination with your raw data.
 
@@ -96,6 +96,9 @@ Viewer or Anomaly Explorer to see your {anomaly-detect} results.
 | Detect changes in your data by creating, managing, and monitoring alerts.
 For example, you might create an alert when the maximum total CPU usage on a machine goes
 above a certain percentage.
+
+| <<maintenance-windows,Maintenance windows>>
+| Suppress rule notifications for scheduled periods of time.
 
 |===
 
@@ -183,6 +186,8 @@ include::{kib-repo-dir}/management/cases/index.asciidoc[]
 include::{kib-repo-dir}/management/action-types.asciidoc[]
 
 include::{kib-repo-dir}/management/managing-licenses.asciidoc[]
+
+include::{kib-repo-dir}/management/maintenance-windows/maintenance-windows.asciidoc[]
 
 include::{kib-repo-dir}/management/manage-data-views.asciidoc[]
 

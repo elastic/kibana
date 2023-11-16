@@ -6,7 +6,7 @@
  */
 
 import { useCallback, useMemo } from 'react';
-import { useUiTracker } from '@kbn/observability-plugin/public';
+import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { DatasetFilter } from '../../../../common/log_analysis';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { useTrackedPromise } from '../../../utils/use_tracked_promise';
@@ -123,6 +123,9 @@ export const useLogAnalysisModule = <JobType extends string>({
       createPromise: async () => {
         return await moduleDescriptor.cleanUpModule(spaceId, logViewId, services.http.fetch);
       },
+      onReject: (e) => {
+        throw new Error(`Failed to clean up previous ML job: ${e}`);
+      },
     },
     [spaceId, logViewId]
   );
@@ -144,8 +147,8 @@ export const useLogAnalysisModule = <JobType extends string>({
         .then(() => {
           setUpModule(selectedIndices, start, end, datasetFilter);
         })
-        .catch(() => {
-          dispatchModuleStatus({ type: 'failedSetup' });
+        .catch((e) => {
+          dispatchModuleStatus({ type: 'failedSetup', reason: e.toString() });
         });
     },
     [cleanUpModule, dispatchModuleStatus, setUpModule]

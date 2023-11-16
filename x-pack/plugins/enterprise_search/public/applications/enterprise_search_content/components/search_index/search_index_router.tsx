@@ -6,11 +6,11 @@
  */
 
 import React, { useEffect } from 'react';
-import { Redirect, Switch, useParams } from 'react-router-dom';
+import { Redirect, useParams } from 'react-router-dom';
 
 import { useActions } from 'kea';
 
-import { Route } from '@kbn/shared-ux-router';
+import { Routes, Route } from '@kbn/shared-ux-router';
 
 import {
   OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH,
@@ -42,7 +42,7 @@ export const SearchIndexRouter: React.FC = () => {
   }, [indexName]);
 
   return (
-    <Switch>
+    <Routes>
       <Route path={SEARCH_INDEX_PATH} exact>
         <SearchIndex />
       </Route>
@@ -56,6 +56,6 @@ export const SearchIndexRouter: React.FC = () => {
         from={OLD_SEARCH_INDEX_CRAWLER_DOMAIN_DETAIL_PATH}
         to={`${SEARCH_INDEX_PATH}/domain_management/:domainId}`}
       />
-    </Switch>
+    </Routes>
   );
 };

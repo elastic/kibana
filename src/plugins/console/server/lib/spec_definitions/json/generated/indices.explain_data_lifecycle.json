@@ -1,0 +1,26 @@
+{
+  "indices.explain_data_lifecycle": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "include_defaults": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "{index}/_lifecycle/explain"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/data-streams-explain-lifecycle.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

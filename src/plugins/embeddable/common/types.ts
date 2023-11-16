@@ -22,6 +22,7 @@ export enum ViewMode {
 }
 
 export type EmbeddableInput = {
+  version?: string;
   viewMode?: ViewMode;
   title?: string;
   description?: string;
@@ -72,7 +73,9 @@ export type EmbeddableInput = {
   executionContext?: KibanaExecutionContext;
 };
 
-export interface PanelState<E extends EmbeddableInput & { id: string } = { id: string }> {
+export interface PanelState<
+  E extends EmbeddableInput & { id: string } = { id: string; version?: string }
+> {
   // The type of embeddable in this panel. Will be used to find the factory in which to
   // load the embeddable.
   type: string;

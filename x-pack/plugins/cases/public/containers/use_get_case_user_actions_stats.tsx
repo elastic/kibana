@@ -15,13 +15,10 @@ import { casesQueriesKeys } from './constants';
 
 export const useGetCaseUserActionsStats = (caseId: string) => {
   const { showErrorToast } = useCasesToast();
-  const abortCtrlRef = new AbortController();
 
   return useQuery(
     casesQueriesKeys.caseUserActionsStats(caseId),
-    () => {
-      return getCaseUserActionsStats(caseId, abortCtrlRef.signal);
-    },
+    ({ signal }) => getCaseUserActionsStats(caseId, signal),
     {
       onError: (error: ServerError) => {
         showErrorToast(error, { title: ERROR_TITLE });

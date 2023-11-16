@@ -6,18 +6,17 @@
  */
 
 import { createReducer } from '@reduxjs/toolkit';
-import { SavedObject } from '@kbn/core-saved-objects-common';
-import { SyntheticsParamSO } from '../../../../../common/runtime_types';
+import { SyntheticsParams } from '../../../../../common/runtime_types';
 import { IHttpSerializedFetchError } from '..';
 import { addNewGlobalParamAction, editGlobalParamAction, getGlobalParamAction } from './actions';
 
 export interface GlobalParamsState {
   isLoading?: boolean;
-  listOfParams?: Array<SavedObject<SyntheticsParamSO>>;
+  listOfParams?: SyntheticsParams[];
   addError: IHttpSerializedFetchError | null;
   editError: IHttpSerializedFetchError | null;
   isSaving?: boolean;
-  savedData?: SyntheticsParamSO;
+  savedData?: SyntheticsParams;
 }
 
 const initialState: GlobalParamsState = {
@@ -69,3 +68,4 @@ export const globalParamsReducer = createReducer(initialState, (builder) => {
 export * from './actions';
 export * from './effects';
 export * from './selectors';
+export * from './api';

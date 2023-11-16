@@ -9,7 +9,7 @@ Retrieves a paginated subset of cases.
 [NOTE]
 ====
 For the most up-to-date API details, refer to the
-{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification]. For a preview, check out <<case-apis>>.
+{kib-repo}/tree/{branch}/x-pack/plugins/cases/docs/openapi[open API specification].
 ====
 
 === {api-request-title}
@@ -42,9 +42,6 @@ identifiers can be found by using the
 `defaultSearchOperator`::
 (Optional, string) The default operator to use for the `simple_query_string`.
 Defaults to `OR`.
-
-`fields`::
-(Optional, array of strings) The fields in the entity to return in the response.
 
 `from`::
 (Optional, string) Returns only cases that were created after a specific date. The date must be specified as a <<kuery-query,KQL>> data range or date match expression.  preview:[]

@@ -5,6 +5,5 @@
  * 2.0.
  */
 
-export type { MlContextValue, SavedSearchQuery } from './ml_context';
-export { MlContext } from './ml_context';
-export { useMlContext } from './use_ml_context';
+export { DataSourceContextProvider, useDataSource } from './data_source_context';
+export { EnabledFeaturesContextProvider, useEnabledFeatures } from './serverless_context';

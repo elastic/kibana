@@ -7,23 +7,31 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { NONE_CONNECTOR_ID } from '../../../common/constants';
+import { CaseSeverity } from '../../../common/types/domain';
 import type { FormProps } from './schema';
 import { schema } from './schema';
 import { getNoneConnector, normalizeActionConnector } from '../configure_cases/utils';
 import { usePostCase } from '../../containers/use_post_case';
 import { usePostPushToService } from '../../containers/use_post_push_to_service';
 
-import type { CaseUI } from '../../containers/types';
-import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity, NONE_CONNECTOR_ID } from '../../../common/api';
+import type { CaseUI, CaseUICustomField } from '../../containers/types';
+import type { CasePostRequest } from '../../../common/types/api';
 import type { UseCreateAttachments } from '../../containers/use_create_attachments';
 import { useCreateAttachments } from '../../containers/use_create_attachments';
 import { useCasesContext } from '../cases_context/use_cases_context';
 import { useCasesFeatures } from '../../common/use_cases_features';
-import { getConnectorById } from '../utils';
+import {
+  getConnectorById,
+  getConnectorsFormDeserializer,
+  getConnectorsFormSerializer,
+  convertCustomFieldValue,
+} from '../utils';
+import { useAvailableCasesOwners } from '../app/use_available_owners';
 import type { CaseAttachmentsWithoutOwner } from '../../types';
 import { useGetSupportedActionConnectors } from '../../containers/configure/use_get_supported_action_connectors';
 import { useCreateCaseWithAttachmentsTransaction } from '../../common/apm/use_cases_transactions';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
 
 const initialCaseValue: FormProps = {
   description: '',
@@ -35,12 +43,13 @@ const initialCaseValue: FormProps = {
   syncAlerts: true,
   selectedOwner: null,
   assignees: [],
+  customFields: {},
 };
 
 interface Props {
   afterCaseCreated?: (
     theCase: CaseUI,
-    createAttachments: UseCreateAttachments['createAttachments']
+    createAttachments: UseCreateAttachments['mutateAsync']
   ) => Promise<void>;
   children?: JSX.Element | JSX.Element[];
   onSuccess?: (theCase: CaseUI) => void;
@@ -57,12 +66,59 @@ export const FormContext: React.FC<Props> = ({
 }) => {
   const { data: connectors = [], isLoading: isLoadingConnectors } =
     useGetSupportedActionConnectors();
+  const {
+    data: { customFields: customFieldsConfiguration },
+    isLoading: isLoadingCaseConfiguration,
+  } = useGetCaseConfiguration();
   const { owner, appId } = useCasesContext();
   const { isSyncAlertsEnabled } = useCasesFeatures();
   const { mutateAsync: postCase } = usePostCase();
-  const { createAttachments } = useCreateAttachments();
-  const { pushCaseToExternalService } = usePostPushToService();
+  const { mutateAsync: createAttachments } = useCreateAttachments();
+  const { mutateAsync: pushCaseToExternalService } = usePostPushToService();
   const { startTransaction } = useCreateCaseWithAttachmentsTransaction();
+  const availableOwners = useAvailableCasesOwners();
+
+  const trimUserFormData = (userFormData: CaseUI) => {
+    let formData = {
+      ...userFormData,
+      title: userFormData.title.trim(),
+      description: userFormData.description.trim(),
+    };
+
+    if (userFormData.category) {
+      formData = { ...formData, category: userFormData.category.trim() };
+    }
+
+    if (userFormData.tags) {
+      formData = { ...formData, tags: userFormData.tags.map((tag: string) => tag.trim()) };
+    }
+
+    return formData;
+  };
+
+  const transformCustomFieldsData = useCallback(
+    (customFields: Record<string, string | boolean>) => {
+      const transformedCustomFields: CaseUI['customFields'] = [];
+
+      if (!customFields || !customFieldsConfiguration.length) {
+        return [];
+      }
+
+      for (const [key, value] of Object.entries(customFields)) {
+        const configCustomField = customFieldsConfiguration.find((item) => item.key === key);
+        if (configCustomField) {
+          transformedCustomFields.push({
+            key: configCustomField.key,
+            type: configCustomField.type,
+            value: convertCustomFieldValue(value),
+          } as CaseUICustomField);
+        }
+      }
+
+      return transformedCustomFields;
+    },
+    [customFieldsConfiguration]
+  );
 
   const submitCase = useCallback(
     async (
@@ -75,8 +131,9 @@ export const FormContext: React.FC<Props> = ({
       isValid
     ) => {
       if (isValid) {
-        const { selectedOwner, ...userFormData } = dataWithoutConnectorId;
+        const { selectedOwner, customFields, ...userFormData } = dataWithoutConnectorId;
         const caseConnector = getConnectorById(dataConnectorId, connectors);
+        const defaultOwner = owner[0] ?? availableOwners[0];
 
         startTransaction({ appId, attachments });
 
@@ -84,12 +141,17 @@ export const FormContext: React.FC<Props> = ({
           ? normalizeActionConnector(caseConnector, fields)
           : getNoneConnector();
 
+        const transformedCustomFields = transformCustomFieldsData(customFields);
+
+        const trimmedData = trimUserFormData(userFormData);
+
         const theCase = await postCase({
           request: {
-            ...userFormData,
+            ...trimmedData,
             connector: connectorToUpdate,
             settings: { syncAlerts },
-            owner: selectedOwner ?? owner[0],
+            owner: selectedOwner ?? defaultOwner,
+            customFields: transformedCustomFields,
           },
         });
 
@@ -98,7 +160,7 @@ export const FormContext: React.FC<Props> = ({
           await createAttachments({
             caseId: theCase.id,
             caseOwner: theCase.owner,
-            data: attachments,
+            attachments,
           });
         }
 
@@ -126,10 +188,12 @@ export const FormContext: React.FC<Props> = ({
       attachments,
       postCase,
       owner,
+      availableOwners,
       afterCaseCreated,
       onSuccess,
       createAttachments,
       pushCaseToExternalService,
+      transformCustomFieldsData,
     ]
   );
 
@@ -138,16 +202,29 @@ export const FormContext: React.FC<Props> = ({
     options: { stripEmptyFields: false },
     schema,
     onSubmit: submitCase,
+    serializer: getConnectorsFormSerializer,
+    deserializer: getConnectorsFormDeserializer,
   });
 
   const childrenWithExtraProp = useMemo(
     () =>
       children != null
         ? React.Children.map(children, (child: React.ReactElement) =>
-            React.cloneElement(child, { connectors, isLoadingConnectors })
+            React.cloneElement(child, {
+              connectors,
+              isLoadingConnectors,
+              customFieldsConfiguration,
+              isLoadingCaseConfiguration,
+            })
           )
         : null,
-    [children, connectors, isLoadingConnectors]
+    [
+      children,
+      connectors,
+      isLoadingConnectors,
+      customFieldsConfiguration,
+      isLoadingCaseConfiguration,
+    ]
   );
   return (
     <Form

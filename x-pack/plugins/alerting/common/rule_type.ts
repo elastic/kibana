@@ -31,6 +31,7 @@ export interface RuleType<
     params: ActionVariable[];
   };
   defaultActionGroupId: ActionGroupIds;
+  category: string;
   producer: string;
   minimumLicenseRequired: LicenseType;
   isExportable: boolean;

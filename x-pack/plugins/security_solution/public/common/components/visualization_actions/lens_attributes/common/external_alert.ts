@@ -20,7 +20,8 @@ export const getExternalAlertLensAttributes: GetLensAttributes = (
         title: 'Empty XY chart',
         legend: {
           isVisible: true,
-          position: 'left',
+          position: 'right',
+          legendSize: 'xlarge',
         },
         valueLabels: 'hide',
         preferredSeriesType: 'bar_stacked',

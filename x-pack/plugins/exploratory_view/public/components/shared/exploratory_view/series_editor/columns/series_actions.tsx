@@ -72,6 +72,7 @@ export function SeriesActions({ seriesId, series, seriesConfig, onEditClick }: P
 
   const popoverButton = (
     <EuiButtonIcon
+      data-test-subj="exploratoryViewSeriesActionsButton"
       iconType="boxesHorizontal"
       onClick={changePopoverVisibility}
       color="text"

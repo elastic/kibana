@@ -80,10 +80,10 @@ export const storedPackagePolicyToAgentInputs = (
     // deeply merge the input.config values with the full policy input
     merge(
       fullInput,
-      Object.entries(input.config || {}).reduce(
-        (acc, [key, { value }]) => ({ ...acc, [key]: value }),
-        {}
-      )
+      Object.entries(input.config || {}).reduce((acc, [key, { value }]) => {
+        acc[key] = value;
+        return acc;
+      }, {} as Record<string, unknown>)
     );
 
     if (packagePolicy.package) {

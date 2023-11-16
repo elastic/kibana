@@ -5,21 +5,6 @@
  * 2.0.
  */
 
-export type {
-  MapAttributes,
-  MapItem,
-  PartialMapItem,
-  MapGetIn,
-  MapGetOut,
-  MapCreateIn,
-  MapCreateOut,
-  MapCreateOptions,
-  MapUpdateIn,
-  MapUpdateOut,
-  MapUpdateOptions,
-  MapDeleteIn,
-  MapDeleteOut,
-  MapSearchIn,
-  MapSearchOptions,
-  MapSearchOut,
-} from './types';
+import { MapCrudTypes } from './types';
+export type { MapCrudTypes, MapAttributes } from './types';
+export type MapItem = MapCrudTypes['Item'];

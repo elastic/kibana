@@ -1,0 +1,11 @@
+in: query
+name: reporters
+description: Filters the returned cases by the user name of the reporter.
+schema:
+  oneOf:
+    - type: string
+    - type: array
+      items:
+        type: string
+      maxItems: 100
+example: elastic

@@ -5,11 +5,11 @@
  * 2.0.
  */
 import { useCallback, useMemo } from 'react';
-import { CommentType } from '@kbn/cases-plugin/common';
+import { AttachmentType, LENS_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
+import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 
 import { useKibana, useGetUserCasesPermissions } from '../../lib/kibana';
 import { ADD_TO_CASE_SUCCESS } from './translations';
-
 import type { LensAttributes } from './types';
 
 export const useAddToExistingCase = ({
@@ -26,13 +26,11 @@ export const useAddToExistingCase = ({
   const attachments = useMemo(() => {
     return [
       {
-        comment: `!{lens${JSON.stringify({
-          timeRange,
-          attributes: lensAttributes,
-        })}}`,
-        type: CommentType.user as const,
+        persistableStateAttachmentState: { attributes: lensAttributes, timeRange },
+        persistableStateAttachmentTypeId: LENS_ATTACHMENT_TYPE,
+        type: AttachmentType.persistableState as const,
       },
-    ];
+    ] as CaseAttachmentsWithoutOwner;
   }, [lensAttributes, timeRange]);
 
   const selectCaseModal = cases.hooks.useCasesAddToExistingCaseModal({

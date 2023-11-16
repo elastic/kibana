@@ -6,13 +6,9 @@
  * Side Public License, v 1.
  */
 
-import {
-  getNewSavedSearch,
-  getSavedSearch,
-  SavedSearch,
-  saveSavedSearch,
-} from '@kbn/saved-search-plugin/public';
+import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
+import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual } from 'lodash';
@@ -23,6 +19,7 @@ import { handleSourceColumnState } from '../../../utils/state_helpers';
 import { DiscoverAppState } from './discover_app_state_container';
 import { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from '../utils/get_state_defaults';
+import type { DiscoverGlobalStateContainer } from './discover_global_state_container';
 
 export interface UpdateParams {
   /**
@@ -111,10 +108,12 @@ export interface DiscoverSavedSearchContainer {
 
 export function getSavedSearchContainer({
   services,
+  globalStateContainer,
 }: {
   services: DiscoverServices;
+  globalStateContainer: DiscoverGlobalStateContainer;
 }): DiscoverSavedSearchContainer {
-  const initialSavedSearch = getNewSavedSearch(services.data);
+  const initialSavedSearch = services.savedSearch.getNew();
   const savedSearchInitial$ = new BehaviorSubject(initialSavedSearch);
   const savedSearchCurrent$ = new BehaviorSubject(copySavedSearch(initialSavedSearch));
   const hasChanged$ = new BehaviorSubject(false);
@@ -135,13 +134,14 @@ export function getSavedSearchContainer({
   const newSavedSearch = async (nextDataView: DataView | undefined) => {
     addLog('[savedSearch] new', { nextDataView });
     const dataView = nextDataView ?? getState().searchSource.getField('index');
-    const nextSavedSearch = await getNewSavedSearch(services.data);
+    const nextSavedSearch = services.savedSearch.getNew();
     nextSavedSearch.searchSource.setField('index', dataView);
     const newAppState = getDefaultAppState(nextSavedSearch, services);
     const nextSavedSearchToSet = updateSavedSearch({
       savedSearch: { ...nextSavedSearch },
       dataView,
       state: newAppState,
+      globalStateContainer,
       services,
     });
     return set(nextSavedSearchToSet);
@@ -149,14 +149,14 @@ export function getSavedSearchContainer({
 
   const persist = async (nextSavedSearch: SavedSearch, saveOptions?: SavedObjectSaveOpts) => {
     addLog('[savedSearch] persist', { nextSavedSearch, saveOptions });
-    updateSavedSearch({ savedSearch: nextSavedSearch, services }, true);
+    updateSavedSearch({
+      savedSearch: nextSavedSearch,
+      globalStateContainer,
+      services,
+      useFilterAndQueryServices: true,
+    });
 
-    const id = await saveSavedSearch(
-      nextSavedSearch,
-      saveOptions || {},
-      services.core.savedObjects.client,
-      services.savedObjectsTagging
-    );
+    const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 
     if (id) {
       set(nextSavedSearch);
@@ -171,15 +171,14 @@ export function getSavedSearchContainer({
       ? nextDataView
       : previousSavedSearch.searchSource.getField('index')!;
 
-    const nextSavedSearch = updateSavedSearch(
-      {
-        savedSearch: { ...previousSavedSearch },
-        dataView,
-        state: nextState || {},
-        services,
-      },
-      useFilterAndQueryServices
-    );
+    const nextSavedSearch = updateSavedSearch({
+      savedSearch: { ...previousSavedSearch },
+      dataView,
+      state: nextState || {},
+      globalStateContainer,
+      services,
+      useFilterAndQueryServices,
+    });
 
     const hasChanged = !isEqualSavedSearch(savedSearchInitial$.getValue(), nextSavedSearch);
     hasChanged$.next(hasChanged);
@@ -191,12 +190,9 @@ export function getSavedSearchContainer({
 
   const load = async (id: string, dataView: DataView | undefined): Promise<SavedSearch> => {
     addLog('[savedSearch] load', { id, dataView });
-    const loadedSavedSearch = await getSavedSearch(id, {
-      search: services.data.search,
-      savedObjectsClient: services.core.savedObjects.client,
-      spaces: services.spaces,
-      savedObjectsTagging: services.savedObjectsTagging,
-    });
+
+    const loadedSavedSearch = await services.savedSearch.get(id);
+
     if (!loadedSavedSearch.searchSource.getField('index') && dataView) {
       loadedSavedSearch.searchSource.setField('index', dataView);
     }
@@ -250,19 +246,61 @@ export function isEqualSavedSearch(savedSearchPrev: SavedSearch, savedSearchNext
   const keys = new Set([
     ...Object.keys(prevSavedSearch),
     ...Object.keys(nextSavedSearchWithoutSearchSource),
-  ]);
-  const savedSearchDiff = [...keys].filter((key: string) => {
-    // @ts-expect-error
-    return !isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+  ] as Array<keyof Omit<SavedSearch, 'searchSource'>>);
+
+  // at least one change in saved search attributes
+  const hasChangesInSavedSearch = [...keys].some((key) => {
+    if (
+      ['usesAdHocDataView', 'hideChart'].includes(key) &&
+      typeof prevSavedSearch[key] === 'undefined' &&
+      nextSavedSearchWithoutSearchSource[key] === false
+    ) {
+      return false; // ignore when value was changed from `undefined` to `false` as it happens per app logic, not by a user action
+    }
+
+    const isSame = isEqual(prevSavedSearch[key], nextSavedSearchWithoutSearchSource[key]);
+
+    if (!isSame) {
+      addLog('[savedSearch] difference between initial and changed version', {
+        key,
+        before: prevSavedSearch[key],
+        after: nextSavedSearchWithoutSearchSource[key],
+      });
+    }
+
+    return !isSame;
   });
 
-  const searchSourceDiff =
-    !isEqual(prevSearchSource.getField('filter'), nextSearchSource.getField('filter')) ||
-    !isEqual(prevSearchSource.getField('query'), nextSearchSource.getField('query')) ||
-    !isEqual(prevSearchSource.getField('index'), nextSearchSource.getField('index'));
-  const hasChanged = Boolean(savedSearchDiff.length || searchSourceDiff);
-  if (hasChanged) {
-    addLog('[savedSearch] difference between initial and changed version', searchSourceDiff);
+  if (hasChangesInSavedSearch) {
+    return false;
   }
-  return !hasChanged;
+
+  // at least one change in search source fields
+  const hasChangesInSearchSource = (
+    ['filter', 'query', 'index'] as Array<keyof SearchSourceFields>
+  ).some((key) => {
+    const prevValue =
+      key === 'index' ? prevSearchSource.getField(key)?.id : prevSearchSource.getField(key);
+    const nextValue =
+      key === 'index' ? nextSearchSource.getField(key)?.id : nextSearchSource.getField(key);
+    const isSame = isEqual(prevValue, nextValue);
+
+    if (!isSame) {
+      addLog('[savedSearch] difference between initial and changed version', {
+        key,
+        before: prevValue,
+        after: nextValue,
+      });
+    }
+
+    return !isSame;
+  });
+
+  if (hasChangesInSearchSource) {
+    return false;
+  }
+
+  addLog('[savedSearch] no difference between initial and changed version');
+
+  return true;
 }

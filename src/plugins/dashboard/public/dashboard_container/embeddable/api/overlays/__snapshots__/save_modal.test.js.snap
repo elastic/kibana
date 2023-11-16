@@ -2,32 +2,13 @@
 
 exports[`renders DashboardSaveModal 1`] = `
 <SavedObjectSaveModal
+  description="dash description"
   initialCopyOnSave={true}
   objectType="dashboard"
   onClose={[Function]}
   onSave={[Function]}
   options={
     <React.Fragment>
-      <EuiFormRow
-        describedByIds={Array []}
-        display="row"
-        hasChildLabel={true}
-        hasEmptyLabelSpace={false}
-        label={
-          <FormattedMessage
-            defaultMessage="Description"
-            id="dashboard.topNav.saveModal.descriptionFormRowLabel"
-            values={Object {}}
-          />
-        }
-        labelType="label"
-      >
-        <EuiTextArea
-          data-test-subj="dashboardDescription"
-          onChange={[Function]}
-          value="dash description"
-        />
-      </EuiFormRow>
       <EuiFormRow
         describedByIds={Array []}
         display="row"
@@ -58,7 +39,7 @@ exports[`renders DashboardSaveModal 1`] = `
     </React.Fragment>
   }
   showCopyOnSave={true}
-  showDescription={false}
+  showDescription={true}
   title="dash title"
 />
 `;

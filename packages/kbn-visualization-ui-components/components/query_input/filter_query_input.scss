@@ -1,0 +1,11 @@
+// TODO - use emotion instead
+.filterQueryInput__popoverButton {
+  @include euiTextBreakWord;
+  @include euiFontSizeS;
+  min-height: $euiSizeXL;
+  width: 100%;
+}
+
+.filterQueryInput__popover {
+  width: $euiSize * 60;
+}

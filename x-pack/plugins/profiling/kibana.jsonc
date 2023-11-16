@@ -1,28 +1,38 @@
 {
   "type": "plugin",
   "id": "@kbn/profiling-plugin",
-  "owner": "@elastic/profiling-ui",
+  "owner": "@elastic/obs-ux-infra_services-team",
   "plugin": {
     "id": "profiling",
     "server": true,
     "browser": true,
     "configPath": ["xpack", "profiling"],
+    "optionalPlugins": [
+      "spaces", 
+      "usageCollection",
+      "security",
+      "cloud",
+      "fleet"
+    ],
     "requiredPlugins": [
-      "navigation",
+      "charts",
       "data",
-      "kibanaUtils",
-      "share",
+      "dataViews",
+      "features",
+      "licensing",
       "observability",
       "observabilityShared",
-      "features",
-      "kibanaReact",
+      "observabilityAIAssistant",
       "unifiedSearch",
-      "dataViews",
-      "charts",
-      "spaces",
-      "cloud",
-      "fleet",
-      "licensing"
+      "share",
+      "embeddable",
+      "profilingDataAccess"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils",
+      "observabilityAIAssistant",
+      "advancedSettings"
     ]
   }
 }

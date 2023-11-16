@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import {
   syntheticsApiKeyID,
   syntheticsApiKeyObjectType,
-} from '@kbn/synthetics-plugin/server/legacy_uptime/lib/saved_objects/service_api_key';
+} from '@kbn/synthetics-plugin/server/saved_objects/service_api_key';
 import { serviceApiKeyPrivileges } from '@kbn/synthetics-plugin/server/synthetics_service/get_api_key';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
@@ -52,7 +52,9 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
-          await supertestWithAuth.delete(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true');
+          await supertestWithAuth
+            .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+            .set('kbn-xsrf', 'true');
         }
       });
       ['manage_security', 'manage_api_key', 'manage_own_api_key'].forEach((privilege) => {
@@ -83,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
             });
 
             const apiResponse = await supertest
-              .put(API_URLS.SYNTHETICS_ENABLEMENT)
+              .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
               .auth(username, password)
               .set('kbn-xsrf', 'true')
               .expect(200);
@@ -129,7 +131,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -177,7 +179,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -196,7 +198,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // call api a second time
           const apiResponse2 = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -279,7 +281,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -328,7 +330,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -358,7 +360,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // call api a second time
           const apiResponse2 = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -404,7 +406,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -427,7 +429,9 @@ export default function ({ getService }: FtrProviderContext) {
       beforeEach(async () => {
         const apiKeys = await getApiKeys();
         if (apiKeys.length) {
-          await supertestWithAuth.delete(API_URLS.SYNTHETICS_ENABLEMENT).set('kbn-xsrf', 'true');
+          await supertestWithAuth
+            .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
+            .set('kbn-xsrf', 'true');
         }
       });
       it('with an admin', async () => {
@@ -457,18 +461,18 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
           const delResponse = await supertest
-            .delete(API_URLS.SYNTHETICS_ENABLEMENT)
+            .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
           expect(delResponse.body).eql({});
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -510,16 +514,16 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           await supertestWithAuth
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .set('kbn-xsrf', 'true')
             .expect(200);
           await supertest
-            .delete(API_URLS.SYNTHETICS_ENABLEMENT)
+            .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(403);
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -532,7 +536,7 @@ export default function ({ getService }: FtrProviderContext) {
           });
         } finally {
           await supertestWithAuth
-            .delete(API_URLS.SYNTHETICS_ENABLEMENT)
+            .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .set('kbn-xsrf', 'true')
             .expect(200);
           await security.user.delete(username);
@@ -571,7 +575,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           // can enable synthetics in default space when enabled in a non default space
           const apiResponseGet = await supertest
-            .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
+            .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT}`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -585,17 +589,17 @@ export default function ({ getService }: FtrProviderContext) {
           });
 
           await supertest
-            .put(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
+            .put(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT}`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
           await supertest
-            .delete(API_URLS.SYNTHETICS_ENABLEMENT)
+            .delete(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
           const apiResponse = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
@@ -610,17 +614,17 @@ export default function ({ getService }: FtrProviderContext) {
 
           // can disable synthetics in non default space when enabled in default space
           await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
           await supertest
-            .delete(`/s/${SPACE_ID}${API_URLS.SYNTHETICS_ENABLEMENT}`)
+            .delete(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT}`)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);
           const apiResponse2 = await supertest
-            .put(API_URLS.SYNTHETICS_ENABLEMENT)
+            .put(SYNTHETICS_API_URLS.SYNTHETICS_ENABLEMENT)
             .auth(username, password)
             .set('kbn-xsrf', 'true')
             .expect(200);

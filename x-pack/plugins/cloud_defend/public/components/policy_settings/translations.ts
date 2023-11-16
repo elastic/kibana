@@ -7,11 +7,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const name = i18n.translate('xpack.cloudDefend.name', {
+  defaultMessage: 'Name',
+});
+
+export const description = i18n.translate('xpack.cloudDefend.description', {
+  defaultMessage: 'Description',
+});
+
 export const enableControl = i18n.translate('xpack.cloudDefend.enableControl', {
-  defaultMessage: 'Enable drift prevention',
+  defaultMessage: 'Enable policy',
 });
 
 export const enableControlHelp = i18n.translate('xpack.cloudDefend.enableControlHelp', {
-  defaultMessage:
-    'Toggles enablement of drift prevention policy to alert and/or block file operations.',
+  defaultMessage: 'Enables drift prevention, alert, and logging policy shown below.',
 });

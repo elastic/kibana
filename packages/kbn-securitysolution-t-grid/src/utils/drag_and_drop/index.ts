@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import type { DropResult } from 'react-beautiful-dnd';
+import type { DropResult } from '@hello-pangea/dnd';
 
 export const draggableIdPrefix = 'draggableId';
 

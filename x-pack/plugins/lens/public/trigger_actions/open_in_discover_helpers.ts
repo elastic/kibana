@@ -10,8 +10,7 @@ import type { IEmbeddable } from '@kbn/embeddable-plugin/public';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { Embeddable } from '../embeddable';
-import { DOC_TYPE } from '../../common/constants';
+import { isLensEmbeddable } from './utils';
 
 interface DiscoverAppLocatorParams extends SerializableRecord {
   timeRange?: TimeRange;
@@ -31,10 +30,6 @@ interface Context {
   dataViews: Pick<DataViewsService, 'get'>;
   locator?: DiscoverAppLocator;
   timeFieldName?: string;
-}
-
-export function isLensEmbeddable(embeddable: IEmbeddable): embeddable is Embeddable {
-  return embeddable.type === DOC_TYPE;
 }
 
 export async function isCompatible({ hasDiscoverAccess, embeddable }: Context) {

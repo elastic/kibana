@@ -7,13 +7,19 @@
  */
 
 import React from 'react';
-import { EuiFlexItem, EuiLoadingContent, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexItem,
+  EuiSkeletonTitle,
+  EuiSkeletonText,
+  EuiHorizontalRule,
+  EuiSpacer,
+} from '@elastic/eui';
 
 const SkeletonComponent: React.FC = () => {
   return (
     <EuiFlexItem css={{ width: 240 }} data-test-subj="tooltip-loading-content">
-      <EuiLoadingContent lines={1} css={{ width: 70, marginBottom: '12px' }} />
-      <EuiLoadingContent lines={3} />
+      <EuiSkeletonTitle size="xxxs" css={{ width: 70, marginBottom: '12px' }} />
+      <EuiSkeletonText lines={3} />
       <EuiHorizontalRule margin="xs" />
       <EuiSpacer size="s" />
     </EuiFlexItem>

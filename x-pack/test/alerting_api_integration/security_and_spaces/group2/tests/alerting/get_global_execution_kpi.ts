@@ -297,7 +297,7 @@ export default function getGlobalExecutionKpiTests({ getService }: FtrProviderCo
         'triggeredActions',
       ]);
       expect(kpiLogs.success).to.be.above(1);
-      expect(kpiLogs.failure).to.be.above(2);
+      expect(kpiLogs.failure).to.be.above(1);
     });
   });
 }

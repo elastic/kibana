@@ -148,6 +148,7 @@ export interface IAnonymousPaths {
 /**
  * Headers to append to the request. Any headers that begin with `kbn-` are considered private to Core and will cause
  * {@link HttpHandler} to throw an error.
+ * Includes the required Header that validates internal requests to internal APIs
  * @public
  */
 export interface HttpHeadersInit {
@@ -279,6 +280,12 @@ export interface HttpFetchOptions extends HttpRequestInit {
    * response information. When `false`, the return type will just be the parsed response body. Defaults to `false`.
    */
   asResponse?: boolean;
+
+  /**
+   * When true, the response from the `fetch` call will be returned as is, without being awaited or processed.
+   * Defaults to `false`.
+   */
+  rawResponse?: boolean;
 
   context?: KibanaExecutionContext;
 

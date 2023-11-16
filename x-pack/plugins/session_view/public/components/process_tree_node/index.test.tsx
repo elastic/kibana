@@ -46,6 +46,7 @@ describe('ProcessTreeNode component', () => {
     onJumpToOutput: jest.fn(),
     showTimestamp: true,
     verboseMode: false,
+    trackEvent: jest.fn(),
   };
 
   beforeEach(() => {

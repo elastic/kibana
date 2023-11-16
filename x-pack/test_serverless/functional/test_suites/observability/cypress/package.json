@@ -1,0 +1,13 @@
+{
+  "author": "Elastic",
+  "name": "@kbn/serverless-observability",
+  "version": "1.0.0",
+  "private": true,
+  "license": "Elastic License 2.0",
+  "scripts": {
+    "cypress:open": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../node_modules/.bin/cypress open --config-file ./cypress.config.ts",
+    "cypress:run": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../node_modules/.bin/cypress run --browser chrome --config-file ./cypress.config.ts",
+    "cypress:serverless:open": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../scripts/functional_tests --config ./config_runner.ts",
+    "cypress:serverless:run": "NODE_OPTIONS=--openssl-legacy-provider node ../../../../../../scripts/functional_tests --config ./config_server.ts"
+  }
+}

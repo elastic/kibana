@@ -9,11 +9,11 @@ import http from 'http';
 import expect from '@kbn/expect';
 
 import {
-  ActionTypes,
+  ConnectorTypes,
+  UserActionTypes,
   CaseSeverity,
   CaseStatuses,
-  ConnectorTypes,
-} from '@kbn/cases-plugin/common/api';
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   globalRead,
   noKibanaPrivileges,
@@ -302,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getConnectors({ caseId: postedCase.id, supertest }),
           ]);
 
-          const pushes = userActions.filter((ua) => ua.type === ActionTypes.pushed);
+          const pushes = userActions.filter((ua) => ua.type === UserActionTypes.pushed);
           const latestPush = pushes[pushes.length - 1];
 
           expect(Object.keys(connectors).length).to.be(2);
@@ -370,7 +370,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getConnectors({ caseId: postedCase.id, supertest }),
           ]);
 
-          const pushes = userActions.filter((ua) => ua.type === ActionTypes.pushed);
+          const pushes = userActions.filter((ua) => ua.type === UserActionTypes.pushed);
           const oldestPush = pushes[0];
           const latestPush = pushes[pushes.length - 1];
 

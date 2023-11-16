@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EcsFlat } from '@kbn/ecs';
+import { EcsFlat, EcsVersion } from '@kbn/ecs';
 import type {
   FlameElementEvent,
   HeatmapElementEvent,
   MetricElementEvent,
+  PartialTheme,
   PartitionElementEvent,
   Theme,
   WordCloudElementEvent,
@@ -17,6 +18,7 @@ import type {
 } from '@elastic/charts';
 import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import { v4 as uuidv4 } from 'uuid';
 
 import { getUnallowedValueRequestItems } from '../allowed_values/helpers';
 import { ErrorEmptyPrompt } from '../error_empty_prompt';
@@ -30,12 +32,19 @@ import {
 import { LoadingEmptyPrompt } from '../loading_empty_prompt';
 import { getIndexPropertiesContainerId } from '../pattern/helpers';
 import { getTabs } from '../tabs/helpers';
-import { getAllIncompatibleMarkdownComments } from '../tabs/incompatible_tab/helpers';
+import {
+  getAllIncompatibleMarkdownComments,
+  getIncompatibleValuesFields,
+  getIncompatibleMappingsFields,
+  getSameFamilyFields,
+} from '../tabs/incompatible_tab/helpers';
 import * as i18n from './translations';
 import type { EcsMetadata, IlmPhase, PartitionedFieldMetadata, PatternRollup } from '../../types';
 import { useAddToNewCase } from '../../use_add_to_new_case';
 import { useMappings } from '../../use_mappings';
 import { useUnallowedValues } from '../../use_unallowed_values';
+import { useDataQualityContext } from '../data_quality_context';
+import { getSizeInBytes } from '../../helpers';
 
 const EMPTY_MARKDOWN_COMMENTS: string[] = [];
 
@@ -59,7 +68,9 @@ export interface Props {
     groupByField1: string;
   };
   ilmPhase: IlmPhase | undefined;
+  indexId: string | null | undefined;
   indexName: string;
+  isAssistantEnabled: boolean;
   openCreateCaseFlyout: ({
     comments,
     headerContent,
@@ -69,19 +80,23 @@ export interface Props {
   }) => void;
   pattern: string;
   patternRollup: PatternRollup | undefined;
-  theme: Theme;
+  theme?: PartialTheme;
+  baseTheme: Theme;
   updatePatternRollup: (patternRollup: PatternRollup) => void;
 }
 
 const IndexPropertiesComponent: React.FC<Props> = ({
   addSuccessToast,
+  baseTheme,
   canUserCreateAndReadCases,
+  docsCount,
   formatBytes,
   formatNumber,
-  docsCount,
   getGroupByFieldsOnClick,
   ilmPhase,
+  indexId,
   indexName,
+  isAssistantEnabled,
   openCreateCaseFlyout,
   pattern,
   patternRollup,
@@ -89,6 +104,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
   updatePatternRollup,
 }) => {
   const { error: mappingsError, indexes, loading: loadingMappings } = useMappings(indexName);
+  const { telemetryEvents, isILMAvailable } = useDataQualityContext();
 
   const requestItems = useMemo(
     () =>
@@ -103,6 +119,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     error: unallowedValuesError,
     loading: loadingUnallowedValues,
     unallowedValues,
+    requestTime,
   } = useUnallowedValues({ indexName, requestItems });
 
   const mappingsProperties = useMemo(
@@ -143,6 +160,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         docsCount,
         getGroupByFieldsOnClick,
         ilmPhase,
+        isAssistantEnabled,
         indexName,
         onAddToNewCase,
         partitionedFieldMetadata: partitionedFieldMetadata ?? EMPTY_METADATA,
@@ -151,6 +169,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
         setSelectedTabId,
         stats: patternRollup?.stats ?? null,
         theme,
+        baseTheme,
       }),
     [
       addSuccessToast,
@@ -161,12 +180,14 @@ const IndexPropertiesComponent: React.FC<Props> = ({
       getGroupByFieldsOnClick,
       ilmPhase,
       indexName,
+      isAssistantEnabled,
       onAddToNewCase,
       partitionedFieldMetadata,
       pattern,
       patternRollup?.docsCount,
       patternRollup?.stats,
       theme,
+      baseTheme,
     ]
   );
 
@@ -207,6 +228,11 @@ const IndexPropertiesComponent: React.FC<Props> = ({
           ? partitionedFieldMetadata.incompatible.length
           : undefined;
 
+      const indexSameFamily: number | undefined =
+        error == null && partitionedFieldMetadata != null
+          ? partitionedFieldMetadata.sameFamily.length
+          : undefined;
+
       if (patternRollup != null) {
         const markdownComments =
           partitionedFieldMetadata != null
@@ -216,6 +242,7 @@ const IndexPropertiesComponent: React.FC<Props> = ({
                 formatNumber,
                 ilmPhase,
                 indexName,
+                isILMAvailable,
                 partitionedFieldMetadata,
                 patternDocsCount: patternRollup.docsCount ?? 0,
                 sizeInBytes: patternRollup.sizeInBytes,
@@ -234,9 +261,36 @@ const IndexPropertiesComponent: React.FC<Props> = ({
               indexName,
               markdownComments,
               pattern,
+              sameFamily: indexSameFamily,
             },
           },
         });
+
+        if (indexId && requestTime != null && requestTime > 0 && partitionedFieldMetadata) {
+          telemetryEvents.reportDataQualityIndexChecked?.({
+            batchId: uuidv4(),
+            ecsVersion: EcsVersion,
+            errorCount: error ? 1 : 0,
+            ilmPhase,
+            indexId,
+            indexName,
+            isCheckAll: false,
+            numberOfDocuments: docsCount,
+            numberOfIncompatibleFields: indexIncompatible,
+            numberOfIndices: 1,
+            numberOfIndicesChecked: 1,
+            numberOfSameFamily: indexSameFamily,
+            sizeInBytes: getSizeInBytes({ stats: patternRollup.stats, indexName }),
+            timeConsumedMs: requestTime,
+            sameFamilyFields: getSameFamilyFields(partitionedFieldMetadata.sameFamily),
+            unallowedMappingFields: getIncompatibleMappingsFields(
+              partitionedFieldMetadata.incompatible
+            ),
+            unallowedValueFields: getIncompatibleValuesFields(
+              partitionedFieldMetadata.incompatible
+            ),
+          });
+        }
       }
     }
   }, [
@@ -244,13 +298,17 @@ const IndexPropertiesComponent: React.FC<Props> = ({
     formatBytes,
     formatNumber,
     ilmPhase,
+    indexId,
     indexName,
+    isILMAvailable,
     loadingMappings,
     loadingUnallowedValues,
     mappingsError,
     partitionedFieldMetadata,
     pattern,
     patternRollup,
+    requestTime,
+    telemetryEvents,
     unallowedValuesError,
     updatePatternRollup,
   ]);

@@ -13,8 +13,8 @@ import * as rt from 'io-ts';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { fold } from 'fp-ts/lib/Either';
 import { constant, identity } from 'fp-ts/lib/function';
+import { replaceStateKeyInQueryString } from '../../../../../common/url_state_storage_service';
 import { useUrlState } from '../../../../utils/use_url_state';
-import { replaceStateKeyInQueryString } from '../../../../utils/url_state';
 
 const parseRange = (range: MetricsTimeInput) => {
   const parsedFrom = dateMath.parse(range.from.toString());
@@ -64,9 +64,11 @@ export const useMetricsTime = () => {
     parseRange(urlState.time || DEFAULT_TIMERANGE)
   );
 
-  const updateTimeRange = useCallback((range: MetricsTimeInput) => {
+  const updateTimeRange = useCallback((range: MetricsTimeInput, parseDate = true) => {
     setTimeRange(range);
-    setParsedTimeRange(parseRange(range));
+    if (parseDate) {
+      setParsedTimeRange(parseRange(range));
+    }
   }, []);
 
   return {

@@ -28,7 +28,9 @@ export const HeaderField = ({
   'data-test-subj': dataTestSubj,
   readOnly,
 }: HeaderFieldProps) => {
-  const defaultValueKeys = Object.keys(defaultValue).filter((key) => key !== 'Content-Type'); // Content-Type is a secret header we hide from the user
+  const defaultValueKeys = Object.keys(defaultValue).filter(
+    filterContentType(defaultValue, contentTypes, contentMode)
+  );
   const formattedDefaultValues: Pair[] = [
     ...defaultValueKeys.map<Pair>((key) => {
       return [key || '', defaultValue[key] || '']; // key, value
@@ -71,6 +73,22 @@ export const HeaderField = ({
     />
   );
 };
+
+// We apply default `Content-Type` headers automatically depending on the request body mime type
+// We hide the default Content-Type headers from the user as an implementation detail
+// However, If the user applies a custom `Content-Type` header, it should be shown
+export const filterContentType =
+  (
+    defaultValue: Record<string, string>,
+    contentTypeMap: Record<CodeEditorMode, ContentType>,
+    contentMode?: CodeEditorMode
+  ) =>
+  (key: string) => {
+    return (
+      key !== 'Content-Type' ||
+      (key === 'Content-Type' && contentMode && defaultValue[key] !== contentTypeMap[contentMode])
+    );
+  };
 
 export const contentTypes: Record<CodeEditorMode, ContentType> = {
   [CodeEditorMode.JSON]: ContentType.JSON,

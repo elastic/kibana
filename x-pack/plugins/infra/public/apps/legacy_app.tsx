@@ -10,8 +10,8 @@ import { createBrowserHistory, History } from 'history';
 import { AppMountParameters } from '@kbn/core/public';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import { RouteProps, Router, Switch } from 'react-router-dom';
-import { Route } from '@kbn/shared-ux-router';
+import { RouteProps } from 'react-router-dom';
+import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 // This exists purely to facilitate legacy app/infra URL redirects.
 // It will be removed in 8.0.0.
@@ -29,7 +29,7 @@ const LegacyApp: React.FunctionComponent<{ history: History<unknown> }> = ({ his
   return (
     <EuiErrorBoundary>
       <Router history={history}>
-        <Switch>
+        <Routes>
           <Route
             path={'/'}
             render={({ location }: RouteProps) => {
@@ -91,7 +91,7 @@ const LegacyApp: React.FunctionComponent<{ history: History<unknown> }> = ({ his
               return null;
             }}
           />
-        </Switch>
+        </Routes>
       </Router>
     </EuiErrorBoundary>
   );

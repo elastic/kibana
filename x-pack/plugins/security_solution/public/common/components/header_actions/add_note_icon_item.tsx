@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { NotesButton } from '../../../timelines/components/timeline/properties/helpers';
-import { TimelineType } from '../../../../common/types';
+import { TimelineType } from '../../../../common/api/timeline';
 import { useUserPrivileges } from '../user_privileges';
 import * as i18n from './translations';
 import { ActionIconItem } from './action_icon_item';

@@ -11,7 +11,7 @@ import React from 'react';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 import { TestProviders } from '../../../../../../../common/mock';
 import { AlertFieldFlexGroup, DEFAULT_GAP, eventKindMatches, showWith } from '.';
-import { TimelineId } from '../../../../../../../../common/types';
+import { TimelineId } from '../../../../../../../../common/types/timeline';
 import { TableId } from '@kbn/securitysolution-data-table';
 
 describe('helpers', () => {

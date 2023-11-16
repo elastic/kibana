@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import { HttpService } from '../http_service';
 import { useMlKibana } from '../../contexts/kibana';
-import { ML_BASE_PATH } from '../../../../common/constants/app';
+import { ML_INTERNAL_BASE_PATH } from '../../../../common/constants/app';
 import type {
   MlAnomalyDetectionAlertParams,
   PreviewResponse,
@@ -23,9 +23,10 @@ export const alertingApiProvider = (httpService: HttpService) => {
     }): Promise<PreviewResponse> {
       const body = JSON.stringify(params);
       return httpService.http<PreviewResponse>({
-        path: `${ML_BASE_PATH}/alerting/preview`,
+        path: `${ML_INTERNAL_BASE_PATH}/alerting/preview`,
         method: 'POST',
         body,
+        version: '1',
       });
     },
   };

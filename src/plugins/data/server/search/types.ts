@@ -35,6 +35,7 @@ export interface SearchStrategyDependencies {
   uiSettingsClient: Pick<IUiSettingsClient, 'get'>;
   searchSessionsClient: IScopedSearchSessionsClient;
   request: KibanaRequest;
+  rollupsEnabled?: boolean;
 }
 
 export interface ISearchSetup {
@@ -55,7 +56,7 @@ export interface ISearchSetup {
    * Used internally for telemetry
    */
   usage?: SearchUsage;
-
+  enableRollups: () => void;
   searchSource: ReturnType<SearchSourceService['setup']>;
 }
 
