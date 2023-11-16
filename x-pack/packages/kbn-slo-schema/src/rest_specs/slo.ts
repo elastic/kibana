@@ -60,6 +60,10 @@ const createSLOResponseSchema = t.type({
 const getPreviewDataParamsSchema = t.type({
   body: t.type({
     indicator: indicatorSchema,
+    range: t.type({
+      start: t.number,
+      end: t.number,
+    }),
   }),
 });
 
