@@ -276,11 +276,16 @@ describe('OpenAIConnector', () => {
     describe('invokeStream', () => {
       let stream;
       beforeEach(() => {
+        const chunk1 =
+          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}';
+
         stream = createStreamMock();
-        stream.write(`data: ${JSON.stringify(mockResponse.data)}`);
+        stream.write(chunk1);
+        // .write(`data: ${JSON.stringify(mockResponse.data)}`);
         mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
         // @ts-ignore
         connector.request = mockRequest;
+        stream.complete();
       });
 
       it('the API call is successful with correct request parameters', async () => {
@@ -314,7 +319,53 @@ describe('OpenAIConnector', () => {
           responseBody += data.toString();
         });
         await waitFor(() => {
-          expect(responseBody).toEqual(mockResponseString);
+          expect(responseBody).toEqual('My new');
+        });
+      });
+      it('correctly buffers stream of json lines', async () => {
+        stream = createStreamMock();
+        const chunk1 =
+          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}';
+        const chunk2 =
+          '\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]';
+
+        stream.write(chunk1);
+        stream.write(chunk2);
+        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
+        // @ts-ignore
+        connector.request = mockRequest;
+
+        const response = await connector.invokeStream(sampleOpenAiBody);
+
+        let responseBody: string = '';
+        response.on('data', (data: string) => {
+          responseBody += data.toString();
+        });
+        await waitFor(() => {
+          expect(responseBody).toEqual('My new message');
+        });
+      });
+      it('correctly buffers partial lines', async () => {
+        stream = createStreamMock();
+        const chunk1 =
+          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"';
+        const chunk2 =
+          '}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]';
+
+        stream.write(chunk1);
+        stream.write(chunk2);
+        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: stream.transform });
+        // @ts-ignore
+        connector.request = mockRequest;
+
+        const response = await connector.invokeStream(sampleOpenAiBody);
+
+        let responseBody: string = '';
+        response.on('data', (data: string) => {
+          responseBody += data.toString();
+        });
+        await waitFor(() => {
+          expect(responseBody).toEqual('My new message');
         });
       });
     });

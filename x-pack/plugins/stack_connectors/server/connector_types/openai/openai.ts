@@ -203,6 +203,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       body: JSON.stringify(body),
       stream: true,
     })) as unknown as IncomingMessage;
+
     return res.pipe(new PassThrough()).pipe(transformToString());
   }
 
@@ -236,20 +237,20 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
  */
 const transformToString = () => {
   let lineBuffer: string = '';
+  const decoder = new TextDecoder();
+  const encoder = new TextEncoder();
 
   return new Transform({
     transform(chunk, encoding, callback) {
-      const decoder = new TextDecoder();
-      const encoder = new TextEncoder();
-      const lines = decoder.decode(chunk).split('\n');
+      const chunks = decoder.decode(chunk);
+      const lines = chunks.split('\n');
+      if (lines[lines.length - 1] === '') {
+        lines.pop();
+      }
       lines[0] = lineBuffer + lines[0];
-
       lineBuffer = lines.pop() || '';
-
       const nextChunk = lines
-        // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
         .map((str) => str.substring(6))
-        // filter out empty lines and the "[DONE]" string
         .filter((str) => !!str && str !== '[DONE]')
         .map((line) => {
           const openaiResponse = JSON.parse(line);
@@ -258,6 +259,25 @@ const transformToString = () => {
         .join('');
       const newChunk = encoder.encode(nextChunk);
       callback(null, newChunk);
+    },
+    flush(callback) {
+      // Emit an additional chunk with the content of lineBuffer if it has length
+      if (lineBuffer.length > 0) {
+        const nextChunk = [lineBuffer]
+          .map((str) => str.substring(6))
+          .filter((str) => !!str && str !== '[DONE]')
+          .map((line) => {
+            const openaiResponse = JSON.parse(line);
+            return openaiResponse.choices[0]?.delta.content ?? '';
+          })
+          .join('');
+        const newChunk = encoder.encode(nextChunk);
+        callback(null, newChunk);
+        // const additionalChunk = encoder.encode(lineBuffer);
+        // callback(null, additionalChunk);
+      } else {
+        callback();
+      }
     },
   });
 };
