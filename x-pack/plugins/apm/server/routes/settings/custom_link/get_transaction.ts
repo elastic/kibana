@@ -11,6 +11,7 @@ import { ProcessorEvent } from '@kbn/observability-plugin/common';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 
 export async function getTransaction({
   apmEventClient,
@@ -48,5 +49,5 @@ export async function getTransaction({
     'get_transaction_for_custom_link',
     params
   );
-  return resp.hits.hits[0]?._source;
+  return resp.hits.hits[0]?._source as Transaction;
 }
