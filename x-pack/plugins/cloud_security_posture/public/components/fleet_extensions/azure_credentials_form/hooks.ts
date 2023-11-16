@@ -29,7 +29,6 @@ const getSetupFormatFromInput = (
   hasArmTemplateUrl: boolean
 ): SetupFormat => {
   const credentialsType = getAzureCredentialsType(input);
-  // CloudFormation is the default setup format if the integration has a CloudFormation template
   if (!credentialsType && hasArmTemplateUrl) {
     return 'arm_template';
   }

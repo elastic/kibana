@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-// import { getAzureCredentialsFormOptions } from '../public/components/fleet_extensions/azure_credentials_form/get_azure_credentials_form_options';
 import {
   PostureTypes,
   VulnSeverity,
@@ -181,4 +180,5 @@ export const AZURE_CREDENTIALS_TYPE_TO_FIELDS_MAP = {
     'azure.credentials.client_password',
   ],
   managed_identity: [],
+  manual: [],
 };
