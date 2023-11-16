@@ -38,7 +38,13 @@ interface PreviewChartPros {
   error?: IErrorObject;
 }
 
-function PreviewChart({
+const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
+  if (aggType === Aggregators.AVERAGE) return 'average';
+  if (aggType === Aggregators.CARDINALITY) return 'unique_count';
+  return aggType;
+};
+
+export function PreviewChart({
   metricExpression,
   dataView,
   filterQuery,
@@ -196,12 +202,6 @@ function PreviewChart({
     }
   }, [aggMap, equation]);
 
-  const getOperationTypeFromRuleAggType = (aggType: AggType): OperationType => {
-    if (aggType === Aggregators.AVERAGE) return 'average';
-    if (aggType === Aggregators.CARDINALITY) return 'unique_count';
-    return aggType;
-  };
-
   useEffect(() => {
     if (!formulaAsync.value || !dataView || !formula) {
       return;
@@ -337,5 +337,3 @@ function PreviewChart({
     </div>
   );
 }
-// eslint-disable-next-line import/no-default-export
-export default PreviewChart; // Correct export

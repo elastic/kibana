@@ -42,7 +42,7 @@ import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
 import { MetricsExplorerFields, GroupBy } from './components/group_by';
-import PreviewChart from './components/preview_chart/preview_chart';
+import { PreviewChart } from './components/preview_chart/preview_chart';
 
 const FILTER_TYPING_DEBOUNCE_MS = 500;
 
