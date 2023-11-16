@@ -185,7 +185,7 @@ export const mobileServiceDetailRoute = {
       '/mobile-services/{serviceName}/errors-and-crashes': {
         ...page({
           tabKey: 'errors-and-crashes',
-          title: i18n.translate('xpack.apm.views.errors.title', {
+          title: i18n.translate('xpack.apm.views.errorsAndCrashes.title', {
             defaultMessage: 'Errors & Crashes',
           }),
           element: <Outlet />,
