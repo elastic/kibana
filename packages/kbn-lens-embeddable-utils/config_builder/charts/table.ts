@@ -12,13 +12,7 @@ import {
   DatatableVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  BuildDependencies,
-  DEFAULT_LAYER_ID,
-  LensAttributes,
-  LensBaseConfig,
-  LensTableConfig,
-} from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTableConfig } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -28,9 +22,7 @@ import {
 import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
-function buildVisualizationState(
-  config: LensTableConfig & LensBaseConfig
-): DatatableVisualizationState {
+function buildVisualizationState(config: LensTableConfig): DatatableVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('single layer must be defined');
   }
@@ -60,7 +52,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -115,12 +107,12 @@ function getValueColumns(layer: LensTableConfig['layers'][0]) {
           return getValueColumn(`${ACCESSOR}_splitby_${i}`, b as string);
         })
       : []),
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
   ];
 }
 
 export async function buildTable(
-  config: LensTableConfig & LensBaseConfig,
+  config: LensTableConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

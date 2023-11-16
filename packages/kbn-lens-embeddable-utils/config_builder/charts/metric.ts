@@ -13,13 +13,7 @@ import {
   PersistedIndexPatternLayer,
 } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  BuildDependencies,
-  DEFAULT_LAYER_ID,
-  LensAttributes,
-  LensBaseConfig,
-  LensMetricConfig,
-} from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensMetricConfig } from '../types';
 import {
   addLayerColumn,
   addLayerFormulaColumns,
@@ -38,9 +32,7 @@ const ACCESSOR = 'metric_formula_accessor';
 const HISTOGRAM_COLUMN_NAME = 'x_date_histogram';
 const TRENDLINE_LAYER_ID = `layer_trendline`;
 
-function buildVisualizationState(
-  config: LensMetricConfig & LensBaseConfig
-): MetricVisualizationState {
+function buildVisualizationState(config: LensMetricConfig): MetricVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('metric must define a single layer');
   }
@@ -132,7 +124,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -144,7 +136,7 @@ function buildFormulaLayer(
             linkToLayers: [DEFAULT_LAYER_ID],
             ...getFormulaColumn(
               `${ACCESSOR}_trendline`,
-              { value: layer.query },
+              { value: layer.value },
               dataView,
               formulaAPI,
               baseLayer
@@ -215,7 +207,7 @@ function getValueColumns(layer: LensMetricConfig['layers'][0]) {
     ...(layer.breakdown
       ? [getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string)]
       : []),
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
     ...(layer.queryMaxValue ? [getValueColumn(`${ACCESSOR}_max`, layer.queryMaxValue)] : []),
     ...(layer.querySecondaryMetric
       ? [getValueColumn(`${ACCESSOR}_secondary`, layer.querySecondaryMetric)]
@@ -224,7 +216,7 @@ function getValueColumns(layer: LensMetricConfig['layers'][0]) {
 }
 
 export async function buildMetric(
-  config: LensMetricConfig & LensBaseConfig,
+  config: LensMetricConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

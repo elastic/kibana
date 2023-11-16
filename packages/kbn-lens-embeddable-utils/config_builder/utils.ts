@@ -16,8 +16,10 @@ import {
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
 import { AggregateQuery } from '@kbn/es-query';
 import {
+  LensAnnotationLayer,
   LensAttributes,
   LensBaseConfig,
+  LensBaseLayer,
   LensDataset,
   LensDatatableDataset,
   LensESQLDataset,
@@ -96,7 +98,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
 
   if ('index' in dataset) {
     index = dataset.index;
-    timeFieldName = dataset.timeFieldName!;
+    timeFieldName = dataset.timeFieldName || '@timestamp';
   } else if ('query' in dataset) {
     index = 'kibana_sample_data_e*'; // parseIndexFromQuery(config.dataset.query);
   } else {
@@ -107,22 +109,22 @@ export function getDatasetIndex(dataset?: LensDataset) {
 }
 
 export function buildDatasourceStatesLayer(
-  layer: any,
+  layer: LensBaseLayer,
   i: number,
-  dataset: any,
+  dataset: LensDataset,
   dataView: DataView | undefined,
   buildFormulaLayers: (
     config: unknown,
     i: number,
     dataView: DataView
   ) => PersistedIndexPatternLayer | undefined,
-  getValueColumns: (config: any, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
+  getValueColumns: (config: unknown, i: number) => TextBasedLayerColumn[] // ValueBasedLayerColumn[]
 ): [
   'textBased' | 'formBased',
   PersistedIndexPatternLayer | TextBasedPersistedState['layers'][0] | undefined
 ] {
-  function buildValueLayer(config: any & LensBaseConfig): TextBasedPersistedState['layers'][0] {
-    const table = (config.dataset || layer.dataset) as LensDatatableDataset;
+  function buildValueLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
+    const table = dataset as LensDatatableDataset;
     const newLayer = {
       table,
       columns: getValueColumns(layer, i),
@@ -141,12 +143,12 @@ export function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  function buildESQLLayer(config: any & LensBaseConfig): TextBasedPersistedState['layers'][0] {
+  function buildESQLLayer(config: LensBaseLayer): TextBasedPersistedState['layers'][0] {
     const columns = getValueColumns(layer, i);
 
     const newLayer = {
       index: dataView!.id!,
-      query: { esql: (config.dataset as LensESQLDataset).query } as AggregateQuery,
+      query: { esql: (config.dataset as LensESQLDataset).esql } as AggregateQuery,
       columns,
       allColumns: columns,
     };
@@ -154,7 +156,7 @@ export function buildDatasourceStatesLayer(
     return newLayer;
   }
 
-  if ('query' in dataset) {
+  if ('esql' in dataset) {
     return ['textBased', buildESQLLayer(layer)];
   } else if ('type' in dataset) {
     return ['textBased', buildValueLayer(layer)];
@@ -172,7 +174,7 @@ export function buildReferences(dataviews: Record<string, DataView>) {
   return references.flat();
 }
 export const buildDatasourceStates = async (
-  config: any,
+  config: LensBaseConfig & { layers: LensBaseLayer[] },
   dataviews: Record<string, DataView>,
   buildFormulaLayers: (
     config: unknown,
@@ -193,28 +195,31 @@ export const buildDatasourceStates = async (
     const layerId = `layer_${i}`;
     const dataset = layer.dataset || mainDataset;
 
-    let dataView: DataView | undefined;
-    if (dataset) {
-      const index = getDatasetIndex(dataset);
-      dataView = index
-        ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
-        : undefined;
+    if (!dataset && 'type' in layer && (layer as LensAnnotationLayer).type !== 'annotation') {
+      throw Error('dataset must be defined');
     }
+
+    const index = getDatasetIndex(dataset);
+    const dataView = index
+      ? await getDataView(index.index, dataViewsAPI, index.timeFieldName)
+      : undefined;
 
     if (dataView) {
       dataviews[layerId] = dataView;
     }
 
-    const [type, layerConfig] = buildDatasourceStatesLayer(
-      layer,
-      i,
-      dataset,
-      dataView,
-      buildFormulaLayers,
-      getValueColumns
-    );
-    if (layerConfig) {
-      layers[type]!.layers[layerId] = layerConfig;
+    if (dataset) {
+      const [type, layerConfig] = buildDatasourceStatesLayer(
+        layer,
+        i,
+        dataset,
+        dataView,
+        buildFormulaLayers,
+        getValueColumns
+      );
+      if (layerConfig) {
+        layers[type]!.layers[layerId] = layerConfig;
+      }
     }
   }
 

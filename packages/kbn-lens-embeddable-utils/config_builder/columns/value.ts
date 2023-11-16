@@ -7,10 +7,16 @@
  */
 
 import { TextBasedLayerColumn } from '@kbn/lens-plugin/public/datasources/text_based/types';
+import { DatatableColumnType } from '@kbn/expressions-plugin/common';
 
-export function getValueColumn(id: string, fieldName?: string): TextBasedLayerColumn {
+export function getValueColumn(
+  id: string,
+  fieldName?: string,
+  type?: DatatableColumnType
+): TextBasedLayerColumn {
   return {
     columnId: id,
     fieldName: fieldName || id,
+    ...(type ? { meta: { type } } : {}),
   };
 }

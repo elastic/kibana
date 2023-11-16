@@ -27,7 +27,6 @@ import {
   BuildDependencies,
   LensAnnotationLayer,
   LensAttributes,
-  LensBaseConfig,
   LensReferenceLineLayer,
   LensSeriesLayer,
   LensXYConfig,
@@ -35,7 +34,7 @@ import {
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(config: LensXYConfig & LensBaseConfig): XYState {
+function buildVisualizationState(config: LensXYConfig): XYState {
   return {
     legend: {
       isVisible: config.legend?.show || true,
@@ -74,6 +73,7 @@ function buildVisualizationState(config: LensXYConfig & LensBaseConfig): XYState
               if ('datetime' in e) {
                 return {
                   type: 'manual',
+                  id: `annotation_${eventNr}`,
                   icon: e.icon || 'triangle',
                   color: e.color || 'blue',
                   label: e.name,
@@ -145,7 +145,7 @@ function getValueColumns(layer: LensSeriesLayer, i: number) {
       ? [getValueColumn(`${ACCESSOR}${i}_breakdown`, layer.breakdown as string)]
       : []),
     getValueColumn(`${ACCESSOR}${i}_x`, layer.xAxis as string),
-    getValueColumn(`${ACCESSOR}${i}`, layer.query),
+    getValueColumn(`${ACCESSOR}${i}`, layer.value, 'number'),
   ];
 }
 
@@ -160,7 +160,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         `${ACCESSOR}${i}`,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -193,7 +193,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         `${ACCESSOR}${i}`,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -208,7 +208,7 @@ function buildFormulaLayer(
 }
 
 export async function buildXY(
-  config: LensXYConfig & LensBaseConfig,
+  config: LensXYConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

@@ -16,7 +16,6 @@ import {
   BuildDependencies,
   DEFAULT_LAYER_ID,
   LensAttributes,
-  LensBaseConfig,
   LensPieConfig,
   LensTreeMapConfig,
   LensMosaicConfig,
@@ -33,7 +32,7 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 const ACCESSOR = 'metric_formula_accessor';
 
 function buildVisualizationState(
-  config: (LensTreeMapConfig | LensPieConfig | LensMosaicConfig) & LensBaseConfig
+  config: LensTreeMapConfig | LensPieConfig | LensMosaicConfig
 ): PieVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('single layer must be defined!');
@@ -58,7 +57,7 @@ function buildVisualizationState(
       {
         layerId: DEFAULT_LAYER_ID,
         layerType: 'data',
-        metrics: [`ACCESSOR`],
+        metrics: [ACCESSOR],
         allowMultipleMetrics: false,
         numberDisplay: 'percent',
         categoryDisplay: 'default',
@@ -84,7 +83,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -122,12 +121,12 @@ function getValueColumns(layer: LensTreeMapConfig['layers'][0]) {
           return getValueColumn(`${ACCESSOR}_breakdown_${i}`, b as string);
         })
       : []),
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
   ];
 }
 
 export async function buildTreeMap(
-  config: (LensTreeMapConfig | LensPieConfig) & LensBaseConfig,
+  config: LensTreeMapConfig | LensPieConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

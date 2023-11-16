@@ -12,13 +12,7 @@ import {
   GaugeVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  BuildDependencies,
-  DEFAULT_LAYER_ID,
-  LensAttributes,
-  LensBaseConfig,
-  LensGaugeConfig,
-} from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensGaugeConfig } from '../types';
 import {
   addLayerFormulaColumns,
   buildDatasourceStates,
@@ -29,9 +23,7 @@ import { getFormulaColumn, getValueColumn } from '../columns';
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(
-  config: LensGaugeConfig & LensBaseConfig
-): GaugeVisualizationState {
+function buildVisualizationState(config: LensGaugeConfig): GaugeVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('metric must define a single layer');
   }
@@ -78,7 +70,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -135,7 +127,7 @@ function buildFormulaLayer(
 
 function getValueColumns(layer: LensGaugeConfig['layers'][0]) {
   return [
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
     ...(layer.queryMaxValue ? [getValueColumn(`${ACCESSOR}_max`, layer.queryMaxValue)] : []),
     ...(layer.queryMinValue ? [getValueColumn(`${ACCESSOR}_secondary`, layer.queryMinValue)] : []),
     ...(layer.queryGoalValue
@@ -145,7 +137,7 @@ function getValueColumns(layer: LensGaugeConfig['layers'][0]) {
 }
 
 export async function buildGauge(
-  config: LensGaugeConfig & LensBaseConfig,
+  config: LensGaugeConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

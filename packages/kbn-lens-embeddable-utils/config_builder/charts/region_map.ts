@@ -13,7 +13,6 @@ import {
   BuildDependencies,
   DEFAULT_LAYER_ID,
   LensAttributes,
-  LensBaseConfig,
   LensRegionMapConfig,
   LensTagCloudConfig,
 } from '../types';
@@ -28,7 +27,7 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 const ACCESSOR = 'metric_formula_accessor';
 
 function buildVisualizationState(
-  config: LensRegionMapConfig & LensBaseConfig
+  config: LensRegionMapConfig
 ): ChoroplethChartState & { layerType: 'data' } {
   if (config.layers.length !== 1) {
     throw new Error('region map must define a single layer');
@@ -59,7 +58,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -88,13 +87,13 @@ function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
     throw new Error('breakdown must be a field name when not using index source');
   }
   return [
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
     getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string),
   ];
 }
 
 export async function buildRegionMap(
-  config: LensRegionMapConfig & LensBaseConfig,
+  config: LensRegionMapConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

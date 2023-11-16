@@ -12,13 +12,7 @@ import {
   HeatmapVisualizationState,
 } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  BuildDependencies,
-  DEFAULT_LAYER_ID,
-  LensAttributes,
-  LensBaseConfig,
-  LensHeatmapConfig,
-} from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensHeatmapConfig } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -29,9 +23,7 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(
-  config: LensHeatmapConfig & LensBaseConfig
-): HeatmapVisualizationState {
+function buildVisualizationState(config: LensHeatmapConfig): HeatmapVisualizationState {
   if (config.layers.length !== 1) {
     throw new Error('heatmap must define a single layer');
   }
@@ -80,7 +72,7 @@ function buildFormulaLayer(
     ...getFormulaColumn(
       ACCESSOR,
       {
-        value: layer.query,
+        value: layer.value,
       },
       dataView,
       formulaAPI
@@ -116,16 +108,14 @@ function getValueColumns(layer: LensHeatmapConfig['layers'][0]) {
     throw new Error('xAxis must be a field name when not using index source');
   }
   return [
-    ...(layer.breakdown
-      ? [getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string)]
-      : []),
+    ...(layer.breakdown ? [getValueColumn(`${ACCESSOR}_y`, layer.breakdown as string)] : []),
     getValueColumn(`${ACCESSOR}_x`, layer.xAxis as string),
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
   ];
 }
 
 export async function buildHeatmap(
-  config: LensHeatmapConfig & LensBaseConfig,
+  config: LensHeatmapConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};

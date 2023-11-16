@@ -48,7 +48,7 @@ export interface LensDataviewDataset {
 export type LensDatatableDataset = Datatable;
 
 export interface LensESQLDataset {
-  query: string;
+  esql: string;
 }
 
 export type LensDataset = LensDataviewDataset | LensDatatableDataset | LensESQLDataset;
@@ -56,7 +56,7 @@ export type LensDataset = LensDataviewDataset | LensDatatableDataset | LensESQLD
 export interface LensBaseConfig {
   title: string;
   /** default data view id or index pattern to use, it can be overriden on each query */
-  dataset: LensDataset;
+  dataset?: LensDataset;
 }
 
 export interface LensBaseLayer {
@@ -67,10 +67,10 @@ export interface LensBaseLayer {
   useGlobalFilter?: boolean;
   seriesColor?: string;
   dataset?: LensDataset;
-  query: LensLayerQuery;
+  value: LensLayerQuery;
 }
 
-export type LensConfig = (
+export type LensConfig =
   | LensMetricConfig
   | LensGaugeConfig
   | LensPieConfig
@@ -80,9 +80,7 @@ export type LensConfig = (
   | LensTableConfig
   | LensTagCloudConfig
   | LensTreeMapConfig
-  | LensXYConfig
-) &
-  LensBaseConfig;
+  | LensXYConfig;
 
 export interface LensConfigOptions {
   /** if true the output will be embeddable input, else lens attributes */
@@ -135,7 +133,7 @@ export type LensBreakdownConfig =
       ) & { colorPalette?: string }
     >;
 
-export interface LensMetricConfig {
+export interface LensMetricConfigBase {
   chartType: 'metric';
   layers: [
     Identity<
@@ -151,7 +149,9 @@ export interface LensMetricConfig {
   ];
 }
 
-export interface LensGaugeConfig {
+export type LensMetricConfig = Identity<LensBaseConfig & LensMetricConfigBase>;
+
+export interface LensGaugeConfigBase {
   chartType: 'gauge';
   layers: [
     Identity<
@@ -166,7 +166,9 @@ export interface LensGaugeConfig {
   ];
 }
 
-export interface LensPieConfig {
+export type LensGaugeConfig = Identity<LensBaseConfig & LensGaugeConfigBase>;
+
+export interface LensPieConfigBase {
   chartType: 'pie' | 'donut';
   layers: [
     Identity<
@@ -180,7 +182,9 @@ export interface LensPieConfig {
   legend?: Identity<LensLegendConfig>;
 }
 
-export interface LensTreeMapConfig {
+export type LensPieConfig = Identity<LensBaseConfig & LensPieConfigBase>;
+
+export interface LensTreeMapConfigBase {
   chartType: 'treemap';
   layers: [
     Identity<
@@ -193,7 +197,9 @@ export interface LensTreeMapConfig {
   ];
 }
 
-export interface LensTagCloudConfig {
+export type LensTreeMapConfig = Identity<LensBaseConfig & LensTreeMapConfigBase>;
+
+export interface LensTagCloudConfigBase {
   chartType: 'tagcloud';
   layers: [
     Identity<
@@ -206,7 +212,8 @@ export interface LensTagCloudConfig {
   ];
 }
 
-export interface LensRegionMapConfig {
+export type LensTagCloudConfig = Identity<LensBaseConfig & LensTagCloudConfigBase>;
+export interface LensRegionMapConfigBase {
   chartType: 'regionmap';
   layers: [
     Identity<
@@ -219,7 +226,9 @@ export interface LensRegionMapConfig {
   ];
 }
 
-export interface LensMosaicConfig {
+export type LensRegionMapConfig = Identity<LensBaseConfig & LensRegionMapConfigBase>;
+
+export interface LensMosaicConfigBase {
   chartType: 'mosaic';
   layers: [
     Identity<
@@ -234,7 +243,9 @@ export interface LensMosaicConfig {
   ];
 }
 
-export interface LensTableConfig {
+export type LensMosaicConfig = Identity<LensBaseConfig & LensMosaicConfigBase>;
+
+export interface LensTableConfigBase {
   chartType: 'table';
   /** *
    * single layer must be defined (layers: [{ ... }])
@@ -251,7 +262,9 @@ export interface LensTableConfig {
   ];
 }
 
-export interface LensHeatmapConfig {
+export type LensTableConfig = Identity<LensBaseConfig & LensTableConfigBase>;
+
+export interface LensHeatmapConfigBase {
   chartType: 'heatmap';
   /** configure a single layer */
   layers: [
@@ -267,11 +280,14 @@ export interface LensHeatmapConfig {
   legend?: Identity<LensLegendConfig>;
 }
 
+export type LensHeatmapConfig = Identity<LensBaseConfig & LensHeatmapConfigBase>;
+
 export interface LensReferenceLineLayerBase {
   type: 'reference';
   lineThickness?: number;
   color?: string;
   fill?: 'none' | 'above' | 'below';
+  value?: number;
 }
 
 export type LensReferenceLineLayer = LensReferenceLineLayerBase & LensBaseLayer;
@@ -282,24 +298,24 @@ export interface LensAnnotationLayerBaseProps {
   icon?: string;
 }
 
-export interface LensAnnotationLayer {
-  type: 'annotation';
-  index?: string;
-  timeFieldName?: string;
-  events: Array<
-    | Identity<
-        LensAnnotationLayerBaseProps & {
-          datetime: string;
-        }
-      >
-    | Identity<
-        LensAnnotationLayerBaseProps & {
-          field: string;
-          filter: string;
-        }
-      >
-  >;
-}
+export type LensAnnotationLayer = Identity<
+  LensBaseLayer & {
+    type: 'annotation';
+    events: Array<
+      | Identity<
+          LensAnnotationLayerBaseProps & {
+            datetime: string;
+          }
+        >
+      | Identity<
+          LensAnnotationLayerBaseProps & {
+            field: string;
+            filter: string;
+          }
+        >
+    >;
+  }
+>;
 
 export type LensSeriesLayer = Identity<
   LensBaseLayer & {
@@ -310,7 +326,7 @@ export type LensSeriesLayer = Identity<
   }
 >;
 
-export interface LensXYConfig {
+export interface LensXYConfigBase {
   chartType: 'xy';
   layers: Array<LensSeriesLayer | LensAnnotationLayer | LensReferenceLineLayer>;
   legend?: Identity<LensLegendConfig>;
@@ -319,3 +335,5 @@ export interface BuildDependencies {
   dataViewsAPI: DataViewsPublicPluginStart;
   formulaAPI: FormulaPublicApi;
 }
+
+export type LensXYConfig = Identity<LensBaseConfig & LensXYConfigBase>;

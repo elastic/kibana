@@ -8,13 +8,7 @@
 
 import { FormBasedPersistedState, FormulaPublicApi, TagcloudState } from '@kbn/lens-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/public';
-import {
-  BuildDependencies,
-  DEFAULT_LAYER_ID,
-  LensAttributes,
-  LensBaseConfig,
-  LensTagCloudConfig,
-} from '../types';
+import { BuildDependencies, DEFAULT_LAYER_ID, LensAttributes, LensTagCloudConfig } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,
@@ -26,7 +20,7 @@ import { getBreakdownColumn, getFormulaColumn, getValueColumn } from '../columns
 
 const ACCESSOR = 'metric_formula_accessor';
 
-function buildVisualizationState(config: LensTagCloudConfig & LensBaseConfig): TagcloudState {
+function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
   if (config.layers.length !== 1) {
     throw new Error('tag cloud must define a single layer');
   }
@@ -59,7 +53,7 @@ function buildFormulaLayer(
       ...getFormulaColumn(
         ACCESSOR,
         {
-          value: layer.query,
+          value: layer.value,
         },
         dataView,
         formulaAPI
@@ -89,13 +83,13 @@ function getValueColumns(layer: LensTagCloudConfig['layers'][0]) {
   }
 
   return [
-    getValueColumn(ACCESSOR, layer.query),
+    getValueColumn(ACCESSOR, layer.value),
     getValueColumn(`${ACCESSOR}_breakdown`, layer.breakdown as string),
   ];
 }
 
 export async function buildTagCloud(
-  config: LensTagCloudConfig & LensBaseConfig,
+  config: LensTagCloudConfig,
   { dataViewsAPI, formulaAPI }: BuildDependencies
 ): Promise<LensAttributes> {
   const dataviews: Record<string, DataView> = {};
