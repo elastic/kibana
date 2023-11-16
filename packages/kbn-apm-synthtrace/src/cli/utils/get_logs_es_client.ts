@@ -7,17 +7,15 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import { ApmSynthtraceEsClient } from '../../lib/apm/client/apm_synthtrace_es_client';
+import { LogsSynthtraceEsClient } from '../../lib/logs/logs_synthtrace_es_client';
 import { Logger } from '../../lib/utils/create_logger';
 import { RunOptions } from './parse_run_cli_flags';
 
-export function getEsClient({
+export function getLogsEsClient({
   target,
   logger,
-  version,
   concurrency,
 }: Pick<RunOptions, 'concurrency'> & {
-  version: string;
   target: string;
   logger: Logger;
 }) {
@@ -25,12 +23,9 @@ export function getEsClient({
     node: target,
   });
 
-  const apmEsClient = new ApmSynthtraceEsClient({
+  return new LogsSynthtraceEsClient({
     client,
     logger,
-    version,
     concurrency,
   });
-
-  return apmEsClient;
 }
