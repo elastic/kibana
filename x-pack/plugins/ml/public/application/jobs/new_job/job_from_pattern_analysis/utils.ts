@@ -25,7 +25,7 @@ export async function redirectToADJobWizards(
 ) {
   const locator = share.url.locators.get(ML_APP_LOCATOR)!;
 
-  const url = await locator?.getUrl({
+  const url = await locator.getUrl({
     page: ML_PAGES.ANOMALY_DETECTION_CREATE_JOB_FROM_PATTERN_ANALYSIS,
     pageState: {
       categorizationType,
