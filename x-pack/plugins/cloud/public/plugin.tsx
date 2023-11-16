@@ -103,7 +103,13 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   }
 
   public start(coreStart: CoreStart): CloudStart {
-    coreStart.chrome.setHelpSupportUrl(ELASTIC_SUPPORT_LINK);
+    let supportUrl = ELASTIC_SUPPORT_LINK;
+    if (this.config.serverless?.project_id) {
+      supportUrl += '?serverless_project_id=' + this.config.serverless.project_id;
+    } else if (this.config.id) {
+      supportUrl += '?cloud_deployment_id=' + this.config.id;
+    }
+    coreStart.chrome.setHelpSupportUrl(supportUrl);
 
     // Nest all the registered context providers under the Cloud Services Provider.
     // This way, plugins only need to require Cloud's context provider to have all the enriched Cloud services.
