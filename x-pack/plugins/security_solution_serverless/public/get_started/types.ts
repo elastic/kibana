@@ -22,7 +22,13 @@ export interface Badge {
   id: string;
 }
 
-export type StepId = CreateProjectSteps | OverviewSteps | AddIntegrationsSteps | ViewDashboardSteps;
+export type StepId =
+  | CreateProjectSteps
+  | OverviewSteps
+  | AddIntegrationsSteps
+  | ViewDashboardSteps
+  | EnablePrebuiltRulesSteps
+  | ViewAlertsSteps;
 
 export interface Step {
   description?: Array<React.ReactNode | string>;
@@ -85,12 +91,18 @@ export enum OverviewSteps {
 
 export enum AddIntegrationsSteps {
   connectToDataSources = 'connectToDataSources',
+}
+
+export enum EnablePrebuiltRulesSteps {
   enablePrebuiltRules = 'enablePrebuiltRules',
 }
 
 export enum ViewDashboardSteps {
-  viewAlerts = 'viewAlerts',
   analyzeData = 'analyzeData',
+}
+
+export enum ViewAlertsSteps {
+  viewAlerts = 'viewAlerts',
 }
 
 export interface ActiveCard {

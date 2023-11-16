@@ -16,6 +16,8 @@ import {
   AddAndValidateYourDataCardsId,
   GetStartedWithAlertsCardsId,
   CreateProjectSteps,
+  EnablePrebuiltRulesSteps,
+  ViewAlertsSteps,
 } from './types';
 import * as i18n from './translations';
 
@@ -55,7 +57,6 @@ export const overviewVideoSteps = [
         title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
       />
     ),
-    timeInMinutes: 3,
   },
 ];
 
@@ -83,7 +84,7 @@ export const viewDashboardSteps = [
 
 export const enablePrebuildRuleSteps = [
   {
-    id: AddIntegrationsSteps.enablePrebuiltRules,
+    id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
     title: i18n.CONFIGURE_STEP4,
     description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <AddElasticRulesButton />],
     splitPanel: (
@@ -94,7 +95,7 @@ export const enablePrebuildRuleSteps = [
 
 export const viewAlertSteps = [
   {
-    id: ViewDashboardSteps.viewAlerts,
+    id: ViewAlertsSteps.viewAlerts,
     title: i18n.EXPLORE_STEP1,
     description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsButton />],
     splitPanel: <img src={viewAlerts} alt={i18n.EXPLORE_STEP1} height="100%" width="100%" />,

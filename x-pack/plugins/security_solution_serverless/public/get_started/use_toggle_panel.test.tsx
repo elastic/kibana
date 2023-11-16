@@ -10,11 +10,16 @@ import { getStartedStorage } from './storage';
 import { ProductLine } from '../../common/product';
 import type { SecurityProductTypes } from '../../common/config';
 import {
-  ConfigureSteps,
-  ExploreSteps,
-  GetSetUpCardId,
-  IntroductionSteps,
+  QuickStartSectionCardsId,
   SectionId,
+  CreateProjectSteps,
+  OverviewSteps,
+  AddAndValidateYourDataCardsId,
+  AddIntegrationsSteps,
+  ViewDashboardSteps,
+  GetStartedWithAlertsCardsId,
+  ViewAlertsSteps,
+  EnablePrebuiltRulesSteps,
 } from './types';
 
 jest.mock('./storage');
@@ -29,7 +34,9 @@ describe('useTogglePanel', () => {
     jest.clearAllMocks();
 
     (getStartedStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     });
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([
       ProductLine.security,
@@ -39,7 +46,6 @@ describe('useTogglePanel', () => {
   });
 
   test('should initialize state with correct initial values - when no active products from local storage', () => {
-    (getStartedStorage.getAllFinishedStepsFromStorage as jest.Mock).mockReturnValue({});
     (getStartedStorage.getActiveProductsFromStorage as jest.Mock).mockReturnValue([]);
 
     const { result } = renderHook(() => useTogglePanel({ productTypes }));
@@ -47,33 +53,54 @@ describe('useTogglePanel', () => {
     const { state } = result.current;
 
     expect(state.activeProducts).toEqual(new Set([ProductLine.security, ProductLine.endpoint]));
-    expect(state.finishedSteps).toEqual({});
+    expect(state.finishedSteps).toEqual({
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
+    });
 
     expect(state.activeSections).toEqual(
       expect.objectContaining({
-        [SectionId.getSetUp]: {
-          [GetSetUpCardId.introduction]: {
-            id: GetSetUpCardId.introduction,
-            timeInMins: 3,
+        [SectionId.quickStart]: {
+          [QuickStartSectionCardsId.createFirstProject]: {
+            id: QuickStartSectionCardsId.createFirstProject,
+            timeInMins: 0,
+            stepsLeft: 0,
+            activeStepIds: [CreateProjectSteps.createFirstProject],
+          },
+          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+            id: QuickStartSectionCardsId.watchTheOverviewVideo,
+            timeInMins: 0,
             stepsLeft: 1,
-            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
           },
-          [GetSetUpCardId.configure]: {
-            id: GetSetUpCardId.configure,
+        },
+        [SectionId.addAndValidateYourData]: {
+          [AddAndValidateYourDataCardsId.addIntegrations]: {
+            id: AddAndValidateYourDataCardsId.addIntegrations,
             timeInMins: 0,
-            stepsLeft: 4,
-            activeStepIds: [
-              ConfigureSteps.learnAbout,
-              ConfigureSteps.deployElasticAgent,
-              ConfigureSteps.connectToDataSources,
-              ConfigureSteps.enablePrebuiltRules,
-            ],
+            stepsLeft: 1,
+            activeStepIds: [AddIntegrationsSteps.connectToDataSources],
           },
-          [GetSetUpCardId.explore]: {
-            id: GetSetUpCardId.explore,
+          [AddAndValidateYourDataCardsId.viewDashboards]: {
+            id: AddAndValidateYourDataCardsId.viewDashboards,
             timeInMins: 0,
-            stepsLeft: 2,
-            activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
+            stepsLeft: 1,
+            activeStepIds: [ViewDashboardSteps.analyzeData],
+          },
+        },
+        [SectionId.getStartedWithAlerts]: {
+          [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
+            id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
+          },
+          [GetStartedWithAlertsCardsId.viewAlerts]: {
+            id: GetStartedWithAlertsCardsId.viewAlerts,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [ViewAlertsSteps.viewAlerts],
           },
         },
       })
@@ -89,34 +116,53 @@ describe('useTogglePanel', () => {
       new Set([ProductLine.security, ProductLine.cloud, ProductLine.endpoint])
     );
     expect(state.finishedSteps).toEqual({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     });
 
     expect(state.activeSections).toEqual(
       expect.objectContaining({
-        [SectionId.getSetUp]: {
-          [GetSetUpCardId.introduction]: {
-            id: GetSetUpCardId.introduction,
+        [SectionId.quickStart]: {
+          [QuickStartSectionCardsId.createFirstProject]: {
+            id: QuickStartSectionCardsId.createFirstProject,
             timeInMins: 0,
             stepsLeft: 0,
-            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+            activeStepIds: [CreateProjectSteps.createFirstProject],
           },
-          [GetSetUpCardId.configure]: {
-            id: GetSetUpCardId.configure,
+          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+            id: QuickStartSectionCardsId.watchTheOverviewVideo,
             timeInMins: 0,
-            stepsLeft: 4,
-            activeStepIds: [
-              ConfigureSteps.learnAbout,
-              ConfigureSteps.deployElasticAgent,
-              ConfigureSteps.connectToDataSources,
-              ConfigureSteps.enablePrebuiltRules,
-            ],
+            stepsLeft: 1,
+            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
           },
-          [GetSetUpCardId.explore]: {
-            id: GetSetUpCardId.explore,
+        },
+        [SectionId.addAndValidateYourData]: {
+          [AddAndValidateYourDataCardsId.addIntegrations]: {
+            id: AddAndValidateYourDataCardsId.addIntegrations,
             timeInMins: 0,
-            stepsLeft: 2,
-            activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
+            stepsLeft: 1,
+            activeStepIds: [AddIntegrationsSteps.connectToDataSources],
+          },
+          [AddAndValidateYourDataCardsId.viewDashboards]: {
+            id: AddAndValidateYourDataCardsId.viewDashboards,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [ViewDashboardSteps.analyzeData],
+          },
+        },
+        [SectionId.getStartedWithAlerts]: {
+          [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
+            id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
+          },
+          [GetStartedWithAlertsCardsId.viewAlerts]: {
+            id: GetStartedWithAlertsCardsId.viewAlerts,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [ViewAlertsSteps.viewAlerts],
           },
         },
       })
@@ -133,34 +179,53 @@ describe('useTogglePanel', () => {
 
     expect(state.activeProducts).toEqual(new Set([ProductLine.security]));
     expect(state.finishedSteps).toEqual({
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
+      [QuickStartSectionCardsId.createFirstProject]: new Set([
+        CreateProjectSteps.createFirstProject,
+      ]),
     });
 
     expect(state.activeSections).toEqual(
       expect.objectContaining({
-        [SectionId.getSetUp]: {
-          [GetSetUpCardId.introduction]: {
-            id: GetSetUpCardId.introduction,
+        [SectionId.quickStart]: {
+          [QuickStartSectionCardsId.createFirstProject]: {
+            id: QuickStartSectionCardsId.createFirstProject,
             timeInMins: 0,
             stepsLeft: 0,
-            activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+            activeStepIds: [CreateProjectSteps.createFirstProject],
           },
-          [GetSetUpCardId.configure]: {
-            id: GetSetUpCardId.configure,
+          [QuickStartSectionCardsId.watchTheOverviewVideo]: {
+            id: QuickStartSectionCardsId.watchTheOverviewVideo,
             timeInMins: 0,
-            stepsLeft: 4,
-            activeStepIds: [
-              ConfigureSteps.learnAbout,
-              ConfigureSteps.deployElasticAgent,
-              ConfigureSteps.connectToDataSources,
-              ConfigureSteps.enablePrebuiltRules,
-            ],
+            stepsLeft: 1,
+            activeStepIds: [OverviewSteps.getToKnowElasticSecurity],
           },
-          [GetSetUpCardId.explore]: {
-            id: GetSetUpCardId.explore,
+        },
+        [SectionId.addAndValidateYourData]: {
+          [AddAndValidateYourDataCardsId.addIntegrations]: {
+            id: AddAndValidateYourDataCardsId.addIntegrations,
             timeInMins: 0,
-            stepsLeft: 2,
-            activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
+            stepsLeft: 1,
+            activeStepIds: [AddIntegrationsSteps.connectToDataSources],
+          },
+          [AddAndValidateYourDataCardsId.viewDashboards]: {
+            id: AddAndValidateYourDataCardsId.viewDashboards,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [ViewDashboardSteps.analyzeData],
+          },
+        },
+        [SectionId.getStartedWithAlerts]: {
+          [GetStartedWithAlertsCardsId.enablePrebuiltRules]: {
+            id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [EnablePrebuiltRulesSteps.enablePrebuiltRules],
+          },
+          [GetStartedWithAlertsCardsId.viewAlerts]: {
+            id: GetStartedWithAlertsCardsId.viewAlerts,
+            timeInMins: 0,
+            stepsLeft: 1,
+            activeStepIds: [ViewAlertsSteps.viewAlerts],
           },
         },
       })
@@ -174,9 +239,9 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepClicked({
-        stepId: IntroductionSteps.getToKnowElasticSecurity,
-        cardId: GetSetUpCardId.introduction,
-        sectionId: SectionId.getSetUp,
+        stepId: CreateProjectSteps.createFirstProject,
+        cardId: QuickStartSectionCardsId.createFirstProject,
+        sectionId: SectionId.quickStart,
         isExpanded: true,
       });
     });
@@ -191,17 +256,17 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepClicked({
-        stepId: IntroductionSteps.getToKnowElasticSecurity,
-        cardId: GetSetUpCardId.introduction,
-        sectionId: SectionId.getSetUp,
+        stepId: CreateProjectSteps.createFirstProject,
+        cardId: QuickStartSectionCardsId.createFirstProject,
+        sectionId: SectionId.quickStart,
         isExpanded: true,
       });
     });
 
     expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.addExpandedCardStepToStorage).toHaveBeenCalledWith(
-      GetSetUpCardId.introduction,
-      IntroductionSteps.getToKnowElasticSecurity
+      QuickStartSectionCardsId.createFirstProject,
+      CreateProjectSteps.createFirstProject
     );
   });
 
@@ -212,17 +277,17 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepClicked({
-        stepId: IntroductionSteps.getToKnowElasticSecurity,
-        cardId: GetSetUpCardId.introduction,
-        sectionId: SectionId.getSetUp,
+        stepId: CreateProjectSteps.createFirstProject,
+        cardId: QuickStartSectionCardsId.createFirstProject,
+        sectionId: SectionId.quickStart,
         isExpanded: false,
       });
     });
 
     expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.removeExpandedCardStepFromStorage).toHaveBeenCalledWith(
-      GetSetUpCardId.introduction,
-      IntroductionSteps.getToKnowElasticSecurity
+      QuickStartSectionCardsId.createFirstProject,
+      CreateProjectSteps.createFirstProject
     );
   });
 
@@ -233,16 +298,16 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepButtonClicked({
-        stepId: IntroductionSteps.getToKnowElasticSecurity,
-        cardId: GetSetUpCardId.introduction,
-        sectionId: SectionId.getSetUp,
+        stepId: CreateProjectSteps.createFirstProject,
+        cardId: QuickStartSectionCardsId.createFirstProject,
+        sectionId: SectionId.quickStart,
       });
     });
 
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.addFinishedStepToStorage).toHaveBeenCalledWith(
-      GetSetUpCardId.introduction,
-      IntroductionSteps.getToKnowElasticSecurity
+      QuickStartSectionCardsId.createFirstProject,
+      CreateProjectSteps.createFirstProject
     );
   });
 
@@ -253,17 +318,17 @@ describe('useTogglePanel', () => {
 
     act(() => {
       onStepButtonClicked({
-        stepId: IntroductionSteps.getToKnowElasticSecurity,
-        cardId: GetSetUpCardId.introduction,
-        sectionId: SectionId.getSetUp,
+        stepId: CreateProjectSteps.createFirstProject,
+        cardId: QuickStartSectionCardsId.createFirstProject,
+        sectionId: SectionId.quickStart,
         undo: true,
       });
     });
 
     expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledTimes(1);
     expect(getStartedStorage.removeFinishedStepFromStorage).toHaveBeenCalledWith(
-      GetSetUpCardId.introduction,
-      IntroductionSteps.getToKnowElasticSecurity
+      QuickStartSectionCardsId.createFirstProject,
+      CreateProjectSteps.createFirstProject
     );
   });
 

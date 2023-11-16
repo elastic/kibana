@@ -98,7 +98,7 @@ describe('isStepActive', () => {
 
   it('should return true if the card has no product type requirement', () => {
     const step = {
-      id: AddIntegrationsSteps.enablePrebuiltRules,
+      id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
     } as Step;
     const activeProducts = new Set([ProductLine.security]);
 
@@ -163,7 +163,7 @@ describe('setupActiveSections', () => {
         SectionId.getStartedWithAlerts,
         activeSections
       ).activeStepIds
-    ).toEqual([AddIntegrationsSteps.enablePrebuiltRules]);
+    ).toEqual([EnablePrebuiltRulesSteps.enablePrebuiltRules]);
 
     expect(
       getCard(
@@ -171,7 +171,7 @@ describe('setupActiveSections', () => {
         SectionId.getStartedWithAlerts,
         activeSections
       ).activeStepIds
-    ).toEqual([ViewDashboardSteps.viewAlerts]);
+    ).toEqual([ViewAlertsSteps.viewAlerts]);
   });
 
   it('should set up active cards based on finished steps', () => {
