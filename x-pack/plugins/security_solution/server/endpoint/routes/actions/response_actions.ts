@@ -20,7 +20,7 @@ import {
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
   GetProcessesRouteRequestSchema,
-  NoParametersV2RequestSchema,
+  IsolateRouteV2RequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -119,27 +119,6 @@ export function registerResponseActionRoutes(
       )
     );
 
-  // FIXME: delete and add `.version()` to the above definition once Core allows new values
-  router.versioned
-    .post({
-      access: 'public',
-      path: `${ISOLATE_HOST_ROUTE_V2}_v2`, // << for testing only
-      options: { authRequired: true, tags: ['access:securitySolution'] },
-    })
-    .addVersion(
-      {
-        version: apiVersion.public.v8_13_0,
-        validate: {
-          request: NoParametersV2RequestSchema,
-        },
-      },
-      withEndpointAuthz(
-        { all: ['canIsolateHost'] },
-        logger,
-        responseActionRequestHandler(endpointContext, 'isolate')
-      )
-    );
-
   router.versioned
     .post({
       access: 'public',
@@ -151,6 +130,48 @@ export function registerResponseActionRoutes(
         version: '2023-10-31',
         validate: {
           request: UnisolateRouteRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canUnIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'unisolate')
+      )
+    );
+
+  // FIXME: delete and add `.version()` to the above definition once Core allows new values
+  router.versioned
+    .post({
+      access: 'public',
+      path: `${ISOLATE_HOST_ROUTE_V2}_v2`, // << for testing only
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: apiVersion.public.v8_13_0,
+        validate: {
+          request: IsolateRouteV2RequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'isolate')
+      )
+    );
+
+  // FIXME: delete and add `.version()` to the above definition once Core allows new values
+  router.versioned
+    .post({
+      access: 'public',
+      path: `${UNISOLATE_HOST_ROUTE_V2}_v2`,
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: apiVersion.public.v8_13_0,
+        validate: {
+          request: IsolateRouteV2RequestSchema,
         },
       },
       withEndpointAuthz(

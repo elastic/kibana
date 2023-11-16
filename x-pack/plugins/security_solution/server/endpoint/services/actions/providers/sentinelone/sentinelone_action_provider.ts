@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { NoParametersRequestSchema, NoParametersV2RequestSchema } from './common/base';
+import { BaseActionsProvider } from '../../../../lib/response_actions/base_actions_provider';
 
-export const IsolateRouteRequestSchema = NoParametersRequestSchema;
-
-export const IsolateRouteV2RequestSchema = NoParametersV2RequestSchema;
+/** Supports sending response actions to sentinel one agents */
+export class SentinelOneActionProvider extends BaseActionsProvider {
+  // FIXME:PT implement
+}
