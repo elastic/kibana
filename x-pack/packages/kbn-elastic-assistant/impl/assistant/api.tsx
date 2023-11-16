@@ -58,7 +58,7 @@ export const fetchConnectorExecuteAction = async ({
   // tracked here: https://github.com/elastic/security-team/issues/7363
   // In part 3 I will make enhancements to langchain to introduce streaming
   // Once implemented, invokeAI can be removed
-  const isStream = true; // !assistantLangChain;
+  const isStream = true; // !assistantLangChain
   const requestBody = isStream
     ? {
         params: {
