@@ -28,7 +28,9 @@ import {
   serializeComponentTemplate,
 } from '../../../shared_imports';
 import { MANAGED_BY_FLEET } from '../../../constants';
+import { getLifecycleValue } from '../../../../../lib/data_streams';
 
+const INFINITE_AS_ICON = true;
 const { stripEmptyFields } = serializers;
 
 const getDescriptionText = (data: any) => {
@@ -122,6 +124,17 @@ export const StepReview: React.FunctionComponent<Props> = React.memo(
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
                 {getDescriptionText(serializedTemplate?.aliases)}
+              </EuiDescriptionListDescription>
+
+              {/* Data retention */}
+              <EuiDescriptionListTitle>
+                <FormattedMessage
+                  id="xpack.idxMgmt.componentTemplateForm.stepReview.summaryTab.dataRetentionLabel"
+                  defaultMessage="Data retention"
+                />
+              </EuiDescriptionListTitle>
+              <EuiDescriptionListDescription>
+                {getLifecycleValue(serializedTemplate?.lifecycle, INFINITE_AS_ICON)}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>

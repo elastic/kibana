@@ -294,6 +294,9 @@
                 "$ref": "#/components/schemas/run_connector_request"
               },
               "examples": {
+                "runEmailConnectorRequest": {
+                  "$ref": "#/components/examples/run_email_connector_request"
+                },
                 "runIndexConnectorRequest": {
                   "$ref": "#/components/examples/run_index_connector_request"
                 },
@@ -356,6 +359,9 @@
                   }
                 },
                 "examples": {
+                  "runEmailConnectorResponse": {
+                    "$ref": "#/components/examples/run_email_connector_response"
+                  },
                   "runIndexConnectorResponse": {
                     "$ref": "#/components/examples/run_index_connector_response"
                   },
@@ -4770,7 +4776,66 @@
           }
         }
       },
-      "run_connector_params_level_message": {
+      "run_connector_params_message_email": {
+        "title": "Email connector parameters",
+        "description": "Test an action that sends an email message. There must be at least one recipient in `to`, `cc`, or `bcc`.\n",
+        "type": "object",
+        "anyOf": [
+          {
+            "required": [
+              "bcc",
+              "message",
+              "subject"
+            ]
+          },
+          {
+            "required": [
+              "cc",
+              "message",
+              "subject"
+            ]
+          },
+          {
+            "required": [
+              "to",
+              "message",
+              "subject"
+            ]
+          }
+        ],
+        "properties": {
+          "bcc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of \"blind carbon copy\" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format\n"
+          },
+          "cc": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "description": "A list of \"carbon copy\" email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format \n"
+          },
+          "message": {
+            "type": "string",
+            "description": "The email message text. Markdown format is supported."
+          },
+          "subject": {
+            "type": "string",
+            "description": "The subject line of the email."
+          },
+          "to": {
+            "type": "array",
+            "description": "A list of email addresses. Addresses can be specified in `user@host-name` format or in name `<user@host-name>` format.\n",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      },
+      "run_connector_params_message_serverlog": {
         "title": "Server log connector parameters",
         "description": "Test an action that writes an entry to the Kibana server log.",
         "type": "object",
@@ -5448,7 +5513,10 @@
                 "$ref": "#/components/schemas/run_connector_params_documents"
               },
               {
-                "$ref": "#/components/schemas/run_connector_params_level_message"
+                "$ref": "#/components/schemas/run_connector_params_message_email"
+              },
+              {
+                "$ref": "#/components/schemas/run_connector_params_message_serverlog"
               },
               {
                 "title": "Subaction parameters",
@@ -5729,6 +5797,25 @@
           }
         }
       },
+      "run_email_connector_request": {
+        "summary": "Send an email message from an email connector.",
+        "value": {
+          "params": {
+            "bcc": [
+              "user1@example.com"
+            ],
+            "cc": [
+              "user2@example.com",
+              "user3@example.com"
+            ],
+            "message": "Test email message.",
+            "subject": "Test message subject",
+            "to": [
+              "user4@example.com"
+            ]
+          }
+        }
+      },
       "run_index_connector_request": {
         "summary": "Run an index connector.",
         "value": {
@@ -5793,6 +5880,36 @@
               }
             }
           }
+        }
+      },
+      "run_email_connector_response": {
+        "summary": "Response for sending a message from an email connector.",
+        "value": {
+          "connector_id": "7fc7b9a0-ecc9-11ec-8736-e7d63118c907",
+          "data": {
+            "accepted": [
+              "user1@example.com",
+              "user2@example.com",
+              "user3@example.com",
+              "user4@example.com"
+            ],
+            "envelope": {
+              "from": "tester@example.com",
+              "to": [
+                "user1@example.com",
+                "user2@example.com",
+                "user3@example.com",
+                "user4@example.com"
+              ]
+            },
+            "envelopeTime": 8,
+            "messageTime": 3,
+            "messageSize": 729,
+            "response": "250 Message queued as QzEXKcGJ",
+            "messageId": "<08a92d29-642a-0706-750c-de5996bd5cf3@example.com>",
+            "rejected": []
+          },
+          "status": "ok"
         }
       },
       "run_index_connector_response": {

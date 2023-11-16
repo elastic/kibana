@@ -7,17 +7,13 @@
 
 import { ElasticsearchClientMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
+import { Pagination } from '@kbn/slo-schema/src/models/pagination';
 import {
   aHitFromSummaryIndex,
   aHitFromTempSummaryIndex,
   aSummaryDocument,
 } from './fixtures/summary_search_document';
-import {
-  DefaultSummarySearchClient,
-  Pagination,
-  Sort,
-  SummarySearchClient,
-} from './summary_search_client';
+import { DefaultSummarySearchClient, Sort, SummarySearchClient } from './summary_search_client';
 
 const defaultSort: Sort = {
   field: 'sli_value',

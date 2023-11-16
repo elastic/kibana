@@ -8,7 +8,6 @@
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
 
 import { ConfigSchema } from './config';
-import { EncryptedSavedObjectsPlugin } from './plugin';
 
 export type { EncryptedSavedObjectTypeRegistration, AttributeToEncrypt } from './crypto';
 export { EncryptionError, EncryptionErrorOperation } from './crypto';
@@ -27,5 +26,7 @@ export type {
 export const config: PluginConfigDescriptor = {
   schema: ConfigSchema,
 };
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new EncryptedSavedObjectsPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { EncryptedSavedObjectsPlugin } = await import('./plugin');
+  return new EncryptedSavedObjectsPlugin(initializerContext);
+};

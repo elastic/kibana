@@ -79,6 +79,19 @@
           },
           {
             "parentPluginId": "securitySolution",
+            "id": "def-public.Plugin.buildFlavor",
+            "type": "string",
+            "tags": [],
+            "label": "buildFlavor",
+            "description": [
+              "\nWhether the environment is 'serverless' or 'traditional'"
+            ],
+            "path": "x-pack/plugins/security_solution/public/plugin.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "securitySolution",
             "id": "def-public.Plugin.prebuiltRulesPackageVersion",
             "type": "string",
             "tags": [],
