@@ -8,4 +8,4 @@
 
 import { OpenTelemetryUsageTest } from './plugin';
 
-export const plugin = () => new OpenTelemetryUsageTest();
+export const plugin = async () => new OpenTelemetryUsageTest();

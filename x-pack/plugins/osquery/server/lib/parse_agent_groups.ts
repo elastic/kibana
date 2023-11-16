@@ -49,7 +49,7 @@ export const parseAgentSelection = async (
   } = agentSelection;
   const agentService = context.service.getAgentService()?.asInternalUser;
   const packagePolicyService = context.service.getPackagePolicyService();
-  const kueryFragments = [];
+  const kueryFragments = ['status:online'];
 
   if (agentService && packagePolicyService) {
     const osqueryPolicies = await aggregateResults(async (page, perPage) => {

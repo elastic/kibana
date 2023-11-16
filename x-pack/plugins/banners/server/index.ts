@@ -6,7 +6,9 @@
  */
 
 import { PluginInitializer } from '@kbn/core/server';
-import { BannersPlugin } from './plugin';
 
 export { config } from './config';
-export const plugin: PluginInitializer<{}, {}, {}, {}> = (context) => new BannersPlugin(context);
+export const plugin: PluginInitializer<{}, {}, {}, {}> = async (context) => {
+  const { BannersPlugin } = await import('./plugin');
+  return new BannersPlugin(context);
+};

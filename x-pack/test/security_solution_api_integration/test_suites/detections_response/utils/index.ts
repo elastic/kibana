@@ -11,6 +11,7 @@ export * from './actions';
 export * from './data_generator';
 export * from './telemetry';
 export * from './event_log';
+export * from './machine_learning';
 
 export * from './get_index_name_from_load';
 export * from './count_down_test';
