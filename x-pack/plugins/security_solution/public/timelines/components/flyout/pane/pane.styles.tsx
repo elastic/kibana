@@ -7,7 +7,14 @@
 import React from 'react';
 import { css } from '@emotion/css';
 import { Global } from '@emotion/react';
-import { useEuiTheme, euiAnimFadeIn, transparentize, euiBackgroundColor } from '@elastic/eui';
+import {
+  useEuiTheme,
+  euiAnimFadeIn,
+  transparentize,
+  euiBackgroundColor,
+  euiCanAnimate,
+  euiAnimSlideInUp,
+} from '@elastic/eui';
 
 export const usePaneStyles = () => {
   const EuiTheme = useEuiTheme();
@@ -22,10 +29,12 @@ export const usePaneStyles = () => {
     display: flex;
     align-items: center;
     justify-content: center;
-    padding-bottom: 10vh;
-    animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;
     background: ${transparentize(euiTheme.colors.ink, 0.5)};
     z-index: ${euiTheme.levels.flyout};
+
+    ${euiCanAnimate} {
+      animation: ${euiAnimFadeIn} ${euiTheme.animation.fast} ease-in;
+    }
 
     &.timeline-wrapper--hidden {
       display: none;
@@ -40,6 +49,10 @@ export const usePaneStyles = () => {
       bottom: 0;
       left: 0;
       background: ${euiBackgroundColor(EuiTheme, 'plain')};
+      ${euiCanAnimate} {
+        animation: ${euiAnimSlideInUp(euiTheme.size.xxl)} ${euiTheme.animation.normal}
+          cubic-bezier(0.39, 0.575, 0.565, 1);
+      }
     }
 
     &:not(.timeline-wrapper--full-screen) .timeline-flyout {

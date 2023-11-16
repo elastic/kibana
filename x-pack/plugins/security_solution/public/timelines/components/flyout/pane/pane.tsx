@@ -49,10 +49,10 @@ const FlyoutPaneComponent: React.FC<FlyoutPaneComponentProps> = ({
               rowRenderers={defaultRowRenderers}
               timelineId={timelineId}
             />
-            {visible && <OverflowHiddenGlobalStyles />}
           </div>
         </div>
       </EuiPortal>
+      {visible && <OverflowHiddenGlobalStyles />}
     </div>
   );
 };
