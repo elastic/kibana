@@ -137,7 +137,7 @@ export async function createOrUpdatePreconfiguredOutputs(
   );
 }
 
-async function hash(str) {
+async function hash(str: string) {
   argon2.hash(str, {
     type: argon2.argon2id,
     memoryCost: 19456,
