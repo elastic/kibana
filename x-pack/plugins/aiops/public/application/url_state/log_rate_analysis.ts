@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import type { WindowParameters } from '@kbn/aiops-utils';
+
 import { getDefaultAiOpsListState, type AiOpsFullIndexBasedAppState } from './common';
 
 export interface LogRateAnalysisPageUrlState {
   pageKey: 'logRateAnalysis';
   pageUrlState: LogRateAnalysisAppState;
 }
-
+/**
+ * To avoid long urls, we store the window parameters in the url state not with
+ * their full parameters names but with abbrevations. `windowParameters2AppState` and
+ * `appState2WindowParameters` are used to transform the data structure.
+ */
 export interface LogRateAnalysisAppState extends AiOpsFullIndexBasedAppState {
   /** Window parameters */
   wp?: {
@@ -25,6 +31,30 @@ export interface LogRateAnalysisAppState extends AiOpsFullIndexBasedAppState {
     dMax: number;
   };
 }
+
+/**
+ * Transforms a full window parameters object to the abbreviated url state version.
+ */
+export const windowParameters2AppState = (wp?: WindowParameters): LogRateAnalysisAppState['wp'] =>
+  wp && {
+    bMin: wp.baselineMin,
+    bMax: wp.baselineMax,
+    dMin: wp.deviationMin,
+    dMax: wp.deviationMax,
+  };
+
+/**
+ * Transforms an abbreviated url state version of window parameters to its full version.
+ */
+export const appState2WindowParameters = (
+  wp: LogRateAnalysisAppState['wp']
+): WindowParameters | undefined =>
+  wp && {
+    baselineMin: wp.bMin,
+    baselineMax: wp.bMax,
+    deviationMin: wp.dMin,
+    deviationMax: wp.dMax,
+  };
 
 export const getDefaultLogRateAnalysisAppState = (
   overrides?: Partial<LogRateAnalysisAppState>
