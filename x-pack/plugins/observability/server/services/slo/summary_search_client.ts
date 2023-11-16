@@ -6,7 +6,7 @@
  */
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { ALL_VALUE } from '@kbn/slo-schema';
+import { ALL_VALUE, Paginated, Pagination } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import _ from 'lodash';
 import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
@@ -30,13 +30,6 @@ interface EsSummaryDocument {
   isTempDoc: boolean;
 }
 
-export interface Paginated<T> {
-  total: number;
-  page: number;
-  perPage: number;
-  results: T[];
-}
-
 export interface SLOSummary {
   id: SLOId;
   instanceId: string;
@@ -47,11 +40,6 @@ export type SortField = 'error_budget_consumed' | 'error_budget_remaining' | 'sl
 export interface Sort {
   field: SortField;
   direction: 'asc' | 'desc';
-}
-
-export interface Pagination {
-  page: number;
-  perPage: number;
 }
 
 export interface SummarySearchClient {
