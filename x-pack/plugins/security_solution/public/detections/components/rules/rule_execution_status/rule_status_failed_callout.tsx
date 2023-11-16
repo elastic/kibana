@@ -16,6 +16,7 @@ import { RuleExecutionStatusEnum } from '../../../../../common/api/detection_eng
 
 import * as i18n from './translations';
 import * as i18nAssistant from '../../../pages/detection_engine/rules/translations';
+import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 interface RuleStatusFailedCallOutProps {
   ruleName: string | undefined;
@@ -32,6 +33,7 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
   message,
   status,
 }) => {
+  const { hasAssistantPrivilege } = useAssistantAvailability();
   const { shouldBeDisplayed, color, title } = getPropsByStatus(status);
   const getPromptContext = useCallback(
     async () =>
@@ -73,19 +75,21 @@ const RuleStatusFailedCallOutComponent: React.FC<RuleStatusFailedCallOutProps> =
         >
           {message}
         </EuiCodeBlock>
-        <EuiButton color={color} size="s">
-          <NewChat
-            category="detection-rules"
-            color={color}
-            conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
-            description={i18n.ASK_ASSISTANT_DESCRIPTION}
-            getPromptContext={getPromptContext}
-            suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
-            tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
-          >
-            {i18n.ASK_ASSISTANT_ERROR_BUTTON}
-          </NewChat>
-        </EuiButton>
+        {hasAssistantPrivilege && (
+          <EuiButton color={color} size="s">
+            <NewChat
+              category="detection-rules"
+              color={color}
+              conversationId={i18nAssistant.DETECTION_RULES_CONVERSATION_ID}
+              description={i18n.ASK_ASSISTANT_DESCRIPTION}
+              getPromptContext={getPromptContext}
+              suggestedUserPrompt={i18n.ASK_ASSISTANT_USER_PROMPT}
+              tooltip={i18n.ASK_ASSISTANT_TOOLTIP}
+            >
+              {i18n.ASK_ASSISTANT_ERROR_BUTTON}
+            </NewChat>
+          </EuiButton>
+        )}
       </EuiCallOut>
     </div>
   );
