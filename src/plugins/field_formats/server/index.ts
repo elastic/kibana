@@ -7,10 +7,10 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { FieldFormatsPlugin } from './plugin';
 export { DateFormat, DateNanosFormat } from './lib/converters';
 
-export function plugin(initializerContext: PluginInitializerContext) {
+export async function plugin(initializerContext: PluginInitializerContext) {
+  const { FieldFormatsPlugin } = await import('./plugin');
   return new FieldFormatsPlugin(initializerContext);
 }
 
