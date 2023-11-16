@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { ApplicationStart, ToastsSetup } from '@kbn/core/public';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import { UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
-import { ReportingAPIClient } from '../lib/reporting_api_client';
-import { ClientConfigType } from '../plugin';
+import type { ApplicationStart, ToastsSetup } from '@kbn/core/public';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { ClientConfigType } from '@kbn/reporting-public';
+import type { UseIlmPolicyStatusReturn } from '../lib/ilm_policy_status_context';
+import type { ReportingAPIClient } from '../lib/reporting_api_client';
 import type { SharePluginSetup } from '../shared_imports';
 
 export interface ListingProps {
