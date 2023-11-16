@@ -53,7 +53,7 @@ export const KibanaNoDataPageKibanaProvider: FC<KibanaNoDataPageKibanaDependenci
     hasUserDataView: dataViews.hasData.hasUserDataView,
   };
 
-  console.log('\n\n\n\n\n\n\n is this used')
+  console.log('\n\n\n\n\n\n\n is this used');
   return (
     <KibanaNoDataPageContext.Provider value={value}>
       <NoDataViewsPromptKibanaProvider {...dependencies}>

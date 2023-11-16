@@ -64,11 +64,11 @@ export interface NoDataViewsPromptKibanaDependencies {
   discover: {
     locator: {
       navigate: {
-        savedSearchId: string,
-        indexPatternId: string,
-      }
-    }
-  }
+        savedSearchId: string;
+        indexPatternId: string;
+      };
+    };
+  };
 }
 
 export interface NoDataViewsPromptComponentProps {
