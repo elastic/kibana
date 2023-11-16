@@ -61,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorCloseButton();
       });
 
-      it.skip('can create a new by-reference links panel', async () => {
+      it('can create a new by-reference links panel', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAddNewEmbeddableLink('links');
 
