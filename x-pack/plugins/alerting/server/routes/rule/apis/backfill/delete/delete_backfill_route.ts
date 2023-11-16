@@ -7,41 +7,34 @@
 
 import { IRouter } from '@kbn/core/server';
 import {
-  scheduleBackfillRequestBodySchemaV1,
-  ScheduleBackfillRequestBodyV1,
-} from '../../../../../../common/routes/rule/apis/backfill/schedule';
+  deleteBackfillRequestParamsSchemaV1,
+  DeleteBackfillRequestParamsV1,
+} from '../../../../../../common/routes/rule/apis/backfill/delete';
 import { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
 import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../../types';
-import { transformRequestV1 } from './transforms';
 
-export const scheduleBackfillRoute = (
+export const deleteBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
-  router.post(
+  router.delete(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/ad_hoc_run/_schedule`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/{id}`,
       validate: {
-        body: scheduleBackfillRequestBodySchemaV1,
+        params: deleteBackfillRequestParamsSchemaV1,
       },
     },
     router.handleLegacyErrors(
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const rulesClient = (await context.alerting).getRulesClient();
-        const body: ScheduleBackfillRequestBodyV1 = req.body;
+        const params: DeleteBackfillRequestParamsV1 = req.params;
 
-        const result = await rulesClient.scheduleBackfill(transformRequestV1(body));
-        // const response: ScheduleAdHocRuleRunResponseV1 = {
-        //   body: transformListTypesResponseV1(result),
-        // };
-        // return res.ok(response);
-        return res.ok({
-          body: result,
-        });
+        await rulesClient.deleteBackfill(params);
+        return res.noContent();
       })
     )
   );

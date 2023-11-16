@@ -12,5 +12,5 @@ export type ScheduleBackfillRequestBody = TypeOf<typeof scheduleBackfillRequestB
 export type ScheduleBackfillResponseBody = TypeOf<typeof scheduleBackfillResponseBodySchemaV1>;
 
 export interface ScheduleBackfillResponse {
-  body: ScheduleBackfillRequestBody;
+  body: ScheduleBackfillResponseBody;
 }

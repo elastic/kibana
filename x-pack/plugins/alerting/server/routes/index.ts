@@ -62,9 +62,11 @@ import { registerRulesValueSuggestionsRoute } from './suggestions/values_suggest
 import { registerFieldsRoute } from './suggestions/fields_rules';
 import { bulkGetMaintenanceWindowRoute } from './maintenance_window/apis/bulk_get/bulk_get_maintenance_windows_route';
 import { registerAlertsValueSuggestionsRoute } from './suggestions/values_suggestion_alerts';
-import { scheduleBackfill } from './rule/apis/backfill/schedule/schedule_backfill_route';
 import { getQueryDelaySettingsRoute } from './rules_settings/apis/get/get_query_delay_settings';
 import { updateQueryDelaySettingsRoute } from './rules_settings/apis/update/update_query_delay_settings';
+import { scheduleBackfillRoute } from './rule/apis/backfill/schedule/schedule_backfill_route';
+import { deleteBackfillRoute } from './rule/apis/backfill/delete/delete_backfill_route';
+import { getBackfillRoute } from './rule/apis/backfill/get/get_backfill_route';
 
 export interface RouteOptions {
   router: IRouter<AlertingRequestHandlerContext>;
@@ -140,5 +142,7 @@ export function defineRoutes(opts: RouteOptions) {
   updateQueryDelaySettingsRoute(router, licenseState);
 
   // backfill rule runs
-  scheduleBackfill(router, licenseState);
+  scheduleBackfillRoute(router, licenseState);
+  getBackfillRoute(router, licenseState);
+  deleteBackfillRoute(router, licenseState);
 }

@@ -71,6 +71,12 @@ import {
 } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
 import { scheduleBackfill } from '../application/rule/methods/backfill/schedule';
 import { ScheduleBackfillOptions } from '../application/rule/methods/backfill/schedule/types';
+import { GetBackfillOptions } from '../application/rule/methods/backfill/get/types';
+import { DeleteBackfillOptions } from '../application/rule/methods/backfill/delete/types';
+import { getBackfill } from '../application/rule/methods/backfill/get';
+import { deleteBackfill } from '../application/rule/methods/backfill/delete';
+import { FindBackfillsOptions } from '../application/rule/methods/backfill/find/types';
+import { findBackfills } from '../application/rule/methods/backfill/find';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -185,6 +191,12 @@ export class RulesClient {
 
   public scheduleBackfill = (options: ScheduleBackfillOptions) =>
     scheduleBackfill(this.context, options);
+
+  public getBackfill = (options: GetBackfillOptions) => getBackfill(this.context, options);
+
+  public findBackfills = (options: FindBackfillsOptions) => findBackfills(this.context, options);
+
+  public deleteBackfill = (options: DeleteBackfillOptions) => deleteBackfill(this.context, options);
 
   public getSpaceId(): string | undefined {
     return this.context.spaceId;
