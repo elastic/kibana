@@ -48,7 +48,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('can add a lens panel by value', async () => {
-      await PageObjects.lens.createAndAddLensFromDashboard({});
+      await PageObjects.lens.createAndAddLensFromDashboard({ ignoreTimeFilter: true });
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(1);
     });
