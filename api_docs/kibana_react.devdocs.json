@@ -3540,55 +3540,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.ToolbarButton",
-        "type": "Function",
-        "tags": [],
-        "label": "ToolbarButton",
-        "description": [],
-        "signature": [
-          "({ children, className, fontWeight, size, hasArrow, groupPosition, dataTestSubj, ...rest }: React.PropsWithChildren<",
-          {
-            "pluginId": "kibanaReact",
-            "scope": "public",
-            "docId": "kibKibanaReactPluginApi",
-            "section": "def-public.ToolbarButtonProps",
-            "text": "ToolbarButtonProps"
-          },
-          ">) => JSX.Element"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "kibanaReact",
-            "id": "def-public.ToolbarButton.$1",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "{\n  children,\n  className,\n  fontWeight = 'normal',\n  size = 'm',\n  hasArrow = true,\n  groupPosition = 'none',\n  dataTestSubj = '',\n  ...rest\n}",
-            "description": [],
-            "signature": [
-              "React.PropsWithChildren<",
-              {
-                "pluginId": "kibanaReact",
-                "scope": "public",
-                "docId": "kibKibanaReactPluginApi",
-                "section": "def-public.ToolbarButtonProps",
-                "text": "ToolbarButtonProps"
-              },
-              ">"
-            ],
-            "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.UrlTemplateEditor",
         "type": "Function",
         "tags": [],
@@ -5338,67 +5289,6 @@
       },
       {
         "parentPluginId": "kibanaReact",
-        "id": "def-public.POSITIONS",
-        "type": "Array",
-        "tags": [],
-        "label": "POSITIONS",
-        "description": [],
-        "signature": [
-          "(\"none\" | \"right\" | \"left\" | \"center\")[]"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.TOOLBAR_BUTTON_SIZES",
-        "type": "Array",
-        "tags": [],
-        "label": "TOOLBAR_BUTTON_SIZES",
-        "description": [],
-        "signature": [
-          "(\"m\" | \"s\" | undefined)[]"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.ToolbarButtonProps",
-        "type": "Type",
-        "tags": [],
-        "label": "ToolbarButtonProps",
-        "description": [],
-        "signature": [
-          "((",
-          "DisambiguateSet",
-          "<",
-          "EuiButtonPropsForAnchor",
-          ", ",
-          "EuiButtonPropsForButton",
-          "> & ",
-          "EuiButtonProps",
-          " & { onClick?: React.MouseEventHandler<HTMLButtonElement> | undefined; } & React.ButtonHTMLAttributes<HTMLButtonElement> & { buttonRef?: React.Ref<HTMLButtonElement> | undefined; }) | (",
-          "DisambiguateSet",
-          "<",
-          "EuiButtonPropsForButton",
-          ", ",
-          "EuiButtonPropsForAnchor",
-          "> & ",
-          "EuiButtonProps",
-          " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })) & { fontWeight?: Weights | undefined; size?: \"m\" | \"s\" | undefined; hasArrow?: boolean | undefined; groupPosition?: \"none\" | \"right\" | \"left\" | \"center\" | undefined; dataTestSubj?: string | undefined; }"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
         "id": "def-public.Value",
         "type": "Type",
         "tags": [],
@@ -5408,21 +5298,6 @@
           "[string | number, string | number]"
         ],
         "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "kibanaReact",
-        "id": "def-public.WEIGHTS",
-        "type": "Array",
-        "tags": [],
-        "label": "WEIGHTS",
-        "description": [],
-        "signature": [
-          "Weights[]"
-        ],
-        "path": "src/plugins/kibana_react/public/toolbar_button/toolbar_button.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
