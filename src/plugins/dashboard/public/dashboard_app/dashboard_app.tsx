@@ -40,6 +40,7 @@ import { useDashboardOutcomeValidation } from './hooks/use_dashboard_outcome_val
 import { loadDashboardHistoryLocationState } from './locator/load_dashboard_history_location_state';
 import type { DashboardCreationOptions } from '../dashboard_container/embeddable/dashboard_container_factory';
 import { DashboardTopNav } from '../dashboard_top_nav';
+import { DashboardTabTitleSetter } from './tab_title_setter/dashboard_tab_title_setter';
 
 export interface DashboardAppProps {
   history: History;
@@ -196,15 +197,17 @@ export function DashboardApp({
       {!showNoDataPage && (
         <>
           {dashboardAPI && (
-            <DashboardTopNav
-              redirectTo={redirectTo}
-              embedSettings={embedSettings}
-              dashboardContainer={dashboardAPI}
-            />
+            <>
+              <DashboardTabTitleSetter dashboardContainer={dashboardAPI} />
+              <DashboardTopNav
+                redirectTo={redirectTo}
+                embedSettings={embedSettings}
+                dashboardContainer={dashboardAPI}
+              />
+            </>
           )}
 
           {getLegacyConflictWarning?.()}
-
           <DashboardRenderer
             ref={setDashboardAPI}
             dashboardRedirect={redirectTo}
