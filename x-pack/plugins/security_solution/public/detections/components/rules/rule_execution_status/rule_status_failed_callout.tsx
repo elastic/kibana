@@ -19,8 +19,8 @@ import * as i18nAssistant from '../../../pages/detection_engine/rules/translatio
 import { useAssistantAvailability } from '../../../../assistant/use_assistant_availability';
 
 interface RuleStatusFailedCallOutProps {
-  ruleName: string | undefined;
-  dataSources: string[] | undefined;
+  ruleName?: string | undefined;
+  dataSources?: string[] | undefined;
   date: string;
   message: string;
   status?: RuleExecutionStatus | null;

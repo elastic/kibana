@@ -404,6 +404,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     );
   }, [ruleId, lastExecutionStatus, lastExecutionDate, ruleLoading, isExistingRule, refreshRule]);
 
+  // Extract rule index if available on rule type
+  let ruleIndex: string[] | undefined;
+  if (rule != null && 'index' in rule && Array.isArray(rule.index)) {
+    ruleIndex = rule.index;
+  }
+
   const ruleError = useMemo(() => {
     return ruleLoading ? (
       <EuiFlexItem>
@@ -412,7 +418,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ) : (
       <RuleStatusFailedCallOut
         ruleName={rule?.immutable ? rule?.name : undefined}
-        dataSources={rule?.immutable ? rule?.index : undefined}
+        dataSources={rule?.immutable ? ruleIndex : undefined}
         status={lastExecutionStatus}
         date={lastExecutionDate}
         message={lastExecutionMessage}
@@ -425,7 +431,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ruleLoading,
     rule?.immutable,
     rule?.name,
-    rule?.index,
+    ruleIndex,
   ]);
 
   const updateDateRangeCallback = useCallback<UpdateDateRange>(
