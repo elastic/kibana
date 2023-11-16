@@ -7,10 +7,10 @@
 
 import expect from '@kbn/expect';
 import { getInitialDetectionMetrics } from '@kbn/security-solution-plugin/server/usage/detections/get_initial_usage';
-import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import { createSignalsIndex, deleteAllRules, deleteAllAlerts, getStats } from '../../../../utils';
 
-// eslint-disable-next-line import/no-default-export
+import { createAlertsIndex, deleteAllRules, deleteAllAlerts, getStats } from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext) => {
   const retry = getService('retry');
   const es = getService('es');
 
-  describe('Detection rule telemetry', async () => {
+  describe('@ess @serverless @skipInQA Detection rule telemetry', async () => {
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/security_solution/telemetry');
     });
@@ -28,7 +28,7 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     beforeEach(async () => {
-      await createSignalsIndex(supertest, log);
+      await createAlertsIndex(supertest, log);
     });
 
     afterEach(async () => {
