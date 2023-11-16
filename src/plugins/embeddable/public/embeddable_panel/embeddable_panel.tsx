@@ -12,7 +12,6 @@ import { distinct, map } from 'rxjs';
 import React, { ReactNode, useEffect, useMemo, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 
-import { isPromise } from '@kbn/std';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { PanelLoader } from '@kbn/panel-loader';
 import {
@@ -137,14 +136,19 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    */
   useEffect(() => {
     if (!embeddableRoot.current) return;
-    const nextNode = embeddable.render(embeddableRoot.current) ?? undefined;
-    if (isPromise(nextNode)) {
-      nextNode.then((resolved) => setNode(resolved));
-    } else {
-      setNode(nextNode);
-    }
 
-    setInitialRenderComplete(true);
+    let cancelled = false;
+
+    const render = async (root: HTMLDivElement) => {
+      const nextNode = (await embeddable.render(root)) ?? undefined;
+
+      if (cancelled) return;
+
+      setNode(nextNode);
+      setInitialRenderComplete(true);
+    };
+
+    render(embeddableRoot.current);
 
     const errorSubscription = embeddable.getOutput$().subscribe({
       next: (output) => {
@@ -152,9 +156,11 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
       },
       error: (error) => setOutputError(error),
     });
+
     return () => {
       embeddable?.destroy();
       errorSubscription?.unsubscribe();
+      cancelled = true;
     };
   }, [embeddable, embeddableRoot]);
 
