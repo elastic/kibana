@@ -9,10 +9,12 @@
 import type { CoreSetup } from '@kbn/core-lifecycle-browser';
 import type { InternalApplicationSetup } from '@kbn/core-application-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 
 /** @internal */
 export interface InternalCoreSetup
-  extends Omit<CoreSetup, 'application' | 'plugins' | 'getStartServices'> {
+  extends Omit<CoreSetup, 'application' | 'plugins' | 'getStartServices' | 'http'> {
   application: InternalApplicationSetup;
   injectedMetadata: InternalInjectedMetadataSetup;
+  http: InternalHttpSetup;
 }

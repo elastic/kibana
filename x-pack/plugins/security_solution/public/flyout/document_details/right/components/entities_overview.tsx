@@ -66,7 +66,7 @@ export const EntitiesOverview: React.FC = () => {
         data-test-subj={INSIGHTS_ENTITIES_TEST_ID}
       >
         {userName || hostName ? (
-          <EuiFlexGroup direction="column" gutterSize="s">
+          <EuiFlexGroup direction="column" gutterSize="s" responsive={false}>
             {userName && (
               <EuiFlexItem>
                 <UserEntityOverview userName={userName} />

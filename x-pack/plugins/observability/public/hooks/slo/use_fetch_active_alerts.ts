@@ -13,6 +13,8 @@ import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
 import { ActiveAlerts } from './active_alerts';
 
+import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
+
 type SloIdAndInstanceId = [string, string];
 
 interface Params {
@@ -39,7 +41,6 @@ interface FindApiResponse {
   };
 }
 
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 const EMPTY_ACTIVE_ALERTS_MAP = new ActiveAlerts();
 
 export function useFetchActiveAlerts({
@@ -109,7 +110,7 @@ export function useFetchActiveAlerts({
       }
     },
     refetchOnWindowFocus: false,
-    refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+    refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
     enabled: Boolean(sloIdsAndInstanceIds.length),
   });
 
