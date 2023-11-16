@@ -87,8 +87,10 @@ export const fetchConnectorExecuteAction = async ({
           rawResponse: isStream,
         }
       );
+      console.log('RESPONSE????', response?.response);
 
       const reader = response?.response?.body?.getReader();
+      console.log('reader????', reader);
 
       if (!reader) {
         return {

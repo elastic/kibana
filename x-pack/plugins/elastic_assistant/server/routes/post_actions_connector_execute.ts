@@ -75,6 +75,8 @@ export const postActionsConnectorExecuteRoute = (
           kbResource: ESQL_RESOURCE,
         });
 
+        console.log('THIS SHOULD BE LAST!!!!!!', langChainResponseBody);
+
         return response.ok({
           body: langChainResponseBody,
         });

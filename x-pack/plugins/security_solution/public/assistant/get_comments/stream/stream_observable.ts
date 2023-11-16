@@ -33,6 +33,7 @@ export const getStreamObservable = (
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
+            console.log('reading', { done, value });
             if (done) {
               observer.next({
                 chunks,
@@ -43,6 +44,7 @@ export const getStreamObservable = (
               return;
             }
             const decoded = decoder.decode(value);
+            console.log('VALUE???', decoded);
             const content = isError
               ? // we format errors as {message: string; status_code: number}
                 `${API_ERROR}\n\n${JSON.parse(decoded).message}`

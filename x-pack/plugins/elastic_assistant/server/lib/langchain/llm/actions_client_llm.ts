@@ -8,12 +8,13 @@
 import { KibanaRequest, Logger } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { BaseLLMCallOptions, LLM } from 'langchain/llms/base';
+import { get } from 'lodash/fp';
 
 import { PassThrough, Readable } from 'stream';
 import { Promise } from 'cypress/types/cy-bluebird';
 import { BaseLanguageModelInput } from 'langchain/base_language';
 import { CallbackManagerForLLMRun } from 'langchain/callbacks';
-import { GenerationChunk, LLMResult } from 'langchain/schema';
+import { GenerationChunk } from 'langchain/schema';
 import { finished } from 'stream/promises';
 import { RequestBody } from '../types';
 import { getMessageContentAndRole } from '../helpers';
@@ -35,6 +36,8 @@ export class ActionsClientLlm extends LLM {
   #actionResultData: string;
   #stream: Readable;
 
+  streaming = false;
+
   // Local `llmType` as it can change and needs to be accessed by abstract `_llmType()` method
   // Not using getter as `this._llmType()` is called in the constructor via `super({})`
   protected llmType: string;
@@ -45,12 +48,14 @@ export class ActionsClientLlm extends LLM {
     llmType,
     logger,
     request,
+    streaming,
   }: {
     actions: ActionsPluginStart;
     connectorId: string;
     llmType?: string;
     logger: Logger;
     request: KibanaRequest<unknown, unknown, RequestBody>;
+    streaming: boolean;
   }) {
     super({});
 
@@ -61,6 +66,8 @@ export class ActionsClientLlm extends LLM {
     this.#request = request;
     this.#actionResultData = '';
     this.#stream = new PassThrough();
+    this.streaming = streaming ?? this.streaming;
+    console.log('IS IT STREAM?', this.streaming);
   }
 
   getActionResultData(): string {
@@ -98,160 +105,32 @@ export class ActionsClientLlm extends LLM {
     await finished(stream);
     return responseBody;
   }
-  async _generate(
-    prompts: string[],
-    options: this['ParsedCallOptions'],
-    runManager?: CallbackManagerForLLMRun
-  ): Promise<LLMResult> {
-    console.log('do we do this? _generate');
-    console.log('promptspromptsprompts', prompts);
-    console.log('optionsoptionsoptions', options);
-    const subPrompts = chunkArray(prompts, 20);
-    const choices = [];
-    // const tokenUsage: TokenUsage = {};
-
-    const params = this.invocationParams(options);
-    console.log('paramsparamsparams', params);
-    console.log('this.#request.body.params.subAction', this.#request.body.params.subAction);
-
-    //
-    // if (params.max_tokens === -1) {
-    //   if (prompts.length !== 1) {
-    //     throw new Error('max_tokens set to -1 not supported for multiple inputs');
-    //   }
-    //   params.max_tokens = await calculateMaxTokens({
-    //     prompt: prompts[0],
-    //     // Cast here to allow for other models that may not fit the union
-    //     modelName: this.modelName as TiktokenModel,
-    //   });
-    // }
-
-    // convert the Langchain prompt to an assistant message:
-    const assistantMessage = getMessageContentAndRole(prompts[0]);
-    // console.log('here prompts[0]', prompts[0]);
-    this.#logger.debug(
-      `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
-    );
-    console.log('subActionParams:::', this.#request.body.params.subActionParams);
-    const subActionParams = {
-      ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
-      messages: [assistantMessage], // the assistant message
-    };
-
-    // create a new connector request body with the assistant message:
-    const requestBody = {
-      actionId: this.#connectorId,
-      params: {
-        ...this.#request.body.params, // the original request body params
-        subActionParams,
-      },
-    };
-
-    // create an actions client from the authenticated request context:
-    const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-    //
-    // const actionResult = await actionsClient.execute(requestBody);
-    console.log('here 000', subPrompts);
-    for (let i = 0; i < subPrompts.length; i += 1) {
-      console.log('here 00');
-      const data =
-        this.#request.body.params.subAction === 'invokeStream'
-          ? await (async () => {
-              let response;
-              console.log('streaming 0');
-              const stream = await actionsClient.execute(requestBody);
-              console.log('streaming what is data from execute:', stream.data);
-              this.#stream = (stream.data as unknown as Readable).pipe(new PassThrough());
-              // console.log('streaming 2', this.#stream);
-              // const whatIsThis = await this._getResponseFromStream(this.#stream);
-              // console.log('whatIsThis', whatIsThis);
-              return this.#stream;
-              for await (const message of this.#stream) {
-                //   // …
-                // }
-                //
-                // for await (const message of this.#stream) {
-                console.log('here 3', message);
-                // TODO: not sure we need this stuff
-                // on the first message set the response properties
-                // if (!response) {
-                //   response = {
-                //     id: message.id,
-                //     object: message.object,
-                //     created: message.created,
-                //     model: message.model,
-                //   };
-                // }
-                //
-                // // on all messages, update choice
-                // for (const part of message.choices) {
-                //   console.log('here 4');
-                //
-                //   if (!choices[part.index]) {
-                //     choices[part.index] = part;
-                //   } else {
-                //     const choice = choices[part.index];
-                //     choice.text += part.text;
-                //     choice.finish_reason = part.finish_reason;
-                //     choice.logprobs = part.logprobs;
-                //   }
-                //   void runManager?.handleLLMNewToken(part.text, {
-                //     prompt: Math.floor(part.index / 1),
-                //     completion: part.index % 1,
-                //   });
-                // }
-              }
-              if (options.signal?.aborted) {
-                throw new Error('AbortError');
-              }
-              console.log('here 5');
-
-              return { ...response, choices };
-            })()
-          : await actionsClient.execute(requestBody);
-      console.log('datadatadata', data);
-      choices.push(...data.choices);
-    }
-
-    const generations = chunkArray(choices, 1).map((promptChoices) =>
-      promptChoices.map((choice) => ({
-        text: choice.text ?? '',
-        generationInfo: {
-          finishReason: choice.finish_reason,
-          logprobs: choice.logprobs,
-        },
-      }))
-    );
-    return {
-      generations,
-      llmOutput: { tokenUsage: {} },
-    };
-  }
 
   async *_streamResponseChunks(
-    input: string,
+    prompt: string,
     options: this['ParsedCallOptions'],
     runManager?: CallbackManagerForLLMRun
   ): AsyncGenerator<GenerationChunk> {
     console.log('do we do this? _streamResponseChunks');
 
-    const params = {
-      ...this.invocationParams(options),
-      prompt: input,
-      stream: true as const,
-    };
-    const stream = await this.completionWithRetry(params, options);
-    for await (const data of stream) {
-      const choice = data?.choices[0];
+    // create an actions client from the authenticated request context:
+    const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
+    const actionStreamResult = await actionsClient.execute(
+      this.formatRequestForActionsClient(prompt)
+    );
+    console.log('THIS SHOULD BE FIRST', actionStreamResult);
+
+    this.#stream = actionStreamResult.data as Readable;
+
+    for await (const data of (actionStreamResult.data as Readable).pipe(new PassThrough())) {
+      const choice = data.toString();
       if (!choice) {
-        continue;
+        throw new Error('this seems bad');
       }
       const chunk = new GenerationChunk({
-        text: choice.text,
-        generationInfo: {
-          finishReason: choice.finish_reason,
-        },
+        text: choice,
       });
+      console.log('yielding chunks', chunk);
       yield chunk;
 
       void runManager?.handleLLMNewToken(chunk.text ?? '');
@@ -260,74 +139,81 @@ export class ActionsClientLlm extends LLM {
       throw new Error('AbortError');
     }
   }
-  //
-  // stream(
-  //   input: BaseLanguageModelInput,
-  //   options?: Partial<BaseLLMCallOptions>
-  // ): Promise<IterableReadableStream<string>> {
-  //   console.log('do we do this? stream');
-  //
-  //   return super.stream(input, options);
-  // }
 
-  async _call(prompt: string): Promise<string> {
-    // convert the Langchain prompt to an assistant message:
+  formatRequestForActionsClient(prompt: string): {
+    actionId: string;
+    params: { subActionParams: { messages: Array<{ content?: string; role: string }> } };
+  } {
     const assistantMessage = getMessageContentAndRole(prompt);
     this.#logger.debug(
       `ActionsClientLlm#_call assistantMessage:\n${JSON.stringify(assistantMessage)} `
     );
-
-    const subActionParams =
-      // TODO: Remove in part 2 of streaming work for security solution
-      // tracked here: https://github.com/elastic/security-team/issues/7363
-      this.#request.body.params.subAction === 'invokeAI'
-        ? {
-            ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
-            messages: [assistantMessage], // the assistant message
-          }
-        : {
-            body: JSON.stringify({
-              ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
-              messages: [assistantMessage], // the assistant message
-            }),
-            stream: true,
-          };
-
     // create a new connector request body with the assistant message:
-    const requestBody = {
+    return {
       actionId: this.#connectorId,
       params: {
         ...this.#request.body.params, // the original request body params
-        subActionParams,
+        subActionParams: {
+          ...this.#request.body.params.subActionParams, // the original request body params.subActionParams
+          messages: [assistantMessage], // the assistant message
+        },
       },
     };
+  }
+
+  async _call(
+    prompt: string,
+    options: this['ParsedCallOptions'],
+    runManager?: CallbackManagerForLLMRun
+  ): Promise<string> {
+    if (this.streaming) {
+      // const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
+      // const actionStreamResult = await actionsClient.execute(
+      //   this.formatRequestForActionsClient(prompt)
+      // );
+      // console.log('actionStreamResult', actionStreamResult);
+      //
+      // this.#stream = (actionStreamResult.data as Readable).pipe(new PassThrough());
+      //
+      // let responseBody: string = '';
+      // this.#stream.on('data', (chunk: string) => {
+      //   responseBody += chunk.toString();
+      // });
+      // await finished(this.#stream);
+      // return responseBody;
+      const stream = this._streamResponseChunks(prompt, options, runManager);
+      let finalResult: GenerationChunk | undefined;
+      for await (const chunk of stream) {
+        if (finalResult === undefined) {
+          finalResult = chunk;
+        } else {
+          finalResult = finalResult.concat(chunk);
+        }
+      }
+      console.log('finalResult', finalResult);
+      return finalResult?.text ?? '';
+    }
 
     // create an actions client from the authenticated request context:
     const actionsClient = await this.#actions.getActionsClientWithRequest(this.#request);
-    console.log('returning dummy data');
-    return JSON.stringify('readable');
-    // const actionResult = await actionsClient.execute(requestBody);
-    //
-    // if (actionResult.status === 'error') {
-    //   throw new Error(
-    //     `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
-    //   );
-    // }
-    //
-    // const content = get('data.message', actionResult);
-    //
-    // if (typeof content !== 'string') {
-    //   throw new Error(
-    //     `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
-    //   );
-    // }
-    // this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
+
+    const actionResult = await actionsClient.execute(this.formatRequestForActionsClient(prompt));
+
+    if (actionResult.status === 'error') {
+      throw new Error(
+        `${LLM_TYPE}: action result status is error: ${actionResult?.message} - ${actionResult?.serviceMessage}`
+      );
+    }
+
+    const content = get('data.message', actionResult);
+
+    if (typeof content !== 'string') {
+      throw new Error(
+        `${LLM_TYPE}: content should be a string, but it had an unexpected type: ${typeof content}`
+      );
+    }
+    this.#actionResultData = content; // save the raw response from the connector, because that's what the assistant expects
+
+    return content; // per the contact of _call, return a string
   }
-}
-function getMessageFromChunks(chunks) {
-  let message = '';
-  chunks.forEach((chunk) => {
-    message += chunk.choices[0]?.delta.content ?? '';
-  });
-  return message;
 }
