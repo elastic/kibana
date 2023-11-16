@@ -65,7 +65,7 @@ const RuleAdd = ({
   filteredRuleTypes,
   validConsumers,
   useRuleProducer,
-  initialSelectedConsumer = null,
+  initialSelectedConsumer,
   ...props
 }: RuleAddProps) => {
   const onSaveHandler = onSave ?? reloadRules;

@@ -113,6 +113,12 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     }, [consumers]);
 
   useEffect(() => {
+    // At initialization, if no value is selected, return a null value to trigger prop validation
+    if (!selectedConsumer) onChange(null);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  useEffect(() => {
     if (consumers.length === 1) {
       onChange(consumers[0] as RuleCreationValidConsumer);
     } else if (consumers.includes(AlertConsumers.OBSERVABILITY)) {
