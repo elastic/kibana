@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 
-import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public/application/hooks/use_load_rule_types_query';
+import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
 import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
