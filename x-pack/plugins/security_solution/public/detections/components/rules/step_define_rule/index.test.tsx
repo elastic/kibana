@@ -318,6 +318,7 @@ describe('StepDefineRule', () => {
         shouldLoadQueryDynamically={stepDefineDefaultValue.shouldLoadQueryDynamically}
         queryBarTitle=""
         queryBarSavedId=""
+        thresholdFields={[]}
       />
     );
   };

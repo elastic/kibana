@@ -165,7 +165,10 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
     unit: 'm',
   },
   suppressionMissingFields:
-    ('alert_suppression' in rule && rule.alert_suppression?.missing_fields_strategy) ||
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'missing_fields_strategy' in rule.alert_suppression &&
+      rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
 });
 

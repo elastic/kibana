@@ -676,7 +676,7 @@ const prepareDefinitionSectionListItems = (
       description: <SuppressAlertsDuration duration={rule.alert_suppression.duration} />,
     });
 
-    if (rule.alert_suppression.missing_fields_strategy) {
+    if ('missing_fields_strategy' in rule.alert_suppression) {
       definitionSectionListItems.push({
         title: (
           <span data-test-subj="alertSuppressionSuppressionFieldPropertyTitle">

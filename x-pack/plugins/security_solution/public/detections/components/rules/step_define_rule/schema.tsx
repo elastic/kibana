@@ -27,7 +27,7 @@ import {
 import { MAX_NUMBER_OF_NEW_TERMS_FIELDS } from '../../../../../common/constants';
 import { isMlRule } from '../../../../../common/machine_learning/helpers';
 import type { FieldValueQueryBar } from '../query_bar';
-import type { ERROR_CODE, FormSchema, ValidationFunc } from '../../../../shared_imports';
+import type { ERROR_CODE, FormSchema, ValidationFunc, FormData } from '../../../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../../../shared_imports';
 import type { DefineStepRule } from '../../../pages/detection_engine/rules/types';
 import { DataSourceType } from '../../../pages/detection_engine/rules/types';
@@ -602,7 +602,7 @@ export const schema: FormSchema<DefineStepRule> = {
     validations: [
       {
         validator: (
-          ...args: Parameters<ValidationFunc>
+          ...args: Parameters<ValidationFunc<FormData, ERROR_CODE, string[]>>
         ): ReturnType<ValidationFunc<{}, ERROR_CODE>> | undefined => {
           const [{ formData, value, path }] = args;
           const needsValidation =
@@ -611,15 +611,13 @@ export const schema: FormSchema<DefineStepRule> = {
           if (!needsValidation) {
             return;
           }
-          console.log('>>>>> formData.threshold.field', formData['threshold.field']);
-          console.log('>>>>> value', value);
           if (
             isThresholdRule(formData.ruleType) &&
-            value.length &&
+            value?.length &&
             !fastDeepEqual(value, formData['threshold.field'])
           ) {
             return {
-              code: 'ERR_FIELD_VALUE',
+              code: 'ERR_FIELD_FORMAT',
               path,
               message: 'Suppress by fields must be equal to threshold Group by fields',
             };
