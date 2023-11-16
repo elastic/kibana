@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 
+import { SecurityService } from '../../../../../../../test/common/services/security/security';
 import { riskEngineRouteHelpersFactory } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -100,7 +101,7 @@ export default ({ getService }: FtrProviderContext) => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
     const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
     const logger = getService('log');
-    let security;
+    let security: SecurityService;
     try {
       security = getService('security');
     } catch (e) {
