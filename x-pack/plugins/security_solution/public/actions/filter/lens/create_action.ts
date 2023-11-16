@@ -16,7 +16,6 @@ import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import { TimelineId } from '../../../../common/types';
@@ -45,13 +44,13 @@ export const createFilterLensAction = ({
   services: StartServices;
   negate?: boolean;
 }) => {
-  const { application: applicationService } = KibanaServices.get();
+  const { application, notifications, data: dataService, topValuesPopover } = services;
+
   let currentAppId: string | undefined;
-  applicationService.currentAppId$.subscribe((appId) => {
+  application.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-  const { notifications } = services;
 
   return createAction<CellValueContext>({
     id,
@@ -84,7 +83,7 @@ export const createFilterLensAction = ({
       }
       if (!field) return;
 
-      services.topValuesPopover.closePopover();
+      topValuesPopover.closePopover();
 
       const addFilter = negate === true ? addFilterOut : addFilterIn;
 
@@ -92,7 +91,7 @@ export const createFilterLensAction = ({
       // timeline is open add the filter to timeline, otherwise add filter to global filters
       const filterManager = timeline?.show
         ? timeline.filterManager
-        : services.data.query.filterManager;
+        : dataService.query.filterManager;
 
       addFilter({ filterManager, fieldName: field, value });
     },
