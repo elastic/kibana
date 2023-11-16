@@ -31,13 +31,13 @@ export const getGridRowsDisplayOptionsFromDiscoverAppState = (
 export const getChartDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
 ): Partial<ChartDisplayOptions> => ({
-  ...(discoverAppState.breakdownField ? { breakdownField: discoverAppState.breakdownField } : {}),
+  breakdownField: discoverAppState.breakdownField ?? null,
 });
 
 export const getDiscoverAppStateFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): Partial<DiscoverAppState> => ({
-  breakdownField: displayOptions.chart.breakdownField,
+  breakdownField: displayOptions.chart.breakdownField ?? undefined,
   columns: getDiscoverColumnsFromDisplayOptions(displayOptions),
   grid: {
     columns: displayOptions.grid.columns.reduce<

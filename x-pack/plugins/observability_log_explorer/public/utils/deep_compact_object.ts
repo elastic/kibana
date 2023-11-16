@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { isEmpty, isPlainObject } from 'lodash';
+import { isEmpty, isPlainObject, isUndefined } from 'lodash';
 
 export const deepCompactObject = <Value extends Record<string, any>>(obj: Value): Value =>
   Object.fromEntries(
     Object.entries(obj)
       .map(([key, value]) => [key, isPlainObject(value) ? deepCompactObject(value) : value])
-      .filter(([, value]) => value != null && !(isPlainObject(value) && isEmpty(value)))
+      .filter(([, value]) => !isUndefined(value) && !(isPlainObject(value) && isEmpty(value)))
   );

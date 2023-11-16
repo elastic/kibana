@@ -6,7 +6,7 @@
  */
 
 export interface ChartDisplayOptions {
-  breakdownField: string;
+  breakdownField: string | null;
 }
 
 export type PartialChartDisplayOptions = Partial<ChartDisplayOptions>;

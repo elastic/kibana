@@ -80,7 +80,7 @@ export const urlSchemaRT = rt.exact(
     time: timeRangeRT,
     refreshInterval: refreshIntervalRT,
     columns: columnsRT,
-    breakdownField: rt.string,
+    breakdownField: rt.union([rt.string, rt.null]),
     // datasetSelection: datasetSelectionFromUrlRT,
     // controlPanels: ControlPanelRT,
   })
