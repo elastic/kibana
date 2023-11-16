@@ -282,7 +282,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const data = await PageObjects.lens.getMetricVisualizationData();
 
-      expect(data.map(({ trendlineColor }) => trendlineColor)).to.be.eql(new Array(6).fill('rgba(0, 0, 0, 1)'));
+      expect(data.map(({ trendlineColor }) => trendlineColor)).to.be.eql(
+        new Array(6).fill('rgba(0, 0, 0, 1)')
+      );
     });
 
     const expectedDynamicColors = [
@@ -315,7 +317,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.waitForVisualization('mtrVis');
 
       expect(
-        (await PageObjects.lens.getMetricVisualizationData()).map(({ trendlineColor }) => trendlineColor)
+        (await PageObjects.lens.getMetricVisualizationData()).map(
+          ({ trendlineColor }) => trendlineColor
+        )
       ).to.eql(expectedDynamicColors); // colors shouldn't change
 
       await PageObjects.lens.closePaletteEditor();

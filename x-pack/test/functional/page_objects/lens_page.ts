@@ -1335,7 +1335,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
     async getChartBackground(): Promise<string> {
       return await (
         await findService.byCssSelector('[data-test-subj="mtrVis"] .echChart .echChartBackground')
-      )?.getComputedStyle('background-color')
+      )?.getComputedStyle('background-color');
     },
 
     async getMetricElementIfExists(selector: string, container: WebElementWrapper) {
@@ -1359,13 +1359,13 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         foregroundColor: await (
           await this.getMetricElementIfExists('.echMetric', tile)
         )?.getComputedStyle('background-color'),
-        trendlineColor: await(
+        trendlineColor: await (
           await this.getMetricElementIfExists('.echSingleMetricSparkline__svg > rect', tile)
-          )?.getAttribute('fill'),
+        )?.getAttribute('fill'),
         showingTrendline: Boolean(
           await this.getMetricElementIfExists('.echSingleMetricSparkline', tile)
         ),
-    };
+      };
     },
 
     async getMetricVisualizationData() {
