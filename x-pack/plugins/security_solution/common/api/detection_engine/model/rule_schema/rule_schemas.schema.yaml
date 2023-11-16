@@ -422,7 +422,15 @@ components:
           items:
             $ref: '../rule_response_actions/response_actions.schema.yaml#/components/schemas/ResponseAction'
         alert_suppression:
-          $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppression'
+            type: object
+            properties:
+              duration: 
+                $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
+              group_by: 
+                $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppressionGroupBy'
+            required:
+              - duration
+              - group_by
         query:
           $ref: './common_attributes.schema.yaml#/components/schemas/RuleQuery'
 

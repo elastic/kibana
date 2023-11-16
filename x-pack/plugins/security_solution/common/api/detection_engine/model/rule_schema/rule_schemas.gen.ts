@@ -68,7 +68,11 @@ import {
   TimestampField,
 } from './specific_attributes/eql_attributes.gen';
 import { ResponseAction } from '../rule_response_actions/response_actions.gen';
-import { AlertSuppression } from './specific_attributes/query_attributes.gen';
+import {
+  AlertSuppression,
+  AlertSuppressionDuration,
+  AlertSuppressionGroupBy,
+} from './specific_attributes/query_attributes.gen';
 import { Threshold } from './specific_attributes/threshold_attributes.gen';
 import {
   ThreatQuery,
@@ -306,7 +310,12 @@ export const SavedQueryRuleOptionalFields = z.object({
   data_view_id: DataViewId.optional(),
   filters: RuleFilterArray.optional(),
   response_actions: z.array(ResponseAction).optional(),
-  alert_suppression: AlertSuppression.optional(),
+  alert_suppression: z
+    .object({
+      duration: AlertSuppressionDuration,
+      group_by: AlertSuppressionGroupBy,
+    })
+    .optional(),
   query: RuleQuery.optional(),
 });
 
