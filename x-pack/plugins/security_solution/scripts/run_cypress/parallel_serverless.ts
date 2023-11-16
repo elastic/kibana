@@ -148,7 +148,8 @@ async function resetCredentials(
   apiKey: string
 ): Promise<Credentials | undefined> {
   log.info(`${runnerId} : Reseting credentials`);
-  try {
+
+  const fetchResetCredentialsStatusAttempt = async (attemptNum: number) => {
     const response = await axios.post(
       `${BASE_ENV_URL}/api/v1/serverless/projects/security/${projectId}/_reset-credentials`,
       {},
@@ -158,13 +159,31 @@ async function resetCredentials(
         },
       }
     );
-    return {
-      password: response.data.password,
-      username: response.data.username,
-    };
-  } catch (error) {
-    throw new Error(`${error.message}`);
-  }
+    if (response.status !== 200) {
+      throw new Error('Credentials have not been reset. Retrying in 20s...');
+    } else {
+      log.info('Credentials have ben reset');
+      return {
+        password: response.data.password,
+        username: response.data.username,
+      };
+    }
+  };
+
+  const retryOptions = {
+    onFailedAttempt: (error: Error | AxiosError) => {
+      if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
+        log.info('Project is not reachable. Retrying in 20s...');
+      } else {
+        log.info(error);
+      }
+    },
+    retries: 100,
+    factor: 2,
+    maxTimeout: 20000,
+  };
+
+  return pRetry(fetchResetCredentialsStatusAttempt, retryOptions);
 }
 
 // Wait until Project is initialized
