@@ -76,7 +76,12 @@ export async function upgradeBatch(
   const latestAgentVersion = await getLatestAvailableVersion();
   const upgradeableResults = await Promise.allSettled(
     agentsToCheckUpgradeable.map(async (agent) => {
-      // Filter out agents currently unenrolling, unenrolled, recently upgraded or not upgradeable b/c of version check
+      // Filter out agents that are:
+      //  - currently unenrolling
+      //  - unenrolled
+      //  - recently upgraded
+      //  - currently upgrading
+      //  - upgradeable b/c of version check
       const isNotAllowed =
         getRecentUpgradeInfoForAgent(agent).hasBeenUpgradedRecently ||
         (!options.force && !isAgentUpgradeable(agent, latestAgentVersion, options.version));
