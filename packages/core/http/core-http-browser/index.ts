@@ -12,6 +12,7 @@ export type {
   IBasePath,
   IExternalUrl,
   IAnonymousPaths,
+  IStaticAssets,
   HttpHeadersInit,
   HttpRequestInit,
   HttpFetchQuery,
