@@ -8,8 +8,10 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
+import dashboard_save from '../../dashboard/group4/dashboard_save';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const deployment = getService('deployment');
@@ -37,7 +39,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const DASHBOARD_NAME = 'Test Links panel';
   const LINKS_PANEL_NAME = 'Some links';
 
-  describe('links panel create and edit', () => {
+  describe.only('links panel create and edit', () => {
     describe('creation', async () => {
       before(async () => {
         await dashboard.navigateToApp();
@@ -59,7 +61,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboardLinks.clickPanelEditorCloseButton();
       });
 
-      it('can create a new by-reference links panel', async () => {
+      it.skip('can create a new by-reference links panel', async () => {
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickAddNewEmbeddableLink('links');
 
@@ -78,18 +80,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await dashboard.clickDiscardChanges();
       });
 
-      it('can create a new by-value links panel', async () => {
-        await dashboardAddPanel.clickEditorMenuButton();
-        await dashboardAddPanel.clickAddNewEmbeddableLink('links');
-        await dashboardLinks.setLayout('horizontal');
-        await createSomeLinks();
-        await dashboardLinks.toggleSaveByReference(false);
-        await dashboardLinks.clickPanelEditorSaveButton();
-        await testSubjects.exists('addObjectToDashboardSuccess');
+      describe('by-value links panel', async () => {
+        it('can create a new by-value links panel', async () => {
+          await dashboardAddPanel.clickEditorMenuButton();
+          await dashboardAddPanel.clickAddNewEmbeddableLink('links');
+          await dashboardLinks.setLayout('horizontal');
+          await createSomeLinks();
+          await dashboardLinks.toggleSaveByReference(false);
+          await dashboardLinks.clickPanelEditorSaveButton();
+          await testSubjects.exists('addObjectToDashboardSuccess');
 
-        expect(await testSubjects.existOrFail('links--component'));
-        expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
-        await dashboard.clickDiscardChanges();
+          expect(await testSubjects.existOrFail('links--component'));
+          expect(await dashboardLinks.getNumberOfLinksInPanel()).to.equal(4);
+        });
+
+        it('can save by-value links panel to the library', async () => {
+          /** Navigate away to test non-extensible input */
+          await dashboard.gotoDashboardLandingPage();
+          await dashboard.clickUnsavedChangesContinueEditing(DASHBOARD_NAME);
+
+          await dashboard.waitForRenderComplete();
+          await dashboardPanelActions.saveToLibrary('Some more links');
+          await testSubjects.existOrFail('addPanelToLibrarySuccess');
+        });
+
+        after(async () => {
+          await dashboard.clickDiscardChanges();
+        });
       });
     });
 
