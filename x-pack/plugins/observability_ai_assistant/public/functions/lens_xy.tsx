@@ -129,7 +129,7 @@ export function registerLensXYFunction({
 }) {
   registerFunction(
     {
-      name: 'lens_metric',
+      name: 'lens_xy',
       contexts: ['core'],
       description:
         "Use this function to create custom xy visualizations, using Lens, that can be saved to dashboards. This function does not return data to the assistant, it only shows it to the user. When using this function, make sure to use the recall function to get more information about how to use it, with how you want to use it. Make sure the query also contains information about the user's request. The visualisation is displayed to the user above your reply, DO NOT try to generate or display an image yourself.",
@@ -146,17 +146,17 @@ export function registerLensXYFunction({
             type: 'object',
             additionalProperties: false,
             description:
-              'Dataset to use for chart. This can be kibana DataTable structure (value datasource) OR object with "esql" property which is an ESQL query (esql datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
+              'Dataset to use for chart. This can be (preferred) an object with "query" property which is an ES|QL query (elasticsearch query language) OR kibana DataTable structure (value datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
             properties: {
               index: {
                 type: 'string',
               },
-              timeField: {
+              timeFieldName: {
                 type: 'string',
                 description:
                   'time field to use for index datasource. Use @timefield if its available on the index.',
               },
-              query: {
+              esql: {
                 type: 'string',
                 description: 'es|ql query to use. dont set when using index + timeField.',
               },
@@ -182,18 +182,18 @@ export function registerLensXYFunction({
                     index: {
                       type: 'string',
                     },
-                    timeField: {
+                    timeFieldName: {
                       type: 'string',
                       description:
                         'time field to use for index datasource. Use @timefield if its available on the index.',
                     },
-                    query: {
+                    esql: {
                       type: 'string',
                       description: 'es|ql query to use. dont set when using index + timeField.',
                     },
                   },
                 },
-                query: {
+                value: {
                   type: 'string',
                   description:
                     'field name when using value or esql datasource. The formula for calculating the value when using index datasource, e.g. sum(my_field_name). Query the knowledge base to get more information about the syntax and available formulas.',

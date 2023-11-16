@@ -46,23 +46,23 @@ export function registerLensTreemapFunction({
             type: 'object',
             additionalProperties: false,
             description:
-              'Dataset to use for chart. This can be kibana DataTable structure (value datasource) OR object with "esql" property which is an ESQL query (esql datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
+              'Dataset to use for chart. This can be (preferred) an object with "esql" property which is an ES|QL query (esql datasource) OR kibana DataTable structure (value datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
             properties: {
               index: {
                 type: 'string',
               },
-              timeField: {
+              timeFieldName: {
                 type: 'string',
                 description:
                   'time field to use for index datasource. Use @timefield if its available on the index.',
               },
-              query: {
+              esql: {
                 type: 'string',
                 description: 'es|ql query to use. dont set when using index + timeField.',
               },
             },
           },
-          query: {
+          value: {
             type: 'string',
             description:
               'field name when using value or esql datasource. The formula for calculating the value when using index datasource, e.g. sum(my_field_name). Query the knowledge base to get more information about the syntax and available formulas.',
@@ -107,7 +107,7 @@ export function registerLensTreemapFunction({
             description: 'The end of the time range, in Elasticsearch datemath',
           },
         },
-        required: ['dataset', 'start', 'end', 'query', 'breakdown'],
+        required: ['dataset', 'start', 'end', 'value', 'breakdown'],
       } as const,
     },
     async () => {

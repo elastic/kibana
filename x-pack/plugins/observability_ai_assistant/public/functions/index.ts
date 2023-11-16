@@ -18,6 +18,7 @@ import { registerLensTableFunction } from './lens_table';
 import { registerLensMetricFunction } from './lens_metric';
 import { registerLensTreemapFunction } from './lens_treemap';
 import { registerLensGaugeFunction } from './lens_gauge';
+import { registerLensXYFunction } from './lens_xy';
 
 export async function registerFunctions({
   registerRenderFunction,
@@ -36,4 +37,5 @@ export async function registerFunctions({
     registerLensTableFunction({ service, pluginsStart, registerFunction });
     registerLensTagcloudFunction({ service, pluginsStart, registerFunction });
     registerLensTreemapFunction({ service, pluginsStart, registerFunction });
+    registerLensXYFunction({ service, pluginsStart, registerFunction });
 }
