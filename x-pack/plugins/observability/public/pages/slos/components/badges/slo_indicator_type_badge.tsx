@@ -17,10 +17,11 @@ import { isApmIndicatorType } from '../../../../utils/slo/indicator';
 import { toIndicatorTypeLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
+  cardView?: boolean;
   slo: SLOWithSummaryResponse;
 }
 
-export function SloIndicatorTypeBadge({ slo }: Props) {
+export function SloIndicatorTypeBadge({ slo, cardView }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -54,7 +55,7 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
   return (
     <>
       <EuiFlexItem grow={false}>
-        <EuiBadge color={euiLightVars.euiColorDisabled}>
+        <EuiBadge color={cardView ? 'default' : euiLightVars.euiColorDisabled}>
           {toIndicatorTypeLabel(slo.indicator.type)}
         </EuiBadge>
       </EuiFlexItem>
@@ -68,7 +69,7 @@ export function SloIndicatorTypeBadge({ slo }: Props) {
             })}
           >
             <EuiBadge
-              color={euiLightVars.euiColorDisabled}
+              color={cardView ? 'default' : euiLightVars.euiColorDisabled}
               onClick={handleNavigateToApm}
               onClickAriaLabel={i18n.translate(
                 'xpack.observability.slo.indicatorTypeBadge.exploreInApm',

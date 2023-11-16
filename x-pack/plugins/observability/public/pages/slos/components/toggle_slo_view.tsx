@@ -1,0 +1,91 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
+import {
+  EuiButtonGroup,
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
+} from '@elastic/eui';
+import { GridSize } from './slos_grid/grid_size';
+
+export type SLOViewType = 'cardView' | 'listView';
+
+interface Props {
+  setGridSize: (gridSize?: string) => void;
+  setSLOView: (view: SLOViewType) => void;
+  sloView: SLOViewType;
+}
+const toggleButtonsIcons = [
+  {
+    id: `cardView`,
+    label: 'Card View',
+    iconType: 'visGauge',
+  },
+  {
+    id: `listView`,
+    label: 'List View',
+    iconType: 'list',
+  },
+];
+
+export function ToggleSLOView({ sloView, setSLOView, setGridSize }: Props) {
+  return (
+    <EuiFlexGroup>
+      <EuiFlexItem>
+        <EuiButtonGroup
+          legend="Text align"
+          options={toggleButtonsIcons}
+          idSelected={sloView}
+          onChange={(id) => setSLOView(id as SLOViewType)}
+          isIconOnly
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <ViewSettings setGridSize={setGridSize} />
+      </EuiFlexItem>
+    </EuiFlexGroup>
+  );
+}
+
+export function ViewSettings({ setGridSize }: { setGridSize: (gridSize?: string) => void }) {
+  const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
+
+  return (
+    <EuiPopover
+      button={
+        <EuiButtonIcon
+          data-test-subj="o11yToggleSLOViewButton"
+          iconType={'gear'}
+          aria-label={i18n.translate(
+            'xpack.observability.toggleSLOView.euiButtonIcon.settingsLabel',
+            { defaultMessage: 'Settings' }
+          )}
+          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
+        />
+      }
+      isOpen={isPopoverOpen}
+      closePopover={() => setIsPopoverOpen(false)}
+      anchorPosition="downCenter"
+    >
+      <EuiPopoverTitle>
+        <FormattedMessage
+          id="xpack.observability.viewSettings.viewSettingsPopoverTitleLabel"
+          defaultMessage="View settings"
+        />
+      </EuiPopoverTitle>
+      <div style={{ width: '300px' }}>
+        <GridSize setGridSize={setGridSize} />
+      </div>
+    </EuiPopover>
+  );
+}

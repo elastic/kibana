@@ -12,17 +12,18 @@ import { euiLightVars } from '@kbn/ui-theme';
 import React from 'react';
 
 export interface Props {
+  cardView?: boolean;
   slo: SLOWithSummaryResponse;
 }
 
-export function SloGroupByBadge({ slo }: Props) {
+export function SloGroupByBadge({ slo, cardView }: Props) {
   if (!slo.groupBy || slo.groupBy === ALL_VALUE) {
     return null;
   }
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiBadge color={euiLightVars.euiColorDisabled}>
+      <EuiBadge color={cardView ? 'default' : euiLightVars.euiColorDisabled}>
         <EuiToolTip
           position="top"
           content={i18n.translate('xpack.observability.slo.partitionByBadge', {

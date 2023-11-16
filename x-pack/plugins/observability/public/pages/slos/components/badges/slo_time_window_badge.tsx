@@ -15,16 +15,17 @@ import { toCalendarAlignedMomentUnitOfTime } from '../../../../utils/slo/duratio
 import { toDurationLabel } from '../../../../utils/slo/labels';
 
 export interface Props {
+  cardView?: boolean;
   slo: SLOWithSummaryResponse;
 }
 
-export function SloTimeWindowBadge({ slo }: Props) {
+export function SloTimeWindowBadge({ slo, cardView }: Props) {
   const unit = slo.timeWindow.duration.slice(-1);
   if (rollingTimeWindowTypeSchema.is(slo.timeWindow.type)) {
     return (
       <EuiFlexItem grow={false}>
         <EuiBadge
-          color={euiLightVars.euiColorDisabled}
+          color={cardView ? 'default' : euiLightVars.euiColorDisabled}
           iconType="editorItemAlignRight"
           iconSide="left"
         >
@@ -45,7 +46,11 @@ export function SloTimeWindowBadge({ slo }: Props) {
 
   return (
     <EuiFlexItem grow={false}>
-      <EuiBadge color={euiLightVars.euiColorDisabled} iconType="calendar" iconSide="left">
+      <EuiBadge
+        color={cardView ? 'default' : euiLightVars.euiColorDisabled}
+        iconType="calendar"
+        iconSide="left"
+      >
         {i18n.translate('xpack.observability.slo.slo.timeWindow.calendar', {
           defaultMessage: '{elapsed}/{total} days',
           values: {
