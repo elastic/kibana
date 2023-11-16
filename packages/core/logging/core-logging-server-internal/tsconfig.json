@@ -22,6 +22,7 @@
     "@kbn/utility-types-jest",
     "@kbn/utility-types",
     "@kbn/ecs",
+    "@kbn/security-hardening",
   ],
   "exclude": [
     "target/**/*",
