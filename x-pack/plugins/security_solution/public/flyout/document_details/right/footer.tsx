@@ -55,7 +55,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
     [eventId, indexName, openRightPanel, scopeId, showHostIsolationPanel]
   );
 
-  return (
+  return !isPreview ? (
     <EuiPanel
       hasShadow={false}
       borderRadius="none"
@@ -75,5 +75,5 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
         refetchFlyoutData={refetchFlyoutData}
       />
     </EuiPanel>
-  );
+  ) : null;
 };

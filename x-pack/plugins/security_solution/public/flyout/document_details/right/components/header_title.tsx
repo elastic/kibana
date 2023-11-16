@@ -31,27 +31,34 @@ export const HeaderTitle: FC = memo(() => {
   );
 
   const ruleTitle = useMemo(
-    () => (
-      <RenderRuleName
-        contextId={scopeId}
-        eventId={eventId}
-        fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
-        fieldType={'string'}
-        isAggregatable={false}
-        isDraggable={false}
-        linkValue={ruleId}
-        value={ruleName}
-        openInNewTab
-      >
+    () =>
+      isPreview ? (
         <FlyoutTitle
           title={ruleName}
           iconType={'warning'}
-          isLink
           data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
         />
-      </RenderRuleName>
-    ),
-    [ruleName, ruleId, eventId, scopeId]
+      ) : (
+        <RenderRuleName
+          contextId={scopeId}
+          eventId={eventId}
+          fieldName={SIGNAL_RULE_NAME_FIELD_NAME}
+          fieldType={'string'}
+          isAggregatable={false}
+          isDraggable={false}
+          linkValue={ruleId}
+          value={ruleName}
+          openInNewTab
+        >
+          <FlyoutTitle
+            title={ruleName}
+            iconType={'warning'}
+            isLink
+            data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}
+          />
+        </RenderRuleName>
+      ),
+    [ruleName, ruleId, eventId, scopeId, isPreview]
   );
 
   const eventTitle = (
