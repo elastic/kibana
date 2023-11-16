@@ -16,13 +16,7 @@ import { isEqual, pull, merge, castArray } from 'lodash';
  * UnionToIntersection is needed to get all keys of union types, see below for
  * example.
  *
- const agentNames = [{ serviceName: '', agentName: '' }];
- const transactionRates = [{ serviceName: '', transactionsPerMinute: 1 }];
- const flattened = joinByKey(
-  [...agentNames, ...transactionRates],
-  'serviceName'
- );
-*/
+ */
 
 export type JoinedReturnType<
   T extends Record<string, any>,

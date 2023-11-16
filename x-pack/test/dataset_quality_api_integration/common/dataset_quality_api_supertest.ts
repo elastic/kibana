@@ -13,7 +13,7 @@ import { formatRequest } from '@kbn/server-route-repository';
 import {
   APIClientRequestParamsOf,
   APIReturnType,
-} from '@kbn/dataset-quality-plugin/public/services/rest/create_call_api';
+} from '@kbn/dataset-quality-plugin/public/services/rest/create_call_dataset_quality_api';
 
 export function createDatasetQualityApiClient(st: supertest.SuperTest<supertest.Test>) {
   return async <TEndpoint extends APIEndpoint>(
