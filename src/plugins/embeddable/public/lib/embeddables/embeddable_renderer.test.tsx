@@ -7,7 +7,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { renderHook } from '@testing-library/react-hooks';
 import {

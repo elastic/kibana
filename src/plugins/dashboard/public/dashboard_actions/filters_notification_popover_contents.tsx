@@ -80,6 +80,7 @@ export function FiltersNotificationPopoverContents({
           <EuiFormRow
             label={dashboardFilterNotificationActionStrings.getQueryTitle()}
             display="rowCompressed"
+            fullWidth
           >
             <EuiCodeBlock
               language={queryLanguage}
@@ -92,7 +93,7 @@ export function FiltersNotificationPopoverContents({
           </EuiFormRow>
         )}
         {filters && filters.length > 0 && (
-          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()}>
+          <EuiFormRow label={dashboardFilterNotificationActionStrings.getFiltersTitle()} fullWidth>
             <EuiFlexGroup wrap={true} gutterSize="xs">
               <FilterItems filters={filters} indexPatterns={dataViews} readOnly={true} />
             </EuiFlexGroup>

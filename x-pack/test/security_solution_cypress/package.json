@@ -7,7 +7,7 @@
   "scripts": {
     "cypress": "NODE_OPTIONS=--openssl-legacy-provider ../../../node_modules/.bin/cypress",
     "cypress:open:ess": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../../plugins/security_solution/scripts/start_cypress_parallel open --spec './cypress/e2e/**/*.cy.ts' --config-file ../../test/security_solution_cypress/cypress/cypress.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
-    "cypress:run:ess": "yarn cypress:ess --spec './cypress/e2e/exceptions/shared_exception_lists_management/**/*.cy.ts'",
+    "cypress:run:ess": "yarn cypress:ess --spec './cypress/e2e/!(investigations|explore)/**/*.cy.ts'",
     "cypress:run:cases:ess": "yarn cypress:ess --spec './cypress/e2e/explore/cases/*.cy.ts'",
     "cypress:ess": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider node ../../plugins/security_solution/scripts/start_cypress_parallel run --config-file ../../test/security_solution_cypress/cypress/cypress_ci.config.ts --ftr-config-file ../../test/security_solution_cypress/cli_config",
     "cypress:run:respops:ess": "yarn cypress:ess --spec './cypress/e2e/(detection_response|exceptions)/**/*.cy.ts'",
@@ -21,7 +21,7 @@
     "cypress:cloud:serverless": "TZ=UTC NODE_OPTIONS=--openssl-legacy-provider NODE_TLS_REJECT_UNAUTHORIZED=0 ../../../node_modules/.bin/cypress",
     "cypress:open:cloud:serverless": "yarn cypress:cloud:serverless open --config-file ./cypress/cypress_serverless.config.ts --env CLOUD_SERVERLESS=true",
     "cypress:open:serverless": "yarn cypress:serverless open --config-file ../../test/security_solution_cypress/cypress/cypress_serverless.config.ts --spec './cypress/e2e/**/*.cy.ts'",
-    "cypress:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/exceptions/shared_exception_lists_management/**/*.cy.ts'",
+    "cypress:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/!(investigations|explore)/**/*.cy.ts'",
     "cypress:run:cloud:serverless": "yarn cypress:cloud:serverless run --config-file ./cypress/cypress_ci_serverless.config.ts --env CLOUD_SERVERLESS=true",
     "cypress:investigations:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/investigations/**/*.cy.ts'",
     "cypress:explore:run:serverless": "yarn cypress:serverless --spec './cypress/e2e/explore/**/*.cy.ts'",

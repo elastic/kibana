@@ -30,6 +30,9 @@
     "@kbn/core-saved-objects-server",
     "@kbn/core",
     "@kbn/alerting-plugin",
-    "@kbn/securitysolution-ecs"
+    "@kbn/core-http-common",
+    "@kbn/securitysolution-ecs",
+    "@kbn/fleet-plugin",
+    "@kbn/repo-info",
   ]
 }
