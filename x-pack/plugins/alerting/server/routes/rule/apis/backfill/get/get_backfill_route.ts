@@ -10,6 +10,7 @@ import { IRouter } from '@kbn/core/server';
 import {
   getBackfillRequestParamsSchemaV1,
   GetBackfillRequestParamsV1,
+  GetBackfillResponseV1,
 } from '../../../../../../common/routes/rule/apis/backfill/get';
 import { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
@@ -17,6 +18,7 @@ import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../../types';
+import { transformResponseV1 } from './transforms';
 
 export const getBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -35,13 +37,10 @@ export const getBackfillRoute = (
         const params: GetBackfillRequestParamsV1 = req.params;
 
         const result = await rulesClient.getBackfill(params);
-        // const response: GetBackfillResponseV1 = {
-        //   body: transformGetBackfillResponseV1(result),
-        // };
-        // return res.ok(response);
-        return res.ok({
-          body: result,
-        });
+        const response: GetBackfillResponseV1 = {
+          body: transformResponseV1(result),
+        };
+        return res.ok(response);
       })
     )
   );

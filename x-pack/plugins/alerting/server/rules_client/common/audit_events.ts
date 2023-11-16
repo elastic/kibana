@@ -35,6 +35,7 @@ export enum RuleAuditAction {
   RUN_SOON = 'rule_run_soon',
   UNTRACK_ALERT = 'rule_alert_untrack',
   SCHEDULE_BACKFILL = 'schedule_backfill',
+  GET_BACKFILL = 'get_backfill',
 }
 
 type VerbsTuple = [string, string, string];
@@ -85,6 +86,7 @@ const eventVerbs: Record<RuleAuditAction, VerbsTuple> = {
   ],
   rule_alert_untrack: ['untrack', 'untracking', 'untracked'],
   schedule_backfill: ['schedule backfill for', 'scheduling backfill for', 'scheduled backfill for'],
+  get_backfill: ['access backfill for', 'accessing backfill for', 'accessed backfill for'],
 };
 
 const eventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
@@ -113,6 +115,7 @@ const eventTypes: Record<RuleAuditAction, ArrayElement<EcsEvent['type']>> = {
   rule_get_global_execution_kpi: 'access',
   rule_alert_untrack: 'change',
   schedule_backfill: 'access',
+  get_backfill: 'access',
 };
 
 export interface RuleAuditEventParams {
