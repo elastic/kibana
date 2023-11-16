@@ -92,7 +92,6 @@ describe('Expression', () => {
         threshold: [1000],
         timeSize: 1,
         timeUnit: 'm',
-        aggType: 'custom',
       },
     ]);
   });
