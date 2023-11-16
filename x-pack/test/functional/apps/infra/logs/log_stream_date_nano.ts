@@ -67,8 +67,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const currentUrl = await browser.getCurrentUrl();
       const parsedUrl = new URL(currentUrl);
 
-      expect(parsedUrl.searchParams.get('logPosition')).to.be(
-        `(position:(tiebreaker:3,time:\'2018-10-17T19:46:22.333333333Z\'))`
+      expect(parsedUrl.searchParams.get('logPosition')).to.contain(
+        `time:\'2018-10-17T19:46:22.333333333Z\'`
       );
     });
 

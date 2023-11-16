@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { cloneDeep } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
-import { ALL_VALUE, FindSLOResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   buildDegradingSummary,
   buildHealthySummary,
@@ -16,8 +16,8 @@ import {
   buildTimeslicesObjective,
   buildViolatedSummary,
 } from './common';
-import { buildCalendarAlignedTimeWindow, buildRollingTimeWindow } from './time_window';
 import { buildApmAvailabilityIndicator, buildCustomKqlIndicator } from './indicator';
+import { buildCalendarAlignedTimeWindow, buildRollingTimeWindow } from './time_window';
 
 export const emptySloList: FindSLOResponse = {
   results: [],
@@ -68,6 +68,7 @@ const baseSlo: Omit<SLOWithSummaryResponse, 'id'> = {
   enabled: true,
   createdAt: now,
   updatedAt: now,
+  version: 2,
 };
 
 export const sloList: FindSLOResponse = {
