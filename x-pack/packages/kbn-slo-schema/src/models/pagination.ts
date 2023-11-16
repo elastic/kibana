@@ -4,8 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+export interface Paginated<T> {
+  total: number;
+  page: number;
+  perPage: number;
+  results: T[];
+}
 
-export * from './src/schema';
-export * from './src/rest_specs';
-export * from './src/models/duration';
-export * from './src/models/pagination';
+export interface Pagination {
+  page: number;
+  perPage: number;
+}
