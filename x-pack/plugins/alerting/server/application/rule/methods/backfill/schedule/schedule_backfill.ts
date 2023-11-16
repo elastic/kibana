@@ -8,7 +8,6 @@
 import pMap from 'p-map';
 import { flatten } from 'lodash';
 import Boom from '@hapi/boom';
-import { parseDuration } from '@kbn/actions-plugin/server/lib/parse_date';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { RuleAttributes } from '../../../../../data/rule/types';
 import { findRulesSo } from '../../../../../data/rule';
@@ -20,27 +19,21 @@ import { convertRuleIdsToKueryNode } from '../../../../../lib';
 import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../../rules_client';
 import { ReadOperations, AlertingAuthorizationEntity } from '../../../../../authorization';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../../rules_client/common/audit_events';
-import type { ScheduleBackfillOptions } from './types';
+import type { ScheduleBackfillOptions, ScheduleBackfillResults } from './types';
 import { scheduleBackfillOptionsSchema } from './schemas';
 import { transformRuleAttributesToRuleDomain } from '../../../transforms';
 
 export async function scheduleBackfill(
   context: RulesClientContext,
   options: ScheduleBackfillOptions
-) {
+): Promise<ScheduleBackfillResults> {
   try {
     scheduleBackfillOptionsSchema.validate(options);
   } catch (error) {
     throw Boom.badRequest(`Error validating schedule data - ${error.message}`);
   }
 
-  // Verify valid duration
-  try {
-    parseDuration(options.intervalDuration);
-  } catch (error) {
-    throw Boom.badRequest(`Invalid intervalDuration - ${options.intervalDuration}`);
-  }
-
+  // Get the rule SOs
   const kueryNodeFilter = convertRuleIdsToKueryNode(options.ruleIds);
   let authorizationTuple;
   try {
@@ -51,7 +44,7 @@ export async function scheduleBackfill(
   } catch (error) {
     context.auditLogger?.log(
       ruleAuditEvent({
-        action: RuleAuditAction.SCHEDULE_AD_HOC_RULE_RUN,
+        action: RuleAuditAction.SCHEDULE_BACKFILL,
         error,
       })
     );
@@ -83,10 +76,18 @@ export async function scheduleBackfill(
   });
 
   const buckets = aggregations?.alertTypeId.buckets;
-
   if (buckets === undefined || !buckets.length) {
+    throw Boom.badRequest(`No rules matching ids ${options.ruleIds} found to schedule backfill`);
+  }
+
+  const lifecycleRuleTypes = buckets.filter(
+    ({ key: [ruleTypeId] }) => context.ruleTypeRegistry.get(ruleTypeId).autoRecoverAlerts ?? true
+  );
+  if (lifecycleRuleTypes.length > 0) {
     throw Boom.badRequest(
-      `No rules matching ids ${options.ruleIds} found to schedule ad hoc rule run`
+      `Cannot schedule backfill for rule types [${lifecycleRuleTypes
+        .map(({ key: [ruleTypeId] }) => ruleTypeId)
+        .join(',')}] - unsupported rule type`
     );
   }
 
@@ -105,7 +106,7 @@ export async function scheduleBackfill(
       } catch (error) {
         context.auditLogger?.log(
           ruleAuditEvent({
-            action: RuleAuditAction.SCHEDULE_AD_HOC_RULE_RUN,
+            action: RuleAuditAction.SCHEDULE_BACKFILL,
             error,
           })
         );

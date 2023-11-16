@@ -16,7 +16,10 @@ import {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import { ScheduleAdHocRuleRunOptions } from '../application/rule/methods/ad_hoc_runs/schedule/types';
+import type {
+  ScheduleBackfillOptions,
+  ScheduleBackfillResults,
+} from '../application/rule/methods/backfill/schedule/types';
 import { RuleDomain } from '../application/rule/types';
 import { AlertingPluginsStart } from '../plugin';
 import { TaskRunnerFactory } from '../task_runner';
@@ -33,7 +36,7 @@ interface BulkQueueOpts {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   rules: RuleDomain[];
   spaceId: string;
-  options: ScheduleAdHocRuleRunOptions;
+  options: ScheduleBackfillOptions;
 }
 
 export class BackfillClient {
@@ -91,14 +94,23 @@ export class BackfillClient {
     }
   }
 
-  public async bulkQueue({ unsecuredSavedObjectsClient, rules, spaceId, options }: BulkQueueOpts) {
+  public async bulkQueue({
+    unsecuredSavedObjectsClient,
+    rules,
+    spaceId,
+    options,
+  }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRuleRunParams>(
       rules.map((rule: RuleDomain) => ({
         type: 'backfill_params',
         attributes: {
+          apiKeyId: Buffer.from(rule.apiKey!, 'base64').toString().split(':')[0],
+          apiKeyToUse: rule.apiKey!,
           createdAt: new Date().toISOString(),
-          spaceId,
-          ruleId: rule.id,
+          currentStart: options.start,
+          duration: rule.schedule.interval,
+          enabled: true,
+          ...(options.end ? { end: options.end } : {}),
           rule: {
             id: rule.id,
             name: rule.name,
@@ -120,20 +132,18 @@ export class BackfillClient {
             revision: rule.revision,
             snoozeSchedule: rule.snoozeSchedule,
           },
-          apiKeyToUse: rule.apiKey!,
-          enabled: true,
-          intervalStart: options.intervalStart,
-          intervalDuration: options.intervalDuration,
-          ...(options.intervalEnd ? { intervalEnd: options.intervalEnd } : {}),
+          spaceId,
+          start: options.start,
+          status: 'Pending',
         },
       }))
     );
 
-    this.logger.info(`queue ${JSON.stringify(bulkResponse)}`);
+    this.logger.info(`queue response ${JSON.stringify(bulkResponse)}`);
     // TODO retry errors
     return bulkResponse.saved_objects.map((so, index) => ({
       ruleId: rules[index].id,
-      adHocRunId: so.error ? null : so.id,
+      backfillId: so.error ? null : so.id,
     }));
   }
 

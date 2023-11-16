@@ -8,9 +8,11 @@
 import { schema } from '@kbn/config-schema';
 
 export const scheduleBackfillRequestBodySchema = schema.object({
-  rule_ids: schema.arrayOf(schema.string(), { minSize: 1 }),
+  rule_ids: schema.arrayOf(schema.string(), { minSize: 1, maxSize: 10 }),
   start: schema.string(),
   end: schema.maybe(schema.string()),
 });
 
-export const scheduleBackfillResponseBodySchema = schema.object({});
+export const scheduleBackfillResponseBodySchema = schema.arrayOf(
+  schema.object({ rule_id: schema.string(), backfill_id: schema.nullable(schema.string()) })
+);

@@ -482,10 +482,17 @@ export interface RawRule extends SavedObjectAttributes {
 
 export type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 
+export const AdHocRuleRunStatuses = ['Pending', 'Running', 'Error', 'Timeout'];
+export type AdHocRuleRunStatus = typeof AdHocRuleRunStatuses[number];
+
 export interface AdHocRuleRunParams extends Record<string, unknown> {
+  apiKeyId: string;
+  apiKeyToUse: string;
   createdAt: string;
-  ruleId: string;
-  spaceId: string;
+  currentStart: string;
+  duration: string;
+  enabled: boolean;
+  end?: string;
   rule: Pick<
     RuleDomain,
     | 'id'
@@ -508,9 +515,7 @@ export interface AdHocRuleRunParams extends Record<string, unknown> {
     | 'revision'
     | 'snoozeSchedule'
   >;
-  apiKeyToUse: string;
-  enabled: boolean;
+  spaceId: string;
   start: string;
-  duration: string;
-  end?: string;
+  status: AdHocRuleRunStatus;
 }

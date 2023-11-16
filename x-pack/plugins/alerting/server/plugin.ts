@@ -481,7 +481,7 @@ export class AlertingPlugin {
         : undefined;
     };
 
-    backfillClient?.startCheck(plugins.taskManager);
+    // backfillClient?.startCheck(plugins.taskManager);
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,

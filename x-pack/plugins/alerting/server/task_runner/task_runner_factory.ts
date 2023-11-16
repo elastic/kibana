@@ -17,7 +17,7 @@ import { TaskRunner } from './task_runner';
 import { NormalizedRuleType } from '../rule_type_registry';
 import { InMemoryMetrics } from '../monitoring';
 import type { TaskRunnerContext } from './types';
-import { AdHocTaskRunner } from '../ad_hoc_runs/ad_hoc_task_runner';
+import { AdHocTaskRunner } from '../ad_hoc_task_runner/ad_hoc_task_runner';
 export class TaskRunnerFactory {
   private isInitialized = false;
   private taskRunnerContext?: TaskRunnerContext;

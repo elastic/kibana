@@ -9,6 +9,7 @@ import { IRouter } from '@kbn/core/server';
 import {
   scheduleBackfillRequestBodySchemaV1,
   ScheduleBackfillRequestBodyV1,
+  ScheduleBackfillResponseV1,
 } from '../../../../../../common/routes/rule/apis/backfill/schedule';
 import { ILicenseState } from '../../../../../lib';
 import { verifyAccessAndContext } from '../../../../lib';
@@ -16,7 +17,7 @@ import {
   AlertingRequestHandlerContext,
   INTERNAL_BASE_ALERTING_API_PATH,
 } from '../../../../../types';
-import { transformRequestV1 } from './transforms';
+import { transformRequestV1, transformResponseV1 } from './transforms';
 
 export const scheduleBackfillRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
@@ -24,7 +25,7 @@ export const scheduleBackfillRoute = (
 ) => {
   router.post(
     {
-      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/ad_hoc_run/_schedule`,
+      path: `${INTERNAL_BASE_ALERTING_API_PATH}/rules/backfill/_schedule`,
       validate: {
         body: scheduleBackfillRequestBodySchemaV1,
       },
@@ -35,13 +36,10 @@ export const scheduleBackfillRoute = (
         const body: ScheduleBackfillRequestBodyV1 = req.body;
 
         const result = await rulesClient.scheduleBackfill(transformRequestV1(body));
-        // const response: ScheduleAdHocRuleRunResponseV1 = {
-        //   body: transformListTypesResponseV1(result),
-        // };
-        // return res.ok(response);
-        return res.ok({
-          body: result,
-        });
+        const response: ScheduleBackfillResponseV1 = {
+          body: transformResponseV1(result),
+        };
+        return res.ok(response);
       })
     )
   );
