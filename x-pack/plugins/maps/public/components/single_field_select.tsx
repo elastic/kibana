@@ -19,10 +19,12 @@ import {
 } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import { DataViewField } from '@kbn/data-views-plugin/public';
+import { css } from '@emotion/react';
 
 function fieldsToOptions(
   fields?: DataViewField[],
-  isFieldDisabled?: (field: DataViewField) => boolean
+  isFieldDisabled?: (field: DataViewField) => boolean,
+  getFieldDisabledReason?: (field: DataViewField) => string | null
 ): Array<EuiComboBoxOptionOption<DataViewField>> {
   if (!fields) {
     return [];
@@ -36,7 +38,29 @@ function fieldsToOptions(
       };
       if (isFieldDisabled && isFieldDisabled(field)) {
         option.disabled = true;
+        const disabledReason = getFieldDisabledReason
+          ? getFieldDisabledReason(option.value!)
+          : null;
+
+        if (disabledReason) {
+          option.prepend = (
+            <EuiToolTip position="left" content={disabledReason}>
+              <div
+                css={css`
+                  position: absolute;
+                  width: 100%;
+                  background-color: rgba(255, 0, 0, 0.3);
+                  top: 0;
+                  bottom: 0;
+                  left: 0;
+                  right: 0;
+                `}
+              />
+            </EuiToolTip>
+          );
+        }
       }
+
       return option;
     })
     .sort((a, b) => {
@@ -63,34 +87,6 @@ export function SingleFieldSelect({
   value,
   ...rest
 }: Props) {
-  function renderOption(
-    option: EuiComboBoxOptionOption<DataViewField>,
-    searchValue: string,
-    contentClassName: string
-  ) {
-    const content = (
-      <EuiFlexGroup className={contentClassName} gutterSize="s" alignItems="center">
-        <EuiFlexItem grow={null}>
-          <FieldIcon type={option.value!.type} fill="none" />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    );
-
-    const disabledReason =
-      option.disabled && getFieldDisabledReason ? getFieldDisabledReason(option.value!) : null;
-
-    return disabledReason ? (
-      <EuiToolTip position="left" content={disabledReason}>
-        {content}
-      </EuiToolTip>
-    ) : (
-      content
-    );
-  }
-
   const onSelection = (selectedOptions: Array<EuiComboBoxOptionOption<DataViewField>>) => {
     onChange(_.get(selectedOptions, '0.value.name'));
   };
@@ -107,16 +103,43 @@ export function SingleFieldSelect({
       });
     }
   }
+  const optt = fieldsToOptions(fields, isFieldDisabled, getFieldDisabledReason);
+  if (optt.length) {
+    optt[0].disabled = true;
+  }
+  const maxLabelLength =
+    fields?.reduce<number>((prev, curr) => {
+      return prev > curr.displayName.length ? prev : curr.displayName.length;
+    }, 20) || 20;
 
+  const panelMinWidth = getPanelMinWidth(maxLabelLength);
   return (
     <EuiComboBox
       singleSelection={true}
-      options={fieldsToOptions(fields, isFieldDisabled)}
+      options={optt}
       selectedOptions={selectedOptions}
       onChange={onSelection}
       isDisabled={!fields || fields.length === 0}
-      renderOption={renderOption}
+      truncationProps={MIDDLE_TRUNCATION_PROPS}
+      inputPopoverProps={{ panelMinWidth }}
       {...rest}
     />
   );
+}
+const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
+const MINIMUM_POPOVER_WIDTH = 300;
+const MINIMUM_POPOVER_WIDTH_CHAR_COUNT = 28;
+const AVERAGE_CHAR_WIDTH = 7;
+const MAXIMUM_POPOVER_WIDTH_CHAR_COUNT = 60;
+const MAXIMUM_POPOVER_WIDTH = 550; // fitting 60 characters
+
+function getPanelMinWidth(labelLength: number) {
+  if (labelLength > MAXIMUM_POPOVER_WIDTH_CHAR_COUNT) {
+    return MAXIMUM_POPOVER_WIDTH;
+  }
+  if (labelLength > MINIMUM_POPOVER_WIDTH_CHAR_COUNT) {
+    const overflownChars = labelLength - MINIMUM_POPOVER_WIDTH_CHAR_COUNT;
+    return MINIMUM_POPOVER_WIDTH + overflownChars * AVERAGE_CHAR_WIDTH;
+  }
+  return MINIMUM_POPOVER_WIDTH;
 }
