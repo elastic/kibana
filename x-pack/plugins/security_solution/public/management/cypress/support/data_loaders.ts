@@ -66,8 +66,8 @@ import { cyLoadEndpointDataHandler } from './plugin_handlers/endpoint_data_loade
 import type {
   CreateAndEnrollEndpointHostCIOptions,
   CreateAndEnrollEndpointHostCIResponse,
-} from './createAndEnrollEndpointHostCI';
-import { createAndEnrollEndpointHostCI } from './createAndEnrollEndpointHostCI';
+} from './create_and_enroll_endpoint_host_ci';
+import { createAndEnrollEndpointHostCI } from './create_and_enroll_endpoint_host_ci';
 
 /**
  * Test Role/User loader for cypress. Checks to see if running in serverless and handles it as appropriate
