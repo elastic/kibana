@@ -16,6 +16,7 @@ import { withSuspense } from '@kbn/shared-ux-utility';
 import { NoDataViewsPromptComponentProps } from '@kbn/shared-ux-prompt-no-data-views-types';
 
 import { DocumentationLink } from './documentation_link';
+import { useServices } from './services';
 
 const createDataViewText = i18n.translate('sharedUXPackages.noDataViewsPrompt.addDataViewText', {
   defaultMessage: 'Create data view',
@@ -34,12 +35,18 @@ export const NoDataViewsPrompt = ({
   showESQLView,
   emptyPromptColor = 'plain',
 }: NoDataViewsPromptComponentProps) => {
+  const services = useServices();
+  const { showESQLViewLocator } = services;
   let actions;
 
   if (canCreateNewDataView && showESQLView) {
-    const onClickEsql = () => {
-      location;
-    };
+    const onClickEsql = async () => {
+      return await showESQLViewLocator.navigate({
+        query: {
+          // esql: “from <one es index> | limit 10”
+     }
+    });
+  }
 
     actions = (
       <>
@@ -59,12 +66,13 @@ export const NoDataViewsPrompt = ({
           data-test-subj="gotoESQLDiscover"
         >
           {i18n.translate('sharedUXPackages.noDataViewsPrompt.goToESQLDiscover', {
-            defaultMessage: 'Go to ESQL-mode-Discover',
+            defaultMessage: 'Go to ES|QL-mode-Discover',
           })}
         </EuiButton>
       </>
     );
   }
+
   if (canCreateNewDataView && !showESQLView) {
     actions = (
       <EuiButton

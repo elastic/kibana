@@ -356,6 +356,7 @@ export const IndexPatternTable = ({
           dataViewsDocLink={docLinks.links.indexPatterns.introduction}
           emptyPromptColor={'subdued'}
           showESQLView={true}
+          // showESQLViewLocator={application.capabilities.catalogue.getESQLSearchProvider}
         />
       </>
     );
