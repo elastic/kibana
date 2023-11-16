@@ -7,6 +7,7 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { apiVersion } from '../../../../common/api_version';
 import type {
   ResponseActionBodySchema,
   NoParametersRequestSchema,
@@ -19,6 +20,7 @@ import {
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
   GetProcessesRouteRequestSchema,
+  NoParametersV2RequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -108,6 +110,27 @@ export function registerResponseActionRoutes(
         version: '2023-10-31',
         validate: {
           request: IsolateRouteRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canIsolateHost'] },
+        logger,
+        responseActionRequestHandler(endpointContext, 'isolate')
+      )
+    );
+
+  // FIXME: delete and add `.version()` to the above definition once Core allows new values
+  router.versioned
+    .post({
+      access: 'public',
+      path: `${ISOLATE_HOST_ROUTE_V2}_v2`, // << for testing only
+      options: { authRequired: true, tags: ['access:securitySolution'] },
+    })
+    .addVersion(
+      {
+        version: apiVersion.public.v8_13_0,
+        validate: {
+          request: NoParametersV2RequestSchema,
         },
       },
       withEndpointAuthz(
