@@ -14,11 +14,15 @@ export const useEndpointExceptionsCapability = (
   capability: 'showEndpointExceptions' | 'crudEndpointExceptions'
 ): boolean => {
   const { lists } = useKibana().services;
-  const { canManageIndex, loading: privilegesLoading } = useListsPrivileges();
+  const { canReadIndex, canWriteIndex, loading: privilegesLoading } = useListsPrivileges();
   const enabled = lists != null;
-  const needsIndexConfiguration = canManageIndex === false;
-  const needsConfiguration = !enabled || needsIndexConfiguration;
-  const hasAccessToLists = !(privilegesLoading || needsConfiguration);
+  const hasListPrivilege = useMemo(
+    () =>
+      capability === 'showEndpointExceptions' ? canReadIndex === false : canWriteIndex === false,
+    [canReadIndex, canWriteIndex, capability]
+  );
+  const canAccessLists = !enabled || hasListPrivilege;
+  const hasAccessToLists = !(privilegesLoading || canAccessLists);
 
   const hasEndpointExceptionCapability = useHasSecurityCapability(capability);
 
