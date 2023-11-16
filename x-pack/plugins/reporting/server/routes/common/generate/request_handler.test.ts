@@ -15,21 +15,24 @@ jest.mock(
     }
 );
 
-import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import rison from '@kbn/rison';
+
+import { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { coreMock, httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
+import { JobParamsPDFDeprecated, TaskPayloadPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
+
 import { ReportingCore } from '../../..';
-import { TaskPayloadPDFV2 } from '../../../../common/types/export_types/printable_pdf_v2';
-import { JobParamsPDFDeprecated } from '../../../export_types/printable_pdf/types';
 import { Report, ReportingStore } from '../../../lib/store';
-import { createMockConfigSchema, createMockReportingCore } from '../../../test_helpers';
+import { createMockReportingCore } from '../../../test_helpers';
 import {
   ReportingJobResponse,
   ReportingRequestHandlerContext,
   ReportingSetup,
 } from '../../../types';
 import { RequestHandler } from './request_handler';
-jest.mock('../../../lib/crypto', () => ({
+
+jest.mock('@kbn/reporting-server/crypto', () => ({
   cryptoFactory: () => ({
     encrypt: () => `hello mock cypher text`,
   }),

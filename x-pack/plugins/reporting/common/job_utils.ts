@@ -5,14 +5,9 @@
  * 2.0.
  */
 
-import {
-  CSV_JOB_TYPE,
-  PDF_JOB_TYPE,
-  PNG_JOB_TYPE,
-  PDF_JOB_TYPE_V2,
-  PNG_JOB_TYPE_V2,
-  CSV_JOB_TYPE_DEPRECATED,
-} from './constants';
+import { CSV_JOB_TYPE, CSV_JOB_TYPE_DEPRECATED } from '@kbn/reporting-export-types-csv-common';
+import { PDF_JOB_TYPE, PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_JOB_TYPE, PNG_JOB_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
 
 // TODO: Remove this code once everyone is using the new PDF format, then we can also remove the legacy
 // export type entirely
