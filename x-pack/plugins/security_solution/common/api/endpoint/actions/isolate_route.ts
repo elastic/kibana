@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { NoParametersRequestSchema, NoParametersV2RequestSchema } from './common/base';
+import type { TypeOf } from '@kbn/config-schema';
+import { NoParametersRequestSchema } from './common/base';
 
 export const IsolateRouteRequestSchema = NoParametersRequestSchema;
-
-export const IsolateRouteV2RequestSchema = NoParametersV2RequestSchema;
+export type IsolationRouteRequestBody = TypeOf<typeof IsolateRouteRequestSchema.body>;

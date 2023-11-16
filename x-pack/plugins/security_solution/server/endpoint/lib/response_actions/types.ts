@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { BaseActionV2RequestBody } from '../../../../common/api/endpoint';
 import type { ActionDetails } from '../../../../common/endpoint/types';
+import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
 
 /**
  * The interface required for a Response Actions provider
  */
 export interface ResponseActionsProvider<TActionDetails extends ActionDetails = ActionDetails> {
   /** Isolates the host */
-  isolate: (options: BaseActionV2RequestBody) => Promise<TActionDetails>;
+  isolate: (options: IsolationRouteRequestBody) => Promise<TActionDetails>;
 
   /** Un-Isolates the host */
-  release: (options: BaseActionV2RequestBody) => Promise<TActionDetails>;
+  release: (options: IsolationRouteRequestBody) => Promise<TActionDetails>;
 }

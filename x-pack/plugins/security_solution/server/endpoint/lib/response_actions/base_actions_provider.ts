@@ -10,8 +10,8 @@ import type { CasesClient } from '@kbn/cases-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { EndpointAppContext } from '../../types';
 import type { ActionDetails } from '../../../../common/endpoint/types';
-import type { BaseActionV2RequestBody } from '../../../../common/api/endpoint';
 import type { ResponseActionsProvider } from './types';
+import type { IsolationRouteRequestBody } from '../../../../common/api/endpoint';
 
 export interface BaseActionsProviderOptions {
   endpointContext: EndpointAppContext;
@@ -25,9 +25,9 @@ export abstract class BaseActionsProvider implements ResponseActionsProvider {
   protected readonly log: Logger;
 
   constructor(protected readonly options: BaseActionsProviderOptions) {
-    this.log = options.endpointContext.logFactory.get(this.constructor.name);
+    this.log = options.endpointContext.logFactory.get(this.constructor.name ?? 'ActionsProvider');
   }
 
-  public abstract isolate(options: BaseActionV2RequestBody): Promise<ActionDetails>;
-  public abstract release(options: BaseActionV2RequestBody): Promise<ActionDetails>;
+  public abstract isolate(options: IsolationRouteRequestBody): Promise<ActionDetails>;
+  public abstract release(options: IsolationRouteRequestBody): Promise<ActionDetails>;
 }

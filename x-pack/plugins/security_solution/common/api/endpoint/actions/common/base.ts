@@ -41,6 +41,14 @@ export const BaseActionRequestSchema = {
       },
     })
   ),
+  // TODO: place this behind a feature flag??? Possible?
+  agentType: schema.maybe(
+    schema.oneOf(
+      // @ts-expect-error TS2769: No overload matches this call
+      RESPONSE_ACTION_AGENT_TYPE.map((type) => schema.literal(type)),
+      { defaultValue: 'endpoint' }
+    )
+  ),
   comment: schema.maybe(schema.string()),
   parameters: schema.maybe(schema.object({})),
 };
@@ -59,23 +67,3 @@ export const KillOrSuspendProcessRequestSchema = {
     ]),
   }),
 };
-
-/**
- * v2 base request for response actions. It adds the `agentType` property in order to handle
- * sending actions to 3rd party systems
- */
-export const BaseActionV2RequestSchema = {
-  ...BaseActionRequestSchema,
-  agentType: schema.maybe(
-    schema.oneOf(
-      // @ts-expect-error TS2769: No overload matches this call
-      RESPONSE_ACTION_AGENT_TYPE.map((type) => schema.literal(type)),
-      { defaultValue: 'endpoint' }
-    )
-  ),
-};
-
-export const NoParametersV2RequestSchema = {
-  body: schema.object({ ...BaseActionV2RequestSchema }),
-};
-export type BaseActionV2RequestBody = TypeOf<typeof NoParametersV2RequestSchema.body>;

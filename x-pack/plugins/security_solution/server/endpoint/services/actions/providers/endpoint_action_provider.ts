@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { ResponseActionsApiCommandNames } from '../../../../../common/endpoint/service/response_actions/constants';
+import type { IsolationRouteRequestBody } from '../../../../../common/api/endpoint';
 import type { ActionDetails, HostMetadata } from '../../../../../common/endpoint/types';
 import { BaseActionsProvider } from '../../../lib/response_actions/base_actions_provider';
 
@@ -29,7 +31,10 @@ export class EndpointActionProvider extends BaseActionsProvider {
     };
   }
 
-  private hostIsolation(command: 'isolate' | 'release', options): Promise<ActionDetails> {
+  private async hostIsolation(
+    command: Pick<ResponseActionsApiCommandNames, 'isolate', 'unisolate'>,
+    options: IsolationRouteRequestBody
+  ): Promise<ActionDetails> {
     const agentIds = await this.checkAgentIds(options.endpoint_ids);
 
     if (!agentIds.allValid) {
@@ -50,11 +55,11 @@ export class EndpointActionProvider extends BaseActionsProvider {
     );
   }
 
-  async isolate(options) {
+  async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
     return this.hostIsolation('isolate', options);
   }
 
-  async release() {
-    return this.hostIsolation('release', options);
+  async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
+    return this.hostIsolation('unisolate', options);
   }
 }
