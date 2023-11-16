@@ -323,6 +323,10 @@ export function registerTransformsRoutes(routeDependencies: RouteDependencies) {
               {
                 title: dataViewName,
                 timeFieldName,
+                // Adding runtime mappings for transforms of type latest only here
+                // since only they will want to replicate the source index mapping.
+                // Pivot type transforms have index mappings that cannot be
+                // inferred from the source index.
                 ...(isPopulatedObject(runtimeMappings) && isLatestTransform(req.body)
                   ? { runtimeFieldMap: runtimeMappings }
                   : {}),
