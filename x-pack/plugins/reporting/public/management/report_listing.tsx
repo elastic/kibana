@@ -5,41 +5,44 @@
  * 2.0.
  */
 
+import { Component, Fragment, default as React } from 'react';
+import { Subscription } from 'rxjs';
+
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
-  EuiBasicTableColumn,
-  EuiIconTip,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Component, default as React, Fragment } from 'react';
-import { Subscription } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { durationToNumber } from '@kbn/reporting-common';
+
+import { ListingProps as Props } from '.';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
-import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
-import { ListingProps as Props } from '.';
 import {
   IlmPolicyLink,
   MigrateIlmPolicyCallOut,
   ReportDeleteButton,
   ReportDiagnostic,
-  ReportStatusIndicator,
   ReportInfoFlyout,
+  ReportStatusIndicator,
 } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
+
 import './report_listing.scss';
 
 type TableColumn = EuiBasicTableColumn<Job>;
