@@ -6,7 +6,7 @@
  */
 
 import { ControlGroupAPI } from '@kbn/controls-plugin/public';
-import { QueryState } from '@kbn/data-plugin/common';
+import { QueryState, RefreshInterval, TimeRange } from '@kbn/data-plugin/common';
 import { DiscoverAppState, DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import { DoneInvokeEvent } from 'xstate';
 import { ControlPanels, DisplayOptions } from '../../../../common';
@@ -152,8 +152,12 @@ export type LogExplorerControllerEvent =
       appState: DiscoverAppState;
     }
   | {
-      type: 'RECEIVE_QUERY_STATE';
-      queryState: QueryState;
+      type: 'RECEIVE_TIMEFILTER_TIME';
+      time: TimeRange;
+    }
+  | {
+      type: 'RECEIVE_TIMEFILTER_REFRESH_INTERVAL';
+      refreshInterval: RefreshInterval;
     }
   | DoneInvokeEvent<DatasetSelection>
   | DoneInvokeEvent<ControlPanels>

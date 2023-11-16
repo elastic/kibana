@@ -6,35 +6,38 @@
  */
 
 import { IToasts } from '@kbn/core/public';
-import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
 import { QueryStart } from '@kbn/data-plugin/public';
-import { IDatasetsClient } from '../../../services/datasets';
+import { actions, createMachine, interpret, InterpreterFrom, raise } from 'xstate';
+import { ControlPanelRT } from '../../../../common/control_panels';
 import { isDatasetSelection } from '../../../../common/dataset_selection';
-import { createAndSetDataView } from './services/data_view_service';
-import { validateSelection } from './services/selection_service';
+import { IDatasetsClient } from '../../../services/datasets';
 import { DEFAULT_CONTEXT } from './defaults';
 import {
   createCreateDataViewFailedNotifier,
   createDatasetSelectionRestoreFailedNotifier,
 } from './notifications';
 import {
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent,
-  LogExplorerControllerTypeState,
-} from './types';
-import {
-  subscribeToDiscoverState,
-  updateChartFromDiscoverAppState,
-  updateDiscoverAppStateFromContext,
-  updateGridFromDiscoverAppState,
-} from './services/discover_service';
-import { subscribeToQueryState, updateQueryStateFromQueryState } from './services/query_service';
-import { ControlPanelRT } from '../../../../common/control_panels';
-import {
   initializeControlPanels,
   subscribeControlGroup,
   updateControlPanels,
 } from './services/control_panels';
+import { createAndSetDataView } from './services/data_view_service';
+import {
+  subscribeToDiscoverState,
+  updateContextFromDiscoverAppState,
+  updateDiscoverAppStateFromContext,
+} from './services/discover_service';
+import { validateSelection } from './services/selection_service';
+import {
+  subscribeToTimefilterService,
+  updateContextFromTimefilter,
+  updateTimefilterFromContext,
+} from './services/timefilter_service';
+import {
+  LogExplorerControllerContext,
+  LogExplorerControllerEvent,
+  LogExplorerControllerTypeState,
+} from './types';
 
 export const createPureLogExplorerControllerStateMachine = (
   initialContext: LogExplorerControllerContext
@@ -64,11 +67,15 @@ export const createPureLogExplorerControllerStateMachine = (
             src: 'createDataView',
             onDone: {
               target: 'initializingControlPanels',
-              actions: ['updateDiscoverAppStateFromContext'],
+              actions: ['updateDiscoverAppStateFromContext', 'updateTimefilterFromContext'],
             },
             onError: {
               target: 'initialized',
-              actions: ['notifyCreateDataViewFailed', 'updateDiscoverAppStateFromContext'],
+              actions: [
+                'notifyCreateDataViewFailed',
+                'updateDiscoverAppStateFromContext',
+                'updateTimefilterFromContext',
+              ],
             },
           },
         },
@@ -92,8 +99,8 @@ export const createPureLogExplorerControllerStateMachine = (
               id: 'discoverStateService',
             },
             {
-              src: 'queryStateService',
-              id: 'queryStateService',
+              src: 'timefilterService',
+              id: 'timefilterService',
             },
           ],
           states: {
@@ -187,10 +194,16 @@ export const createPureLogExplorerControllerStateMachine = (
           },
           on: {
             RECEIVE_DISCOVER_APP_STATE: {
-              actions: ['updateGridFromDiscoverAppState', 'updateChartFromDiscoverAppState'],
+              actions: ['updateContextFromDiscoverAppState'],
             },
             RECEIVE_QUERY_STATE: {
-              actions: ['updateQueryStateFromQueryState'],
+              actions: ['updateQueryStateFromQueryServiceState'],
+            },
+            RECEIVE_TIMEFILTER_TIME: {
+              actions: ['updateContextFromTimefilter'],
+            },
+            RECEIVE_TIMEFILTER_REFRESH_INTERVAL: {
+              actions: ['updateContextFromTimefilter'],
             },
           },
         },
@@ -227,10 +240,9 @@ export const createPureLogExplorerControllerStateMachine = (
             : {}
         ),
         notifyDataViewUpdate: raise('DATA_VIEW_UPDATED'),
-        updateGridFromDiscoverAppState,
-        updateChartFromDiscoverAppState,
+        updateContextFromDiscoverAppState,
         updateDiscoverAppStateFromContext,
-        updateQueryStateFromQueryState,
+        updateContextFromTimefilter,
       },
       guards: {
         controlGroupAPIExists: (_context, event) => {
@@ -257,6 +269,7 @@ export const createLogExplorerControllerStateMachine = ({
     actions: {
       notifyCreateDataViewFailed: createCreateDataViewFailedNotifier(toasts),
       notifyDatasetSelectionRestoreFailed: createDatasetSelectionRestoreFailedNotifier(toasts),
+      updateTimefilterFromContext: updateTimefilterFromContext(query),
     },
     services: {
       createDataView: createAndSetDataView(),
@@ -265,7 +278,7 @@ export const createLogExplorerControllerStateMachine = ({
       updateControlPanels: updateControlPanels(),
       validateSelection: validateSelection({ datasetsClient }),
       discoverStateService: subscribeToDiscoverState(),
-      queryStateService: subscribeToQueryState({ query }),
+      timefilterService: subscribeToTimefilterService(query),
     },
   });
 

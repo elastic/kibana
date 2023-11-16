@@ -9,9 +9,10 @@ import { isEmpty } from 'lodash';
 import { ActionFunction, actions, InvokeCallback } from 'xstate';
 import {
   getChartDisplayOptionsFromDiscoverAppState,
-  getDiscoverAppStateFromDisplayOptions,
+  getDiscoverAppStateFromContext,
   getGridColumnDisplayOptionsFromDiscoverAppState,
   getGridRowsDisplayOptionsFromDiscoverAppState,
+  getQueryStateFromDiscoverAppState,
 } from '../../../../utils/convert_discover_app_state';
 import { LogExplorerControllerContext, LogExplorerControllerEvent } from '../types';
 
@@ -45,27 +46,7 @@ export const subscribeToDiscoverState =
     };
   };
 
-export const updateGridFromDiscoverAppState = actions.assign<
-  LogExplorerControllerContext,
-  LogExplorerControllerEvent
->((context, event) => {
-  if ('appState' in event && event.type === 'RECEIVE_DISCOVER_APP_STATE') {
-    return {
-      grid: {
-        columns:
-          getGridColumnDisplayOptionsFromDiscoverAppState(event.appState) ?? context.grid.columns,
-        rows: {
-          ...context.grid.rows,
-          ...getGridRowsDisplayOptionsFromDiscoverAppState(event.appState),
-        },
-      },
-    };
-  }
-
-  return {};
-});
-
-export const updateChartFromDiscoverAppState = actions.assign<
+export const updateContextFromDiscoverAppState = actions.assign<
   LogExplorerControllerContext,
   LogExplorerControllerEvent
 >((context, event) => {
@@ -75,6 +56,15 @@ export const updateChartFromDiscoverAppState = actions.assign<
         ...context.chart,
         ...getChartDisplayOptionsFromDiscoverAppState(event.appState),
       },
+      grid: {
+        columns:
+          getGridColumnDisplayOptionsFromDiscoverAppState(event.appState) ?? context.grid.columns,
+        rows: {
+          ...context.grid.rows,
+          ...getGridRowsDisplayOptionsFromDiscoverAppState(event.appState),
+        },
+      },
+      ...getQueryStateFromDiscoverAppState(event.appState),
     };
   }
 
@@ -89,5 +79,5 @@ export const updateDiscoverAppStateFromContext: ActionFunction<
     return;
   }
 
-  context.discoverStateContainer.appState.update(getDiscoverAppStateFromDisplayOptions(context));
+  context.discoverStateContainer.appState.update(getDiscoverAppStateFromContext(context));
 };

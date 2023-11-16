@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { QueryState } from '@kbn/data-plugin/public';
 import { DiscoverAppState } from '@kbn/discover-plugin/public';
+import { cloneDeep } from 'lodash';
 import {
   ChartDisplayOptions,
   DisplayOptions,
@@ -34,8 +36,15 @@ export const getChartDisplayOptionsFromDiscoverAppState = (
   breakdownField: discoverAppState.breakdownField ?? null,
 });
 
-export const getDiscoverAppStateFromDisplayOptions = (
-  displayOptions: DisplayOptions
+export const getQueryStateFromDiscoverAppState = (
+  discoverAppState: DiscoverAppState
+): QueryState => ({
+  query: discoverAppState.query,
+  filters: discoverAppState.filters,
+});
+
+export const getDiscoverAppStateFromContext = (
+  displayOptions: DisplayOptions & QueryState
 ): Partial<DiscoverAppState> => ({
   breakdownField: displayOptions.chart.breakdownField ?? undefined,
   columns: getDiscoverColumnsFromDisplayOptions(displayOptions),
@@ -51,6 +60,8 @@ export const getDiscoverAppStateFromDisplayOptions = (
   },
   rowHeight: displayOptions.grid.rows.rowHeight,
   rowsPerPage: displayOptions.grid.rows.rowsPerPage,
+  query: cloneDeep(displayOptions.query),
+  filters: cloneDeep(displayOptions.filters),
 });
 
 export const getDiscoverColumnsFromDisplayOptions = (
