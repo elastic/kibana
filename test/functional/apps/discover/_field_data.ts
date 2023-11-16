@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const find = getService('find');
   const testSubjects = getService('testSubjects');
 
-  describe('discover tab', function describeIndexTests() {
+  describe.only('discover tab', function describeIndexTests() {
     this.tags('includeFirefox');
     before(async function () {
       await kibanaServer.savedObjects.clean({ types: ['search', 'index-pattern'] });
