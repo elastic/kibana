@@ -8,6 +8,9 @@
 import type { BaseActionV2RequestBody } from '../../../../common/api/endpoint';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 
+/**
+ * The interface required for a Response Actions provider
+ */
 export interface ResponseActionsProvider<TActionDetails extends ActionDetails = ActionDetails> {
   /** Isolates the host */
   isolate: (options: BaseActionV2RequestBody) => Promise<TActionDetails>;

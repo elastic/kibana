@@ -7,6 +7,12 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import type { CreateActionPayload } from '../../services/actions/create/types';
+import type { BaseActionsProviderOptions } from '../../lib/response_actions/base_actions_provider';
+import {
+  EndpointActionProvider,
+  SentinelOneActionProvider,
+} from '../../services/actions/providers';
 import { apiVersion } from '../../../../common/api_version';
 import type {
   ResponseActionBodySchema,
@@ -41,7 +47,10 @@ import type {
   ActionDetails,
   HostMetadata,
 } from '../../../../common/endpoint/types';
-import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
+import type {
+  ResponseActionsApiCommandNames,
+  ResponseActionAgentType,
+} from '../../../../common/endpoint/service/response_actions/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -302,23 +311,47 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
   return async (context, req, res) => {
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
+    const casesClient = await endpointContext.service.getCasesClient(req);
 
     let action: ActionDetails;
 
     try {
-      const createActionPayload = { ...req.body, command, user };
-      const endpointData = await endpointContext.service
-        .getEndpointMetadataService()
-        .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
-      const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+      if (command === 'isolate' || command === 'unisolate') {
+        const agentType: ResponseActionAgentType = req.body.agentType ?? 'endpoint';
+        const defaultProviderOptions: BaseActionsProviderOptions = {
+          esClient,
+          casesClient,
+          endpointContext,
+          username: user?.username ?? 'unknown',
+        };
+        const actionProvider =
+          agentType === 'sentinelone'
+            ? new SentinelOneActionProvider(defaultProviderOptions)
+            : new EndpointActionProvider(defaultProviderOptions);
 
-      action = await endpointContext.service
-        .getActionCreateService()
-        .createAction(createActionPayload, agentIds);
+        switch (command) {
+          case 'isolate':
+            action = await actionProvider.isolate(req.body);
+            break;
 
-      // update cases
-      const casesClient = await endpointContext.service.getCasesClient(req);
-      await updateCases({ casesClient, createActionPayload, endpointData });
+          case 'unisolate':
+            action = await actionProvider.release(req.body);
+            break;
+        }
+      } else {
+        const createActionPayload: CreateActionPayload = { ...req.body, command, user };
+        const endpointData = await endpointContext.service
+          .getEndpointMetadataService()
+          .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
+        const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
+
+        action = await endpointContext.service
+          .getActionCreateService()
+          .createAction(createActionPayload, agentIds);
+
+        // update cases
+        await updateCases({ casesClient, createActionPayload, endpointData });
+      }
     } catch (err) {
       return res.customError({
         statusCode: 500,

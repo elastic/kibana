@@ -5,9 +5,5 @@
  * 2.0.
  */
 
-import { BaseActionsProvider } from '../../../../lib/response_actions/base_actions_provider';
-
-/** Supports sending response actions to sentinel one agents */
-export class SentinelOneActionProvider extends BaseActionsProvider {
-  // FIXME:PT implement
-}
+export { SentinelOneActionProvider } from './sentinelone_action_provider';
+export { EndpointActionProvider } from './endpoint_action_provider';

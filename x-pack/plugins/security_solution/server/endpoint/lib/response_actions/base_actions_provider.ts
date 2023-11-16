@@ -6,20 +6,27 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type { CasesClient } from '@kbn/cases-plugin/server';
+import type { Logger } from '@kbn/logging';
 import type { EndpointAppContext } from '../../types';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import type { BaseActionV2RequestBody } from '../../../../common/api/endpoint';
 import type { ResponseActionsProvider } from './types';
 
-interface BaseActionsProviderOptions {
+export interface BaseActionsProviderOptions {
   endpointContext: EndpointAppContext;
   esClient: ElasticsearchClient;
+  casesClient: CasesClient;
   /** Username that will be stored along with the action's ES documents */
   username: string;
 }
 
 export abstract class BaseActionsProvider implements ResponseActionsProvider {
-  constructor(protected readonly options: BaseActionsProviderOptions) {}
+  protected readonly log: Logger;
+
+  constructor(protected readonly options: BaseActionsProviderOptions) {
+    this.log = options.endpointContext.logFactory.get(this.constructor.name);
+  }
 
   public abstract isolate(options: BaseActionV2RequestBody): Promise<ActionDetails>;
   public abstract release(options: BaseActionV2RequestBody): Promise<ActionDetails>;

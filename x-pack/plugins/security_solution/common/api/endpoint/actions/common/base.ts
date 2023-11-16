@@ -67,8 +67,11 @@ export const KillOrSuspendProcessRequestSchema = {
 export const BaseActionV2RequestSchema = {
   ...BaseActionRequestSchema,
   agentType: schema.maybe(
-    // @ts-expect-error TS2769: No overload matches this call
-    schema.oneOf(RESPONSE_ACTION_AGENT_TYPE.map((type) => schema.literal(type)))
+    schema.oneOf(
+      // @ts-expect-error TS2769: No overload matches this call
+      RESPONSE_ACTION_AGENT_TYPE.map((type) => schema.literal(type)),
+      { defaultValue: 'endpoint' }
+    )
   ),
 };
 
