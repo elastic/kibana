@@ -364,7 +364,7 @@ export const ThresholdRuleOptionalFields = z.object({
   saved_id: SavedQueryId.optional(),
   alert_suppression: z
     .object({
-      duration: AlertSuppressionDuration,
+      duration: AlertSuppressionDuration.optional(),
       group_by: AlertSuppressionGroupBy,
     })
     .optional(),
