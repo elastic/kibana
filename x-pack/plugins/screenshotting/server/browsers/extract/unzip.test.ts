@@ -28,13 +28,7 @@ describe('unzip', () => {
   it('should extract zipped contents', async () => {
     await unzip('/test.zip', '/output');
 
-    let testOutput = null;
-    try {
-      testOutput = (await readFile('/output/test.txt')).toString();
-    } catch (e) {
-      // assertion will error
-    }
-    expect(testOutput).toEqual('test');
+    await expect(readFile('/output/test.txt', 'utf8')).resolves.toBe('test');
   });
 
   it('should reject on invalid archive', async () => {
