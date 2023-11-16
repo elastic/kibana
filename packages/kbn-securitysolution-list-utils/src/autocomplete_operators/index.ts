@@ -109,7 +109,6 @@ export const EVENT_FILTERS_OPERATORS: OperatorOption[] = [
   isOneOfOperator,
   isNotOneOfOperator,
   matchesOperator,
-  doesNotMatchOperator,
 ];
 
 /*

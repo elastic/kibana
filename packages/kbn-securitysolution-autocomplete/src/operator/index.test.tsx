@@ -223,7 +223,6 @@ describe('operator', () => {
       { label: 'is one of' },
       { label: 'is not one of' },
       { label: 'matches' },
-      { label: 'does not match' },
     ]);
   });
 
