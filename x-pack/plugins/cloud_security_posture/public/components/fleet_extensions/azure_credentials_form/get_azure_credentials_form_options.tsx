@@ -118,8 +118,15 @@ export const getAzureCredentialsFormOptions = (): AzureOptions => ({
     },
   },
   managed_identity: {
-    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualIdentityLabel', {
+    label: i18n.translate('xpack.csp.azureIntegration.credentialType.managedIdentityLabel', {
       defaultMessage: 'Managed Identity',
+    }),
+    info: [],
+    fields: {},
+  },
+  manual: {
+    label: i18n.translate('xpack.csp.azureIntegration.credentialType.manualLabel', {
+      defaultMessage: 'Manual',
     }),
     info: [],
     fields: {},

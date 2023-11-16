@@ -1330,6 +1330,27 @@ describe('<CspPolicyTemplateForm />', () => {
       ).toBeInTheDocument();
     });
 
+    it(`doesnt render ${CLOUDBEAT_AZURE} Manual fields when version is not at least version 1.7.0`, () => {
+      let policy = getMockPolicyAzure();
+      policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
+        'azure.credentials.type': { value: 'manual' },
+        'azure.account_type': { value: 'single-account' },
+      });
+
+      const { queryByRole } = render(
+        <WrappedComponent newPolicy={policy} packageInfo={getMockPackageInfoCspmAzure('1.6.0')} />
+      );
+
+      expect(onChange).toHaveBeenCalledWith({
+        isValid: true,
+        updatedPolicy: policy,
+      });
+
+      expect(
+        queryByRole('option', { name: 'Service principal with Client Secret', selected: true })
+      ).not.toBeInTheDocument();
+    });
+
     it(`selects default ${CLOUDBEAT_AZURE} fields`, () => {
       let policy = getMockPolicyAzure();
       policy = getPosturePolicy(policy, CLOUDBEAT_AZURE, {
