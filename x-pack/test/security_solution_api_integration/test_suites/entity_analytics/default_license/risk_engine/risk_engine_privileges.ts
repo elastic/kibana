@@ -105,6 +105,8 @@ export default ({ getService }: FtrProviderContext) => {
     try {
       security = getService('security');
     } catch (e) {
+      // even though this test doesn't have the @serverless tag I cannot get it to stop running
+      // with serverless config. This is a hack to skip the test if security service is not available
       logger.info(
         'Skipping privileges test as security service not available (likely run with serverless config)'
       );
