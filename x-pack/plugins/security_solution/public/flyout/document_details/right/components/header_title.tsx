@@ -7,10 +7,11 @@
 
 import type { FC } from 'react';
 import React, { memo, useCallback, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';import { isEmpty } from 'lodash';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { isEmpty } from 'lodash';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
+import { TableId } from '@kbn/securitysolution-data-table';
 import { DocumentStatus } from './status';
 import { DocumentSeverity } from './severity';
 import { RiskScore } from './risk_score';
