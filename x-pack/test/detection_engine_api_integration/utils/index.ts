@@ -15,7 +15,6 @@ export * from './create_exception_list_item';
 export * from './create_legacy_rule_action';
 export * from './create_new_action';
 export * from './create_rule';
-export * from './create_rule_with_auth';
 export * from './create_rule_with_exception_entries';
 export * from './create_rule_saved_object';
 export * from './create_signals_index';
