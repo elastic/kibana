@@ -26,6 +26,8 @@ import {
   EuiPopover,
   EuiLink,
   EuiButtonIcon,
+  EuiToolTip,
+  EuiIcon,
 } from '@elastic/eui';
 import styled from 'styled-components';
 
@@ -332,42 +334,36 @@ const SecretFieldLabel = ({ fieldLabel }: { fieldLabel: string }) => {
   const closePopover = () => setIsPopoverOpen(false);
 
   return (
-    <EuiFlexGroup alignItems="center" gutterSize="xs">
-      <EuiFlexItem grow={true} aria-label={fieldLabel}>
-        {fieldLabel}
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiPopover
-          isOpen={isPopoverOpen}
-          button={<EuiButtonIcon size="s" iconType="lock" onClick={onButtonClick} />}
-          closePopover={closePopover}
-          anchorPosition="upLeft"
-        >
-          <EuiText size="s">
-            <p
-              css={`
-                max-width: 400px;
-              `}
-            >
+    <>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
+        <EuiFlexItem grow={true} aria-label={fieldLabel}>
+          {fieldLabel}
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiToolTip
+            content={
               <FormattedMessage
                 id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMorePopoverContent"
-                defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again. {learnMoreLink}."
-                values={{
-                  learnMoreLink: (
-                    <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
-                      <FormattedMessage
-                        id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMoreLink"
-                        defaultMessage="Learn more."
-                      />
-                    </EuiLink>
-                  ),
-                }}
+                defaultMessage="This value is a secret. After you save this integration policy, you won't be able to view the value again."
               />
-            </p>
-          </EuiText>
-        </EuiPopover>
-      </EuiFlexItem>
-    </EuiFlexGroup>
+            }
+          >
+            <EuiIcon aria-label="Secret value" type="questionInCircle" color="subdued" />
+          </EuiToolTip>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+
+      <EuiText size="xs">
+        <EuiLink href={docLinks.links.fleet.policySecrets} target="_blank">
+          <FormattedMessage
+            id="xpack.fleet.createPackagePolicy.stepConfigure.secretLearnMoreText"
+            defaultMessage="Learn more about policy secrets."
+          />
+        </EuiLink>
+      </EuiText>
+
+      <EuiSpacer size="s" />
+    </>
   );
 };
 
