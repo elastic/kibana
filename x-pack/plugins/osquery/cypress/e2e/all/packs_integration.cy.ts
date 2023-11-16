@@ -224,6 +224,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('createAgentPolicyNameField').type(agentPolicy);
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
+        closeToastIfVisible();
         cy.contains(agentPolicy).click();
         cy.contains('Add integration').click();
         cy.getBySel('epmList.searchBar').type('osquery');
