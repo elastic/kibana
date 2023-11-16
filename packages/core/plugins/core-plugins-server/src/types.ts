@@ -473,7 +473,8 @@ export type PluginInitializer<
   TPluginsStart extends object = object
 > = (
   core: PluginInitializerContext
-) =>
+) => Promise<
   | Plugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
   | PrebootPlugin<TSetup, TPluginsSetup>
-  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>;
+  | AsyncPlugin<TSetup, TStart, TPluginsSetup, TPluginsStart>
+>;

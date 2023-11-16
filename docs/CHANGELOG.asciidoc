@@ -58,14 +58,35 @@ Review important information about the {kib} 8.x releases.
 [[release-notes-8.11.1]]
 == {kib} 8.11.1
 
-The 8.11.1 release includes the following bug fixes.
+For information about the {kib} 8.11.1 release, review the following information.
+
+[float]
+[[security-update-v8.11.1]]
+=== Security updates
+
+* An issue was discovered by Elastic whereby sensitive information is recorded
+in {kib} logs in the event of an error. The error message recorded in the log
+may contain account credentials for the `kibana_system` user, API Keys, and
+credentials of {kib} end users.
++
+--
+The issue impacts {kib} {kib} versions on or after 8.0.0 and before 8.11.1. The
+issue is resolved in {kib} 8.11.1.
+
+**Nov 15, 2023 Update:** After additional investigation, it has been determined
+that {kib} 7.x versions are not affected by this issue. We previously reported
+this issue impacted {kib} versions before 7.17.15.
+
+For more information, see our related
+https://discuss.elastic.co/t/8-11-1-7-17-15-security-update-esa-2023-25/347149[security
+announcement].
+--
 
 [float]
 [[fixes-v8.11.1]]
 === Bug Fixes
 
 Fleet::
-* Fixes inability to upgrade agents from version 8.10.4 to version 8.11 ({kibana-pull}170974[#170974]).
 * Append space ID to security solution tag ({kibana-pull}170789[#170789]).
 * Modify bulk unenroll to include inactive agents ({kibana-pull}170249[#170249]).
 Lens & Visualizations::
@@ -799,10 +820,10 @@ For information about the {kib} 8.9.0 release, review the following information.
 [%collapsible]
 ====
 *Details* +
-Changes to Lens visualizations do not appear in the saved object. 
+Changes to Lens visualizations do not appear in the saved object.
 
 *Impact* +
-When you remove fields from Lens visualizations, then save your changes, the removed fields continue to appear in the Lens visualization saved objects. 
+When you remove fields from Lens visualizations, then save your changes, the removed fields continue to appear in the Lens visualization saved objects.
 For example, when you remove runtime fields from a Lens visualization and {kib}, then inspect the Lens visualization saved object, the runtime fields continue to appear and an error message appears.
 
 *Workaround* +
