@@ -8,11 +8,8 @@
 import axios, { AxiosResponse } from 'axios';
 import Url from 'url';
 import * as cheerio from 'cheerio';
-import * as fs from 'fs';
 import { parse as parseCookie } from 'tough-cookie';
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-plugin/common';
-import { CA_CERT_PATH } from '@kbn/dev-utils';
-import https from 'https';
 import { ToolingLog } from '@kbn/tooling-log';
 import { Session } from './svl_user_manager';
 
@@ -139,31 +136,21 @@ const finishSAMLHandshake = async ({
   sid?: string;
   log: ToolingLog;
 }) => {
+  const encodedResponse = encodeURIComponent(samlResponse);
   let authResponse: AxiosResponse;
-  const url = kbnHost + '/api/security/saml/callback';
 
   try {
-    if (sid) {
-      // real SAML authentication
-      const encodedResponse = encodeURIComponent(samlResponse);
-      authResponse = await axios.post(url, {
-        data: `SAMLResponse=${encodedResponse}`,
-        headers: {
-          'content-type': 'application/x-www-form-urlencoded',
-          Cookie: `sid=${sid}`,
-        },
-        validateStatus: () => true,
-        maxRedirects: 0,
-      });
-    } else {
-      // Kibana is running in TLS mode and uses the self-signed dev certificate
-      const caCrt = fs.readFileSync(CA_CERT_PATH);
-      const httpsAgent = new https.Agent({ ca: caCrt, keepAlive: false });
-      authResponse = await axios.post(url, {
-        data: JSON.stringify({ SAMLResponse: samlResponse }),
-        httpsAgent,
-      });
-    }
+    authResponse = await axios.request({
+      url: kbnHost + '/api/security/saml/callback',
+      method: 'post',
+      data: `SAMLResponse=${encodedResponse}`,
+      headers: {
+        ...(sid ? { Cookie: `sid=${sid}` } : {}),
+        ...{ 'content-type': 'application/x-www-form-urlencoded' },
+      },
+      validateStatus: () => true,
+      maxRedirects: 0,
+    });
   } catch (err) {
     if (axios.isAxiosError(err)) {
       log.debug(JSON.stringify(err));
@@ -187,7 +174,7 @@ export const createNewSAMLSession = async (params: SAMLSessionParams) => {
 export const createSessionWithFakeSAMLAuth = async (params: FakeSAMLSessionParams) => {
   const { username, email, fullname, role, kbnHost, log } = params;
   const samlResponse = await createMockedSAMLResponse({
-    kibanaUrl: kbnHost,
+    kibanaUrl: kbnHost + '/api/security/saml/callback',
     username,
     fullname,
     email,
