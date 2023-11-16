@@ -44,7 +44,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'unifiedFieldList',
   ]);
 
-  describe.skip('scripted fields', function () {
+  describe('scripted fields', function () {
     this.tags(['skipFirefox']);
 
     before(async function () {
@@ -145,7 +145,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         });
       });
 
-      describe.skip('discover scripted field', async () => {
+      describe('discover scripted field', async () => {
         before(async () => {
           const from = 'Sep 17, 2015 @ 06:31:44.000';
           const to = 'Sep 18, 2015 @ 18:31:44.000';
@@ -226,7 +226,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('creating and using Painless string scripted fields', function describeIndexTests() {
+    describe('creating and using Painless string scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painString';
 
       before(async () => {
@@ -330,7 +330,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe.skip('creating and using Painless boolean scripted fields', function describeIndexTests() {
+    describe('creating and using Painless boolean scripted fields', function describeIndexTests() {
       const scriptedPainlessFieldName2 = 'painBool';
 
       before(async () => {
