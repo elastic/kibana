@@ -23,6 +23,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   isIntegrationPolicyTemplate,
   isPackagePrerelease,
+  isRootPrivilegesRequired,
 } from '../../../../../../../../common/services';
 
 import {
@@ -37,6 +38,7 @@ import type { PackageInfo, RegistryPolicyTemplate } from '../../../../../types';
 import { Screenshots } from './screenshots';
 import { Readme } from './readme';
 import { Details } from './details';
+import { Requirements } from './requirements';
 
 interface Props {
   packageInfo: PackageInfo;
@@ -277,6 +279,8 @@ export const OverviewPage: React.FC<Props> = memo(
       ];
     }, [h1, navItems]);
 
+    const requireAgentRootPrivileges = isRootPrivilegesRequired(packageInfo);
+
     return (
       <EuiFlexGroup alignItems="flexStart" data-test-subj="epm.OverviewPage">
         <SideBar grow={2}>
@@ -309,6 +313,11 @@ export const OverviewPage: React.FC<Props> = memo(
         </EuiFlexItem>
         <EuiFlexItem grow={3}>
           <EuiFlexGroup direction="column" gutterSize="l" alignItems="flexStart">
+            {requireAgentRootPrivileges ? (
+              <EuiFlexItem>
+                <Requirements />
+              </EuiFlexItem>
+            ) : null}
             {screenshots.length ? (
               <EuiFlexItem>
                 <Screenshots
@@ -318,7 +327,7 @@ export const OverviewPage: React.FC<Props> = memo(
                 />
               </EuiFlexItem>
             ) : null}
-            <EuiFlexItem>
+            <EuiFlexItem className="eui-textBreakWord">
               <Details packageInfo={packageInfo} />
             </EuiFlexItem>
           </EuiFlexGroup>

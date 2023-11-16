@@ -8,7 +8,10 @@
 import execa from 'execa';
 import { ToolingLog } from '@kbn/tooling-log';
 import { KbnClient } from '@kbn/test';
-import { waitForHostToEnroll } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
+import {
+  fetchFleetServerUrl,
+  waitForHostToEnroll,
+} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_services';
 
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';
@@ -40,6 +43,9 @@ export class AgentManager extends Manager {
     const artifact = `docker.elastic.co/beats/elastic-agent:${await getLatestVersion()}`;
     this.log.info(artifact);
     const containerName = generateRandomString(12);
+    const fleetServerUrl =
+      (await fetchFleetServerUrl(this.kbnClient)) ??
+      `https://host.docker.internal:${this.fleetServerPort}`;
 
     const dockerArgs = [
       'run',
@@ -55,7 +61,7 @@ export class AgentManager extends Manager {
       '--env',
       'FLEET_ENROLL=1',
       '--env',
-      `FLEET_URL=https://host.docker.internal:${this.fleetServerPort}`,
+      `FLEET_URL=${fleetServerUrl}`,
       '--env',
       `FLEET_ENROLLMENT_TOKEN=${this.policyEnrollmentKey}`,
       '--env',
@@ -64,8 +70,12 @@ export class AgentManager extends Manager {
       artifact,
     ];
 
-    this.agentContainerId = (await execa('docker', dockerArgs)).stdout;
-    await waitForHostToEnroll(this.kbnClient, containerName);
+    const startedContainer = await execa('docker', dockerArgs);
+
+    this.log.info(`agent docker container started:\n${JSON.stringify(startedContainer, null, 2)}`);
+
+    this.agentContainerId = startedContainer.stdout;
+    await waitForHostToEnroll(this.kbnClient, this.log, containerName, 240000);
   }
 
   public cleanup() {
