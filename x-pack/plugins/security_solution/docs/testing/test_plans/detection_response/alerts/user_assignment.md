@@ -16,7 +16,7 @@ Status: `in progress`. The current test plan covers functionality described in [
 
 - **Assignee**: The user assigned to an alert.
 
-- **Assignees field**: The alert's `kibana.alert.workflow_assignee_ids` field which contains an array of assignees IDs.
+- **Assignees field**: The alert's `kibana.alert.workflow_assignee_ids` field which contains an array of assignees IDs. These ids conrespond to [User Profiles](https://www.elastic.co/guide/en/elasticsearch/reference/current/user-profile.html) endpoint.
 
 - **Assignee's avatar**: The avatar of an assignee. Can be either user profile picture if uploaded by the user or initials of the user.
 
@@ -29,6 +29,7 @@ Status: `in progress`. The current test plan covers functionality described in [
 - There are multiple (five or more) available users which could be assigned to alerts
 - User need to have editor or higher privileges to assign users to alerts
 - Mixed states are not supported by the current version of User Profiles component
+- "Displayed/Shown in UI" refers to "Alerts Table" and "Alert's Details Flyout"
 
 ## Scenarios
 
@@ -172,6 +173,17 @@ Then there should be an option to filter alerts to see those which are not assig
 Given multiple alerts with and without assignees
 When user filters by "No assignees" option
 Then all alerts with empty assignees fields are displayed
+```
+
+#### **Scenario: By assignee and alert status**
+
+**Automation**: 1 e2e test + 1 unit test.
+
+```Gherkin
+Given multiple alerts with and without assignees
+When user filters by one of the assignees
+AND alert's status
+Then only alerts with selected assignee in assignees field AND selected alert's status are displayed
 ```
 
 ### Authorization / RBAC
