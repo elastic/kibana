@@ -66,7 +66,8 @@ export default ({ getService }: FtrProviderContext) => {
       await deleteAllEventLogExecutionEvents(es, log);
     });
 
-    describe('"kql" rule type', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/171438
+    describe.skip('"kql" rule type', () => {
       let stats: DetectionMetrics | undefined;
       before(async () => {
         const rule = getRuleForAlertTesting(['telemetry']);
