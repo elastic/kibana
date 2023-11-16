@@ -6,7 +6,6 @@
  */
 
 import objectHash from 'object-hash';
-import type { Moment } from 'moment';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -15,7 +14,6 @@ import {
   ALERT_SUPPRESSION_START,
   ALERT_SUPPRESSION_END,
 } from '@kbn/rule-data-utils';
-import { computeIsESQLQueryAggregating } from '@kbn/securitysolution-utils';
 
 import type {
   BaseFieldsLatest,
@@ -23,19 +21,13 @@ import type {
 } from '../../../../../common/api/detection_engine/model/alerts';
 import type { ConfigType } from '../../../../config';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
-import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
 import { buildBulkBody } from '../factories/utils/build_bulk_body';
-import type { EsqlTable } from './esql_request';
-import { rowToDocument, pickCells } from './utils';
-import type { WrapHits } from '../types';
 
-import type { ThresholdSignalHistory, ThresholdBucket } from './types';
+import type { ThresholdBucket } from './types';
 import type { BuildReasonMessage } from '../utils/reason_formatters';
-import { getTransformedHits, transformBucketIntoHit } from './bulk_create_threshold_signals';
+import { transformBucketIntoHit } from './bulk_create_threshold_signals';
 import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
-
-import type { SignalSource } from '../types';
 
 export const wrapSuppressedThresholdALerts = ({
   buckets,

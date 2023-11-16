@@ -5,27 +5,21 @@
  * 2.0.
  */
 
-import { TIMESTAMP } from '@kbn/rule-data-utils';
-
 import type {
   AlertInstanceContext,
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { ThresholdNormalized } from '../../../../../common/api/detection_engine/model/rule_schema';
 import type { GenericBulkCreateResponse } from '../factories/bulk_create_factory';
-import { calculateThresholdSignalUuid } from './utils';
 import { buildReasonMessageForThresholdAlert } from '../utils/reason_formatters';
-import type { ThresholdSignalHistory, ThresholdBucket } from './types';
-import type { BulkCreate, WrapHits, RunOpts } from '../types';
+import type { ThresholdBucket } from './types';
+import type { RunOpts } from '../types';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type {
   BaseFieldsLatest,
   SuppressionFieldsLatest,
 } from '../../../../../common/api/detection_engine/model/alerts';
-import { createEnrichEventsFunction } from '../utils/enrichments';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { getTransformedHits, transformBucketIntoHit } from './bulk_create_threshold_signals';
 import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
 
