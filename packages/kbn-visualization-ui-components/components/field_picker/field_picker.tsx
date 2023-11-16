@@ -36,14 +36,14 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
   ['data-test-subj']: dataTestSub,
   ...rest
 }: FieldPickerProps<T>) {
-  let theLongestLabel = '';
+  let maxLabelLength = 20;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
     if (otherAttr.options) {
       return {
         ...otherAttr,
         options: otherAttr.options.map(({ exists: fieldOptionExists, ...fieldOption }) => {
-          if (fieldOption.label.length > theLongestLabel.length) {
-            theLongestLabel = fieldOption.label;
+          if (fieldOption.label.length > maxLabelLength) {
+            maxLabelLength = fieldOption.label.length;
           }
           return {
             ...fieldOption,
@@ -75,7 +75,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
     };
   });
 
-  const panelMinWidth = getPanelMinWidth(theLongestLabel.length);
+  const panelMinWidth = getPanelMinWidth(maxLabelLength);
   return (
     <EuiComboBox
       fullWidth
