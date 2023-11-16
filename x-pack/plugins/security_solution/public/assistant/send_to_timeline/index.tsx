@@ -19,7 +19,10 @@ import type { TimeRange } from '../../common/store/inputs/model';
 import { SourcererScopeName } from '../../common/store/sourcerer/model';
 import { TimelineTabs, TimelineId } from '../../../common/types/timeline';
 import { TimelineType } from '../../../common/api/timeline';
-import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../detections/components/alerts_table/translations';
+import {
+  ACTION_CANNOT_INVESTIGATE_IN_TIMELINE,
+  ACTION_INVESTIGATE_IN_TIMELINE,
+} from '../../detections/components/alerts_table/translations';
 import type { DataProvider } from '../../timelines/components/timeline/data_providers/data_provider';
 import { useCreateTimeline } from '../../timelines/components/timeline/properties/use_create_timeline';
 import {
@@ -31,6 +34,7 @@ import {
   updateEqlOptions,
 } from '../../timelines/store/timeline/actions';
 import { useDiscoverInTimelineContext } from '../../common/components/discover_in_timeline/use_discover_in_timeline_context';
+import { useShowTimeline } from '../../common/utils/timeline/use_show_timeline';
 
 export interface SendToTimelineButtonProps {
   asEmptyButton: boolean;
@@ -52,6 +56,7 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
 }) => {
   const dispatch = useDispatch();
 
+  const [isTimelineBottomBarVisible] = useShowTimeline();
   const { discoverStateContainer } = useDiscoverInTimelineContext();
 
   const getDataViewsSelector = useMemo(
@@ -209,6 +214,25 @@ export const SendToTimelineButton: React.FunctionComponent<SendToTimelineButtonP
     defaultDataView.id,
     signalIndexName,
   ]);
+
+  // As we work around timeline visibility issues, we will disable the button if timeline isn't available
+  if (isTimelineBottomBarVisible) {
+    return asEmptyButton ? (
+      <EuiButtonEmpty
+        aria-label={ACTION_CANNOT_INVESTIGATE_IN_TIMELINE}
+        disabled={true}
+        color="text"
+        flush="both"
+        size="xs"
+      >
+        {children}
+      </EuiButtonEmpty>
+    ) : (
+      <EuiButton aria-label={ACTION_CANNOT_INVESTIGATE_IN_TIMELINE} disabled={true} {...rest}>
+        {children}
+      </EuiButton>
+    );
+  }
 
   return asEmptyButton ? (
     <EuiButtonEmpty
