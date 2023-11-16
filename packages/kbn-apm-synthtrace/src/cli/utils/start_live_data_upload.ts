@@ -14,6 +14,7 @@ import { awaitStream } from '../../lib/utils/wait_until_stream_finished';
 import { bootstrap } from './bootstrap';
 import { getScenario } from './get_scenario';
 import { RunOptions } from './parse_run_cli_flags';
+import { SynthtraceEsClient } from '../../lib/utils/with_client';
 
 export async function startLiveDataUpload({
   runOptions,
@@ -33,6 +34,7 @@ export async function startLiveDataUpload({
   let requestedUntil = start;
 
   let currentStreams: PassThrough[] = [];
+  const cachedStreams: WeakMap<SynthtraceEsClient, PassThrough> = new WeakMap();
 
   process.on('SIGINT', () => closeStreams());
   process.on('SIGTERM', () => closeStreams());
@@ -66,8 +68,16 @@ export async function startLiveDataUpload({
       const generatorsAndClientsArray = castArray(generatorsAndClients);
 
       const streams = generatorsAndClientsArray.map(({ client }) => {
-        const stream = new PassThrough({ objectMode: true });
-        client.index(stream);
+        let stream: PassThrough;
+
+        if (cachedStreams.has(client)) {
+          stream = cachedStreams.get(client)!;
+        } else {
+          stream = new PassThrough({ objectMode: true });
+          cachedStreams.set(client, stream);
+          client.index(stream);
+        }
+
         return stream;
       });
 
