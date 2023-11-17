@@ -31,8 +31,8 @@
     z.union([ 
   {{/if}}
   {{~#each anyOf~}}
-      {{~> zod_schema_item ~}},
-      {{~/each~}}
+    {{~> zod_schema_item ~}},
+  {{~/each~}}
   ])
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
@@ -44,9 +44,9 @@
   {{else}}
     z.union([ 
   {{/if}}
-    {{~#each oneOf~}}
+  {{~#each oneOf~}}
     {{~> zod_schema_item ~}},
-    {{~/each~}}
+  {{~/each~}}
   ])
   {{~#if nullable}}.nullable(){{/if~}}
   {{~#if (eq requiredBool false)}}.optional(){{/if~}}
