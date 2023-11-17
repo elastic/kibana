@@ -7,11 +7,14 @@
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export default ({ getService, loadTestFile }: FtrProviderContext) => {
+export default ({ getService, loadTestFile, getPageObject }: FtrProviderContext) => {
   describe('Data View Management', function () {
     const esArchiver = getService('esArchiver');
+    const svlCommonPage = getPageObject('svlCommonPage');
 
     before(async () => {
+      // TODO: Serverless tests require login first
+      await svlCommonPage.login();
       await esArchiver.unload('test/functional/fixtures/es_archiver/logstash_functional');
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/makelogs');
     });
@@ -25,6 +28,7 @@ export default ({ getService, loadTestFile }: FtrProviderContext) => {
     loadTestFile(require.resolve('./_runtime_fields'));
     loadTestFile(require.resolve('./_runtime_fields_composite'));
     loadTestFile(require.resolve('./_exclude_index_pattern'));
+    loadTestFile(require.resolve('./_index_pattern_filter'));
     loadTestFile(require.resolve('./_edit_field'));
   });
 };
