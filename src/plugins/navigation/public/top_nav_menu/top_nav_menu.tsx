@@ -6,15 +6,8 @@
  * Side Public License, v 1.
  */
 
-import React, { ReactElement, Fragment } from 'react';
-import {
-  EuiBadge,
-  EuiBadgeGroup,
-  EuiBadgeProps,
-  EuiHeaderLinks,
-  EuiToolTip,
-  EuiToolTipProps,
-} from '@elastic/eui';
+import React, { ReactElement } from 'react';
+import { EuiBadgeProps, EuiToolTipProps } from '@elastic/eui';
 import classNames from 'classnames';
 
 import { MountPoint } from '@kbn/core/public';
@@ -23,7 +16,8 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { StatefulSearchBarProps } from '@kbn/unified-search-plugin/public';
 import { AggregateQuery, Query } from '@kbn/es-query';
 import { TopNavMenuData } from './top_nav_menu_data';
-import { TopNavMenuItem } from './top_nav_menu_item';
+import { TopNavMenuItems } from './top_nav_menu_items';
+import { TopNavMenuBadges } from './top_nav_menu_badges';
 
 export type TopNavMenuBadgeProps = EuiBadgeProps & {
   badgeText: string;
@@ -83,54 +77,12 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
     return null;
   }
 
-  function createBadge(
-    { badgeText, toolTipProps, renderCustomBadge, ...badgeProps }: TopNavMenuBadgeProps,
-    i: number
-  ): ReactElement {
-    const key = `nav-menu-badge-${i}`;
-
-    const Badge = () => (
-      <EuiBadge tabIndex={0} {...badgeProps}>
-        {badgeText}
-      </EuiBadge>
-    );
-
-    if (renderCustomBadge) {
-      return <Fragment key={key}>{renderCustomBadge({ badgeText })}</Fragment>;
-    }
-
-    return toolTipProps ? (
-      <EuiToolTip key={key} {...toolTipProps}>
-        <Badge />
-      </EuiToolTip>
-    ) : (
-      <Badge key={key} />
-    );
-  }
-
   function renderBadges(): ReactElement | null {
-    if (!badges || badges.length === 0) return null;
-    return (
-      <EuiBadgeGroup className={'kbnTopNavMenu__badgeGroup'}>
-        {badges.map(createBadge)}
-      </EuiBadgeGroup>
-    );
-  }
-
-  function renderItems(): ReactElement[] | null {
-    if (!config || config.length === 0) return null;
-    return config.map((menuItem: TopNavMenuData, i: number) => {
-      return <TopNavMenuItem key={`nav-menu-${i}`} {...menuItem} />;
-    });
+    return <TopNavMenuBadges badges={badges} />;
   }
 
   function renderMenu(className: string): ReactElement | null {
-    if (!config || config.length === 0) return null;
-    return (
-      <EuiHeaderLinks data-test-subj="top-nav" gutterSize="xs" className={className}>
-        {renderItems()}
-      </EuiHeaderLinks>
-    );
+    return <TopNavMenuItems config={config} className={className} />;
   }
 
   function renderSearchBar(): ReactElement | null {

@@ -756,7 +756,7 @@ describe('Test discover state with embedded mode', () => {
     state = getDiscoverStateContainer({
       services: discoverServiceMock,
       history,
-      mode: 'embedded',
+      displayMode: 'embedded',
     });
     state.savedSearchState.set(savedSearchMock);
     await state.appState.update({}, true);

@@ -11,16 +11,20 @@ import type { Query, TimeRange, AggregateQuery } from '@kbn/es-query';
 import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
+import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
+import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getTopNavBadges } from './get_top_nav_badges';
-import { getHeaderActionMenuMounter } from '../../../../kibana_services';
+import { getHeaderActionMenuMounter, getLogExplorerTabs } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
+import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
+import { useAppStateSelector } from '../../services/discover_app_state_container';
 
 export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
@@ -229,43 +233,84 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
+  const columns = useAppStateSelector((state) => state.columns);
+  const sort = useAppStateSelector((state) => state.sort);
+  const statefulTopNavProps = services.serverless
+    ? {}
+    : {
+        badges: topNavBadges,
+        config: topNavMenu,
+        setMenuMountPoint,
+      };
+
   return (
-    <SearchBar
-      appName="discover"
-      badges={topNavBadges}
-      config={topNavMenu}
-      indexPatterns={[dataView]}
-      onQuerySubmit={updateQuery}
-      onSavedQueryIdChange={updateSavedQueryId}
-      query={query}
-      setMenuMountPoint={setMenuMountPoint}
-      savedQueryId={savedQuery}
-      screenTitle={savedSearch.title}
-      showDatePicker={showDatePicker}
-      saveQueryMenuVisibility={
-        services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
-      }
-      showSearchBar={true}
-      useDefaultBehaviors={true}
-      dataViewPickerOverride={
-        searchBarCustomization?.CustomDataViewPicker ? (
-          <searchBarCustomization.CustomDataViewPicker />
-        ) : undefined
-      }
-      dataViewPickerComponentProps={
-        shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
-      }
-      displayStyle="detached"
-      textBasedLanguageModeErrors={
-        textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
-      }
-      textBasedLanguageModeWarning={textBasedLanguageModeWarning}
-      onTextBasedSavedAndExit={onTextBasedSavedAndExit}
-      prependFilterBar={
-        searchBarCustomization?.PrependFilterBar ? (
-          <searchBarCustomization.PrependFilterBar />
-        ) : undefined
-      }
-    />
+    <>
+      {Boolean(services.serverless) && stateContainer.displayMode === 'standalone' && (
+        <EuiHeader css={{ flexShrink: 0, boxShadow: 'none' }}>
+          {getLogExplorerTabs().enabled && (
+            <EuiHeaderSection>
+              <EuiHeaderSectionItem>
+                <LogExplorerTabs
+                  locators={services.share?.url.locators!}
+                  params={{
+                    timeRange: services.timefilter.getTime(),
+                    refreshInterval: services.timefilter.getRefreshInterval(),
+                    query,
+                    columns,
+                    sort,
+                    filters: services.filterManager.getFilters(),
+                    dataViewSpec: dataView?.toMinimalSpec(),
+                  }}
+                  selectedTab="discover"
+                />
+              </EuiHeaderSectionItem>
+            </EuiHeaderSection>
+          )}
+          <EuiHeaderSection side="right">
+            <EuiHeaderSectionItem>
+              <TopNavMenuBadges badges={topNavBadges} />
+            </EuiHeaderSectionItem>
+            <EuiHeaderSectionItem>
+              <TopNavMenuItems config={topNavMenu} />
+            </EuiHeaderSectionItem>
+          </EuiHeaderSection>
+        </EuiHeader>
+      )}
+      <SearchBar
+        {...statefulTopNavProps}
+        appName="discover"
+        indexPatterns={[dataView]}
+        onQuerySubmit={updateQuery}
+        onSavedQueryIdChange={updateSavedQueryId}
+        query={query}
+        savedQueryId={savedQuery}
+        screenTitle={savedSearch.title}
+        showDatePicker={showDatePicker}
+        saveQueryMenuVisibility={
+          services.capabilities.discover.saveQuery ? 'allowed_by_app_privilege' : 'globally_managed'
+        }
+        showSearchBar={true}
+        useDefaultBehaviors={true}
+        dataViewPickerOverride={
+          searchBarCustomization?.CustomDataViewPicker ? (
+            <searchBarCustomization.CustomDataViewPicker />
+          ) : undefined
+        }
+        dataViewPickerComponentProps={
+          shouldHideDefaultDataviewPicker ? undefined : dataViewPickerProps
+        }
+        displayStyle="detached"
+        textBasedLanguageModeErrors={
+          textBasedLanguageModeErrors ? [textBasedLanguageModeErrors] : undefined
+        }
+        textBasedLanguageModeWarning={textBasedLanguageModeWarning}
+        onTextBasedSavedAndExit={onTextBasedSavedAndExit}
+        prependFilterBar={
+          searchBarCustomization?.PrependFilterBar ? (
+            <searchBarCustomization.PrependFilterBar />
+          ) : undefined
+        }
+      />
+    </>
   );
 };

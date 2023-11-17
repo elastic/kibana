@@ -54,3 +54,9 @@ export const syncHistoryLocations = () => {
 
 export const [getScopedHistory, setScopedHistory] =
   createGetterSetter<ScopedHistory>('scopedHistory');
+
+export const [getLogExplorerTabs, setLogExplorerTabs] = createGetterSetter<{ enabled: boolean }>(
+  'showLogExplorerTabs'
+);
+
+setLogExplorerTabs({ enabled: false });

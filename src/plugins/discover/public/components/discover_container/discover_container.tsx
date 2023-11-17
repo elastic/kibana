@@ -90,7 +90,7 @@ export const DiscoverContainerInternal = ({
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
-            mode="embedded"
+            displayMode="embedded"
             isDev={isDev}
           />
         </KibanaContextProvider>

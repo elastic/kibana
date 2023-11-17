@@ -68,10 +68,10 @@ interface DiscoverStateContainerParams {
    */
   services: DiscoverServices;
   /*
-   * mode in which discover is running
+   * display mode in which discover is running
    *
    * */
-  mode?: DiscoverDisplayMode;
+  displayMode?: DiscoverDisplayMode;
 }
 
 export interface LoadParams {
@@ -90,11 +90,15 @@ export interface LoadParams {
 }
 
 export interface DiscoverStateContainer {
+  /*
+   * display mode in which discover is running
+   *
+   * */
+  displayMode: DiscoverDisplayMode;
   /**
    * Global State, the _g part of the URL
    */
   globalState: DiscoverGlobalStateContainer;
-
   /**
    * App state, the _a part of the URL
    */
@@ -201,7 +205,7 @@ export interface DiscoverStateContainer {
 export function getDiscoverStateContainer({
   history,
   services,
-  mode = 'standalone',
+  displayMode = 'standalone',
 }: DiscoverStateContainerParams): DiscoverStateContainer {
   const storeInSessionStorage = services.uiSettings.get('state:storeInSessionStorage');
   const toasts = services.core.notifications.toasts;
@@ -212,7 +216,7 @@ export function getDiscoverStateContainer({
   const stateStorage = createKbnUrlStateStorage({
     useHash: storeInSessionStorage,
     history,
-    useHashQuery: mode !== 'embedded',
+    useHashQuery: displayMode !== 'embedded',
     ...(toasts && withNotifyOnErrors(toasts)),
   });
 
@@ -468,6 +472,7 @@ export function getDiscoverStateContainer({
   };
 
   return {
+    displayMode,
     globalState: globalStateContainer,
     appState: appStateContainer,
     internalState: internalStateContainer,

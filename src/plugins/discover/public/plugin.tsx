@@ -46,9 +46,11 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
 import { TRUNCATE_MAX_HEIGHT, ENABLE_ESQL } from '@kbn/discover-utils';
 import { NoDataPagePluginStart } from '@kbn/no-data-page-plugin/public';
+import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import { PLUGIN_ID } from '../common';
 import {
   setHeaderActionMenuMounter,
+  setLogExplorerTabs,
   setScopedHistory,
   setUiActions,
   setUrlTracker,
@@ -152,6 +154,7 @@ export interface DiscoverStart {
   readonly locator: undefined | DiscoverAppLocator;
   readonly DiscoverContainer: ComponentType<DiscoverContainerProps>;
   readonly registerCustomizationProfile: RegisterCustomizationProfile;
+  readonly showLogExplorerTabs: () => void;
 }
 
 /**
@@ -197,6 +200,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -401,6 +405,9 @@ export class DiscoverPlugin
         );
       },
       registerCustomizationProfile: createRegisterCustomizationProfile(this.profileRegistry),
+      showLogExplorerTabs: () => {
+        setLogExplorerTabs({ enabled: true });
+      },
     };
   }
 

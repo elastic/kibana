@@ -45,10 +45,13 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
-  mode?: DiscoverDisplayMode;
+  displayMode?: DiscoverDisplayMode;
 }
 
-export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' }: MainRouteProps) {
+export function DiscoverMainRoute({
+  customizationCallbacks,
+  displayMode = 'standalone',
+}: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
   const {
@@ -65,7 +68,7 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
     getDiscoverStateContainer({
       history,
       services,
-      mode,
+      displayMode,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
@@ -150,7 +153,7 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
         });
-        if (mode === 'standalone') {
+        if (displayMode === 'standalone') {
           if (currentSavedSearch?.id) {
             chrome.recentlyAccessed.add(
               getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -205,7 +208,7 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
       core.theme,
       basePath,
       toastNotifications,
-      mode,
+      displayMode,
     ]
   );
 
@@ -280,7 +283,7 @@ export function DiscoverMainRoute({ customizationCallbacks, mode = 'standalone' 
   return (
     <DiscoverCustomizationProvider value={customizationService}>
       <DiscoverMainProvider value={stateContainer}>
-        <DiscoverMainAppMemoized stateContainer={stateContainer} mode={mode} />
+        <DiscoverMainAppMemoized stateContainer={stateContainer} />
       </DiscoverMainProvider>
     </DiscoverCustomizationProvider>
   );

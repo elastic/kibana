@@ -91,7 +91,11 @@ export class ObservabilityLogExplorerPlugin
     };
   }
 
-  public start(_core: CoreStart, _pluginsStart: ObservabilityLogExplorerStartDeps) {
+  public start(_core: CoreStart, pluginsStart: ObservabilityLogExplorerStartDeps) {
+    if (pluginsStart.serverless) {
+      pluginsStart.discover.showLogExplorerTabs();
+    }
+
     return {};
   }
 }

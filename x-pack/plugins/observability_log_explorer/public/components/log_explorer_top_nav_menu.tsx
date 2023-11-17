@@ -30,6 +30,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { css } from '@emotion/react';
 import { LOG_EXPLORER_FEEDBACK_LINK } from '@kbn/observability-shared-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { LogExplorerTabs } from '@kbn/discover-plugin/public';
 import { PluginKibanaContextValue } from '../utils/use_kibana';
 import {
   betaBadgeDescription,
@@ -72,13 +73,22 @@ const ServerlessTopNav = ({
   services,
   state$,
 }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
+  const discoverLinkParams = useDiscoverLinkParams(state$);
+
   return (
-    <EuiHeader data-test-subj="logExplorerHeaderMenu">
+    <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
-          <EuiHeaderLinks gutterSize="xs">
-            <DiscoverLink services={services} state$={state$} />
-          </EuiHeaderLinks>
+          <LogExplorerTabs
+            locators={services.share?.url.locators!}
+            params={{
+              ...discoverLinkParams,
+              timeRange: services.data.query.timefilter.timefilter.getTime(),
+              refreshInterval: services.data.query.timefilter.timefilter.getRefreshInterval(),
+              filters: services.data.query.filterManager.getFilters(),
+            }}
+            selectedTab="log-explorer"
+          />
         </EuiHeaderSectionItem>
       </EuiHeaderSection>
       <EuiHeaderSection
@@ -177,31 +187,7 @@ const StatefulTopNav = ({
 
 const DiscoverLink = React.memo(
   ({ services, state$ }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
-    const { appState, logExplorerState } = useObservable<LogExplorerStateContainer>(
-      state$.pipe(
-        distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
-          if (!prev.appState || !curr.appState) return false;
-          return deepEqual(
-            [
-              prev.appState.columns,
-              prev.appState.filters,
-              prev.appState.index,
-              prev.appState.query,
-            ],
-            [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
-          );
-        })
-      ),
-      { appState: {}, logExplorerState: {} }
-    );
-
-    const discoverLinkParams = {
-      columns: appState?.columns,
-      filters: appState?.filters,
-      query: appState?.query,
-      dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
-    };
-
+    const discoverLinkParams = useDiscoverLinkParams(state$);
     const discoverUrl = services.discover.locator?.getRedirectUrl(discoverLinkParams);
 
     const navigateToDiscover = () => {
@@ -275,3 +261,25 @@ const VerticalRule = styled.span`
   height: 20px;
   background-color: ${euiThemeVars.euiColorLightShade};
 `;
+
+const useDiscoverLinkParams = (state$: BehaviorSubject<LogExplorerStateContainer>) => {
+  const { appState, logExplorerState } = useObservable<LogExplorerStateContainer>(
+    state$.pipe(
+      distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
+        if (!prev.appState || !curr.appState) return false;
+        return deepEqual(
+          [prev.appState.columns, prev.appState.filters, prev.appState.index, prev.appState.query],
+          [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
+        );
+      })
+    ),
+    { appState: {}, logExplorerState: {} }
+  );
+
+  return {
+    columns: appState?.columns,
+    filters: appState?.filters,
+    query: appState?.query,
+    dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),
+  };
+};
