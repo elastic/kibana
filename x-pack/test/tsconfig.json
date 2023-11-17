@@ -145,6 +145,7 @@
     "@kbn/coloring",
     "@kbn/es",
     "@kbn/metrics-data-access-plugin",
+    "@kbn/dataset-quality-plugin",
     "@kbn/reporting-export-types-csv-common",
     "@kbn/reporting-export-types-pdf-common",
     "@kbn/reporting-export-types-png-common",
