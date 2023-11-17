@@ -33,8 +33,7 @@
 
 import 'cypress-file-upload';
 import 'cypress-recurse/commands';
-import { login, logout } from '../tasks/login';
-
+import { logout } from '../tasks/login';
 
 Cypress.Commands.add(
   'attachFile',
