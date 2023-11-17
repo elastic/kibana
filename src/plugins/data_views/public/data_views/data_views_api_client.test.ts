@@ -17,7 +17,9 @@ describe('IndexPatternsApiClient', () => {
 
   beforeEach(() => {
     fetchSpy = jest.spyOn(http, 'fetch').mockImplementation(() => Promise.resolve({}));
-    indexPatternsApiClient = new DataViewsApiClient(http as HttpSetup, () => Promise.resolve(undefined));
+    indexPatternsApiClient = new DataViewsApiClient(http as HttpSetup, () =>
+      Promise.resolve(undefined)
+    );
   });
 
   test('uses the right URI to fetch fields for wildcard', async function () {
