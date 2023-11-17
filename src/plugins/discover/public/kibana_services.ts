@@ -56,7 +56,7 @@ export const [getScopedHistory, setScopedHistory] =
   createGetterSetter<ScopedHistory>('scopedHistory');
 
 export const [getLogExplorerTabs, setLogExplorerTabs] = createGetterSetter<{ enabled: boolean }>(
-  'showLogExplorerTabs'
+  'logExplorerTabs'
 );
 
 setLogExplorerTabs({ enabled: false });

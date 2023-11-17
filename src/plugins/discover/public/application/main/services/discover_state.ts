@@ -69,7 +69,6 @@ interface DiscoverStateContainerParams {
   services: DiscoverServices;
   /*
    * display mode in which discover is running
-   *
    * */
   displayMode?: DiscoverDisplayMode;
 }
@@ -92,7 +91,6 @@ export interface LoadParams {
 export interface DiscoverStateContainer {
   /*
    * display mode in which discover is running
-   *
    * */
   displayMode: DiscoverDisplayMode;
   /**
