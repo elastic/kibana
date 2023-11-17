@@ -5,26 +5,29 @@
  * 2.0.
  */
 
-import { concatMap, delay, finalize, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
+import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import type { PromptObservableState, Chunk } from './types';
-
+import { API_ERROR } from '../translations';
+import type { PromptObservableState } from './types';
 const MIN_DELAY = 35;
+
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
  * @param reader - The ReadableStreamDefaultReader used to read data from the stream.
  * @param setLoading - A function to update the loading state.
+ * @param isError - indicates whether the reader response is an error message or not
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
 export const getStreamObservable = (
   reader: ReadableStreamDefaultReader<Uint8Array>,
-  setLoading: Dispatch<SetStateAction<boolean>>
+  setLoading: Dispatch<SetStateAction<boolean>>,
+  isError: boolean
 ): Observable<PromptObservableState> =>
   new Observable<PromptObservableState>((observer) => {
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
-    const chunks: Chunk[] = [];
+    const chunks: string[] = [];
     function read() {
       reader
         .read()
@@ -39,23 +42,17 @@ export const getStreamObservable = (
               observer.complete();
               return;
             }
-
-            const nextChunks: Chunk[] = decoder
-              .decode(value)
-              .split('\n')
-              // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
-              .map((str) => str.substring(6))
-              // filter out empty lines and the "[DONE]" string
-              .filter((str) => !!str && str !== '[DONE]')
-              .map((line) => JSON.parse(line));
-
-            nextChunks.forEach((chunk) => {
-              chunks.push(chunk);
-              observer.next({
-                chunks,
-                message: getMessageFromChunks(chunks),
-                loading: true,
-              });
+            const decoded = decoder.decode(value);
+            const content = isError
+              ? // we format errors as {message: string; status_code: number}
+                `${API_ERROR}\n\n${JSON.parse(decoded).message}`
+              : // all other responses are just strings (handled by subaction invokeStream)
+                decoded;
+            chunks.push(content);
+            observer.next({
+              chunks,
+              message: getMessageFromChunks(chunks),
+              loading: true,
             });
           } catch (err) {
             observer.error(err);
@@ -72,9 +69,6 @@ export const getStreamObservable = (
       reader.cancel();
     };
   }).pipe(
-    // make sure the request is only triggered once,
-    // even with multiple subscribers
-    shareReplay(1),
     // append a timestamp of when each value was emitted
     timestamp(),
     // use the previous timestamp to calculate a target
@@ -105,8 +99,8 @@ export const getStreamObservable = (
     finalize(() => setLoading(false))
   );
 
-function getMessageFromChunks(chunks: Chunk[]) {
-  return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
+function getMessageFromChunks(chunks: string[]) {
+  return chunks.join('');
 }
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();
