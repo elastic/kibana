@@ -14,7 +14,7 @@ import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
-import type { FieldListGroups, FieldListItem } from '../../types';
+import type { FieldListGroups, FieldListItem, StickyHeadersOptions } from '../../types';
 import { ExistenceFetchStatus, FieldsGroup, FieldsGroupNames } from '../../types';
 import './field_list_grouped.scss';
 
@@ -40,6 +40,7 @@ export interface FieldListGroupedProps<T extends FieldListItem> {
   scrollToTopResetCounter: number;
   screenReaderDescriptionId?: string;
   localStorageKeyPrefix?: string; // Your app name: "discover", "lens", etc. If not provided, sections state would not be persisted.
+  stickyHeaders?: StickyHeadersOptions;
   'data-test-subj'?: string;
 }
 
@@ -51,6 +52,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
   scrollToTopResetCounter,
   screenReaderDescriptionId,
   localStorageKeyPrefix,
+  stickyHeaders,
   'data-test-subj': dataTestSubject = 'fieldListGrouped',
 }: FieldListGroupedProps<T>) {
   const hasSyncedExistingFields =
@@ -221,7 +223,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
         )}
         {hasSpecialFields && (
           <>
-            <ul>
+            <ul className="unifiedFieldList__fieldListGrouped__specialFields">
               {fieldGroupsToCollapse.flatMap(([key, { fields, fieldSearchHighlight }]) =>
                 fields.map((field, index) => (
                   <Fragment key={getFieldKey(field)}>
@@ -237,7 +239,6 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                 ))
               )}
             </ul>
-            <EuiSpacer size="s" />
           </>
         )}
         {fieldGroupsToShow.map(([key, fieldGroup], index) => {
@@ -260,6 +261,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                 paginatedFields={paginatedFields[key]}
                 groupIndex={index + 1}
                 groupName={key as FieldsGroupNames}
+                stickyHeaders={stickyHeaders}
                 onToggle={(open) => {
                   setAccordionState((s) => ({
                     ...s,
@@ -296,7 +298,7 @@ function InnerFieldListGrouped<T extends FieldListItem = DataViewField>({
                 )}
                 renderFieldItem={renderFieldItem}
               />
-              <EuiSpacer size="m" />
+              <EuiSpacer size="s" />
             </Fragment>
           );
         })}

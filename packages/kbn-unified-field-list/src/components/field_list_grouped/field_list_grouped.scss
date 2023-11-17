@@ -12,9 +12,12 @@
 }
 
 .unifiedFieldList__fieldListGrouped__container {
-  padding-top: $euiSizeS;
   position: absolute;
   top: 0;
   left: $euiSize; /* 1 */
   right: $euiSizeXS; /* 1 */
+}
+
+.unifiedFieldList__fieldListGrouped__specialFields {
+  padding-top: $euiSizeS;
 }

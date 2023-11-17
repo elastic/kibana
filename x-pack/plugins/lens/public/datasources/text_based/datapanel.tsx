@@ -24,6 +24,7 @@ import {
   GetCustomFieldType,
   useGroupedFields,
 } from '@kbn/unified-field-list';
+import { euiThemeVars } from '@kbn/ui-theme';
 import type { DatasourceDataPanelProps } from '../../types';
 import type { TextBasedPrivateState } from './types';
 import { getStateFromAggregateQuery } from './utils';
@@ -130,6 +131,11 @@ export function TextBasedDataPanel({
     [hasSuggestionForField, dropOntoWorkspace]
   );
 
+  const [stickyHeaders] = useState(() => ({
+    enabled: true,
+    backgroundColor: euiThemeVars.euiColorLightestShade,
+  }));
+
   return (
     <KibanaContextProvider
       services={{
@@ -148,6 +154,7 @@ export function TextBasedDataPanel({
           renderFieldItem={renderFieldItem}
           data-test-subj="lnsTextBasedLanguages"
           localStorageKeyPrefix="lens"
+          stickyHeaders={stickyHeaders}
         />
       </FieldList>
     </KibanaContextProvider>
