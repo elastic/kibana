@@ -19,6 +19,9 @@ export type {
 } from './types';
 export type { UseDataGridColumnsCellActions, UseDataGridColumnsCellActionsProps } from './hooks';
 
+// Constants
+export { CellActionsMode } from './constants';
+
 // Components and hooks
 export { CellActionsProvider } from './context';
 export { CellActions } from './components';
