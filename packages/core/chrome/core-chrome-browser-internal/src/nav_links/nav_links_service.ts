@@ -9,7 +9,8 @@
 import { sortBy } from 'lodash';
 import { BehaviorSubject, ReplaySubject } from 'rxjs';
 import { map, takeUntil } from 'rxjs/operators';
-import type { HttpStart, IBasePath } from '@kbn/core-http-browser';
+import type { IBasePath } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import type { PublicAppDeepLinkInfo, PublicAppInfo } from '@kbn/core-application-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
@@ -18,7 +19,7 @@ import { toNavLink } from './to_nav_link';
 
 interface StartDeps {
   application: InternalApplicationStart;
-  http: HttpStart;
+  http: InternalHttpStart;
 }
 
 export class NavLinksService {

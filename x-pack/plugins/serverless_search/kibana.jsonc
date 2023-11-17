@@ -15,6 +15,7 @@
     "requiredPlugins": [
       "cloud",
       "console",
+      "dataViews",
       "dashboard",
       "devTools",
       "discover",
