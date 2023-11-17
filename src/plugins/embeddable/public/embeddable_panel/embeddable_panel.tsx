@@ -169,7 +169,7 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
     if (outputError) attrs['data-error'] = true;
     return attrs;
   }, [loading, outputError]);
-
+  // debugger;
   return (
     <EuiPanel
       role="figure"

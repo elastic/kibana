@@ -54,7 +54,7 @@ export function ReactExpressionRenderer({
   if (padding) {
     expressionStyles.padding = euiTheme.size[padding];
   }
-
+  // debugger;
   return (
     <div {...dataAttrs} className={classes}>
       {isEmpty && <EuiLoadingChart mono size="l" />}

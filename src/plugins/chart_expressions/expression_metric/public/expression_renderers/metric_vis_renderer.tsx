@@ -56,6 +56,7 @@ export const getMetricVisRenderer = (
     displayName: 'metric visualization',
     reuseDomNode: true,
     render: async (domNode, { visData, visConfig, overrides }, handlers) => {
+      // debugger;
       const { core, plugins } = deps.getStartDeps();
 
       handlers.onDestroy(() => {
