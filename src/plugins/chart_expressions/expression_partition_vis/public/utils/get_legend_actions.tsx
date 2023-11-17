@@ -14,7 +14,7 @@ import { LegendAction, SeriesIdentifier, useLegendAction } from '@elastic/charts
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Datatable } from '@kbn/expressions-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import { PartitionVisParams } from '../../common/types';
 import { CellValueAction, ColumnCellValueActions, FilterEvent } from '../types';
 import { getSeriesValueColumnIndex, getFilterPopoverTitle } from './filter_helpers';

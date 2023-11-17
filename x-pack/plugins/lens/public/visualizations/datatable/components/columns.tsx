@@ -19,7 +19,7 @@ import type {
   DatatableColumnMeta,
 } from '@kbn/expressions-plugin/common';
 import { EuiDataGridColumnCellAction } from '@elastic/eui/src/components/datagrid/data_grid_types';
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions';
+import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 import type { FormatFactory } from '../../../../common/types';
 import type { ColumnConfig } from '../../../../common/expressions';
 import { LensCellValueAction } from '../../../types';

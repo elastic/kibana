@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FILTER_CELL_ACTION_TYPE } from '@kbn/cell-actions';
+import { FILTER_CELL_ACTION_TYPE, COPY_CELL_ACTION_TYPE } from '@kbn/cell-actions/constants';
 
 export enum SecurityCellActionsTrigger {
   DEFAULT = 'security-default-cellActions',
@@ -32,4 +32,5 @@ export enum SecurityCellActionType {
 
 export const DefaultCellActionTypes = {
   FILTER: FILTER_CELL_ACTION_TYPE,
+  COPY: COPY_CELL_ACTION_TYPE,
 } as const;
