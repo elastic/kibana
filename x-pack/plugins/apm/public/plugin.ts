@@ -10,6 +10,7 @@ import type {
   PluginStartContract as AlertingPluginPublicStart,
 } from '@kbn/alerting-plugin/public';
 import { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { CloudExperimentsPluginStart } from '@kbn/cloud-experiments-plugin/common';
 import {
   AppMountParameters,
   AppNavLinkStatus,
@@ -113,6 +114,7 @@ export interface ApmServices {
 export interface ApmPluginStartDeps {
   alerting?: AlertingPluginPublicStart;
   charts?: ChartsPluginStart;
+  cloudExperiments?: CloudExperimentsPluginStart;
   data: DataPublicPluginStart;
   discover?: DiscoverStart;
   embeddable: EmbeddableStart;

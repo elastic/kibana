@@ -103,7 +103,8 @@
     "@kbn/monaco",
     "@kbn/shared-svg",
     "@kbn/deeplinks-observability",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/cloud-experiments-plugin"
   ],
   "exclude": ["target/**/*"]
 }
