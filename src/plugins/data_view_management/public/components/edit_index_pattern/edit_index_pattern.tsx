@@ -39,6 +39,7 @@ import { APP_STATE_STORAGE_KEY } from './edit_index_pattern_state_container';
 
 const codeStyle = {
   marginLeft: '8px',
+  overflowWrap: 'anywhere',
 };
 
 export interface EditIndexPatternProps extends RouteComponentProps {
