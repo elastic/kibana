@@ -21,7 +21,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { SloSelector } from './slo_selector';
 
-import type { EmbeddableSloProps, SloAlertsEmbeddableInput } from './types';
+import type { EmbeddableSloProps, SloAlertsEmbeddableInput, SloItem } from './types';
 
 interface SloConfigurationProps {
   initialInput?: Partial<SloAlertsEmbeddableInput>;
@@ -30,12 +30,9 @@ interface SloConfigurationProps {
 }
 
 export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfigurationProps) {
-  console.log(initialInput, '!!initialInput');
-  const slos = initialInput?.slos;
-  console.log(slos, '!!slos');
-  const [selectedSlos, setSelectedSlos] = useState<EmbeddableSloProps>(slos);
-  const onConfirmClick = () => onCreate({ slos: selectedSlos });
+  const [selectedSlos, setSelectedSlos] = useState(initialInput?.slos ?? []);
   const [hasError, setHasError] = useState(false);
+  const onConfirmClick = () => onCreate({ slos: selectedSlos });
 
   return (
     <EuiModal onClose={onCancel} style={{ minWidth: 550 }}>
@@ -63,7 +60,8 @@ export function SloConfiguration({ initialInput, onCreate, onCancel }: SloConfig
                     id: slo?.id,
                     instanceId: slo?.instanceId,
                     name: slo?.name,
-                  }))
+                    groupBy: slo?.groupBy,
+                  })) as SloItem[]
                 );
               }}
             />

@@ -6,10 +6,19 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import type { TimeRange } from '@kbn/es-query';
 import { SloAlertsSummary } from './components/slo_alerts_summary';
 import { SloAlertsTable } from './components/slo_alerts_table';
+import type { SloItem } from './types';
+import { SloEmbeddableDeps } from './slo_alerts_embeddable';
 
-export function SloAlertsWrapper({ slos, deps, timeRange }) {
+interface Props {
+  deps: SloEmbeddableDeps;
+  slos: SloItem[];
+  timeRange?: TimeRange | undefined;
+}
+
+export function SloAlertsWrapper({ slos, deps, timeRange }: Props) {
   return (
     <EuiFlexGroup direction="column" style={{ margin: '10px' }}>
       <EuiFlexItem>

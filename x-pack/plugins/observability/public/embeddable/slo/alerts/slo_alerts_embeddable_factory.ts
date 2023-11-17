@@ -13,7 +13,6 @@ import {
   EmbeddableFactory,
   ErrorEmbeddable,
 } from '@kbn/embeddable-plugin/public';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { SLOAlertsEmbeddable, SLO_ALERTS_EMBEDDABLE } from './slo_alerts_embeddable';
 import { ObservabilityPublicPluginsStart, ObservabilityPublicStart } from '../../..';
 import { SloAlertsEmbeddableInput } from './types';
@@ -50,16 +49,12 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
     }
   }
 
-  public async create(initialInput: EmbeddableInput, parent?: IContainer) {
+  public async create(initialInput: SloAlertsEmbeddableInput, parent?: IContainer) {
     try {
-      const [coreStart, pluginsStart] = await this.getStartServices();
-      console.log(coreStart, pluginsStart, '!!coreStart');
-
       const [
         { uiSettings, application, http, i18n: i18nService, notifications, settings },
         { triggersActionsUi, cases, data, security, charts },
       ] = await this.getStartServices();
-      // const [coreStart, pluginsStart] = await this.getStartServices();
       return new SLOAlertsEmbeddable(
         {
           uiSettings,

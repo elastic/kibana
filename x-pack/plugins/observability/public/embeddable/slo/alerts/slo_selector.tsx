@@ -15,6 +15,7 @@ interface SloItem {
   id: string | undefined;
   instanceId: string | undefined;
   name: string;
+  groupBy: string;
 }
 
 interface Props {
@@ -28,17 +29,15 @@ const SLO_REQUIRED = i18n.translate('xpack.observability.sloEmbeddable.config.er
 });
 
 export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
-  const initialSelectedOptions = initialSlos?.map((slo) => {
-    const label = slo.instanceId !== ALL_VALUE ? `${slo.name} (: ${slo.instanceId})` : slo.name;
-    return {
-      label,
+  const mapSlosToOptions = (slos: SloItem[] | SLOWithSummaryResponse[] | undefined) =>
+    slos?.map((slo) => ({
+      label:
+        slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})` : slo.name,
       value: `${slo.id}-${slo.instanceId}`,
-      instanceId: slo.instanceId,
-    };
-  });
-  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>();
+    })) ?? [];
+  const [options, setOptions] = useState<Array<EuiComboBoxOptionOption<string>>>([]);
   const [selectedOptions, setSelectedOptions] = useState<Array<EuiComboBoxOptionOption<string>>>(
-    initialSelectedOptions ?? []
+    mapSlosToOptions(initialSlos)
   );
   const [searchValue, setSearchValue] = useState<string>('');
   const {
@@ -52,17 +51,7 @@ export function SloSelector({ initialSlos, onSelected, hasError }: Props) {
   useEffect(() => {
     const isLoadedWithData = !isLoading && sloList!.results !== undefined;
     const opts: Array<EuiComboBoxOptionOption<string>> = isLoadedWithData
-      ? sloList!.results!.map((slo) => {
-          const label =
-            slo.instanceId !== ALL_VALUE
-              ? `${slo.name} (${slo.groupBy}: ${slo.instanceId})`
-              : slo.name;
-          return {
-            value: `${slo.id}-${slo.instanceId}`,
-            label,
-            instanceId: slo.instanceId,
-          };
-        })
+      ? mapSlosToOptions(sloList!.results!)
       : [];
     setOptions(opts);
   }, [isLoading, sloList]);

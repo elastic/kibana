@@ -10,43 +10,58 @@ import { Subscription } from 'rxjs';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { i18n } from '@kbn/i18n';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createBrowserHistory } from 'history';
-const history = createBrowserHistory();
 import {
   Embeddable as AbstractEmbeddable,
   EmbeddableOutput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { CasesUiStart } from '@kbn/cases-plugin/public';
 
-import { type CoreStart, IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
+import {
+  type CoreStart,
+  IUiSettingsClient,
+  ApplicationStart,
+  NotificationsStart,
+} from '@kbn/core/public';
 import { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Router } from '@kbn/shared-ux-router';
+import { SettingsStart } from '@kbn/core-ui-settings-browser';
+import { SecurityPluginStart } from '@kbn/security-plugin/public';
+import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
+import type { SloAlertsEmbeddableInput } from './types';
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
+const history = createBrowserHistory();
 
-interface SloEmbeddableDeps {
+export interface SloEmbeddableDeps {
   uiSettings: IUiSettingsClient;
   http: CoreStart['http'];
   i18n: CoreStart['i18n'];
   application: ApplicationStart;
   triggersActionsUi: TriggersAndActionsUIPublicPluginStart;
   data: DataPublicPluginStart;
+  notifications: NotificationsStart;
+  cases: CasesUiStart;
+  settings: SettingsStart;
+  security: SecurityPluginStart;
+  charts: ChartsPluginStart;
 }
 
-type SloIdAndInstanceId = [string, string];
-
-export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, EmbeddableOutput> {
+export class SLOAlertsEmbeddable extends AbstractEmbeddable<
+  SloAlertsEmbeddableInput,
+  EmbeddableOutput
+> {
   public readonly type = SLO_ALERTS_EMBEDDABLE;
   private subscription: Subscription;
   private node?: HTMLElement;
 
   constructor(
     private readonly deps: SloEmbeddableDeps,
-    initialInput: EmbeddableInput,
+    initialInput: SloAlertsEmbeddableInput,
     parent?: IContainer
   ) {
     super(initialInput, {}, parent);
@@ -71,7 +86,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<EmbeddableInput, Emb
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
-    const { slos, timeRange } = this.getInput(); // TODO fix types
+    const { slos, timeRange } = this.getInput();
     const deps = this.deps;
     ReactDOM.render(
       <I18nContext>

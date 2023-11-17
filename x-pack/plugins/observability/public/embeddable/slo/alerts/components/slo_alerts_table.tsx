@@ -6,12 +6,21 @@
  */
 import React from 'react';
 import { AlertConsumers } from '@kbn/rule-data-utils';
+import type { TimeRange } from '@kbn/es-query';
+import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
+import type { SloItem } from '../types';
 
 type SloIdAndInstanceId = [string, string];
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.sloEmbeddable.alert.table';
 
-export function SloAlertsTable({ slos, deps, timeRange }) {
+interface Props {
+  deps: SloEmbeddableDeps;
+  slos: SloItem[];
+  timeRange: TimeRange;
+}
+
+export function SloAlertsTable({ slos, deps, timeRange }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = deps;
@@ -60,9 +69,6 @@ export function SloAlertsTable({ slos, deps, timeRange }) {
       id={ALERTS_TABLE_ID}
       pageSize={ALERTS_PER_PAGE}
       showAlertStatusWithFlapping
-      onUpdate={() => {
-        console.log('!!update the table');
-      }}
     />
   );
 }

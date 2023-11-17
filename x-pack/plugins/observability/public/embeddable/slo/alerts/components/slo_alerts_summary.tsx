@@ -5,16 +5,25 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+import type { TimeRange } from '@kbn/es-query';
 import { getAlertSummaryTimeRange } from '../../../../utils/alert_summary_widget';
 import { observabilityAlertFeatureIds } from '../../../../../common/constants';
 import { useTimeBuckets } from '../../../../hooks/use_time_buckets';
 import { calculateTimeRangeBucketSize } from '../../../../pages/overview/helpers/calculate_bucket_size';
+import { SloEmbeddableDeps } from '../slo_alerts_embeddable';
+import { SloItem } from '../types';
 
 type SloIdAndInstanceId = [string, string];
 const DEFAULT_INTERVAL = '60s';
 const DEFAULT_DATE_FORMAT = 'YYYY-MM-DD HH:mm';
 
-export function SloAlertsSummary({ slos, deps, timeRange }) {
+interface Props {
+  deps: SloEmbeddableDeps;
+  slos: SloItem[];
+  timeRange: TimeRange;
+}
+
+export function SloAlertsSummary({ slos, deps, timeRange }: Props) {
   const {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },

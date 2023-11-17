@@ -5,15 +5,18 @@
  * 2.0.
  */
 import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { TimeRange } from '@kbn/es-query';
 
-interface SloItem {
+export interface SloItem {
   id: string | undefined;
   instanceId: string | undefined;
   name: string;
+  groupBy: string;
 }
 
 export interface EmbeddableSloProps {
   slos: SloItem[];
+  timeRange?: TimeRange;
   lastReloadRequestTime?: number | undefined;
 }
 
