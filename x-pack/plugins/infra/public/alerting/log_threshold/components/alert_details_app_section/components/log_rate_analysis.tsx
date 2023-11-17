@@ -162,7 +162,7 @@ export const LogRateAnalysis: FC<AlertDetailsLogRateAnalysisSectionProps> = ({ r
 
   const onAnalysisCompleted = (analysisResults: LogRateAnalysisResultsData | undefined) => {
     const significantFieldValues = orderBy(
-      analysisResults?.significantTerms?.map((item) => ({
+      analysisResults?.significantItems?.map((item) => ({
         field: item.fieldName,
         value: item.fieldValue,
         docCount: item.doc_count,
