@@ -29,7 +29,7 @@ jest.mock('../../../kibana_services');
 export class MockSearchSource {
   getField(fieldName: string) {
     if (fieldName === 'filter') {
-      return []
+      return [];
     }
 
     throw new Error('Unsupported field: ', fieldName);

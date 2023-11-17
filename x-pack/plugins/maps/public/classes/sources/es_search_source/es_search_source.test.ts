@@ -55,7 +55,7 @@ describe('ESSearchSource', () => {
         const mockSearchSource = {
           getField: (fieldName: string) => {
             if (fieldName === 'filter') {
-              return []
+              return [];
             }
 
             throw new Error('Unsupported field: ', fieldName);
@@ -138,7 +138,8 @@ describe('ESSearchSource', () => {
           hasLabels: 'false',
           index: 'foobar-title-*',
           requestBody:
-            "(fields:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(_id)),'7':('0':source,'1':!f),'8':('0':fields,'1':!(tooltipField,styleField)),'9':('0':filter,'1':!((meta:(),query:(exists:(field:bar)))))))",          token: '1234',
+            "(fields:('0':('0':index,'1':(fields:(),title:'foobar-title-*')),'1':('0':size,'1':1000),'2':('0':filter,'1':!()),'3':('0':query),'4':('0':index,'1':(fields:(),title:'foobar-title-*')),'5':('0':query,'1':(language:KQL,query:'tooltipField: foobar')),'6':('0':fieldsFromSource,'1':!(_id)),'7':('0':source,'1':!f),'8':('0':fields,'1':!(tooltipField,styleField)),'9':('0':filter,'1':!((meta:(),query:(exists:(field:bar)))))))",
+          token: '1234',
         });
       });
 
