@@ -143,8 +143,8 @@ export const BaseResponseProps = BaseRequiredFields.merge(BaseOptionalFields).me
   BaseDefaultableFields.required()
 );
 
-export type ResponseRequiredFields = z.infer<typeof ResponseRequiredFields>;
-export const ResponseRequiredFields = z.object({
+export type ResponseFields = z.infer<typeof ResponseFields>;
+export const ResponseFields = z.object({
   id: RuleObjectId,
   rule_id: RuleSignatureId,
   immutable: IsRuleImmutable,
@@ -156,10 +156,6 @@ export const ResponseRequiredFields = z.object({
   related_integrations: RelatedIntegrationArray,
   required_fields: RequiredFieldArray,
   setup: SetupGuide,
-});
-
-export type ResponseOptionalFields = z.infer<typeof ResponseOptionalFields>;
-export const ResponseOptionalFields = z.object({
   execution_summary: RuleExecutionSummary.optional(),
 });
 
@@ -187,8 +183,7 @@ export const SharedPatchProps = BasePatchProps.merge(
 );
 
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
-export const SharedResponseProps =
-  BaseResponseProps.merge(ResponseRequiredFields).merge(ResponseOptionalFields);
+export const SharedResponseProps = BaseResponseProps.merge(ResponseFields);
 
 export type EqlQueryLanguage = z.infer<typeof EqlQueryLanguage>;
 export const EqlQueryLanguage = z.literal('eql');
