@@ -40,8 +40,8 @@ export const checkIndexStatus = async (
         {
           range: {
             '@timestamp': {
-              gte: `now-${PostureTypeAndRetention?.retentionTime}/h`,
-              lte: 'now/h',
+              gte: `now-${PostureTypeAndRetention?.retentionTime}`,
+              lte: 'now',
             },
           },
         },

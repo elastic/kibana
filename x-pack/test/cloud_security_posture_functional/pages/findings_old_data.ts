@@ -17,7 +17,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const dataOldKspm = [
     {
-      '@timestamp': (Date.now() - hoursToMillisecond(6)).toString(),
+      '@timestamp': (Date.now() - hoursToMillisecond(27)).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -37,7 +37,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
   const dataOldCspm = [
     {
-      '@timestamp': (Date.now() - hoursToMillisecond(26)).toString(),
+      '@timestamp': (Date.now() - hoursToMillisecond(27)).toString(),
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {

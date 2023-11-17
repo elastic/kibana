@@ -47,11 +47,6 @@ export const LATEST_FINDINGS_INDEX_DEFAULT_NS =
   'logs-cloud_security_posture.findings_latest-default';
 export const LATEST_FINDINGS_RETENTION_POLICY = '26h';
 
-export const KSPM_RETENTION_POLICY = '5h';
-export const CSPM_RETENTION_POLICY = '24h';
-export const VULN_MGMT_RETENTION_POLICY = '96h';
-export const ALL_RETENTION_POLICY = '72h';
-
 export const BENCHMARK_SCORE_INDEX_TEMPLATE_NAME = 'logs-cloud_security_posture.scores';
 export const BENCHMARK_SCORE_INDEX_PATTERN = 'logs-cloud_security_posture.scores-*';
 export const BENCHMARK_SCORE_INDEX_DEFAULT_NS = 'logs-cloud_security_posture.scores-default';
