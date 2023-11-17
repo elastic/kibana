@@ -251,6 +251,6 @@ export class Config {
   }
 
   getDistPluginsFromRepo() {
-    return getPackages(this.repoRoot).filter((p) => this.pluginFilter(p) && !p.isDevOnly());
+    return getPackages(this.repoRoot).filter((p) => !p.isDevOnly() && this.pluginFilter(p));
   }
 }
