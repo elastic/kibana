@@ -11,7 +11,6 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_ENRICH_POLICY_NAME,
 } from '../../assets/constants';
 import { SLORepository } from './slo_repository';
 import { TransformManager } from './transform_manager';
@@ -21,8 +20,7 @@ export class DeleteSLO {
     private repository: SLORepository,
     private transformManager: TransformManager,
     private esClient: ElasticsearchClient,
-    private rulesClient: RulesClientApi,
-    private systemClient: ElasticsearchClient
+    private rulesClient: RulesClientApi
   ) {}
 
   public async execute(sloId: string): Promise<void> {
@@ -36,7 +34,6 @@ export class DeleteSLO {
     await this.deleteSummaryData(slo.id);
     await this.deleteAssociatedRules(slo.id);
     await this.repository.deleteById(slo.id);
-    await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
   }
 
   private async deleteRollupData(sloId: string): Promise<void> {

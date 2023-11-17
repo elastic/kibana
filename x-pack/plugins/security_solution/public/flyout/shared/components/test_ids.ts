@@ -32,3 +32,7 @@ export const EXPAND_DETAILS_BUTTON_TEST_ID =
 export const COLLAPSE_DETAILS_BUTTON_TEST_ID =
   `${FLYOUT_NAVIGATION_TEST_ID}CollapseDetailButton` as const;
 export const HEADER_ACTIONS_TEST_ID = `${FLYOUT_NAVIGATION_TEST_ID}Actions` as const;
+
+export const FLYOUT_TITLE_TEST_ID = `${PREFIX}Title` as const;
+export const TITLE_HEADER_ICON_TEST_ID = `${FLYOUT_TITLE_TEST_ID}Icon` as const;
+export const TITLE_LINK_ICON_TEST_ID = `${FLYOUT_TITLE_TEST_ID}LinkIcon` as const;
