@@ -53,6 +53,12 @@ export const usePaneStyles = () => {
         animation: ${euiAnimSlideInUp(euiTheme.size.xxl)} ${euiTheme.animation.normal}
           cubic-bezier(0.39, 0.575, 0.565, 1);
       }
+
+      .timeline-body {
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+      }
     }
 
     &:not(.timeline-wrapper--full-screen) .timeline-flyout {
