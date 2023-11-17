@@ -24,23 +24,28 @@ fi
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
-request_body='{
-          "name": "ftr-integration-tests-'$random_number'",
-          "region_id": "aws-eu-west-1"}'
 
 if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
-  kbn_override='{ "overrides": {
-        "kibana": {
-            "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:latest"
-        }
-    }}'
-  request_body=$(echo $request_body | jq ". + $kbn_override")
-fi
-
-ENVIRONMENT_DETAILS=$(curl --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
+  ENVIRONMENT_DETAILS=$(curl -v --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
     --header "Authorization: ApiKey $QA_API_KEY" \
     --header 'Content-Type: application/json' \
-    --data $request_body | jq '.')
+    --data '{
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1",
+          "overrides": {
+            "kibana": {
+              "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:latest"
+              }
+            }
+          }' | jq '.')
+else 
+  ENVIRONMENT_DETAILS=$(curl -v --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
+    --header "Authorization: ApiKey $QA_API_KEY" \
+    --header 'Content-Type: application/json' \
+    --data '{
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1"}' | jq '.')
+fi
 
 NAME=$(echo $ENVIRONMENT_DETAILS | jq -r '.name')
 ID=$(echo $ENVIRONMENT_DETAILS | jq -r '.id')
