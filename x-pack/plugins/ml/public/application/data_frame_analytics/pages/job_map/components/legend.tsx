@@ -125,6 +125,21 @@ export const JobMapLegend: FC<{ theme: EuiThemeType }> = ({ theme }) => {
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="xs" alignItems="center">
           <EuiFlexItem grow={false}>
+            <span className="mlJobMapLegend__analyticsMissing" />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.ml.dataframe.analyticsMap.legend.missingAnalyticsJobLabel"
+                defaultMessage="missing analytics job"
+              />
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexItem grow={false}>
             <span className="mlJobMapLegend__analytics" />
           </EuiFlexItem>
           <EuiFlexItem grow={false}>

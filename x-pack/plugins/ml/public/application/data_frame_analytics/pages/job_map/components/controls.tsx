@@ -196,7 +196,11 @@ export const Controls: FC<Props> = React.memo(
     // Set up Cytoscape event handlers
     useEffect(() => {
       const selectHandler: cytoscape.EventHandler = (event) => {
-        setSelectedNode(event.target);
+        const targetNode = event.target;
+        if (targetNode._private.data.type === JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING) {
+          return;
+        }
+        setSelectedNode(targetNode);
         setShowFlyout(true);
       };
 

@@ -67,6 +67,16 @@ export class AnalyticsManager {
     this._jobs = jobs.data_frame_analytics;
   }
 
+  private getMissingJobNode(label: string): AnalyticsMapNodeElement {
+    return {
+      data: {
+        id: `${label}-${JOB_MAP_NODE_TYPES.ANALYTICS}`,
+        label,
+        type: JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING,
+      },
+    };
+  }
+
   private isDuplicateElement(analyticsId: string, elements: MapElements[]): boolean {
     let isDuplicate = false;
     elements.forEach((elem) => {
@@ -106,12 +116,8 @@ export class AnalyticsManager {
     );
   }
 
-  private findJob(id: string): estypes.MlDataframeAnalyticsSummary {
-    const job = this._jobs.find((js) => js.id === id);
-    if (job === undefined) {
-      throw Error(`No known job with id '${id}'`);
-    }
-    return job;
+  private findJob(id: string): estypes.MlDataframeAnalyticsSummary | undefined {
+    return this._jobs.find((js) => js.id === id);
   }
 
   private findTrainedModel(id: string): estypes.MlTrainedModelConfig {
@@ -221,7 +227,7 @@ export class AnalyticsManager {
     const resultElements = [];
     const modelElements = [];
     const details: any = {};
-    let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary;
+    let data: estypes.MlTrainedModelConfig | estypes.MlDataframeAnalyticsSummary | undefined;
     // fetch model data and create model elements
     data = this.findTrainedModel(modelId);
     const modelNodeId = `${data.model_id}-${JOB_MAP_NODE_TYPES.TRAINED_MODEL}`;
@@ -243,37 +249,35 @@ export class AnalyticsManager {
     details[modelNodeId] = data;
     // fetch source job data and create elements
     if (sourceJobId !== undefined) {
-      try {
-        data = this.findJob(sourceJobId);
+      data = this.findJob(sourceJobId);
 
-        nextLinkId = data?.source?.index[0];
-        nextType = JOB_MAP_NODE_TYPES.INDEX;
+      nextLinkId = data?.source?.index[0];
+      nextType = JOB_MAP_NODE_TYPES.INDEX;
+      previousNodeId = `${data?.id ?? sourceJobId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
-        previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+      resultElements.push(
+        data === undefined
+          ? this.getMissingJobNode(sourceJobId)
+          : {
+              data: {
+                id: previousNodeId,
+                label: data?.id,
+                type: JOB_MAP_NODE_TYPES.ANALYTICS,
+                analysisType: getAnalysisType(data?.analysis),
+              },
+            }
+      );
+      // Create edge between job and model
+      modelElements.push({
+        data: {
+          id: `${previousNodeId}~${modelNodeId}`,
+          source: previousNodeId,
+          target: modelNodeId,
+        },
+      });
 
-        resultElements.push({
-          data: {
-            id: previousNodeId,
-            label: data.id,
-            type: JOB_MAP_NODE_TYPES.ANALYTICS,
-            analysisType: getAnalysisType(data?.analysis),
-          },
-        });
-        // Create edge between job and model
-        modelElements.push({
-          data: {
-            id: `${previousNodeId}~${modelNodeId}`,
-            source: previousNodeId,
-            target: modelNodeId,
-          },
-        });
-
+      if (data) {
         details[previousNodeId] = data;
-      } catch (error) {
-        // fail silently if job doesn't exist
-        if (error.statusCode !== 404) {
-          throw error.body ?? error;
-        }
       }
     }
 
@@ -295,21 +299,25 @@ export class AnalyticsManager {
 
     const nextLinkId = data?.source?.index[0];
     const nextType: JobMapNodeTypes = JOB_MAP_NODE_TYPES.INDEX;
+    const previousNodeId = `${data?.id ?? jobId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
 
-    const previousNodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+    resultElements.push(
+      data === undefined
+        ? this.getMissingJobNode(jobId)
+        : {
+            data: {
+              id: previousNodeId,
+              label: data.id,
+              type: JOB_MAP_NODE_TYPES.ANALYTICS,
+              analysisType: getAnalysisType(data?.analysis),
+              isRoot: true,
+            },
+          }
+    );
 
-    resultElements.push({
-      data: {
-        id: previousNodeId,
-        label: data.id,
-        type: JOB_MAP_NODE_TYPES.ANALYTICS,
-        analysisType: getAnalysisType(data?.analysis),
-        isRoot: true,
-      },
-    });
-
-    details[previousNodeId] = data;
-
+    if (data) {
+      details[previousNodeId] = data;
+    }
     const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
       jobId,
       jobCreateTime
@@ -429,33 +437,40 @@ export class AnalyticsManager {
               nextType = JOB_MAP_NODE_TYPES.TRANSFORM;
             }
           } else if (isJobDataLinkReturnType(link) && link.isJob === true) {
+            // Create missing job node here if job is undefined
             data = link.jobData;
-            const nodeId = `${data.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+            const nodeId = `${data?.id ?? nextLinkId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
             previousNodeId = nodeId;
 
-            result.elements.unshift({
-              data: {
-                id: nodeId,
-                label: data.id,
-                type: JOB_MAP_NODE_TYPES.ANALYTICS,
-                analysisType: getAnalysisType(data?.analysis),
-              },
-            });
+            result.elements.unshift(
+              data === undefined
+                ? this.getMissingJobNode(nextLinkId)
+                : {
+                    data: {
+                      id: nodeId,
+                      label: data.id,
+                      type: JOB_MAP_NODE_TYPES.ANALYTICS,
+                      analysisType: getAnalysisType(data?.analysis),
+                    },
+                  }
+            );
             result.details[nodeId] = data;
             nextLinkId = data?.source?.index[0];
             nextType = JOB_MAP_NODE_TYPES.INDEX;
 
-            // Get trained model for analytics job and create model node
-            ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
-              data.id,
-              data.create_time
-            ));
-            if (isAnalyticsMapNodeElement(modelElement)) {
-              modelElements.push(modelElement);
-              result.details[modelElement.data.id] = modelDetails;
-            }
-            if (isAnalyticsMapEdgeElement(edgeElement)) {
-              modelElements.push(edgeElement);
+            if (data) {
+              // Get trained model for analytics job and create model node
+              ({ modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
+                data.id,
+                data.create_time
+              ));
+              if (isAnalyticsMapNodeElement(modelElement)) {
+                modelElements.push(modelElement);
+                result.details[modelElement.data.id] = modelDetails;
+              }
+              if (isAnalyticsMapEdgeElement(edgeElement)) {
+                modelElements.push(edgeElement);
+              }
             }
           } else if (isTransformLinkReturnType(link) && link.isTransform === true) {
             data = link.transformData;
