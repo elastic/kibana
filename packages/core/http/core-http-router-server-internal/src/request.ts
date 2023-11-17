@@ -8,6 +8,7 @@
 
 import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
+import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
 import { fromEvent, NEVER } from 'rxjs';
 import { shareReplay, first, filter } from 'rxjs/operators';
@@ -36,6 +37,10 @@ import {
 import { RouteValidator } from './validator';
 import { isSafeMethod } from './route';
 import { KibanaSocket } from './socket';
+import { patchRequest } from './patch_requests';
+
+// patching at module load
+patchRequest();
 
 const requestSymbol = Symbol('request');
 
@@ -172,6 +177,29 @@ export class CoreKibanaRequest<
       // missing in fakeRequests, so we cast to false
       isAuthenticated: request.auth?.isAuthenticated ?? false,
     };
+  }
+
+  toString() {
+    return `[CoreKibanaRequest id="${this.id}" method="${this.route.method}" url="${this.url}" fake="${this.isFakeRequest}" system="${this.isSystemRequest}" api="${this.isInternalApiRequest}"]`;
+  }
+
+  toJSON() {
+    return {
+      id: this.id,
+      uuid: this.uuid,
+      url: `${this.url}`,
+      isFakeRequest: this.isFakeRequest,
+      isSystemRequest: this.isSystemRequest,
+      isInternalApiRequest: this.isInternalApiRequest,
+      auth: {
+        isAuthenticated: this.auth.isAuthenticated,
+      },
+      route: this.route,
+    };
+  }
+
+  [inspect.custom]() {
+    return this.toJSON();
   }
 
   private getEvents(request: RawRequest): KibanaRequestEvents {

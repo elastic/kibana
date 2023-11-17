@@ -12,7 +12,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { ApplicationStart } from '@kbn/core/public';
-import { RedirectAppLinks } from '@kbn/kibana-react-plugin/public';
+import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { FeatureCatalogueEntry } from '../../../services';
 import { createAppNavigationHandler } from '../app_navigation_handler';
 import { Synopsis } from '../synopsis';
@@ -58,7 +58,11 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
                 {/* Check if both the Dev Tools UI and the Console UI are enabled. */}
                 {isDevToolsEnabled && consoleHref !== undefined ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiButtonEmpty
                         data-test-subj="homeDevTools"
                         className="kbnOverviewPageHeader__actionButton"
@@ -77,7 +81,11 @@ export const ManageData: FC<Props> = ({ addBasePath, application, features }) =>
 
                 {isManagementEnabled ? (
                   <EuiFlexItem grow={false}>
-                    <RedirectAppLinks application={application}>
+                    <RedirectAppLinks
+                      coreStart={{
+                        application,
+                      }}
+                    >
                       <EuiButtonEmpty
                         data-test-subj="homeManage"
                         className="kbnOverviewPageHeader__actionButton"

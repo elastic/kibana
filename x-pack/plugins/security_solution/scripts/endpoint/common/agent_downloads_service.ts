@@ -10,6 +10,7 @@ import { join } from 'path';
 import fs from 'fs';
 import nodeFetch from 'node-fetch';
 import { finished } from 'stream/promises';
+import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { SettingsStorage } from './settings_storage';
 
 export interface DownloadedAgentInfo {
@@ -40,6 +41,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   private downloadsFolderExists = false;
   private readonly downloadsDirName = 'agent_download_storage';
   private readonly downloadsDirFullPath: string;
+  private readonly log = createToolingLogger();
 
   constructor() {
     super('agent_download_storage_settings.json', {
@@ -57,6 +59,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
     if (!this.downloadsFolderExists) {
       await mkdir(this.downloadsDirFullPath, { recursive: true });
+      this.log.debug(`Created directory [this.downloadsDirFullPath] for cached agent downloads`);
       this.downloadsFolderExists = true;
     }
   }
@@ -74,6 +77,8 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
   }
 
   public async downloadAndStore(agentDownloadUrl: string): Promise<DownloadedAgentInfo> {
+    this.log.debug(`Downloading and storing: ${agentDownloadUrl}`);
+
     // TODO: should we add "retry" attempts to file downloads?
 
     await this.ensureExists();
@@ -82,6 +87,7 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
 
     // If download is already present on disk, then just return that info. No need to re-download it
     if (fs.existsSync(newDownloadInfo.fullFilePath)) {
+      this.log.debug(`Download already cached at [${newDownloadInfo.fullFilePath}]`);
       return newDownloadInfo;
     }
 
@@ -104,10 +110,14 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
       throw e;
     }
 
+    await this.cleanupDownloads();
+
     return newDownloadInfo;
   }
 
   public async cleanupDownloads(): Promise<{ deleted: string[] }> {
+    this.log.debug(`Performing cleanup of cached Agent downlaods`);
+
     const settings = await this.get();
     const maxAgeDate = new Date();
     const response: { deleted: string[] } = { deleted: [] };
@@ -138,6 +148,9 @@ class AgentDownloadStorage extends SettingsStorage<AgentDownloadStorageSettings>
     }
 
     await Promise.allSettled(deleteFilePromises);
+
+    this.log.debug(`Deleted [${response.deleted.length}] file(s)`);
+    this.log.verbose(`files deleted:\n`, response.deleted.join('\n'));
 
     return response;
   }

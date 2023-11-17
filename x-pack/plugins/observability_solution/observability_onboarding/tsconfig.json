@@ -33,7 +33,8 @@
     "@kbn/custom-integrations",
     "@kbn/share-plugin",
     "@kbn/deeplinks-observability",
-    "@kbn/fleet-plugin"
+    "@kbn/fleet-plugin",
+    "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": ["target/**/*"]
 }

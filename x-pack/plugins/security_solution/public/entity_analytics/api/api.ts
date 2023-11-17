@@ -20,7 +20,7 @@ import type {
   GetRiskEngineStatusResponse,
   InitRiskEngineResponse,
   DisableRiskEngineResponse,
-} from '../../../server/lib/risk_engine/types';
+} from '../../../server/lib/entity_analytics/risk_engine/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
 
 /**
