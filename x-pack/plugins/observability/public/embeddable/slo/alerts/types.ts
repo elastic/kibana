@@ -8,8 +8,8 @@ import { EmbeddableInput } from '@kbn/embeddable-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 
 export interface SloItem {
-  id: string | undefined;
-  instanceId: string | undefined;
+  id: string;
+  instanceId: string;
   name: string;
   groupBy: string;
 }

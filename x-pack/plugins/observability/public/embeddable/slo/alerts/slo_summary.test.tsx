@@ -13,7 +13,7 @@ import { render } from '../../../utils/test_helper';
 import { SloSummary } from './slo_summary';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
 import { ActiveAlerts } from '../../../hooks/slo/active_alerts';
-
+import { SloItem } from './types';
 jest.mock('../../../hooks/slo/use_fetch_active_alerts');
 const useFetchActiveAlertsMock = useFetchActiveAlerts as jest.Mock;
 
@@ -31,7 +31,8 @@ describe('SLO Alert Summary', () => {
         id: slo.id,
         instanceId: slo.instanceId,
         name: slo.name,
-      }));
+        groupBy: slo.groupBy,
+      })) as SloItem[];
 
       useFetchActiveAlertsMock.mockReturnValue({
         isLoading: false,
@@ -49,7 +50,8 @@ describe('SLO Alert Summary', () => {
           id: slo.id,
           instanceId: slo.instanceId,
           name: slo.name,
-        }));
+          groupBy: slo.groupBy,
+        })) as SloItem[];
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
         };
@@ -71,7 +73,8 @@ describe('SLO Alert Summary', () => {
           id: slo.id,
           instanceId: slo.instanceId,
           name: slo.name,
-        }));
+          groupBy: slo.groupBy,
+        })) as SloItem[];
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,
           'c0f8d669-9177-4706-9098-f397a88173a6|*': 1,
@@ -92,7 +95,8 @@ describe('SLO Alert Summary', () => {
           id: slo.id,
           instanceId: slo.instanceId,
           name: slo.name,
-        }));
+          groupBy: slo.groupBy,
+        })) as SloItem[];
         const activeAlertsData = {
           '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 3,
           'c0f8d669-9177-4706-9098-f397a88173a6|*': 2,
@@ -115,8 +119,8 @@ describe('SLO Alert Summary', () => {
       const slos = results.map((slo) => ({
         id: slo.id,
         instanceId: slo.instanceId,
-        name: slo.name,
-      }));
+        groupBy: slo.groupBy,
+      })) as SloItem[];
       const selectedSlo = [slos[0]];
 
       useFetchActiveAlertsMock.mockReturnValue({
@@ -133,8 +137,8 @@ describe('SLO Alert Summary', () => {
       const slos = results.map((slo) => ({
         id: slo.id,
         instanceId: slo.instanceId,
-        name: slo.name,
-      }));
+        groupBy: slo.groupBy,
+      })) as SloItem[];
       const selectedSlo = [slos[0]];
       const activeAlertsData = {
         '1f1c6ee7-433f-4b56-b727-5682262e0d7d|*': 1,

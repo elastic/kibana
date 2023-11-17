@@ -15,7 +15,7 @@ import { SloEmbeddableDeps } from './slo_alerts_embeddable';
 interface Props {
   deps: SloEmbeddableDeps;
   slos: SloItem[];
-  timeRange?: TimeRange | undefined;
+  timeRange: TimeRange;
 }
 
 export function SloAlertsWrapper({ slos, deps, timeRange }: Props) {

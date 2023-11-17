@@ -11,12 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { debounce } from 'lodash';
 import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
-interface SloItem {
-  id: string | undefined;
-  instanceId: string | undefined;
-  name: string;
-  groupBy: string;
-}
+import { SloItem } from './types';
 
 interface Props {
   initialSlos?: SloItem[];

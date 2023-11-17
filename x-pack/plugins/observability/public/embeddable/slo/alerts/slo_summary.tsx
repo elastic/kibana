@@ -9,24 +9,27 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiText, EuiFlexItem, EuiPanel, EuiStat, EuiBadge } from '@elastic/eui';
 import { euiLightVars } from '@kbn/ui-theme';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-
 import { EmbeddableSloProps } from './types';
 type SloIdAndInstanceId = [string, string];
 
-export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) {
-  const sloNames = slos.map((slo) => `${slo.name}(${slo.instanceId})`); // TODO remove * if no partition
-  const more = sloNames.length - 1;
-  const slosWithoutName = slos.map((slo) => ({
-    id: slo.id,
-    instanceId: slo.instanceId,
-  }));
+export function SloSummary({ slos }: EmbeddableSloProps) {
+  const sloBadges = slos.map((slo) =>
+    slo.instanceId !== ALL_VALUE ? `${slo.name} (${slo.instanceId})` : slo.name
+  );
+  const more = sloBadges.length - 1;
   const { data: activeAlerts } = useFetchActiveAlerts({
-    sloIdsAndInstanceIds: slosWithoutName.map(Object.values) as SloIdAndInstanceId[],
+    sloIdsAndInstanceIds: slos
+      .map((slo) => ({
+        id: slo.id,
+        instanceId: slo.instanceId,
+      }))
+      .map(Object.values) as SloIdAndInstanceId[],
   });
   const totalActiveAlerts = slos.reduce((total, slo) => {
-    if (activeAlerts.get(slo)) {
-      total += activeAlerts.get(slo);
+    if (activeAlerts && activeAlerts.get(slo)) {
+      total += activeAlerts.get(slo)!;
     }
     return total;
   }, 0);
@@ -50,11 +53,13 @@ export function SloSummary({ slos, lastReloadRequestTime }: EmbeddableSloProps) 
             responsive={false}
           >
             <EuiFlexItem grow={false} style={{ maxWidth: '150px' }}>
-              <EuiBadge color={euiLightVars.euiColorDisabled}>{sloNames[0]}</EuiBadge>
+              <EuiBadge color={euiLightVars.euiColorDisabled}>{sloBadges[0]}</EuiBadge>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color={euiLightVars.euiColorDisabled}>{`+${more} more`}</EuiBadge>
-            </EuiFlexItem>
+            {more > 0 && (
+              <EuiFlexItem grow={false}>
+                <EuiBadge color={euiLightVars.euiColorDisabled}>{`+${more} more`}</EuiBadge>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexGroup>
 

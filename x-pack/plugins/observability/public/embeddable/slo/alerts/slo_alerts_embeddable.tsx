@@ -86,7 +86,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     const queryClient = new QueryClient();
 
     const I18nContext = this.deps.i18n.Context;
-    const { slos, timeRange } = this.getInput();
+    const { slos, timeRange = { from: 'now-15m/m', to: 'now' } } = this.getInput();
     const deps = this.deps;
     ReactDOM.render(
       <I18nContext>
