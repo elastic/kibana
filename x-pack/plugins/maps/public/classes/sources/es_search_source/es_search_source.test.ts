@@ -58,7 +58,7 @@ describe('ESSearchSource', () => {
               return [];
             }
 
-            throw new Error('Unsupported field: ', fieldName);
+            throw new Error(`Unsupported search source field: ${fieldName}`);
           },
           setField: jest.fn(),
           getSearchRequestBody() {
