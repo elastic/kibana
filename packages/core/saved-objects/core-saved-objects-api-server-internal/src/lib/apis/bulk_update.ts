@@ -58,6 +58,8 @@ export const performBulkUpdate = async <T>(
   } = helpers;
   const { securityExtension } = extensions;
 
+  // console.log('the objects we are testing in unit test for errors:', JSON.stringify(objects));
+
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const time = getCurrentTime();
 
@@ -90,6 +92,9 @@ export const performBulkUpdate = async <T>(
       migrationVersionCompatibility,
     } = object;
     let error: DecoratedError | undefined;
+    // console.log(
+    //   `expectedBulkGetResults should return error as result for object that has "*" as namespace', type: ${type}, objectNamespace: ${objectNamespace}`
+    // );
     if (!allowedTypes.includes(type)) {
       error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     } else {
@@ -179,7 +184,7 @@ export const performBulkUpdate = async <T>(
     let result;
     const { type, id, objectNamespace, esRequestIndex: index } = element.value;
 
-    const preflightResult = index !== undefined ? bulkGetResponse?.body.docs[index] : undefined;
+    const preflightResult = index !== undefined ? bulkGetResponse?.body?.docs[index] : undefined;
     if (registry.isMultiNamespace(type)) {
       result = {
         type,

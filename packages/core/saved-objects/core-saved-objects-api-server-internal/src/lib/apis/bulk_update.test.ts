@@ -398,51 +398,72 @@ describe('SavedObjectsRepository', () => {
         isBulkError: boolean,
         expectedErrorResult: ExpectedErrorResult
       ) => {
-        const objects = [obj1, obj, obj2];
-        const mockResponse = getMockBulkUpdateResponse(registry, objects);
+        const objects = [obj1, obj2, obj];
+
+        const mockedMgetResponse = getMockMgetResponse(registry, [obj1, obj2, obj]);
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        client.mget.mockResponseOnce(mockedMgetResponse);
+
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, objects);
         if (isBulkError) {
-          // mock the bulk error for only the second object
+          // mock the bulk error for only the third object
+          mockGetBulkOperationError.mockReturnValueOnce(undefined);
           mockGetBulkOperationError.mockReturnValueOnce(undefined);
           mockGetBulkOperationError.mockReturnValueOnce(expectedErrorResult.error as Payload);
         }
-        client.bulk.mockResponseOnce(mockResponse);
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
 
         const result = await repository.bulkUpdate(objects);
+
+        expect(client.mget).toHaveBeenCalled();
         expect(client.bulk).toHaveBeenCalled();
-        const objCall = isBulkError ? expectObjArgs(obj) : [];
-        const body = [...expectObjArgs(obj1), ...objCall, ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
+
+        const expectClientCallObjects = isBulkError ? [obj1, obj2, obj] : [obj1, obj2];
+        expectClientCallArgsAction(expectClientCallObjects, { method: 'index' });
+
         expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectedErrorResult, expectSuccess(obj2)],
+          saved_objects: [expectSuccess(obj1), expectSuccess(obj2), expectedErrorResult],
         });
       };
 
       const bulkUpdateMultiError = async (
-        [obj1, _obj, obj2]: SavedObjectsBulkUpdateObject[],
+        [obj1, obj2, _obj]: SavedObjectsBulkUpdateObject[],
         options: SavedObjectsBulkUpdateOptions | undefined,
         mgetResponse: estypes.MgetResponse,
         mgetOptions?: { statusCode?: number }
       ) => {
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        // we only need to mock the response once. A 404 status code will apply to the response for all
         client.mget.mockResponseOnce(mgetResponse, { statusCode: mgetOptions?.statusCode });
 
-        const bulkResponse = getMockBulkUpdateResponse(registry, [obj1, obj2], { namespace });
-        client.bulk.mockResponseOnce(bulkResponse);
-
-        const result = await repository.bulkUpdate([obj1, _obj, obj2], options);
-        expect(client.bulk).toHaveBeenCalled();
-        expect(client.mget).toHaveBeenCalled();
-        const body = [...expectObjArgs(obj1), ...expectObjArgs(obj2)];
-        expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
-          expect.anything()
-        );
-
-        expect(result).toEqual({
-          saved_objects: [expectSuccess(obj1), expectErrorNotFound(_obj), expectSuccess(obj2)],
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, [obj1, obj2], {
+          namespace,
         });
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
+
+        const result = await repository.bulkUpdate([obj1, obj2, _obj], options);
+
+        expect(client.mget).toHaveBeenCalled();
+        // @TINA TODO: celan this up with a small parameterized function
+        if (mgetOptions?.statusCode === 404) {
+          expect(client.bulk).not.toHaveBeenCalled();
+          expect(result).toEqual({
+            saved_objects: [
+              expectErrorNotFound(obj1),
+              expectErrorNotFound(obj2),
+              expectErrorNotFound(_obj),
+            ],
+          });
+        } else {
+          expect(client.bulk).toHaveBeenCalled();
+          expectClientCallArgsAction([obj1, obj2], { method: 'index' });
+
+          expect(result).toEqual({
+            saved_objects: [expectSuccess(obj1), expectSuccess(obj2), expectErrorNotFound(_obj)],
+          });
+        }
       };
 
       it(`throws when options.namespace is '*'`, async () => {
@@ -472,22 +493,22 @@ describe('SavedObjectsRepository', () => {
 
       it(`returns error when ES is unable to find the document (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE, found: false };
-        const mgetResponse = getMockMgetResponse(registry, [_obj]);
-        await bulkUpdateMultiError([obj1, _obj, obj2], undefined, mgetResponse);
+        const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj]);
+        await bulkUpdateMultiError([obj1, obj2, _obj], undefined, mgetResponse);
       });
 
       it(`returns error when ES is unable to find the index (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        const mgetResponse = getMockMgetResponse(registry, [_obj]);
-        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse, {
+        const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj]);
+        await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse, {
           statusCode: 404,
         });
       });
 
       it(`returns error when there is a conflict with an existing multi-namespace saved object (mget)`, async () => {
         const _obj = { ...obj, type: MULTI_NAMESPACE_ISOLATED_TYPE };
-        const mgetResponse = getMockMgetResponse(registry, [_obj], 'bar-namespace');
-        await bulkUpdateMultiError([obj1, _obj, obj2], { namespace }, mgetResponse);
+        const mgetResponse = getMockMgetResponse(registry, [obj1, obj2, _obj], 'bar-namespace');
+        await bulkUpdateMultiError([obj1, obj2, _obj], { namespace }, mgetResponse);
       });
 
       it(`returns bulk error`, async () => {
