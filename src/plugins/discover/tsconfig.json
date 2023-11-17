@@ -76,7 +76,9 @@
     "@kbn/resizable-layout",
     "@kbn/unsaved-changes-badge",
     "@kbn/core-chrome-browser",
-    "@kbn/core-plugins-server"
+    "@kbn/core-plugins-server",
+    "@kbn/serverless",
+    "@kbn/deeplinks-observability"
   ],
   "exclude": [
     "target/**/*"
