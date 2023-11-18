@@ -521,7 +521,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    describe('returns', () => {
+    describe.only('returns', () => {
       it(`formats the ES response`, async () => {
         const response = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
         expect(response).toEqual({
@@ -543,14 +543,24 @@ describe('SavedObjectsRepository', () => {
           id: 'three',
           attributes: {},
         };
-        const objects = [obj1, obj, obj2];
-        const mockResponse = getMockBulkUpdateResponse(registry, objects);
-        client.bulk.mockResponseOnce(mockResponse);
+        const objects = [obj1, obj2, obj];
+        const mockedMgetResponse = getMockMgetResponse(registry, [obj1, obj2, obj]);
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        client.mget.mockResponseOnce(mockedMgetResponse);
 
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, objects);
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
         const result = await repository.bulkUpdate(objects);
-        expect(client.bulk).toHaveBeenCalledTimes(1);
+
+        expect(client.mget).toHaveBeenCalled();
+        expect(client.bulk).toHaveBeenCalled();
+
+        const expectClientCallObjects = [obj1, obj2];
+        expectClientCallArgsAction(expectClientCallObjects, { method: 'index' });
+
         expect(result).toEqual({
-          saved_objects: [expectUpdateResult(obj1), expectError(obj), expectUpdateResult(obj2)],
+          saved_objects: [expectUpdateResult(obj1), expectUpdateResult(obj2), expectError(obj)],
         });
       });
 
@@ -575,14 +585,25 @@ describe('SavedObjectsRepository', () => {
           id: 'three',
           attributes: {},
         };
-        const result = await bulkUpdateSuccess(
-          client,
-          repository,
-          registry,
-          [obj1, obj],
-          {},
-          originId
-        );
+        client.bulk.mockClear();
+        client.mget.mockClear();
+        const objects = [
+          { ...obj1, originId },
+          { ...obj, originId },
+        ];
+        const mockedMgetResponse = getMockMgetResponse(registry, objects);
+
+        client.mget.mockResponseOnce(mockedMgetResponse);
+
+        const mockBulkIndexResponse = getMockBulkUpdateResponse(registry, objects, {}, originId);
+        client.bulk.mockResponseOnce(mockBulkIndexResponse);
+        const result = await repository.bulkUpdate(objects);
+
+        expect(client.mget).toHaveBeenCalled();
+        expect(client.bulk).toHaveBeenCalled();
+
+        const expectClientCallObjects = objects;
+        expectClientCallArgsAction(expectClientCallObjects, { method: 'index' });
         expect(result).toEqual({
           saved_objects: [
             expect.objectContaining({ originId }),

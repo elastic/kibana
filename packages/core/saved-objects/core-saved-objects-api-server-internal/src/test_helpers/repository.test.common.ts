@@ -464,21 +464,27 @@ export const getMockGetResponse = (
       ...mockTimestampFields,
     } as SavedObjectsRawDocSource,
   } as estypes.GetResponse<SavedObjectsRawDocSource>;
+  // console.log('getMockGetResponse result', JSON.stringify(result));
   return result;
 };
 
 export const getMockMgetResponse = (
   registry: SavedObjectTypeRegistry,
-  objects: Array<TypeIdTuple & { found?: boolean; initialNamespaces?: string[] }>,
+  objects: Array<
+    TypeIdTuple & { found?: boolean; initialNamespaces?: string[]; originId?: string }
+  >,
   namespace?: string
-) =>
-  ({
+) => {
+  const result = {
     docs: objects.map((obj) =>
       obj.found === false
         ? obj
         : getMockGetResponse(registry, obj, obj.initialNamespaces ?? namespace)
     ),
-  } as estypes.MgetResponse<SavedObjectsRawDocSource>);
+  } as estypes.MgetResponse<SavedObjectsRawDocSource>;
+  console.log('getMockMgetResponse result', JSON.stringify(result));
+  return result;
+};
 
 expect.extend({
   toBeDocumentWithoutError(received, type, id) {
@@ -649,8 +655,8 @@ export const getMockBulkUpdateResponse = (
   objects: TypeIdTuple[],
   options?: SavedObjectsBulkUpdateOptions,
   originId?: string
-) =>
-  ({
+) => {
+  const mockedBulkUpdateResponse = {
     items: objects.map(({ type, id }) => ({
       index: {
         _id: `${
@@ -667,7 +673,10 @@ export const getMockBulkUpdateResponse = (
         result: 'updated',
       },
     })),
-  } as estypes.BulkResponse);
+  } as estypes.BulkResponse;
+  console.log('mockedBulkUpdateResponse', JSON.stringify(mockedBulkUpdateResponse));
+  return mockedBulkUpdateResponse;
+};
 
 export const bulkUpdateSuccess = async (
   client: ElasticsearchClientMock,
@@ -678,10 +687,11 @@ export const bulkUpdateSuccess = async (
   originId?: string,
   multiNamespaceSpace?: string // the space for multi namespace objects returned by mock mget (this is only needed for space ext testing)
 ) => {
-  // console.log(
-  //   'bulkUpdateSuccess: the objects for mocking bulkUpdateSuccess are:',
-  //   JSON.stringify(objects)
-  // );
+  console.log(
+    'bulkUpdateSuccess: the objects for mocking bulkUpdateSuccess are:',
+    JSON.stringify(objects)
+  );
+  console.log('do we have originId?', originId);
   let mockedMgetResponse;
   const validObjects = objects.filter(({ type }) => registry.getType(type) !== undefined);
   // console.log('bulkUpdateSuccess: the valid objects are:', JSON.stringify(validObjects));
@@ -689,6 +699,7 @@ export const bulkUpdateSuccess = async (
 
   if (validObjects?.length) {
     if (multiNamespaceObjects.length > 0) {
+      console.log('with multiNamespaceObjects');
       mockedMgetResponse = getMockMgetResponse(
         registry,
         validObjects,
@@ -698,10 +709,10 @@ export const bulkUpdateSuccess = async (
       // console.log('bulkUpdateSuccess: no multinamespace object types');
       mockedMgetResponse = getMockMgetResponse(registry, validObjects);
     }
-    // console.log(
-    //   'bulkUpdateSuccess: mocking mget response only once with:',
-    //   JSON.stringify(mockedMgetResponse)
-    // );
+    console.log(
+      'bulkUpdateSuccess: mocking mget response only once with:',
+      JSON.stringify(mockedMgetResponse)
+    );
     client.mget.mockResponseOnce(mockedMgetResponse);
   }
   const response = getMockBulkUpdateResponse(registry, objects, options, originId);
