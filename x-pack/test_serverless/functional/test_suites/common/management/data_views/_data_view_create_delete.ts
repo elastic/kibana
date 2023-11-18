@@ -19,6 +19,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['settings', 'common', 'header']);
 
   describe('creating and deleting default data view', function describeIndexTests() {
+    // failsOnMKI, see https://github.com/elastic/kibana/issues/171479
+    this.tags(['failsOnMKI']);
     before(async function () {
       // TODO: emptyKibanaIndex fails in Serverless with
       // "index_not_found_exception: no such index [.kibana_ingest]",
