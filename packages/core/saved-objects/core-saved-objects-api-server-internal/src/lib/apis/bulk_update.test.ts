@@ -521,7 +521,7 @@ describe('SavedObjectsRepository', () => {
       });
     });
 
-    describe.only('returns', () => {
+    describe('returns', () => {
       it(`formats the ES response`, async () => {
         const response = await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
         expect(response).toEqual({

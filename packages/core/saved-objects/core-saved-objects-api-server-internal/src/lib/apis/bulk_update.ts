@@ -394,9 +394,7 @@ export const performBulkUpdate = async <T>(
       const { [type]: attributes, references, updated_at } = documentToSave; // use the original request params ?? probably need to return the actual updated doc that exists in es now.
 
       const { originId } = rawMigratedUpdatedDoc._source;
-      console.log('in actual API, do we have an originId?', originId);
-      // @TINA TODO: ensure we return the correct response without changing the signature
-      const intermediateResult = {
+      return {
         id,
         type,
         ...(namespaces && { namespaces }),
@@ -406,8 +404,6 @@ export const performBulkUpdate = async <T>(
         attributes,
         references,
       };
-      console.log('In actual API, intermediateResult:', JSON.stringify(intermediateResult));
-      return intermediateResult;
     }),
   };
 
