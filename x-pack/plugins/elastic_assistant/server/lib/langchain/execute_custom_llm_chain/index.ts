@@ -10,6 +10,7 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool, Tool } from 'langchain/tools';
 
+import { LangChainTracer } from 'langchain/callbacks';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -19,6 +20,11 @@ import { APMTracer } from '../tracers/apm_tracer';
 
 export const DEFAULT_AGENT_EXECUTOR_ID = 'Elastic AI Assistant Agent Executor';
 
+/**
+ * The default agent executor used by the Elastic AI Assistant. Main agent/chain that wraps the ActionsClientLlm,
+ * sets up a conversation BufferMemory from chat history, and registers tools like the ESQLKnowledgeBaseTool.
+ *
+ */
 export const callAgentExecutor = async ({
   actions,
   connectorId,
@@ -80,25 +86,36 @@ export const callAgentExecutor = async ({
     verbose: false,
   });
 
-  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
-  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  /*
+   Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+   If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+
+   Custom LangChainTracer is only necessary to add the `exampleId` so Dataset 'Test' runs are written to LangSmith
+   If `exampleId` is present (and a corresponding example exists in LangSmith) trace is written to the Dataset's `Tests`
+   section, otherwise it is written to the `Project` provided
+  */
   const tracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  const lcTracer = new LangChainTracer({
+    projectName: traceOptions?.runName ?? 'default', // Shows as the 'test' run's 'name' in langsmith ui
+    exampleId: traceOptions?.exampleId,
+  });
   let traceData;
 
   // Wrap executor call with an APM span for instrumentation
   await withAssistantSpan(DEFAULT_AGENT_EXECUTOR_ID, async (span) => {
-    if (span?.ids['span.id'] != null && span?.ids['trace.id'] != null) {
+    if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
       traceData = {
         // Transactions ID since this span is the parent
-        transaction_id: span.ids['span.id'],
+        transaction_id: span.transaction.ids['transaction.id'],
         trace_id: span.ids['trace.id'],
       };
+      span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
 
     return executor.call(
       { input: latestMessage[0].content },
       {
-        callbacks: [tracer],
+        callbacks: [lcTracer, tracer],
         runName: DEFAULT_AGENT_EXECUTOR_ID,
         tags: traceOptions?.tags ?? [],
       }

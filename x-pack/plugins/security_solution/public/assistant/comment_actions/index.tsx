@@ -80,10 +80,19 @@ const CommentActionsComponent: React.FC<Props> = ({ message }) => {
 
   // Note: This feature is behind the `isModelEvaluationEnabled` FF. If ever released, this URL should be configurable
   // as APM data may not go to the same cluster where the Kibana instance is running
+  // Links to the experimental trace explorer page
+  // Note: There's a bug with URL params being rewritten, so must specify 'query' to filter on transaction id
+  // See: https://github.com/elastic/kibana/issues/171368
   const apmTraceLink =
     message.traceData != null
-      ? `${basePath}/app/apm/services/kibana/transactions/view?kuery=&rangeFrom=now-1y&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&transactionName=POST%20/internal/elastic_assistant/actions/connector/?/_execute&transactionType=request&offset=1d&latencyAggregationType=avg`
+      ? `${basePath}/app/apm/traces/explorer/waterfall?comparisonEnabled=false&detailTab=timeline&environment=ENVIRONMENT_ALL&kuery=&query=transaction.id:%20${message.traceData.transactionId}&rangeFrom=now-1y/d&rangeTo=now&showCriticalPath=false&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&type=kql&waterfallItemId=`
       : undefined;
+
+  // Use this link for routing to the services/transactions view which provides a slightly different view
+  // const apmTraceLink =
+  //     message.traceData != null
+  //         ? `${basePath}/app/apm/services/kibana/transactions/view?kuery=&rangeFrom=now-1y&rangeTo=now&environment=ENVIRONMENT_ALL&serviceGroup=&comparisonEnabled=true&traceId=${message.traceData.traceId}&transactionId=${message.traceData.transactionId}&transactionName=POST%20/internal/elastic_assistant/actions/connector/?/_execute&transactionType=request&offset=1d&latencyAggregationType=avg`
+  //         : undefined;
 
   return (
     // APM Trace support is currently behind the Model Evaluation feature flag until wider testing is performed

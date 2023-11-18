@@ -18,7 +18,10 @@ import { PostEvaluateBody, PostEvaluatePathQuery } from '../../schemas/evaluate/
 import { performEvaluation } from '../../lib/model_evaluator/evaluation';
 import { callAgentExecutor } from '../../lib/langchain/execute_custom_llm_chain';
 import { callOpenAIFunctionsExecutor } from '../../lib/langchain/executors/openai_functions_executor';
-import { AgentExecutor, AgentExecutorEvaluator } from '../../lib/langchain/executors/types';
+import {
+  AgentExecutor,
+  AgentExecutorEvaluatorWithMetadata,
+} from '../../lib/langchain/executors/types';
 import { ActionsClientLlm } from '../../lib/langchain/llm/actions_client_llm';
 import {
   indexEvaluations,
@@ -53,13 +56,18 @@ export const postEvaluateRoute = (
       const resp = buildResponse(response);
       const logger: Logger = (await context.elasticAssistant).logger;
 
-      const { evalModel, evaluationType, outputIndex, datasetName, projectName, runName } =
-        request.query;
+      const evaluationId = uuidv4();
+      const {
+        evalModel,
+        evaluationType,
+        outputIndex,
+        datasetName,
+        projectName = 'default',
+        runName = evaluationId,
+      } = request.query;
       const { dataset: customDataset = [], evalPrompt } = request.body;
       const connectorIds = request.query.models?.split(',') || [];
       const agentNames = request.query.agents?.split(',') || [];
-
-      const evaluationId = uuidv4();
 
       // Fetch dataset from langsmith
       const langsmithDataset = await fetchLangSmithDataset(datasetName, logger);
@@ -117,33 +125,43 @@ export const postEvaluateRoute = (
         // Create an array of executor functions to call in batches
         // One for each connector/model + agent combination
         // Hoist `langChainMessages` so they can be batched by dataset.input in the evaluator
-        const agents: AgentExecutorEvaluator[] = [];
+        const agents: AgentExecutorEvaluatorWithMetadata[] = [];
         connectorIds.forEach((connectorId) => {
           agentNames.forEach((agentName) => {
             logger.info(`Creating agent: ${connectorId} + ${agentName}`);
             const llmType = getLlmType(connectorId, connectors);
-            const connectorName = getConnectorName(connectorId, connectors);
-            agents.push((langChainMessages) =>
-              AGENT_EXECUTOR_MAP[agentName]({
-                actions,
-                connectorId,
-                esClient,
-                elserId,
-                langChainMessages,
-                llmType,
-                logger,
-                request: skeletonRequest,
-                kbResource: ESQL_RESOURCE,
-                traceOptions: {
-                  projectName: projectName ?? 'default',
-                  runName: runName ?? evaluationId,
-                  tags: [
-                    'security-assistant-prediction',
-                    ...(connectorName != null ? [connectorName] : []),
-                  ],
-                },
-              })
-            );
+            const connectorName =
+              getConnectorName(connectorId, connectors) ?? '[unknown connector]';
+            const detailedRunName = `${runName} - ${connectorName} + ${agentName}`;
+            agents.push({
+              agentEvaluator: (langChainMessages, exampleId) =>
+                AGENT_EXECUTOR_MAP[agentName]({
+                  actions,
+                  connectorId,
+                  esClient,
+                  elserId,
+                  langChainMessages,
+                  llmType,
+                  logger,
+                  request: skeletonRequest,
+                  kbResource: ESQL_RESOURCE,
+                  traceOptions: {
+                    exampleId,
+                    projectName,
+                    runName: detailedRunName,
+                    evaluationId,
+                    tags: [
+                      'security-assistant-prediction',
+                      ...(connectorName != null ? [connectorName] : []),
+                      runName,
+                    ],
+                  },
+                }),
+              metadata: {
+                connectorName,
+                runName: detailedRunName,
+              },
+            });
           });
         });
         logger.info(`Agents created: ${agents.length}`);
@@ -181,14 +199,14 @@ export const postEvaluateRoute = (
         });
 
         return response.ok({
-          body: { success: true },
+          body: { evaluationId, success: true },
         });
       } catch (err) {
         logger.error(err);
         const error = transformError(err);
 
         return resp.error({
-          body: error.message,
+          body: { success: false, error: error.message },
           statusCode: error.statusCode,
         });
       }

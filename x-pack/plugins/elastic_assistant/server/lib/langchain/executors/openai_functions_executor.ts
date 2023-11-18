@@ -10,6 +10,7 @@ import { RetrievalQAChain } from 'langchain/chains';
 import { BufferMemory, ChatMessageHistory } from 'langchain/memory';
 import { ChainTool, Tool } from 'langchain/tools';
 
+import { LangChainTracer } from 'langchain/callbacks';
 import { ElasticsearchStore } from '../elasticsearch_store/elasticsearch_store';
 import { ActionsClientLlm } from '../llm/actions_client_llm';
 import { KNOWLEDGE_BASE_INDEX_PATTERN } from '../../../routes/knowledge_base/constants';
@@ -30,11 +31,12 @@ export const callOpenAIFunctionsExecutor = async ({
   actions,
   connectorId,
   esClient,
-  elserId,
   langChainMessages,
   llmType,
   logger,
   request,
+  elserId,
+  kbResource,
   traceOptions,
 }: AgentExecutorParams): AgentExecutorResponse => {
   const llm = new ActionsClientLlm({ actions, connectorId, request, llmType, logger });
@@ -51,8 +53,23 @@ export const callOpenAIFunctionsExecutor = async ({
   });
 
   // ELSER backed ElasticsearchStore for Knowledge Base
-  const esStore = new ElasticsearchStore(esClient, KNOWLEDGE_BASE_INDEX_PATTERN, logger, elserId);
-  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever());
+  const esStore = new ElasticsearchStore(
+    esClient,
+    KNOWLEDGE_BASE_INDEX_PATTERN,
+    logger,
+    elserId,
+    kbResource
+  );
+
+  const modelExists = await esStore.isModelInstalled();
+  if (!modelExists) {
+    throw new Error(
+      'Please ensure ELSER is configured to use the Knowledge Base, otherwise disable the Knowledge Base in Advanced Settings to continue.'
+    );
+  }
+
+  // Create a chain that uses the ELSER backed ElasticsearchStore, override k=10 for esql query generation for now
+  const chain = RetrievalQAChain.fromLLM(llm, esStore.asRetriever(10));
 
   // TODO: Dependency inject these tools
   const tools: Tool[] = [
@@ -71,25 +88,36 @@ export const callOpenAIFunctionsExecutor = async ({
     verbose: false,
   });
 
-  // Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
-  // If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+  /*
+   Sets up tracer for tracing executions to APM. See x-pack/plugins/elastic_assistant/server/lib/langchain/tracers/README.mdx
+   If LangSmith env vars are set, executions will be traced there as well. See https://docs.smith.langchain.com/tracing
+
+   Custom LangChainTracer is only necessary to add the `exampleId` so Dataset 'Test' runs are written to LangSmith
+   If `exampleId` is present (and a corresponding example exists in LangSmith) trace is written to the Dataset's `Tests`
+   section, otherwise it is written to the `Project` provided
+  */
   const tracer = new APMTracer({ projectName: traceOptions?.projectName ?? 'default' }, logger);
+  const lcTracer = new LangChainTracer({
+    projectName: traceOptions?.runName ?? 'default', // Shows as the 'test' run's 'name' in langsmith ui
+    exampleId: traceOptions?.exampleId,
+  });
   let traceData;
 
   // Wrap executor call with an APM span for instrumentation
   await withAssistantSpan(OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID, async (span) => {
-    if (span?.ids['span.id'] != null && span?.ids['trace.id'] != null) {
+    if (span?.transaction?.ids['transaction.id'] != null && span?.ids['trace.id'] != null) {
       traceData = {
         // Transactions ID since this span is the parent
-        transaction_id: span.ids['span.id'],
+        transaction_id: span.transaction.ids['transaction.id'],
         trace_id: span.ids['trace.id'],
       };
+      span.addLabels({ evaluationId: traceOptions?.evaluationId });
     }
 
     return executor.call(
       { input: latestMessage[0].content },
       {
-        callbacks: [tracer],
+        callbacks: [lcTracer, tracer],
         runName: OPEN_AI_FUNCTIONS_AGENT_EXECUTOR_ID,
         tags: traceOptions?.tags ?? [],
       }

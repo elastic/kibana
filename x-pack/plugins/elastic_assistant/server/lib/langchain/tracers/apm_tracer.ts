@@ -41,13 +41,28 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
   protected async persistRun(_run: Run): Promise<void> {}
 
+  /**
+   * LangChain Run's contain a lot of useful information, so here we unpack as much of it as we can
+   * into labels that can be added to the corresponding span. Stringifying outputs at the moment since
+   * the Run schema is a loose KVMap, but we should more elegantly unpack relevant data that we find useful
+   *
+   * See BaseRun interface Run extends from
+   *
+   * @param run
+   * @protected
+   */
   protected _getLabelsFromRun(run: Run): agent.Labels {
-    return {
-      ...(run.tags?.reduce((acc, t) => ({ ...acc, [t]: t }), {}) ?? {}),
-      ...(run.outputs ?? {}),
-      ...(run.events?.reduce((acc, e) => ({ ...acc, ...e }), {}) ?? {}),
-      ...run.inputs,
-    };
+    try {
+      return {
+        tags: JSON.stringify(run.tags),
+        outputs: JSON.stringify(run.outputs),
+        events: JSON.stringify(run.events),
+        inputs: JSON.stringify(run.inputs),
+      };
+    } catch (e) {
+      this.logger.error(`Error parsing run into labels:\n${e}`);
+      return {};
+    }
   }
 
   protected createAndAddSpanFromRun(run: Run, spans: Span[]) {
@@ -66,7 +81,11 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
   async onRetrieverEnd(run: Run): Promise<void> {
     this.logger.debug(`onRetrieverEnd: run:\n${JSON.stringify(run, null, 2)}`);
-    this.retrieverSpans.pop()?.end();
+    const span = this.retrieverSpans.pop();
+    if (span != null) {
+      span.addLabels(this._getLabelsFromRun(run));
+      span.end();
+    }
   }
 
   async onRetrieverError(run: Run): Promise<void> {
@@ -80,7 +99,11 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
   async onLLMEnd(run: Run): Promise<void> {
     this.logger.debug(`onLLMEnd: run:\n${JSON.stringify(run, null, 2)}`);
-    this.llmSpans.pop()?.end();
+    const span = this.llmSpans.pop();
+    if (span != null) {
+      span.addLabels(this._getLabelsFromRun(run));
+      span.end();
+    }
   }
 
   async onLLMError(run: Run): Promise<void> {
@@ -94,7 +117,11 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
   async onChainEnd(run: Run): Promise<void> {
     this.logger.debug(`onChainEnd: run:\n${JSON.stringify(run, null, 2)}`);
-    this.chainSpans.pop()?.end();
+    const span = this.chainSpans.pop();
+    if (span != null) {
+      span.addLabels(this._getLabelsFromRun(run));
+      span.end();
+    }
   }
 
   async onChainError(run: Run): Promise<void> {
@@ -108,7 +135,11 @@ export class APMTracer extends BaseTracer implements LangChainTracerFields {
 
   async onToolEnd(run: Run): Promise<void> {
     this.logger.debug(`onToolEnd: run:\n${JSON.stringify(run, null, 2)}`);
-    this.toolSpans.pop()?.end();
+    const span = this.toolSpans.pop();
+    if (span != null) {
+      span.addLabels(this._getLabelsFromRun(run));
+      span.end();
+    }
   }
 
   async onToolError(run: Run): Promise<void> {

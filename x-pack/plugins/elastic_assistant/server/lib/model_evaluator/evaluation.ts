@@ -11,14 +11,15 @@ import { ChainValues, HumanMessage } from 'langchain/schema';
 import { chunk as createChunks } from 'lodash/fp';
 import { Logger } from '@kbn/core/server';
 import { ToolingLog } from '@kbn/tooling-log';
-import { asyncForEach } from '@kbn/std';
-import { AgentExecutorEvaluator } from '../langchain/executors/types';
+import { LangChainTracer, RunCollectorCallbackHandler } from 'langchain/callbacks';
+import { AgentExecutorEvaluatorWithMetadata } from '../langchain/executors/types';
 import { Dataset } from '../../schemas/evaluate/post_evaluate';
-import { callAgentWithRetry, getMessageFromLangChainResponse, wait } from './utils';
+import { callAgentWithRetry, getMessageFromLangChainResponse } from './utils';
 import { ResponseBody } from '../langchain/types';
+import { writeLangSmithFeedback } from '../../routes/evaluate/utils';
 
 export interface PerformEvaluationParams {
-  agentExecutorEvaluators: AgentExecutorEvaluator[];
+  agentExecutorEvaluators: AgentExecutorEvaluatorWithMetadata[];
   dataset: Dataset;
   evaluationId: string;
   evaluatorModel?: LLM;
@@ -31,12 +32,16 @@ export interface PerformEvaluationParams {
 
 export interface EvaluationResult {
   '@timestamp': string;
+  connectorName: string;
   evaluation: ChainValues;
   evaluationId: string;
   input: string;
+  inputExampleId?: string | undefined;
+  langSmithLink?: string | undefined;
   prediction: string;
   predictionResponse: PromiseSettledResult<ResponseBody>;
   reference: string;
+  runName: string;
 }
 
 export interface EvaluationSummary {
@@ -45,6 +50,8 @@ export interface EvaluationSummary {
   evaluationEnd: number;
   evaluationId: string;
   evaluationDuration: number;
+  langSmithLink?: string | undefined;
+  runName: string;
   totalAgents: number;
   totalRequests: number;
   totalInput: number;
@@ -64,17 +71,23 @@ export const performEvaluation = async ({
   evaluationType,
   maxConcurrency = 1,
   logger,
-  runName,
+  runName = 'default-run-name',
 }: PerformEvaluationParams) => {
   const startTime = new Date().getTime();
   const evaluationResults: EvaluationResult[] = [];
 
-  const predictionRequests = dataset.flatMap(({ input, reference }) =>
-    agentExecutorEvaluators.map((agent) => ({
-      input,
-      reference,
-      request: () => callAgentWithRetry({ agent, messages: [new HumanMessage(input)], logger }),
-    }))
+  const predictionRequests = dataset.flatMap(({ input, reference, id: exampleId }) =>
+    agentExecutorEvaluators.map(
+      ({ agentEvaluator: agent, metadata: { connectorName, runName: agentRunName } }) => ({
+        connectorName,
+        input,
+        reference,
+        exampleId,
+        request: () =>
+          callAgentWithRetry({ agent, exampleId, messages: [new HumanMessage(input)], logger }),
+        runName: agentRunName,
+      })
+    )
   );
 
   const requestChunks = createChunks(maxConcurrency, predictionRequests);
@@ -99,12 +112,15 @@ export const performEvaluation = async ({
     chunkResults.forEach((response, chunkResultIndex) =>
       evaluationResults.push({
         '@timestamp': new Date().toISOString(),
+        connectorName: chunk[chunkResultIndex].connectorName,
         input: chunk[chunkResultIndex].input,
+        inputExampleId: chunk[chunkResultIndex].exampleId,
         reference: chunk[chunkResultIndex].reference,
         evaluationId,
         evaluation: {},
         prediction: getMessageFromLangChainResponse(response),
         predictionResponse: response,
+        runName: chunk[chunkResultIndex].runName,
       })
     );
   }
@@ -120,12 +136,13 @@ export const performEvaluation = async ({
       evaluationStart: startTime,
       evaluationEnd: endTime,
       evaluationDuration: endTime - startTime,
+      runName,
       totalAgents: agentExecutorEvaluators.length,
       totalInput: dataset.length,
       totalRequests: predictionRequests.length,
     };
 
-    logger.info(`Final results:\n${JSON.stringify(evaluationResults, null, 2)}`);
+    logger.info(`Final results:\n${JSON.stringify(evaluationResults)}`);
 
     return { evaluationResults, evaluationSummary };
   }
@@ -140,25 +157,47 @@ export const performEvaluation = async ({
       criteria: 'correctness',
       llm: evaluatorModel,
     });
-    await asyncForEach(evaluationResults, async ({ input, prediction, reference }, index) => {
-      // TODO: Rate limit evaluator calls, though haven't seen any `429`'s yet in testing datasets up to 10 w/ azure/bedrock
+
+    for (const result of evaluationResults) {
+      const { input, inputExampleId: exampleId, prediction, reference } = result;
+      // Create an eval tracer so eval traces end up in the right project (runName in this instance as to correlate
+      // with the test run), don't supply `exampleID` as that results in a new Dataset `Test` run being created and
+      // polluting the `predictions` that ran above
+      const evalTracer = new LangChainTracer({
+        projectName: runName,
+      });
+      // Create RunCollector for uploading evals to LangSmith, no TS variant for `EvaluatorCallbackHandler` or
+      // `run_on_dataset` w/ eval config, so using `RunCollectorCallbackHandler` and then uploading manually via
+      // client.createFeedback()
+      // See: https://github.com/langchain-ai/langsmith-sdk/blob/18449e5848d85ac0a320f320c37f454f949de1e1/js/src/client.ts#L1249-L1256
+      const runCollector = new RunCollectorCallbackHandler({ exampleId });
       const evaluation = await evaluator.evaluateStrings(
         {
           input,
           prediction,
           reference,
         },
-        { tags: ['security-assistant-evaluation'] }
+        { callbacks: [evalTracer, runCollector], tags: ['security-assistant-evaluation'] }
       );
-      evaluationResults[index].evaluation = evaluation;
-      await wait(1000);
-    });
+      // Write to LangSmith
+      const langSmithLink = await writeLangSmithFeedback(
+        runCollector.tracedRuns[0],
+        evaluationId,
+        logger
+      );
+      result.evaluation = evaluation;
+      result.langSmithLink = langSmithLink;
+    }
   } else if (evaluationType === 'esql-validator') {
     logger.info('Evaluation type: esql-validator');
     // TODO: Implement esql-validator here
   } else if (evaluationType === 'custom') {
     logger.info('Evaluation type: custom');
     // TODO: Implement custom evaluation here
+    // const llm = new ChatOpenAI({ temperature: 0, tags: ["my-llm-tag"] });
+    // const prompt = PromptTemplate.fromTemplate("Say {input}");
+    // const chain = prompt.pipe(llm).withConfig( { tags: ["my-bash-tag", "another-tag"] });
+    // await chain.invoke({ input: "Hello, World!"}, { tags: ["shared-tags"] });
   }
 
   const endTime = new Date().getTime();
@@ -169,12 +208,13 @@ export const performEvaluation = async ({
     evaluationStart: startTime,
     evaluationEnd: endTime,
     evaluationDuration: endTime - startTime,
+    runName,
     totalAgents: agentExecutorEvaluators.length,
     totalInput: dataset.length,
     totalRequests: predictionRequests.length,
   };
 
-  logger.info(`Final results:\n${JSON.stringify(evaluationResults, null, 2)}`);
+  logger.info(`Final results:\n${JSON.stringify(evaluationResults)}`);
 
   return { evaluationResults, evaluationSummary };
 };

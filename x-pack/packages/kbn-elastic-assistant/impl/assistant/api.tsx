@@ -300,6 +300,7 @@ export interface PostEvaluationParams {
 }
 
 export interface PostEvaluationResponse {
+  evaluationId: string;
   success: boolean;
 }
 

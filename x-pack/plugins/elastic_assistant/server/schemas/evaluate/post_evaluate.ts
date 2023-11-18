@@ -37,6 +37,7 @@ export const PostEvaluatePathQuery = t.type({
 
 export type DatasetItem = t.TypeOf<typeof DatasetItem>;
 export const DatasetItem = t.type({
+  id: t.union([t.string, t.undefined]),
   input: t.string,
   reference: t.string,
   tags: t.union([t.array(t.string), t.undefined]),

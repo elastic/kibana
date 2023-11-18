@@ -33,6 +33,8 @@ import { useLoadConnectors } from '../../../connectorland/use_load_connectors';
 import { getActionTypeTitle, getGenAiConfig } from '../../../connectorland/helpers';
 import { PRECONFIGURED_CONNECTOR } from '../../../connectorland/translations';
 import { usePerformEvaluation } from './use_perform_evaluation';
+import { getApmLink, getDiscoverLink } from './utils';
+import { PostEvaluationResponse } from '../../api';
 
 /**
  * See AGENT_EXECUTOR_MAP in `x-pack/plugins/elastic_assistant/server/routes/evaluate/post_evaluate.ts`
@@ -44,6 +46,7 @@ const DEFAULT_EVAL_TYPES_OPTIONS = [
   { label: 'esql-validator', disabled: true },
   { label: 'custom', disabled: true },
 ];
+const DEFAULT_OUTPUT_INDEX = '.kibana-elastic-ai-assistant-evaluation-results';
 
 interface Props {
   onEvaluationSettingsChange?: () => void;
@@ -55,7 +58,11 @@ interface Props {
 export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSettingsChange }) => {
   const { actionTypeRegistry, basePath, http } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({ http });
-  const { mutate: performEvaluation, isLoading: isPerformingEvaluation } = usePerformEvaluation({
+  const {
+    data: evalResponse,
+    mutate: performEvaluation,
+    isLoading: isPerformingEvaluation,
+  } = usePerformEvaluation({
     http,
   });
 
@@ -77,7 +84,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     [setRunName]
   );
   // Local Output Index
-  const [outputIndex, setOutputIndex] = useState('.kibana-elastic-ai-assistant-evaluation-results');
+  const [outputIndex, setOutputIndex] = useState(DEFAULT_OUTPUT_INDEX);
   const onOutputIndexChange = useCallback(
     (e) => {
       setOutputIndex(e.target.value);
@@ -245,7 +252,7 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     outputIndex.length === 0;
 
   // Perform Evaluation Button
-  const handlePerformEvaluation = useCallback(() => {
+  const handlePerformEvaluation = useCallback(async () => {
     const evalParams = {
       models: selectedModelOptions.flatMap((option) => option.key ?? []),
       agents: selectedAgentOptions.map((option) => option.label),
@@ -274,7 +281,15 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
     useLangSmithDataset,
   ]);
 
-  const discoverLink = `${basePath}/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:now-7d%2Fd,to:now))&_a=(columns:!('@timestamp',evaluationId,totalAgents,totalInput,totalRequests,input,reference,prediction,evaluation.value,evaluation.reasoning,predictionResponse.value.connector_id),filters:!(),grid:(columns:('@timestamp':(width:212),evaluationId:(width:285),totalAgents:(width:111),totalInput:(width:98),totalRequests:(width:121))),index:'6d9ba861-a76b-4d31-90f4-dfb8f01b78bd',interval:auto,query:(esql:'from%20.kibana-elastic-ai-assistant-evaluation-results%20%0A%7C%20keep%20@timestamp,%20evaluationId,%20totalAgents,%20totalInput,%20totalRequests,%20input,%20reference,%20prediction,%20evaluation.value,%20evaluation.reasoning,%20predictionResponse.value.connector_id%0A%7C%20sort%20@timestamp%20desc%0A%7C%20limit%20100%0A%0A%0A'),sort:!(!('@timestamp',desc)))`;
+  const discoverLink = useMemo(
+    () => getDiscoverLink(basePath, (evalResponse as PostEvaluationResponse)?.evaluationId ?? ''),
+    [basePath, evalResponse]
+  );
+
+  const apmLink = useMemo(
+    () => getApmLink(basePath, (evalResponse as PostEvaluationResponse)?.evaluationId ?? ''),
+    [basePath, evalResponse]
+  );
 
   const getSection = (title: string, description: string) => (
     <div>
@@ -385,6 +400,9 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
             <EuiTextArea
               aria-label={'evaluation-dataset-textarea'}
               compressed
+              css={css`
+                min-height: 300px;
+              `}
               fullWidth
               onChange={onDatasetTextChange}
               value={datasetText}
@@ -494,6 +512,9 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
           <EuiTextArea
             aria-label={'evaluation-prompt-textarea'}
             compressed
+            css={css`
+              min-height: 330px;
+            `}
             disabled={selectedEvaluationType[0]?.label !== 'custom'}
             fullWidth
             onChange={onEvalPromptChange}
@@ -518,12 +539,17 @@ export const EvaluationSettings: React.FC<Props> = React.memo(({ onEvaluationSet
         <EuiFlexItem>
           <EuiText color={'subdued'} size={'xs'}>
             <FormattedMessage
-              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and {funFacts} to view the results in Discover once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
+              defaultMessage="Fun Facts: Watch the Kibana server logs for progress, and view results in {discover} / {apm} once complete. Will take (many) minutes depending on dataset, and closing this dialog will cancel the evaluation!"
               id="xpack.elasticAssistant.assistant.settings.evaluationSettings.evaluatorFunFactText"
               values={{
-                funFacts: (
+                discover: (
                   <EuiLink external href={discoverLink} target="_blank">
                     {i18n.EVALUATOR_FUN_FACT_DISCOVER_LINK}
+                  </EuiLink>
+                ),
+                apm: (
+                  <EuiLink external href={apmLink} target="_blank">
+                    {i18n.EVALUATOR_FUN_FACT_APM_LINK}
                   </EuiLink>
                 ),
               }}

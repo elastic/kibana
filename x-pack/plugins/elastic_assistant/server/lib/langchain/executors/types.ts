@@ -29,9 +29,22 @@ export type AgentExecutorResponse = Promise<ResponseBody>;
 
 export type AgentExecutor = (params: AgentExecutorParams) => AgentExecutorResponse;
 
-export type AgentExecutorEvaluator = (langChainMessages: BaseMessage[]) => AgentExecutorResponse;
+export type AgentExecutorEvaluator = (
+  langChainMessages: BaseMessage[],
+  exampleId?: string
+) => AgentExecutorResponse;
+
+export interface AgentExecutorEvaluatorWithMetadata {
+  agentEvaluator: AgentExecutorEvaluator;
+  metadata: {
+    connectorName: string;
+    runName: string;
+  };
+}
 
 export interface TraceOptions {
+  evaluationId?: string;
+  exampleId?: string;
   projectName?: string;
   runName?: string;
   tags?: string[];
