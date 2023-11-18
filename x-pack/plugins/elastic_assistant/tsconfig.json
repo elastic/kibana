@@ -29,7 +29,6 @@
     "@kbn/tooling-log",
     "@kbn/core-elasticsearch-server",
     "@kbn/logging",
-    "@kbn/std",
     "@kbn/stack-connectors-plugin",
     "@kbn/ml-plugin",
     "@kbn/apm-utils",
