@@ -25,7 +25,7 @@ export function createEditSloAlertsPanelAction(
   >['getStartServices']
 ): UiActionsActionDefinition<EditSloAlertsPanelContext> {
   return {
-    id: 'edit-slo-alerts',
+    id: EDIT_SLO_ALERTS_ACTION,
     type: EDIT_SLO_ALERTS_ACTION,
     getIconType(context): string {
       return 'pencil';

@@ -22,7 +22,6 @@ export async function resolveEmbeddableSloUserInput(
 ): Promise<EmbeddableSloProps> {
   const { overlays } = coreStart;
   const queryClient = new QueryClient();
-  console.log('!!here');
   return new Promise(async (resolve, reject) => {
     try {
       const modalSession = overlays.openModal(
@@ -42,7 +41,8 @@ export async function resolveEmbeddableSloUserInput(
                 }}
                 onCancel={() => {
                   modalSession.close();
-                  reject();
+                  // @ts-expect-error
+                  resolve(undefined);
                 }}
               />
             </QueryClientProvider>

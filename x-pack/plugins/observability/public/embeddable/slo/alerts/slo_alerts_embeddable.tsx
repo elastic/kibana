@@ -32,9 +32,12 @@ import { Router } from '@kbn/shared-ux-router';
 import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { SloAlertsEmbeddableInput } from './types';
 export const SLO_ALERTS_EMBEDDABLE = 'SLO_ALERTS_EMBEDDABLE';
+
 const history = createBrowserHistory();
 
 export interface SloEmbeddableDeps {
@@ -49,6 +52,7 @@ export interface SloEmbeddableDeps {
   settings: SettingsStart;
   security: SecurityPluginStart;
   charts: ChartsPluginStart;
+  uiActions: UiActionsStart;
 }
 
 export class SLOAlertsEmbeddable extends AbstractEmbeddable<
@@ -93,7 +97,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
         <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>
           <Router history={history}>
             <QueryClientProvider client={queryClient}>
-              <SloAlertsWrapper deps={deps} slos={slos} timeRange={timeRange} />
+              <SloAlertsWrapper embeddable={this} deps={deps} slos={slos} timeRange={timeRange} />
             </QueryClientProvider>
           </Router>
         </KibanaContextProvider>
