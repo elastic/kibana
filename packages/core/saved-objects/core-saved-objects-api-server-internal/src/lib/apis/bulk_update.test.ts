@@ -78,6 +78,17 @@ describe('SavedObjectsRepository', () => {
     return expect.toBeDocumentWithoutError(type, id);
   };
 
+  const expectMigrationArgs = (args: unknown, contains = true, n = 1) => {
+    const obj = contains ? expect.objectContaining(args) : expect.not.objectContaining(args);
+    expect(migrator.migrateDocument).toHaveBeenNthCalledWith(
+      n,
+      obj,
+      expect.objectContaining({
+        allowDowngrade: expect.any(Boolean),
+      })
+    );
+  };
+
   beforeEach(() => {
     pointInTimeFinderMock.mockClear();
     client = elasticsearchClientMock.createElasticsearchClient();
@@ -123,6 +134,8 @@ describe('SavedObjectsRepository', () => {
     const references = [{ name: 'ref_0', type: 'test', id: '1' }];
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
+
+    // Setup migration mock for updating an object
     const mockMigrationVersion = { foo: '2.3.4' };
     const mockMigrateDocumentForUpdate = (doc: SavedObjectUnsanitizedDoc<any>) => {
       const response = {
@@ -518,6 +531,52 @@ describe('SavedObjectsRepository', () => {
           error: { message: 'Oh no, a bulk error!' },
         };
         await bulkUpdateError(obj, true, expectedErrorResult);
+      });
+    });
+    describe('migration', () => {
+      it('migrates the fetched documents from Mget', async () => {
+        const modifiedObj2 = { ...obj2, coreMigrationVersion: '8.0.0' };
+        const objects = [modifiedObj2];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects);
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(2);
+        expectMigrationArgs({
+          id: modifiedObj2.id,
+          type: modifiedObj2.type,
+        });
+      });
+
+      it('migrates namespace agnostic and multinamespace object documents', async () => {
+        const modifiedObj2 = {
+          ...obj2,
+          coreMigrationVersion: '8.0.0',
+          type: MULTI_NAMESPACE_ISOLATED_TYPE,
+          namespace: 'default',
+        };
+        const modifiedObj1 = { ...obj1, type: NAMESPACE_AGNOSTIC_TYPE };
+        const objects = [modifiedObj2, modifiedObj1];
+        migrator.migrateDocument.mockImplementationOnce((doc) => ({ ...doc, migrated: true }));
+
+        await bulkUpdateSuccess(client, repository, registry, objects, { namespace });
+
+        expect(migrator.migrateDocument).toHaveBeenCalledTimes(4);
+        expectMigrationArgs(
+          {
+            id: modifiedObj2.id,
+            type: modifiedObj2.type,
+          },
+          true,
+          1
+        );
+        expectMigrationArgs(
+          {
+            id: modifiedObj1.id,
+            type: modifiedObj1.type,
+          },
+          true,
+          2
+        );
       });
     });
 
