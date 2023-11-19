@@ -45,7 +45,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       console.log(2);
       request = this.http.get<T>(url, { query, version });
     } else {
-      debugger
+      debugger;
       request = this.staleWhileRevalidateCache
         .fetch(url, { query, version, forceRefresh: cache === 'reload' })
         .then((resp) => resp.json());
