@@ -17,6 +17,8 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import { RunActionResponseSchema, StreamingResponseSchema } from '../../../common/openai/schema';
 import { initDashboard } from './create_dashboard';
+import { Transform } from 'stream';
+import { waitFor } from '@testing-library/react';
 jest.mock('./create_dashboard');
 
 describe('OpenAIConnector', () => {
@@ -31,6 +33,9 @@ describe('OpenAIConnector', () => {
         {
           message: {
             role: 'assistant',
+            content: mockResponseString,
+          },
+          delta: {
             content: mockResponseString,
           },
           finish_reason: 'stop',
@@ -265,6 +270,98 @@ describe('OpenAIConnector', () => {
         await expect(
           connector.streamApi({ body: JSON.stringify(sampleOpenAiBody), stream: true })
         ).rejects.toThrow('API Error');
+      });
+    });
+
+    describe('invokeStream', () => {
+      const mockStream = (
+        dataToStream: string[] = [
+          'data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}',
+        ]
+      ) => {
+        const streamMock = createStreamMock();
+        dataToStream.forEach((chunk) => {
+          streamMock.write(chunk);
+        });
+        streamMock.complete();
+        mockRequest = jest.fn().mockResolvedValue({ ...mockResponse, data: streamMock.transform });
+        return mockRequest;
+      };
+      beforeEach(() => {
+        // @ts-ignore
+        connector.request = mockStream();
+      });
+
+      it('the API call is successful with correct request parameters', async () => {
+        await connector.invokeStream(sampleOpenAiBody);
+        expect(mockRequest).toBeCalledTimes(1);
+        expect(mockRequest).toHaveBeenCalledWith({
+          url: 'https://api.openai.com/v1/chat/completions',
+          method: 'post',
+          responseSchema: StreamingResponseSchema,
+          responseType: 'stream',
+          data: JSON.stringify({ ...sampleOpenAiBody, stream: true, model: DEFAULT_OPENAI_MODEL }),
+          headers: {
+            Authorization: 'Bearer 123',
+            'content-type': 'application/json',
+          },
+        });
+      });
+
+      it('errors during API calls are properly handled', async () => {
+        // @ts-ignore
+        connector.request = mockError;
+
+        await expect(connector.invokeStream(sampleOpenAiBody)).rejects.toThrow('API Error');
+      });
+
+      it('transforms the response into a string', async () => {
+        // @ts-ignore
+        connector.request = mockStream();
+        const response = await connector.invokeStream(sampleOpenAiBody);
+
+        let responseBody: string = '';
+        response.on('data', (data: string) => {
+          responseBody += data.toString();
+        });
+        await waitFor(() => {
+          expect(responseBody).toEqual('My new');
+        });
+      });
+      it('correctly buffers stream of json lines', async () => {
+        const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"}}]}`;
+        const chunk2 = `\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
+
+        // @ts-ignore
+        connector.request = mockStream([chunk1, chunk2]);
+
+        const response = await connector.invokeStream(sampleOpenAiBody);
+
+        let responseBody: string = '';
+        response.on('data', (data: string) => {
+          responseBody += data.toString();
+        });
+        await waitFor(() => {
+          expect(responseBody).toEqual('My new message');
+        });
+      });
+      it('correctly buffers partial lines', async () => {
+        const chunk1 = `data: {"object":"chat.completion.chunk","choices":[{"delta":{"content":"My"}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" new"`;
+
+        const chunk2 = `}}]}\ndata: {"object":"chat.completion.chunk","choices":[{"delta":{"content":" message"}}]}\ndata: [DONE]`;
+
+        // @ts-ignore
+        connector.request = mockStream([chunk1, chunk2]);
+
+        const response = await connector.invokeStream(sampleOpenAiBody);
+
+        let responseBody: string = '';
+        response.on('data', (data: string) => {
+          responseBody += data.toString();
+        });
+        await waitFor(() => {
+          expect(responseBody).toEqual('My new message');
+        });
       });
     });
 
@@ -598,3 +695,21 @@ describe('OpenAIConnector', () => {
     });
   });
 });
+
+function createStreamMock() {
+  const transform: Transform = new Transform({});
+
+  return {
+    write: (data: string) => {
+      transform.push(data);
+    },
+    fail: () => {
+      transform.emit('error', new Error('Stream failed'));
+      transform.end();
+    },
+    transform,
+    complete: () => {
+      transform.end();
+    },
+  };
+}
