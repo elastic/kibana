@@ -6,6 +6,8 @@
  * Side Public License, v 1.
  */
 
-export { runBuildApiDocsCli } from './src';
-
-export { findPlugins, findTeamPlugins } from './src/find_plugins';
+module.exports = {
+  preset: '@kbn/test/jest_node',
+  rootDir: '../..',
+  roots: ['<rootDir>/packages/kbn-plugin-check'],
+};

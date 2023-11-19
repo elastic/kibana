@@ -6,6 +6,11 @@
  * Side Public License, v 1.
  */
 
-export { runBuildApiDocsCli } from './src';
+import { findPlugins } from '@kbn/docs-utils';
+import { ToolingLog } from '@kbn/tooling-log';
 
-export { findPlugins, findTeamPlugins } from './src/find_plugins';
+export const getPlugin = (pluginName: string, log: ToolingLog) => {
+  const plugin = findPlugins([pluginName])[0];
+  log.debug('Found plugin:', pluginName);
+  return plugin;
+};
