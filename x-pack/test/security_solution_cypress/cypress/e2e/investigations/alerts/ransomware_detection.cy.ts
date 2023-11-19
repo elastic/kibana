@@ -48,7 +48,7 @@ describe('Ransomware Detection Alerts', { tags: ['@ess', '@serverless'] }, () =>
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/168602
+  // FLAKY: https://github.com/elastic/kibana/issues/170846
   describe.skip('Ransomware in Timelines', () => {
     before(() => {
       login();

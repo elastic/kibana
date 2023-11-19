@@ -45,6 +45,7 @@ export const checkOsqueryResponseActionsPermissions = (enabled: boolean) => {
     cy.getBySel('globalLoadingIndicator').should('not.exist');
     closeDateTabIfVisible();
     cy.getBySel('edit-rule-actions-tab').click();
+    cy.getBySel('globalLoadingIndicator').should('not.exist');
     cy.contains('Response actions are run on each rule execution.');
     cy.getBySel(OSQUERY_RESPONSE_ACTION_ADD_BUTTON).click();
     if (enabled) {

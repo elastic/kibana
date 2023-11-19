@@ -15,25 +15,33 @@ import type { RuleParams } from '../../../../../../application/rule/types';
 const transformCreateBodyActions = (actions: CreateRuleActionV1[]): CreateRuleData['actions'] => {
   if (!actions) return [];
 
-  return actions.map(({ frequency, alerts_filter: alertsFilter, ...action }) => {
-    return {
-      group: action.group,
-      id: action.id,
-      params: action.params,
-      actionTypeId: action.actionTypeId,
-      ...(action.uuid ? { uuid: action.uuid } : {}),
-      ...(frequency
-        ? {
-            frequency: {
-              summary: frequency.summary,
-              throttle: frequency.throttle,
-              notifyWhen: frequency.notify_when,
-            },
-          }
-        : {}),
-      ...(alertsFilter ? { alertsFilter } : {}),
-    };
-  });
+  return actions.map(
+    ({
+      frequency,
+      alerts_filter: alertsFilter,
+      use_alert_data_for_template: useAlertDataForTemplate,
+      ...action
+    }) => {
+      return {
+        group: action.group,
+        id: action.id,
+        params: action.params,
+        actionTypeId: action.actionTypeId,
+        useAlertDataForTemplate,
+        ...(action.uuid ? { uuid: action.uuid } : {}),
+        ...(frequency
+          ? {
+              frequency: {
+                summary: frequency.summary,
+                throttle: frequency.throttle,
+                notifyWhen: frequency.notify_when,
+              },
+            }
+          : {}),
+        ...(alertsFilter ? { alertsFilter } : {}),
+      };
+    }
+  );
 };
 
 export const transformCreateBody = <Params extends RuleParams = never>(

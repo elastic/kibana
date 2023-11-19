@@ -48,19 +48,19 @@ export const LogRateAnalysisPage: FC = () => {
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
             'application',
+            'charts',
             'data',
             'executionContext',
-            'charts',
             'fieldFormats',
             'http',
+            'i18n',
+            'lens',
             'notifications',
             'share',
             'storage',
+            'theme',
             'uiSettings',
             'unifiedSearch',
-            'theme',
-            'lens',
-            'i18n',
           ])}
         />
       )}
