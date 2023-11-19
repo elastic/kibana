@@ -104,7 +104,9 @@ export class DataViewsPublicPlugin
       cacheMaxSizeBytes: SWR_CACHE_MAX_SIZE_BYTES,
       cachePruneIntervalMs: SWR_CACHE_PRUNE_INTERVAL_MS,
       getIdentityHash: createGetIdentityHash(core),
+      // eslint-disable-next-line no-console
       onOpenCacheError: console.error,
+      // eslint-disable-next-line no-console
       onPruneError: console.error,
     });
 

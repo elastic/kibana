@@ -39,13 +39,10 @@ export class DataViewsApiClient implements IDataViewsApiClient {
     let request: Promise<T>;
 
     if (body) {
-      console.log(1);
       request = this.http.post<T>(url, { query, body, version });
     } else if (cache === 'no-store') {
-      console.log(2);
       request = this.http.get<T>(url, { query, version });
     } else {
-      debugger
       request = this.staleWhileRevalidateCache
         .fetch(url, { query, version, forceRefresh: cache === 'reload' })
         .then((resp) => resp.json());
