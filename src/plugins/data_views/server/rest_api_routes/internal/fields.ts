@@ -96,7 +96,7 @@ const handler: (
       const ifNoneMatch = request.headers['if-none-match'];
       const ifNoneMatchString = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
 
-      if (ifNoneMatchString) {
+      if (ifNoneMatchString && cacheMaxAge > 0) {
         const requestHash = unwrapEtag(ifNoneMatchString);
         if (etag === requestHash) {
           return response.notModified({ headers });
