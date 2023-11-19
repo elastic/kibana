@@ -21,6 +21,6 @@ export const SUBMIT_BTN = '[data-test-subj="create-case-submit"]';
 
 export const TAGS_INPUT = '[data-test-subj="caseTags"] [data-test-subj="comboBoxSearchInput"]';
 
-export const TIMELINE = '[data-test-subj="timeline"]';
+export const TIMELINE = '[data-test-subj="selectable-input"] [data-test-subj="timeline"]';
 
 export const TITLE_INPUT = '[data-test-subj="caseTitle"] [data-test-subj="input"]';
