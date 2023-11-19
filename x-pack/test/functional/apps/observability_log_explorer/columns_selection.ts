@@ -6,14 +6,14 @@
  */
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from './config';
 
 const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const retry = getService('retry');
-  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer', 'settings']);
+  const PageObjects = getPageObjects(['discover', 'observabilityLogExplorer']);
 
   describe('Columns selection initialization and update', () => {
     before(async () => {
@@ -30,8 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('when the log explorer loads', () => {
       it("should initialize the table columns to logs' default selection", async () => {
-        // did this work?
-        PageObjects.settings.refreshDataViewFieldList('All logs');
         await PageObjects.observabilityLogExplorer.navigateTo();
 
         await retry.try(async () => {

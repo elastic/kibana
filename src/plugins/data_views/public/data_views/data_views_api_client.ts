@@ -15,35 +15,51 @@ import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
 
+async function sha1(str: string) {
+  const enc = new TextEncoder();
+  const hash = await crypto.subtle.digest('SHA-1', enc.encode(str));
+  return Array.from(new Uint8Array(hash))
+    .map((v) => v.toString(16).padStart(2, '0'))
+    .join('');
+}
+
 /**
  * Data Views API Client - client implementation
  */
 export class DataViewsApiClient implements IDataViewsApiClient {
   private http: HttpSetup;
+  private getCurrentUserId: () => Promise<string | undefined>;
 
   /**
    * constructor
    * @param http http dependency
    */
-  constructor(http: HttpSetup) {
+  constructor(http: HttpSetup, getCurrentUserId: () => Promise<string | undefined>) {
     this.http = http;
+    this.getCurrentUserId = getCurrentUserId;
   }
 
-  private _request<T = unknown>(
+  private async _request<T = unknown>(
     url: string,
     query?: {},
     body?: string,
     forceRefresh?: boolean
   ): Promise<HttpResponse<T> | undefined> {
     const asResponse = true;
-    // circle back to this, will likely need changes to any code that loads fields
-    // const rawResponse = true;
-    const rawResponse = false;
     const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
+    const userId = await this.getCurrentUserId();
+
+    const userHash = userId ? await sha1(userId) : '';
 
     const request = body
       ? this.http.post<T>(url, { query, body, version, asResponse })
-      : this.http.fetch<T>(url, { query, version, ...cacheOptions, asResponse, rawResponse });
+      : this.http.fetch<T>(url, {
+          query,
+          version,
+          ...cacheOptions,
+          asResponse,
+          headers: { 'user-hash': userHash },
+        });
 
     return request.catch((resp) => {
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
@@ -73,6 +89,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       includeUnmapped,
       fields,
       forceRefresh,
+      allowHidden,
     } = options;
     const path = indexFilter ? FIELDS_FOR_WILDCARD_PATH : FIELDS_PATH;
 
@@ -86,6 +103,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         allow_no_index: allowNoIndex,
         include_unmapped: includeUnmapped,
         fields,
+        allow_hidden: allowHidden,
       },
       indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
       forceRefresh
@@ -106,8 +124,6 @@ export class DataViewsApiClient implements IDataViewsApiClient {
       this._getUrl(['has_user_index_pattern'])
     );
 
-    // const body = await response?.response?.json();
-    // return body?.result ?? false;
     return response?.body?.result ?? false;
   }
 }

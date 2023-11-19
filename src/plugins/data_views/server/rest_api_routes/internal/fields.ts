@@ -7,10 +7,8 @@
  */
 
 import { createHash } from 'crypto';
-import { estypes } from '@elastic/elasticsearch';
-import { schema } from '@kbn/config-schema';
-import { IRouter, RequestHandler, StartServicesAccessor } from '@kbn/core/server';
-// import { FullValidationConfig } from '@kbn/core-http-server';
+import { IRouter, RequestHandler, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
+import { unwrapEtag } from '../../../common/utils';
 import { IndexPatternsFetcher } from '../../fetcher';
 import type {
   DataViewsServerPluginStart,
@@ -18,107 +16,19 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
+import { parseFields, IBody, IQuery, querySchema } from './fields_for';
 
-/**
- * Accepts one of the following:
- * 1. An array of field names
- * 2. A JSON-stringified array of field names
- * 3. A single field name (not comma-separated)
- * @returns an array of field names
- * @param fields
- */
-export const parseFields = (fields: string | string[]): string[] => {
-  if (Array.isArray(fields)) return fields;
-  try {
-    return JSON.parse(fields);
-  } catch (e) {
-    if (!fields.includes(',')) return [fields];
-    throw new Error(
-      'metaFields should be an array of field names, a JSON-stringified array of field names, or a single field name'
-    );
-  }
-};
-
-type IBody = { index_filter?: estypes.QueryDslQueryContainer } | undefined;
-interface IQuery {
-  pattern: string;
-  meta_fields: string | string[];
-  type?: string;
-  rollup_index?: string;
-  allow_no_index?: boolean;
-  include_unmapped?: boolean;
-  fields?: string[];
-}
-
-const querySchema = schema.object({
-  pattern: schema.string(),
-  meta_fields: schema.oneOf([schema.string(), schema.arrayOf(schema.string())], {
-    defaultValue: [],
-  }),
-  type: schema.maybe(schema.string()),
-  rollup_index: schema.maybe(schema.string()),
-  allow_no_index: schema.maybe(schema.boolean()),
-  include_unmapped: schema.maybe(schema.boolean()),
-  fields: schema.maybe(schema.oneOf([schema.string(), schema.arrayOf(schema.string())])),
-});
-
-/**
-const fieldSubTypeSchema = schema.object({
-  multi: schema.maybe(schema.object({ parent: schema.string() })),
-  nested: schema.maybe(schema.object({ path: schema.string() })),
-});
-
-/*
-const FieldDescriptorSchema = schema.object({
-  aggregatable: schema.boolean(),
-  name: schema.string(),
-  readFromDocValues: schema.boolean(),
-  searchable: schema.boolean(),
-  type: schema.string(),
-  esTypes: schema.maybe(schema.arrayOf(schema.string())),
-  subType: fieldSubTypeSchema,
-  metadata_field: schema.maybe(schema.boolean()),
-  fixedInterval: schema.maybe(schema.arrayOf(schema.string())),
-  timeZone: schema.maybe(schema.arrayOf(schema.string())),
-  timeSeriesMetric: schema.maybe(
-    schema.oneOf([
-      schema.literal('histogram'),
-      schema.literal('summary'),
-      schema.literal('counter'),
-      schema.literal('gauge'),
-      schema.literal('position'),
-    ])
-  ),
-  timeSeriesDimension: schema.maybe(schema.boolean()),
-  conflictDescriptions: schema.maybe(
-    schema.recordOf(schema.string(), schema.arrayOf(schema.string()))
-  ),
-});
-
-/*
-const validate: FullValidationConfig<any, any, any> = {
-  request: {
-    query: querySchema,
-  },
-  response: {
-    200: {
-      body: schema.object({
-        fields: schema.arrayOf(FieldDescriptorSchema),
-        indices: schema.arrayOf(schema.string()),
-      }),
-    },
-  },
-};
-*/
-
-function calculateHash(srcBuffer: Buffer) {
+export function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1');
   hash.update(srcBuffer);
   return hash.digest('hex');
 }
 
-const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, IBody> =
-  (isRollupsEnabled) => async (context, request, response) => {
+const handler: (
+  isRollupsEnabled: () => boolean,
+  getUserId: () => (kibanaRequest: KibanaRequest) => Promise<string | undefined>
+) => RequestHandler<{}, IQuery, IBody> =
+  (isRollupsEnabled, getUserIdGetter) => async (context, request, response) => {
     const core = await context.core;
     const uiSettings = core.uiSettings.client;
     const { asCurrentUser } = core.elasticsearch.client;
@@ -144,7 +54,6 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
     try {
       const { fields, indices } = await indexPatterns.getFieldsForWildcard({
         pattern,
-        // todo should these be added elsewhere?
         metaFields: parsedMetaFields,
         type,
         rollupIndex,
@@ -162,32 +71,33 @@ const handler: (isRollupsEnabled: () => boolean) => RequestHandler<{}, IQuery, I
 
       const etag = calculateHash(Buffer.from(JSON.stringify(body)));
 
-      // todo are these needed?
+      const getUserId = getUserIdGetter();
+      const userId = await getUserId(request);
+      const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
+
       const headers: Record<string, string> = {
         'content-type': 'application/json',
-        // 'If-None-Match': '123456',
         etag,
-        // Expires
+        vary: 'accept-encoding, user-hash',
+        'user-hash': userHash,
       };
 
-      // todo consider running in parallel with the request
       const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
 
-      if (cacheMaxAge) {
+      if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
         headers[
           'cache-control'
         ] = `private, max-age=${cacheMaxAge}, stale-while-revalidate=${stale}`;
+      } else {
+        headers['cache-control'] = 'private, no-cache';
       }
 
-      // move to util
       const ifNoneMatch = request.headers['if-none-match'];
-      if (ifNoneMatch) {
-        let requestHash = (ifNoneMatch as string).slice(1, -1);
-        if (requestHash.indexOf('-') > -1) {
-          requestHash = requestHash.split('-')[0];
-        }
+      const ifNoneMatchString = Array.isArray(ifNoneMatch) ? ifNoneMatch[0] : ifNoneMatch;
 
+      if (ifNoneMatchString) {
+        const requestHash = unwrapEtag(ifNoneMatchString);
         if (etag === requestHash) {
           return response.notModified({ headers });
         }
@@ -223,16 +133,8 @@ export const registerFields = async (
     DataViewsServerPluginStartDependencies,
     DataViewsServerPluginStart
   >,
-  isRollupsEnabled: () => boolean
+  isRollupsEnabled: () => boolean,
+  getUserId: () => (request: KibanaRequest) => Promise<string | undefined>
 ) => {
-  // handler
-  /* This seems to fail due to lack of custom headers on cache requests
-  router.versioned
-    .get({ path, access })
-    .addVersion(
-      { version, validate: { request: { query: querySchema }, response: validate.response } },
-      handler(isRollupsEnabled)
-    );
-    */
-  router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled));
+  router.get({ path, validate: { query: querySchema } }, handler(isRollupsEnabled, getUserId));
 };

@@ -286,7 +286,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    //
     describe('renders field groups', function () {
       it('should show field list groups excluding subfields', async function () {
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -477,7 +476,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
       });
 
-      //
       it('should work correctly for a data view for a missing index', async function () {
         // but we are skipping importing the index itself
         await kibanaServer.importExport.load(
@@ -495,8 +493,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 10000 * 60));
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '0 available fields. 0 empty fields. 0 meta fields.'
         );
@@ -531,10 +527,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         );
 
         await browser.refresh();
-        // here
-        await PageObjects.settings.refreshDataViewFieldList('with-timefield');
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.waitUntilSearchingHasFinished();
+        await PageObjects.discover.refreshFieldList();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
@@ -555,12 +548,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 1000 * 300));
-        // todo - comapre to main. This looks correct in this branch
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '0 available fields. 7 empty fields. 3 meta fields.'
-          // '0 available fields. 13 empty fields. 0 empty fields. 3 meta fields.'
         );
         await testSubjects.existOrFail(
           `${PageObjects.unifiedFieldList.getSidebarSectionSelector(
@@ -584,8 +573,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await esArchiver.unload(
           'test/functional/fixtures/es_archiver/index_pattern_without_timefield'
         );
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 1000 * 30));
       });
 
       it('should work when filters change', async () => {
@@ -712,8 +699,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should render even when retrieving documents failed with an error', async () => {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
-        await testSubjects.missingOrFail('discoverNoResultsError');
-
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           INITIAL_FIELD_LIST_SUMMARY
         );
@@ -723,7 +708,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
 
         // error in fetching documents because of the invalid runtime field
-        await testSubjects.existOrFail('discoverNoResultsError');
+        await PageObjects.discover.showsErrorCallout();
 
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
@@ -736,7 +721,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
         await browser.refresh();
         await PageObjects.header.waitUntilLoadingHasFinished();
-        await testSubjects.existOrFail('discoverNoResultsError'); // still has error
+        await PageObjects.discover.showsErrorCallout(); // still has error
 
         // check that the sidebar is rendered event after a refresh
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
@@ -746,8 +731,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.discover.removeField('_invalid-runtimefield');
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
-
-        await testSubjects.missingOrFail('discoverNoResultsError');
       });
 
       it('should work correctly when time range is updated', async function () {
@@ -770,8 +753,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.header.waitUntilLoadingHasFinished();
         await PageObjects.unifiedFieldList.waitUntilSidebarHasLoaded();
 
-        // console.log('######################## await timeout');
-        // await new Promise((r) => setTimeout(r, 1000 * 30));
         expect(await PageObjects.unifiedFieldList.getSidebarAriaDescription()).to.be(
           '0 available fields. 7 empty fields. 3 meta fields.'
         );

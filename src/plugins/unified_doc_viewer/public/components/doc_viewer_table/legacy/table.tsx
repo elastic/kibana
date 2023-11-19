@@ -25,6 +25,7 @@ export const DocViewerLegacyTable = ({
   columns,
   hit,
   dataView,
+  hideActionsColumn,
   filter,
   onAddColumn,
   onRemoveColumn,
@@ -34,8 +35,8 @@ export const DocViewerLegacyTable = ({
 
   const mapping = useCallback((name: string) => dataView.fields.getByName(name), [dataView.fields]);
   const tableColumns = useMemo(() => {
-    return filter ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
-  }, [filter]);
+    return !hideActionsColumn ? [ACTIONS_COLUMN, ...MAIN_COLUMNS] : MAIN_COLUMNS;
+  }, [hideActionsColumn]);
   const onToggleColumn = useCallback(
     (field: string) => {
       if (!onRemoveColumn || !onAddColumn || !columns) {

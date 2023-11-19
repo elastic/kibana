@@ -143,3 +143,5 @@ export type {
   VersionedRouteRegistrar,
   VersionedRouter,
 } from './src/versioning';
+
+export type { IStaticAssets } from './src/static_assets';

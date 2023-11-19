@@ -25,15 +25,5 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./perform_bulk_action'));
     loadTestFile(require.resolve('./perform_bulk_action_dry_run'));
     loadTestFile(require.resolve('./patch_rules'));
-    loadTestFile(require.resolve('./read_privileges'));
-    loadTestFile(require.resolve('./timestamps'));
-    loadTestFile(require.resolve('./runtime'));
-    loadTestFile(require.resolve('./throttle'));
-    loadTestFile(require.resolve('./ignore_fields'));
-    loadTestFile(require.resolve('./risk_engine/init_and_status_apis'));
-    loadTestFile(require.resolve('./risk_engine/risk_score_preview'));
-    loadTestFile(require.resolve('./risk_engine/risk_score_calculation'));
-    loadTestFile(require.resolve('./risk_engine/risk_scoring_task_execution'));
-    loadTestFile(require.resolve('./risk_engine/telemetry_usage'));
   });
 };

@@ -117,6 +117,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       exceptionItems,
       exceptionItemMeta: { name: exceptionItemName },
       newComment,
+      commentErrorExists,
       bulkCloseAlerts,
       disableBulkClose,
       bulkCloseIndex,
@@ -129,6 +130,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
     exceptionItems: [itemToEdit],
     exceptionItemMeta: { name: itemToEdit.name },
     newComment: '',
+    commentErrorExists: false,
     bulkCloseAlerts: false,
     disableBulkClose: true,
     bulkCloseIndex: undefined,
@@ -192,6 +194,16 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       dispatch({
         type: 'setComment',
         comment,
+      });
+    },
+    [dispatch]
+  );
+
+  const setCommentError = useCallback(
+    (errorExists: boolean): void => {
+      dispatch({
+        type: 'setCommentError',
+        errorExists,
       });
     },
     [dispatch]
@@ -337,8 +349,17 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
       exceptionItems.every((item) => item.entries.length === 0) ||
       isLoading ||
       entryErrorExists ||
+      expireErrorExists ||
+      commentErrorExists,
+    [
+      isLoading,
+      entryErrorExists,
+      exceptionItems,
+      isSubmitting,
+      isClosingAlerts,
       expireErrorExists,
-    [isLoading, entryErrorExists, exceptionItems, isSubmitting, isClosingAlerts, expireErrorExists]
+      commentErrorExists,
+    ]
   );
 
   return (
@@ -398,6 +419,7 @@ const EditExceptionFlyoutComponent: React.FC<EditExceptionFlyoutProps> = ({
           exceptionItemComments={itemToEdit.comments}
           newCommentValue={newComment}
           newCommentOnChange={setComment}
+          setCommentError={setCommentError}
         />
         {listType !== ExceptionListTypeEnum.ENDPOINT && (
           <>
