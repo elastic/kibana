@@ -33,6 +33,9 @@
     "@kbn/object-versioning",
     "@kbn/core-saved-objects-server",
     "@kbn/logging",
+    "@kbn/core-http-browser",
+    "@kbn/core-http-common",
+    "@kbn/security-plugin",
   ],
   "exclude": [
     "target/**/*",
