@@ -6,11 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import type { AuthenticationServiceStart, SecurityPluginStart } from '@kbn/security-plugin/public';
+import hash from 'object-hash';
 import { getIndexPatternLoad } from './expressions';
 import type { ClientConfigType } from '../common/types';
-import {
+import type {
   DataViewsPublicPluginSetup,
   DataViewsPublicPluginStart,
   DataViewsPublicSetupDependencies,
@@ -30,6 +32,13 @@ import { debounceByKey } from './debounce_by_key';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common/constants';
 import { LATEST_VERSION } from '../common/content_management/v1/constants';
+import { StaleWhileRevalidateCache } from './data_views/stale_while_revalidate_cache';
+
+const SWR_CACHE_NAME = 'data-views';
+const SWR_CACHE_ENTRY_FRESH_TIME_MS = 1000 * 60 * 5; // 5 minutes
+const SWR_CACHE_MAX_AGE_MS = 1000 * 60 * 60 * 24 * 30; // 30 days
+const SWR_CACHE_MAX_SIZE_BYTES = 500 * 1024 * 1024; // 500 MB
+const SWR_CACHE_PRUNE_INTERVAL_MS = 1000 * 60 * 60; // 1 hour
 
 export class DataViewsPublicPlugin
   implements
@@ -43,6 +52,7 @@ export class DataViewsPublicPlugin
   private readonly hasData = new HasData();
   private rollupsEnabled: boolean = false;
   private userIdGetter: UserIdGetter = async () => undefined;
+  private stopSwrCachePruning?: () => void;
 
   constructor(private readonly initializerContext: PluginInitializerContext) {}
 
@@ -86,12 +96,25 @@ export class DataViewsPublicPlugin
     );
 
     const config = this.initializerContext.config.get<ClientConfigType>();
+    const staleWhileRevalidateCache = new StaleWhileRevalidateCache({
+      http,
+      cacheName: SWR_CACHE_NAME,
+      cacheEntryFreshTimeMs: SWR_CACHE_ENTRY_FRESH_TIME_MS,
+      cacheEntryMaxAgeMs: SWR_CACHE_MAX_AGE_MS,
+      cacheMaxSizeBytes: SWR_CACHE_MAX_SIZE_BYTES,
+      cachePruneIntervalMs: SWR_CACHE_PRUNE_INTERVAL_MS,
+      getIdentityHash: createGetIdentityHash(core),
+      onOpenCacheError: console.error,
+      onPruneError: console.error,
+    });
+
+    this.stopSwrCachePruning = staleWhileRevalidateCache.startPruning();
 
     return new DataViewsServicePublic({
       hasData: this.hasData.start(core),
       uiSettings: new UiSettingsPublicToCommon(uiSettings),
       savedObjectsClient: new ContentMagementWrapper(contentManagement.client),
-      apiClient: new DataViewsApiClient(http, this.userIdGetter),
+      apiClient: new DataViewsApiClient(http, staleWhileRevalidateCache),
       fieldFormats,
       http,
       onNotification: (toastInputFields, key) => {
@@ -110,5 +133,37 @@ export class DataViewsPublicPlugin
     });
   }
 
-  public stop() {}
+  public stop() {
+    this.stopSwrCachePruning?.();
+  }
 }
+
+const createGetIdentityHash = (core: CoreStart) => {
+  let authc: AuthenticationServiceStart | undefined;
+  let identityHash: string | undefined;
+
+  const getIdentityHash = async () => {
+    if (!authc) {
+      return '';
+    }
+
+    if (identityHash !== undefined) {
+      return identityHash;
+    }
+
+    try {
+      const user = await authc.getCurrentUser();
+      return (identityHash = hash(user));
+    } catch {
+      return '';
+    }
+  };
+
+  core.plugins.onStart<{ security: SecurityPluginStart }>('security').then(({ security }) => {
+    if (security.found) {
+      authc = security.contract.authc;
+    }
+  });
+
+  return getIdentityHash;
+};

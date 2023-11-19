@@ -6,62 +6,56 @@
  * Side Public License, v 1.
  */
 
-import { HttpSetup, HttpResponse } from '@kbn/core/public';
+import { HttpSetup } from '@kbn/core/public';
 import { DataViewMissingIndices } from '../../common/lib';
 import { GetFieldsOptions, IDataViewsApiClient } from '../../common';
 import { FieldsForWildcardResponse } from '../../common/types';
 import { FIELDS_FOR_WILDCARD_PATH, FIELDS_PATH } from '../../common/constants';
+import { StaleWhileRevalidateCache } from './stale_while_revalidate_cache';
 
 const API_BASE_URL: string = `/api/index_patterns/`;
 const version = '1';
-
-async function sha1(str: string) {
-  const enc = new TextEncoder();
-  const hash = await crypto.subtle.digest('SHA-1', enc.encode(str));
-  return Array.from(new Uint8Array(hash))
-    .map((v) => v.toString(16).padStart(2, '0'))
-    .join('');
-}
 
 /**
  * Data Views API Client - client implementation
  */
 export class DataViewsApiClient implements IDataViewsApiClient {
-  private http: HttpSetup;
-  private getCurrentUserId: () => Promise<string | undefined>;
-
   /**
    * constructor
    * @param http http dependency
+   * @param staleWhileRevalidateCache cache dependency
    */
-  constructor(http: HttpSetup, getCurrentUserId: () => Promise<string | undefined>) {
-    this.http = http;
-    this.getCurrentUserId = getCurrentUserId;
-  }
+  constructor(
+    private readonly http: HttpSetup,
+    private readonly staleWhileRevalidateCache: StaleWhileRevalidateCache
+  ) {}
 
   private async _request<T = unknown>(
     url: string,
+    cache: 'stale-while-revalidate' | 'reload' | 'no-store',
     query?: {},
-    body?: string,
-    forceRefresh?: boolean
-  ): Promise<HttpResponse<T> | undefined> {
-    const asResponse = true;
-    const cacheOptions = forceRefresh ? { cache: 'no-cache' as RequestCache } : {};
-    const userId = await this.getCurrentUserId();
+    body?: string
+  ): Promise<T | undefined> {
+    let request: Promise<T>;
 
-    const userHash = userId ? await sha1(userId) : '';
-
-    const request = body
-      ? this.http.post<T>(url, { query, body, version, asResponse })
-      : this.http.fetch<T>(url, {
-          query,
-          version,
-          ...cacheOptions,
-          asResponse,
-          headers: { 'user-hash': userHash },
-        });
+    if (body) {
+      console.log(1);
+      request = this.http.post<T>(url, { query, body, version });
+    } else if (cache === 'no-store') {
+      console.log(2);
+      request = this.http.get<T>(url, { query, version });
+    } else {
+      debugger
+      request = this.staleWhileRevalidateCache
+        .fetch(url, { query, version, forceRefresh: cache === 'reload' })
+        .then((resp) => resp.json());
+    }
 
     return request.catch((resp) => {
+      if (!resp?.body) {
+        throw resp;
+      }
+
       if (resp.body.statusCode === 404 && resp.body.attributes?.code === 'no_matching_indices') {
         throw new DataViewMissingIndices(resp.body.message);
       }
@@ -95,6 +89,7 @@ export class DataViewsApiClient implements IDataViewsApiClient {
 
     return this._request<FieldsForWildcardResponse>(
       path,
+      forceRefresh ? 'reload' : 'stale-while-revalidate',
       {
         pattern,
         meta_fields: metaFields,
@@ -105,14 +100,9 @@ export class DataViewsApiClient implements IDataViewsApiClient {
         fields,
         allow_hidden: allowHidden,
       },
-      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined,
-      forceRefresh
+      indexFilter ? JSON.stringify({ index_filter: indexFilter }) : undefined
     ).then((response) => {
-      return {
-        indices: response?.body?.indices || [],
-        fields: response?.body?.fields || [],
-        etag: response?.response?.headers?.get('etag') || '',
-      };
+      return response || { fields: [], indices: [] };
     });
   }
 
@@ -121,9 +111,9 @@ export class DataViewsApiClient implements IDataViewsApiClient {
    */
   async hasUserDataView(): Promise<boolean> {
     const response = await this._request<{ result: boolean }>(
-      this._getUrl(['has_user_index_pattern'])
+      this._getUrl(['has_user_index_pattern']),
+      'no-store'
     );
-
-    return response?.body?.result ?? false;
+    return response?.result ?? false;
   }
 }

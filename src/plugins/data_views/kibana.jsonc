@@ -20,6 +20,7 @@
     ],
     "extraPublicDirs": [
       "common"
-    ]
+    ],
+    "runtimePluginDependencies" : ["security"]
   }
 }
