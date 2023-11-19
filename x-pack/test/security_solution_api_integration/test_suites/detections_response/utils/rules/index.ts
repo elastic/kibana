@@ -31,6 +31,13 @@ export * from './get_saved_query_rule_for_alert_testing';
 export * from './get_rule_so_by_id';
 export * from './create_rule_saved_object';
 export * from './get_rule_with_legacy_investigation_fields';
+export * from './create_rule_with_auth';
+export * from './preview_rule';
+export * from './preview_rule_with_exception_entries';
+export * from './patch_rule';
 export * from './generate_event';
+export * from './create_legacy_rule_action';
+export * from './get_simple_threat_match';
+export * from './get_simple_ml_rule';
 
 export * from './prebuilt_rules';
