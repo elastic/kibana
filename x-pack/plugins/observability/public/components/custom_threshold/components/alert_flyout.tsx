@@ -8,17 +8,11 @@
 import React, { useCallback, useContext, useMemo } from 'react';
 
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
-import { MetricsExplorerSeries } from '../../../../common/custom_threshold_rule/metrics_explorer';
-
 import { TriggerActionsContext } from './triggers_actions_context';
-import { useAlertPrefillContext } from '../helpers/use_alert_prefill';
-import { MetricsExplorerOptions } from '../hooks/use_metrics_explorer_options';
 import { observabilityRuleCreationValidConsumers } from '../../../../common/constants';
 
 interface Props {
   visible?: boolean;
-  options?: Partial<MetricsExplorerOptions>;
-  series?: MetricsExplorerSeries;
   setVisible: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
@@ -34,14 +28,9 @@ export function AlertFlyout(props: Props) {
         onClose: onCloseFlyout,
         canChangeTrigger: false,
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
-        metadata: {
-          currentOptions: props.options,
-          series: props.series,
-        },
         validConsumers: observabilityRuleCreationValidConsumers,
         useRuleProducer: true,
       }),
-    // eslint-disable-next-line react-hooks/exhaustive-deps
     [triggersActionsUI, onCloseFlyout]
   );
 
@@ -49,8 +38,5 @@ export function AlertFlyout(props: Props) {
 }
 
 export function PrefilledThresholdAlertFlyout({ onClose }: { onClose(): void }) {
-  const { metricThresholdPrefill } = useAlertPrefillContext();
-  const { groupBy, filterQuery, metrics } = metricThresholdPrefill;
-
-  return <AlertFlyout options={{ groupBy, filterQuery, metrics }} visible setVisible={onClose} />;
+  return <AlertFlyout visible setVisible={onClose} />;
 }

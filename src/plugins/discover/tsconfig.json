@@ -74,7 +74,9 @@
     "@kbn/rule-data-utils",
     "@kbn/global-search-plugin",
     "@kbn/resizable-layout",
-    "@kbn/core-chrome-browser"
+    "@kbn/unsaved-changes-badge",
+    "@kbn/core-chrome-browser",
+    "@kbn/core-plugins-server"
   ],
   "exclude": [
     "target/**/*"
