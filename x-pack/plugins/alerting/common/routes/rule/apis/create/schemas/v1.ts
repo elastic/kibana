@@ -7,6 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { ruleNotifyWhenV1 } from '../../../response';
+import { filterStateStore as filterStateStoreV1 } from '../../../response/constants/v1';
 import {
   validateNotifyWhenV1,
   validateDurationV1,
@@ -37,7 +38,14 @@ export const actionAlertsFilterSchema = schema.object({
         schema.object({
           query: schema.maybe(schema.recordOf(schema.string(), schema.any())),
           meta: schema.recordOf(schema.string(), schema.any()),
-          state$: schema.maybe(schema.object({ store: schema.string() })),
+          $state: schema.maybe(
+            schema.object({
+              store: schema.oneOf([
+                schema.literal(filterStateStoreV1.APP_STATE),
+                schema.literal(filterStateStoreV1.GLOBAL_STATE),
+              ]),
+            })
+          ),
         })
       ),
       dsl: schema.maybe(schema.string()),
