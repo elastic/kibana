@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { toKueryFilterFormat, mergeKueries } from './to_kuery_filter_format';
+import { toKueryFilterFormat, mergeKueries } from './kuery_utils';
 
 describe('toKueryFilterFormat', () => {
   it('returns a single value', () => {
@@ -29,29 +29,34 @@ describe('toKueryFilterFormat', () => {
 
   describe('mergeKueries', () => {
     it('returns empty string when both kueries are empty', () => {
-      expect(mergeKueries('', '')).toEqual('');
+      expect(mergeKueries(['', ''])).toEqual('');
     });
 
     it('returns only first kuery when second is empty', () => {
-      expect(mergeKueries('host.name: "foo"', '')).toEqual(
-        '(host.name: "foo")'
+      expect(mergeKueries(['host.name: "foo"', ''])).toEqual(
+        'host.name: "foo"'
       );
     });
 
     it('returns second kuery when first is empty', () => {
-      expect(mergeKueries('', 'host.name: "foo"')).toEqual('host.name: "foo"');
+      expect(mergeKueries(['', 'host.name: "foo"'])).toEqual(
+        'host.name: "foo"'
+      );
     });
 
     it('returns merged kueries with default separator', () => {
       expect(
-        mergeKueries('host.name: "foo" OR host.name: "bar"', 'process.id: "1"')
-      ).toEqual('(host.name: "foo" OR host.name: "bar") AND process.id: "1"');
+        mergeKueries([
+          'host.name: "foo" OR host.name: "bar"',
+          'process.id: "1"',
+        ])
+      ).toEqual('host.name: "foo" OR host.name: "bar" AND process.id: "1"');
     });
 
     it('uses custom separator', () => {
-      expect(mergeKueries('host.name: "foo"', 'process.id: "1"', 'OR')).toEqual(
-        '(host.name: "foo") OR process.id: "1"'
-      );
+      expect(
+        mergeKueries(['host.name: "foo"', 'process.id: "1"'], 'OR')
+      ).toEqual('host.name: "foo" OR process.id: "1"');
     });
   });
 });

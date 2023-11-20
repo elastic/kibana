@@ -13,7 +13,7 @@ import { HOST_NAME } from '../../../common/es_fields/apm';
 import {
   mergeKueries,
   toKueryFilterFormat,
-} from '../../../common/utils/to_kuery_filter_format';
+} from '../../../common/utils/kuery_utils';
 import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
 import {
@@ -76,10 +76,10 @@ const profilingFlamegraphRoute = createApmServerRoute({
           esClient: esClient.asCurrentUser,
           rangeFromMs: start,
           rangeToMs: end,
-          kuery: mergeKueries(
-            toKueryFilterFormat(HOST_NAME, serviceHostNames),
-            kuery
-          ),
+          kuery: mergeKueries([
+            `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+            kuery,
+          ]),
           useLegacyFlamegraphAPI,
         });
 
@@ -144,10 +144,10 @@ const profilingFunctionsRoute = createApmServerRoute({
         esClient: esClient.asCurrentUser,
         rangeFromMs: start,
         rangeToMs: end,
-        kuery: mergeKueries(
-          toKueryFilterFormat(HOST_NAME, serviceHostNames),
-          kuery
-        ),
+        kuery: mergeKueries([
+          `(${toKueryFilterFormat(HOST_NAME, serviceHostNames)})`,
+          kuery,
+        ]),
         startIndex,
         endIndex,
       });

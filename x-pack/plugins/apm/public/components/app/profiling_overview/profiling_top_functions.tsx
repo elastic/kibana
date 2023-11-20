@@ -18,7 +18,7 @@ import { HOST_NAME } from '../../../../common/es_fields/apm';
 import {
   mergeKueries,
   toKueryFilterFormat,
-} from '../../../../common/utils/to_kuery_filter_format';
+} from '../../../../common/utils/kuery_utils';
 import { isPending, useFetcher } from '../../../hooks/use_fetcher';
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { HostnamesFilterWarning } from './host_names_filter_warning';
@@ -101,10 +101,10 @@ export function ProfilingTopNFunctions({
             <EuiLink
               data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
               href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
-                kuery: mergeKueries(
-                  hostNamesKueryFormat,
-                  searchBarFilter.filters
-                ),
+                kuery: mergeKueries([
+                  `(${hostNamesKueryFormat})`,
+                  searchBarFilter.filters,
+                ]),
               })}
             >
               {i18n.translate('xpack.apm.profiling.topnFunctions.link', {

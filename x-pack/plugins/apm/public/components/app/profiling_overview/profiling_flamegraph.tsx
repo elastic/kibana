@@ -25,7 +25,7 @@ import { HOST_NAME } from '../../../../common/es_fields/apm';
 import {
   mergeKueries,
   toKueryFilterFormat,
-} from '../../../../common/utils/to_kuery_filter_format';
+} from '../../../../common/utils/kuery_utils';
 import {
   FETCH_STATUS,
   isPending,
@@ -97,10 +97,10 @@ export function ProfilingFlamegraph({
             <EuiLink
               data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
               href={profilingLocators?.flamegraphLocator.getRedirectUrl({
-                kuery: mergeKueries(
-                  hostNamesKueryFormat,
-                  searchBarFilter.filters
-                ),
+                kuery: mergeKueries([
+                  `(${hostNamesKueryFormat})`,
+                  searchBarFilter.filters,
+                ]),
               })}
             >
               {i18n.translate('xpack.apm.profiling.flamegraph.link', {
