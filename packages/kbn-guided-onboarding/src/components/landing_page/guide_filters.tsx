@@ -27,7 +27,7 @@ const filterButtonCss = css`
     text-decoration: none;
   }
 `;
-export type GuideFilterValues = GuideCardSolutions | 'all';
+export type GuideFilterValues = GuideCardSolutions;
 export interface GuideFiltersProps {
   activeFilter: GuideFilterValues;
   setActiveFilter: React.Dispatch<React.SetStateAction<GuideFilterValues>>;
@@ -52,19 +52,6 @@ export const GuideFilters = ({ activeFilter, setActiveFilter, application }: Gui
 
   return (
     <EuiFlexGroup justifyContent="center" gutterSize="s">
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          onClick={onSelectFilter}
-          data-filter-id="all"
-          color="text"
-          css={[filterButtonCss, activeFilter === 'all' && activeFilterFill]}
-        >
-          <FormattedMessage
-            id="guidedOnboardingPackage.gettingStarted.guideFilter.all.buttonLabel"
-            defaultMessage="All"
-          />
-        </EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           onClick={onSelectFilter}

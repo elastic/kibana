@@ -14,8 +14,8 @@ import { GuideCards, GuideCardsProps } from './guide_cards';
 const defaultProps: GuideCardsProps = {
   activateGuide: jest.fn(),
   navigateToApp: jest.fn(),
-  activeFilter: 'all',
   guidesState: [],
+  activeFilter: 'search',
 };
 
 describe('guide cards', () => {

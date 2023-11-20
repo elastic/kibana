@@ -33,6 +33,20 @@ export interface GuideCardConstants {
 export const guideCards: GuideCardConstants[] = [
   {
     solution: 'search',
+    icon: 'pivot',
+    title: (
+      <FormattedMessage
+        id="guidedOnboardingPackage.gettingStarted.cards.elasticsearchApi.title"
+        defaultMessage="Connect to the Elasticsearch API"
+        values={{ linebreak: <br /> }}
+      />
+    ),
+    guideId: 'elasticsearchApi',
+    telemetryId: 'onboarding--search--elasticsearchApi',
+    order: 1,
+  },
+  {
+    solution: 'search',
     icon: 'database',
     title: (
       <FormattedMessage

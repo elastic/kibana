@@ -68,7 +68,7 @@ export const GuideCard = ({
     setIsLoading(false);
   }, [activateGuide, card.guideId, card.navigateTo, guideState, navigateToApp]);
 
-  const isHighlighted = activeFilter === 'all' || activeFilter === card.solution;
+  const isHighlighted = activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';
   const progress = getProgressLabel(guideState);
 
