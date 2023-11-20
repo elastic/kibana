@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { css } from '@emotion/react';
+
 import {
   EuiBadge,
   EuiButtonIcon,
@@ -18,6 +20,7 @@ import {
   EuiLink,
   EuiText,
   EuiTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -51,6 +54,7 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
   serviceType,
   ...props
 }) => {
+  const { euiTheme } = useEuiTheme();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   return (
     <EuiCheckableCard
@@ -58,6 +62,14 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
       disabled={disabled}
       id={`checkableCard-${serviceType}`}
       className="connectorCheckable"
+      css={
+        showNativeBadge
+          ? css`
+              box-shadow: 8px 9px 0px -1px ${euiTheme.colors.lightestShade},
+                8px 9px 0px 0px ${euiTheme.colors.lightShade};
+            `
+          : undefined
+      }
       data-telemetry-id={`entSearchContent-connector-selectConnector-${serviceType}-select`}
       label={
         <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
@@ -95,6 +107,11 @@ export const ConnectorCheckable: React.FC<ConnectorCheckableProps> = ({
                 closePopover={() => setIsPopoverOpen(false)}
                 isPopoverOpen={isPopoverOpen}
               />
+            </EuiFlexItem>
+          )}
+          {!disabled && showNativeBadge && (
+            <EuiFlexItem grow={false}>
+              <EuiButtonIcon display="base" color="primary" iconType="boxesHorizontal" />
             </EuiFlexItem>
           )}
         </EuiFlexGroup>
