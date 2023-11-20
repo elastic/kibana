@@ -40,7 +40,7 @@ steps:
       automatic:
         - exit_status: '-1'
           limit: 3
-    if: build.env("KIBANA_BUILD_SHA")
+    if: build.env("KIBANA_BUILD_SHA") =~ /^git-[a-zA-Z0-9]+$/
 
   - label: Running exception_workflows:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless
