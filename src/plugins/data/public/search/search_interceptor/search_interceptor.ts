@@ -593,15 +593,15 @@ export class SearchInterceptor {
       return;
     }
 
-    const searchErrorParts = renderSearchError({
+    const searchErrorDisplay = renderSearchError({
       error: e,
       application: this.application,
     });
 
-    if (searchErrorParts) {
+    if (searchErrorDisplay) {
       this.deps.toasts.addDanger({
-        title: searchErrorParts.title,
-        text: toMountPoint(searchErrorParts.body, { theme$: this.deps.theme.theme$ }),
+        title: searchErrorDisplay.title,
+        text: toMountPoint(searchErrorDisplay.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {

@@ -10,7 +10,7 @@ import { isEqual, uniqWith } from 'lodash';
 import { estypes } from '@elastic/elasticsearch';
 import { ExpressionRenderError } from '@kbn/expressions-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
-import { isEsError } from '@kbn/data-plugin/public';
+import { isEsError } from '@kbn/search-errors';
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { RemovableUserMessage } from '../types';

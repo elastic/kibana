@@ -87,6 +87,7 @@
     "@kbn/serverless",
     "@kbn/ebt-tools",
     "@kbn/chart-expressions-common",
+    "@kbn/search-errors",
     "@kbn/search-response-warnings",
     "@kbn/logging",
     "@kbn/core-plugins-server",
