@@ -23,5 +23,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./dashboard_controls'));
     loadTestFile(require.resolve('./users'));
     loadTestFile(require.resolve('./roles'));
+    loadTestFile(require.resolve('./ingest_node_pipelines'));
+    loadTestFile(require.resolve('./index_lifecycle_management'));
   });
 };
