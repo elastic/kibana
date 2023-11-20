@@ -144,6 +144,13 @@ export const ACTION_INVESTIGATE_IN_TIMELINE = i18n.translate(
   }
 );
 
+export const ACTION_CANNOT_INVESTIGATE_IN_TIMELINE = i18n.translate(
+  'xpack.securitySolution.detectionEngine.alerts.actions.cannotInvestigateInTimelineTitle',
+  {
+    defaultMessage: 'Please navigate to a page with timeline to investigate',
+  }
+);
+
 export const ACTION_INVESTIGATE_IN_TIMELINE_ARIA_LABEL = i18n.translate(
   'xpack.securitySolution.detectionEngine.alerts.actions.investigateInTimelineAriaLabel',
   {
