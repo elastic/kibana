@@ -391,7 +391,7 @@ export const UnifiedFieldListSidebarComponent: React.FC<UnifiedFieldListSidebarP
                 {onRefreshDataView && (
                   <EuiCallOut color="success" iconType="info">
                     <p>
-                      Hurray! New fields! <EuiLink onClick={onRefreshDataView}>Refresh</EuiLink>.
+                      <EuiLink onClick={onRefreshDataView}>Load new fields</EuiLink>.
                     </p>
                   </EuiCallOut>
                 )}
