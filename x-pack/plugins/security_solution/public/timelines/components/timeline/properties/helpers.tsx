@@ -62,6 +62,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
       disabled={disableFavoriteButton}
       aria-label={label}
+      title={label}
     />
   ) : (
     <EuiButton
@@ -72,6 +73,7 @@ const AddToFavoritesButtonComponent: React.FC<AddToFavoritesButtonProps> = ({
       data-test-subj={`timeline-favorite-${isFavorite ? 'filled' : 'empty'}-star`}
       disabled={disableFavoriteButton}
       aria-label={label}
+      title={label}
     >
       {label}
     </EuiButton>

@@ -9,8 +9,13 @@ import React from 'react';
 import { EuiTextColor, EuiText } from '@elastic/eui';
 import { FormattedRelative } from '@kbn/i18n-react';
 
+import styled from 'styled-components';
 import { TimelineStatus } from '../../../../../common/api/timeline';
 import * as i18n from './translations';
+
+const NoWrapText = styled(EuiText)`
+  white-space: nowrap;
+`;
 
 export const TimelineStatusInfoComponent = React.memo<{
   status: TimelineStatus;
@@ -37,9 +42,9 @@ export const TimelineStatusInfoComponent = React.memo<{
     );
   }
   return (
-    <EuiText size="xs" data-test-subj="timeline-status">
+    <NoWrapText size="xs" data-test-subj="timeline-status">
       {statusContent}
-    </EuiText>
+    </NoWrapText>
   );
 });
 TimelineStatusInfoComponent.displayName = 'TimelineStatusInfoComponent';

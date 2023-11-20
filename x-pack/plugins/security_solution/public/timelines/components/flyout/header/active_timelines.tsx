@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiToolTip } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
 import styled from 'styled-components';
-import { FormattedRelative } from '@kbn/i18n-react';
 
-import { TimelineStatus, TimelineType } from '../../../../../common/api/timeline';
+import type { TimelineStatus } from '../../../../../common/api/timeline';
+import { TimelineType } from '../../../../../common/api/timeline';
 import { TimelineEventsCountBadge } from '../../../../common/hooks/use_timeline_events_count';
 import {
   ACTIVE_TIMELINE_BUTTON_CLASS_NAME,
@@ -46,6 +46,7 @@ const TitleConatiner = styled(EuiFlexItem)`
   overflow: hidden;
   display: inline-block;
   text-overflow: ellipsis;
+  white-space: nowrap;
 `;
 
 const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
@@ -70,22 +71,35 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
     ? UNTITLED_TEMPLATE
     : UNTITLED_TIMELINE;
 
-  const tooltipContent = useMemo(() => {
-    if (timelineStatus === TimelineStatus.draft) {
-      return <>{i18n.UNSAVED}</>;
-    }
+  const titleContent = useMemo(() => {
     return (
-      <>
-        {i18n.SAVED}{' '}
-        <FormattedRelative
-          data-test-subj="timeline-status"
-          key="timeline-status-autosaved"
-          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
-          value={new Date(updated!)}
-        />
-      </>
+      <EuiFlexGroup
+        gutterSize="none"
+        alignItems="center"
+        justifyContent="flexStart"
+        responsive={false}
+      >
+        <TitleConatiner data-test-subj="timeline-title" grow={false}>
+          {isOpen ? (
+            <EuiText grow={false}>
+              <h3>{title}</h3>
+            </EuiText>
+          ) : (
+            <>{title}</>
+          )}
+        </TitleConatiner>
+        {!isOpen && (
+          <EuiFlexItem grow={false}>
+            <TimelineEventsCountBadge />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
     );
-  }, [timelineStatus, updated]);
+  }, [isOpen, title]);
+
+  if (isOpen) {
+    return <>{titleContent}</>;
+  }
 
   return (
     <StyledEuiButtonEmpty
@@ -97,26 +111,7 @@ const ActiveTimelinesComponent: React.FC<ActiveTimelinesProps> = ({
       isSelected={isOpen}
       onClick={handleToggleOpen}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        justifyContent="flexStart"
-        responsive={false}
-      >
-        <TitleConatiner data-test-subj="timeline-title" grow={false}>
-          {title}
-        </TitleConatiner>
-        {!isOpen && (
-          <EuiFlexItem grow={false}>
-            <TimelineEventsCountBadge />
-          </EuiFlexItem>
-        )}
-        <EuiFlexItem grow={false}>
-          <EuiToolTip position="top" content={tooltipContent}>
-            <EuiHealthStyled color="warning" />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
+      {titleContent}
     </StyledEuiButtonEmpty>
   );
 };

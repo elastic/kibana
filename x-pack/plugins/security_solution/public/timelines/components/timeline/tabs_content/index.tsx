@@ -389,7 +389,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   return (
     <>
       {!timelineFullScreen && (
-        <EuiTabs>
+        <EuiTabs className="eui-scrollBar">
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.query}`}
             onClick={setQueryAsActiveTab}

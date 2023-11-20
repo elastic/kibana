@@ -5,20 +5,14 @@
  * 2.0.
  */
 
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiToolTip,
-  EuiButtonIcon,
-  useEuiTheme,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiToolTip, EuiButtonIcon } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { isEmpty, get, pick } from 'lodash/fp';
 import { useDispatch, useSelector } from 'react-redux';
 import styled from 'styled-components';
 
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
+import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import type { State } from '../../../../common/store';
 import { timelineActions, timelineSelectors } from '../../../store/timeline';
@@ -38,8 +32,18 @@ interface FlyoutHeaderPanelProps {
   timelineId: string;
 }
 
+const FlyoutHeaderPanelContentFlexGroupContainer = styled(EuiFlexGroup)`
+  overflow-x: auto;
+`;
+
 const ActiveTimelinesContainer = styled(EuiFlexItem)`
   overflow: hidden;
+`;
+
+const TimelinePanel = euiStyled(EuiPanel)`
+  backgroundColor: ${(props) => props.theme.eui.euiColorEmptyShade};
+  color: ${(props) => props.theme.eui.euiTextColor};
+  padding-inline: ${(props) => props.theme.eui.euiSizeM};
 `;
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
@@ -115,19 +119,17 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
     focusActiveTimelineButton();
   }, [dispatch, timelineId]);
 
-  const { euiTheme } = useEuiTheme();
-
   return (
-    <EuiPanel
+    <TimelinePanel
       borderRadius="none"
       grow={false}
       paddingSize="s"
       hasShadow={false}
       data-test-subj="timeline-flyout-header-panel"
       data-show={show}
-      style={{ backgroundColor: euiTheme.colors.emptyShade, color: euiTheme.colors.text }}
     >
-      <EuiFlexGroup
+      <FlyoutHeaderPanelContentFlexGroupContainer
+        className="eui-scrollBar"
         alignItems="center"
         gutterSize="s"
         responsive={false}
@@ -188,8 +190,8 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
             </EuiFlexGroup>
           </EuiFlexItem>
         )}
-      </EuiFlexGroup>
-    </EuiPanel>
+      </FlyoutHeaderPanelContentFlexGroupContainer>
+    </TimelinePanel>
   );
 };
 
