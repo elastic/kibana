@@ -44,7 +44,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
+          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
 
           await result.then(
             (res) => {
@@ -64,7 +64,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 10);
+          const result = writeBodyCharAtATime(request, '{"foo":"bar"}', 20);
 
           await result.then(
             (res) => {
@@ -106,7 +106,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
             .set('Transfer-Encoding', 'chunked')
             .set('kbn-xsrf', 'true');
 
-          const result = writeBodyCharAtATime(request, '{"responseDelay":0}', 10);
+          const result = writeBodyCharAtATime(request, '{"responseDelay":0}', 20);
 
           await result.then(
             (res) => {
