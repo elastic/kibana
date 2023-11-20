@@ -8,7 +8,7 @@
 import { EuiSpacer } from '@elastic/eui';
 import type { Query } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { LogEntry } from '@kbn/logs-shared-plugin/common';
+import { LogEntry, convertISODateToNanoPrecision } from '@kbn/logs-shared-plugin/common';
 import {
   LogEntryFlyout,
   LogEntryStreamItem,
@@ -117,8 +117,12 @@ export const StreamPageLogsContent = React.memo<{
 
     const isCenterPointOutsideLoadedRange =
       targetPosition != null &&
-      ((topCursor != null && targetPosition.time < topCursor.time) ||
-        (bottomCursor != null && targetPosition.time > bottomCursor.time));
+      ((topCursor != null &&
+        convertISODateToNanoPrecision(targetPosition.time) <
+          convertISODateToNanoPrecision(topCursor.time)) ||
+        (bottomCursor != null &&
+          convertISODateToNanoPrecision(targetPosition.time) >
+            convertISODateToNanoPrecision(bottomCursor.time)));
 
     const hasQueryChanged = filterQuery !== prevFilterQuery;
 
