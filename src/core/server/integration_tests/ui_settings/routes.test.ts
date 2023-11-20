@@ -156,6 +156,47 @@ describe('ui settings service', () => {
       });
     });
 
+    describe('validate', () => {
+      it('returns correct validation error message for invalid value', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/custom/validate')
+          .send({ value: 100 })
+          .expect(200);
+
+        expect(response.body).toMatchObject({
+          valid: false,
+          errorMessage: 'expected value of type [string] but got [number]',
+        });
+      });
+
+      it('returns no validation error message for valid value', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/custom/validate')
+          .send({ value: 'test' })
+          .expect(200);
+
+        expect(response.body).toMatchObject({ valid: true });
+      });
+
+      it('returns a 404 for non-existing key', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/test/validate')
+          .send({ value: 'test' })
+          .expect(404);
+
+        expect(response.body.message).toBe('Setting with a key [test] does not exist.');
+      });
+
+      it('returns a 400 for a null value', async () => {
+        const response = await request
+          .post(root, '/internal/kibana/settings/test/validate')
+          .send({ value: null })
+          .expect(400);
+
+        expect(response.body.message).toBe('No value was specified.');
+      });
+    });
+
     describe('global', () => {
       describe('set', () => {
         it('validates value', async () => {

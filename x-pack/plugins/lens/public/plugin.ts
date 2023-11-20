@@ -127,6 +127,8 @@ import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 
+export type { SaveProps } from './app_plugin';
+
 export interface LensPluginSetupDependencies {
   urlForwarding: UrlForwardingSetup;
   expressions: ExpressionsSetup;
