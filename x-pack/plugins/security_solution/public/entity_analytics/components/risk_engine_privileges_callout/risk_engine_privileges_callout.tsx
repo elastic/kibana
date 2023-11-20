@@ -15,7 +15,7 @@ import { useMissingPrivileges } from './use_missing_risk_engine_privileges';
 export const RiskEnginePrivilegesCallOut = () => {
   const missingPrivileges = useMissingPrivileges();
 
-  const MissingPrivilegesMessage: CallOutMessage | null = useMemo(() => {
+  const message: CallOutMessage | null = useMemo(() => {
     const hasMissingPrivileges =
       missingPrivileges.indexPrivileges.length > 0 ||
       missingPrivileges.clusterPrivileges.length > 0 ||
@@ -25,24 +25,15 @@ export const RiskEnginePrivilegesCallOut = () => {
       return null;
     }
 
-    const missingPrivilegesHash = hash(missingPrivileges);
     return {
       type: 'primary',
-      /**
-       * Use privileges hash as a part of the message id.
-       * We want to make sure that the user will see the
-       * callout message in case his privileges change.
-       * The previous click on Dismiss should not affect that.
-       */
-      id: `missing-risk-engine-privileges-${missingPrivilegesHash}`,
+      id: `missing-risk-engine-privileges`,
       title: MISSING_PRIVILEGES_CALLOUT_TITLE,
       description: <MissingPrivilegesCallOutBody {...missingPrivileges} />,
     };
   }, [missingPrivileges]);
 
   return (
-    MissingPrivilegesMessage && (
-      <CallOutSwitcher namespace="detections" condition={true} message={MissingPrivilegesMessage} />
-    )
+    message && <CallOutSwitcher namespace="entity_analytics" condition={true} message={message} />
   );
 };
