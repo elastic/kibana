@@ -5,33 +5,35 @@
  * 2.0.
  */
 
-import React, { memo, useContext } from 'react';
+import React, { memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiContextMenuItem } from '@elastic/eui';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
-import { useLocation } from 'react-router-dom';
 import { AlertActionsProps } from './types';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
 import { useKibana } from '../../../../common/lib/kibana';
 
 /**
  * Alerts table row action to open the selected alert detail page
  */
 export const ViewAlertDetailsAlertAction = memo(
-  ({ alert, setFlyoutAlert, onActionExecuted, isAlertDetailsEnabled }: AlertActionsProps) => {
+  ({
+    alert,
+    setFlyoutAlert,
+    onActionExecuted,
+    isAlertDetailsEnabled,
+    resolveAlertPagePath,
+    id: pageId,
+  }: AlertActionsProps) => {
     const {
       http: {
         basePath: { prepend },
       },
     } = useKibana().services;
-    const { pathname } = useLocation();
-    const { resolveAlertPagePath } = useContext(AlertsTableContext);
-
     const alertId = alert[ALERT_UUID]?.[0] ?? null;
-    const linkToAlert =
-      alertId && resolveAlertPagePath ? prepend(resolveAlertPagePath(alertId)) : null;
+    const pagePath = alertId && pageId && resolveAlertPagePath?.(alertId, pageId);
+    const linkToAlert = pagePath ? prepend(pagePath) : null;
 
-    if (linkToAlert?.endsWith(pathname)) {
+    if (!linkToAlert) {
       return null;
     }
 
@@ -57,7 +59,7 @@ export const ViewAlertDetailsAlertAction = memo(
         size="s"
         onClick={() => {
           onActionExecuted?.();
-          setFlyoutAlert({ fields: Object.entries(alert).map(([k, v]) => [k, v?.[0]]) });
+          setFlyoutAlert(alert._id);
         }}
       >
         {i18n.translate('xpack.triggersActionsUI.alertsTable.viewAlertDetails', {

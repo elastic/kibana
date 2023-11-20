@@ -18,7 +18,6 @@ import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { AlertConsumers } from '@kbn/rule-data-utils';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Query, BoolQuery } from '@kbn/es-query';
-import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { observabilityFeatureId } from '../../../../common';
@@ -111,8 +110,6 @@ export function RuleDetailsTabs({
                   featureIds={featureIds}
                   query={esQuery}
                   showAlertStatusWithFlapping
-                  resolveRulePagePath={paths.observability.ruleDetails}
-                  resolveAlertPagePath={paths.observability.alertDetails}
                 />
               )}
             </EuiFlexItem>

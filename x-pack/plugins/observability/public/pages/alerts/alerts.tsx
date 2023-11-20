@@ -16,7 +16,6 @@ import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
-import { paths } from '../../../common/locators/paths';
 import { rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
 import { useKibana } from '../../utils/kibana_react';
@@ -229,8 +228,6 @@ function InternalAlertsPage() {
                 query={esQuery}
                 showAlertStatusWithFlapping
                 pageSize={ALERTS_PER_PAGE}
-                resolveRulePagePath={paths.observability.ruleDetails}
-                resolveAlertPagePath={paths.observability.alertDetails}
               />
             )}
           </EuiFlexItem>

@@ -77,8 +77,6 @@ export type AlertsTableStateProps = {
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  resolveRulePagePath?: (ruleId: string) => string;
-  resolveAlertPagePath?: (alertId: string) => string;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -152,8 +150,6 @@ const AlertsTableStateWithQueryProvider = ({
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
-  resolveRulePagePath,
-  resolveAlertPagePath,
   dynamicRowHeight,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
@@ -442,8 +438,6 @@ const AlertsTableStateWithQueryProvider = ({
       value={{
         mutedAlerts: mutedAlerts ?? {},
         bulkActions: initialBulkActionsState,
-        resolveRulePagePath,
-        resolveAlertPagePath,
       }}
     >
       {!isLoading && alertsCount === 0 && (

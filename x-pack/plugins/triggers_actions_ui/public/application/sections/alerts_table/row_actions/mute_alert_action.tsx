@@ -34,7 +34,7 @@ export const MuteAlertAction = memo(({ alert, refresh, onActionExecuted }: Alert
     refresh();
   }, [alertInstanceId, isMuted, muteAlert, onActionExecuted, refresh, ruleId, unmuteAlert]);
 
-  if (!isAlertActive) {
+  if (!isAlertActive && !isMuted) {
     return null;
   }
 

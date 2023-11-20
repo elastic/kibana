@@ -120,7 +120,9 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<RuleEditProps, 'actionTypeRegistry' | 'ruleTypeRegistry'>
   ) => ReactElement<RuleEditProps>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
-  getAlertsTableDefaultAlertActions: (props: AlertActionsProps) => ReactElement<AlertActionsProps>;
+  getAlertsTableDefaultAlertActions: <P extends AlertActionsProps>(
+    props: P
+  ) => ReactElement<AlertActionsProps>;
   getAlertsStateTable: (
     props: AlertsTableStateProps & LazyLoadProps
   ) => ReactElement<AlertsTableStateProps>;

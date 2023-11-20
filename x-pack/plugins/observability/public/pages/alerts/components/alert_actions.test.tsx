@@ -19,6 +19,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
+import { waitFor } from '@testing-library/react';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -48,7 +49,10 @@ jest.mock('../../../hooks/use_get_user_cases_permissions', () => ({
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public/common/lib/kibana/kibana_react', () => ({
   useKibana: jest.fn(() => ({
-    services: { notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } } },
+    services: {
+      notifications: { toasts: { addDanger: jest.fn(), addSuccess: jest.fn() } },
+      http: mockUseKibanaReturnValue.services.http,
+    },
   })),
 }));
 
@@ -120,33 +124,42 @@ describe('ObservabilityActions component', () => {
   it('should hide "View rule details" menu item for rule page id', async () => {
     const wrapper = await setup(RULE_DETAILS_PAGE_ID);
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
-    expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(0);
+      wrapper.update();
+      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').exists()).toBeTruthy();
+    });
   });
 
   it('should show "View rule details" menu item', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-    expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
+      expect(wrapper.find('[data-test-subj~="viewAlertDetailsFlyout"]').hostNodes().length).toBe(1);
+    });
   });
 
   it('should create a valid link for rule details page', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
-    expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
-      '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
-    );
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().length).toBe(1);
+      expect(wrapper.find('[data-test-subj~="viewRuleDetails"]').hostNodes().prop('href')).toBe(
+        '/app/observability/alerts/rules/06f53080-0f91-11ed-9d86-013908b232ef'
+      );
+    });
   });
 
   it('should refresh when adding an alert to a new case', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
+    await waitFor(() => {
+      expect(wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().length).toBe(1);
 
-    wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
-    expect(refresh).toHaveBeenCalled();
+      wrapper.find('[data-test-subj="add-to-new-case-action"]').hostNodes().simulate('click');
+      expect(refresh).toHaveBeenCalled();
+    });
   });
 
   it('should refresh when when calling onSuccess of useCasesAddToNewCaseFlyout', async () => {
@@ -161,12 +174,14 @@ describe('ObservabilityActions component', () => {
   it('should refresh when adding an alert to an existing case', async () => {
     const wrapper = await setup('nothing');
     wrapper.find('[data-test-subj="alertsTableRowActionMore"]').hostNodes().simulate('click');
-    expect(wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length).toBe(
-      1
-    );
+    await waitFor(() => {
+      expect(
+        wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().length
+      ).toBe(1);
 
-    wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
-    expect(refresh).toHaveBeenCalled();
+      wrapper.find('[data-test-subj="add-to-existing-case-action"]').hostNodes().simulate('click');
+      expect(refresh).toHaveBeenCalled();
+    });
   });
 
   it('should refresh when when calling onSuccess of useCasesAddToExistingCaseModal', async () => {

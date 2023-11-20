@@ -270,11 +270,7 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
             <button
               data-test-subj="expandColumnCellOpenFlyoutButton-0"
               onClick={() => {
-                setFlyoutAlert({
-                  fields: {
-                    [ALERT_UUID]: 'alert-id-1',
-                  },
-                });
+                setFlyoutAlert('alert-id-1');
               }}
             />
           );
