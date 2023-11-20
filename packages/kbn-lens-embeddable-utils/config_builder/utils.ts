@@ -14,7 +14,7 @@ import {
   TextBasedLayerColumn,
   TextBasedPersistedState,
 } from '@kbn/lens-plugin/public/datasources/text_based/types';
-import { AggregateQuery } from '@kbn/es-query';
+import { AggregateQuery, getIndexPatternFromSQLQuery } from '@kbn/es-query';
 import {
   LensAnnotationLayer,
   LensAttributes,
@@ -110,7 +110,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
     index = dataset.index;
     timeFieldName = dataset.timeFieldName || '@timestamp';
   } else if ('esql' in dataset) {
-    index = 'kibana_sample_data_e*'; // parseIndexFromQuery(config.dataset.query);
+    index = getIndexPatternFromSQLQuery(dataset.esql); // parseIndexFromQuery(config.dataset.query);
   } else {
     return undefined;
   }
