@@ -27,6 +27,7 @@ import {
   Locations,
   CodeEditorMode,
   ICMPFieldsCodec,
+  FormMonitorType,
 } from '../../../common/runtime_types';
 
 import {
@@ -177,8 +178,12 @@ export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
     // since api accept url key as well
     rawConfig[ConfigKey.HOSTS] = rawHost;
   }
-  if (monitor.type === 'browser') {
-    // urls isn't not supported for browser but is needed for SO AAD
+  if (
+    monitor.type === 'browser' &&
+    monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.SINGLE &&
+    monitor[ConfigKey.FORM_MONITOR_TYPE] !== FormMonitorType.MULTISTEP
+  ) {
+    // urls isn't supported for browser but is needed for SO AAD
     supportedKeys = supportedKeys.filter((key) => key !== ConfigKey.URLS);
   }
   const unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));

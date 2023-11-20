@@ -48,7 +48,14 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
     return {
       rawBody: result.body,
       body: {
-        ...omit(result.body, ['created_at', 'updated_at', 'url', 'id', 'config_id']),
+        ...omit(result.body, [
+          'created_at',
+          'updated_at',
+          'url',
+          'id',
+          'config_id',
+          'form_monitor_type',
+        ]),
         ...(url ? { urls: url } : {}),
       },
     };

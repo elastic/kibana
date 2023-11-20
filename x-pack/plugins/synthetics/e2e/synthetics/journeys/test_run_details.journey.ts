@@ -26,7 +26,10 @@ journey(`TestRunDetailsPage`, async ({ page, params }) => {
       'https://www.google.com',
       {
         type: 'browser',
+        form_monitor_type: 'single',
         urls: 'https://www.google.com',
+        'source.inline.script':
+          "step('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n});\n\nstep('Go to https://www.google.com', async () => {\n  await page.goto('https://www.google.com');\n});",
         custom_heartbeat_id: 'a47bfc4e-361a-4eb0-83f3-b5bb68781b5b',
         locations: [
           { id: 'us_central', label: 'North America - US Central', isServiceManaged: true },

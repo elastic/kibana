@@ -39,6 +39,7 @@ export const addTestMonitorProject = async (
 const testProjectMonitorBrowser = (name: string, config?: Record<string, unknown>) => ({
   monitors: [
     {
+      type: 'browser',
       throttling: {
         download: 5,
         upload: 3,

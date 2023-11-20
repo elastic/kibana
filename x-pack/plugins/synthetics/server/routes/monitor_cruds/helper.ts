@@ -13,7 +13,13 @@ import {
   MonitorFields,
 } from '../../../common/runtime_types';
 
-const keysToOmit = ['hash', 'journey_id', ConfigKey.URLS, ConfigKey.HOSTS];
+const keysToOmit = [
+  ConfigKey.URLS,
+  ConfigKey.HOSTS,
+  ConfigKey.CONFIG_HASH,
+  ConfigKey.JOURNEY_ID,
+  ConfigKey.FORM_MONITOR_TYPE,
+];
 
 type Result = MonitorFields & { url?: string; host?: string };
 export function mapSavedObjectToMonitor(
