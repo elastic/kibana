@@ -21,17 +21,17 @@ import {
   FieldPopoverFooter,
   type FieldPopoverFooterProps,
 } from '../../components/field_popover';
+import { FieldItemDragHandle } from '../../components/field_item_drag_handle';
 import {
   UnifiedFieldListItemStats,
   type UnifiedFieldListItemStatsProps,
 } from './field_list_item_stats';
-import { FieldListItemHandle } from './field_list_item_handle';
 import type {
   UnifiedFieldListSidebarContainerStateService,
   AddFieldFilterHandler,
 } from '../../types';
 
-const DRAG_HANDLE = <FieldListItemHandle />;
+const DRAG_HANDLE = <FieldItemDragHandle />;
 
 interface GetCommonFieldItemButtonPropsParams {
   stateService: UnifiedFieldListSidebarContainerStateService;
