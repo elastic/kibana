@@ -7,7 +7,7 @@
  */
 
 import { Observable, Subject } from 'rxjs';
-import { BfetchRequestError } from '../../common';
+import { BfetchRequestError } from '@kbn/bfetch';
 
 /**
  * Creates observable from streaming XMLHttpRequest, where each event

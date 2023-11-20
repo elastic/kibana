@@ -164,6 +164,7 @@
     "@kbn/assetManager-plugin": "link:x-pack/plugins/asset_manager",
     "@kbn/audit-log-plugin": "link:x-pack/test/security_api_integration/plugins/audit_log",
     "@kbn/banners-plugin": "link:x-pack/plugins/banners",
+    "@kbn/bfetch": "link:packages/kbn-bfetch",
     "@kbn/bfetch-explorer-plugin": "link:examples/bfetch_explorer",
     "@kbn/bfetch-plugin": "link:src/plugins/bfetch",
     "@kbn/calculate-auto": "link:packages/kbn-calculate-auto",

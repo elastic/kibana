@@ -49,7 +49,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/search-errors",
     "@kbn/search-response-warnings",
-    "@kbn/shared-ux-link-redirect-app"
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/bfetch"
   ],
   "exclude": [
     "target/**/*",

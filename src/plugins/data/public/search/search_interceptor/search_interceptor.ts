@@ -36,7 +36,6 @@ import { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
-import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
 import { type Start as InspectorStart, RequestAdapter } from '@kbn/inspector-plugin/public';
 
 import {
@@ -52,6 +51,7 @@ import {
 import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plugin/public';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
+import { BfetchRequestError } from '@kbn/bfetch';
 import {
   EsError,
   isEsError,
