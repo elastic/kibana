@@ -646,17 +646,20 @@ export const RuleForm = ({
   };
 
   const hasFieldsForAAD = useMemo(() => {
-    if (
-      MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '') &&
-      !(validConsumers || VALID_CONSUMERS).includes(selectedConsumer as RuleCreationValidConsumer)
-    ) {
-      return false;
-    }
-    return selectedRuleType
+    const hasAlertHasData = selectedRuleType
       ? selectedRuleType.hasFieldsForAAD ||
-          selectedRuleType.producer === AlertConsumers.SIEM ||
-          selectedRuleType.hasAlertsMappings
+        selectedRuleType.producer === AlertConsumers.SIEM ||
+        selectedRuleType.hasAlertsMappings
       : false;
+
+    if (MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule?.ruleTypeId ?? '')) {
+      return (
+        (validConsumers || VALID_CONSUMERS).includes(
+          selectedConsumer as RuleCreationValidConsumer
+        ) && hasAlertHasData
+      );
+    }
+    return hasAlertHasData;
   }, [rule?.ruleTypeId, selectedConsumer, selectedRuleType, validConsumers]);
 
   const ruleTypeDetails = (
@@ -838,7 +841,7 @@ export const RuleForm = ({
             featureId={connectorFeatureId}
             producerId={
               MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId)
-                ? rule.consumer
+                ? selectedConsumer ?? rule.consumer
                 : selectedRuleType.producer
             }
             hasFieldsForAAD={hasFieldsForAAD}

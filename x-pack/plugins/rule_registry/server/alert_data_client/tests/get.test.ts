@@ -31,6 +31,7 @@ const alertsClientParams: jest.Mocked<ConstructorOptions> = {
   auditLogger,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
 };
 
@@ -267,7 +268,7 @@ describe('get()', () => {
 
     await expect(alertsClient.get({ id: fakeAlertId, index: '.alerts-observability.apm.alerts' }))
       .rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get 
+      "Unable to retrieve alert details for alert with id of \\"myfakeid1\\" or with query \\"undefined\\" and operation get
       Error: Error: Unauthorized for fake.rule and apm"
     `);
 
@@ -294,7 +295,7 @@ describe('get()', () => {
     await expect(
       alertsClient.get({ id: 'NoxgpHkBqbdrfX07MqXV', index: '.alerts-observability.apm.alerts' })
     ).rejects.toThrowErrorMatchingInlineSnapshot(`
-      "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get 
+      "Unable to retrieve alert details for alert with id of \\"NoxgpHkBqbdrfX07MqXV\\" or with query \\"undefined\\" and operation get
       Error: Error: something went wrong"
     `);
   });
