@@ -11,6 +11,7 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { ALERT_SUPPRESSION_DOCS_COUNT } from '@kbn/rule-data-utils';
 import { find } from 'lodash/fp';
 
+import { APP_ID } from '../../../../../common';
 import * as i18n from './translations';
 
 import type { BrowserFields } from '../../../containers/source';

@@ -29,6 +29,7 @@ export type {
   Ecs,
   CaseViewRefreshPropInterface,
   CasesPermissions,
+  CasesCapabilities,
   CasesStatus,
 } from './ui/types';
 

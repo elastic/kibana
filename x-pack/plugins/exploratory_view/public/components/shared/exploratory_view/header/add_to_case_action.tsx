@@ -16,7 +16,6 @@ import {
 } from '@kbn/cases-plugin/public';
 import { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
-import { useGetUserCasesPermissions } from '@kbn/observability-shared-plugin/public';
 import { ObservabilityAppServices } from '../../../../application/types';
 import { useAddToCase } from '../hooks/use_add_to_case';
 import { parseRelativeDate } from '../components/date_range_picker';
@@ -37,7 +36,7 @@ export function AddToCaseAction({
   timeRange,
 }: AddToCaseProps) {
   const kServices = useKibana<ObservabilityAppServices>().services;
-  const userCasesPermissions = useGetUserCasesPermissions();
+  const userCasesPermissions = kServices.cases.helpers.canUseCases([observabilityFeatureId]);
 
   const {
     cases,

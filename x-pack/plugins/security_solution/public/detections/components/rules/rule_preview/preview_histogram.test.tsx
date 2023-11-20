@@ -23,7 +23,6 @@ import { usePreviewHistogram } from './use_preview_histogram';
 
 import { PreviewHistogram } from './preview_histogram';
 import { ALL_VALUES_ZEROS_TITLE } from '../../../../common/components/charts/translation';
-import { useGetUserCasesPermissions } from '../../../../common/lib/kibana';
 import { useTimelineEvents } from '../../../../common/components/events_viewer/use_timelines_events';
 import { TableId } from '@kbn/securitysolution-data-table';
 import { createStore } from '../../../../common/store';
@@ -58,12 +57,7 @@ const mockUseIsExperimentalFeatureEnabled = useIsExperimentalFeatureEnabled as j
 const getMockUseIsExperimentalFeatureEnabled =
   (mockMapping?: Partial<ExperimentalFeatures>) => (flag: keyof typeof allowedExperimentalValues) =>
     mockMapping ? mockMapping?.[flag] : allowedExperimentalValues?.[flag];
-const originalKibanaLib = jest.requireActual('../../../../common/lib/kibana');
 
-// Restore the useGetUserCasesPermissions so the calling functions can receive a valid permissions object
-// The returned permissions object will indicate that the user does not have permissions by default
-const mockUseGetUserCasesPermissions = useGetUserCasesPermissions as jest.Mock;
-mockUseGetUserCasesPermissions.mockImplementation(originalKibanaLib.useGetUserCasesPermissions);
 const mockUseFieldBrowserOptions = jest.fn();
 jest.mock('../../../../timelines/components/fields_browser', () => ({
   useFieldBrowserOptions: (props: UseFieldBrowserOptionsProps) => mockUseFieldBrowserOptions(props),

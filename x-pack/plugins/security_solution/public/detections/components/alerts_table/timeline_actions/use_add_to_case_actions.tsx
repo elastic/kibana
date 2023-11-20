@@ -9,6 +9,7 @@ import React, { useCallback, useMemo } from 'react';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
+import { APP_ID } from '../../../../../common';
 import { CasesTourSteps } from '../../../../common/components/guided_onboarding_tour/cases_tour_steps';
 import {
   AlertsCasesTourSteps,
@@ -43,7 +44,7 @@ export const useAddToCaseActions = ({
   refetch,
 }: UseAddToCaseActions) => {
   const { cases: casesUi } = useKibana().services;
-  const userCasesPermissions = cases.helpers.canUseCases([APP_ID]);
+  const userCasesPermissions = casesUi.helpers.canUseCases([APP_ID]);
 
   const isAlert = useMemo(() => {
     return ecsData?.event?.kind?.includes('signal');

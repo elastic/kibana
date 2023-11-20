@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 
-import { useKibana, useGetUserCasesPermissions } from '../../../../common/lib/kibana';
+import { useKibana } from '../../../../common/lib/kibana';
 import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../common/mock';
 import { TimelineId } from '../../../../../common/types/timeline';
 import { useTimelineKpis } from '../../../containers/kpis';
@@ -57,6 +57,9 @@ const defaultMocks = {
   loading: false,
   selectedPatterns: mockIndexNames,
 };
+
+const mockCanUseCases = jest.fn();
+
 describe('header', () => {
   beforeEach(() => {
     // Mocking these services is required for the header component to render.
@@ -67,6 +70,8 @@ describe('header', () => {
       catalogue: {},
       actions: { show: true, crud: true },
     };
+
+    useKibanaMock().services.cases.helpers.canUseCases = mockCanUseCases;
   });
 
   afterEach(() => {
@@ -79,7 +84,7 @@ describe('header', () => {
     });
 
     it('renders the button when the user has create and read permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(allCasesPermissions());
+      mockCanUseCases.mockReturnValue(allCasesPermissions());
 
       render(
         <TestProviders>
@@ -91,7 +96,7 @@ describe('header', () => {
     });
 
     it('does not render the button when the user does not have create permissions', () => {
-      (useGetUserCasesPermissions as jest.Mock).mockReturnValue(readCasesPermissions());
+      mockCanUseCases.mockReturnValue(readCasesPermissions());
 
       render(
         <TestProviders>
