@@ -51,12 +51,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(res.status).eql(200, JSON.stringify(res.body));
 
-      const {
-        url,
-        created_at: createdAt,
-        updated_at: updatedAt,
-        ...rest
-      } = res.body as EncryptedSyntheticsSavedMonitor;
+      const { url, created_at: createdAt, updated_at: updatedAt, ...rest } = res.body;
 
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
@@ -70,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
         .send(modifiedMonitor)
         .expect(200);
 
-      const { url, ...rest } = res.body as EncryptedSyntheticsSavedMonitor;
+      const { url, ...rest } = res.body;
 
       const result = { ...rest, urls: url } as EncryptedSyntheticsSavedMonitor;
       return omitBy(omit(result, ['created_at', 'updated_at']), removeMonitorEmptyValues);

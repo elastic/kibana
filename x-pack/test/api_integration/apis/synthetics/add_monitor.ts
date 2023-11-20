@@ -345,9 +345,6 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('preserves the passed namespace when preserve_namespace is passed', async () => {
-      const username = 'admin';
-      const password = `${username}-password`;
-      const roleName = 'uptime-role';
       const SPACE_ID = `test-space-${uuidv4()}`;
       const SPACE_NAME = `test-space-name ${uuidv4()}`;
       const monitor = {
