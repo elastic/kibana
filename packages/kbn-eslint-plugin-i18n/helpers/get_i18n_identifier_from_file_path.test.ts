@@ -11,7 +11,7 @@ import { getI18nIdentifierFromFilePath } from './get_i18n_identifier_from_file_p
 const SYSTEMPATH = 'systemPath';
 
 const testMap = [
-  ['x-pack/plugins/observability/foo/bar/baz/header_actions.tsx', 'xpack.observability'],
+  ['x-pack/plugins/observability/public/header_actions.tsx', 'xpack.observability'],
   ['x-pack/plugins/apm/public/components/app/correlations/correlations_table.tsx', 'xpack.apm'],
   ['x-pack/plugins/cases/public/components/foo.tsx', 'xpack.cases'],
   [

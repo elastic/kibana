@@ -14,18 +14,35 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
-  const relativePathArray = relativePathToFile.split('/');
+  const relativePathArray = relativePathToFile.includes('src')
+    ? relativePathToFile.split('/').slice(1)
+    : relativePathToFile.split('/').slice(2);
 
-  const path = `${relativePathArray[2]}/${relativePathArray[3]}`;
+  const publicFolderIndex = relativePathArray.findIndex((el) => el === 'public' || el === 'server');
+
+  const path = relativePathArray.reduce((acc, curr, index) => {
+    if (index < publicFolderIndex) {
+      return index === 0 ? curr : `${acc}/${curr}`;
+    }
+    return acc;
+  }, '');
 
   const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
+  const rootRC = resolve(join(__dirname, '../../../'), '.i18nrc.json');
 
-  const i18nrcFile = fs.readFileSync(xpackRC, 'utf8');
-  const i18nrc = JSON.parse(i18nrcFile);
+  const xpackI18nrcFile = fs.readFileSync(xpackRC, 'utf8');
+  const xpackI18nrc = JSON.parse(xpackI18nrcFile);
 
-  return i18nrc && i18nrc.paths
-    ? findKey(i18nrc.paths, (v) =>
-        Array.isArray(v) ? v.find((e) => e === path) : typeof v === 'string' && v === path
+  const rootI18nrcFile = fs.readFileSync(rootRC, 'utf8');
+  const rootI18nrc = JSON.parse(rootI18nrcFile);
+
+  const allPaths = { ...xpackI18nrc.paths, ...rootI18nrc.paths };
+
+  return Object.keys(allPaths).length
+    ? findKey(allPaths, (value) =>
+        Array.isArray(value)
+          ? value.find((el) => el === path)
+          : typeof value === 'string' && value === path
       ) ?? 'app_not_found_in_i18nrc'
     : 'could_not_find_i18nrc';
 }

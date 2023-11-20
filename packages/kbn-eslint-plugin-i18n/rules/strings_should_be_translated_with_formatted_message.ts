@@ -44,10 +44,10 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
 
         // Check if i18n has already been imported into the file
-        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, mode } =
+        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
           getI18nImportFixer({
             sourceCode,
-            mode: 'FormattedMessage',
+            translationFunction: 'FormattedMessage',
           });
 
         // Show warning to developer and offer autofix suggestion
@@ -65,7 +65,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
 />`
               ),
               !hasI18nImportLine && rangeToAddI18nImportLine
-                ? mode === 'replace'
+                ? replaceMode === 'replace'
                   ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
                   : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
                 : null,
@@ -106,10 +106,10 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
         const translationIdSuggestion = `${i18nAppId}.${functionName}.${intent}`; // 'xpack.observability.overview.logs.loadMoreLabel'
 
         // Check if i18n has already been imported into the file.
-        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, mode } =
+        const { hasI18nImportLine, i18nImportLine, rangeToAddI18nImportLine, replaceMode } =
           getI18nImportFixer({
             sourceCode,
-            mode: 'FormattedMessage',
+            translationFunction: 'FormattedMessage',
           });
 
         // Show warning to developer and offer autofix suggestion
@@ -124,7 +124,7 @@ export const StringsShouldBeTranslatedWithFormattedMessage: Rule.RuleModule = {
                 `{<FormattedMessage id="${translationIdSuggestion}" defaultMessage="${val}" />}`
               ),
               !hasI18nImportLine && rangeToAddI18nImportLine
-                ? mode === 'replace'
+                ? replaceMode === 'replace'
                   ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)
                   : fixer.insertTextAfterRange(rangeToAddI18nImportLine, `\n${i18nImportLine}`)
                 : null,
