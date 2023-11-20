@@ -12,7 +12,7 @@ import React from 'react';
 import { useLocation } from 'react-router-dom';
 import rison from '@kbn/rison';
 import url from 'url';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
+import { useDataViewId } from '../../../../hooks/use_data_view_id';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { getTimepickerRisonData } from '../rison_helpers';
 
@@ -37,16 +37,18 @@ export const getDiscoverHref = ({
   basePath,
   location,
   query,
+  dataViewId,
 }: {
   basePath: IBasePath;
   location: Location;
   query: Props['query'];
+  dataViewId: string;
 }) => {
   const risonQuery = {
     _g: getTimepickerRisonData(location.search),
     _a: {
       ...query._a,
-      index: APM_STATIC_DATA_VIEW_ID,
+      index: dataViewId,
     },
   };
 
@@ -62,11 +64,13 @@ export const getDiscoverHref = ({
 export function DiscoverLink({ query = {}, ...rest }: Props) {
   const { core } = useApmPluginContext();
   const location = useLocation();
+  const dataViewId = useDataViewId();
 
   const href = getDiscoverHref({
     basePath: core.http.basePath,
     query,
     location,
+    dataViewId,
   });
 
   return <EuiLink data-test-subj="apmDiscoverLinkLink" {...rest} href={href} />;
