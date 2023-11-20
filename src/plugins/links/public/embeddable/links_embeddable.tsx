@@ -6,37 +6,25 @@
  * Side Public License, v 1.
  */
 
-import React, { createContext, useContext } from 'react';
-import { unmountComponentAtNode } from 'react-dom';
-import { Subscription, distinctUntilChanged, skip, switchMap } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
+import React, { createContext } from 'react';
+import { unmountComponentAtNode } from 'react-dom';
+import { distinctUntilChanged, skip, Subject, Subscription, switchMap } from 'rxjs';
 
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
   AttributeService,
   Embeddable,
   ReferenceOrValueEmbeddable,
   SavedObjectEmbeddableInput,
 } from '@kbn/embeddable-plugin/public';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
-import { ReduxEmbeddableTools, ReduxToolsPackage } from '@kbn/presentation-util-plugin/public';
 
-import { linksReducers } from './links_reducers';
-import { LinksByReferenceInput, LinksByValueInput, LinksReduxState } from './types';
-import { LinksComponent } from '../components/links_component';
-import { LinksInput, LinksOutput } from './types';
-import { LinksAttributes } from '../../common/content_management';
 import { CONTENT_ID } from '../../common';
+import { LinksAttributes } from '../../common/content_management';
+import { LinksComponent } from '../components/links_component';
+import { LinksByReferenceInput, LinksByValueInput, LinksInput, LinksOutput } from './types';
 
 export const LinksContext = createContext<LinksEmbeddable | null>(null);
-export const useLinks = (): LinksEmbeddable => {
-  const linksEmbeddable = useContext<LinksEmbeddable | null>(LinksContext);
-  if (linksEmbeddable == null) {
-    throw new Error('useLinks must be used inside LinksContext.');
-  }
-  return linksEmbeddable!;
-};
-
-type LinksReduxEmbeddableTools = ReduxEmbeddableTools<LinksReduxState, typeof linksReducers>;
 
 export interface LinksConfig {
   editable: boolean;
@@ -53,20 +41,10 @@ export class LinksEmbeddable
   private isDestroyed?: boolean;
   private subscriptions: Subscription = new Subscription();
 
-  // state management
-  /**
-   * TODO: Keep track of the necessary state without the redux embeddable tools; it's kind of overkill here.
-   *       Related issue: https://github.com/elastic/kibana/issues/167577
-   */
-  public select: LinksReduxEmbeddableTools['select'];
-  public getState: LinksReduxEmbeddableTools['getState'];
-  public dispatch: LinksReduxEmbeddableTools['dispatch'];
-  public onStateChange: LinksReduxEmbeddableTools['onStateChange'];
-
-  private cleanupStateTools: () => void;
+  public attributes?: LinksAttributes;
+  public attributes$ = new Subject<LinksAttributes>();
 
   constructor(
-    reduxToolsPackage: ReduxToolsPackage,
     config: LinksConfig,
     initialInput: LinksInput,
     private attributeService: AttributeService<LinksAttributes>,
@@ -80,24 +58,6 @@ export class LinksEmbeddable
       },
       parent
     );
-
-    /** Build redux embeddable tools */
-    const reduxEmbeddableTools = reduxToolsPackage.createReduxEmbeddableTools<
-      LinksReduxState,
-      typeof linksReducers
-    >({
-      embeddable: this,
-      reducers: linksReducers,
-      initialComponentState: {
-        title: '',
-      },
-    });
-
-    this.select = reduxEmbeddableTools.select;
-    this.getState = reduxEmbeddableTools.getState;
-    this.dispatch = reduxEmbeddableTools.dispatch;
-    this.cleanupStateTools = reduxEmbeddableTools.cleanup;
-    this.onStateChange = reduxEmbeddableTools.onStateChange;
 
     this.initializeSavedLinks()
       .then(() => this.setInitializationFinished())
@@ -113,19 +73,25 @@ export class LinksEmbeddable
         )
         .subscribe()
     );
+
+    // Keep attributes in sync with subject value so it can be used in output
+    this.subscriptions.add(
+      this.attributes$.pipe(distinctUntilChanged(deepEqual)).subscribe((attributes) => {
+        this.attributes = attributes;
+      })
+    );
   }
 
   private async initializeSavedLinks() {
     const { attributes } = await this.attributeService.unwrapAttributes(this.getInput());
-    if (this.isDestroyed) return;
-
-    this.dispatch.setAttributes(attributes);
-
+    this.attributes$.next(attributes);
     await this.initializeOutput();
   }
 
   private async initializeOutput() {
-    const attributes = this.getState().componentState;
+    const attributes = this.attributes;
+    if (!attributes) return;
+
     const { title, description } = this.getInput();
     this.updateOutput({
       defaultTitle: attributes.title,
@@ -173,7 +139,6 @@ export class LinksEmbeddable
     this.isDestroyed = true;
     super.destroy();
     this.subscriptions.unsubscribe();
-    this.cleanupStateTools();
     if (this.domNode) {
       unmountComponentAtNode(this.domNode);
     }
