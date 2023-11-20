@@ -15,6 +15,7 @@ disabled:
   - x-pack/test/fleet_api_integration/config.base.ts
   - x-pack/test/security_solution_api_integration/config/ess/config.base.ts
   - x-pack/test/security_solution_api_integration/config/serverless/config.base.ts
+  - x-pack/test/security_solution_api_integration/config/serverless/config.base.essentials
   - x-pack/test/security_solution_endpoint/config.base.ts
   - x-pack/test/security_solution_endpoint_api_int/config.base.ts
 
