@@ -48,6 +48,9 @@ export const postActionsConnectorExecuteRoute = (
           const result = await executeAction({ actions, request, connectorId });
           return response.ok({
             body: result,
+            ...(request.body.params.subAction === 'invokeStream'
+              ? { headers: { connection: 'keep-alive', 'Transfer-Encoding': 'chunked' } }
+              : {}),
           });
         }
 

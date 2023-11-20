@@ -85,6 +85,7 @@ export const fetchConnectorExecuteAction = async ({
           signal,
           asResponse: isStream,
           rawResponse: isStream,
+          headers: { Connection: 'keep-alive' },
         }
       );
 
