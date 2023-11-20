@@ -18,8 +18,9 @@
   "kbn_references": [
     "@kbn/i18n",
     "@kbn/core",
-    "@kbn/core-i18n-browser",
     "@kbn/kibana-utils-plugin",
     "@kbn/data-views-plugin",
+    "@kbn/bfetch-plugin",
+    "@kbn/core-application-browser",
   ]
 }
