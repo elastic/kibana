@@ -7,7 +7,6 @@
  */
 
 import { FtrService } from '../ftr_provider_context';
-import { WebElementWrapper } from './lib/web_element_wrapper';
 
 export class AppsMenuService extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
@@ -119,54 +118,53 @@ export class AppsMenuService extends FtrService {
   ) {
     await this.waitUntilLoadingHasFinished();
 
-    try {
+    this.ctx.getService('retry').try(async () => {
       this.log.debug(`click "${name}" app link`);
-      await this.openCollapsibleNav();
-      let nav;
-      if (typeof category === 'string') {
-        // we can search within a specific section of the side nav
-        nav = await this.testSubjects.find(`collapsibleNavGroup-${category}`);
-        const link = await nav.findByPartialLinkText(name);
-        await link.click();
-      } else {
-        // we need to search our app link in the whole side nav
-        // first, we get all the links, along with their inner text
-        const allLinks = await this.testSubjects.findAll('collapsibleNavAppLink');
-        const allLinksTexts = await Promise.all(
-          allLinks.map(
-            (link: WebElementWrapper): Promise<{ link: WebElementWrapper; text: string }> =>
-              new Promise((resolve) => {
-                link.getVisibleText().then((text: string) => resolve({ link, text }));
-              })
-          )
-        );
 
-        // then, filter out those that don't have a matching text
-        const matchingLinks = allLinksTexts.filter(({ text }) => text.includes(name));
-        if (matchingLinks.length === 0) {
-          this.log.debug(
-            `Found ${allLinks.length} links on the side nav: ${allLinksTexts.map(
-              ({ text }) => text
-            )}`
+      try {
+        await this.openCollapsibleNav();
+        let nav;
+        if (typeof category === 'string') {
+          // we can search within a specific section of the side nav
+          nav = await this.testSubjects.find(`collapsibleNavGroup-${category}`);
+          const link = await nav.findByPartialLinkText(name);
+          await link.click();
+        } else {
+          // we need to search our app link in the whole side nav
+          // first, we get all the links, along with their inner text
+          const allLinks = await this.testSubjects.findAll('collapsibleNavAppLink');
+          const allLinksTexts = await Promise.all(
+            allLinks.map((link) => link.getVisibleText().then((text) => ({ link, text })))
           );
-          throw new Error(
-            `Could not find the '${name}' application on the side nav (${allLinks.length} links found)`
-          );
-        } else if (matchingLinks.length > 1) {
-          throw new Error(
-            `Multiple apps exist in the side nav with the specified name: '${name}'. Consider using the "category" parameter to disambiguate`
-          );
+
+          // then, filter out those that don't have a matching text
+          const matchingLinks = allLinksTexts.filter(({ text }) => text.includes(name));
+          if (matchingLinks.length === 0) {
+            this.log.debug(
+              `Found ${allLinks.length} links on the side nav: ${allLinksTexts.map(
+                ({ text }) => text
+              )}`
+            );
+            throw new Error(
+              `Could not find the '${name}' application on the side nav (${allLinks.length} links found)`
+            );
+          } else if (matchingLinks.length > 1) {
+            throw new Error(
+              `Multiple apps exist in the side nav with the specified name: '${name}'. Consider using the "category" parameter to disambiguate`
+            );
+          }
+
+          this.log.debug(`Found "${name}" app link on the side nav!`);
+          // if we click on a stale element (e.g. re-rendered) it'll throw an Error and we will retry
+          await matchingLinks.pop()!.link.click();
         }
 
-        this.log.debug(`Found "${name}" app link on the side nav!`);
-        await matchingLinks.pop()!.link.click();
+        if (closeCollapsibleNav) {
+          await this.closeCollapsibleNav();
+        }
+      } finally {
+        // Intentionally empty
       }
-
-      if (closeCollapsibleNav) {
-        await this.closeCollapsibleNav();
-      }
-    } finally {
-      // Intentionally empty
-    }
+    });
   }
 }
