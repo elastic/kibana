@@ -14,7 +14,7 @@ import styled from 'styled-components';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';
 import type { ClickTriggerEvent, MultiClickTriggerEvent } from '@kbn/charts-plugin/public';
-import type { XYState } from '@kbn/lens-plugin/public';
+import type { EmbeddableComponentProps, XYState } from '@kbn/lens-plugin/public';
 import { setAbsoluteRangeDatePicker } from '../../store/inputs/actions';
 import { useKibana } from '../../lib/kibana';
 import { useLensAttributes } from './use_lens_attributes';
@@ -186,8 +186,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
     [onLoad]
   );
 
-  const onFilterCallback = useCallback(
-    async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
+  const onFilterCallback = useCallback(() => {
+    const callback: EmbeddableComponentProps['onFilter'] = async (e) => {
       if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area' || disableOnClickFilter) {
         e.preventDefault();
         return;
@@ -203,9 +203,14 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
           range: [rangeFilter.gte, rangeFilter.lt],
         });
       }
-    },
-    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType, disableOnClickFilter]
-  );
+    };
+    return callback;
+  }, [
+    createFiltersFromValueClickAction,
+    updateDateRange,
+    preferredSeriesType,
+    disableOnClickFilter,
+  ]);
 
   const adHocDataViews = useMemo(
     () =>
