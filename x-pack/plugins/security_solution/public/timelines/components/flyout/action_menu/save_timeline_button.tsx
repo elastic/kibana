@@ -26,7 +26,7 @@ export interface SaveTimelineButtonProps {
 const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
 const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTourSeen';
 
-export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
+const SaveTimelineButtonComponent = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
   const isTimelineSaveTourSaveTourDisabled =
     useIsExperimentalFeatureEnabled('disableTimelineSaveTour');
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
@@ -145,4 +145,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   );
 });
 
-SaveTimelineButton.displayName = 'SaveTimelineButton';
+SaveTimelineButtonComponent.displayName = 'SaveTimelineButton';
+
+export const SaveTimelineButton = React.memo(SaveTimelineButtonComponent);

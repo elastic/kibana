@@ -58,12 +58,12 @@ import { Sourcerer } from '../../../../common/components/sourcerer';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 
-const TimelineHeaderContainer = styled.div`
+const EqlTabHeaderContainer = styled.div`
   margin-top: ${euiThemeVars.euiSizeS};
   width: 100%;
 `;
 
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
+EqlTabHeaderContainer.displayName = 'TimelineHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: stretch;
@@ -261,9 +261,11 @@ export const EqlTabContentComponent: React.FC<Props> = ({
             hasBorder={false}
           >
             <EuiFlexGroup
+              className="euiScrollBar"
               alignItems="flexStart"
               gutterSize="s"
               data-test-subj="timeline-date-picker-container"
+              responsive={false}
             >
               {timelineFullScreen && setTimelineFullScreen != null && (
                 <ExitFullScreen
@@ -284,9 +286,9 @@ export const EqlTabContentComponent: React.FC<Props> = ({
               </EuiFlexItem>
             </EuiFlexGroup>
           </StyledEuiFlyoutHeader>
-          <TimelineHeaderContainer data-test-subj="timelineHeader">
+          <EqlTabHeaderContainer data-test-subj="timelineHeader">
             <EqlQueryBarTimeline timelineId={timelineId} />
-          </TimelineHeaderContainer>
+          </EqlTabHeaderContainer>
 
           <EventDetailsWidthProvider>
             <StyledEuiFlyoutBody

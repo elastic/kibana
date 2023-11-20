@@ -31,8 +31,8 @@ import * as i18n from './translations';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { TIMELINE_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useCreateTimeline } from '../../timeline/properties/use_create_timeline';
-import { formSchema } from '../../timeline/header/schema';
 import { NOTES_PANEL_WIDTH } from '../../timeline/properties/notes_size';
+import { formSchema } from './schema';
 
 const CommonUseField = getUseField({ component: Field });
 interface SaveTimelineModalProps {
@@ -46,7 +46,7 @@ interface SaveTimelineModalProps {
   showWarning?: boolean;
 }
 
-export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
+export const SaveTimelineModalComponent = React.memo<SaveTimelineModalProps>(
   ({ closeSaveTimeline, initialFocusOn, timelineId, showWarning }) => {
     const { startTransaction } = useStartTransaction();
     const getTimeline = useMemo(() => timelineSelectors.getTimelineByIdSelector(), []);
@@ -265,4 +265,6 @@ export const SaveTimelineModal = React.memo<SaveTimelineModalProps>(
   }
 );
 
-SaveTimelineModal.displayName = 'SaveTimelineModal';
+SaveTimelineModalComponent.displayName = 'SaveTimelineModal';
+
+export const SaveTimelineModal = React.memo(SaveTimelineModalComponent);

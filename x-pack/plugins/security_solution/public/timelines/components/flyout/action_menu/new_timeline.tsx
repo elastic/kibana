@@ -15,7 +15,7 @@ interface NewTimelineActionProps {
   timelineId: string;
 }
 
-export const NewTimelineAction = ({ timelineId }: NewTimelineActionProps) => {
+const NewTimelineActionComponent = ({ timelineId }: NewTimelineActionProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
   const closePopover = useCallback(() => {
@@ -65,3 +65,5 @@ export const NewTimelineAction = ({ timelineId }: NewTimelineActionProps) => {
     </EuiPopover>
   );
 };
+
+export const NewTimelineAction = React.memo(NewTimelineActionComponent);

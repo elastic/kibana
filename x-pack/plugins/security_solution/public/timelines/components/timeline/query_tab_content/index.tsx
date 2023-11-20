@@ -35,7 +35,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { defaultHeaders } from '../body/column_headers/default_headers';
 import { StatefulBody } from '../body';
 import { Footer, footerHeight } from '../footer';
-import { TimelineHeader } from '../header';
+import { QueryTabHeader } from './header';
 import { calculateTotalPages } from '../helpers';
 import { combineQueries } from '../../../../common/lib/kuery';
 import { TimelineRefetch } from '../refetch_timeline';
@@ -63,12 +63,12 @@ import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
 import { TimelineKpi } from '../kpi';
-const TimelineHeaderContainer = styled.div`
+const QueryTabHeaderContainer = styled.div`
   /* margin-top: 6px; */
   width: 100%;
 `;
 
-TimelineHeaderContainer.displayName = 'TimelineHeaderContainer';
+QueryTabHeaderContainer.displayName = 'TimelineHeaderContainer';
 
 const StyledEuiFlyoutHeader = styled(EuiFlyoutHeader)`
   align-items: stretch;
@@ -357,15 +357,15 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 </EuiFlexItem>
               )}
               <EuiFlexItem data-test-subj="timeline-date-picker-container">
-                <TimelineHeaderContainer data-test-subj="timelineHeader">
-                  <TimelineHeader
+                <QueryTabHeaderContainer data-test-subj="timelineHeader">
+                  <QueryTabHeader
                     filterManager={filterManager}
                     show={show && activeTab === TimelineTabs.query}
                     showCallOutUnauthorizedMsg={showCallOutUnauthorizedMsg}
                     status={status}
                     timelineId={timelineId}
                   />
-                </TimelineHeaderContainer>
+                </QueryTabHeaderContainer>
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TimelineKpi timelineId={timelineId} />

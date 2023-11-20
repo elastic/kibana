@@ -13,6 +13,8 @@ import {
   RunActionResponseSchema,
   InvokeAIActionParamsSchema,
   InvokeAIActionResponseSchema,
+  StreamActionParamsSchema,
+  StreamingResponseSchema,
 } from './schema';
 
 export type Config = TypeOf<typeof ConfigSchema>;
@@ -21,3 +23,5 @@ export type RunActionParams = TypeOf<typeof RunActionParamsSchema>;
 export type InvokeAIActionParams = TypeOf<typeof InvokeAIActionParamsSchema>;
 export type InvokeAIActionResponse = TypeOf<typeof InvokeAIActionResponseSchema>;
 export type RunActionResponse = TypeOf<typeof RunActionResponseSchema>;
+export type StreamActionParams = TypeOf<typeof StreamActionParamsSchema>;
+export type StreamingResponse = TypeOf<typeof StreamingResponseSchema>;

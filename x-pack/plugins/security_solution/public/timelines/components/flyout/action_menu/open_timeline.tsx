@@ -13,7 +13,7 @@ import * as i18n from './translations';
 
 const actionTimelineToHide: ActionTimelineToShow[] = ['createFrom'];
 
-export const OpenTimelineAction = React.memo<{}>(() => {
+const OpenTimelineActionComponent = React.memo<{}>(() => {
   const [showTimelineModal, setShowTimelineModal] = useState(false);
   const onCloseTimelineModal = useCallback(() => setShowTimelineModal(false), []);
   const onOpenTimelineModal = useCallback(() => {
@@ -37,4 +37,6 @@ export const OpenTimelineAction = React.memo<{}>(() => {
   );
 });
 
-OpenTimelineAction.displayName = 'OpenTimelineModalButton';
+OpenTimelineActionComponent.displayName = 'OpenTimelineModalButton';
+
+export const OpenTimelineAction = React.memo(OpenTimelineActionComponent);

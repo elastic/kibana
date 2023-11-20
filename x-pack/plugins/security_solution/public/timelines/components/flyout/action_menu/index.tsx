@@ -13,8 +13,8 @@ import { InspectButton } from '../../../../common/components/inspect';
 import { InputsModelId } from '../../../../common/store/inputs/constants';
 import { AddToCaseButton } from '../add_to_case_button';
 import { NewTimelineAction } from './new_timeline';
+import { SaveTimelineButton } from './save_timeline_button';
 import { OpenTimelineAction } from './open_timeline';
-import { SaveTimelineAction } from './save_timeline';
 
 interface TimelineActionMenuProps {
   mode?: 'compact' | 'normal';
@@ -23,7 +23,7 @@ interface TimelineActionMenuProps {
   activeTab: TimelineTabs;
 }
 
-export const TimelineActionMenu = ({
+const TimelineActionMenuComponent = ({
   mode = 'normal',
   timelineId,
   activeTab,
@@ -31,7 +31,7 @@ export const TimelineActionMenu = ({
 }: TimelineActionMenuProps) => {
   const userCasesPermissions = useGetUserCasesPermissions();
   return (
-    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center">
+    <EuiFlexGroup gutterSize="xs" justifyContent="flexEnd" alignItems="center" responsive={false}>
       <EuiFlexItem data-test-subj="new-timeline-action">
         <NewTimelineAction timelineId={timelineId} />
       </EuiFlexItem>
@@ -53,8 +53,10 @@ export const TimelineActionMenu = ({
         />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="save-timeline-action">
-        <SaveTimelineAction timelineId={timelineId} />
+        <SaveTimelineButton timelineId={timelineId} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
+
+export const TimelineActionMenu = React.memo(TimelineActionMenuComponent);

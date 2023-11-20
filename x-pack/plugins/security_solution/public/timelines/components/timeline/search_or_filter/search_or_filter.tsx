@@ -71,7 +71,9 @@ interface Props {
   timelineType: TimelineType;
 }
 
-const SearchOrFilterContainer = styled.div``;
+const SearchOrFilterContainer = styled.div`
+  overflow: auto;
+`;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';
 
@@ -127,6 +129,7 @@ export const SearchOrFilter = React.memo<Props>(
             data-test-subj="timeline-search-or-filter"
             gutterSize="xs"
             alignItems="center"
+            responsive={false}
           >
             <EuiFlexItem grow={false}>
               <Sourcerer scope={SourcererScopeName.timeline} />

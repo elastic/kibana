@@ -134,7 +134,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
         justifyContent="spaceBetween"
       >
         <EuiFlexItem grow={false}>
-          <EuiFlexGroup gutterSize="xs" alignItems="center">
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
               <ActiveTimelinesContainer grow={false}>
                 <ActiveTimelines

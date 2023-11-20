@@ -153,7 +153,14 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
     return (
       <EuiFlexGroup direction="column" gutterSize="s">
         <EuiFlexItem>
-          <EuiFlexGroup direction="row" justifyContent="center" alignItems="center" gutterSize="xs">
+          <EuiFlexGroup
+            className="eui-scrollBar"
+            direction="row"
+            alignItems="center"
+            gutterSize="xs"
+            responsive={false}
+            css={{ overflowX: 'auto' }}
+          >
             <EuiFlexItem grow={true}>
               <SearchOrFilter
                 dataProviders={dataProviders}
