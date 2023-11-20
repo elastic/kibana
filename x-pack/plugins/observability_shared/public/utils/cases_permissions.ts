@@ -13,4 +13,16 @@ export const noCasesPermissions = () => ({
   delete: false,
   push: false,
   connectors: false,
+  settings: false,
+});
+
+export const allCasesPermissions = () => ({
+  all: true,
+  create: true,
+  read: true,
+  update: true,
+  delete: true,
+  push: true,
+  connectors: true,
+  settings: true,
 });

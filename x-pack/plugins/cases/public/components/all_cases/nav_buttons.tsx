@@ -43,14 +43,14 @@ export const NavButtons: FunctionComponent<Props> = ({ actionsErrors }) => {
     [navigateToCreateCase]
   );
 
-  if (!permissions.create && !permissions.configure) {
+  if (!permissions.create && !permissions.settings) {
     return null;
   }
 
   return (
     <EuiFlexItem>
       <ButtonFlexGroup responsive={false}>
-        {permissions.configure && (
+        {permissions.settings && (
           <EuiFlexItem grow={false}>
             <ConfigureCaseButton
               label={i18n.CONFIGURE_CASES_BUTTON}

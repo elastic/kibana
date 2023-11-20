@@ -12,12 +12,12 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities(undefined)).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -27,12 +27,12 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities()).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -42,12 +42,12 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({ create_cases: true })).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": false,
         "create": true,
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -66,12 +66,12 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -81,12 +81,12 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({})).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
         "read": false,
+        "settings": false,
         "update": false,
       }
     `);
@@ -105,12 +105,12 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": true,
         "create": false,
         "delete": true,
         "push": true,
         "read": true,
+        "settings": false,
         "update": true,
       }
     `);
@@ -129,12 +129,12 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": false,
         "create": false,
         "delete": true,
         "push": true,
         "read": true,
+        "settings": false,
         "update": true,
       }
     `);
@@ -154,12 +154,12 @@ describe('getUICapabilities', () => {
     ).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": false,
         "connectors": true,
         "create": false,
         "delete": true,
         "push": true,
         "read": true,
+        "settings": false,
         "update": true,
       }
     `);
@@ -169,12 +169,12 @@ describe('getUICapabilities', () => {
     expect(getUICapabilities({ edit_cases_settings: true })).toMatchInlineSnapshot(`
       Object {
         "all": false,
-        "configure": true,
         "connectors": false,
         "create": false,
         "delete": false,
         "push": false,
         "read": false,
+        "settings": true,
         "update": false,
       }
     `);

@@ -85,6 +85,7 @@ jest.mock('../../../../common/lib/kibana', () => {
               delete: true,
               push: true,
             }),
+            getRuleIdFromEvent: jest.fn(),
           },
         },
       },

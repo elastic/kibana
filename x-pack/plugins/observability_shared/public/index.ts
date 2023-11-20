@@ -65,7 +65,7 @@ export { NavigationWarningPromptProvider, Prompt } from './components/navigation
 
 export type { ApmIndicesConfig, UXMetrics } from './types';
 
-export { noCasesPermissions } from './utils/cases_permissions';
+export { noCasesPermissions, allCasesPermissions } from './utils/cases_permissions';
 
 export {
   type ObservabilityActionContextMenuItemProps,

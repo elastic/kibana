@@ -303,7 +303,7 @@ export interface CasesPermissions {
   delete: boolean;
   push: boolean;
   connectors: boolean;
-  configure: boolean;
+  settings: boolean;
 }
 
 export interface CasesCapabilities {
