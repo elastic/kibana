@@ -61,7 +61,7 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: KIBANA_DOCKER_CONTEXT=ubi9 .buildkite/scripts/steps/artifacts/docker_context.sh
+  - command: KIBANA_DOCKER_CONTEXT=ubi .buildkite/scripts/steps/artifacts/docker_context.sh
     label: 'Docker Context Verification'
     agents:
       queue: n2-2
