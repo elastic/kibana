@@ -67,23 +67,19 @@ export const ViewLogsButton: React.FunctionComponent<ViewLogsProps> = ({
     );
   }, [logStreamQuery, http.basePath, startTime, endTime]);
 
-  return (
-    <>
-      {viewInLogs ? (
-        <EuiButton href={viewInLogsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
-          <FormattedMessage
-            id="xpack.fleet.agentLogs.openInLogsUiLinkText"
-            defaultMessage="Open in Logs"
-          />
-        </EuiButton>
-      ) : (
-        <EuiButton href={viewInDiscoverUrl} iconType="popout" data-test-subj="viewInDiscoverBtn">
-          <FormattedMessage
-            id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
-            defaultMessage="Open in Discover"
-          />
-        </EuiButton>
-      )}
-    </>
+  return viewInLogs ? (
+    <EuiButton href={viewInLogsUrl} iconType="popout" data-test-subj="viewInLogsBtn">
+      <FormattedMessage
+        id="xpack.fleet.agentLogs.openInLogsUiLinkText"
+        defaultMessage="Open in Logs"
+      />
+    </EuiButton>
+  ) : (
+    <EuiButton href={viewInDiscoverUrl} iconType="popout" data-test-subj="viewInDiscoverBtn">
+      <FormattedMessage
+        id="xpack.fleet.agentLogs.openInDiscoverUiLinkText"
+        defaultMessage="Open in Discover"
+      />
+    </EuiButton>
   );
 };

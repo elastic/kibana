@@ -10,6 +10,7 @@ import React from 'react';
 import type { EuiBasicTableProps } from '@elastic/eui';
 import { EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
+import moment from 'moment';
 
 import { i18n } from '@kbn/i18n';
 
@@ -31,19 +32,9 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
   const coreStart = useStartServices();
   const isLogsUIAvailable = !coreStart.cloud?.isServerlessEnabled;
 
-  const addOrSubtractMinutes = (timestamp: string, interval: number, subtract?: boolean) => {
-    const date = new Date(timestamp);
-    if (!subtract) {
-      date.setMinutes(date.getMinutes() + interval);
-    } else {
-      date.setMinutes(date.getMinutes() - interval);
-    }
-    return date.toISOString();
-  };
-
   const getLogsButton = (agentId: string, timestamp: string, viewInLogs: boolean) => {
-    const startTime = addOrSubtractMinutes(timestamp, 5, true);
-    const endTime = addOrSubtractMinutes(timestamp, 5);
+    const startTime = moment(timestamp).subtract(5, 'm').toISOString();
+    const endTime = moment(timestamp).add(5, 'm').toISOString();
 
     const logStreamQuery = buildQuery({
       agentId,
