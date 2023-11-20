@@ -155,9 +155,7 @@ export const initNavNode = <
   const id = getNavigationNodeId(node);
   const title = getTitleForNode(node, { deepLink, cloudLinks });
   const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href;
-
-  // TODO: don't create new array each tie... we probably want the path to be a string
-  const nodePath = parentNodePath ? [...parentNodePath, id] : [id];
+  const nodePath = parentNodePath ? `${parentNodePath}.${id}` : id;
 
   if (href && !isAbsoluteLink(href)) {
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
@@ -166,7 +164,7 @@ export const initNavNode = <
   const internalNavNode: ChromeProjectNavigationNode = {
     ...navNode,
     id,
-    path: nodePath ?? [],
+    path: nodePath ?? '',
     title: title ?? '',
     deepLink,
     href,

@@ -23,7 +23,6 @@ import {
 } from '@elastic/eui';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../../types/internal';
-import { nodePathToString } from '../../utils';
 import { useNavigation as useServices } from '../../services';
 import { usePanel } from './panel';
 
@@ -54,7 +53,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();
   const { title, deepLink, isActive, children } = item;
-  const id = nodePathToString(item);
+  const id = item.path;
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
@@ -113,7 +112,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
       {isIconVisible && (
         <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
           <EuiButtonIcon
-            display={nodePathToString(selectedNode) === id ? 'base' : 'empty'}
+            display={selectedNode?.path === id ? 'base' : 'empty'}
             size="s"
             color="text"
             onClick={onIconClick}

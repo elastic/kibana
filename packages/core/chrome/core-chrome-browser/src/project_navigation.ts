@@ -169,7 +169,7 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
   /** Optional title. If not provided and a "link" is provided the title will be the Deep link title */
   title: string;
   /** Path in the tree of the node */
-  path: string[];
+  path: string;
   /** App id or deeplink id */
   deepLink?: ChromeNavLink;
   /**

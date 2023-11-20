@@ -25,7 +25,7 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { useNavigation } from './navigation';
-import { nodePathToString, isAbsoluteLink, getNavigationNodeHref } from '../../utils';
+import { isAbsoluteLink, getNavigationNodeHref } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
@@ -33,12 +33,12 @@ const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 const DEFAULT_IS_COLLAPSED = true;
 const DEFAULT_IS_COLLAPSIBLE = true;
 
-function isSamePath(pathA: string[] | null, pathB: string[] | null) {
+function isSamePath(pathA: string | string[] | null, pathB: string | string[] | null) {
   if (pathA === null || pathB === null) {
     return false;
   }
-  const pathAToString = pathA.join('.');
-  const pathBToString = pathB.join('.');
+  const pathAToString = Array.isArray(pathA) ? pathA.join('.') : pathA;
+  const pathBToString = Array.isArray(pathB) ? pathB.join('.') : pathB;
   return pathAToString === pathBToString;
 }
 
@@ -87,7 +87,7 @@ const filterChildren = (
   return children.filter(itemIsVisible);
 };
 
-const isActiveFromUrl = (nodePath: string[], activeNodes: ChromeProjectNavigationNode[][]) => {
+const isActiveFromUrl = (nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) => {
   return activeNodes.reduce((acc, nodesBranch) => {
     return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
   }, false);
@@ -101,7 +101,7 @@ const serializeNavNode = (
 
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
-    id: nodePathToString(navNode),
+    id: navNode.path,
     children: filterChildren(navNode.children),
     isActive: navNode.isActive ?? isActiveFromUrl(navNode.path, activeNodes),
     href,
@@ -368,13 +368,13 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     });
     debug2.current = { ...navNode };
     const byId = {
-      [nodePathToString(navNode)]: navNode,
+      [navNode.path]: navNode,
     };
 
     const parse = (navNodes?: ChromeProjectNavigationNode[]) => {
       if (!navNodes) return;
       navNodes.forEach((childNode) => {
-        byId[nodePathToString(childNode)] = childNode;
+        byId[childNode.path] = childNode;
         parse(childNode.children);
       });
     };
