@@ -184,7 +184,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
               groupType: 'independent',
               privileges: [
                 {
-                  id: 'cases_configure',
+                  id: 'edit_cases_settings',
                   name: i18n.translate(
                     'xpack.observability.featureRegistry.configureSubFeatureDetails',
                     {
@@ -197,7 +197,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                     read: [...filesSavedObjectTypes],
                   },
                   cases: {
-                    configure: [observabilityFeatureId],
+                    settings: [observabilityFeatureId],
                   },
                   ui: casesCapabilities.configure,
                 },

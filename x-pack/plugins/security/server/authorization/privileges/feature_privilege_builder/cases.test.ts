@@ -47,7 +47,7 @@ describe(`cases`, () => {
         ['read', 'observability'],
         ['update', 'observability'],
         ['delete', 'securitySolution'],
-        ['configure', 'observability'],
+        ['settings', 'observability'],
       ])('grants %s privileges under feature with id %s', (operation, featureID) => {
         const actions = new Actions();
         const casesFeaturePrivilege = new FeaturePrivilegeCasesBuilder(actions);
@@ -89,7 +89,7 @@ describe(`cases`, () => {
             update: ['obs'],
             delete: ['security'],
             read: ['obs'],
-            configure: ['security'],
+            settings: ['security'],
           },
 
           savedObject: {

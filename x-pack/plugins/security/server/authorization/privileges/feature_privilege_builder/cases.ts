@@ -28,14 +28,14 @@ const readOperations = [
 ] as const;
 const updateOperations = ['updateCase', 'updateComment'] as const;
 const deleteOperations = ['deleteCase', 'deleteComment'] as const;
-const configureOperations = ['createConfiguration', 'updateConfiguration'] as const;
+const settingsOperations = ['createConfiguration', 'updateConfiguration'] as const;
 const allOperations = [
   ...pushOperations,
   ...createOperations,
   ...readOperations,
   ...updateOperations,
   ...deleteOperations,
-  ...configureOperations,
+  ...settingsOperations,
 ] as const;
 
 export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
@@ -59,7 +59,7 @@ export class FeaturePrivilegeCasesBuilder extends BaseFeaturePrivilegeBuilder {
       ...getCasesPrivilege(readOperations, privilegeDefinition.cases?.read),
       ...getCasesPrivilege(updateOperations, privilegeDefinition.cases?.update),
       ...getCasesPrivilege(deleteOperations, privilegeDefinition.cases?.delete),
-      ...getCasesPrivilege(deleteOperations, privilegeDefinition.cases?.configure),
+      ...getCasesPrivilege(settingsOperations, privilegeDefinition.cases?.settings),
     ]);
   }
 }

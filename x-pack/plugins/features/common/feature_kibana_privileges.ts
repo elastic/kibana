@@ -213,7 +213,7 @@ export interface FeatureKibanaPrivileges {
      *  }
      * ```
      */
-    configure?: readonly string[];
+    settings?: readonly string[];
   };
 
   /**
