@@ -8,11 +8,7 @@
 import { ElasticsearchClient } from '@kbn/core/server';
 import { ALL_VALUE, CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { v4 as uuidv4 } from 'uuid';
-import {
-  SLO_MODEL_VERSION,
-  SLO_SUMMARY_ENRICH_POLICY_NAME,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
-} from '../../assets/constants';
+import { SLO_SUMMARY_TEMP_INDEX_NAME } from '../../assets/constants';
 import { Duration, DurationUnit, SLO } from '../../domain/models';
 import { validateSLO } from '../../domain/services';
 import { SLORepository } from './slo_repository';
@@ -22,7 +18,6 @@ import { TransformManager } from './transform_manager';
 export class CreateSLO {
   constructor(
     private esClient: ElasticsearchClient,
-    private systemClient: ElasticsearchClient,
     private repository: SLORepository,
     private transformManager: TransformManager
   ) {}
@@ -59,8 +54,6 @@ export class CreateSLO {
       refresh: true,
     });
 
-    await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
-
     return this.toResponse(slo);
   }
 
@@ -79,7 +72,6 @@ export class CreateSLO {
       createdAt: now,
       updatedAt: now,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
-      version: SLO_MODEL_VERSION,
     };
   }
 

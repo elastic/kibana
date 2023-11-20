@@ -127,7 +127,7 @@ xpack.alerting.rules.run.actions.max: 3000
 xpack.alerting.rules.run.timeout: 1m
 xpack.alerting.rules.run.ruleTypeOverrides:
   - id: siem.indicatorRule
-    timeout: 1m
+    timeout: 10m
 xpack.alerting.rules.minimumScheduleInterval.enforce: true
 xpack.alerting.rules.maxScheduledPerMinute: 400
 xpack.actions.run.maxAttempts: 10
@@ -150,6 +150,14 @@ xpack.reporting.queue.pollInterval: 3m
 xpack.reporting.roles.enabled: false
 xpack.reporting.statefulSettings.enabled: false
 
-
 # Disabled Observability plugins
 xpack.ux.enabled: false
+xpack.monitoring.enabled: false
+xpack.uptime.enabled: false
+xpack.legacy_uptime.enabled: false
+monitoring.ui.enabled: false
+
+## Enable uiSettings validations
+xpack.securitySolution.enableUiSettingsValidations: true
+data.enableUiSettingsValidations: true
+discover.enableUiSettingsValidations: true
