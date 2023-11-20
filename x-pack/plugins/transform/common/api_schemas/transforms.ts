@@ -148,16 +148,29 @@ export interface PutTransformsPivotRequestSchema
 
 export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 'pivot'>;
 
+export const putTransformsQuerySchema = schema.object({
+  createDataView: schema.boolean({ defaultValue: false }),
+  timeFieldName: schema.maybe(schema.string()),
+});
+
+export type PutTransformsQuerySchema = TypeOf<typeof putTransformsQuerySchema>;
+
 interface TransformCreated {
   transform: TransformId;
 }
-interface TransformCreatedError {
-  id: TransformId;
+interface DataViewCreated {
+  id: string;
+}
+interface CreatedError {
+  id: string;
   error: any;
 }
+
 export interface PutTransformsResponseSchema {
   transformsCreated: TransformCreated[];
-  errors: TransformCreatedError[];
+  dataViewsCreated: DataViewCreated[];
+  dataViewsErrors: CreatedError[];
+  errors: CreatedError[];
 }
 
 // POST transforms/_preview
