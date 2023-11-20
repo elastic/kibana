@@ -12,6 +12,7 @@ import { pipeline, Readable } from 'stream';
 import semver from 'semver';
 import { Scenario } from '../cli/scenario';
 import { deleteSummaryFieldTransform } from '../lib/utils/transform_helpers';
+import { withClient } from '../lib/utils/with_client';
 
 const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
   const isLegacy = versionOverride && semver.lt(versionOverride, '8.7.0');
@@ -31,7 +32,7 @@ const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
         });
       }
     },
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const successfulTimestamps = range.ratePerMinute(6);
       const instance = apm
         .service({
@@ -41,16 +42,19 @@ const scenario: Scenario<ApmFields> = async ({ logger, versionOverride }) => {
         })
         .instance(`instance`);
 
-      return successfulTimestamps.generator((timestamp) => {
-        const randomHigh = random(1000, 4000);
-        const randomLow = random(100, randomHigh / 5);
-        const duration = random(randomLow, randomHigh);
-        return instance
-          .transaction({ transactionName: 'GET /order/{id}' })
-          .timestamp(timestamp)
-          .duration(duration)
-          .success();
-      });
+      return withClient(
+        apmEsClient,
+        successfulTimestamps.generator((timestamp) => {
+          const randomHigh = random(1000, 4000);
+          const randomLow = random(100, randomHigh / 5);
+          const duration = random(randomLow, randomHigh);
+          return instance
+            .transaction({ transactionName: 'GET /order/{id}' })
+            .timestamp(timestamp)
+            .duration(duration)
+            .success();
+        })
+      );
     },
   };
 };
