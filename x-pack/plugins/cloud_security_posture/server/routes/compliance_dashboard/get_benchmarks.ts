@@ -43,7 +43,7 @@ export const getBenchmarksQuery = (
   runtime_mappings: { ...runtimeMappings, ...getIdentifierRuntimeMapping() },
   query,
   aggs: {
-    aggs_by_benchmarks: {
+    aggs_by_benchmark: {
       terms: {
         field: 'rule.benchmark.id',
         order: {
@@ -55,16 +55,11 @@ export const getBenchmarksQuery = (
         aggs_by_benchmark_version: {
           terms: {
             field: 'rule.benchmark.version',
-            size: 100,
           },
           aggs: {
             aggs_by_benchmark_name: {
               terms: {
                 field: 'rule.benchmark.name',
-                order: {
-                  _count: 'desc',
-                },
-                size: 100,
               },
             },
             asset_count: {

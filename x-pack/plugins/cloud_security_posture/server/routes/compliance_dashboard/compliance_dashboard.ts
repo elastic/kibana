@@ -21,7 +21,7 @@ import { ClusterWithoutTrend, getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
-import { BenchmarkWithoutTrend } from './get_benchmarks';
+import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -40,10 +40,12 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], trends: Trends) =>
   benchmarksWithoutTrends.map((benchmark) => ({
     ...benchmark,
-    trend: trends.map(({ timestamp, benchmarks: benchmarksTrendData }) => ({
-      timestamp,
-      ...benchmarksTrendData[`${benchmark.meta.benchmarkId}_${benchmark.meta.benchmarkVersion}`],
-    })),
+    trend: trends
+      .map(({ timestamp, benchmarks: benchmarksTrendData }) => ({
+        timestamp,
+        ...benchmarksTrendData[`${benchmark.meta.benchmarkId}_${benchmark.meta.benchmarkVersion}`],
+      }))
+      .filter((doc) => Object.keys(doc).length > 1),
   }));
 
 const getSummaryTrend = (trends: Trends) =>
@@ -91,13 +93,13 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             stats,
             groupedFindingsEvaluation,
             clustersWithoutTrends,
-            // benchmarksWithoutTrends,
+            benchmarksWithoutTrends,
             trends,
           ] = await Promise.all([
             getStats(esClient, query, pitId, runtimeMappings),
             getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings),
             getClusters(esClient, query, pitId, runtimeMappings),
-            // getBenchmarks(esClient, query, pitId, runtimeMappings),
+            getBenchmarks(esClient, query, pitId, runtimeMappings),
             getTrends(esClient, policyTemplate),
           ]);
 
@@ -108,8 +110,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           });
 
           const clusters = getClustersTrends(clustersWithoutTrends, trends);
-          // const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trends);
-          // console.log(JSON.stringify(benchmarks))
+          const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trends);
 
           const trend = getSummaryTrend(trends);
 
@@ -117,6 +118,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             stats,
             groupedFindingsEvaluation,
             clusters,
+            benchmarks,
             trend,
           };
 

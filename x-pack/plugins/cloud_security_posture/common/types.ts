@@ -90,8 +90,8 @@ export interface ComplianceDashboardData {
   stats: Stats;
   groupedFindingsEvaluation: GroupedFindingsEvaluation[];
   clusters: Cluster[];
-  benchmarks?: BenchmarkData[];
   trend: PostureTrend[];
+  benchmarks: BenchmarkData[];
 }
 
 export type CspStatusCode =
