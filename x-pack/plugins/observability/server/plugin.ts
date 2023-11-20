@@ -13,25 +13,31 @@ import {
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClient,
 } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
 import { i18n } from '@kbn/i18n';
-import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
-import { SharePluginSetup } from '@kbn/share-plugin/server';
-import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
-import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import {
   ApmRuleType,
   ES_QUERY_ID,
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import { RuleRegistryPluginSetupContract } from '@kbn/rule-registry-plugin/server';
+import { SharePluginSetup } from '@kbn/share-plugin/server';
+import { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -57,6 +63,7 @@ import {
   DefaultSummaryTransformInstaller,
 } from './services/slo';
 
+import { EnrishPolicyRefreshTask } from './services/slo/enrich_policy_refresh_task';
 import { uiSettings } from './ui_settings';
 
 export type ObservabilityPluginSetup = ReturnType<ObservabilityPlugin['setup']>;
@@ -70,10 +77,12 @@ interface PluginSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -88,6 +97,7 @@ const o11yRuleTypes = [
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
+  private sloTask?: EnrishPolicyRefreshTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -248,7 +258,6 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
 
     const { ruleDataService } = plugins.ruleRegistry;
 
-    const savedObjectTypes = [SO_SLO_TYPE];
     plugins.features.registerKibanaFeature({
       id: sloFeatureId,
       name: i18n.translate('xpack.observability.featureRegistry.linkSloTitle', {
@@ -265,7 +274,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           catalogue: [sloFeatureId, 'observability'],
           api: ['slo_write', 'slo_read', 'rac'],
           savedObject: {
-            all: savedObjectTypes,
+            all: [SO_SLO_TYPE],
             read: [],
           },
           alerting: {
@@ -284,7 +293,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           api: ['slo_read', 'rac'],
           savedObject: {
             all: [],
-            read: savedObjectTypes,
+            read: [SO_SLO_TYPE],
           },
           alerting: {
             rule: {
@@ -311,6 +320,8 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       alertsLocator
     );
     registerSloUsageCollector(plugins.usageCollection);
+
+    this.sloTask = new EnrishPolicyRefreshTask(plugins.taskManager, this.logger);
 
     core.getStartServices().then(([coreStart, pluginStart]) => {
       registerRoutes({
@@ -360,7 +371,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: PluginStart) {
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    this.sloTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+  }
 
   public stop() {}
 }

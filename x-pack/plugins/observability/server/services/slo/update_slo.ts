@@ -12,7 +12,6 @@ import {
   getSLOTransformId,
   SLO_DESTINATION_INDEX_PATTERN,
   SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_ENRICH_POLICY_NAME,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../assets/constants';
 import { SLO } from '../../domain/models';
@@ -25,8 +24,7 @@ export class UpdateSLO {
   constructor(
     private repository: SLORepository,
     private transformManager: TransformManager,
-    private esClient: ElasticsearchClient,
-    private systemClient: ElasticsearchClient
+    private esClient: ElasticsearchClient
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -56,7 +54,6 @@ export class UpdateSLO {
 
     validateSLO(updatedSlo);
     await this.repository.save(updatedSlo);
-    await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
 
     if (!requireRevisionBump) {
       return this.toResponse(updatedSlo);
@@ -66,7 +63,6 @@ export class UpdateSLO {
       await this.transformManager.install(updatedSlo);
     } catch (err) {
       await this.repository.save(originalSlo);
-      await this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
       throw err;
     }
 
@@ -78,7 +74,6 @@ export class UpdateSLO {
       await Promise.all([
         this.transformManager.uninstall(updatedSloTransformId),
         this.repository.save(originalSlo),
-        this.systemClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME }),
       ]);
 
       throw err;

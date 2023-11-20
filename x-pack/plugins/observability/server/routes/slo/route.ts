@@ -85,11 +85,10 @@ const createSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const systemEsClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const createSLO = new CreateSLO(esClient, systemEsClient, repository, transformManager);
+    const createSLO = new CreateSLO(esClient, repository, transformManager);
 
     const response = await createSLO.execute(params.body);
 
@@ -108,12 +107,11 @@ const updateSLORoute = createObservabilityServerRoute({
     await assertPlatinumLicense(context);
 
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
-    const systemEsClient = (await context.core).elasticsearch.client.asInternalUser;
     const soClient = (await context.core).savedObjects.client;
 
     const repository = new KibanaSavedObjectsSLORepository(soClient);
     const transformManager = new DefaultTransformManager(transformGenerators, esClient, logger);
-    const updateSLO = new UpdateSLO(repository, transformManager, esClient, systemEsClient);
+    const updateSLO = new UpdateSLO(repository, transformManager, esClient);
 
     const response = await updateSLO.execute(params.path.id, params.body);
 

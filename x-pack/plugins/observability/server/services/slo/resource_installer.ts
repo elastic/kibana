@@ -127,17 +127,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
         }
         throw err;
       }
-
-      this.logger.info(`Installing enrich SLO policy [${policy.name}]`);
-      try {
-        await this.esClient.enrich.executePolicy({ name: policy.name });
-      } catch (err) {
-        if (err?.meta?.body?.error?.type === 'es_rejected_execution_exception') {
-          this.logger.info(`Enrich SLO policy [${policy.name}] already executing`);
-          return;
-        }
-        throw err;
-      }
     });
   }
 
