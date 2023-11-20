@@ -12,7 +12,11 @@ import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { getFunctionSignatures, getCommandSignature } from '../definitions/helpers';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
-import { FunctionDefinition, CommandDefinition } from '../definitions/types';
+import {
+  FunctionDefinition,
+  CommandDefinition,
+  CommandOptionsDefinition,
+} from '../definitions/types';
 import { getCommandDefinition } from '../shared/helpers';
 import { buildDocumentation, buildFunctionDocumentation } from './documentation_util';
 
@@ -184,6 +188,21 @@ export const buildMatchingFieldsDefinition = (
     }),
     sortText: 'D',
   }));
+
+export const buildOptionDefinition = (option: CommandOptionsDefinition) => {
+  const completeItem: AutocompleteCommandDefinition = {
+    label: option.name,
+    insertText: option.name,
+    kind: 21,
+    detail: option.description,
+    sortText: 'D',
+  };
+  if (option.wrapped) {
+    completeItem.insertText = `${option.wrapped[0]}${option.name} $0 ${option.wrapped[1]}`;
+    completeItem.insertTextRules = 4; // monaco.languages.CompletionItemInsertTextRule.InsertAsSnippet;
+  }
+  return completeItem;
+};
 
 export const buildNoPoliciesAvailableDefinition = (): AutocompleteCommandDefinition => ({
   label: i18n.translate('monaco.esql.autocomplete.noPoliciesLabel', {

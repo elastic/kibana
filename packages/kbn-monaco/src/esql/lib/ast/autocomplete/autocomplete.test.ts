@@ -14,7 +14,6 @@ import { ESQLErrorListener } from '../../monaco/esql_error_listener';
 import { AstListener } from '../ast_factory';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
-import { getFunctionSignatures } from '../definitions/helpers';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 
 const triggerCharacters = [',', '(', '=', ' '];
@@ -93,7 +92,7 @@ function getFunctionSignaturesByReturnType(
       return true;
     })
     .map(({ builtin: isBuiltinFn, name, signatures, ...defRest }) =>
-      isBuiltinFn ? name : getFunctionSignatures({ name, ...defRest, signatures })[0].declaration
+      isBuiltinFn ? `${name} $0` : `${name}($0)`
     );
 }
 
@@ -144,6 +143,12 @@ function createSuggestContext(text: string, triggerCharacter?: string) {
   };
 }
 
+function getPolicyFields(policyName: string) {
+  return policies
+    .filter(({ name }) => name === policyName)
+    .flatMap(({ enrichFields }) => enrichFields);
+}
+
 describe('autocomplete', () => {
   const getAstAndErrors = async (text: string) => {
     const errorListener = new ESQLErrorListener();
@@ -184,7 +189,7 @@ describe('autocomplete', () => {
           async (text) => (text ? await getAstAndErrors(text) : { ast: [] }),
           callbackMocks
         );
-        expect(suggestions.map((i) => i.label)).toEqual(expected);
+        expect(suggestions.map((i) => i.insertText)).toEqual(expected);
       }
     );
   };
@@ -216,7 +221,7 @@ describe('autocomplete', () => {
     testSuggestions('f', ['row', 'from', 'show']);
     testSuggestions('from ', indexes);
     testSuggestions('from a,', indexes);
-    testSuggestions('from a, b ', ['metadata', '|', ',']);
+    testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
     testSuggestions('from *,', indexes);
   });
 
@@ -326,12 +331,12 @@ describe('autocomplete', () => {
     const allAggFunctions = getFunctionSignaturesByReturnType('stats', 'any', {
       agg: true,
     });
-    testSuggestions('from a | stats ', ['var0', ...allAggFunctions]);
-    testSuggestions('from a | stats a ', ['=']);
+    testSuggestions('from a | stats ', ['var0 =', ...allAggFunctions]);
+    testSuggestions('from a | stats a ', ['= $0']);
     testSuggestions('from a | stats a=', [...allAggFunctions]);
     testSuggestions('from a | stats a=max(b) by ', [...fields.map(({ name }) => name)]);
     testSuggestions('from a | stats a=c by d', ['|', ',']);
-    testSuggestions('from a | stats a=max(b), ', ['var0', ...allAggFunctions, 'a']);
+    testSuggestions('from a | stats a=max(b), ', ['var0 =', ...allAggFunctions]);
     testSuggestions(
       'from a | stats a=min()',
       [...fields.filter(({ type }) => type === 'number').map(({ name }) => name)],
@@ -340,27 +345,22 @@ describe('autocomplete', () => {
     testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
     testSuggestions('from a | stats a=min(b) by ', [...fields.map(({ name }) => name)]);
     // @TODO: remove last 2 suggestions if possible
-    testSuggestions('from a | stats a=min(b),', ['var0', ...allAggFunctions, 'a']);
+    testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
     // @TODO: remove last 2 suggestions if possible
-    testSuggestions('from a | stats var0=min(b),var1=c,', [
-      'var2',
-      ...allAggFunctions,
-      'var0',
-      'var1',
-    ]);
+    testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min(b), b=max()', [
       ...fields.filter(({ type }) => type === 'number').map(({ name }) => name),
     ]);
     // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | eval var0=round(b), var1=round(c) | stats ', [
-      'var2',
+      'var2 =',
       ...allAggFunctions,
       'var0',
       'var1',
     ]);
   });
 
-  describe.skip('enrich', () => {
+  describe('enrich', () => {
     for (const prevCommand of [
       '',
       '| enrich other-policy ',
@@ -379,82 +379,87 @@ describe('autocomplete', () => {
         'kubernetes.something.something',
         'listField',
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b `, ['with', '|', ',']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with `, [
-        'var0',
-        'stringField',
-        'numberField',
-        'dateField',
-        'booleanField',
-        'ipField',
-        'any#Char$ field',
-        'kubernetes.something.something',
-        'listField',
+        'var0 =',
+        ...getPolicyFields('policy'),
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 `, ['=', '|']);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 `, ['= $0', '|', ',']);
       testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = `, [
-        'stringField',
-        'numberField',
-        'dateField',
-        'booleanField',
-        'ipField',
-        'any#Char$ field',
-        'kubernetes.something.something',
-        'listField',
+        ...getPolicyFields('policy'),
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c `, ['|']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c, `, [
-        'var1',
-        'stringField',
-        'numberField',
-        'dateField',
-        'booleanField',
-        'ipField',
-        'any#Char$ field',
-        'kubernetes.something.something',
-        'listField',
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = stringField `, [
+        '|',
+        ',',
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c, var1 `, ['=', '|']);
-      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = c, var1 = `, [
-        'stringField',
-        'numberField',
-        'dateField',
-        'booleanField',
-        'ipField',
-        'any#Char$ field',
-        'kubernetes.something.something',
-        'listField',
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = stringField, `, [
+        'var1 =',
+        ...getPolicyFields('policy'),
       ]);
+      testSuggestions(`from a ${prevCommand}| enrich policy on b with var0 = stringField, var1 `, [
+        '= $0',
+        '|',
+        ',',
+      ]);
+      testSuggestions(
+        `from a ${prevCommand}| enrich policy on b with var0 = stringField, var1 = `,
+        [...getPolicyFields('policy')]
+      );
       testSuggestions(`from a ${prevCommand}| enrich policy with `, [
-        'var0',
-        'otherField',
-        'yetAnotherField',
+        'var0 =',
+        ...getPolicyFields('policy'),
       ]);
-      testSuggestions(`from a ${prevCommand}| enrich policy with c`, ['=', '|', ',']);
+      testSuggestions(`from a ${prevCommand}| enrich policy with stringField`, ['= $0', '|', ',']);
     }
   });
 
-  describe.skip('eval', () => {
-    testSuggestions('from a | eval ', ['var0']);
-    testSuggestions('from a | eval a ', [
-      ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }),
+  describe('eval', () => {
+    testSuggestions('from a | eval ', [
+      'var0 =',
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+      ...fields.map(({ name }) => name),
+    ]);
+    testSuggestions('from a | eval numberField ', [
+      ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
+      '|',
+      ',',
     ]);
     testSuggestions('from a | eval a=', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
     ]);
-    testSuggestions('from a | eval a=b, ', ['var0']);
-    testSuggestions('from a | eval a=round', ['(']);
-    testSuggestions('from a | eval a=round(', ['FieldIdentifier']);
-    testSuggestions('from a | eval a=round(b) ', ['|', '+', '-', '/', '*']);
-    testSuggestions('from a | eval a=round(b),', ['var0']);
-    testSuggestions('from a | eval a=round(b) + ', [
-      'FieldIdentifier',
+    testSuggestions('from a | eval a=numberField, ', [
+      'var0 =',
       ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
     ]);
-    // NOTE: this is handled also partially in the suggestion wrapper with auto-injection of closing brackets
-    testSuggestions('from a | eval a=round(b', [')', 'FieldIdentifier']);
-    testSuggestions('from a | eval a=round(b), b=round(', ['FieldIdentifier']);
-    testSuggestions('from a | stats a=round(b), b=round(', ['FieldIdentifier']);
+    testSuggestions(
+      'from a | eval a=round()',
+      [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      ],
+      '('
+    );
+    testSuggestions('from a | eval a=round(numberField) ', [
+      '|',
+      ',',
+      ...getFunctionSignaturesByReturnType('eval', 'number', { builtin: true }),
+    ]);
+    testSuggestions('from a | eval a=round(numberField),', [
+      'var0 =',
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
+    ]);
+    testSuggestions('from a | eval a=round(numberField) + ', [
+      ...getFieldNamesByType('number'),
+      ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+    ]);
+    testSuggestions(
+      'from a | eval a=round(numberField), b=round()',
+      [
+        ...getFieldNamesByType('number'),
+        ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      ],
+      '('
+    );
 
     describe.skip('date math', () => {
       const dateSuggestions = [

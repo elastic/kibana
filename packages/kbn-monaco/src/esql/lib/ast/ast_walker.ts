@@ -71,6 +71,7 @@ import {
   sanifyIdentifierString,
   computeLocationExtends,
 } from './ast_helpers';
+import { getPosition } from './ast_position_utils';
 import type {
   ESQLLiteral,
   ESQLColumn,
@@ -111,10 +112,12 @@ export function getMatchField(ctx: EnrichCommandContext) {
   }
   const identifier = ctx.sourceIdentifier(1);
   if (identifier) {
-    const fn = createOption('on', ctx);
+    const fn = createOption(ctx.ON()!.text, ctx);
     if (identifier.text) {
       fn.args.push(createColumn(identifier));
     }
+    // overwrite the location inferring the correct position
+    fn.location = getPosition(ctx.ON()!.symbol, ctx.WITH()?.symbol);
     return [fn];
   }
   return [];
@@ -141,6 +144,7 @@ export function getEnrichClauses(ctx: EnrichCommandContext) {
         }
       }
     }
+    option.location = getPosition(ctx.WITH()?.symbol);
   }
 
   return ast;

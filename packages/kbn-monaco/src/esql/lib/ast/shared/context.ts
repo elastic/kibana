@@ -17,11 +17,8 @@ import type {
 import { EDITOR_MARKER } from './constants';
 import {
   isOptionItem,
-  isFunctionItem,
   isColumnItem,
   getLastCharFromTrimmed,
-  isAssignment,
-  getCommandOption,
   getFunctionDefinition,
 } from './helpers';
 
@@ -57,88 +54,105 @@ function findCommand(ast: ESQLAst, offset: number) {
   return ast[commandIndex] || ast[ast.length - 1];
 }
 
+function findOption(nodes: ESQLAstItem[], offset: number): ESQLCommandOption | undefined {
+  // this is a similar logic to the findNode, but it check if the command is in root or option scope
+  for (const node of nodes) {
+    if (!Array.isArray(node) && isOptionItem(node)) {
+      if (
+        (node.location.min <= offset && node.location.max >= offset) ||
+        (nodes[nodes.length - 1] === node && node.location.max < offset)
+      ) {
+        return node;
+      }
+    }
+  }
+}
+
+function isMarkerNode(node: ESQLSingleAstItem | undefined): boolean {
+  return Boolean(node && isColumnItem(node) && node.name === EDITOR_MARKER);
+}
+
+function cleanMarkerNode(node: ESQLSingleAstItem | undefined): ESQLSingleAstItem | undefined {
+  return isMarkerNode(node) ? undefined : node;
+}
+
+function isNotMarkerNodeOrArray(arg: ESQLAstItem) {
+  return Array.isArray(arg) || !isMarkerNode(arg);
+}
+
+function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
+  return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
+}
+
+export function removeMarkerArgFromArgsList(node: ESQLCommand | ESQLSingleAstItem | undefined) {
+  if (!node) {
+    return;
+  }
+  if (node.type === 'command' || node.type === 'option' || node.type === 'function') {
+    return {
+      ...node,
+      args: node.args.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode),
+    };
+  }
+  return node;
+}
+
 function findAstPosition(ast: ESQLAst, offset: number) {
   const command = findCommand(ast, offset);
   if (!command) {
-    return { command: undefined, node: undefined };
+    return { command: undefined, node: undefined, option: undefined };
   }
-  const node = findNode(command.args, offset);
-  return { command, node };
+  return {
+    command: removeMarkerArgFromArgsList(command) as ESQLCommand,
+    option: removeMarkerArgFromArgsList(findOption(command.args, offset)) as
+      | ESQLCommandOption
+      | undefined,
+    node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))) as
+      | ESQLSingleAstItem
+      | undefined,
+  };
 }
 
 function isNotEnrichClauseAssigment(node: ESQLFunction, command: ESQLCommand) {
   return node.name !== '=' && command.name !== 'enrich';
-}
-function isNotLastFunctionStats(node: ESQLFunction, command: ESQLCommand, offset: number) {
-  return command.name === 'stats' && isAssignment(node) && offset < node.location.max;
 }
 function isBuiltinFunction(node: ESQLFunction) {
   return Boolean(getFunctionDefinition(node.name)?.builtin);
 }
 
 export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
-  const { command, node } = findAstPosition(ast, offset);
-  console.log({ ast, offset, command, node });
+  const { command, option, node } = findAstPosition(ast, offset);
   if (node) {
     if (node.type === 'function') {
-      console.log(
-        isNotEnrichClauseAssigment(node, command),
-        isNotLastFunctionStats(node, command, offset)
-      );
       if (['in', 'not_in'].includes(node.name)) {
         // command ... a in ( <here> )
-        return { type: 'list' as const, command, node };
+        return { type: 'list' as const, command, node, option };
       }
       if (isNotEnrichClauseAssigment(node, command) && !isBuiltinFunction(node)) {
         // command ... fn( <here> )
-        return { type: 'function' as const, command, node };
+        return { type: 'function' as const, command, node, option };
       }
     }
-    if (node.type === 'option') {
+    if (node.type === 'option' || option) {
       // command ... by <here>
-      return { type: 'option' as const, command, node };
+      return { type: 'option' as const, command, node, option };
     }
   }
   if (command && command.args.length) {
-    const lastArg = command.args[command.args.length - 1];
-    if (
-      isOptionItem(lastArg) &&
-      (lastArg.incomplete ||
-        !lastArg.args.length ||
-        getCommandOption(lastArg.name)?.signature.multipleParams ||
-        handleEnrichWithClause(lastArg))
-    ) {
-      return { type: 'option' as const, command, node: lastArg };
+    if (option) {
+      return { type: 'option' as const, command, node, option };
     }
   }
   if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
     //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node: undefined };
+    return { type: 'newCommand' as const, command: undefined, node, option };
   }
 
   // command a ... <here> OR command a = ... <here>
   return {
     type: 'expression' as const,
     command,
-    // make sure to clean it up in case the found node is the marker
-    node: node && isColumnItem(node) && node.name === EDITOR_MARKER ? undefined : node,
+    option,
+    node,
   };
-}
-
-function isEmptyValue(text: string) {
-  return [EDITOR_MARKER, ''].includes(text);
-}
-
-// The enrich with clause it a bit tricky to detect, so it deserves a specific check
-function handleEnrichWithClause(option: ESQLCommandOption) {
-  const fnArg = isFunctionItem(option.args[0]) ? option.args[0] : undefined;
-  if (fnArg) {
-    if (fnArg.name === '=' && isColumnItem(fnArg.args[0]) && fnArg.args[1]) {
-      const assignValue = fnArg.args[1];
-      if (Array.isArray(assignValue) && isColumnItem(assignValue[0])) {
-        return fnArg.args[0].name === assignValue[0].name || isEmptyValue(assignValue[0].name);
-      }
-    }
-  }
-  return false;
 }
