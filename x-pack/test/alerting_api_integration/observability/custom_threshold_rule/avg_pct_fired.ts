@@ -16,7 +16,6 @@ import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/cus
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
@@ -38,8 +37,19 @@ export default function ({ getService }: FtrProviderContext) {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
-    const DATE_VIEW_NAME = 'data-view-name';
+    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
+    const MOCKED_AD_HOC_DATA_VIEW = {
+      id: DATA_VIEW_ID,
+      title: DATE_VIEW,
+      timeFieldName: '@timestamp',
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      allowNoIndex: false,
+      name: DATE_VIEW_NAME,
+      allowHidden: false,
+    };
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
@@ -48,12 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
-      await createDataView({
-        supertest,
-        name: DATE_VIEW_NAME,
-        id: DATA_VIEW_ID,
-        title: DATE_VIEW,
-      });
     });
 
     after(async () => {
@@ -66,10 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
-      });
-      await deleteDataView({
-        supertest,
-        id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
       await cleanup({ esClient, logger });
@@ -109,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
                 query: '',
                 language: 'kuery',
               },
-              index: DATA_VIEW_ID,
+              index: MOCKED_AD_HOC_DATA_VIEW,
             },
           },
           actions: [
@@ -199,7 +199,10 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: MOCKED_AD_HOC_DATA_VIEW,
+              query: { query: '', language: 'kuery' },
+            },
           });
       });
 
