@@ -22,8 +22,7 @@ if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
         - Version               : $version
     """
     echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
-    # Setting commit to match the last built container commit hash
-    git checkout $vcs_ref
+    buildkite-agent env set KIBANA_BUILD_SHA="git-${BUILDKITE_COMMIT:0:12}"
 else
     echo "KIBANA_OVERRIDE_FLAG is $KIBANA_OVERRIDE_FLAG"
 fi 
