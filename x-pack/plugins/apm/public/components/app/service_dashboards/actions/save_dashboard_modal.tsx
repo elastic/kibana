@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { useHistory } from 'react-router-dom';
 import {
   EuiButton,
   EuiModal,
@@ -29,6 +30,7 @@ import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { SERVICE_NAME } from '../../../../../common/es_fields/apm';
+import { fromQuery, toQuery } from '../../../shared/links/url_helpers';
 import { MergedServiceDashboard } from '..';
 
 interface Props {
@@ -48,6 +50,7 @@ export function SaveDashboardModal({
     core: { notifications },
   } = useApmPluginContext();
   const { data: allAvailableDashboards, status } = useDashboardFetcher();
+  const history = useHistory();
 
   let defaultOption: EuiComboBoxOptionOption<string> | undefined;
 
@@ -87,7 +90,7 @@ export function SaveDashboardModal({
         ) ?? false,
     })
   );
-  const onSave = useCallback(
+  const onClickSave = useCallback(
     async function () {
       const [newDashboard] = selectedDashboard;
       try {
@@ -110,6 +113,13 @@ export function SaveDashboardModal({
               ? getEditSuccessToastLabels(newDashboard.label)
               : getLinkSuccessToastLabels(newDashboard.label)
           );
+          history.push({
+            ...history.location,
+            search: fromQuery({
+              ...toQuery(location.search),
+              dashboardId: newDashboard.value,
+            }),
+          });
           reloadCustomDashboards();
         }
       } catch (error) {
@@ -136,6 +146,7 @@ export function SaveDashboardModal({
       isEditMode,
       serviceName,
       currentDashboard,
+      history,
     ]
   );
 
@@ -167,7 +178,7 @@ export function SaveDashboardModal({
             placeholder={i18n.translate(
               'xpack.apm.serviceDashboards.selectDashboard.placeholder',
               {
-                defaultMessage: 'Select dasbboard',
+                defaultMessage: 'Select dashboard',
               }
             )}
             singleSelection={{ asPlainText: true }}
@@ -222,7 +233,7 @@ export function SaveDashboardModal({
         </EuiButtonEmpty>
         <EuiButton
           data-test-subj="apmSelectDashboardButton"
-          onClick={onSave}
+          onClick={onClickSave}
           fill
         >
           {isEditMode

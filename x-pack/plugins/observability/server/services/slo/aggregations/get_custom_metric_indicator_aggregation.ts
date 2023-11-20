@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricCustomIndicator } from '@kbn/slo-schema';
+import { metricCustomDocCountMetric, MetricCustomIndicator } from '@kbn/slo-schema';
 import { getElastichsearchQueryOrThrow } from '../transform_generators';
 
 type MetricCustomMetricDef =
@@ -20,12 +20,22 @@ export class GetCustomMetricIndicatorAggregation {
       const filter = metric.filter
         ? getElastichsearchQueryOrThrow(metric.filter)
         : { match_all: {} };
+
+      if (metricCustomDocCountMetric.is(metric)) {
+        return {
+          ...acc,
+          [`_${type}_${metric.name}`]: {
+            filter,
+          },
+        };
+      }
+
       return {
         ...acc,
         [`_${type}_${metric.name}`]: {
           filter,
           aggs: {
-            sum: {
+            metric: {
               [metric.aggregation]: { field: metric.field },
             },
           },
@@ -42,10 +52,11 @@ export class GetCustomMetricIndicatorAggregation {
   }
 
   private buildMetricEquation(type: 'good' | 'total', metricDef: MetricCustomMetricDef) {
-    const bucketsPath = metricDef.metrics.reduce(
-      (acc, metric) => ({ ...acc, [metric.name]: `_${type}_${metric.name}>sum` }),
-      {}
-    );
+    const bucketsPath = metricDef.metrics.reduce((acc, metric) => {
+      const path = metricCustomDocCountMetric.is(metric) ? '_count' : 'metric';
+      return { ...acc, [metric.name]: `_${type}_${metric.name}>${path}` };
+    }, {});
+
     return {
       bucket_script: {
         buckets_path: bucketsPath,

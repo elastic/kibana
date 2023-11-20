@@ -11,7 +11,7 @@ import type {
   LogExplorerPluginStart,
 } from '@kbn/log-explorer-plugin/public';
 import { useActor } from '@xstate/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import { LogExplorerTopNavMenu } from '../../components/log_explorer_top_nav_menu';
 import { ObservabilityLogExplorerPageTemplate } from '../../components/page_template';
 import {
@@ -32,6 +32,8 @@ export const ObservablityLogExplorerMainRoute = () => {
   useBreadcrumbs(noBreadcrumbs, chrome, serverless);
 
   const urlStateStorageContainer = useKbnUrlStateStorageFromRouterContext();
+
+  const customizations = useMemo(() => createLogExplorerCustomizations(), []);
 
   return (
     <ObservabilityLogExplorerPageStateProvider
@@ -97,7 +99,11 @@ const InitializedContent = React.memo(
     logExplorerController: LogExplorerController;
   }) => (
     <ObservabilityLogExplorerPageTemplate>
-      <logExplorer.LogExplorer scopedHistory={history} controller={logExplorerController} />
+      <logExplorer.LogExplorer
+        controller={logExplorerController}
+        customizations={customizations}
+        scopedHistory={history}
+      />
     </ObservabilityLogExplorerPageTemplate>
   )
 );

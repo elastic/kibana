@@ -13,7 +13,8 @@ import type { Observable } from 'rxjs';
 import type { LogExplorerController } from '../../controller';
 import { createLogExplorerProfileCustomizations } from '../../customizations/log_explorer_profile';
 import type { LogExplorerControllerContext } from '../../state_machines/log_explorer_controller';
-import type { LogExplorerStartDeps } from '../../types';
+import { LogExplorerStartDeps } from '../../types';
+import { LogExplorerCustomizations } from './types';
 
 export interface CreateLogExplorerArgs {
   core: CoreStart;
@@ -26,6 +27,7 @@ export interface LogExplorerStateContainer {
 }
 
 export interface LogExplorerProps {
+  customizations?: LogExplorerCustomizations;
   scopedHistory: ScopedHistory;
   state$?: Observable<LogExplorerStateContainer>;
   controller: LogExplorerController;
@@ -36,10 +38,10 @@ export const createLogExplorer = ({ core, plugins }: CreateLogExplorerArgs) => {
     discover: { DiscoverContainer },
   } = plugins;
 
-  return ({ scopedHistory, controller }: LogExplorerProps) => {
+  return ({ customizations = {}, scopedHistory, controller }: LogExplorerProps) => {
     const logExplorerCustomizations = useMemo(
-      () => [createLogExplorerProfileCustomizations({ core, plugins, controller })],
-      [controller]
+      () => [createLogExplorerProfileCustomizations({ controller, core, customizations, plugins })],
+      [controller, customizations]
     );
 
     const { urlStateStorage, ...overrideServices } = controller.discoverServices;

@@ -11,7 +11,7 @@ import { EuiSteps, EuiSpacer } from '@elastic/eui';
 import { safeDump } from 'js-yaml';
 
 import type { FullAgentPolicy } from '../../../../../../../../../../common/types/models/agent_policy';
-
+import { API_VERSIONS } from '../../../../../../../../../../common/constants';
 import {
   AgentStandaloneBottomBar,
   StandaloneModeWarningCallout,
@@ -95,7 +95,9 @@ export const InstallElasticAgentStandalonePageStep: React.FC<InstallAgentPagePro
   const installManagedCommands = StandaloneInstructions(kibanaVersion);
 
   const downloadLink = core.http.basePath.prepend(
-    `${agentPolicyRouteService.getInfoFullDownloadPath(agentPolicy?.id)}?standalone=true`
+    `${agentPolicyRouteService.getInfoFullDownloadPath(
+      agentPolicy?.id
+    )}?standalone=true&apiVersion=${API_VERSIONS.public.v1}`
   );
   const steps = [
     ConfigureStandaloneAgentStep({

@@ -248,6 +248,7 @@ describe('DocViewTable at Discover Doc', () => {
   const props = {
     hit,
     dataView,
+    hideActionsColumn: true,
   };
   const component = mountComponent(props);
   const foundLength = findTestSubject(component, 'addInclusiveFilterButton').length;
