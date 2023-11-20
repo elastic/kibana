@@ -21,6 +21,7 @@ import {
   initGetLogEntryExamplesRoute,
   initValidateLogAnalysisDatasetsRoute,
   initValidateLogAnalysisIndicesRoute,
+  initGetLogAnalysisIdFormatsRoute,
 } from './routes/log_analysis';
 import { initMetadataRoute } from './routes/metadata';
 import { initMetricsAPIRoute } from './routes/metrics_api';
@@ -45,6 +46,7 @@ export const initInfraServer = (libs: InfraBackendLibs) => {
   initSnapshotRoute(libs);
   initNodeDetailsRoute(libs);
   initMetricsSourceConfigurationRoutes(libs);
+  initGetLogAnalysisIdFormatsRoute(libs);
   initValidateLogAnalysisDatasetsRoute(libs);
   initValidateLogAnalysisIndicesRoute(libs);
   initGetLogEntryExamplesRoute(libs);
