@@ -198,6 +198,12 @@ export const Controls: FC<Props> = React.memo(
       const selectHandler: cytoscape.EventHandler = (event) => {
         const targetNode = event.target;
         if (targetNode._private.data.type === JOB_MAP_NODE_TYPES.ANALYTICS_JOB_MISSING) {
+          toasts.addWarning(
+            i18n.translate('xpack.ml.dataframe.analyticsMap.flyout.jobMissingMessage', {
+              defaultMessage: 'There is no data available for job {label}.',
+              values: { label: targetNode._private.data.label },
+            })
+          );
           return;
         }
         setSelectedNode(targetNode);
@@ -215,7 +221,7 @@ export const Controls: FC<Props> = React.memo(
           cy.removeListener('unselect', 'node', deselect);
         }
       };
-    }, [cy, deselect]);
+    }, [cy, deselect, toasts]);
 
     useEffect(
       function updateElementsOnClose() {

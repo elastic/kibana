@@ -162,14 +162,16 @@ export class AnalyticsManager {
 
   private getAnalyticsModelElements(
     analyticsId: string,
-    analyticsCreateTime: number
+    analyticsCreateTime?: number
   ): {
     modelElement?: AnalyticsMapNodeElement;
     modelDetails?: any;
     edgeElement?: AnalyticsMapEdgeElement;
   } {
     // Get trained model for analytics job and create model node
-    const analyticsModel = this.findJobModel(analyticsId, analyticsCreateTime);
+    const analyticsModel = analyticsCreateTime
+      ? this.findJobModel(analyticsId, analyticsCreateTime)
+      : undefined;
     let modelElement;
     let edgeElement;
 
@@ -254,7 +256,7 @@ export class AnalyticsManager {
       nextLinkId = data?.source?.index[0];
       nextType = JOB_MAP_NODE_TYPES.INDEX;
       previousNodeId = `${data?.id ?? sourceJobId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
-
+      // If data is undefined - job wasn't found. Create missing job node.
       resultElements.push(
         data === undefined
           ? this.getMissingJobNode(sourceJobId)
@@ -641,7 +643,7 @@ export class AnalyticsManager {
       if (analyticsId !== undefined) {
         const jobData = this.findJob(analyticsId);
 
-        const currentJobNodeId = `${jobData.id}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
+        const currentJobNodeId = `${jobData?.id ?? analyticsId}-${JOB_MAP_NODE_TYPES.ANALYTICS}`;
         rootIndex = Array.isArray(jobData?.dest?.index)
           ? jobData?.dest?.index[0]
           : jobData?.dest?.index;
@@ -650,7 +652,7 @@ export class AnalyticsManager {
         // Fetch trained model for incoming job id and add node and edge
         const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
           analyticsId,
-          jobData.create_time!
+          jobData?.create_time!
         );
         if (isAnalyticsMapNodeElement(modelElement)) {
           result.elements.push(modelElement);
