@@ -93,7 +93,7 @@ describe('RuleFormConsumerSelectionModal', () => {
     expect(screen.queryByTestId('ruleFormConsumerSelect')).not.toBeInTheDocument();
   });
 
-  it('should display nothing if observability is one of the consumer', () => {
+  it('should display nothing if observability is one of the consumers', () => {
     render(
       <RuleFormConsumerSelection
         selectedConsumer={null}
@@ -118,5 +118,18 @@ describe('RuleFormConsumerSelectionModal', () => {
 
     expect(screen.getByText('Logs')).toBeInTheDocument();
     expect(() => screen.getByText('Select a scope')).toThrow();
+  });
+
+  it('should not display the initial selected consumer if it is not a selectable option', () => {
+    render(
+      <RuleFormConsumerSelection
+        selectedConsumer={'logs'}
+        consumers={['stackAlerts', 'infrastructure']}
+        onChange={mockOnChange}
+        errors={{}}
+      />
+    );
+    expect(() => screen.getByText('Logs')).toThrow();
+    expect(screen.getByText('Select a scope')).toBeInTheDocument();
   });
 });

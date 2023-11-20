@@ -86,12 +86,22 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
     },
     [onChange]
   );
+  const validatedSelectedConsumer = useMemo(() => {
+    if (
+      selectedConsumer &&
+      consumers.includes(selectedConsumer) &&
+      featureNameMap[selectedConsumer]
+    ) {
+      return selectedConsumer;
+    }
+    return null;
+  }, [selectedConsumer, consumers]);
   const selectedOptions = useMemo(
     () =>
-      selectedConsumer
-        ? [{ value: selectedConsumer, label: featureNameMap[selectedConsumer] }]
+      validatedSelectedConsumer
+        ? [{ value: validatedSelectedConsumer, label: featureNameMap[validatedSelectedConsumer] }]
         : [],
-    [selectedConsumer]
+    [validatedSelectedConsumer]
   );
 
   const formattedSelectOptions: Array<EuiComboBoxOptionOption<RuleCreationValidConsumer>> =
@@ -114,7 +124,7 @@ export const RuleFormConsumerSelection = (props: RuleFormConsumerSelectionProps)
 
   useEffect(() => {
     // At initialization, if no value is selected, return a null value to trigger prop validation
-    if (!selectedConsumer) onChange(null);
+    if (!validatedSelectedConsumer) onChange(null);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
