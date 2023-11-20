@@ -12,12 +12,13 @@ import type {
   CalculateScoresParams,
   CalculateScoresResponse,
   RiskEngineConfiguration,
-} from './types';
+} from '../types';
 import { calculateRiskScores } from './calculate_risk_scores';
 import { calculateAndPersistRiskScores } from './calculate_and_persist_risk_scores';
-import type { RiskEngineDataClient } from './risk_engine_data_client';
+import type { RiskEngineDataClient } from '../risk_engine/risk_engine_data_client';
+import type { RiskScoreDataClient } from './risk_score_data_client';
 import type { RiskInputsIndexResponse } from './get_risk_inputs_index';
-import { scheduleLatestTransformNow } from './utils/transforms';
+import { scheduleLatestTransformNow } from '../utils/transforms';
 
 export interface RiskScoreService {
   calculateScores: (params: CalculateScoresParams) => Promise<CalculateScoresResponse>;
@@ -33,6 +34,7 @@ export interface RiskScoreServiceFactoryParams {
   esClient: ElasticsearchClient;
   logger: Logger;
   riskEngineDataClient: RiskEngineDataClient;
+  riskScoreDataClient: RiskScoreDataClient;
   spaceId: string;
 }
 
@@ -40,12 +42,13 @@ export const riskScoreServiceFactory = ({
   esClient,
   logger,
   riskEngineDataClient,
+  riskScoreDataClient,
   spaceId,
 }: RiskScoreServiceFactoryParams): RiskScoreService => ({
   calculateScores: (params) => calculateRiskScores({ ...params, esClient, logger }),
   calculateAndPersistScores: (params) =>
-    calculateAndPersistRiskScores({ ...params, esClient, logger, riskEngineDataClient, spaceId }),
+    calculateAndPersistRiskScores({ ...params, esClient, logger, riskScoreDataClient, spaceId }),
   getConfiguration: async () => riskEngineDataClient.getConfiguration(),
-  getRiskInputsIndex: async (params) => riskEngineDataClient.getRiskInputsIndex(params),
+  getRiskInputsIndex: async (params) => riskScoreDataClient.getRiskInputsIndex(params),
   scheduleLatestTransformNow: () => scheduleLatestTransformNow({ namespace: spaceId, esClient }),
 });

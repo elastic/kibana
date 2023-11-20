@@ -7,8 +7,8 @@
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { RiskEngineDataClient } from './risk_engine_data_client';
-import type { CalculateAndPersistScoresParams, CalculateAndPersistScoresResponse } from './types';
+import type { RiskScoreDataClient } from './risk_score_data_client';
+import type { CalculateAndPersistScoresParams, CalculateAndPersistScoresResponse } from '../types';
 import { calculateRiskScores } from './calculate_risk_scores';
 
 export const calculateAndPersistRiskScores = async (
@@ -16,11 +16,11 @@ export const calculateAndPersistRiskScores = async (
     esClient: ElasticsearchClient;
     logger: Logger;
     spaceId: string;
-    riskEngineDataClient: RiskEngineDataClient;
+    riskScoreDataClient: RiskScoreDataClient;
   }
 ): Promise<CalculateAndPersistScoresResponse> => {
-  const { riskEngineDataClient, spaceId, ...rest } = params;
-  const writer = await riskEngineDataClient.getWriter({
+  const { riskScoreDataClient, spaceId, ...rest } = params;
+  const writer = await riskScoreDataClient.getWriter({
     namespace: spaceId,
   });
   const { after_keys: afterKeys, scores } = await calculateRiskScores(rest);

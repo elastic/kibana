@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CalculateAndPersistScoresResponse } from './types';
+import type { CalculateAndPersistScoresResponse } from '../types';
 
 const buildResponseMock = (
   overrides: Partial<CalculateAndPersistScoresResponse> = {}

@@ -21,8 +21,8 @@ import type {
   GetRiskEngineStatusResponse,
   InitRiskEngineResponse,
   DisableRiskEngineResponse,
-  RiskEnginePrivilegesResponse,
-} from '../../../server/lib/entity_analytics/risk_engine/types';
+  RiskEnginePrivilegesResponse
+} from '../../../server/lib/entity_analytics/types';
 import type { RiskScorePreviewRequestSchema } from '../../../common/risk_engine/risk_score_preview/request_schema';
 
 /**

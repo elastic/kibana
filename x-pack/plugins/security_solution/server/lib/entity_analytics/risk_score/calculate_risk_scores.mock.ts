@@ -14,7 +14,7 @@ import type {
   CalculateRiskScoreAggregations,
   CalculateScoresResponse,
   RiskScoreBucket,
-} from './types';
+} from '../types';
 
 const buildRiskScoreBucketMock = (overrides: Partial<RiskScoreBucket> = {}): RiskScoreBucket => ({
   key: { 'user.name': 'username' },

@@ -12,12 +12,12 @@ import {
   APP_ID,
   DEFAULT_RISK_SCORE_PAGE_SIZE,
   RISK_SCORE_CALCULATION_URL,
-} from '../../../../../common/constants';
-import { riskScoreCalculationRequestSchema } from '../../../../../common/risk_engine/risk_score_calculation/request_schema';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { buildRouteValidation } from '../../../../utils/build_validation/route_validation';
-import { riskScoreServiceFactory } from '../risk_score_service';
-import { getRiskInputsIndex } from '../get_risk_inputs_index';
+} from '../../../../common/constants';
+import { riskScoreCalculationRequestSchema } from '../../../../common/risk_engine/risk_score_calculation/request_schema';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import { buildRouteValidation } from '../../../utils/build_validation/route_validation';
+import { riskScoreServiceFactory } from '../risk_score/risk_score_service';
+import { getRiskInputsIndex } from '../risk_score/get_risk_inputs_index';
 
 export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
   router.versioned

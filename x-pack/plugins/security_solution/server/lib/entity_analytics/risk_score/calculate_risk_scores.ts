@@ -38,7 +38,7 @@ import type {
   CalculateScoresParams,
   CalculateScoresResponse,
   RiskScoreBucket,
-} from './types';
+} from '../types';
 
 const bucketToResponse = ({
   bucket,

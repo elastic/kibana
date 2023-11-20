@@ -81,8 +81,8 @@ import {
   riskEngineEnableRoute,
   riskEngineStatusRoute,
   riskEnginePrivilegesRoute,
-} from '../lib/entity_analytics/risk_engine/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_engine/routes/risk_score_calculation_route';
+} from '../lib/entity_analytics/routes';
+import { riskScoreCalculationRoute } from '../lib/entity_analytics/routes/risk_score_calculation_route';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,

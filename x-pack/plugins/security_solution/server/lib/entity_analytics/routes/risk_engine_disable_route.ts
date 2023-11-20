@@ -5,17 +5,22 @@
  * 2.0.
  */
 
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
+import { RISK_ENGINE_DISABLE_URL, APP_ID } from '../../../../common/constants';
+import type { StartPlugins } from '../../../plugin';
+import type { SecuritySolutionPluginRouter } from '../../../types';
+import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
 
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-
-export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const riskEngineDisableRoute = (
+  router: SecuritySolutionPluginRouter,
+  getStartServices: StartServicesAccessor<StartPlugins>
+) => {
   router.versioned
-    .get({
+    .post({
       access: 'internal',
-      path: RISK_ENGINE_STATUS_URL,
+      path: RISK_ENGINE_DISABLE_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
@@ -23,21 +28,20 @@ export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
     .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
 
+      const [_, { taskManager }] = await getStartServices();
       const securitySolution = await context.securitySolution;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
-      const spaceId = securitySolution.getSpaceId();
+
+      if (!taskManager) {
+        return siemResponse.error({
+          statusCode: 400,
+          body: TASK_MANAGER_UNAVAILABLE_ERROR,
+        });
+      }
 
       try {
-        const result = await riskEngineClient.getStatus({
-          namespace: spaceId,
-        });
-        return response.ok({
-          body: {
-            risk_engine_status: result.riskEngineStatus,
-            legacy_risk_engine_status: result.legacyRiskEngineStatus,
-            is_max_amount_of_risk_engines_reached: result.isMaxAmountOfRiskEnginesReached,
-          },
-        });
+        await riskEngineClient.disableRiskEngine({ taskManager });
+        return response.ok({ body: { success: true } });
       } catch (e) {
         const error = transformError(e);
 

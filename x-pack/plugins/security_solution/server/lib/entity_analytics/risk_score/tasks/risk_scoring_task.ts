@@ -21,7 +21,8 @@ import type { AnalyticsServiceSetup } from '@kbn/core-analytics-server';
 import type { AfterKeys, IdentifierType } from '../../../../../common/risk_engine';
 import type { StartPlugins } from '../../../../plugin';
 import { type RiskScoreService, riskScoreServiceFactory } from '../risk_score_service';
-import { RiskEngineDataClient } from '../risk_engine_data_client';
+import { RiskEngineDataClient } from '../../risk_engine/risk_engine_data_client';
+import { RiskScoreDataClient } from '../risk_score_data_client';
 import { isRiskScoreCalculationComplete } from '../helpers';
 import {
   defaultState,
@@ -77,11 +78,19 @@ export const registerRiskScoringTask = ({
         namespace,
         soClient,
       });
+      const riskScoreDataClient = new RiskScoreDataClient({
+        logger,
+        kibanaVersion,
+        esClient,
+        namespace,
+        soClient,
+      });
 
       return riskScoreServiceFactory({
         esClient,
         logger,
         riskEngineDataClient,
+        riskScoreDataClient,
         spaceId: namespace,
       });
     });

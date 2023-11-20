@@ -14,7 +14,7 @@ import type {
   Range,
   RiskEngineStatus,
   RiskScore,
-} from '../../../../common/risk_engine';
+} from '../../../common/risk_engine';
 
 export interface CalculateScoresParams {
   afterKeys: AfterKeys;

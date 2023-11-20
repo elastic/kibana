@@ -14,7 +14,7 @@ import type { AnalyticsServiceSetup } from '@kbn/core/public';
 import type { RiskScoreService } from '../risk_score_service';
 import { riskScoreServiceMock } from '../risk_score_service.mock';
 import { riskScoringTaskMock } from './risk_scoring_task.mock';
-import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
+import { riskEngineDataClientMock } from '../../risk_engine/risk_engine_data_client.mock';
 import {
   registerRiskScoringTask,
   startRiskScoringTask,

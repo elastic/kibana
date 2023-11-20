@@ -9,19 +9,19 @@ import { riskScoreCalculationRoute } from './risk_score_calculation_route';
 
 import { loggerMock } from '@kbn/logging-mocks';
 
-import { RISK_SCORE_CALCULATION_URL } from '../../../../../common/constants';
+import { RISK_SCORE_CALCULATION_URL } from '../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
   requestMock,
-} from '../../../detection_engine/routes/__mocks__';
-import { riskScoreServiceFactory } from '../risk_score_service';
-import { riskScoreServiceMock } from '../risk_score_service.mock';
-import { getRiskInputsIndex } from '../get_risk_inputs_index';
-import { calculateAndPersistRiskScoresMock } from '../calculate_and_persist_risk_scores.mock';
+} from '../../detection_engine/routes/__mocks__';
+import { riskScoreServiceFactory } from '../risk_score/risk_score_service';
+import { riskScoreServiceMock } from '../risk_score/risk_score_service.mock';
+import { getRiskInputsIndex } from '../risk_score/get_risk_inputs_index';
+import { calculateAndPersistRiskScoresMock } from '../risk_score/calculate_and_persist_risk_scores.mock';
 
-jest.mock('../get_risk_inputs_index');
-jest.mock('../risk_score_service');
+jest.mock('../risk_score/get_risk_inputs_index');
+jest.mock('../risk_score/risk_score_service');
 
 describe('risk score calculation route', () => {
   let server: ReturnType<typeof serverMock.create>;

@@ -6,7 +6,7 @@
  */
 
 import type { AfterKey, AfterKeys, IdentifierType } from '../../../../common/risk_engine';
-import type { CalculateAndPersistScoresResponse } from './types';
+import type { CalculateAndPersistScoresResponse } from '../types';
 
 export const getFieldForIdentifierAgg = (identifierType: IdentifierType): string =>
   identifierType === 'host' ? 'host.name' : 'user.name';

@@ -8,11 +8,10 @@
 import type { StartServicesAccessor, Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
-import type { StartPlugins } from '../../../../plugin';
+import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../common/constants';
+import type { StartPlugins } from '../../../plugin';
 import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { AssetCriticalityDataClient } from '../../asset_criticality/asset_criticality_data_client';
+import type { SecuritySolutionPluginRouter } from '../../../types';
 import type { InitRiskEngineResultResponse } from '../types';
 
 export const riskEngineInitRoute = (
@@ -44,19 +43,9 @@ export const riskEngineInitRoute = (
           });
         }
 
-        const coreContext = await context.core;
-
-        // We use internal user here for resource installation, not current user
-        const assetCriticalityDataClient = new AssetCriticalityDataClient({
-          esClient: coreContext.elasticsearch.client.asInternalUser,
-          logger,
-          namespace: spaceId,
-        });
-
         const initResult = await riskEngineDataClient.init({
           taskManager,
           namespace: spaceId,
-          assetCriticalityDataClient,
           isAssetCriticalityEnabled,
         });
 

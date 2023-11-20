@@ -14,11 +14,11 @@ import type {
   TransformPutTransformRequest,
   TransformGetTransformStatsTransformStats,
 } from '@elastic/elasticsearch/lib/api/types';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { RiskScoreEntity } from '../../../../common/search_strategy';
 import {
   getRiskScorePivotTransformId,
   getRiskScoreLatestTransformId,
-} from '../../../../../common/utils/risk_score_modules';
+} from '../../../../common/utils/risk_score_modules';
 
 export const getLegacyTransforms = async ({
   namespace,
