@@ -3433,6 +3433,48 @@
             "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYVisualOptions.valueLabels",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "valueLabels",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "expressionXY",
+                "scope": "common",
+                "docId": "kibExpressionXYPluginApi",
+                "section": "def-common.ValueLabelMode",
+                "text": "ValueLabelMode"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/lens-embeddable-utils",
+            "id": "def-public.XYVisualOptions.axisTitlesVisibilitySettings",
+            "type": "Object",
+            "tags": [],
+            "label": "axisTitlesVisibilitySettings",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "visualizations",
+                "scope": "common",
+                "docId": "kibVisualizationsPluginApi",
+                "section": "def-common.AxesSettingsConfig",
+                "text": "AxesSettingsConfig"
+              },
+              " | undefined"
+            ],
+            "path": "packages/kbn-lens-embeddable-utils/attribute_builder/visualization_types/xy_chart.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -3606,7 +3648,15 @@
           },
           " | undefined; reducedTimeRange?: string | undefined; timeScale?: ",
           "TimeScaleUnit",
-          " | undefined; format?: { id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined; }, \"formula\"> & { color?: string | undefined; value: string; }"
+          " | undefined; format?: { id: string; params?: { decimals: number; compact?: boolean | undefined; } | undefined; } | undefined; }, \"formula\"> & { color?: string | undefined; fill?: ",
+          {
+            "pluginId": "expressionXY",
+            "scope": "common",
+            "docId": "kibExpressionXYPluginApi",
+            "section": "def-common.FillStyle",
+            "text": "FillStyle"
+          },
+          " | undefined; value: string; }"
         ],
         "path": "packages/kbn-lens-embeddable-utils/attribute_builder/types.ts",
         "deprecated": false,
