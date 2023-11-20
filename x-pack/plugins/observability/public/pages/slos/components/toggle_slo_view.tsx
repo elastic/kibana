@@ -30,11 +30,13 @@ const toggleButtonsIcons = [
     id: `cardView`,
     label: 'Card View',
     iconType: 'visGauge',
+    'data-test-subj': 'sloCardViewButton',
   },
   {
     id: `listView`,
     label: 'List View',
     iconType: 'list',
+    'data-test-subj': 'sloListViewButton',
   },
 ];
 
