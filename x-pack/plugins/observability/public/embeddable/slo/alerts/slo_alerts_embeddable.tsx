@@ -33,6 +33,7 @@ import { SettingsStart } from '@kbn/core-ui-settings-browser';
 import { SecurityPluginStart } from '@kbn/security-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import { ServerlessPluginStart } from '@kbn/serverless/public';
 
 import { SloAlertsWrapper } from './slo_alerts_wrapper';
 import type { SloAlertsEmbeddableInput } from './types';
@@ -53,6 +54,7 @@ export interface SloEmbeddableDeps {
   security: SecurityPluginStart;
   charts: ChartsPluginStart;
   uiActions: UiActionsStart;
+  serverless?: ServerlessPluginStart;
 }
 
 export class SLOAlertsEmbeddable extends AbstractEmbeddable<
@@ -94,7 +96,13 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     const deps = this.deps;
     ReactDOM.render(
       <I18nContext>
-        <KibanaContextProvider services={{ ...this.deps, storage: new Storage(localStorage) }}>
+        <KibanaContextProvider
+          services={{
+            ...this.deps,
+            storage: new Storage(localStorage),
+            isServerless: !!deps.serverless,
+          }}
+        >
           <Router history={history}>
             <QueryClientProvider client={queryClient}>
               <SloAlertsWrapper embeddable={this} deps={deps} slos={slos} timeRange={timeRange} />

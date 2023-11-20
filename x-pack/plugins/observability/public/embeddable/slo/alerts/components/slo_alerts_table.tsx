@@ -12,7 +12,7 @@ import type { SloItem } from '../types';
 
 type SloIdAndInstanceId = [string, string];
 const ALERTS_PER_PAGE = 10;
-const ALERTS_TABLE_ID = 'xpack.observability.sloEmbeddable.alert.table';
+const ALERTS_TABLE_ID = 'xpack.observability.sloAlertsEmbeddable.alert.table';
 
 interface Props {
   deps: SloEmbeddableDeps;
