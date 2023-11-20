@@ -7,10 +7,8 @@
 
 import styled from 'styled-components';
 import React from 'react';
-import { encode } from '@kbn/rison';
 import type { EuiBasicTableProps } from '@elastic/eui';
-import { EuiButton, EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiAccordion, EuiToolTip, EuiText, EuiBasicTable } from '@elastic/eui';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 
 import { i18n } from '@kbn/i18n';
@@ -18,6 +16,7 @@ import { i18n } from '@kbn/i18n';
 import type { ActionErrorResult } from '../../../../../../../common/types';
 
 import { buildQuery } from '../../agent_details_page/components/agent_logs/build_query';
+import { ViewLogsButton } from '../../agent_details_page/components/agent_logs/view_logs_button';
 
 import type { ActionStatus } from '../../../../types';
 import { useStartServices } from '../../../../hooks';
@@ -30,6 +29,7 @@ const TruncatedEuiText = styled(EuiText)`
 
 export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ action }) => {
   const coreStart = useStartServices();
+  const isLogsUIAvailable = !coreStart.cloud?.isServerlessEnabled;
 
   const addOrSubtractMinutes = (timestamp: string, interval: number, subtract?: boolean) => {
     const date = new Date(timestamp);
@@ -41,26 +41,26 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
     return date.toISOString();
   };
 
-  const viewInDiscoverUrl = (agentId: string, timestamp: string) => {
-    const index = 'logs-*';
-
+  const getLogsButton = (agentId: string, timestamp: string, viewInLogs: boolean) => {
     const startTime = addOrSubtractMinutes(timestamp, 5, true);
     const endTime = addOrSubtractMinutes(timestamp, 5);
 
-    const query = encode({
-      query: buildQuery({
-        agentId,
-        datasets: ['elastic_agent'],
-        logLevels: ['error'],
-        userQuery: '',
-      }),
-      language: 'kuery',
+    const logStreamQuery = buildQuery({
+      agentId,
+      datasets: ['elastic_agent'],
+      logLevels: ['error'],
+      userQuery: '',
     });
-
-    return coreStart.http.basePath.prepend(
-      `/app/discover#/?_g=(filters:!(),refreshInterval:(pause:!t,value:60000),time:(from:'${startTime}',to:'${endTime}'))&_a=(columns:!(message,error.message,log.level),index:'${index}',query:${query})`
+    return (
+      <ViewLogsButton
+        viewInLogs={viewInLogs}
+        logStreamQuery={logStreamQuery}
+        startTime={startTime}
+        endTime={endTime}
+      />
     );
   };
+
   const columns: EuiBasicTableProps<ActionErrorResult>['columns'] = [
     {
       field: 'hostname',
@@ -95,16 +95,7 @@ export const ViewErrors: React.FunctionComponent<{ action: ActionStatus }> = ({ 
         const errorItem = (action.latestErrors ?? []).find((item) => item.agentId === agentId);
         return (
           <RedirectAppLinks coreStart={coreStart}>
-            <EuiButton
-              href={viewInDiscoverUrl(agentId, errorItem!.timestamp)}
-              color="danger"
-              data-test-subj="viewInDiscoverBtn"
-            >
-              <FormattedMessage
-                id="xpack.fleet.agentActivityFlyout.reviewErrorLogs"
-                defaultMessage="Review error logs"
-              />
-            </EuiButton>
+            {getLogsButton(agentId, errorItem!.timestamp, !!isLogsUIAvailable)}
           </RedirectAppLinks>
         );
       },
