@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import type { IEsError } from '@kbn/data-plugin/public';
+import type { IEsError } from '@kbn/search-errors';
 import type { KibanaError, SecurityAppError } from '@kbn/securitysolution-t-grid';
 
 import { useToasts } from '../lib/kibana';
