@@ -14,7 +14,7 @@ import {
   PluginInitializerContext,
   KibanaRequest,
 } from '@kbn/core/server';
-import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { dataViewsServiceFactory } from './data_views_service_factory';
 import { registerRoutes } from './routes';
 import { dataViewSavedObjectType } from './saved_objects';
