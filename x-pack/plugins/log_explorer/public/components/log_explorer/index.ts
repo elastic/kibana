@@ -6,3 +6,4 @@
  */
 
 export * from './log_explorer';
+export * from './types';
