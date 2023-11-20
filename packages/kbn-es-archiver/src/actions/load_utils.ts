@@ -26,6 +26,16 @@ import {
 
 import { isGzip, createParseArchiveStreams } from '../lib';
 
+export const warningToUpdateArchive = (path: string) => {
+  return `This test is using '${path}' archive that contains saved object index definitions (in the 'mappings.json').
+This has proven to be a source of conflicts and flakiness, so the goal is to remove support for this feature ASAP. We kindly ask you to
+update your test archives and remove SO index definitions, so that tests use the official saved object indices created by Kibana at startup.
+You can achieve that by simply removing your saved object index definitions from 'mappings.json' (likely removing the file altogether).
+We also recommend migrating existing tests to 'kbnArchiver' whenever possible. After the fix please remove archive path from the exception list:
+${resolve(__dirname, '../fixtures/override_saved_objects_index/exception_list.json')}.
+Find more information here: https://github.com/elastic/kibana/issues/161882`;
+};
+
 export const readableFactory =
   (log: ToolingLog) => (archiveDir: string) => (archiveName: string) => (fileName: string) =>
     function readableStreams() {

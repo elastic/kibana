@@ -316,9 +316,100 @@ export function testsLoop(
     });
   };
 }
+
 export const LOOP_LIMIT: number = (process.env.LOOP_LIMIT as unknown as number) ?? 50;
-export const archives = [
-  'x-pack/test/functional/es_archives/logstash_functional',
+
+const fixed = [
+  'test/functional/fixtures/es_archiver/dashboard/current/data',
+  'test/functional/fixtures/es_archiver/saved_objects_management/export_exclusion',
+  'test/functional/fixtures/es_archiver/saved_objects_management/export_transform',
+  'test/functional/fixtures/es_archiver/saved_objects_management/hidden_from_http_apis',
+  'test/functional/fixtures/es_archiver/saved_objects_management/hidden_saved_objects',
+  'test/functional/fixtures/es_archiver/saved_objects_management/hidden_types',
+  'test/functional/fixtures/es_archiver/saved_objects_management/nested_export_transform',
+  'test/functional/fixtures/es_archiver/saved_objects_management/visible_in_management',
+  'test/functional/fixtures/es_archiver/search/downsampled',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/8.0.0',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/apm_8.0.0',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/apm_mappings_only_8.0.0',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/infra_metrics_and_apm',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/metrics_8.0.0',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/ml_8.0.0',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/observability_overview',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/rum_8.0.0',
+  'x-pack/test/apm_api_integration/common/fixtures/es_archiver/rum_test_data',
+];
+const oss = [
+  'test/functional/fixtures/es_archiver/alias',
+  'test/functional/fixtures/es_archiver/date_nanos',
+  'test/functional/fixtures/es_archiver/date_nanos_custom',
+  'test/functional/fixtures/es_archiver/date_nanos_mixed',
+  'test/functional/fixtures/es_archiver/date_nested',
+  'test/functional/fixtures/es_archiver/deprecations_service',
+  'test/functional/fixtures/es_archiver/hamlet',
+  'test/functional/fixtures/es_archiver/huge_fields',
+  'test/functional/fixtures/es_archiver/index_pattern_without_timefield',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_flights',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_flights_index_pattern',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_logs_tsdb',
+  'test/functional/fixtures/es_archiver/large_fields',
+  'test/functional/fixtures/es_archiver/logstash_functional',
+  'test/functional/fixtures/es_archiver/long_window_logstash',
+  'test/functional/fixtures/es_archiver/makelogs',
   'test/functional/fixtures/es_archiver/many_fields',
+  'test/functional/fixtures/es_archiver/message_with_newline',
+  'test/functional/fixtures/es_archiver/stress_test',
+  'test/functional/fixtures/es_archiver/unmapped_fields',
+];
+const recentlyFound = [
+  'x-pack/test/monitoring_api_integration/archives/apm/metricbeat',
+  'x-pack/test/monitoring_api_integration/archives/apm/package',
+  'x-pack/test/monitoring_api_integration/archives/beats/metricbeat',
+  'x-pack/test/monitoring_api_integration/archives/beats/package',
+  'x-pack/test/monitoring_api_integration/archives/elasticsearch/metricbeat',
+  'x-pack/test/monitoring_api_integration/archives/elasticsearch/package',
+  'x-pack/test/monitoring_api_integration/archives/enterprisesearch/metricbeat',
+  'x-pack/test/monitoring_api_integration/archives/enterprisesearch/package',
+  'x-pack/test/monitoring_api_integration/archives/kibana/single_node/metricbeat',
+  'x-pack/test/monitoring_api_integration/archives/kibana/single_node/package',
+  'x-pack/test/monitoring_api_integration/archives/logstash/single_node/metricbeat',
+  'x-pack/test/monitoring_api_integration/archives/logstash/single_node/package',
+];
+const xpack = [
+  'test/functional/fixtures/es_archiver/dashboard/current/data',
+  'test/functional/fixtures/es_archiver/getting_started/shakespeare',
+  'test/functional/fixtures/es_archiver/index_pattern_without_timefield',
+  'test/functional/fixtures/es_archiver/kibana_sample_data_flights',
+  'test/functional/fixtures/es_archiver/logstash_functional',
+  'x-pack/test/functional/es_archives/dashboard/async_search',
+  'x-pack/test/functional/es_archives/fleet/agents',
+  'x-pack/test/functional/es_archives/getting_started/shakespeare',
+  'x-pack/test/functional/es_archives/graph/secrepo',
+  'x-pack/test/functional/es_archives/lens/rollup/data',
+  'x-pack/test/functional/es_archives/logstash_functional',
+  'x-pack/test/functional/es_archives/ml/bm_classification',
+  'x-pack/test/functional/es_archives/ml/categorization_small',
+  'x-pack/test/functional/es_archives/ml/ecommerce',
+  'x-pack/test/functional/es_archives/ml/egs_regression',
+  'x-pack/test/functional/es_archives/ml/event_rate_nanos',
   'x-pack/test/functional/es_archives/ml/farequote',
-] as const;
+  'x-pack/test/functional/es_archives/ml/farequote_small',
+  'x-pack/test/functional/es_archives/ml/ihp_outlier',
+  'x-pack/test/functional/es_archives/ml/module_sample_ecommerce',
+  'x-pack/test/functional/es_archives/ml/module_sample_logs',
+  'x-pack/test/functional/es_archives/reporting/unmapped_fields',
+  'x-pack/test/functional/es_archives/security/dlstest',
+  'x-pack/test/functional/es_archives/uptime/blank',
+  'x-pack/test/functional/es_archives/visualize/default',
+  'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional',
+  ...recentlyFound,
+];
+// const single = ['test/functional/fixtures/es_archiver/alias'];
+const _archives = [
+  // ...single,
+  ...fixed,
+  ...oss,
+  ...xpack,
+];
+const xs = new Set(_archives);
+export const archives = Array.from(xs).sort((a, b) => a.localeCompare(b));
