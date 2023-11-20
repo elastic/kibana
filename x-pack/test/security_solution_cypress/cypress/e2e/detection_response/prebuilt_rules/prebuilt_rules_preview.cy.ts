@@ -167,8 +167,8 @@ describe('Detection rules, Prebuilt Rules Installation and Update workflow', () 
     name: 'Custom query index pattern rule',
     rule_id: 'custom_query_index_pattern_rule',
     ...(commonProperties as Record<string, unknown>),
-    type: 'query',
     ...queryProperties,
+    type: 'query',
     index: ['winlogbeat-*', 'logs-endpoint.events.*'],
     alert_suppression: {
       group_by: [
