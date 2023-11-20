@@ -7,42 +7,51 @@ properties:
       type: object
   alertTypeId:
     type: string
-    example: ".index-threshold"
+    examples:
+      - ".index-threshold"
   apiKeyOwner:
     type:
       - "string"
       - "null"
-    example: elastic
+    examples:
+      - elastic
   createdAt:
     type: string
     description: The date and time that the alert was created.
     format: date-time
-    example: '2022-12-05T23:36:58.284Z'
+    examples:
+      - '2022-12-05T23:36:58.284Z'
   createdBy:
     type: string
     description: The identifier for the user that created the alert.
-    example: elastic
+    examples:
+      - elastic
   enabled:
     type: boolean
     description: Indicates whether the alert is currently enabled.
-    example: true
+    examples:
+      - true
   executionStatus:
     type: object
     properties:
       lastExecutionDate:
         type: string
         format: date-time
-        example: '2022-12-06T00:13:43.890Z'
+        examples:
+          - '2022-12-06T00:13:43.890Z'
       status:
         type: string
-        example: ok
+        examples:
+          - ok
   id:
     type: string
     description: The identifier for the alert.
-    example: b530fed0-74f5-11ed-9801-35303b735aef
+    examples:
+      - b530fed0-74f5-11ed-9801-35303b735aef
   muteAll:
     type: boolean
-    example: false
+    examples:
+      - false
   mutedInstanceIds:
     type:
       - "array"
@@ -52,10 +61,12 @@ properties:
   name:
     type: string
     description: The name of the alert.
-    example: my alert
+    examples:
+      - my alert
   notifyWhen:
     type: string
-    example: onActionGroupChange
+    examples:
+      - onActionGroupChange
   params:
     type: object
     additionalProperties: true
@@ -66,7 +77,8 @@ properties:
         type: string
   scheduledTaskId:
     type: string
-    example: b530fed0-74f5-11ed-9801-35303b735aef
+    examples:
+      - b530fed0-74f5-11ed-9801-35303b735aef
   tags:
     type: array
     items:
@@ -77,10 +89,12 @@ properties:
       - "null"
   updatedAt:
     type: string
-    example: '2022-12-05T23:36:58.284Z'
+    examples:
+      - '2022-12-05T23:36:58.284Z'
   updatedBy:
     type:
       - "string"
       - "null"
     description: The identifier for the user that updated this alert most recently.
-    example: elastic
+    examples:
+      - elastic
