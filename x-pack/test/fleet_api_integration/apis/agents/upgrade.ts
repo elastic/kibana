@@ -443,6 +443,167 @@ export default function (providerContext: FtrProviderContext) {
           })
           .expect(200);
       });
+
+      it('should respond 400 if trying to upgrade an already upgrading agent with no upgrade details', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              upgrade_started_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+            },
+          },
+        });
+        const response = await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+          })
+          .expect(400);
+
+        expect(response.body.message).to.contain('is already upgrading');
+      });
+
+      it('should respond 200 if trying to upgrade an already upgrading agent with no upgrade details with force flag', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              upgrade_started_at: new Date(Date.now() - 9 * 6e4).toISOString(),
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            force: true,
+          })
+          .expect(200);
+      });
+
+      it('should respond 400 if trying to upgrade an already upgrading agent with upgrade details', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+              upgrade_details: {
+                target_version: fleetServerVersion,
+                action_id: 'XXX',
+                state: 'UPG_REQUESTED',
+              },
+            },
+          },
+        });
+        const response = await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+          })
+          .expect(400);
+
+        expect(response.body.message).to.contain('is already upgrading');
+      });
+
+      it('should respond 200 if trying to upgrade an already upgrading agent with upgrade details with force flag', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+              upgrade_details: {
+                target_version: fleetServerVersion,
+                action_id: 'XXX',
+                state: 'UPG_REQUESTED',
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+            force: true,
+          })
+          .expect(200);
+      });
+
+      it('should respond 200 if trying to upgrade an agent with a failed upgrade status', async () => {
+        await es.update({
+          id: 'agent1',
+          refresh: 'wait_for',
+          index: AGENTS_INDEX,
+          body: {
+            doc: {
+              local_metadata: {
+                elastic: {
+                  agent: {
+                    upgradeable: true,
+                    version: '0.0.0',
+                  },
+                },
+              },
+              upgrade_details: {
+                target_version: fleetServerVersion,
+                action_id: 'XXX',
+                state: 'UPG_FAILED',
+                metadata: {
+                  error_msg: 'Upgrade timed out',
+                },
+              },
+            },
+          },
+        });
+        await supertest
+          .post(`/api/fleet/agents/agent1/upgrade`)
+          .set('kbn-xsrf', 'xxx')
+          .send({
+            version: fleetServerVersion,
+          })
+          .expect(200);
+      });
     });
 
     describe('multiple agents', () => {
