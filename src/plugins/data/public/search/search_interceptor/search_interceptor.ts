@@ -53,6 +53,13 @@ import { BatchedFunc, BfetchPublicSetup, DISABLE_BFETCH } from '@kbn/bfetch-plug
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { AbortError, KibanaServerError } from '@kbn/kibana-utils-plugin/public';
 import {
+  EsError,
+  isEsError,
+  isPainlessError,
+  PainlessError,
+  renderSearchError,
+} from '@kbn/search-errors';
+import {
   ENHANCED_ES_SEARCH_STRATEGY,
   IAsyncSearchOptions,
   IKibanaSearchRequest,
@@ -65,18 +72,8 @@ import {
   type SanitizedConnectionRequestParams,
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
-import {
-  SearchTimeoutError,
-  TimeoutErrorMode,
-} from './timeout_error';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
-import {
-  EsError,
-  isEsError,
-  isPainlessError,
-  PainlessError,
-  renderSearchError,
-} from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';

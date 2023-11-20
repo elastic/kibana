@@ -31,7 +31,9 @@ export const ErrorCallout = ({ title, error }: Props) => {
     <EuiEmptyPrompt
       iconType="error"
       color="danger"
-      title={<h2 data-test-subj="discoverErrorCalloutTitle">{searchErrorDisplay?.title ?? title}</h2>}
+      title={
+        <h2 data-test-subj="discoverErrorCalloutTitle">{searchErrorDisplay?.title ?? title}</h2>
+      }
       actions={searchErrorDisplay?.actions ?? []}
       body={
         <div
