@@ -15,19 +15,11 @@ import { Promise } from 'cypress/types/cy-bluebird';
 import { BaseLanguageModelInput } from 'langchain/base_language';
 import { CallbackManagerForLLMRun } from 'langchain/callbacks';
 import { GenerationChunk } from 'langchain/schema';
-import { finished } from 'stream/promises';
 import { RequestBody } from '../types';
 import { getMessageContentAndRole } from '../helpers';
 
 const LLM_TYPE = 'ActionsClientLlm';
-export const chunkArray = (arr, chunkSize) =>
-  arr.reduce((chunks, elem, index) => {
-    const chunkIndex = Math.floor(index / chunkSize);
-    const chunk = chunks[chunkIndex] || [];
 
-    chunks[chunkIndex] = chunk.concat([elem]);
-    return chunks;
-  }, []);
 export class ActionsClientLlm extends LLM {
   #actions: ActionsPluginStart;
   #connectorId: string;
@@ -97,15 +89,6 @@ export class ActionsClientLlm extends LLM {
     return super._streamIterator(input, options);
   }
 
-  async _getResponseFromStream(stream: Readable): Promise<string> {
-    let responseBody: string = '';
-    stream.on('data', (chunk: string) => {
-      responseBody += chunk.toString();
-    });
-    await finished(stream);
-    return responseBody;
-  }
-
   async *_streamResponseChunks(
     prompt: string,
     options: this['ParsedCallOptions'],
@@ -118,7 +101,6 @@ export class ActionsClientLlm extends LLM {
     const actionStreamResult = await actionsClient.execute(
       this.formatRequestForActionsClient(prompt)
     );
-    console.log('THIS SHOULD BE FIRST', actionStreamResult);
 
     this.#stream = actionStreamResult.data as Readable;
 
@@ -127,10 +109,10 @@ export class ActionsClientLlm extends LLM {
       if (!choice) {
         throw new Error('this seems bad');
       }
+      console.log('CHUNK:', choice);
       const chunk = new GenerationChunk({
         text: choice,
       });
-      console.log('yielding chunks', chunk);
       yield chunk;
 
       void runManager?.handleLLMNewToken(chunk.text ?? '');
