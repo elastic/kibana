@@ -10,17 +10,22 @@ import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import {
+  EuiAccordion,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
+  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiSuperSelect,
   EuiText,
   EuiTitle,
+  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
+import { SetupType } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -32,7 +37,7 @@ import { i18n } from '@kbn/i18n';
 import { AZURE_ARM_TEMPLATE_CREDENTIAL_TYPE } from './azure_credentials_form/azure_credentials_form';
 import { CspRadioGroupProps, RadioGroup } from './csp_boxed_radio_group';
 import { assert } from '../../../common/utils/helpers';
-import type { PostureInput, CloudSecurityPolicyTemplate } from '../../../common/types';
+import type { CloudSecurityPolicyTemplate, PostureInput } from '../../../common/types';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_VANILLA,
@@ -41,14 +46,14 @@ import {
   SUPPORTED_POLICY_TEMPLATES,
 } from '../../../common/constants';
 import {
-  getPosturePolicy,
-  getPostureInputHiddenVars,
-  getVulnMgmtCloudFormationDefaultValue,
-  POSTURE_NAMESPACE,
-  type NewPackagePolicyPostureInput,
-  isPostureInput,
   getMaxPackageName,
+  getPostureInputHiddenVars,
+  getPosturePolicy,
+  getVulnMgmtCloudFormationDefaultValue,
+  isPostureInput,
   isBelowMinVersion,
+  type NewPackagePolicyPostureInput,
+  POSTURE_NAMESPACE,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -519,15 +524,98 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
+const SetupTypeSelector = ({
+  setupType,
+  onSetupTypeChange,
+}: {
+  setupType: SetupType;
+  onSetupTypeChange: (value: SetupType) => void;
+}) => {
+  const options = [
+    {
+      value: SetupType.AGENTLESS,
+      inputDisplay: 'Agentless',
+      dropdownDisplay: (
+        <>
+          <strong>Agentless</strong>
+          <EuiText size="s" color="subdued">
+            <p>Set up the integration without an agent</p>
+          </EuiText>
+        </>
+      ),
+    },
+    {
+      value: SetupType.AGENT_BASED,
+      inputDisplay: 'Agent-based',
+      dropdownDisplay: (
+        <>
+          <strong>Agent-based</strong>
+          <EuiText size="s" color="subdued">
+            <p>Set up the integration with an agent</p>
+          </EuiText>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <>
+      <EuiSpacer size="l" />
+      <EuiAccordion
+        id={useGeneratedHtmlId({ prefix: 'setup-type' })}
+        buttonContent={<EuiLink>Advanced options</EuiLink>}
+      >
+        <EuiSpacer size="l" />
+        <EuiFormRow fullWidth label="Setup technology">
+          <EuiSuperSelect
+            options={options}
+            valueOfSelected={setupType}
+            placeholder="Select the setup technology"
+            onChange={onSetupTypeChange}
+            itemLayoutAlign="top"
+            hasDividers
+            fullWidth
+          />
+        </EuiFormRow>
+      </EuiAccordion>
+    </>
+  );
+};
+
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
-  ({ newPolicy, onChange, validationResults, isEditPage, packageInfo }) => {
+  ({
+    newPolicy,
+    onChange,
+    validationResults,
+    isEditPage,
+    packageInfo,
+    handleSetupTypeChange,
+    agentlessPolicy,
+  }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
     const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
       ? integrationParam
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
+    const [setupType, setSetupType] = useState<SetupType>(SetupType.AGENT_BASED);
     const input = getSelectedOption(newPolicy.inputs, integration);
+    const isCspmAws = input.type === CLOUDBEAT_AWS;
+    const isAgentlessAvailable = isCspmAws && agentlessPolicy;
+
+    useEffect(() => {
+      if (isAgentlessAvailable) {
+        setSetupType(SetupType.AGENTLESS);
+      } else {
+        setSetupType(SetupType.AGENT_BASED);
+      }
+    }, [isAgentlessAvailable]);
+
+    useEffect(() => {
+      if (handleSetupTypeChange) {
+        handleSetupTypeChange(setupType);
+      }
+    }, [handleSetupTypeChange, setupType]);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -721,6 +809,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
           fields={integrationFields}
           onChange={(field, value) => updatePolicy({ ...newPolicy, [field]: value })}
         />
+
+        {isAgentlessAvailable && (
+          <SetupTypeSelector setupType={setupType} onSetupTypeChange={setSetupType} />
+        )}
 
         {/* Defines the vars of the enabled input of the active policy template */}
         <PolicyTemplateVarsForm

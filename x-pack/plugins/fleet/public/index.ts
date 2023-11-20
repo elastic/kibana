@@ -16,6 +16,7 @@ export const plugin = (initializerContext: PluginInitializerContext) => {
 };
 
 export type { NewPackagePolicy, KibanaSavedObjectType } from './types';
+export { SetupType } from './types';
 export type {
   AgentDetailsReassignPolicyAction,
   AgentPolicyDetailsDeployAgentAction,
