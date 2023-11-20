@@ -114,3 +114,26 @@ export const dataFrameAnalyticsNewJobCapsParamsSchema = schema.object({
 export const dataFrameAnalyticsNewJobCapsQuerySchema = schema.maybe(
   schema.object({ rollup: schema.maybe(schema.string()) })
 );
+
+export const putDataFrameAnalyticsQuerySchema = schema.object({
+  createDataView: schema.boolean({ defaultValue: false }),
+  timeFieldName: schema.maybe(schema.string()),
+});
+
+interface DataFrameAnalyticsJobsCreated {
+  id: string;
+}
+interface DataViewCreated {
+  id: string;
+}
+interface CreatedError {
+  id: string;
+  error: any;
+}
+
+export interface PutDataFrameAnalyticsResponseSchema {
+  dataFrameAnalyticsJobsCreated: DataFrameAnalyticsJobsCreated[];
+  dataFrameAnalyticsJobsErrors: CreatedError[];
+  dataViewsCreated: DataViewCreated[];
+  dataViewsErrors: CreatedError[];
+}

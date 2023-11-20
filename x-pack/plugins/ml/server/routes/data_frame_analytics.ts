@@ -6,13 +6,14 @@
  */
 
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { DataViewsService } from '@kbn/data-views-plugin/common';
+import type { DataViewsService, RuntimeField } from '@kbn/data-views-plugin/common';
 import type { Field, Aggregation } from '@kbn/ml-anomaly-utils';
 import {
   JOB_MAP_NODE_TYPES,
   type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
 import { analyticsAuditMessagesProvider } from '../models/data_frame_analytics/analytics_audit_messages';
@@ -30,6 +31,8 @@ import {
   dataFrameAnalyticsQuerySchema,
   dataFrameAnalyticsNewJobCapsParamsSchema,
   dataFrameAnalyticsNewJobCapsQuerySchema,
+  putDataFrameAnalyticsQuerySchema,
+  type PutDataFrameAnalyticsResponseSchema,
 } from './schemas/data_frame_analytics_schema';
 import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
 import { DataViewHandler } from '../models/data_frame_analytics/data_view_handler';
@@ -306,28 +309,82 @@ export function dataFrameAnalyticsRoutes(
         validate: {
           request: {
             params: dataFrameAnalyticsIdSchema,
+            query: putDataFrameAnalyticsQuerySchema,
             body: dataFrameAnalyticsJobConfigSchema,
           },
         },
       },
-      routeGuard.fullLicenseAPIGuard(async ({ mlClient, request, response }) => {
-        try {
+      routeGuard.fullLicenseAPIGuard(
+        async ({ mlClient, request, response, getDataViewsService }) => {
           const { analyticsId } = request.params;
-          const body = await mlClient.putDataFrameAnalytics(
-            {
+          const { createDataView, timeFieldName } = request.query;
+
+          const fullResponse: PutDataFrameAnalyticsResponseSchema = {
+            dataFrameAnalyticsJobsCreated: [],
+            dataFrameAnalyticsJobsErrors: [],
+            dataViewsCreated: [],
+            dataViewsErrors: [],
+          };
+
+          try {
+            const resp = await mlClient.putDataFrameAnalytics(
+              {
+                id: analyticsId,
+                // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
+                body: request.body,
+              },
+              getAuthorizationHeader(request)
+            );
+
+            if (resp.id && resp.create_time) {
+              fullResponse.dataFrameAnalyticsJobsCreated.push({ id: analyticsId });
+            } else {
+              fullResponse.dataFrameAnalyticsJobsErrors.push({
+                id: analyticsId,
+                error: wrapError(resp),
+              });
+            }
+          } catch (e) {
+            fullResponse.dataFrameAnalyticsJobsErrors.push({
               id: analyticsId,
-              // @ts-expect-error @elastic-elasticsearch Data frame types incomplete
-              body: request.body,
-            },
-            getAuthorizationHeader(request)
-          );
-          return response.ok({
-            body,
-          });
-        } catch (e) {
-          return response.customError(wrapError(e));
+              error: wrapError(e),
+            });
+          }
+
+          if (createDataView) {
+            const dataViewsService = await getDataViewsService();
+
+            const dataViewName = request.body.dest.index;
+            const runtimeMappings = request.body.source.runtime_mappings as Record<
+              string,
+              RuntimeField
+            >;
+
+            try {
+              const dataViewsResp = await dataViewsService.createAndSave(
+                {
+                  title: dataViewName,
+                  timeFieldName,
+                  runtimeFieldMap: runtimeMappings,
+                  allowNoIndex: true,
+                },
+                false,
+                true
+              );
+
+              if (dataViewsResp.id) {
+                fullResponse.dataViewsCreated = [{ id: dataViewsResp.id }];
+              }
+            } catch (error) {
+              // For the error id we use the analytics id
+              // because in case of an error we don't get a data view id.
+              fullResponse.dataViewsErrors = [{ id: analyticsId, error }];
+            }
+          }
+
+          return response.ok({ body: fullResponse });
         }
-      })
+      )
     );
 
   /**
