@@ -70,7 +70,7 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   useBreadcrumbs('settings');
   const form = useOutputForm(onClose, output);
   const inputs = form.inputs;
-  const { docLinks } = useStartServices();
+  const { docLinks, cloud } = useStartServices();
   const { euiTheme } = useEuiTheme();
   const { outputSecretsStorage: isOutputSecretsStorageEnabled } = ExperimentalFeaturesService.get();
   const [useSecretsStorage, setUseSecretsStorage] = React.useState(isOutputSecretsStorageEnabled);
@@ -87,10 +87,12 @@ export const EditOutputFlyout: React.FunctionComponent<EditOutputFlyoutProps> = 
   const { kafkaOutput: isKafkaOutputEnabled, remoteESOutput: isRemoteESOutputEnabled } =
     ExperimentalFeaturesService.get();
   const isRemoteESOutput = inputs.typeInput.value === outputType.RemoteElasticsearch;
+  // Remote ES output not yet supported in serverless
+  const isStateful = !cloud?.isServerlessEnabled;
 
   const OUTPUT_TYPE_OPTIONS = [
     { value: outputType.Elasticsearch, text: 'Elasticsearch' },
-    ...(isRemoteESOutputEnabled
+    ...(isRemoteESOutputEnabled && isStateful
       ? [{ value: outputType.RemoteElasticsearch, text: 'Remote Elasticsearch' }]
       : []),
     { value: outputType.Logstash, text: 'Logstash' },
