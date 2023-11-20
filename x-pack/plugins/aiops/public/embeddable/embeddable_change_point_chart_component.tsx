@@ -7,7 +7,7 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { TimeRange } from '@kbn/es-query';
-import React, { CSSProperties } from 'react';
+import React from 'react';
 import {
   EmbeddableFactory,
   EmbeddableOutput,
@@ -20,6 +20,12 @@ import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
 
+export interface RelatedEventsFilter {
+  term: {
+    [x: string]: string;
+  };
+}
+
 export interface EmbeddableChangePointChartProps {
   dataViewId: string;
   timeRange: TimeRange;
@@ -31,7 +37,7 @@ export interface EmbeddableChangePointChartProps {
   /**
    * Component to render if there are no change points found
    */
-  emptyState?: () => React.ReactElement;
+  emptyState?: React.ReactElement;
   /**
    * Outputs the most recent change point data
    */
@@ -40,10 +46,8 @@ export interface EmbeddableChangePointChartProps {
    * Last reload request time, can be used for manual reload
    */
   lastReloadRequestTime?: number;
-  /*
-   * Style the chart embeddable
-   */
-  style?: CSSProperties;
+  relatedEventsFilter?: Array<RelatedEventsFilter | null>;
+  relatedEventsStyle?: Record<string, string>;
 }
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
   const { embeddable: embeddableStart } = plugins;

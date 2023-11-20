@@ -21,7 +21,10 @@ import type {
   EmbeddableChangePointChartInput,
   EmbeddableChangePointChartOutput,
 } from './embeddable_change_point_chart';
-import { EmbeddableChangePointChartProps } from './embeddable_change_point_chart_component';
+import {
+  EmbeddableChangePointChartProps,
+  RelatedEventsFilter,
+} from './embeddable_change_point_chart_component';
 import { FilterQueryContextProvider, useFilerQueryUpdates } from '../hooks/use_filters_query';
 import { DataSourceContextProvider, useDataSource } from '../hooks/use_data_source';
 import { useAiopsAppContext } from '../hooks/use_aiops_app_context';
@@ -98,7 +101,8 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               onError={onError}
               onChange={input.onChange}
               emptyState={input.emptyState}
-              style={input.style}
+              relatedEventsFilter={input.relatedEventsFilter}
+              relatedEventsStyle={input.relatedEventsStyle}
             />
           </FilterQueryContextProvider>
         </ChangePointDetectionControlsContextProvider>
@@ -135,7 +139,8 @@ export const ChartGridEmbeddableWrapper: FC<
   onRenderComplete,
   onChange,
   emptyState,
-  style,
+  relatedEventsFilter,
+  relatedEventsStyle,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -172,7 +177,13 @@ export const ChartGridEmbeddableWrapper: FC<
       },
     });
 
-    if (Array.isArray(partitions) && partitions.length > 0 && fieldConfig.splitField) {
+    if (relatedEventsFilter) {
+      mergedQuery.bool!.filter.push(
+        ...(relatedEventsFilter.filter((item) => item !== null) as RelatedEventsFilter[])
+      );
+    }
+
+    if (partitions && fieldConfig.splitField) {
       mergedQuery.bool?.filter.push({
         terms: {
           [fieldConfig.splitField]: partitions,
@@ -190,6 +201,7 @@ export const ChartGridEmbeddableWrapper: FC<
     timeRange.from,
     timeRange.to,
     uiSettings,
+    relatedEventsFilter,
   ]);
 
   const requestParams = useMemo<ChangePointDetectionRequestParams>(() => {
@@ -238,13 +250,13 @@ export const ChartGridEmbeddableWrapper: FC<
     >
       {changePoints.length > 0 ? (
         <ChartsGrid
-          style={style}
+          relatedEventsStyle={relatedEventsStyle}
           changePoints={changePoints.map((r) => ({ ...r, ...fieldConfig }))}
           interval={requestParams.interval}
           onRenderComplete={onRenderComplete}
         />
       ) : emptyState ? (
-        emptyState()
+        emptyState
       ) : (
         <NoChangePointsWarning />
       )}

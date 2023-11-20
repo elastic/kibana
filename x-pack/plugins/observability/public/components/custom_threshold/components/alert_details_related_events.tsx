@@ -6,12 +6,14 @@
  */
 
 import moment from 'moment';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
+import { i18n } from '@kbn/i18n';
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { ChangePointAnnotation } from '@kbn/aiops-plugin/public/components/change_point_detection/change_point_detection_context';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
 import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -37,6 +39,8 @@ interface AlertDetailsRelatedEventsProps {
   dataView?: DataView;
 }
 
+const emptyState = <></>;
+
 // eslint-disable-next-line import/no-default-export
 export default function AlertDetailsRelatedEvents({
   alert,
@@ -46,9 +50,20 @@ export default function AlertDetailsRelatedEvents({
   const { aiops } = useKibana().services;
   const { EmbeddableChangePointChart } = aiops;
   const [relatedMetrics, setRelatedMetrics] = useState<Array<string | undefined>>([]);
-  const [metricAggType, setMetricAggType] = useState<string>('avg');
+  const [metricAggType, setMetricAggType] = useState<string>();
   const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
+
+  const relatedEventsFilter = ruleParams.groupBy
+    ? [...ruleParams.groupBy]
+        .map((groupByField) => {
+          const groupByValue = (
+            alert.fields[ALERT_GROUP] as Array<{ field: string; value: string }>
+          )?.find((fieldObj) => fieldObj.field === groupByField)?.value;
+          return groupByValue ? { term: { [groupByField]: groupByValue } } : null;
+        })
+        .filter((termFilter) => termFilter)
+    : [];
 
   let changePointDataAll: ChangePointAnnotation[] = predefinedMetrics.map((metricName) => {
     return {
@@ -56,37 +71,41 @@ export default function AlertDetailsRelatedEvents({
     } as ChangePointAnnotation;
   });
 
-  useEffect(() => {
-    const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
-      criterion.metrics?.some(
-        (metric: CustomThresholdExpressionMetric) =>
-          metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
-      );
+  const isCpuOrMemoryCriterion = (criterion: MetricExpression) =>
+    criterion.metrics?.some(
+      (metric: CustomThresholdExpressionMetric) =>
+        metric.field?.includes(cpuMetricPrefix) ||
+        metric.field?.includes(memoryMetricPrefix) ||
+        predefinedMetrics.includes(metric.field ?? '')
+    );
 
-    const relatedMetricsPerCriteria = () => {
-      const hasCpuOrMemoryCriteria = ruleParams.criteria.some((criterion) =>
-        isCpuOrMemoryCriterion(criterion)
-      );
+  const relatedMetricsPerCriteria = useCallback(() => {
+    const hasCpuOrMemoryCriteria = ruleParams.criteria.some((criterion) =>
+      isCpuOrMemoryCriterion(criterion)
+    );
 
-      const relatedMetricsInDataView = hasCpuOrMemoryCriteria
-        ? dataView?.fields
-            .map((field) => field.name)
-            .filter((fieldName) => predefinedMetrics.includes(fieldName))
-        : [];
+    const relatedMetricsInDataView = hasCpuOrMemoryCriteria
+      ? dataView?.fields
+          .map((field) => field.name)
+          .filter((fieldName) => predefinedMetrics.includes(fieldName))
+      : [];
 
-      const aggType = ruleParams.criteria
-        .find((criterion) => isCpuOrMemoryCriterion(criterion))
-        ?.metrics?.find(
-          (metric) =>
-            metric.field?.includes(cpuMetricPrefix) || metric.field?.includes(memoryMetricPrefix)
-        )?.aggType;
+    const aggType = ruleParams.criteria
+      .find((criterion) => isCpuOrMemoryCriterion(criterion))
+      ?.metrics?.find(
+        (metric) =>
+          metric.field?.includes(cpuMetricPrefix) ||
+          metric.field?.includes(memoryMetricPrefix) ||
+          predefinedMetrics.includes(metric.field ?? '')
+      )?.aggType;
 
-      setRelatedMetrics(relatedMetricsInDataView ?? []);
-      setMetricAggType(aggType ? (fnList.includes(aggType) ? aggType : 'avg') : 'avg');
-    };
-
-    relatedMetricsPerCriteria();
+    setRelatedMetrics(relatedMetricsInDataView ?? []);
+    setMetricAggType(aggType ? (fnList.includes(aggType) ? aggType : undefined) : undefined);
   }, [dataView, ruleParams.criteria]);
+
+  useEffect(() => {
+    relatedMetricsPerCriteria();
+  }, [relatedMetricsPerCriteria]);
 
   const relatedEventsTimeRangeEnd = moment(alert.start).add(
     (ruleParams.criteria[0].timeSize ?? 5) * 2,
@@ -115,15 +134,15 @@ export default function AlertDetailsRelatedEvents({
       .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
       .map((cpItem) => cpItem.metricField);
 
-    setRelatedMetrics(sortedMetrics);
+    if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
   };
 
   const sortByPValue = () => {
     const sortedMetrics = changePointDataAll
-      .sort((a, b) => a.p_value - b.p_value)
+      .sort((a, b) => Number(a.p_value) - Number(b.p_value))
       .map((cpItem) => cpItem.metricField);
 
-    setRelatedMetrics(sortedMetrics);
+    if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
   };
 
   const onChangeSort = (type: SortField | undefined) => {
@@ -135,6 +154,7 @@ export default function AlertDetailsRelatedEvents({
   };
 
   const onRefresh = () => {
+    relatedMetricsPerCriteria();
     setLastReloadRequestTime(moment(new Date()).valueOf());
   };
 
@@ -151,46 +171,51 @@ export default function AlertDetailsRelatedEvents({
     }
   };
 
-  const emptyState = () => <></>;
-
-  const relatedEventsTab = !!ruleParams.criteria ? (
-    <>
-      <EuiSpacer size="s" />
-      <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
-        <EuiFlexItem grow={true} style={{ maxWidth: 150 }}>
-          <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
-        </EuiFlexItem>
-        <EuiButton data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton" onClick={onRefresh}>
-          Refresh
-        </EuiButton>
-      </EuiFlexGroup>
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="none"
-        data-test-subj="thresholdAlertRelatedEventsSection"
-      >
-        {relatedMetrics?.map(
-          (relatedMetric, relatedMetricIndex) =>
-            dataView &&
-            dataView.id &&
-            relatedMetric && (
-              <EmbeddableChangePointChart
-                id={`relatedMetric${relatedMetricIndex}`}
-                key={`relatedMetric${relatedMetricIndex}`}
-                dataViewId={dataView.id}
-                timeRange={relatedEventsTimeRange()}
-                fn={metricAggType || 'avg'}
-                metricField={relatedMetric}
-                emptyState={emptyState}
-                onChange={onChangePointDataChange}
-                style={{ marginTop: 10 }}
-                lastReloadRequestTime={lastReloadRequestTime}
-              />
-            )
-        )}
-      </EuiFlexGroup>
-    </>
-  ) : null;
+  const relatedEventsTab =
+    !!ruleParams.criteria && relatedMetrics.length > 0 && metricAggType ? (
+      <>
+        <EuiSpacer size="s" />
+        <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
+          <EuiFlexItem grow={true} style={{ maxWidth: 180 }}>
+            <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
+          </EuiFlexItem>
+          <EuiButton
+            data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton"
+            onClick={onRefresh}
+          >
+            {i18n.translate('xpack.observability.alertDetailsRelatedEvents.refreshButtonLabel', {
+              defaultMessage: 'Refresh',
+            })}
+          </EuiButton>
+        </EuiFlexGroup>
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="none"
+          data-test-subj="thresholdAlertRelatedEventsSection"
+        >
+          {relatedMetrics?.map(
+            (relatedMetric, relatedMetricIndex) =>
+              dataView &&
+              dataView.id &&
+              relatedMetric && (
+                <EmbeddableChangePointChart
+                  id={`relatedMetric${relatedMetricIndex}`}
+                  key={`relatedMetric${relatedMetricIndex}`}
+                  dataViewId={dataView.id}
+                  timeRange={relatedEventsTimeRange()}
+                  fn={metricAggType}
+                  metricField={relatedMetric}
+                  emptyState={emptyState}
+                  onChange={onChangePointDataChange}
+                  relatedEventsStyle={{ 'margin-top': '10px' }}
+                  lastReloadRequestTime={lastReloadRequestTime}
+                  relatedEventsFilter={relatedEventsFilter}
+                />
+              )
+          )}
+        </EuiFlexGroup>
+      </>
+    ) : null;
 
   return relatedEventsTab;
 }
