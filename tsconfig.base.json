@@ -1262,6 +1262,8 @@
       "@kbn/search-api-panels/*": ["packages/kbn-search-api-panels/*"],
       "@kbn/search-connectors": ["packages/kbn-search-connectors"],
       "@kbn/search-connectors/*": ["packages/kbn-search-connectors/*"],
+      "@kbn/search-errors": ["packages/kbn-search-errors"],
+      "@kbn/search-errors/*": ["packages/kbn-search-errors/*"],
       "@kbn/search-examples-plugin": ["examples/search_examples"],
       "@kbn/search-examples-plugin/*": ["examples/search_examples/*"],
       "@kbn/search-response-warnings": ["packages/kbn-search-response-warnings"],
