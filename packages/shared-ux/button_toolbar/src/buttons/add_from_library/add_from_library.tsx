@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ToolbarButton, ToolbarButtonProps } from '../toolbar_button';
 
-export type Props = Omit<ToolbarButtonProps, 'iconType' | 'label' | 'type'>;
+export type Props = Omit<ToolbarButtonProps<'standard'>, 'iconType' | 'label' | 'type'>;
 
 const label = {
   getLibraryButtonLabel: () =>

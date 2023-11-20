@@ -4,14 +4,19 @@
     "outDir": "target/types"
   },
   "include": [
-    "../../../typings/**/*",
     "common/**/*",
     "public/**/*",
-    "server/**/*.ts",
-    "../../typings/**/*"
+    "server/**/*",
+    "../../../typings/**/*",
   ],
   "kbn_references": [
     "@kbn/core",
+    "@kbn/server-route-repository",
+    "@kbn/core-plugins-server",
+    "@kbn/core-elasticsearch-server-mocks",
+    "@kbn/std",
   ],
-  "exclude": ["target/**/*"]
+  "exclude": [
+    "target/**/*",
+  ]
 }

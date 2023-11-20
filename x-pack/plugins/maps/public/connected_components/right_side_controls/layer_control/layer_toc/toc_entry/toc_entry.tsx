@@ -9,14 +9,7 @@ import React, { Component } from 'react';
 import classNames from 'classnames';
 import type { DraggableProvidedDragHandleProps } from '@hello-pangea/dnd';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiIcon,
-  EuiButtonIcon,
-  EuiCallOut,
-  EuiConfirmModal,
-  EuiButtonEmpty,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiIcon, EuiButtonIcon, EuiConfirmModal, EuiButtonEmpty } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TOCEntryActionsPopover } from './toc_entry_actions_popover';
 import {
@@ -25,6 +18,7 @@ import {
   EDIT_LAYER_SETTINGS_LABEL,
   FIT_TO_DATA_LABEL,
 } from './action_labels';
+import { LegendDetails } from './legend_details';
 import { ILayer } from '../../../../../classes/layers/layer';
 import { isLayerGroup } from '../../../../../classes/layers/layer_group';
 
@@ -111,7 +105,9 @@ export class TOCEntry extends Component<Props, State> {
 
   async _loadHasLegendDetails() {
     const hasLegendDetails =
-      (await this.props.layer.hasLegendDetails()) &&
+      ((await this.props.layer.hasLegendDetails()) ||
+        this.props.layer.hasErrors() ||
+        this.props.layer.hasWarnings()) &&
       this.props.layer.isVisible() &&
       this.props.layer.showAtZoomLevel(this.props.zoom);
     if (this._isMounted && hasLegendDetails !== this.state.hasLegendDetails) {
@@ -148,10 +144,6 @@ export class TOCEntry extends Component<Props, State> {
 
   _toggleVisible = () => {
     this.props.toggleVisible(this.props.layer.getId());
-  };
-
-  _getLayerErrors = () => {
-    return isLayerGroup(this.props.layer) ? [] : this.props.layer.getErrors();
   };
 
   _renderCancelModal() {
@@ -240,8 +232,7 @@ export class TOCEntry extends Component<Props, State> {
   }
 
   _renderDetailsToggle() {
-    const errors = this._getLayerErrors();
-    if (this.props.isDragging || (!this.state.hasLegendDetails && errors.length === 0)) {
+    if (this.props.isDragging || !this.state.hasLegendDetails) {
       return null;
     }
 
@@ -304,32 +295,6 @@ export class TOCEntry extends Component<Props, State> {
     );
   }
 
-  _renderLegendDetails = () => {
-    if (!this.props.isLegendDetailsOpen) {
-      return null;
-    }
-
-    const errors = this._getLayerErrors();
-
-    return this.state.hasLegendDetails || errors.length ? (
-      <div
-        className="mapTocEntry__layerDetails"
-        data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
-      >
-        {errors.length
-          ? errors.map(({ title, error }, index) => (
-              <div key={index}>
-                <EuiCallOut color="danger" size="s" title={title}>
-                  {error}
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </div>
-            ))
-          : this.props.layer.renderLegendDetails()}
-      </div>
-    ) : null;
-  };
-
   _hightlightAsSelectedLayer() {
     if (this.props.isCombineLayer) {
       return false;
@@ -365,7 +330,16 @@ export class TOCEntry extends Component<Props, State> {
       >
         {this._renderLayerHeader()}
 
-        {this._renderLegendDetails()}
+        {this.props.isLegendDetailsOpen &&
+        this.state.hasLegendDetails &&
+        !isLayerGroup(this.props.layer) ? (
+          <div
+            className="mapTocEntry__layerDetails"
+            data-test-subj={`mapLayerTOCDetails${escapeLayerName(this.state.displayName)}`}
+          >
+            <LegendDetails layer={this.props.layer} />
+          </div>
+        ) : null}
 
         {this._renderDetailsToggle()}
 
