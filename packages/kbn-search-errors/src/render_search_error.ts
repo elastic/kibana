@@ -9,7 +9,7 @@
 import { i18n } from '@kbn/i18n';
 import { ReactNode } from 'react';
 import { BfetchRequestError } from '@kbn/bfetch-plugin/public';
-import { ApplicationStart } from '@kbn/core-application-browser';
+import type { ApplicationStart } from '@kbn/core-application-browser';
 import { EsError } from './es_error';
 
 export function renderSearchError({
