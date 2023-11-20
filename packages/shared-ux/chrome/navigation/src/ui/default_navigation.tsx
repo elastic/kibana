@@ -208,10 +208,16 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
     []
   );
 
+  const { body } = navigationDefinition;
+
+  const jsxNodes = useMemo(() => {
+    return renderNodes(body);
+  }, [renderNodes, body]);
+
   return (
     <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
       <>
-        {renderNodes(navigationDefinition.body)}
+        {jsxNodes}
         {navigationDefinition.footer && (
           <NavigationFooter>{renderNodes(navigationDefinition.footer)}</NavigationFooter>
         )}

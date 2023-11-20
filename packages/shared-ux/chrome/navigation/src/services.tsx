@@ -61,11 +61,13 @@ export const NavigationKibanaProvider: FC<NavigationKibanaDependencies> = ({
   const { chrome, http } = core;
   const { basePath } = http;
   const { navigateToUrl } = core.application;
+  const { billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl } = cloud;
 
-  const cloudLinks: CloudLinks = useMemo(
-    () => (cloud ? parseCloudURLs(getCloudLinks(cloud)) : {}),
-    [cloud]
-  );
+  const cloudLinks: CloudLinks = useMemo(() => {
+    return parseCloudURLs(
+      getCloudLinks({ billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl })
+    );
+  }, [billingUrl, deploymentUrl, performanceUrl, usersAndRolesUrl]);
   const isSideNavCollapsed = useObservable(chrome.getIsSideNavCollapsed$(), true);
 
   const value: NavigationServices = {
