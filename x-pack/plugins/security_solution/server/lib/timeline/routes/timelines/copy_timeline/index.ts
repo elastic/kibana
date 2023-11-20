@@ -28,7 +28,7 @@ export const copyTimelineRoute = async (
       options: {
         tags: ['access:securitySolution'],
       },
-      access: 'public',
+      access: 'internal',
     })
     .addVersion(
       {
