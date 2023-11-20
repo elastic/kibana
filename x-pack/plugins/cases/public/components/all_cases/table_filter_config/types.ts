@@ -12,16 +12,15 @@ export interface FilterConfigState {
   isActive: boolean;
 }
 
+export interface FilterConfigRenderParams {
+  filterOptions: FilterOptions;
+  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
+}
+
 export interface FilterConfig {
   key: string;
   label: string;
   isActive: boolean;
   isAvailable: boolean;
-  render: ({
-    filterOptions,
-    onChange,
-  }: {
-    filterOptions: FilterOptions;
-    onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
-  }) => React.ReactNode;
+  render: (params: FilterConfigRenderParams) => React.ReactNode;
 }

@@ -77,8 +77,7 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
     setFilterVisibilityMap(newFilterVisibilityMap);
   };
 
-  const availableConfigs = Array.from(filters.values()).filter((filter) => filter.isAvailable);
-  const selectableOptions = availableConfigs
+  const selectableOptions = Array.from(filters.values())
     .map(({ key, label }) => ({
       key,
       label,

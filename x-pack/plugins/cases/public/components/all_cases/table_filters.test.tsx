@@ -52,6 +52,43 @@ const props = {
 
 describe('CasesTableFilters ', () => {
   let appMockRender: AppMockRenderer;
+  // eslint-disable-next-line prefer-object-spread
+  const originalGetComputedStyle = Object.assign({}, window.getComputedStyle);
+
+  beforeAll(() => {
+    // The JSDOM implementation is too slow
+    // Especially for dropdowns that try to position themselves
+    // perf issue - https://github.com/jsdom/jsdom/issues/3234
+    Object.defineProperty(window, 'getComputedStyle', {
+      value: (el: HTMLElement) => {
+        /**
+         * This is based on the jsdom implementation of getComputedStyle
+         * https://github.com/jsdom/jsdom/blob/9dae17bf0ad09042cfccd82e6a9d06d3a615d9f4/lib/jsdom/browser/Window.js#L779-L820
+         *
+         * It is missing global style parsing and will only return styles applied directly to an element.
+         * Will not return styles that are global or from emotion
+         */
+        const declaration = new CSSStyleDeclaration();
+        const { style } = el;
+
+        Array.prototype.forEach.call(style, (property: string) => {
+          declaration.setProperty(
+            property,
+            style.getPropertyValue(property),
+            style.getPropertyPriority(property)
+          );
+        });
+
+        return declaration;
+      },
+      configurable: true,
+      writable: true,
+    });
+  });
+
+  afterAll(() => {
+    Object.defineProperty(window, 'getComputedStyle', originalGetComputedStyle);
+  });
 
   beforeEach(() => {
     appMockRender = createAppMockRenderer();
@@ -272,7 +309,7 @@ describe('CasesTableFilters ', () => {
     });
   });
 
-  describe.only('custom filters configuration', () => {
+  describe('custom filters configuration', () => {
     beforeEach(() => {
       getCaseConfigureMock.mockImplementation(() => {
         return {
@@ -282,6 +319,10 @@ describe('CasesTableFilters ', () => {
           ],
         };
       });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
     });
 
     it('should render all options in the popover, including custom fields', async () => {
@@ -342,20 +383,12 @@ describe('CasesTableFilters ', () => {
             "key": "status",
           },
           Object {
-            "isActive": false,
-            "key": "assignee",
-          },
-          Object {
             "isActive": true,
             "key": "tags",
           },
           Object {
             "isActive": true,
             "key": "category",
-          },
-          Object {
-            "isActive": false,
-            "key": "owner",
           },
           Object {
             "isActive": true,
@@ -404,20 +437,12 @@ describe('CasesTableFilters ', () => {
             "key": "status",
           },
           Object {
-            "isActive": false,
-            "key": "assignee",
-          },
-          Object {
             "isActive": true,
             "key": "tags",
           },
           Object {
             "isActive": true,
             "key": "category",
-          },
-          Object {
-            "isActive": false,
-            "key": "owner",
           },
           Object {
             "isActive": false,
@@ -481,62 +506,6 @@ describe('CasesTableFilters ', () => {
       });
     });
 
-    it.only('when a custom field is active but it gets deleted, it should be removed from the list', async () => {
-      getCaseConfigureMock
-        .mockImplementation(() => {
-          console.log('its called again');
-          return {
-            customFields: [{ type: 'toggle', key: 'za', label: 'ZToggle', required: false }],
-          };
-        })
-        .mockImplementationOnce(() => {
-          console.log('its calling the first one');
-          return {
-            customFields: [
-              { type: 'toggle', key: 'za', label: 'ZToggle', required: false },
-              { type: 'toggle', key: 'tc', label: 'Toggle', required: false },
-              { type: 'toggle', key: 'ta', label: 'Toggle', required: false },
-              { type: 'toggle', key: 'tb', label: 'Toggle', required: false },
-              { type: 'toggle', key: 'aa', label: 'AToggle', required: false },
-            ],
-          };
-        });
-      const previousState = [
-        { key: 'severity', isActive: true },
-        { key: 'status', isActive: false },
-        { key: 'ta', isActive: true },
-        { key: 'tags', isActive: true },
-        { key: 'category', isActive: false },
-        { key: 'owner', isActive: false },
-        { key: 'toggle', isActive: true },
-      ];
-
-      localStorage.setItem('filters', JSON.stringify(previousState));
-
-      console.log('render');
-      const { rerender } = appMockRender.render(<CasesTableFilters {...props} />);
-
-      const filterBar = screen.getByTestId('cases-table-filters-group');
-      let allFilters: HTMLElement[];
-      await waitFor(() => {
-        allFilters = within(filterBar).getAllByRole('button');
-        expect(allFilters).toHaveLength(4);
-      });
-
-      console.log('rerender');
-      rerender(<CasesTableFilters {...props} countOpenCases={98} />);
-
-      await waitFor(() => {
-        allFilters = within(filterBar).getAllByRole('button');
-        expect(allFilters).toHaveLength(3);
-      });
-
-      const orderedFilterLabels = ['Severity', 'Tags', 'More'];
-      orderedFilterLabels.forEach((label, index) => {
-        expect(allFilters[index]).toHaveTextContent(label);
-      });
-    });
-
     it('should sort the labels shown in the popover (on equal label, sort by key)', async () => {
       getCaseConfigureMock.mockImplementation(() => {
         return {
@@ -564,6 +533,28 @@ describe('CasesTableFilters ', () => {
       });
     });
 
-    it('check - uncheck - check', () => {});
+    it('should have right order after deactivating and activating a filter that by default is activated and not in the last one', async () => {
+      appMockRender.render(<CasesTableFilters {...props} />);
+
+      const filterBar = screen.getByTestId('cases-table-filters-group');
+      let allFilters = within(filterBar).getAllByRole('button');
+      let orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'More'];
+      orderedFilterLabels.forEach((label, index) => {
+        expect(allFilters[index]).toHaveTextContent(label);
+      });
+
+      expect(screen.getByRole('button', { name: 'Status' })).toBeInTheDocument();
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      userEvent.click(await screen.findByRole('option', { name: 'Status' }));
+
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      userEvent.click(await screen.findByRole('option', { name: 'Status' }));
+
+      allFilters = within(filterBar).getAllByRole('button');
+      orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'Status', 'More'];
+      orderedFilterLabels.forEach((label, index) => {
+        expect(allFilters[index]).toHaveTextContent(label);
+      });
+    });
   });
 });

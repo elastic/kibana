@@ -20,7 +20,6 @@ export const useCustomFieldsFilterConfig = () => {
   } = useGetCaseConfiguration();
 
   useEffect(() => {
-    console.log({ customFields });
     const customFieldsFilterConfig: FilterConfig[] = [];
     for (const { key, type, label } of customFields ?? []) {
       if (customFieldsBuilder[type]) {

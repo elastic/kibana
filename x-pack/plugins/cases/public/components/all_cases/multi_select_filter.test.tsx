@@ -161,4 +161,23 @@ describe('multi select filter', () => {
     await waitForEuiPopoverOpen();
     expect(screen.getAllByTestId(TEST_ID).length).toBe(2);
   });
+
+  it('should not show the amount of options if hideActiveOptionsNumber is active', () => {
+    const onChange = jest.fn();
+    const props = {
+      id: 'tags',
+      buttonLabel: 'Tags',
+      options: [
+        { label: 'tag a', key: 'tag a' },
+        { label: 'tag b', key: 'tag b' },
+      ],
+      onChange,
+      selectedOptionKeys: ['tag b'],
+    };
+
+    const { rerender } = render(<MultiSelectFilter {...props} />);
+    expect(screen.queryByLabelText('1 active filters')).toBeInTheDocument();
+    rerender(<MultiSelectFilter {...props} hideActiveOptionsNumber />);
+    expect(screen.queryByLabelText('1 active filters')).not.toBeInTheDocument();
+  });
 });
