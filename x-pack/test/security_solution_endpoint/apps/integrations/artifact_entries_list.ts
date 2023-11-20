@@ -235,7 +235,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      describe(`When on the ${testData.title} entries list`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/171477
+      // FLAKY: https://github.com/elastic/kibana/issues/171478
+      describe.skip(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();
