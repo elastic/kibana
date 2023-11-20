@@ -41,6 +41,9 @@ export const installAllPrebuiltRulesRequest = () =>
     body: {
       mode: 'ALL_RULES',
     },
+    headers: {
+      'elastic-api-version': '1',
+    },
   });
 
 /* Install specific prebuilt rules. Should be available as security-rule saved objects
@@ -59,6 +62,9 @@ export const installSpecificPrebuiltRulesRequest = (rules: Array<typeof SAMPLE_P
         rule_id: rule['security-rule'].rule_id,
         version: rule['security-rule'].version,
       })),
+    },
+    headers: {
+      'elastic-api-version': '1',
     },
   });
 
