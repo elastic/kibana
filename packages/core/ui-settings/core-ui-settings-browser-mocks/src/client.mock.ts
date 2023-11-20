@@ -22,6 +22,7 @@ export const clientMock = () => {
     isOverridden: jest.fn(),
     getUpdate$: jest.fn(),
     getUpdateErrors$: jest.fn(),
+    validateValue: jest.fn(),
   };
   mock.get$.mockReturnValue(new Subject<any>());
   mock.getUpdate$.mockReturnValue(new Subject<any>());
