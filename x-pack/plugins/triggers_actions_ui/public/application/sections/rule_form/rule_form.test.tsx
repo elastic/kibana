@@ -394,9 +394,6 @@ describe('rule_form', () => {
         wrapper.update();
       });
     }
-    beforeEach(() => {
-      mockSetConsumer.mockReset();
-    });
 
     it('renders rule name', async () => {
       await setup();
@@ -656,7 +653,7 @@ describe('rule_form', () => {
         wrapper.update();
       });
 
-      expect(mockSetConsumer).not.toHaveBeenCalled();
+      expect(mockSetConsumer).toHaveBeenLastCalledWith(null);
     });
 
     it('should not display the consumer select for invalid rule types', async () => {
