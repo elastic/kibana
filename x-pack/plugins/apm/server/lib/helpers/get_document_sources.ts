@@ -240,7 +240,7 @@ export async function getDocumentSources({
     .map((checkedSource) => {
       const { documentType, hasDocs, rollupInterval } = checkedSource;
 
-      const hasDurationSummary = sourcesWithHasDocs.some((eSource) => {
+      const hasDurationSummaryField = sourcesWithHasDocs.some((eSource) => {
         return (
           eSource.documentType === documentType &&
           eSource.rollupInterval === rollupInterval &&
@@ -253,7 +253,7 @@ export async function getDocumentSources({
         documentType,
         rollupInterval,
         hasDocs,
-        hasDurationSummary,
+        hasDurationSummaryField,
       };
     });
 
@@ -261,6 +261,6 @@ export async function getDocumentSources({
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
     hasDocs: true,
-    hasDurationSummary: false,
+    hasDurationSummaryField: false,
   });
 }

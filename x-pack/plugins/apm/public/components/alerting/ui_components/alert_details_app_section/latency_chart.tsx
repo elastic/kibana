@@ -102,7 +102,7 @@ function LatencyChart({
                 rollupInterval: preferred.source.rollupInterval,
                 bucketSizeInSeconds: preferred.bucketSizeInSeconds,
                 useDurationSummary:
-                  preferred.source.hasDurationSummary &&
+                  preferred.source.hasDurationSummaryField &&
                   latencyAggregationType === LatencyAggregationType.avg,
               },
             },

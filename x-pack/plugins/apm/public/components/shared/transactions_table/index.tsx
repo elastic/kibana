@@ -152,7 +152,8 @@ export function TransactionsTable({
   });
 
   const shouldUseDurationSummary =
-    latencyAggregationType === 'avg' && preferred?.source?.hasDurationSummary;
+    latencyAggregationType === 'avg' &&
+    preferred?.source?.hasDurationSummaryField;
 
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {

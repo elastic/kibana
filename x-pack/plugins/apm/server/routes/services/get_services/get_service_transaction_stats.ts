@@ -30,7 +30,7 @@ import { RandomSampler } from '../../../lib/helpers/get_random_sampler';
 import {
   getDurationLegacyFilter,
   getDurationSummaryFilter,
-  isSummaryFieldSupported,
+  isSummaryFieldSupportedByDocType,
 } from '../../../lib/helpers/transactions';
 import {
   calculateFailedTransactionRate,
@@ -53,6 +53,7 @@ interface AggregationParams {
     | ApmDocumentType.TransactionMetric
     | ApmDocumentType.TransactionEvent;
   rollupInterval: RollupInterval;
+  useDurationSummary: boolean;
 }
 
 export interface ServiceTransactionStatsResponse {
@@ -69,7 +70,7 @@ export interface ServiceTransactionStatsResponse {
 }
 
 type DurationSummaryAggregation = ReturnType<
-  typeof getDurationSummaryAggregation
+  typeof getConditionalDurationAggregation
 >;
 type DurationAggregation = ReturnType<typeof getDurationAggregation>;
 type AvgLatencyAggregation = ReturnType<typeof getOutcomeAggregation> &
@@ -95,8 +96,10 @@ export async function getServiceTransactionStats({
   randomSampler,
   documentType,
   rollupInterval,
+  useDurationSummary,
 }: AggregationParams): Promise<ServiceTransactionStatsResponse> {
-  const summaryFieldSupported = isSummaryFieldSupported(documentType);
+  const summaryFieldSupportedByDocType =
+    isSummaryFieldSupportedByDocType(documentType);
   const outcomes = getOutcomeAggregation(documentType);
 
   const baseParams: SearchParams = {
@@ -111,9 +114,11 @@ export async function getServiceTransactionStats({
       ...serviceGroupWithOverflowQuery(serviceGroup),
     ],
     metrics: {
-      ...(summaryFieldSupported
-        ? getDurationSummaryAggregation()
-        : getDurationAggregation()),
+      ...(summaryFieldSupportedByDocType && !useDurationSummary
+        ? // if useDurationSummary is false, we can try to check if it's supported by each individual service
+          getConditionalDurationAggregation()
+        : // if useDurationSummary is true, it means that transaction.duration.summary is fully supported
+          getDurationAggregation(summaryFieldSupportedByDocType)),
       ...outcomes,
     },
   };
@@ -169,7 +174,7 @@ function isDurationSummary(
     DurationSummaryAggregation,
     {}
   >;
-  return !!summaryAgg.avg_duration_legacy || !!summaryAgg.avg_duration_summary;
+  return !!summaryAgg.avg_duration_legacy && !!summaryAgg.avg_duration_summary;
 }
 
 function getAvgDurationValue(
@@ -185,21 +190,22 @@ function getAvgDurationValue(
   return outcomeResponse.avg_duration.value;
 }
 
-function getDurationAggregation() {
+function getDurationAggregation(summaryFieldSupportedByDocType: boolean) {
   return {
     avg_duration: {
       avg: {
-        field: TRANSACTION_DURATION,
+        field: summaryFieldSupportedByDocType
+          ? TRANSACTION_DURATION_SUMMARY
+          : TRANSACTION_DURATION,
       },
     },
   };
 }
 
-function getDurationSummaryAggregation() {
+function getConditionalDurationAggregation() {
   return {
     avg_duration_summary: {
       filter: { ...getDurationSummaryFilter() },
-
       aggs: {
         result: {
           avg: {

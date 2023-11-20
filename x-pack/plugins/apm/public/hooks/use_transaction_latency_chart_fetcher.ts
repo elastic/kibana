@@ -50,7 +50,8 @@ export function useTransactionLatencyChartsFetcher({
   });
 
   const shouldUseDurationSummary =
-    preferred?.source?.hasDurationSummary && latencyAggregationType === 'avg';
+    latencyAggregationType === 'avg' &&
+    preferred?.source?.hasDurationSummaryField;
 
   const { data, error, status } = useFetcher(
     (callApmApi) => {

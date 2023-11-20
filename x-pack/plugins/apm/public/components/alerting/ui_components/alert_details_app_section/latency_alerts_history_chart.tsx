@@ -97,7 +97,7 @@ export function LatencyAlertsHistoryChart({
                 documentType: preferred.source.documentType,
                 rollupInterval: preferred.source.rollupInterval,
                 useDurationSummary:
-                  preferred.source.hasDurationSummary &&
+                  preferred.source.hasDurationSummaryField &&
                   latencyAggregationType === LatencyAggregationType.avg,
               },
             },

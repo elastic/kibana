@@ -91,7 +91,7 @@ export async function getSearchTransactionsEvents({
   }
 }
 
-export function isSummaryFieldSupported(
+export function isSummaryFieldSupportedByDocType(
   typeOrSearchAgggregatedTransactions:
     | ApmDocumentType.ServiceTransactionMetric
     | ApmDocumentType.TransactionMetric
@@ -121,7 +121,7 @@ export function getDurationFieldForTransactions(
     | boolean,
   useDurationSummaryField?: boolean
 ) {
-  if (isSummaryFieldSupported(typeOrSearchAgggregatedTransactions)) {
+  if (isSummaryFieldSupportedByDocType(typeOrSearchAgggregatedTransactions)) {
     if (useDurationSummaryField) {
       return TRANSACTION_DURATION_SUMMARY;
     }

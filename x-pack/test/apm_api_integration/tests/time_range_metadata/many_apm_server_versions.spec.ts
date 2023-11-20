@@ -125,7 +125,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
           const allHasSummaryField = response.body.sources
             .filter((source) => source.documentType !== ApmDocumentType.TransactionEvent)
-            .every((source) => source.hasDurationSummary);
+            .every((source) => source.hasDurationSummaryField);
 
           expect(allHasSummaryField).to.eql(true);
         });
@@ -148,7 +148,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           const allHasSummaryField = response.body.sources.every((source) => {
-            return source.hasDurationSummary;
+            return source.hasDurationSummaryField;
           });
 
           expect(allHasSummaryField).to.eql(false);

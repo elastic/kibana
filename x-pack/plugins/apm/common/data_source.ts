@@ -26,6 +26,6 @@ export interface ApmDataSource<
 export type ApmDataSourceWithSummary<
   T extends AnyApmDocumentType = AnyApmDocumentType
 > = ApmDataSource<T> & {
-  hasDurationSummary: boolean;
+  hasDurationSummaryField: boolean;
   hasDocs: boolean;
 };
