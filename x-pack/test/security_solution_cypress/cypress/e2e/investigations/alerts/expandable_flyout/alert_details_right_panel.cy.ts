@@ -58,6 +58,7 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 
 describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
   const rule = getNewRule();
@@ -153,10 +154,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
 
-    // TODO figure out how to verify the toasts pops up
-    // cy.get(KIBANA_TOAST)
-    //   .should('be.visible')
-    //   .and('have.text', 'Successfully marked 1 alert as acknowledged.');
+    cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
   });
 
@@ -166,8 +164,7 @@ describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serve
     expandFirstAlertExpandableFlyout();
     openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
 
-    // TODO figure out how to verify the toasts pops up
-    // cy.get(KIBANA_TOAST).should('be.visible').and('have.text', 'Successfully closed 1 alert.');
+    cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
     cy.get(EMPTY_ALERT_TABLE).should('exist');
   });
 
