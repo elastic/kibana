@@ -14,6 +14,16 @@ import { KbnError } from '@kbn/kibana-utils-plugin/common';
 import { IEsError } from './types';
 import { getRootCause } from './utils';
 
+/**
+ * Checks if a given errors originated from Elasticsearch.
+ * Those params are assigned to the attributes property of an error.
+ *
+ * @param e
+ */
+export function isEsError(e: any): e is IEsError {
+  return !!e.attributes;
+}
+
 export class EsError extends KbnError {
   readonly attributes: IEsError['attributes'];
 

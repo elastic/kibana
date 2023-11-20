@@ -6,17 +6,20 @@
  * Side Public License, v 1.
  */
 
+import { estypes } from '@elastic/elasticsearch';
+import type { ConnectionRequestParams } from '@elastic/transport';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
 import { IEsErrorAttributes } from '../../../common';
 
-export type IEsError = KibanaServerError<IEsErrorAttributes>;
+type SanitizedConnectionRequestParams = Pick<
+  ConnectionRequestParams,
+  'method' | 'path' | 'querystring'
+>;
 
-/**
- * Checks if a given errors originated from Elasticsearch.
- * Those params are assigned to the attributes property of an error.
- *
- * @param e
- */
-export function isEsError(e: any): e is IEsError {
-  return !!e.attributes;
+interface IEsErrorAttributes {
+  error?: estypes.ErrorCause;
+  rawResponse?: estypes.SearchResponseBody;
+  requestParams?: SanitizedConnectionRequestParams;
 }
+
+export type IEsError = KibanaServerError<IEsErrorAttributes>;
