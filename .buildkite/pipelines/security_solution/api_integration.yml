@@ -21,6 +21,7 @@ steps:
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
     label: "Upload runtime info"
+    key: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 300
@@ -32,6 +33,7 @@ steps:
   - label: Running exception_workflows:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless
     key: exception_workflows:runner:serverless
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -43,6 +45,7 @@ steps:
   - label: Running exception_operators_date_numeric_types:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_date_numeric_types:qa:serverless
     key: exception_operators_date_numeric_types:runner:serverless
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -54,6 +57,7 @@ steps:
   - label: Running exception_operators_keyword_text_long:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_keyword_text_long:qa:serverless
     key: exception_operators_keyword_text_long:runner:serverless
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -65,6 +69,7 @@ steps:
   - label: Running exception_operators_ips_text_array:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_ips_text_array:qa:serverless
     key: exception_operators_ips_text_array:runner:serverless
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -76,6 +81,7 @@ steps:
   - label: Running rule_creation:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_creation:qa:serverless
     key: rule_creation:runner:serverless
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -87,6 +93,7 @@ steps:
   - label: Running actions:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh actions:qa:serverless
     key: actions:qa:serverless
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
