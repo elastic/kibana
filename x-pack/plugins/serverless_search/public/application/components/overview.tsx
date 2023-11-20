@@ -52,6 +52,7 @@ import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorsCallout } from './connectors_callout';
+import { ConnectorIngestionPanel } from './connectors_ingestion';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -302,7 +303,7 @@ export const ElasticsearchOverview = () => {
           docLinks={docLinks}
           application={application}
           sharePlugin={share}
-          http={http}
+          additionalIngestionPanel={<ConnectorIngestionPanel />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section

@@ -12,7 +12,6 @@ import { EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type { HttpStart } from '@kbn/core-http-browser';
 import { CodeBox } from './code_box';
 import { LanguageDefinition } from '../types';
 import { OverviewPanel } from './overview_panel';
@@ -30,7 +29,7 @@ interface IngestDataProps {
   sharePlugin: SharePluginStart;
   languages: LanguageDefinition[];
   consoleRequest?: string;
-  http: HttpStart;
+  additionalIngestionPanel?: React.ReactNode;
 }
 
 export const IngestData: React.FC<IngestDataProps> = ({
@@ -43,9 +42,8 @@ export const IngestData: React.FC<IngestDataProps> = ({
   sharePlugin,
   languages,
   consoleRequest,
-  http,
+  additionalIngestionPanel,
 }) => {
-  const connectorPath = http.basePath.prepend('/app/connectors');
   return (
     <OverviewPanel
       description={i18n.translate('searchApiPanels.welcomeBanner.ingestData.description', {
@@ -78,7 +76,7 @@ export const IngestData: React.FC<IngestDataProps> = ({
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <IngestionsPanel connectorPath={connectorPath} docLinks={docLinks} />
+      <IngestionsPanel docLinks={docLinks} additionalIngestionPanel={additionalIngestionPanel} />
     </OverviewPanel>
   );
 };

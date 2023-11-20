@@ -20,59 +20,15 @@ import {
 import { i18n } from '@kbn/i18n';
 
 interface IngestionPanelProps {
-  connectorPath: string;
+  additionalIngestionPanel?: React.ReactNode;
   docLinks: { beats: string; logstash: string };
 }
 
-export const IngestionsPanel: React.FC<IngestionPanelProps> = ({ connectorPath, docLinks }) => {
+export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
+  additionalIngestionPanel,
+  docLinks,
+}) => {
   const panels = [
-    {
-      description: i18n.translate(
-        'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.connectorsDescription',
-        {
-          defaultMessage:
-            'Sync third-party data sources to Elasticsearch, by deploying open code Elastic connectors on your own infrastructure.  ',
-        }
-      ),
-      title: i18n.translate(
-        'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.connectorsTitle',
-        {
-          defaultMessage: 'Connectors',
-        }
-      ),
-      links: [
-        {
-          href: connectorPath,
-          label: i18n.translate(
-            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.setupConnectorLabel',
-            {
-              defaultMessage: 'Set up a connector',
-            }
-          ),
-          external: false,
-        },
-        {
-          href: 'https://github.com/elastic/connectors-python',
-          icon: 'logoGithub',
-          label: i18n.translate(
-            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.connectorPythonGithubLabel',
-            {
-              defaultMessage: 'connectors-python',
-            }
-          ),
-        },
-        {
-          href: 'https://github.com/elastic/connectors-python/blob/main/docs/DOCKER.md',
-          icon: 'logoDocker',
-          label: i18n.translate(
-            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.connectorDockerLabel',
-            {
-              defaultMessage: 'Docker',
-            }
-          ),
-        },
-      ],
-    },
     {
       description: i18n.translate(
         'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.logstashDescription',
@@ -151,6 +107,7 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({ connectorPath, 
   ];
   return (
     <>
+      {additionalIngestionPanel}
       {panels.map(({ title, description, links }) => (
         <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">
           <EuiFlexItem grow={false}>
