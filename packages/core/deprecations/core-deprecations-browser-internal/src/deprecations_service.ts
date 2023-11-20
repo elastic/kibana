@@ -8,13 +8,13 @@
 
 import type { CoreService } from '@kbn/core-base-browser-internal';
 import type { DeprecationsServiceStart } from '@kbn/core-deprecations-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { DeprecationsClient } from './deprecations_client';
 
 export class DeprecationsService implements CoreService<void, DeprecationsServiceStart> {
   public setup(): void {}
 
-  public start({ http }: { http: HttpStart }): DeprecationsServiceStart {
+  public start({ http }: { http: InternalHttpStart }): DeprecationsServiceStart {
     const deprecationsClient = new DeprecationsClient({ http });
 
     return {

@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { ILM_POLICY_NAME } from '@kbn/reporting-plugin/common/constants';
+import { ILM_POLICY_NAME } from '@kbn/reporting-common/constants';
 import { INTERNAL_ROUTES } from '@kbn/reporting-plugin/common/constants/routes';
 import { FtrProviderContext } from '../ftr_provider_context';
 

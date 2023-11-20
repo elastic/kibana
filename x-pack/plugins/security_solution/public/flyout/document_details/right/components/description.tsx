@@ -98,7 +98,12 @@ export const Description: FC = () => {
       <EuiFlexItem data-test-subj={DESCRIPTION_TITLE_TEST_ID}>
         <EuiTitle size="xxs">
           {isAlert ? (
-            <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+            <EuiFlexGroup
+              justifyContent="spaceBetween"
+              alignItems="center"
+              gutterSize="none"
+              responsive={false}
+            >
               <EuiFlexItem>
                 <h5>
                   <FormattedMessage

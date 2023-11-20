@@ -5,13 +5,38 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
+import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
+import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
 
-export default async function ({ readConfigFile }: FtrConfigProviderContext) {
+export default async function createTestConfig({ readConfigFile }: FtrConfigProviderContext) {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
+  const services = functionalConfig.get('services');
+  const pageObjects = functionalConfig.get('pageObjects');
 
   return {
     ...functionalConfig.getAll(),
     testFiles: [require.resolve('.')],
+    services: {
+      ...services,
+      logSynthtraceEsClient: (context: InheritedFtrProviderContext) => {
+        return new LogsSynthtraceEsClient({
+          client: context.getService('es'),
+          logger: createLogger(LogLevel.info),
+          refreshAfterIndex: true,
+        });
+      },
+    },
+    pageObjects,
   };
 }
+
+export type CreateTestConfig = Awaited<ReturnType<typeof createTestConfig>>;
+
+export type ObsLogExplorerServices = CreateTestConfig['services'];
+export type ObsLogExplorerPageObject = CreateTestConfig['pageObjects'];
+
+export type FtrProviderContext = GenericFtrProviderContext<
+  ObsLogExplorerServices,
+  ObsLogExplorerPageObject
+>;
