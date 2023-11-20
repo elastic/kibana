@@ -302,6 +302,7 @@ x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 x-pack/plugins/custom_branding @elastic/appex-sharedux
+packages/kbn-custom-icons @elastic/obs-ux-logs-team
 packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
@@ -345,6 +346,7 @@ packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
+packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-solution
 x-pack/plugins/elastic_assistant @elastic/security-solution
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
@@ -883,6 +885,9 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /x-pack/test_serverless/api_integration/test_suites/common/scripts_tests @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_oss @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_xpack @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/context @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/discover @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/discover_ml_uptime/discover @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/data_view_field_editor_example @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/discover_customization_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/field_formats @elastic/kibana-data-discovery
@@ -890,6 +895,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /x-pack/test_serverless/functional/test_suites/common/examples/search @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
 
 # Visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
