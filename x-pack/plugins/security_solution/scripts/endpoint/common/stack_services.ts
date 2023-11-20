@@ -16,6 +16,7 @@ import { type AxiosResponse } from 'axios';
 import type { ClientOptions } from '@elastic/elasticsearch/lib/client';
 import fs from 'fs';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import { omit } from 'lodash';
 import { createToolingLogger } from '../../../common/endpoint/data_loaders/utils';
 import { catchAxiosErrorFormatAndThrow } from './format_axios_error';
 import { isLocalhost } from './is_localhost';
@@ -243,7 +244,12 @@ export const createEsClient = ({
   }
 
   if (log) {
-    log.verbose(`Creating Elasticsearch client options: ${JSON.stringify(clientOptions)}`);
+    log.verbose(
+      `Creating Elasticsearch client options: ${JSON.stringify({
+        ...omit(clientOptions, 'tls'),
+        ...(clientOptions.tls ? { tls: { ca: ['Buffer() suppressed for logging!'] } } : {}),
+      })}`
+    );
   }
 
   return new Client(clientOptions);
