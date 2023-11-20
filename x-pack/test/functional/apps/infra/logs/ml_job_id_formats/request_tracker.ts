@@ -72,6 +72,8 @@ export function createRequestTracker(browser: Browser, common: CommonPageObject)
     const patternString = pattern.toString();
     const trimmedPattern = patternString.substring(1, patternString.length - 1);
 
+    // Some change
+
     return await browser.execute((browserPattern: string) => {
       const regExp = new RegExp(browserPattern);
       if (window.ftrLogsUiAnomalies) {
