@@ -12,6 +12,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../../../screens/alerts_detection_rules';
 import {
+  disableAutoRefresh,
   selectRulesByName,
   unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
@@ -20,7 +21,6 @@ import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
@@ -38,16 +38,13 @@ describe(
   'Rules table: selection',
   { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       /* Create and install two mock rules */
       createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
       visit(RULES_MANAGEMENT_URL);
       waitForPrebuiltDetectionRulesToBeLoaded();
+      disableAutoRefresh();
     });
 
     it('should correctly update the selection label when rules are individually selected and unselected', () => {

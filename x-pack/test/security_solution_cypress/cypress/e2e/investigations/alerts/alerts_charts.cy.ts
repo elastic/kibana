@@ -15,7 +15,6 @@ import {
   selectAlertsHistogram,
 } from '../../../tasks/alerts';
 import { createRule } from '../../../tasks/api_calls/rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import { ALERTS_URL } from '../../../urls/navigation';
@@ -31,10 +30,6 @@ describe(
   () => {
     const ruleConfigs = getNewRule();
 
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       createRule(getNewRule({ rule_id: 'new custom rule' }));
@@ -42,16 +37,18 @@ describe(
       selectAlertsHistogram();
     });
 
-    it('Filter in/out should add a filter to KQL bar', function () {
-      const expectedNumberOfAlerts = 2;
+    it('Filter in should add a filter to KQL bar', function () {
+      const expectedNumberOfAlerts = 1;
       clickAlertsHistogramLegend();
       clickAlertsHistogramLegendFilterFor(ruleConfigs.name);
       cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
         'have.text',
         `kibana.alert.rule.name: ${ruleConfigs.name}`
       );
-      cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alerts`);
+      cy.get(ALERTS_COUNT).should('have.text', `${expectedNumberOfAlerts} alert`);
+    });
 
+    it('Filter out should add a filter to KQL bar', function () {
       clickAlertsHistogramLegend();
       clickAlertsHistogramLegendFilterOut(ruleConfigs.name);
       cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should(
