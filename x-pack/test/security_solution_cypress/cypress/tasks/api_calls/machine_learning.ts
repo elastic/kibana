@@ -13,11 +13,6 @@ export const fetchMachineLearningModules = () => {
   return rootRequest<Module[]>({
     method: 'GET',
     url: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': 1,
-    },
     failOnStatusCode: false,
   });
 };
