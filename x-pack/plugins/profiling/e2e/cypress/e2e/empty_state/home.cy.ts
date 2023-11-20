@@ -83,4 +83,32 @@ describe('Home page with empty state', () => {
       cy.contains('Delete existing profiling data');
     });
   });
+
+  it('shows disabled button for users without privileges', () => {
+    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      body: {
+        has_setup: false,
+        has_data: false,
+        pre_8_9_1_data: false,
+        has_required_role: false,
+      },
+    }).as('getEsResources');
+    cy.visitKibana('/app/profiling');
+    cy.wait('@getEsResources');
+    cy.contains('Set up Universal Profiling').should('be.disabled');
+  });
+
+  it('shows emabled button for users without privileges', () => {
+    cy.intercept('GET', '/internal/profiling/setup/es_resources', {
+      body: {
+        has_setup: false,
+        has_data: false,
+        pre_8_9_1_data: false,
+        has_required_role: true,
+      },
+    }).as('getEsResources');
+    cy.visitKibana('/app/profiling');
+    cy.wait('@getEsResources');
+    cy.contains('Set up Universal Profiling').should('not.be.disabled');
+  });
 });

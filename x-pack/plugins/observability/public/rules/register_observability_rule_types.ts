@@ -14,7 +14,7 @@ import { ConfigSchema } from '../plugin';
 import { ObservabilityRuleTypeRegistry } from './create_observability_rule_type_registry';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../common/constants';
 import { validateBurnRateRule } from '../components/burn_rate_rule_editor/validation';
-import { validateMetricThreshold } from '../components/custom_threshold/components/validation';
+import { validateCustomThreshold } from '../components/custom_threshold/components/validation';
 import { formatReason } from '../components/custom_threshold/rule_data_formatters';
 
 const sloBurnRateDefaultActionMessage = i18n.translate(
@@ -112,12 +112,12 @@ export const registerObservabilityRuleTypes = (
       ),
       iconClass: 'bell',
       documentationUrl(docLinks) {
-        return `${docLinks.links.observability.threshold}`;
+        return `${docLinks.links.observability.customThreshold}`;
       },
       ruleParamsExpression: lazy(
         () => import('../components/custom_threshold/custom_threshold_rule_expression')
       ),
-      validate: validateMetricThreshold,
+      validate: validateCustomThreshold,
       defaultActionMessage: thresholdDefaultActionMessage,
       defaultRecoveryMessage: thresholdDefaultRecoveryMessage,
       requiresAppContext: false,

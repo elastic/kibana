@@ -386,9 +386,9 @@ export const termsOperation: OperationDefinition<
       }),
     }).toAst();
   },
-  getDefaultLabel: (column, indexPattern) =>
+  getDefaultLabel: (column, columns, indexPattern) =>
     ofName(
-      indexPattern.getFieldByName(column.sourceField)?.displayName,
+      indexPattern?.getFieldByName(column.sourceField)?.displayName,
       column.params.secondaryFields?.length,
       column.params.orderBy.type === 'rare',
       column.params.orderBy.type === 'significant',

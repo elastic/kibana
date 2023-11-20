@@ -512,12 +512,8 @@ describe('Utils', () => {
       jest.clearAllMocks();
     });
 
-    it('returns array of string when value is string', async () => {
-      expect(convertCustomFieldValue('my text value')).toMatchInlineSnapshot(`
-        Array [
-          "my text value",
-        ]
-      `);
+    it('returns the string when the value is a non-empty string', async () => {
+      expect(convertCustomFieldValue('my text value')).toMatchInlineSnapshot(`"my text value"`);
     });
 
     it('returns null when value is empty string', async () => {

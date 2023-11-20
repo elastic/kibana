@@ -39,7 +39,7 @@ export const GuidedOnboardingExampleApp = (props: GuidedOnboardingExampleAppDeps
             />
           }
         />
-        {guidedOnboarding.guidedOnboardingApi?.isEnabled ? (
+        {guidedOnboarding?.guidedOnboardingApi?.isEnabled ? (
           <EuiPageTemplate.Section>
             <Router history={history}>
               <Routes>

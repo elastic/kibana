@@ -13,6 +13,7 @@ import {
   AssetClientDependencies,
   AssetClientOptionsWithInjectedValues,
 } from '../../asset_client_types';
+import { validateStringDateRange } from '../../validators/validate_date_range';
 
 export type GetServicesOptions = GetServicesOptionsPublic & AssetClientDependencies;
 export type GetServicesOptionsInjected = AssetClientOptionsWithInjectedValues<GetServicesOptions>;
@@ -20,6 +21,8 @@ export type GetServicesOptionsInjected = AssetClientOptionsWithInjectedValues<Ge
 export async function getServices(
   options: GetServicesOptionsInjected
 ): Promise<{ services: Asset[] }> {
+  validateStringDateRange(options.from, options.to);
+
   const filters = [];
 
   if (options.parent) {

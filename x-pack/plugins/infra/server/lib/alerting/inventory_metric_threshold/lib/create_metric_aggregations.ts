@@ -6,11 +6,8 @@
  */
 
 import { get } from 'lodash';
-import {
-  InventoryItemType,
-  SnapshotMetricType,
-} from '../../../../../common/inventory_models/types';
-import { findInventoryModel } from '../../../../../common/inventory_models';
+import { InventoryItemType, SnapshotMetricType } from '@kbn/metrics-data-access-plugin/common';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { InfraTimerangeInput, SnapshotCustomMetricInput } from '../../../../../common/http_api';
 import { isMetricRate, isCustomMetricRate, isInterfaceRateAgg } from './is_rate';
 import { createRateAggs } from './create_rate_aggs';

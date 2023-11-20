@@ -59,9 +59,9 @@ const EntityAnalyticsRoutes = () => (
 
 const DataQualityRoutes = () => (
   <PluginTemplateWrapper>
-    <TrackApplicationView viewId={SecurityPageName.dataQuality}>
+    <SecurityRoutePageWrapper pageName={SecurityPageName.dataQuality}>
       <DataQuality />
-    </TrackApplicationView>
+    </SecurityRoutePageWrapper>
   </PluginTemplateWrapper>
 );
 

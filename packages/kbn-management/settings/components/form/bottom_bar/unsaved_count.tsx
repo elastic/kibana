@@ -25,7 +25,7 @@ interface UnsavedCountProps {
 export const UnsavedCount = ({ unsavedCount }: UnsavedCountProps) => {
   const { cssFormUnsavedCountMessage } = useFormStyles();
   return (
-    <EuiText size="s" color="ghost" css={cssFormUnsavedCountMessage}>
+    <EuiText size="s" css={cssFormUnsavedCountMessage}>
       <FormattedMessage
         id="management.settings.form.countOfSettingsChanged"
         defaultMessage="{unsavedCount} unsaved {unsavedCount, plural,

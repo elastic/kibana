@@ -40,7 +40,7 @@ describe('CustomFieldsList', () => {
     expect(screen.getByTestId('custom-fields-list')).toBeInTheDocument();
 
     for (const field of customFieldsConfigurationMock) {
-      expect(screen.getByTestId(`custom-field-${field.label}-${field.type}`)).toBeInTheDocument();
+      expect(screen.getByTestId(`custom-field-${field.key}-${field.type}`)).toBeInTheDocument();
     }
   });
 
@@ -54,7 +54,7 @@ describe('CustomFieldsList', () => {
     expect(list).toBeInTheDocument();
     expect(
       screen.getByTestId(
-        `custom-field-${customFieldsConfigurationMock[0].label}-${customFieldsConfigurationMock[0].type}`
+        `custom-field-${customFieldsConfigurationMock[0].key}-${customFieldsConfigurationMock[0].type}`
       )
     ).toBeInTheDocument();
     expect(

@@ -108,7 +108,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
     const { isValid, data } = await formState.submit();
 
     if (isValid) {
-      const value = isEmpty(data.value) ? null : [data.value];
+      const value = isEmpty(data.value) ? null : data.value;
 
       onSubmit({
         ...customField,
@@ -121,7 +121,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
     setIsEdit(false);
   };
 
-  const initialValue = customField?.value?.[0] ?? '';
+  const initialValue = customField?.value ?? '';
   const title = customFieldConfiguration.label;
   const isTextFieldValid = formState.isValid;
   const isCustomFieldValueDefined = !isEmpty(customField?.value);
@@ -162,7 +162,7 @@ const EditComponent: CustomFieldType<CaseCustomFieldText>['Edit'] = ({
         direction="column"
       >
         {!isCustomFieldValueDefined && !isEdit && (
-          <p data-test-subj="no-tags">{NO_CUSTOM_FIELD_SET(customFieldConfiguration.label)}</p>
+          <p data-test-subj="no-custom-field-value">{NO_CUSTOM_FIELD_SET}</p>
         )}
         {!isEdit && isCustomFieldValueDefined && (
           <EuiFlexItem>

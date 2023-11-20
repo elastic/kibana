@@ -7,6 +7,8 @@
 
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
+import { PassThrough, Transform } from 'stream';
+import { IncomingMessage } from 'http';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -82,6 +84,12 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'invokeAI',
       schema: InvokeAIActionParamsSchema,
     });
+
+    this.registerSubAction({
+      name: SUB_ACTION.INVOKE_STREAM,
+      method: 'invokeStream',
+      schema: InvokeAIActionParamsSchema,
+    });
   }
 
   protected getResponseErrorMessage(error: AxiosError<{ error?: { message?: string } }>): string {
@@ -114,6 +122,8 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       method: 'post',
       responseSchema: RunActionResponseSchema,
       data: sanitizedBody,
+      // give up to 2 minutes for response
+      timeout: 120000,
       ...axiosOptions,
     });
     return response.data;
@@ -183,18 +193,80 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
   }
 
   /**
-   * takes an array of messages and a model as input and returns a promise that resolves to a string.
-   * Sends the stringified input to the runApi method. Returns the trimmed completion from the response.
-   * @param body An object containing array of message objects, and possible other OpenAI properties
+   * Responsible for invoking the streamApi method with the provided body and
+   * stream parameters set to true. It then returns a Transform stream that processes
+   * the response from the streamApi method and returns the response string alone.
+   * @param body - the OpenAI Invoke request body
+   */
+  public async invokeStream(body: InvokeAIActionParams): Promise<Transform> {
+    const res = (await this.streamApi({
+      body: JSON.stringify(body),
+      stream: true,
+    })) as unknown as IncomingMessage;
+
+    return res.pipe(new PassThrough()).pipe(transformToString());
+  }
+
+  /**
+   * Deprecated. Use invokeStream instead.
+   * TODO: remove before 8.12 FF in part 3 of streaming work for security solution
+   * tracked here: https://github.com/elastic/security-team/issues/7363
    */
   public async invokeAI(body: InvokeAIActionParams): Promise<InvokeAIActionResponse> {
     const res = await this.runApi({ body: JSON.stringify(body) });
 
     if (res.choices && res.choices.length > 0 && res.choices[0].message?.content) {
       const result = res.choices[0].message.content.trim();
-      return result;
+      return { message: result, usage: res.usage };
     }
 
-    return 'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.';
+    return {
+      message:
+        'An error occurred sending your message. \n\nAPI Error: The response from OpenAI was in an unrecognized format.',
+      ...(res.usage
+        ? { usage: res.usage }
+        : { usage: { prompt_tokens: 0, completion_tokens: 0, total_tokens: 0 } }),
+    };
   }
 }
+
+/**
+ * Takes in a readable stream of data and returns a Transform stream that
+ * parses the proprietary OpenAI response into a string of the response text alone,
+ * returning the response string to the stream
+ */
+const transformToString = () => {
+  let lineBuffer: string = '';
+  const decoder = new TextDecoder();
+
+  return new Transform({
+    transform(chunk, encoding, callback) {
+      const chunks = decoder.decode(chunk);
+      const lines = chunks.split('\n');
+      lines[0] = lineBuffer + lines[0];
+      lineBuffer = lines.pop() || '';
+      callback(null, getNextChunk(lines));
+    },
+    flush(callback) {
+      // Emit an additional chunk with the content of lineBuffer if it has length
+      if (lineBuffer.length > 0) {
+        callback(null, getNextChunk([lineBuffer]));
+      } else {
+        callback();
+      }
+    },
+  });
+};
+
+const getNextChunk = (lines: string[]) => {
+  const encoder = new TextEncoder();
+  const nextChunk = lines
+    .map((str) => str.substring(6))
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      const openaiResponse = JSON.parse(line);
+      return openaiResponse.choices[0]?.delta.content ?? '';
+    })
+    .join('');
+  return encoder.encode(nextChunk);
+};

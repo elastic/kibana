@@ -387,6 +387,12 @@ export class CommonPageObject extends FtrService {
     this.log.debug('Clicking modal confirm');
     // make sure this data-test-subj 'confirmModalTitleText' exists because we're going to wait for it to be gone later
     await this.testSubjects.exists('confirmModalTitleText');
+    // make sure button is enabled before clicking it
+    // (and conveniently give UI enough time to bind a handler to it)
+    const isEnabled = await this.testSubjects.isEnabled('confirmModalConfirmButton');
+    if (!isEnabled) {
+      throw new Error('Modal confirm button is not enabled');
+    }
     await this.testSubjects.click('confirmModalConfirmButton');
     if (ensureHidden) {
       await this.ensureModalOverlayHidden();

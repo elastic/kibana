@@ -44,6 +44,10 @@ export function createCoreSetupMock({
     settings: settingsServiceMock.createSetupContract(),
     deprecations: deprecationsServiceMock.createSetupContract(),
     theme: themeServiceMock.createSetupContract(),
+    plugins: {
+      onSetup: jest.fn(),
+      onStart: jest.fn(),
+    },
   };
 
   return mock;

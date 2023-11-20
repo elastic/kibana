@@ -7,13 +7,19 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export function MachineLearningNavigationProviderObservability({ getService }: FtrProviderContext) {
+export function MachineLearningNavigationProviderObservability({
+  getService,
+  getPageObject,
+}: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   async function navigateToArea(id: string) {
-    await testSubjects.click('~nav-item-id-aiops');
-    await testSubjects.existOrFail(`~nav-item-id-ml:${id}`, { timeout: 60 * 1000 });
-    await testSubjects.click(`~nav-item-id-ml:${id}`);
+    await svlCommonNavigation.sidenav.openSection('observability_project_nav.aiops');
+    await testSubjects.existOrFail(`~nav-item-id-observability_project_nav.aiops.ml:${id}`, {
+      timeout: 60 * 1000,
+    });
+    await testSubjects.click(`~nav-item-id-observability_project_nav.aiops.ml:${id}`);
   }
 
   return {

@@ -101,14 +101,12 @@ export function ChatItemActions({
           closePopover={() => setIsPopoverOpen(undefined)}
         >
           <EuiText size="s">
-            <p>
-              {i18n.translate(
-                'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageSuccessful',
-                {
-                  defaultMessage: 'Copied message',
-                }
-              )}
-            </p>
+            {i18n.translate(
+              'xpack.observabilityAiAssistant.chatTimeline.actions.copyMessageSuccessful',
+              {
+                defaultMessage: 'Copied message',
+              }
+            )}
           </EuiText>
         </EuiPopover>
       ) : null}

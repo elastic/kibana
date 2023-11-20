@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle, EuiFlyoutSize } from '@elastic/eui';
+import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { FC } from 'react';
@@ -71,13 +71,15 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
       }};
     }
   }
-  div .euiDataGridRowCell__contentByHeight {
-    height: auto;
-    align-self: center;
+  div .euiDataGridRowCell__contentWrapper {
+    display: flex;
+    align-items: center;
   }
-  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__contentByHeight {
-    flex-grow: 0;
+  div .euiDataGridRowCell__content {
     width: 100%;
+  }
+  div .euiDataGridRowCell--lastColumn .euiDataGridRowCell__content {
+    flex-grow: 0;
   }
   div .siemEventsTable__trSupplement--summary {
     display: block;
@@ -86,7 +88,6 @@ const EuiDataGridContainer = styled.div<GridContainerProps>`
 `;
 interface DetectionEngineAlertTableProps {
   configId: string;
-  flyoutSize: EuiFlyoutSize;
   inputFilters: Filter[];
   tableId: TableId;
   sourcererScope?: SourcererScopeName;
@@ -96,7 +97,6 @@ interface DetectionEngineAlertTableProps {
 
 export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
   configId,
-  flyoutSize,
   inputFilters,
   tableId = TableId.alertsOnAlertsPage,
   sourcererScope = SourcererScopeName.detections,
@@ -258,10 +258,8 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
       configurationId: configId,
       // stores saperate configuration based on the view of the table
       id: `detection-engine-alert-table-${configId}-${tableView}`,
-      flyoutSize,
       featureIds: ['siem'],
       query: finalBoolQuery,
-      showExpandToDetails: false,
       gridStyle,
       shouldHighlightRow,
       rowHeightsOptions,
@@ -273,12 +271,12 @@ export const AlertsTableComponent: FC<DetectionEngineAlertTableProps> = ({
         showColumnSelector: !isEventRenderedView,
         showSortSelector: !isEventRenderedView,
       },
+      dynamicRowHeight: isEventRenderedView,
     }),
     [
       triggersActionsUi.alertsTableConfigurationRegistry,
       configId,
       tableView,
-      flyoutSize,
       finalBoolQuery,
       gridStyle,
       rowHeightsOptions,

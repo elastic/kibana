@@ -15,7 +15,7 @@ describe('Custom field', () => {
         {
           key: 'first_custom_field_key',
           type: 'text',
-          value: ['this is a text field value'],
+          value: 'this is a text field value',
         },
       ],
     };
@@ -47,7 +47,7 @@ describe('Custom field', () => {
           {
             key: 'first_custom_field_key',
             type: 'text',
-            value: ['this is a text field value'],
+            value: 'this is a text field value',
           },
         ],
       },

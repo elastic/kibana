@@ -15,7 +15,11 @@ import { set, unset } from 'lodash';
 import { createConnectorObject } from '../../test_utils';
 import { UserActionPersister } from './create';
 import { createUserActionSO } from '../test_utils';
-import type { BulkCreateAttachmentUserAction, CreateUserActionClient } from '../types';
+import type {
+  BuilderParameters,
+  BulkCreateAttachmentUserAction,
+  CreateUserActionArgs,
+} from '../types';
 import type { UserActionPersistedAttributes } from '../../../common/types/user_actions';
 import {
   getAssigneesAddedRemovedUserActions,
@@ -65,16 +69,19 @@ describe('UserActionPersister', () => {
     jest.useRealTimers();
   });
 
-  const getRequest = () =>
+  const getRequest = <T extends keyof BuilderParameters = 'connector'>(overrides = {}) =>
     ({
-      action: 'update' as const,
-      type: 'connector' as const,
-      caseId: 'test',
-      payload: { connector: createConnectorObject().connector },
-      connectorId: '1',
-      owner: 'cases',
-      user: { email: '', full_name: '', username: '' },
-    } as CreateUserActionClient<'connector'>);
+      userAction: {
+        action: 'update' as const,
+        type: 'connector' as const,
+        caseId: 'test',
+        payload: { connector: createConnectorObject().connector },
+        connectorId: '1',
+        owner: 'cases',
+        user: { email: '', full_name: '', username: '' },
+        ...overrides,
+      },
+    } as CreateUserActionArgs<T>);
 
   const getBulkCreateAttachmentRequest = (): BulkCreateAttachmentUserAction => ({
     caseId: 'test',
@@ -107,7 +114,7 @@ describe('UserActionPersister', () => {
 
       it('throws if fields is omitted', async () => {
         const req = getRequest();
-        unset(req, 'payload.connector.fields');
+        unset(req, 'userAction.payload.connector.fields');
 
         await expect(persister.createUserAction(req)).rejects.toThrow(
           'Invalid value "undefined" supplied to "payload,connector,fields"'
@@ -128,6 +135,56 @@ describe('UserActionPersister', () => {
     });
 
     describe('bulkCreateAttachmentCreation', () => {
+      beforeEach(() => {
+        unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+          saved_objects: [
+            {
+              attributes: createUserActionSO(),
+              id: '1',
+              type: CASE_USER_ACTION_SAVED_OBJECT,
+              references: [],
+            },
+          ],
+        });
+      });
+
+      it('decodes correctly the requested attributes', async () => {
+        await expect(
+          persister.bulkCreateUserAction({
+            userActions: [getRequest().userAction],
+          })
+        ).resolves.not.toThrow();
+      });
+
+      it('throws if owner is omitted', async () => {
+        const req = getRequest().userAction;
+        unset(req, 'owner');
+
+        await expect(
+          persister.bulkCreateUserAction({
+            userActions: [req],
+          })
+        ).rejects.toThrow('Invalid value "undefined" supplied to "owner"');
+      });
+
+      it('strips out excess attributes', async () => {
+        const req = getRequest().userAction;
+        set(req, 'payload.foo', 'bar');
+
+        await expect(
+          persister.bulkCreateUserAction({
+            userActions: [req],
+          })
+        ).resolves.not.toThrow();
+
+        const persistedAttributes = unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0][0]
+          .attributes as UserActionPersistedAttributes;
+
+        expect(persistedAttributes.payload).not.toHaveProperty('foo');
+      });
+    });
+
+    describe('bulkCreateUserAction', () => {
       beforeEach(() => {
         unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
           saved_objects: [
@@ -257,9 +314,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "this is a text field value",
-                          ],
+                          "value": "this is a text field value",
                         },
                       ],
                     },
@@ -311,9 +366,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "updated value",
-                          ],
+                          "value": "updated value",
                         },
                       ],
                     },
@@ -403,9 +456,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_2",
                           "type": "text",
-                          "value": Array [
-                            "new custom field 2",
-                          ],
+                          "value": "new custom field 2",
                         },
                       ],
                     },
@@ -457,9 +508,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "new value",
-                          ],
+                          "value": "new value",
                         },
                       ],
                     },
@@ -511,9 +560,7 @@ describe('UserActionPersister', () => {
                         Object {
                           "key": "string_custom_field_1",
                           "type": "text",
-                          "value": Array [
-                            "new value",
-                          ],
+                          "value": "new value",
                         },
                       ],
                     },
@@ -532,6 +579,105 @@ describe('UserActionPersister', () => {
           }
         `);
       });
+    });
+  });
+
+  describe('bulkCreateUserAction', () => {
+    beforeEach(() => {
+      unsecuredSavedObjectsClient.bulkCreate.mockResolvedValue({
+        saved_objects: [
+          {
+            attributes: [createUserActionSO()],
+            id: '1',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+          {
+            attributes: [createUserActionSO()],
+            id: '2',
+            type: CASE_USER_ACTION_SAVED_OBJECT,
+            references: [],
+          },
+        ],
+      });
+    });
+
+    it('bulk creates the user actions correctly', async () => {
+      const connectorUserAction = getRequest().userAction;
+      const titleUserAction = getRequest<'title'>({
+        type: 'title',
+        payload: { title: 'my title' },
+      }).userAction;
+
+      await persister.bulkCreateUserAction({
+        userActions: [connectorUserAction, titleUserAction],
+      });
+
+      expect(unsecuredSavedObjectsClient.bulkCreate.mock.calls[0][0]).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "attributes": Object {
+              "action": "update",
+              "created_at": "2022-01-09T22:00:00.000Z",
+              "created_by": Object {
+                "email": "",
+                "full_name": "",
+                "username": "",
+              },
+              "owner": "cases",
+              "payload": Object {
+                "connector": Object {
+                  "fields": Object {
+                    "issueType": "bug",
+                    "parent": "2",
+                    "priority": "high",
+                  },
+                  "name": ".jira",
+                  "type": ".jira",
+                },
+              },
+              "type": "connector",
+            },
+            "references": Array [
+              Object {
+                "id": "test",
+                "name": "associated-cases",
+                "type": "cases",
+              },
+              Object {
+                "id": "1",
+                "name": "connectorId",
+                "type": "action",
+              },
+            ],
+            "type": "cases-user-actions",
+          },
+          Object {
+            "attributes": Object {
+              "action": "update",
+              "created_at": "2022-01-09T22:00:00.000Z",
+              "created_by": Object {
+                "email": "",
+                "full_name": "",
+                "username": "",
+              },
+              "owner": "cases",
+              "payload": Object {
+                "title": "my title",
+              },
+              "type": "title",
+            },
+            "references": Array [
+              Object {
+                "id": "test",
+                "name": "associated-cases",
+                "type": "cases",
+              },
+            ],
+            "type": "cases-user-actions",
+          },
+        ]
+      `);
     });
   });
 });

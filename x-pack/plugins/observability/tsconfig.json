@@ -70,7 +70,6 @@
     "@kbn/exploratory-view-plugin",
     "@kbn/rison",
     "@kbn/io-ts-utils",
-    "@kbn/ml-anomaly-utils",
     "@kbn/observability-alert-details",
     "@kbn/ui-actions-plugin",
     "@kbn/field-types",
@@ -90,7 +89,13 @@
     "@kbn/deeplinks-observability",
     "@kbn/core-application-common",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/shared-ux-link-redirect-app",
+    "@kbn/core-chrome-browser",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/serverless",
+    "@kbn/dashboard-plugin",
+    "@kbn/calculate-auto"
   ],
   "exclude": [
     "target/**/*"

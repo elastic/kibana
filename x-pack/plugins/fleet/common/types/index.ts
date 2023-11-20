@@ -60,6 +60,7 @@ export interface FleetConfigType {
         min?: string;
         max?: string;
       };
+      excludePackages: string[];
     };
   };
   createArtifactsBulkBatchSize?: number;

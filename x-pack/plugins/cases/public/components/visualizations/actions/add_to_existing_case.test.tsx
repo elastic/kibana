@@ -24,7 +24,7 @@ import {
   mockTimeRange,
 } from './mocks';
 import { useKibana } from '../../../common/lib/kibana';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { canUseCases } from '../../../client/helpers/can_use_cases';
 import { getCaseOwnerByAppId } from '../../../../common/utils/owner';
 

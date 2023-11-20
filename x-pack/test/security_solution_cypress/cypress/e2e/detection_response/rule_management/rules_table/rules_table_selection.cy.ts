@@ -20,7 +20,6 @@ import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
 } from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanKibana } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
@@ -34,20 +33,14 @@ const RULE_2 = createRuleAssetSavedObject({
   rule_id: 'rule_2',
 });
 
-// TODO: https://github.com/elastic/kibana/issues/161540
-// FLAKY: https://github.com/elastic/kibana/issues/165643
-describe.skip(
+describe(
   'Rules table: selection',
-  { tags: ['@ess', '@serverless', '@skipInServerless'] },
+  { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] },
   () => {
-    before(() => {
-      cleanKibana();
-    });
-
     beforeEach(() => {
       login();
       /* Create and install two mock rules */
-      createAndInstallMockedPrebuiltRules({ rules: [RULE_1, RULE_2] });
+      createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
       visit(RULES_MANAGEMENT_URL);
       waitForPrebuiltDetectionRulesToBeLoaded();
     });

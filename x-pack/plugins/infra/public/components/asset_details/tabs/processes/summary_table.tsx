@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiLoadingSpinner,
@@ -28,8 +27,8 @@ interface Props {
 }
 
 type SummaryRecord = {
-  total: number;
-} & Record<keyof typeof STATE_NAMES, number>;
+  total: number | string;
+} & Record<keyof typeof STATE_NAMES, number | string>;
 
 const processSummaryNotAvailable = {
   total: NOT_AVAILABLE_LABEL,
@@ -43,21 +42,18 @@ const processSummaryNotAvailable = {
 };
 
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
-  const summary = !processSummary?.total ? processSummaryNotAvailable : processSummary;
-
-  const processCount = useMemo(
-    () =>
-      ({
-        total: isLoading ? -1 : summary.total,
-        ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
-        ...(isLoading ? {} : summary),
-      } as SummaryRecord),
-    [summary, isLoading]
+  const mergedSummary: SummaryRecord = useMemo(
+    () => ({
+      ...processSummaryNotAvailable,
+      ...Object.fromEntries(Object.entries(processSummary).filter(([_, v]) => !!v)),
+    }),
+    [processSummary]
   );
+
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
-        {Object.entries(processCount).map(([field, value]) => (
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+        {Object.entries(mergedSummary).map(([field, value]) => (
           <EuiFlexItem key={field}>
             <EuiDescriptionList
               data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
@@ -71,17 +67,7 @@ export const SummaryTable = ({ processSummary, isLoading }: Props) => {
                 {columnTitles[field as keyof SummaryRecord]}
               </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {value === -1 ? (
-                  <EuiLoadingSpinner
-                    size="m"
-                    css={css`
-                      margin-top: 2px;
-                      margin-bottom: 3px;
-                    `}
-                  />
-                ) : (
-                  value
-                )}
+                {isLoading ? <EuiLoadingSpinner size="m" /> : value}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>

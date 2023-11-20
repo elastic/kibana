@@ -14,10 +14,10 @@ export const testIndexMock: Index = {
   name: testIndexName,
   uuid: 'test1234',
   primary: '1',
-  replica: '1',
+  replica: '2',
   documents: 1,
   documents_deleted: 0,
-  size: '10kb',
+  size: '20kb',
   primary_size: '10kb',
   isFrozen: false,
   aliases: 'none',
@@ -67,10 +67,13 @@ export const testIndexSettings = {
     },
   },
 };
-export const testIndexEditableSettings = {
+export const testIndexEditableSettingsAll = {
   'index.priority': '1',
   'index.query.default_field': ['*'],
   'index.routing.allocation.include._tier_preference': 'data_content',
+};
+export const testIndexEditableSettingsLimited = {
+  'index.query.default_field': ['*'],
 };
 
 // Mocking partial index stats response

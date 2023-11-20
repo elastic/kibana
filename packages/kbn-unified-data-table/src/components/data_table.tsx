@@ -27,7 +27,11 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridCustomBodyProps,
   EuiDataGridCellValueElementProps,
+  EuiDataGridCustomToolbarProps,
+  EuiDataGridToolBarVisibilityOptions,
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
   EuiDataGridStyle,
+  EuiDataGridProps,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -63,6 +67,18 @@ import {
   toolbarVisibility as toolbarVisibilityDefaults,
 } from '../constants';
 import { UnifiedDataTableFooter } from './data_table_footer';
+import { UnifiedDataTableAdditionalDisplaySettings } from './data_table_additional_display_settings';
+
+export interface UnifiedDataTableRenderCustomToolbarProps {
+  toolbarProps: EuiDataGridCustomToolbarProps;
+  gridProps: {
+    additionalControls?: EuiDataGridToolBarVisibilityOptions['additionalControls'];
+  };
+}
+
+export type UnifiedDataTableRenderCustomToolbar = (
+  props: UnifiedDataTableRenderCustomToolbarProps
+) => React.ReactElement;
 
 export type SortOrder = [string, string];
 
@@ -138,10 +154,6 @@ export interface UnifiedDataTableProps {
    */
   rows?: DataTableRecord[];
   /**
-   * The max size of the documents returned by Elasticsearch
-   */
-  sampleSize: number;
-  /**
    * Function to set the expanded document, which is displayed in a flyout
    */
   setExpandedDoc?: (doc?: DataTableRecord) => void;
@@ -205,6 +217,18 @@ export interface UnifiedDataTableProps {
    * Update rows per page state
    */
   onUpdateRowsPerPage?: (rowsPerPage: number) => void;
+  /**
+   * Configuration option to limit sample size slider
+   */
+  maxAllowedSampleSize?: number;
+  /**
+   * The max size of the documents returned by Elasticsearch
+   */
+  sampleSizeState: number;
+  /**
+   * Update rows per page state
+   */
+  onUpdateSampleSize?: (sampleSize: number) => void;
   /**
    * Callback to execute on edit runtime field
    */
@@ -279,6 +303,12 @@ export interface UnifiedDataTableProps {
    */
   renderCustomGridBody?: (args: EuiDataGridCustomBodyProps) => React.ReactNode;
   /**
+   * Optional render for the grid toolbar
+   * @param toolbarProps
+   * @param gridProps
+   */
+  renderCustomToolbar?: UnifiedDataTableRenderCustomToolbar;
+  /**
    * An optional list of the EuiDataGridControlColumn type for setting trailing control columns standard for EuiDataGrid.
    */
   trailingControlColumns?: EuiDataGridControlColumn[];
@@ -328,7 +358,6 @@ export const UnifiedDataTable = ({
   onSetColumns,
   onSort,
   rows,
-  sampleSize,
   searchDescription,
   searchTitle,
   settings,
@@ -342,12 +371,16 @@ export const UnifiedDataTable = ({
   className,
   rowHeightState,
   onUpdateRowHeight,
+  maxAllowedSampleSize,
+  sampleSizeState,
+  onUpdateSampleSize,
   isPlainRecord = false,
   rowsPerPageState,
   onUpdateRowsPerPage,
   onFieldEdited,
   services,
   renderCustomGridBody,
+  renderCustomToolbar,
   trailingControlColumns,
   totalHits,
   onFetchMoreRecords,
@@ -538,6 +571,7 @@ export const UnifiedDataTable = ({
         fieldFormats: services.fieldFormats,
         maxEntries: maxDocFieldsDisplayed,
         externalCustomRenderers,
+        isPlainRecord,
       }),
     [
       dataView,
@@ -547,6 +581,7 @@ export const UnifiedDataTable = ({
       maxDocFieldsDisplayed,
       services.fieldFormats,
       externalCustomRenderers,
+      isPlainRecord,
     ]
   );
 
@@ -695,8 +730,12 @@ export const UnifiedDataTable = ({
       : internalControlColumns;
   }, [canSetExpandedDoc, externalControlColumns, controlColumnIds]);
 
-  const additionalControls = useMemo(
-    () => (
+  const additionalControls = useMemo(() => {
+    if (!externalAdditionalControls && !usedSelectedDocs.length) {
+      return null;
+    }
+
+    return (
       <>
         {usedSelectedDocs.length ? (
           <DataTableDocumentToolbarBtn
@@ -709,20 +748,44 @@ export const UnifiedDataTable = ({
         ) : null}
         {externalAdditionalControls}
       </>
-    ),
-    [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]
+    );
+  }, [usedSelectedDocs, isFilterActive, rows, externalAdditionalControls]);
+
+  const renderCustomToolbarFn: EuiDataGridProps['renderCustomToolbar'] | undefined = useMemo(
+    () =>
+      renderCustomToolbar
+        ? (toolbarProps) =>
+            renderCustomToolbar({
+              toolbarProps,
+              gridProps: {
+                additionalControls,
+              },
+            })
+        : undefined,
+    [renderCustomToolbar, additionalControls]
   );
 
-  const showDisplaySelector = useMemo(
-    () =>
-      !!onUpdateRowHeight
-        ? {
-            allowDensity: false,
-            allowRowHeight: true,
-          }
-        : undefined,
-    [onUpdateRowHeight]
-  );
+  const showDisplaySelector = useMemo(() => {
+    const options: EuiDataGridToolBarVisibilityDisplaySelectorOptions = {};
+
+    if (onUpdateRowHeight) {
+      options.allowDensity = false;
+      options.allowRowHeight = true;
+    }
+
+    if (onUpdateSampleSize) {
+      options.allowResetButton = false;
+      options.additionalDisplaySettings = (
+        <UnifiedDataTableAdditionalDisplaySettings
+          maxAllowedSampleSize={maxAllowedSampleSize}
+          sampleSize={sampleSizeState}
+          onChangeSampleSize={onUpdateSampleSize}
+        />
+      );
+    }
+
+    return Object.keys(options).length ? options : undefined;
+  }, [maxAllowedSampleSize, sampleSizeState, onUpdateRowHeight, onUpdateSampleSize]);
 
   const inMemory = useMemo(() => {
     return isPlainRecord && columns.length
@@ -827,15 +890,17 @@ export const UnifiedDataTable = ({
             inMemory={inMemory}
             gridStyle={gridStyleOverride ?? GRID_STYLE}
             renderCustomGridBody={renderCustomGridBody}
+            renderCustomToolbar={renderCustomToolbarFn}
             trailingControlColumns={trailingControlColumns}
           />
         </div>
         {loadingState !== DataLoadingState.loading &&
+          !usedSelectedDocs.length && // hide footer when showing selected documents
           isPaginationEnabled && ( // we hide the footer for Surrounding Documents page
             <UnifiedDataTableFooter
               isLoadingMore={loadingState === DataLoadingState.loadingMore}
               rowCount={rowCount}
-              sampleSize={sampleSize}
+              sampleSize={sampleSizeState}
               pageCount={pageCount}
               pageIndex={paginationObj?.pageIndex}
               totalHits={totalHits}

@@ -797,7 +797,7 @@
             "label": "align",
             "description": [],
             "signature": [
-              "\"left\" | \"right\" | \"center\" | undefined"
+              "\"right\" | \"left\" | \"center\" | undefined"
             ],
             "path": "x-pack/plugins/exploratory_view/public/components/shared/exploratory_view/embeddable/embeddable.tsx",
             "deprecated": false,
@@ -1161,26 +1161,6 @@
                 "docId": "kibEmbeddablePluginApi",
                 "section": "def-public.EmbeddableStart",
                 "text": "EmbeddableStart"
-              }
-            ],
-            "path": "x-pack/plugins/exploratory_view/public/plugin.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "exploratoryView",
-            "id": "def-public.ExploratoryViewPublicPluginsStart.guidedOnboarding",
-            "type": "Object",
-            "tags": [],
-            "label": "guidedOnboarding",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "guidedOnboarding",
-                "scope": "public",
-                "docId": "kibGuidedOnboardingPluginApi",
-                "section": "def-public.GuidedOnboardingPluginStart",
-                "text": "GuidedOnboardingPluginStart"
               }
             ],
             "path": "x-pack/plugins/exploratory_view/public/plugin.ts",

@@ -6,7 +6,6 @@
  */
 
 import { getNewRule } from '../../../../objects/rule';
-import { cleanKibana } from '../../../../tasks/common';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
@@ -20,7 +19,6 @@ describe('Expandable flyout state sync', { tags: ['@ess', '@serverless'] }, () =
   const rule = getNewRule();
 
   beforeEach(() => {
-    cleanKibana();
     login();
     createRule(rule);
     visit(ALERTS_URL);

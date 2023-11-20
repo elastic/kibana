@@ -30,6 +30,10 @@ export interface InfraConfig {
     logsUIEnabled: boolean;
     metricsExplorerEnabled: boolean;
     osqueryEnabled: boolean;
+    inventoryThresholdAlertRuleEnabled: boolean;
+    metricThresholdAlertRuleEnabled: boolean;
+    logThresholdAlertRuleEnabled: boolean;
+    alertsAndRulesDropdownEnabled: boolean;
   };
 }
 

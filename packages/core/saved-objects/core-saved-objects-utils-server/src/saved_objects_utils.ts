@@ -7,7 +7,7 @@
  */
 
 import { isFunction } from 'lodash';
-import { v1 as uuidv1, v5 as uuidv5 } from 'uuid';
+import { v4 as uuidv4, v5 as uuidv5 } from 'uuid';
 import type {
   SavedObjectsFindOptions,
   SavedObjectsFindResponse,
@@ -70,7 +70,7 @@ export class SavedObjectsUtils {
    * Generates a random ID for a saved objects.
    */
   public static generateId() {
-    return uuidv1();
+    return uuidv4();
   }
 
   /**

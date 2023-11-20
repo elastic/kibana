@@ -12,8 +12,7 @@ tags:
   - name: saved objects
     description: Manage Kibana saved objects, including dashboards, visualizations, and more.
 servers:
-  - url: 'http://localhost:5601'
-    description: local
+  - url: /
 paths:
 # Paths in the default space
   '/api/encrypted_saved_objects/_rotate_key':

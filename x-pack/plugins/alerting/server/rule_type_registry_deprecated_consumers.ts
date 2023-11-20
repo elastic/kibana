@@ -30,7 +30,6 @@ export const ruleTypeIdWithValidLegacyConsumers: Record<string, string[]> = {
   'siem.newTermsRule': [ALERTS_FEATURE_ID],
   'siem.notifications': [ALERTS_FEATURE_ID],
   'slo.rules.burnRate': [ALERTS_FEATURE_ID],
-  'metrics.alert.anomaly': [ALERTS_FEATURE_ID],
   'logs.alert.document.count': [ALERTS_FEATURE_ID],
   'metrics.alert.inventory.threshold': [ALERTS_FEATURE_ID],
   'metrics.alert.threshold': [ALERTS_FEATURE_ID],

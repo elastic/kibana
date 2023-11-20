@@ -27,6 +27,8 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import semverGt from 'semver/functions/gt';
 import semverLt from 'semver/functions/lt';
 
+import { AGENT_UPGRADE_COOLDOWN_IN_MIN } from '../../../../../../../common/services';
+
 import { getMinVersion } from '../../../../../../../common/services/get_min_max_version';
 import {
   AGENT_UPDATING_TIMEOUT_HOURS,
@@ -361,14 +363,32 @@ export const AgentUpgradeAgentModal: React.FunctionComponent<AgentUpgradeAgentMo
             defaultMessage="No selected agents are eligible for an upgrade. Please select one or more eligible agents."
           />
         ) : isSingleAgent ? (
-          <FormattedMessage
-            id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
-            defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
-            values={{
-              hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
-              version: getVersion(selectedVersion),
-            }}
-          />
+          <>
+            <p>
+              <FormattedMessage
+                id="xpack.fleet.upgradeAgents.upgradeSingleDescription"
+                defaultMessage="This action will upgrade the agent running on '{hostName}' to version {version}. This action can not be undone. Are you sure you wish to continue?"
+                values={{
+                  hostName: ((agents[0] as Agent).local_metadata.host as any).hostname,
+                  version: getVersion(selectedVersion),
+                }}
+              />
+            </p>
+            {isUpdating && (
+              <p>
+                <em>
+                  <FormattedMessage
+                    id="xpack.fleet.upgradeAgents.upgradeSingleTimeout"
+                    // TODO: Add link to docs regarding agent upgrade cooldowns
+                    defaultMessage="Note that you may only restart an upgrade every {minutes} minutes to ensure that the upgrade will not be rolled back."
+                    values={{
+                      minutes: AGENT_UPGRADE_COOLDOWN_IN_MIN,
+                    }}
+                  />
+                </em>
+              </p>
+            )}
+          </>
         ) : (
           <FormattedMessage
             id="xpack.fleet.upgradeAgents.upgradeMultipleDescription"

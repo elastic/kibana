@@ -14,7 +14,14 @@ import { login, ROLE } from '../../tasks/login';
 
 describe(
   'Response actions history page',
-  { tags: ['@ess', '@serverless', '@brokenInServerless'] },
+  {
+    tags: [
+      '@ess',
+      '@serverless',
+      // Not supported in serverless! Currently using a custom role that is not available in serverless
+      '@brokenInServerless',
+    ],
+  },
   () => {
     let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
     let endpointDataWithAutomated: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
@@ -22,8 +29,6 @@ describe(
     const [endpointAgentId, endpointHostname] = generateRandomStringName(2);
 
     before(() => {
-      login(ROLE.endpoint_response_actions_access);
-
       indexEndpointHosts({ numResponseActions: 2 }).then((indexEndpoints) => {
         endpointData = indexEndpoints;
       });
@@ -57,6 +62,10 @@ describe(
         alertData.cleanup();
         alertData = undefined;
       }
+    });
+
+    beforeEach(() => {
+      login(ROLE.endpoint_response_actions_access);
     });
 
     it('enable filtering by type', () => {

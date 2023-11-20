@@ -37,6 +37,13 @@ export default {
         saveChanges={action('saveChanges')}
         showError={action('showError')}
         showReloadPagePrompt={action('showReloadPagePrompt')}
+        validateChange={async (key, value) => {
+          action(`validateChange`)({
+            key,
+            value,
+          });
+          return { successfulValidation: true, valid: true };
+        }}
       >
         <Story />
       </FormProvider>
@@ -62,7 +69,11 @@ export const Form = ({ isSavingEnabled, requirePageReload }: FormStoryProps) => 
     uiSettingsClientMock
   );
 
-  return <Component {...{ fields, isSavingEnabled }} />;
+  // This is only needed for when a search query is present
+  const categoryCounts = {};
+  const onClearQuery = () => {};
+
+  return <Component {...{ fields, isSavingEnabled, categoryCounts, onClearQuery }} />;
 };
 
 Form.args = {

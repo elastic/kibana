@@ -73,8 +73,4 @@ export class DataViewEditorPlugin
       },
     };
   }
-
-  public stop() {
-    return {};
-  }
 }

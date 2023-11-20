@@ -59,5 +59,15 @@ export const useCategoryStory = ({ isFiltered, isSavingEnabled }: Params) => {
     setUnsavedChanges((changes) => ({ ...changes, [id]: change }));
   };
 
-  return { onClearQuery, onFieldChange, isSavingEnabled, unsavedChanges, categorizedFields };
+  // This is only needed for when a search query is present
+  const categoryCounts = {};
+
+  return {
+    onClearQuery,
+    onFieldChange,
+    isSavingEnabled,
+    unsavedChanges,
+    categorizedFields,
+    categoryCounts,
+  };
 };

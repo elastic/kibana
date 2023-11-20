@@ -8,6 +8,10 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import Boom from '@hapi/boom';
+
+import { outputType } from '../../../common/constants';
+
 import type {
   DeleteOutputRequestSchema,
   GetOneOutputRequestSchema,
@@ -18,12 +22,22 @@ import type {
   DeleteOutputResponse,
   GetOneOutputResponse,
   GetOutputsResponse,
+  Output,
   PostLogstashApiKeyResponse,
 } from '../../../common/types';
 import { outputService } from '../../services/output';
 import { defaultFleetErrorHandler, FleetUnauthorizedError } from '../../errors';
 import { agentPolicyService } from '../../services';
 import { generateLogstashApiKey, canCreateLogstashApiKey } from '../../services/api_keys';
+
+function ensureNoDuplicateSecrets(output: Partial<Output>) {
+  if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
+    throw Boom.badRequest('Cannot specify both password and secrets.password');
+  }
+  if (output.ssl?.key && output.secrets?.ssl?.key) {
+    throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+}
 
 export const getOutputsHandler: RequestHandler = async (context, request, response) => {
   const soClient = (await context.core).savedObjects.client;
@@ -74,8 +88,10 @@ export const putOutputHandler: RequestHandler<
   const coreContext = await context.core;
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
+  const outputUpdate = request.body;
+  ensureNoDuplicateSecrets(outputUpdate);
   try {
-    await outputService.update(soClient, esClient, request.params.outputId, request.body);
+    await outputService.update(soClient, esClient, request.params.outputId, outputUpdate);
     const output = await outputService.get(soClient, request.params.outputId);
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
@@ -108,8 +124,9 @@ export const postOutputHandler: RequestHandler<
   const soClient = coreContext.savedObjects.client;
   const esClient = coreContext.elasticsearch.client.asInternalUser;
   try {
-    const { id, ...data } = request.body;
-    const output = await outputService.create(soClient, esClient, data, { id });
+    const { id, ...newOutput } = request.body;
+    ensureNoDuplicateSecrets(newOutput);
+    const output = await outputService.create(soClient, esClient, newOutput, { id });
     if (output.is_default || output.is_default_monitoring) {
       await agentPolicyService.bumpAllAgentPolicies(soClient, esClient);
     }

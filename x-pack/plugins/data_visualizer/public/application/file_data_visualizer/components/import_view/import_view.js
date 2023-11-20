@@ -11,7 +11,7 @@ import React, { Component } from 'react';
 import {
   EuiButton,
   EuiPageBody,
-  EuiPageContentHeader_Deprecated as EuiPageContentHeader,
+  EuiPageHeader,
   EuiPanel,
   EuiSpacer,
   EuiTitle,
@@ -481,11 +481,11 @@ export class ImportView extends Component {
 
     return (
       <EuiPageBody data-test-subj="dataVisualizerPageFileImport">
-        <EuiPageContentHeader>
+        <EuiPageHeader>
           <EuiTitle>
             <h1>{this.props.fileName}</h1>
           </EuiTitle>
-        </EuiPageContentHeader>
+        </EuiPageHeader>
         <EuiSpacer size="m" />
         <EuiPanel data-test-subj="dataVisualizerFileImportSettingsPanel">
           <EuiTitle size="s">

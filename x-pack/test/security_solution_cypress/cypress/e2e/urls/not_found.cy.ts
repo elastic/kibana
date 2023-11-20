@@ -25,8 +25,7 @@ import { editRuleUrl } from '../../urls/edit_rule';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 
-// FLAKY: https://github.com/elastic/kibana/issues/165710
-describe('Display not found page', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
+describe('Display not found page', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
     login();
     visitWithTimeRange(TIMELINES_URL);

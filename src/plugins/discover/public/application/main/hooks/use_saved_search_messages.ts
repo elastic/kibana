@@ -8,7 +8,7 @@
 
 import type { BehaviorSubject } from 'rxjs';
 import type { DataTableRecord } from '@kbn/discover-utils/src/types';
-import type { SearchResponseInterceptedWarning } from '@kbn/search-response-warnings';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { FetchStatus } from '../../types';
 import type {
   DataDocuments$,
@@ -96,7 +96,7 @@ export function sendLoadingMoreFinishedMsg(
     interceptedWarnings,
   }: {
     moreRecords: DataTableRecord[];
-    interceptedWarnings: SearchResponseInterceptedWarning[] | undefined;
+    interceptedWarnings: SearchResponseWarning[] | undefined;
   }
 ) {
   const currentValue = documents$.getValue();

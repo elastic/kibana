@@ -5,24 +5,14 @@
  * 2.0.
  */
 
-export {
-  ruleSnoozeScheduleSchema,
-  bulkEditOperationsSchema,
-  bulkEditRulesRequestBodySchema,
-} from './schemas/latest';
-export type {
-  RuleSnoozeSchedule,
-  BulkEditRulesRequestBody,
-  BulkEditRulesResponse,
-} from './types/latest';
+export { bulkEditOperationsSchema, bulkEditRulesRequestBodySchema } from './schemas/latest';
+export type { BulkEditRulesRequestBody, BulkEditRulesResponse } from './types/latest';
 
 export {
-  ruleSnoozeScheduleSchema as ruleSnoozeScheduleSchemaV1,
   bulkEditOperationsSchema as bulkEditOperationsSchemaV1,
   bulkEditRulesRequestBodySchema as bulkEditRulesRequestBodySchemaV1,
 } from './schemas/v1';
 export type {
-  RuleSnoozeSchedule as RuleSnoozeScheduleV1,
   BulkEditRulesRequestBody as BulkEditRulesRequestBodyV1,
   BulkEditRulesResponse as BulkEditRulesResponseV1,
 } from './types/v1';

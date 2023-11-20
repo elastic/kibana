@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
-  const { learnMoreUrl } = useDeploymentDetails();
+  const { apiKeysLearnMoreUrl } = useDeploymentDetails();
 
   return (
     <EuiModal
@@ -49,7 +49,7 @@ export const DeploymentDetailsModal: FC<Props> = ({ closeModal }) => {
       <EuiModalFooter>
         <EuiFlexGroup alignItems="baseline" justifyContent="flexEnd">
           <EuiFlexItem grow={false}>
-            <EuiLink external href={learnMoreUrl} target="_blank">
+            <EuiLink external href={apiKeysLearnMoreUrl} target="_blank">
               {i18n.translate('cloud.deploymentDetails.modal.learnMoreButtonLabel', {
                 defaultMessage: 'Learn more',
               })}

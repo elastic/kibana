@@ -11,6 +11,8 @@ import {
   BedrockSimulator,
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
+import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -159,7 +161,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               statusCode: 400,
               error: 'Bad Request',
               message:
-                'error validating action type config: Error configuring AWS Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
+                'error validating action type config: Error configuring Amazon Bedrock action: Error: error validating url: target url "http://bedrock.mynonexistent.com" is not added to the Kibana config xpack.actions.allowedHosts',
             });
           });
       });
@@ -279,7 +281,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
-            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: AWS Bedrock. Connector type: .bedrock`,
+            service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
       });
@@ -396,13 +398,51 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             expect(simulator.requestData).to.eql({
               prompt:
                 '\n\nHuman:Hello world\n\nHuman:Be a good chatbot\n\nAssistant:Hi, I am a good chatbot\n\nHuman:What is 2+2? \n\nAssistant:',
-              max_tokens_to_sample: 300,
+              max_tokens_to_sample: DEFAULT_TOKEN_LIMIT,
+              temperature: 0.5,
               stop_sequences: ['\n\nHuman:'],
             });
             expect(body).to.eql({
               status: 'ok',
               connector_id: bedrockActionId,
-              data: bedrockSuccessResponse.completion,
+              data: { message: bedrockSuccessResponse.completion },
+            });
+          });
+
+          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            await new Promise<void>((resolve, reject) => {
+              let responseBody: string = '';
+
+              const passThrough = new PassThrough();
+
+              supertest
+                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .on('error', reject)
+                .send({
+                  params: {
+                    subAction: 'invokeStream',
+                    subActionParams: {
+                      messages: [
+                        {
+                          role: 'user',
+                          content: 'Hello world',
+                        },
+                      ],
+                    },
+                  },
+                  assistantLangChain: false,
+                })
+                .pipe(passThrough);
+
+              passThrough.on('data', (chunk) => {
+                responseBody += chunk.toString();
+              });
+
+              passThrough.on('end', () => {
+                expect(responseBody).to.eql('Hello world, what a unique string!');
+                resolve();
+              });
             });
           });
         });

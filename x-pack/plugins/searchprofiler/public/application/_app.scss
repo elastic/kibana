@@ -27,7 +27,7 @@
 }
 
 // adding dev tool top bar to the body offset
-$bodyOffset: $euiHeaderHeightCompensation;
+$bodyOffset: $euiSize * 3;
 
 .appRoot {
   @include kibanaFullBodyHeight($bodyOffset);
