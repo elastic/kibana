@@ -42,7 +42,7 @@ export const createRule = (
  * @param duration Snooze duration in milliseconds, -1 for indefinite
  */
 export const snoozeRule = (id: string, duration: number): Cypress.Chainable =>
-  cy.request({
+  rootRequest({
     method: 'POST',
     url: internalAlertingSnoozeRule(id),
     body: {
