@@ -68,7 +68,7 @@ export const PanelFooter: FC<PanelFooterProps> = ({ isPreview }) => {
         detailsEcsData={dataAsNestedObject}
         handleOnEventClosed={closeFlyout}
         isHostIsolationPanelOpen={isHostIsolationPanelOpen}
-        isReadOnly={isPreview}
+        isReadOnly={false}
         loadingEventDetails={false}
         onAddIsolationStatusClick={showHostIsolationPanelCallback}
         scopeId={scopeId}
