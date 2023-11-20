@@ -18,7 +18,7 @@ const staticDataViewRoute = createApmServerRoute({
   endpoint: 'POST /internal/apm/data_view/static',
   options: { tags: ['access:apm'] },
   handler: async (resources): CreateDataViewResponse => {
-    const { context, plugins, request } = resources;
+    const { context, plugins, request, logger } = resources;
     const apmEventClient = await getApmEventClient(resources);
     const coreContext = await context.core;
 
@@ -44,6 +44,7 @@ const staticDataViewRoute = createApmServerRoute({
       resources,
       apmEventClient,
       spaceId,
+      logger,
     });
 
     return res;

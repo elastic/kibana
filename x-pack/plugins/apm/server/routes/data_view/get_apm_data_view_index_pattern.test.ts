@@ -9,7 +9,7 @@ import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 
 describe('getApmDataViewIndexPattern', () => {
-  it('returns a data view index pattern by combining existing indicies', () => {
+  it('returns a data view index pattern by combining existing indices', () => {
     const indexPattern = getApmDataViewIndexPattern({
       transaction: 'apm-*-transaction-*',
       span: 'apm-*-span-*',

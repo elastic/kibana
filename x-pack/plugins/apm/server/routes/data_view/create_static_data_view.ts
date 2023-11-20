@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
 import {
@@ -33,15 +33,17 @@ export async function createStaticDataView({
   resources,
   apmEventClient,
   spaceId,
+  logger,
 }: {
   dataViewService: DataViewsService;
   resources: APMRouteHandlerResources;
   apmEventClient: APMEventClient;
   spaceId: string;
+  logger: Logger;
 }): CreateDataViewResponse {
   const { config } = resources;
   const dataViewId = getDataViewId(spaceId);
-  console.log(`create static data view ${dataViewId}`);
+  logger.info(`create static data view ${dataViewId}`);
 
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
