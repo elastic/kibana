@@ -144,9 +144,9 @@ export default function ({ getService }: FtrProviderContext) {
           ...newMonitor[ConfigKey.METADATA],
           ...updates[ConfigKey.METADATA],
         },
-      };
+      } as any;
 
-      const editResponse = await editMonitor(modifiedMonitor as MonitorFields, monitorId);
+      const editResponse = await editMonitor(modifiedMonitor, monitorId);
 
       expect(editResponse).eql(
         omitEmptyValues({
