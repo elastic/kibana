@@ -9,6 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import { calculateWidthFromLabel } from '@kbn/visualization-ui-components';
 import { type IndexPatternRef } from '../../types';
 import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 
@@ -28,6 +29,11 @@ export function ChangeIndexPattern({
   selectableProps?: EuiSelectableProps;
 }) {
   const [isPopoverOpen, setPopoverIsOpen] = useState(false);
+
+  const maxLabelLength = indexPatternRefs.reduce((acc, curr) => {
+    const dataViewName = curr.name || curr.id;
+    return acc > dataViewName.length ? acc : dataViewName.length;
+  }, 20);
 
   return (
     <>
@@ -49,7 +55,15 @@ export function ChangeIndexPattern({
         panelPaddingSize="none"
         ownFocus
       >
-        <div>
+        <div
+          css={{
+            width: calculateWidthFromLabel(maxLabelLength, {
+              minWidth: 280,
+              minWidthCharCapacity: 25,
+              maxWidth: 600,
+            }),
+          }}
+        >
           <EuiPopoverTitle paddingSize="s">
             {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
               defaultMessage: 'Data view',

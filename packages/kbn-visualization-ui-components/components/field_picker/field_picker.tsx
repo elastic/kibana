@@ -13,6 +13,7 @@ import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
 import classNames from 'classnames';
 import type { FieldOptionValue, FieldOption } from './types';
+import { calculateWidthFromLabel } from './calculate_width_from_label';
 
 export interface FieldPickerProps<T extends FieldOptionValue>
   extends EuiComboBoxProps<FieldOption<T>['value']> {
@@ -27,23 +28,26 @@ export interface FieldPickerProps<T extends FieldOptionValue>
 const MIDDLE_TRUNCATION_PROPS = { truncation: 'middle' as const };
 const SINGLE_SELECTION_AS_TEXT_PROPS = { asPlainText: true };
 
-export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
-  selectedOptions,
-  options,
-  onChoose,
-  onDelete,
-  fieldIsInvalid,
-  ['data-test-subj']: dataTestSub,
-  ...rest
-}: FieldPickerProps<T>) {
-  let theLongestLabel = '';
+export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
+  props: FieldPickerProps<T>
+) {
+  const {
+    selectedOptions,
+    options,
+    onChoose,
+    onDelete,
+    fieldIsInvalid,
+    ['data-test-subj']: dataTestSub,
+    ...rest
+  } = props;
+  let maxLabelLength = 0;
   const styledOptions = options?.map(({ compatible, exists, ...otherAttr }) => {
     if (otherAttr.options) {
       return {
         ...otherAttr,
         options: otherAttr.options.map(({ exists: fieldOptionExists, ...fieldOption }) => {
-          if (fieldOption.label.length > theLongestLabel.length) {
-            theLongestLabel = fieldOption.label;
+          if (fieldOption.label.length > maxLabelLength) {
+            maxLabelLength = fieldOption.label.length;
           }
           return {
             ...fieldOption,
@@ -75,7 +79,6 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
     };
   });
 
-  const panelMinWidth = getPanelMinWidth(theLongestLabel.length);
   return (
     <EuiComboBox
       fullWidth
@@ -90,7 +93,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
       selectedOptions={selectedOptions}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
-      inputPopoverProps={{ panelMinWidth }}
+      inputPopoverProps={{ panelMinWidth: calculateWidthFromLabel(maxLabelLength) }}
       onChange={(choices) => {
         if (choices.length === 0) {
           onDelete?.();
@@ -101,21 +104,4 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>({
       {...rest}
     />
   );
-}
-
-const MINIMUM_POPOVER_WIDTH = 300;
-const MINIMUM_POPOVER_WIDTH_CHAR_COUNT = 28;
-const AVERAGE_CHAR_WIDTH = 7;
-const MAXIMUM_POPOVER_WIDTH_CHAR_COUNT = 60;
-const MAXIMUM_POPOVER_WIDTH = 550; // fitting 60 characters
-
-function getPanelMinWidth(labelLength: number) {
-  if (labelLength > MAXIMUM_POPOVER_WIDTH_CHAR_COUNT) {
-    return MAXIMUM_POPOVER_WIDTH;
-  }
-  if (labelLength > MINIMUM_POPOVER_WIDTH_CHAR_COUNT) {
-    const overflownChars = labelLength - MINIMUM_POPOVER_WIDTH_CHAR_COUNT;
-    return MINIMUM_POPOVER_WIDTH + overflownChars * AVERAGE_CHAR_WIDTH;
-  }
-  return MINIMUM_POPOVER_WIDTH;
 }

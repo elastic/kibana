@@ -96,7 +96,13 @@ export function ChangeDataView({
   const { application, data, storage, dataViews, dataViewEditor, appName, usageCollection } =
     kibana.services;
   const reportUiCounter = usageCollection?.reportUiCounter.bind(usageCollection, appName);
-  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth });
+
+  const maxLabelLength = dataViewsList.reduce((acc, curr) => {
+    const dataViewName = curr.name || curr.id;
+    return acc > dataViewName.length ? acc : dataViewName.length;
+  }, 0);
+  const styles = changeDataViewStyles({ fullWidth: trigger.fullWidth, maxLabelLength });
+
   const [isTextLangTransitionModalDismissed, setIsTextLangTransitionModalDismissed] = useState(() =>
     Boolean(storage.get(TEXT_LANG_TRANSITION_MODAL_KEY))
   );

@@ -7,4 +7,5 @@
  */
 
 export { FieldPicker } from './field_picker';
+export { calculateWidthFromLabel } from './calculate_width_from_label';
 export type { FieldOptionValue, FieldOption, DataType } from './types';

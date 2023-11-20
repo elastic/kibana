@@ -6,15 +6,23 @@
  * Side Public License, v 1.
  */
 
-export const DATA_VIEW_POPOVER_CONTENT_WIDTH = 280;
+import { calculateWidthFromLabel } from '@kbn/visualization-ui-components';
 
-export const changeDataViewStyles = ({ fullWidth }: { fullWidth?: boolean }) => {
+const MIN_WIDTH = 300;
+
+export const changeDataViewStyles = ({
+  fullWidth,
+  maxLabelLength,
+}: {
+  fullWidth?: boolean;
+  maxLabelLength: number;
+}) => {
   return {
     trigger: {
-      maxWidth: fullWidth ? undefined : DATA_VIEW_POPOVER_CONTENT_WIDTH,
+      maxWidth: fullWidth ? undefined : MIN_WIDTH,
     },
     popoverContent: {
-      width: DATA_VIEW_POPOVER_CONTENT_WIDTH,
+      width: calculateWidthFromLabel(maxLabelLength, { minWidth: MIN_WIDTH }),
     },
   };
 };

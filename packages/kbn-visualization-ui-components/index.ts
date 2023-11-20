@@ -30,6 +30,7 @@ export {
   LineStyleSettings,
   TextDecorationSetting,
   emptyTitleText,
+  calculateWidthFromLabel,
 } from './components';
 
 export { isFieldLensCompatible } from './util';
