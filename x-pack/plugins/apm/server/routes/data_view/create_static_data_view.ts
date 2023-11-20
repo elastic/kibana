@@ -5,18 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { Logger, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
+import {
+  DO_NOT_USE_LEGACY_APM_STATIC_DATA_VIEW_ID,
+  getDataViewId,
+} from '../../../common/data_view_constants';
 import {
   TRACE_ID,
   TRANSACTION_ID,
   TRANSACTION_DURATION,
 } from '../../../common/es_fields/apm';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../common/data_view_constants';
 import { hasHistoricalAgentData } from '../historical_data/has_historical_agent_data';
 import { withApmSpan } from '../../utils/with_apm_span';
-import { getApmDataViewTitle } from './get_apm_data_view_title';
+import { getApmDataViewIndexPattern } from './get_apm_data_view_index_pattern';
 import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { APMRouteHandlerResources } from '../apm_routes/register_apm_server_routes';
 
@@ -29,12 +32,18 @@ export async function createStaticDataView({
   dataViewService,
   resources,
   apmEventClient,
+  spaceId,
+  logger,
 }: {
   dataViewService: DataViewsService;
   resources: APMRouteHandlerResources;
   apmEventClient: APMEventClient;
+  spaceId: string;
+  logger: Logger;
 }): CreateDataViewResponse {
   const { config } = resources;
+  const dataViewId = getDataViewId(spaceId);
+  logger.info(`create static data view ${dataViewId}`);
 
   return withApmSpan('create_static_data_view', async () => {
     // don't auto-create APM data view if it's been disabled via the config
@@ -61,10 +70,13 @@ export async function createStaticDataView({
       };
     }
 
-    const apmDataViewTitle = getApmDataViewTitle(apmEventClient.indices);
+    const apmDataViewIndexPattern = getApmDataViewIndexPattern(
+      apmEventClient.indices
+    );
     const shouldCreateOrUpdate = await getShouldCreateOrUpdate({
-      apmDataViewTitle,
+      apmDataViewIndexPattern,
       dataViewService,
+      dataViewId,
     });
 
     if (!shouldCreateOrUpdate) {
@@ -72,52 +84,48 @@ export async function createStaticDataView({
         created: false,
         reason: i18n.translate(
           'xpack.apm.dataView.alreadyExistsInActiveSpace',
-          { defaultMessage: 'Dataview already exists in the active space' }
+          {
+            defaultMessage:
+              'Dataview already exists in the active space and does not need to be updated',
+          }
         ),
       };
     }
 
-    return await withApmSpan('create_data_view', async () => {
-      try {
-        const dataView = await createAndSaveStaticDataView({
-          dataViewService,
-          apmDataViewTitle,
-        });
+    // delete legacy global data view
 
-        await addDataViewToAllSpaces(resources);
+    const dataView = await createAndSaveStaticDataView({
+      dataViewService,
+      apmDataViewIndexPattern,
+      dataViewId,
+    });
 
-        return { created: true, dataView };
-      } catch (e) {
-        // if the data view (saved object) already exists a conflict error (code: 409) will be thrown
-        if (SavedObjectsErrorHelpers.isConflictError(e)) {
-          return {
-            created: false,
-            reason: i18n.translate(
-              'xpack.apm.dataView.alreadyExistsInAnotherSpace',
-              {
-                defaultMessage:
-                  'Dataview already exists in another space but is not made available in this space',
-              }
-            ),
-          };
-        }
+    try {
+      await dataViewService.delete(DO_NOT_USE_LEGACY_APM_STATIC_DATA_VIEW_ID);
+    } catch (e) {
+      // swallow error if caused by the data view (saved object) not existing
+      if (!SavedObjectsErrorHelpers.isNotFoundError(e)) {
         throw e;
       }
-    });
+    }
+
+    return { created: true, dataView };
   });
 }
 
 // only create data view if it doesn't exist or was changed
 async function getShouldCreateOrUpdate({
   dataViewService,
-  apmDataViewTitle,
+  apmDataViewIndexPattern,
+  dataViewId,
 }: {
   dataViewService: DataViewsService;
-  apmDataViewTitle: string;
+  apmDataViewIndexPattern: string;
+  dataViewId: string;
 }) {
   try {
-    const existingDataView = await dataViewService.get(APM_STATIC_DATA_VIEW_ID);
-    return existingDataView.title !== apmDataViewTitle;
+    const existingDataView = await dataViewService.get(dataViewId);
+    return existingDataView.getIndexPattern() !== apmDataViewIndexPattern;
   } catch (e) {
     // ignore exception if the data view (saved object) is not found
     if (SavedObjectsErrorHelpers.isNotFoundError(e)) {
@@ -128,32 +136,21 @@ async function getShouldCreateOrUpdate({
   }
 }
 
-async function addDataViewToAllSpaces(resources: APMRouteHandlerResources) {
-  const { request, core } = resources;
-  const startServices = await core.start();
-  const scopedClient = startServices.savedObjects.getScopedClient(request);
-
-  // make data view available across all spaces
-  return scopedClient.updateObjectsSpaces(
-    [{ id: APM_STATIC_DATA_VIEW_ID, type: 'index-pattern' }],
-    ['*'],
-    []
-  );
-}
-
 function createAndSaveStaticDataView({
   dataViewService,
-  apmDataViewTitle,
+  apmDataViewIndexPattern,
+  dataViewId,
 }: {
   dataViewService: DataViewsService;
-  apmDataViewTitle: string;
+  apmDataViewIndexPattern: string;
+  dataViewId: string;
 }) {
   return dataViewService.createAndSave(
     {
       allowNoIndex: true,
-      id: APM_STATIC_DATA_VIEW_ID,
+      id: dataViewId,
       name: 'APM',
-      title: apmDataViewTitle,
+      title: apmDataViewIndexPattern,
       timeFieldName: '@timestamp',
 
       // link to APM from Discover
