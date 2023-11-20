@@ -8,7 +8,7 @@
 import moment from 'moment';
 import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
+import { EuiButton, EuiFlexGroup, EuiSpacer } from '@elastic/eui';
 import { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
@@ -18,7 +18,6 @@ import { CustomThresholdExpressionMetric } from '../../../../common/custom_thres
 import { useKibana } from '../../../utils/kibana_react';
 
 import { AlertParams, MetricExpression } from '../types';
-import { RelatedEventsSortBar, SortField } from './alert_details_related_events_sort_bar';
 import { CustomThresholdAlert, CustomThresholdRule } from './alert_details_app_section';
 
 const cpuMetricPrefix = 'system.cpu';
@@ -137,22 +136,6 @@ export default function AlertDetailsRelatedEvents({
     if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
   };
 
-  const sortByPValue = () => {
-    const sortedMetrics = changePointDataAll
-      .sort((a, b) => Number(a.p_value) - Number(b.p_value))
-      .map((cpItem) => cpItem.metricField);
-
-    if (sortedMetrics.length > 0) setRelatedMetrics(sortedMetrics);
-  };
-
-  const onChangeSort = (type: SortField | undefined) => {
-    if (type === 'time') {
-      sortByTime();
-    } else if (type === 'p_value') {
-      sortByPValue();
-    }
-  };
-
   const onRefresh = () => {
     relatedMetricsPerCriteria();
     setLastReloadRequestTime(moment(new Date()).valueOf());
@@ -176,9 +159,11 @@ export default function AlertDetailsRelatedEvents({
       <>
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
-          <EuiFlexItem grow={true} style={{ maxWidth: 180 }}>
-            <RelatedEventsSortBar loading={false} onChangeSort={onChangeSort} />
-          </EuiFlexItem>
+          <EuiButton data-test-subj="o11yAlertDetailsRelatedEventsSortButton" onClick={sortByTime}>
+            {i18n.translate('xpack.observability.alertDetailsRelatedEvents.sortButtonLabel', {
+              defaultMessage: 'Sort by time',
+            })}
+          </EuiButton>
           <EuiButton
             data-test-subj="o11yAlertDetailsRelatedEventsRefreshButton"
             onClick={onRefresh}
