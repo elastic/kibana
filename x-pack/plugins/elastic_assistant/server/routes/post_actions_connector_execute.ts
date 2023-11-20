@@ -46,12 +46,15 @@ export const postActionsConnectorExecuteRoute = (
         if (!request.body.assistantLangChain) {
           logger.debug('Executing via actions framework directly, assistantLangChain: false');
           const result = await executeAction({ actions, request, connectorId });
-          return response.ok({
-            body: result,
-            ...(request.body.params.subAction === 'invokeStream'
-              ? { headers: { connection: 'keep-alive', 'Transfer-Encoding': 'chunked' } }
-              : {}),
-          });
+          return request.body.params.subAction === 'invokeStream'
+            ? // a guess
+              response.accepted({
+                body: result,
+                headers: { connection: 'keep-alive', 'Transfer-Encoding': 'chunked' },
+              })
+            : response.ok({
+                body: result,
+              });
         }
 
         // TODO: Add `traceId` to actions request when calling via langchain

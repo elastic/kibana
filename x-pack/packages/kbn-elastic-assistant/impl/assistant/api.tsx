@@ -88,6 +88,7 @@ export const fetchConnectorExecuteAction = async ({
           headers: { Connection: 'keep-alive' },
         }
       );
+      console.log('RESPONSE?????', response);
 
       const reader = response?.response?.body?.getReader();
 
