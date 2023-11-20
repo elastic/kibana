@@ -25,7 +25,7 @@ import { useGetCasesMockState, connectorsMock } from '../../containers/mock';
 import { SortFieldCase, StatusAll } from '../../../common/ui/types';
 import { CaseSeverity, CaseStatuses } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
-import { getEmptyTagValue } from '../empty_value';
+import { getEmptyCellValue } from '../empty_value';
 import { useKibana } from '../../common/lib/kibana';
 import { AllCasesList } from './all_cases_list';
 import type { GetCasesColumn, UseCasesColumnsReturnValue } from './use_cases_columns';
@@ -48,7 +48,10 @@ import { userProfiles, userProfilesMap } from '../../containers/user_profiles/ap
 import { useBulkGetUserProfiles } from '../../containers/user_profiles/use_bulk_get_user_profiles';
 import { useLicense } from '../../common/use_license';
 import * as api from '../../containers/api';
+import { useGetCaseConfiguration } from '../../containers/configure/use_get_case_configuration';
+import { useCaseConfigureResponse } from '../configure_cases/__mock__';
 
+jest.mock('../../containers/configure/use_get_case_configuration');
 jest.mock('../../containers/use_get_cases');
 jest.mock('../../containers/use_get_action_license');
 jest.mock('../../containers/use_get_tags');
@@ -64,6 +67,7 @@ jest.mock('../app/use_available_owners', () => ({
 jest.mock('../../containers/use_update_case');
 jest.mock('../../common/use_license');
 
+const useGetCaseConfigurationMock = useGetCaseConfiguration as jest.Mock;
 const useGetCasesMock = useGetCases as jest.Mock;
 const useGetTagsMock = useGetTags as jest.Mock;
 const useGetCurrentUserProfileMock = useGetCurrentUserProfile as jest.Mock;
@@ -89,7 +93,7 @@ describe('AllCasesListGeneric', () => {
   const onRowClick = jest.fn();
   const updateCaseProperty = jest.fn();
 
-  const emptyTag = getEmptyTagValue().props.children;
+  const emptyTag = getEmptyCellValue().props.children;
 
   const defaultGetCases = {
     ...useGetCasesMockState,
@@ -99,9 +103,11 @@ describe('AllCasesListGeneric', () => {
     filterStatus: CaseStatuses.open,
     handleIsLoading: jest.fn(),
     isLoadingCases: [],
+    isLoadingColumns: false,
     isSelectorView: false,
     userProfiles: new Map(),
     currentUserProfile: undefined,
+    selectedColumns: [],
   };
 
   const removeMsFromDate = (value: string) => moment(value).format('YYYY-MM-DDTHH:mm:ss[Z]');
@@ -156,8 +162,9 @@ describe('AllCasesListGeneric', () => {
     useGetTagsMock.mockReturnValue({ data: ['coke', 'pepsi'], isLoading: false });
     useGetCategoriesMock.mockReturnValue({ data: ['twix', 'snickers'], isLoading: false });
     useGetCurrentUserProfileMock.mockReturnValue({ data: userProfiles[0], isLoading: false });
-    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useGetConnectorsMock.mockImplementation(() => ({ data: connectorsMock, isLoading: false }));
+    useGetCaseConfigurationMock.mockImplementation(() => useCaseConfigureResponse);
+    useBulkGetUserProfilesMock.mockReturnValue({ data: userProfilesMap });
     useUpdateCaseMock.mockReturnValue({ mutate: updateCaseProperty });
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => false });
     mockKibana();
@@ -1117,6 +1124,20 @@ describe('AllCasesListGeneric', () => {
           ).toBeGreaterThan(0);
         });
       });
+    });
+  });
+
+  describe('Columns Popover', () => {
+    it('renders the columns popover correctly', async () => {
+      appMockRenderer.render(<AllCasesList isSelectorView={false} />);
+
+      expect(await screen.findByTestId('column-selection-popover-button')).toBeInTheDocument();
+    });
+
+    it('does not render the columns popover when isSelectorView=true', () => {
+      appMockRenderer.render(<AllCasesList isSelectorView={true} />);
+
+      expect(screen.queryByTestId('column-selection-popover-button')).not.toBeInTheDocument();
     });
   });
 });

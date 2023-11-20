@@ -12,5 +12,5 @@ export interface JoinState {
   dataHasChanged: boolean;
   join: InnerJoin;
   joinIndex: number;
-  propertiesMap?: PropertiesMap;
+  joinMetrics?: PropertiesMap;
 }
