@@ -21,7 +21,7 @@ export function renderSearchError({
 }): { title: string; body: ReactNode; actions?: ReactNode[] } | undefined {
   if (error instanceof EsError) {
     return {
-      title: i18n.translate('data.search.esErrorTitle', {
+      title: i18n.translate('searchErrors.search.esErrorTitle', {
         defaultMessage: 'Cannot retrieve search results',
       }),
       body: error.getErrorMessage(),
@@ -30,12 +30,12 @@ export function renderSearchError({
   }
 
   if (error.constructor.name === 'HttpFetchError' || error instanceof BfetchRequestError) {
-    const defaultMsg = i18n.translate('data.errors.fetchError', {
+    const defaultMsg = i18n.translate('searchErrors.errors.fetchError', {
       defaultMessage: 'Check your network connection and try again.',
     });
 
     return {
-      title: i18n.translate('data.search.httpErrorTitle', {
+      title: i18n.translate('searchErrors.search.httpErrorTitle', {
         defaultMessage: 'Unable to connect to the Kibana server',
       }),
       body: error.message || defaultMsg,

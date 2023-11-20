@@ -37,7 +37,7 @@ export class PainlessError extends EsError {
     return (
       <>
         <EuiText size="s" data-test-subj="painlessScript">
-          {i18n.translate('data.painlessError.painlessScriptedFieldErrorMessage', {
+          {i18n.translate('searchErrors.painlessError.painlessScriptedFieldErrorMessage', {
             defaultMessage:
               'Error executing runtime field or scripted field on index pattern {indexPatternName}',
             values: {
@@ -73,7 +73,7 @@ export class PainlessError extends EsError {
         onClick={() => onClick(this?.indexPattern?.id)}
         size="s"
       >
-        {i18n.translate('data.painlessError.buttonTxt', {
+        {i18n.translate('searchErrors.painlessError.buttonTxt', {
           defaultMessage: 'Edit script',
         })}
       </EuiButtonEmpty>

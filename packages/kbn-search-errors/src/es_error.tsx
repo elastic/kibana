@@ -31,7 +31,7 @@ export class EsError extends KbnError {
     super(
       `EsError: ${
         getRootCause(err?.attributes?.error)?.reason ||
-        i18n.translate('data.esError.unknownRootCause', { defaultMessage: 'unknown' })
+        i18n.translate('searchErrors.esError.unknownRootCause', { defaultMessage: 'unknown' })
       }`
     );
     this.attributes = err.attributes;
@@ -59,7 +59,7 @@ export class EsError extends KbnError {
   public getActions(application: ApplicationStart) {
     return [
       <EuiButton key="viewRequestDetails" color="primary" onClick={this.openInInspector} size="s">
-        {i18n.translate('data.esError.viewDetailsButtonLabel', {
+        {i18n.translate('searchErrors.esError.viewDetailsButtonLabel', {
           defaultMessage: 'View details',
         })}
       </EuiButton>,
