@@ -122,6 +122,11 @@ export function MetricRowWithAgg({
                 'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                 { defaultMessage: 'Aggregation {name}', values: { name } }
               )}
+              labelAppend={
+                !disableDelete ? (
+                  <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
+                ) : undefined
+              }
             >
               <EuiExpression
                 data-test-subj="aggregationName"
@@ -218,9 +223,6 @@ export function MetricRowWithAgg({
           </div>
         </EuiPopover>
       </EuiFlexItem>
-      {!disableDelete && (
-        <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
-      )}
     </EuiFlexGroup>
   );
 }
