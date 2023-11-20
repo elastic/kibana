@@ -8,7 +8,6 @@
 import { SavedObjectsClientContract, SavedObjectsFindResponse } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { sloSchema } from '@kbn/slo-schema';
-import { SLO_MODEL_VERSION } from '../../assets/constants';
 import { SLO, StoredSLO } from '../../domain/models';
 import { SLOIdConflict, SLONotFound } from '../../errors';
 import { SO_SLO_TYPE } from '../../saved_objects';
@@ -165,42 +164,19 @@ describe('KibanaSavedObjectsSLORepository', () => {
     expect(soClientMock.delete).toHaveBeenCalledWith(SO_SLO_TYPE, SOME_SLO.id);
   });
 
-  describe('search', () => {
-    it('searches by name', async () => {
-      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(soFindResponse([SOME_SLO, ANOTHER_SLO]));
+  it('searches by name', async () => {
+    const repository = new KibanaSavedObjectsSLORepository(soClientMock);
+    soClientMock.find.mockResolvedValueOnce(soFindResponse([SOME_SLO, ANOTHER_SLO]));
 
-      const results = await repository.search(SOME_SLO.name, { page: 1, perPage: 100 });
+    const results = await repository.search(SOME_SLO.name);
 
-      expect(results.results).toEqual([SOME_SLO, ANOTHER_SLO]);
-      expect(soClientMock.find).toHaveBeenCalledWith({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 100,
-        search: SOME_SLO.name,
-        searchFields: ['name'],
-      });
-    });
-
-    it('searches only the outdated ones', async () => {
-      const repository = new KibanaSavedObjectsSLORepository(soClientMock);
-      soClientMock.find.mockResolvedValueOnce(soFindResponse([SOME_SLO, ANOTHER_SLO]));
-
-      const results = await repository.search(
-        SOME_SLO.name,
-        { page: 1, perPage: 100 },
-        { includeOutdatedOnly: true }
-      );
-
-      expect(results.results).toEqual([SOME_SLO, ANOTHER_SLO]);
-      expect(soClientMock.find).toHaveBeenCalledWith({
-        type: SO_SLO_TYPE,
-        page: 1,
-        perPage: 100,
-        search: SOME_SLO.name,
-        searchFields: ['name'],
-        filter: `slo.attributes.version < ${SLO_MODEL_VERSION}`,
-      });
+    expect(results).toEqual([SOME_SLO, ANOTHER_SLO]);
+    expect(soClientMock.find).toHaveBeenCalledWith({
+      type: SO_SLO_TYPE,
+      page: 1,
+      perPage: 25,
+      search: SOME_SLO.name,
+      searchFields: ['name'],
     });
   });
 });
