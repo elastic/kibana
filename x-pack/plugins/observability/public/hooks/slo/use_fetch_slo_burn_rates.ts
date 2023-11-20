@@ -13,6 +13,7 @@ import {
 import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
 
 export interface UseFetchSloBurnRatesResponse {
   isInitialLoading: boolean;
@@ -25,8 +26,6 @@ export interface UseFetchSloBurnRatesResponse {
     options?: (RefetchOptions & RefetchQueryFilters<TPageData>) | undefined
   ) => Promise<QueryObserverResult<GetSLOBurnRatesResponse | undefined, unknown>>;
 }
-
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
 
 interface UseFetchSloBurnRatesParams {
   slo: SLOWithSummaryResponse;
@@ -58,7 +57,7 @@ export function useFetchSloBurnRates({
           // ignore error
         }
       },
-      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+      refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }

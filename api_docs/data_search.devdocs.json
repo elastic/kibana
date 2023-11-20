@@ -267,7 +267,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; readonly state$: ",
+              "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -277,7 +277,7 @@
                 "section": "def-public.SearchSessionState",
                 "text": "SearchSessionState"
               },
-              ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
+              ">; readonly sessionMeta$: ",
               "Observable",
               "<",
               "SessionMeta",
@@ -723,7 +723,7 @@
               "\nCurrent session management\n{@link ISessionService}"
             ],
             "signature": [
-              "{ start: () => string; readonly state$: ",
+              "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
               "Observable",
               "<",
               {
@@ -733,7 +733,7 @@
                 "section": "def-public.SearchSessionState",
                 "text": "SearchSessionState"
               },
-              ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
+              ">; readonly sessionMeta$: ",
               "Observable",
               "<",
               "SessionMeta",
@@ -1279,7 +1279,7 @@
         "label": "ISessionService",
         "description": [],
         "signature": [
-          "{ start: () => string; readonly state$: ",
+          "{ start: () => string; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly state$: ",
           "Observable",
           "<",
           {
@@ -1289,7 +1289,7 @@
             "section": "def-public.SearchSessionState",
             "text": "SearchSessionState"
           },
-          ">; save: () => Promise<void>; clear: () => void; destroy: () => void; readonly sessionMeta$: ",
+          ">; readonly sessionMeta$: ",
           "Observable",
           "<",
           "SessionMeta",
@@ -1480,7 +1480,7 @@
                 "label": "config",
                 "description": [],
                 "signature": [
-                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; }>"
+                  "Readonly<{} & { search: Readonly<{} & { aggs: Readonly<{} & { shardDelay: Readonly<{} & { enabled: boolean; }>; }>; asyncSearch: Readonly<{ pollInterval?: number | undefined; } & { waitForCompletion: moment.Duration; keepAlive: moment.Duration; batchedReduceSize: number; }>; sessions: Readonly<{} & { enabled: boolean; management: Readonly<{} & { refreshInterval: moment.Duration; maxSessions: number; refreshTimeout: moment.Duration; expiresSoonWarning: moment.Duration; }>; notTouchedTimeout: moment.Duration; maxUpdateRetries: number; defaultExpiration: moment.Duration; }>; }>; enableUiSettingsValidations: boolean; }>"
                 ],
                 "path": "src/plugins/data/server/search/session/session_service.ts",
                 "deprecated": false,

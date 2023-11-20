@@ -10,7 +10,6 @@ import { layeredXyVisFunction } from '.';
 import { createMockExecutionContext } from '@kbn/expressions-plugin/common/mocks';
 import { sampleArgs, sampleExtendedLayer } from '../__mocks__';
 import { XY_VIS } from '../constants';
-import { shouldShowLegendActionDefault } from '../helpers/visualization';
 
 describe('layeredXyVis', () => {
   test('it renders with the specified data and args', async () => {
@@ -31,7 +30,6 @@ describe('layeredXyVis', () => {
         syncTooltips: false,
         syncCursor: true,
         canNavigateToLens: false,
-        shouldShowLegendAction: shouldShowLegendActionDefault,
       },
     });
   });
