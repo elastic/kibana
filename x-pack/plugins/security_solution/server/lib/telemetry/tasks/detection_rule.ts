@@ -25,11 +25,11 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
     timeout: '10m',
     version: '1.0.0',
     runTask: async (
-      taskId: string,
+      _taskId: string,
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      taskExecutionPeriod: TaskExecutionPeriod
+      _taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';

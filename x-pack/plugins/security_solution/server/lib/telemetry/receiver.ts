@@ -165,6 +165,10 @@ export interface ITelemetryReceiver {
 
   fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
+  fetchDiagnosticTimelineEndpointAlerts(
+    interval: number
+  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
+
   buildProcessTree(
     entityId: string,
     resolverSchema: ResolverSchema,
@@ -697,7 +701,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
-  public async fetchTimelineEndpointAlerts(interval: number) {
+  private async fetchTimelineAlerts(index: string | undefined, interval: number) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
@@ -708,7 +712,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     // create and assign an initial point in time
     let pitId: OpenPointInTimeResponse['id'] = (
       await this.esClient.openPointInTime({
-        index: `${this.alertsIndex}*`,
+        index: `${index}*`,
         keep_alive: keepAlive,
       })
     ).id;
@@ -807,7 +811,20 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     }
 
     tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
-    return alertsToReturn;
+    return alertsToReturn || [];
+  }
+
+  public async fetchTimelineEndpointAlerts(interval: number) {
+    return this.fetchTimelineAlerts(this.alertsIndex, interval);
+  }
+
+  public fetchDiagnosticTimelineEndpointAlerts(
+    interval: number
+  ): Promise<Array<SearchHit<EnhancedAlertEvent>>> {
+    // TODO: confirm that this is the proper index and move to
+    // another place, either config or constant
+    const index = '.logs-endpoint.diagnostic.collection-*';
+    return this.fetchTimelineAlerts(index, interval);
   }
 
   public async buildProcessTree(

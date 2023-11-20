@@ -22,9 +22,11 @@ import { resolverEntity } from '../../../endpoint/routes/resolver/entity/utils/b
 import { tlog, createTaskMetric } from '../helpers';
 
 export function createTelemetryTimelineTaskConfig() {
+  const taskName = 'Security Solution Timeline telemetry';
+
   return {
     type: 'security:telemetry-timelines',
-    title: 'Security Solution Timeline telemetry',
+    title: taskName,
     interval: '3h',
     timeout: '10m',
     version: '1.0.0',
@@ -36,7 +38,6 @@ export function createTelemetryTimelineTaskConfig() {
       taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const startTime = Date.now();
-      const taskName = 'Security Solution Timeline telemetry';
       try {
         let counter = 0;
 
@@ -79,6 +80,8 @@ export function createTelemetryTimelineTaskConfig() {
             createTaskMetric(taskName, true, startTime),
           ]);
           return counter;
+        } else {
+          tlog(logger, `${endpointAlerts.length} alerts received. Processing...`);
         }
 
         // Build process tree for each EP Alert recieved
