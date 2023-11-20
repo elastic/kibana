@@ -35,9 +35,16 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
   clusterPrivileges,
   kibanaPrivileges,
 }) => {
-  const kibanaPrivilegesExplanation = kibanaPrivileges
-    .map((privilege) => [privilege, kibanaPrivilegesExplanations[privilege]])
-    .filter(Boolean);
+  const kibanaPrivilegesExplanation = kibanaPrivileges.reduce<Array<[string, string]>>(
+    (acc, privilege) => {
+      const explanation = kibanaPrivilegesExplanations[privilege];
+      if (explanation) {
+        acc.push([privilege, explanation]);
+      }
+      return acc;
+    },
+    []
+  );
 
   const { docLinks } = useKibana().services;
 
