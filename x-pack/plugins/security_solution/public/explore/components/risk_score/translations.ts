@@ -53,20 +53,22 @@ export const getRiskEntityTranslation = (
   lowercase = false,
   plural = false
 ) => {
-  const text = (() => {
-    if (!riskEntity && plural) return ENTITIES;
-    if (!riskEntity) return ENTITY;
-
-    if (riskEntity === RiskScoreEntity.host && plural) return HOSTS;
-    if (riskEntity === RiskScoreEntity.host) return HOST;
-
-    if (riskEntity === RiskScoreEntity.user && plural) return USERS;
-    if (riskEntity === RiskScoreEntity.user) return USER;
-
-    return '';
-  })();
-
+  const text = getRiskEntityTranslationText(riskEntity, plural);
   return lowercase ? text.toLowerCase() : text;
+};
+
+export const getRiskEntityTranslationText = (
+  riskEntity: RiskScoreEntity | undefined,
+  plural: boolean
+) => {
+  if (riskEntity === RiskScoreEntity.host && plural) return HOSTS;
+  if (riskEntity === RiskScoreEntity.host) return HOST;
+
+  if (riskEntity === RiskScoreEntity.user && plural) return USERS;
+  if (riskEntity === RiskScoreEntity.user) return USER;
+
+  if (plural) return ENTITIES;
+  return ENTITY;
 };
 
 export const ALERTS = i18n.translate('xpack.securitySolution.riskScore.overview.alerts', {

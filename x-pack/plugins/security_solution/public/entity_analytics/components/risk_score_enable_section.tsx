@@ -29,7 +29,8 @@ import {
   EuiAccordion,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { DETECTION_ENTITY_DASHBOARD, RISKY_ENTITY_SCORE_DOC_LINK } from '../../../common/constants';
+import { LinkAnchor } from '../../common/components/links';
+import { SecurityPageName } from '../../../common/constants';
 import * as i18n from '../translations';
 import { useRiskEngineStatus } from '../api/hooks/use_risk_engine_status';
 import { useInitRiskEngineMutation } from '../api/hooks/use_init_risk_engine_mutation';
@@ -39,7 +40,6 @@ import { RiskEngineStatus, MAX_SPACES_COUNT } from '../../../common/risk_engine'
 
 import { RiskInformationFlyout } from '../../explore/components/risk_score/risk_information';
 import { useOnOpenCloseHandler } from '../../helper_hooks';
-import { useKibana } from '../../common/lib/kibana';
 
 const MIN_WIDTH_TO_PREVENT_LABEL_FROM_MOVING = '50px';
 
@@ -178,7 +178,6 @@ const RiskScoreUpdateModal = ({
 };
 
 export const RiskScoreEnableSection = () => {
-  const { http } = useKibana().services;
   const [isModalVisible, setIsModalVisible] = useState(false);
   const { data: riskEngineStatus, isFetching: isStatusLoading } = useRiskEngineStatus();
   const initRiskEngineMutation = useInitRiskEngineMutation({
@@ -333,11 +332,11 @@ export const RiskScoreEnableSection = () => {
         </EuiTitle>
         <EuiSpacer />
         <ul>
-          <li key={DETECTION_ENTITY_DASHBOARD}>
+          <li>
             <LinkAnchor id={SecurityPageName.entityAnalytics}>{i18n.EA_DASHBOARD_LINK}</LinkAnchor>
             <EuiSpacer size="s" />
           </li>
-          <li key={RISKY_ENTITY_SCORE_DOC_LINK}>
+          <li>
             <EuiLink onClick={handleOnOpen} data-test-subj="open-risk-information-flyout-trigger">
               {i18n.EA_DOCS_ENTITY_RISK_SCORE}
             </EuiLink>

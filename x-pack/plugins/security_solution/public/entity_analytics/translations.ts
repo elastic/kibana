@@ -59,7 +59,7 @@ export const RISK_SCORE_MODULE_STATUS_OFF = i18n.translate(
 export const ENTITY_RISK_SCORING = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
   {
-    defaultMessage: 'Entity risk scoring',
+    defaultMessage: 'How is the risk score calculated',
   }
 );
 
@@ -70,7 +70,7 @@ export const USEFUL_LINKS = i18n.translate(
   }
 );
 
-export const EA_DOCS_DASHBOARD = i18n.translate(
+export const EA_DASHBOARD_LINK = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.eaDocsDashboard',
   {
     defaultMessage: 'Entity Analytics documentation',
