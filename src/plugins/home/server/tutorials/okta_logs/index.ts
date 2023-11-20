@@ -40,7 +40,7 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-okta.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/okta.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/okta.svg'),
     artifacts: {
       dashboards: [
         {
@@ -56,7 +56,7 @@ export function oktaLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/okta_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/okta_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
