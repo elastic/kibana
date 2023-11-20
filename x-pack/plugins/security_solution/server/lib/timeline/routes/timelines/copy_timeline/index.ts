@@ -6,13 +6,12 @@
  */
 
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import type { ConfigType } from '../../../../..';
 import { copyTimelineSchema } from '../../../../../../common/api/timeline';
 import { copyTimeline } from '../../../saved_object/timelines';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
-import type { StartPlugins, SetupPlugins } from '../../../../../plugin';
+import type { SetupPlugins } from '../../../../../plugin';
 import { TIMELINE_COPY_URL } from '../../../../../../common/constants';
 import { buildSiemResponse } from '../../../../detection_engine/routes/utils';
 
@@ -20,12 +19,9 @@ import { buildFrameworkRequest } from '../../../utils/common';
 
 export const copyTimelineRoute = async (
   router: SecuritySolutionPluginRouter,
-  startServices: StartServicesAccessor<StartPlugins>,
   _: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  const [, { data }] = await startServices();
-
   router.versioned
     .post({
       path: TIMELINE_COPY_URL,
@@ -45,15 +41,9 @@ export const copyTimelineRoute = async (
         const siemResponse = buildSiemResponse(response);
 
         try {
-          const searchSourceClient = await data.search.searchSource.asScoped(request);
           const frameworkRequest = await buildFrameworkRequest(context, security, request);
           const { timeline, timelineIdToCopy } = request.body;
-          const copiedTimeline = await copyTimeline(
-            frameworkRequest,
-            timeline,
-            timelineIdToCopy,
-            searchSourceClient
-          );
+          const copiedTimeline = await copyTimeline(frameworkRequest, timeline, timelineIdToCopy);
 
           return response.ok({
             body: { data: { persistTimeline: copiedTimeline } },
