@@ -16,15 +16,12 @@ import type { CellValueContext } from '@kbn/embeddable-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INCOMPATIBLE_VALUE_WARNING } from '@kbn/cell-actions/src/actions/translations';
 import { i18n } from '@kbn/i18n';
-import { KibanaServices } from '../../../common/lib/kibana';
 import { timelineSelectors } from '../../../timelines/store/timeline';
 import { fieldHasCellActions, isInSecurityApp, isLensEmbeddable } from '../../utils';
 import { TimelineId } from '../../../../common/types';
-import { SecurityCellActionType } from '../../constants';
+import { DefaultCellActionTypes } from '../../constants';
 import type { SecurityAppStore } from '../../../common/store';
 import type { StartServices } from '../../../types';
-import { HISTOGRAM_LEGEND_ACTION_FILTER_IN } from './filter_in';
-import { HISTOGRAM_LEGEND_ACTION_FILTER_OUT } from './filter_out';
 
 function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   return (
@@ -34,7 +31,7 @@ function isDataColumnsValid(data?: CellValueContext['data']): boolean {
   );
 }
 
-export const createHistogramFilterLegendActionFactory = ({
+export const createFilterLensAction = ({
   id,
   order,
   store,
@@ -47,14 +44,13 @@ export const createHistogramFilterLegendActionFactory = ({
   services: StartServices;
   negate?: boolean;
 }) => {
-  const { application: applicationService } = KibanaServices.get();
+  const { application, notifications, data: dataService, topValuesPopover } = services;
+
   let currentAppId: string | undefined;
-  applicationService.currentAppId$.subscribe((appId) => {
+  application.currentAppId$.subscribe((appId) => {
     currentAppId = appId;
   });
   const getTimelineById = timelineSelectors.getTimelineByIdSelector();
-  const { notifications } = services;
-  const { filterManager } = services.data.query;
 
   return createAction<CellValueContext>({
     id,
@@ -68,7 +64,7 @@ export const createHistogramFilterLegendActionFactory = ({
         : i18n.translate('xpack.securitySolution.actions.filterForTimeline', {
             defaultMessage: `Filter for`,
           }),
-    type: SecurityCellActionType.FILTER,
+    type: DefaultCellActionTypes.FILTER,
     isCompatible: async ({ embeddable, data }) =>
       !isErrorEmbeddable(embeddable) &&
       isLensEmbeddable(embeddable) &&
@@ -85,27 +81,19 @@ export const createHistogramFilterLegendActionFactory = ({
         });
         return;
       }
-
       if (!field) return;
 
-      const timeline = getTimelineById(store.getState(), TimelineId.active);
-      services.topValuesPopover.closePopover();
+      topValuesPopover.closePopover();
 
-      if (!negate) {
-        addFilterIn({
-          filterManager:
-            id === HISTOGRAM_LEGEND_ACTION_FILTER_IN ? filterManager : timeline.filterManager,
-          fieldName: field,
-          value,
-        });
-      } else {
-        addFilterOut({
-          filterManager:
-            id === HISTOGRAM_LEGEND_ACTION_FILTER_OUT ? filterManager : timeline.filterManager,
-          fieldName: field,
-          value,
-        });
-      }
+      const addFilter = negate === true ? addFilterOut : addFilterIn;
+
+      const timeline = getTimelineById(store.getState(), TimelineId.active);
+      // timeline is open add the filter to timeline, otherwise add filter to global filters
+      const filterManager = timeline?.show
+        ? timeline.filterManager
+        : dataService.query.filterManager;
+
+      addFilter({ filterManager, fieldName: field, value });
     },
   });
 };
