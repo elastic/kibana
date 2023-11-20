@@ -57,7 +57,7 @@ describe('Cloud Plugin', () => {
 
       test('register the shipper FullStory with the correct duration', async () => {
         const { coreSetup } = await setupPlugin({
-          config: { org_id: 'foo', pageVarsDebounceTimeMs: `${duration(500, 'ms')}` },
+          config: { org_id: 'foo', pageVarsDebounceTime: `${duration(500, 'ms')}` },
         });
 
         expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();

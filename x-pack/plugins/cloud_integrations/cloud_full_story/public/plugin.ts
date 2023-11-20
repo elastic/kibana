@@ -23,7 +23,7 @@ interface SetupFullStoryDeps {
 export interface CloudFullStoryConfig {
   org_id?: string;
   eventTypesAllowlist: string[];
-  pageVarsDebounceTimeMs: string;
+  pageVarsDebounceTime: string;
 }
 
 interface CloudFullStorySetupDeps {
@@ -63,7 +63,7 @@ export class CloudFullStoryPlugin implements Plugin {
    * @private
    */
   private async setupFullStory({ analytics, basePath }: SetupFullStoryDeps) {
-    const { org_id: fullStoryOrgId, eventTypesAllowlist, pageVarsDebounceTimeMs } = this.config;
+    const { org_id: fullStoryOrgId, eventTypesAllowlist, pageVarsDebounceTime } = this.config;
     if (!fullStoryOrgId) {
       return; // do not load any FullStory code in the browser if not enabled
     }
@@ -74,8 +74,8 @@ export class CloudFullStoryPlugin implements Plugin {
       eventTypesAllowlist,
       fullStoryOrgId,
       // Duration configs get stringified when forwarded to the UI and need reconversion
-      ...(pageVarsDebounceTimeMs
-        ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTimeMs).asMilliseconds() }
+      ...(pageVarsDebounceTime
+        ? { pageVarsDebounceTimeMs: duration(pageVarsDebounceTime).asMilliseconds() }
         : {}),
       // Load an Elastic-internally audited script. Ideally, it should be hosted on a CDN.
       scriptUrl: basePath.prepend(
