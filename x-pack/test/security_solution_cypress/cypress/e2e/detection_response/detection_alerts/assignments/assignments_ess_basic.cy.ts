@@ -1,0 +1,53 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { getNewRule } from '../../../../objects/rule';
+import { expandFirstAlert } from '../../../../tasks/alerts';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { loadPageAs } from '../../../../tasks/navigation';
+import { ALERTS_URL } from '../../../../urls/navigation';
+import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import {
+  asigneesMenuItemsAreNotAvailable,
+  cannotAddAssigneesViaDetailsFlyout,
+} from '../../../../tasks/alert_assignments';
+
+describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
+  before(() => {
+    cy.task('esArchiverLoad', { archiveName: 'auditbeat_multiple' });
+  });
+
+  after(() => {
+    cy.task('esArchiverUnload', 'auditbeat_multiple');
+  });
+
+  beforeEach(() => {
+    loadPageAs(ALERTS_URL);
+    deleteAlertsAndRules();
+    createRule(getNewRule({ rule_id: 'new custom rule' }));
+    waitForAlertsToPopulate();
+
+    cy.request({
+      method: 'POST',
+      url: '/api/license/start_basic?acknowledge=true',
+      headers: {
+        'kbn-xsrf': 'cypress-creds',
+        'x-elastic-internal-origin': 'security-solution',
+      },
+    });
+  });
+
+  it('user with Basic license should not be able to update assignees', () => {
+    // Check alerts table
+    asigneesMenuItemsAreNotAvailable();
+
+    // Check alert's details flyout
+    expandFirstAlert();
+    cannotAddAssigneesViaDetailsFlyout();
+  });
+});
