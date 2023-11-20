@@ -39,7 +39,7 @@ async function getCoreWebVitalsResponse({
   dataStartPlugin,
 }: WithDataPlugin<FetchDataParams>) {
   const dataViewResponse = await callApmApi(
-    'GET /internal/apm/data_view/title',
+    'GET /internal/apm/data_view/index_pattern',
     {
       signal: null,
     }
@@ -47,7 +47,7 @@ async function getCoreWebVitalsResponse({
 
   return await esQuery<ReturnType<typeof coreWebVitalsQuery>>(dataStartPlugin, {
     params: {
-      index: dataViewResponse.apmDataViewTitle,
+      index: dataViewResponse.apmDataViewIndexPattern,
       ...coreWebVitalsQuery(absoluteTime.start, absoluteTime.end, undefined, {
         serviceName: serviceName ? [serviceName] : undefined,
       }),
@@ -83,7 +83,7 @@ export async function hasRumData(
   params: WithDataPlugin<HasDataParams>
 ): Promise<UXHasDataResponse> {
   const dataViewResponse = await callApmApi(
-    'GET /internal/apm/data_view/title',
+    'GET /internal/apm/data_view/index_pattern',
     {
       signal: null,
     }
@@ -93,7 +93,7 @@ export async function hasRumData(
     params.dataStartPlugin,
     {
       params: {
-        index: dataViewResponse.apmDataViewTitle,
+        index: dataViewResponse.apmDataViewIndexPattern,
         ...hasRumDataQuery({
           start: params?.absoluteTime?.start,
           end: params?.absoluteTime?.end,
@@ -102,7 +102,10 @@ export async function hasRumData(
     }
   );
 
-  return formatHasRumResult(esQueryResponse, dataViewResponse.apmDataViewTitle);
+  return formatHasRumResult(
+    esQueryResponse,
+    dataViewResponse.apmDataViewIndexPattern
+  );
 }
 
 async function esQuery<T>(
