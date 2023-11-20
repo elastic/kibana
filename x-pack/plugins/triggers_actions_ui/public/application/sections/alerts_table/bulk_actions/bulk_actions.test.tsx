@@ -24,7 +24,7 @@ import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';
 import { getMaintenanceWindowMockMap } from '../maintenance_windows/index.mock';
 import { createCasesServiceMock } from '../index.mock';
-import { AlertsTableContext } from '../contexts/alerts_table_context';
+import { AlertsTableContext, AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('@kbn/data-plugin/public');
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
@@ -244,7 +244,7 @@ describe('AlertsTable.BulkActions', () => {
   const AlertsTableWithBulkActionsContext: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(), []);
+    const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 
     const initialBulkActionsState = useReducer(

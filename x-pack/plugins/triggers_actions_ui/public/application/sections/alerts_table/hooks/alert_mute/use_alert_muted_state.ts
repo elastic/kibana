@@ -12,16 +12,15 @@ import { Alert } from '../../../../../types';
 
 export const useAlertMutedState = (alert: Alert) => {
   const { mutedAlerts } = useContext(AlertsTableContext);
-  const alertInstanceId = alert[ALERT_INSTANCE_ID]![0];
-  const ruleId = alert[ALERT_RULE_UUID]![0];
-  const rule = mutedAlerts[ruleId];
-  return useMemo(
-    () => ({
-      isMuted: rule?.includes(alertInstanceId),
+  const alertInstanceId = alert[ALERT_INSTANCE_ID]?.[0];
+  const ruleId = alert[ALERT_RULE_UUID]?.[0];
+  return useMemo(() => {
+    const rule = ruleId ? mutedAlerts[ruleId] : [];
+    return {
+      isMuted: alertInstanceId ? rule?.includes(alertInstanceId) : null,
       ruleId,
       rule,
       alertInstanceId,
-    }),
-    [alertInstanceId, rule, ruleId]
-  );
+    };
+  }, [alertInstanceId, mutedAlerts, ruleId]);
 };

@@ -15,6 +15,7 @@ import { useKibana } from '../../../../common/lib/kibana';
 import { useBulkGetMaintenanceWindows } from './use_bulk_get_maintenance_windows';
 import { AppMockRenderer, createAppMockRenderer } from '../../test_utils';
 import { useLicense } from '../../../hooks/use_license';
+import { AlertsTableQueryContext } from '../contexts/alerts_table_context';
 
 jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../hooks/use_license');
@@ -82,7 +83,7 @@ describe('useBulkGetMaintenanceWindows', () => {
       },
     };
     useLicenseMock.mockReturnValue({ isAtLeastPlatinum: () => true });
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { useQuery } from '@tanstack/react-query';
+import { QueryClientProviderProps, useQuery } from '@tanstack/react-query';
 import { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { ServerError } from '../types';
@@ -16,7 +16,6 @@ import {
   bulkGetMaintenanceWindows,
   BulkGetMaintenanceWindowsResult,
 } from './apis/bulk_get_maintenance_windows';
-import { AlertTableQueryContext } from '../contexts/alerts_table_context';
 
 const ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.api.bulkGetMaintenanceWindow.errorTitle',
@@ -40,10 +39,11 @@ const transformMaintenanceWindows = (
 interface UseBulkGetMaintenanceWindowsProps {
   ids: string[];
   canFetchMaintenanceWindows?: boolean;
+  queryContext?: QueryClientProviderProps['context'];
 }
 
 export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindowsProps) => {
-  const { ids, canFetchMaintenanceWindows = false } = props;
+  const { ids, canFetchMaintenanceWindows = false, queryContext } = props;
 
   const {
     http,
@@ -74,7 +74,7 @@ export const useBulkGetMaintenanceWindows = (props: UseBulkGetMaintenanceWindows
     select: transformMaintenanceWindows,
     queryFn,
     onError,
-    context: AlertTableQueryContext,
+    context: queryContext,
   });
 
   return {

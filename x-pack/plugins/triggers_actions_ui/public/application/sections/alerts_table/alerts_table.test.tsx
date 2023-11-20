@@ -36,7 +36,7 @@ import { createAppMockRenderer, getJsDomPerformanceFix } from '../test_utils';
 import { createCasesServiceMock } from './index.mock';
 import { useCaseViewNavigation } from './cases/use_case_view_navigation';
 import { act } from 'react-dom/test-utils';
-import { AlertsTableContext } from './contexts/alerts_table_context';
+import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const mockCaseService = createCasesServiceMock();
 
@@ -325,7 +325,7 @@ describe('AlertsTable', () => {
   const AlertsTableWithProviders: React.FunctionComponent<
     AlertsTableProps & { initialBulkActionsState?: BulkActionsState }
   > = (props) => {
-    const renderer = useMemo(() => createAppMockRenderer(), []);
+    const renderer = useMemo(() => createAppMockRenderer(AlertsTableQueryContext), []);
     const AppWrapper = renderer.AppWrapper;
 
     const initialBulkActionsState = useReducer(

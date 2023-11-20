@@ -20,6 +20,7 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { noop } from 'lodash';
 import { EuiDataGridCellValueElementProps } from '@elastic/eui/src/components/datagrid/data_grid_types';
 import { waitFor } from '@testing-library/react';
+import { AlertsTableQueryContext } from '@kbn/triggers-actions-ui-plugin/public/application/sections/alerts_table/contexts/alerts_table_context';
 
 const refresh = jest.fn();
 const caseHooksReturnedValue = {
@@ -109,7 +110,7 @@ describe('ObservabilityActions component', () => {
     };
 
     const wrapper = mountWithIntl(
-      <QueryClientProvider client={queryClient}>
+      <QueryClientProvider client={queryClient} context={AlertsTableQueryContext}>
         <AlertActions {...props} />
       </QueryClientProvider>
     );

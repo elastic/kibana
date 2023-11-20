@@ -50,7 +50,7 @@ import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
 import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
-import { AlertsTableContext, AlertTableQueryContext } from './contexts/alerts_table_context';
+import { AlertsTableContext, AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -126,7 +126,7 @@ const isMaintenanceWindowColumnEnabled = (columns: EuiDataGridColumn[]): boolean
 
 const AlertsTableState = (props: AlertsTableStateProps) => {
   return (
-    <QueryClientProvider client={alertsTableQueryClient} context={AlertTableQueryContext}>
+    <QueryClientProvider client={alertsTableQueryClient} context={AlertsTableQueryContext}>
       <AlertsTableStateWithQueryProvider {...props} />
     </QueryClientProvider>
   );
@@ -288,6 +288,7 @@ const AlertsTableStateWithQueryProvider = ({
     useBulkGetMaintenanceWindows({
       ids: Array.from(maintenanceWindowIds.values()),
       canFetchMaintenanceWindows: fetchMaintenanceWindows,
+      queryContext: AlertsTableQueryContext,
     });
 
   const initialBulkActionsState = useReducer(bulkActionsReducer, {

@@ -38,7 +38,7 @@ import { InspectButtonContainer } from './toolbar/components/inspect';
 import { SystemCellId } from './types';
 import { SystemCellFactory, systemCells } from './cells';
 import { triggersActionsUiQueriesKeys } from '../../hooks/constants';
-import { AlertTableQueryContext } from './contexts/alerts_table_context';
+import { AlertsTableQueryContext } from './contexts/alerts_table_context';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout'));
 const DefaultGridStyle: EuiDataGridStyle = {
@@ -148,7 +148,7 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
     getInspectQuery,
   } = alertsData;
 
-  const queryClient = useQueryClient({ context: AlertTableQueryContext });
+  const queryClient = useQueryClient({ context: AlertsTableQueryContext });
   const { data: cases, isLoading: isLoadingCases } = props.cases;
   const { data: maintenanceWindows, isLoading: isLoadingMaintenanceWindows } =
     props.maintenanceWindows;

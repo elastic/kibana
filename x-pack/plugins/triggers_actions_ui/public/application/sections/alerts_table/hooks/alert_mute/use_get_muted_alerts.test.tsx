@@ -7,10 +7,11 @@
 
 import { renderHook } from '@testing-library/react-hooks';
 import * as api from '../apis/get_rules_muted_alerts';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
 import { AppMockRenderer, createAppMockRenderer } from '../../../test_utils';
 import { useGetMutedAlerts } from './use_get_muted_alerts';
+import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 
 jest.mock('../apis/get_rules_muted_alerts');
 jest.mock('../../../../../common/lib/kibana');
@@ -24,7 +25,7 @@ describe('useGetMutedAlerts', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    appMockRender = createAppMockRenderer();
+    appMockRender = createAppMockRenderer(AlertsTableQueryContext);
   });
 
   it('calls the api when invoked with the correct parameters', async () => {

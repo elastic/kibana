@@ -7,6 +7,7 @@
 
 import { useMutation } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { AlertsTableQueryContext } from '../../contexts/alerts_table_context';
 import { muteAlertInstance } from '../../../../lib/rule_api/mute_alert';
 import { useKibana } from '../../../../..';
 import { ServerError, ToggleAlertParams } from '../../types';
@@ -24,6 +25,7 @@ export const useMuteAlert = () => {
     ({ ruleId, alertInstanceId }: ToggleAlertParams) =>
       muteAlertInstance({ http, id: ruleId, instanceId: alertInstanceId }),
     {
+      context: AlertsTableQueryContext,
       onSuccess() {
         toasts.addSuccess(
           i18n.translate('xpack.triggersActionsUI.alertsTable.alertMuted', {

@@ -25,6 +25,9 @@ export const MuteAlertAction = memo(({ alert, refresh, onActionExecuted }: Alert
   const isAlertActive = useMemo(() => alert[ALERT_STATUS]?.[0] === ALERT_STATUS_ACTIVE, [alert]);
 
   const toggleAlert = useCallback(async () => {
+    if (ruleId == null || alertInstanceId == null) {
+      return;
+    }
     if (isMuted) {
       await unmuteAlert({ ruleId, alertInstanceId });
     } else {
@@ -34,7 +37,7 @@ export const MuteAlertAction = memo(({ alert, refresh, onActionExecuted }: Alert
     refresh();
   }, [alertInstanceId, isMuted, muteAlert, onActionExecuted, refresh, ruleId, unmuteAlert]);
 
-  if (!isAlertActive && !isMuted) {
+  if ((!isAlertActive && !isMuted) || ruleId == null || alertInstanceId == null) {
     return null;
   }
 
