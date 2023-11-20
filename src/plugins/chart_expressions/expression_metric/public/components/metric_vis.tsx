@@ -328,6 +328,7 @@ export const MetricVis = ({
                 background: { color: defaultColor },
                 metric: {
                   barBackground: euiThemeVars.euiColorLightShade,
+                  emptyBackground: euiThemeVars.euiColorEmptyShade,
                 },
               },
               ...(Array.isArray(settingsThemeOverrides)
