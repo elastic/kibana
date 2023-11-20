@@ -30,6 +30,7 @@ export const createMockConfig = (): ConfigType => {
     settings: getDefaultConfigSettings(),
     experimentalFeatures: parseExperimentalConfigValue(enableExperimental).features,
     enabled: true,
+    enableUiSettingsValidations: false,
   };
 };
 
