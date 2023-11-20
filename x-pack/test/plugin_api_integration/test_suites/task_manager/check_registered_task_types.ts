@@ -150,6 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
         'security:telemetry-prebuilt-rule-alerts',
         'security:telemetry-timelines',
         'session_cleanup',
+        'SLO-Enrich-Policy-Refresh',
       ]);
     });
   });

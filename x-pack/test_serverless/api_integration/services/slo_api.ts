@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CreateSLOInput } from '@kbn/slo-schema';
 import { FtrProviderContext } from '../ftr_provider_context';
 
 type DurationUnit = 'm' | 'h' | 'd' | 'w' | 'M';
@@ -28,30 +29,6 @@ export interface SloBurnRateRuleParams {
   windows: WindowSchema[];
 }
 
-interface SloParams {
-  id: string;
-  name: string;
-  description: string;
-  indicator: {
-    type: 'sli.kql.custom';
-    params: {
-      index: string;
-      good: string;
-      total: string;
-      timestampField: string;
-    };
-  };
-  timeWindow: {
-    duration: string;
-    type: string;
-  };
-  budgetingMethod: string;
-  objective: {
-    target: number;
-  };
-  groupBy: string;
-}
-
 export function SloApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
@@ -59,7 +36,7 @@ export function SloApiProvider({ getService }: FtrProviderContext) {
   const retryTimeout = 120 * 1000;
 
   return {
-    async create(slo: SloParams) {
+    async create(slo: CreateSLOInput) {
       const { body } = await supertest
         .post(`/api/observability/slos`)
         .set('kbn-xsrf', 'foo')
