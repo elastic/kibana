@@ -32,6 +32,8 @@ const EXCLUDED_TYPES = ['constant_keyword'];
 
 const EXPERIMENTAL_FIELDS = [
   'faas.trigger', // this was previously mapped as nested but changed to object
+  'faas.trigger.request_id',
+  'faas.trigger.type',
   'host.cpu.system.norm.pct',
   'host.cpu.user.norm.pct',
   'host.fsstats.total_size.total',
