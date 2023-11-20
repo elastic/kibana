@@ -38,7 +38,17 @@ export const getDefaultReferences = (
   ];
 };
 
-export const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
+export function buildReferences(dataviews: Record<string, DataView>) {
+  const references = [];
+  for (const layerid in dataviews) {
+    if (dataviews[layerid]) {
+      references.push(...getDefaultReferences(dataviews[layerid].id!, layerid));
+    }
+  }
+  return references.flat();
+}
+
+const getAdhocDataView = (dataView: DataView): Record<string, DataViewSpec> => {
   return {
     [dataView.id ?? uuidv4()]: {
       ...dataView.toSpec(),
@@ -99,7 +109,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
   if ('index' in dataset) {
     index = dataset.index;
     timeFieldName = dataset.timeFieldName || '@timestamp';
-  } else if ('query' in dataset) {
+  } else if ('esql' in dataset) {
     index = 'kibana_sample_data_e*'; // parseIndexFromQuery(config.dataset.query);
   } else {
     return undefined;
@@ -108,7 +118,7 @@ export function getDatasetIndex(dataset?: LensDataset) {
   return { index, timeFieldName };
 }
 
-export function buildDatasourceStatesLayer(
+function buildDatasourceStatesLayer(
   layer: LensBaseLayer,
   i: number,
   dataset: LensDataset,
@@ -162,16 +172,6 @@ export function buildDatasourceStatesLayer(
     return ['textBased', buildValueLayer(layer)];
   }
   return ['formBased', buildFormulaLayers(layer, i, dataView!)];
-}
-
-export function buildReferences(dataviews: Record<string, DataView>) {
-  const references = [];
-  for (const layerid in dataviews) {
-    if (dataviews[layerid]) {
-      references.push(...getDefaultReferences(dataviews[layerid].id!, layerid));
-    }
-  }
-  return references.flat();
 }
 export const buildDatasourceStates = async (
   config: LensBaseConfig & { layers: LensBaseLayer[] },
