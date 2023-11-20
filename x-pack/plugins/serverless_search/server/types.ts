@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { ServerlessPluginSetup } from '@kbn/serverless/server';
 
@@ -14,6 +15,7 @@ export interface ServerlessSearchPluginSetup {}
 export interface ServerlessSearchPluginStart {}
 
 export interface StartDependencies {
+  dataViews: DataViewsServerPluginStart;
   security: SecurityPluginStart;
 }
 export interface SetupDependencies {

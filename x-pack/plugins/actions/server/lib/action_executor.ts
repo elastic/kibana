@@ -8,12 +8,13 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
-import { PassThrough, Readable } from 'stream';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateParams,
   validateConfig,
@@ -38,7 +39,6 @@ import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
 import type { ActionsAuthorization } from '../authorization/actions_authorization';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -328,55 +328,33 @@ export class ActionExecutor {
           eventLogger.logEvent(event);
         }
 
-        // start openai extension
-        // add event.kibana.action.execution.openai to event log when OpenAI Connector is executed
-        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
-          const data = result.data as unknown as {
-            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-          };
-          event.kibana = event.kibana || {};
-          event.kibana.action = event.kibana.action || {};
-          event.kibana = {
-            ...event.kibana,
-            action: {
-              ...event.kibana.action,
-              execution: {
-                ...event.kibana.action.execution,
-                gen_ai: {
-                  usage: {
-                    total_tokens: data.usage?.total_tokens,
-                    prompt_tokens: data.usage?.prompt_tokens,
-                    completion_tokens: data.usage?.completion_tokens,
-                  },
-                },
-              },
-            },
-          };
-
-          if (result.data instanceof Readable) {
-            getTokenCountFromOpenAIStream({
-              responseStream: result.data.pipe(new PassThrough()),
-              body: (validatedParams as { subActionParams: { body: string } }).subActionParams.body,
+        // start genai extension
+        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
+          getGenAiTokenTracking({
+            actionTypeId,
+            logger,
+            result,
+            validatedParams,
+          })
+            .then((tokenTracking) => {
+              if (tokenTracking != null) {
+                set(event, 'kibana.action.execution.gen_ai.usage', {
+                  total_tokens: tokenTracking.total_tokens,
+                  prompt_tokens: tokenTracking.prompt_tokens,
+                  completion_tokens: tokenTracking.completion_tokens,
+                });
+              }
             })
-              .then(({ total, prompt, completion }) => {
-                event.kibana!.action!.execution!.gen_ai!.usage = {
-                  total_tokens: total,
-                  prompt_tokens: prompt,
-                  completion_tokens: completion,
-                };
-              })
-              .catch((err) => {
-                logger.error('Failed to calculate tokens from streaming response');
-                logger.error(err);
-              })
-              .finally(() => {
-                completeEventLogging();
-              });
-
-            return resultWithoutError;
-          }
+            .catch((err) => {
+              logger.error('Failed to calculate tokens from streaming response');
+              logger.error(err);
+            })
+            .finally(() => {
+              completeEventLogging();
+            });
+          return resultWithoutError;
         }
-        // end openai extension
+        // end genai extension
 
         completeEventLogging();
 
