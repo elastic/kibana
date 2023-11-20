@@ -8,7 +8,11 @@
 
 import { SortOrder } from '@kbn/saved-search-plugin/public';
 import { DataView } from '@kbn/data-views-plugin/common';
-import { MODIFY_COLUMNS_ON_SWITCH, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
+import {
+  MODIFY_COLUMNS_ON_SWITCH,
+  SORT_DEFAULT_ORDER_SETTING,
+  DEFAULT_COLUMNS_SETTING,
+} from '@kbn/discover-utils';
 import { DiscoverInternalStateContainer } from '../../services/discover_internal_state_container';
 import { DiscoverAppStateContainer } from '../../services/discover_app_state_container';
 import { addLog } from '../../../../utils/add_log';
@@ -46,6 +50,7 @@ export async function changeDataView(
     const nextAppState = getDataViewAppState(
       dataView,
       nextDataView,
+      uiSettings.get(DEFAULT_COLUMNS_SETTING, []),
       state.columns || [],
       (state.sort || []) as SortOrder[],
       uiSettings.get(MODIFY_COLUMNS_ON_SWITCH),

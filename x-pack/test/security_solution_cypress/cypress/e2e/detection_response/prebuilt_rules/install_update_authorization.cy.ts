@@ -32,7 +32,6 @@ import {
   RULE_CHECKBOX,
   UPGRADE_ALL_RULES_BUTTON,
 } from '../../../screens/alerts_detection_rules';
-import { cleanKibana } from '../../../tasks/common';
 import { login } from '../../../tasks/login';
 
 // Rule to test update
@@ -72,7 +71,6 @@ describe(
   () => {
     beforeEach(() => {
       preventPrebuiltRulesPackageInstallation();
-      cleanKibana();
     });
 
     describe('User with read privileges on Security Solution', () => {

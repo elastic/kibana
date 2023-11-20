@@ -7,7 +7,8 @@
  */
 
 import { createLogger } from '../../lib/utils/create_logger';
-import { getEsClient } from './get_es_client';
+import { getApmEsClient } from './get_apm_es_client';
+import { getLogsEsClient } from './get_logs_es_client';
 import { getKibanaClient } from './get_kibana_client';
 import { getServiceUrls } from './get_service_urls';
 import { RunOptions } from './parse_run_cli_flags';
@@ -26,22 +27,30 @@ export async function bootstrap(runOptions: RunOptions) {
 
   const version = runOptions.versionOverride || latestPackageVersion;
 
-  const apmEsClient = getEsClient({
+  const apmEsClient = getApmEsClient({
     target: esUrl,
     logger,
     concurrency: runOptions.concurrency,
     version,
   });
 
+  const logsEsClient = getLogsEsClient({
+    target: esUrl,
+    logger,
+    concurrency: runOptions.concurrency,
+  });
+
   await kibanaClient.installApmPackage(latestPackageVersion);
 
   if (runOptions.clean) {
     await apmEsClient.clean();
+    await logsEsClient.clean();
   }
 
   return {
     logger,
     apmEsClient,
+    logsEsClient,
     version,
     kibanaUrl,
     esUrl,

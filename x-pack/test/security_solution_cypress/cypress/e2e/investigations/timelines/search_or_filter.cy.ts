@@ -13,7 +13,6 @@ import {
   TIMELINE_SEARCH_OR_FILTER,
 } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
-import { cleanKibana } from '../../../tasks/common';
 
 import { login } from '../../../tasks/login';
 import { visit, visitWithTimeRange } from '../../../tasks/navigation';
@@ -29,10 +28,6 @@ import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
 import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 
 describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   describe('timeline search or filter KQL bar', () => {
     beforeEach(() => {
       login();

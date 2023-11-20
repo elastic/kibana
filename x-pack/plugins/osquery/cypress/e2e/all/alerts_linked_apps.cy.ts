@@ -45,9 +45,10 @@ describe(
       cy.getBySel('editRuleSettingsLink').click();
       cy.getBySel('globalLoadingIndicator').should('not.exist');
       cy.getBySel('edit-rule-actions-tab').click();
-
       cy.getBySel('osquery-investigation-guide-text').should('exist');
-      cy.getBySel('osqueryAddInvestigationGuideQueries').should('not.be.disabled');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.contains('Loading connectors...').should('not.exist');
+
       cy.getBySel('osqueryAddInvestigationGuideQueries').click();
       cy.getBySel('osquery-investigation-guide-text').should('not.exist');
 
@@ -59,6 +60,7 @@ describe(
       cy.getBySel(RESPONSE_ACTIONS_ITEM_1).within(() => {
         cy.contains('select * from users');
       });
+
       cy.contains('Save changes').click();
       cy.contains(`${ruleName} was saved`).should('exist');
       closeToastIfVisible();

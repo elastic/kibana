@@ -19,6 +19,7 @@ import { QueryStringInput } from '@kbn/unified-search-plugin/public';
 import { QueryErrorMessage } from '@kbn/ml-error-utils';
 
 import { SEARCH_QUERY_LANGUAGE, SearchQueryLanguage } from '@kbn/ml-query-utils';
+import { PLUGIN_ID } from '../../../../../../../common/constants/app';
 import { Dictionary } from '../../../../../../../common/types/common';
 import { removeFilterFromQueryString } from '../../../../../explorer/explorer_utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
@@ -53,17 +54,8 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
   );
 
   const { services } = useMlKibana();
-  const {
-    unifiedSearch,
-    data,
-    storage,
-    appName,
-    notifications,
-    http,
-    docLinks,
-    uiSettings,
-    dataViews,
-  } = services;
+  const { unifiedSearch, data, storage, notifications, http, docLinks, uiSettings, dataViews } =
+    services;
 
   const searchChangeHandler = (q: Query) => setSearchInput(q);
 
@@ -206,7 +198,7 @@ export const ExplorationQueryBar: FC<ExplorationQueryBarProps> = ({
               disableAutoFocus={true}
               dataTestSubj="mlDFAnalyticsQueryInput"
               languageSwitcherPopoverAnchorPosition="rightDown"
-              appName={appName}
+              appName={PLUGIN_ID}
               deps={{
                 unifiedSearch,
                 notifications,
