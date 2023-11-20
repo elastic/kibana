@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { DataFrameAnalyticsConfig } from '@kbn/ml-data-frame-analytics-utils';
+import {
+  type DataFrameAnalyticsConfig,
+  ANALYSIS_CONFIG_TYPE,
+} from '@kbn/ml-data-frame-analytics-utils';
 import { DeepPartial } from '@kbn/ml-plugin/common/types/common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 import { USER } from '../../../../functional/services/ml/security_common';
@@ -35,8 +38,9 @@ export default ({ getService }: FtrProviderContext) => {
     max_num_threads: 1, // default value
   };
 
-  const jobTypes = ['classification', 'regression', 'outlier_detection'];
-  const jobAnalyses: any = {
+  const jobTypes = Object.values(ANALYSIS_CONFIG_TYPE);
+  type JobType = typeof jobTypes[number];
+  const jobAnalyses = {
     classification: {
       dependent_variable: 'y',
       training_percent: 20,
@@ -53,7 +57,7 @@ export default ({ getService }: FtrProviderContext) => {
 
   const testJobConfigs: Array<{
     jobId: string;
-    jobType: string;
+    jobType: JobType;
     config: DeepPartial<DataFrameAnalyticsConfig>;
   }> = ['Test classification job', 'Test regression job', 'Test outlier detection job'].map(
     (description, idx) => {
