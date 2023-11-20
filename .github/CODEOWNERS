@@ -1109,7 +1109,6 @@ x-pack/plugins/infra/server/lib/alerting @elastic/obs-ux-management-team
 /src/cli/keystore/ @elastic/kibana-operations
 /src/cli/serve/ @elastic/kibana-operations
 /.ci/es-snapshots/ @elastic/kibana-operations
-/.ci/.storybook/ @elastic/kibana-operations
 /.github/workflows/ @elastic/kibana-operations
 /vars/ @elastic/kibana-operations
 /.bazelignore @elastic/kibana-operations
