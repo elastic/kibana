@@ -164,7 +164,7 @@ export const initNavNode = <
   const internalNavNode: ChromeProjectNavigationNode = {
     ...navNode,
     id,
-    path: nodePath ?? '',
+    path: nodePath,
     title: title ?? '',
     deepLink,
     href,
