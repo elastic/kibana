@@ -555,7 +555,7 @@ export function useLensDefinition(slo: SLOResponse): TypedLensByValueInput['attr
       adHocDataViews: {
         '32ca1ad4-81c0-4daf-b9d1-07118044bdc5': {
           id: '32ca1ad4-81c0-4daf-b9d1-07118044bdc5',
-          title: '.slo-observability.sli-v3.*',
+          title: '.slo-observability.sli-v2.*',
           timeFieldName: '@timestamp',
           sourceFilters: [],
           fieldFormats: {},
