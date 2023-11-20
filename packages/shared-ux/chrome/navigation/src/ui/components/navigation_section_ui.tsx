@@ -472,7 +472,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
 
           if (
             node.children &&
-            node.renderAs === 'accordion' &&
+            node.renderAs !== 'item' &&
             (!prevState || prevState.doCollapseFromActiveState === true)
           ) {
             let nextIsActive = node.isActive;
