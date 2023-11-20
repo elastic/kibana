@@ -28,7 +28,6 @@ import {
   SavedObjectManagementTypeInfo,
 } from '@kbn/saved-objects-management-plugin/public';
 import { pickBy } from 'lodash';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import type * as CSS from 'csstype';
 import { IndexPatternManagmentContext } from '../../types';
 import { Tabs } from './tabs';
