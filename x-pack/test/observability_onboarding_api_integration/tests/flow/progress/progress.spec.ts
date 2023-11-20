@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { log, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import { ObservabilityOnboardingApiClientKey } from '../../../common/config';
 import { FtrProviderContext } from '../../../common/ftr_provider_context';
 import { ObservabilityOnboardingApiError } from '../../../common/observability_onboarding_api_supertest';
 import { expectToReject } from '../../../common/utils/expect_to_reject';
-import { createLogDoc } from './es_utils';
 
 export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const observabilityOnboardingApiClient = getService('observabilityOnboardingApiClient');
-  const es = getService('es');
+  const synthtrace = getService('logSynthtraceEsClient');
 
   async function callApi({
     onboardingId,
@@ -141,24 +141,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               describe('with a different agentId', () => {
                 describe('and onboarding type is logFiles', () => {
                   before(async () => {
-                    await es.indices.createDataStream({
-                      name: `logs-${datasetName}-${namespace}`,
-                    });
-
-                    const doc = createLogDoc({
-                      time: new Date('06/28/2023').getTime(),
-                      logFilepath: '/my-service.log',
-                      serviceName: 'my-service',
-                      namespace,
-                      datasetName,
-                      message: 'This is a log message',
-                      agentId: 'another-agent-id',
-                    });
-
-                    await es.bulk({
-                      body: [{ create: { _index: `logs-${datasetName}-${namespace}` } }, doc],
-                      refresh: 'wait_for',
-                    });
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a log message')
+                            .timestamp(timestamp)
+                            .dataset(datasetName)
+                            .namespace(namespace)
+                            .service('my-service')
+                            .defaults({
+                              'agent.id': 'another-agent-id',
+                              'log.file.path': '/my-service.log',
+                            })
+                        ),
+                    ]);
                   });
 
                   it('should return log-ingest as incomplete', async () => {
@@ -173,9 +173,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   });
 
                   after(async () => {
-                    await es.indices.deleteDataStream({
-                      name: `logs-${datasetName}-${namespace}`,
-                    });
+                    await synthtrace.clean();
                   });
                 });
 
@@ -211,23 +209,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                       },
                     });
 
-                    await es.indices.createDataStream({
-                      name: `logs-system.syslog-${namespace}`,
-                    });
-
-                    const doc = createLogDoc({
-                      time: new Date('06/28/2023').getTime(),
-                      logFilepath: '/var/log/system.log',
-                      namespace,
-                      datasetName: 'system.syslog',
-                      message: 'This is a system log message',
-                      agentId: 'another-agent-id',
-                    });
-
-                    await es.bulk({
-                      body: [{ create: { _index: `logs-system.syslog-${namespace}` } }, doc],
-                      refresh: 'wait_for',
-                    });
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a system log message')
+                            .timestamp(timestamp)
+                            .dataset('system.syslog')
+                            .namespace(namespace)
+                            .defaults({
+                              'agent.id': 'another-agent-id',
+                              'log.file.path': '/var/log/system.log',
+                            })
+                        ),
+                    ]);
                   });
 
                   it('should return log-ingest as incomplete', async () => {
@@ -242,9 +240,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   });
 
                   after(async () => {
-                    await es.indices.deleteDataStream({
-                      name: `logs-system.syslog-${namespace}`,
-                    });
+                    await synthtrace.clean();
                   });
                 });
               });
@@ -252,24 +248,24 @@ export default function ApiTest({ getService }: FtrProviderContext) {
               describe('with the expected agentId', () => {
                 describe('and onboarding type is logFiles', () => {
                   before(async () => {
-                    await es.indices.createDataStream({
-                      name: `logs-${datasetName}-${namespace}`,
-                    });
-
-                    const doc = createLogDoc({
-                      time: new Date('06/28/2023').getTime(),
-                      logFilepath: '/my-service.log',
-                      serviceName: 'my-service',
-                      namespace,
-                      datasetName,
-                      message: 'This is a log message',
-                      agentId,
-                    });
-
-                    await es.bulk({
-                      body: [{ create: { _index: `logs-${datasetName}-${namespace}` } }, doc],
-                      refresh: 'wait_for',
-                    });
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a log message')
+                            .timestamp(timestamp)
+                            .dataset(datasetName)
+                            .namespace(namespace)
+                            .service('my-service')
+                            .defaults({
+                              'agent.id': agentId,
+                              'log.file.path': '/my-service.log',
+                            })
+                        ),
+                    ]);
                   });
 
                   it('should return log-ingest as complete', async () => {
@@ -284,9 +280,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   });
 
                   after(async () => {
-                    await es.indices.deleteDataStream({
-                      name: `logs-${datasetName}-${namespace}`,
-                    });
+                    await synthtrace.clean();
                   });
                 });
 
@@ -322,23 +316,23 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                       },
                     });
 
-                    await es.indices.createDataStream({
-                      name: `logs-system.syslog-${namespace}`,
-                    });
-
-                    const doc = createLogDoc({
-                      time: new Date('06/28/2023').getTime(),
-                      logFilepath: '/var/log/system.log',
-                      namespace,
-                      datasetName: 'system.syslog',
-                      message: 'This is a system log message',
-                      agentId,
-                    });
-
-                    await es.bulk({
-                      body: [{ create: { _index: `logs-system.syslog-${namespace}` } }, doc],
-                      refresh: 'wait_for',
-                    });
+                    await synthtrace.index([
+                      timerange('2023-11-20T10:00:00.000Z', '2023-11-20T10:01:00.000Z')
+                        .interval('1m')
+                        .rate(1)
+                        .generator((timestamp) =>
+                          log
+                            .create()
+                            .message('This is a system log message')
+                            .timestamp(timestamp)
+                            .dataset('system.syslog')
+                            .namespace(namespace)
+                            .defaults({
+                              'agent.id': agentId,
+                              'log.file.path': '/var/log/system.log',
+                            })
+                        ),
+                    ]);
                   });
 
                   it('should return log-ingest as complete', async () => {
@@ -353,9 +347,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                   });
 
                   after(async () => {
-                    await es.indices.deleteDataStream({
-                      name: `logs-system.syslog-${namespace}`,
-                    });
+                    await synthtrace.clean();
                   });
                 });
               });
