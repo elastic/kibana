@@ -252,6 +252,14 @@
             "section": "def-common.ICspConfig",
             "text": "ICspConfig"
           },
+          "; staticAssets: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IStaticAssets",
+            "text": "IStaticAssets"
+          },
           "; registerRouteHandlerContext: jest.MockInstance<",
           {
             "pluginId": "@kbn/core-http-server",
@@ -340,7 +348,7 @@
             "section": "def-common.HttpServiceSetup",
             "text": "HttpServiceSetup"
           },
-          "<ContextType>, \"createRouter\" | \"basePath\"> & { basePath: BasePathMocked; createRouter: jest.MockedFunction<() => ",
+          "<ContextType>, \"createRouter\" | \"basePath\"> & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; createRouter: jest.MockedFunction<() => ",
           {
             "pluginId": "@kbn/core-http-router-server-mocks",
             "scope": "common",
@@ -371,6 +379,14 @@
             "section": "def-common.IBasePath",
             "text": "IBasePath"
           },
+          "; staticAssets: ",
+          {
+            "pluginId": "@kbn/core-http-server",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpServerPluginApi",
+            "section": "def-common.IStaticAssets",
+            "text": "IStaticAssets"
+          },
           "; auth: ",
           {
             "pluginId": "@kbn/core-http-server",
@@ -395,7 +411,7 @@
             "section": "def-common.HttpServiceStart",
             "text": "HttpServiceStart"
           },
-          " & { basePath: BasePathMocked; }"
+          " & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; }"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
@@ -486,7 +502,7 @@
           },
           ">) => void], unknown>; } & Omit<",
           "InternalHttpServicePreboot",
-          ", \"basePath\" | \"staticAssets\"> & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; }"
+          ", \"basePath\" | \"staticAssets\"> & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
@@ -625,7 +641,7 @@
           },
           ">], unknown>; } & Omit<",
           "InternalHttpServiceSetup",
-          ", \"createRouter\" | \"basePath\" | \"auth\" | \"staticAssets\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; staticAssets: StaticAssetsMocked; createRouter: jest.MockedFunction<(path: string) => ",
+          ", \"createRouter\" | \"basePath\" | \"auth\" | \"staticAssets\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; createRouter: jest.MockedFunction<(path: string) => ",
           {
             "pluginId": "@kbn/core-http-router-server-mocks",
             "scope": "common",
@@ -656,7 +672,9 @@
         "label": "InternalHttpServiceStartMock",
         "description": [],
         "signature": [
-          "{ isListening: jest.MockInstance<boolean, [], unknown>; basePath: ",
+          "{ staticAssets: ",
+          "InternalStaticAssets",
+          "; isListening: jest.MockInstance<boolean, [], unknown>; basePath: ",
           {
             "pluginId": "@kbn/core-http-server",
             "scope": "common",
@@ -682,7 +700,7 @@
           },
           ", [], unknown>; } & ",
           "InternalHttpServiceStart",
-          " & { basePath: BasePathMocked; }"
+          " & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
         "deprecated": false,
