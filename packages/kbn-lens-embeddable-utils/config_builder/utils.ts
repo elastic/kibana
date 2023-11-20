@@ -158,7 +158,7 @@ function buildDatasourceStatesLayer(
 
     const newLayer = {
       index: dataView!.id!,
-      query: { esql: (config.dataset as LensESQLDataset).esql } as AggregateQuery,
+      query: { esql: (dataset as LensESQLDataset).esql } as AggregateQuery,
       columns,
       allColumns: columns,
     };
