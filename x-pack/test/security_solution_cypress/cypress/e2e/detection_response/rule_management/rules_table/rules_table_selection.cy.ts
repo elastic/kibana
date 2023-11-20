@@ -12,6 +12,7 @@ import {
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
 } from '../../../../screens/alerts_detection_rules';
 import {
+  disableAutoRefresh,
   selectRulesByName,
   unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
@@ -43,6 +44,7 @@ describe(
       createAndInstallMockedPrebuiltRules([RULE_1, RULE_2]);
       visit(RULES_MANAGEMENT_URL);
       waitForPrebuiltDetectionRulesToBeLoaded();
+      disableAutoRefresh();
     });
 
     it('should correctly update the selection label when rules are individually selected and unselected', () => {

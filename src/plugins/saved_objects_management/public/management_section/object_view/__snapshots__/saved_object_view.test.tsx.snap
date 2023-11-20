@@ -17,6 +17,7 @@ exports[`SavedObjectEdition should render normally 1`] = `
           "isOverridden": [MockFunction],
           "remove": [MockFunction],
           "set": [MockFunction],
+          "validateValue": [MockFunction],
         },
         "globalClient": Object {
           "get": [MockFunction],
@@ -30,6 +31,7 @@ exports[`SavedObjectEdition should render normally 1`] = `
           "isOverridden": [MockFunction],
           "remove": [MockFunction],
           "set": [MockFunction],
+          "validateValue": [MockFunction],
         },
       },
       "theme": Object {
@@ -49,6 +51,7 @@ exports[`SavedObjectEdition should render normally 1`] = `
         "isOverridden": [MockFunction],
         "remove": [MockFunction],
         "set": [MockFunction],
+        "validateValue": [MockFunction],
       },
     }
   }

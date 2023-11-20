@@ -54,7 +54,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
   }
 
   private renderWithSuggestions() {
-    const { suggestions } = this.state;
+    const { suggestions, isLoading } = this.state;
     const { value, intl, onChange, fullWidth } = this.props;
     // there are cases when the value is a number, this would cause an exception
     const valueAsStr = String(value);
@@ -62,6 +62,8 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
     return (
       <div ref={this.comboBoxWrapperRef}>
         <StringComboBox
+          async
+          isLoading={isLoading}
           inputRef={(ref) => {
             this.inputRef = ref;
           }}

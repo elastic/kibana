@@ -16,9 +16,34 @@ export const groupBy = {
       field: 'slo.revision',
     },
   },
+  'slo.groupBy': {
+    terms: {
+      field: 'slo.groupBy',
+    },
+  },
   'slo.instanceId': {
     terms: {
       field: 'slo.instanceId',
+    },
+  },
+  'slo.name': {
+    terms: {
+      field: 'slo.name',
+    },
+  },
+  'slo.description': {
+    terms: {
+      field: 'slo.description',
+    },
+  },
+  'slo.tags': {
+    terms: {
+      field: 'slo.tags',
+    },
+  },
+  'slo.indicator.type': {
+    terms: {
+      field: 'slo.indicator.type',
     },
   },
   'slo.budgetingMethod': {
