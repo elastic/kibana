@@ -419,14 +419,16 @@ function getErrorCountByParentId(
 export const getHasOrphanTraceItems = (
   traceDocs: Array<WaterfallTransaction | WaterfallSpan>
 ) => {
-  const waterfallItemsIds = traceDocs.map((doc) =>
-    doc.processor.event === 'span'
-      ? (doc?.span as WaterfallSpan['span']).id
-      : doc?.transaction?.id
+  const waterfallItemsIds = new Set(
+    traceDocs.map((doc) =>
+      doc.processor.event === 'span'
+        ? (doc?.span as WaterfallSpan['span']).id
+        : doc?.transaction?.id
+    )
   );
 
   return traceDocs.some(
-    (item) => item.parent?.id && !waterfallItemsIds.includes(item.parent?.id)
+    (item) => item.parent?.id && !waterfallItemsIds.has(item.parent.id)
   );
 };
 

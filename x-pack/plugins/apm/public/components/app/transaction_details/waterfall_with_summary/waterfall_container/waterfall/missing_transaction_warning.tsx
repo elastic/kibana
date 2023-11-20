@@ -13,7 +13,6 @@ export function MissingTransactionWarning() {
   return (
     <EuiToolTip
       position="left"
-      delay="regular"
       content={i18n.translate(
         'xpack.apm.transactionDetails.agentMissingTransactionMessage',
         {

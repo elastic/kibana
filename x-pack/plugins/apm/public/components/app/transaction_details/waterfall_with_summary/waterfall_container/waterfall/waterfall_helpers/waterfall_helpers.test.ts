@@ -728,7 +728,7 @@ describe('waterfall_helpers', () => {
       },
     } as WaterfallTransaction;
 
-    it('should return false if there is not orphan items', () => {
+    it('should return false if there are no orphan items', () => {
       const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
         myTransactionItem,
         {
@@ -744,7 +744,7 @@ describe('waterfall_helpers', () => {
       expect(getHasOrphanTraceItems(traceItems)).toBe(false);
     });
 
-    it('should return true if there is orphan items', () => {
+    it('should return true if there are orphan items', () => {
       const traceItems: Array<WaterfallTransaction | WaterfallSpan> = [
         myTransactionItem,
         {
