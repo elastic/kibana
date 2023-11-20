@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFunctions,
-  SearchBarFilter,
+  ProfilingSearchBarFilter,
 } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
@@ -33,8 +33,8 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
-  searchBarFilter: SearchBarFilter;
-  onSearchBarFilterChange: (next: SearchBarFilter) => void;
+  searchBarFilter: ProfilingSearchBarFilter;
+  onSearchBarFilterChange: (next: ProfilingSearchBarFilter) => void;
 }
 
 export function ProfilingTopNFunctions({

@@ -9,15 +9,18 @@ import {
   EmbeddableInput,
   IContainer,
 } from '@kbn/embeddable-plugin/public';
-import { EMBEDDABLE_FLAMEGRAPH, SearchBarFilter } from '@kbn/observability-shared-plugin/public';
+import {
+  EMBEDDABLE_FLAMEGRAPH,
+  ProfilingSearchBarFilter,
+} from '@kbn/observability-shared-plugin/public';
 import type { BaseFlameGraph } from '@kbn/profiling-utils';
 import type { GetProfilingEmbeddableDependencies } from '../profiling_embeddable_provider';
 
 interface EmbeddableFlamegraphInput {
   data?: BaseFlameGraph;
   isLoading: boolean;
-  onSearchBarFilterChange?: (filters: SearchBarFilter) => void;
-  searchBarFilter?: SearchBarFilter;
+  onSearchBarFilterChange?: (filters: ProfilingSearchBarFilter) => void;
+  searchBarFilter?: ProfilingSearchBarFilter;
 }
 
 export type EmbeddableFlamegraphEmbeddableInput = EmbeddableFlamegraphInput & EmbeddableInput;

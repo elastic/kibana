@@ -10,7 +10,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useEffect, useRef, useState } from 'react';
 import { ObservabilitySharedStart } from '../../../plugin';
 
-export interface SearchBarFilter {
+export interface ProfilingSearchBarFilter {
   filters: string;
   /** Is used to force a new api call when refresh button is clicked without any changes in the query value */
   id: string;
@@ -21,8 +21,8 @@ export interface ProfilingEmbeddableProps<T> {
   embeddableFactoryId: string;
   isLoading: boolean;
   height?: string;
-  searchBarFilter?: SearchBarFilter;
-  onSearchBarFilterChange?: (params: SearchBarFilter) => void;
+  searchBarFilter?: ProfilingSearchBarFilter;
+  onSearchBarFilterChange?: (params: ProfilingSearchBarFilter) => void;
 }
 
 export function ProfilingEmbeddable<T>({

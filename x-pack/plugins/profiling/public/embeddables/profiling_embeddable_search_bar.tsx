@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { SearchBarFilter } from '@kbn/observability-shared-plugin/public';
+import { ProfilingSearchBarFilter } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { v4 } from 'uuid';
 import { ProfilingSearchBar } from '../components/profiling_app_page_template/profiling_search_bar';
 
 interface Props {
-  onQuerySubmit: (filters: SearchBarFilter) => void;
+  onQuerySubmit: (filters: ProfilingSearchBarFilter) => void;
   kuery?: string;
 }
 

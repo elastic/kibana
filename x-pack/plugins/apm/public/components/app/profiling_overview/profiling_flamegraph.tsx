@@ -15,7 +15,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import {
   EmbeddableFlamegraph,
-  SearchBarFilter,
+  ProfilingSearchBarFilter,
 } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React from 'react';
@@ -42,8 +42,8 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
-  searchBarFilter: SearchBarFilter;
-  onSearchBarFilterChange: (next: SearchBarFilter) => void;
+  searchBarFilter: ProfilingSearchBarFilter;
+  onSearchBarFilterChange: (next: ProfilingSearchBarFilter) => void;
 }
 
 export function ProfilingFlamegraph({

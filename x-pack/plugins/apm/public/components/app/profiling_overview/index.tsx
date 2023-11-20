@@ -18,7 +18,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import React, { useMemo, useState } from 'react';
-import { SearchBarFilter } from '@kbn/observability-shared-plugin/public';
+import { ProfilingSearchBarFilter } from '@kbn/observability-shared-plugin/public';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -44,10 +44,11 @@ export function ProfilingOverview() {
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 20,
   });
-  const [searchBarFilter, setSearchBarFilter] = useState<SearchBarFilter>({
-    id: '',
-    filters: '',
-  });
+  const [searchBarFilter, setSearchBarFilter] =
+    useState<ProfilingSearchBarFilter>({
+      id: '',
+      filters: '',
+    });
 
   const [
     apmUniversalProfilingShowCallout,

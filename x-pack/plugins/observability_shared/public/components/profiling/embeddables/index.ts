@@ -15,4 +15,4 @@ export const EMBEDDABLE_FUNCTIONS = 'EMBEDDABLE_FUNCTIONS';
 /** Profiling functions embeddable */
 export { EmbeddableFunctions } from './embeddable_functions';
 /** Profiling Search bar params */
-export type { SearchBarFilter } from './profiling_embeddable';
+export type { ProfilingSearchBarFilter } from './profiling_embeddable';
