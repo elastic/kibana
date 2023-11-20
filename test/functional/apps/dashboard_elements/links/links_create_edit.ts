@@ -8,10 +8,8 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
-import dashboard_save from '../../dashboard/group4/dashboard_save';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
-  const browser = getService('browser');
   const testSubjects = getService('testSubjects');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const deployment = getService('deployment');
