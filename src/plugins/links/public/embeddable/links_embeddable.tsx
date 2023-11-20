@@ -63,7 +63,7 @@ export class LinksEmbeddable
       .then(() => this.setInitializationFinished())
       .catch((e: Error) => this.onFatalError(e));
 
-    // By-value panels should update the componentState when input changes
+    // By-value panels should update the links attributes when input changes
     this.subscriptions.add(
       this.getInput$()
         .pipe(
@@ -89,15 +89,12 @@ export class LinksEmbeddable
   }
 
   private async initializeOutput() {
-    const attributes = this.attributes;
-    if (!attributes) return;
-
     const { title, description } = this.getInput();
     this.updateOutput({
-      defaultTitle: attributes.title,
-      defaultDescription: attributes.description,
-      title: title ?? attributes.title,
-      description: description ?? attributes.description,
+      defaultTitle: this.attributes?.title,
+      defaultDescription: this.attributes?.description,
+      title: title ?? this.attributes?.title,
+      description: description ?? this.attributes?.description,
     });
   }
 
@@ -128,7 +125,7 @@ export class LinksEmbeddable
 
   public async reload() {
     if (this.isDestroyed) return;
-    // By-reference embeddable panels are reloaded when changed, so update the componentState
+    // By-reference embeddable panels are reloaded when changed, so update the attributes
     this.initializeSavedLinks();
     if (this.domNode) {
       this.render(this.domNode);
