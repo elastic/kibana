@@ -51,6 +51,12 @@ describe('useEnterpriseSearchContentNav', () => {
             name: 'Indices',
           },
           {
+            href: '/app/enterprise_search/content/connectors',
+            id: 'connectors',
+            items: undefined,
+            name: 'Connectors',
+          },
+          {
             href: '/app/enterprise_search/content/settings',
             id: 'settings',
             items: undefined,
@@ -212,7 +218,14 @@ describe('useEnterpriseSearchApplicationNav', () => {
           {
             href: '/app/enterprise_search/content/search_indices',
             id: 'search_indices',
+            items: undefined,
             name: 'Indices',
+          },
+          {
+            href: '/app/enterprise_search/content/connectors',
+            id: 'connectors',
+            items: undefined,
+            name: 'Connectors',
           },
           {
             href: '/app/enterprise_search/content/settings',
@@ -245,16 +258,19 @@ describe('useEnterpriseSearchApplicationNav', () => {
           {
             href: '/app/enterprise_search/elasticsearch',
             id: 'elasticsearch',
+            items: undefined,
             name: 'Elasticsearch',
           },
           {
             href: '/app/enterprise_search/vector_search',
             id: 'vectorSearch',
+            items: undefined,
             name: 'Vector Search',
           },
           {
             href: '/app/enterprise_search/ai_search',
             id: 'aiSearch',
+            items: undefined,
             name: 'AI Search',
           },
         ],
@@ -266,11 +282,13 @@ describe('useEnterpriseSearchApplicationNav', () => {
           {
             href: '/app/enterprise_search/app_search',
             id: 'app_search',
+            items: undefined,
             name: 'App Search',
           },
           {
             href: '/app/enterprise_search/workplace_search',
             id: 'workplace_search',
+            items: undefined,
             name: 'Workplace Search',
           },
         ],
