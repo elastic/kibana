@@ -11,8 +11,8 @@ import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiSpacer, EuiText, EuiCodeBlock } from '@elastic/eui';
 import { ApplicationStart } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import { IEsError, isEsError } from './types';
-import { EsError } from './es_error';
+import type { IEsError } from './types';
+import { EsError, isEsError } from './es_error';
 import { getRootCause } from './utils';
 
 export class PainlessError extends EsError {

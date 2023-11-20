@@ -12,7 +12,7 @@ import { coreMock, themeServiceMock } from '@kbn/core/public/mocks';
 import { IEsSearchRequest } from '../../../common/search';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
-import { PainlessError, TimeoutErrorMode, EsError, type IEsError } from '@kbn/search-errors';
+import { PainlessError, EsError, type IEsError } from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '..';
 import { bfetchPluginMock } from '@kbn/bfetch-plugin/public/mocks';
 import { BfetchPublicSetup } from '@kbn/bfetch-plugin/public';
@@ -24,7 +24,7 @@ import { dataPluginMock } from '../../mocks';
 import { UI_SETTINGS } from '../../../common';
 import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
-import { SearchTimeoutError } from './timeout_error';
+import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
 jest.mock('./utils', () => {
   const originalModule = jest.requireActual('./utils');

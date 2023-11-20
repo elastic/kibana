@@ -165,8 +165,6 @@ export type {
   SearchRequest,
   SearchSourceFields,
   SerializedSearchSourceFields,
-  // errors
-  IEsError,
   WaitUntilNextSessionCompletesOptions,
 } from './search';
 
@@ -178,8 +176,6 @@ export {
   noSearchSessionStorageCapabilityMessage,
   SEARCH_SESSIONS_MANAGEMENT_ID,
   waitUntilNextSessionCompletes$,
-  isEsError,
-  getSearchErrorOverrideDisplay,
   SearchSource,
   SearchSessionState,
   SortDirection,

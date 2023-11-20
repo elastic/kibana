@@ -8,6 +8,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
+import { Sha256 } from '@kbn/crypto-browser';
+import stringify from 'json-stable-stringify';
 import {
   BehaviorSubject,
   EMPTY,
@@ -64,17 +66,19 @@ import {
 } from '../../../common';
 import { SearchUsageCollector } from '../collectors';
 import {
+  SearchTimeoutError,
+  TimeoutErrorMode,
+} from './timeout_error';
+import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
+import {
   EsError,
   isEsError,
   isPainlessError,
   PainlessError,
-  SearchTimeoutError,
-  TimeoutErrorMode,
-  SearchSessionIncompleteWarning,
-} from '../errors';
+  renderSearchError,
+} from '@kbn/search-errors';
 import { ISessionService, SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
-import { createRequestHash, getSearchErrorOverrideDisplay } from './utils';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
 import type { SearchServiceStartDependencies } from '../search_service';
@@ -94,6 +98,10 @@ export interface SearchInterceptorDeps {
 
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
+
+async function createRequestHash(keys: Record<string, any>) {
+  return new Sha256().update(stringify(keys), 'utf8').digest('hex');
+}
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
@@ -585,15 +593,15 @@ export class SearchInterceptor {
       return;
     }
 
-    const overrideDisplay = getSearchErrorOverrideDisplay({
+    const searchErrorParts = renderSearchError({
       error: e,
       application: this.application,
     });
 
-    if (overrideDisplay) {
+    if (searchErrorParts) {
       this.deps.toasts.addDanger({
-        title: overrideDisplay.title,
-        text: toMountPoint(overrideDisplay.body, { theme$: this.deps.theme.theme$ }),
+        title: searchErrorParts.title,
+        text: toMountPoint(searchErrorParts.body, { theme$: this.deps.theme.theme$ }),
       });
     } else {
       this.deps.toasts.addError(e, {
