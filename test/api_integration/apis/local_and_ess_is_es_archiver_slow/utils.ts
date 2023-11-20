@@ -276,7 +276,7 @@ const csvify =
     highWaterMark,
   }: {
     env: string;
-    concurrency: number;
+    concurrency: number | string;
     highWaterMark: number;
   }) =>
   ({ name, avg, min, max }: FinalResult): string =>
@@ -302,7 +302,7 @@ export const afterAll = (
 
     finalResults
       .map(printEachJsonVerbose(log))
-      .map(csvify({ env: theEnv, concurrency: 4, highWaterMark: 5000 }))
+      .map(csvify({ env: theEnv, concurrency: 'calculated', highWaterMark: 5000 }))
       // @ts-ignore
       .map(flushCsv(logDirAbsolutePath)(theEnv))
       .forEach((x) => console.log(x));
