@@ -85,7 +85,6 @@ export function SloAlertsSummary({ slos, deps, timeRange }: Props) {
   const chartProps = {
     theme: charts.theme.useChartsTheme(),
     baseTheme: charts.theme.useChartsBaseTheme(),
-    onBrushEnd: () => {}, // TODO
   };
   return (
     <AlertSummaryWidget
