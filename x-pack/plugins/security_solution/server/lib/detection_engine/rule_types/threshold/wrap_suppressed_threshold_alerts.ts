@@ -6,6 +6,8 @@
  */
 
 import objectHash from 'object-hash';
+
+import dateMath from '@kbn/datemath';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -43,6 +45,8 @@ export const wrapSuppressedThresholdALerts = ({
   inputIndex,
   startedAt,
   from,
+  to,
+  suppressionWindow,
   threshold,
 }: {
   buckets: ThresholdBucket[];
@@ -58,11 +62,11 @@ export const wrapSuppressedThresholdALerts = ({
   inputIndex: string;
   startedAt: Date;
   from: Date;
+  to: Date;
+  suppressionWindow: string;
   threshold: ThresholdNormalized;
 }): Array<WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>> => {
-  const bucketsMap = buckets.reduce<
-    Record<string, WrappedFieldsLatest<BaseFieldsLatest & SuppressionFieldsLatest>>
-  >((acc, bucket) => {
+  return buckets.map((bucket) => {
     const hit = transformBucketIntoHit(
       bucket,
       inputIndex,
@@ -102,29 +106,20 @@ export const wrapSuppressedThresholdALerts = ({
       publicBaseUrl
     );
 
-    if (acc[instanceId]) {
-      acc[instanceId]._source[ALERT_SUPPRESSION_DOCS_COUNT] += 1;
-    } else {
-      acc[instanceId] = {
-        _id: id,
-        _index: '',
-        _source: {
-          ...baseAlert,
-          [ALERT_SUPPRESSION_TERMS]: [],
-          [ALERT_SUPPRESSION_START]: bucket.min_timestamp.value
-            ? new Date(bucket.min_timestamp.value)
-            : new Date(),
-          [ALERT_SUPPRESSION_END]: bucket.max_timestamp.value
-            ? new Date(bucket.max_timestamp.value)
-            : new Date(),
-          [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
-          [ALERT_INSTANCE_ID]: instanceId,
-        },
-      };
-    }
-
-    return acc;
-  }, {});
-
-  return Object.values(bucketsMap).slice(0, 100);
+    return {
+      _id: id,
+      _index: '',
+      _source: {
+        ...baseAlert,
+        [ALERT_SUPPRESSION_TERMS]: Object.entries(bucket.key).map(([field, value]) => ({
+          field,
+          value,
+        })),
+        [ALERT_SUPPRESSION_START]: dateMath.parse(suppressionWindow)?.toDate() || from,
+        [ALERT_SUPPRESSION_END]: to,
+        [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+        [ALERT_INSTANCE_ID]: instanceId,
+      },
+    };
+  });
 };

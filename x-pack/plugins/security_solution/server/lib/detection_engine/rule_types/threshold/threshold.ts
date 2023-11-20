@@ -143,32 +143,34 @@ export const thresholdExecutor = async ({
     });
 
     const alertSuppression = completeRule.ruleParams.alertSuppression;
-    const createResult = alertSuppression?.groupBy.length
-      ? await bulkCreateSuppressedThresholdAlerts({
-          buckets,
-          completeRule,
-          services,
-          inputIndexPattern: inputIndex,
-          startedAt,
-          from: tuple.from.toDate(),
-          ruleExecutionLogger,
-          spaceId,
-          runOpts,
-        })
-      : await bulkCreateThresholdSignals({
-          buckets,
-          completeRule,
-          filter: esFilter,
-          services,
-          inputIndexPattern: inputIndex,
-          signalsIndex: ruleParams.outputIndex,
-          startedAt,
-          from: tuple.from.toDate(),
-          signalHistory: validSignalHistory,
-          bulkCreate,
-          wrapHits,
-          ruleExecutionLogger,
-        });
+    const createResult =
+      alertSuppression?.groupBy.length && alertSuppression.duration
+        ? await bulkCreateSuppressedThresholdAlerts({
+            buckets,
+            completeRule,
+            services,
+            inputIndexPattern: inputIndex,
+            startedAt,
+            from: tuple.from.toDate(),
+            to: tuple.to.toDate(),
+            ruleExecutionLogger,
+            spaceId,
+            runOpts,
+          })
+        : await bulkCreateThresholdSignals({
+            buckets,
+            completeRule,
+            filter: esFilter,
+            services,
+            inputIndexPattern: inputIndex,
+            signalsIndex: ruleParams.outputIndex,
+            startedAt,
+            from: tuple.from.toDate(),
+            signalHistory: validSignalHistory,
+            bulkCreate,
+            wrapHits,
+            ruleExecutionLogger,
+          });
 
     addToSearchAfterReturn({
       current: result,

@@ -29,6 +29,7 @@ interface BulkCreateSuppressedThresholdAlertsParams {
   inputIndexPattern: string[];
   startedAt: Date;
   from: Date;
+  to: Date;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   spaceId: string;
   runOpts: RunOpts<ThresholdRuleParams>;
@@ -41,6 +42,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
   inputIndexPattern,
   startedAt,
   from,
+  to,
   ruleExecutionLogger,
   spaceId,
   runOpts,
@@ -70,6 +72,8 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     inputIndex: inputIndexPattern.join(','),
     startedAt,
     from,
+    to,
+    suppressionWindow,
     threshold: ruleParams.threshold,
   });
 
