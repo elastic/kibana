@@ -41,7 +41,7 @@ describe('calculateAndPersistRiskScores', () => {
         range: { start: 'now - 15d', end: 'now' },
         spaceId: 'default',
         // @ts-expect-error not relevant for this test
-        riskEngineDataClient: { getWriter: jest.fn() },
+        riskScoreDataClient: { getWriter: jest.fn() },
         runtimeMappings: {},
       });
 
