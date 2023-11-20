@@ -56,6 +56,11 @@ export function DataViewPicker({
       />
     );
   };
+  const maxLabelLength = dataViews.reduce((acc, curr) => {
+    const dataViewName = curr.name || curr.id;
+    return acc > dataViewName.length ? acc : dataViewName.length;
+  }, 0);
+  const panelMinWidth = getPanelMinWidth(maxLabelLength);
 
   return (
     <EuiInputPopover
@@ -67,6 +72,7 @@ export function DataViewPicker({
       isOpen={isPopoverOpen}
       input={createTrigger()}
       closePopover={() => setPopoverIsOpen(false)}
+      panelMinWidth={panelMinWidth}
       panelProps={{
         'data-test-subj': 'data-view-picker-popover',
       }}
@@ -113,3 +119,20 @@ export function DataViewPicker({
 // required for dynamic import using React.lazy()
 // eslint-disable-next-line import/no-default-export
 export default DataViewPicker;
+
+const MINIMUM_POPOVER_WIDTH = 300;
+const MINIMUM_POPOVER_WIDTH_CHAR_COUNT = 28;
+const AVERAGE_CHAR_WIDTH = 7;
+const MAXIMUM_POPOVER_WIDTH_CHAR_COUNT = 60;
+const MAXIMUM_POPOVER_WIDTH = 550; // fitting 60 characters
+
+function getPanelMinWidth(labelLength: number) {
+  if (labelLength > MAXIMUM_POPOVER_WIDTH_CHAR_COUNT) {
+    return MAXIMUM_POPOVER_WIDTH;
+  }
+  if (labelLength > MINIMUM_POPOVER_WIDTH_CHAR_COUNT) {
+    const overflownChars = labelLength - MINIMUM_POPOVER_WIDTH_CHAR_COUNT;
+    return MINIMUM_POPOVER_WIDTH + overflownChars * AVERAGE_CHAR_WIDTH;
+  }
+  return MINIMUM_POPOVER_WIDTH;
+}
