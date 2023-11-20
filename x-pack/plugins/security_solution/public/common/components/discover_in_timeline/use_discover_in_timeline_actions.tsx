@@ -137,7 +137,7 @@ export const useDiscoverInTimelineActions = (
    * */
   const resetDiscoverAppState = useCallback(async () => {
     const defaultDiscoverAppState = await getDefaultDiscoverAppState();
-    discoverStateContainer.current?.appState.set(defaultDiscoverAppState);
+    discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
     discoverStateContainer.current?.globalState.set({
       ...discoverStateContainer.current?.globalState.get(),
       time: defaultDiscoverTimeRange,

@@ -150,12 +150,11 @@ describe('Timelines', (): void => {
     }
   );
 
-  // FLAKY: https://github.com/elastic/kibana/issues/170691
-  describe.skip('shows the different timeline states', () => {
+  describe('shows the different timeline states', () => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
-      openTimelineUsingToggle();
+      createNewTimeline();
     });
 
     it('should show the correct timeline status', { tags: ['@ess', '@serverless'] }, () => {

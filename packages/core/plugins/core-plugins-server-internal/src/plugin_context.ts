@@ -235,6 +235,10 @@ export function createPluginSetupContext<TPlugin, TPluginDependencies>({
       registerOnPostAuth: deps.http.registerOnPostAuth,
       registerOnPreResponse: deps.http.registerOnPreResponse,
       basePath: deps.http.basePath,
+      staticAssets: {
+        getPluginAssetHref: (assetPath: string) =>
+          deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
+      },
       csp: deps.http.csp,
       getServerInfo: deps.http.getServerInfo,
     },
@@ -324,6 +328,10 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       auth: deps.http.auth,
       basePath: deps.http.basePath,
       getServerInfo: deps.http.getServerInfo,
+      staticAssets: {
+        getPluginAssetHref: (assetPath: string) =>
+          deps.http.staticAssets.getPluginAssetHref(plugin.name, assetPath),
+      },
     },
     savedObjects: {
       getScopedClient: deps.savedObjects.getScopedClient,
