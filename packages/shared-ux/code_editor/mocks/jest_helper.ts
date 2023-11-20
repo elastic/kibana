@@ -13,6 +13,7 @@ jest.mock('@kbn/code-editor', () => {
 
   return {
     ...module,
+    CodeEditorField: MockedCodeEditor,
     CodeEditor: MockedCodeEditor,
   };
 });

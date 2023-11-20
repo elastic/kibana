@@ -8,6 +8,7 @@
 import { EuiButtonIcon, EuiComboBox, EuiTextArea } from '@elastic/eui';
 import React from 'react';
 
+import '@kbn/code-editor-mock/jest_helper';
 import { CodeEditorField } from '@kbn/code-editor';
 import { coreMock } from '@kbn/core/public/mocks';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';

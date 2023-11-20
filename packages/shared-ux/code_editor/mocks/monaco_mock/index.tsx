@@ -33,6 +33,7 @@ function createEditorInstance() {
     getDomNode: jest.fn(),
     getPosition: jest.fn(),
     getSelection: jest.fn(),
+    getContentHeight: jest.fn(),
     getContribution: jest.fn((id: string) => {
       if (id === 'editor.contrib.suggestController') {
         return {

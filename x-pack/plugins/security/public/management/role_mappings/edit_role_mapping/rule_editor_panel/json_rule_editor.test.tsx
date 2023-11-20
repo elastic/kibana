@@ -14,6 +14,7 @@ import '@kbn/web-worker-stub';
 
 import React from 'react';
 import { act } from 'react-dom/test-utils';
+import '@kbn/code-editor-mock/jest_helper';
 
 import { CodeEditorField } from '@kbn/code-editor';
 import type { monaco } from '@kbn/monaco';
