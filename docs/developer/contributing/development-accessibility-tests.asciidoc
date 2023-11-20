@@ -68,7 +68,7 @@ node scripts/functional_test_runner.js --config test/accessibility/config.ts
 -----------
 
 To run the x-pack tests, swap the config file out for
-`x-pack/test/accessibility/config.ts`.
+`x-pack/test/accessibility/apps/{group1,group2,group3}/config.ts`.
 
 The testing is done using https://github.com/dequelabs/axe-core[axe].
 You can run the same thing that runs CI using browser plugins:
