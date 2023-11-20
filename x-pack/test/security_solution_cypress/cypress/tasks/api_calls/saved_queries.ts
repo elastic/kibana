@@ -36,6 +36,9 @@ export const createSavedQuery = (
         },
       ],
     },
+    headers: {
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+    },
   });
 
 export const deleteSavedQueries = () => {
@@ -55,9 +58,6 @@ export const deleteSavedQueries = () => {
           ],
         },
       },
-    },
-    headers: {
-      [ELASTIC_HTTP_VERSION_HEADER]: '1',
     },
   });
 };
