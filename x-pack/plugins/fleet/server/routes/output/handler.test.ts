@@ -28,7 +28,7 @@ describe('output handler', () => {
     jest.spyOn(outputService, 'create').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'update').mockResolvedValue({ id: 'output1' } as any);
     jest.spyOn(outputService, 'get').mockResolvedValue({ id: 'output1' } as any);
-    jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({});
+    jest.spyOn(agentPolicyService, 'bumpAllAgentPoliciesForOutput').mockResolvedValue({} as any);
   });
 
   it('should return error on post output using remote_elasticsearch in serverless', async () => {
