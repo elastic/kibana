@@ -67,6 +67,7 @@ export type AlertsTableStateProps = {
   pageSize?: number;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
+  onLoaded?: () => void;
   runtimeMappings?: MappingRuntimeFields;
   showAlertStatusWithFlapping?: boolean;
   toolbarVisibility?: EuiDataGridToolBarVisibilityOptions;
@@ -158,6 +159,7 @@ const AlertsTableStateWithQueryProvider = ({
   gridStyle,
   browserFields: propBrowserFields,
   onUpdate,
+  onLoaded,
   runtimeMappings,
   showAlertStatusWithFlapping,
   toolbarVisibility,
@@ -262,6 +264,12 @@ const AlertsTableStateWithQueryProvider = ({
     sort,
     skip: false,
   });
+
+  useEffect(() => {
+    if (!isLoading && onLoaded) {
+      onLoaded();
+    }
+  }, [isLoading, onLoaded]);
 
   useEffect(() => {
     alertsTableConfigurationRegistry.update(configurationId, {

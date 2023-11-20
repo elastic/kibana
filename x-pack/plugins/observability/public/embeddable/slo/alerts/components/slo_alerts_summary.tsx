@@ -21,13 +21,15 @@ interface Props {
   deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
+  onLoaded?: () => void;
 }
 
-export function SloAlertsSummary({ slos, deps, timeRange }: Props) {
+export function SloAlertsSummary({ slos, deps, timeRange, onLoaded }: Props) {
   const {
     charts,
     triggersActionsUi: { getAlertSummaryWidget: AlertSummaryWidget },
   } = deps;
+
   const slosWithoutName = slos.map((slo) => ({
     id: slo.id,
     instanceId: slo.instanceId,
@@ -93,6 +95,11 @@ export function SloAlertsSummary({ slos, deps, timeRange }: Props) {
       timeRange={alertSummaryTimeRange}
       chartProps={chartProps}
       fullSize
+      onLoaded={() => {
+        if (onLoaded) {
+          onLoaded();
+        }
+      }}
     />
   );
 }

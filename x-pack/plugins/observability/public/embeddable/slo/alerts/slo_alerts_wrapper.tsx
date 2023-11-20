@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiLink } from '@elastic/eui';
@@ -25,14 +25,25 @@ interface Props {
   slos: SloItem[];
   timeRange: TimeRange;
   embeddable: IEmbeddable<SloAlertsEmbeddableInput, EmbeddableOutput>;
+  onRenderComplete?: () => void;
 }
 
-export function SloAlertsWrapper({ embeddable, slos, deps, timeRange }: Props) {
+export function SloAlertsWrapper({ embeddable, slos, deps, timeRange, onRenderComplete }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
   } = deps;
 
+  const [isSummaryLoaded, setIsSummaryLoaded] = useState(false);
+  const [isTableLoaded, setIsTableLoaded] = useState(false);
+  useEffect(() => {
+    if (!onRenderComplete) {
+      return;
+    }
+    if (isSummaryLoaded && isTableLoaded) {
+      onRenderComplete();
+    }
+  }, [isSummaryLoaded, isTableLoaded, onRenderComplete]);
   const handleGoToAlertsClick = () => {
     let kuery = '';
     slos.map((slo, index) => {
@@ -48,6 +59,7 @@ export function SloAlertsWrapper({ embeddable, slos, deps, timeRange }: Props) {
       },rangeTo:${timeRange.to})`
     );
   };
+
   return (
     <>
       <EuiFlexGroup
@@ -92,10 +104,20 @@ export function SloAlertsWrapper({ embeddable, slos, deps, timeRange }: Props) {
         <EuiFlexItem>
           <EuiFlexGroup direction="column" style={{ margin: '10px' }} responsive={true}>
             <EuiFlexItem>
-              <SloAlertsSummary slos={slos} deps={deps} timeRange={timeRange} />
+              <SloAlertsSummary
+                slos={slos}
+                deps={deps}
+                timeRange={timeRange}
+                onLoaded={() => setIsSummaryLoaded(true)}
+              />
             </EuiFlexItem>
             <EuiFlexItem grow={true}>
-              <SloAlertsTable slos={slos} deps={deps} timeRange={timeRange} />
+              <SloAlertsTable
+                slos={slos}
+                deps={deps}
+                timeRange={timeRange}
+                onLoaded={() => setIsTableLoaded(true)}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>

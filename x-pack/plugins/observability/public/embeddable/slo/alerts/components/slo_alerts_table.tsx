@@ -18,9 +18,10 @@ interface Props {
   deps: SloEmbeddableDeps;
   slos: SloItem[];
   timeRange: TimeRange;
+  onLoaded?: () => void;
 }
 
-export function SloAlertsTable({ slos, deps, timeRange }: Props) {
+export function SloAlertsTable({ slos, deps, timeRange, onLoaded }: Props) {
   const {
     triggersActionsUi: { alertsTableConfigurationRegistry, getAlertsStateTable: AlertsStateTable },
   } = deps;
@@ -69,6 +70,11 @@ export function SloAlertsTable({ slos, deps, timeRange }: Props) {
       id={ALERTS_TABLE_ID}
       pageSize={ALERTS_PER_PAGE}
       showAlertStatusWithFlapping
+      onLoaded={() => {
+        if (onLoaded) {
+          onLoaded();
+        }
+      }}
     />
   );
 }

@@ -77,12 +77,23 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     this.subscription.add(this.getInput$().subscribe(() => this.reload()));
   }
 
+  public reportsEmbeddableLoad() {
+    return true;
+  }
+
+  public onRenderComplete() {
+    this.renderComplete.dispatchComplete();
+  }
+
   setTitle(title: string) {
     this.updateInput({ title });
   }
 
   public render(node: HTMLElement) {
+    super.render(node);
     this.node = node;
+    // required for the export feature to work
+    this.node.setAttribute('data-shared-item', '');
     this.setTitle(
       this.input.title ||
         i18n.translate('xpack.observability.sloAlertsEmbeddable.displayTitle', {
@@ -105,7 +116,13 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
         >
           <Router history={history}>
             <QueryClientProvider client={queryClient}>
-              <SloAlertsWrapper embeddable={this} deps={deps} slos={slos} timeRange={timeRange} />
+              <SloAlertsWrapper
+                onRenderComplete={() => this.onRenderComplete()}
+                embeddable={this}
+                deps={deps}
+                slos={slos}
+                timeRange={timeRange}
+              />
             </QueryClientProvider>
           </Router>
         </KibanaContextProvider>
