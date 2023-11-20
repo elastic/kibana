@@ -23,6 +23,7 @@ export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';
 
 export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
+export { calculateWidthFromLabel } from './dataview_picker/calculate_width_from_label';
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { calculateWidthFromLabel } from '@kbn/visualization-ui-components';
+import { calculateWidthFromLabel } from './calculate_width_from_label';
 
 const MIN_WIDTH = 300;
 

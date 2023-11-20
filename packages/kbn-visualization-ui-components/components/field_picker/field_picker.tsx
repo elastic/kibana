@@ -9,11 +9,11 @@
 import './field_picker.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import classNames from 'classnames';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
-import classNames from 'classnames';
+import { calculateWidthFromLabel } from '@kbn/unified-search-plugin/public';
 import type { FieldOptionValue, FieldOption } from './types';
-import { calculateWidthFromLabel } from './calculate_width_from_label';
 
 export interface FieldPickerProps<T extends FieldOptionValue>
   extends EuiComboBoxProps<FieldOption<T>['value']> {

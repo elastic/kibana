@@ -8,8 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
-import { DataViewsList } from '@kbn/unified-search-plugin/public';
-import { calculateWidthFromLabel } from '@kbn/visualization-ui-components';
+import { DataViewsList, calculateWidthFromLabel } from '@kbn/unified-search-plugin/public';
 import { type IndexPatternRef } from '../../types';
 import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 

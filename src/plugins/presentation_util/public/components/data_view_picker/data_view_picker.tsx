@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { calculateWidthFromLabel } from '@kbn/visualization-ui-components';
+import { calculateWidthFromLabel } from '@kbn/unified-search-plugin/public';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 

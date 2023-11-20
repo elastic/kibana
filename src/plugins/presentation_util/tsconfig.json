@@ -31,8 +31,7 @@
     "@kbn/ui-actions-plugin",
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-plugin",
-    "@kbn/shared-ux-button-toolbar",
-    "@kbn/visualization-ui-components"
+    "@kbn/shared-ux-button-toolbar"
   ],
   "exclude": ["target/**/*"]
 }

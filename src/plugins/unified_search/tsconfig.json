@@ -41,8 +41,7 @@
     "@kbn/text-based-editor",
     "@kbn/core-doc-links-browser",
     "@kbn/core-lifecycle-browser",
-    "@kbn/ml-string-hash",
-    "@kbn/visualization-ui-components"
+    "@kbn/ml-string-hash"
   ],
   "exclude": [
     "target/**/*",
