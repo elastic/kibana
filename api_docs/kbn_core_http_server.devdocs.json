@@ -1831,6 +1831,28 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.HttpServiceSetup.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-common.HttpServiceSetup.csp",
             "type": "Object",
             "tags": [],
@@ -2003,6 +2025,28 @@
                 "docId": "kibKbnCoreHttpServerPluginApi",
                 "section": "def-common.IBasePath",
                 "text": "IBasePath"
+              }
+            ],
+            "path": "packages/core/http/core-http-server/src/http_contract.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.HttpServiceStart.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [
+              "\nAPIs for creating hrefs to static assets.\nSee {@link IStaticAssets}"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
               }
             ],
             "path": "packages/core/http/core-http-server/src/http_contract.ts",
@@ -5805,6 +5849,10 @@
               {
                 "plugin": "@kbn/core-ui-settings-server-internal",
                 "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/set.ts"
+              },
+              {
+                "plugin": "@kbn/core-ui-settings-server-internal",
+                "path": "packages/core/ui-settings/core-ui-settings-server-internal/src/routes/internal/validate.ts"
               },
               {
                 "plugin": "@kbn/core-capabilities-server-internal",
@@ -9641,6 +9689,56 @@
       },
       {
         "parentPluginId": "@kbn/core-http-server",
+        "id": "def-common.IStaticAssets",
+        "type": "Interface",
+        "tags": [],
+        "label": "IStaticAssets",
+        "description": [
+          "\nAPIs for creating hrefs to static assets.\n"
+        ],
+        "path": "packages/core/http/core-http-server/src/static_assets.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-common.IStaticAssets.getPluginAssetHref",
+            "type": "Function",
+            "tags": [],
+            "label": "getPluginAssetHref",
+            "description": [
+              "\nGets the full href to the current plugin's asset,\ngiven its path relative to the plugin's `public/assets` folder.\n"
+            ],
+            "signature": [
+              "(assetPath: string) => string"
+            ],
+            "path": "packages/core/http/core-http-server/src/static_assets.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-http-server",
+                "id": "def-common.IStaticAssets.getPluginAssetHref.$1",
+                "type": "string",
+                "tags": [],
+                "label": "assetPath",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/http/core-http-server/src/static_assets.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-http-server",
         "id": "def-common.KibanaErrorResponseFactory",
         "type": "Interface",
         "tags": [],
@@ -13184,6 +13282,10 @@
                 "path": "x-pack/plugins/ml/server/routes/management.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_config.ts"
               },
@@ -13194,10 +13296,6 @@
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -13621,27 +13719,27 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_audit_messages.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/audit_messages/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_nodes/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_all/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_single/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_all/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_stats_single/register_route.ts"
               },
               {
                 "plugin": "uptime",
@@ -13919,16 +14017,16 @@
                 "path": "x-pack/plugins/ml/server/routes/anomaly_detectors.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_user_has_seen_notice.ts"
               },
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_last_reported.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -14016,7 +14114,7 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_create/register_route.ts"
               },
               {
                 "plugin": "uptime",
@@ -14514,6 +14612,10 @@
                 "path": "x-pack/plugins/ml/server/routes/alerting.ts"
               },
               {
+                "plugin": "fleet",
+                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
+              },
+              {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_opt_in_stats.ts"
               },
@@ -14524,10 +14626,6 @@
               {
                 "plugin": "telemetry",
                 "path": "src/plugins/telemetry/server/routes/telemetry_usage_stats.ts"
-              },
-              {
-                "plugin": "fleet",
-                "path": "x-pack/plugins/fleet/server/services/security/fleet_router.ts"
               },
               {
                 "plugin": "metricsDataAccess",
@@ -14871,39 +14969,39 @@
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/field_histograms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/field_histograms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_update/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/reauthorize_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/reset_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/transforms_preview/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/start_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/stop_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/delete_transforms/register_route.ts"
               },
               {
                 "plugin": "transform",
-                "path": "x-pack/plugins/transform/server/routes/api/transforms.ts"
+                "path": "x-pack/plugins/transform/server/routes/api/schedule_now_transforms/register_route.ts"
               },
               {
                 "plugin": "controls",
