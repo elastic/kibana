@@ -125,7 +125,17 @@ export const RiskInputsPanelContent = ({ riskInputs }: RiskInputsPanelContentPro
             />
           </h2>
         </EuiTitle>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="m" />
+        {/* Temporary label. It will be replaced by a filter */}
+        <EuiTitle size="xs">
+          <h3>
+            <FormattedMessage
+              id="xpack.securitySolution.flyout.entityDetails.riskInputs.alertsTitle"
+              defaultMessage="Alerts"
+            />
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="xs" />
         <RiskInputsUtilityBar pagination={pagination} selectedAlerts={selectedItems} />
         <EuiSpacer size="xs" />
         <EuiInMemoryTable
