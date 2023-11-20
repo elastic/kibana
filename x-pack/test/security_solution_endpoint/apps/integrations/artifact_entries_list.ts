@@ -333,7 +333,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    describe('Should check artifacts are correctly generated when multiple entries', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/171476
+    describe.skip('Should check artifacts are correctly generated when multiple entries', function () {
       let firstPolicy: PolicyTestResourceInfo;
       let secondPolicy: PolicyTestResourceInfo;
 
