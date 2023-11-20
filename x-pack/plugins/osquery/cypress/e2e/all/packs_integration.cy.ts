@@ -7,8 +7,17 @@
 
 import { find } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import {
+  ADD_PACK_HEADER_BUTTON,
+  EDIT_PACK_HEADER_BUTTON,
+  SAVE_PACK_BUTTON,
+  POLICY_SELECT_COMBOBOX,
+  TABLE_ROWS,
+  UPDATE_PACK_BUTTON,
+  formFieldInputSelector,
+} from '../../screens/packs';
 import { API_VERSIONS } from '../../../common/constants';
-import { FLEET_AGENT_POLICIES, navigateToWithoutWaitForReact } from '../../tasks/navigation';
+import { FLEET_AGENT_POLICIES, navigateTo } from '../../tasks/navigation';
 import {
   checkActionItemsInResults,
   checkResults,
@@ -60,11 +69,11 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(integration).click();
         addIntegration(AGENT_POLICY_NAME);
         cy.contains('Add Elastic Agent later').click();
-        navigateToWithoutWaitForReact('app/osquery/packs');
-        cy.getBySel('addPackButton').click();
-        cy.get('input[name="name"]').type(`${REMOVING_PACK}{downArrow}{enter}`);
-        cy.getBySel('policyIdsComboBox').type(`${AGENT_POLICY_NAME}{downArrow}{enter}`);
-        cy.getBySel('savePackButton').click();
+        navigateTo('app/osquery/packs');
+        cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+        cy.get(formFieldInputSelector('name')).type(`${REMOVING_PACK}{downArrow}{enter}`);
+        cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${AGENT_POLICY_NAME}{downArrow}{enter}`);
+        cy.getBySel(SAVE_PACK_BUTTON).click();
         closeToastIfVisible();
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
@@ -84,7 +93,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.contains(/^Delete integration$/).click();
         closeModalIfVisible();
         cy.contains(/^Deleted integration 'osquery_manager-*/);
-        navigateToWithoutWaitForReact('app/osquery/packs');
+        navigateTo('app/osquery/packs');
         cy.contains(REMOVING_PACK).click();
         cy.contains(`${REMOVING_PACK} details`).should('exist');
         cy.wait(1000);
@@ -104,13 +113,13 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
     describe('', () => {
       beforeEach(() => {
         cy.login(ServerlessRoleName.SOC_MANAGER);
-        navigateToWithoutWaitForReact('/app/osquery/packs');
+        navigateTo('/app/osquery/packs');
       });
       it('should load prebuilt packs', () => {
         cy.contains('Load Elastic prebuilt packs').click();
         cy.contains('Load Elastic prebuilt packs').should('not.exist');
         cy.wait(1000);
-        cy.get('tbody > tr').should('have.length.above', 5);
+        cy.get(TABLE_ROWS).should('have.length.above', 5);
       });
 
       it('should be able to activate pack', () => {
@@ -120,9 +129,9 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
 
       it('should be able to add policy to it', () => {
         cy.contains(PREBUILD_PACK_NAME).click();
-        cy.contains('Edit').click();
-        cy.getBySel('policyIdsComboBox').type(`${DEFAULT_POLICY} {downArrow}{enter}`);
-        cy.getBySel('updatePackButton').click();
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
+        cy.getBySel(POLICY_SELECT_COMBOBOX).type(`${DEFAULT_POLICY} {downArrow}{enter}`);
+        cy.getBySel(UPDATE_PACK_BUTTON).click();
         cy.getBySel('confirmModalConfirmButton').click();
         cy.contains(`Successfully updated "${PREBUILD_PACK_NAME}" pack`);
       });
@@ -133,15 +142,15 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       });
       it('should not be able to update prebuilt pack', () => {
         cy.contains(PREBUILD_PACK_NAME).click();
-        cy.contains('Edit').click();
-        cy.get('input[name="name"]').should('be.disabled');
-        cy.get('input[name="description"]').should('be.disabled');
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
+        cy.get(formFieldInputSelector('name')).should('be.disabled');
+        cy.get(formFieldInputSelector('description')).should('be.disabled');
         cy.contains('Add Query').should('not.exist');
         cy.get('.euiTableRowCell--hasActions').should('not.exist');
       });
       it('should be able to delete prebuilt pack and add it again', () => {
         cy.contains(PREBUILD_PACK_NAME).click();
-        cy.contains('Edit').click();
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
         deleteAndConfirm('pack');
         cy.contains(PREBUILD_PACK_NAME).should('not.exist');
         cy.contains('Update Elastic prebuilt packs').click();
@@ -150,10 +159,10 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('should be able to run live prebuilt pack', () => {
-        navigateToWithoutWaitForReact('/app/osquery/live_queries');
+        navigateTo('/app/osquery/live_queries');
         cy.contains('New live query').click();
         cy.contains('Run a set of queries in a pack.').click();
-        cy.get(LIVE_QUERY_EDITOR).should('not.exist');
+        cy.getBySel(LIVE_QUERY_EDITOR).should('not.exist');
         cy.getBySel('select-live-pack').click().type('osquery-monitoring{downArrow}{enter}');
         selectAllAgents();
         submitQuery();
@@ -165,7 +174,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           cases: true,
           timeline: false,
         });
-        navigateToWithoutWaitForReact('/app/osquery');
+        navigateTo('/app/osquery');
         cy.contains('osquery-monitoring');
       });
     });
@@ -174,7 +183,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
   describe('Global packs', { tags: ['@ess', '@serverless'] }, () => {
     beforeEach(() => {
       cy.login(ServerlessRoleName.PLATFORM_ENGINEER);
-      navigateToWithoutWaitForReact('/app/osquery/packs');
+      navigateTo('/app/osquery/packs');
     });
 
     describe('add proper shard to policies packs config', () => {
@@ -198,12 +207,12 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       });
 
       it('add global packs to policies', () => {
-        cy.getBySel('addPackButton').click();
-        cy.get('input[name="name"]').type(`${globalPack}{downArrow}{enter}`);
-        cy.getBySel('policyIdsComboBox').should('exist');
+        cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+        cy.get(formFieldInputSelector('name')).type(`${globalPack}{downArrow}{enter}`);
+        cy.getBySel(POLICY_SELECT_COMBOBOX).should('exist');
         cy.getBySel('osqueryPackTypeGlobal').click();
-        cy.getBySel('policyIdsComboBox').should('not.exist');
-        cy.getBySel('savePackButton').click();
+        cy.getBySel(POLICY_SELECT_COMBOBOX).should('not.exist');
+        cy.getBySel(SAVE_PACK_BUTTON).click();
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains(globalPack);
@@ -215,6 +224,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('createAgentPolicyNameField').type(agentPolicy);
         cy.getBySel('createAgentPolicyFlyoutBtn').click();
         cy.contains(`Agent policy '${agentPolicy}' created`).click();
+        closeToastIfVisible();
         cy.contains(agentPolicy).click();
         cy.contains('Add integration').click();
         cy.getBySel('epmList.searchBar').type('osquery');
@@ -260,8 +270,8 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
       it('', () => {
         const shardPack = 'shardPack' + generateRandomStringName(1)[0];
 
-        cy.getBySel('addPackButton').click();
-        cy.get('input[name="name"]').type(`${shardPack}{downArrow}{enter}`);
+        cy.getBySel(ADD_PACK_HEADER_BUTTON).click();
+        cy.get(formFieldInputSelector('name')).type(`${shardPack}{downArrow}{enter}`);
 
         cy.contains('Partial deployment (shards)').click();
         cy.getBySel('packShardsForm-0').within(() => {
@@ -272,7 +282,7 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
           cy.getBySel('shards-field-policy').type(`${OSQUERY_POLICY}{downArrow}{enter}`);
           cy.get('#shardsPercentage1').type('{backspace}{backspace}{backspace}');
         });
-        cy.getBySel('savePackButton').click();
+        cy.getBySel(SAVE_PACK_BUTTON).click();
 
         cy.contains(`Successfully created "${shardPack}" pack`);
         closeToastIfVisible();
@@ -295,24 +305,24 @@ describe('ALL - Packs', { tags: ['@ess', '@serverless'] }, () => {
         cy.getBySel('tablePaginationPopoverButton').click();
         cy.getBySel('tablePagination-50-rows').click();
         cy.contains(shardPack).click();
-        cy.contains('Edit').click();
+        cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
         cy.get('#shardsPercentage0').should('have.value', '15');
         cy.getBySel('packShardsForm-1').within(() => {
           cy.getBySel('shards-field-policy').contains(OSQUERY_POLICY);
           cy.get('#shardsPercentage1').should('have.value', '0');
         });
-        cy.getBySel('policyIdsComboBox').within(() => {
+        cy.getBySel(POLICY_SELECT_COMBOBOX).within(() => {
           cy.contains(OSQUERY_POLICY).should('not.exist');
         });
 
         cy.getBySel('comboBoxInput').contains(OSQUERY_POLICY).should('exist');
-        cy.getBySel('policyIdsComboBox').click();
+        cy.getBySel(POLICY_SELECT_COMBOBOX).click();
         cy.get('[data-test-subj="packShardsForm-1"]').within(() => {
           cy.get(`[aria-label="Delete shards row"]`).click();
         });
-        cy.getBySel('policyIdsComboBox').contains(OSQUERY_POLICY).should('not.exist');
-        cy.getBySel('policyIdsComboBox').click().type(`${OSQUERY_POLICY}{downArrow}{enter}`);
-        cy.getBySel('policyIdsComboBox').contains(OSQUERY_POLICY).should('exist');
+        cy.getBySel(POLICY_SELECT_COMBOBOX).contains(OSQUERY_POLICY).should('not.exist');
+        cy.getBySel(POLICY_SELECT_COMBOBOX).click().type(`${OSQUERY_POLICY}{downArrow}{enter}`);
+        cy.getBySel(POLICY_SELECT_COMBOBOX).contains(OSQUERY_POLICY).should('exist');
       });
     });
   });

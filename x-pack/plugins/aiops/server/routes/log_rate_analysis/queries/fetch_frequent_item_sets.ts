@@ -12,12 +12,12 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
-import { type SignificantTerm } from '@kbn/ml-agg-utils';
+import { type SignificantItem } from '@kbn/ml-agg-utils';
 import { createRandomSamplerWrapper } from '@kbn/ml-random-sampler-utils';
 
 import { RANDOM_SAMPLER_SEED, LOG_RATE_ANALYSIS_SETTINGS } from '../../../../common/constants';
 import type {
-  SignificantTermDuplicateGroup,
+  SignificantItemDuplicateGroup,
   ItemSet,
   FetchFrequentItemSetsResponse,
 } from '../../../../common/types';
@@ -29,10 +29,10 @@ interface FrequentItemSetsAggregation extends estypes.AggregationsSamplerAggrega
 }
 
 export function groupDuplicates(
-  cps: SignificantTerm[],
-  uniqueFields: Array<keyof SignificantTerm>
+  cps: SignificantItem[],
+  uniqueFields: Array<keyof SignificantItem>
 ) {
-  const groups: SignificantTermDuplicateGroup[] = [];
+  const groups: SignificantItemDuplicateGroup[] = [];
 
   for (const cp of cps) {
     const compareAttributes = pick(cp, uniqueFields);
@@ -51,16 +51,16 @@ export function groupDuplicates(
   return groups;
 }
 
-export function getShouldClauses(significantTerms: SignificantTerm[]) {
+export function getShouldClauses(significantItems: SignificantItem[]) {
   return Array.from(
-    group(significantTerms, ({ fieldName }) => fieldName),
+    group(significantItems, ({ fieldName }) => fieldName),
     ([field, values]) => ({ terms: { [field]: values.map((d) => d.fieldValue) } })
   );
 }
 
-export function getFrequentItemSetsAggFields(significantTerms: SignificantTerm[]) {
+export function getFrequentItemSetsAggFields(significantItems: SignificantItem[]) {
   return Array.from(
-    group(significantTerms, ({ fieldName }) => fieldName),
+    group(significantItems, ({ fieldName }) => fieldName),
     ([field, values]) => ({ field, include: values.map((d) => String(d.fieldValue)) })
   );
 }
@@ -69,7 +69,7 @@ export async function fetchFrequentItemSets(
   client: ElasticsearchClient,
   index: string,
   searchQuery: estypes.QueryDslQueryContainer,
-  significantTerms: SignificantTerm[],
+  significantItems: SignificantItem[],
   timeFieldName: string,
   deviationMin: number,
   deviationMax: number,
@@ -80,7 +80,7 @@ export async function fetchFrequentItemSets(
   abortSignal?: AbortSignal
 ): Promise<FetchFrequentItemSetsResponse> {
   // Sort significant terms by ascending p-value, necessary to apply the field limit correctly.
-  const sortedSignificantTerms = significantTerms.slice().sort((a, b) => {
+  const sortedSignificantItems = significantItems.slice().sort((a, b) => {
     return (a.pValue ?? 0) - (b.pValue ?? 0);
   });
 
@@ -98,7 +98,7 @@ export async function fetchFrequentItemSets(
           },
         },
       ],
-      should: getShouldClauses(sortedSignificantTerms),
+      should: getShouldClauses(sortedSignificantItems),
     },
   };
 
@@ -108,7 +108,7 @@ export async function fetchFrequentItemSets(
         minimum_set_size: 2,
         size: 200,
         minimum_support: LOG_RATE_ANALYSIS_SETTINGS.FREQUENT_ITEMS_SETS_MINIMUM_SUPPORT,
-        fields: getFrequentItemSetsAggFields(sortedSignificantTerms),
+        fields: getFrequentItemSetsAggFields(sortedSignificantItems),
       },
     },
   };
@@ -177,7 +177,7 @@ export async function fetchFrequentItemSets(
     Object.entries(fis.key).forEach(([key, value]) => {
       result.set[key] = value[0];
 
-      const pValue = sortedSignificantTerms.find(
+      const pValue = sortedSignificantItems.find(
         (t) => t.fieldName === key && t.fieldValue === value[0]
       )?.pValue;
 

@@ -5,13 +5,19 @@
  * 2.0.
  */
 
+import { LIVE_QUERY_EDITOR } from '../../screens/live_query';
+import {
+  ADD_QUERY_BUTTON,
+  customActionEditSavedQuerySelector,
+  customActionRunSavedQuerySelector,
+  EDIT_PACK_HEADER_BUTTON,
+  SAVED_QUERY_DROPDOWN_SELECT,
+} from '../../screens/packs';
 import { preparePack } from '../../tasks/packs';
 import {
   addToCase,
   checkResults,
   deleteAndConfirm,
-  findAndClickButton,
-  findFormFieldByRowsLabelAndType,
   inputQuery,
   selectAllAgents,
   submitQuery,
@@ -53,7 +59,8 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     cy.contains('Saved queries').click();
     cy.contains('Add saved query').click();
 
-    findFormFieldByRowsLabelAndType('ID', 'users_elastic');
+    cy.get('input[name="id"]').type(`users_elastic{downArrow}{enter}`);
+
     cy.contains('ID must be unique').should('not.exist');
     inputQuery('test');
     cy.contains('Save query').click();
@@ -105,14 +112,14 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('checks result type on prebuilt saved query', () => {
-      cy.get(`[aria-label="Edit users_elastic"]`).click();
+      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.getBySel('resultsTypeField').within(() => {
         cy.contains('Snapshot');
       });
     });
 
     it('user can run prebuilt saved query and add to case', () => {
-      cy.get(`[aria-label="Run users_elastic"]`).click();
+      cy.get(customActionRunSavedQuerySelector('users_elastic')).click();
 
       selectAllAgents();
       submitQuery();
@@ -122,7 +129,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
     });
 
     it('user can not delete prebuilt saved query but can delete normal saved query', () => {
-      cy.get(`[aria-label="Edit users_elastic"]`).click();
+      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
       cy.contains('Delete query').should('not.exist');
       navigateTo(`/app/osquery/saved_queries/${savedQueryId}`);
 
@@ -131,12 +138,14 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
 
     it('user can edit prebuilt saved query under pack', () => {
       preparePack(packName);
-      findAndClickButton('Edit');
+      cy.getBySel(EDIT_PACK_HEADER_BUTTON).click();
       cy.contains(`Edit ${packName}`);
-      findAndClickButton('Add query');
-      cy.contains('Attach next query');
+      cy.getBySel(ADD_QUERY_BUTTON).click();
 
-      cy.getBySel('savedQuerySelect').click().type('users_elastic{downArrow} {enter}');
+      cy.contains('Attach next query');
+      cy.getBySel('globalLoadingIndicator').should('not.exist');
+      cy.getBySel(LIVE_QUERY_EDITOR).should('exist');
+      cy.getBySel(SAVED_QUERY_DROPDOWN_SELECT).click().type('users_elastic{downArrow} {enter}');
       inputQuery('where name=1');
       cy.getBySel('resultsTypeField').click();
       cy.contains('Differential (Ignore removals)').click();
@@ -154,7 +163,7 @@ describe('ALL - Saved queries', { tags: ['@ess', '@serverless'] }, () => {
       cy.contains('User ID').should('not.exist');
       cy.get(`[aria-labelledby="flyoutTitle"]`).contains('Save').click();
 
-      cy.get(`[aria-label="Edit users_elastic"]`).click();
+      cy.get(customActionEditSavedQuerySelector('users_elastic')).click();
 
       cy.contains('SELECT * FROM users;where name=1');
       cy.contains('Unique identifier of the us.').should('not.exist');

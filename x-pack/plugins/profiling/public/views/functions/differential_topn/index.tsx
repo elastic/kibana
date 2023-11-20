@@ -13,11 +13,12 @@ import {
   EuiPanel,
   EuiSpacer,
 } from '@elastic/eui';
+import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import React, { useRef } from 'react';
 import { GridOnScrollProps } from 'react-window';
-import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
+import { FramesSummary } from '../../../components/frames_summary';
 import {
   NormalizationMenu,
   NormalizationMode,
@@ -25,7 +26,6 @@ import {
 } from '../../../components/normalization_menu';
 import { PrimaryAndComparisonSearchBar } from '../../../components/primary_and_comparison_search_bar';
 import { TopNFunctionsGrid } from '../../../components/topn_functions';
-import { TopNFunctionsSummary } from '../../../components/topn_functions_summary';
 import { AsyncStatus } from '../../../hooks/use_async';
 import { useProfilingParams } from '../../../hooks/use_profiling_params';
 import { useProfilingRouter } from '../../../hooks/use_profiling_router';
@@ -192,21 +192,36 @@ export function DifferentialTopNFunctionsView() {
               onChange={onChangeNormalizationMode}
             />
             <EuiSpacer />
-            <TopNFunctionsSummary
-              baselineTopNFunctions={state.data}
-              comparisonTopNFunctions={comparisonState.data}
-              baselineScaleFactor={isNormalizedByTime ? baselineTime : baseline}
-              comparisonScaleFactor={isNormalizedByTime ? comparisonTime : comparison}
+            <FramesSummary
               isLoading={
                 state.status === AsyncStatus.Loading ||
                 comparisonState.status === AsyncStatus.Loading
               }
-              baselineDuration={totalSeconds}
-              comparisonDuration={totalComparisonSeconds}
+              baseValue={
+                state.data
+                  ? {
+                      duration: totalSeconds,
+                      selfCPU: state.data.selfCPU,
+                      totalCount: state.data.TotalCount,
+                      totalCPU: state.data.totalCPU,
+                      scaleFactor: isNormalizedByTime ? baselineTime : baseline,
+                    }
+                  : undefined
+              }
+              comparisonValue={
+                comparisonState.data
+                  ? {
+                      duration: totalComparisonSeconds,
+                      selfCPU: comparisonState.data.selfCPU,
+                      totalCount: comparisonState.data.TotalCount,
+                      totalCPU: comparisonState.data.totalCPU,
+                      scaleFactor: isNormalizedByTime ? comparisonTime : comparison,
+                    }
+                  : undefined
+              }
             />
           </EuiPanel>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} />
         <EuiFlexItem>
           <EuiFlexGroup direction="row" gutterSize="s">
             <EuiFlexItem>

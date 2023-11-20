@@ -28,6 +28,7 @@ pageLoadAssetSize:
   dashboard: 82025
   dashboardEnhanced: 65646
   data: 454087
+  datasetQuality: 35000
   dataViewEditor: 28082
   dataViewFieldEditor: 27000
   dataViewManagement: 5100
@@ -88,12 +89,13 @@ pageLoadAssetSize:
   licensing: 29004
   links: 44490
   lists: 22900
-  logExplorer: 39045
+  logExplorer: 54342
   logsShared: 281060
   logstash: 53548
   management: 46112
   maps: 90000
   mapsEms: 26072
+  metricsDataAccess: 60000
   ml: 82187
   monitoring: 80000
   navigation: 37269
@@ -122,7 +124,7 @@ pageLoadAssetSize:
   screenshotting: 22870
   searchprofiler: 67080
   security: 81771
-  securitySolution: 66738
+  securitySolution: 67584
   securitySolutionEss: 16573
   securitySolutionServerless: 62488
   serverless: 16573

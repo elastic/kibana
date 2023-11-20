@@ -30,7 +30,8 @@
       "cloud",
       "features",
       "home",
-      "spaces"
+      "spaces",
+      "serverless",
     ],
     "requiredBundles": [
       "alerting",

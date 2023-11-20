@@ -9,9 +9,9 @@ import React from 'react';
 import { match as RouteMatch, Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 
+import { inventoryModels } from '@kbn/metrics-data-access-plugin/common';
 import { RedirectToLogs } from './redirect_to_logs';
 import { RedirectToNodeLogs } from './redirect_to_node_logs';
-import { inventoryModels } from '../../../common/inventory_models';
 
 interface LinkToPageProps {
   match: RouteMatch<{}>;
