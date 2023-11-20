@@ -95,6 +95,7 @@ export interface PushToServiceResponse extends ExternalServiceIncidentResponse {
 
 export type Incident = ServiceNowITSMIncident | ServiceNowSIRIncident;
 export type PartialIncident = Partial<Incident>;
+export type PartialCloseIncident = Partial<ServiceNowITSMCloseIncident>;
 
 export interface ExternalServiceParamsCreate {
   incident: Incident & Record<string, unknown>;
@@ -106,11 +107,10 @@ export interface ExternalServiceParamsUpdate {
 }
 
 export interface ExternalServiceParamsClose {
-  externalId: string | null;
+  incidentId: string | null;
   correlation_id: string | null;
-  close_notes: string;
-  close_code: string;
-  state: number;
+  close_code: 'Closed' | 'Resolved';
+  state: '7';
 }
 
 export interface ExternalService {
@@ -125,6 +125,7 @@ export interface ExternalService {
   checkInstance: (res: AxiosResponse) => void;
   getApplicationInformation: () => Promise<GetApplicationInfoResponse>;
   checkIfApplicationIsInstalled: () => Promise<void>;
+  getIncidentByCorrelationId: (correlation_id: string) => Promise<ServiceNowIncident>
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
@@ -151,6 +152,11 @@ export type ExecutorSubActionCloseIncidentParams = TypeOf<
 export type ServiceNowITSMIncident = Omit<
   TypeOf<typeof ExecutorSubActionPushParamsSchemaITSM>['incident'],
   'externalId'
+>;
+
+export type ServiceNowITSMCloseIncident = Omit<
+  TypeOf<typeof ExecutorSubActionCloseIncidentParamsSchema>, 
+  'externalId' | 'correlation_id'
 >;
 
 export type ServiceNowSIRIncident = Omit<

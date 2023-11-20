@@ -6,7 +6,6 @@
  */
 
 import { AxiosResponse } from 'axios';
-import { orderBy } from 'lodash/fp';
 
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';
 import {
@@ -19,12 +18,12 @@ import {
   GetApplicationInfoResponse,
   ServiceFactory,
   ExternalServiceParamsClose,
+  ServiceNowITSMCloseIncident,
 } from './types';
 
 import * as i18n from './translations';
 import { ServiceNowPublicConfigurationType, ServiceNowSecretConfigurationType } from './types';
 import { createServiceError, getPushedDate, prepareIncident } from './utils';
-import { FIELD_PREFIX } from './config';
 
 export const SYS_DICTIONARY_ENDPOINT = `api/now/table/sys_dictionary`;
 
@@ -72,7 +71,6 @@ export const createExternalService: ServiceFactory = ({
   const getCreateIncidentUrl = () => (useTableApi ? tableApiIncidentUrl : importSetTableUrl);
   const getUpdateIncidentUrl = (incidentId: string) =>
     useTableApi ? `${tableApiIncidentUrl}/${incidentId}` : importSetTableUrl;
-  const getCloseIncidentUrl = () => importSetTableUrl;
 
   const getIncidentViewURL = (id: string) => {
     // Based on: https://docs.servicenow.com/bundle/orlando-platform-user-interface/page/use/navigation/reference/r_NavigatingByURLExamples.html
@@ -279,19 +277,17 @@ export const createExternalService: ServiceFactory = ({
 
   const closeIncident = async(params: ExternalServiceParamsClose) => {
     try{
-      const {correlation_id, externalId, ...rest} = params;
+      const {correlation_id, incidentId, ...rest} = params;
 
       await checkIfApplicationIsInstalled();
   
-      if(correlation_id == null && externalId == null) {
+      if(correlation_id == null && incidentId == null) {
         throw new Error('No correlation_id or incident id found.');
       }
 
-      console.log('STEP 1')
-
       let incidentToBeClosed = null;
 
-      if(correlation_id && externalId == null) {
+      if(correlation_id && incidentId == null) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlation_id);
 
         if(!incidentToBeClosed) {  
@@ -299,28 +295,16 @@ export const createExternalService: ServiceFactory = ({
         }
       }
 
-      console.log('STEP 2', {...rest})
-
-      const closeData = Object.entries({...rest}).reduce(
-        (acc, [key, value]) => {
-          if(!value) {
-            throw new Error(`Invalid value for ${key}`);
-          }
-          return key ? ({ ...acc, [`${FIELD_PREFIX}${key}`]: value }) : {};
-        },
-        {}
-      );
-
-      console.log({externalId, incidentToBeClosed, correlation_id});
+      const closeData = prepareIncident(useTableApi, rest as Partial<ServiceNowITSMCloseIncident>);
 
       const resp = await request({
         axios: axiosInstance,
-        url: getCloseIncidentUrl(),
+        url: getCreateIncidentUrl(),
         method: 'post',
         logger,
         data: {
           ...closeData,
-          'elastic_incident_id': !externalId ? externalId : incidentToBeClosed?.sys_id,
+          'elastic_incident_id': incidentId ?? incidentToBeClosed?.sys_id,
         },
         configurationUtilities
       });
@@ -329,12 +313,14 @@ export const createExternalService: ServiceFactory = ({
 
       const closedIncident = resp.data.result[0];
 
-      console.log({closedIncident});
+      if(!closedIncident) {
+        throw new Error('Something went wrong.');
+      }
 
       return {
         title: closedIncident.display_value,
         id: closedIncident.sys_id,
-        pushedDate: getPushedDate(closedIncident.sys_updated_on),
+        pushedDate: getPushedDate(closedIncident.closed_at),
         url: getIncidentViewURL(closedIncident.sys_id),
       };
 
@@ -387,5 +373,6 @@ export const createExternalService: ServiceFactory = ({
     getApplicationInformation,
     checkIfApplicationIsInstalled,
     closeIncident,
+    getIncidentByCorrelationId,
   };
 };

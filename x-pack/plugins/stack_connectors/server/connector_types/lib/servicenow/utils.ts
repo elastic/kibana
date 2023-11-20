@@ -15,6 +15,7 @@ import {
   ExternalServiceCredentials,
   Incident,
   PartialIncident,
+  PartialCloseIncident,
   ResponseError,
   ServiceNowError,
   ServiceNowPublicConfigurationType,
@@ -23,7 +24,7 @@ import {
 import { FIELD_PREFIX } from './config';
 import * as i18n from './translations';
 
-export const prepareIncident = (useOldApi: boolean, incident: PartialIncident): PartialIncident =>
+export const prepareIncident = (useOldApi: boolean, incident: PartialIncident | PartialCloseIncident): PartialIncident | PartialCloseIncident=>
   useOldApi
     ? incident
     : Object.entries(incident).reduce(

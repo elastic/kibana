@@ -60,6 +60,13 @@ const CommonAttributes = {
   correlation_display: schema.nullable(schema.string()),
 };
 
+const commonCloseIncidentAttributes = {
+  state: schema.literal('7'),
+  close_code: schema.oneOf([schema.literal('Closed'), schema.literal('Resolved')], {
+    defaultValue: 'Closed'
+  }),
+};
+
 // Schema for ServiceNow Incident Management (ITSM)
 export const ExecutorSubActionPushParamsSchemaITSM = schema.object({
   incident: schema.object({
@@ -118,11 +125,7 @@ export const ExecutorSubActionGetIncidentParamsSchema = schema.object({
 export const ExecutorSubActionCloseIncidentParamsSchema = schema.object({
   externalId: schema.nullable(schema.string()),
   correlation_id: schema.nullable(schema.string({ defaultValue: DEFAULT_ALERTS_GROUPING_KEY })),
-  // state: schema.literal('7'),
-  // close_code: schema.literal('Closed/Resolved by Caller'),
-  state: schema.number(),
-  close_code: schema.string(),
-  close_notes: schema.string(),
+  ...commonCloseIncidentAttributes,
 });
 
 // Reserved for future implementation
