@@ -61,7 +61,6 @@ export interface DataViewsServerPluginStart {
  */
 export interface DataViewsServerPluginSetup {
   enableRollups: () => void;
-  setGetUserId: (getUserId: GetUserId) => void;
 }
 
 /**
