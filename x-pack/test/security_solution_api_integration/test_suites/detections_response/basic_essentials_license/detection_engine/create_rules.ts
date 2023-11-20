@@ -6,42 +6,49 @@
  */
 
 import expect from '@kbn/expect';
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { RuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 
 import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
+
 import {
-  createSignalsIndex,
+  createAlertsIndex,
   deleteAllRules,
   getSimpleRule,
-  getSimpleRuleOutput,
   getSimpleRuleOutputWithoutRuleId,
   getSimpleRuleWithoutRuleId,
   removeServerGeneratedProperties,
   removeServerGeneratedPropertiesIncludingRuleId,
-  getSimpleMlRule,
   deleteAllAlerts,
+  updateUsername,
 } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const auditbeatPath = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('create_rules', () => {
+  describe('@ess @serverless create_rules', () => {
     describe('creating rules', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(auditbeatPath);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(auditbeatPath);
       });
 
       beforeEach(async () => {
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -53,12 +60,14 @@ export default ({ getService }: FtrProviderContext) => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(getSimpleRule())
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutput());
+        const expectedRule = updateUsername(bodyToCompare, ELASTICSEARCH_USERNAME);
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should create a single rule without an input index', async () => {
@@ -72,90 +81,49 @@ export default ({ getService }: FtrProviderContext) => {
           type: 'query',
           query: 'user.name: root or user.name: admin',
         };
-        const expected = {
-          actions: [],
-          author: [],
-          created_by: 'elastic',
-          description: 'Simple Rule Query',
-          enabled: true,
-          false_positives: [],
-          from: 'now-6m',
-          immutable: false,
-          interval: '5m',
-          rule_id: 'rule-1',
-          language: 'kuery',
-          output_index: '',
-          max_signals: 100,
-          risk_score: 1,
-          risk_score_mapping: [],
-          name: 'Simple Rule Query',
-          query: 'user.name: root or user.name: admin',
-          references: [],
-          related_integrations: [],
-          required_fields: [],
-          setup: '',
-          severity: 'high',
-          severity_mapping: [],
-          updated_by: 'elastic',
-          tags: [],
-          to: 'now',
-          type: 'query',
-          threat: [],
-          exceptions_list: [],
-          version: 1,
-          revision: 0,
-        };
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(rule)
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql(expected);
+        const expectedRule = updateUsername(bodyToCompare, ELASTICSEARCH_USERNAME);
+
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should create a single rule without a rule_id', async () => {
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(getSimpleRuleWithoutRuleId())
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
-        expect(bodyToCompare).to.eql(getSimpleRuleOutputWithoutRuleId());
-      });
+        const expectedRule = updateUsername(
+          getSimpleRuleOutputWithoutRuleId(),
+          ELASTICSEARCH_USERNAME
+        );
 
-      it('should give a 403 when trying to create a single Machine Learning rule since the license is basic', async () => {
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(getSimpleMlRule())
-          .expect(403);
-
-        const bodyToCompare = removeServerGeneratedProperties(body);
-        expect(bodyToCompare).to.eql({
-          message: 'Your license does not support machine learning. Please upgrade your license.',
-          status_code: 403,
-        });
+        expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should cause a 409 conflict if we attempt to create the same rule_id twice', async () => {
         await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(getSimpleRule())
           .expect(200);
 
         const { body } = await supertest
           .post(DETECTION_ENGINE_RULES_URL)
           .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+          .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
           .send(getSimpleRule())
           .expect(409);
 

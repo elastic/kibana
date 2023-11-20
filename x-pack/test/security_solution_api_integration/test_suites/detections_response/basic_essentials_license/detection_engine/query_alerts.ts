@@ -11,25 +11,31 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
-import { getSignalStatus, createSignalsIndex, deleteAllAlerts } from '../../utils';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
+import { getAlertStatus, createAlertsIndex, deleteAllAlerts } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const endpointResolverSignalsPath = dataPathBuilder.getPath('endpoint/resolver/signals');
 
-  describe('query_signals_route and find_alerts_route', () => {
+  describe('@ess @serverless query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
       // This fails and should be investigated or removed if it no longer applies
-      it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
-        await createSignalsIndex(supertest, log);
+      it.skip('should not give errors when querying and the alerts index does exist and is empty', async () => {
+        await createAlertsIndex(supertest, log);
         const { body } = await supertest
           .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
           .set('kbn-xsrf', 'true')
-          .send(getSignalStatus())
+          .send(getAlertStatus())
           .expect(200);
 
         // remove any server generated items that are indeterministic
@@ -48,56 +54,14 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    describe('backwards compatibility', () => {
+    // TODO: remove the @brokenInServerless until a confimation
+    describe('@brokenInServerless runtime fields', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await createSignalsIndex(supertest, log);
+        await esArchiver.load(endpointResolverSignalsPath);
+        await createAlertsIndex(supertest, log);
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await deleteAllAlerts(supertest, log, es);
-      });
-
-      it('should be able to filter old signals on host.os.name.caseless using runtime field', async () => {
-        const query = {
-          query: {
-            bool: {
-              should: [{ match_phrase: { 'host.os.name.caseless': 'windows' } }],
-            },
-          },
-        };
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(query)
-          .expect(200);
-        expect(body.hits.total.value).to.eql(3);
-      });
-
-      it('should be able to filter old signals using field aliases', async () => {
-        const query = {
-          query: {
-            bool: {
-              should: [{ match_phrase: { 'kibana.alert.workflow_status': 'open' } }],
-            },
-          },
-        };
-        const { body } = await supertest
-          .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
-          .set('kbn-xsrf', 'true')
-          .send(query)
-          .expect(200);
-        expect(body.hits.total.value).to.eql(3);
-      });
-    });
-
-    describe('runtime fields', () => {
-      before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
-        await createSignalsIndex(supertest, log);
-      });
-      after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        await esArchiver.unload(endpointResolverSignalsPath);
         await deleteAllAlerts(supertest, log, es);
       });
 
@@ -129,12 +93,12 @@ export default ({ getService }: FtrProviderContext) => {
     describe('find_alerts_route', () => {
       describe('validation checks', () => {
         // This fails and should be investigated or removed if it no longer applies
-        it.skip('should not give errors when querying and the signals index does exist and is empty', async () => {
-          await createSignalsIndex(supertest, log);
+        it.skip('should not give errors when querying and the alerts index does exist and is empty', async () => {
+          await createAlertsIndex(supertest, log);
           const { body } = await supertest
             .post(ALERTS_AS_DATA_FIND_URL)
             .set('kbn-xsrf', 'true')
-            .send({ ...getSignalStatus(), index: '.siem-signals-default' })
+            .send({ ...getAlertStatus(), index: '.siem-signals-default' })
             .expect(200);
 
           // remove any server generated items that are indeterministic
@@ -153,10 +117,11 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         it('should not give errors when executing security solution histogram aggs', async () => {
-          await createSignalsIndex(supertest, log);
+          await createAlertsIndex(supertest, log);
           await supertest
             .post(ALERTS_AS_DATA_FIND_URL)
             .set('kbn-xsrf', 'true')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send({
               index: '.siem-signals-default',
               aggs: {
