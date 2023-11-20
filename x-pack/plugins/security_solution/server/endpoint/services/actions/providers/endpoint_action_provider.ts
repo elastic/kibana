@@ -14,6 +14,7 @@ import type {
   IsolationRouteRequestBody,
   ResponseActionGetFileRequestBody,
   UploadActionApiRequestBody,
+  ResponseActionsRequestBody,
 } from '../../../../../common/api/endpoint';
 import { BaseActionsProvider } from '../../../lib/response_actions/base_actions_provider';
 import type {
@@ -56,10 +57,10 @@ export class EndpointActionProvider extends BaseActionsProvider {
     };
   }
 
-  private async handleResponseAction(
-    command: ResponseActionsApiCommandNames,
-    options: IsolationRouteRequestBody
-  ): Promise<ActionDetails> {
+  private async handleResponseAction<
+    TOptions extends ResponseActionsRequestBody = ResponseActionsRequestBody,
+    TResponse extends ActionDetails = ActionDetails
+  >(command: ResponseActionsApiCommandNames, options: TOptions): Promise<TResponse> {
     const agentIds = await this.checkAgentIds(options.endpoint_ids);
 
     if (!agentIds.allValid) {
@@ -82,7 +83,7 @@ export class EndpointActionProvider extends BaseActionsProvider {
 
     await this.updateCases(createPayload, agentIds.hosts);
 
-    return response;
+    return response as TResponse;
   }
 
   protected async updateCases(
@@ -97,11 +98,14 @@ export class EndpointActionProvider extends BaseActionsProvider {
   }
 
   async isolate(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    return this.handleResponseAction('isolate', options);
+    return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>('isolate', options);
   }
 
   async release(options: IsolationRouteRequestBody): Promise<ActionDetails> {
-    return this.handleResponseAction('unisolate', options);
+    return this.handleResponseAction<IsolationRouteRequestBody, ActionDetails>(
+      'unisolate',
+      options
+    );
   }
 
   async killProcess(
@@ -109,7 +113,10 @@ export class EndpointActionProvider extends BaseActionsProvider {
   ): Promise<
     ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
-    return this.handleResponseAction('kill-process', options);
+    return this.handleResponseAction<
+      KillOrSuspendProcessRequestBody,
+      ActionDetails<KillProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    >('kill-process', options);
   }
 
   async suspendProcess(
@@ -117,25 +124,37 @@ export class EndpointActionProvider extends BaseActionsProvider {
   ): Promise<
     ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
   > {
-    return this.handleResponseAction('suspend-process', options);
+    return this.handleResponseAction<
+      KillOrSuspendProcessRequestBody,
+      ActionDetails<SuspendProcessActionOutputContent, ResponseActionParametersWithPidOrEntityId>
+    >('suspend-process', options);
   }
 
   async runningProcesses(
     options: GetProcessesRequestBody
   ): Promise<ActionDetails<GetProcessesActionOutputContent>> {
-    return this.handleResponseAction('running-processes', options);
+    return this.handleResponseAction<
+      GetProcessesRequestBody,
+      ActionDetails<GetProcessesActionOutputContent>
+    >('running-processes', options);
   }
 
   async getFile(
     options: ResponseActionGetFileRequestBody
   ): Promise<ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>> {
-    return this.handleResponseAction('get-file', options);
+    return this.handleResponseAction<
+      ResponseActionGetFileRequestBody,
+      ActionDetails<ResponseActionGetFileOutputContent, ResponseActionGetFileParameters>
+    >('get-file', options);
   }
 
   async execute(
     options: ExecuteActionRequestBody
   ): Promise<ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>> {
-    return this.handleResponseAction('execute', options);
+    return this.handleResponseAction<
+      ExecuteActionRequestBody,
+      ActionDetails<ResponseActionExecuteOutputContent, ResponseActionsExecuteParameters>
+    >('execute', options);
   }
 
   async upload(

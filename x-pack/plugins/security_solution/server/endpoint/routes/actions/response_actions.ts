@@ -7,10 +7,13 @@
 import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
+import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
 import { EndpointActionProvider } from '../../services/actions/providers';
 import type {
-  ResponseActionBodySchema,
   NoParametersRequestSchema,
+  ResponseActionsRequestBody,
+  ExecuteActionRequestBody,
+  ResponseActionGetFileRequestBody,
 } from '../../../../common/api/endpoint';
 import {
   ExecuteActionRequestSchema,
@@ -38,6 +41,7 @@ import type {
   ResponseActionParametersWithPidOrEntityId,
   ResponseActionsExecuteParameters,
   ActionDetails,
+  KillOrSuspendProcessRequestBody,
 } from '../../../../common/endpoint/types';
 import type { ResponseActionsApiCommandNames } from '../../../../common/endpoint/service/response_actions/constants';
 import type {
@@ -252,7 +256,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 ): RequestHandler<
   unknown,
   unknown,
-  TypeOf<typeof ResponseActionBodySchema>,
+  ResponseActionsRequestBody,
   SecuritySolutionRequestHandlerContext
 > {
   const logger = endpointContext.logFactory.get('responseActionsHandler');
@@ -285,23 +289,26 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
           break;
 
         case 'execute':
-          action = await actionProvider.execute(req.body);
+          action = await actionProvider.execute(req.body as ExecuteActionRequestBody);
           break;
 
         case 'suspend-process':
-          action = await actionProvider.suspendProcess(req.body);
+          action = await actionProvider.suspendProcess(req.body as KillOrSuspendProcessRequestBody);
           break;
 
         case 'kill-process':
-          action = await actionProvider.killProcess(req.body);
+          action = await actionProvider.killProcess(req.body as KillOrSuspendProcessRequestBody);
           break;
 
         case 'get-file':
-          action = await actionProvider.getFile(req.body);
+          action = await actionProvider.getFile(req.body as ResponseActionGetFileRequestBody);
           break;
 
         default:
-          throw new Error(`No handler found for response action command: [${command}]`);
+          throw new CustomHttpRequestError(
+            `No handler found for response action command: [${command}]`,
+            501
+          );
       }
 
       const { action: actionId, ...data } = action;
@@ -315,26 +322,6 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     } catch (err) {
       return errorHandler(logger, res, err);
     }
-
-    // try {
-    //   const createActionPayload: CreateActionPayload = { ...req.body, command, user };
-    //   const endpointData = await endpointContext.service
-    //     .getEndpointMetadataService()
-    //     .getMetadataForEndpoints(esClient, [...new Set(createActionPayload.endpoint_ids)]);
-    //   const agentIds = endpointData.map((endpoint: HostMetadata) => endpoint.elastic.agent.id);
-    //
-    //   action = await endpointContext.service
-    //     .getActionCreateService()
-    //     .createAction(createActionPayload, agentIds);
-    //
-    //   // update cases
-    //   await updateCases({ casesClient, createActionPayload, endpointData });
-    // } catch (err) {
-    //   return res.customError({
-    //     statusCode: 500,
-    //     body: err,
-    //   });
-    // }
   };
 }
 
