@@ -224,7 +224,13 @@ export const syncEditedMonitor = async ({
     return {
       failedPolicyUpdates,
       publicSyncErrors,
-      editedMonitor: editedMonitorSavedObject,
+      editedMonitor: {
+        ...editedMonitorSavedObject,
+        attributes: {
+          ...editedMonitorSavedObject?.attributes,
+          ...monitorWithId,
+        },
+      },
     };
   } catch (e) {
     server.logger.error(

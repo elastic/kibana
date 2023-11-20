@@ -123,7 +123,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(editedBodyError.updatedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors.length).eql(1);
       expect(editedBodyError.failedMonitors[0].details).eql(
-        'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
+        `Invalid locations specified. Private Location(s) 'Test private location 8'  not found. Available private locations are '${testPolicyId}'`
       );
       expect(editedBodyError.failedMonitors[0].reason).eql(
         "Couldn't save or update monitor because of an invalid configuration."

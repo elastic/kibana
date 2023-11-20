@@ -12,7 +12,7 @@ import {
   CodeEditorMode,
   CommonFields,
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPAdvancedFields,
   HTTPFields,
@@ -53,7 +53,7 @@ describe('validateMonitor', () => {
     testSchedule = { number: '5', unit: ScheduleUnit.MINUTES };
     testTags = ['tag1', 'tag2'];
     testCommonFields = {
-      [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.ICMP,
       [ConfigKey.NAME]: 'test-monitor-name',
       [ConfigKey.CONFIG_ID]: 'test-monitor-id',
       [ConfigKey.MONITOR_QUERY_ID]: '',
@@ -90,7 +90,7 @@ describe('validateMonitor', () => {
       ...testCommonFields,
       [ConfigKey.HOSTS]: 'test-hosts',
       [ConfigKey.WAIT]: '',
-      [ConfigKey.MONITOR_TYPE]: DataStream.ICMP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.ICMP,
       [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorType.ICMP,
     };
 
@@ -122,7 +122,7 @@ describe('validateMonitor', () => {
       ...testTCPSimpleFields,
       ...testTCPAdvancedFields,
       ...testTLSFields,
-      [ConfigKey.MONITOR_TYPE]: DataStream.TCP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.TCP,
     };
 
     testHTTPSimpleFields = {
@@ -153,7 +153,7 @@ describe('validateMonitor', () => {
       ...testHTTPSimpleFields,
       ...testHTTPAdvancedFields,
       ...testTLSFields,
-      [ConfigKey.MONITOR_TYPE]: DataStream.HTTP,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.HTTP,
     };
 
     testBrowserSimpleFields = {
@@ -190,7 +190,7 @@ describe('validateMonitor', () => {
     testBrowserFields = {
       ...testBrowserSimpleFields,
       ...testBrowserAdvancedFields,
-      [ConfigKey.MONITOR_TYPE]: DataStream.BROWSER,
+      [ConfigKey.MONITOR_TYPE]: MonitorTypeEnum.BROWSER,
     };
   });
 
@@ -202,12 +202,13 @@ describe('validateMonitor', () => {
           unit: ScheduleUnit.MINUTES,
           number: '3',
         },
+        locations: ['somewhere'],
       } as unknown as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: expect.stringMatching(/(?=.*invalid)(?=.*DataStream)/i),
+        details: 'Invalid value "undefined" supplied to "MonitorType"',
       });
     });
 
@@ -218,12 +219,13 @@ describe('validateMonitor', () => {
           unit: ScheduleUnit.MINUTES,
           number: '3',
         },
+        locations: ['somewhere'],
       } as unknown as MonitorFields;
       const result = validateMonitor(monitor);
       expect(result).toMatchObject({
         valid: false,
         reason: 'Monitor type is invalid',
-        details: expect.stringMatching(/(?=.*invalid)(?=.*non-HTTP)(?=.*DataStream)/i),
+        details: 'Invalid value "non-HTTP" supplied to "MonitorType"',
       });
     });
 
@@ -239,7 +241,7 @@ describe('validateMonitor', () => {
         valid: false,
         reason: 'Monitor schedule is invalid',
         details:
-          'Invalid schedule 4 minutes supplied to monitor configuration. Please use a supported monitor schedule.',
+          'Invalid schedule 4 minutes supplied to monitor configuration. Supported schedule values in minutes are 1, 3, 5, 10, 15, 20, 30, 60, 120, 240',
       });
     });
 
@@ -291,8 +293,37 @@ describe('validateMonitor', () => {
       });
     });
 
-    it('when payload is a correct Browser monitor', () => {
+    it('when payload is not a correct Browser monitor', () => {
       const testMonitor = testBrowserFields as MonitorFields;
+      const result = validateMonitor(testMonitor);
+      expect(result).toMatchObject({
+        valid: false,
+        details: 'source.inline.script: Script is required for browser monitor.',
+        reason: 'Monitor is not a valid monitor of type browser',
+        payload: testMonitor,
+      });
+    });
+
+    it('when payload is  not a valid Browser monitor', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'journey()',
+      } as MonitorFields;
+      const result = validateMonitor(testMonitor);
+      expect(result).toMatchObject({
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type browser',
+        details:
+          'source.inline.script: Monitor script is invalid. Inline scripts cannot be full journey scripts, they may only contain step definitions.',
+        payload: testMonitor,
+      });
+    });
+
+    it('when payload is a correct Browser monitor', () => {
+      const testMonitor = {
+        ...testBrowserFields,
+        [ConfigKey.SOURCE_INLINE]: 'step()',
+      } as MonitorFields;
       const result = validateMonitor(testMonitor);
       expect(result).toMatchObject({
         valid: true,
@@ -318,7 +349,7 @@ describe('validateMonitor', () => {
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.HOSTS));
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.ICMP}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.ICMP}`,
         payload: testMonitor,
       });
     });
@@ -327,17 +358,18 @@ describe('validateMonitor', () => {
       const testMonitor = {
         ...testTCPFields,
         ...({
-          [ConfigKey.NAME]: undefined,
+          [ConfigKey.HOSTS]: undefined,
         } as unknown as Partial<TCPFields>),
       } as MonitorFields;
 
       const result = validateMonitor(testMonitor);
 
-      expect(result.details).toEqual(expect.stringContaining('Invalid value'));
-      expect(result.details).toEqual(expect.stringContaining(ConfigKey.NAME));
+      expect(result.details).toEqual(
+        expect.stringContaining('Invalid field "host", must be a non-empty string.')
+      );
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.TCP}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.TCP}`,
         payload: testMonitor,
       });
     });
@@ -352,11 +384,10 @@ describe('validateMonitor', () => {
 
       const result = validateMonitor(testMonitor);
 
-      expect(result.details).toEqual(expect.stringContaining('Invalid value'));
-      expect(result.details).toEqual(expect.stringContaining(ConfigKey.URLS));
+      expect(result.details).toEqual('Invalid field "url", must be a non-empty string.');
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.HTTP}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.HTTP}`,
         payload: testMonitor,
       });
     });
@@ -371,11 +402,13 @@ describe('validateMonitor', () => {
 
       const result = validateMonitor(testMonitor);
 
-      expect(result.details).toEqual(expect.stringContaining('Invalid value'));
+      expect(result.details).toEqual(
+        expect.stringContaining('source.inline.script: Inline script must be a non-empty string')
+      );
       expect(result.details).toEqual(expect.stringContaining(ConfigKey.SOURCE_INLINE));
       expect(result).toMatchObject({
         valid: false,
-        reason: `Monitor is not a valid monitor of type ${DataStream.BROWSER}`,
+        reason: `Monitor is not a valid monitor of type ${MonitorTypeEnum.BROWSER}`,
         payload: testMonitor,
       });
     });

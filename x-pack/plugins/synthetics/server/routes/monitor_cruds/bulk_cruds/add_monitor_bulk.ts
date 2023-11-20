@@ -13,7 +13,6 @@ import { SavedObjectError } from '@kbn/core-saved-objects-common';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import { SyntheticsServerSetup } from '../../../types';
 import { RouteContext } from '../../types';
-import { deleteMonitorIfCreated } from '../add_monitor';
 import { formatTelemetryEvent, sendTelemetryEvents } from '../../telemetry/monitor_upgrade_sender';
 import { deleteMonitor } from '../delete_monitor';
 import { formatSecrets } from '../../../synthetics_service/utils';
@@ -183,5 +182,32 @@ const sendNewMonitorTelemetry = (
         stackVersion: server.stackVersion,
       })
     );
+  }
+};
+
+export const deleteMonitorIfCreated = async ({
+  newMonitorId,
+  routeContext,
+}: {
+  routeContext: RouteContext;
+  newMonitorId: string;
+}) => {
+  const { server, savedObjectsClient } = routeContext;
+  try {
+    const encryptedMonitor = await savedObjectsClient.get<EncryptedSyntheticsMonitorAttributes>(
+      syntheticsMonitorType,
+      newMonitorId
+    );
+    if (encryptedMonitor) {
+      await savedObjectsClient.delete(syntheticsMonitorType, newMonitorId);
+
+      await deleteMonitor({
+        routeContext,
+        monitorId: newMonitorId,
+      });
+    }
+  } catch (e) {
+    // ignore errors here
+    server.logger.error(e);
   }
 };

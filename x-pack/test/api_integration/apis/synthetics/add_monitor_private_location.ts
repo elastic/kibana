@@ -16,10 +16,10 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { omit } from 'lodash';
-import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';
+import { omit, omitBy } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
+import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -27,6 +27,7 @@ import {
   INSTALLED_VERSION,
   PrivateLocationTestService,
 } from './services/private_location_test_service';
+import { addMonitorAPIHelper } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
@@ -42,6 +43,10 @@ export default function ({ getService }: FtrProviderContext) {
 
     const testPrivateLocations = new PrivateLocationTestService(getService);
     const security = getService('security');
+
+    const addMonitorAPI = async (monitor: any, statusCode = 200) => {
+      return addMonitorAPIHelper(supertestAPI, monitor, statusCode);
+    };
 
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -95,14 +100,16 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('does not add a monitor if there is an error in creating integration', async () => {
       const newMonitor = { ...httpMonitorJson };
-
-      const invalidLocation = testFleetPolicyID + '1';
       const invalidName = 'invalid name';
 
       const location = {
-        id: invalidLocation,
+        id: 'invalidLocation',
         label: 'Test private location 0',
         isServiceManaged: false,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
       };
 
       newMonitor.name = invalidName;
@@ -110,13 +117,14 @@ export default function ({ getService }: FtrProviderContext) {
       const apiResponse = await supertestAPI
         .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
         .set('kbn-xsrf', 'true')
-        .send({ ...newMonitor, locations: [location, ...newMonitor.locations] })
-        .expect(500);
+        .send({ ...newMonitor, locations: [location] });
+
+      expect(apiResponse.status).eql(400);
 
       expect(apiResponse.body).eql({
-        statusCode: 500,
-        message: `Unable to find Synthetics private location for agentId ${invalidLocation}`,
-        error: 'Internal Server Error',
+        statusCode: 400,
+        error: 'Bad Request',
+        message: `Invalid locations specified. Private Location(s) 'invalidLocation'  not found. Available private locations are '${testFleetPolicyID}'`,
       });
 
       const apiGetResponse = await supertestAPI
@@ -135,30 +143,16 @@ export default function ({ getService }: FtrProviderContext) {
         id: testFleetPolicyID,
         label: 'Test private location 0',
         isServiceManaged: false,
+        geo: {
+          lat: 0,
+          lon: 0,
+        },
       });
 
-      const apiResponse = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor)
-        .expect(200);
+      const { body, rawBody } = await addMonitorAPI(newMonitor);
 
-      const { created_at: createdAt, updated_at: updatedAt } = apiResponse.body;
-      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
-
-      expect(apiResponse.body).eql(
-        omit(
-          {
-            ...newMonitor,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            created_at: createdAt,
-            updated_at: updatedAt,
-          },
-          secretKeys
-        )
-      );
-      newMonitorId = apiResponse.body.id;
+      expect(body).eql(omitBy(newMonitor, removeMonitorEmptyValues));
+      newMonitorId = rawBody.id;
     });
 
     it('added an integration for previously added monitor', async () => {
@@ -171,7 +165,7 @@ export default function ({ getService }: FtrProviderContext) {
           pkgPolicy.id === newMonitorId + '-' + testFleetPolicyID + '-default'
       );
 
-      expect(packagePolicy.policy_id).eql(testFleetPolicyID);
+      expect(packagePolicy?.policy_id).eql(testFleetPolicyID);
 
       comparePolicies(
         packagePolicy,
@@ -206,15 +200,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
       expect(apiResponse.body).eql(
-        omit(
+        omitBy(
           {
-            ...httpMonitorJson,
+            ...omit(httpMonitorJson, ['urls']),
+            url: httpMonitorJson.urls,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
             updated_at: updatedAt,
             revision: 2,
           },
-          secretKeys
+          removeMonitorEmptyValues
         )
       );
     });
@@ -333,6 +328,10 @@ export default function ({ getService }: FtrProviderContext) {
             id: testFleetPolicyID,
             label: 'Test private location 0',
             isServiceManaged: false,
+            geo: {
+              lat: 0,
+              lon: 0,
+            },
           },
         ],
       };
@@ -367,15 +366,19 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(apiResponse.body).eql(
           omit(
-            {
-              ...monitor,
-              [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-              [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-              [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
-              created_at: createdAt,
-              updated_at: updatedAt,
-            },
-            secretKeys
+            omitBy(
+              {
+                ...monitor,
+                [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+                [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+                [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+                url: apiResponse.body.url,
+                created_at: createdAt,
+                updated_at: updatedAt,
+              },
+              removeMonitorEmptyValues
+            ),
+            ['urls']
           )
         );
         monitorId = apiResponse.body.id;

@@ -6,13 +6,14 @@
  */
 
 import * as t from 'io-ts';
+import { NonEmptyArray, NonEmptyString } from '@kbn/securitysolution-io-ts-types';
 import { AlertConfigsCodec } from './alert_config';
 import { secretKeys } from '../../constants/monitor_management';
 import { ConfigKey } from './config_key';
 import { MonitorServiceLocationCodec, ServiceLocationErrors } from './locations';
 import {
-  DataStream,
-  DataStreamCodec,
+  MonitorTypeEnum,
+  MonitorTypeCodec,
   FormMonitorTypeCodec,
   ModeCodec,
   ResponseBodyIndexPolicyCodec,
@@ -25,6 +26,7 @@ import {
 } from './monitor_configs';
 import { MetadataCodec } from './monitor_meta_data';
 import { PrivateLocationCodec } from './synthetics_private_locations';
+import { getNonEmptyStringCodec, InlineScriptString } from '../common';
 
 const ScheduleCodec = t.interface({
   number: t.string,
@@ -46,16 +48,18 @@ export const TLSSensitiveFieldsCodec = t.partial({
 
 export const TLSCodec = t.intersection([TLSFieldsCodec, TLSSensitiveFieldsCodec]);
 
-const MonitorLocationsCodec = t.array(t.union([MonitorServiceLocationCodec, PrivateLocationCodec]));
+const MonitorLocationsCodec = NonEmptyArray(
+  t.union([MonitorServiceLocationCodec, PrivateLocationCodec])
+);
 
 export type MonitorLocations = t.TypeOf<typeof MonitorLocationsCodec>;
 
 // CommonFields
 export const CommonFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.NAME]: t.string,
+    [ConfigKey.NAME]: NonEmptyString,
     [ConfigKey.NAMESPACE]: t.string,
-    [ConfigKey.MONITOR_TYPE]: DataStreamCodec,
+    [ConfigKey.MONITOR_TYPE]: MonitorTypeCodec,
     [ConfigKey.ENABLED]: t.boolean,
     [ConfigKey.SCHEDULE]: ScheduleCodec,
     [ConfigKey.APM_SERVICE_NAME]: t.string,
@@ -67,7 +71,7 @@ export const CommonFieldsCodec = t.intersection([
   }),
   t.partial({
     [ConfigKey.FORM_MONITOR_TYPE]: FormMonitorTypeCodec,
-    [ConfigKey.TIMEOUT]: t.union([t.string, t.null]),
+    [ConfigKey.TIMEOUT]: t.union([t.string, t.null, t.number]),
     [ConfigKey.REVISION]: t.number,
     [ConfigKey.MONITOR_SOURCE_TYPE]: SourceTypeCodec,
     [ConfigKey.CONFIG_HASH]: t.string,
@@ -77,6 +81,7 @@ export const CommonFieldsCodec = t.intersection([
     [ConfigKey.CUSTOM_HEARTBEAT_ID]: t.string,
     [ConfigKey.ALERT_CONFIG]: AlertConfigsCodec,
     [ConfigKey.PARAMS]: t.string,
+    retest_on_failure: t.boolean,
   }),
 ]);
 
@@ -84,7 +89,7 @@ export const CommonFieldsCodec = t.intersection([
 export const TCPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
-    [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.HOSTS]: getNonEmptyStringCodec('host'),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   t.partial({
@@ -136,7 +141,7 @@ export type TCPFields = t.TypeOf<typeof TCPFieldsCodec>;
 // ICMP SimpleFields
 export const ICMPSimpleFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.HOSTS]: t.string,
+    [ConfigKey.HOSTS]: NonEmptyString,
     [ConfigKey.WAIT]: t.string,
   }),
   CommonFieldsCodec,
@@ -161,7 +166,7 @@ export const HTTPSimpleFieldsCodec = t.intersection([
   t.interface({
     [ConfigKey.METADATA]: MetadataCodec,
     [ConfigKey.MAX_REDIRECTS]: t.string,
-    [ConfigKey.URLS]: t.string,
+    [ConfigKey.URLS]: getNonEmptyStringCodec('url'),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
   }),
   CommonFieldsCodec,
@@ -235,7 +240,7 @@ export const EncryptedBrowserSimpleFieldsCodec = t.intersection([
 
 export const BrowserSensitiveSimpleFieldsCodec = t.intersection([
   t.interface({
-    [ConfigKey.SOURCE_INLINE]: t.string,
+    [ConfigKey.SOURCE_INLINE]: InlineScriptString,
     [ConfigKey.SOURCE_PROJECT_CONTENT]: t.string,
     [ConfigKey.URLS]: t.union([t.string, t.null]),
     [ConfigKey.PORT]: t.union([t.number, t.null]),
@@ -350,10 +355,10 @@ export const EncryptedSyntheticsSavedMonitorCodec = t.intersection([
 ]);
 
 export const MonitorDefaultsCodec = t.interface({
-  [DataStream.HTTP]: HTTPFieldsCodec,
-  [DataStream.TCP]: TCPFieldsCodec,
-  [DataStream.ICMP]: ICMPSimpleFieldsCodec,
-  [DataStream.BROWSER]: BrowserFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.ICMP]: ICMPSimpleFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 });
 
 export const MonitorManagementListResultCodec = t.type({

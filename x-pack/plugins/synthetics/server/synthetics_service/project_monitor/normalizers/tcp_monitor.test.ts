@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { DataStream, Locations, LocationStatus } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -49,7 +49,7 @@ describe('tcp normalizers', () => {
         hosts: ['smtp.gmail.com:587'],
         schedule: 1,
         tags: ['service:smtp', 'org:google'],
-        privateLocations: ['BEEP'],
+        privateLocations: ['Germany'],
         'service.name': 'test service',
         'ssl.supported_protocols': ['TLSv1.2', 'TLSv1.3'],
         hash: testHash,
@@ -62,7 +62,7 @@ describe('tcp normalizers', () => {
         hosts: 'localhost:18278',
         schedule: 1,
         tags: 'tag1,tag2',
-        privateLocations: ['BEEP'],
+        privateLocations: ['Germany'],
         service: {
           name: 'test service',
         },
@@ -80,7 +80,7 @@ describe('tcp normalizers', () => {
         ports: ['5698'],
         schedule: 1,
         tags: 'tag1,tag2',
-        privateLocations: ['BEEP'],
+        privateLocations: ['Germany'],
         unsupportedKey: {
           nestedUnsupportedKey: 'unnsuportedValue',
         },
@@ -101,7 +101,7 @@ describe('tcp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.TCP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -123,6 +123,11 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'GMail SMTP',
@@ -155,7 +160,7 @@ describe('tcp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.TCP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -177,6 +182,11 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Always Down',
@@ -222,7 +232,7 @@ describe('tcp normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.TCP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -244,6 +254,11 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Always Down',
@@ -289,7 +304,7 @@ describe('tcp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.TCP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -311,6 +326,11 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'GMail SMTP',
@@ -343,7 +363,7 @@ describe('tcp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.TCP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -365,6 +385,11 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Always Down',
@@ -410,7 +435,7 @@ describe('tcp normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.TCP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.TCP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -432,6 +457,11 @@ describe('tcp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Always Down',

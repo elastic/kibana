@@ -16,6 +16,7 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
       await esDeleteAllIndices('synthetics*');
     });
 
+    loadTestFile(require.resolve('./add_monitor_public_api'));
     loadTestFile(require.resolve('./synthetics_enablement'));
     loadTestFile(require.resolve('./get_filters'));
     loadTestFile(require.resolve('./enable_default_alerting'));

@@ -2026,7 +2026,7 @@ export default function ({ getService }: FtrProviderContext) {
           failedMonitors: [
             {
               details:
-                'Invalid location: "does not exist". Remove it or replace it with a valid location.',
+                "Invalid locations specified. Elastic managed Location(s) 'does not exist'  not found. Available locations are 'localhost'",
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {
@@ -2104,8 +2104,7 @@ export default function ({ getService }: FtrProviderContext) {
           createdMonitors: [],
           failedMonitors: [
             {
-              details:
-                'Invalid private location: "does not exist". Remove it or replace it with a valid private location.',
+              details: `Invalid locations specified. Private Location(s) 'does not exist'  not found. Available private locations are '${testPolicyId}'`,
               id: httpProjectMonitors.monitors[1].id,
               payload: {
                 'check.request': {

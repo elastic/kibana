@@ -9,23 +9,30 @@ import { i18n } from '@kbn/i18n';
 import { isLeft } from 'fp-ts/lib/Either';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
 
+import { omit } from 'lodash';
+import { CreateMonitorPayLoad } from './add_monitor/add_monitor_api';
+import { flattenAndFormatObject } from '../../synthetics_service/project_monitor/normalizers/common_fields';
 import { PrivateLocationAttributes } from '../../runtime_types/private_locations';
 import {
   BrowserFieldsCodec,
   ProjectMonitorCodec,
   ProjectMonitor,
   ConfigKey,
-  DataStream,
-  DataStreamCodec,
+  MonitorTypeEnum,
+  MonitorTypeCodec,
   HTTPFieldsCodec,
   MonitorFields,
   TCPFieldsCodec,
   SyntheticsMonitor,
   Locations,
+  CodeEditorMode,
   ICMPFieldsCodec,
 } from '../../../common/runtime_types';
 
-import { ALLOWED_SCHEDULES_IN_MINUTES } from '../../../common/constants/monitor_defaults';
+import {
+  ALLOWED_SCHEDULES_IN_MINUTES,
+  DEFAULT_FIELDS,
+} from '../../../common/constants/monitor_defaults';
 
 type MonitorCodecType =
   | typeof ICMPFieldsCodec
@@ -33,11 +40,11 @@ type MonitorCodecType =
   | typeof HTTPFieldsCodec
   | typeof BrowserFieldsCodec;
 
-const monitorTypeToCodecMap: Record<DataStream, MonitorCodecType> = {
-  [DataStream.ICMP]: ICMPFieldsCodec,
-  [DataStream.TCP]: TCPFieldsCodec,
-  [DataStream.HTTP]: HTTPFieldsCodec,
-  [DataStream.BROWSER]: BrowserFieldsCodec,
+const monitorTypeToCodecMap: Record<MonitorTypeEnum, MonitorCodecType> = {
+  [MonitorTypeEnum.ICMP]: ICMPFieldsCodec,
+  [MonitorTypeEnum.TCP]: TCPFieldsCodec,
+  [MonitorTypeEnum.HTTP]: HTTPFieldsCodec,
+  [MonitorTypeEnum.BROWSER]: BrowserFieldsCodec,
 };
 
 export interface ValidationResult {
@@ -54,8 +61,22 @@ export interface ValidationResult {
  */
 export function validateMonitor(monitorFields: MonitorFields): ValidationResult {
   const { [ConfigKey.MONITOR_TYPE]: monitorType } = monitorFields;
+  if (monitorType !== MonitorTypeEnum.BROWSER && !monitorFields.name) {
+    monitorFields.name = monitorFields.urls || monitorFields.hosts;
+  }
 
-  const decodedType = DataStreamCodec.decode(monitorType);
+  if (monitorFields.locations.length === 0) {
+    return {
+      valid: false,
+      reason: i18n.translate('xpack.synthetics.createMonitor.validation.noLocations', {
+        defaultMessage: 'At least one location is required, either elastic managed or private.',
+      }),
+      details: '',
+      payload: monitorFields,
+    };
+  }
+
+  const decodedType = MonitorTypeCodec.decode(monitorType);
 
   if (isLeft(decodedType)) {
     return {
@@ -99,6 +120,21 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
     };
   }
 
+  if (monitorType === MonitorTypeEnum.BROWSER) {
+    const inlineScript = monitorFields[ConfigKey.SOURCE_INLINE];
+    const projectContent = monitorFields[ConfigKey.SOURCE_PROJECT_CONTENT];
+    if (!inlineScript && !projectContent) {
+      return {
+        valid: false,
+        reason: 'Monitor is not a valid monitor of type browser',
+        details: i18n.translate('xpack.synthetics.createMonitor.validation.noScript', {
+          defaultMessage: 'source.inline.script: Script is required for browser monitor.',
+        }),
+        payload: monitorFields,
+      };
+    }
+  }
+
   return {
     valid: true,
     reason: '',
@@ -107,6 +143,75 @@ export function validateMonitor(monitorFields: MonitorFields): ValidationResult 
     decodedMonitor: decodedMonitor.right,
   };
 }
+
+export const normalizeAPIConfig = (monitor: CreateMonitorPayLoad) => {
+  const monitorType = monitor.type as MonitorTypeEnum;
+
+  const decodedType = MonitorTypeCodec.decode(monitorType);
+
+  if (isLeft(decodedType)) {
+    return {
+      errorMessage: formatErrors(decodedType.left).join(' | '),
+    };
+  }
+
+  const defaultFields = DEFAULT_FIELDS[monitor.type as MonitorTypeEnum];
+  let supportedKeys = Object.keys(defaultFields);
+  const flattenedConfig = flattenAndFormatObject(monitor, '', supportedKeys);
+  const {
+    locations: _locations,
+    private_locations: _privateLocations,
+    id: _id,
+    retest_on_failure: _retestOnFailure,
+    url: rawUrl,
+    ssl: rawSSL,
+    host: rawHost,
+    custom_heartbeat_id: _customHeartbeatId,
+    ...rawConfig
+  } = flattenedConfig;
+  if (rawUrl) {
+    // since api accept url key as well
+    rawConfig[ConfigKey.URLS] = rawUrl;
+  }
+  if (rawHost) {
+    // since api accept url key as well
+    rawConfig[ConfigKey.HOSTS] = rawHost;
+  }
+  if (monitor.type === 'browser') {
+    // urls isn't not supported for browser but is needed for SO AAD
+    supportedKeys = supportedKeys.filter((key) => key !== ConfigKey.URLS);
+  }
+  const unsupportedKeys = Object.keys(rawConfig).filter((key) => !supportedKeys.includes(key));
+
+  const result = omit(rawConfig, unsupportedKeys);
+
+  const formattedConfig = {
+    ...result,
+    locations: _locations,
+    private_locations: _privateLocations,
+    retest_on_failure: _retestOnFailure,
+    custom_heartbeat_id: _customHeartbeatId,
+  } as CreateMonitorPayLoad;
+
+  const requestBodyCheck = formattedConfig[ConfigKey.REQUEST_BODY_CHECK];
+  if (typeof requestBodyCheck === 'string') {
+    formattedConfig[ConfigKey.REQUEST_BODY_CHECK] = {
+      type: CodeEditorMode.PLAINTEXT,
+      value: requestBodyCheck,
+    };
+  }
+
+  if (unsupportedKeys.length > 0) {
+    return {
+      formattedConfig,
+      errorMessage: i18n.translate('xpack.synthetics.restApi.monitor.invalidMonitorKey', {
+        defaultMessage: 'Invalid monitor key(s) for {monitorType} type:  {unsupportedKeys}',
+        values: { monitorType: monitor.type, unsupportedKeys: unsupportedKeys.join(' | ') },
+      }),
+    };
+  }
+  return { formattedConfig };
+};
 
 export function validateProjectMonitor(
   monitorFields: ProjectMonitor,
@@ -200,7 +305,7 @@ export function validateLocation(
   }
 }
 
-const INVALID_CONFIGURATION_ERROR = i18n.translate(
+export const INVALID_CONFIGURATION_ERROR = i18n.translate(
   'xpack.synthetics.server.monitors.invalidConfigurationError',
   {
     defaultMessage: "Couldn't save or update monitor because of an invalid configuration.",
@@ -228,9 +333,10 @@ const INVALID_SCHEDULE_ERROR = i18n.translate(
 const INVALID_SCHEDULE_DETAILS = (schedule: string) =>
   i18n.translate('xpack.synthetics.server.monitors.invalidScheduleDetails', {
     defaultMessage:
-      'Invalid schedule {schedule} minutes supplied to monitor configuration. Please use a supported monitor schedule.',
+      'Invalid schedule {schedule} minutes supplied to monitor configuration. Supported schedule values in minutes are {allowedSchedulesInMinutes}',
     values: {
       schedule,
+      allowedSchedulesInMinutes: ALLOWED_SCHEDULES_IN_MINUTES.join(', '),
     },
   });
 
@@ -266,3 +372,12 @@ const INVALID_PUBLIC_LOCATION_ERROR = (location: string) =>
       location,
     },
   });
+
+export const getUnsupportedKeysError = (
+  monitor: MonitorFields,
+  unsupportedKeys: string[],
+  version: string
+) =>
+  `The following Heartbeat options are not supported for ${
+    monitor.type
+  }  in ${version}: ${unsupportedKeys.join('|')}. You monitor was not created.`;

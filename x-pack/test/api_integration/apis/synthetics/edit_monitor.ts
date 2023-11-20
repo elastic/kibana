@@ -6,7 +6,7 @@
  */
 import moment from 'moment';
 import { v4 as uuidv4 } from 'uuid';
-import { omit } from 'lodash';
+import { omit, omitBy } from 'lodash';
 import {
   ConfigKey,
   EncryptedSyntheticsSavedMonitor,
@@ -15,11 +15,13 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
+import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { omitTimestamps, omitTimestampsAndSecrets } from './helper/monitor';
+import { omitResponseTimestamps, omitEmptyValues } from './helper/monitor';
 import { PrivateLocationTestService } from './services/private_location_test_service';
 import { SyntheticsMonitorTestService } from './services/synthetics_monitor_test_service';
+import { LOCAL_LOCATION } from './get_filters';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EditMonitor', function () {
@@ -37,14 +39,41 @@ export default function ({ getService }: FtrProviderContext) {
     let httpMonitorJson: HTTPFields;
     let testPolicyId = '';
 
-    const saveMonitor = async (monitor: MonitorFields) => {
+    const saveMonitor = async (monitor: MonitorFields, spaceId?: string) => {
       const res = await supertest
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .post(
+          spaceId
+            ? `/s/${spaceId}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`
+            : SYNTHETICS_API_URLS.SYNTHETICS_MONITORS
+        )
         .set('kbn-xsrf', 'true')
-        .send(monitor)
+        .send(monitor);
+
+      expect(res.status).eql(200, JSON.stringify(res.body));
+
+      const {
+        url,
+        created_at: createdAt,
+        updated_at: updatedAt,
+        ...rest
+      } = res.body as EncryptedSyntheticsSavedMonitor;
+
+      expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
+
+      return { ...rest, urls: url } as EncryptedSyntheticsSavedMonitor;
+    };
+
+    const editMonitor = async (modifiedMonitor: MonitorFields, monitorId: string) => {
+      const res = await supertest
+        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
+        .set('kbn-xsrf', 'true')
+        .send(modifiedMonitor)
         .expect(200);
 
-      return res.body as EncryptedSyntheticsSavedMonitor;
+      const { url, ...rest } = res.body as EncryptedSyntheticsSavedMonitor;
+
+      const result = { ...rest, urls: url } as EncryptedSyntheticsSavedMonitor;
+      return omitBy(omit(result, ['created_at', 'updated_at']), removeMonitorEmptyValues);
     };
 
     before(async () => {
@@ -79,8 +108,8 @@ export default function ({ getService }: FtrProviderContext) {
       const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-      expect(omitTimestamps(savedMonitor)).eql(
-        omitTimestampsAndSecrets({
+      expect(omitResponseTimestamps(savedMonitor)).eql(
+        omitEmptyValues({
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: monitorId,
           [ConfigKey.CONFIG_ID]: monitorId,
@@ -122,14 +151,10 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      const editResponse = await supertest
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-        .set('kbn-xsrf', 'true')
-        .send(modifiedMonitor)
-        .expect(200);
+      const editResponse = await editMonitor(modifiedMonitor as MonitorFields, monitorId);
 
-      expect(omitTimestamps(editResponse.body)).eql(
-        omitTimestampsAndSecrets({
+      expect(editResponse).eql(
+        omitEmptyValues({
           ...modifiedMonitor,
           revision: 2,
         })
@@ -145,8 +170,8 @@ export default function ({ getService }: FtrProviderContext) {
       const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-      expect(omitTimestamps(savedMonitor)).eql(
-        omitTimestampsAndSecrets({
+      expect(omitResponseTimestamps(savedMonitor)).eql(
+        omitEmptyValues({
           ...newMonitor,
           [ConfigKey.MONITOR_QUERY_ID]: monitorId,
           [ConfigKey.CONFIG_ID]: monitorId,
@@ -191,20 +216,16 @@ export default function ({ getService }: FtrProviderContext) {
         ['unknownkey']
       );
 
-      const editResponse = await supertest
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-        .set('kbn-xsrf', 'true')
-        .send(modifiedMonitor)
-        .expect(200);
+      const editResponse = await editMonitor(modifiedMonitor as MonitorFields, monitorId);
 
-      expect(omitTimestamps(editResponse.body)).eql(
-        omitTimestampsAndSecrets({
+      expect(editResponse).eql(
+        omitEmptyValues({
           ...savedMonitor,
           ...modifiedMonitor,
           revision: 2,
         })
       );
-      expect(editResponse.body).not.to.have.keys('unknownkey');
+      expect(editResponse).not.to.have.keys('unknownkey');
     });
 
     it('returns 404 if monitor id is not present', async () => {
@@ -237,9 +258,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('returns bad request if monitor type is invalid', async () => {
-      const { id: monitorId, ...savedMonitor } = await saveMonitor(
-        httpMonitorJson as MonitorFields
-      );
+      const { id: monitorId, ...savedMonitor } = await saveMonitor({
+        ...httpMonitorJson,
+        name: 'test monitor - 11',
+      } as MonitorFields);
 
       const toUpdate = { ...savedMonitor, type: 'invalid-data-steam' };
 
@@ -259,17 +281,18 @@ export default function ({ getService }: FtrProviderContext) {
       const savedMonitor = await saveMonitor({
         ...(newMonitor as MonitorFields),
         [ConfigKey.CONFIG_HASH]: configHash,
+        name: 'test monitor - 12',
       });
       const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
       const { created_at: createdAt, updated_at: updatedAt } = savedMonitor;
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
-      expect(omitTimestamps(savedMonitor)).eql(
-        omitTimestampsAndSecrets({
+      expect(savedMonitor).eql(
+        omitEmptyValues({
           ...newMonitor,
           [ConfigKey.CONFIG_ID]: monitorId,
           [ConfigKey.MONITOR_QUERY_ID]: monitorId,
-          [ConfigKey.CONFIG_HASH]: configHash,
+          name: 'test monitor - 12',
         })
       );
 
@@ -286,14 +309,10 @@ export default function ({ getService }: FtrProviderContext) {
         },
       };
 
-      const editResponse = await supertest
-        .put(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS + '/' + monitorId)
-        .set('kbn-xsrf', 'true')
-        .send(modifiedMonitor)
-        .expect(200);
+      const editResponse = await editMonitor(modifiedMonitor as MonitorFields, monitorId);
 
-      expect(omitTimestamps(editResponse.body)).eql(
-        omitTimestampsAndSecrets({
+      expect(editResponse).eql(
+        omitEmptyValues({
           ...modifiedMonitor,
           [ConfigKey.CONFIG_ID]: monitorId,
           [ConfigKey.MONITOR_QUERY_ID]: monitorId,
@@ -301,7 +320,7 @@ export default function ({ getService }: FtrProviderContext) {
           revision: 2,
         })
       );
-      expect(editResponse.body).not.to.have.keys('unknownkey');
+      expect(editResponse).not.to.have.keys('unknownkey');
     });
 
     it.skip('handles private location errors and does not update the monitor if integration policy is unable to be updated', async () => {
@@ -382,13 +401,7 @@ export default function ({ getService }: FtrProviderContext) {
         name,
         type: 'http',
         urls: 'https://elastic.co',
-        locations: [
-          {
-            id: 'us_central_west',
-            label: 'Europe West',
-            isServiceManaged: true,
-          },
-        ],
+        locations: [LOCAL_LOCATION],
       };
 
       const SPACE_ID = `test-space-${uuidv4()}`;
@@ -396,13 +409,8 @@ export default function ({ getService }: FtrProviderContext) {
 
       await kibanaServer.spaces.create({ id: SPACE_ID, name: SPACE_NAME });
 
-      const response = await supertest
-        .post(`/s/${SPACE_ID}${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}`)
-        .set('kbn-xsrf', 'true')
-        .send(newMonitor)
-        .expect(200);
+      const savedMonitor = await saveMonitor(newMonitor as MonitorFields, SPACE_ID);
 
-      const savedMonitor = response.body;
       const monitorId = savedMonitor[ConfigKey.CONFIG_ID];
       const toUpdate = {
         ...savedMonitor,

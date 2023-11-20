@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DataStream, Locations, LocationStatus } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -49,7 +49,7 @@ describe('icmp normalizers', () => {
         hosts: ['1.1.1.1'],
         schedule: 1,
         tags: ['service:smtp', 'org:google'],
-        privateLocations: ['Test private location 0'],
+        privateLocations: ['Germany'],
         timeout: '1m',
         wait: '30s',
         'service.name': 'test service',
@@ -63,7 +63,7 @@ describe('icmp normalizers', () => {
         hosts: '1.1.1.1',
         schedule: 1,
         tags: 'tag1,tag2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: ['Germany'],
         wait: '1m',
         service: {
           name: 'test service',
@@ -78,7 +78,7 @@ describe('icmp normalizers', () => {
         hosts: '1.1.1.1,2.2.2.2',
         schedule: 1,
         tags: 'tag1,tag2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: ['Germany'],
         unsupportedKey: {
           nestedUnsupportedKey: 'unnsuportedValue',
         },
@@ -99,7 +99,7 @@ describe('icmp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.ICMP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-test-project-id-test-space',
             enabled: true,
@@ -115,6 +115,11 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Cloudflare DNS',
@@ -139,7 +144,7 @@ describe('icmp normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.ICMP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-2-test-project-id-test-space',
             enabled: true,
@@ -155,6 +160,11 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Cloudflare DNS 2',
@@ -192,7 +202,7 @@ describe('icmp normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.ICMP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.ICMP],
             config_id: '',
             custom_heartbeat_id: 'Cloudflare-DNS-3-test-project-id-test-space',
             enabled: true,
@@ -208,6 +218,11 @@ describe('icmp normalizers', () => {
                 id: 'us_central',
                 isServiceManaged: true,
                 label: 'Test Location',
+              },
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
               },
             ],
             name: 'Cloudflare DNS 3',

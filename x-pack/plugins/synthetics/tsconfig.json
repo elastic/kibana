@@ -79,6 +79,7 @@
     "@kbn/observability-ai-assistant-plugin",
     "@kbn/unified-doc-viewer-plugin",
     "@kbn/discover-utils",
+    "@kbn/securitysolution-io-ts-types",
     "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": [

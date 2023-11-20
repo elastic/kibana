@@ -64,7 +64,7 @@ import { getDocLinks } from '../../../../../kibana_services';
 import { useMonitorName } from '../../../hooks/use_monitor_name';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   FormMonitorType,
   HTTPMethod,
   ScreenshotOption,
@@ -822,7 +822,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           id="xpack.synthetics.monitorConfig.indexResponseHeaders.helpText"
           defaultMessage="Controls the indexing of the HTTP response headers to "
         />
-        <EuiCode>http.response.body.headers</EuiCode>
+        <EuiCode>{'http.response.body.headers'}</EuiCode>
       </>
     ),
     props: (): Omit<EuiCheckboxProps, ControlledFieldProp> => ({
@@ -843,7 +843,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
           id="xpack.synthetics.monitorConfig.indexResponseBody.helpText"
           defaultMessage="Controls the indexing of the HTTP response body contents to"
         />
-        <EuiCode>http.response.body.contents</EuiCode>
+        <EuiCode>{'http.response.body.contents'}</EuiCode>
       </>
     ),
     props: (): ResponseBodyIndexFieldProps => ({
@@ -869,7 +869,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validResponseStatusCheck: (value) => {
-          const validateFn = validate[DataStream.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
+          const validateFn = validate[MonitorTypeEnum.HTTP][ConfigKey.RESPONSE_STATUS_CHECK];
           if (validateFn) {
             return !validateFn({
               [ConfigKey.RESPONSE_STATUS_CHECK]: value,
@@ -1042,14 +1042,14 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.params.helpText"
         defaultMessage="Use JSON to define parameters that can be referenced in your script with {paramsValue}"
         values={{
-          paramsValue: <EuiCode>params.value</EuiCode>,
+          paramsValue: <EuiCode>{'params.value'}</EuiCode>,
         }}
       />
     ),
     validation: () => ({
       validate: {
         validParams: (value) => {
-          const validateFn = validate[DataStream.BROWSER][ConfigKey.PARAMS];
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PARAMS];
           if (validateFn) {
             return validateFn({
               [ConfigKey.PARAMS]: value,
@@ -1335,7 +1335,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     validation: () => ({
       validate: {
         validPlaywrightOptions: (value) => {
-          const validateFn = validate[DataStream.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
+          const validateFn = validate[MonitorTypeEnum.BROWSER][ConfigKey.PLAYWRIGHT_OPTIONS];
           if (validateFn) {
             return validateFn({
               [ConfigKey.PLAYWRIGHT_OPTIONS]: value,
@@ -1418,8 +1418,8 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
         id="xpack.synthetics.monitorConfig.syntheticsArgs.mode.helpText"
         defaultMessage="If {any}, the monitor pings only one IP address for a hostname. If {all}, the monitor pings all resolvable IPs for a hostname. {all} is useful if you are using a DNS-load balancer and want to ping every IP address for the specified hostname."
         values={{
-          all: <EuiCode>all</EuiCode>,
-          any: <EuiCode>any</EuiCode>,
+          all: <EuiCode>{'all'}</EuiCode>,
+          any: <EuiCode>{'any'}</EuiCode>,
         }}
       />
     ),

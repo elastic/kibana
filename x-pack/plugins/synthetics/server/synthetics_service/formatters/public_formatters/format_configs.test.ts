@@ -15,7 +15,7 @@ import {
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   ConfigKey,
-  DataStream,
+  MonitorTypeEnum,
   CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
@@ -25,7 +25,7 @@ import {
 } from '../../../../common/runtime_types';
 
 const testHTTPConfig: Partial<MonitorFields> = {
-  type: 'http' as DataStream,
+  type: 'http' as MonitorTypeEnum,
   enabled: true,
   schedule: { number: '3', unit: 'm' as ScheduleUnit },
   'service.name': '',
@@ -62,7 +62,7 @@ const testHTTPConfig: Partial<MonitorFields> = {
 };
 
 const testBrowserConfig: Partial<MonitorFields> = {
-  type: DataStream.BROWSER,
+  type: MonitorTypeEnum.BROWSER,
   enabled: true,
   schedule: { number: '3', unit: ScheduleUnit.MINUTES },
   'service.name': 'APM Service',

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import { DataStream, Locations, LocationStatus } from '../../../../common/runtime_types';
+import { MonitorTypeEnum, Locations, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';
 import { PrivateLocationAttributes } from '../../../runtime_types/private_locations';
@@ -42,7 +42,7 @@ describe('http normalizers', () => {
     ];
     const monitors = [
       {
-        locations: ['localhost'],
+        privateLocations: ['Germany'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-2',
@@ -80,7 +80,7 @@ describe('http normalizers', () => {
         max_redirects: 2,
       },
       {
-        locations: ['localhost'],
+        privateLocations: ['Germany'],
         type: 'http',
         enabled: false,
         id: 'my-monitor-3',
@@ -138,10 +138,17 @@ describe('http normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: true,
             },
+            locations: [
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+              },
+            ],
             'check.request.body': {
               type: 'json',
               value: '{"json":"body"}',
@@ -159,7 +166,6 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-2',
-            locations: [],
             max_redirects: '2',
             name: 'My Monitor 2',
             namespace: 'test_space',
@@ -195,10 +201,17 @@ describe('http normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: true,
             },
+            locations: [
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+              },
+            ],
             'check.request.body': {
               type: 'text',
               value: 'sometextbody',
@@ -216,7 +229,6 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-3',
-            locations: [],
             max_redirects: '0',
             name: 'My Monitor 3',
             namespace: 'test_space',
@@ -278,7 +290,7 @@ describe('http normalizers', () => {
             },
           ],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: true,
             },
@@ -299,7 +311,13 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-2',
-            locations: [],
+            locations: [
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+              },
+            ],
             max_redirects: '2',
             name: 'My Monitor 2',
             namespace: 'test_space',
@@ -335,7 +353,7 @@ describe('http normalizers', () => {
         {
           errors: [],
           normalizedFields: {
-            ...DEFAULT_FIELDS[DataStream.HTTP],
+            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
             __ui: {
               is_tls_enabled: false,
             },
@@ -356,7 +374,13 @@ describe('http normalizers', () => {
             enabled: false,
             form_monitor_type: 'http',
             journey_id: 'my-monitor-3',
-            locations: [],
+            locations: [
+              {
+                id: 'germany',
+                isServiceManaged: false,
+                label: 'Germany',
+              },
+            ],
             max_redirects: '0',
             name: 'My Monitor 3',
             namespace: 'test_space',

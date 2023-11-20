@@ -1,0 +1,236 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import expect from '@kbn/expect';
+import { omit, omitBy } from 'lodash';
+import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+
+import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
+import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
+import { FtrProviderContext } from '../../ftr_provider_context';
+
+export default function ({ getService }: FtrProviderContext) {
+  describe('AddNewMonitorsPublicAPI', function () {
+    this.tags('skipCloud');
+
+    const supertestAPI = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
+
+    async function addMonitorAPI(monitor: any, statusCode: number = 200) {
+      const res = await supertestAPI
+        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
+        .set('kbn-xsrf', 'true')
+        .send(monitor);
+
+      if (statusCode) {
+        expect(res.status).eql(statusCode, JSON.stringify(res.body));
+      }
+
+      if (statusCode === 200) {
+        const omitKeys = ['id', 'config_id', 'created_at', 'updated_at'];
+        expect(res.body).to.have.keys(omitKeys);
+        return omit(res.body, omitKeys);
+      }
+
+      return res.body;
+    }
+
+    before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
+    it('should return error for empty monitor', async function () {
+      const { message } = await addMonitorAPI({}, 400);
+      expect(message).eql('Invalid value "undefined" supplied to "MonitorType"');
+    });
+
+    it('return error if no location specified', async () => {
+      const { message } = await addMonitorAPI({ type: 'http' }, 400);
+      expect(message).eql('At least one location is required, either elastic managed or private.');
+    });
+
+    it('return error if invalid location specified', async () => {
+      const { message } = await addMonitorAPI({ type: 'http', locations: ['mars'] }, 400);
+      expect(message).eql(
+        "Invalid locations specified. Elastic managed Location(s) 'mars'  not found. Available locations are 'localhost'"
+      );
+    });
+
+    it('return error if invalid private location specified', async () => {
+      const { message } = await addMonitorAPI(
+        {
+          type: 'http',
+          locations: ['mars'],
+          privateLocations: ['moon'],
+        },
+        400
+      );
+      expect(message).eql('Invalid monitor key(s) for http type:  privateLocations');
+
+      const result = await addMonitorAPI(
+        {
+          type: 'http',
+          locations: ['mars'],
+          private_locations: ['moon'],
+        },
+        400
+      );
+      expect(result.message).eql(
+        "Invalid locations specified. Elastic managed Location(s) 'mars'  not found. Available locations are 'localhost' Private Location(s) 'moon'  not found. No private location available to use."
+      );
+    });
+
+    const omitKeys = ['urls', 'hash', 'journey_id'];
+    const localLoc = {
+      id: 'localhost',
+      label: 'Local Synthetics Service',
+      geo: {
+        lat: 0,
+        lon: 0,
+      },
+      isServiceManaged: true,
+    };
+
+    describe('HTTP Monitor', () => {
+      const defaultFields = omitBy(DEFAULT_FIELDS.http, removeMonitorEmptyValues);
+      it('return error empty http', async () => {
+        const { message, attributes } = await addMonitorAPI(
+          {
+            type: 'http',
+            locations: ['localhost'],
+          },
+          400
+        );
+
+        expect(message).eql('Monitor is not a valid monitor of type http');
+        expect(attributes).eql({
+          details:
+            'Invalid field "url", must be a non-empty string. | Invalid value "undefined" supplied to "name"',
+          payload: { type: 'http' },
+        });
+      });
+
+      it('base http monitor', async () => {
+        const monitor = {
+          type: 'http',
+          locations: ['localhost'],
+          url: 'https://www.google.com',
+        };
+        const result = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omit(
+            {
+              ...defaultFields,
+              ...monitor,
+              locations: [localLoc],
+              name: 'https://www.google.com',
+            },
+            omitKeys
+          )
+        );
+      });
+    });
+
+    describe('TCP Monitor', () => {
+      const defaultFields = omitBy(DEFAULT_FIELDS.tcp, removeMonitorEmptyValues);
+
+      it('base tcp monitor', async () => {
+        const monitor = {
+          type: 'tcp',
+          locations: ['localhost'],
+          host: 'https://www.google.com/',
+        };
+        const result = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omit(
+            {
+              ...defaultFields,
+              ...monitor,
+              locations: [localLoc],
+              name: 'https://www.google.com/',
+            },
+            omitKeys
+          )
+        );
+      });
+    });
+
+    describe('ICMP Monitor', () => {
+      const defaultFields = omitBy(DEFAULT_FIELDS.icmp, removeMonitorEmptyValues);
+
+      it('base icmp monitor', async () => {
+        const monitor = {
+          type: 'icmp',
+          locations: ['localhost'],
+          host: 'https://8.8.8.8',
+        };
+        const result = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omit(
+            {
+              ...defaultFields,
+              ...monitor,
+              locations: [localLoc],
+              name: 'https://8.8.8.8',
+            },
+            omitKeys
+          )
+        );
+      });
+    });
+
+    describe('Browser Monitor', () => {
+      const defaultFields = omitBy(DEFAULT_FIELDS.browser, removeMonitorEmptyValues);
+
+      it('empty browser monitor', async () => {
+        const monitor = {
+          type: 'browser',
+          locations: ['localhost'],
+          name: 'simple journey',
+        };
+        const result = await addMonitorAPI(monitor, 400);
+
+        expect(result).eql({
+          statusCode: 400,
+          error: 'Bad Request',
+          message: 'Monitor is not a valid monitor of type browser',
+          attributes: {
+            details: 'source.inline.script: Script is required for browser monitor.',
+            payload: { type: 'browser', name: 'simple journey' },
+          },
+        });
+      });
+
+      it('base browser monitor', async () => {
+        const monitor = {
+          type: 'browser',
+          locations: ['localhost'],
+          name: 'simple journey',
+          'source.inline.script': 'step("simple journey", async () => {});',
+        };
+        const result = await addMonitorAPI(monitor);
+
+        expect(result).eql(
+          omit(
+            {
+              ...defaultFields,
+              ...monitor,
+              locations: [localLoc],
+            },
+            omitKeys
+          )
+        );
+      });
+    });
+  });
+}

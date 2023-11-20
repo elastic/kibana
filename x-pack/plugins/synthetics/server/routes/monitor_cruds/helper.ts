@@ -6,17 +6,33 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import { mergeWith } from 'lodash';
+import { mergeWith, omit, omitBy } from 'lodash';
 import {
-  EncryptedSyntheticsMonitorAttributes,
   ConfigKey,
   EncryptedSyntheticsMonitor,
+  MonitorFields,
 } from '../../../common/runtime_types';
 
-export function mapSavedObjectToMonitor(so: SavedObject<EncryptedSyntheticsMonitorAttributes>) {
-  return Object.assign(so.attributes, { created_at: so.created_at, updated_at: so.updated_at });
-}
+const keysToOmit = ['hash', 'journey_id', ConfigKey.URLS, ConfigKey.HOSTS];
 
+type Result = MonitorFields & { url?: string; host?: string };
+export function mapSavedObjectToMonitor(
+  so: SavedObject<MonitorFields | EncryptedSyntheticsMonitor>
+) {
+  let result = Object.assign(so.attributes, {
+    created_at: so.created_at,
+    updated_at: so.updated_at,
+  }) as Result;
+  if (result[ConfigKey.URLS]) {
+    result.url = result[ConfigKey.URLS];
+  }
+  if (result[ConfigKey.HOSTS]) {
+    result.host = result[ConfigKey.HOSTS];
+  }
+  result = omit(result, keysToOmit) as Result;
+  // omit undefined value or null value
+  return omitBy(result, removeMonitorEmptyValues);
+}
 export function mergeSourceMonitor(
   normalizedPreviousMonitor: EncryptedSyntheticsMonitor,
   monitor: EncryptedSyntheticsMonitor
@@ -32,4 +48,20 @@ const customizer = (destVal: any, srcValue: any, key: string) => {
   if (key !== ConfigKey.METADATA) {
     return srcValue;
   }
+};
+
+export const removeMonitorEmptyValues = (v: any) => {
+  if (v === undefined || v === null) {
+    return true;
+  }
+  if (typeof v === 'string' && v.trim() === '') {
+    return true;
+  }
+  if (Array.isArray(v) && v.length === 0) {
+    return true;
+  }
+  if (typeof v === 'object' && Object.keys(v).length === 0) {
+    return true;
+  }
+  return false;
 };
