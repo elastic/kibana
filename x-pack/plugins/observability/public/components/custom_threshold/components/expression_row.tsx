@@ -13,7 +13,6 @@ import {
   EuiFormRow,
   EuiSpacer,
   EuiTitle,
-  EuiHorizontalRule,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState, ReactElement } from 'react';
@@ -207,7 +206,6 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
         </EuiFlexItem>
       </EuiFlexGroup>
       {children}
-      <EuiHorizontalRule margin="s" />
     </>
   );
 };

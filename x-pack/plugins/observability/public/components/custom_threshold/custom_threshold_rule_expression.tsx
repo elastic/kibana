@@ -14,6 +14,7 @@ import {
   EuiEmptyPrompt,
   EuiFormErrorText,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiIcon,
   EuiLink,
   EuiLoadingSpinner,
@@ -202,11 +203,8 @@ export default function Expressions(props: Props) {
 
   const removeExpression = useCallback(
     (id: number) => {
-      const ruleCriteria = ruleParams.criteria?.slice() || [];
-      if (ruleCriteria.length > 1) {
-        ruleCriteria.splice(id, 1);
-        setRuleParams('criteria', ruleCriteria);
-      }
+      const ruleCriteria = ruleParams.criteria?.filter((_, index) => index !== id) || [];
+      setRuleParams('criteria', ruleCriteria);
     },
     [setRuleParams, ruleParams.criteria]
   );
@@ -378,7 +376,8 @@ export default function Expressions(props: Props) {
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <div key={idx}>
+            <div key={JSON.stringify(e) + idx}>
+              {idx > 0 && <EuiHorizontalRule margin="s" />}
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}
                 fields={derivedIndexPattern.fields}
