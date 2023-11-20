@@ -589,7 +589,7 @@ export class FleetPlugin
         });
       } catch (error) {
         logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
-          error: { message: error }
+          error: { message: error },
         });
 
         this.fleetStatus$.next({
