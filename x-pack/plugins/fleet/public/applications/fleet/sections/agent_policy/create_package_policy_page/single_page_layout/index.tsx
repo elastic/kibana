@@ -5,21 +5,21 @@
  * 2.0.
  */
 
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useRouteMatch } from 'react-router-dom';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButtonEmpty,
-  EuiButton,
-  EuiSteps,
   EuiBottomBar,
+  EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
+  EuiErrorBoundary,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
-  EuiErrorBoundary,
-  EuiCallOut,
+  EuiSteps,
 } from '@elastic/eui';
 import type { EuiStepProps } from '@elastic/eui/src/components/steps/step';
 
@@ -31,28 +31,37 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
-import type { NewAgentPolicy } from '../../../../types';
-import { useConfig, sendGetAgentStatus, useGetPackageInfoByKeyQuery } from '../../../../hooks';
+import { AGENTLESS_FEATURE_FLAG, AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../../../../types';
+import { SetupType } from '../../../../types';
 import {
-  Loading,
+  sendGetAgentStatus,
+  sendGetOneAgentPolicy,
+  useConfig,
+  useGetPackageInfoByKeyQuery,
+  useUIExtension,
+} from '../../../../hooks';
+import {
+  DevtoolsRequestFlyoutButton,
   Error as ErrorComponent,
   ExtensionWrapper,
-  DevtoolsRequestFlyoutButton,
+  Loading,
 } from '../../../../components';
 
 import { agentPolicyFormValidation, ConfirmDeployAgentPolicyModal } from '../../components';
-import { useUIExtension } from '../../../../hooks';
-import type { PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { pkgKeyFromPackageInfo } from '../../../../services';
 
 import type { AddToPolicyParams, CreatePackagePolicyParams } from '../types';
 
-import { IntegrationBreadcrumb } from '../components';
-
 import {
+  IntegrationBreadcrumb,
+  SelectedPolicyTab,
   StepConfigurePackagePolicy,
   StepDefinePackagePolicy,
-  SelectedPolicyTab,
   StepSelectHosts,
 } from '../components';
 
@@ -87,6 +96,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
+    enableExperimental,
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
 
@@ -293,6 +303,53 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
+  const isAgentlessEnabled = enableExperimental?.includes(AGENTLESS_FEATURE_FLAG) ?? false;
+  const [selectedSetupType, setSelectedSetupType] = useState<SetupType>(SetupType.AGENT_BASED);
+  const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
+
+  useEffect(() => {
+    const fetchAgentlessPolicy = async () => {
+      const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
+      const isAgentlessAvailable = !error && data && data.item;
+
+      if (isAgentlessAvailable) {
+        setAgentlessPolicy(data.item);
+      }
+    };
+
+    if (isAgentlessEnabled) {
+      fetchAgentlessPolicy();
+    }
+  }, [isAgentlessEnabled]);
+
+  const handleSetupTypeChange = useCallback(
+    (setupType) => {
+      if (!isAgentlessEnabled || setupType === selectedSetupType) {
+        return;
+      }
+
+      if (setupType === SetupType.AGENTLESS) {
+        if (agentlessPolicy) {
+          updateAgentPolicy(agentlessPolicy);
+          setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
+        }
+      } else if (setupType === SetupType.AGENT_BASED) {
+        updateNewAgentPolicy(newAgentPolicy);
+        setSelectedPolicyTab(SelectedPolicyTab.NEW);
+      }
+
+      setSelectedSetupType(setupType);
+    },
+    [
+      isAgentlessEnabled,
+      selectedSetupType,
+      agentlessPolicy,
+      updateAgentPolicy,
+      updateNewAgentPolicy,
+      newAgentPolicy,
+    ]
+  );
+
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
       !isInitialized ? (
@@ -306,6 +363,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onChange={handleExtensionViewOnChange}
             validationResults={validationResults}
             isEditPage={false}
+            handleSetupTypeChange={handleSetupTypeChange}
+            agentlessPolicy={agentlessPolicy}
           />
         </ExtensionWrapper>
       )
@@ -374,13 +433,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       'data-test-subj': 'dataCollectionSetupStep',
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
     },
-    {
+  ];
+
+  if (selectedSetupType !== 'agentless') {
+    steps.push({
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
         defaultMessage: 'Where to add this integration?',
       }),
       children: stepSelectAgentPolicy,
-    },
-  ];
+    });
+  }
 
   // Display package error if there is one
   if (packageInfoError) {
