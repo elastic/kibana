@@ -48,45 +48,30 @@ export const useMissingPrivileges = (): MissingPrivileges => {
   const { data: privilegesRes, isLoading } = useRiskEnginePrivileges();
 
   return useMemo<MissingPrivileges>(() => {
-    const indexPrivileges: MissingIndexPrivileges = [];
-    const clusterPrivileges: MissingClusterPrivileges = [];
-    const kibanaPrivileges: MissingKibanaPrivileges = [];
-
     if (isLoading || !privilegesRes || privilegesRes?.has_all_required) {
       return {
-        clusterPrivileges,
-        indexPrivileges,
-        kibanaPrivileges,
+        indexPrivileges: [],
+        clusterPrivileges: [],
+        kibanaPrivileges: [],
       };
     }
 
-    const { privileges } = privilegesRes;
+    const {
+      privileges: { elasticsearch, kibana },
+    } = privilegesRes;
 
-    const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
-      (privilege) => !privileges.elasticsearch.cluster[privilege]
+    const indexPrivileges = getMissingIndexPrivileges(elasticsearch.index);
+
+    const clusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
+      (privilege) => !elasticsearch.cluster[privilege]
     );
-
-    if (missingClusterPrivileges.length) {
-      clusterPrivileges.push(...missingClusterPrivileges);
-    }
-
-    const missingIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
-
-    if (missingIndexPrivileges.length) {
-      indexPrivileges.push(...missingIndexPrivileges);
-    }
-
-    const missingKibanaPrivileges = RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES.filter(
-      (privilege) => !privileges.kibana[privilege]
+    const kibanaPrivileges = RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES.filter(
+      (privilege) => !kibana[privilege]
     );
-
-    if (missingKibanaPrivileges.length) {
-      kibanaPrivileges.push(...missingKibanaPrivileges);
-    }
 
     return {
-      clusterPrivileges,
       indexPrivileges,
+      clusterPrivileges,
       kibanaPrivileges,
     };
   }, [isLoading, privilegesRes]);
