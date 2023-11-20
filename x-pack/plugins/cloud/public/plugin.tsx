@@ -105,8 +105,10 @@ export class CloudPlugin implements Plugin<CloudSetup> {
   public start(coreStart: CoreStart): CloudStart {
     let supportUrl = ELASTIC_SUPPORT_LINK;
     if (this.config.serverless?.project_id) {
+      // serverless projects use config.id and config.serverless.project_id
       supportUrl += '?serverless_project_id=' + this.config.serverless.project_id;
     } else if (this.config.id) {
+      // non-serverless Cloud projects only use config.id
       supportUrl += '?cloud_deployment_id=' + this.config.id;
     }
     coreStart.chrome.setHelpSupportUrl(supportUrl);
