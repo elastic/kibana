@@ -81,6 +81,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
   timerange,
   width: wrapperWidth,
   withActions = true,
+  disableOnClickFilter = false,
 }) => {
   const style = useMemo(
     () => ({
@@ -187,7 +188,8 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
 
   const onFilterCallback = useCallback(
     async (e: ClickTriggerEvent['data'] | MultiClickTriggerEvent['data']) => {
-      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area') {
+      if (!isClickTriggerEvent(e) || preferredSeriesType !== 'area' || disableOnClickFilter) {
+        e.preventDefault();
         return;
       }
       // Update timerange when clicking on a dot in an area chart
@@ -202,7 +204,7 @@ const LensEmbeddableComponent: React.FC<LensEmbeddableComponentProps> = ({
         });
       }
     },
-    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType]
+    [createFiltersFromValueClickAction, updateDateRange, preferredSeriesType, disableOnClickFilter]
   );
 
   const adHocDataViews = useMemo(

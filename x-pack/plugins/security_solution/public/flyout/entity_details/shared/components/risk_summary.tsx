@@ -198,6 +198,7 @@ export const RiskSummary = React.memo(({ riskScoreData, queryId }: RiskSummaryPr
                   timerange={LAST_30_DAYS}
                   width={'100%'}
                   height={LENS_VISUALIZATION_HEIGHT}
+                  disableOnClickFilter
                   inspectTitle={
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.entityDetails.inspectVisualizationTitle"
