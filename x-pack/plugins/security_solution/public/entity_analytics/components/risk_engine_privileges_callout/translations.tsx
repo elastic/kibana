@@ -21,14 +21,14 @@ export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-const kibanaPrivilegesExplanations = {
+const kibanaPrivilegesExplanations: Record<string, string> = {
   [KIBANA_SAVED_OBJECT_MANAGE_ALL_PRIVILEGE]: i18n.translate(
     'xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.kibanaSavedObjectManageAllPrivilegeExplanation',
     {
       defaultMessage: '"All" for the "Saved Objects Management" feature under Management',
     }
   ),
-} as Record<string, string>;
+};
 
 export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
   indexPrivileges,
