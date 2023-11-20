@@ -16,7 +16,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
 import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
 import { type DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import { mountReactNode } from '@kbn/core-mount-utils-browser-internal';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
@@ -63,7 +63,7 @@ export interface SetupDeps {
 export interface StartDeps {
   application: InternalApplicationStart;
   docLinks: DocLinksStart;
-  http: HttpStart;
+  http: InternalHttpStart;
   injectedMetadata: InternalInjectedMetadataStart;
   notifications: NotificationsStart;
   customBranding: CustomBrandingStart;

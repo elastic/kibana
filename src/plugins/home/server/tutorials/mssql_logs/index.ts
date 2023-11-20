@@ -39,7 +39,7 @@ export function mssqlLogsSpecProvider(context: TutorialContext): TutorialSchema 
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-mssql.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/microsoft.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/microsoft.svg'),
     artifacts: {
       dashboards: [],
       application: {
