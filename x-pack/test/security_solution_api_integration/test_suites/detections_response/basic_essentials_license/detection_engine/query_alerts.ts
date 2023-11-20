@@ -14,18 +14,12 @@ import {
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { getAlertStatus, createAlertsIndex, deleteAllAlerts } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service
-  const config = getService('config');
-  const isServerless = config.get('serverless');
-  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
-  const endpointResolverSignalsPath = dataPathBuilder.getPath('endpoint/resolver/signals');
 
   describe('@ess @serverless query_signals_route and find_alerts_route', () => {
     describe('validation checks', () => {
@@ -57,11 +51,11 @@ export default ({ getService }: FtrProviderContext) => {
     // TODO: remove the @brokenInServerless until a confimation
     describe('@brokenInServerless runtime fields', () => {
       before(async () => {
-        await esArchiver.load(endpointResolverSignalsPath);
+        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         await createAlertsIndex(supertest, log);
       });
       after(async () => {
-        await esArchiver.unload(endpointResolverSignalsPath);
+        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         await deleteAllAlerts(supertest, log, es);
       });
 
