@@ -19,9 +19,9 @@ import { SLO } from '../../domain/models';
 import { fiveMinute, oneMinute, twoMinute } from './fixtures/duration';
 import {
   createAPMTransactionErrorRateIndicator,
+  createMetricCustomIndicator,
   createSLO,
   createSLOWithTimeslicesBudgetingMethod,
-  createMetricCustomIndicator,
 } from './fixtures/slo';
 import { thirtyDaysRolling } from './fixtures/time_window';
 import { createSLORepositoryMock, createTransformManagerMock } from './mocks';
@@ -33,20 +33,13 @@ describe('UpdateSLO', () => {
   let mockRepository: jest.Mocked<SLORepository>;
   let mockTransformManager: jest.Mocked<TransformManager>;
   let mockEsClient: jest.Mocked<ElasticsearchClient>;
-  let mockSystemEsClient: jest.Mocked<ElasticsearchClient>;
   let updateSLO: UpdateSLO;
 
   beforeEach(() => {
     mockRepository = createSLORepositoryMock();
     mockTransformManager = createTransformManagerMock();
     mockEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    mockSystemEsClient = elasticsearchServiceMock.createElasticsearchClient();
-    updateSLO = new UpdateSLO(
-      mockRepository,
-      mockTransformManager,
-      mockEsClient,
-      mockSystemEsClient
-    );
+    updateSLO = new UpdateSLO(mockRepository, mockTransformManager, mockEsClient);
   });
 
   describe('when the update payload does not change the original SLO', () => {
@@ -386,7 +379,6 @@ describe('UpdateSLO', () => {
       await updateSLO.execute(slo.id, { indicator: newIndicator });
 
       expect(mockEsClient.index.mock.calls[0]).toMatchSnapshot();
-      expect(mockSystemEsClient.enrich.executePolicy).toBeCalled();
     });
 
     it('removes the original data from the original SLO', async () => {
@@ -426,7 +418,6 @@ describe('UpdateSLO', () => {
       );
 
       expect(mockRepository.save).toHaveBeenCalledWith(slo);
-      expect(mockSystemEsClient.enrich.executePolicy).toHaveBeenCalled();
       expect(mockTransformManager.preview).not.toHaveBeenCalled();
       expect(mockTransformManager.start).not.toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
@@ -453,7 +444,6 @@ describe('UpdateSLO', () => {
         getSLOTransformId(slo.id, slo.revision + 1)
       );
       expect(mockRepository.save).toHaveBeenCalledWith(slo);
-      expect(mockSystemEsClient.enrich.executePolicy).toHaveBeenCalled();
       expect(mockTransformManager.stop).not.toHaveBeenCalled();
       expect(mockEsClient.deleteByQuery).not.toHaveBeenCalled();
     });
