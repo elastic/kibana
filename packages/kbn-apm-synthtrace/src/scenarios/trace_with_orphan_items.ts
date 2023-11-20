@@ -12,12 +12,13 @@ import { Scenario } from '../cli/scenario';
 
 import { RunOptions } from '../cli/utils/parse_run_cli_flags';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
+import { withClient } from '../lib/utils/with_client';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
   return {
-    generate: ({ range }) => {
+    generate: ({ range, clients: { apmEsClient } }) => {
       const transactionName = 'trace with orphans';
       const successfulTimestamps = range.interval('1s').rate(3);
 
@@ -141,7 +142,10 @@ const scenario: Scenario<ApmFields> = async (runOptions: RunOptions) => {
         },
       })) as Array<Serializable<ApmFields>>;
 
-      return Readable.from([...unserializedChanged, ...successfulTraceEvents]);
+      return withClient(
+        apmEsClient,
+        Readable.from([...unserializedChanged, ...successfulTraceEvents])
+      );
     },
   };
 };
