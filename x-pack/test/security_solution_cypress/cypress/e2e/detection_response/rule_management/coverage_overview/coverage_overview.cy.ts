@@ -50,7 +50,6 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     deleteAlertsAndRules();
     deletePrebuiltRulesAssets();
     preventPrebuiltRulesPackageInstallation();
-    visit(COVERAGE_OVERVIEW_URL);
     createAndInstallMockedPrebuiltRules(prebuiltRules);
     createRule(
       getNewRule({ rule_id: 'enabled_custom_rule', enabled: true, name: 'Enabled custom rule' })
@@ -58,10 +57,10 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     createRule(
       getNewRule({ rule_id: 'disabled_custom_rule', name: 'Disabled custom rule', enabled: false })
     );
-    cy.reload();
+    visit(COVERAGE_OVERVIEW_URL);
   });
 
-  it('technique panel renders correct data on page load', () => {
+  it('technique panel renders custom and prebuilt rule data on page load', () => {
     openTechniquePanel(getMockThreatData().technique.name);
     cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
     cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
@@ -74,76 +73,85 @@ describe('Coverage overview', { tags: ['@ess', '@serverless'] }, () => {
     cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
   });
 
-  it('filtering displays correct data', () => {
-    // all data filtered in
-    selectCoverageOverviewActivityFilterOption('Disabled rules');
-    openTechniquePanel(getMockThreatData().technique.name);
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
-    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+  describe('filtering tests', () => {
+    it('filters for all data', () => {
+      selectCoverageOverviewActivityFilterOption('Disabled rules');
 
-    // only filtering for disabled and prebuilt rules
-    selectCoverageOverviewActivityFilterOption('Enabled rules');
-    selectCoverageOverviewSourceFilterOption('Custom rules');
-    openTechniquePanel(getMockThreatData().technique.name);
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
-      .contains('Enabled prebuilt rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
-      .contains('Enabled custom rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
-      .contains('Disabled custom rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+      openTechniquePanel(getMockThreatData().technique.name);
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+    });
 
-    // only filtering for prebuilt rules
-    selectCoverageOverviewActivityFilterOption('Enabled rules');
-    openTechniquePanel(getMockThreatData().technique.name);
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
-      .contains('Enabled custom rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
-      .contains('Disabled custom rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+    it('filters for disabled and prebuilt rules', () => {
+      selectCoverageOverviewActivityFilterOption('Enabled rules'); // Disables default filter
+      selectCoverageOverviewActivityFilterOption('Disabled rules');
+      selectCoverageOverviewSourceFilterOption('Custom rules'); // Disables default filter
 
-    // only filtering for custom rules
-    selectCoverageOverviewSourceFilterOption('Custom rules');
-    selectCoverageOverviewSourceFilterOption('Elastic rules'); // Turn off filter
+      openTechniquePanel(getMockThreatData().technique.name);
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+        .contains('Enabled prebuilt rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+        .contains('Enabled custom rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+        .contains('Disabled custom rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+    });
 
-    openTechniquePanel(getMockThreatData().technique.name);
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
-      .contains('Enabled prebuilt rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
-      .contains('Disabled prebuilt rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
-    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+    it('filters for only prebuilt rules', () => {
+      selectCoverageOverviewActivityFilterOption('Disabled rules');
+      selectCoverageOverviewSourceFilterOption('Custom rules'); // Disables default filter
 
-    // filtering for search term
-    selectCoverageOverviewSourceFilterOption('Elastic rules');
-    filterCoverageOverviewBySearchBar('Enabled custom rule');
+      openTechniquePanel(getMockThreatData().technique.name);
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled prebuilt rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+        .contains('Enabled custom rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled prebuilt rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+        .contains('Disabled custom rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+    });
 
-    openTechniquePanel(getMockThreatData().technique.name);
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
-      .contains('Enabled prebuilt rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
-      .contains('Disabled prebuilt rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
-      .contains('Disabled custom rule')
-      .should('not.exist');
-    cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
+    it('filters for only custom rules', () => {
+      selectCoverageOverviewActivityFilterOption('Disabled rules');
+      selectCoverageOverviewSourceFilterOption('Elastic rules'); // Disables default filter
+
+      openTechniquePanel(getMockThreatData().technique.name);
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+        .contains('Enabled prebuilt rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+        .contains('Disabled prebuilt rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES).contains('Disabled custom rule');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('not.be.disabled');
+    });
+
+    it('filters for search term', () => {
+      filterCoverageOverviewBySearchBar('Enabled custom rule'); // Disables default filter
+
+      openTechniquePanel(getMockThreatData().technique.name);
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES)
+        .contains('Enabled prebuilt rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_ENABLED_RULES).contains('Enabled custom rule');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+        .contains('Disabled prebuilt rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_POPOVER_DISABLED_RULES)
+        .contains('Disabled custom rule')
+        .should('not.exist');
+      cy.get(COVERAGE_OVERVIEW_ENABLE_ALL_DISABLED_BUTTON).should('be.disabled');
+    });
   });
 
   it('enables all disabled rules', () => {
