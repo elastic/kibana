@@ -9,8 +9,9 @@ properties:
     type: string
     example: ".index-threshold"
   apiKeyOwner:
-    type: string
-    nullable: true
+    type:
+      - "string"
+      - "null"
     example: elastic
   createdAt:
     type: string
@@ -43,8 +44,9 @@ properties:
     type: boolean
     example: false
   mutedInstanceIds:
-    type: array
-    nullable: true
+    type:
+      - "array"
+      - "null"
     items:
       type: string
   name:
@@ -70,13 +72,15 @@ properties:
     items:
       type: string
   throttle:
-    type: string
-    nullable: true
+    type: 
+      - "string"
+      - "null"
   updatedAt:
     type: string
     example: '2022-12-05T23:36:58.284Z'
   updatedBy:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: The identifier for the user that updated this alert most recently.
-    nullable: true
     example: elastic

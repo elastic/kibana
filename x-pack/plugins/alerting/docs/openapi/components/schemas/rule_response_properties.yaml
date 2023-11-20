@@ -27,10 +27,11 @@ properties:
     description: Indicates whether the API key that is associated with the rule was created by the user.
     example: false
   api_key_owner:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: >
       The owner of the API key that is associated with the rule and used to run background tasks.
-    nullable: true
     example: elastic
   consumer:
     type: string
@@ -42,9 +43,10 @@ properties:
     format: date-time
     example: '2022-12-05T23:36:58.284Z'
   created_by:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: The identifier for the user that created the rule.
-    nullable: true
     example: elastic
   enabled:
     type: boolean
@@ -85,19 +87,22 @@ properties:
         type: string
         example: succeeded
       outcome_msg:
-        type: array
+        type:
+          - "array"
+          - "null"
         items:
           type: string
-        nullable: true
       outcome_order:
         type: integer
       warning:
-        type: string
-        nullable: true
+        type:
+          - "string"
+          - "null"
         example: null
   muted_alert_ids:
-    type: array
-    nullable: true
+    type:
+      - "array"
+      - "null"
     items:
       type: string
   mute_all:
@@ -108,14 +113,16 @@ properties:
     description: The name of the rule.
     example: cluster_health_rule
   next_run:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
     example: '2022-12-06T00:14:43.818Z'
   notify_when:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: Indicates how often alerts generate actions.
-    nullable: true
   params:
     type: object
     description: The parameters for the rule.
@@ -145,7 +152,8 @@ properties:
     description: The date and time that the rule was updated most recently.
     example: '2022-12-05T23:36:58.284Z'
   updated_by:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: The identifier for the user that updated this rule most recently.
-    nullable: true
     example: elastic

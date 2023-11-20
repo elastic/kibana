@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Alerting
   description: OpenAPI schema for alerting endpoints
@@ -1579,8 +1579,9 @@ components:
           type: object
           properties:
             alias:
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             controlledBy:
               type: string
             disabled:
@@ -1617,16 +1618,18 @@ components:
         - onThrottleInterval
       example: onActiveAlert
     throttle:
-      type: string
+      type:
+        - string
+        - 'null'
       description: |
         The throttle interval, which defines how often an alert generates repeated actions. It is specified in seconds, minutes, hours, or days and is applicable only if `notify_when` is set to `onThrottleInterval`. NOTE: You cannot specify the throttle interval at both the rule and action level. The recommended method is to set it for each action. If you set it at the rule level then update the rule in Kibana, it is automatically changed to use action-specific values.
-      nullable: true
       default: null
       example: 10m
     actions:
-      type: array
+      type:
+        - array
+        - 'null'
       default: []
-      nullable: true
       items:
         type: object
         required:
@@ -4359,10 +4362,11 @@ components:
           description: Indicates whether the API key that is associated with the rule was created by the user.
           example: false
         api_key_owner:
-          type: string
+          type:
+            - string
+            - 'null'
           description: |
             The owner of the API key that is associated with the rule and used to run background tasks.
-          nullable: true
           example: elastic
         consumer:
           type: string
@@ -4374,9 +4378,10 @@ components:
           format: date-time
           example: '2022-12-05T23:36:58.284Z'
         created_by:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The identifier for the user that created the rule.
-          nullable: true
           example: elastic
         enabled:
           type: boolean
@@ -4417,19 +4422,22 @@ components:
               type: string
               example: succeeded
             outcome_msg:
-              type: array
+              type:
+                - array
+                - 'null'
               items:
                 type: string
-              nullable: true
             outcome_order:
               type: integer
             warning:
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
               example: null
         muted_alert_ids:
-          type: array
-          nullable: true
+          type:
+            - array
+            - 'null'
           items:
             type: string
         mute_all:
@@ -4440,14 +4448,16 @@ components:
           description: The name of the rule.
           example: cluster_health_rule
         next_run:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
           example: '2022-12-06T00:14:43.818Z'
         notify_when:
-          type: string
+          type:
+            - string
+            - 'null'
           description: Indicates how often alerts generate actions.
-          nullable: true
         params:
           type: object
           description: The parameters for the rule.
@@ -4477,9 +4487,10 @@ components:
           description: The date and time that the rule was updated most recently.
           example: '2022-12-05T23:36:58.284Z'
         updated_by:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The identifier for the user that updated this rule most recently.
-          nullable: true
           example: elastic
     401_response:
       type: object
@@ -4571,8 +4582,9 @@ components:
           type: string
           example: .index-threshold
         apiKeyOwner:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
           example: elastic
         createdAt:
           type: string
@@ -4605,8 +4617,9 @@ components:
           type: boolean
           example: false
         mutedInstanceIds:
-          type: array
-          nullable: true
+          type:
+            - array
+            - 'null'
           items:
             type: string
         name:
@@ -4632,15 +4645,17 @@ components:
           items:
             type: string
         throttle:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
         updatedAt:
           type: string
           example: '2022-12-05T23:36:58.284Z'
         updatedBy:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The identifier for the user that updated this alert most recently.
-          nullable: true
           example: elastic
   examples:
     create_es_query_esql_rule_request:

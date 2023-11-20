@@ -1,6 +1,7 @@
-type: array
+type: 
+  - "array"
+  - "null"
 default: []
-nullable: true
 items:
   type: object
   required:
