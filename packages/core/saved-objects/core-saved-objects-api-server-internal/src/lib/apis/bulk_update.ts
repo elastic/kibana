@@ -299,7 +299,6 @@ export const performBulkUpdate = async <T>(
       const typeDefinition = registry.getType(type)!;
 
       if (docFound) {
-        // actualResult could be undefined
         const document = getSavedObjectFromSource<T>(
           registry,
           type,
