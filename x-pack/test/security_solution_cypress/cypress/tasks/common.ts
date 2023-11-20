@@ -111,10 +111,6 @@ export const deleteAlertsAndRules = () => {
       action: 'delete',
     },
     failOnStatusCode: false,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-    },
     timeout: 300000,
   });
 
@@ -313,10 +309,6 @@ export const postDataView = (indexPattern: string, name?: string, id?: string) =
         timeFieldName: '@timestamp',
       },
     },
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-    },
     failOnStatusCode: false,
   });
 };
@@ -325,7 +317,6 @@ export const deleteDataView = (dataViewId: string) => {
   rootRequest({
     method: 'POST',
     url: 'api/content_management/rpc/delete',
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
     body: {
       contentTypeId: 'index-pattern',
       id: dataViewId,

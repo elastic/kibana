@@ -14,7 +14,6 @@ export const setKibanaSetting = (key: string, value: boolean | number | string) 
     method: 'POST',
     url: 'internal/kibana/settings',
     body: { changes: { [key]: value } },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });
 };
 
