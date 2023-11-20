@@ -211,7 +211,7 @@ export const copyTimeline = async ({
     response = await KibanaServices.get().http.post<TimelineResponse>(TIMELINE_COPY_URL, {
       method: 'POST',
       body: requestBody,
-      version: '2023-10-31',
+      version: '1',
     });
   } catch (err) {
     // For Future developer
