@@ -56,7 +56,7 @@ export function HttpErrorRateChart({
   const { data = INITIAL_STATE, status } = useFetcher(
     (callApmApi) => {
       return callApmApi(
-        'GET /internal/apm/mobile-services/{serviceName}/http/error/rate',
+        'GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate',
         {
           params: {
             path: {

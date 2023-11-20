@@ -35,7 +35,8 @@ import {
 } from './get_mobile_http_errors';
 
 const mobileMobileHttpRatesRoute = createApmServerRoute({
-  endpoint: 'GET /internal/apm/mobile-services/{serviceName}/http/error/rate',
+  endpoint:
+    'GET /internal/apm/mobile-services/{serviceName}/error/http_error_rate',
   params: t.type({
     path: t.type({
       serviceName: t.string,
