@@ -101,7 +101,7 @@ export function TriggerButton({
       fullWidth
       {...colorProp}
       {...rest}
-      textProps={{ style: { width: '100%', lineHeight: '100%' } }}
+      textProps={{ style: { width: '100%', lineHeight: '1.2em' } }}
     >
       <TriggerLabel label={label} extraIcons={extraIcons} />
     </ToolbarButton>
