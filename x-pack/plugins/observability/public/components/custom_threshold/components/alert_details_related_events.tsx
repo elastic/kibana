@@ -50,7 +50,7 @@ export default function AlertDetailsRelatedEvents({
   const { aiops } = useKibana().services;
   const { EmbeddableChangePointChart } = aiops;
   const [relatedMetrics, setRelatedMetrics] = useState<Array<string | undefined>>([]);
-  const [metricAggType, setMetricAggType] = useState<string>('avg');
+  const [metricAggType, setMetricAggType] = useState<string>();
   const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
 
@@ -100,7 +100,7 @@ export default function AlertDetailsRelatedEvents({
       )?.aggType;
 
     setRelatedMetrics(relatedMetricsInDataView ?? []);
-    setMetricAggType(aggType ? (fnList.includes(aggType) ? aggType : 'avg') : 'avg');
+    setMetricAggType(aggType ? (fnList.includes(aggType) ? aggType : undefined) : undefined);
   }, [dataView, ruleParams.criteria]);
 
   useEffect(() => {
@@ -172,7 +172,7 @@ export default function AlertDetailsRelatedEvents({
   };
 
   const relatedEventsTab =
-    !!ruleParams.criteria && relatedMetrics.length > 0 ? (
+    !!ruleParams.criteria && relatedMetrics.length > 0 && metricAggType ? (
       <>
         <EuiSpacer size="s" />
         <EuiFlexGroup direction="row" justifyContent="flexEnd" gutterSize="xs">
@@ -203,7 +203,7 @@ export default function AlertDetailsRelatedEvents({
                   key={`relatedMetric${relatedMetricIndex}`}
                   dataViewId={dataView.id}
                   timeRange={relatedEventsTimeRange()}
-                  fn={metricAggType || 'avg'}
+                  fn={metricAggType}
                   metricField={relatedMetric}
                   emptyState={emptyState}
                   onChange={onChangePointDataChange}
