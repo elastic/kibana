@@ -39,6 +39,7 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
         const {
           data: {
             logView,
+            idFormats,
             timeRange: { startTime, endTime },
           },
         } = request.body;
@@ -49,6 +50,7 @@ export const initGetLogEntryAnomaliesDatasetsRoute = ({ framework }: InfraBacken
           const { datasets, timing } = await getLogEntryAnomaliesDatasets(
             { infra: await infraMlContext.infra },
             logView,
+            idFormats,
             startTime,
             endTime
           );
