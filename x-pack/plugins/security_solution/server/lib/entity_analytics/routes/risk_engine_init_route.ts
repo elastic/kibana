@@ -33,6 +33,8 @@ export const riskEngineInitRoute = (
       const securitySolution = await context.securitySolution;
       const [_, { taskManager }] = await getStartServices();
       const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
+      const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
+      const assetCriticalityDataClient = securitySolution.getAssetCriticalityDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
@@ -47,6 +49,8 @@ export const riskEngineInitRoute = (
           taskManager,
           namespace: spaceId,
           isAssetCriticalityEnabled,
+          assetCriticalityDataClient,
+          riskScoreDataClient,
         });
 
         const initResultResponse: InitRiskEngineResultResponse = {

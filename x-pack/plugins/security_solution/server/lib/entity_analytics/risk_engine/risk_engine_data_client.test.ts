@@ -18,6 +18,8 @@ import { AssetCriticalityDataClient } from '../asset_criticality/asset_criticali
 import type { RiskEngineConfiguration } from '../types';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from '../utils/transforms';
+import { assetCriticalityDataClientMock } from '../asset_criticality/asset_criticality_data_client.mock';
+import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
   page: 1,
@@ -242,6 +244,8 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
           expect(initResult).toEqual({
@@ -262,6 +266,8 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
           expect(initResult).toEqual({
@@ -283,6 +289,8 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
           expect(initResult).toEqual({
@@ -296,18 +304,21 @@ describe('RiskEngineDataClient', () => {
         });
 
         it('should catch error for initializeResources and stop', async () => {
-          initRiskScore.mockImplementationOnce(() => {
-            throw new Error('Error initRiskScore');
+          const riskScoreDataClient = riskScoreDataClientMock.create();
+          riskScoreDataClient.init.mockImplementationOnce(() => {
+            throw new Error('Error riskScoreDataClient');
           });
 
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            riskScoreDataClient,
           });
 
           expect(initResult).toEqual({
-            errors: ['Error initRiskScore'],
+            errors: ['Error riskScoreDataClient'],
             legacyRiskEngineDisabled: true,
             riskEngineConfigurationCreated: false,
             riskEngineEnabled: false,
@@ -317,7 +328,8 @@ describe('RiskEngineDataClient', () => {
         });
 
         it('should catch error for asset criticality init and stop', async () => {
-          initAssetCriticality.mockImplementationOnce(() => {
+          const assetCriticalityDataClient = assetCriticalityDataClientMock.create();
+          assetCriticalityDataClient.init.mockImplementationOnce(() => {
             throw new Error('Error initAssetCriticality');
           });
 
@@ -325,6 +337,8 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient,
+            riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
           expect(initResult).toEqual({
@@ -346,6 +360,8 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
           expect(initResult).toEqual({
@@ -367,6 +383,8 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
+            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+            riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
           expect(initResult).toEqual({

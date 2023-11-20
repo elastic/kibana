@@ -21,14 +21,16 @@ import {
   getEnabledRiskEngineAmount,
 } from './utils/saved_object_configuration';
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
-import { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
+import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
-import { AssetCriticalityDataClient } from '../asset_criticality/asset_criticality_data_client';
+import type { AssetCriticalityDataClient } from '../asset_criticality/asset_criticality_data_client';
 
 interface InitOpts {
   namespace: string;
   taskManager: TaskManagerStartContract;
   isAssetCriticalityEnabled: boolean;
+  riskScoreDataClient: RiskScoreDataClient;
+  assetCriticalityDataClient: AssetCriticalityDataClient;
 }
 
 interface RiskEngineDataClientOpts {
@@ -45,7 +47,8 @@ export class RiskEngineDataClient {
   public async init({
     namespace,
     taskManager,
-
+    assetCriticalityDataClient,
+    riskScoreDataClient,
     isAssetCriticalityEnabled,
   }: InitOpts) {
     const result: InitRiskEngineResult = {
@@ -65,13 +68,6 @@ export class RiskEngineDataClient {
     }
 
     try {
-      const riskScoreDataClient = new RiskScoreDataClient({
-        esClient: this.options.esClient,
-        logger: this.options.logger,
-        namespace,
-        kibanaVersion: this.options.kibanaVersion,
-        soClient: this.options.soClient,
-      });
       await riskScoreDataClient.init();
       result.riskEngineResourcesInstalled = true;
     } catch (e) {
@@ -81,12 +77,6 @@ export class RiskEngineDataClient {
 
     if (isAssetCriticalityEnabled) {
       try {
-        // We use internal user here for resource installation, not current user
-        const assetCriticalityDataClient = new AssetCriticalityDataClient({
-          esClient: this.options.esClient,
-          logger: this.options.logger,
-          namespace,
-        });
         await assetCriticalityDataClient.init();
         result.assetCriticalityInstalled = true;
       } catch (e) {

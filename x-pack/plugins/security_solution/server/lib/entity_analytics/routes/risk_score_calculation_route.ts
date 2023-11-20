@@ -41,11 +41,13 @@ export const riskScoreCalculationRoute = (router: SecuritySolutionPluginRouter, 
         const soClient = coreContext.savedObjects.client;
         const spaceId = securityContext.getSpaceId();
         const riskEngineDataClient = securityContext.getRiskEngineDataClient();
+        const riskScoreDataClient = securityContext.getRiskScoreDataClient();
 
         const riskScoreService = riskScoreServiceFactory({
           esClient,
           logger,
           riskEngineDataClient,
+          riskScoreDataClient,
           spaceId,
         });
 
