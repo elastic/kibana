@@ -7,20 +7,19 @@
 
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useEffect, useState } from 'react';
-import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { getDataViewId } from '../../common/data_view_constants';
 import { ApmPluginStartDeps } from '../plugin';
 
 export function useDataViewId() {
   const [dataViewId, setDataViewId] = useState<string>(
-    getDataViewId(DEFAULT_SPACE_ID)
+    getDataViewId('default')
   );
   const { spaces } = useKibana<ApmPluginStartDeps>().services;
 
   useEffect(() => {
     const fetchSpaceId = async () => {
       const space = await spaces?.getActiveSpace();
-      setDataViewId(getDataViewId(space?.id ?? DEFAULT_SPACE_ID));
+      setDataViewId(getDataViewId(space?.id ?? 'default'));
     };
 
     fetchSpaceId();
