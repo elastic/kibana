@@ -482,6 +482,8 @@ const installTransformsAssets = async (
       }
     );
 
+    console.log(`Installing transforms for ${installablePackage.name}...`)
+
     // create index templates and component templates
     await Promise.all(
       destinationIndexTemplates

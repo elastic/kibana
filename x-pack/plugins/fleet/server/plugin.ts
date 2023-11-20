@@ -588,7 +588,9 @@ export class FleetPlugin
           summary: 'Fleet is available',
         });
       } catch (error) {
-        logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, { error: { message: error } });
+        logger.warn(`Fleet setup failed after ${setupAttempts} attempts`, {
+          error: { message: error }
+        });
 
         this.fleetStatus$.next({
           // As long as Fleet has a dependency on EPR, we can't reliably set Kibana status to `unavailable` here.
