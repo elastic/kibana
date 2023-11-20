@@ -182,7 +182,7 @@ export const createTimelineEpic =
               withLatestFrom(timeline$, allTimelineQuery$, kibana$),
               mergeMap(([response, recentTimeline, allTimelineQuery, kibana]) => {
                 if (isErrorResponse(response)) {
-                  switch (response.statusCode) {
+                  switch (response.status_code) {
                     // conflict
                     case 409:
                       kibana.notifications.toasts.addDanger({
@@ -412,5 +412,5 @@ const convertToString = (obj: unknown) => {
 type PossibleResponse = TimelineResponse | TimelineErrorResponse;
 
 function isErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
-  return 'statusCode' in response;
+  return 'status_code' in response;
 }
