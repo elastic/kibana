@@ -189,7 +189,7 @@ export async function loadStatus({
   http,
   notifications,
 }: {
-  http: HttpSetup;
+  http: Pick<HttpSetup, 'get'>;
   notifications: NotificationsSetup;
 }) {
   let response: StatusResponse;

@@ -39,8 +39,8 @@ packages/analytics/shippers/gainsight @elastic/kibana-core
 packages/kbn-apm-config-loader @elastic/kibana-core @vigneshshanmugam
 x-pack/plugins/apm_data_access @elastic/obs-knowledge-team @elastic/obs-ux-infra_services-team
 x-pack/plugins/apm @elastic/obs-ux-infra_services-team
-packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team
-packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team
+packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
@@ -54,6 +54,7 @@ x-pack/plugins/banners @elastic/appex-sharedux
 packages/kbn-bazel-runner @elastic/kibana-operations
 examples/bfetch_explorer @elastic/appex-sharedux
 src/plugins/bfetch @elastic/appex-sharedux
+packages/kbn-calculate-auto @elastic/obs-ux-management-team
 x-pack/plugins/canvas @elastic/kibana-presentation
 x-pack/test/cases_api_integration/common/plugins/cases @elastic/response-ops
 packages/kbn-cases-components @elastic/response-ops
@@ -301,6 +302,7 @@ x-pack/plugins/cross_cluster_replication @elastic/platform-deployment-management
 packages/kbn-crypto @elastic/kibana-security
 packages/kbn-crypto-browser @elastic/kibana-core
 x-pack/plugins/custom_branding @elastic/appex-sharedux
+packages/kbn-custom-icons @elastic/obs-ux-logs-team
 packages/kbn-custom-integrations @elastic/obs-ux-logs-team
 src/plugins/custom_integrations @elastic/fleet
 packages/kbn-cypress-config @elastic/kibana-operations
@@ -344,6 +346,7 @@ packages/kbn-ebt-tools @elastic/kibana-core
 packages/kbn-ecs @elastic/kibana-core @elastic/security-threat-hunting-investigations
 x-pack/packages/security-solution/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
 x-pack/plugins/ecs_data_quality_dashboard @elastic/security-threat-hunting-investigations
+packages/kbn-elastic-agent-utils @elastic/obs-ux-logs-team
 x-pack/packages/kbn-elastic-assistant @elastic/security-solution
 x-pack/plugins/elastic_assistant @elastic/security-solution
 test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
@@ -419,7 +422,6 @@ x-pack/examples/gen_ai_streaming_response_example @elastic/response-ops
 packages/kbn-generate @elastic/kibana-operations
 packages/kbn-generate-console-definitions @elastic/platform-deployment-management
 packages/kbn-generate-csv @elastic/appex-sharedux
-packages/kbn-generate-csv-types @elastic/appex-sharedux
 packages/kbn-get-repo-files @elastic/kibana-operations
 x-pack/plugins/global_search_bar @elastic/appex-sharedux
 x-pack/plugins/global_search @elastic/appex-sharedux
@@ -535,7 +537,6 @@ x-pack/packages/ml/runtime_field_utils @elastic/ml-ui
 x-pack/packages/ml/string_hash @elastic/ml-ui
 x-pack/packages/ml/trained_models_utils @elastic/ml-ui
 x-pack/packages/ml/url_state @elastic/ml-ui
-packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-monaco @elastic/appex-sharedux
 x-pack/plugins/monitoring_collection @elastic/obs-ux-infra_services-team
 x-pack/plugins/monitoring @elastic/obs-ux-infra_services-team
@@ -593,7 +594,16 @@ packages/kbn-repo-source-classifier @elastic/kibana-operations
 packages/kbn-repo-source-classifier-cli @elastic/kibana-operations
 packages/kbn-reporting/common @elastic/appex-sharedux
 x-pack/examples/reporting_example @elastic/appex-sharedux
+packages/kbn-reporting/export_types/csv @elastic/appex-sharedux
+packages/kbn-reporting/export_types/csv_common @elastic/appex-sharedux
+packages/kbn-reporting/export_types/pdf @elastic/appex-sharedux
+packages/kbn-reporting/export_types/pdf_common @elastic/appex-sharedux
+packages/kbn-reporting/export_types/png @elastic/appex-sharedux
+packages/kbn-reporting/export_types/png_common @elastic/appex-sharedux
+packages/kbn-reporting/mocks_server @elastic/appex-sharedux
 x-pack/plugins/reporting @elastic/appex-sharedux
+packages/kbn-reporting/public @elastic/appex-sharedux
+packages/kbn-reporting/server @elastic/appex-sharedux
 packages/kbn-resizable-layout @elastic/kibana-data-discovery
 examples/resizable_layout_examples @elastic/kibana-data-discovery
 x-pack/test/plugin_functional/plugins/resolver_test @elastic/security-solution
@@ -875,6 +885,9 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /x-pack/test_serverless/api_integration/test_suites/common/scripts_tests @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_oss @elastic/kibana-data-discovery
 /x-pack/test_serverless/api_integration/test_suites/common/search_xpack @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/context @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/discover @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/discover_ml_uptime/discover @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/data_view_field_editor_example @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/discover_customization_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/field_formats @elastic/kibana-data-discovery
@@ -882,6 +895,7 @@ packages/kbn-zod-helpers @elastic/security-detection-rule-management
 /x-pack/test_serverless/functional/test_suites/common/examples/search @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/search_examples @elastic/kibana-data-discovery
 /x-pack/test_serverless/functional/test_suites/common/examples/unified_field_list_examples @elastic/kibana-data-discovery
+/x-pack/test_serverless/functional/test_suites/common/management/data_views @elastic/kibana-data-discovery
 
 # Visualizations
 /src/plugins/visualize/ @elastic/kibana-visualizations
@@ -1224,6 +1238,9 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/test/security_solution_cypress/cypress/e2e/investigations @elastic/security-threat-hunting-investigations
 /x-pack/test/security_solution_cypress/cypress/e2e/sourcerer/sourcerer_timeline.cy.ts @elastic/security-threat-hunting-investigations
 
+x-pack/test/security_solution_cypress/cypress/screens/expandable_flyout  @elastic/security-threat-hunting-investigations
+x-pack/test/security_solution_cypress/cypress/tasks/expandable_flyout  @elastic/security-threat-hunting-investigations
+
 /x-pack/plugins/security_solution/public/common/components/alerts_viewer @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table/timeline_action @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/common/components/event_details @elastic/security-threat-hunting-investigations
@@ -1232,7 +1249,8 @@ x-pack/plugins/cloud_integrations/cloud_full_story/server/config.ts @elastic/kib
 /x-pack/plugins/security_solution/public/detections/components/alerts_kpis @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_table @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/detections/components/alerts_info @elastic/security-threat-hunting-investigations
-/x-pack/plugins/security_solution/public/flyout @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/flyout/document_details @elastic/security-threat-hunting-investigations
+/x-pack/plugins/security_solution/public/flyout/shared @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/resolver @elastic/security-threat-hunting-investigations
 /x-pack/plugins/security_solution/public/timelines @elastic/security-threat-hunting-investigations
 
@@ -1375,6 +1393,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/rule_creation @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/actions @elastic/security-detection-engine
 x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/alerts @elastic/security-detection-engine
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/user_roles  @elastic/security-detection-engine
 /x-pack/plugins/security_solution/server/lib/detection_engine/scripts/roles_users @elastic/security-detection-engine
 
 ## Security Threat Intelligence - Under Security Platform
@@ -1398,7 +1417,7 @@ x-pack/test/security_solution_api_integration/test_suites/detections_response/de
 /x-pack/plugins/security_solution/server/routes @elastic/security-detections-response @elastic/security-threat-hunting
 /x-pack/plugins/security_solution/server/utils @elastic/security-detections-response @elastic/security-threat-hunting
 x-pack/test/security_solution_api_integration/test_suites/detections_response/utils @elastic/security-detections-response
-
+x-pack/test/security_solution_api_integration/test_suites/detections_response/default_license/telemetry @elastic/security-detections-response
 
 ## Security Solution sub teams - security-defend-workflows
 /x-pack/plugins/security_solution/public/management/ @elastic/security-defend-workflows
