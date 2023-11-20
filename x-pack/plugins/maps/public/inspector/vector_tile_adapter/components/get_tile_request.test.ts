@@ -126,6 +126,7 @@ test('Should return elasticsearch vector tile request for hits tiles', () => {
           type: 'long',
         },
       },
+      size: 10000,
       sort: [
         {
           '@timestamp': {

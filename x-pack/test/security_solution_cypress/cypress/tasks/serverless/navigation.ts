@@ -5,14 +5,32 @@
  * 2.0.
  */
 
-const serverlessLocator = {
-  alerts: '[data-test-subj="solutionSideNavItemLink-alerts"]',
-};
+import { ALERTS, DISCOVER, EXPLORE } from '../../screens/serverless_security_header';
+import {
+  EXPLORE_BREADCRUMB,
+  HOSTS_BREADCRUMB,
+} from '../../screens/serverless_security_breadcrumbs';
 
 const navigateTo = (page: string) => {
   cy.get(page).click();
 };
 
 export const navigateToAlertsPageInServerless = () => {
-  navigateTo(serverlessLocator.alerts);
+  navigateTo(ALERTS);
+};
+
+export const navigateToDiscoverPageInServerless = () => {
+  navigateTo(DISCOVER);
+};
+
+export const navigateToExplorePageInServerless = () => {
+  navigateTo(EXPLORE);
+};
+
+export const navigateToHostsUsingBreadcrumb = () => {
+  cy.get(HOSTS_BREADCRUMB).click();
+};
+
+export const navigateToExploreUsingBreadcrumb = () => {
+  cy.get(EXPLORE_BREADCRUMB).click();
 };

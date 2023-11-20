@@ -25,7 +25,7 @@ import {
   filterTableTabTable,
   toggleColumnTableTabTable,
 } from '../../../../tasks/expandable_flyout/alert_details_right_panel_table_tab';
-import { cleanKibana } from '../../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../../tasks/common';
 import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { createRule } from '../../../../tasks/api_calls/rules';
@@ -38,7 +38,7 @@ describe(
   { tags: ['@ess', '@serverless'] },
   () => {
     beforeEach(() => {
-      cleanKibana();
+      deleteAlertsAndRules();
       login();
       createRule(getNewRule());
       visit(ALERTS_URL);

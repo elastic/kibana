@@ -22,6 +22,8 @@ import {
   threat_mapping,
 } from '@kbn/securitysolution-io-ts-alerting-types';
 
+// TODO https://github.com/elastic/security-team/issues/7491
+// eslint-disable-next-line no-restricted-imports
 import {
   AlertSuppression,
   EventCategoryOverride,
@@ -47,8 +49,7 @@ import {
   Threshold,
   TiebreakerField,
   TimestampField,
-  anomaly_threshold,
-} from '../../../../model';
+} from '../../../../model/rule_schema_legacy';
 
 import {
   BuildingBlockObject,
@@ -64,6 +65,7 @@ import {
 } from './diffable_field_types';
 
 import { buildSchema } from './build_schema';
+import { anomaly_threshold } from '../../../../model/schemas';
 
 export type DiffableCommonFields = t.TypeOf<typeof DiffableCommonFields>;
 export const DiffableCommonFields = buildSchema({

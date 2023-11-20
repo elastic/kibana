@@ -27,7 +27,7 @@ export const getRateMetricAgg = () => {
     name: METRIC_TYPES.RATE,
     expressionName: aggRateFnName,
     title: rateTitle,
-    valueType: 'number',
+    getValueType: () => 'number',
     makeLabel: (aggConfig) => {
       return i18n.translate('data.search.aggs.metrics.rateLabel', {
         defaultMessage: 'Rate of {field} per {unit}',

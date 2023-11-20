@@ -20,8 +20,6 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/400_response.yaml'
-  servers:
-     - url: https://localhost:5601
 
 post:
   summary: Create Kibana saved objects.
@@ -102,5 +100,3 @@ put:
          application/json:
           schema:
             type: object
-servers:
-      - url: https://localhost:5601

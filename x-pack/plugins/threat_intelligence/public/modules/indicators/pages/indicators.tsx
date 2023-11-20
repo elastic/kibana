@@ -37,7 +37,7 @@ const IndicatorsPageProviders: FC = ({ children }) => (
 const IndicatorsPageContent: VFC = () => {
   const { blockListIndicatorValue } = useBlockListContext();
 
-  const { browserFields, indexPattern } = useSourcererDataView();
+  const { browserFields, indexPattern, sourcererDataView } = useSourcererDataView();
 
   const columnSettings = useColumnSettings();
 
@@ -84,6 +84,7 @@ const IndicatorsPageContent: VFC = () => {
           <QueryBar
             queries={[indicatorChartQuery, indicatorListQuery]}
             indexPattern={indexPattern}
+            sourcererDataView={sourcererDataView}
           />
         </FiltersGlobal>
 

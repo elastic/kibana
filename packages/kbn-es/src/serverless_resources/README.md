@@ -2,6 +2,15 @@
 
 The resources in this directory are used for seeding Elasticsearch Serverless images with users, roles and tokens for SSL and authentication. Serverless requires file realm authentication, so we will bind mount them into the containers at `/usr/share/elasticsearch/config/`.
 
+## Roles
+
+Roles defined in `roles.yml` intended to mock a Serverless deployment. It must be in sync with `project-controller` defined roles and used in real (MKI) environments. In case of some differences tests may pass against Serverless snapshot environment but fail against MKI environments creating confusion.
+
+### Why `security_roles.json` is here?
+
+`security_roles.json` is a subset of defined in `roles.yml` roles in a JSON format and extended with necessary fields
+to be compatible with `/api/security/role/{roleName}` endpoint. It's consumed by test environments like Cypress to be able to run different scenarios.
+
 ## Users
 
 ### Default user

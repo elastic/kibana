@@ -41,7 +41,6 @@ export interface EmbeddableChangePointChartProps {
    */
   lastReloadRequestTime?: number;
 }
-
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
   const { embeddable: embeddableStart } = plugins;
   const factory = embeddableStart.getEmbeddableFactory<EmbeddableChangePointChartInput>(

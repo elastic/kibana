@@ -157,7 +157,7 @@ const profilingStatusRoute = createApmServerRoute({
     if (profilingDataAccessStart) {
       try {
         const response = await profilingDataAccessStart?.services.getStatus({
-          esClient: esClient.asCurrentUser,
+          esClient,
           soClient: (await context.core).savedObjects.client,
           spaceId: (
             await plugins.spaces?.start()

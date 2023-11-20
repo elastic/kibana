@@ -10,7 +10,7 @@
 
 import { offeringBasedSchema, schema, TypeOf } from '@kbn/config-schema';
 import { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import { ObservabilityPlugin, ObservabilityPluginSetup } from './plugin';
+import type { ObservabilityPluginSetup } from './plugin';
 import { createOrUpdateIndex, Mappings } from './utils/create_or_update_index';
 import { createOrUpdateIndexTemplate } from './utils/create_or_update_index_template';
 import { ScopedAnnotationsClient } from './lib/annotations/bootstrap_annotations';
@@ -48,7 +48,7 @@ const configSchema = schema.object({
     }),
     thresholdRule: schema.object({
       enabled: offeringBasedSchema({
-        serverless: schema.boolean({ defaultValue: false }),
+        serverless: schema.boolean({ defaultValue: true }),
         traditional: schema.boolean({ defaultValue: true }),
       }),
     }),
@@ -57,6 +57,7 @@ const configSchema = schema.object({
     groupByPageSize: schema.number({ defaultValue: 10_000 }),
   }),
   enabled: schema.boolean({ defaultValue: true }),
+  createO11yGenericFeatureId: schema.boolean({ defaultValue: false }),
 });
 
 export const config: PluginConfigDescriptor = {
@@ -74,8 +75,10 @@ export const config: PluginConfigDescriptor = {
 
 export type ObservabilityConfig = TypeOf<typeof configSchema>;
 
-export const plugin = (initContext: PluginInitializerContext) =>
-  new ObservabilityPlugin(initContext);
+export const plugin = async (initContext: PluginInitializerContext) => {
+  const { ObservabilityPlugin } = await import('./plugin');
+  return new ObservabilityPlugin(initContext);
+};
 
 export type { Mappings, ObservabilityPluginSetup, ScopedAnnotationsClient };
 export {

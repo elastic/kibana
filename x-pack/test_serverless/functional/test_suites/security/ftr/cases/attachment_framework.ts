@@ -9,9 +9,9 @@ import { expect } from 'expect';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getPageObject, getService }: FtrProviderContext) => {
+  const common = getPageObject('common');
   const dashboard = getPageObject('dashboard');
   const lens = getPageObject('lens');
-  const svlSecNavigation = getService('svlSecNavigation');
   const svlCommonPage = getPageObject('svlCommonPage');
   const testSubjects = getService('testSubjects');
   const cases = getService('cases');
@@ -25,9 +25,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     describe('lens visualization', () => {
       before(async () => {
         await svlCommonPage.login();
-        await svlSecNavigation.navigateToLandingPage();
-
-        await testSubjects.click('solutionSideNavItemLink-dashboards');
+        await common.navigateToApp('security', { path: 'dashboards' });
         await header.waitUntilLoadingHasFinished();
 
         await retry.waitFor('createDashboardButton', async () => {
@@ -88,7 +86,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           owner: 'securitySolution',
         });
 
-        await testSubjects.click('solutionSideNavItemLink-dashboards');
+        await common.navigateToApp('security', { path: 'dashboards' });
+        await header.waitUntilLoadingHasFinished();
 
         if (await testSubjects.exists('edit-unsaved-New-Dashboard')) {
           await testSubjects.click('edit-unsaved-New-Dashboard');

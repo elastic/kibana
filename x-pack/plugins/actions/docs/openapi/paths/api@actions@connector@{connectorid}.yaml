@@ -19,8 +19,6 @@ get:
       $ref: '../components/responses/401.yaml'
     '404':
       $ref: '../components/responses/404.yaml'
-  servers:
-    - url: https://localhost:5601
 
 delete:
   summary: Deletes a connector.
@@ -37,8 +35,6 @@ delete:
       $ref: '../components/responses/401.yaml'
     '404':
       $ref: '../components/responses/404.yaml'
-  servers:
-    - url: https://localhost:5601
 
 post:
   summary: Creates a connector.
@@ -77,8 +73,6 @@ post:
               $ref: '../components/examples/create_index_connector_response.yaml'
     '401':
       $ref: '../components/responses/401.yaml'
-  servers:
-    - url: https://localhost:5601
 
 put:
   summary: Updates the attributes for a connector.
@@ -110,7 +104,3 @@ put:
       $ref: '../components/responses/401.yaml'
     '404':
       $ref: '../components/responses/404.yaml'
-  servers:
-    - url: https://localhost:5601
-servers:
-  - url: https://localhost:5601

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { TIMESTAMP_FIELD } from '../../common/constants';
-import { findInventoryModel } from '../../common/inventory_models';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 // import { KibanaFramework } from '../lib/adapters/framework/kibana_framework_adapter';
-import { InventoryItemType } from '../../common/inventory_models/types';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { TIMESTAMP_FIELD } from '../../common/constants';
 import { ESSearchClient } from '../lib/metrics/types';
 
 interface Options {

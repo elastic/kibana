@@ -15,6 +15,10 @@ const testMap = [
   ['x-pack/plugins/apm/public/components/app/correlations/correlations_table.tsx', 'xpack.apm'],
   ['x-pack/plugins/cases/public/components/foo.tsx', 'xpack.cases'],
   [
+    'x-pack/plugins/synthetics/public/apps/synthetics/components/alerts/toggle_alert_flyout_button.tsx',
+    'xpack.synthetics',
+  ],
+  [
     'packages/kbn-alerts-ui-shared/src/alert_lifecycle_status_badge/index.tsx',
     'app_not_found_in_i18nrc',
   ],

@@ -72,6 +72,7 @@ const NO_DATA_MESSAGE = 'There was an error displaying data.';
 describe('<RulePreview />', () => {
   afterEach(() => {
     jest.clearAllMocks();
+    mockUseGetSavedQuery.mockReturnValue({ isSavedQueryLoading: false, savedQueryBar: null });
   });
 
   it('should render rule preview and its sub sections', async () => {
@@ -84,7 +85,6 @@ describe('<RulePreview />', () => {
       scheduleRuleData: mockScheduleStepRule(),
       ruleActionsData: { actions: ['action'] },
     });
-    mockUseGetSavedQuery.mockReturnValue({ isSavedQueryLoading: false, savedQueryBar: null });
 
     const { getByTestId } = renderRulePreview();
 
@@ -124,6 +124,7 @@ describe('<RulePreview />', () => {
 
   it('should render loading spinner when rule is loading', async () => {
     mockUseRuleWithFallback.mockReturnValue({ loading: true, rule: null });
+    mockGetStepsData.mockReturnValue({});
     const { getByTestId } = renderRulePreview();
     await act(async () => {
       expect(getByTestId(RULE_PREVIEW_LOADING_TEST_ID)).toBeInTheDocument();
@@ -132,6 +133,7 @@ describe('<RulePreview />', () => {
 
   it('should not render rule preview when rule is null', async () => {
     mockUseRuleWithFallback.mockReturnValue({});
+    mockGetStepsData.mockReturnValue({});
     const { queryByTestId, getByText } = renderRulePreview();
     await act(async () => {
       expect(queryByTestId(RULE_PREVIEW_BODY_TEST_ID)).not.toBeInTheDocument();

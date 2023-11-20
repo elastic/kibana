@@ -314,7 +314,7 @@
             "label": "workplaceSearch",
             "description": [],
             "signature": [
-              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceCloudConnectorPackage: string; readonly confluenceServer: string; readonly contentSources: string; readonly customConnectorPackage: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalSharePointOnline: string; readonly externalIdentities: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly networkDrive: string; readonly oneDrive: string; readonly permissions: string; readonly privateSourcePermissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly sharePointServer: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
+              "{ readonly apiKeys: string; readonly box: string; readonly confluenceCloud: string; readonly confluenceCloudConnectorPackage: string; readonly confluenceServer: string; readonly contentSources: string; readonly customConnectorPackage: string; readonly customSources: string; readonly customSourcePermissions: string; readonly documentPermissions: string; readonly dropbox: string; readonly externalSharePointOnline: string; readonly externalIdentities: string; readonly gatedFormBlog: string; readonly gitHub: string; readonly gettingStarted: string; readonly gmail: string; readonly googleDrive: string; readonly indexingSchedule: string; readonly jiraCloud: string; readonly jiraServer: string; readonly networkDrive: string; readonly oneDrive: string; readonly permissions: string; readonly privateSourcePermissions: string; readonly salesforce: string; readonly security: string; readonly serviceNow: string; readonly sharePoint: string; readonly sharePointServer: string; readonly slack: string; readonly synch: string; readonly zendesk: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -560,7 +560,7 @@
             "label": "query",
             "description": [],
             "signature": [
-              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; }"
+              "{ readonly eql: string; readonly kueryQuerySyntax: string; readonly luceneQuery: string; readonly luceneQuerySyntax: string; readonly percolate: string; readonly queryDsl: string; readonly queryESQL: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -658,7 +658,7 @@
             "label": "observability",
             "description": [],
             "signature": [
-              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly threshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly sloBurnRateRule: string; }"
+              "{ readonly guide: string; readonly infrastructureThreshold: string; readonly logsThreshold: string; readonly metricsThreshold: string; readonly customThreshold: string; readonly monitorStatus: string; readonly monitorUptime: string; readonly tlsCertificate: string; readonly uptimeDurationAnomaly: string; readonly monitorLogs: string; readonly analyzeMetrics: string; readonly monitorUptimeSynthetics: string; readonly userExperience: string; readonly createAlerts: string; readonly syntheticsAlerting: string; readonly syntheticsCommandReference: string; readonly syntheticsProjectMonitors: string; readonly syntheticsMigrateFromIntegration: string; readonly sloBurnRateRule: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -840,7 +840,7 @@
             "label": "fleet",
             "description": [],
             "signature": [
-              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; }"
+              "{ readonly beatsAgentComparison: string; readonly guide: string; readonly fleetServer: string; readonly fleetServerAddFleetServer: string; readonly esSettings: string; readonly settings: string; readonly logstashSettings: string; readonly kafkaSettings: string; readonly settingsFleetServerHostSettings: string; readonly settingsFleetServerProxySettings: string; readonly troubleshooting: string; readonly elasticAgent: string; readonly datastreams: string; readonly datastreamsILM: string; readonly datastreamsNamingScheme: string; readonly datastreamsManualRollover: string; readonly datastreamsTSDS: string; readonly datastreamsTSDSMetrics: string; readonly installElasticAgent: string; readonly installElasticAgentStandalone: string; readonly packageSignatures: string; readonly upgradeElasticAgent: string; readonly learnMoreBlog: string; readonly apiKeysLearnMore: string; readonly onPremRegistry: string; readonly secureLogstash: string; readonly agentPolicy: string; readonly api: string; readonly uninstallAgent: string; readonly installAndUninstallIntegrationAssets: string; readonly elasticAgentInputConfiguration: string; readonly policySecrets: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,
@@ -896,7 +896,7 @@
             "label": "legal",
             "description": [],
             "signature": [
-              "{ readonly privacyStatement: string; }"
+              "{ readonly privacyStatement: string; readonly generalPrivacyStatement: string; readonly termsOfService: string; readonly dataUse: string; }"
             ],
             "path": "packages/kbn-doc-links/src/types.ts",
             "deprecated": false,

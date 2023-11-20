@@ -73,6 +73,54 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
+        "id": "def-common.ChromeBreadcrumb",
+        "type": "Interface",
+        "tags": [],
+        "label": "ChromeBreadcrumb",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          },
+          " extends ",
+          "EuiBreadcrumbProps"
+        ],
+        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-chrome-browser",
+            "id": "def-common.ChromeBreadcrumb.deepLinkId",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "deepLinkId",
+            "description": [
+              "\nThe deepLinkId can be used to merge the navigational breadcrumbs set via project navigation\nwith the deeper context breadcrumbs set via the `chrome.setBreadcrumbs` API."
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.AppDeepLinkId",
+                "text": "AppDeepLinkId"
+              },
+              " | undefined"
+            ],
+            "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.ChromeBreadcrumbsAppendExtension",
         "type": "Interface",
         "tags": [],
@@ -2083,7 +2131,13 @@
               "() => ",
               "Observable",
               "<",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]>"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
@@ -2103,7 +2157,13 @@
             ],
             "signature": [
               "(newBreadcrumbs: ",
-              "EuiBreadcrumbProps",
+              {
+                "pluginId": "@kbn/core-chrome-browser",
+                "scope": "common",
+                "docId": "kibKbnCoreChromeBrowserPluginApi",
+                "section": "def-common.ChromeBreadcrumb",
+                "text": "ChromeBreadcrumb"
+              },
               "[]) => void"
             ],
             "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
@@ -2118,7 +2178,13 @@
                 "label": "newBreadcrumbs",
                 "description": [],
                 "signature": [
-                  "EuiBreadcrumbProps",
+                  {
+                    "pluginId": "@kbn/core-chrome-browser",
+                    "scope": "common",
+                    "docId": "kibKbnCoreChromeBrowserPluginApi",
+                    "section": "def-common.ChromeBreadcrumb",
+                    "text": "ChromeBreadcrumb"
+                  },
                   "[]"
                 ],
                 "path": "packages/core/chrome/core-chrome-browser/src/contracts.ts",
@@ -3041,25 +3107,6 @@
       },
       {
         "parentPluginId": "@kbn/core-chrome-browser",
-        "id": "def-common.ChromeBreadcrumb",
-        "type": "Type",
-        "tags": [],
-        "label": "ChromeBreadcrumb",
-        "description": [],
-        "signature": [
-          "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
-          "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"location\" | \"time\" | \"step\" | undefined; popoverContent?: React.ReactNode; popoverProps?: Omit<",
-          "EuiPopoverProps",
-          ", \"button\" | \"closePopover\" | \"isOpen\"> | undefined; }"
-        ],
-        "path": "packages/core/chrome/core-chrome-browser/src/breadcrumb.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "@kbn/core-chrome-browser",
         "id": "def-common.ChromeHelpExtensionLinkBase",
         "type": "Type",
         "tags": [],
@@ -3128,11 +3175,13 @@
         "label": "ChromeProjectBreadcrumb",
         "description": [],
         "signature": [
-          "Omit<React.HTMLAttributes<HTMLElement>, \"color\" | \"aria-current\"> & ",
-          "CommonProps",
-          " & { href?: string | undefined; rel?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; text: React.ReactNode; truncate?: boolean | undefined; color?: \"text\" | \"warning\" | \"success\" | \"subdued\" | \"primary\" | \"accent\" | \"danger\" | \"ghost\" | undefined; 'aria-current'?: boolean | \"page\" | \"date\" | \"true\" | \"false\" | \"location\" | \"time\" | \"step\" | undefined; popoverContent?: React.ReactNode; popoverProps?: Omit<",
-          "EuiPopoverProps",
-          ", \"button\" | \"closePopover\" | \"isOpen\"> | undefined; }"
+          {
+            "pluginId": "@kbn/core-chrome-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreChromeBrowserPluginApi",
+            "section": "def-common.ChromeBreadcrumb",
+            "text": "ChromeBreadcrumb"
+          }
         ],
         "path": "packages/core/chrome/core-chrome-browser/src/project_navigation.ts",
         "deprecated": false,

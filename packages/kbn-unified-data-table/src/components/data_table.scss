@@ -161,3 +161,12 @@
     display: none;
   }
 }
+
+// Ensure full screen data grids are not covered by elements with a z-index
+.euiDataGrid__restrictBody *:not(
+.euiDataGrid--fullScreen,
+.euiDataGrid--fullScreen *,
+[data-euiportal='true'],
+[data-euiportal='true'] *) {
+  z-index: unset !important;
+}

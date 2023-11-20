@@ -5,58 +5,12 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <button
+      <div
         class="euiContextMenuItem css-0"
         data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
-        type="button"
       >
         <span
-          class="euiContextMenu__itemLayout"
-        >
-          <span
-            class="euiContextMenuItem__text"
-          >
-            <div
-              class="euiFlexGroup css-5zp1nn"
-            >
-              <div
-                class="euiFlexItem emotion-euiFlexItem-growZero"
-                data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
-              >
-                <span
-                  data-euiicon-type="check"
-                />
-              </div>
-              <div
-                class="euiFlexItem emotion-EuiFlexItem"
-              >
-                <div
-                  data-test-subj="securityLinkAnchorComponent"
-                >
-                  <a
-                    href="1a2b3c"
-                  >
-                    Simple Rule Query
-                  </a>
-                </div>
-              </div>
-            </div>
-          </span>
-        </span>
-      </button>
-    </div>
-  </body>,
-  "container": <div>
-    <button
-      class="euiContextMenuItem css-0"
-      data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
-      type="button"
-    >
-      <span
-        class="euiContextMenu__itemLayout"
-      >
-        <span
-          class="euiContextMenuItem__text"
+          class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
         >
           <div
             class="euiFlexGroup css-5zp1nn"
@@ -84,8 +38,44 @@ Object {
             </div>
           </div>
         </span>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiContextMenuItem css-0"
+      data-test-subj="generateLinedRulesMenuItemsTestActionItem1a2b3c"
+    >
+      <span
+        class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+      >
+        <div
+          class="euiFlexGroup css-5zp1nn"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+            data-test-subj="generateLinedRulesMenuItemsTestLeftIcon"
+          >
+            <span
+              data-euiicon-type="check"
+            />
+          </div>
+          <div
+            class="euiFlexItem emotion-EuiFlexItem"
+          >
+            <div
+              data-test-subj="securityLinkAnchorComponent"
+            >
+              <a
+                href="1a2b3c"
+              >
+                Simple Rule Query
+              </a>
+            </div>
+          </div>
+        </div>
       </span>
-    </button>
+    </div>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],
@@ -146,50 +136,12 @@ Object {
   "asFragment": [Function],
   "baseElement": <body>
     <div>
-      <button
-        class="euiContextMenuItem css-es0s2t"
+      <div
+        class="euiContextMenuItem emotion-EuiContextMenuItem"
         data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
-        type="button"
       >
         <span
-          class="euiContextMenu__itemLayout"
-        >
-          <span
-            class="euiContextMenuItem__text"
-          >
-            <div
-              class="euiFlexGroup css-5zp1nn"
-            >
-              <div
-                class="euiFlexItem emotion-EuiFlexItem"
-              >
-                <div
-                  data-test-subj="securityLinkAnchorComponent"
-                >
-                  <a
-                    href="2a2b3c"
-                  >
-                    Simple Rule Query 2
-                  </a>
-                </div>
-              </div>
-            </div>
-          </span>
-        </span>
-      </button>
-    </div>
-  </body>,
-  "container": <div>
-    <button
-      class="euiContextMenuItem css-es0s2t"
-      data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
-      type="button"
-    >
-      <span
-        class="euiContextMenu__itemLayout"
-      >
-        <span
-          class="euiContextMenuItem__text"
+          class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
         >
           <div
             class="euiFlexGroup css-5zp1nn"
@@ -209,8 +161,36 @@ Object {
             </div>
           </div>
         </span>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiContextMenuItem emotion-EuiContextMenuItem"
+      data-test-subj="generateLinedRulesMenuItemsTestActionItem2a2b3c"
+    >
+      <span
+        class="euiContextMenuItem__text emotion-euiContextMenuItem__text"
+      >
+        <div
+          class="euiFlexGroup css-5zp1nn"
+        >
+          <div
+            class="euiFlexItem emotion-EuiFlexItem"
+          >
+            <div
+              data-test-subj="securityLinkAnchorComponent"
+            >
+              <a
+                href="2a2b3c"
+              >
+                Simple Rule Query 2
+              </a>
+            </div>
+          </div>
+        </div>
       </span>
-    </button>
+    </div>
   </div>,
   "debug": [Function],
   "findAllByAltText": [Function],

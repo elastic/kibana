@@ -63,10 +63,12 @@
         "tags": [],
         "label": "KibanaErrorBoundaryProvider",
         "description": [
-          "\nKibana-specific Provider that maps dependencies to services."
+          "\nProvider that uses dependencies to give context to the KibanaErrorBoundary component\nThis provider is aware if services were already created from a higher level of the component tree"
         ],
         "signature": [
-          "({ children }: { children?: React.ReactNode; }) => JSX.Element"
+          "({ children, analytics, }: React.PropsWithChildren<",
+          "KibanaErrorBoundaryProviderDeps",
+          ">) => JSX.Element"
         ],
         "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
         "deprecated": false,
@@ -75,14 +77,51 @@
           {
             "parentPluginId": "@kbn/shared-ux-error-boundary",
             "id": "def-common.KibanaErrorBoundaryProvider.$1",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
-            "label": "{ children }",
+            "label": "{\n  children,\n  analytics,\n}",
             "description": [],
             "signature": [
-              "{ children?: React.ReactNode; }"
+              "React.PropsWithChildren<",
+              "KibanaErrorBoundaryProviderDeps",
+              ">"
             ],
             "path": "packages/shared-ux/error_boundary/src/services/error_boundary_services.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/shared-ux-error-boundary",
+        "id": "def-common.ThrowIfError",
+        "type": "Function",
+        "tags": [],
+        "label": "ThrowIfError",
+        "description": [
+          "\nThis component allows errors to be caught outside of a render tree, and re-thrown within a render tree\nwrapped by KibanaErrorBoundary. The purpose is to let KibanaErrorBoundary control the user experience when\nReact can not render due to an error.\n"
+        ],
+        "signature": [
+          "({ error }: React.PropsWithChildren<{ error: Error | null; }>) => null"
+        ],
+        "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/shared-ux-error-boundary",
+            "id": "def-common.ThrowIfError.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ error }",
+            "description": [],
+            "signature": [
+              "React.PropsWithChildren<{ error: Error | null; }>"
+            ],
+            "path": "packages/shared-ux/error_boundary/src/ui/throw_if_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

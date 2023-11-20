@@ -25,6 +25,8 @@ function getResourceName(resource: string) {
   return `.kibana-observability-ai-assistant-${resource}`;
 }
 
+export const ELSER_MODEL_ID = '.elser_model_2';
+
 export const INDEX_QUEUED_DOCUMENTS_TASK_ID = 'observabilityAIAssistant:indexQueuedDocumentsTask';
 
 export const INDEX_QUEUED_DOCUMENTS_TASK_TYPE = INDEX_QUEUED_DOCUMENTS_TASK_ID + 'Type';
@@ -120,6 +122,11 @@ export class ObservabilityAIAssistantService {
             auto_expand_replicas: '0-1',
             hidden: true,
           },
+          mappings: {
+            _meta: {
+              model: ELSER_MODEL_ID,
+            },
+          },
         },
       });
 
@@ -150,7 +157,7 @@ export class ObservabilityAIAssistantService {
         processors: [
           {
             inference: {
-              model_id: '.elser_model_1',
+              model_id: ELSER_MODEL_ID,
               target_field: 'ml',
               field_map: {
                 text: 'text_field',

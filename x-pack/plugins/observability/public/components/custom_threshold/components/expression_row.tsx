@@ -4,6 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import {
   EuiButtonIcon,
   EuiFieldText,
@@ -11,7 +12,6 @@ import {
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -19,19 +19,24 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import {
   AggregationType,
   builtInComparators,
+  COMPARATORS,
   IErrorObject,
   ThresholdExpression,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase } from '@kbn/es-query';
+import { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
-import { Comparator } from '../../../../common/custom_threshold_rule/types';
-import { AGGREGATION_TYPES, DerivedIndexPattern, MetricExpression } from '../types';
+import { Aggregators, Comparator } from '../../../../common/custom_threshold_rule/types';
+import { MetricExpression } from '../types';
 import { CustomEquationEditor } from './custom_equation';
 import { CUSTOM_EQUATION, LABEL_HELP_MESSAGE, LABEL_LABEL } from '../i18n_strings';
 import { decimalToPct, pctToDecimal } from '../helpers/corrected_percent_convert';
 
+// Create a new object with COMPARATORS.NOT_BETWEEN removed as we use OUTSIDE_RANGE
+const updatedBuiltInComparators = { ...builtInComparators };
+delete updatedBuiltInComparators[COMPARATORS.NOT_BETWEEN];
+
 const customComparators = {
-  ...builtInComparators,
+  ...updatedBuiltInComparators,
   [Comparator.OUTSIDE_RANGE]: {
     text: i18n.translate('xpack.observability.customThreshold.rule.alertFlyout.outsideRangeLabel', {
       defaultMessage: 'Is not between',
@@ -42,7 +47,7 @@ const customComparators = {
 };
 
 interface ExpressionRowProps {
-  fields: DerivedIndexPattern['fields'];
+  fields: DataViewFieldBase[];
   expressionId: number;
   expression: MetricExpression;
   errors: IErrorObject;
@@ -74,9 +79,12 @@ export const ExpressionRow: React.FC<ExpressionRowProps> = (props) => {
     canDelete,
   } = props;
 
-  const { metric, comparator = Comparator.GT, threshold = [] } = expression;
+  const { metrics, comparator = Comparator.GT, threshold = [] } = expression;
 
-  const isMetricPct = useMemo(() => Boolean(metric && metric.endsWith('.pct')), [metric]);
+  const isMetricPct = useMemo(
+    () => Boolean(metrics.length === 1 && metrics[0].field?.endsWith('.pct')),
+    [metrics]
+  );
   const [label, setLabel] = useState<string | undefined>(expression?.label || undefined);
 
   const updateComparator = useCallback(
@@ -217,17 +225,8 @@ const ThresholdElement: React.FC<{
         onChangeSelectedThreshold={updateThreshold}
         errors={errors}
         display="fullWidth"
+        unit={isMetricPct ? '%' : ''}
       />
-
-      {isMetricPct && (
-        <div
-          style={{
-            alignSelf: 'center',
-          }}
-        >
-          <EuiText size={'s'}>%</EuiText>
-        </div>
-      )}
     </>
   );
 };
@@ -242,7 +241,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'histogram'],
-    value: AGGREGATION_TYPES.AVERAGE,
+    value: Aggregators.AVERAGE,
   },
   max: {
     text: i18n.translate(
@@ -253,7 +252,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
-    value: AGGREGATION_TYPES.MAX,
+    value: Aggregators.MAX,
   },
   min: {
     text: i18n.translate(
@@ -264,7 +263,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
     ),
     fieldRequired: true,
     validNormalizedTypes: ['number', 'date', 'histogram'],
-    value: AGGREGATION_TYPES.MIN,
+    value: Aggregators.MIN,
   },
   cardinality: {
     text: i18n.translate(
@@ -274,29 +273,18 @@ export const aggregationType: { [key: string]: AggregationType } = {
       }
     ),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.CARDINALITY,
+    value: Aggregators.CARDINALITY,
     validNormalizedTypes: ['number', 'string', 'ip', 'date'],
-  },
-  rate: {
-    text: i18n.translate(
-      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.rate',
-      {
-        defaultMessage: 'Rate',
-      }
-    ),
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.RATE,
-    validNormalizedTypes: ['number'],
   },
   count: {
     text: i18n.translate(
       'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.count',
       {
-        defaultMessage: 'Document count',
+        defaultMessage: 'Count',
       }
     ),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.COUNT,
+    value: Aggregators.COUNT,
     validNormalizedTypes: ['number'],
   },
   sum: {
@@ -307,35 +295,7 @@ export const aggregationType: { [key: string]: AggregationType } = {
       }
     ),
     fieldRequired: false,
-    value: AGGREGATION_TYPES.SUM,
-    validNormalizedTypes: ['number', 'histogram'],
-  },
-  p95: {
-    text: i18n.translate(
-      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.p95',
-      {
-        defaultMessage: '95th Percentile',
-      }
-    ),
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.P95,
-    validNormalizedTypes: ['number', 'histogram'],
-  },
-  p99: {
-    text: i18n.translate(
-      'xpack.observability.customThreshold.rule.alertFlyout.aggregationText.p99',
-      {
-        defaultMessage: '99th Percentile',
-      }
-    ),
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.P99,
-    validNormalizedTypes: ['number', 'histogram'],
-  },
-  custom: {
-    text: CUSTOM_EQUATION,
-    fieldRequired: false,
-    value: AGGREGATION_TYPES.CUSTOM,
+    value: Aggregators.SUM,
     validNormalizedTypes: ['number', 'histogram'],
   },
 };

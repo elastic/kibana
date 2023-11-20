@@ -217,6 +217,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       dropbox: `${WORKPLACE_SEARCH_DOCS}workplace-search-dropbox-connector.html`,
       externalSharePointOnline: `${WORKPLACE_SEARCH_DOCS}sharepoint-online-external.html`,
       externalIdentities: `${WORKPLACE_SEARCH_DOCS}workplace-search-external-identities-api.html`,
+      gatedFormBlog: `${ELASTIC_WEBSITE_URL}blog/evolution-workplace-search-private-data-elasticsearch`,
       gettingStarted: `${WORKPLACE_SEARCH_DOCS}workplace-search-getting-started.html`,
       gitHub: `${WORKPLACE_SEARCH_DOCS}workplace-search-github-connector.html`,
       gmail: `${WORKPLACE_SEARCH_DOCS}workplace-search-gmail-connector.html`,
@@ -466,6 +467,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       luceneQuerySyntax: `${ELASTICSEARCH_DOCS}query-dsl-query-string-query.html#query-string-syntax`,
       percolate: `${ELASTICSEARCH_DOCS}query-dsl-percolate-query.html`,
       queryDsl: `${ELASTICSEARCH_DOCS}query-dsl.html`,
+      queryESQL: `${ELASTICSEARCH_DOCS}esql.html`,
     },
     search: {
       sessions: `${KIBANA_DOCS}search-sessions.html`,
@@ -534,7 +536,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       infrastructureThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/infrastructure-threshold-alert.html`,
       logsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/logs-threshold-alert.html`,
       metricsThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/metrics-threshold-alert.html`,
-      threshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/threshold-alert.html`,
+      customThreshold: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/custom-threshold-alert.html`,
       monitorStatus: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-status-alert.html`,
       monitorUptime: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/monitor-uptime.html`,
       tlsCertificate: `${ELASTIC_WEBSITE_URL}guide/en/observability/${DOC_LINK_VERSION}/tls-certificate-alert.html`,
@@ -767,6 +769,7 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
       uninstallAgent: `${SECURITY_SOLUTION_DOCS}uninstall-agent.html`,
       installAndUninstallIntegrationAssets: `${FLEET_DOCS}install-uninstall-integration-assets.html`,
       elasticAgentInputConfiguration: `${FLEET_DOCS}elastic-agent-input-configuration.html`,
+      policySecrets: `${FLEET_DOCS}agent-policy.html#agent-policy-secret-values`,
     },
     ecs: {
       guide: `${ELASTIC_WEBSITE_URL}guide/en/ecs/current/index.html`,
@@ -815,6 +818,9 @@ export const getDocLinks = ({ kibanaBranch }: GetDocLinkOptions): DocLinks => {
     },
     legal: {
       privacyStatement: `${ELASTIC_WEBSITE_URL}legal/product-privacy-statement`,
+      generalPrivacyStatement: `${ELASTIC_WEBSITE_URL}legal/privacy-statement`,
+      termsOfService: `${ELASTIC_WEBSITE_URL}legal/elastic-cloud-account-terms`,
+      dataUse: `${ELASTIC_WEBSITE_URL}legal/privacy-statement#how-we-use-the-information`,
     },
     kibanaUpgradeSavedObjects: {
       resolveMigrationFailures: `${KIBANA_DOCS}resolve-migrations-failures.html`,

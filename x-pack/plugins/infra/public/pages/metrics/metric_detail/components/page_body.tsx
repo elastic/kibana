@@ -7,8 +7,8 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
-import { InventoryItemType } from '../../../../../common/inventory_models/types';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
 import { MetricsTimeInput } from '../hooks/use_metrics_time';

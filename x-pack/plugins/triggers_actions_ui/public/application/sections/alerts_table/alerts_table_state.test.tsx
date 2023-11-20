@@ -9,7 +9,12 @@ import { BehaviorSubject } from 'rxjs';
 import userEvent from '@testing-library/user-event';
 import { get } from 'lodash';
 import { fireEvent, render, waitFor, screen } from '@testing-library/react';
-import { AlertConsumers, ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
+import {
+  AlertConsumers,
+  ALERT_CASE_IDS,
+  ALERT_MAINTENANCE_WINDOW_IDS,
+  ALERT_UUID,
+} from '@kbn/rule-data-utils';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 
 import {
@@ -18,6 +23,7 @@ import {
   AlertsTableConfigurationRegistry,
   AlertsTableFlyoutBaseProps,
   FetchAlertData,
+  RenderCustomActionsRowArgs,
 } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import AlertsTableState, { AlertsTableStateProps } from './alerts_table_state';
@@ -130,6 +136,7 @@ const alerts = [
     [AlertsField.name]: ['one'],
     [AlertsField.reason]: ['two'],
     [AlertsField.uuid]: ['1047d115-670d-469e-af7a-86fdd2b2f814'],
+    [ALERT_UUID]: ['alert-id-1'],
     [ALERT_CASE_IDS]: ['test-id'],
     [ALERT_MAINTENANCE_WINDOW_IDS]: ['test-mw-id-1'],
   },
@@ -257,6 +264,22 @@ const getMock = jest.fn().mockImplementation((plugin: string) => {
         jest.fn().mockImplementation((props) => {
           return `${props.colIndex}:${props.rowIndex}`;
         }),
+      useActionsColumn: () => ({
+        renderCustomActionsRow: ({ setFlyoutAlert }: RenderCustomActionsRowArgs) => {
+          return (
+            <button
+              data-test-subj="expandColumnCellOpenFlyoutButton-0"
+              onClick={() => {
+                setFlyoutAlert({
+                  fields: {
+                    [ALERT_UUID]: 'alert-id-1',
+                  },
+                });
+              }}
+            />
+          );
+        },
+      }),
     };
   }
   return {};
@@ -313,7 +336,6 @@ describe('AlertsTableState', () => {
     id: `test-alerts`,
     featureIds: [AlertConsumers.LOGS],
     query: {},
-    showExpandToDetails: true,
   };
 
   const mockCustomProps = (customProps: Partial<AlertsTableConfigurationRegistry>) => {
@@ -656,7 +678,7 @@ describe('AlertsTableState', () => {
   describe('flyout', () => {
     it('should show a flyout when selecting an alert', async () => {
       const wrapper = render(<AlertsTableWithLocale {...tableProps} />);
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
 
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
@@ -684,7 +706,7 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 
@@ -722,7 +744,7 @@ describe('AlertsTableState', () => {
         />
       );
 
-      userEvent.click(wrapper.queryByTestId('expandColumnCellOpenFlyoutButton-0')!);
+      userEvent.click(wrapper.queryAllByTestId('expandColumnCellOpenFlyoutButton-0')[0]!);
       const result = await wrapper.findAllByTestId('alertsFlyout');
       expect(result.length).toBe(1);
 

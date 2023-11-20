@@ -28,7 +28,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const svlCases = getService('svlCases');
   const find = getService('find');
-
+  const config = getService('config');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -453,7 +453,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const reporterText = await reporter.getVisibleText();
 
-        expect(reporterText).to.be('elastic_serverless');
+        expect(reporterText).to.be(config.get('servers.kibana.username'));
       });
     });
 

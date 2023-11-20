@@ -198,6 +198,7 @@ export interface DocLinks {
     readonly dropbox: string;
     readonly externalSharePointOnline: string;
     readonly externalIdentities: string;
+    readonly gatedFormBlog: string;
     readonly gitHub: string;
     readonly gettingStarted: string;
     readonly gmail: string;
@@ -357,6 +358,7 @@ export interface DocLinks {
     readonly luceneQuerySyntax: string;
     readonly percolate: string;
     readonly queryDsl: string;
+    readonly queryESQL: string;
   };
   readonly date: {
     readonly dateMath: string;
@@ -406,7 +408,7 @@ export interface DocLinks {
     infrastructureThreshold: string;
     logsThreshold: string;
     metricsThreshold: string;
-    threshold: string;
+    customThreshold: string;
     monitorStatus: string;
     monitorUptime: string;
     tlsCertificate: string;
@@ -525,6 +527,7 @@ export interface DocLinks {
     uninstallAgent: string;
     installAndUninstallIntegrationAssets: string;
     elasticAgentInputConfiguration: string;
+    policySecrets: string;
   }>;
   readonly ecs: {
     readonly guide: string;
@@ -572,6 +575,9 @@ export interface DocLinks {
   };
   readonly legal: {
     readonly privacyStatement: string;
+    readonly generalPrivacyStatement: string;
+    readonly termsOfService: string;
+    readonly dataUse: string;
   };
   readonly kibanaUpgradeSavedObjects: {
     readonly resolveMigrationFailures: string;

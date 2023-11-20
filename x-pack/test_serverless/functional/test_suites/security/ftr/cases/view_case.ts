@@ -18,6 +18,7 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 import {
   createOneCaseBeforeDeleteAllAfter,
   createAndNavigateToCase,
+  navigateToCasesApp,
 } from '../../../../../shared/lib/cases/helpers';
 
 const owner = SECURITY_SOLUTION_OWNER;
@@ -28,7 +29,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
   const cases = getService('cases');
   const svlCases = getService('svlCases');
   const find = getService('find');
-
+  const config = getService('config');
   const retry = getService('retry');
   const comboBox = getService('comboBox');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
@@ -452,7 +453,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         const reporterText = await reporter.getVisibleText();
 
-        expect(reporterText).to.be('elastic_serverless');
+        expect(reporterText).to.be(config.get('servers.kibana.username'));
       });
     });
 
@@ -473,7 +474,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       ];
 
       before(async () => {
-        await testSubjects.click('solutionSideNavItemLink-cases');
+        await navigateToCasesApp(getPageObject, getService, owner);
         await cases.api.createConfigWithCustomFields({ customFields, owner });
         await cases.api.createCase({
           customFields: [

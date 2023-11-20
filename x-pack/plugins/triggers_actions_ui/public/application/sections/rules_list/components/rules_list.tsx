@@ -749,7 +749,7 @@ export const RulesList = ({
       {showSearchBar && !isEmpty(filters.ruleParams) ? (
         <RulesListClearRuleFilterBanner onClickClearFilter={handleClearRuleParamFilter} />
       ) : null}
-      <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+      <MaintenanceWindowCallout kibanaServices={kibanaServices} categories={filterConsumers} />
       <RulesListPrompts
         showNoAuthPrompt={showNoAuthPrompt}
         showCreateFirstRulePrompt={showCreateFirstRulePrompt}

@@ -12,10 +12,7 @@ tags:
   - name: cases
     description: Case APIs enable you to open and track issues.
 servers:
-  - url: https://{kibanaUrl}
-    variables:
-      kibanaUrl:
-        default: localhost:5601
+  - url: /
 paths:
 # Paths in the default space
   '/api/cases':
