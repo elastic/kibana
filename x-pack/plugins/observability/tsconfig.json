@@ -94,7 +94,8 @@
     "@kbn/core-chrome-browser",
     "@kbn/lens-embeddable-utils",
     "@kbn/serverless",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/calculate-auto"
   ],
   "exclude": [
     "target/**/*"
