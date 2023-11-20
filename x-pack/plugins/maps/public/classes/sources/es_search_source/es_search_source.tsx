@@ -9,6 +9,7 @@ import _ from 'lodash';
 import React, { ReactElement } from 'react';
 import type { QueryDslFieldLookup } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
@@ -58,6 +59,7 @@ import {
 import { ImmutableSourceProperty, SourceEditorArgs } from '../source';
 import { IField } from '../../fields/field';
 import {
+  getLayerFeaturesRequestName,
   GetFeatureActionsArgs,
   GeoJsonWithMeta,
   IMvtVectorSource,
@@ -377,29 +379,21 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
       }
     }
 
+    const warnings: SearchResponseWarning[] = [];
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.esSearchSource.topHits.requestName', {
-        defaultMessage: '{layerName} top hits request',
-        values: { layerName },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.esSearchSource.topHits.requestDescription', {
-        defaultMessage:
-          'Get top hits from data view: {dataViewName}, entities: {entitiesFieldName}, geospatial field: {geoFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          entitiesFieldName: topHitsGroupByTimeseries ? '_tsid' : topHitsSplitFieldName,
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:top_hits' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const allHits: any[] = [];
@@ -424,6 +418,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
         areEntitiesTrimmed,
         entityCount: entityBuckets.length,
         totalEntities,
+        warnings,
       },
     };
   }
@@ -435,6 +430,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     registerCancelCallback: (callback: () => void) => void,
     inspectorAdapters: Adapters
   ) {
+    const warnings: SearchResponseWarning[] = [];
     const indexPattern = await this.getIndexPattern();
 
     const { docValueFields, sourceOnlyFields } = getDocValueAndSourceFields(
@@ -451,7 +447,15 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
     delete requestMetaWithoutTimeslice.timeslice;
     const useRequestMetaWithoutTimeslice =
       requestMeta.timeslice !== undefined &&
-      (await this.canLoadAllDocuments(requestMetaWithoutTimeslice, registerCancelCallback));
+      (await this.canLoadAllDocuments(
+        layerName,
+        requestMetaWithoutTimeslice,
+        registerCancelCallback,
+        inspectorAdapters,
+        (warning) => {
+          warnings.push(warning);
+        }
+      ));
 
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(
@@ -473,26 +477,18 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
 
     const resp = await this._runEsQuery({
       requestId: this.getId(),
-      requestName: i18n.translate('xpack.maps.esSearchSource.requestName', {
-        defaultMessage: '{layerName} documents request',
-        values: { layerName },
-      }),
+      requestName: getLayerFeaturesRequestName(layerName),
       searchSource,
       registerCancelCallback,
-      requestDescription: i18n.translate('xpack.maps.esSearchSource.requestDescription', {
-        defaultMessage:
-          'Get documents from data view: {dataViewName}, geospatial field: {geoFieldName}',
-        values: {
-          dataViewName: indexPattern.getName(),
-          geoFieldName: this._descriptor.geoField,
-        },
-      }),
       searchSessionId: requestMeta.searchSessionId,
       executionContext: mergeExecutionContext(
         { description: 'es_search_source:doc_search' },
         requestMeta.executionContext
       ),
       requestsAdapter: inspectorAdapters.requests,
+      onWarning: (warning: SearchResponseWarning) => {
+        warnings.push(warning);
+      },
     });
 
     const isTimeExtentForTimeslice =
@@ -506,6 +502,7 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
           ? requestMeta.timeslice
           : timerangeToTimeextent(requestMeta.timeFilters),
         isTimeExtentForTimeslice,
+        warnings,
       },
     };
   }
@@ -990,25 +987,31 @@ export class ESSearchSource extends AbstractESSource implements IMvtVectorSource
   }
 
   async canLoadAllDocuments(
+    layerName: string,
     requestMeta: VectorSourceRequestMeta,
-    registerCancelCallback: (callback: () => void) => void
+    registerCancelCallback: (callback: () => void) => void,
+    inspectorAdapters: Adapters,
+    onWarning: (warning: SearchResponseWarning) => void
   ) {
-    const abortController = new AbortController();
-    registerCancelCallback(() => abortController.abort());
     const maxResultWindow = await this.getMaxResultWindow();
     const searchSource = await this.makeSearchSource(requestMeta, 0);
     searchSource.setField('trackTotalHits', maxResultWindow + 1);
-    const { rawResponse: resp } = await lastValueFrom(
-      searchSource.fetch$({
-        abortSignal: abortController.signal,
-        sessionId: requestMeta.searchSessionId,
-        legacyHitsTotal: false,
-        executionContext: mergeExecutionContext(
-          { description: 'es_search_source:all_doc_counts' },
-          requestMeta.executionContext
-        ),
-      })
-    );
+    const resp = await this._runEsQuery({
+      requestId: this.getId() + 'features_count',
+      requestName: i18n.translate('xpack.maps.vectorSource.featuresCountRequestName', {
+        defaultMessage: 'load features count ({layerName})',
+        values: { layerName },
+      }),
+      searchSource,
+      registerCancelCallback,
+      searchSessionId: requestMeta.searchSessionId,
+      executionContext: mergeExecutionContext(
+        { description: 'es_search_source:all_doc_counts' },
+        requestMeta.executionContext
+      ),
+      requestsAdapter: inspectorAdapters.requests,
+      onWarning,
+    });
     return !isTotalHitsGreaterThan(resp.hits.total as unknown as TotalHits, maxResultWindow);
   }
 

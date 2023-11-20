@@ -24,7 +24,7 @@ import {
   EXPAND_DETAILS_BUTTON_TEST_ID,
 } from './test_ids';
 
-export interface PanelNavigationProps {
+export interface FlyoutNavigationProps {
   /**
    * If true, the expand detail button will be displayed
    */
@@ -39,7 +39,11 @@ export interface PanelNavigationProps {
   actions?: React.ReactElement;
 }
 
-export const FlyoutNavigation: FC<PanelNavigationProps> = memo(
+/**
+ * Navigation menu on the right panel only, with expand/collapse button and option to
+ * pass in a list of actions to be displayed on top.
+ */
+export const FlyoutNavigation: FC<FlyoutNavigationProps> = memo(
   ({ flyoutIsExpandable = false, expandDetails, actions }) => {
     const { euiTheme } = useEuiTheme();
     const { closeLeftPanel, panels } = useExpandableFlyoutContext();
