@@ -83,7 +83,7 @@ export class SLOAlertsEmbeddable extends AbstractEmbeddable<
     this.node = node;
     this.setTitle(
       this.input.title ||
-        i18n.translate('xpack.observability.sloEmbeddable.displayTitle', {
+        i18n.translate('xpack.observability.sloAlertsEmbeddable.displayTitle', {
           defaultMessage: 'SLO Alerts',
         })
     );

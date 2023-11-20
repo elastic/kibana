@@ -80,7 +80,7 @@ export class SloAlertsEmbeddableFactoryDefinition implements EmbeddableFactoryDe
 
   public getDescription() {
     return i18n.translate('xpack.observability.sloAlertsEmbeddable.description', {
-      defaultMessage: 'Get SLO alerts',
+      defaultMessage: 'Get an overview of your SLO alerts',
     });
   }
 

@@ -24,9 +24,12 @@ export const columns: Array<
 > = [
   {
     columnHeaderType: 'not-filtered',
-    displayAsText: i18n.translate('xpack.observability.alertsTGrid.statusColumnDescription', {
-      defaultMessage: 'Status',
-    }),
+    displayAsText: i18n.translate(
+      'xpack.observability.sloAlertsEmbeddable.alertsTGrid.statusColumnDescription',
+      {
+        defaultMessage: 'Status',
+      }
+    ),
     id: ALERT_STATUS,
     initialWidth: 110,
   },
