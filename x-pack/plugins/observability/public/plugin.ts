@@ -34,6 +34,8 @@ import type {
   ObservabilitySharedPluginSetup,
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
+import type { LicensingPluginSetup } from '@kbn/licensing-plugin/public';
+
 import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import {
   TriggersAndActionsUIPublicPluginSetup,
@@ -61,6 +63,7 @@ import { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/publi
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
+import { firstValueFrom } from 'rxjs';
 import { observabilityAppId, observabilityFeatureId } from '../common';
 import {
   ALERTS_PATH,
@@ -117,6 +120,7 @@ export interface ObservabilityPublicPluginsSetup {
   usageCollection: UsageCollectionSetup;
   embeddable: EmbeddableSetup;
   uiActions: UiActionsSetup;
+  licensing: LicensingPluginSetup;
 }
 
 export interface ObservabilityPublicPluginsStart {
@@ -296,31 +300,41 @@ export class Plugin
     coreSetup.application.register(app);
 
     registerObservabilityRuleTypes(config, this.observabilityRuleTypeRegistry);
-    const registerSloEmbeddableFactory = async () => {
-      const { SloOverviewEmbeddableFactoryDefinition } = await import(
-        './embeddable/slo/overview/slo_embeddable_factory'
-      );
-      const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
-      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-    };
-    registerSloEmbeddableFactory();
 
-    const registerSloAlertsEmbeddableFactory = async () => {
-      const { SloAlertsEmbeddableFactoryDefinition } = await import(
-        './embeddable/slo/alerts/slo_alerts_embeddable_factory'
-      );
-      const factory = new SloAlertsEmbeddableFactoryDefinition(coreSetup.getStartServices);
-      pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
-    };
-    registerSloAlertsEmbeddableFactory();
+    const assertPlatinumLicense = async () => {
+      const licensing = await pluginsSetup.licensing;
+      const license = await firstValueFrom(licensing.license$);
 
-    const registerAsyncSloAlertsUiActions = async () => {
-      if (pluginsSetup.uiActions) {
-        const { registerSloAlertsUiActions } = await import('./ui_actions');
-        registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+      const hasPlatinumLicense = license.hasAtLeast('platinum');
+      if (hasPlatinumLicense) {
+        const registerSloOverviewEmbeddableFactory = async () => {
+          const { SloOverviewEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/overview/slo_embeddable_factory'
+          );
+          const factory = new SloOverviewEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloOverviewEmbeddableFactory();
+        const registerSloAlertsEmbeddableFactory = async () => {
+          const { SloAlertsEmbeddableFactoryDefinition } = await import(
+            './embeddable/slo/alerts/slo_alerts_embeddable_factory'
+          );
+          const factory = new SloAlertsEmbeddableFactoryDefinition(coreSetup.getStartServices);
+          pluginsSetup.embeddable.registerEmbeddableFactory(factory.type, factory);
+        };
+        registerSloAlertsEmbeddableFactory();
+
+        const registerAsyncSloAlertsUiActions = async () => {
+          if (pluginsSetup.uiActions) {
+            const { registerSloAlertsUiActions } = await import('./ui_actions');
+            registerSloAlertsUiActions(pluginsSetup.uiActions, coreSetup);
+          }
+        };
+        registerAsyncSloAlertsUiActions();
       }
     };
-    registerAsyncSloAlertsUiActions();
+
+    assertPlatinumLicense();
 
     if (pluginsSetup.home) {
       pluginsSetup.home.featureCatalogue.registerSolution({
