@@ -6,14 +6,27 @@
  */
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
+import { ManagedUserDatasetKey } from '../../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { ManagedUserDetailsRequestOptions } from '../../../../../../common/api/search_strategy';
 import { EVENT_KIND_ASSET_FILTER } from '../../../../../../common/search_strategy';
+
+// input.type: "entity-analytics"
+// data_stream.dataset: "entityanalytics_entra_id.entity" | "entityanalytics_okta.user"
+// event.dataset: "entityanalytics_entra_id.entity" | "entityanalytics_okta.user"
+// event.kind: "asset"
+// tags: ["forwarded","entityanalytics_entra_id-entity", "entityanalytics_okta-user" ]
 
 export const buildManagedUserDetailsQuery = ({
   userName,
   defaultIndex,
 }: ManagedUserDetailsRequestOptions): ISearchRequestParams => {
-  const filter = [{ term: { 'user.name': userName } }, EVENT_KIND_ASSET_FILTER];
+  const filter = [
+    { term: { 'user.name': userName } },
+    {
+      terms: { 'event.dataset': [ManagedUserDatasetKey.OKTA, ManagedUserDatasetKey.ENTRA] },
+    },
+    EVENT_KIND_ASSET_FILTER,
+  ];
 
   const dslQuery = {
     allow_no_indices: true,
@@ -22,7 +35,30 @@ export const buildManagedUserDetailsQuery = ({
     track_total_hits: false,
     body: {
       query: { bool: { filter } },
-      size: 1,
+      size: 0,
+      aggs: {
+        datasets: {
+          terms: {
+            field: 'event.dataset',
+          },
+          aggs: {
+            latest_hit: {
+              top_hits: {
+                // _source: false,
+                // fields: [],
+                size: 1,
+                sort: [
+                  {
+                    '@timestamp': {
+                      order: 'desc' as const,
+                    },
+                  },
+                ],
+              },
+            },
+          },
+        },
+      },
     },
     sort: [{ '@timestamp': 'desc' }],
   };

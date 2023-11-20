@@ -24,6 +24,7 @@ export interface UseFirstLastSeen {
   order: Direction.asc | Direction.desc;
   defaultIndex: string[];
   filterQuery?: ESQuery | string;
+  skip?: boolean;
 }
 
 export const useFirstLastSeen = ({

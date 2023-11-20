@@ -7,7 +7,7 @@
 
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { UserItem } from '../../../../../common/search_strategy';
-import type { AzureManagedUser } from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import type { ManagedUser } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import type { AnomalyTableProviderChildrenProps } from '../../../../common/components/ml/anomaly/anomaly_table_provider';
 
 export interface ObservedUserTable {
@@ -35,10 +35,8 @@ export interface ObservedUserData {
 
 export interface ManagedUserData {
   isLoading: boolean;
-  details: AzureManagedUser | undefined;
+  details: ManagedUser | undefined; // rename to data
   isIntegrationEnabled: boolean;
-  firstSeen: FirstLastSeenData;
-  lastSeen: FirstLastSeenData;
 }
 
 export interface FirstLastSeenData {

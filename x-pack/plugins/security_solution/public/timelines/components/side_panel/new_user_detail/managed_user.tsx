@@ -11,26 +11,28 @@ import {
   EuiAccordion,
   EuiTitle,
   EuiPanel,
-  useEuiTheme,
   EuiEmptyPrompt,
   EuiCallOut,
-  useEuiFontSize,
 } from '@elastic/eui';
 
 import React, { useMemo } from 'react';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type {
+  EntraManagedUser,
+  OktaManagedUser,
+} from '../../../../../common/search_strategy/security_solution/users/managed_details';
+import { ManagedUserDatasetKey } from '../../../../../common/search_strategy/security_solution/users/managed_details';
 import * as i18n from './translations';
 
 import { BasicTable } from '../../../../common/components/ml/tables/basic_table';
 import { getManagedUserTableColumns } from './columns';
-import { useManagedUserItems } from './hooks';
 
-import { FormattedRelativePreferenceDate } from '../../../../common/components/formatted_date';
 import type { ManagedUserData } from './types';
-import { INSTALL_INTEGRATION_HREF, MANAGED_USER_QUERY_ID, ONE_WEEK_IN_HOURS } from './constants';
+import { INSTALL_EA_INTEGRATIONS_HREF, MANAGED_USER_QUERY_ID } from './constants';
 import { InspectButton, InspectButtonContainer } from '../../../../common/components/inspect';
 import { useAppUrl } from '../../../../common/lib/kibana';
+import { ManagedUserAccordion } from './managed_user_accordion';
+import { useManagedUserItems } from './hooks/use_managed_user_items';
 
 export const ManagedUser = ({
   managedUser,
@@ -43,34 +45,24 @@ export const ManagedUser = ({
   scopeId: string;
   isDraggable: boolean;
 }) => {
-  const { euiTheme } = useEuiTheme();
-  const managedItems = useManagedUserItems(managedUser.details);
-  const managedUserTableColumns = useMemo(
-    () => getManagedUserTableColumns(contextID, scopeId, isDraggable),
-    [isDraggable, contextID, scopeId]
-  );
+  const entraManagedUser = managedUser.details?.[ManagedUserDatasetKey.ENTRA];
+  const oktaManagedUser = managedUser.details?.[ManagedUserDatasetKey.OKTA];
   const { getAppUrl } = useAppUrl();
-
   const installedIntegrationHref = useMemo(
-    () => getAppUrl({ appId: 'integrations', path: INSTALL_INTEGRATION_HREF }),
+    () => getAppUrl({ appId: 'integrations', path: INSTALL_EA_INTEGRATIONS_HREF }),
     [getAppUrl]
   );
-
-  const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   return (
     <>
       <InspectButtonContainer>
         <EuiAccordion
           isLoading={managedUser.isLoading}
-          initialIsOpen={false}
+          initialIsOpen={true}
           id={'managedUser-data'}
           data-test-subj="managedUser-data"
           buttonProps={{
             'data-test-subj': 'managedUser-accordion-button',
-            css: css`
-              color: ${euiTheme.colors.primary};
-            `,
           }}
           buttonContent={
             <EuiTitle size="xs">
@@ -78,47 +70,21 @@ export const ManagedUser = ({
             </EuiTitle>
           }
           extraAction={
-            <>
-              <span
-                css={css`
-                  margin-right: ${euiTheme.size.s};
-                `}
-              >
-                <InspectButton
-                  queryId={MANAGED_USER_QUERY_ID}
-                  title={i18n.MANAGED_USER_INSPECT_TITLE}
-                />
-              </span>
-              {managedUser.lastSeen.date && (
-                <span
-                  css={css`
-                    font-size: ${xsFontSize};
-                  `}
-                >
-                  <FormattedMessage
-                    id="xpack.securitySolution.timeline.userDetails.updatedTime"
-                    defaultMessage="Updated {time}"
-                    values={{
-                      time: (
-                        <FormattedRelativePreferenceDate
-                          value={managedUser.lastSeen.date}
-                          dateFormat="MMM D, YYYY"
-                          relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                        />
-                      ),
-                    }}
-                  />
-                </span>
-              )}
-            </>
+            <InspectButton
+              queryId={MANAGED_USER_QUERY_ID}
+              title={i18n.MANAGED_USER_INSPECT_TITLE}
+            />
           }
-          css={css`
-            .euiAccordion__optionalAction {
-              margin-left: auto;
-            }
-          `}
         >
           <EuiSpacer size="m" />
+
+          <FormattedMessage
+            id="xpack.securitySolution.timeline.userDetails.managed.description"
+            defaultMessage="Metadata from any asset repository integrations enabled in your environment."
+          />
+
+          <EuiSpacer size="m" />
+
           {!managedUser.isLoading && !managedUser.isIntegrationEnabled ? (
             <EuiPanel
               data-test-subj="managedUser-integration-disable-callout"
@@ -138,27 +104,82 @@ export const ManagedUser = ({
             </EuiPanel>
           ) : (
             <>
-              {managedItems || managedUser.isLoading ? (
-                <BasicTable
-                  loading={managedUser.isLoading}
-                  data-test-subj="managedUser-table"
-                  columns={managedUserTableColumns}
-                  items={managedItems ?? []}
-                />
-              ) : (
+              {!entraManagedUser && !oktaManagedUser && !managedUser.isLoading ? (
                 <EuiCallOut
                   data-test-subj="managedUser-no-data"
-                  title={i18n.NO_AZURE_DATA_TITLE}
+                  title={i18n.NO_MANAGED_DATA_TITLE}
                   color="warning"
                   iconType="help"
                 >
-                  <p>{i18n.NO_AZURE_DATA_TEXT}</p>
+                  <p>{i18n.NO_MANAGED_DATA_TEXT}</p>
                 </EuiCallOut>
+              ) : (
+                <>
+                  {entraManagedUser && (
+                    <ManagedUserAccordion
+                      id="managedUser-entra-data"
+                      openTitle={i18n.HIDE_ENTRA_DATA_BUTTON}
+                      closedTitle={i18n.SHOW_ENTRA_DATA_BUTTON}
+                      managedUser={entraManagedUser}
+                    >
+                      <ManagedUserDataset
+                        isDraggable={isDraggable}
+                        contextID={contextID}
+                        scopeId={scopeId}
+                        managedUser={entraManagedUser}
+                      />
+                    </ManagedUserAccordion>
+                  )}
+
+                  {entraManagedUser && oktaManagedUser && <EuiSpacer size="m" />}
+
+                  {oktaManagedUser && (
+                    <ManagedUserAccordion
+                      id="managedUser-okta-data"
+                      openTitle={i18n.HIDE_OKTA_DATA_BUTTON}
+                      closedTitle={i18n.SHOW_OKTA_DATA_BUTTON}
+                      managedUser={oktaManagedUser}
+                    >
+                      <ManagedUserDataset
+                        isDraggable={isDraggable}
+                        contextID={contextID}
+                        scopeId={scopeId}
+                        managedUser={oktaManagedUser}
+                      />
+                    </ManagedUserAccordion>
+                  )}
+                </>
               )}
             </>
           )}
         </EuiAccordion>
       </InspectButtonContainer>
     </>
+  );
+};
+
+export const ManagedUserDataset = ({
+  managedUser,
+  contextID,
+  scopeId,
+  isDraggable,
+}: {
+  managedUser: EntraManagedUser | OktaManagedUser;
+  contextID: string;
+  scopeId: string;
+  isDraggable: boolean;
+}) => {
+  const managedUserTableColumns = useMemo(
+    () => getManagedUserTableColumns(contextID, scopeId, isDraggable),
+    [isDraggable, contextID, scopeId]
+  );
+  const managedItems = useManagedUserItems(managedUser);
+
+  return (
+    <BasicTable
+      data-test-subj="managedUser-table"
+      columns={managedUserTableColumns}
+      items={managedItems ?? []}
+    />
   );
 };

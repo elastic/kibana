@@ -12,7 +12,7 @@ import type { ExpandableFlyoutContextValue } from '@kbn/expandable-flyout/src/co
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { StorybookProviders } from '../../../common/mock/storybook_providers';
 import {
-  mockManagedUser,
+  mockManagedUserData,
   mockObservedUser,
   mockRiskScoreState,
 } from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
@@ -35,7 +35,7 @@ storiesOf('Components/UserPanelContent', module)
   ))
   .add('default', () => (
     <UserPanelContent
-      managedUser={mockManagedUser}
+      managedUser={mockManagedUserData}
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
       contextID={'test-user-details'}
@@ -49,14 +49,6 @@ storiesOf('Components/UserPanelContent', module)
         details: undefined,
         isLoading: false,
         isIntegrationEnabled: false,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
       }}
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
@@ -71,14 +63,6 @@ storiesOf('Components/UserPanelContent', module)
         details: undefined,
         isLoading: false,
         isIntegrationEnabled: true,
-        firstSeen: {
-          isLoading: false,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: false,
-          date: undefined,
-        },
       }}
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
@@ -89,7 +73,7 @@ storiesOf('Components/UserPanelContent', module)
   ))
   .add('no observed data', () => (
     <UserPanelContent
-      managedUser={mockManagedUser}
+      managedUser={mockManagedUserData}
       observedUser={{
         details: {
           user: {
@@ -127,14 +111,6 @@ storiesOf('Components/UserPanelContent', module)
         details: undefined,
         isLoading: true,
         isIntegrationEnabled: true,
-        firstSeen: {
-          isLoading: true,
-          date: undefined,
-        },
-        lastSeen: {
-          isLoading: true,
-          date: undefined,
-        },
       }}
       observedUser={{
         details: {

@@ -46,17 +46,31 @@ export const OBSERVED_DATA_TITLE = i18n.translate(
   }
 );
 
-export const HIDE_AZURE_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.hideManagedDataButton',
+export const HIDE_ENTRA_DATA_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.hideEntraDataButton',
   {
-    defaultMessage: 'Hide Azure AD data',
+    defaultMessage: 'Hide Entra ID data',
   }
 );
 
-export const SHOW_AZURE_DATA_BUTTON = i18n.translate(
-  'xpack.securitySolution.timeline.userDetails.showManagedDataButton',
+export const SHOW_ENTRA_DATA_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.showEntraDataButton',
   {
-    defaultMessage: 'Show Azure AD data',
+    defaultMessage: 'Show Entra ID data',
+  }
+);
+
+export const HIDE_OKTA_DATA_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.hideOktaDataButton',
+  {
+    defaultMessage: 'Hide Okta data',
+  }
+);
+
+export const SHOW_OKTA_DATA_BUTTON = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.showOktaDataButton',
+  {
+    defaultMessage: 'Show Okta data',
   }
 );
 
@@ -149,6 +163,20 @@ export const PHONE = i18n.translate('xpack.securitySolution.timeline.userDetails
   defaultMessage: 'Phone',
 });
 
+export const JOB_TITLE = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.jobTitleLabel',
+  {
+    defaultMessage: 'Job title',
+  }
+);
+
+export const WORK_LOCATION = i18n.translate(
+  'xpack.securitySolution.timeline.userDetails.work:ocationLabel',
+  {
+    defaultMessage: 'Work location',
+  }
+);
+
 export const NO_ACTIVE_INTEGRATION_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noActiveIntegrationTitle',
   {
@@ -171,14 +199,14 @@ export const ADD_EXTERNAL_INTEGRATION_BUTTON = i18n.translate(
   }
 );
 
-export const NO_AZURE_DATA_TITLE = i18n.translate(
+export const NO_MANAGED_DATA_TITLE = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noAzureDataTitle',
   {
     defaultMessage: 'No metadata found for this user',
   }
 );
 
-export const NO_AZURE_DATA_TEXT = i18n.translate(
+export const NO_MANAGED_DATA_TEXT = i18n.translate(
   'xpack.securitySolution.timeline.userDetails.noAzureDataText',
   {
     defaultMessage:
