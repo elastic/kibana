@@ -6,6 +6,7 @@
  */
 
 // import { ControlPanels } from '../../common';
+import { hydrateDatasetSelection } from '../../common';
 import {
   DEFAULT_CONTEXT,
   LogExplorerControllerContext,
@@ -17,6 +18,7 @@ export const getPublicStateFromContext = (
 ): LogExplorerPublicState => {
   return {
     chart: context.chart,
+    datasetSelection: context.datasetSelection.toPlainSelection(),
     grid: context.grid,
     filters: context.filters,
     query: context.query,
@@ -24,7 +26,6 @@ export const getPublicStateFromContext = (
     time: context.time,
     // TODO: fix control panels
     // controls: getPublicControlsStateFromControlPanels(context.controlPanels),
-    // TODO: add dataset selection
   };
 };
 
@@ -36,6 +37,10 @@ export const getContextFromPublicState = (
     ...DEFAULT_CONTEXT.chart,
     ...publicState.chart,
   },
+  datasetSelection:
+    publicState.datasetSelection != null
+      ? hydrateDatasetSelection(publicState.datasetSelection)
+      : DEFAULT_CONTEXT.datasetSelection,
   grid: {
     ...DEFAULT_CONTEXT.grid,
     ...publicState.grid,
@@ -49,7 +54,6 @@ export const getContextFromPublicState = (
   refreshInterval: publicState.refreshInterval ?? DEFAULT_CONTEXT.refreshInterval,
   time: publicState.time ?? DEFAULT_CONTEXT.time,
   // TODO: add control panels
-  // TODO: add dataset selection
 });
 
 // const getPublicControlsStateFromControlPanels = (

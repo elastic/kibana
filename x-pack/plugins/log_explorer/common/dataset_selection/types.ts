@@ -65,4 +65,5 @@ export type DatasetSelectionPlain = rt.TypeOf<typeof datasetSelectionPlainRT>;
 export interface DatasetSelectionStrategy {
   toDataviewSpec(): DataViewSpec;
   toURLSelectionId(): string;
+  toPlainSelection(): DatasetSelectionPlain;
 }

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { datasetSelectionPlainRT } from '@kbn/log-explorer-plugin/common';
 import { LogExplorerPublicStateUpdate } from '@kbn/log-explorer-plugin/public';
 import * as rt from 'io-ts';
 import { deepCompactObject } from '../../../utils/deep_compact_object';
@@ -75,13 +76,15 @@ const refreshIntervalRT = rt.strict({
 export const urlSchemaRT = rt.exact(
   rt.partial({
     v: rt.literal(1),
-    query: queryRT,
-    filters: filtersRT,
-    time: timeRangeRT,
-    refreshInterval: refreshIntervalRT,
-    columns: columnsRT,
     breakdownField: rt.union([rt.string, rt.null]),
-    // datasetSelection: datasetSelectionFromUrlRT,
+    columns: columnsRT,
+    datasetSelection: datasetSelectionPlainRT,
+    filters: filtersRT,
+    query: queryRT,
+    refreshInterval: refreshIntervalRT,
+    rowHeight: rt.number,
+    rowsPerPage: rt.number,
+    time: timeRangeRT,
     // controlPanels: ControlPanelRT,
   })
 );
@@ -93,14 +96,14 @@ export const getStateFromUrlValue = (urlValue: UrlSchema): LogExplorerPublicStat
     chart: {
       breakdownField: urlValue.breakdownField,
     },
+    datasetSelection: urlValue.datasetSelection,
     filters: urlValue.filters,
     grid: {
       columns: urlValue.columns,
-      // TODO
-      // rows: {
-      //   rowHeight: urlValue.rowHeight,
-      //   rowsPerPage: urlValue.rowsPerPage,
-      // }
+      rows: {
+        rowHeight: urlValue.rowHeight,
+        rowsPerPage: urlValue.rowsPerPage,
+      },
     },
     query: urlValue.query,
     refreshInterval: urlValue.refreshInterval,
@@ -111,12 +114,15 @@ export const getUrlValueFromState = (state: LogExplorerPublicStateUpdate): UrlSc
   deepCompactObject<UrlSchema>({
     breakdownField: state.chart?.breakdownField,
     columns: state.grid?.columns,
+    datasetSelection: state.datasetSelection,
     filters: state.filters,
     query: state.query,
     refreshInterval: state.refreshInterval,
-    // TODO: add other fields
+    rowHeight: state.grid?.rows?.rowHeight,
+    rowsPerPage: state.grid?.rows?.rowsPerPage,
     time: state.time,
     v: 1,
+    // TODO: add other fields
   });
 
 const stateFromUrlSchemaRT = new rt.Type<LogExplorerPublicStateUpdate, UrlSchema, UrlSchema>(

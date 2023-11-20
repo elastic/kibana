@@ -34,13 +34,17 @@ export class UnresolvedDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toURLSelectionId() {
-    return encodeDatasetSelection({
+    return encodeDatasetSelection(this.toPlainSelection());
+  }
+
+  toPlainSelection() {
+    return {
       selectionType: this.selectionType,
       selection: {
         name: this.selection.name,
         dataset: this.selection.dataset.toPlain(),
       },
-    });
+    };
   }
 
   public static fromSelection(selection: UnresolvedDatasetSelectionPayload) {

@@ -26,8 +26,8 @@ export const getGridColumnDisplayOptionsFromDiscoverAppState = (
 export const getGridRowsDisplayOptionsFromDiscoverAppState = (
   discoverAppState: DiscoverAppState
 ): Partial<GridRowsDisplayOptions> => ({
-  ...(discoverAppState.rowHeight ? { rowHeight: discoverAppState.rowHeight } : {}),
-  ...(discoverAppState.rowsPerPage ? { rowsPerPage: discoverAppState.rowsPerPage } : {}),
+  ...(discoverAppState.rowHeight != null ? { rowHeight: discoverAppState.rowHeight } : {}),
+  ...(discoverAppState.rowsPerPage != null ? { rowsPerPage: discoverAppState.rowsPerPage } : {}),
 });
 
 export const getChartDisplayOptionsFromDiscoverAppState = (

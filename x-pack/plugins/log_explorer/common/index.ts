@@ -9,7 +9,7 @@ export { ControlPanelRT } from './control_panels';
 export type { ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
-  datasetSelectionFromUrlRT,
+  datasetSelectionPlainRT,
   decodeDatasetSelection,
   encodeDatasetSelection,
   hydrateDatasetSelection,
@@ -18,12 +18,12 @@ export {
 export type { DatasetSelectionPlain } from './dataset_selection';
 export type {
   ChartDisplayOptions,
-  PartialChartDisplayOptions,
-  GridColumnDisplayOptions,
-  GridRowsDisplayOptions,
-  PartialGridRowsDisplayOptions,
-  GridDisplayOptions,
-  PartialGridDisplayOptions,
   DisplayOptions,
+  GridColumnDisplayOptions,
+  GridDisplayOptions,
+  GridRowsDisplayOptions,
+  PartialChartDisplayOptions,
   PartialDisplayOptions,
+  PartialGridDisplayOptions,
+  PartialGridRowsDisplayOptions,
 } from './display_options';

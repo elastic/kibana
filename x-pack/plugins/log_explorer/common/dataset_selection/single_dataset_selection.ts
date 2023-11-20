@@ -38,7 +38,11 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toURLSelectionId() {
-    return encodeDatasetSelection({
+    return encodeDatasetSelection(this.toPlainSelection());
+  }
+
+  toPlainSelection() {
+    return {
       selectionType: this.selectionType,
       selection: {
         name: this.selection.name,
@@ -46,7 +50,7 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
         version: this.selection.version,
         dataset: this.selection.dataset.toPlain(),
       },
-    });
+    };
   }
 
   public static fromSelection(selection: SingleDatasetSelectionPayload) {

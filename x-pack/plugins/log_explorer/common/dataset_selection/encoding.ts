@@ -6,10 +6,7 @@
  */
 
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import { RisonValue, encode, decode } from '@kbn/rison';
-import { chain as chainE } from 'fp-ts/lib/Either';
-import { pipe } from 'fp-ts/lib/function';
-import * as rt from 'io-ts';
+import { decode, encode, RisonValue } from '@kbn/rison';
 import * as lz from 'lz-string';
 import { DatasetEncodingError } from './errors';
 import { DatasetSelectionPlain, datasetSelectionPlainRT } from './types';
@@ -40,35 +37,3 @@ export const decodeDatasetSelection = (base64DatasetSelection: string): DatasetS
 
   return datasetSelection;
 };
-
-const compressedRisonStringRT = new rt.Type<RisonValue, string, unknown>(
-  'CompressedRisonString',
-  rt.any.is,
-  (unknownInput, context) =>
-    pipe(
-      rt.string.validate(unknownInput, context),
-      chainE((stringInput) => {
-        const decompressedValue = lz.decompressFromBase64(stringInput);
-
-        if (decompressedValue === null || decompressedValue === '') {
-          return rt.failure(stringInput, context, 'The input is not a compressed value.');
-        }
-
-        try {
-          return rt.success(decode(decompressedValue));
-        } catch (err) {
-          return rt.failure(
-            stringInput,
-            context,
-            `The input is not a compressed rison value: ${err}`
-          );
-        }
-      })
-    ),
-  (risonValue) => lz.compressToBase64(encode(risonValue))
-);
-
-export const datasetSelectionFromUrlRT = compressedRisonStringRT.pipe(
-  datasetSelectionPlainRT,
-  'datasetSelectionFromUrlRt'
-);

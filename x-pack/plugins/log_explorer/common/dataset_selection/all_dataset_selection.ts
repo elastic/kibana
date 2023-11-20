@@ -32,9 +32,13 @@ export class AllDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toURLSelectionId() {
-    return encodeDatasetSelection({
+    return encodeDatasetSelection(this.toPlainSelection());
+  }
+
+  toPlainSelection() {
+    return {
       selectionType: this.selectionType,
-    });
+    };
   }
 
   public static create() {
