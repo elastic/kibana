@@ -159,6 +159,11 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       options: props.alertsTableConfiguration.useActionsColumn,
     });
 
+  const renderCellContext = props.alertsTableConfiguration.useFetchPageContext?.({
+    alerts,
+    columns: props.columns,
+  });
+
   const {
     isBulkActionsColumnActive,
     getBulkActionsLeadingControlColumn,
@@ -373,9 +378,10 @@ const AlertsTable: React.FunctionComponent<AlertsTableProps> = (props: AlertsTab
       props.alertsTableConfiguration?.getRenderCellValue
         ? props.alertsTableConfiguration?.getRenderCellValue({
             setFlyoutAlert: handleFlyoutAlert,
+            context: renderCellContext,
           })
         : basicRenderCellValue,
-    [handleFlyoutAlert, props.alertsTableConfiguration]
+    [handleFlyoutAlert, props.alertsTableConfiguration, renderCellContext]
   )();
 
   const handleRenderCellValue = useCallback(
