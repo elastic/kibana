@@ -442,7 +442,7 @@ export const TimelineResponseType = runtimeTypes.type({
 });
 
 export const TimelineErrorResponseType = runtimeTypes.type({
-  status_code: runtimeTypes.number,
+  statusCode: runtimeTypes.number,
   message: runtimeTypes.string,
 });
 
