@@ -6,7 +6,9 @@
  */
 
 import { EuiHeaderLink } from '@elastic/eui';
+import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
@@ -28,7 +30,7 @@ export const ConnectedDiscoverLink = React.memo(() => {
   if (pageState.matches('uninitialized')) {
     return null;
   } else if (pageState.matches('initialized')) {
-    return <DiscoverLink discover={discover} pageState={pageState} />;
+    return <DiscoverLinkForState discover={discover} pageState={pageState} />;
   } else {
     return null;
   }
@@ -36,19 +38,43 @@ export const ConnectedDiscoverLink = React.memo(() => {
 
 type InitializedPageState = MatchedStateFromActor<ObservabilityLogExplorerService, 'initialized'>;
 
-export const DiscoverLink = React.memo(
-  ({ discover, pageState }: { discover: DiscoverStart; pageState: InitializedPageState }) => {
-    const discoverLinkParams = useMemo(
+export const DiscoverLinkForState = React.memo(
+  ({
+    discover,
+    pageState: {
+      context: { logExplorerState },
+    },
+  }: {
+    discover: DiscoverStart;
+    pageState: InitializedPageState;
+  }) => {
+    const discoverLinkParams = useMemo<DiscoverAppLocatorParams>(
       () => ({
-        // columns:
-        //   logExplorerState != null ? getDiscoverColumnsFromDisplayOptions(pageState) : undefined,
-        // filters: appState?.filters,
-        // query: appState?.query,
+        breakdownField: logExplorerState.chart.breakdownField ?? undefined,
+        columns: getDiscoverColumnsFromDisplayOptions(logExplorerState),
+        filters: logExplorerState.filters,
+        query: logExplorerState.query,
+        refreshInterval: logExplorerState.refreshInterval,
+        timeRange: logExplorerState.time,
+        // TODO: add dataviewspec
+        // dataViewSpec: logExplorerState.datasetSelection
         // dataViewSpec: pageState.datasetSelection?.selection.dataset.toDataviewSpec(),
       }),
-      [pageState]
+      [logExplorerState]
     );
 
+    return <DiscoverLink discover={discover} discoverLinkParams={discoverLinkParams} />;
+  }
+);
+
+export const DiscoverLink = React.memo(
+  ({
+    discover,
+    discoverLinkParams,
+  }: {
+    discover: DiscoverStart;
+    discoverLinkParams: DiscoverAppLocatorParams;
+  }) => {
     const discoverUrl = discover.locator?.getRedirectUrl(discoverLinkParams);
 
     const navigateToDiscover = () => {

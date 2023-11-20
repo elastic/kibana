@@ -21,7 +21,10 @@ export type {
 } from './controller';
 export type { LogExplorerControllerContext } from './state_machines/log_explorer_controller';
 export type { LogExplorerPluginSetup, LogExplorerPluginStart } from './types';
-export { getDiscoverColumnsFromDisplayOptions } from './utils/convert_discover_app_state';
+export {
+  getDiscoverColumnsFromDisplayOptions,
+  getDiscoverGridFromDisplayOptions,
+} from './utils/convert_discover_app_state';
 
 export function plugin(context: PluginInitializerContext<LogExplorerConfig>) {
   return new LogExplorerPlugin(context);

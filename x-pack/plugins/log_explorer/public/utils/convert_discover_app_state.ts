@@ -48,16 +48,7 @@ export const getDiscoverAppStateFromContext = (
 ): Partial<DiscoverAppState> => ({
   breakdownField: displayOptions.chart.breakdownField ?? undefined,
   columns: getDiscoverColumnsFromDisplayOptions(displayOptions),
-  grid: {
-    columns: displayOptions.grid.columns.reduce<
-      NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
-    >((gridColumns, { field, width }) => {
-      if (width != null) {
-        gridColumns[field] = { width };
-      }
-      return gridColumns;
-    }, {}),
-  },
+  grid: getDiscoverGridFromDisplayOptions(displayOptions),
   rowHeight: displayOptions.grid.rows.rowHeight,
   rowsPerPage: displayOptions.grid.rows.rowsPerPage,
   query: cloneDeep(displayOptions.query),
@@ -67,3 +58,16 @@ export const getDiscoverAppStateFromContext = (
 export const getDiscoverColumnsFromDisplayOptions = (
   displayOptions: DisplayOptions
 ): DiscoverAppState['columns'] => displayOptions.grid.columns.map(({ field }) => field);
+
+export const getDiscoverGridFromDisplayOptions = (
+  displayOptions: DisplayOptions
+): DiscoverAppState['grid'] => ({
+  columns: displayOptions.grid.columns.reduce<
+    NonNullable<NonNullable<DiscoverAppState['grid']>['columns']>
+  >((gridColumns, { field, width }) => {
+    if (width != null) {
+      gridColumns[field] = { width };
+    }
+    return gridColumns;
+  }, {}),
+});
