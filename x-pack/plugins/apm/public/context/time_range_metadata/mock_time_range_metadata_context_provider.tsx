@@ -29,7 +29,7 @@ const DEFAULTS = {
       documentType: ApmDocumentType.TransactionEvent,
       hasDocs: true,
       rollupInterval: RollupInterval.None,
-      hasDurationSummaryField: true,
+      hasDurationSummaryField: false,
     },
     {
       documentType: ApmDocumentType.ServiceDestinationMetric,

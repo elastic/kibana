@@ -58,7 +58,7 @@ const txEventSources: ApmDataSourceWithSummary[] = [
   {
     documentType: ApmDocumentType.TransactionEvent,
     rollupInterval: RollupInterval.None,
-    hasDurationSummaryField: true,
+    hasDurationSummaryField: false,
     hasDocs: false,
   },
 ];
