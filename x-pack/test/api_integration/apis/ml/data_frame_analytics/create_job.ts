@@ -104,12 +104,55 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(body).not.to.be(undefined);
 
-          expect(body.description).to.eql(requestBody.description);
-          expect(body.allow_lazy_start).to.eql(requestBody.allow_lazy_start);
-          expect(body.model_memory_limit).to.eql(requestBody.model_memory_limit);
-          expect(body.max_num_threads).to.eql(requestBody.max_num_threads);
+          expect(body.dataFrameAnalyticsJobsCreated).to.have.length(
+            1,
+            `Expected dataFrameAnalyticsJobsCreated length to be 1, got ${body.dataFrameAnalyticsJobsCreated}.`
+          );
+          expect(body.dataFrameAnalyticsJobsErrors).to.have.length(
+            0,
+            `Expected dataFrameAnalyticsJobsErrors length to be 0, got ${body.dataFrameAnalyticsJobsErrors}.`
+          );
+          expect(body.dataViewsCreated).to.have.length(
+            0,
+            `Expected dataViewsCreated length to be 0, got ${body.dataViewsCreated}.`
+          );
+          expect(body.dataViewsErrors).to.have.length(
+            0,
+            `Expected dataViewsErrors length to be 0, got ${body.dataViewsErrors}.`
+          );
+        });
 
-          expect(Object.keys(body.analysis)).to.eql(Object.keys(requestBody.analysis!));
+        it(`should create ${testConfig.jobType} job and data view with given config`, async () => {
+          const analyticsId = `${testConfig.jobId}_with_data_view`;
+          const requestBody = testConfig.config;
+
+          const { body, status } = await supertest
+            .put(
+              `/internal/ml/data_frame/analytics/${analyticsId}?createDataView=true&timeFieldName=@timestamp`
+            )
+            .auth(USER.ML_POWERUSER, ml.securityCommon.getPasswordForUser(USER.ML_POWERUSER))
+            .set(getCommonRequestHeader('1'))
+            .send(requestBody);
+          ml.api.assertResponseStatusCode(200, status, body);
+
+          expect(body).not.to.be(undefined);
+
+          expect(body.dataFrameAnalyticsJobsCreated).to.have.length(
+            1,
+            `Expected dataFrameAnalyticsJobsCreated length to be 1, got ${body.dataFrameAnalyticsJobsCreated}.`
+          );
+          expect(body.dataFrameAnalyticsJobsErrors).to.have.length(
+            0,
+            `Expected dataFrameAnalyticsJobsErrors length to be 0, got ${body.dataFrameAnalyticsJobsErrors}.`
+          );
+          expect(body.dataViewsCreated).to.have.length(
+            1,
+            `Expected dataViewsCreated length to be 1, got ${body.dataViewsCreated}.`
+          );
+          expect(body.dataViewsErrors).to.have.length(
+            0,
+            `Expected dataViewsErrors length to be 0, got ${body.dataViewsErrors}.`
+          );
         });
       });
 
