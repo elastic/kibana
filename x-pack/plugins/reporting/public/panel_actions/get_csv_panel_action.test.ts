@@ -226,8 +226,8 @@ describe('GetCsvReportPanelAction', () => {
 
     await mockStartServices$.pipe(first()).toPromise();
 
-    expect(panel.getIconType()).toMatchInlineSnapshot(`"document"`);
-    expect(panel.getDisplayName()).toMatchInlineSnapshot(`"Download CSV"`);
+    expect(panel.getIconType()).toBe('document');
+    expect(panel.getDisplayName()).toBe('Download CSV');
   });
 
   describe('Application UI Capabilities', () => {

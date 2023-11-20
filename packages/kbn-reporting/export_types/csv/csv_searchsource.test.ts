@@ -96,10 +96,8 @@ test('gets the csv content from job parameters', async () => {
     stream
   );
 
-  expect(payload).toMatchInlineSnapshot(`
-        Object {
-          "content_type": "text/csv",
-          "size": 123,
-        }
-      `);
+  expect(payload).toEqual({
+    content_type: 'text/csv',
+    size: 123,
+  });
 });

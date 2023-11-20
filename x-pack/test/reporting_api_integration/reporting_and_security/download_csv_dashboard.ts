@@ -33,6 +33,15 @@ export default function ({ getService }: FtrProviderContext) {
     },
   };
 
+  const getCsvStats = (csvText: string) => {
+    // Data is indexed concurrently and not being uniquely sortable in each test.
+    // Therefore we test against stats of the file rather than the actual contents
+    return {
+      numLines: csvText.split('\n').length,
+      bytesSize: new Blob([csvText]).size,
+    };
+  };
+
   const fromTime = '2019-06-20T00:00:00.000Z';
   const toTime = '2019-06-25T00:00:00.000Z';
 
@@ -159,7 +168,7 @@ export default function ({ getService }: FtrProviderContext) {
         )) as supertest.Response;
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 6, bytesSize: 5243 });
       });
 
       it('Exports CSV with all fields when using defaults', async () => {
@@ -200,7 +209,7 @@ export default function ({ getService }: FtrProviderContext) {
         );
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 7, bytesSize: 5507 });
       });
     });
 
@@ -240,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 61, bytesSize: 3020 });
       });
 
       it('With filters and timebased data, non-default timezone', async () => {
@@ -279,7 +288,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 61, bytesSize: 3020 });
       });
     });
 
@@ -310,7 +319,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 4, bytesSize: 103 });
       });
 
       it('Formatted date_nanos data, custom timezone (New York)', async () => {
@@ -332,7 +341,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 4, bytesSize: 103 });
       });
     });
 
@@ -356,7 +365,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 4, bytesSize: 134 });
 
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/nanos');
       });
@@ -388,7 +397,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+        expect(getCsvStats(resText)).to.eql({ numLines: 14, bytesSize: 274 });
 
         await esArchiver.unload('x-pack/test/functional/es_archives/reporting/sales');
       });
@@ -469,7 +478,8 @@ export default function ({ getService }: FtrProviderContext) {
             title: 'testsearch',
           })
         )) as supertest.Response;
-        expectSnapshot(text).toMatch();
+
+        expect(getCsvStats(text)).to.eql({ numLines: 6, bytesSize: 329 });
       });
     });
 
@@ -531,7 +541,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         expect(resStatus).to.eql(200);
         expect(resType).to.eql('text/csv');
-        expectSnapshot(resText).toMatch();
+
+        expect(getCsvStats(resText)).to.eql({ numLines: 6, bytesSize: 5764 });
       });
     });
   });

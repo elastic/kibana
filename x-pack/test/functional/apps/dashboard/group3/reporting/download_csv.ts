@@ -44,10 +44,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   // checks every 100ms for the file to exist in the download dir
   // just wait up to 5 seconds
-  const getDownload = (filePath: string) => {
+  const getDownloadedFileStats = (filePath: string) => {
     return retry.tryForTime(5000, async () => {
       expect(fs.existsSync(filePath)).to.be(true);
-      return fs.readFileSync(filePath).toString();
+      const contents = fs.readFileSync(filePath).toString();
+      const numLines = contents.split('\n').length;
+      // Data is indexed concurrently and not being uniquely sortable in each test.
+      // Therefore we test against stats of the file rather than the actual contents
+      return {
+        size: new Blob([contents]).size,
+        lines: numLines,
+      };
     });
   };
 
@@ -96,8 +103,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
-        expectSnapshot(csvFile).toMatch();
+        const { size, lines } = await getDownloadedFileStats(getCsvPath('Ecommerce Data'));
+        expect({ size, lines }).to.eql({ size: 76137, lines: 457 });
       });
 
       it('Downloads a filtered CSV export of a saved search panel', async function () {
@@ -109,8 +116,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
-        expectSnapshot(csvFile).toMatch();
+        const { size, lines } = await getDownloadedFileStats(getCsvPath('Ecommerce Data'));
+        expect({ size, lines }).to.eql({ size: 17106, lines: 99 });
       });
 
       it('Downloads a saved search panel with a custom time range that does not intersect with dashboard time range', async function () {
@@ -121,8 +128,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('EcommerceData');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data'));
-        expectSnapshot(csvFile).toMatch();
+        const { size, lines } = await getDownloadedFileStats(getCsvPath('Ecommerce Data'));
+        expect({ size, lines }).to.eql({ size: 23277, lines: 142 });
       });
 
       it('Gets the correct filename if panel titles are hidden', async () => {
@@ -135,8 +142,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickDownloadCsv();
         await testSubjects.existOrFail('csvDownloadStarted');
 
-        const csvFile = await getDownload(getCsvPath('Ecommerce Data')); // file exists with proper name
-        expect(csvFile).to.not.be(null);
+        const { size, lines } = await getDownloadedFileStats(getCsvPath('Ecommerce Data')); // file exists with proper name
+        expect({ size, lines }).to.eql({ size: 98, lines: 2 });
       });
     });
 
@@ -167,8 +174,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu(TEST_SEARCH_TITLE.replace(/ /g, ''));
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath(TEST_SEARCH_TITLE));
-        expectSnapshot(csvFile).toMatch();
+        const { size, lines } = await getDownloadedFileStats(getCsvPath(TEST_SEARCH_TITLE));
+        expect({ size, lines }).to.eql({ size: 2253, lines: 28 });
       });
     });
 
@@ -200,8 +207,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await clickActionsMenu('namessearch');
         await clickDownloadCsv();
 
-        const csvFile = await getDownload(getCsvPath('namessearch'));
-        expectSnapshot(csvFile).toMatch();
+        const { size, lines } = await getDownloadedFileStats(getCsvPath('namessearch'));
+        expect({ size, lines }).to.eql({ size: 168, lines: 3 });
       });
     });
   });
