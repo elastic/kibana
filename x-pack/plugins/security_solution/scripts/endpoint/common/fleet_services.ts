@@ -337,12 +337,25 @@ export const fetchIntegrationPolicyList = async (
  * @param kbnClient
  */
 export const getAgentVersionMatchingCurrentStack = async (
-  kbnClient: KbnClient
+  kbnClient: KbnClient,
+  log: ToolingLog = createToolingLogger()
 ): Promise<string> => {
   const kbnStatus = await fetchKibanaStatus(kbnClient);
+
+  log.debug(`Kibana status:\n`, kbnStatus);
+
+  if (!kbnStatus.version) {
+    throw new Error(
+      `Kibana status api response did not include 'version' information - possibly due to invalid credentials`
+    );
+  }
+
   const agentVersions = await axios
     .get('https://artifacts-api.elastic.co/v1/versions')
-    .then((response) => map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]));
+    .then((response) => {
+      log.verbose(`Agent Version:\n`, response.data);
+      return map(response.data.versions, (version) => version.split('-SNAPSHOT')[0]);
+    });
 
   let version =
     semver.maxSatisfying(agentVersions, `<=${kbnStatus.version.number}`) ??
