@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+import type { TimeKey, UniqueTimeKey } from '@kbn/io-ts-utils';
 import { bisector } from 'd3-array';
-import { compareToTimeKey, getIndexAtTimeKey, TimeKey, UniqueTimeKey } from '../../../common/time';
+import { compareToTimeKey, getIndexAtTimeKey } from '../../../common/time';
 import {
   LogEntry,
   LogColumn,
@@ -38,7 +39,7 @@ export const getLogEntryAtTime = (entries: LogEntry[], time: TimeKey) => {
 };
 
 export const isTimestampColumn = (column: LogColumn): column is LogTimestampColumn =>
-  column != null && 'timestamp' in column;
+  column != null && 'time' in column;
 
 export const isMessageColumn = (column: LogColumn): column is LogMessageColumn =>
   column != null && 'message' in column;

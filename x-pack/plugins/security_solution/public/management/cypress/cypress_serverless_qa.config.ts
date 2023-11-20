@@ -14,7 +14,10 @@ export default defineCypressConfig(
     env: {
       IS_SERVERLESS: true,
 
-      grepTags: '@serverless --@brokenInServerless',
+      // FIXME:PT Comment this out before commit to `main`
+      TOOLING_LOG_LEVEL: 'verbose',
+
+      grepTags: '@serverless_mki --@brokenInServerless',
     },
   })
 );

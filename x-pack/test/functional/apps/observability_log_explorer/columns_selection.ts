@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from './config';
 
 const defaultLogColumns = ['@timestamp', 'service.name', 'host.name', 'message'];
 

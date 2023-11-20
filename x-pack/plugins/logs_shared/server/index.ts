@@ -6,7 +6,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/server';
-import { LogsSharedPlugin } from './plugin';
 
 export type { LogsSharedPluginSetup, LogsSharedPluginStart } from './types';
 export type {
@@ -17,6 +16,7 @@ export type {
 export { config } from './config';
 export { logViewSavedObjectName } from './saved_objects';
 
-export function plugin(context: PluginInitializerContext) {
+export async function plugin(context: PluginInitializerContext) {
+  const { LogsSharedPlugin } = await import('./plugin');
   return new LogsSharedPlugin(context);
 }
