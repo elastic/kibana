@@ -57,7 +57,7 @@ export function useRuleAADFields(ruleTypeId?: string): {
     isInitialLoading,
     isLoading,
   } = useQuery({
-    queryKey: ['loadAlertAadFieldsPerRuleType'],
+    queryKey: ['loadAlertAadFieldsPerRuleType', ruleTypeId],
     queryFn: queryAadFieldsFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,

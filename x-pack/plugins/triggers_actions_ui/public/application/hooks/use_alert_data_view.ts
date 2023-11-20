@@ -58,7 +58,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     isInitialLoading: isIndexNameInitialLoading,
     isLoading: isIndexNameLoading,
   } = useQuery({
-    queryKey: ['loadAlertIndexNames'],
+    queryKey: ['loadAlertIndexNames', features],
     queryFn: queryIndexNameFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
@@ -71,7 +71,7 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
     isInitialLoading: isAlertFieldsInitialLoading,
     isLoading: isAlertFieldsLoading,
   } = useQuery({
-    queryKey: ['loadAlertFields'],
+    queryKey: ['loadAlertFields', features],
     queryFn: queryAlertFieldsFn,
     onError: onErrorFn,
     refetchOnWindowFocus: false,
