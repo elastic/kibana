@@ -29,6 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('Building a new dashboard', function () {
     before(async () => {
       await PageObjects.svlCommonPage.login();
+      await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
       await kibanaServer.importExport.load(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
@@ -44,11 +45,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await kibanaServer.importExport.unload(
         'x-pack/test/functional/fixtures/kbn_archiver/lens/lens_basic.json'
       );
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.svlCommonPage.forceLogout();
     });
 
     it('can add a lens panel by value', async () => {
-      await PageObjects.lens.createAndAddLensFromDashboard({ ignoreTimeFilter: true });
+      await PageObjects.lens.createAndAddLensFromDashboard({});
       const newPanelCount = await PageObjects.dashboard.getPanelCount();
       expect(newPanelCount).to.eql(1);
     });

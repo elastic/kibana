@@ -29,6 +29,7 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./logs/log_stream_date_nano'));
       loadTestFile(require.resolve('./logs/link_to'));
       loadTestFile(require.resolve('./logs/log_stream'));
+      loadTestFile(require.resolve('./logs/ml_job_id_formats/tests'));
     });
   });
 };
