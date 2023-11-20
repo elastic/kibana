@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import hash from 'object-hash';
 import type { CallOutMessage } from '../../../common/components/callouts';
 import { CallOutSwitcher } from '../../../common/components/callouts';
 import { MissingPrivilegesCallOutBody, MISSING_PRIVILEGES_CALLOUT_TITLE } from './translations';
