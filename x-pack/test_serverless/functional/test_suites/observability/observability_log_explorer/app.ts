@@ -5,14 +5,18 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
+import { log, timerange } from '@kbn/apm-synthtrace-client';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getPageObjects }: FtrProviderContext) {
+export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects([
     'observabilityLogExplorer',
     'svlCommonNavigation',
     'svlCommonPage',
   ]);
+
+  const synthtrace = getService('svlLogsSynthtraceClient');
+  const dataGrid = getService('dataGrid');
 
   describe('Application', () => {
     before(async () => {
@@ -25,6 +29,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
     it('is shown in the global search', async () => {
       await PageObjects.observabilityLogExplorer.navigateTo();
+
       await PageObjects.svlCommonNavigation.search.showSearch();
       await PageObjects.svlCommonNavigation.search.searchFor('log explorer');
 
@@ -33,5 +38,32 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       await PageObjects.svlCommonNavigation.search.hideSearch();
     });
+
+    it('should load logs', async () => {
+      const from = '2023-08-03T10:24:14.035Z';
+      const to = '2023-08-03T10:24:14.091Z';
+      const COUNT = 5;
+      await synthtrace.index(generateLogsData({ from, to, count: COUNT }));
+      await PageObjects.observabilityLogExplorer.navigateTo();
+      const docCount = await dataGrid.getDocCount();
+
+      expect(docCount).to.be(COUNT);
+      await synthtrace.clean();
+    });
   });
+}
+
+function generateLogsData({ from, to, count = 1 }: { from: string; to: string; count: number }) {
+  const range = timerange(from, to);
+
+  return range
+    .interval('1m')
+    .rate(1)
+    .generator((timestamp) =>
+      Array(count)
+        .fill(0)
+        .map(() => {
+          return log.create().message('A sample log').timestamp(timestamp);
+        })
+    );
 }

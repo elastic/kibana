@@ -74,7 +74,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
             <span>
               <EuiButton
                 iconType={`${assetBasePath}/github_white.svg`}
-                href="https://github.com/elastic/connectors-python"
+                href="https://github.com/elastic/connectors"
                 fill
               >
                 {i18n.translate('xpack.serverlessSearch.connectors.runFromSourceLink', {
@@ -92,7 +92,7 @@ export const ConnectorLinkElasticsearch: React.FC<ConnectorLinkElasticsearchProp
                 {i18n.translate('xpack.serverlessSearch.connectors.variablesTitle', {
                   defaultMessage: 'Variables for your ',
                 })}
-                <EuiCode>connectors-python/config.yml</EuiCode>
+                <EuiCode>elastic/connectors/config.yml</EuiCode>
               </h3>
             </EuiTitle>
             <EuiSpacer />

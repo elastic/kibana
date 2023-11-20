@@ -57,7 +57,8 @@ const orderSettings = (settings: SettingsConfig): SettingsConfig => {
 
 export const initUiSettings = (
   uiSettings: CoreSetup['uiSettings'],
-  experimentalFeatures: ExperimentalFeatures
+  experimentalFeatures: ExperimentalFeatures,
+  validationsEnabled: boolean
 ) => {
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
@@ -115,7 +116,9 @@ export const initUiSettings = (
       }),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.arrayOf(schema.string()),
+      schema: validationsEnabled
+        ? schema.arrayOf(schema.string(), { maxSize: 50 })
+        : schema.arrayOf(schema.string()),
     },
     [DEFAULT_THREAT_INDEX_KEY]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultThreatIndexLabel', {
@@ -132,7 +135,9 @@ export const initUiSettings = (
       ),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.arrayOf(schema.string()),
+      schema: validationsEnabled
+        ? schema.arrayOf(schema.string(), { maxSize: 10 })
+        : schema.arrayOf(schema.string()),
     },
     [DEFAULT_ANOMALY_SCORE]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.defaultAnomalyScoreLabel', {
@@ -149,7 +154,7 @@ export const initUiSettings = (
       ),
       category: [APP_ID],
       requiresPageReload: true,
-      schema: schema.number(),
+      schema: validationsEnabled ? schema.number({ max: 100, min: 0 }) : schema.number(),
     },
     [ENABLE_NEWS_FEED_SETTING]: {
       name: i18n.translate('xpack.securitySolution.uiSettings.enableNewsFeedLabel', {

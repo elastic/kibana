@@ -5,6 +5,13 @@
  * 2.0.
  */
 
+import React, { Component, ReactElement } from 'react';
+import url from 'url';
+
+import { CSV_REPORT_TYPE } from '@kbn/reporting-export-types-csv-common';
+import { PDF_REPORT_TYPE, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
+import { PNG_REPORT_TYPE, PNG_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-png-common';
+
 import {
   EuiAccordion,
   EuiButton,
@@ -15,20 +22,12 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
+import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
-import React, { Component, ReactElement } from 'react';
-import { IUiSettingsClient, ThemeServiceSetup, ToastsSetup } from '@kbn/core/public';
-import url from 'url';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
-import {
-  CSV_REPORT_TYPE,
-  PDF_REPORT_TYPE,
-  PDF_REPORT_TYPE_V2,
-  PNG_REPORT_TYPE,
-  PNG_REPORT_TYPE_V2,
-} from '../../../common/constants';
-import { BaseParams } from '../../../common/types';
+import type { BaseParams } from '@kbn/reporting-common/types';
+
 import { ReportingAPIClient } from '../../lib/reporting_api_client';
 import { ErrorUnsavedWorkPanel, ErrorUrlTooLongPanel } from './components';
 import { getMaxUrlLength } from './constants';
