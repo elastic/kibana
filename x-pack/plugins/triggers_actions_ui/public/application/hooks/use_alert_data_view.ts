@@ -33,7 +33,8 @@ export function useAlertDataView(featureIds: ValidFeatureId[]): UserAlertDataVie
   const hasSecurityAndO11yFeatureIds =
     featureIds.length > 1 && featureIds.includes(AlertConsumers.SIEM);
 
-  const hasNoSecuritySolution = !isOnlySecurity && !hasSecurityAndO11yFeatureIds;
+  const hasNoSecuritySolution =
+    featureIds.length > 0 && !isOnlySecurity && !hasSecurityAndO11yFeatureIds;
 
   const queryIndexNameFn = () => {
     return fetchAlertIndexNames({ http, features });
