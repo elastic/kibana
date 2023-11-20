@@ -124,6 +124,7 @@ export const getComments = ({
               amendMessage={amendMessageOfConversation}
               index={index}
               isLastComment={isLastComment}
+              isError={message.isError}
               reader={message.reader}
               regenerateMessage={regenerateMessageOfConversation}
               transformMessage={transformMessage}

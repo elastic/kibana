@@ -156,7 +156,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
     return [
       {
         title: (
-          <EuiFlexGroup alignItems="flexEnd" gutterSize="none">
+          <EuiFlexGroup alignItems="flexEnd" gutterSize="none" responsive={false}>
             <EuiFlexItem grow={false}>{HOST_RISK_LEVEL}</EuiFlexItem>
             <EuiFlexItem grow={false}>
               <RiskScoreDocTooltip riskScoreEntity={RiskScoreEntity.host} />
@@ -177,9 +177,14 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
   }, [hostRisk]);
 
   return (
-    <EuiFlexGroup direction="column" gutterSize="s" data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}>
+    <EuiFlexGroup
+      direction="column"
+      gutterSize="s"
+      responsive={false}
+      data-test-subj={ENTITIES_HOST_OVERVIEW_TEST_ID}
+    >
       <EuiFlexItem>
-        <EuiFlexGroup gutterSize="m">
+        <EuiFlexGroup gutterSize="m" responsive={false}>
           <EuiFlexItem grow={false}>
             <EuiIcon type={HOST_ICON} />
           </EuiFlexItem>
@@ -207,7 +212,7 @@ export const HostEntityOverview: React.FC<HostEntityOverviewProps> = ({ hostName
         />
       ) : (
         <EuiFlexItem>
-          <EuiFlexGroup>
+          <EuiFlexGroup responsive={false}>
             <EuiFlexItem>
               <OverviewDescriptionList
                 dataTestSubj={ENTITIES_HOST_OVERVIEW_OS_FAMILY_TEST_ID}

@@ -96,8 +96,13 @@ export const Reason: FC = () => {
         <EuiTitle size="xxs">
           <h5>
             {isAlert ? (
-              <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
-                <EuiFlexItem>
+              <EuiFlexGroup
+                justifyContent="spaceBetween"
+                alignItems="center"
+                gutterSize="none"
+                responsive={false}
+              >
+                <EuiFlexItem grow={false}>
                   <h5>
                     <FormattedMessage
                       id="xpack.securitySolution.flyout.right.about.reason.alertReasonTitle"
