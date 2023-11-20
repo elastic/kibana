@@ -202,6 +202,7 @@ export const SEARCH_DEBOUNCE_MS = 500;
 export const LOCAL_STORAGE_KEYS = {
   casesQueryParams: 'cases.list.queryParams',
   casesFilterOptions: 'cases.list.filterOptions',
+  casesTableColumns: 'cases.list.tableColumns',
 };
 
 /**

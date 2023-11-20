@@ -7,7 +7,6 @@
 
 import { PluginInitializerContext } from '@kbn/core/server';
 import { PluginConfigDescriptor } from '@kbn/core/server';
-import { MapsPlugin } from './plugin';
 import { configSchema, MapsXPackConfig } from '../config';
 
 export const config: PluginConfigDescriptor<MapsXPackConfig> = {
@@ -20,5 +19,7 @@ export const config: PluginConfigDescriptor<MapsXPackConfig> = {
   schema: configSchema,
 };
 
-export const plugin = (initializerContext: PluginInitializerContext) =>
-  new MapsPlugin(initializerContext);
+export const plugin = async (initializerContext: PluginInitializerContext) => {
+  const { MapsPlugin } = await import('./plugin');
+  return new MapsPlugin(initializerContext);
+};
