@@ -17,7 +17,7 @@ describe('PipelinePanel', () => {
     extract_binary_content: true,
     name: 'name',
     reduce_whitespace: true,
-    run_ml_inference: false,
+    run_ml_inference: true,
   };
   it('renders', () => {
     const wrapper = shallow(<PipelinePanel pipeline={pipeline} />);
