@@ -36,5 +36,8 @@ export * from './preview_rule';
 export * from './preview_rule_with_exception_entries';
 export * from './patch_rule';
 export * from './generate_event';
+export * from './create_legacy_rule_action';
+export * from './get_simple_threat_match';
+export * from './get_simple_ml_rule';
 
 export * from './prebuilt_rules';

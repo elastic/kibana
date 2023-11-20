@@ -21,6 +21,78 @@
     "functions": [
       {
         "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.getWarningsDescription",
+        "type": "Function",
+        "tags": [],
+        "label": "getWarningsDescription",
+        "description": [],
+        "signature": [
+          "(warnings: ",
+          "SearchResponseIncompleteWarning",
+          "[]) => string"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.getWarningsDescription.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning",
+              "[]"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.getWarningsTitle",
+        "type": "Function",
+        "tags": [],
+        "label": "getWarningsTitle",
+        "description": [],
+        "signature": [
+          "(warnings: ",
+          "SearchResponseIncompleteWarning",
+          "[]) => string"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.getWarningsTitle.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "warnings",
+            "description": [],
+            "signature": [
+              "SearchResponseIncompleteWarning",
+              "[]"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/i18n_utils.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
         "id": "def-common.hasUnsupportedDownsampledAggregationFailure",
         "type": "Function",
         "tags": [],
@@ -178,6 +250,39 @@
               "Props"
             ],
             "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/empty_prompt.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-response-warnings",
+        "id": "def-common.ViewDetailsPopover",
+        "type": "Function",
+        "tags": [],
+        "label": "ViewDetailsPopover",
+        "description": [],
+        "signature": [
+          "(props: Props) => JSX.Element | null"
+        ],
+        "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-response-warnings",
+            "id": "def-common.ViewDetailsPopover.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "packages/kbn-search-response-warnings/src/components/search_response_warnings/view_details_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
