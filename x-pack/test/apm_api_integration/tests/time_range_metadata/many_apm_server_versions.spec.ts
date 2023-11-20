@@ -52,7 +52,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           await generateTraceDataForService({
             serviceName: 'synth-java',
             start: startLegacy,
-            end: start,
+            end: start.subtract(1, 'minute'),
             isLegacy: true,
             synthtrace,
           });
@@ -86,7 +86,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(10);
+          expect(res.hits.total.value).to.be(12);
         });
 
         it('ingests transaction metrics without transaction.duration.summary', async () => {
@@ -103,10 +103,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(30);
+          expect(res.hits.total.value).to.be(28);
         });
 
-        it('has transaction.duration.summary field for every document type in the time range', async () => {
+        it('has transaction.duration.summary field for every document type in the time range for a service', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
@@ -124,10 +124,38 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           const allHasSummaryField = response.body.sources
-            .filter((source) => source.documentType !== ApmDocumentType.TransactionEvent)
+            .filter(
+              (source) =>
+                source.documentType !== ApmDocumentType.TransactionEvent &&
+                source.rollupInterval === RollupInterval.OneMinute
+            )
             .every((source) => source.hasDurationSummaryField);
 
           expect(allHasSummaryField).to.eql(true);
+        });
+
+        it('does not suppport transaction.duration.summary when the field is not present in all documents in the time range for a service', async () => {
+          const response = await apmApiClient.readUser({
+            endpoint: 'GET /internal/apm/time_range_metadata',
+            params: {
+              query: {
+                start: startLegacy.toISOString(),
+                end: end.toISOString(),
+                enableContinuousRollups: true,
+                enableServiceTransactionMetrics: true,
+                useSpanName: false,
+                kuery: '',
+                serviceName: 'synth-java',
+                environment: 'production',
+              },
+            },
+          });
+
+          const allHasSummaryField = response.body.sources.every((source) => {
+            return source.hasDurationSummaryField;
+          });
+
+          expect(allHasSummaryField).to.eql(false);
         });
 
         it('does not suppport transaction.duration.summary when the field is not present in all documents in the time range', async () => {
@@ -141,8 +169,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 enableServiceTransactionMetrics: true,
                 useSpanName: false,
                 kuery: '',
-                serviceName: 'synth-java',
-                environment: 'production',
               },
             },
           });
@@ -170,6 +196,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             null,
             null,
             null,
+            null,
           ]);
         });
 
@@ -183,6 +210,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
+            1000000,
             1000000,
             1000000,
             1000000,
