@@ -152,9 +152,6 @@ export const createTimelineEpic =
               allTimelineQuery$
             );
           } else if (isSaveTimelineAction(action)) {
-            // - Add acceptance tests
-            // - generate endpoint documentation and mark it as private
-            // - Unit test the endpoint
             const saveAction = action as unknown as ReturnType<typeof saveTimeline>;
             const savedSearch = timeline[action.payload.id].savedSearch;
             return from(
