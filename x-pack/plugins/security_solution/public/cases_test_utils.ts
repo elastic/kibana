@@ -14,7 +14,7 @@ export const noCasesCapabilities = (): CasesCapabilities => ({
   delete_cases: false,
   push_cases: false,
   cases_connectors: false,
-  configure_cases: false,
+  edit_cases_settings: false,
 });
 
 export const readCasesCapabilities = (): CasesCapabilities => ({
@@ -24,7 +24,7 @@ export const readCasesCapabilities = (): CasesCapabilities => ({
   delete_cases: false,
   push_cases: false,
   cases_connectors: true,
-  configure_cases: false,
+  edit_cases_settings: false,
 });
 
 export const allCasesCapabilities = (): CasesCapabilities => ({
@@ -34,7 +34,7 @@ export const allCasesCapabilities = (): CasesCapabilities => ({
   delete_cases: true,
   push_cases: true,
   cases_connectors: true,
-  configure_cases: true,
+  edit_cases_settings: true,
 });
 
 export const noCasesPermissions = (): CasesPermissions => ({

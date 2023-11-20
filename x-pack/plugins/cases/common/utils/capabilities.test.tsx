@@ -10,25 +10,25 @@ import { createUICapabilities } from './capabilities';
 describe('createUICapabilities', () => {
   it('returns the UI capabilities correctly', () => {
     expect(createUICapabilities()).toMatchInlineSnapshot(`
-    Object {
-      "all": Array [
-        "create_cases",
-        "read_cases",
-        "update_cases",
-        "push_cases",
-        "cases_connectors",
-      ],
-      "configure": Array [
-        "configure_cases",
-      ],
-      "delete": Array [
-        "delete_cases",
-      ],
-      "read": Array [
-        "read_cases",
-        "cases_connectors",
-      ],
-    }
-  `);
+      Object {
+        "all": Array [
+          "create_cases",
+          "read_cases",
+          "update_cases",
+          "push_cases",
+          "cases_connectors",
+        ],
+        "configure": Array [
+          "edit_cases_settings",
+        ],
+        "delete": Array [
+          "delete_cases",
+        ],
+        "read": Array [
+          "read_cases",
+          "cases_connectors",
+        ],
+      }
+    `);
   });
 });
