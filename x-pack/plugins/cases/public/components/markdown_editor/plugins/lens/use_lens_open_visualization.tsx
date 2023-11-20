@@ -8,6 +8,7 @@
 import { useCallback } from 'react';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { AttachmentActionType } from '../../../../client/attachment_framework/types';
 import { useKibana } from '../../../../common/lib/kibana';
 import {
@@ -24,6 +25,8 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     lens: { navigateToPrefilledEditor, canUseEditor },
   } = useKibana().services;
 
+  const hasLensPermissions = canUseEditor();
+
   const handleClick = useCallback(() => {
     navigateToPrefilledEditor(
       {
@@ -38,15 +41,26 @@ export const useLensOpenVisualization = ({ comment }: { comment: string }) => {
     );
   }, [lensVisualization, navigateToPrefilledEditor]);
 
+  if (!lensVisualization.length || lensVisualization?.[0]?.attributes == null) {
+    return { canUseEditor: hasLensPermissions, actionConfig: null };
+  }
+
+  const lensAttributes = lensVisualization[0]
+    .attributes as unknown as TypedLensByValueInput['attributes'];
+
+  const isESQLQuery = isOfAggregateQueryType(lensAttributes.state.query);
+
+  if (isESQLQuery) {
+    return { canUseEditor: hasLensPermissions, actionConfig: null };
+  }
+
   return {
-    canUseEditor: canUseEditor(),
-    actionConfig: !lensVisualization.length
-      ? null
-      : {
-          type: AttachmentActionType.BUTTON as const,
-          iconType: 'lensApp',
-          label: OPEN_IN_VISUALIZATION,
-          onClick: handleClick,
-        },
+    canUseEditor: hasLensPermissions,
+    actionConfig: {
+      type: AttachmentActionType.BUTTON as const,
+      iconType: 'lensApp',
+      label: OPEN_IN_VISUALIZATION,
+      onClick: handleClick,
+    },
   };
 };
