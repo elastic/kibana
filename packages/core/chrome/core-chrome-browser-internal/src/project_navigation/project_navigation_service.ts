@@ -16,7 +16,7 @@ import {
   ChromeSetProjectBreadcrumbsParams,
   ChromeProjectNavigationNode,
 } from '@kbn/core-chrome-browser';
-import type { HttpStart } from '@kbn/core-http-browser';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
   BehaviorSubject,
   Observable,
@@ -37,7 +37,7 @@ import { buildBreadcrumbs } from './breadcrumbs';
 interface StartDeps {
   application: InternalApplicationStart;
   navLinks: ChromeNavLinks;
-  http: HttpStart;
+  http: InternalHttpStart;
   chromeBreadcrumbs$: Observable<ChromeBreadcrumb[]>;
 }
 
@@ -59,7 +59,7 @@ export class ProjectNavigationService {
   }>({ breadcrumbs: [], params: { absolute: false } });
   private readonly stop$ = new ReplaySubject<void>(1);
   private application?: InternalApplicationStart;
-  private http?: HttpStart;
+  private http?: InternalHttpStart;
   private unlistenHistory?: () => void;
 
   public start({ application, navLinks, http, chromeBreadcrumbs$ }: StartDeps) {
