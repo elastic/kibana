@@ -33,6 +33,7 @@
     "@kbn/management-settings-section-registry",
     "@kbn/react-kibana-context-render",
     "@kbn/code-editor",
+    "@kbn/code-editor-mock",
   ],
   "exclude": [
     "target/**/*",
