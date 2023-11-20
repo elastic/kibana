@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Dataset } from '../datasets';
 import { encodeDatasetSelection } from './encoding';
 import { DatasetSelectionStrategy } from './types';
@@ -22,12 +23,10 @@ export class AllDatasetSelection implements DatasetSelectionStrategy {
     };
   }
 
-  toDataviewSpec() {
-    const { name, title } = this.selection.dataset.toDataviewSpec();
+  toDataviewSpec(): DataViewSpec {
     return {
+      ...this.selection.dataset.toDataviewSpec(),
       id: this.toURLSelectionId(),
-      name,
-      title,
     };
   }
 

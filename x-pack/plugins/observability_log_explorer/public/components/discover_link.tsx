@@ -8,6 +8,7 @@
 import { EuiHeaderLink } from '@elastic/eui';
 import { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DiscoverStart } from '@kbn/discover-plugin/public';
+import { hydrateDatasetSelection } from '@kbn/log-explorer-plugin/common';
 import { getDiscoverColumnsFromDisplayOptions } from '@kbn/log-explorer-plugin/public';
 import { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
@@ -56,9 +57,7 @@ export const DiscoverLinkForState = React.memo(
         query: logExplorerState.query,
         refreshInterval: logExplorerState.refreshInterval,
         timeRange: logExplorerState.time,
-        // TODO: add dataviewspec
-        // dataViewSpec: logExplorerState.datasetSelection
-        // dataViewSpec: pageState.datasetSelection?.selection.dataset.toDataviewSpec(),
+        dataViewSpec: hydrateDatasetSelection(logExplorerState.datasetSelection).toDataviewSpec(),
       }),
       [logExplorerState]
     );

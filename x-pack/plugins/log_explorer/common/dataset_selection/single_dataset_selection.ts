@@ -29,11 +29,9 @@ export class SingleDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toDataviewSpec() {
-    const { name, title } = this.selection.dataset.toDataviewSpec();
     return {
+      ...this.selection.dataset.toDataviewSpec(),
       id: this.toURLSelectionId(),
-      name,
-      title,
     };
   }
 
