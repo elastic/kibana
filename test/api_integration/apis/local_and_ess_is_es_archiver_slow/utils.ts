@@ -41,9 +41,8 @@ import type {
 } from './shared.types';
 import { LoadResult } from './shared.types';
 import { computeAverageMinMax } from './calc';
-import { markdownify } from './markdown';
 
-export const logPathAndFileName = (logDirectory: PathLike) =>
+export const logPathAndFileNameF = (logDirectory: PathLike) =>
   `${logDirectory}/${process.env.LOG_FILE_NAME ?? 'es_archiver_load_times_log.txt'}`;
 export const mkDirAndIgnoreAllErrors: PromiseEitherFn = (logDirPath: PathLike) =>
   pipe(
@@ -58,13 +57,17 @@ const encoding = 'utf8';
 const appendUtf8 = { flag: 'a', encoding };
 const overwriteUtf8 = { flag: 'w', encoding };
 
-export const ioFlushBefore = (dest: string) => (x: any) => {
+export const ioFlushCreateLogAndWrite = (dest: string) => (x: any) => {
   const writeToFile = writeFileSync.bind(null, dest);
   // @ts-ignore
   writeToFile(`${JSON.stringify(x, null, 2)}\n`, overwriteUtf8);
 };
-
-export const ioFlushAfter = (dest: string) => (x: any) => {
+export const ioFlushCreateLogAndWriteSimple = (dest: string) => (x: any) => {
+  const writeToFile = writeFileSync.bind(null, dest);
+  // @ts-ignore
+  writeToFile(x, overwriteUtf8);
+};
+export const ioFlushAppendLog = (dest: string) => (x: any) => {
   const writeToFile = writeFileSync.bind(null, dest);
   // // @ts-ignore
   // writeToFile(`${JSON.stringify(x, null, 2)}\n`, appendUtf8);
@@ -108,6 +111,8 @@ export function metricsFactory(resultSet: LoadResults) {
     resultSet.add(found);
   };
 }
+
+export const errFilePath = () => resolve(REPO_ROOT, 'esarch_failed_load_action_archives.txt');
 export const compositionChain =
   (
     loadUnloadAndGetMetrics: (
@@ -131,7 +136,26 @@ export const compositionChain =
       return await pipe(
         TE.tryCatch(
           async (): Promise<ArchiveLoadMetrics> => await loadUnloadAndGetMetrics(i, archive),
-          (reason: any) => toError(reason)
+          (reason) => {
+            const { code, stack, message } = reason;
+
+            const caught = {
+              code,
+              stack,
+              message,
+              archiveThatFailed: archive,
+            };
+            const failedMsg = `${JSON.stringify(caught, null, 2)}`;
+
+            try {
+              throw new Error(`${reason}`);
+            } catch (err) {
+              console.log(failedMsg);
+              writeFileSync(errFilePath(), `${failedMsg},\n`, { flag: 'a', encoding: 'utf8' });
+            }
+
+            return toError(reason);
+          }
         ),
         TE.map((x: ArchiveLoadMetrics) => {
           push({
@@ -141,7 +165,7 @@ export const compositionChain =
           });
           return x;
         }),
-        TE.map(ioFlush(logPathAndFileName(logDirAbsolutePath)))
+        TE.map(ioFlush(logPathAndFileNameF(logDirAbsolutePath)))
       )();
     };
 const fake =
@@ -177,6 +201,7 @@ const work = async (
   log: ToolingLog
 ): Promise<{ bef: DateTime; aft: DateTime }> =>
   dryRun ? await fake()(log) : await real(esArchiver)(archive);
+
 export function loadAndTime(esArchiver: EsArchiver, dryRun: boolean = false, log: ToolingLog) {
   return async function getMetrics(
     loopIndex: number,
@@ -226,33 +251,63 @@ export const tap = (log: ToolingLog) => (environ: RuntimeEnv) => (x: string) => 
   environ === 'SERVERLESS' ? console.log(fx(x)) : log.info(fx(x));
   return x as unknown as FinalResult;
 };
+const reportLogFile2Screen = (logDirAbsolutePath: string) => (filePathF: any) =>
+  console.log(
+    chalk.bold.cyanBright.underline(
+      `\nλλλ Please see the log file: \n${pipe(logDirAbsolutePath, filePathF)}`
+    )
+  );
+const printEachJsonVerbose =
+  (log: ToolingLog) =>
+  (x: FinalResult): FinalResult => {
+    log.verbose(
+      chalk.bold.cyanBright.underline(`\nλλλ Avg, Min, and Max: \n${JSON.stringify(x, null, 2)}`)
+    );
+    return x;
+  };
+
+const csvPathAndFileNameF = (logDirectory: PathLike) => (theEnv: string) =>
+  `${logDirectory}/${theEnv}_es_archiver_load_results.csv`;
+
+const csvify =
+  ({
+    env,
+    concurrency,
+    highWaterMark,
+  }: {
+    env: string;
+    concurrency: number;
+    highWaterMark: number;
+  }) =>
+  ({ name, avg, min, max }: FinalResult): string =>
+    `${name},${avg},${min},${max},${env},${concurrency},${highWaterMark}`;
+
+const flushCsv = (logDirAbsolutePath: PathLike) => (theEnv: string) => (result: FinalResult) => {
+  ioFlushAppendLog(csvPathAndFileNameF(logDirAbsolutePath)(theEnv))(result);
+  return result;
+};
 export const afterAll = (
   theEnv: RuntimeEnv,
   logDirAbsolutePath: PathLike,
   results: LoadResults
 ) => {
-  const flushFinal = ioFlushAfter(logPathAndFileName(logDirAbsolutePath));
+  const flushFinalLog = ioFlushAppendLog(logPathAndFileNameF(logDirAbsolutePath));
 
   return async function finalMetricsAndLogging(log: ToolingLog): Promise<void> {
-    flushFinal(`λλλ FINAL METRICS @ ${lazyNow()}`);
-    const tapLog = tap(log)(theEnv);
-    // const tapLog = tap(log)('SERVERLESS');
-    ((await computeAverageMinMax(results)) as FinalResult[])
-      .map(function printEachJsonVerbose(x: FinalResult): FinalResult {
-        log.verbose(
-          chalk.bold.cyanBright.underline(
-            `\nλλλ Avg, Min, and Max: \n${JSON.stringify(x, null, 2)}`
-          )
-        );
-        return x;
-      })
-      .map((x: FinalResult) => pipe(markdownify(theEnv)(x), tapLog))
-      .forEach(flushFinal);
-    console.log(
-      chalk.bold.cyanBright.underline(
-        `\nλλλ Please see the log file: \n${pipe(logDirAbsolutePath, logPathAndFileName)}`
-      )
-    );
+    flushFinalLog(`λλλ FINAL METRICS @ ${lazyNow()}`);
+
+    const finalResults = (await computeAverageMinMax(results)) as FinalResult[];
+
+    ioFlushCreateLogAndWriteSimple(csvPathAndFileNameF(logDirAbsolutePath)(theEnv))(`${theEnv}\n`);
+
+    finalResults
+      .map(printEachJsonVerbose(log))
+      .map(csvify({ env: theEnv, concurrency: 4, highWaterMark: 5000 }))
+      // @ts-ignore
+      .map(flushCsv(logDirAbsolutePath)(theEnv))
+      .forEach((x) => console.log(x));
+
+    reportLogFile2Screen(logDirAbsolutePath as string)(logPathAndFileNameF);
   };
 };
 const logLoops = (x: number): void => {
@@ -290,10 +345,10 @@ export async function printInfoAndInitOutputLogging(
   preLog();
 
   await mkDirAndIgnoreAllErrors(logDirAbsolutePath);
-  ioFlushBefore(logPathAndFileName(logDirAbsolutePath))(
+  ioFlushCreateLogAndWrite(logPathAndFileNameF(logDirAbsolutePath))(
     `λλλ Init ${isDryRun() ? 'Dry Run ' : ''}Logging @ ${lazyNow()}`
   );
-  ioFlushAfter(logPathAndFileName(logDirAbsolutePath))(hardware());
+  ioFlushAppendLog(logPathAndFileNameF(logDirAbsolutePath))(hardware());
 }
 export function testsLoop(
   esArchiver: EsArchiver,
