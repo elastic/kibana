@@ -334,9 +334,7 @@ export const RiskScoreEnableSection = () => {
         <EuiSpacer />
         <ul>
           <li key={DETECTION_ENTITY_DASHBOARD}>
-            <EuiLink href={http.basePath.prepend(DETECTION_ENTITY_DASHBOARD)} target="_blank">
-              {i18n.EA_DOCS_DASHBOARD}
-            </EuiLink>
+            <LinkAnchor id={SecurityPageName.entityAnalytics}>{i18n.EA_DASHBOARD_LINK}</LinkAnchor>
             <EuiSpacer size="s" />
           </li>
           <li key={RISKY_ENTITY_SCORE_DOC_LINK}>
