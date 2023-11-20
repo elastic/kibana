@@ -21,6 +21,16 @@ import { commonFunctionalServices } from '@kbn/ftr-common-functional-services';
 import { services } from './services';
 
 const MOCK_IDP_REALM_NAME = 'mock-idp';
+const MOCK_IDP_ENTITY_ID = 'urn:mock-idp'; // Must match `entityID` in `metadata.xml`
+
+const MOCK_IDP_ATTRIBUTE_PRINCIPAL = 'http://saml.elastic-cloud.com/attributes/principal';
+const MOCK_IDP_ATTRIBUTE_ROLES = 'http://saml.elastic-cloud.com/attributes/roles';
+const MOCK_IDP_ATTRIBUTE_EMAIL = 'http://saml.elastic-cloud.com/attributes/email';
+const MOCK_IDP_ATTRIBUTE_NAME = 'http://saml.elastic-cloud.com/attributes/name';
+
+const SERVERLESS_CONFIG_PATH = '/usr/share/elasticsearch/config/';
+
+const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
 
 export default async () => {
   const servers = {
@@ -35,6 +45,12 @@ export default async () => {
       certificateAuthorities: process.env.TEST_CLOUD ? undefined : [Fs.readFileSync(CA_CERT_PATH)],
     },
   };
+
+  const kibanaUrl = formatUrl({
+    protocol: servers.kibana.protocol,
+    hostname: servers.kibana.hostname,
+    port: servers.kibana.port,
+  });
 
   // "Fake" SAML provider
   const idpPath = resolve(
@@ -70,6 +86,23 @@ export default async () => {
         'xpack.security.authc.realms.jwt.jwt1.order=-98',
         `xpack.security.authc.realms.jwt.jwt1.pkc_jwkset_path=${getDockerFileMountPath(jwksPath)}`,
         `xpack.security.authc.realms.jwt.jwt1.token_type=access_token`,
+        // Mock IDP Realm
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order=0`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path=${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id=${MOCK_IDP_ENTITY_ID}`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id=${trimTrailingSlash(
+          kibanaUrl
+        )}`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs=${trimTrailingSlash(
+          kibanaUrl
+        )}/api/security/saml/callback`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout=${trimTrailingSlash(
+          kibanaUrl
+        )}/logout`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal=${MOCK_IDP_ATTRIBUTE_PRINCIPAL}`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups=${MOCK_IDP_ATTRIBUTE_ROLES}`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name=${MOCK_IDP_ATTRIBUTE_EMAIL}`,
+        `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail=${MOCK_IDP_ATTRIBUTE_NAME}`,
       ],
       ssl: true, // SSL is required for SAML realm
     },
