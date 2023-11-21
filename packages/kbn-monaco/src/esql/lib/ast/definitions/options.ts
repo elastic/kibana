@@ -56,7 +56,7 @@ export const onOption: CommandOptionsDefinition = {
     multipleParams: false,
     params: [{ name: 'matchingColumn', type: 'column' }],
   },
-  optional: false,
+  optional: true,
 };
 
 export const withOption: CommandOptionsDefinition = {
