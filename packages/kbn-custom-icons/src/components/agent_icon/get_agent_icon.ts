@@ -1,40 +1,40 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
-
 import {
-  isIosAgentName,
-  isRumAgentName,
-  isJavaAgentName,
   isAndroidAgentName,
+  isIosAgentName,
+  isJavaAgentName,
+  isRumAgentName,
+  OpenTelemetryAgentName,
   OPEN_TELEMETRY_AGENT_NAMES,
-} from '../../../../common/agent_name';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
-import defaultIcon from '../span_icon/icons/default.svg';
-import cppIcon from './icons/cpp.svg';
-import darkCppIcon from './icons/cpp_dark.svg';
-import dotNetIcon from './icons/dot_net.svg';
-import erlangIcon from './icons/erlang.svg';
-import darkErlangIcon from './icons/erlang_dark.svg';
-import goIcon from './icons/go.svg';
-import iosIcon from './icons/ios.svg';
-import darkIosIcon from './icons/ios_dark.svg';
-import javaIcon from './icons/java.svg';
-import nodeJsIcon from './icons/nodejs.svg';
-import ocamlIcon from './icons/ocaml.svg';
-import openTelemetryIcon from './icons/otel_default.svg';
-import phpIcon from './icons/php.svg';
-import pythonIcon from './icons/python.svg';
-import rubyIcon from './icons/ruby.svg';
-import rumJsIcon from './icons/rumjs.svg';
-import darkPhpIcon from './icons/php_dark.svg';
-import darkRumJsIcon from './icons/rumjs_dark.svg';
-import rustIcon from './icons/rust.svg';
-import darkRustIcon from './icons/rust_dark.svg';
-import androidIcon from './icons/android.svg';
+} from '@kbn/elastic-agent-utils';
+import defaultIcon from '../../../assets/default.svg';
+import cppIcon from '../../../assets/cpp.svg';
+import darkCppIcon from '../../../assets/cpp_dark.svg';
+import dotNetIcon from '../../../assets/dot_net.svg';
+import erlangIcon from '../../../assets/erlang.svg';
+import darkErlangIcon from '../../../assets/erlang_dark.svg';
+import goIcon from '../../../assets/go.svg';
+import iosIcon from '../../../assets/ios.svg';
+import darkIosIcon from '../../../assets/ios_dark.svg';
+import javaIcon from '../../../assets/java.svg';
+import nodeJsIcon from '../../../assets/nodejs.svg';
+import ocamlIcon from '../../../assets/ocaml.svg';
+import openTelemetryIcon from '../../../assets/otel_default.svg';
+import phpIcon from '../../../assets/php.svg';
+import pythonIcon from '../../../assets/python.svg';
+import rubyIcon from '../../../assets/ruby.svg';
+import rumJsIcon from '../../../assets/rumjs.svg';
+import darkPhpIcon from '../../../assets/php_dark.svg';
+import darkRumJsIcon from '../../../assets/rumjs_dark.svg';
+import rustIcon from '../../../assets/rust.svg';
+import darkRustIcon from '../../../assets/rust_dark.svg';
+import androidIcon from '../../../assets/android.svg';
 
 const agentIcons: { [key: string]: string } = {
   cpp: cppIcon,
@@ -89,25 +89,19 @@ export function getAgentIconKey(agentName: string) {
   }
 
   // Remove "opentelemetry/" prefix
-  const agentNameWithoutPrefix = lowercasedAgentName.replace(
-    /^opentelemetry\//,
-    ''
-  );
+  const agentNameWithoutPrefix = lowercasedAgentName.replace(/^opentelemetry\//, '');
 
   if (Object.keys(agentIcons).includes(agentNameWithoutPrefix)) {
     return agentNameWithoutPrefix;
   }
 
   // OpenTelemetry-only agents
-  if (OPEN_TELEMETRY_AGENT_NAMES.includes(lowercasedAgentName as AgentName)) {
+  if (OPEN_TELEMETRY_AGENT_NAMES.includes(lowercasedAgentName as OpenTelemetryAgentName)) {
     return 'opentelemetry';
   }
 }
 
-export function getAgentIcon(
-  agentName: string | undefined,
-  isDarkMode: boolean
-) {
+export function getAgentIcon(agentName: string | undefined, isDarkMode: boolean = false) {
   const key = agentName && getAgentIconKey(agentName);
   if (!key) {
     return defaultIcon;
