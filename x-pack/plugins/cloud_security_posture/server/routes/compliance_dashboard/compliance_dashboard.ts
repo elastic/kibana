@@ -22,6 +22,7 @@ import { getStats } from './get_stats';
 import { CspRouter } from '../../types';
 import { getTrends, Trends } from './get_trends';
 import { BenchmarkWithoutTrend, getBenchmarks } from './get_benchmarks';
+import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 
 export interface KeyDocCount<TKey = string> {
   key: TKey;
@@ -40,12 +41,16 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
 const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], trends: Trends) =>
   benchmarksWithoutTrends.map((benchmark) => ({
     ...benchmark,
-    trend: trends
-      .map(({ timestamp, benchmarks: benchmarksTrendData }) => ({
+    trend: trends.map(({ timestamp, benchmarks: benchmarksTrendData }) => {
+      const benchmarkIdVersion = toBenchmarkDocFieldKey(
+        benchmark.meta.benchmarkId,
+        benchmark.meta.benchmarkName
+      );
+      return {
         timestamp,
-        ...benchmarksTrendData[`${benchmark.meta.benchmarkId}_${benchmark.meta.benchmarkVersion}`],
-      }))
-      .filter((doc) => Object.keys(doc).length > 1),
+        ...benchmarksTrendData[benchmarkIdVersion],
+      };
+    }),
   }));
 
 const getSummaryTrend = (trends: Trends) =>
@@ -111,7 +116,6 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
 
           const clusters = getClustersTrends(clustersWithoutTrends, trends);
           const benchmarks = getBenchmarksTrends(benchmarksWithoutTrends, trends);
-
           const trend = getSummaryTrend(trends);
 
           const body: ComplianceDashboardData = {

@@ -9,6 +9,7 @@ import { ElasticsearchClient } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types';
+import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 
 export interface ScoreTrendDoc {
   '@timestamp': string;
@@ -45,8 +46,8 @@ export type Trends = Array<{
 
 export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   index: BENCHMARK_SCORE_INDEX_DEFAULT_NS,
-  // large number that should be sufficient for 24 hours considering we write to the score index every 5 minutes
-  size: 999,
+  // Amount of samples of the last 24 hours (accounting that we take a sample every 5 minutes)
+  size: (24 * 60) / 5,
   sort: '@timestamp:desc',
   query: {
     bool: {
@@ -88,9 +89,9 @@ export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trend
         ? Object.fromEntries(
             Object.entries(data.score_by_benchmark_id).flatMap(([benchmarkId, benchmark]) =>
               Object.entries(benchmark).map(([benchmarkVersion, benchmarkStats]) => {
-                const benchmarkVersionFieldFormat = benchmarkVersion.split('_').join('.');
+                const benchmarkIdVersion = toBenchmarkDocFieldKey(benchmarkId, benchmarkVersion);
                 return [
-                  `${benchmarkId}_${benchmarkVersionFieldFormat}`,
+                  benchmarkIdVersion,
                   {
                     totalFindings: benchmarkStats.total_findings,
                     totalFailed: benchmarkStats.failed_findings,

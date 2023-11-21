@@ -32,6 +32,7 @@ import {
   type LatestTaskStateSchema,
   type TaskHealthStatus,
 } from './task_state';
+import { toBenchmarkMappingFieldKey } from '../lib/mapping_field_util';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
@@ -294,9 +295,12 @@ const getFindingsScoresDocIndexingPromises = (
         const benchmarkId = benchmarkIdBucket.key;
         const benchmarkVersions = Object.fromEntries(
           benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
-            const benchmarkVersion = benchmarkVersionBucket.key.split('.').join('_');
+            const benchmarkIdVersion = toBenchmarkMappingFieldKey(
+              benchmarkId,
+              benchmarkVersionBucket.key
+            );
             return [
-              benchmarkVersion,
+              benchmarkIdVersion,
               {
                 total_findings: benchmarkVersionBucket.total_findings.value,
                 passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
