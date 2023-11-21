@@ -6,6 +6,7 @@
  */
 
 import type { SavedObjectsImportResponse, SavedObjectsImportRetry } from '@kbn/core/public';
+import type { SavedObjectsUpdateObjectsSpacesResponse } from '@kbn/core-saved-objects-api-server';
 
 export interface ShareOptions {
   selectedSpaceIds: string[];
@@ -69,7 +70,7 @@ export interface ShareToSpaceFlyoutProps {
     objects: Array<{ type: string; id: string }>,
     spacesToAdd: string[],
     spacesToRemove: string[]
-  ) => Promise<void>;
+  ) => SavedObjectsUpdateObjectsSpacesResponse;
   /**
    * Optional callback when the target object and its relatives are updated.
    */
