@@ -61,14 +61,14 @@ export const getRiskEntityTranslationText = (
   riskEntity: RiskScoreEntity | undefined,
   plural: boolean
 ) => {
-  if (riskEntity === RiskScoreEntity.host && plural) return HOSTS;
-  if (riskEntity === RiskScoreEntity.host) return HOST;
-
-  if (riskEntity === RiskScoreEntity.user && plural) return USERS;
-  if (riskEntity === RiskScoreEntity.user) return USER;
-
-  if (plural) return ENTITIES;
-  return ENTITY;
+  switch (riskEntity) {
+    case RiskScoreEntity.host:
+      return plural ? HOSTS : HOST;
+    case RiskScoreEntity.user:
+      return plural ? USERS : USER;
+    default:
+      return plural ? ENTITIES : ENTITY;
+  }
 };
 
 export const ALERTS = i18n.translate('xpack.securitySolution.riskScore.overview.alerts', {
