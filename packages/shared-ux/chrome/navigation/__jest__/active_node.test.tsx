@@ -47,12 +47,12 @@ describe('Active node', () => {
           {
             id: 'group1',
             title: 'Group 1',
-            path: ['group1'],
+            path: 'group1',
           },
           {
             id: 'item1',
             title: 'Item 1',
-            path: ['group1', 'item1'],
+            path: 'group1.item1',
           },
         ],
       ]);
@@ -75,12 +75,12 @@ describe('Active node', () => {
               {
                 id: 'group1',
                 title: 'Group 1',
-                path: ['group1'],
+                path: 'group1',
               },
               {
                 id: 'item2',
                 title: 'Item 2',
-                path: ['group1', 'item2'],
+                path: 'group1.item2',
               },
             ],
           ]);
