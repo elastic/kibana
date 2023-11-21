@@ -30,7 +30,7 @@ export interface UseAddToCaseActions {
   onSuccess?: () => Promise<void>;
   isActiveTimelines: boolean;
   isInDetections: boolean;
-  refetch: (() => void) | undefined;
+  refetch?: (() => void) | undefined;
 }
 
 export const useAddToCaseActions = ({
@@ -174,5 +174,6 @@ export const useAddToCaseActions = ({
   return {
     addToCaseActionItems,
     handleAddToNewCaseClick,
+    handleAddToExistingCaseClick,
   };
 };
