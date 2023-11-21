@@ -62,9 +62,8 @@ export const BreakdownFieldSelector = ({
     max-width: ${euiTheme.base * 22}px;
   `;
 
-  const maxLabelLength = fieldOptions.reduce(
-    (acc, curr) => (acc > curr.label.length ? acc : curr.label.length),
-    0
+  const panelMinWidth = calculateWidthFromCharCount(
+    fieldOptions.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
   );
 
   return (
@@ -84,7 +83,7 @@ export const BreakdownFieldSelector = ({
         aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
           defaultMessage: 'Break down by',
         })}
-        inputPopoverProps={{ panelMinWidth: calculateWidthFromCharCount(maxLabelLength) }}
+        inputPopoverProps={{ panelMinWidth }}
         singleSelection={SINGLE_SELECTION}
         options={fieldOptions}
         selectedOptions={selectedFields}
