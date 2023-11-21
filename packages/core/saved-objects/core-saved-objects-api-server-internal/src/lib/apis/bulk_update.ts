@@ -41,7 +41,6 @@ import {
   mergeForUpdate,
 } from './utils';
 import { ApiExecutionContext } from './types';
-
 export interface PerformUpdateParams<T = unknown> {
   objects: Array<SavedObjectsBulkUpdateObject<T>>;
   options: SavedObjectsBulkUpdateOptions;
@@ -57,8 +56,6 @@ export const performBulkUpdate = async <T>(
     migration: migrationHelper,
   } = helpers;
   const { securityExtension } = extensions;
-
-  // console.log('the objects we are testing in unit test for errors:', JSON.stringify(objects));
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
   const time = getCurrentTime();
@@ -77,10 +74,7 @@ export const performBulkUpdate = async <T>(
       migrationVersionCompatibility?: 'raw' | 'compatible';
     }
   >;
-  // get all docs from ES -> once we have them, we're pretty much in a similar flow as
-  // bulkCreate when requestId !== undefined && overwrite === true
 
-  // maps to expectedResults in bulkCreate
   const expectedBulkGetResults = objects.map<ExpectedBulkGetResult>((object) => {
     const {
       type,
@@ -92,9 +86,7 @@ export const performBulkUpdate = async <T>(
       migrationVersionCompatibility,
     } = object;
     let error: DecoratedError | undefined;
-    // console.log(
-    //   `expectedBulkGetResults should return error as result for object that has "*" as namespace', type: ${type}, objectNamespace: ${objectNamespace}`
-    // );
+
     if (!allowedTypes.includes(type)) {
       error = SavedObjectsErrorHelpers.createGenericNotFoundError(type, id);
     } else {
@@ -117,8 +109,6 @@ export const performBulkUpdate = async <T>(
       ...(Array.isArray(references) && { references }),
     };
 
-    // const requiresNamespacesCheck = registry.isMultiNamespace(object.type);
-
     return right({
       type,
       id,
@@ -129,10 +119,9 @@ export const performBulkUpdate = async <T>(
       migrationVersionCompatibility,
     });
   });
-  // maps to validObjects in bulkCreate
+
   const validObjects = expectedBulkGetResults.filter(isRight);
   if (validObjects.length === 0) {
-    // We only have error results; return early to avoid potentially trying authZ checks for 0 types which would result in an exception.
     return {
       // Technically the returned array should only contain SavedObject results, but for errors this is not true (we cast to 'any' below)
       saved_objects: expectedBulkGetResults.map<SavedObject<T>>(
@@ -151,18 +140,15 @@ export const performBulkUpdate = async <T>(
       : namespace;
 
   const getNamespaceString = (objectNamespace?: string) => objectNamespace ?? namespaceString;
-  // bulkGetDocs maps to preflightCheckObjects in bulkCreate
-  // bulkCreate uses bulkGetObjectsAndAliases to mget them
-  // here we're only interested in the objects themselves
+
   const bulkGetDocs = validObjects
-    .filter(({ value }) => value.esRequestIndex !== undefined) // line 136 in bulk_create
+    .filter(({ value }) => value.esRequestIndex !== undefined)
     .map(({ value: { type, id, objectNamespace } }) => ({
       _id: serializer.generateRawId(getNamespaceId(objectNamespace), type, id),
       _index: commonHelper.getIndexForType(type),
-      // _source: true,
       _source: ['type', 'namespaces'],
     }));
-  // bulkGetResponse maps to preflightCheckResponse in bulkCreate
+
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
         { body: { docs: bulkGetDocs } },
@@ -179,7 +165,7 @@ export const performBulkUpdate = async <T>(
   ) {
     throw SavedObjectsErrorHelpers.createGenericNotFoundEsUnavailableError();
   }
-  // we need to still check auth for bulkUpdate a doc, regardless of using a different esClient API
+
   const authObjects: AuthorizeUpdateObject[] = validObjects.map((element) => {
     let result;
     const { type, id, objectNamespace, esRequestIndex: index } = element.value;
@@ -189,16 +175,16 @@ export const performBulkUpdate = async <T>(
       result = {
         type,
         id,
-        objectNamespace, // the namespace as defined per object in params.objects
+        objectNamespace,
         // @ts-expect-error MultiGetHit._source is optional
-        existingNamespaces: preflightResult?._source?.namespaces ?? [], // we only have _source.namespaces for multi-namespace objects.
+        existingNamespaces: preflightResult?._source?.namespaces ?? [],
       };
     } else {
       result = {
         type,
         id,
         objectNamespace,
-        existingNamespaces: [], // we only have _source.namespaces for multi-namespace objects.
+        existingNamespaces: [],
       };
     }
     return result;
@@ -250,7 +236,6 @@ export const performBulkUpdate = async <T>(
       const docFound =
         indexFound && esRequestIndex !== undefined && isMgetDoc(actualResult) && actualResult.found;
       if (registry.isMultiNamespace(type)) {
-        // esRequestIndex will be undefined for invalid types. we assign an esReqeustIndex to all docs, regardless of namespace type and can't use it as an indicator for a multinamespace object type.
         if (
           !docFound ||
           !rawDocExistsInNamespace(
@@ -366,7 +351,7 @@ export const performBulkUpdate = async <T>(
     ? await client.bulk({
         refresh,
         body: bulkUpdateParams,
-        _source_includes: ['originId'], // originId can only be defined for multi-namespace object types
+        _source_includes: ['originId'],
         require_alias: true,
       })
     : undefined;
@@ -390,7 +375,7 @@ export const performBulkUpdate = async <T>(
       const { _seq_no: seqNo, _primary_term: primaryTerm } = rawResponse;
 
       // eslint-disable-next-line @typescript-eslint/naming-convention
-      const { [type]: attributes, references, updated_at } = documentToSave; // use the original request params ?? probably need to return the actual updated doc that exists in es now.
+      const { [type]: attributes, references, updated_at } = documentToSave;
 
       const { originId } = rawMigratedUpdatedDoc._source;
       return {

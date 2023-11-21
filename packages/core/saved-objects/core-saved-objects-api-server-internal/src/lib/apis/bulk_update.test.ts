@@ -22,10 +22,7 @@ import type {
   SavedObjectsBulkUpdateObject,
   SavedObjectsBulkUpdateOptions,
 } from '@kbn/core-saved-objects-api-server';
-import {
-  SavedObjectUnsanitizedDoc,
-  type SavedObjectReference,
-} from '@kbn/core-saved-objects-server';
+import { type SavedObjectReference } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
@@ -134,28 +131,6 @@ describe('SavedObjectsRepository', () => {
     const references = [{ name: 'ref_0', type: 'test', id: '1' }];
     const originId = 'some-origin-id';
     const namespace = 'foo-namespace';
-
-    // Setup migration mock for updating an object
-    const mockMigrationVersion = { foo: '2.3.4' };
-    const mockMigrateDocumentForUpdate = (doc: SavedObjectUnsanitizedDoc<any>) => {
-      const response = {
-        ...doc,
-        attributes: {
-          ...doc.attributes,
-          ...(doc.attributes?.title && { title: `${doc.attributes.title}!!` }),
-        },
-        migrationVersion: mockMigrationVersion,
-        managed: doc.managed ?? false,
-        references: doc.references || [
-          {
-            name: 'ref_0',
-            type: 'test',
-            id: '1',
-          },
-        ],
-      };
-      return response;
-    };
 
     // bulk index calls have two objects for each source -- the action, and the source
     const expectClientCallArgsAction = (
@@ -459,7 +434,6 @@ describe('SavedObjectsRepository', () => {
         const result = await repository.bulkUpdate([obj1, obj2, _obj], options);
 
         expect(client.mget).toHaveBeenCalled();
-        // @TINA TODO: celan this up with a small parameterized function
         if (mgetOptions?.statusCode === 404) {
           expect(client.bulk).not.toHaveBeenCalled();
           expect(result).toEqual({
