@@ -50,6 +50,7 @@ const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
 export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
   const { hideHeader, showShadow, embeddable, hideInspector, onPanelStatusChange } = panelProps;
   const [node, setNode] = useState<ReactNode | undefined>();
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -128,7 +129,10 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    * Select state from the embeddable
    */
   const loading = useSelectFromEmbeddableOutput('loading', embeddable);
-  const loadingFinished = loading === false;
+
+  if (loading === false && !initialLoadComplete) {
+    setInitialLoadComplete(true);
+  }
 
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
@@ -217,9 +221,9 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      {!loadingFinished && <PanelLoader />}
+      {!initialLoadComplete && <PanelLoader />}
       <div
-        css={{ display: loadingFinished ? 'block' : 'none !important' }}
+        css={{ display: initialLoadComplete ? 'block' : 'none !important' }}
         className="embPanel__content"
         ref={embeddableRoot}
         {...contentAttrs}
