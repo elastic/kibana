@@ -277,7 +277,7 @@ export class DiscoverPageObject extends FtrService {
 
   public async getHitCount() {
     await this.header.waitUntilLoadingHasFinished();
-    return await this.testSubjects.getVisibleText('unifiedHistogramQueryHits');
+    return await this.testSubjects.getVisibleText('discoverQueryHits');
   }
 
   public async getHitCountInt() {

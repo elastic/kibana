@@ -76,10 +76,15 @@ export const DiscoverMainContent = ({
   const isDropAllowed = Boolean(onDropFieldToTable);
 
   const viewModeToggle = useMemo(() => {
-    return !isPlainRecord ? (
-      <DocumentViewModeToggle viewMode={viewMode} setDiscoverViewMode={setDiscoverViewMode} />
-    ) : undefined;
-  }, [viewMode, setDiscoverViewMode, isPlainRecord]);
+    return (
+      <DocumentViewModeToggle
+        viewMode={viewMode}
+        isTextBasedQuery={isPlainRecord}
+        stateContainer={stateContainer}
+        setDiscoverViewMode={setDiscoverViewMode}
+      />
+    );
+  }, [viewMode, setDiscoverViewMode, isPlainRecord, stateContainer]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 

@@ -21,13 +21,6 @@ export const useChartStyles = (chartVisible: boolean) => {
       align-items: center;
     }
   `;
-  const resultCountTitleCss = css`
-    flex-basis: auto;
-
-    ${useEuiBreakpoint(['xs', 's'])} {
-      margin-bottom: 0 !important;
-    }
-  `;
   const resultCountToggleCss = css`
     flex-basis: auto;
     min-width: 0;
@@ -70,7 +63,6 @@ export const useChartStyles = (chartVisible: boolean) => {
   return {
     resultCountCss,
     resultCountInnerCss,
-    resultCountTitleCss,
     resultCountToggleCss,
     histogramCss,
     breakdownFieldSelectorGroupCss,

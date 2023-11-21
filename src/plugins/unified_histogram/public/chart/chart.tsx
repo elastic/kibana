@@ -27,7 +27,6 @@ import { DataView, DataViewField, DataViewType } from '@kbn/data-views-plugin/pu
 import type { LensEmbeddableInput } from '@kbn/lens-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { Subject } from 'rxjs';
-import { HitsCounter } from '../hits_counter';
 import { Histogram } from './histogram';
 import { useChartPanels } from './hooks/use_chart_panels';
 import type {
@@ -67,7 +66,6 @@ export interface ChartProps {
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
-  appendHitsCounter?: ReactElement;
   appendHistogram?: ReactElement;
   disableAutoFetching?: boolean;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
@@ -106,7 +104,6 @@ export function Chart({
   currentSuggestion,
   allSuggestions,
   isPlainRecord,
-  appendHitsCounter,
   appendHistogram,
   disableAutoFetching,
   disableTriggers,
@@ -202,7 +199,6 @@ export function Chart({
   const {
     resultCountCss,
     resultCountInnerCss,
-    resultCountTitleCss,
     resultCountToggleCss,
     histogramCss,
     breakdownFieldSelectorGroupCss,
@@ -293,13 +289,6 @@ export function Chart({
           responsive={false}
           css={resultCountInnerCss}
         >
-          <EuiFlexItem
-            grow={false}
-            className="eui-textTruncate eui-textNoWrap"
-            css={resultCountTitleCss}
-          >
-            {hits && <HitsCounter hits={hits} append={appendHitsCounter} />}
-          </EuiFlexItem>
           {chart && (
             <EuiFlexItem css={resultCountToggleCss}>
               <EuiFlexGroup
