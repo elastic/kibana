@@ -68,7 +68,7 @@ import type {
   ValueListIndicatorMatchResponseAggregation,
 } from './types';
 import { telemetryConfiguration } from './configuration';
-import { ENDPOINT_METRICS_INDEX } from '../../../common/constants';
+import { DEFAULT_DIAGNOSTIC_INDEX, ENDPOINT_METRICS_INDEX } from '../../../common/constants';
 import { PREBUILT_RULES_PACKAGE_NAME } from '../../../common/detection_engine/constants';
 
 export interface ITelemetryReceiver {
@@ -163,10 +163,14 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(interval: number): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
+  fetchTimelineEndpointAlerts(
+    rangeFrom: string,
+    rangeTo: string
+  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   fetchDiagnosticTimelineEndpointAlerts(
-    interval: number
+    rangeFrom: string,
+    rangeTo: string
   ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
 
   buildProcessTree(
@@ -400,7 +404,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     const query = {
       expand_wildcards: ['open' as const, 'hidden' as const],
-      index: '.logs-endpoint.diagnostic.collection-*',
+      index: `${DEFAULT_DIAGNOSTIC_INDEX}-*`,
       ignore_unavailable: true,
       size: telemetryConfiguration.telemetry_max_buffer_size,
       body: {
@@ -701,7 +705,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
-  private async fetchTimelineAlerts(index: string | undefined, interval: number) {
+  private async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
@@ -750,8 +754,8 @@ export class TelemetryReceiver implements ITelemetryReceiver {
               {
                 range: {
                   '@timestamp': {
-                    gte: `now-${interval}h`,
-                    lte: 'now',
+                    gte: rangeFrom,
+                    lte: rangeTo,
                   },
                 },
               },
@@ -814,17 +818,18 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return alertsToReturn || [];
   }
 
-  public async fetchTimelineEndpointAlerts(interval: number) {
-    return this.fetchTimelineAlerts(this.alertsIndex, interval);
+  public async fetchTimelineEndpointAlerts(rangeFrom: string, rangeTo: string) {
+    if (this.alertsIndex === undefined) {
+      throw Error('alerts index is not ready yet, skipping telemetry task');
+    }
+
+    return this.fetchTimelineAlerts(this.alertsIndex, rangeFrom, rangeTo);
   }
 
   public fetchDiagnosticTimelineEndpointAlerts(
     interval: number
   ): Promise<Array<SearchHit<EnhancedAlertEvent>>> {
-    // TODO: confirm that this is the proper index and move to
-    // another place, either config or constant
-    const index = '.logs-endpoint.diagnostic.collection-*';
-    return this.fetchTimelineAlerts(index, interval);
+    return this.fetchTimelineAlerts(DEFAULT_DIAGNOSTIC_INDEX, interval);
   }
 
   public async buildProcessTree(

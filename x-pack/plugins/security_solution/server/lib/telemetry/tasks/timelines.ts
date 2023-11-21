@@ -70,8 +70,9 @@ export function createTelemetryTimelineTaskConfig() {
         };
 
         // Fetch EP Alerts
-
-        const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(3);
+        const rangeFrom = taskExecutionPeriod.last ?? 'now-3h';
+        const rangeTo = taskExecutionPeriod.current;
+        const endpointAlerts = await receiver.fetchTimelineEndpointAlerts(rangeFrom, rangeTo);
 
         // No EP Alerts -> Nothing to do
         if (endpointAlerts.length === 0 || endpointAlerts.length === undefined) {

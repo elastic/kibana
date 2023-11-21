@@ -43,8 +43,8 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
   return {
     type: 'security:telemetry-diagnostic-timelines',
     title: taskName,
-    interval: '3h',
-    timeout: '10m',
+    interval: '1m',
+    timeout: '15m',
     version: '1.0.0',
     runTask: async (
       taskId: string,
@@ -63,7 +63,10 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
       try {
         let counter = 0;
 
-        const alerts = await receiver.fetchDiagnosticTimelineEndpointAlerts(3);
+        const rangeFrom = taskExecutionPeriod.last ?? 'now-3h';
+        const rangeTo = taskExecutionPeriod.current;
+
+        const alerts = await receiver.fetchDiagnosticTimelineEndpointAlerts(rangeFrom, rangeTo);
 
         tlog(logger, `found ${alerts.length} alerts to process`);
 
@@ -191,13 +194,11 @@ class TelemetryTimelineFetcher {
       this.receiver.fetchLicenseInfo(),
     ]);
 
-    const clusterInfo: ESClusterInfo | undefined =
+    const clusterInfo: ESClusterInfo =
       clusterInfoPromise.status === 'fulfilled' ? clusterInfoPromise.value : ({} as ESClusterInfo);
 
     const licenseInfo: ESLicense | undefined =
-      licenseInfoPromise.status === 'fulfilled'
-        ? licenseInfoPromise.value
-        : ({} as ESLicense | undefined);
+      licenseInfoPromise.status === 'fulfilled' ? licenseInfoPromise.value : ({} as ESLicense);
 
     return { clusterInfo, licenseInfo };
   }

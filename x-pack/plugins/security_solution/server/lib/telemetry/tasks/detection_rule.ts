@@ -21,18 +21,24 @@ export function createTelemetryDetectionRuleListsTaskConfig(maxTelemetryBatch: n
   return {
     type: 'security:telemetry-detection-rules',
     title: 'Security Solution Detection Rule Lists Telemetry',
-    interval: '24h',
-    timeout: '10m',
+    interval: '1m',
+    timeout: '15m',
     version: '1.0.0',
     runTask: async (
-      _taskId: string,
+      taskId: string,
       logger: Logger,
       receiver: ITelemetryReceiver,
       sender: ITelemetryEventsSender,
-      _taskExecutionPeriod: TaskExecutionPeriod
+      taskExecutionPeriod: TaskExecutionPeriod
     ) => {
       const startTime = Date.now();
       const taskName = 'Security Solution Detection Rule Lists Telemetry';
+
+      tlog(
+        logger,
+        `Running task: ${taskId} [last: ${taskExecutionPeriod.last} - current: ${taskExecutionPeriod.current}]`
+      );
+
       try {
         const [clusterInfoPromise, licenseInfoPromise] = await Promise.allSettled([
           receiver.fetchClusterInfo(),
