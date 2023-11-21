@@ -33,7 +33,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternName, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(indexPatternName, '@timestamp');
       await ml.testResources.createSavedSearchFarequoteKueryIfNeeded();
       await ml.testResources.setKibanaTimeZoneToUTC();
 
@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternName);
+      await ml.testResources.deleteDataViewByTitle(indexPatternName);
     });
 
     describe('create advanced job action', function () {

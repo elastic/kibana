@@ -234,7 +234,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await aiops.logRateAnalysisDataGenerator.generateData(testData.dataGenerator);
 
-          await ml.testResources.createIndexPatternIfNeeded(
+          await ml.testResources.createDataViewIfNeeded(
             testData.sourceIndexOrSavedSearch,
             '@timestamp'
           );
@@ -260,7 +260,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         after(async () => {
           await elasticChart.setNewChartUiDebugFlag(false);
           if (testData.dataGenerator !== 'kibana_sample_data_logs') {
-            await ml.testResources.deleteIndexPatternByTitle(testData.sourceIndexOrSavedSearch);
+            await ml.testResources.deleteDataViewByTitle(testData.sourceIndexOrSavedSearch);
           }
           await aiops.logRateAnalysisDataGenerator.removeGeneratedData(testData.dataGenerator);
         });

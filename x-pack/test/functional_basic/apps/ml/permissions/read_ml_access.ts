@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
           await esArchiver.loadIfNeeded(
             'x-pack/test/functional/es_archives/ml/module_sample_ecommerce'
           );
-          await ml.testResources.createIndexPatternIfNeeded(ecIndexPattern, 'order_date');
+          await ml.testResources.createDataViewIfNeeded(ecIndexPattern, 'order_date');
 
           await ml.securityUI.loginAs(testUser.user);
         });

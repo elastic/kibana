@@ -160,11 +160,11 @@ export default ({ getService }: FtrProviderContext) => {
 
         before(async () => {
           // Mimic real job by creating data view after job is created
-          await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
+          await ml.testResources.createDataViewIfNeeded(destinationIndex);
         });
 
         after(async () => {
-          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(destinationIndex);
         });
 
         it('should delete job and data view by id', async () => {
@@ -191,12 +191,12 @@ export default ({ getService }: FtrProviderContext) => {
           // Mimic real job by creating target index & data view after DFA job is created
           await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
-          await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
+          await ml.testResources.createDataViewIfNeeded(destinationIndex);
         });
 
         after(async () => {
           await ml.api.deleteIndices(destinationIndex);
-          await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
+          await ml.testResources.deleteDataViewByTitle(destinationIndex);
         });
 
         it('should delete job, target index, and data view by id', async () => {

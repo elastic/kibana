@@ -64,7 +64,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(indexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.securityUI.loginAsMlPowerUser();
@@ -72,7 +72,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(indexPatternString);
     });
 
     for (const { suiteTitle, jobId, deleteAnnotations, expectedAnnotations } of testConfigs) {

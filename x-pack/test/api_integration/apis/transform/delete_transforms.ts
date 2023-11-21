@@ -232,12 +232,12 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
-        await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
+        await transform.testResources.createDataViewIfNeeded(destinationIndex);
       });
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+        await transform.testResources.deleteDataViewByTitle(destinationIndex);
       });
 
       it('should delete transform and destination index pattern', async () => {
@@ -272,12 +272,12 @@ export default ({ getService }: FtrProviderContext) => {
       before(async () => {
         await createTransform(transformId);
         await transform.api.createIndices(destinationIndex);
-        await transform.testResources.createIndexPatternIfNeeded(destinationIndex);
+        await transform.testResources.createDataViewIfNeeded(destinationIndex);
       });
 
       after(async () => {
         await transform.api.deleteIndices(destinationIndex);
-        await transform.testResources.deleteIndexPatternByTitle(destinationIndex);
+        await transform.testResources.deleteDataViewByTitle(destinationIndex);
       });
 
       it('should delete transform, destination index, & destination index pattern', async () => {

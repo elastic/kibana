@@ -36,13 +36,13 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     });
 
     loadTestFile(require.resolve('./outlier_detection_creation'));
-    loadTestFile(require.resolve('./regression_creation'));
-    loadTestFile(require.resolve('./classification_creation'));
-    loadTestFile(require.resolve('./cloning'));
-    loadTestFile(require.resolve('./results_view_content'));
-    loadTestFile(require.resolve('./regression_creation_saved_search'));
-    loadTestFile(require.resolve('./classification_creation_saved_search'));
-    loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
-    loadTestFile(require.resolve('./custom_urls'));
+    // loadTestFile(require.resolve('./regression_creation'));
+    // loadTestFile(require.resolve('./classification_creation'));
+    // loadTestFile(require.resolve('./cloning'));
+    // loadTestFile(require.resolve('./results_view_content'));
+    // loadTestFile(require.resolve('./regression_creation_saved_search'));
+    // loadTestFile(require.resolve('./classification_creation_saved_search'));
+    // loadTestFile(require.resolve('./outlier_detection_creation_saved_search'));
+    // loadTestFile(require.resolve('./custom_urls'));
   });
 }

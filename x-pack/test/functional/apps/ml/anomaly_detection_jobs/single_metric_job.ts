@@ -92,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags(['ml']);
     before(async () => {
       await esNode.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(indexPatternString, '@timestamp');
       await ml.testResources.setKibanaTimeZoneToUTC();
 
       await ml.api.createCalendar(calendarId);
@@ -101,7 +101,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     after(async () => {
       await ml.api.cleanMlIndices();
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(indexPatternString);
     });
 
     it('job creation loads the single metric wizard for the source data', async () => {
@@ -230,7 +230,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('job cloning creates a temporary data view and opens the single metric wizard if a matching data view does not exist', async () => {
       await ml.testExecution.logTestStep('delete data view used by job');
-      await ml.testResources.deleteIndexPatternByTitle(indexPatternString);
+      await ml.testResources.deleteDataViewByTitle(indexPatternString);
 
       // Refresh page to ensure page has correct cache of data views
       await browser.refresh();
@@ -244,7 +244,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('job cloning opens the existing job in the single metric wizard', async () => {
       await ml.testExecution.logTestStep('recreate data view used by job');
-      await ml.testResources.createIndexPatternIfNeeded(indexPatternString, '@timestamp');
+      await ml.testResources.createDataViewIfNeeded(indexPatternString, '@timestamp');
 
       await ml.navigation.navigateToMl();
       await ml.navigation.navigateToJobManagement();

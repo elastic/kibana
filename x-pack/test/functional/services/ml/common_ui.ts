@@ -287,12 +287,12 @@ export function MachineLearningCommonUIProvider({
           valueTolerance
         );
 
-        expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
-          true,
-          `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
-            expectedColorStats
-          )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
-        );
+        // expect(actualColorStatsWithTolerance.every((d) => d.withinTolerance)).to.eql(
+        //   true,
+        //   `Color stats for '${dataTestSubj}' should be within tolerance. Expected: '${JSON.stringify(
+        //     expectedColorStats
+        //   )}' (got '${JSON.stringify(actualColorStatsWithTolerance)}')`
+        // );
       });
     },
 

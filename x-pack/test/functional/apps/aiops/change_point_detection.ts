@@ -19,13 +19,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   describe('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
       await ml.testResources.setKibanaTimeZoneToUTC();
       await ml.securityUI.loginAsMlPowerUser();
     });
 
     after(async () => {
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     it(`loads the change point detection page`, async () => {
