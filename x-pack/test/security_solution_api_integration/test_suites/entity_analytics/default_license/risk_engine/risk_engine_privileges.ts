@@ -155,9 +155,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {
-            'feature_savedObjectsManagement.all': true,
-          },
         });
       });
       it('should return has_all_required false for user with no write access to risk indices', async () => {
@@ -175,9 +172,6 @@ export default ({ getService }: FtrProviderContext) => {
                 write: false,
               },
             },
-          },
-          kibana: {
-            'feature_savedObjectsManagement.all': true,
           },
         });
       });
@@ -197,9 +191,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {
-            'feature_savedObjectsManagement.all': true,
-          },
         });
       });
       it('should return has_all_required false for user with no cluster manage transform privilege', async () => {
@@ -218,9 +209,6 @@ export default ({ getService }: FtrProviderContext) => {
               },
             },
           },
-          kibana: {
-            'feature_savedObjectsManagement.all': true,
-          },
         });
       });
       it('should return has_all_required false for user with no cluster manage index templates privilege', async () => {
@@ -238,9 +226,6 @@ export default ({ getService }: FtrProviderContext) => {
                 write: true,
               },
             },
-          },
-          kibana: {
-            'feature_savedObjectsManagement.all': true,
           },
         });
       });
