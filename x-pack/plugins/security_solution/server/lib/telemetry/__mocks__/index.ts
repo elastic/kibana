@@ -71,7 +71,7 @@ export const stubLicenseInfo: ESLicense = {
 export const createMockTelemetryReceiver = (
   diagnosticsAlert?: unknown,
   emptyTimelineTree?: boolean
-): jest.Mocked<TelemetryReceiver> => {
+): jest.Mocked<ITelemetryReceiver> => {
   const processTreeResponse = emptyTimelineTree
     ? Promise.resolve([])
     : Promise.resolve(Promise.resolve(stubProcessTree()));
@@ -92,6 +92,9 @@ export const createMockTelemetryReceiver = (
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
     fetchEndpointMetadata: jest.fn(),
     fetchTimelineEndpointAlerts: jest
+      .fn()
+      .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
+    fetchDiagnosticTimelineEndpointAlerts: jest
       .fn()
       .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
