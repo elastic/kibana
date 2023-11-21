@@ -25,9 +25,9 @@ import {
   waitForRuleSuccess,
   getRuleForAlertTesting,
   deleteAllAlerts,
-} from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { EsArchivePathBuilder } from '../../../../es_archive_path_builder';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');

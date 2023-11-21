@@ -8,10 +8,10 @@ import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Detection Engine Basic and Essentials API', function () {
-    loadTestFile(require.resolve('./create_rules'));
-    loadTestFile(require.resolve('./create_ml_rules'));
-    loadTestFile(require.resolve('./open_close_alerts'));
-    loadTestFile(require.resolve('./query_alerts'));
-    loadTestFile(require.resolve('./query_alerts_backword_compatibility'));
+    loadTestFile(require.resolve('./rules/create_rules'));
+    loadTestFile(require.resolve('./rules/create_ml_rules_privileges'));
+    loadTestFile(require.resolve('./alerts/open_close_alerts'));
+    loadTestFile(require.resolve('./alerts/query_alerts'));
+    loadTestFile(require.resolve('./alerts/query_alerts_backword_compatibility'));
   });
 }

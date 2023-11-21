@@ -12,8 +12,8 @@ import {
   ALERTS_AS_DATA_FIND_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { getAlertStatus, createAlertsIndex, deleteAllAlerts } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { getAlertStatus, createAlertsIndex, deleteAllAlerts } from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
@@ -48,14 +48,19 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // TODO: remove the @brokenInServerless until a confimation
-    describe('@brokenInServerless runtime fields', () => {
+    describe('runtime fields', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        await esArchiver.load(
+          'x-pack/test/functional/es_archives/security_solution/alerts/8.8.0_multiple_docs',
+          {
+            useCreate: true,
+            docsOnly: true,
+          }
+        );
         await createAlertsIndex(supertest, log);
       });
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
+        // await esArchiver.unload('x-pack/test/functional/es_archives/endpoint/resolver/signals');
         await deleteAllAlerts(supertest, log, es);
       });
 

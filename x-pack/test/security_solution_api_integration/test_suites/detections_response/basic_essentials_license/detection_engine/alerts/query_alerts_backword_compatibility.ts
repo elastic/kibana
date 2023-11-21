@@ -8,8 +8,8 @@
 import expect from '@kbn/expect';
 
 import { DETECTION_ENGINE_QUERY_SIGNALS_URL } from '@kbn/security-solution-plugin/common/constants';
-import { createAlertsIndex, deleteAllAlerts } from '../../utils';
-import { FtrProviderContext } from '../../../../ftr_provider_context';
+import { createAlertsIndex, deleteAllAlerts } from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
