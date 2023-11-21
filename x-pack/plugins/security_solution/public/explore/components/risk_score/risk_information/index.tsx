@@ -222,7 +222,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
             <FormattedMessage
               id="xpack.securitySolution.riskInformation.intro"
               defaultMessage="Finally, the engine assigns a risk level by mapping the normalized risk score to the
-            below 6 risk levels."
+            below 5 risk levels."
             />
           </p>
         </EuiText>
