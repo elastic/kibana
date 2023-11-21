@@ -64,7 +64,7 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.setValue('userProfileFullName', newFullName);
     },
 
-    async setEmailInputField(newEmailAddress: string, clearWithKeyboard?: boolean = false) {
+    async setEmailInputField(newEmailAddress: string, clearWithKeyboard: boolean = false) {
       return await testSubjects.setValue('userProfileEmail', newEmailAddress, {
         clearWithKeyboard,
       });
