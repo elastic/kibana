@@ -52,8 +52,6 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
               defaultMessage: 'Documentation',
             }
           ),
-
-          external: true,
         },
         {
           href: 'https://github.com/elastic/logstash',
@@ -90,7 +88,6 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
               defaultMessage: 'Documentation',
             }
           ),
-          external: true,
         },
         {
           href: 'https://github.com/elastic/beats',
@@ -108,8 +105,13 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
   return (
     <>
       {additionalIngestionPanel}
-      {panels.map(({ title, description, links }) => (
-        <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">
+      {panels.map(({ title, description, links }, panelIndex) => (
+        <EuiFlexGroup
+          direction="column"
+          justifyContent="spaceEvenly"
+          gutterSize="s"
+          key={panelIndex}
+        >
           <EuiFlexItem grow={false}>
             <EuiTitle size="xxs">
               <h6>{title}</h6>
@@ -122,17 +124,17 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
           {links && links.length > 0 && (
             <>
               <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
-                {links.map(({ label, href, external, icon }, index) => (
-                  <EuiFlexItem grow={false}>
-                    <EuiLink href={href} key={index} external={external}>
-                      {icon ? (
-                        <EuiButtonEmpty color="primary" iconType={icon} size="s">
-                          {label}
-                        </EuiButtonEmpty>
-                      ) : (
-                        label
-                      )}
-                    </EuiLink>
+                {links.map(({ label, href, icon }, linksIndex) => (
+                  <EuiFlexItem grow={false} key={linksIndex}>
+                    {icon ? (
+                      <EuiButtonEmpty color="primary" iconType={icon} size="s">
+                        {label}
+                      </EuiButtonEmpty>
+                    ) : (
+                      <EuiLink href={href} target="_blank">
+                        {label}
+                      </EuiLink>
+                    )}
                   </EuiFlexItem>
                 ))}
               </EuiFlexGroup>

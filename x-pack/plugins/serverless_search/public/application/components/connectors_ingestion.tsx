@@ -59,31 +59,37 @@ export const ConnectorIngestionPanel = () => {
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href="https://github.com/elastic/connectors-python">
-            <EuiButtonEmpty color="primary" iconType="logoGithub" size="s">
-              {i18n.translate(
-                'xpack.serverlessSearch.ingestData.alternativeOptions.connectorPythonGithubLabel',
-                {
-                  defaultMessage: 'connectors-python',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiLink>
+          <EuiButtonEmpty
+            color="primary"
+            iconType="logoGithub"
+            size="s"
+            href="https://github.com/elastic/connectors-python"
+          >
+            {i18n.translate(
+              'xpack.serverlessSearch.ingestData.alternativeOptions.connectorPythonGithubLabel',
+              {
+                defaultMessage: 'connectors-python',
+              }
+            )}
+          </EuiButtonEmpty>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiLink href="https://github.com/elastic/connectors-python/blob/main/docs/DOCKER.md">
-            <EuiButtonEmpty color="primary" iconType="logoDocker" size="s">
-              {i18n.translate(
-                'xpack.serverlessSearch.ingestData.alternativeOptions.connectorDockerLabel',
-                {
-                  defaultMessage: 'Docker',
-                }
-              )}
-            </EuiButtonEmpty>
-          </EuiLink>
+          <EuiButtonEmpty
+            color="primary"
+            iconType="logoDocker"
+            size="s"
+            href="https://github.com/elastic/connectors-python/blob/main/docs/DOCKER.md"
+          >
+            {i18n.translate(
+              'xpack.serverlessSearch.ingestData.alternativeOptions.connectorDockerLabel',
+              {
+                defaultMessage: 'Docker',
+              }
+            )}
+          </EuiButtonEmpty>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="xs" />
+      <EuiSpacer size="m" />
     </EuiFlexGroup>
   );
 };
