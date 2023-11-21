@@ -119,7 +119,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
   };
 
   private onVisTypeSelected = (visType: BaseVisType | VisTypeAlias) => {
-    if (!('alias' in visType) && visType.requiresSearch && visType.options.showIndexSelection) {
+    if ('visConfig' in visType && visType.requiresSearch && visType.options.showIndexSelection) {
       this.setState({
         showSearchVisModal: true,
         visType,
