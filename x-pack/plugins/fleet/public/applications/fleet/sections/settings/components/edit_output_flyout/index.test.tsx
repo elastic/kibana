@@ -11,6 +11,7 @@ import type { Output } from '../../../../types';
 import { createFleetTestRendererMock } from '../../../../../../mock';
 import { useFleetStatus } from '../../../../../../hooks/use_fleet_status';
 import { ExperimentalFeaturesService } from '../../../../../../services';
+import { useStartServices } from '../../../../hooks';
 
 import { EditOutputFlyout } from '.';
 
@@ -24,6 +25,16 @@ jest.mock('../../../../../../hooks/use_fleet_status', () => ({
   },
   useFleetStatus: jest.fn().mockReturnValue({}),
 }));
+
+jest.mock('../../../../hooks', () => {
+  return {
+    ...jest.requireActual('../../../../hooks'),
+    useBreadcrumbs: jest.fn(),
+    useStartServices: jest.fn(),
+  };
+});
+
+const mockUseStartServices = useStartServices as jest.Mock;
 
 const mockedUsedFleetStatus = useFleetStatus as jest.MockedFunction<typeof useFleetStatus>;
 
@@ -67,6 +78,22 @@ const kafkaSectionsLabels = [
 const remoteEsOutputLabels = ['Hosts', 'Service Token'];
 
 describe('EditOutputFlyout', () => {
+  const mockStartServices = (isServerlessEnabled?: boolean) => {
+    mockUseStartServices.mockReturnValue({
+      notifications: { toasts: {} },
+      docLinks: {
+        links: { fleet: {}, logstash: {}, kibana: {} },
+      },
+      cloud: {
+        isServerlessEnabled,
+      },
+    });
+  };
+
+  beforeEach(() => {
+    mockStartServices(false);
+  });
+
   it('should render the flyout if there is not output provided', async () => {
     renderFlyout();
   });
@@ -177,5 +204,26 @@ describe('EditOutputFlyout', () => {
       expect(utils.queryByLabelText(label)).not.toBeNull();
     });
     expect(utils.queryByTestId('serviceTokenCallout')).not.toBeNull();
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).toContain(
+      'Remote Elasticsearch'
+    );
+  });
+
+  it('should not display remote ES output in type lists if serverless', async () => {
+    jest.spyOn(ExperimentalFeaturesService, 'get').mockReturnValue({ remoteESOutput: true });
+    mockUseStartServices.mockReset();
+    mockStartServices(true);
+    const { utils } = renderFlyout({
+      type: 'elasticsearch',
+      name: 'dummy',
+      id: 'output',
+      is_default: false,
+      is_default_monitoring: false,
+    });
+
+    expect(utils.queryByTestId('settingsOutputsFlyout.typeInput')?.textContent).not.toContain(
+      'Remote Elasticsearch'
+    );
   });
 });

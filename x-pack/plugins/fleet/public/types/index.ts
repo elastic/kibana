@@ -137,6 +137,7 @@ export type {
   KibanaSavedObjectType,
   GetInputsTemplatesRequest,
   GetInputsTemplatesResponse,
+  BulkGetAgentPoliciesResponse,
 } from '../../common/types';
 export {
   entries,
