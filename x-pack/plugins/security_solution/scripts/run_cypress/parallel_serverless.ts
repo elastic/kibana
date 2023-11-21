@@ -187,7 +187,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       })
       .catch(catchAxiosErrorFormatAndThrow);
     if (response.data.phase !== 'initialized') {
-      throw new Error('Project is not initialized. Retrying in 20s...');
+      throw new Error(`Project not yet initialized [${response.data.phase}]. Retrying...`);
     } else {
       log.info('Project is initialized');
     }
@@ -197,7 +197,8 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
         log.info('Project is not reachable. Retrying in 20s...');
       } else {
-        log.info(error);
+        log.info(error.message);
+        log.verbose(error);
       }
     },
     retries: 100,
@@ -577,7 +578,7 @@ ${JSON.stringify(cypressConfigFile, null, 2)}
 
             // Normalized the set of available env vars in cypress
             const cyCustomEnv = {
-              CYPRESS_BASE_URL: project.kb_url,
+              BASE_URL: project.kb_url,
 
               ELASTICSEARCH_URL: project.es_url,
               ELASTICSEARCH_USERNAME: credentials.username,
