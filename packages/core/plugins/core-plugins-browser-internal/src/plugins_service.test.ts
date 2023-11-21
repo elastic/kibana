@@ -104,6 +104,10 @@ describe('PluginsService', () => {
       application: expect.any(Object),
       plugins: expect.any(Object),
       getStartServices: expect.any(Function),
+      http: {
+        ...mockSetupDeps.http,
+        staticAssets: expect.any(Object),
+      },
     };
     // @ts-expect-error this file was not being type checked properly in the past, error is legit
     mockStartDeps = {
@@ -128,6 +132,10 @@ describe('PluginsService', () => {
       application: expect.any(Object),
       plugins: expect.any(Object),
       chrome: omit(mockStartDeps.chrome, 'getComponent'),
+      http: {
+        ...mockStartDeps.http,
+        staticAssets: expect.any(Object),
+      },
     };
 
     // Reset these for each test.

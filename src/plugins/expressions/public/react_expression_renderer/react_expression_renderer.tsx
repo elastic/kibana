@@ -24,7 +24,6 @@ export interface ReactExpressionRendererProps
     error?: ExpressionRenderError | null
   ) => React.ReactElement | React.ReactElement[];
   padding?: 'xs' | 's' | 'm' | 'l' | 'xl';
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type ReactExpressionRendererType = React.ComponentType<ReactExpressionRendererProps>;
