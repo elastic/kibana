@@ -30,6 +30,8 @@ import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND,
   DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_ICON,
+  DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE,
   DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE,
@@ -56,167 +58,158 @@ import { createRule } from '../../../../tasks/api_calls/rules';
 import { getNewRule } from '../../../../objects/rule';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 
-// FLAKY: https://github.com/elastic/kibana/issues/171002
-describe.skip(
-  'Alert details expandable flyout right panel',
-  { tags: ['@ess', '@serverless'] },
-  () => {
-    const rule = getNewRule();
+describe('Alert details expandable flyout right panel', { tags: ['@ess', '@serverless'] }, () => {
+  const rule = getNewRule();
 
-    beforeEach(() => {
-      deleteAlertsAndRules();
-      login();
-      createRule(rule);
-      visit(ALERTS_URL);
-      waitForAlertsToPopulate();
-    });
+  beforeEach(() => {
+    deleteAlertsAndRules();
+    login();
+    createRule(rule);
+    visit(ALERTS_URL);
+    waitForAlertsToPopulate();
+  });
 
-    it('should display header and footer basics', () => {
-      expandFirstAlertExpandableFlyout();
+  it('should display header and footer basics', () => {
+    expandFirstAlertExpandableFlyout();
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_ICON).should('exist');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_TITLE).should('have.text', rule.name);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_LINK_ICON).should('exist');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('have.text', 'open');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_STATUS).should('have.text', 'open');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('have.text', 'Risk score:');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
-        .should('be.visible')
-        .and('have.text', rule.risk_score);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE).should('have.text', 'Risk score:');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_RISK_SCORE_VALUE)
+      .should('be.visible')
+      .and('have.text', rule.risk_score);
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
-        .should('be.visible')
-        .and('have.text', upperFirst(rule.severity));
+    cy.get(DOCUMENT_DETAILS_FLYOUT_HEADER_SEVERITY_VALUE)
+      .should('be.visible')
+      .and('have.text', upperFirst(rule.severity));
 
-      cy.log('Verify all 3 tabs are visible');
+    cy.log('Verify all 3 tabs are visible');
 
-      cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB)
-        .should('have.text', 'Overview')
-        .and('have.class', 'euiTab-isSelected');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB)
-        .should('have.text', 'Table')
-        .and('not.have.class', 'euiTab-isSelected');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB)
-        .should('have.text', 'JSON')
-        .and('not.have.class', 'euiTab-isSelected');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_OVERVIEW_TAB)
+      .should('have.text', 'Overview')
+      .and('have.class', 'euiTab-isSelected');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB)
+      .should('have.text', 'Table')
+      .and('not.have.class', 'euiTab-isSelected');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB)
+      .should('have.text', 'JSON')
+      .and('not.have.class', 'euiTab-isSelected');
 
-      cy.log('Verify the expand/collapse button is visible and functionality works');
+    cy.log('Verify the expand/collapse button is visible and functionality works');
 
-      expandDocumentDetailsExpandableFlyoutLeftSection();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).should(
-        'have.text',
-        'Collapse details'
+    expandDocumentDetailsExpandableFlyoutLeftSection();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_COLLAPSE_DETAILS_BUTTON).should('have.text', 'Collapse details');
+
+    collapseDocumentDetailsExpandableFlyoutLeftSection();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).should('have.text', 'Expand details');
+
+    cy.log('Verify the take action button is visible on all tabs');
+
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+
+    openTableTab();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('have.class', 'euiTab-isSelected');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+
+    openJsonTab();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('have.class', 'euiTab-isSelected');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
+  });
+
+  // TODO this will change when add to existing case is improved
+  //  https://github.com/elastic/security-team/issues/6298
+  it('should add to existing case', () => {
+    expandFirstAlertExpandableFlyout();
+    openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
+    fillOutFormToCreateNewCase();
+    openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE);
+
+    cy.get(EXISTING_CASE_SELECT_BUTTON).contains('Select').click();
+
+    cy.get(VIEW_CASE_TOASTER_LINK).should('contain.text', 'View case');
+  });
+
+  // TODO this will change when add to new case is improved
+  //  https://github.com/elastic/security-team/issues/6298
+  it('should add to new case', () => {
+    expandFirstAlertExpandableFlyout();
+    openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
+    fillOutFormToCreateNewCase();
+
+    cy.get(VIEW_CASE_TOASTER_LINK).should('contain.text', 'View case');
+  });
+
+  it('should mark as acknowledged', () => {
+    cy.get(ALERT_CHECKBOX).should('have.length', 1);
+
+    expandFirstAlertExpandableFlyout();
+    openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
+
+    cy.get(TOASTER).should('have.text', 'Successfully marked 1 alert as acknowledged.');
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
+  });
+
+  it('should mark as closed', () => {
+    cy.get(ALERT_CHECKBOX).should('have.length', 1);
+
+    expandFirstAlertExpandableFlyout();
+    openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
+
+    cy.get(TOASTER).should('have.text', 'Successfully closed 1 alert.');
+    cy.get(EMPTY_ALERT_TABLE).should('exist');
+  });
+
+  // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown
+  it('should test other action within take action dropdown', () => {
+    expandFirstAlertExpandableFlyout();
+
+    cy.log('should add endpoint exception');
+
+    // TODO figure out why this option is disabled in Cypress but not running the app locally
+    //  https://github.com/elastic/security-team/issues/6300
+    openTakeActionButton();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.disabled');
+
+    cy.log('should add rule exception');
+
+    // TODO this isn't fully testing the add rule exception yet
+    //  https://github.com/elastic/security-team/issues/6301
+    selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER).should('exist');
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON)
+      .should('be.visible')
+      .click();
+
+    // cy.log('should isolate host');
+
+    // TODO figure out why isolate host isn't showing up in the dropdown
+    //  https://github.com/elastic/security-team/issues/6302
+    // openTakeActionButton();
+    // cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.visible');
+
+    cy.log('should respond');
+
+    // TODO this will change when respond is improved
+    //  https://github.com/elastic/security-team/issues/6303
+    openTakeActionButton();
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.disabled');
+
+    cy.log('should investigate in timeline');
+
+    selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
+    cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
+      .first()
+      .within(() =>
+        cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY).should('exist')
       );
-
-      collapseDocumentDetailsExpandableFlyoutLeftSection();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_EXPAND_DETAILS_BUTTON).should('have.text', 'Expand details');
-
-      cy.log('Verify the take action button is visible on all tabs');
-
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
-
-      openTableTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB).should('have.class', 'euiTab-isSelected');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
-
-      openJsonTab();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_JSON_TAB).should('have.class', 'euiTab-isSelected');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_TAKE_ACTION_BUTTON).should('be.visible');
-    });
-
-    // TODO this will change when add to existing case is improved
-    //  https://github.com/elastic/security-team/issues/6298
-    it('should add to existing case', () => {
-      expandFirstAlertExpandableFlyout();
-      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
-      fillOutFormToCreateNewCase();
-      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_EXISTING_CASE);
-
-      cy.get(EXISTING_CASE_SELECT_BUTTON).should('be.visible').contains('Select').click();
-
-      cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
-    });
-
-    // TODO this will change when add to new case is improved
-    //  https://github.com/elastic/security-team/issues/6298
-    it('should add to new case', () => {
-      expandFirstAlertExpandableFlyout();
-      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE);
-      fillOutFormToCreateNewCase();
-
-      cy.get(VIEW_CASE_TOASTER_LINK).should('be.visible').and('contain.text', 'View case');
-    });
-
-    it('should mark as acknowledged', () => {
-      cy.get(ALERT_CHECKBOX).should('have.length', 1);
-
-      expandFirstAlertExpandableFlyout();
-      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_MARK_AS_ACKNOWLEDGED);
-
-      // TODO figure out how to verify the toasts pops up
-      // cy.get(KIBANA_TOAST)
-      //   .should('be.visible')
-      //   .and('have.text', 'Successfully marked 1 alert as acknowledged.');
-      cy.get(EMPTY_ALERT_TABLE).should('exist');
-    });
-
-    it('should mark as closed', () => {
-      cy.get(ALERT_CHECKBOX).should('have.length', 1);
-
-      expandFirstAlertExpandableFlyout();
-      openTakeActionButtonAndSelectItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_MARK_AS_CLOSED);
-
-      // TODO figure out how to verify the toasts pops up
-      // cy.get(KIBANA_TOAST).should('be.visible').and('have.text', 'Successfully closed 1 alert.');
-      cy.get(EMPTY_ALERT_TABLE).should('exist');
-    });
-
-    // these actions are now grouped together as we're not really testing their functionality but just the existence of the option in the dropdown
-    it('should test other action within take action dropdown', () => {
-      expandFirstAlertExpandableFlyout();
-
-      cy.log('should add endpoint exception');
-
-      // TODO figure out why this option is disabled in Cypress but not running the app locally
-      //  https://github.com/elastic/security-team/issues/6300
-      openTakeActionButton();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_ENDPOINT_EXCEPTION).should('be.disabled');
-
-      cy.log('should add rule exception');
-
-      // TODO this isn't fully testing the add rule exception yet
-      //  https://github.com/elastic/security-team/issues/6301
-      selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION);
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_HEADER).should('exist');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_RULE_EXCEPTION_FLYOUT_CANCEL_BUTTON)
-        .should('be.visible')
-        .click();
-
-      // cy.log('should isolate host');
-
-      // TODO figure out why isolate host isn't showing up in the dropdown
-      //  https://github.com/elastic/security-team/issues/6302
-      // openTakeActionButton();
-      // cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_ISOLATE_HOST).should('be.visible');
-
-      cy.log('should respond');
-
-      // TODO this will change when respond is improved
-      //  https://github.com/elastic/security-team/issues/6303
-      openTakeActionButton();
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_RESPOND).should('be.disabled');
-
-      cy.log('should investigate in timeline');
-
-      selectTakeActionItem(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE);
-      cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_SECTION)
-        .first()
-        .within(() =>
-          cy.get(DOCUMENT_DETAILS_FLYOUT_FOOTER_INVESTIGATE_IN_TIMELINE_ENTRY).should('exist')
-        );
-    });
-  }
-);
+  });
+});

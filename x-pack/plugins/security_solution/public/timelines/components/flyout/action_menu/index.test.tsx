@@ -12,7 +12,7 @@ import { TestProviders, mockIndexNames, mockIndexPattern } from '../../../../com
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { allCasesPermissions, readCasesPermissions } from '../../../../cases_test_utils';
 import { mockBrowserFields } from '../../../../common/containers/source/mock';
-import { TimelineActionMenuComponent } from '.';
+import { TimelineActionMenu } from '.';
 import { TimelineId, TimelineTabs } from '../../../../../common/types';
 
 const mockUseSourcererDataView: jest.Mock = useSourcererDataView as jest.Mock;
@@ -58,7 +58,7 @@ describe('Action menu', () => {
 
       render(
         <TestProviders>
-          <TimelineActionMenuComponent
+          <TimelineActionMenu
             timelineId={TimelineId.test}
             activeTab={TimelineTabs.query}
             isInspectButtonDisabled={false}
@@ -74,7 +74,7 @@ describe('Action menu', () => {
 
       render(
         <TestProviders>
-          <TimelineActionMenuComponent
+          <TimelineActionMenu
             timelineId={TimelineId.test}
             activeTab={TimelineTabs.query}
             isInspectButtonDisabled={false}

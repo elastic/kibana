@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiHealth, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, EuiText } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
 import { isEmpty } from 'lodash/fp';
@@ -21,10 +21,6 @@ import {
 import { UNTITLED_TIMELINE, UNTITLED_TEMPLATE } from '../../timeline/properties/translations';
 import { timelineActions } from '../../../store/timeline';
 import * as i18n from './translations';
-
-const EuiHealthStyled = styled(EuiHealth)`
-  display: block;
-`;
 
 interface ActiveTimelinesProps {
   timelineId: string;

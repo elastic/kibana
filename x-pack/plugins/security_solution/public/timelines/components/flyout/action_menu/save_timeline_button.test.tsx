@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, fireEvent, waitFor, screen } from '@testing-library/react';
 import type { SaveTimelineButtonProps } from './save_timeline_button';
-import { SaveTimelineButtonComponent } from './save_timeline_button';
+import { SaveTimelineButton } from './save_timeline_button';
 import { TestProviders } from '../../../../common/mock';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { getTimelineStatusByIdSelector } from '../header/selectors';
@@ -43,7 +43,7 @@ const props: SaveTimelineButtonProps = {
 
 const TestSaveTimelineButton = (_props: SaveTimelineButtonProps) => (
   <TestProviders>
-    <SaveTimelineButtonComponent {..._props} />
+    <SaveTimelineButton {..._props} />
   </TestProviders>
 );
 
@@ -58,7 +58,7 @@ describe('SaveTimelineButton', () => {
     });
     render(
       <TestProviders>
-        <SaveTimelineButtonComponent {...props} />
+        <SaveTimelineButton {...props} />
       </TestProviders>
     );
     expect(screen.getByRole('button')).toBeDisabled();
