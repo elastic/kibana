@@ -5069,6 +5069,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-ui-actions@link:x-pack/packages/ml/ui_actions":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-url-state@link:x-pack/packages/ml/url_state":
   version "0.0.0"
   uid ""

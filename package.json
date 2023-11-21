@@ -555,6 +555,7 @@
     "@kbn/ml-runtime-field-utils": "link:x-pack/packages/ml/runtime_field_utils",
     "@kbn/ml-string-hash": "link:x-pack/packages/ml/string_hash",
     "@kbn/ml-trained-models-utils": "link:x-pack/packages/ml/trained_models_utils",
+    "@kbn/ml-ui-actions": "link:x-pack/packages/ml/ui_actions",
     "@kbn/ml-url-state": "link:x-pack/packages/ml/url_state",
     "@kbn/monaco": "link:packages/kbn-monaco",
     "@kbn/monitoring-collection-plugin": "link:x-pack/plugins/monitoring_collection",
