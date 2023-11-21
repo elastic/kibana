@@ -44,7 +44,7 @@ import {
 
 const loadPageAsUserWithNoPrivileges = () => {
   login(ROLES.reader);
-  visit(ENTITY_ANALYTICS_MANAGEMENT_URL, { role: ROLES.no_risk_engine_privileges });
+  visit(ENTITY_ANALYTICS_MANAGEMENT_URL, { role: ROLES.reader });
 };
 
 describe(
