@@ -16,7 +16,7 @@ import {
   buildDataTableRecord,
 } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../plugin';
-import { UnifiedDocViewerServices } from './use_doc_viewer_services';
+import { UnifiedDocViewerServices } from '../types';
 
 const index = 'test-index';
 const mockSearchResult = new Subject();

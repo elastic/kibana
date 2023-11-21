@@ -16,7 +16,7 @@ import { createGetterSetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { CoreStart } from '@kbn/core/public';
-import { type UnifiedDocViewerServices } from './hooks';
+import type { UnifiedDocViewerServices } from './types';
 
 export const [getUnifiedDocViewerServices, setUnifiedDocViewerServices] =
   createGetterSetter<UnifiedDocViewerServices>('UnifiedDocViewerServices');

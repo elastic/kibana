@@ -15,7 +15,7 @@ import { EuiButton, EuiEmptyPrompt, EuiLoadingSpinner } from '@elastic/eui';
 import { JsonCodeEditorCommon } from '../json_code_editor';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
-import { UnifiedDocViewerServices } from '../../hooks';
+import type { UnifiedDocViewerServices } from '../../types';
 
 const mockDataView = {
   getComputedFields: () => [],

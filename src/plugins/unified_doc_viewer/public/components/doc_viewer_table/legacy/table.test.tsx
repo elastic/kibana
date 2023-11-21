@@ -13,8 +13,8 @@ import { DocViewerLegacyTable } from './table';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DocViewRenderProps } from '@kbn/unified-doc-viewer/types';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type { UnifiedDocViewerServices } from '../../../hooks';
 import { setUnifiedDocViewerServices } from '../../../plugin';
+import type { UnifiedDocViewerServices } from '../../../types';
 
 const services = {
   uiSettings: {
