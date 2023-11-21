@@ -234,6 +234,7 @@ describe('Cases API', () => {
           search: 'hello',
           owner: [SECURITY_SOLUTION_OWNER],
           category: [],
+          customFields: {},
         },
         queryParams: DEFAULT_QUERY_PARAMS,
         signal: abortCtrl.signal,

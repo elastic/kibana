@@ -37,7 +37,7 @@ export const useCustomFieldsFilterConfig = () => {
                 id={key}
                 onChange={onChange}
                 options={mapToMultiSelectOption(customField.filterOptions || [])}
-                selectedOptionKeys={filterOptions[key]}
+                selectedOptionKeys={filterOptions.customFields[key]}
               />
             );
           },

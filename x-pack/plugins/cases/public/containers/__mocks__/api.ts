@@ -95,6 +95,7 @@ export const getCases = async ({
     tags: [],
     owner: [],
     category: [],
+    customFields: {},
   },
   queryParams = {
     page: 1,
