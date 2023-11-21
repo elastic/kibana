@@ -33,7 +33,7 @@ import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
 import {
   installIntegrations,
   PackagePolicyWithoutAgentPolicyId,
-} from '../../../../tasks/integrations';
+} from '../../../../tasks/api_calls/integrations';
 import {
   disableAutoRefresh,
   openIntegrationsPopover,
