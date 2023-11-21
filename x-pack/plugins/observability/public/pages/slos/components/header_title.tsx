@@ -5,24 +5,16 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 
 export function HeaderTitle() {
   return (
-    <EuiFlexGroup
-      direction="row"
-      gutterSize="m"
-      alignItems="center"
-      justifyContent="flexStart"
-      responsive={false}
-    >
-      <EuiFlexItem grow={false}>
-        {i18n.translate('xpack.observability.slosPageTitle', {
-          defaultMessage: 'SLOs',
-        })}
-      </EuiFlexItem>
-    </EuiFlexGroup>
+    <EuiFlexItem grow={false}>
+      {i18n.translate('xpack.observability.slosPageTitle', {
+        defaultMessage: 'SLOs',
+      })}
+    </EuiFlexItem>
   );
 }
