@@ -305,6 +305,13 @@ function areCurrentArgsValid(
       }
     }
   }
+  if (command.name === 'rename') {
+    if (node) {
+      if (isColumnItem(node)) {
+        return true;
+      }
+    }
+  }
   return true;
 }
 
@@ -655,14 +662,16 @@ async function getExpressionSuggestionsByType(
       suggestions.push(...optionsAvailable.map(buildOptionDefinition));
     }
 
-    // now suggest pipe or comma
-    suggestions.push(
-      ...getFinalSuggestions({
-        comma:
-          commandDef.signature.multipleParams &&
-          optionsAvailable.length === commandDef.options.length,
-      })
-    );
+    if (!optionsAvailable.length || optionsAvailable.every(({ optional }) => optional)) {
+      // now suggest pipe or comma
+      suggestions.push(
+        ...getFinalSuggestions({
+          comma:
+            commandDef.signature.multipleParams &&
+            optionsAvailable.length === commandDef.options.length,
+        })
+      );
+    }
   }
   // Due to some logic overlapping functions can be repeated
   // so dedupe here based on insertText string (it can differ from name)
@@ -973,6 +982,14 @@ async function getOptionArgsSuggestions(
       }
     }
   }
+  if (command.name === 'rename') {
+    if (option.args.length < 2) {
+      const fieldsMap = await getFieldsMaps();
+      const anyVariables = collectVariables(commands, fieldsMap);
+      suggestions.push(...buildVariablesDefinitions([findNewVariable(anyVariables)]));
+    }
+  }
+
   if (optionDef) {
     if (!suggestions.length) {
       const argIndex = Math.max(option.args.length - 1, 0);

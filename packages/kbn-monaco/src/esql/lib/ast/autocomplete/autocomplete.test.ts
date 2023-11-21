@@ -16,6 +16,7 @@ import { evalFunctionsDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
 import { chronoLiterals, timeLiterals } from '../definitions/literals';
+import { commandDefinitions } from '../definitions/commands';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -228,9 +229,39 @@ describe('autocomplete', () => {
     },
   });
 
+  const sourceCommands = ['row', 'from', 'show'];
+
+  describe('New command', () => {
+    testSuggestions(' ', sourceCommands);
+    testSuggestions(
+      'from a | ',
+      commandDefinitions
+        .filter(({ name }) => !sourceCommands.includes(name))
+        .map(({ name }) => name)
+    );
+    testSuggestions(
+      'from a [metadata _id] | ',
+      commandDefinitions
+        .filter(({ name }) => !sourceCommands.includes(name))
+        .map(({ name }) => name)
+    );
+    testSuggestions(
+      'from a | eval var0 = a | ',
+      commandDefinitions
+        .filter(({ name }) => !sourceCommands.includes(name))
+        .map(({ name }) => name)
+    );
+    testSuggestions(
+      'from a [metadata _id] | eval var0 = a | ',
+      commandDefinitions
+        .filter(({ name }) => !sourceCommands.includes(name))
+        .map(({ name }) => name)
+    );
+  });
+
   describe('from', () => {
     // Monaco will filter further down here
-    testSuggestions('f', ['row', 'from', 'show']);
+    testSuggestions('f', sourceCommands);
     testSuggestions('from ', indexes);
     testSuggestions('from a,', indexes);
     testSuggestions('from a, b ', ['[metadata $0 ]', '|', ',']);
@@ -337,6 +368,12 @@ describe('autocomplete', () => {
   describe('mv_expand', () => {
     testSuggestions('from a | mv_expand ', ['listField']);
     testSuggestions('from a | mv_expand a ', ['|']);
+  });
+
+  describe('rename', () => {
+    testSuggestions('from a | rename ', [...getFieldNamesByType('any')]);
+    testSuggestions('from a | rename stringField ', ['as']);
+    testSuggestions('from a | rename stringField as ', ['var0']);
   });
 
   describe('stats', () => {

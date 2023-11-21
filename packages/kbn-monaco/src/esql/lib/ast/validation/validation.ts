@@ -521,7 +521,19 @@ function validateColumnForCommand(
       );
     }
   } else {
-    const columnCheck = columnExists(column.name, references);
+    let columnName = column.name;
+    let columnCheck = columnExists(columnName, references);
+    // give it another try if quoted with a trimmed version: mind to skip fields this time
+    if (!columnCheck && column.quoted) {
+      const trimmedName = columnName.replace(/ /g, '');
+      columnCheck = columnExists(columnName.replace(/ /g, ''), {
+        ...references,
+        fields: new Map(),
+      });
+      if (columnCheck) {
+        columnName = trimmedName;
+      }
+    }
     if (columnCheck) {
       const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
@@ -530,7 +542,7 @@ function validateColumnForCommand(
 
       if (columnParamsWithInnerTypes.length) {
         // this should be guaranteed by the columnCheck above
-        const columnRef = getColumnHit(column.name, references)!;
+        const columnRef = getColumnHit(columnName, references)!;
         if (
           columnParamsWithInnerTypes.every(({ innerType }) => {
             return innerType !== columnRef.type;
@@ -546,7 +558,7 @@ function validateColumnForCommand(
                 type: supportedTypes.join(', '),
                 typeCount: supportedTypes.length,
                 givenType: columnRef.type,
-                column: column.name,
+                column: columnName,
               },
               locations: column.location,
             })
@@ -554,7 +566,7 @@ function validateColumnForCommand(
         }
       }
       if (
-        hasWildcard(column.name) &&
+        hasWildcard(columnName) &&
         !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
       ) {
         messages.push(
@@ -562,7 +574,7 @@ function validateColumnForCommand(
             messageId: 'wildcardNotSupportedForCommand',
             values: {
               command: commandName,
-              value: column.name,
+              value: columnName,
             },
             locations: column.location,
           })

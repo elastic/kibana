@@ -313,8 +313,14 @@ export function visitRenameClauses(clausesCtx: RenameClauseContext[]): ESQLAstIt
       const asToken = clause.tryGetToken(esql_parser.AS, 0);
       if (asToken) {
         const fn = createOption(asToken.text.toLowerCase(), clause);
-        fn.args.push(createColumn(clause._oldName), createColumn(clause._newName));
+        for (const arg of [clause._oldName, clause._newName]) {
+          if (arg?.text) {
+            fn.args.push(createColumn(arg));
+          }
+        }
         return fn;
+      } else if (clause._oldName?.text) {
+        return createColumn(clause._oldName);
       }
     })
     .filter(nonNullable);
