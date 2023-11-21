@@ -9,22 +9,39 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
       data-test-subj="flyout-pane"
     />
   </div>
-  .c3 {
-  display: block;
+  .c3:active,
+.c3:focus {
+  background: transparent;
 }
 
-.c1 > span {
+.c3 > span {
   padding: 0;
+}
+
+.c4 {
+  overflow: hidden;
+  display: inline-block;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.c5 {
+  white-space: nowrap;
+}
+
+.c1 {
+  overflow-x: auto;
 }
 
 .c2 {
   overflow: hidden;
-  display: inline-block;
-  text-overflow: ellipsis;
 }
 
 .c0 {
-  overflow: hidden;
+  backgroundColor: #1d1e24;
+  color: #dfe5ef;
+  padding-inline: 12px;
+  border-radius: 0px;
 }
 
 <div
@@ -32,30 +49,29 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
     data-test-subj="flyoutBottomBar"
   >
     <div
-      class="euiPanel euiPanel--plain euiPanel--paddingSmall emotion-euiPanel-none-s-plain"
+      class="euiPanel euiPanel--plain euiPanel--paddingSmall c0 emotion-euiPanel-m-s-plain"
       data-show="false"
       data-test-subj="timeline-flyout-header-panel"
-      style="background-color: rgb(255, 255, 255); color: rgb(52, 55, 65);"
     >
       <div
-        class="euiFlexGroup emotion-euiFlexGroup-s-spaceBetween-center-row"
+        class="euiFlexGroup c1 eui-scrollBar emotion-euiFlexGroup-s-spaceBetween-center-row"
       >
         <div
           class="euiFlexItem emotion-euiFlexItem-growZero"
         >
           <div
-            class="euiFlexGroup emotion-euiFlexGroup-responsive-xs-flexStart-center-row"
+            class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiFlexItem c0 emotion-euiFlexItem-growZero"
+                class="euiFlexItem c2 emotion-euiFlexItem-growZero"
               >
                 <button
                   aria-label="Open timeline Untitled timeline"
                   aria-pressed="false"
-                  class="euiButtonEmpty c1 active-timeline-button emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary-flush-both"
+                  class="euiButtonEmpty c3 active-timeline-button emotion-euiButtonDisplay-euiButtonEmpty-s-empty-primary-flush-both"
                   data-test-subj="flyoutOverlay"
                   type="button"
                 >
@@ -69,7 +85,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                         class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-center-row"
                       >
                         <div
-                          class="euiFlexItem c2 emotion-euiFlexItem-growZero"
+                          class="euiFlexItem c4 emotion-euiFlexItem-growZero"
                           data-test-subj="timeline-title"
                         >
                           Untitled timeline
@@ -78,33 +94,6 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                           class="euiFlexItem emotion-euiFlexItem-growZero"
                         >
                           <div />
-                        </div>
-                        <div
-                          class="euiFlexItem emotion-euiFlexItem-growZero"
-                        >
-                          <span
-                            class="euiToolTipAnchor emotion-euiToolTipAnchor-inlineBlock"
-                          >
-                            <div
-                              class="euiHealth c3 emotion-euiHealth-s"
-                            >
-                              <div
-                                class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
-                              >
-                                <div
-                                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                                >
-                                  <span
-                                    color="warning"
-                                    data-euiicon-type="dot"
-                                  />
-                                </div>
-                                <div
-                                  class="euiFlexItem emotion-euiFlexItem-growZero"
-                                />
-                              </div>
-                            </div>
-                          </span>
                         </div>
                       </div>
                     </span>
@@ -116,7 +105,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiText emotion-euiText-xs"
+                class="euiText c5 emotion-euiText-xs"
                 data-test-subj="timeline-status"
               >
                 <span
@@ -134,6 +123,7 @@ exports[`Flyout rendering it renders correctly against snapshot 1`] = `
                 aria-pressed="false"
                 class="euiButtonIcon emotion-euiButtonIcon-xs-empty-primary"
                 data-test-subj="timeline-favorite-empty-star"
+                title="Add to favorites"
                 type="button"
               >
                 <span

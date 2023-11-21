@@ -13,7 +13,6 @@ import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   closeTimelineUsingCloseButton,
-  closeTimelineUsingToggle,
   openTimelineUsingToggle,
 } from '../../../tasks/security_main';
 
@@ -29,7 +28,7 @@ describe('timeline flyout button', () => {
   it('toggles open the timeline', { tags: ['@ess', '@serverless'] }, () => {
     openTimelineUsingToggle();
     cy.get(TIMELINE_FLYOUT_HEADER).should('have.css', 'visibility', 'visible');
-    closeTimelineUsingToggle();
+    closeTimelineUsingCloseButton();
   });
 
   it(
@@ -37,7 +36,7 @@ describe('timeline flyout button', () => {
     { tags: ['@ess', '@serverless'] },
     () => {
       openTimelineUsingToggle();
-      closeTimelineUsingToggle();
+      closeTimelineUsingCloseButton();
 
       cy.get(TIMELINE_BOTTOM_BAR_TOGGLE_BUTTON).should('have.focus');
     }

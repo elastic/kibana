@@ -151,6 +151,7 @@ describe('Timelines', (): void => {
     before(() => {
       login();
       visitWithTimeRange(OVERVIEW_URL);
+      openTimelineUsingToggle();
       createNewTimeline();
     });
 
