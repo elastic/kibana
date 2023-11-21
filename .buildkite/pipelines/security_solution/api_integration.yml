@@ -31,16 +31,17 @@ steps:
           limit: 1
 
   - command: echo "Building kibana docker image"
-  # .buildkite/scripts/steps/artifacts/docker_image.sh
+    # .buildkite/scripts/steps/artifacts/docker_image.sh
     label: Build serverless container images
+    depends_on:
     agents:
       queue: n2-16-spot
     timeout_in_minutes: 60
     retry:
       automatic:
-        - exit_status: '-1'
+        - exit_status: "-1"
           limit: 3
-    if: build.env("KIBANA_BUILD_SHA") =~ /^git-[a-zA-Z0-9]+$/
+    if: env('KIBANA_BUILD_NEW') == 1
 
   - label: Running exception_workflows:runner:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless

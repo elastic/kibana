@@ -23,6 +23,7 @@ if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
     """
     echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
     buildkite-agent env set KIBANA_BUILD_SHA="git-${BUILDKITE_COMMIT:0:12}"
+    buildkite-agent env set KIBANA_BUILD_NEW=1
 else
     echo "KIBANA_OVERRIDE_FLAG is $KIBANA_OVERRIDE_FLAG"
 fi 
