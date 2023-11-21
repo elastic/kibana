@@ -25,11 +25,9 @@ buildkite-agent meta-data set deploy-tag "$DEPLOY_TAG"
 # Push the tag to GitHub
 if [[ -z "${DRY_RUN:-}" ]]; then
   echo "Pushing tag to GitHub..."
-  # git push origin --tags
+  git push origin --tags
 else
   echo "Skipping tag push to GitHub due to DRY_RUN=$DRY_RUN"
 fi
 
 echo "Created deploy tag: $DEPLOY_TAG - your QA release should start @ https://buildkite.com/elastic/kibana-serverless-release/builds?branch=$DEPLOY_TAG"
-
-# TODO: add more helpful links like we have in the github job
