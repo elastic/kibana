@@ -7,7 +7,6 @@
 
 import objectHash from 'object-hash';
 
-import dateMath from '@kbn/datemath';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
