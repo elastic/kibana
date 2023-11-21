@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { useInvestigationGuide } from '../../shared/hooks/use_investigation_guide';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelInvestigationTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelInvestigationTab } from '../../left';
 import {
   INVESTIGATION_GUIDE_BUTTON_TEST_ID,
   INVESTIGATION_GUIDE_LOADING_TEST_ID,
@@ -32,7 +32,7 @@ export const InvestigationGuide: React.FC = () => {
 
   const goToInvestigationsTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: {
         tab: LeftPanelInvestigationTab,
       },
