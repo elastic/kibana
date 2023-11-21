@@ -42,7 +42,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('with data loaded', function () {
-        const ecDataView = 'ft_ecommerce';
+        const ecIndexName = 'ft_ecommerce';
 
         const pivotGroupByEntries = [
           {
@@ -85,7 +85,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         before(async () => {
           await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-          await transform.testResources.createDataViewIfNeeded(ecDataView, 'order_date');
+          await transform.testResources.createDataViewIfNeeded(ecIndexName, 'order_date');
           await transform.testResources.setKibanaTimeZoneToUTC();
         });
 
@@ -95,7 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.api.deleteIndices(latestTransformDestinationIndex);
           await transform.testResources.deleteDataViewByTitle(pivotTransformDestinationIndex);
           await transform.testResources.deleteDataViewByTitle(latestTransformDestinationIndex);
-          await transform.testResources.deleteDataViewByTitle(ecDataView);
+          await transform.testResources.deleteDataViewByTitle(ecIndexName);
           await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
           await transform.testResources.resetKibanaTimeZone();
         });
@@ -110,7 +110,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             'transform creation selects the source data and loads the Transform wizard page'
           );
-          await transform.sourceSelection.selectSource(ecDataView);
+          await transform.sourceSelection.selectSource(ecIndexName);
 
           await transform.testExecution.logTestStep(
             `sets the date picker to the default '15 minutes ago'`
@@ -201,7 +201,7 @@ export default function ({ getService }: FtrProviderContext) {
           await transform.testExecution.logTestStep(
             'selects the source data and loads the Transform wizard page'
           );
-          await transform.sourceSelection.selectSource(ecDataView);
+          await transform.sourceSelection.selectSource(ecIndexName);
 
           await transform.testExecution.logTestStep(
             `sets the date picker to the default '15 minutes ago'`
