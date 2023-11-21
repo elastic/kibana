@@ -43,7 +43,7 @@ export function createTelemetryDiagnosticTimelineTaskConfig() {
   return {
     type: 'security:telemetry-diagnostic-timelines',
     title: taskName,
-    interval: '1m',
+    interval: '1h',
     timeout: '15m',
     version: '1.0.0',
     runTask: async (
