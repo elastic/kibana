@@ -224,45 +224,42 @@ export function DifferentialTopNFunctionsGrid({
   const rowCount = Math.min(Math.max(sortedBaseRows.length, sortedComparisonRows.length), 100);
 
   return (
-    <div>
-      <EuiDataGrid
-        data-test-subj="profilingDiffTopNFunctionsGrid"
-        css={css`
-          .thickBorderLeft {
-            border-left: ${theme.euiTheme.border.thick} !important;
-          }
-        `}
-        aria-label={i18n.translate(
-          'xpack.profiling.onWeelkDiffTopN.euiDataGrid.topNFunctionsLabel',
-          { defaultMessage: 'TopN functions' }
-        )}
-        columns={columns}
-        columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={rowCount}
-        renderCellValue={CellValue}
-        sorting={{
-          columns: [
-            { id: sortField, direction: sortDirection },
-            { id: comparisonSortField, direction: comparisonSortDirection },
-          ],
-          onSort,
-        }}
-        pagination={{
-          pageIndex,
-          pageSize: 50,
-          // Left it empty on purpose as it is a required property on the pagination
-          onChangeItemsPerPage: () => {},
-          onChangePage,
-          pageSizeOptions: [],
-        }}
-        rowHeightsOptions={{ defaultHeight: 'auto' }}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showKeyboardShortcuts: false,
-          showDisplaySelector: false,
-          showSortSelector: false,
-        }}
-      />
-    </div>
+    <EuiDataGrid
+      data-test-subj="profilingDiffTopNFunctionsGrid"
+      css={css`
+        .thickBorderLeft {
+          border-left: ${theme.euiTheme.border.thick} !important;
+        }
+      `}
+      aria-label={i18n.translate('xpack.profiling.onWeelkDiffTopN.euiDataGrid.topNFunctionsLabel', {
+        defaultMessage: 'TopN functions',
+      })}
+      columns={columns}
+      columnVisibility={{ visibleColumns, setVisibleColumns }}
+      rowCount={rowCount}
+      renderCellValue={CellValue}
+      sorting={{
+        columns: [
+          { id: sortField, direction: sortDirection },
+          { id: comparisonSortField, direction: comparisonSortDirection },
+        ],
+        onSort,
+      }}
+      pagination={{
+        pageIndex,
+        pageSize: 50,
+        // Left it empty on purpose as it is a required property on the pagination
+        onChangeItemsPerPage: () => {},
+        onChangePage,
+        pageSizeOptions: [],
+      }}
+      rowHeightsOptions={{ defaultHeight: 'auto' }}
+      toolbarVisibility={{
+        showColumnSelector: false,
+        showKeyboardShortcuts: false,
+        showDisplaySelector: false,
+        showSortSelector: false,
+      }}
+    />
   );
 }
