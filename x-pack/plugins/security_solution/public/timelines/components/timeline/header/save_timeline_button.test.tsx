@@ -64,7 +64,28 @@ describe('SaveTimelineButton', () => {
     expect(screen.getByRole('button')).toBeDisabled();
   });
 
+  it('should disable the save timeline button when the timeline is immutable', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({
+      kibanaSecuritySolutionsPrivileges: { crud: true },
+    });
+    (getTimelineStatusByIdSelector as jest.Mock).mockReturnValue(() => ({
+      status: TimelineStatus.immutable,
+    }));
+    render(
+      <TestProviders>
+        <SaveTimelineButton {...props} />
+      </TestProviders>
+    );
+    expect(screen.getByRole('button')).toBeDisabled();
+  });
+
   describe('with draft timeline', () => {
+    beforeAll(() => {
+      (getTimelineStatusByIdSelector as jest.Mock).mockReturnValue(() => ({
+        status: TimelineStatus.draft,
+      }));
+    });
+
     it('should not show the save modal if user does not have write access', async () => {
       (useUserPrivileges as jest.Mock).mockReturnValue({
         kibanaSecuritySolutionsPrivileges: { crud: false },
