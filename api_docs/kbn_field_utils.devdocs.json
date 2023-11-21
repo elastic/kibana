@@ -543,6 +543,20 @@
             "path": "packages/kbn-field-utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/field-utils",
+            "id": "def-common.FieldBase.conflictDescriptions",
+            "type": "Object",
+            "tags": [],
+            "label": "conflictDescriptions",
+            "description": [],
+            "signature": [
+              "Record<string, string[]> | undefined"
+            ],
+            "path": "packages/kbn-field-utils/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false

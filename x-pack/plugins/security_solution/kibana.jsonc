@@ -28,7 +28,6 @@
       "eventLog",
       "features",
       "fieldFormats",
-      "guidedOnboarding",
       "inspector",
       "kubernetesSecurity",
       "lens",
@@ -70,7 +69,8 @@
       "telemetry",
       "dataViewFieldEditor",
       "osquery",
-      "savedObjectsTaggingOss"
+      "savedObjectsTaggingOss",
+      "guidedOnboarding"
     ],
     "requiredBundles": [
       "esUiShared",

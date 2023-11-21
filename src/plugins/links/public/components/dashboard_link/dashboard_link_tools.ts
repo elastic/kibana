@@ -8,20 +8,8 @@
 
 import { isEmpty, filter } from 'lodash';
 
-import {
-  cleanEmptyKeys,
-  getEmbeddableParams,
-  DashboardAppLocatorParams,
-} from '@kbn/dashboard-plugin/public';
-import { isFilterPinned } from '@kbn/es-query';
-import { KibanaLocation } from '@kbn/share-plugin/public';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
-import { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
-
 import { DashboardItem } from '../../embeddable/types';
-import type { LinksEmbeddable } from '../../embeddable';
-import { Link } from '../../../common/content_management';
-import { coreServices, dashboardServices } from '../../services/kibana_services';
+import { dashboardServices } from '../../services/kibana_services';
 
 /**
  * ----------------------------------
@@ -95,57 +83,4 @@ export const fetchDashboards = async ({
   });
 
   return simplifiedDashboardList;
-};
-
-/**
- * ----------------------------------
- * Navigate from one dashboard to another
- * ----------------------------------
- */
-
-interface GetDashboardLocatorProps {
-  link: Link & { options: DashboardDrilldownOptions };
-  linksEmbeddable: LinksEmbeddable;
-}
-
-/**
- * Fetch the locator to use for dashboard navigation
- * @param props `GetDashboardLocatorProps`
- * @returns The locator to use for dashboard navigation
- */
-export const getDashboardLocator = async ({ link, linksEmbeddable }: GetDashboardLocatorProps) => {
-  const params: DashboardAppLocatorParams = {
-    dashboardId: link.destination,
-    ...getEmbeddableParams(linksEmbeddable, link.options),
-  };
-
-  const locator = dashboardServices.locator; // TODO: Make this generic as part of https://github.com/elastic/kibana/issues/164748
-  if (locator) {
-    const location: KibanaLocation<DashboardAppLocatorParams> = await locator.getLocation(params);
-    return location;
-  }
-};
-
-/**
- * Get URL for dashboard app - should only be used when relying on native `href` functionality
- * @param locator Locator that should be used to get the URL
- * @returns A full URL to the dashboard, with all state included
- */
-export const getDashboardHref = ({
-  app,
-  path,
-  state,
-}: KibanaLocation<DashboardAppLocatorParams>): string => {
-  return coreServices.application.getUrlForApp(app, {
-    path: setStateToKbnUrl(
-      '_a',
-      cleanEmptyKeys({
-        query: state.query,
-        filters: state.filters?.filter((f) => !isFilterPinned(f)),
-      }),
-      { useHash: false, storeInHashQuery: true },
-      path
-    ),
-    absolute: true,
-  });
 };

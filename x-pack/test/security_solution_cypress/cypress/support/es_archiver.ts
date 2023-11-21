@@ -58,7 +58,6 @@ export const esArchiver = (
     esArchiverLoad: async ({ archiveName, ...options }) =>
       esArchiverInstance.load(archiveName, options),
     esArchiverUnload: async (archiveName) => esArchiverInstance.unload(archiveName),
-    esArchiverResetKibana: async () => esArchiverInstance.emptyKibanaIndex(),
   });
 
   return esArchiverInstance;

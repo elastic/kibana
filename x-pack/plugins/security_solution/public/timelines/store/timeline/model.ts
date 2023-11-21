@@ -140,6 +140,8 @@ export interface TimelineModel {
   rowHeight?: number;
   /* sample size, total record number stored in in memory EuiDataGrid */
   sampleSize: number;
+  /** used to mark the timeline as unsaved in the UI */
+  changed?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -195,6 +197,7 @@ export type SubsetTimelineModel = Readonly<
     | 'filterManager'
     | 'savedSearchId'
     | 'isDiscoverSavedSearchLoaded'
+    | 'changed'
   >
 >;
 

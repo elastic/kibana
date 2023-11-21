@@ -27,7 +27,6 @@ import {
   showTimeline,
   startTimelineSaving,
   unPinEvent,
-  updateAutoSaveMsg,
   updateDataProviderEnabled,
   updateDataProviderExcluded,
   updateDataProviderType,
@@ -44,7 +43,6 @@ import {
   updateSessionViewConfig,
   toggleModalSaveTimeline,
   updateEqlOptions,
-  setTimelineUpdatedAt,
   toggleDetailPanel,
   setEventsLoading,
   removeColumn,
@@ -64,6 +62,7 @@ import {
   updateColumnWidth,
   updateSavedSearchId,
   setIsDiscoverSavedSearchLoaded,
+  setChanged,
 } from './actions';
 
 import {
@@ -112,10 +111,6 @@ import { TimelineType } from '../../../../common/api/timeline';
 
 export const initialTimelineState: TimelineState = {
   timelineById: EMPTY_TIMELINE_BY_ID,
-  autoSavedWarningMsg: {
-    timelineId: null,
-    newTimelineModel: null,
-  },
   showCallOutUnauthorizedMsg: false,
   insertTimeline: null,
 };
@@ -306,13 +301,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       andProviderId,
     }),
   }))
-  .case(updateAutoSaveMsg, (state, { timelineId, newTimelineModel }) => ({
-    ...state,
-    autoSavedWarningMsg: {
-      timelineId,
-      newTimelineModel,
-    },
-  }))
   .case(showCallOutUnauthorizedMsg, (state) => ({
     ...state,
     showCallOutUnauthorizedMsg: true,
@@ -384,16 +372,6 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
           ...(state.timelineById[id].eqlOptions ?? {}),
           [field]: value,
         },
-      },
-    },
-  }))
-  .case(setTimelineUpdatedAt, (state, { id, updated }) => ({
-    ...state,
-    timelineById: {
-      ...state.timelineById,
-      [id]: {
-        ...state.timelineById[id],
-        updated,
       },
     },
   }))
@@ -572,6 +550,16 @@ export const timelineReducer = reducerWithInitialState(initialTimelineState)
       [id]: {
         ...state.timelineById[id],
         sampleSize,
+      },
+    },
+  }))
+  .case(setChanged, (state, { id, changed }) => ({
+    ...state,
+    timelineById: {
+      ...state.timelineById,
+      [id]: {
+        ...state.timelineById[id],
+        changed,
       },
     },
   }))

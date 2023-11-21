@@ -18,7 +18,6 @@ import {
   validateSymbolizerPackagePolicy,
 } from '../../../common/fleet_policies';
 import { hasProfilingData } from '../../../common/has_profiling_data';
-import { validateSecurityRole } from '../../../common/security_role';
 import { mergePartialSetupStates } from '../../../common/setup';
 
 export async function cloudSetupState(
@@ -30,7 +29,6 @@ export async function cloudSetupState(
   const verifyFunctions = [
     validateMaximumBuckets,
     validateResourceManagement,
-    validateSecurityRole,
     validateCollectorPackagePolicy,
     validateSymbolizerPackagePolicy,
     validateProfilingInApmPackagePolicy,

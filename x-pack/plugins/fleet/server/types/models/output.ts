@@ -124,6 +124,22 @@ const ElasticSearchUpdateSchema = {
 };
 
 /**
+ * Remote Elasticsearch schemas
+ */
+
+export const RemoteElasticSearchSchema = {
+  ...ElasticSearchSchema,
+  type: schema.literal(outputType.RemoteElasticsearch),
+  service_token: schema.string(),
+};
+
+const RemoteElasticSearchUpdateSchema = {
+  ...ElasticSearchUpdateSchema,
+  type: schema.maybe(schema.literal(outputType.RemoteElasticsearch)),
+  service_token: schema.maybe(schema.string()),
+};
+
+/**
  * Logstash schemas
  */
 
@@ -287,12 +303,14 @@ const KafkaUpdateSchema = {
 
 export const OutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchSchema }),
+  schema.object({ ...RemoteElasticSearchSchema }),
   schema.object({ ...LogstashSchema }),
   schema.object({ ...KafkaSchema }),
 ]);
 
 export const UpdateOutputSchema = schema.oneOf([
   schema.object({ ...ElasticSearchUpdateSchema }),
+  schema.object({ ...RemoteElasticSearchUpdateSchema }),
   schema.object({ ...LogstashUpdateSchema }),
   schema.object({ ...KafkaUpdateSchema }),
 ]);

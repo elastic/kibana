@@ -23,7 +23,6 @@ const dataViews = ['auditbeat-*,fakebeat-*', 'auditbeat-*,*beat*,siem-read*,.kib
 
 describe('Sourcerer permissions', { tags: ['@ess', '@skipInServerless'] }, () => {
   before(() => {
-    cy.task('esArchiverResetKibana');
     dataViews.forEach((dataView: string) => postDataView(dataView));
     createUsersAndRoles(usersToCreate, rolesToCreate);
   });

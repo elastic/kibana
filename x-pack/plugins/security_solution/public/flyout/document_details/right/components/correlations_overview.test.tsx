@@ -12,7 +12,7 @@ import { RightPanelContext } from '../context';
 import { TestProviders } from '../../../../common/mock';
 import { CorrelationsOverview } from './correlations_overview';
 import { CORRELATIONS_TAB_ID } from '../../left/components/correlations_details';
-import { LeftPanelInsightsTab, LeftPanelKey } from '../../left';
+import { LeftPanelInsightsTab, DocumentDetailsLeftPanelKey } from '../../left';
 import {
   CORRELATIONS_RELATED_ALERTS_BY_ANCESTRY_TEST_ID,
   CORRELATIONS_RELATED_ALERTS_BY_SAME_SOURCE_EVENT_TEST_ID,
@@ -196,7 +196,7 @@ describe('<CorrelationsOverview />', () => {
 
     getByTestId(TITLE_LINK_TEST_ID).click();
     expect(flyoutContextValue.openLeftPanel).toHaveBeenCalledWith({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelInsightsTab, subTab: CORRELATIONS_TAB_ID },
       params: {
         id: panelContextValue.eventId,

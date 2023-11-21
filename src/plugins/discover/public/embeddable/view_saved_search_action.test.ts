@@ -82,7 +82,7 @@ describe('view saved search action', () => {
     expect(discoverServiceMock.locator.navigate).toHaveBeenCalledWith(
       getDiscoverLocatorParams({
         input: embeddable.getInput(),
-        savedSearch: embeddable.getSavedSearch(),
+        savedSearch: embeddable.getSavedSearch()!,
       })
     );
   });

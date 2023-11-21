@@ -1,0 +1,67 @@
+[[delete-parameters-api]]
+== Delete Parameters API
+++++
+<titleabbrev>Delete Parameters</titleabbrev>
+++++
+
+Deletes one or more parameters from the Synthetics app.
+
+=== {api-request-title}
+
+`DELETE <kibana host>:<port>/api/synthetics/params`
+
+`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/params`
+
+=== {api-prereq-title}
+
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
+<<kibana-feature-privileges,{kib} feature privileges>>.
+
+[[parameters-delete-request-body]]
+==== Request Body
+
+The request body should contain an array of parameter IDs that you want to delete.
+
+`ids`::
+(Required, array of strings) An array of parameter IDs to delete.
+
+
+Here is an example of a DELETE request to delete a list of parameters by ID:
+
+[source,sh]
+--------------------------------------------------
+DELETE /api/synthetics/params
+{
+  "ids": [
+    "param1-id",
+    "param2-id"
+  ]
+}
+--------------------------------------------------
+
+[[parameters-delete-response-example]]
+==== Response Example
+
+The API response includes information about the deleted parameters, where each entry in the response array contains the following attributes:
+
+- `id` (string): The unique identifier of the deleted parameter.
+- `deleted` (boolean): Indicates whether the parameter was successfully deleted (`true` if deleted, `false` if not).
+
+Here's an example response for deleting multiple parameters:
+
+[source,sh]
+--------------------------------------------------
+[
+  {
+    "id": "param1-id",
+    "deleted": true
+  },
+  {
+    "id": "param2-id",
+    "deleted": true
+  }
+]
+--------------------------------------------------

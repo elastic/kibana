@@ -171,6 +171,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
             title={i18n.translate('xpack.serverlessSearch.apiKey.flyout.errorTitle', {
               defaultMessage: 'Error creating API key',
             })}
+            data-test-subj="create-api-key-error-callout"
           >
             {createError}
           </EuiCallOut>
@@ -256,6 +257,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
                 label={privilegesEnabled ? ENABLED_LABEL : DISABLED_LABEL}
                 checked={privilegesEnabled}
                 onChange={togglePrivileges}
+                data-test-subj="create-api-role-descriptors-switch"
               />
             }
             forceState={privilegesOpen}
@@ -310,6 +312,7 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
                 label={metadataEnabled ? ENABLED_LABEL : DISABLED_LABEL}
                 checked={metadataEnabled}
                 onChange={toggleMetadata}
+                data-test-subj="create-api-metadata-switch"
               />
             }
             forceState={metadataOpen}
@@ -331,14 +334,24 @@ export const CreateApiKeyFlyout: React.FC<CreateApiKeyFlyoutProps> = ({
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty isDisabled={isLoading} onClick={onClose}>
+            <EuiButtonEmpty
+              isDisabled={isLoading}
+              onClick={onClose}
+              data-test-subj="create-api-key-cancel"
+            >
               {CANCEL_LABEL}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiFlexGroup justifyContent="flexEnd">
               <EuiFlexItem>
-                <EuiButton fill disabled={!name} isLoading={isLoading} onClick={onCreateClick}>
+                <EuiButton
+                  fill
+                  disabled={!name}
+                  isLoading={isLoading}
+                  onClick={onCreateClick}
+                  data-test-subj="create-api-key-submit"
+                >
                   {i18n.translate('xpack.serverlessSearch.apiKey.flyOutCreateLabel', {
                     defaultMessage: 'Create API Key',
                   })}

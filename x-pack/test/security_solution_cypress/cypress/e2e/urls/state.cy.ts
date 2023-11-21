@@ -44,13 +44,12 @@ import {
   saveQuery,
 } from '../../tasks/security_header';
 import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { addNameToTimeline, closeTimeline, populateTimeline } from '../../tasks/timeline';
+import { addNameToTimelineAndSave, closeTimeline, populateTimeline } from '../../tasks/timeline';
 
 import { hostsUrl } from '../../urls/navigation';
 import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
 
 import { getTimeline } from '../../objects/timeline';
-import { TIMELINE } from '../../screens/create_new_case';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM_AT,
   GLOBAL_SEARCH_BAR_PINNED_FILTER,
@@ -299,8 +298,8 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
     cy.get(LOADING_INDICATOR).should('not.exist');
+    addNameToTimelineAndSave(getTimeline().title);
     cy.wait('@timeline').then(({ response }) => {
-      addNameToTimeline(getTimeline().title);
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
       const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
@@ -308,7 +307,6 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
       visitWithTimeRange(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
-      cy.get(TIMELINE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('be.visible');
       cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
     });

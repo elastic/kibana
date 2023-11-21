@@ -22,9 +22,7 @@ import {
   findExceptionReferencesOnRuleSchema,
   rulesReferencedByExceptionListsSchema,
 } from '../../../../../../common/api/detection_engine/rule_exceptions';
-
-import { enrichFilterWithRuleTypeMapping } from '../../../rule_management/logic/search/enrich_filter_with_rule_type_mappings';
-import type { RuleParams } from '../../../rule_schema';
+import { findRules } from '../../../rule_management/logic/search/find_rules';
 
 export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
@@ -92,15 +90,18 @@ export const findRuleExceptionReferencesRoute = (router: SecuritySolutionPluginR
           }
           const references: RuleReferencesSchema[] = await Promise.all(
             foundExceptionLists.data.map(async (list, index) => {
-              const foundRules = await rulesClient.find<RuleParams>({
-                options: {
-                  perPage: 10000,
-                  filter: enrichFilterWithRuleTypeMapping(null),
-                  hasReference: {
-                    id: list.id,
-                    type: getSavedObjectType({ namespaceType: list.namespace_type }),
-                  },
+              const foundRules = await findRules({
+                rulesClient,
+                perPage: 10000,
+                hasReference: {
+                  id: list.id,
+                  type: getSavedObjectType({ namespaceType: list.namespace_type }),
                 },
+                filter: undefined,
+                fields: undefined,
+                sortField: undefined,
+                sortOrder: undefined,
+                page: undefined,
               });
 
               const ruleData = foundRules.data.map(({ name, id, params }) => ({

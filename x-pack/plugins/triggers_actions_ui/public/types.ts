@@ -217,6 +217,7 @@ export interface ActionParamsProps<TParams> {
   index: number;
   editAction: (key: string, value: RuleActionParam, index: number) => void;
   errors: IErrorObject;
+  ruleTypeId?: string;
   messageVariables?: ActionVariable[];
   defaultMessage?: string;
   useDefaultMessage?: boolean;
@@ -566,6 +567,10 @@ export type AlertsTableProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
   featureIds?: ValidFeatureId[];
 } & Partial<Pick<EuiDataGridProps, 'gridStyle' | 'rowHeightsOptions'>>;
 
@@ -838,4 +843,5 @@ export interface NotifyWhenSelectOptions {
 export type RuleCreationValidConsumer =
   | typeof AlertConsumers.LOGS
   | typeof AlertConsumers.INFRASTRUCTURE
+  | typeof AlertConsumers.OBSERVABILITY
   | typeof STACK_ALERTS_FEATURE_ID;

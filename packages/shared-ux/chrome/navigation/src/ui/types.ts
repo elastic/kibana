@@ -8,7 +8,6 @@
 
 import type { ReactNode } from 'react';
 
-import type { EuiAccordionProps } from '@elastic/eui';
 import type {
   AppDeepLinkId,
   ChromeProjectNavigationNode,
@@ -76,20 +75,6 @@ export interface GroupDefinition<
   ChildrenId extends string = Id
 > extends Omit<NodeDefinition<LinkId, Id, ChildrenId>, 'children'> {
   type: 'navGroup';
-  /**
-   * Flag to indicate if the group is initially collapsed or not.
-   *
-   * `undefined`: (Recommended) the group will be opened if any of its children nodes matches the current URL.
-   *
-   * `false`: the group will be opened event if none of its children nodes matches the current URL.
-   *
-   * `true`: the group will be collapsed event if any of its children nodes matches the current URL.
-   */
-  defaultIsCollapsed?: boolean;
-  /*
-   * Pass props to the EUI accordion component used to represent a nav group
-   */
-  accordionProps?: Partial<EuiAccordionProps>;
   children: Array<NodeDefinition<LinkId, Id, ChildrenId>>;
 }
 

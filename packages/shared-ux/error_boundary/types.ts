@@ -16,3 +16,15 @@ export interface KibanaErrorBoundaryServices {
   onClickRefresh: () => void;
   errorService: KibanaErrorService;
 }
+
+/**
+ * {analytics: AnalyticsServiceStart | undefined}
+ * @public
+ */
+export interface KibanaErrorBoundaryProviderDeps {
+  analytics:
+    | {
+        reportEvent: (eventType: string, eventData: object) => void;
+      }
+    | undefined;
+}

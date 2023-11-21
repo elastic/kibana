@@ -38,6 +38,11 @@ describe('Enrich policies tab', () => {
   describe('empty states', () => {
     beforeEach(async () => {
       setDelayResponse(false);
+
+      httpRequestsMockHelpers.setGetPrivilegesResponse({
+        hasAllPrivileges: true,
+        missingPrivileges: { cluster: [] },
+      });
     });
 
     test('displays a loading prompt', async () => {
@@ -77,6 +82,24 @@ describe('Enrich policies tab', () => {
     });
   });
 
+  describe('permissions check', () => {
+    it('shows a permissions error when the user does not have sufficient privileges', async () => {
+      httpRequestsMockHelpers.setGetPrivilegesResponse({
+        hasAllPrivileges: false,
+        missingPrivileges: { cluster: ['manage_enrich'] },
+      });
+
+      testBed = await setup(httpSetup);
+      await act(async () => {
+        testBed.actions.goToEnrichPoliciesTab();
+      });
+
+      testBed.component.update();
+
+      expect(testBed.exists('enrichPoliciesInsuficientPrivileges')).toBe(true);
+    });
+  });
+
   describe('policies list', () => {
     let testPolicy: ReturnType<typeof createTestEnrichPolicy>;
     beforeEach(async () => {
@@ -86,6 +109,11 @@ describe('Enrich policies tab', () => {
         testPolicy,
         createTestEnrichPolicy('policy-range', 'range'),
       ]);
+
+      httpRequestsMockHelpers.setGetPrivilegesResponse({
+        hasAllPrivileges: true,
+        missingPrivileges: { cluster: [] },
+      });
 
       testBed = await setup(httpSetup);
       await act(async () => {
@@ -112,7 +140,7 @@ describe('Enrich policies tab', () => {
 
       // Should have made a call to load the policies after the reload
       // button is clicked.
-      expect(httpSetup.get.mock.calls).toHaveLength(1);
+      expect(httpSetup.get.mock.calls.length).toBeGreaterThan(0);
     });
 
     describe('details flyout', () => {

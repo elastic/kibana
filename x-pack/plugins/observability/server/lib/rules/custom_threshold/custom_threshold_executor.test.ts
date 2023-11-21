@@ -15,20 +15,18 @@ import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_so
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import { LifecycleAlertServices } from '@kbn/rule-registry-plugin/server';
 import { ruleRegistryMocks } from '@kbn/rule-registry-plugin/server/mocks';
-import {
-  createMetricThresholdExecutor,
-  FIRED_ACTIONS,
-  MetricThresholdAlertContext,
-  NO_DATA_ACTIONS,
-} from './custom_threshold_executor';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
+import { FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import { CustomThresholdAlertContext } from './types';
 import { Evaluation } from './lib/evaluate_rule';
 import type { LogMeta, Logger } from '@kbn/logging';
 import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
+import { CUSTOM_AGGREGATOR } from '../../../../common/custom_threshold_rule/constants';
 import {
   Aggregators,
   Comparator,
-  CountMetricExpressionParams,
-  NonCountMetricExpressionParams,
+  CustomMetricExpressionParams,
+  CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));
@@ -150,7 +148,7 @@ describe('The metric threshold alert type', () => {
           sourceId,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold,
             },
@@ -166,10 +164,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator,
             threshold,
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire,
@@ -237,10 +234,9 @@ describe('The metric threshold alert type', () => {
       await execute(Comparator.GT, [0.75]);
       const { action } = mostRecentAction(instanceID);
       expect(action.group).toBeUndefined();
-      expect(action.reason).toContain('is 1');
-      expect(action.reason).toContain('Alert when > 0.75');
-      expect(action.reason).toContain('test.metric.1');
-      expect(action.reason).toContain('in the last 1 min');
+      expect(action.reason).toBe(
+        'Average test.metric.1 is 1, above the threshold of 0.75. (duration: 1 min, data view: mockedDataViewName)'
+      );
     });
   });
 
@@ -250,7 +246,7 @@ describe('The metric threshold alert type', () => {
       comparator: Comparator,
       threshold: number[],
       groupBy: string[] = ['groupByField'],
-      metric?: string,
+      metrics?: CustomThresholdExpressionMetric[],
       state?: any
     ) =>
       executor({
@@ -261,10 +257,10 @@ describe('The metric threshold alert type', () => {
           groupBy,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold,
-              metric: metric ?? baseNonCountCriterion.metric,
+              metrics: metrics ?? customThresholdNonCountCriterion.metrics,
             },
           ],
         },
@@ -276,10 +272,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -287,10 +282,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -307,10 +301,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.LT,
             threshold: [1.5],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -318,10 +311,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.LT,
             threshold: [1.5],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -338,10 +330,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [5],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -349,10 +340,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [5],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -369,10 +359,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -380,10 +369,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -404,10 +392,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -415,10 +409,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -426,10 +426,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'b' },
           },
           c: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -442,16 +448,21 @@ describe('The metric threshold alert type', () => {
         Comparator.GT,
         [0.75],
         ['groupByField'],
-        'test.metric.2'
+        [
+          {
+            aggType: Aggregators.AVERAGE,
+            name: 'A',
+            field: 'test.metric.2',
+          },
+        ]
       );
       expect(stateResult1.missingGroups).toEqual(expect.arrayContaining([]));
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -459,10 +470,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -470,10 +480,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'b' },
           },
           c: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -486,7 +495,13 @@ describe('The metric threshold alert type', () => {
         Comparator.GT,
         [0.75],
         ['groupByField'],
-        'test.metric.1',
+        [
+          {
+            aggType: Aggregators.AVERAGE,
+            name: 'A',
+            field: 'test.metric.1',
+          },
+        ],
         stateResult1
       );
       expect(stateResult2.missingGroups).toEqual(
@@ -495,10 +510,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -506,10 +520,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -522,7 +535,13 @@ describe('The metric threshold alert type', () => {
         Comparator.GT,
         [0.75],
         ['groupByField', 'groupByField-else'],
-        'test.metric.1',
+        [
+          {
+            aggType: Aggregators.AVERAGE,
+            name: 'A',
+            field: 'test.metric.2',
+          },
+        ],
         stateResult2
       );
       expect(stateResult3.missingGroups).toEqual(expect.arrayContaining([]));
@@ -532,7 +551,7 @@ describe('The metric threshold alert type', () => {
       comparator: Comparator,
       threshold: number[],
       filterQuery: string,
-      metric?: string,
+      metrics?: any,
       state?: any
     ) =>
       executor({
@@ -543,10 +562,10 @@ describe('The metric threshold alert type', () => {
           groupBy: ['groupByField'],
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold,
-              metric: metric ?? baseNonCountCriterion.metric,
+              metrics: metrics ?? customThresholdNonCountCriterion.metrics,
             },
           ],
           searchConfiguration: {
@@ -562,10 +581,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -573,10 +598,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -584,10 +615,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'b' },
           },
           c: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -606,10 +643,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -617,10 +653,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -628,10 +663,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'b' },
           },
           c: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -653,10 +687,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -664,10 +697,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -680,7 +712,13 @@ describe('The metric threshold alert type', () => {
         Comparator.GT,
         [0.75],
         JSON.stringify({ query: 'different' }),
-        'test.metric.1',
+        [
+          {
+            aggType: Aggregators.AVERAGE,
+            name: 'A',
+            field: 'test.metric.1',
+          },
+        ],
         stateResult2
       );
       expect(stateResult3.groups).toEqual(expect.arrayContaining([]));
@@ -693,7 +731,7 @@ describe('The metric threshold alert type', () => {
       comparator: Comparator,
       threshold: number[],
       groupBy: string[] = ['host.name'],
-      metric?: string,
+      metrics?: any,
       state?: any
     ) =>
       executor({
@@ -704,10 +742,10 @@ describe('The metric threshold alert type', () => {
           groupBy,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold,
-              metric: metric ?? baseNonCountCriterion.metric,
+              metrics: metrics ?? customThresholdNonCountCriterion.metrics,
             },
           ],
         },
@@ -724,10 +762,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           'host-01': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -738,10 +775,9 @@ describe('The metric threshold alert type', () => {
             },
           },
           'host-02': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -775,7 +811,7 @@ describe('The metric threshold alert type', () => {
       comparator: Comparator,
       threshold: number[],
       groupBy: string = '',
-      metric?: string,
+      metrics?: any,
       state?: any
     ) =>
       executor({
@@ -786,10 +822,10 @@ describe('The metric threshold alert type', () => {
           groupBy,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold,
-              metric: metric ?? baseNonCountCriterion.metric,
+              metrics: metrics ?? customThresholdNonCountCriterion.metrics,
             },
           ],
         },
@@ -804,10 +840,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.75],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -841,15 +876,21 @@ describe('The metric threshold alert type', () => {
           groupBy,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold: thresholdA,
             },
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator,
               threshold: thresholdB,
-              metric: 'test.metric.2',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.2',
+                },
+              ],
             },
           ],
         },
@@ -858,10 +899,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [1.0],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -871,10 +911,9 @@ describe('The metric threshold alert type', () => {
         },
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [3.0],
-            metric: 'test.metric.2',
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -891,10 +930,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.LT_OR_EQ,
             threshold: [1.0],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -912,10 +950,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [1.0],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -923,10 +960,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [1.0],
-            metric: 'test.metric.1',
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -936,10 +972,16 @@ describe('The metric threshold alert type', () => {
         },
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [3.0],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -947,10 +989,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [3.0],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -969,10 +1017,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [1.0],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -982,10 +1029,16 @@ describe('The metric threshold alert type', () => {
         },
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT_OR_EQ,
             threshold: [3.0],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -997,16 +1050,10 @@ describe('The metric threshold alert type', () => {
       const instanceID = '*';
       await execute(Comparator.GT_OR_EQ, [1.0], [3.0]);
       const { action } = mostRecentAction(instanceID);
-      const reasons = action.reason.split('\n');
-      expect(reasons.length).toBe(2);
-      expect(reasons[0]).toContain('test.metric.1');
-      expect(reasons[1]).toContain('test.metric.2');
-      expect(reasons[0]).toContain('is 1');
-      expect(reasons[1]).toContain('is 3');
-      expect(reasons[0]).toContain('Alert when >= 1');
-      expect(reasons[1]).toContain('Alert when >= 3');
-      expect(reasons[0]).toContain('in the last 1 min');
-      expect(reasons[1]).toContain('in the last 1 min');
+      const reasons = action.reason;
+      expect(reasons).toBe(
+        'Average test.metric.1 is 1, above the threshold of 1; Average test.metric.2 is 3, above the threshold of 3. (duration: 1 min, data view: mockedDataViewName)'
+      );
     });
   });
   describe('querying with the count aggregator', () => {
@@ -1021,10 +1068,10 @@ describe('The metric threshold alert type', () => {
           sourceId,
           criteria: [
             {
-              ...baseCountCriterion,
+              ...customThresholdCountCriterion,
               comparator,
               threshold,
-            } as CountMetricExpressionParams,
+            },
           ],
         },
       });
@@ -1032,10 +1079,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseCountCriterion,
+            ...customThresholdCountCriterion,
             comparator: Comparator.GT,
             threshold: [0.9],
-            metric: 'count',
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1049,10 +1095,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseCountCriterion,
+            ...customThresholdCountCriterion,
             comparator: Comparator.LT,
             threshold: [0.5],
-            metric: 'count',
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1080,7 +1125,7 @@ describe('The metric threshold alert type', () => {
             groupBy: 'groupByField',
             criteria: [
               {
-                ...baseCountCriterion,
+                ...customThresholdCountCriterion,
                 comparator,
                 threshold,
               },
@@ -1095,10 +1140,9 @@ describe('The metric threshold alert type', () => {
         setEvaluationResults([
           {
             a: {
-              ...baseCountCriterion,
+              ...customThresholdCountCriterion,
               comparator: Comparator.LT_OR_EQ,
               threshold: [0],
-              metric: 'count',
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: false,
@@ -1106,10 +1150,9 @@ describe('The metric threshold alert type', () => {
               bucketKey: { groupBy0: 'a' },
             },
             b: {
-              ...baseCountCriterion,
+              ...customThresholdCountCriterion,
               comparator: Comparator.LT_OR_EQ,
               threshold: [0],
-              metric: 'count',
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: false,
@@ -1124,10 +1167,9 @@ describe('The metric threshold alert type', () => {
         setEvaluationResults([
           {
             a: {
-              ...baseCountCriterion,
+              ...customThresholdCountCriterion,
               comparator: Comparator.LT_OR_EQ,
               threshold: [0],
-              metric: 'count',
               currentValue: 0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
@@ -1135,10 +1177,9 @@ describe('The metric threshold alert type', () => {
               bucketKey: { groupBy0: 'a' },
             },
             b: {
-              ...baseCountCriterion,
+              ...customThresholdCountCriterion,
               comparator: Comparator.LT_OR_EQ,
               threshold: [0],
-              metric: 'count',
               currentValue: 0,
               timestamp: new Date().toISOString(),
               shouldFire: true,
@@ -1153,121 +1194,6 @@ describe('The metric threshold alert type', () => {
       });
     });
   });
-  describe('querying with the p99 aggregator', () => {
-    afterAll(() => clearInstances());
-    const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor({
-        ...mockOptions,
-        services,
-        params: {
-          ...mockOptions.params,
-          criteria: [
-            {
-              ...baseNonCountCriterion,
-              comparator,
-              threshold,
-              aggType: Aggregators.P99,
-              metric: 'test.metric.2',
-            },
-          ],
-        },
-      });
-    test('alerts based on the p99 values', async () => {
-      setEvaluationResults([
-        {
-          '*': {
-            ...baseNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: [1],
-            metric: 'test.metric.2',
-            currentValue: 3,
-            timestamp: new Date().toISOString(),
-            shouldFire: true,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.GT, [1]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setEvaluationResults([
-        {
-          '*': {
-            ...baseNonCountCriterion,
-            comparator: Comparator.LT,
-            threshold: [1],
-            metric: 'test.metric.2',
-            currentValue: 3,
-            timestamp: new Date().toISOString(),
-            shouldFire: false,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.LT, [1]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-    });
-  });
-  describe('querying with the p95 aggregator', () => {
-    afterAll(() => clearInstances());
-    const instanceID = '*';
-    const execute = (comparator: Comparator, threshold: number[], sourceId: string = 'default') =>
-      executor({
-        ...mockOptions,
-        services,
-        params: {
-          ...mockOptions.params,
-          sourceId,
-          criteria: [
-            {
-              ...baseNonCountCriterion,
-              comparator,
-              threshold,
-              aggType: Aggregators.P95,
-              metric: 'test.metric.1',
-            },
-          ],
-        },
-      });
-    test('alerts based on the p95 values', async () => {
-      setEvaluationResults([
-        {
-          '*': {
-            ...baseNonCountCriterion,
-            comparator: Comparator.GT,
-            threshold: [0.25],
-            metric: 'test.metric.1',
-            currentValue: 1.0,
-            timestamp: new Date().toISOString(),
-            shouldFire: true,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.GT, [0.25]);
-      expect(mostRecentAction(instanceID)).toBeAlertAction();
-      setEvaluationResults([
-        {
-          '*': {
-            ...baseNonCountCriterion,
-            comparator: Comparator.LT,
-            threshold: [0.95],
-            metric: 'test.metric.1',
-            currentValue: 1.0,
-            timestamp: new Date().toISOString(),
-            shouldFire: false,
-            isNoData: false,
-            bucketKey: { groupBy0: '*' },
-          },
-        },
-      ]);
-      await execute(Comparator.LT, [0.95]);
-      expect(mostRecentAction(instanceID)).toBe(undefined);
-    });
-  });
   describe("querying a metric that hasn't reported data", () => {
     afterAll(() => clearInstances());
     const instanceID = '*';
@@ -1280,10 +1206,16 @@ describe('The metric threshold alert type', () => {
           sourceId,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [1],
-              metric: 'test.metric.3',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.3',
+                },
+              ],
             },
           ],
           alertOnNoData,
@@ -1293,10 +1225,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.LT,
             threshold: [1],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1307,17 +1245,25 @@ describe('The metric threshold alert type', () => {
       ]);
       await execute(true);
       const recentAction = mostRecentAction(instanceID);
-      expect(recentAction.action.reason).toEqual('test.metric.3 reported no data in the last 1m');
+      expect(recentAction.action.reason).toEqual(
+        'Average test.metric.3 reported no data in the last 1m'
+      );
       expect(recentAction).toBeNoDataAction();
     });
     test('does not send a No Data alert when not configured to do so', async () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.LT,
             threshold: [1],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1343,13 +1289,19 @@ describe('The metric threshold alert type', () => {
           sourceId,
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [1],
-              metric: 'test.metric.3',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.3',
+                },
+              ],
             },
             {
-              ...baseCountCriterion,
+              ...customThresholdCountCriterion,
               comparator: Comparator.GT,
               threshold: [30],
             },
@@ -1361,10 +1313,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.LT,
             threshold: [1],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: STARTED_AT_MOCK_DATE.toISOString(),
             shouldFire: false,
@@ -1378,9 +1336,9 @@ describe('The metric threshold alert type', () => {
       const recentAction = mostRecentAction(instanceID);
       expect(recentAction.action).toEqual({
         alertDetailsUrl: '',
-        reason: 'test.metric.3 reported no data in the last 1m',
+        reason: 'Average test.metric.3 reported no data in the last 1m',
         timestamp: STARTED_AT_MOCK_DATE.toISOString(),
-        value: ['[NO DATA]', 0],
+        value: ['[NO DATA]', null],
         tags: [],
       });
       expect(recentAction).toBeNoDataAction();
@@ -1393,7 +1351,7 @@ describe('The metric threshold alert type', () => {
     const instanceIdA = 'a';
     const instanceIdB = 'b';
     const instanceIdC = 'c';
-    const execute = (metric: string, alertOnGroupDisappear: boolean = true, state?: any) =>
+    const execute = (metrics: any, alertOnGroupDisappear: boolean = true, state?: any) =>
       executor({
         ...mockOptions,
         services,
@@ -1403,10 +1361,10 @@ describe('The metric threshold alert type', () => {
           sourceId: 'default',
           criteria: [
             {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric,
+              metrics,
             },
           ],
           alertOnNoData: true,
@@ -1428,10 +1386,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1445,10 +1409,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           '*': {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1462,10 +1432,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.1',
             currentValue: 1.0,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1473,10 +1442,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1498,10 +1466,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1509,10 +1483,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.3',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.3',
+              },
+            ],
             currentValue: null,
             timestamp: new Date().toISOString(),
             shouldFire: false,
@@ -1530,10 +1510,16 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1541,10 +1527,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1552,10 +1544,16 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'b' },
           },
           c: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.2',
+            metrics: [
+              {
+                aggType: Aggregators.AVERAGE,
+                name: 'A',
+                field: 'test.metric.2',
+              },
+            ],
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1572,10 +1570,9 @@ describe('The metric threshold alert type', () => {
       setEvaluationResults([
         {
           a: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.1',
             currentValue: 1,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1583,10 +1580,9 @@ describe('The metric threshold alert type', () => {
             bucketKey: { groupBy0: 'a' },
           },
           b: {
-            ...baseNonCountCriterion,
+            ...customThresholdNonCountCriterion,
             comparator: Comparator.GT,
             threshold: [0],
-            metric: 'test.metric.1',
             currentValue: 3,
             timestamp: new Date().toISOString(),
             shouldFire: true,
@@ -1603,7 +1599,7 @@ describe('The metric threshold alert type', () => {
     });
 
     describe('if alertOnNoData is disabled but alertOnGroupDisappear is enabled', () => {
-      const executeWeirdNoDataConfig = (metric: string, state?: any) =>
+      const executeWeirdNoDataConfig = (metrics: any, state?: any) =>
         executor({
           ...mockOptions,
           services,
@@ -1613,10 +1609,10 @@ describe('The metric threshold alert type', () => {
             sourceId: 'default',
             criteria: [
               {
-                ...baseNonCountCriterion,
+                ...customThresholdNonCountCriterion,
                 comparator: Comparator.GT,
                 threshold: [0],
-                metric,
+                metrics,
               },
             ],
             alertOnNoData: false,
@@ -1634,10 +1630,16 @@ describe('The metric threshold alert type', () => {
         setEvaluationResults([
           {
             '*': {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric: 'test.metric.3',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.3',
+                },
+              ],
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
@@ -1651,10 +1653,16 @@ describe('The metric threshold alert type', () => {
         setEvaluationResults([
           {
             '*': {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric: 'test.metric.3',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.3',
+                },
+              ],
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
@@ -1668,10 +1676,9 @@ describe('The metric threshold alert type', () => {
         setEvaluationResults([
           {
             a: {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric: 'test.metric.1',
               currentValue: 1,
               timestamp: new Date().toISOString(),
               shouldFire: true,
@@ -1679,10 +1686,9 @@ describe('The metric threshold alert type', () => {
               bucketKey: { groupBy0: 'a' },
             },
             b: {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric: 'test.metric.1',
               currentValue: 3,
               timestamp: new Date().toISOString(),
               shouldFire: true,
@@ -1702,10 +1708,16 @@ describe('The metric threshold alert type', () => {
         setEvaluationResults([
           {
             a: {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric: 'test.metric.3',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.3',
+                },
+              ],
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
@@ -1713,10 +1725,16 @@ describe('The metric threshold alert type', () => {
               bucketKey: { groupBy0: 'a' },
             },
             b: {
-              ...baseNonCountCriterion,
+              ...customThresholdNonCountCriterion,
               comparator: Comparator.GT,
               threshold: [0],
-              metric: 'test.metric.3',
+              metrics: [
+                {
+                  aggType: Aggregators.AVERAGE,
+                  name: 'A',
+                  field: 'test.metric.3',
+                },
+              ],
               currentValue: null,
               timestamp: new Date().toISOString(),
               shouldFire: false,
@@ -1750,12 +1768,13 @@ const mockLibs: any = {
   },
 };
 
-const executor = createMetricThresholdExecutor(mockLibs);
+const executor = createCustomThresholdExecutor(mockLibs);
 
 const alertsServices = alertsMock.createRuleExecutorServices();
 const mockedIndex = {
   id: 'c34a7c79-a88b-4b4a-ad19-72f6d24104e4',
   title: 'metrics-fake_hosts',
+  name: 'mockedDataViewName',
   fieldFormatMap: {},
   typeMeta: {},
   timeFieldName: '@timestamp',
@@ -1768,7 +1787,7 @@ const mockedSearchSource = {
   getField: jest.fn(() => mockedDataView),
 } as any as ISearchSource;
 const services: RuleExecutorServicesMock &
-  LifecycleAlertServices<AlertState, MetricThresholdAlertContext, string> = {
+  LifecycleAlertServices<AlertState, CustomThresholdAlertContext, string> = {
   ...alertsServices,
   ...ruleRegistryMocks.createLifecycleAlertServices(alertsServices),
   searchSourceClient: {
@@ -1836,7 +1855,7 @@ interface Action {
 
 expect.extend({
   toBeAlertAction(action?: Action) {
-    const pass = action?.id === FIRED_ACTIONS.id && !action?.action.reason.includes('no data');
+    const pass = action?.id === FIRED_ACTION.id && !action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be an ALERT action`;
     return {
       message,
@@ -1844,7 +1863,7 @@ expect.extend({
     };
   },
   toBeNoDataAction(action?: Action) {
-    const pass = action?.id === NO_DATA_ACTIONS.id && action?.action.reason.includes('no data');
+    const pass = action?.id === NO_DATA_ACTION.id && action?.action.reason.includes('no data');
     const message = () => `expected ${action} to be a NO DATA action`;
     return {
       message,
@@ -1863,19 +1882,31 @@ declare global {
   }
 }
 
-const baseNonCountCriterion = {
-  aggType: Aggregators.AVERAGE,
-  metric: 'test.metric.1',
+const customThresholdNonCountCriterion: CustomMetricExpressionParams = {
+  aggType: CUSTOM_AGGREGATOR,
+  comparator: Comparator.GT,
+  metrics: [
+    {
+      aggType: Aggregators.AVERAGE,
+      name: 'A',
+      field: 'test.metric.1',
+    },
+  ],
   timeSize: 1,
   timeUnit: 'm',
   threshold: [0],
-  comparator: Comparator.GT,
-} as NonCountMetricExpressionParams;
+};
 
-const baseCountCriterion = {
-  aggType: Aggregators.COUNT,
+const customThresholdCountCriterion: CustomMetricExpressionParams = {
+  aggType: CUSTOM_AGGREGATOR,
+  comparator: Comparator.GT,
+  metrics: [
+    {
+      aggType: Aggregators.COUNT,
+      name: 'A',
+    },
+  ],
   timeSize: 1,
   timeUnit: 'm',
   threshold: [0],
-  comparator: Comparator.GT,
-} as CountMetricExpressionParams;
+};

@@ -45,7 +45,7 @@ export type BulkEditOptionsFilter<Params extends RuleParams> = BulkEditOptionsCo
 };
 
 export type BulkEditOptionsIds<Params extends RuleParams> = BulkEditOptionsCommon<Params> & {
-  ids: string[];
+  ids?: string[];
 };
 
 export type BulkEditSkipReason = 'RULE_NOT_MODIFIED';

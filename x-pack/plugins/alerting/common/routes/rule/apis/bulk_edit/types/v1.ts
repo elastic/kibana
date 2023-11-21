@@ -6,9 +6,8 @@
  */
 import type { TypeOf } from '@kbn/config-schema';
 import { RuleParamsV1, RuleResponseV1 } from '../../../response';
-import { ruleSnoozeScheduleSchemaV1, bulkEditRulesRequestBodySchemaV1 } from '..';
+import { bulkEditRulesRequestBodySchemaV1 } from '..';
 
-export type RuleSnoozeSchedule = TypeOf<typeof ruleSnoozeScheduleSchemaV1>;
 export type BulkEditRulesRequestBody = TypeOf<typeof bulkEditRulesRequestBodySchemaV1>;
 
 interface BulkEditActionSkippedResult {

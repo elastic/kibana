@@ -6,6 +6,7 @@
  */
 
 import { SECURITY_SOLUTION_OWNER } from '@kbn/cases-plugin/common';
+import { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { FtrProviderContext } from '../../../functional/ftr_provider_context';
 
 export const createOneCaseBeforeDeleteAllAfter = (
@@ -64,15 +65,15 @@ export const navigateToCasesApp = async (
   getService: FtrProviderContext['getService'],
   owner: string
 ) => {
-  const testSubjects = getService('testSubjects');
-
   const common = getPageObject('common');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
 
   await common.navigateToApp('landingPage');
 
   if (owner === SECURITY_SOLUTION_OWNER) {
-    await testSubjects.click('solutionSideNavItemLink-cases');
+    await svlCommonNavigation.sidenav.clickLink({
+      deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
+    });
   } else {
     await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
   }

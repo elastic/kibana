@@ -55,7 +55,7 @@ export interface TimelineArgs {
   pageInfo: Pick<PaginationInputPaginated, 'activePage' | 'querySize'>;
   refetch: inputsModel.Refetch;
   totalCount: number;
-  updatedAt: number;
+  refreshedAt: number;
 }
 
 type OnNextResponseHandler = (response: TimelineArgs) => Promise<void> | void;
@@ -192,13 +192,6 @@ export const useTimelineEventsHandler = ({
     wrappedLoadPage(0);
   }, [wrappedLoadPage]);
 
-  const setUpdated = useCallback(
-    (updatedAt: number) => {
-      dispatch(timelineActions.setTimelineUpdatedAt({ id, updated: updatedAt }));
-    },
-    [dispatch, id]
-  );
-
   const [timelineResponse, setTimelineResponse] = useState<TimelineArgs>({
     id,
     inspect: {
@@ -213,14 +206,8 @@ export const useTimelineEventsHandler = ({
     },
     events: [],
     loadPage: wrappedLoadPage,
-    updatedAt: 0,
+    refreshedAt: 0,
   });
-
-  useEffect(() => {
-    if (timelineResponse.updatedAt !== 0) {
-      setUpdated(timelineResponse.updatedAt);
-    }
-  }, [setUpdated, timelineResponse.updatedAt]);
 
   const timelineSearch = useCallback(
     async (
@@ -260,7 +247,7 @@ export const useTimelineEventsHandler = ({
                     inspect: getInspectResponse(response, prevResponse.inspect),
                     pageInfo: response.pageInfo,
                     totalCount: response.totalCount,
-                    updatedAt: Date.now(),
+                    refreshedAt: Date.now(),
                   };
                   if (id === TimelineId.active) {
                     activeTimeline.setExpandedDetail({});
@@ -457,7 +444,7 @@ export const useTimelineEventsHandler = ({
         },
         events: [],
         loadPage: wrappedLoadPage,
-        updatedAt: 0,
+        refreshedAt: 0,
       });
     }
   }, [filterQuery, id, refetchGrid, wrappedLoadPage]);

@@ -308,7 +308,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, inspect, totalCount, refetch, loadPage, pageInfo, updatedAt },
+    { events, inspect, totalCount, refetch, loadPage, pageInfo, refreshedAt },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -461,7 +461,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                 showExpandedDetails={showExpandedDetails}
                 onChangePage={loadPage}
                 activeTab={activeTab}
-                updatedAt={updatedAt}
+                updatedAt={refreshedAt}
                 isTextBasedQuery={false}
               />
             </RootDragDropProvider>
@@ -502,7 +502,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   <Footer
                     activePage={pageInfo?.activePage ?? 0}
                     data-test-subj="timeline-footer"
-                    updatedAt={updatedAt}
+                    updatedAt={refreshedAt}
                     height={footerHeight}
                     id={timelineId}
                     isLive={isLive}

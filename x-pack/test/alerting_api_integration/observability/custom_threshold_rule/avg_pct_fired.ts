@@ -5,17 +5,17 @@
  * 2.0.
  */
 
+import { CUSTOM_AGGREGATOR } from '@kbn/observability-plugin/common/custom_threshold_rule/constants';
 import moment from 'moment';
 import { cleanup, generate } from '@kbn/infra-forge';
 import {
   Aggregators,
   Comparator,
 } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/custom_threshold_executor';
+import { FIRED_ACTIONS_ID } from '@kbn/observability-plugin/server/lib/rules/custom_threshold/constants';
 import expect from '@kbn/expect';
 import { OBSERVABILITY_THRESHOLD_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { createIndexConnector, createRule } from '../helpers/alerting_api_helper';
-import { createDataView, deleteDataView } from '../helpers/data_view';
 import {
   waitForAlertInIndex,
   waitForDocumentInIndex,
@@ -37,7 +37,19 @@ export default function ({ getService }: FtrProviderContext) {
     // DATE_VIEW should match the index template:
     // x-pack/packages/kbn-infra-forge/src/data_sources/composable/template.json
     const DATE_VIEW = 'kbn-data-forge-fake_hosts';
+    const DATE_VIEW_NAME = 'ad-hoc-data-view-name';
     const DATA_VIEW_ID = 'data-view-id';
+    const MOCKED_AD_HOC_DATA_VIEW = {
+      id: DATA_VIEW_ID,
+      title: DATE_VIEW,
+      timeFieldName: '@timestamp',
+      sourceFilters: [],
+      fieldFormats: {},
+      runtimeFieldMap: {},
+      allowNoIndex: false,
+      name: DATE_VIEW_NAME,
+      allowHidden: false,
+    };
     let infraDataIndex: string;
     let actionId: string;
     let ruleId: string;
@@ -46,12 +58,6 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       infraDataIndex = await generate({ esClient, lookback: 'now-15m', logger });
-      await createDataView({
-        supertest,
-        name: DATE_VIEW,
-        id: DATA_VIEW_ID,
-        title: DATE_VIEW,
-      });
     });
 
     after(async () => {
@@ -64,10 +70,6 @@ export default function ({ getService }: FtrProviderContext) {
       await esClient.deleteByQuery({
         index: '.kibana-event-log-*',
         query: { term: { 'kibana.alert.rule.consumer': 'logs' } },
-      });
-      await deleteDataView({
-        supertest,
-        id: DATA_VIEW_ID,
       });
       await esDeleteAllIndices([ALERT_ACTION_INDEX, infraDataIndex]);
       await cleanup({ esClient, logger });
@@ -90,7 +92,7 @@ export default function ({ getService }: FtrProviderContext) {
           params: {
             criteria: [
               {
-                aggType: Aggregators.CUSTOM,
+                aggType: CUSTOM_AGGREGATOR,
                 comparator: Comparator.GT,
                 threshold: [0.5],
                 timeSize: 5,
@@ -107,7 +109,7 @@ export default function ({ getService }: FtrProviderContext) {
                 query: '',
                 language: 'kuery',
               },
-              index: DATA_VIEW_ID,
+              index: MOCKED_AD_HOC_DATA_VIEW,
             },
           },
           actions: [
@@ -197,7 +199,10 @@ export default function ({ getService }: FtrProviderContext) {
             ],
             alertOnNoData: true,
             alertOnGroupDisappear: true,
-            searchConfiguration: { index: 'data-view-id', query: { query: '', language: 'kuery' } },
+            searchConfiguration: {
+              index: MOCKED_AD_HOC_DATA_VIEW,
+              query: { query: '', language: 'kuery' },
+            },
           });
       });
 
@@ -213,9 +218,9 @@ export default function ({ getService }: FtrProviderContext) {
           `https://localhost:5601/app/observability/alerts?_a=(kuery:%27kibana.alert.uuid:%20%22${alertId}%22%27%2CrangeFrom:%27${rangeFrom}%27%2CrangeTo:now%2Cstatus:all)`
         );
         expect(resp.hits.hits[0]._source?.reason).eql(
-          'Custom equation is 2.5 in the last 5 mins. Alert when > 0.5.'
+          `Average system.cpu.user.pct is 250%, above the threshold of 50%. (duration: 5 mins, data view: ${DATE_VIEW_NAME})`
         );
-        expect(resp.hits.hits[0]._source?.value).eql('2.5');
+        expect(resp.hits.hits[0]._source?.value).eql('250%');
       });
     });
   });

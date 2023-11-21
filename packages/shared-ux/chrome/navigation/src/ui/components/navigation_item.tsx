@@ -9,6 +9,7 @@
 import React, { Fragment, useEffect, useMemo } from 'react';
 import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
+import classNames from 'classnames';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import { useInitNavNode } from '../hooks';
@@ -74,13 +75,19 @@ function NavigationItemComp<
 
   if (isRootLevel) {
     const href = getNavigationNodeHref(navNode);
+    const dataTestSubj = classNames(`nav-item`, {
+      [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
+      [`nav-item-isActive`]: navNode.isActive,
+    });
+
     return (
       <EuiCollapsibleNavItem
         id={navNode.id}
         title={navNode.title}
         icon={navNode.icon}
         iconProps={{ size: 'm' }}
-        data-test-subj={`nav-item-${navNode.id}`}
+        isSelected={navNode.isActive}
+        data-test-subj={dataTestSubj}
         linkProps={{
           href,
           onClick: (e: React.MouseEvent) => {

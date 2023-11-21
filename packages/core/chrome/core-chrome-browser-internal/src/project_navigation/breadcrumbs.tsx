@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import {
   AppDeepLinkId,
   ChromeProjectBreadcrumb,
@@ -13,15 +14,21 @@ import {
   ChromeSetProjectBreadcrumbsParams,
   ChromeBreadcrumb,
 } from '@kbn/core-chrome-browser';
-import { createHomeBreadcrumb } from './home_breadcrumbs';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import React from 'react';
 
 export function buildBreadcrumbs({
-  homeHref,
+  projectsUrl,
+  projectName,
+  projectUrl,
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
 }: {
-  homeHref: string;
+  projectsUrl?: string;
+  projectName?: string;
+  projectUrl?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
@@ -29,12 +36,10 @@ export function buildBreadcrumbs({
   chromeBreadcrumbs: ChromeBreadcrumb[];
   activeNodes: ChromeProjectNavigationNode[][];
 }): ChromeProjectBreadcrumb[] {
-  const homeBreadcrumb = createHomeBreadcrumb({
-    homeHref,
-  });
+  const rootCrumb = buildRootCrumb({ projectsUrl, projectName, projectUrl });
 
   if (projectBreadcrumbs.params.absolute) {
-    return [homeBreadcrumb, ...projectBreadcrumbs.breadcrumbs];
+    return [rootCrumb, ...projectBreadcrumbs.breadcrumbs];
   }
 
   // breadcrumbs take the first active path
@@ -52,7 +57,7 @@ export function buildBreadcrumbs({
 
   // if there are project breadcrumbs set, use them
   if (projectBreadcrumbs.breadcrumbs.length !== 0) {
-    return [homeBreadcrumb, ...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs];
+    return [rootCrumb, ...navBreadcrumbs, ...projectBreadcrumbs.breadcrumbs];
   }
 
   // otherwise try to merge legacy breadcrumbs with navigational project breadcrumbs using deeplinkid
@@ -70,12 +75,52 @@ export function buildBreadcrumbs({
   }
 
   if (chromeBreadcrumbStartIndex === -1) {
-    return [homeBreadcrumb, ...navBreadcrumbs];
+    return [rootCrumb, ...navBreadcrumbs];
   } else {
     return [
-      homeBreadcrumb,
+      rootCrumb,
       ...navBreadcrumbs.slice(0, navBreadcrumbEndIndex),
       ...chromeBreadcrumbs.slice(chromeBreadcrumbStartIndex),
     ];
   }
+}
+
+function buildRootCrumb({
+  projectsUrl,
+  projectName,
+  projectUrl,
+}: {
+  projectsUrl?: string;
+  projectName?: string;
+  projectUrl?: string;
+}): ChromeProjectBreadcrumb {
+  return {
+    text:
+      projectName ??
+      i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
+        defaultMessage: 'Project',
+      }),
+    // increase the max-width of the root breadcrumb to not truncate too soon
+    style: { maxWidth: '320px' },
+    popoverContent: (
+      <EuiContextMenuPanel
+        size="s"
+        items={[
+          <EuiContextMenuItem key="project" href={projectUrl} icon={'gear'}>
+            <FormattedMessage
+              id="core.ui.primaryNav.cloud.linkToProject"
+              defaultMessage="Manage project"
+            />
+          </EuiContextMenuItem>,
+          <EuiContextMenuItem key="projects" href={projectsUrl} icon={'grid'}>
+            <FormattedMessage
+              id="core.ui.primaryNav.cloud.linkToAllProjects"
+              defaultMessage="View all projects"
+            />
+          </EuiContextMenuItem>,
+        ]}
+      />
+    ),
+    popoverProps: { panelPaddingSize: 'none' },
+  };
 }

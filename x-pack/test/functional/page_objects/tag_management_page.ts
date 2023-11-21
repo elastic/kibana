@@ -65,6 +65,7 @@ class TagModal extends FtrService {
       });
     }
     if (fields.color !== undefined) {
+      await this.testSubjects.click('~createModalField-color');
       await this.testSubjects.setValue('~createModalField-color', fields.color, {
         clearWithKeyboard,
       });

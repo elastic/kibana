@@ -2271,6 +2271,7 @@ const createMockStaticConfiguration = (sources: any): InfraConfig => ({
     inventoryThresholdAlertRuleEnabled: true,
     metricThresholdAlertRuleEnabled: true,
     logThresholdAlertRuleEnabled: true,
+    alertsAndRulesDropdownEnabled: true,
   },
   enabled: true,
   sources,

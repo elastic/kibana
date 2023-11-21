@@ -140,8 +140,8 @@ export const SELECT_HISTOGRAM = '[data-test-subj="chart-select-trend"]';
 export const LEGEND_ACTIONS = {
   ADD_TO_TIMELINE: (ruleName: string) =>
     `[data-test-subj="legend-${ruleName}-embeddable_addToTimeline"]`,
-  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterIn"]`,
-  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-filterOut"]`,
+  FILTER_FOR: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_filterIn"]`,
+  FILTER_OUT: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_filterOut"]`,
   COPY: (ruleName: string) => `[data-test-subj="legend-${ruleName}-embeddable_copyToClipboard"]`,
 };
 

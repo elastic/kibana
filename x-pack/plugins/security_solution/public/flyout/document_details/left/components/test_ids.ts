@@ -11,7 +11,6 @@ import { PREFIX } from '../../../shared/test_ids';
 
 export const ANALYZER_GRAPH_TEST_ID = `${PREFIX}AnalyzerGraph` as const;
 export const SESSION_VIEW_TEST_ID = `${PREFIX}SessionView` as const;
-export const SESSION_VIEW_ERROR_TEST_ID = `${PREFIX}SessionViewError` as const;
 
 /* Insights tab */
 

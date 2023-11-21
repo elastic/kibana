@@ -195,7 +195,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
 
   const [
     dataLoadingState,
-    { events, inspect, totalCount, pageInfo, loadPage, updatedAt, refetch },
+    { events, inspect, totalCount, pageInfo, loadPage, refreshedAt, refetch },
   ] = useTimelineEvents({
     dataViewId,
     endDate: end,
@@ -327,7 +327,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
                 <Footer
                   activePage={pageInfo?.activePage ?? 0}
                   data-test-subj="timeline-footer"
-                  updatedAt={updatedAt}
+                  updatedAt={refreshedAt}
                   height={footerHeight}
                   id={timelineId}
                   isLive={isLive}
