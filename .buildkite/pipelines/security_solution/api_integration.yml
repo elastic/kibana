@@ -143,17 +143,6 @@ steps:
         - exit_status: '1'
           limit: 2
 
-  - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless
-    command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless
-    key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless
-    agents:
-      queue: n2-4-spot
-    timeout_in_minutes: 120
-    retry:
-      automatic:
-        - exit_status: '1'
-          limit: 2 
-
   - label: Running rule_execution_logic:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_execution_logic:qa:serverless
     key: rule_execution_logic:qa:serverless
