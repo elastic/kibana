@@ -26,6 +26,7 @@ const alertsClientFactoryParams: AlertsClientFactoryProps = {
   esClient: {} as ElasticsearchClient,
   ruleDataService: ruleDataServiceMock.create(),
   getRuleType: jest.fn(),
+  getRuleList: jest.fn(),
   getAlertIndicesAlias: jest.fn(),
 };
 
