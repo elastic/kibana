@@ -16,6 +16,11 @@ export interface UiSettingsApiResponse {
   settings: UiSettingsState;
 }
 
+export interface ValidationApiResponse {
+  valid: boolean;
+  errorMessage?: string;
+}
+
 interface Changes {
   values: {
     [key: string]: any;
@@ -91,6 +96,15 @@ export class UiSettingsApi {
       };
 
       this.flushPendingChanges('global');
+    });
+  }
+
+  /**
+   * Sends a validation request to the server for the provided key+value pair.
+   */
+  public async validate(key: string, value: any): Promise<ValidationApiResponse> {
+    return await this.sendRequest('POST', `/internal/kibana/settings/${key}/validate`, {
+      value,
     });
   }
 
