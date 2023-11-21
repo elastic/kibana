@@ -13,9 +13,9 @@ export async function getDataStreamsStats(options: {
   esClient: ElasticsearchClient;
   type?: DataStreamTypes;
   datasetQuery?: string;
-  sortOrder: 'asc' | 'desc';
+  sortOrder?: 'asc' | 'desc';
 }) {
-  const { esClient, type, datasetQuery, sortOrder } = options;
+  const { esClient, type, datasetQuery, sortOrder = 'asc' } = options;
 
   const matchingDataStreamsStats = await dataStreamService.getMatchingDataStreamsStats(esClient, {
     type: type ?? '*',

@@ -17,6 +17,6 @@ export const dataStreamTypesRt = t.partial({
   ]),
 });
 
-export const sortOrderRt = t.type({
+export const sortOrderRt = t.partial({
   sortOrder: t.union([t.literal('asc'), t.literal('desc')]),
 });
