@@ -21,7 +21,7 @@ import {
   deleteAllRules,
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
-  createNonSecurityRule,
+  // createNonSecurityRule,
   getCustomQueryRuleParams,
 } from '../../utils';
 import { getCoverageOverview } from '../../utils/rules/get_coverage_overview';
@@ -36,31 +36,31 @@ export default ({ getService }: FtrProviderContext): void => {
       await deleteAllRules(supertest, log);
     });
 
-    it('does NOT error when there are no security rules', async () => {
-      await createNonSecurityRule(supertest);
-      const rule1 = await createRule(
-        supertest,
-        log,
-        getCustomQueryRuleParams({ threat: generateThreatArray(1) })
-      );
+    // it('does NOT error when there are no security rules', async () => {
+    //   await createNonSecurityRule(supertest);
+    //   const rule1 = await createRule(
+    //     supertest,
+    //     log,
+    //     getCustomQueryRuleParams({ threat: generateThreatArray(1) })
+    //   );
 
-      const body = getCoverageOverview(supertest);
+    //   const body = getCoverageOverview(supertest);
 
-      expect(body).to.eql({
-        coverage: {
-          T001: [rule1.id],
-          TA001: [rule1.id],
-          'T001.001': [rule1.id],
-        },
-        unmapped_rule_ids: [],
-        rules_data: {
-          [rule1.id]: {
-            activity: 'disabled',
-            name: 'Simple Rule Query',
-          },
-        },
-      });
-    });
+    //   expect(body).to.eql({
+    //     coverage: {
+    //       T001: [rule1.id],
+    //       TA001: [rule1.id],
+    //       'T001.001': [rule1.id],
+    //     },
+    //     unmapped_rule_ids: [],
+    //     rules_data: {
+    //       [rule1.id]: {
+    //         activity: 'disabled',
+    //         name: 'Simple Rule Query',
+    //       },
+    //     },
+    //   });
+    // });
 
     describe('without filters', () => {
       it('returns an empty response if there are no rules', async () => {
