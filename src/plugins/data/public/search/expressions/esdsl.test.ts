@@ -63,7 +63,7 @@ describe('esdsl', () => {
       } catch (error) {
         errorMessage = error.message;
       }
-      expect(errorMessage).toEqual(`Unexpected token 'i', "invalid json" is not valid JSON`);
+      expect(errorMessage).toEqual('Unexpected token i in JSON at position 0');
     });
 
     test('adds filters', async () => {
