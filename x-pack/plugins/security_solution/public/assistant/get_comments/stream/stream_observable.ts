@@ -7,7 +7,6 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import { API_ERROR } from '../translations';
 import type { PromptObservableState } from './types';
 const MIN_DELAY = 35;
 
@@ -42,17 +41,23 @@ export const getStreamObservable = (
               observer.complete();
               return;
             }
-            const decoded = decoder.decode(value);
-            const content = isError
-              ? // we format errors as {message: string; status_code: number}
-                `${API_ERROR}\n\n${JSON.parse(decoded).message}`
-              : // all other responses are just strings (handled by subaction invokeStream)
-                decoded;
-            chunks.push(content);
-            observer.next({
-              chunks,
-              message: getMessageFromChunks(chunks),
-              loading: true,
+
+            const nextChunks = decoder
+              .decode(value)
+              .split('\n')
+              // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
+              .map((str) => str.substring(6))
+              // filter out empty lines and the "[DONE]" string
+              .filter((str) => !!str && str !== '[DONE]')
+              .map((line) => JSON.parse(line));
+
+            nextChunks.forEach((chunk) => {
+              chunks.push(chunk);
+              observer.next({
+                chunks,
+                message: getMessageFromChunks(chunks),
+                loading: true,
+              });
             });
           } catch (err) {
             observer.error(err);
@@ -99,8 +104,8 @@ export const getStreamObservable = (
     finalize(() => setLoading(false))
   );
 
-function getMessageFromChunks(chunks: string[]) {
-  return chunks.join('');
+function getMessageFromChunks(chunks) {
+  return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
 }
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();
