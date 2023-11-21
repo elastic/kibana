@@ -28,7 +28,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await aiops.logRateAnalysisPage.navigateToIndexPatternSelection();
+      await aiops.logRateAnalysisPage.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(`${testData.suiteTitle} loads the log rate analysis page`);
       await ml.jobSourceSelection.selectSourceForLogRateAnalysis(testData.sourceIndexOrSavedSearch);

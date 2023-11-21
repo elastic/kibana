@@ -378,7 +378,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             await ml.testExecution.logTestStep(
               'should load an index into the data visualizer page'
             );
-            await ml.dataVisualizer.navigateToIndexPatternSelection();
+            await ml.dataVisualizer.navigateToDataViewSelection();
             await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(ecIndexPattern);
 
             await ml.testExecution.logTestStep('should display the time range step');

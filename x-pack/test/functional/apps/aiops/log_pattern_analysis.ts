@@ -49,7 +49,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
+      await aiops.logPatternAnalysisPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
 
@@ -76,7 +76,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.logPatternAnalysisPage.navigateToIndexPatternSelection();
+      await aiops.logPatternAnalysisPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForLogPatternAnalysisDetection('logstash-*');
       await aiops.logPatternAnalysisPage.assertLogPatternAnalysisPageExists();
 

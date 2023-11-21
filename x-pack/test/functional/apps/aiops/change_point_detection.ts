@@ -32,7 +32,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Start navigation from the base of the ML app.
       await ml.navigation.navigateToMl();
       await elasticChart.setNewChartUiDebugFlag(true);
-      await aiops.changePointDetectionPage.navigateToIndexPatternSelection();
+      await aiops.changePointDetectionPage.navigateToDataViewSelection();
       await ml.jobSourceSelection.selectSourceForChangePointDetection('ft_ecommerce');
       await aiops.changePointDetectionPage.assertChangePointDetectionPageExists();
     });

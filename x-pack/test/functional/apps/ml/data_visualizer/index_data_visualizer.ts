@@ -26,7 +26,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await ml.dataVisualizer.navigateToIndexPatternSelection();
+      await ml.dataVisualizer.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the index data visualizer page`
@@ -223,7 +223,7 @@ export default function ({ getPageObject, getService }: FtrProviderContext) {
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} loads the saved search selection page`
         );
-        await ml.dataVisualizer.navigateToIndexPatternSelection();
+        await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep(
           `${testData.suiteTitle} loads the index data visualizer page`

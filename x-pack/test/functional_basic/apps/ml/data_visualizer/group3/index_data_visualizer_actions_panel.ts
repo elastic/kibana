@@ -34,7 +34,7 @@ export default function ({ getService }: FtrProviderContext) {
         await ml.navigation.navigateToDataVisualizer();
 
         await ml.testExecution.logTestStep('loads the saved search selection page');
-        await ml.dataVisualizer.navigateToIndexPatternSelection();
+        await ml.dataVisualizer.navigateToDataViewSelection();
 
         await ml.testExecution.logTestStep('loads the index data visualizer page');
         await ml.jobSourceSelection.selectSourceForIndexBasedDataVisualizer(savedSearch);

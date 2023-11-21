@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.destIndexDeleted.success).to.eql(false);
           expect(body.destIndexPatternDeleted.success).to.eql(true);
           await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
-          await ml.testResources.assertIndexPatternNotExist(destinationIndex);
+          await ml.testResources.assertDataViewNotExist(destinationIndex);
         });
       });
 
@@ -212,7 +212,7 @@ export default ({ getService }: FtrProviderContext) => {
           expect(body.destIndexPatternDeleted.success).to.eql(true);
           await ml.api.waitForDataFrameAnalyticsJobNotToExist(analyticsId);
           await ml.api.assertIndicesNotToExist(destinationIndex);
-          await ml.testResources.assertIndexPatternNotExist(destinationIndex);
+          await ml.testResources.assertDataViewNotExist(destinationIndex);
         });
       });
     });

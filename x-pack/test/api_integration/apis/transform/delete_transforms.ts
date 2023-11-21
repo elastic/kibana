@@ -261,7 +261,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destDataViewDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesToExist(destinationIndex);
-        await transform.testResources.assertIndexPatternNotExist(destinationIndex);
+        await transform.testResources.assertDataViewNotExist(destinationIndex);
       });
     });
 
@@ -301,7 +301,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(body[transformId].destDataViewDeleted.success).to.eql(true);
         await transform.api.waitForTransformNotToExist(transformId);
         await transform.api.waitForIndicesNotToExist(destinationIndex);
-        await transform.testResources.assertIndexPatternNotExist(destinationIndex);
+        await transform.testResources.assertDataViewNotExist(destinationIndex);
       });
     });
   });
