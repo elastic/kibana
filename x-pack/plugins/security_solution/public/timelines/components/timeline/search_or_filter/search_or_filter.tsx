@@ -72,7 +72,8 @@ interface Props {
 }
 
 const SearchOrFilterContainer = styled.div`
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
 `;
 
 SearchOrFilterContainer.displayName = 'SearchOrFilterContainer';

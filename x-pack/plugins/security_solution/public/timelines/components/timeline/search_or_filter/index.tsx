@@ -159,7 +159,6 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
             alignItems="center"
             gutterSize="xs"
             responsive={false}
-            css={{ overflowX: 'auto' }}
           >
             <EuiFlexItem grow={true}>
               <SearchOrFilter

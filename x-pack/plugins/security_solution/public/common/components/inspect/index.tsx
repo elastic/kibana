@@ -40,7 +40,7 @@ interface InspectButtonProps {
   onCloseInspect?: () => void;
   queryId: string;
   showInspectButton?: boolean;
-  title: string | React.ReactElement | React.ReactNode;
+  title?: string | React.ReactElement | React.ReactNode;
 }
 
 const InspectButtonComponent: React.FC<InspectButtonProps> = ({

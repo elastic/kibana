@@ -49,7 +49,7 @@ const TimelineActionMenuComponent = ({
           queryId={`${timelineId}-${activeTab}`}
           inputId={InputsModelId.timeline}
           isDisabled={isInspectButtonDisabled}
-          title="Inspect"
+          title=""
         />
       </EuiFlexItem>
       <EuiFlexItem data-test-subj="save-timeline-action">
