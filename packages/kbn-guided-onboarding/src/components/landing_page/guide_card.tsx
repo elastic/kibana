@@ -7,7 +7,6 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { css } from '@emotion/react';
 
 import {
   EuiCard,
@@ -19,6 +18,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
+import { css } from '@emotion/react';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
@@ -55,7 +55,6 @@ export const GuideCard = ({
   if (card.guideId) {
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
-
   const onClick = useCallback(async () => {
     setIsLoading(true);
     if (card.guideId) {

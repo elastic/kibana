@@ -202,6 +202,7 @@ export const GettingStarted = () => {
           navigateToApp={application.navigateToApp}
           activeFilter={filter}
           guidesState={guidesState}
+          solutionName={filter}
         />
         <EuiSpacer />
         <div className="eui-textCenter">

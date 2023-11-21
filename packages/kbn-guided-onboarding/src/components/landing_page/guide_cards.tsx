@@ -6,16 +6,15 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { groupBy, keys } from 'lodash';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
 
 import { GuideId, GuideState } from '../../types';
 import { GuideFilterValues } from './guide_filters';
-import { guideCards } from './guide_cards.constants';
+import { GuideCardConstants, guideCards } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
@@ -27,25 +26,27 @@ export interface GuideCardsProps {
   guidesState: GuideState[];
 }
 export const GuideCards = (props: GuideCardsProps) => {
-  const groupedGuideCards = groupBy(guideCards, 'solution');
+  const { activeFilter } = props;
+  const [filteredCards, setFilteredCards] = useState<any[]>([]);
 
+  // if activeFilter changes we want to regenerate the filtered cards
+  useCallback(() => {
+    setFilteredCards(
+      guideCards.filter((card: GuideCardConstants) => card.solution === activeFilter)
+    );
+  }, [activeFilter]);
   return (
     <EuiFlexGroup>
-      {keys(groupedGuideCards).map((groupedGuideCard, groupIndex) => {
-        const cards = groupedGuideCards[groupedGuideCard];
-        return (
-          <EuiFlexItem key={groupIndex}>
-            <EuiFlexGroup direction="column" alignItems="center">
-              {cards.map((card, index) => (
-                <EuiFlexItem key={index} grow={false}>
-                  <GuideCard card={card} {...props} />
-                  <EuiSpacer size="m" />
-                </EuiFlexItem>
-              ))}
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        );
-      })}
+      <EuiFlexItem>
+        <EuiFlexGroup direction="column" alignItems="center">
+          {filteredCards.map((card, index) => (
+            <EuiFlexItem key={index} grow={false}>
+              <GuideCard card={card} {...props} />
+              <EuiSpacer size="m" />
+            </EuiFlexItem>
+          ))}
+        </EuiFlexGroup>
+      </EuiFlexItem>
     </EuiFlexGroup>
   );
 };
