@@ -15,7 +15,6 @@ import { ILicense } from '@kbn/licensing-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import type { ClientConfigType } from '@kbn/reporting-public';
 import { ReportListing } from '.';
-import { IlmPolicyStatusContextProvider } from '../lib/ilm_policy_status_context';
 import { InternalApiClientProvider, ReportingAPIClient } from '../lib/reporting_api_client';
 import type { ManagementAppMountParams, SharePluginSetup } from '../shared_imports';
 import { KibanaContextProvider } from '../shared_imports';
@@ -30,29 +29,6 @@ export async function mountManagementSection(
   urlService: SharePluginSetup['url'],
   params: ManagementAppMountParams
 ) {
-  const CtxProvider = config.statefulSettings.enabled ? (
-    <IlmPolicyStatusContextProvider>
-      <ReportListing
-        toasts={coreSetup.notifications.toasts}
-        license$={license$}
-        config={config}
-        redirect={coreStart.application.navigateToApp}
-        navigateToUrl={coreStart.application.navigateToUrl}
-        urlService={urlService}
-      />
-    </IlmPolicyStatusContextProvider>
-  ) : (
-    <PolicyStatusContextProvider config={config}>
-      <ReportListing
-        toasts={coreSetup.notifications.toasts}
-        license$={license$}
-        config={config}
-        redirect={coreStart.application.navigateToApp}
-        navigateToUrl={coreStart.application.navigateToUrl}
-        urlService={urlService}
-      />
-    </PolicyStatusContextProvider>
-  );
   render(
     <KibanaThemeProvider theme={{ theme$: params.theme$ }}>
       <I18nProvider>
@@ -64,7 +40,19 @@ export async function mountManagementSection(
             docLinks: coreStart.docLinks,
           }}
         >
-          <InternalApiClientProvider apiClient={apiClient}>{CtxProvider}</InternalApiClientProvider>
+          <InternalApiClientProvider apiClient={apiClient}>
+            <PolicyStatusContextProvider config={config}>
+              <ReportListing
+                apiClient={apiClient}
+                toasts={coreSetup.notifications.toasts}
+                license$={license$}
+                config={config}
+                redirect={coreStart.application.navigateToApp}
+                navigateToUrl={coreStart.application.navigateToUrl}
+                urlService={urlService}
+              />
+            </PolicyStatusContextProvider>
+          </InternalApiClientProvider>
         </KibanaContextProvider>
       </I18nProvider>
     </KibanaThemeProvider>,
