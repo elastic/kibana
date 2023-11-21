@@ -18,7 +18,7 @@ import { RightPanelContext } from '../context';
 import { mockGetFieldsData } from '../../shared/mocks/mock_get_fields_data';
 import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import type { TimelineEventsDetailsItem } from '@kbn/timelines-plugin/common';
-import { PreviewPanelKey } from '../../preview';
+import { DocumentDetailsPreviewPanelKey } from '../../preview';
 
 const ruleUuid = {
   category: 'kibana',
@@ -119,7 +119,7 @@ describe('<Description />', () => {
       getByTestId(RULE_SUMMARY_BUTTON_TEST_ID).click();
 
       expect(flyoutContextValue.openPreviewPanel).toHaveBeenCalledWith({
-        id: PreviewPanelKey,
+        id: DocumentDetailsPreviewPanelKey,
         path: { tab: 'rule-preview' },
         params: {
           id: panelContext.eventId,
