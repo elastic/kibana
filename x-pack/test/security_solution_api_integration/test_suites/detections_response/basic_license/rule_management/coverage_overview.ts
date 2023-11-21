@@ -22,6 +22,7 @@ import {
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
   getCustomQueryRuleParams,
+  // createNonSecurityRule,
 } from '../../utils';
 import { getCoverageOverview } from '../../utils/rules/get_coverage_overview';
 
@@ -43,7 +44,7 @@ export default ({ getService }: FtrProviderContext): void => {
     //     getCustomQueryRuleParams({ threat: generateThreatArray(1) })
     //   );
 
-    //   const body = getCoverageOverview(supertest);
+    //   const body = await getCoverageOverview(supertest);
 
     //   expect(body).to.eql({
     //     coverage: {
@@ -55,7 +56,7 @@ export default ({ getService }: FtrProviderContext): void => {
     //     rules_data: {
     //       [rule1.id]: {
     //         activity: 'disabled',
-    //         name: 'Simple Rule Query',
+    //         name: 'Custom query rule',
     //       },
     //     },
     //   });
@@ -63,7 +64,7 @@ export default ({ getService }: FtrProviderContext): void => {
 
     describe('without filters', () => {
       it('returns an empty response if there are no rules', async () => {
-        const body = getCoverageOverview(supertest);
+        const body = await getCoverageOverview(supertest);
 
         expect(body).to.eql({
           coverage: {},
@@ -79,7 +80,7 @@ export default ({ getService }: FtrProviderContext): void => {
           getCustomQueryRuleParams({ threat: generateThreatArray(1) })
         );
 
-        const body = getCoverageOverview(supertest);
+        const body = await getCoverageOverview(supertest);
 
         expect(body).to.eql({
           coverage: {
@@ -91,7 +92,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_data: {
             [rule1.id]: {
               activity: 'disabled',
-              name: 'Simple Rule Query',
+              name: 'Custom query rule',
             },
           },
         });
@@ -104,7 +105,7 @@ export default ({ getService }: FtrProviderContext): void => {
           getCustomQueryRuleParams({ threat: undefined })
         );
 
-        const body = getCoverageOverview(supertest);
+        const body = await getCoverageOverview(supertest);
 
         expect(body).to.eql({
           coverage: {},
@@ -112,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
           rules_data: {
             [rule1.id]: {
               activity: 'disabled',
-              name: 'Simple Rule Query',
+              name: 'Custom query rule',
             },
           },
         });
@@ -133,7 +134,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             search_term: 'TA002',
           });
 
@@ -147,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -165,7 +166,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             search_term: 'T002',
           });
 
@@ -179,7 +180,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -197,7 +198,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             search_term: 'T002.002',
           });
 
@@ -211,7 +212,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -225,7 +226,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-2', name: 'rule-2' })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             search_term: 'rule-2',
           });
 
@@ -253,7 +254,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-2', index: ['index-pattern-2'] })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             search_term: 'index-pattern-2',
           });
 
@@ -263,7 +264,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -280,10 +281,14 @@ export default ({ getService }: FtrProviderContext): void => {
           await createRule(
             supertest,
             log,
-            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+            getCustomQueryRuleParams({
+              rule_id: 'rule-2',
+              enabled: true,
+              threat: generateThreatArray(2),
+            })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             activity: [CoverageOverviewRuleActivity.Disabled],
           });
 
@@ -297,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -312,10 +317,14 @@ export default ({ getService }: FtrProviderContext): void => {
           const expectedRule = await createRule(
             supertest,
             log,
-            getCustomQueryRuleParams({ rule_id: 'rule-2', threat: generateThreatArray(2) })
+            getCustomQueryRuleParams({
+              rule_id: 'rule-2',
+              enabled: true,
+              threat: generateThreatArray(2),
+            })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             activity: [CoverageOverviewRuleActivity.Enabled],
           });
 
@@ -329,7 +338,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'enabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -357,7 +366,7 @@ export default ({ getService }: FtrProviderContext): void => {
             })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             activity: [CoverageOverviewRuleActivity.Enabled, CoverageOverviewRuleActivity.Disabled],
           });
 
@@ -401,7 +410,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             source: [CoverageOverviewRuleSource.Custom],
           });
 
@@ -415,7 +424,7 @@ export default ({ getService }: FtrProviderContext): void => {
             rules_data: {
               [expectedRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });
@@ -439,7 +448,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             source: [CoverageOverviewRuleSource.Prebuilt],
           });
 
@@ -477,7 +486,7 @@ export default ({ getService }: FtrProviderContext): void => {
             getCustomQueryRuleParams({ rule_id: 'rule-1', threat: generateThreatArray(2) })
           );
 
-          const body = getCoverageOverview(supertest, {
+          const body = await getCoverageOverview(supertest, {
             source: [CoverageOverviewRuleSource.Prebuilt, CoverageOverviewRuleSource.Custom],
           });
 
@@ -498,7 +507,7 @@ export default ({ getService }: FtrProviderContext): void => {
               },
               [expectedCustomRule.id]: {
                 activity: 'disabled',
-                name: 'Simple Rule Query',
+                name: 'Custom query rule',
               },
             },
           });

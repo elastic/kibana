@@ -34,8 +34,8 @@ export async function createNonSecurityRule(
 ): Promise<void> {
   await supertest
     .post('/api/alerting/rule')
-    .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31')
+    .set('kbn-xsrf', 'foo')
+    .set('x-elastic-internal-origin', 'foo')
     .send(SIMPLE_APM_RULE_DATA)
     .expect(200);
 }
