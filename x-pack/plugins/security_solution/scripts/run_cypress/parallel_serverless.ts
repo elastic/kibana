@@ -16,6 +16,7 @@ import cypress from 'cypress';
 import grep from '@cypress/grep/src/plugin';
 import crypto from 'crypto';
 import fs from 'fs';
+import { exec } from 'child_process';
 import { createFailError } from '@kbn/dev-cli-errors';
 import axios, { AxiosError } from 'axios';
 import path from 'path';
