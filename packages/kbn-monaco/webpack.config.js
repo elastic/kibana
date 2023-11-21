@@ -47,6 +47,21 @@ const getWorkerConfig = (language) => ({
           },
         },
       },
+      {
+        /**
+         * further process the esm modules exported by monaco-editor
+         * because they utilize the class property proposal.
+         */
+        test: /monaco-editor\/esm\/vs\/.*(t|j)sx?$/,
+        use: {
+          loader: 'babel-loader',
+          options: {
+            babelrc: false,
+            envName: process.env.NODE_ENV || 'development',
+            presets: [require.resolve('@kbn/babel-preset/webpack_preset')],
+          },
+        },
+      },
     ],
   },
 });
