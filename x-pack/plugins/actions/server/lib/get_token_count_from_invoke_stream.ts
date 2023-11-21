@@ -54,15 +54,10 @@ export async function getTokenCountFromInvokeStream({
   let responseBody: string = '';
 
   const isBedrock = actionTypeId === '.bedrock';
-  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
 
   responseStream.on('data', (chunk) => {
     if (isBedrock) {
-      const event = awsDecoder.decode(chunk);
-      const parsed = JSON.parse(
-        Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
-      );
-      responseBody += parsed.completion;
+      responseBody += parseBedrockChunk(chunk);
     } else {
       responseBody += chunk.toString();
     }
@@ -73,6 +68,8 @@ export async function getTokenCountFromInvokeStream({
     logger.error('An error occurred while calculating streaming response tokens');
   }
 
+  // parse openai response once responseBody is fully built
+  // They send the response in sometimes incomplete chunks of JSON
   const parsedResponse = isBedrock ? responseBody : parseOpenAIResponse(responseBody);
 
   const completionTokens = encode(parsedResponse).length;
@@ -84,8 +81,17 @@ export async function getTokenCountFromInvokeStream({
   };
 }
 
-const parseOpenAIResponse = (responseBody: string) => {
-  return responseBody
+const parseBedrockChunk = (chunk: ArrayBufferView) => {
+  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+  const event = awsDecoder.decode(chunk);
+  const parsed = JSON.parse(
+    Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+  );
+  return parsed.completion;
+};
+
+const parseOpenAIResponse = (responseBody: string) =>
+  responseBody
     .split('\n')
     .filter((line) => {
       return line.startsWith('data: ') && !line.endsWith('[DONE]');
@@ -109,4 +115,3 @@ const parseOpenAIResponse = (responseBody: string) => {
       prev += msg.content || '';
       return prev;
     }, '');
-};
