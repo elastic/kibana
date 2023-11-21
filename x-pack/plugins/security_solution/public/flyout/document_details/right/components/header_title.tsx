@@ -56,7 +56,7 @@ export const HeaderTitle: FC = memo(() => {
 
   const eventTitle = (
     <EuiTitle size="s">
-      <h2 data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+      <h2>
         <FormattedMessage
           id="xpack.securitySolution.flyout.right.header.headerTitle"
           defaultMessage="Event details"
@@ -71,7 +71,9 @@ export const HeaderTitle: FC = memo(() => {
       <EuiSpacer size="m" />
       {timestamp && <PreferenceFormattedDate value={new Date(timestamp)} />}
       <EuiSpacer size="xs" />
-      {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
+      <div data-test-subj={FLYOUT_HEADER_TITLE_TEST_ID}>
+        {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
+      </div>
       <EuiSpacer size="m" />
       <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
