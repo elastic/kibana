@@ -61,6 +61,11 @@ export const getSLOMappingsTemplate = (name: string) => ({
             name: {
               type: 'keyword',
               ignore_above: 256,
+              fields: {
+                text: {
+                  type: 'text',
+                },
+              },
             },
             description: {
               type: 'keyword',
