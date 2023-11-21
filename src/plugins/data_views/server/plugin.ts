@@ -49,7 +49,14 @@ export class DataViewsServerPlugin
   ) {
     core.savedObjects.registerType(dataViewSavedObjectType);
     core.capabilities.registerProvider(capabilitiesProvider);
-    core.uiSettings.register(cacheMaxAge);
+
+    const config = this.initializerContext.config.get<ClientConfigType>();
+
+    // add conditional
+    if (config.fieldListCachingEnabled) {
+      core.uiSettings.register(cacheMaxAge);
+    }
+
     const dataViewRestCounter = usageCollection?.createUsageCounter('dataViewsRestApi');
 
     registerRoutes({

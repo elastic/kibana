@@ -47,6 +47,12 @@ const configSchema = schema.object({
     schema.boolean({ defaultValue: false }),
     schema.never()
   ),
+  fieldListCachingEnabled: schema.conditional(
+    schema.contextRef('serverless'),
+    true,
+    schema.boolean({ defaultValue: false }),
+    schema.never()
+  ),
 });
 
 type ConfigType = TypeOf<typeof configSchema>;

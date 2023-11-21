@@ -17,6 +17,7 @@ import type {
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
 import { parseFields, IBody, IQuery, querySchema } from './fields_for';
+import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 
 export function calculateHash(srcBuffer: Buffer) {
   const hash = createHash('sha1');
@@ -82,7 +83,10 @@ const handler: (
         'user-hash': userHash,
       };
 
-      const cacheMaxAge = await uiSettings.get<number>('data_views:cache_max_age');
+      // field cache is configurable in classic environment but not on serverless
+      const cacheMaxAge =
+        (await uiSettings.get<number | undefined>('data_views:cache_max_age')) ||
+        DEFAULT_FIELD_CACHE_FRESHNESS;
 
       if (cacheMaxAge && fields.length) {
         const stale = 365 * 24 * 60 * 60 - cacheMaxAge;
