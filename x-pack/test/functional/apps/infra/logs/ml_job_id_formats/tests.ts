@@ -205,7 +205,8 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    describe('creation and recreation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/171493
+    describe.skip('creation and recreation', () => {
       it('create first ML job', async () => {
         await logsUi.logEntryRatePage.navigateTo();
         await requestTracker.install();
