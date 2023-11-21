@@ -12,6 +12,7 @@ import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { contentManagementMock } from '@kbn/content-management-plugin/public/mocks';
 import { sharePluginMock } from '@kbn/share-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { lensPluginMock } from '@kbn/lens-plugin/public/mocks';
 
 const triggersActionsUiStartMock = {
   createStart() {
@@ -103,7 +104,7 @@ export const observabilityPublicPluginsStartMock = {
       dataViewEditor: dataViewEditor.createStart(),
       dataViews: dataViews.createStart(),
       discover: null,
-      lens: null,
+      lens: lensPluginMock.createStartContract(),
       share: sharePluginMock.createStartContract(),
       triggersActionsUi: triggersActionsUiStartMock.createStart(),
       unifiedSearch: unifiedSearchPluginMock.createStartContract(),

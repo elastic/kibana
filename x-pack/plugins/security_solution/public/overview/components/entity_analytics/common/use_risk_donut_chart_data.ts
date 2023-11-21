@@ -6,10 +6,10 @@
  */
 import { sum } from 'lodash/fp';
 import { useMemo } from 'react';
+import { RISK_SEVERITY_COLOUR } from '../../../../entity_analytics/common/utils';
 import type { LegendItem } from '../../../../common/components/charts/legend_item';
 import type { SeverityCount } from '../../../../explore/components/risk_score/severity/types';
 import type { DonutChartProps } from '../../../../common/components/charts/donutchart';
-import { RISK_SEVERITY_COLOUR } from '../../../../explore/components/risk_score/severity/common';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const legendField = 'kibana.alert.severity';

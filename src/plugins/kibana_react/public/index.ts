@@ -44,10 +44,6 @@ export {
 
 export { useExecutionContext } from './use_execution_context';
 
-export type { ToolbarButtonProps } from './toolbar_button';
-/** @deprecated ToolbarButton - use `ToolbarButton` from `@kbn/shared-ux-button-toolbar` */
-export { POSITIONS, WEIGHTS, TOOLBAR_BUTTON_SIZES, ToolbarButton } from './toolbar_button';
-
 export { reactRouterNavigate, reactRouterOnClickHandler } from './react_router_navigate';
 
 export type {
@@ -75,9 +71,6 @@ export { Markdown, MarkdownSimple } from './markdown';
 
 export { toMountPoint } from './util';
 export type { ToMountPointOptions } from './util';
-
-/** @deprecated Use `RedirectAppLinks` from `@kbn/shared-ux-link-redirect-app` */
-export { RedirectAppLinks } from './app_links';
 
 /** @deprecated Use `KibanaThemeProvider`, `wrapWithTheme` from `@kbn/react-kibana-context-theme`  */
 export { KibanaThemeProvider, wrapWithTheme, type KibanaThemeProviderProps } from './theme';
