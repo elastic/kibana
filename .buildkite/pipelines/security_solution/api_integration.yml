@@ -1,23 +1,16 @@
 steps:
-  - input: "Flow parameterisation input"
-    key: "configuration_pane"
-    fields:
-      - select: "The environment to test against"
-        key: "environment"
-        default: "QA"
-        required: false
-        options:
-          - label: "QA"
-            value: "QA"
-      - select: "Override kibana"
-        key: "kibana_override"
-        default: "False"
-        required: false
-        options:
-          - label: "Enable"
-            value: "1"
-          - label: "Disable"
-            value: "0"
+  - command: echo "Building kibana docker image"
+    # .buildkite/scripts/steps/artifacts/docker_image.sh
+    label: Build serverless container images
+    depends_on: upload_runtime_info
+    agents:
+      queue: n2-16-spot
+    timeout_in_minutes: 60
+    retry:
+      automatic:
+        - exit_status: "-1"
+          limit: 3
+    if: env('KIBANA_LATEST') == "1"
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
     label: "Upload runtime info"
@@ -29,19 +22,7 @@ steps:
       automatic:
         - exit_status: "*"
           limit: 1
-
-  - command: echo "Building kibana docker image"
-    # .buildkite/scripts/steps/artifacts/docker_image.sh
-    label: Build serverless container images
-    depends_on:
-    agents:
-      queue: n2-16-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: "-1"
-          limit: 3
-    if: env('KIBANA_BUILD_NEW') == "1"
+    if: env('KIBANA_LATEST') == "1"
 
   # - label: Running exception_workflows:runner:serverless
   #   command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless

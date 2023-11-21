@@ -1,10 +1,10 @@
 if [ -z "${KIBANA_LATEST+x}" ]; then
-    KIBANA_OVERRIDE_FLAG=$(buildkite-agent meta-data get kibana_override --default 0)
-    echo "OVERRIDING KIBANA FROM CONFIG_PANE : $KIBANA_OVERRIDE_FLAG"
+    KIBANA_OVERRIDE_FLAG=0
 else
     KIBANA_OVERRIDE_FLAG=$KIBANA_LATEST
-    echo "OVERRIDING KIBANA FROM TRIGGER : $KIBANA_OVERRIDE_FLAG"
 fi
+
+echo "KIBANA override is: $KIBANA_OVERRIDE_FLAG"
 
 if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
     echo "KIBANA_OVERRIDE_FLAG is equal to 1"
@@ -22,8 +22,4 @@ if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
         - Version               : $version
     """
     echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
-    buildkite-agent env set KIBANA_BUILD_SHA="git-${BUILDKITE_COMMIT:0:12}"
-    buildkite-agent env set KIBANA_BUILD_NEW=1
-else
-    echo "KIBANA_OVERRIDE_FLAG is $KIBANA_OVERRIDE_FLAG"
-fi 
+fi
