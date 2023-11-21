@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
+import { concatMap, delay, finalize, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
+import { API_ERROR } from '@kbn/elastic-assistant/impl/assistant/translations';
 import type { PromptObservableState } from './types';
 const MIN_DELAY = 35;
 
@@ -27,45 +28,58 @@ export const getStreamObservable = (
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
     const chunks: string[] = [];
+    let lineBuffer: string = '';
     function read() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
+              if (lineBuffer) {
+                console.log('EXTRA LINE BUFFER!', lineBuffer);
+                chunks.push(lineBuffer);
+              }
               observer.next({
                 chunks,
-                message: getMessageFromChunks(chunks),
+                message: chunks.join(''),
                 loading: false,
               });
               observer.complete();
               return;
             }
 
-            const nextChunks = decoder
-              .decode(value)
-              .split('\n')
-              // every line starts with "data: ", we remove it and are left with stringified JSON or the string "[DONE]"
-              .map((str) => str.substring(6))
-              // filter out empty lines and the "[DONE]" string
-              .filter((str) => !!str && str !== '[DONE]')
-              .map((line) => JSON.parse(line));
-
-            nextChunks.forEach((chunk) => {
-              chunks.push(chunk);
+            const decoded = decoder.decode(value);
+            if (isError) {
+              const content = `${API_ERROR}\n\n${JSON.parse(decoded).message}`;
+              chunks.push(content);
               observer.next({
                 chunks,
-                message: getMessageFromChunks(chunks),
+                message: chunks.join(''),
                 loading: true,
               });
-            });
+            } else {
+              const lines = decoded.split('\n');
+
+              lines[0] = lineBuffer + lines[0];
+              lineBuffer = lines.pop() || '';
+              const content = getNextChunk(lines);
+              chunks.push(content);
+
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: true,
+              });
+            }
           } catch (err) {
+            console.log('error caught', err);
             observer.error(err);
             return;
           }
           read();
         })
         .catch((err) => {
+          console.log('error caught 2', err);
           observer.error(err);
         });
     }
@@ -74,6 +88,9 @@ export const getStreamObservable = (
       reader.cancel();
     };
   }).pipe(
+    // make sure the request is only triggered once,
+    // even with multiple subscribers
+    shareReplay(1),
     // append a timestamp of when each value was emitted
     timestamp(),
     // use the previous timestamp to calculate a target
@@ -104,8 +121,21 @@ export const getStreamObservable = (
     finalize(() => setLoading(false))
   );
 
-function getMessageFromChunks(chunks) {
-  return chunks.map((chunk) => chunk.choices[0]?.delta.content ?? '').join('');
-}
+const getNextChunk = (lines: string[]) => {
+  const nextChunk = lines
+    .map((str) => str.substring(6))
+    .filter((str) => !!str && str !== '[DONE]')
+    .map((line) => {
+      try {
+        const openaiResponse = JSON.parse(line);
+        return openaiResponse.choices[0]?.delta.content ?? '';
+      } catch (err) {
+        console.log('ERROR', err);
+        return '';
+      }
+    })
+    .join('');
+  return nextChunk;
+};
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();
