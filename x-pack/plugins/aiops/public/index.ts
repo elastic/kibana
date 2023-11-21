@@ -20,6 +20,8 @@ export type { LogCategorizationAppStateProps } from './components/log_categoriza
 export type { ChangePointDetectionAppStateProps } from './components/change_point_detection';
 export type { LogRateAnalysisResultsData } from './components/log_rate_analysis/log_rate_analysis_results';
 
+export type { ChangePointType } from './components/change_point_detection/constants';
+
 export {
   LogRateAnalysis,
   LogRateAnalysisContent,

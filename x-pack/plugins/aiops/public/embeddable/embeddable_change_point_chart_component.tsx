@@ -19,6 +19,7 @@ import { EMBEDDABLE_CHANGE_POINT_CHART_TYPE } from '../../common/constants';
 import type { AiopsPluginStartDeps } from '../types';
 import type { EmbeddableChangePointChartInput } from './embeddable_change_point_chart';
 import type { ChangePointAnnotation } from '../components/change_point_detection/change_point_detection_context';
+import { ChangePointType } from '../components/change_point_detection/constants';
 
 export interface RelatedEventsFilter {
   term: {
@@ -48,6 +49,7 @@ export interface EmbeddableChangePointChartProps {
   lastReloadRequestTime?: number;
   relatedEventsFilter?: Array<RelatedEventsFilter | null>;
   relatedEventsStyle?: Record<string, string>;
+  excludedAdditionalChangePointTypes?: Set<ChangePointType>;
 }
 export function getEmbeddableChangePointChart(core: CoreStart, plugins: AiopsPluginStartDeps) {
   const { embeddable: embeddableStart } = plugins;

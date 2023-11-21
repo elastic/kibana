@@ -120,7 +120,8 @@ export function useChangePointResults(
   fieldConfig: FieldConfig,
   requestParams: ChangePointDetectionRequestParams,
   query: QueryDslQueryContainer,
-  splitFieldCardinality: number | null
+  splitFieldCardinality: number | null,
+  excludedAdditionalChangePointTypes?: Set<ChangePointType>
 ) {
   const {
     notifications: { toasts },
@@ -258,7 +259,13 @@ export function useChangePointResults(
                 : `${fieldConfig.splitField}_${v.key?.splitFieldTerm}`,
             } as ChangePointAnnotation;
           })
-          .filter((v) => !EXCLUDED_CHANGE_POINT_TYPES.has(v.type));
+          .filter(
+            (v) =>
+              !EXCLUDED_CHANGE_POINT_TYPES.has(v.type) &&
+              (excludedAdditionalChangePointTypes
+                ? !excludedAdditionalChangePointTypes.has(v.type)
+                : true)
+          );
 
         if (Array.isArray(requestParams.changePointType)) {
           groups = groups.filter((v) => requestParams.changePointType!.includes(v.type));
@@ -308,6 +315,7 @@ export function useChangePointResults(
       runRequest,
       toasts,
       usageCollection,
+      excludedAdditionalChangePointTypes,
     ]
   );
 

@@ -14,6 +14,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';
 import { ChangePointAnnotation } from '@kbn/aiops-plugin/public/components/change_point_detection/change_point_detection_context';
 import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ChangePointType } from '@kbn/aiops-plugin/public';
 import { CustomThresholdExpressionMetric } from '../../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../../utils/kibana_react';
 
@@ -53,6 +54,8 @@ export default function AlertDetailsRelatedEvents({
   const [metricAggType, setMetricAggType] = useState<string>();
   const [lastReloadRequestTime, setLastReloadRequestTime] = useState<number>();
   const ruleParams = rule.params as RuleTypeParams & AlertParams;
+
+  const excludedAdditionalChangePointTypes = new Set<ChangePointType>(['dip', 'spike']);
 
   const relatedEventsFilter = ruleParams.groupBy
     ? [...ruleParams.groupBy]
@@ -210,6 +213,7 @@ export default function AlertDetailsRelatedEvents({
                   relatedEventsStyle={{ 'margin-top': '10px' }}
                   lastReloadRequestTime={lastReloadRequestTime}
                   relatedEventsFilter={relatedEventsFilter}
+                  excludedAdditionalChangePointTypes={excludedAdditionalChangePointTypes}
                 />
               )
           )}

@@ -103,6 +103,7 @@ export const EmbeddableInputTracker: FC<EmbeddableInputTrackerProps> = ({
               emptyState={input.emptyState}
               relatedEventsFilter={input.relatedEventsFilter}
               relatedEventsStyle={input.relatedEventsStyle}
+              excludedAdditionalChangePointTypes={input.excludedAdditionalChangePointTypes}
             />
           </FilterQueryContextProvider>
         </ChangePointDetectionControlsContextProvider>
@@ -141,6 +142,7 @@ export const ChartGridEmbeddableWrapper: FC<
   emptyState,
   relatedEventsFilter,
   relatedEventsStyle,
+  excludedAdditionalChangePointTypes,
 }) => {
   const { filters, query, timeRange } = useFilerQueryUpdates();
 
@@ -212,7 +214,8 @@ export const ChartGridEmbeddableWrapper: FC<
     fieldConfig,
     requestParams,
     combinedQuery,
-    10000
+    10000,
+    excludedAdditionalChangePointTypes
   );
 
   useEffect(() => {
