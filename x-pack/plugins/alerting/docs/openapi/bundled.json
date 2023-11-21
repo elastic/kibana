@@ -3,7 +3,7 @@
   "info": {
     "title": "Alerting",
     "description": "OpenAPI schema for alerting endpoints",
-    "version": "0.1",
+    "version": "0.2",
     "contact": {
       "name": "Alerting Team"
     },
