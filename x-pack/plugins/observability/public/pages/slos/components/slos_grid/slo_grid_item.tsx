@@ -20,7 +20,7 @@ import { SLOWithSummaryResponse, HistoricalSummaryResponse } from '@kbn/slo-sche
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import { euiLightVars } from '@kbn/ui-theme';
-import { SloCardBadges } from '../badges/slo_card_badges';
+import { SloGridItemBadges } from './slo_grid_item_badges';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { sloKeys } from '../../../../hooks/slo/query_key_factory';
@@ -170,12 +170,11 @@ export function SloGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
             ]}
           />
         </Chart>
-        <SloCardBadges
-          isLoading={!slo.summary}
+        <SloGridItemBadges
           slo={slo}
           rules={rules}
           activeAlerts={activeAlerts}
-          onClickRuleBadge={handleCreateRule}
+          handleCreateRule={handleCreateRule}
         />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloGridItemActions

@@ -9,8 +9,8 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import styled from 'styled-components';
+import { SloCardBadges } from '../badges/slo_card_badges';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
-import { SloBadges } from '../badges/slo_badges';
 
 interface Props {
   activeAlerts?: number;
@@ -31,13 +31,12 @@ const Container = styled.div`
 export function SloGridItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
   return (
     <Container>
-      <SloBadges
+      <SloCardBadges
         activeAlerts={activeAlerts}
         isLoading={!slo.summary}
         rules={rules}
         slo={slo}
         onClickRuleBadge={handleCreateRule}
-        viewMode={true}
       />
     </Container>
   );
