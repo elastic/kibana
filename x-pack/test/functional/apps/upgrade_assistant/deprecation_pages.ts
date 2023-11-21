@@ -20,7 +20,7 @@ export default function upgradeAssistantFunctionalTests({
   const log = getService('log');
 
   describe('Deprecation pages', function () {
-    this.tags(['skipFirefox', 'upgradeAssistant']);
+    this.tags(['skipFirefox']);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);

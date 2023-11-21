@@ -16,7 +16,7 @@ export default function upgradeAssistantOverviewPageFunctionalTests({
   const testSubjects = getService('testSubjects');
 
   describe('Overview Page', function () {
-    this.tags(['skipFirefox', 'upgradeAssistant']);
+    this.tags(['skipFirefox']);
 
     before(async () => {
       await security.testUser.setRoles(['superuser']);
