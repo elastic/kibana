@@ -115,7 +115,7 @@ export const wrapSuppressedThresholdALerts = ({
           field,
           value,
         })),
-        [ALERT_SUPPRESSION_START]: dateMath.parse(suppressionWindow)?.toDate() || from,
+        [ALERT_SUPPRESSION_START]: startedAt,
         [ALERT_SUPPRESSION_END]: to,
         [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
         [ALERT_INSTANCE_ID]: instanceId,
