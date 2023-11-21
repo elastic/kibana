@@ -10,7 +10,7 @@ import { hostLensFormulas } from '../../../formulas';
 import { METRICS_TOOLTIP } from '../../translations';
 import type { KPIChartProps } from '../../types';
 
-const BACKGROUND_COLOR = '#e6f1fA';
+const BACKGROUND_COLOR = '#e6f1fa';
 
 export const hostKPICharts: KPIChartProps[] = [
   {
