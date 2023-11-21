@@ -184,8 +184,8 @@ const nodeToEuiCollapsibleNavProps = (
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
-  const { id, path, title, href, icon, renderAs, spaceBefore: _spaceBefore } = navNode;
-  const isExternal = Boolean(href) && isAbsoluteLink(href!);
+  const { id, path, title, href, icon, renderAs, isCloudLink, spaceBefore: _spaceBefore } = navNode;
+  const isExternal = Boolean(href) && !isCloudLink && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
   const isAccordionExpanded =
