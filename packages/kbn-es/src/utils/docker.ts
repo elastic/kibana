@@ -14,17 +14,12 @@ import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
 
 import { ToolingLog } from '@kbn/tooling-log';
 import { kibanaPackageJson as pkg, REPO_ROOT } from '@kbn/repo-info';
-import { CA_CERT_PATH, ES_P12_PASSWORD, ES_P12_PATH } from '@kbn/dev-utils';
 import {
-  MOCK_IDP_REALM_NAME,
-  MOCK_IDP_ENTITY_ID,
-  MOCK_IDP_ATTRIBUTE_PRINCIPAL,
-  MOCK_IDP_ATTRIBUTE_ROLES,
-  MOCK_IDP_ATTRIBUTE_EMAIL,
-  MOCK_IDP_ATTRIBUTE_NAME,
-  ensureSAMLRoleMapping,
-  createMockIdpMetadata,
-} from '@kbn/mock-idp-plugin/common';
+  CA_CERT_PATH,
+  ES_P12_PASSWORD,
+  ES_P12_PATH,
+  kibanaDevServiceAccount,
+} from '@kbn/dev-utils';
 
 import { waitForSecurityIndex } from './wait_for_security_index';
 import { createCliError } from '../errors';
@@ -33,7 +28,6 @@ import {
   SERVERLESS_RESOURCES_PATHS,
   SERVERLESS_SECRETS_PATH,
   SERVERLESS_JWKS_PATH,
-  SERVERLESS_IDP_METADATA_PATH,
   SERVERLESS_CONFIG_PATH,
   SERVERLESS_FILES_PATH,
   SERVERLESS_SECRETS_SSL_PATH,
@@ -75,8 +69,6 @@ export interface ServerlessOptions extends EsClusterExecOptions, BaseOptions {
   background?: boolean;
   /** Wait for the ES cluster to be ready to serve requests */
   waitForReady?: boolean;
-  /** Fully qualified URL where Kibana is hosted (including base path) */
-  kibanaUrl?: string;
   /**
    * Resource file(s) to overwrite
    * (see list of files that can be overwritten under `packages/kbn-es/src/serverless_resources/users`)
@@ -468,54 +460,6 @@ export function resolveEsArgs(
     esArgs.set('ELASTIC_PASSWORD', password);
   }
 
-  // Configure mock identify provider (ES only supports SAML when running in SSL mode)
-  if (
-    ssl &&
-    'kibanaUrl' in options &&
-    options.kibanaUrl &&
-    esArgs.get('xpack.security.enabled') !== 'false'
-  ) {
-    const trimTrailingSlash = (url: string) => (url.endsWith('/') ? url.slice(0, -1) : url);
-
-    esArgs.set(`xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.order`, '0');
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.metadata.path`,
-      `${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml`
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.idp.entity_id`,
-      MOCK_IDP_ENTITY_ID
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.entity_id`,
-      trimTrailingSlash(options.kibanaUrl)
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.acs`,
-      `${trimTrailingSlash(options.kibanaUrl)}/api/security/saml/callback`
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.sp.logout`,
-      `${trimTrailingSlash(options.kibanaUrl)}/logout`
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.principal`,
-      MOCK_IDP_ATTRIBUTE_PRINCIPAL
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.groups`,
-      MOCK_IDP_ATTRIBUTE_ROLES
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.name`,
-      MOCK_IDP_ATTRIBUTE_EMAIL
-    );
-    esArgs.set(
-      `xpack.security.authc.realms.saml.${MOCK_IDP_REALM_NAME}.attributes.mail`,
-      MOCK_IDP_ATTRIBUTE_NAME
-    );
-  }
-
   return Array.from(esArgs).flatMap((e) => ['--env', e.join('=')]);
 }
 
@@ -536,18 +480,25 @@ export function getDockerFileMountPath(hostPath: string) {
  * Setup local volumes for Serverless ES
  */
 export async function setupServerlessVolumes(log: ToolingLog, options: ServerlessOptions) {
-  const { basePath, clean, ssl, kibanaUrl, files, resources } = options;
+  const { basePath, clean, ssl, files, resources } = options;
   const objectStorePath = resolve(basePath, 'stateless');
 
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
 
-  if (clean && fs.existsSync(objectStorePath)) {
+  let exists = null;
+  try {
+    await Fsp.access(objectStorePath);
+    exists = true;
+  } catch (e) {
+    exists = false;
+  }
+  if (clean && exists) {
     log.info('Cleaning existing object store.');
     await Fsp.rm(objectStorePath, { recursive: true, force: true });
   }
 
-  if (clean || !fs.existsSync(objectStorePath)) {
+  if (clean || !exists) {
     await Fsp.mkdir(objectStorePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );
@@ -607,16 +558,6 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     );
   }
 
-  // Create and add meta data for mock identity provider
-  if (ssl && kibanaUrl) {
-    const metadata = await createMockIdpMetadata(kibanaUrl);
-    await Fsp.writeFile(SERVERLESS_IDP_METADATA_PATH, metadata);
-    volumeCmds.push(
-      '--volume',
-      `${SERVERLESS_IDP_METADATA_PATH}:${SERVERLESS_CONFIG_PATH}secrets/idp_metadata.xml:z`
-    );
-  }
-
   volumeCmds.push(
     ...getESp12Volume(),
     ...serverlessResources,
@@ -625,6 +566,7 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
     `${
       ssl ? SERVERLESS_SECRETS_SSL_PATH : SERVERLESS_SECRETS_PATH
     }:${SERVERLESS_CONFIG_PATH}secrets/secrets.json:z`,
+
     '--volume',
     `${SERVERLESS_JWKS_PATH}:${SERVERLESS_CONFIG_PATH}secrets/jwks.json:z`
   );
@@ -726,52 +668,33 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     process.on('SIGINT', () => teardownServerlessClusterSync(log, options));
   }
 
-  const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
-    0,
-    portCmd[1].lastIndexOf(':')
-  )}`;
-
-  const client = getESClient({
-    node: esNodeUrl,
-    auth: {
-      username: ELASTIC_SERVERLESS_SUPERUSER,
-      password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
-    },
-    ...(options.ssl
-      ? {
-          tls: {
-            ca: [fs.readFileSync(CA_CERT_PATH)],
-            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-            // for the ip which is not validated. As such we are getting the error
-            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-            // To work around that we are overriding the function checkServerIdentity too
-            checkServerIdentity: () => {
-              return undefined;
-            },
-          },
-        }
-      : {}),
-  });
-
-  const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
-    async () => {
-      if (!options.ssl || !options.kibanaUrl) {
-        return;
-      }
-
-      await ensureSAMLRoleMapping(client);
-
-      log.success(
-        `Created role mapping for mock identity provider. You can now login using ${chalk.bold.cyan(
-          MOCK_IDP_REALM_NAME
-        )} realm`
-      );
-    }
-  );
-
   if (options.waitForReady) {
     log.info('Waiting until ES is ready to serve requests...');
-    await readyPromise;
+
+    const esNodeUrl = `${options.ssl ? 'https' : 'http'}://${portCmd[1].substring(
+      0,
+      portCmd[1].lastIndexOf(':')
+    )}`;
+
+    const client = getESClient({
+      node: esNodeUrl,
+      auth: { bearer: kibanaDevServiceAccount.token },
+      ...(options.ssl
+        ? {
+            tls: {
+              ca: [fs.readFileSync(CA_CERT_PATH)],
+              // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+              // for the ip which is not validated. As such we are getting the error
+              // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+              // To work around that we are overriding the function checkServerIdentity too
+              checkServerIdentity: () => {
+                return undefined;
+              },
+            },
+          }
+        : {}),
+    });
+    await waitUntilClusterReady({ client, expectedStatus: 'green', log });
     if (!options.esArgs || !options.esArgs.includes('xpack.security.enabled=false')) {
       // If security is not disabled, make sure the security index exists before running the test to avoid flakiness
       await waitForSecurityIndex({ client, log });

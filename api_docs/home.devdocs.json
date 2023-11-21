@@ -1768,6 +1768,26 @@
           },
           {
             "parentPluginId": "home",
+            "id": "def-server.TutorialContext.staticAssets",
+            "type": "Object",
+            "tags": [],
+            "label": "staticAssets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/core-http-server",
+                "scope": "common",
+                "docId": "kibKbnCoreHttpServerPluginApi",
+                "section": "def-common.IStaticAssets",
+                "text": "IStaticAssets"
+              }
+            ],
+            "path": "src/plugins/home/server/services/tutorials/lib/tutorials_registry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "home",
             "id": "def-server.TutorialContext.Unnamed",
             "type": "IndexSignature",
             "tags": [],
@@ -1911,7 +1931,9 @@
         "label": "SampleDatasetProvider",
         "description": [],
         "signature": [
-          "() => ",
+          "(context: ",
+          "SampleDatasetProviderContext",
+          ") => ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1925,7 +1947,22 @@
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
-        "children": [],
+        "children": [
+          {
+            "parentPluginId": "home",
+            "id": "def-server.SampleDatasetProvider.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "context",
+            "description": [],
+            "signature": [
+              "SampleDatasetProviderContext"
+            ],
+            "path": "src/plugins/home/server/services/sample_data/lib/sample_dataset_registry_types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
         "initialIsOpen": false
       },
       {
