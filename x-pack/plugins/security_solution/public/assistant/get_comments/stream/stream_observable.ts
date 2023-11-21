@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { concatMap, delay, finalize, Observable, of, scan, shareReplay, timestamp } from 'rxjs';
+import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
-import { API_ERROR } from '@kbn/elastic-assistant/impl/assistant/translations';
 import type { PromptObservableState } from './types';
+import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
 /**
@@ -35,12 +35,9 @@ export const getStreamObservable = (
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
-              if (lineBuffer) {
-                chunks.push(lineBuffer);
-              }
               observer.next({
                 chunks,
-                message: chunks.join(' '),
+                message: chunks.join(''),
                 loading: false,
               });
               observer.complete();
@@ -48,21 +45,20 @@ export const getStreamObservable = (
             }
 
             const decoded = decoder.decode(value);
-            let content;
+            let nextChunks;
             if (isError) {
-              content = `${API_ERROR}\n\n${JSON.parse(decoded).message}`;
+              nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
             } else {
               const lines = decoded.split('\n');
               lines[0] = lineBuffer + lines[0];
               lineBuffer = lines.pop() || '';
-              content = getNextChunk(lines);
+              nextChunks = getNextChunks(lines);
             }
-            const characters = content.split(' ');
-            characters.forEach((char) => {
-              chunks.push(char);
+            nextChunks.forEach((chunk: string) => {
+              chunks.push(chunk);
               observer.next({
                 chunks,
-                message: chunks.join(' '),
+                message: chunks.join(''),
                 loading: true,
               });
             });
@@ -81,9 +77,6 @@ export const getStreamObservable = (
       reader.cancel();
     };
   }).pipe(
-    // make sure the request is only triggered once,
-    // even with multiple subscribers
-    shareReplay(1),
     // append a timestamp of when each value was emitted
     timestamp(),
     // use the previous timestamp to calculate a target
@@ -103,16 +96,18 @@ export const getStreamObservable = (
     concatMap((value) => {
       const now = Date.now();
       const delayFor = value.timestamp - now;
+
       if (delayFor <= 0) {
         return of(value.value);
       }
+
       return of(value.value).pipe(delay(delayFor));
     }),
     // set loading to false when the observable completes or errors out
     finalize(() => setLoading(false))
   );
 
-const getNextChunk = (lines: string[]) => {
+const getNextChunks = (lines: string[]): string[] => {
   const nextChunk = lines
     .map((str) => str.substring(6))
     .filter((str) => !!str && str !== '[DONE]')
@@ -123,8 +118,7 @@ const getNextChunk = (lines: string[]) => {
       } catch (err) {
         return '';
       }
-    })
-    .join('');
+    });
   return nextChunk;
 };
 
