@@ -26,6 +26,8 @@ if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   exit 0
 fi
 
+docker pull docker.elastic.co/kibana-ci/kibana-serverless:latest
+
 echo "--- Build images"
 node scripts/build \
   --debug \

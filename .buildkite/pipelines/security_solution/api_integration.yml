@@ -1,22 +1,32 @@
 steps:
-  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/docker_image.sh
-    label: Build serverless container images
-    key: build_artifact
-    agents:
-      queue: n2-16-spot
-    timeout_in_minutes: 60
-    retry:
-      automatic:
-        - exit_status: "-1"
-          limit: 3
-    if: env('KIBANA_LATEST') == "1"
-    # soft_fail:
-      # - exit_status: 1
+  # - command: .buildkite/scripts/pipelines/security_solution_quality_gate/create_docker_image.sh
+  #   label: Build serverless container image for current commit
+  #   key: build_artifact
+  #   agents:
+  #     queue: n2-16-spot
+  #   timeout_in_minutes: 60
+  #   retry:
+  #     automatic:
+  #       - exit_status: "-1"
+  #         limit: 3
+  #   if: env('KIBANA_LATEST') == "1"
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
     label: "Upload runtime info"
     key: upload_runtime_info
-    depends_on: build_artifact
+    # depends_on: build_artifact
+    agents:
+      queue: n2-4-spot
+    timeout_in_minutes: 300
+    retry:
+      automatic:
+        - exit_status: "*"
+          limit: 1
+    if: env('KIBANA_LATEST') == "1"
+
+  - command: "echo '$BUILDKITE_COMMIT'"
+    label: "test"
+    depends_on: upload_runtime_info
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 300
