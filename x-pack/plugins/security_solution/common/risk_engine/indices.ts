@@ -13,3 +13,6 @@ export const latestRiskScoreIndexPattern = 'risk-score.risk-score-latest-*';
 
 export const getRiskScoreLatestIndex = (spaceId = 'default') =>
   `${riskScoreBaseIndexName}.risk-score-latest-${spaceId}`;
+
+export const getRiskScoreTimeSeriesIndex = (spaceId = 'default') =>
+  `${riskScoreBaseIndexName}.risk-score-${spaceId}`;
