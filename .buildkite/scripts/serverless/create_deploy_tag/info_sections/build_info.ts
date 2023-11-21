@@ -6,8 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, buildkiteBuildStateToEmoji, buildStateToEmoji, octokit } from '../shared';
-import { CommitWithStatuses } from '../generate_commit_selector';
+import {
+  buildkite,
+  buildkiteBuildStateToEmoji,
+  buildStateToEmoji,
+  CommitWithStatuses,
+  octokit,
+} from '../shared';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
 const KIBANA_ARTIFACT_BUILD_SLUG = 'kibana-artifacts-container-image';
@@ -90,7 +95,7 @@ export async function getArtifactBuildJob(
   };
 }
 
-export async function getQAReleaseContainingCommit(
+export async function getQAFBuildContainingCommit(
   commitSha: string,
   qafBuilds: BuildkiteBuildExtract[]
 ) {

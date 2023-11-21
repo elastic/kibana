@@ -18,7 +18,7 @@ import {
   getArtifactBuildJob,
   getOnMergePRBuild,
   getQAFTestBuilds,
-  getQAReleaseContainingCommit,
+  getQAFBuildContainingCommit,
   toBuildkiteBuildInfoHtml,
 } from './info_sections/build_info';
 import {
@@ -45,7 +45,7 @@ async function main() {
   // Buildkite build info
   const buildkiteBuild = await getOnMergePRBuild(selectedSha);
   const qafBuilds = await getQAFTestBuilds(selectedCommitInfo.date!);
-  const nextBuildContainingCommit = await getQAReleaseContainingCommit(selectedSha, qafBuilds);
+  const nextBuildContainingCommit = await getQAFBuildContainingCommit(selectedSha, qafBuilds);
   const artifactBuild = await getArtifactBuildJob(selectedSha);
   addBuildkiteInfoSection(
     toBuildkiteBuildInfoHtml('Relevant build info:', {

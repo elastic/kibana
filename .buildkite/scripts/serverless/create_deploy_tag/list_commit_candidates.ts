@@ -6,26 +6,22 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, COMMIT_INFO_CTX, exec, SELECTED_COMMIT_META_KEY } from './shared';
 import {
-  BuildkiteBuildExtract,
+  buildkite,
+  COMMIT_INFO_CTX,
+  CommitWithStatuses,
+  exec,
+  SELECTED_COMMIT_META_KEY,
+} from './shared';
+import {
   getArtifactBuildJob,
   getOnMergePRBuild,
+  getQAFBuildContainingCommit,
   getQAFTestBuilds,
   toCommitInfoWithBuildResults,
 } from './info_sections/build_info';
 import { getRecentCommits, GitCommitExtract } from './info_sections/commit_info';
 import { BuildkiteInputStep } from '#pipeline-utils';
-
-export interface CommitWithStatuses extends GitCommitExtract {
-  title: string;
-  author: string | undefined;
-  checks: {
-    onMergeBuild: BuildkiteBuildExtract | null;
-    ftrBuild: BuildkiteBuildExtract | null;
-    artifactBuild: BuildkiteBuildExtract | null;
-  };
-}
 
 async function main(commitCountArg: string) {
   console.log('--- Listing commits');
@@ -73,7 +69,8 @@ async function enrichWithStatuses(commits: GitCommitExtract[]): Promise<CommitWi
         };
       }
 
-      const nextFTRBuild = (await getQAFTestBuilds(commit.date))[0] || null;
+      const nextFTRBuilds = await getQAFTestBuilds(commit.date);
+      const nextFTRBuild = await getQAFBuildContainingCommit(commit.sha, nextFTRBuilds);
       const artifactBuild = await getArtifactBuildJob(commit.sha);
 
       return {

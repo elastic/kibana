@@ -7,6 +7,8 @@
  */
 
 import { getExec } from './mock_exec';
+import { GitCommitExtract } from './info_sections/commit_info';
+import { BuildkiteBuildExtract } from './info_sections/build_info';
 import { BuildkiteClient, getGithubClient } from '#pipeline-utils';
 
 const SELECTED_COMMIT_META_KEY = 'selected-commit-hash';
@@ -54,3 +56,13 @@ export {
   SELECTED_COMMIT_META_KEY,
   COMMIT_INFO_CTX,
 };
+
+export interface CommitWithStatuses extends GitCommitExtract {
+  title: string;
+  author: string | undefined;
+  checks: {
+    onMergeBuild: BuildkiteBuildExtract | null;
+    ftrBuild: BuildkiteBuildExtract | null;
+    artifactBuild: BuildkiteBuildExtract | null;
+  };
+}
