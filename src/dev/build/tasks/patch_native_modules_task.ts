@@ -47,8 +47,8 @@ const packages: Package[] = [
     extractMethod: 'gunzip',
     archives: {
       'linux-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/linux-x64-108.gz',
-        sha256: 'e14f274f73ede22f170bfe9e57a0645ebf7ed320042a27361fa158bc239a5563',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/linux-x64-115.gz',
+        sha256: '7a4821ef7e9ddbafe5bba6beb54b100c233242f0dbf5a7268f55beea5f845f97',
       },
       // Linux ARM builds are currently done manually as Github Actions used in upstream project
       // do not natively support an Linux ARM target.
@@ -63,20 +63,20 @@ const packages: Package[] = [
       // * capture the sha256 with: `shasum -a 256 linux-arm64-*`
       // * upload the `linux-arm64-*.gz` artifact to the `yarn-prebuilt-artifacts` bucket in GCS using the correct version number
       'linux-arm64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/linux-arm64-108.gz',
-        sha256: 'cbdf3f75a331c601ac0bd34715814d0a1fd17612c6d6b5269f176d46044defd5',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/linux-arm64-115.gz',
+        sha256: '8d753d6ac15d95d6d236dce2f986f4a6b2f9945ba0d927ab972eb82da68d14b1',
       },
       'darwin-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/darwin-x64-108.gz',
-        sha256: 'f88c09e98f152ac15c593b3b923b7fbe28d448cfde5986da40c34461bede5a09',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/darwin-x64-115.gz',
+        sha256: '91823077c510c6da9c428038bfd210846373bcd0ab6851f7408add67864785a9',
       },
       'darwin-arm64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/darwin-arm64-108.gz',
-        sha256: '80700aecbe63052149aba721449a8ce30c24d884e414025124bb4602efe708be',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/darwin-arm64-115.gz',
+        sha256: '935e2a5590e93e6f52f41d40ae4115fbd2f130a4d61afb0a6549ed17adb1dd84',
       },
       'win32-x64': {
-        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/win32-x64-108.gz',
-        sha256: 'cadc4713907f3ad1de45f470810ec8e13e08f32c1a1e45e5d5ab5e9d7fcb9763',
+        url: 'https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/node-re2/uhop/node-re2/releases/download/1.20.1/win32-x64-115.gz',
+        sha256: '120c2663bcab4803f8405d9aa2cb97fa181d90b4ff176827cc7295667aa2e9c2',
       },
     },
   },

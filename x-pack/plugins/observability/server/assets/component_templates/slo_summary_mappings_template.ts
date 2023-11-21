@@ -55,10 +55,12 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
               ignore_above: 256,
             },
             name: {
-              type: 'text',
+              type: 'keyword',
+              ignore_above: 256,
             },
             description: {
-              type: 'text',
+              type: 'keyword',
+              ignore_above: 256,
             },
             tags: {
               type: 'keyword',
@@ -117,14 +119,6 @@ export const getSLOSummaryMappingsTemplate = (name: string) => ({
         },
         isTempDoc: {
           type: 'boolean',
-        },
-        latestSliTimestamp: {
-          type: 'date',
-          format: 'date_optional_time||epoch_millis',
-        },
-        summaryUpdatedAt: {
-          type: 'date',
-          format: 'date_optional_time||epoch_millis',
         },
       },
     },

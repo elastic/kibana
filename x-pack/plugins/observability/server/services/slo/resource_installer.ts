@@ -7,7 +7,6 @@
 
 import type {
   ClusterPutComponentTemplateRequest,
-  EnrichPutPolicyRequest,
   IndicesPutIndexTemplateRequest,
   IngestPutPipelineRequest,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -32,7 +31,6 @@ import {
   SLO_SUMMARY_INGEST_PIPELINE_NAME,
   SLO_SUMMARY_TEMP_INDEX_NAME,
 } from '../../assets/constants';
-import { getSLOSummaryEnrichPolicy } from '../../assets/enrich_policies/slo_summary_enrich_policy';
 import { getSLOIndexTemplate } from '../../assets/index_templates/slo_index_templates';
 import { getSLOSummaryIndexTemplate } from '../../assets/index_templates/slo_summary_index_templates';
 import { getSLOPipelineTemplate } from '../../assets/ingest_templates/slo_pipeline_template';
@@ -86,8 +84,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createIndex(SLO_SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SLO_SUMMARY_TEMP_INDEX_NAME);
 
-      await this.createOrUpdateEnrichPolicy(getSLOSummaryEnrichPolicy());
-
       await this.createOrUpdateIngestPipelineTemplate(
         getSLOPipelineTemplate(SLO_INGEST_PIPELINE_NAME, SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX)
       );
@@ -114,20 +110,6 @@ export class DefaultResourceInstaller implements ResourceInstaller {
   private async createOrUpdateIngestPipelineTemplate(template: IngestPutPipelineRequest) {
     this.logger.info(`Installing SLO ingest pipeline [${template.id}]`);
     return this.execute(() => this.esClient.ingest.putPipeline(template));
-  }
-
-  private async createOrUpdateEnrichPolicy(policy: EnrichPutPolicyRequest) {
-    return this.execute(async () => {
-      const existingPolicy = await this.esClient.enrich.getPolicy({ name: policy.name });
-      if (existingPolicy.policies.some(({ config }) => config.match?.name === policy.name)) {
-        this.logger.info(`SLO summary erich policy [${policy.name}] already exists.`);
-        return;
-      }
-      this.logger.info(`Installing SLO summary erich policy [${policy.name}]`);
-      return this.esClient.enrich
-        .putPolicy(policy)
-        .then(() => this.esClient.enrich.executePolicy({ name: policy.name }));
-    });
   }
 
   private async createIndex(indexName: string) {
