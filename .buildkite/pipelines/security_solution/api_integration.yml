@@ -1,8 +1,7 @@
 steps:
-  - command: echo "Building kibana docker image"
-    # .buildkite/scripts/steps/artifacts/docker_image.sh
+  - command: .buildkite/scripts/steps/artifacts/docker_image.sh
     label: Build serverless container images
-    depends_on: upload_runtime_info
+    key: build_artifact
     agents:
       queue: n2-16-spot
     timeout_in_minutes: 60
@@ -15,6 +14,7 @@ steps:
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
     label: "Upload runtime info"
     key: upload_runtime_info
+    depends_on: build_artifact
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 300
