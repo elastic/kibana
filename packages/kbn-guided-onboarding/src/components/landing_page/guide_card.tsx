@@ -22,6 +22,8 @@ import { css } from '@emotion/react';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
+import { toMountPoint } from '@kbn/react-kibana-mount';
+import { ESApiModal } from '../modal';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {
@@ -48,6 +50,9 @@ export const GuideCard = ({
   activateGuide,
   navigateToApp,
   activeFilter,
+  openModal,
+  i18nStart,
+  theme,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -55,6 +60,7 @@ export const GuideCard = ({
   if (card.guideId) {
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
+
   const onClick = useCallback(async () => {
     setIsLoading(true);
     if (card.guideId) {
@@ -87,6 +93,23 @@ export const GuideCard = ({
     }
   `;
 
+  const openESApiModal = () => {
+    const session = openModal(
+      toMountPoint(
+        <ESApiModal
+          onClose={() => {
+            return session.close();
+          }}
+        />,
+        { theme, i18n: i18nStart }
+      ),
+      {
+        maxWidth: 400,
+        'data-test-subj': 'link-modal',
+      }
+    )
+  };
+
   return (
     <EuiCard
       // data-test-subj used for FS tracking
@@ -99,6 +122,7 @@ export const GuideCard = ({
       title={<h3 style={{ fontWeight: 600 }}>{card.title}</h3>}
       titleSize="xs"
       icon={<EuiIcon size="l" type={card.icon} />}
+      onClose={openESApiModal}
       description={
         <>
           {progress && (

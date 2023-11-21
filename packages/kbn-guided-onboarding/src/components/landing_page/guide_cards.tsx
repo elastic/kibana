@@ -16,6 +16,8 @@ import { GuideId, GuideState } from '../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
+import { OverlayStart } from '@kbn/core-overlays-browser';
+import { CoreStart } from '@kbn/core-lifecycle-browser';
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
 
@@ -25,6 +27,9 @@ export interface GuideCardsProps {
   activeFilter: GuideFilterValues;
   guidesState: GuideState[];
   filteredCards?: GuideCardConstants[];
+  openModal: OverlayStart['openModal'];
+  theme: CoreStart['theme'];
+  i18nStart: CoreStart['i18n'];
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;

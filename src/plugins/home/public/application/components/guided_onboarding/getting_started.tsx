@@ -47,7 +47,7 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud } = getServices();
+  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud, openModal, theme, i18nStart } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -214,6 +214,9 @@ export const GettingStarted = () => {
           activeFilter={filter}
           guidesState={guidesState}
           filteredCards={filteredCards}
+          openModal={openModal}
+          i18nStart={i18nStart}
+          theme={theme}
         />
         <EuiSpacer />
         <div className="eui-textCenter">
