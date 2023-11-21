@@ -69,6 +69,12 @@ interface CreateRuntimeServicesOptions {
   esPassword?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
+  /**
+   * If set to `true` (default) and kibana is running in serverless mode, then the credentials used
+   * for superuser will be adjusted to use `system_index_superuser` username/password.
+   * Applies only when `asSuperuser` option is `true`.
+   */
+  adjustAsSuperuserCredsForServerless: boolean;
   /** If true, then a certificate will not be used when creating the Kbn/Es clients when url is `https` */
   noCertForSsl?: boolean;
 }
@@ -108,15 +114,17 @@ export const createRuntimeServices = async ({
   username: _username,
   password: _password,
   apiKey,
-  esUsername,
-  esPassword,
-  log: _log,
+  esUsername: _esUsername,
+  esPassword: _esPassword,
+  log = createToolingLogger(),
   asSuperuser = false,
+  adjustAsSuperuserCredsForServerless = true,
   noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
-  const log = _log ?? createToolingLogger();
   let username = _username;
   let password = _password;
+  let esUsername = _esUsername;
+  let esPassword = _esPassword;
 
   if (asSuperuser) {
     const tmpKbnClient = createKbnClient({
@@ -131,13 +139,18 @@ export const createRuntimeServices = async ({
     const isServerlessEs = await isServerlessKibanaFlavor(tmpKbnClient);
 
     if (isServerlessEs) {
-      log?.warning(
-        'Creating Security Superuser is not supported in current environment. ES is running in serverless mode. ' +
-          'Will use username [system_indices_superuser] instead.'
-      );
+      if (adjustAsSuperuserCredsForServerless) {
+        log?.warning(
+          'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
+            'Will use username [system_indices_superuser] instead.'
+        );
 
-      username = 'system_indices_superuser';
-      password = 'changeme';
+        username = 'system_indices_superuser';
+        password = 'changeme';
+
+        esUsername = 'system_indices_superuser';
+        esPassword = 'changeme';
+      }
     } else {
       const superuserResponse = await createSecuritySuperuser(
         createEsClient({
@@ -247,7 +260,7 @@ export const createEsClient = ({
     log.verbose(
       `Creating Elasticsearch client options: ${JSON.stringify({
         ...omit(clientOptions, 'tls'),
-        ...(clientOptions.tls ? { tls: { ca: ['Buffer() suppressed for logging!'] } } : {}),
+        ...(clientOptions.tls ? { tls: { ca: [typeof clientOptions.tls.ca] } } : {}),
       })}`
     );
   }
