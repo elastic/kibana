@@ -183,10 +183,6 @@ describe(
       );
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_index_templates');
       cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should('contain', 'manage_transform');
-      cy.get(RISK_SCORE_PRIVILEGES_CALLOUT).should(
-        'contain',
-        '"All" for the "Saved Objects Management" feature under Management'
-      );
     });
   }
 );

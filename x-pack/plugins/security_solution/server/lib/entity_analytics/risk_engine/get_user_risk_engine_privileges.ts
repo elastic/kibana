@@ -11,7 +11,6 @@ import type { RiskEnginePrivilegesResponse } from './types';
 import {
   RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
-  RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES,
 } from '../../../../common/risk_engine';
 
 const groupByPrivilege = (
@@ -34,7 +33,6 @@ export async function getUserRiskEnginePrivileges(
 ): Promise<RiskEnginePrivilegesResponse> {
   const checkPrivileges = security.authz.checkPrivilegesDynamicallyWithRequest(request);
   const { privileges, hasAllRequested } = await checkPrivileges({
-    kibana: RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES,
     elasticsearch: {
       cluster: RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES,
       index: RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
@@ -42,7 +40,6 @@ export async function getUserRiskEnginePrivileges(
   });
 
   const clusterPrivilegesByPrivilege = groupByPrivilege(privileges.elasticsearch.cluster);
-  const kibanaPrivilegesByPrivilege = groupByPrivilege(privileges.kibana);
 
   const indexPrivilegesByIndex = Object.entries(privileges.elasticsearch.index).reduce<
     Record<string, Record<string, boolean>>
@@ -52,7 +49,6 @@ export async function getUserRiskEnginePrivileges(
 
   return {
     privileges: {
-      kibana: kibanaPrivilegesByPrivilege,
       elasticsearch: {
         cluster: clusterPrivilegesByPrivilege,
         index: indexPrivilegesByIndex,

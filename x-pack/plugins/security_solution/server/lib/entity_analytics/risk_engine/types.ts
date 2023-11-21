@@ -104,7 +104,6 @@ export interface RiskEnginePrivilegesResponse {
       cluster: Record<string, boolean>;
       index: Record<string, Record<string, boolean>>;
     };
-    kibana: Record<string, boolean>;
   };
   has_all_required: boolean;
 }

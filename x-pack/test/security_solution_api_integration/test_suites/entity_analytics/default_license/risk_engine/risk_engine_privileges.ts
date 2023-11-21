@@ -66,19 +66,6 @@ const ROLES = [
       },
     },
   },
-  {
-    name: 'saved_objects_management_all',
-    privileges: {
-      kibana: [
-        {
-          feature: {
-            savedObjectsManagement: ['all'],
-          },
-          spaces: ['default'],
-        },
-      ],
-    },
-  },
 ];
 
 const ALL_ROLES = ROLES.map((role) => role.name);
@@ -90,7 +77,6 @@ const USERNAME_TO_ROLES = {
   no_cluster_manage_transform: allRolesExcept('cluster_manage_transform'),
   no_risk_score_index_read: allRolesExcept('risk_score_index_read'),
   no_risk_score_index_write: allRolesExcept('risk_score_index_write'),
-  no_saved_objects_management_all: allRolesExcept('saved_objects_management_all'),
   all: ALL_ROLES,
 };
 
@@ -255,27 +241,6 @@ export default ({ getService }: FtrProviderContext) => {
           },
           kibana: {
             'feature_savedObjectsManagement.all': true,
-          },
-        });
-      });
-      it('should return has_all_required false for user with no saved objects management all privilege', async () => {
-        const { body } = await getPrivilegesForUsername('no_saved_objects_management_all');
-        expect(body.has_all_required).to.eql(false);
-        expect(body.privileges).to.eql({
-          elasticsearch: {
-            cluster: {
-              manage_index_templates: true,
-              manage_transform: true,
-            },
-            index: {
-              'risk-score.risk-score-*': {
-                read: true,
-                write: true,
-              },
-            },
-          },
-          kibana: {
-            'feature_savedObjectsManagement.all': false,
           },
         });
       });

@@ -465,10 +465,6 @@ components:
                       type: object
                       additionalProperties:
                         type: boolean
-              kibana:
-                type: object
-                additionalProperties:
-                  type: boolean
           has_all_required:
             description: If true then the user has full access to the risk engine
             type: boolean

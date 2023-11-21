@@ -11,7 +11,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import { useKibana } from '../../../common/lib/kibana';
 import { CommaSeparatedValues } from '../../../detections/components/callouts/missing_privileges_callout/comma_separated_values';
-import { KIBANA_SAVED_OBJECT_MANAGE_ALL_PRIVILEGE } from '../../../../common/risk_engine';
 import type { MissingPrivileges } from './use_missing_risk_engine_privileges';
 
 export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
@@ -21,37 +20,16 @@ export const MISSING_PRIVILEGES_CALLOUT_TITLE = i18n.translate(
   }
 );
 
-const kibanaPrivilegesExplanations: Record<string, string> = {
-  [KIBANA_SAVED_OBJECT_MANAGE_ALL_PRIVILEGE]: i18n.translate(
-    'xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.kibanaSavedObjectManageAllPrivilegeExplanation',
-    {
-      defaultMessage: '"All" for the "Saved Objects Management" feature under Management',
-    }
-  ),
-};
-
 export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
   indexPrivileges,
   clusterPrivileges,
-  kibanaPrivileges,
 }) => {
-  const kibanaPrivilegesExplanation = kibanaPrivileges.reduce<Array<[string, string]>>(
-    (acc, privilege) => {
-      const explanation = kibanaPrivilegesExplanations[privilege];
-      if (explanation) {
-        acc.push([privilege, explanation]);
-      }
-      return acc;
-    },
-    []
-  );
-
   const { docLinks } = useKibana().services;
 
   return (
     <FormattedMessage
       id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.messageDetail"
-      defaultMessage="{essence} {indexPrivileges} {clusterPrivileges} {kibanaPrivileges} "
+      defaultMessage="{essence} {indexPrivileges} {clusterPrivileges} "
       values={{
         essence: (
           <p>
@@ -98,20 +76,6 @@ export const MissingPrivilegesCallOutBody: React.FC<MissingPrivileges> = ({
               <ul>
                 {clusterPrivileges.map((privilege) => (
                   <li key={privilege}>{privilege}</li>
-                ))}
-              </ul>
-            </>
-          ) : null,
-        kibanaPrivileges:
-          kibanaPrivilegesExplanation.length > 0 ? (
-            <>
-              <FormattedMessage
-                id="xpack.securitySolution.riskEngine.missingPrivilegesCallOut.messageBody.featurePrivilegesTitle"
-                defaultMessage="Missing Kibana feature privileges:"
-              />
-              <ul>
-                {kibanaPrivilegesExplanation.map(([privilege, explanation]) => (
-                  <li key={privilege}>{explanation}</li>
                 ))}
               </ul>
             </>

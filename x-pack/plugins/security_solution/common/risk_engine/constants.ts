@@ -7,9 +7,6 @@
 
 export const MAX_SPACES_COUNT = 1;
 
-export const KIBANA_SAVED_OBJECT_MANAGE_ALL_PRIVILEGE = 'feature_savedObjectsManagement.all';
-export const RISK_ENGINE_REQUIRED_KIBANA_PRIVILEGES = [KIBANA_SAVED_OBJECT_MANAGE_ALL_PRIVILEGE];
-
 export const RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES = [
   'manage_index_templates',
   'manage_transform',
