@@ -370,9 +370,9 @@ describe('CasesTableFilters ', () => {
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       userEvent.click(screen.getByRole('option', { name: 'Toggle' }));
-      const storedFilterState = localStorage.getItem('filters');
+      const storedFilterState = localStorage.getItem('testAppId.cases.list.tableFiltersConfig');
       expect(storedFilterState).toBeTruthy();
-      expect(JSON.parse(storedFilterState || '')).toMatchInlineSnapshot(`
+      expect(JSON.parse(storedFilterState!)).toMatchInlineSnapshot(`
         Array [
           Object {
             "isActive": true,
@@ -424,7 +424,7 @@ describe('CasesTableFilters ', () => {
 
       userEvent.click(screen.getByRole('option', { name: 'Status' }));
 
-      const storedFilterState = localStorage.getItem('filters');
+      const storedFilterState = localStorage.getItem('testAppId.cases.list.tableFiltersConfig');
       expect(storedFilterState).toBeTruthy();
       expect(JSON.parse(storedFilterState || '')).toMatchInlineSnapshot(`
         Array [
@@ -462,7 +462,10 @@ describe('CasesTableFilters ', () => {
         { key: 'status', isActive: false },
         { key: 'severity', isActive: true },
       ];
-      localStorage.setItem('filters', JSON.stringify(previousState));
+      localStorage.setItem(
+        'testAppId.cases.list.tableFiltersConfig',
+        JSON.stringify(previousState)
+      );
 
       appMockRender.render(<CasesTableFilters {...props} />);
 
@@ -489,7 +492,10 @@ describe('CasesTableFilters ', () => {
         { key: 'owner', isActive: false },
         { key: 'toggle', isActive: true },
       ];
-      localStorage.setItem('filters', JSON.stringify(previousState));
+      localStorage.setItem(
+        'testAppId.cases.list.tableFiltersConfig',
+        JSON.stringify(previousState)
+      );
 
       appMockRender.render(<CasesTableFilters {...props} />);
 

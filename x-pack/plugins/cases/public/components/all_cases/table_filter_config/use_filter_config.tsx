@@ -7,9 +7,11 @@
 
 import { useState, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
 import type { FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { MoreFiltersSelectable } from './more_filters_selectable';
+import { useCasesContext } from '../../cases_context/use_cases_context';
 
 const serializeFilterVisibilityMap = (value: Map<string, FilterConfigState>) => {
   return JSON.stringify(
@@ -30,13 +32,14 @@ const deserializeFilterVisibilityMap = (value: string): Map<string, FilterConfig
 };
 
 export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: FilterConfig[] }) => {
+  const { appId } = useCasesContext();
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig();
   const [filters, setFilters] = useState<Map<string, FilterConfig>>(
     () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
   );
   const [filterVisibilityMap, setFilterVisibilityMap] = useLocalStorage<
     Map<string, FilterConfigState>
-  >('filters', new Map(), {
+  >(`${appId}.${LOCAL_STORAGE_KEYS.casesTableFiltersConfig}`, new Map(), {
     raw: false,
     serializer: serializeFilterVisibilityMap,
     deserializer: deserializeFilterVisibilityMap,
