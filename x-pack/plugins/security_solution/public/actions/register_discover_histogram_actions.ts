@@ -7,9 +7,9 @@
 
 import { createFilterAction } from '@kbn/unified-search-plugin/public';
 import type { History } from 'history';
-import type { SecurityAppStore } from '../../common/store';
-import type { StartServices } from '../../types';
-import { EsqlInTimelineTrigger, EsqlInTimelineAction } from '../constants';
+import type { SecurityAppStore } from '../common/store';
+import type { StartServices } from '../types';
+import { EsqlInTimelineTrigger, EsqlInTimelineAction } from './constants';
 
 const createDiscoverHistogramCustomFilterAction = (
   store: SecurityAppStore,
