@@ -41,12 +41,14 @@ export {
   useForm,
   Form,
   getUseField,
+  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 
 export {
   getFormRow,
   Field,
   JsonEditorField,
+  NumericField,
 } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 export { isJSON } from '@kbn/es-ui-shared-plugin/static/validators/string';
