@@ -9,15 +9,20 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
+  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
   describe('security', function () {
-    this.tags('upgradeAssistant');
     before(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
       await PageObjects.common.navigateToApp('home');
+    });
+
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
