@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import * as RxJS from 'rxjs';
 import type { FullStoryApi } from './types';
 
 export const fullStoryApiMock: jest.Mocked<FullStoryApi> = {
@@ -20,5 +21,12 @@ export const fullStoryApiMock: jest.Mocked<FullStoryApi> = {
 jest.doMock('./load_snippet', () => {
   return {
     loadSnippet: () => fullStoryApiMock,
+  };
+});
+
+jest.doMock('rxjs', () => {
+  return {
+    ...RxJS,
+    debounceTime: () => RxJS.identity,
   };
 });
