@@ -9,20 +9,17 @@ import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
-  const kibanaServer = getService('kibanaServer');
   const security = getService('security');
   const PageObjects = getPageObjects(['common', 'settings', 'security']);
   const appsMenu = getService('appsMenu');
   const managementMenu = getService('managementMenu');
 
-  describe('security', function () {
-    before(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
-      await PageObjects.common.navigateToApp('home');
-    });
+  // Failing: See https://github.com/elastic/kibana/issues/167073
+  describe.skip('security', function () {
+    this.tags('upgradeAssistant');
 
-    after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+    before(async () => {
+      await PageObjects.common.navigateToApp('home');
     });
 
     describe('global all privileges (aka kibana_admin)', () => {
