@@ -13,8 +13,13 @@ import { BaseFeaturePrivilegeBuilder } from './feature_privilege_builder';
 
 export type CasesSupportedOperations = typeof allOperations[number];
 
-// if you add a value here you'll likely also need to make changes here:
-// x-pack/plugins/cases/server/authorization/index.ts
+/**
+ * If you add a new operation type (all, push, update, etc) you should also
+ * extend the mapping here x-pack/plugins/features/server/feature_privilege_iterator/feature_privilege_iterator.ts
+ *
+ * Also if you add a new operation (createCase, updateCase, etc) here you'll likely also need to make changes here:
+ * x-pack/plugins/cases/server/authorization/index.ts
+ */
 
 const pushOperations = ['pushCase'] as const;
 const createOperations = ['createCase', 'createComment'] as const;
