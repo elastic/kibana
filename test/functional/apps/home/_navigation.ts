@@ -42,7 +42,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const modifiedTimeDiscoverUrl = await browser.getCurrentUrl();
 
       // Navigate to dashboard app
-      await appsMenu.clickLink('Dashboards', { category: 'kibana' });
+      await appsMenu.clickLink('Dashboard', { category: 'kibana' });
 
       // Navigating back to discover
       await browser.goBack();

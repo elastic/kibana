@@ -68,7 +68,7 @@ export class DashboardPageObject extends FtrService {
 
   public async navigateToAppFromAppsMenu() {
     await this.retry.try(async () => {
-      await this.appsMenu.clickLink('Dashboards', { category: 'kibana' });
+      await this.appsMenu.clickLink('Dashboard', { category: 'kibana' });
       await this.header.waitUntilLoadingHasFinished();
       const currentUrl = await this.browser.getCurrentUrl();
       if (!currentUrl.includes('app/dashboard')) {
