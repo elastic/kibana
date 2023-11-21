@@ -46,12 +46,20 @@ export function toSOComparisonBlockHtml(comparisonResult: {
   changed: string[];
   command: string;
 }): string {
-  return `<div>
-<h4>Plugin Saved Object migration changes: ${comparisonResult.hasChanges}</h4>
+  if (comparisonResult.hasChanges) {
+    return `<div>
+<h4>Plugin Saved Object migration changes: *yes, ${comparisonResult.changed.length} plugin(s)*</h4>
 <div>Changed plugins: ${comparisonResult.changed.join(', ')}</div>
 <i>Find detailed info in the archived artifacts, or run the command yourself: </i>
 <div><pre>${comparisonResult.command}</pre></div>
 </div>`;
+  } else {
+    return `<div>
+<h4>Plugin Saved Object migration changes: none</h4>
+<i>No changes between, you can run the command yourself to verify: </i>
+<div><pre>${comparisonResult.command}</pre></div>
+</div>`;
+  }
 }
 
 export function getSOComparisonErrorHtml(): string {
