@@ -18,6 +18,7 @@ import { useCasesFeatures } from '../../common/use_cases_features';
 import type { AssigneesFilteringSelection } from '../user_profiles/types';
 import { useSystemFilterConfig } from './table_filter_config/use_system_filter_config';
 import { useFilterConfig } from './table_filter_config/use_filter_config';
+import type { FilterChangeHandler } from './table_filter_config/types';
 
 interface CasesTableFiltersProps {
   countClosedCases: number | null;
@@ -88,17 +89,23 @@ const CasesTableFiltersComponent = ({
     onFilterConfigChange,
   } = useFilterConfig({ systemFilterConfig });
 
-  const onFilterOptionChange = ({
+  const onFilterOptionChange: FilterChangeHandler = ({
     filterId,
     selectedOptionKeys,
-  }: {
-    filterId: string;
-    selectedOptionKeys: string[];
+    isCustomField = false,
   }) => {
-    const newFilters = {
-      ...filterOptions,
-      [filterId]: selectedOptionKeys,
-    };
+    const newFilters = isCustomField
+      ? {
+          ...filterOptions,
+          customFields: {
+            ...filterOptions.customFields,
+            [filterId]: selectedOptionKeys,
+          },
+        }
+      : {
+          ...filterOptions,
+          [filterId]: selectedOptionKeys,
+        };
 
     if (!isEqual(newFilters, filterOptions)) {
       onFilterChanged(newFilters);

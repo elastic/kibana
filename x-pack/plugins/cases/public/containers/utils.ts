@@ -170,3 +170,12 @@ export const constructReportersFilter = (reporters: User[]) => {
       }
     : {};
 };
+
+export const constructCustomFieldsFilter = (customFields: FilterOptions['customFields']) => {
+  const filter = Object.entries(customFields).reduce(
+    (acc, [key, value]) => (value.length > 0 ? { ...acc, [key]: value } : acc),
+    {}
+  );
+
+  return Object.keys(filter).length > 0 ? filter : {};
+};

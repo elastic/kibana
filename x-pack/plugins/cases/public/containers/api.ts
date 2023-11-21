@@ -86,6 +86,7 @@ import {
   constructAssigneesFilter,
   constructReportersFilter,
   decodeCaseUserActionStatsResponse,
+  constructCustomFieldsFilter,
 } from './utils';
 import { decodeCasesFindResponse } from '../api/decoders';
 
@@ -287,6 +288,7 @@ export const getCases = async ({
     ...(filterOptions.searchFields.length > 0 ? { searchFields: filterOptions.searchFields } : {}),
     ...(filterOptions.owner.length > 0 ? { owner: filterOptions.owner } : {}),
     ...(filterOptions.category.length > 0 ? { category: filterOptions.category } : {}),
+    ...constructCustomFieldsFilter(filterOptions.customFields),
     ...queryParams,
   };
 

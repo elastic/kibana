@@ -12,9 +12,15 @@ export interface FilterConfigState {
   isActive: boolean;
 }
 
+export type FilterChangeHandler = (params: {
+  filterId: string;
+  selectedOptionKeys: string[];
+  isCustomField?: boolean;
+}) => void;
+
 export interface FilterConfigRenderParams {
   filterOptions: FilterOptions;
-  onChange: (params: { filterId: string; selectedOptionKeys: string[] }) => void;
+  onChange: FilterChangeHandler;
 }
 
 export interface FilterConfig {
