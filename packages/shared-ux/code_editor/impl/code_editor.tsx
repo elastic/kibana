@@ -57,35 +57,35 @@ export interface CodeEditorProps {
   /**
    * Options for the Monaco Code Editor
    * Documentation of options can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.editor.istandaloneeditorconstructionoptions.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/editor.IStandaloneEditorConstructionOptions.html
    */
   options?: monaco.editor.IStandaloneEditorConstructionOptions;
 
   /**
    * Suggestion provider for autocompletion
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.completionitemprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.CompletionItemProvider.html
    */
   suggestionProvider?: monaco.languages.CompletionItemProvider;
 
   /**
    * Signature provider for function parameter info
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.signaturehelpprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.SignatureHelpProvider.html
    */
   signatureProvider?: monaco.languages.SignatureHelpProvider;
 
   /**
    * Hover provider for hover documentation
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.hoverprovider.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.HoverProvider.html
    */
   hoverProvider?: monaco.languages.HoverProvider;
 
   /**
    * Language config provider for bracket
    * Documentation for the provider can be found here:
-   * https://microsoft.github.io/monaco-editor/api/interfaces/monaco.languages.languageconfiguration.html
+   * https://microsoft.github.io/monaco-editor/docs.html#interfaces/languages.LanguageConfiguration.html
    */
   languageConfiguration?: monaco.languages.LanguageConfiguration;
 
@@ -373,7 +373,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       const textbox = editor.getDomNode()?.getElementsByTagName('textarea')[0];
       if (textbox) {
-        // Make sure the textarea is not directly accesible with TAB
+        // Make sure the textarea is not directly accessible with TAB
         textbox.tabIndex = -1;
 
         // The Monaco editor seems to override the tabindex and set it back to "0"
@@ -431,7 +431,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const { CopyButton } = useCopy({ isCopyable, value });
 
   useEffect(() => {
-    // Register themes when 'useDarkThem' changes
+    // Register themes when 'useDarkTheme' changes
     monaco.editor.defineTheme('euiColors', useDarkTheme ? DARK_THEME : LIGHT_THEME);
     monaco.editor.defineTheme(
       'euiColorsTransparent',
