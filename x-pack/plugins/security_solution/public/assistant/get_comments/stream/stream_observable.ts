@@ -36,7 +36,6 @@ export const getStreamObservable = (
           try {
             if (done) {
               if (lineBuffer) {
-                console.log('EXTRA LINE BUFFER!', lineBuffer);
                 chunks.push(lineBuffer);
               }
               observer.next({
@@ -72,14 +71,12 @@ export const getStreamObservable = (
               });
             }
           } catch (err) {
-            console.log('error caught', err);
             observer.error(err);
             return;
           }
           read();
         })
         .catch((err) => {
-          console.log('error caught 2', err);
           observer.error(err);
         });
     }
@@ -130,7 +127,6 @@ const getNextChunk = (lines: string[]) => {
         const openaiResponse = JSON.parse(line);
         return openaiResponse.choices[0]?.delta.content ?? '';
       } catch (err) {
-        console.log('ERROR', err);
         return '';
       }
     })

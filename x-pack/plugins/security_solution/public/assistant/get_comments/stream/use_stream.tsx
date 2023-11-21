@@ -7,7 +7,6 @@
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Subscription } from 'rxjs';
-import { share } from 'rxjs';
 import { getPlaceholderObservable, getStreamObservable } from './stream_observable';
 
 interface UseStreamProps {
@@ -66,7 +65,7 @@ export const useStream = ({
     }
   }, [complete, onCompleteStream]);
   useEffect(() => {
-    const newSubscription = observer$.pipe(share()).subscribe({
+    const newSubscription = observer$.subscribe({
       next: ({ message, loading: isLoading }) => {
         setLoading(isLoading);
         setPendingMessage(message);
