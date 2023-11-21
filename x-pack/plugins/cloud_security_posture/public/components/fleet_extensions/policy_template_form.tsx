@@ -534,24 +534,54 @@ const SetupTypeSelector = ({
   const options = [
     {
       value: SetupType.AGENTLESS,
-      inputDisplay: 'Agentless',
+      inputDisplay: (
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.setupType.agentlessInputDisplay"
+          defaultMessage="Agentless"
+        />
+      ),
       dropdownDisplay: (
         <>
-          <strong>Agentless</strong>
+          <strong>
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupType.agentlessDrowpownDisplay"
+              defaultMessage="Agentless"
+            />
+          </strong>
           <EuiText size="s" color="subdued">
-            <p>Set up the integration without an agent</p>
+            <p>
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.setupType.agentlessDrowpownDescription"
+                defaultMessage="Set up the integration without an agent"
+              />
+            </p>
           </EuiText>
         </>
       ),
     },
     {
       value: SetupType.AGENT_BASED,
-      inputDisplay: 'Agent-based',
+      inputDisplay: (
+        <FormattedMessage
+          id="xpack.csp.fleetIntegration.setupType.agentbasedInputDisplay"
+          defaultMessage="Agent-based"
+        />
+      ),
       dropdownDisplay: (
         <>
-          <strong>Agent-based</strong>
+          <strong>
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupType.agentbasedDrowpownDisplay"
+              defaultMessage="Agent-based"
+            />
+          </strong>
           <EuiText size="s" color="subdued">
-            <p>Set up the integration with an agent</p>
+            <p>
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.setupType.agentbasedDrowpownDescription"
+                defaultMessage="Set up the integration with an agent"
+              />
+            </p>
           </EuiText>
         </>
       ),
@@ -563,14 +593,34 @@ const SetupTypeSelector = ({
       <EuiSpacer size="l" />
       <EuiAccordion
         id={useGeneratedHtmlId({ prefix: 'setup-type' })}
-        buttonContent={<EuiLink>Advanced options</EuiLink>}
+        buttonContent={
+          <EuiLink>
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupType.advancedOptionsLabel"
+              defaultMessage="Advanced options"
+            />
+          </EuiLink>
+        }
       >
         <EuiSpacer size="l" />
-        <EuiFormRow fullWidth label="Setup technology">
+        <EuiFormRow
+          fullWidth
+          label={
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupType.setupTechnologyLabel"
+              defaultMessage="Setup technology"
+            />
+          }
+        >
           <EuiSuperSelect
             options={options}
             valueOfSelected={setupType}
-            placeholder="Select the setup technology"
+            placeholder={
+              <FormattedMessage
+                id="xpack.csp.fleetIntegration.setupType.setupTechnologyPlaceholder"
+                defaultMessage="Select the setup technology"
+              />
+            }
             onChange={onSetupTypeChange}
             itemLayoutAlign="top"
             hasDividers
