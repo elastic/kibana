@@ -32,7 +32,7 @@ import {
   dataFrameAnalyticsNewJobCapsQuerySchema,
 } from './schemas/data_frame_analytics_schema';
 import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
-import { DataViewHandler } from '../models/data_frame_analytics/index_patterns';
+import { DataViewHandler } from '../models/data_frame_analytics/data_view_handler';
 import { AnalyticsManager } from '../models/data_frame_analytics/analytics_manager';
 import { validateAnalyticsJob } from '../models/data_frame_analytics/validation';
 import { fieldServiceProvider } from '../models/job_service/new_job_caps/field_service';
