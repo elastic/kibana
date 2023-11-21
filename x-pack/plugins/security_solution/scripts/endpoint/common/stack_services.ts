@@ -69,12 +69,6 @@ interface CreateRuntimeServicesOptions {
   esPassword?: string;
   log?: ToolingLog;
   asSuperuser?: boolean;
-  /**
-   * If set to `true` (default) and kibana is running in serverless mode, then the credentials used
-   * for superuser will be adjusted to use `system_index_superuser` username/password.
-   * Applies only when `asSuperuser` option is `true`.
-   */
-  adjustAsSuperuserCredsForServerless: boolean;
   /** If true, then a certificate will not be used when creating the Kbn/Es clients when url is `https` */
   noCertForSsl?: boolean;
 }
@@ -118,7 +112,6 @@ export const createRuntimeServices = async ({
   esPassword: _esPassword,
   log = createToolingLogger(),
   asSuperuser = false,
-  adjustAsSuperuserCredsForServerless = true,
   noCertForSsl,
 }: CreateRuntimeServicesOptions): Promise<RuntimeServices> => {
   let username = _username;
@@ -139,18 +132,16 @@ export const createRuntimeServices = async ({
     const isServerlessEs = await isServerlessKibanaFlavor(tmpKbnClient);
 
     if (isServerlessEs) {
-      if (adjustAsSuperuserCredsForServerless) {
-        log?.warning(
-          'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
-            'Will use username [system_indices_superuser] instead.'
-        );
+      log?.warning(
+        'Creating Security Superuser is not supported in current environment.\nES is running in serverless mode. ' +
+          'Will use username [system_indices_superuser] instead.'
+      );
 
-        username = 'system_indices_superuser';
-        password = 'changeme';
+      username = 'system_indices_superuser';
+      password = 'changeme';
 
-        esUsername = 'system_indices_superuser';
-        esPassword = 'changeme';
-      }
+      esUsername = 'system_indices_superuser';
+      esPassword = 'changeme';
     } else {
       const superuserResponse = await createSecuritySuperuser(
         createEsClient({

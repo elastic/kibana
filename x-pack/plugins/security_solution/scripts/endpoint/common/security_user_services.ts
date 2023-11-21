@@ -8,11 +8,17 @@
 import type { Client } from '@elastic/elasticsearch';
 import { userInfo } from 'os';
 
+export interface CreatedSecuritySuperuser {
+  username: string;
+  password: string;
+  created: boolean;
+}
+
 export const createSecuritySuperuser = async (
   esClient: Client,
   username: string = userInfo().username,
   password: string = 'changeme'
-): Promise<{ username: string; password: string; created: boolean }> => {
+): Promise<CreatedSecuritySuperuser> => {
   if (!username || !password) {
     throw new Error(`username and password require values.`);
   }
