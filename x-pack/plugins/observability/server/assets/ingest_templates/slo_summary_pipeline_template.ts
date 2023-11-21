@@ -5,12 +5,19 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION, SLO_SUMMARY_ENRICH_POLICY_NAME } from '../constants';
+import { SLO_RESOURCES_VERSION } from '../constants';
 
 export const getSLOSummaryPipelineTemplate = (id: string) => ({
   id,
   description: 'SLO summary ingest pipeline',
   processors: [
+    {
+      split: {
+        description: 'Split comma separated list of tags into an array',
+        field: 'slo.tags',
+        separator: ',',
+      },
+    },
     {
       set: {
         description: "if 'statusCode == 0', set status to NO_DATA",
@@ -41,72 +48,6 @@ export const getSLOSummaryPipelineTemplate = (id: string) => ({
         if: 'ctx.statusCode == 4',
         field: 'status',
         value: 'HEALTHY',
-      },
-    },
-    {
-      enrich: {
-        field: 'slo.id',
-        policy_name: SLO_SUMMARY_ENRICH_POLICY_NAME,
-        target_field: '_enrich',
-      },
-    },
-    {
-      set: {
-        field: 'slo.name',
-        copy_from: '_enrich.slo.name',
-      },
-    },
-    {
-      set: {
-        field: 'slo.description',
-        copy_from: '_enrich.slo.description',
-      },
-    },
-    {
-      set: {
-        field: 'slo.indicator',
-        copy_from: '_enrich.slo.indicator',
-      },
-    },
-    {
-      set: {
-        field: 'slo.timeWindow',
-        copy_from: '_enrich.slo.timeWindow',
-      },
-    },
-    {
-      set: {
-        field: 'slo.groupBy',
-        copy_from: '_enrich.slo.groupBy',
-      },
-    },
-    {
-      set: {
-        field: 'slo.tags',
-        copy_from: '_enrich.slo.tags',
-      },
-    },
-    {
-      set: {
-        field: 'slo.objective',
-        copy_from: '_enrich.slo.objective',
-      },
-    },
-    {
-      set: {
-        field: 'slo.budgetingMethod',
-        copy_from: '_enrich.slo.budgetingMethod',
-      },
-    },
-    {
-      remove: {
-        field: '_enrich',
-      },
-    },
-    {
-      set: {
-        field: 'summaryUpdatedAt',
-        value: '{{{_ingest.timestamp}}}',
       },
     },
   ],

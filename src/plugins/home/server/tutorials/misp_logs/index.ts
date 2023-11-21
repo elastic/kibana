@@ -39,7 +39,7 @@ export function mispLogsSpecProvider(context: TutorialContext): TutorialSchema {
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-misp.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/misp.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/misp.svg'),
     artifacts: {
       dashboards: [
         {
@@ -55,7 +55,7 @@ export function mispLogsSpecProvider(context: TutorialContext): TutorialSchema {
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/misp_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/misp_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),

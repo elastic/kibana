@@ -448,6 +448,11 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
       return await row[rowIndex];
     },
   });
+  const isLatestFindingsTableThere = async () => {
+    const table = await testSubjects.findAll('docTable');
+    const trueOrFalse = table.length > 0 ? true : false;
+    return trueOrFalse;
+  };
 
   return {
     navigateToLatestFindingsPage,
@@ -468,5 +473,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     groupSelector,
     findingsGrouping,
     createDataTableObject,
+    isLatestFindingsTableThere,
   };
 }
