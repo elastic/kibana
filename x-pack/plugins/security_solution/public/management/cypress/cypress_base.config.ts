@@ -74,6 +74,7 @@ export const getCypressBaseConfig = (
         experimentalRunAllSpecs: true,
         experimentalMemoryManagement: true,
         experimentalInteractiveRunEvents: true,
+        experimentalCspAllowList: ['default-src', 'script-src', 'script-src-elem'],
         setupNodeEvents: async (on: Cypress.PluginEvents, config: Cypress.PluginConfigOptions) => {
           // IMPORTANT: setting the log level should happen before any tooling is called
           setupToolingLogLevel(config);
