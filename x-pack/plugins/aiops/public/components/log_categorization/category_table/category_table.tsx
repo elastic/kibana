@@ -142,7 +142,7 @@ export const CategoryTable: FC<Props> = ({
 
           return {
             doc_count_overall: adjustedDocCount,
-            doc_count_significant_term: newTerm,
+            doc_count_significant_item: newTerm,
             key: catKey,
             key_as_string: `${catKey}`,
           };

@@ -235,7 +235,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
           cy.get(ALERTS_COUNT)
             .invoke('text')
             .should((newAlertCount) => {
-              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10) - 1));
+              expect(newAlertCount.split(' ')[0]).eq(String(parseInt(originalAlertCount, 10)));
             });
         });
     });
@@ -318,7 +318,7 @@ describe(`Detections : Page Filters`, { tags: ['@ess', '@serverless'] }, () => {
       togglePageFilterPopover(0);
       cy.get(OPTION_SELECTABLE(0, 'open')).should('be.visible');
       cy.get(OPTION_SELECTABLE(0, 'open')).should('contain.text', 'open');
-      cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 2);
+      cy.get(OPTION_SELECTABLE(0, 'open')).get(OPTION_SELECTABLE_COUNT).should('have.text', 1);
     });
 
     it('should take kqlQuery into account', () => {

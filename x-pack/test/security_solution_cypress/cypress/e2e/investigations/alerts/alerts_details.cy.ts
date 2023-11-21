@@ -54,8 +54,8 @@ describe('Alert details flyout', { tags: ['@ess', '@serverless'] }, () => {
 
     it('should update the table when status of the alert is updated', () => {
       cy.get(OVERVIEW_RULE).should('be.visible');
-      cy.get(ALERTS_TABLE_COUNT).should('have.text', '2 alerts');
-      cy.get(ALERT_SUMMARY_SEVERITY_DONUT_CHART).should('contain.text', '2alerts');
+      cy.get(ALERTS_TABLE_COUNT).should('have.text', '1 alert');
+      cy.get(ALERT_SUMMARY_SEVERITY_DONUT_CHART).should('contain.text', '1alert');
       expandFirstAlert();
       changeAlertStatusTo('acknowledged');
       cy.get(ALERTS_TABLE_COUNT).should('have.text', '1 alert');

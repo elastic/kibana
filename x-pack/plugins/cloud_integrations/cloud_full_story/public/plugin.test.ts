@@ -6,9 +6,9 @@
  */
 
 import { coreMock } from '@kbn/core/public/mocks';
-import type { CloudFullStoryConfigType } from '../server/config';
-import { CloudFullStoryPlugin } from './plugin';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
+import { duration } from 'moment';
+import { CloudFullStoryConfig, CloudFullStoryPlugin } from './plugin';
 
 describe('Cloud Plugin', () => {
   describe('#setup', () => {
@@ -20,9 +20,11 @@ describe('Cloud Plugin', () => {
       const setupPlugin = async ({
         config = {},
         isCloudEnabled = true,
+        isElasticStaffOwned = false,
       }: {
-        config?: Partial<CloudFullStoryConfigType>;
+        config?: Partial<CloudFullStoryConfig>;
         isCloudEnabled?: boolean;
+        isElasticStaffOwned?: boolean;
       }) => {
         const initContext = coreMock.createPluginInitializerContext(config);
 
@@ -30,7 +32,7 @@ describe('Cloud Plugin', () => {
 
         const coreSetup = coreMock.createSetup();
 
-        const cloud = { ...cloudMock.createSetup(), isCloudEnabled };
+        const cloud = { ...cloudMock.createSetup(), isCloudEnabled, isElasticStaffOwned };
 
         plugin.setup(coreSetup, { cloud });
 
@@ -53,10 +55,33 @@ describe('Cloud Plugin', () => {
         });
       });
 
+      test('register the shipper FullStory with the correct duration', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { org_id: 'foo', pageVarsDebounceTime: `${duration(500, 'ms')}` },
+        });
+
+        expect(coreSetup.analytics.registerShipper).toHaveBeenCalled();
+        expect(coreSetup.analytics.registerShipper).toHaveBeenCalledWith(expect.anything(), {
+          fullStoryOrgId: 'foo',
+          pageVarsDebounceTimeMs: 500,
+          scriptUrl: '/internal/cloud/100/fullstory.js',
+          namespace: 'FSKibana',
+        });
+      });
+
       it('does not call initializeFullStory when isCloudEnabled=false', async () => {
         const { coreSetup } = await setupPlugin({
           config: { org_id: 'foo' },
           isCloudEnabled: false,
+        });
+        expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
+      });
+
+      it('does set up FullStory when isCloudEnabled=true but the deployment is owned by an Elastician', async () => {
+        const { coreSetup } = await setupPlugin({
+          config: { org_id: 'foo' },
+          isCloudEnabled: true,
+          isElasticStaffOwned: true,
         });
         expect(coreSetup.analytics.registerShipper).not.toHaveBeenCalled();
       });
