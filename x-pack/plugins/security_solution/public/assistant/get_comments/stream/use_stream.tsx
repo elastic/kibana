@@ -12,6 +12,7 @@ import { getPlaceholderObservable, getStreamObservable } from './stream_observab
 
 interface UseStreamProps {
   amendMessage: (message: string) => void;
+  isError: boolean;
   content?: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
@@ -33,8 +34,14 @@ interface UseStream {
  * @param amendMessage - handles the amended message
  * @param content - the content of the message. If provided, the function will not use the reader to stream data.
  * @param reader - The readable stream reader used to stream data. If provided, the function will use this reader to stream data.
+ * @param isError - indicates whether the reader response is an error message or not
  */
-export const useStream = ({ amendMessage, content, reader }: UseStreamProps): UseStream => {
+export const useStream = ({
+  amendMessage,
+  content,
+  reader,
+  isError,
+}: UseStreamProps): UseStream => {
   const [pendingMessage, setPendingMessage] = useState<string | undefined>();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
@@ -42,9 +49,9 @@ export const useStream = ({ amendMessage, content, reader }: UseStreamProps): Us
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable(reader, setLoading)
+        ? getStreamObservable(reader, setLoading, isError)
         : getPlaceholderObservable(),
-    [content, reader]
+    [content, isError, reader]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();

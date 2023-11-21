@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import { controlGroupInputBuilder } from '@kbn/controls-plugin/public';
 import { getDefaultControlGroupInput } from '@kbn/controls-plugin/common';
 import { NotificationsStart } from '@kbn/core/public';
-import { APM_STATIC_DATA_VIEW_ID } from '../../../../../common/data_view_constants';
+import { useDataViewId } from '../../../../hooks/use_data_view_id';
 import {
   ENVIRONMENT_ALL,
   ENVIRONMENT_NOT_DEFINED,
@@ -28,11 +28,11 @@ import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plug
 import { useApmDataView } from '../../../../hooks/use_apm_data_view';
 import { useApmServiceContext } from '../../../../context/apm_service/use_apm_service_context';
 import { useApmParams } from '../../../../hooks/use_apm_params';
-
 import { getDashboardPanelMap, MetricsDashboardProps } from './helper';
 
 export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   const [dashboard, setDashboard] = useState<AwaitingDashboardAPI>();
+  const dataViewId = useDataViewId();
 
   const {
     query: { environment, kuery, rangeFrom, rangeTo },
@@ -65,7 +65,7 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
   return (
     <DashboardRenderer
       getCreationOptions={() =>
-        getCreationOptions(dashboardProps, notifications)
+        getCreationOptions(dashboardProps, notifications, dataViewId)
       }
       ref={setDashboard}
     />
@@ -74,20 +74,21 @@ export function JsonMetricsDashboard(dashboardProps: MetricsDashboardProps) {
 
 async function getCreationOptions(
   dashboardProps: MetricsDashboardProps,
-  notifications: NotificationsStart
+  notifications: NotificationsStart,
+  dataViewId: string
 ): Promise<DashboardCreationOptions> {
   try {
     const builder = controlGroupInputBuilder;
     const controlGroupInput = getDefaultControlGroupInput();
 
     await builder.addDataControlFromField(controlGroupInput, {
-      dataViewId: APM_STATIC_DATA_VIEW_ID,
+      dataViewId,
       title: 'Node name',
       fieldName: 'service.node.name',
       width: 'medium',
       grow: true,
     });
-    const panels = await getDashboardPanelMap(dashboardProps);
+    const panels = await getDashboardPanelMap(dashboardProps, dataViewId);
 
     if (!panels) {
       throw new Error('Failed parsing dashboard panels.');

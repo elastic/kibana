@@ -170,7 +170,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const experimentalFeatures = config.experimentalFeatures;
 
     initSavedObjects(core.savedObjects);
-    initUiSettings(core.uiSettings, experimentalFeatures);
+    initUiSettings(core.uiSettings, experimentalFeatures, config.enableUiSettingsValidations);
     appFeaturesService.init(plugins.features);
 
     events.forEach((eventConfig) => core.analytics.registerEventType(eventConfig));
