@@ -69,3 +69,13 @@ export const welcomeConvo: Conversation = {
     },
   ],
 };
+
+export const customConvo: Conversation = {
+  id: 'Custom option',
+  isDefault: false,
+  messages: [],
+  apiConfig: {
+    connectorId: 'c29c28a0-20fe-11ee-9306-a1f4d42ec542',
+    provider: OpenAiProviderType.OpenAi,
+  },
+};

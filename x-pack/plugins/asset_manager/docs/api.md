@@ -165,9 +165,11 @@ it will be able to pull the properly-scoped client dependencies off of that requ
 
 ### Client methods
 
+TODO: Link to a centralized asset document example that each response can reference?
+
 #### getHosts
 
-Get a group of host assets found within a specified time range.
+Get a list of host assets found within a specified time range.
 
 | Parameter | Type            | Required? | Description                                                            |
 | :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
@@ -184,4 +186,22 @@ Get a group of host assets found within a specified time range.
 }
 ```
 
-TODO: Link to a centralized asset document example that each response can reference?
+#### getServices
+
+Get a list of service assets found within a specified time range.
+
+| Parameter | Type            | Required? | Description                                                            |
+| :-------- | :-------------- | :-------- | :--------------------------------------------------------------------- |
+| from      | datetime string | yes       | ISO date string representing the START of the time range being queried |
+| to        | datetime string | yes       | ISO date string representing the END of the time range being queried   |
+| parent    | string          | no        | EAN value for a given parent service to filter services by             |
+
+**Response**
+
+```json
+{
+  "services": [
+    ...found service assets
+  ]
+}
+```

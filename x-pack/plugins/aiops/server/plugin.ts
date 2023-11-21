@@ -10,8 +10,6 @@ import { Subscription } from 'rxjs';
 import { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-
-import { CASES_ATTACHMENT_CHANGE_POINT_CHART } from '../common/constants';
 import { PLUGIN_ID } from '../common';
 import { isActiveLicense } from './lib/license';
 import {
@@ -21,9 +19,9 @@ import {
   AiopsPluginSetupDeps,
   AiopsPluginStartDeps,
 } from './types';
-
-import { defineLogRateAnalysisRoute } from './routes';
-import { defineLogCategorizationRoutes } from './routes/log_categorization';
+import { defineRoute as defineLogRateAnalysisRoute } from './routes/log_rate_analysis/define_route';
+import { defineRoute as defineCategorizationFieldValidationRoute } from './routes/categorization_field_validation/define_route';
+import { registerCasesPersistableState } from './register_cases';
 
 export class AiopsPlugin
   implements Plugin<AiopsPluginSetup, AiopsPluginStart, AiopsPluginSetupDeps, AiopsPluginStartDeps>
@@ -47,8 +45,12 @@ export class AiopsPlugin
     // This way we can pass on license changes to the route factory having always
     // the current license because it's stored in a mutable attribute.
     const aiopsLicense: AiopsLicense = { isActivePlatinumLicense: false };
-    this.licenseSubscription = plugins.licensing.license$.subscribe(async (license) => {
+    this.licenseSubscription = plugins.licensing.license$.subscribe((license) => {
       aiopsLicense.isActivePlatinumLicense = isActiveLicense('platinum', license);
+
+      if (aiopsLicense.isActivePlatinumLicense) {
+        registerCasesPersistableState(plugins.cases, this.logger);
+      }
     });
 
     const router = core.http.createRouter<DataRequestHandlerContext>();
@@ -56,14 +58,8 @@ export class AiopsPlugin
     // Register server side APIs
     core.getStartServices().then(([coreStart, depsStart]) => {
       defineLogRateAnalysisRoute(router, aiopsLicense, this.logger, coreStart, this.usageCounter);
-      defineLogCategorizationRoutes(router, aiopsLicense, this.usageCounter);
+      defineCategorizationFieldValidationRoute(router, aiopsLicense, this.usageCounter);
     });
-
-    if (plugins.cases) {
-      plugins.cases.attachmentFramework.registerPersistableState({
-        id: CASES_ATTACHMENT_CHANGE_POINT_CHART,
-      });
-    }
 
     return {};
   }

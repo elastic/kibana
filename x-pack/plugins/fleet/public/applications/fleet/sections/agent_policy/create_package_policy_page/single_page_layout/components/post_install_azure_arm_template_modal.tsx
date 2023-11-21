@@ -35,18 +35,21 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
   agentPolicy: AgentPolicy;
   packagePolicy: PackagePolicy;
 }> = ({ onConfirm, onCancel, agentPolicy, packagePolicy }) => {
-  const { data: apyKeysData } = useQuery(['cloudFormationApiKeys'], () =>
-    sendGetEnrollmentAPIKeys({
-      page: 1,
-      perPage: 1,
-      kuery: `policy_id:${agentPolicy.id}`,
-    })
+  const { data: apyKeysData } = useQuery(
+    ['azureArmTemplateApiKeys', { agentPolicyId: agentPolicy.id }],
+    () =>
+      sendGetEnrollmentAPIKeys({
+        page: 1,
+        perPage: 1,
+        kuery: `policy_id:${agentPolicy.id}`,
+      })
   );
 
   const azureArmTemplateProps = getAzureArmPropsFromPackagePolicy(packagePolicy);
+  const enrollmentToken = apyKeysData?.data?.items[0]?.api_key;
 
   const { azureArmTemplateUrl, error, isError, isLoading } = useCreateAzureArmTemplateUrl({
-    enrollmentAPIKey: apyKeysData?.data?.items[0]?.api_key,
+    enrollmentAPIKey: enrollmentToken,
     azureArmTemplateProps,
   });
 
@@ -62,7 +65,11 @@ export const PostInstallAzureArmTemplateModal: React.FunctionComponent<{
       </EuiModalHeader>
 
       <EuiModalBody>
-        <AzureArmTemplateGuide azureAccountType={azureArmTemplateProps.azureAccountType} />
+        <AzureArmTemplateGuide
+          azureAccountType={azureArmTemplateProps.azureAccountType}
+          agentPolicy={agentPolicy}
+          enrollmentToken={enrollmentToken}
+        />
         {error && isError && (
           <>
             <EuiSpacer size="m" />

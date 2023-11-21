@@ -15,8 +15,10 @@ export interface MessagePresentation {
 }
 export interface Message {
   role: ConversationRole;
-  content: string;
+  reader?: ReadableStreamDefaultReader<Uint8Array>;
+  content?: string;
   timestamp: string;
+  isError?: boolean;
   presentation?: MessagePresentation;
 }
 

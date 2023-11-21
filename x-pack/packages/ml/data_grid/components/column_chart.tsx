@@ -13,6 +13,7 @@ import { euiTextTruncate, type EuiDataGridColumn } from '@elastic/eui';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 
+import { i18n } from '@kbn/i18n';
 import { isUnsupportedChartData, ChartData } from '../lib/field_histograms';
 
 import { useColumnChart } from '../hooks/use_column_chart';
@@ -82,6 +83,7 @@ export const ColumnChart: FC<Props> = ({
             <Settings
               // TODO use the EUI charts theme see src/plugins/charts/public/services/theme/README.md
               theme={columnChartTheme}
+              locale={i18n.getLocale()}
             />
             <BarSeries
               id="histogram"

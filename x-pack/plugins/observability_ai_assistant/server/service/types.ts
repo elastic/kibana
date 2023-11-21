@@ -14,9 +14,6 @@ export interface ObservabilityAIAssistantResourceNames {
     conversations: string;
     kb: string;
   };
-  ilmPolicy: {
-    conversations: string;
-  };
   aliases: {
     conversations: string;
     kb: string;

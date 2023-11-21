@@ -7,8 +7,7 @@
  */
 import mockFs from 'mock-fs';
 
-import { existsSync } from 'fs';
-import { stat } from 'fs/promises';
+import Fsp from 'fs/promises';
 import { basename } from 'path';
 
 import {
@@ -29,6 +28,7 @@ import {
   teardownServerlessClusterSync,
   verifyDockerInstalled,
   getESp12Volume,
+  ServerlessOptions,
 } from './docker';
 import { ToolingLog, ToolingLogCollectingWriter } from '@kbn/tooling-log';
 import { ES_P12_PATH } from '@kbn/dev-utils';
@@ -39,6 +39,7 @@ import {
   SERVERLESS_JWKS_PATH,
 } from '../paths';
 import * as waitClusterUtil from './wait_until_cluster_ready';
+import * as waitForSecurityIndexUtil from './wait_for_security_index';
 
 jest.mock('execa');
 const execa = jest.requireMock('execa');
@@ -52,6 +53,10 @@ jest.mock('./wait_until_cluster_ready', () => ({
   waitUntilClusterReady: jest.fn(),
 }));
 
+jest.mock('./wait_for_security_index', () => ({
+  waitForSecurityIndex: jest.fn(),
+}));
+
 const log = new ToolingLog();
 const logWriter = new ToolingLogCollectingWriter();
 log.setWriters([logWriter]);
@@ -62,6 +67,7 @@ const serverlessDir = 'stateless';
 const serverlessObjectStorePath = `${baseEsPath}/${serverlessDir}`;
 
 const waitUntilClusterReadyMock = jest.spyOn(waitClusterUtil, 'waitUntilClusterReady');
+const waitForSecurityIndexMock = jest.spyOn(waitForSecurityIndexUtil, 'waitForSecurityIndex');
 
 beforeEach(() => {
   jest.resetAllMocks();
@@ -102,7 +108,7 @@ const volumeCmdTest = async (volumeCmd: string[]) => {
 
   // extract only permission from mode
   // eslint-disable-next-line no-bitwise
-  expect((await stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
+  expect((await Fsp.stat(serverlessObjectStorePath)).mode & 0o777).toBe(0o777);
 };
 
 describe('resolveDockerImage()', () => {
@@ -155,6 +161,19 @@ describe('resolvePort()', () => {
     `);
   });
 
+  test('should return default port when custom host passed in options', () => {
+    const port = resolvePort({ host: '192.168.25.1' } as ServerlessOptions);
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9200:9200",
+        "-p",
+        "192.168.25.1:9200:9200",
+      ]
+    `);
+  });
+
   test('should return custom port when passed in options', () => {
     const port = resolvePort({ port: 9220 });
 
@@ -162,6 +181,21 @@ describe('resolvePort()', () => {
       Array [
         "-p",
         "127.0.0.1:9220:9220",
+        "--env",
+        "http.port=9220",
+      ]
+    `);
+  });
+
+  test('should return custom port and host when passed in options', () => {
+    const port = resolvePort({ port: 9220, host: '192.168.25.1' });
+
+    expect(port).toMatchInlineSnapshot(`
+      Array [
+        "-p",
+        "127.0.0.1:9220:9220",
+        "-p",
+        "192.168.25.1:9220:9220",
         "--env",
         "http.port=9220",
       ]
@@ -407,7 +441,7 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(serverlessObjectStorePath)).toBe(true);
+    await expect(Fsp.access(serverlessObjectStorePath)).resolves.not.toThrow();
   });
 
   test('should use an existing object store', async () => {
@@ -416,7 +450,9 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(true);
+    await expect(
+      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
+    ).resolves.not.toThrow();
   });
 
   test('should remove an existing object store when clean is passed', async () => {
@@ -425,7 +461,9 @@ describe('setupServerlessVolumes()', () => {
     const volumeCmd = await setupServerlessVolumes(log, { basePath: baseEsPath, clean: true });
 
     volumeCmdTest(volumeCmd);
-    expect(existsSync(`${serverlessObjectStorePath}/cluster_state/lease`)).toBe(false);
+    await expect(
+      Fsp.access(`${serverlessObjectStorePath}/cluster_state/lease`)
+    ).rejects.toThrowError();
   });
 
   test('should add SSL volumes when ssl is passed', async () => {
@@ -530,6 +568,32 @@ describe('runServerlessCluster()', () => {
     expect(waitUntilClusterReadyMock).toHaveBeenCalledTimes(1);
     expect(waitUntilClusterReadyMock.mock.calls[0][0].expectedStatus).toEqual('green');
     expect(waitUntilClusterReadyMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should wait for the security index`, async () => {
+    waitForSecurityIndexMock.mockResolvedValue();
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, { basePath: baseEsPath, waitForReady: true });
+    expect(waitForSecurityIndexMock).toHaveBeenCalledTimes(1);
+    expect(waitForSecurityIndexMock.mock.calls[0][0].readyTimeout).toEqual(undefined);
+  });
+
+  test(`should not wait for the security index when security is disabled`, async () => {
+    mockFs({
+      [baseEsPath]: {},
+    });
+    execa.mockImplementation(() => Promise.resolve({ stdout: '' }));
+
+    await runServerlessCluster(log, {
+      basePath: baseEsPath,
+      waitForReady: true,
+      esArgs: ['xpack.security.enabled=false'],
+    });
+    expect(waitForSecurityIndexMock).not.toHaveBeenCalled();
   });
 });
 

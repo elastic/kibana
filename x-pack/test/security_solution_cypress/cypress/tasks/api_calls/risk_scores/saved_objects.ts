@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import { RISK_SCORE_SAVED_OBJECTS_URL, SAVED_OBJECTS_URL } from '../../../urls/risk_score';
 import type { RiskScoreEntity } from '../../risk_scores/common';
 import { getRiskScoreTagName } from '../../risk_scores/saved_objects';
@@ -17,7 +18,11 @@ export const deleteSavedObjects = (templateName: `${RiskScoreEntity}RiskScoreDas
     body: {
       deleteAll: true,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
+    headers: {
+      'kbn-xsrf': 'cypress-creds',
+      'x-elastic-internal-origin': 'security-solution',
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+    },
   });
 };
 

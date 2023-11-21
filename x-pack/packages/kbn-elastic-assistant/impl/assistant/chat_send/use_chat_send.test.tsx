@@ -23,6 +23,7 @@ const setSelectedPromptContexts = jest.fn();
 const setUserPrompt = jest.fn();
 const sendMessages = jest.fn();
 const appendMessage = jest.fn();
+const removeLastMessage = jest.fn();
 const appendReplacements = jest.fn();
 const clearConversation = jest.fn();
 
@@ -44,7 +45,7 @@ export const testProps: UseChatSendProps = {
   setSelectedPromptContexts,
   setUserPrompt,
 };
-const robotMessage = 'Response message from the robot';
+const robotMessage = { response: 'Response message from the robot', isError: false };
 describe('use chat send', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -55,6 +56,7 @@ describe('use chat send', () => {
     (useConversation as jest.Mock).mockReturnValue({
       appendMessage,
       appendReplacements,
+      removeLastMessage,
       clearConversation,
     });
   });
@@ -88,7 +90,7 @@ describe('use chat send', () => {
         `You are a helpful, expert assistant who answers questions about Elastic Security. Do not answer questions unrelated to Elastic Security.\nIf you answer a question related to KQL or EQL, it should be immediately usable within an Elastic Security timeline; please always format the output correctly with back ticks. Any answer provided for Query DSL should also be usable in a security timeline. This means you should only ever include the "filter" portion of the query.\nUse the following context to answer questions:\n\n\n\n${promptText}`
       );
       expect(appendMessageSend.message.role).toEqual('user');
-      expect(appendMessageResponse.message.content).toEqual(robotMessage);
+      expect(appendMessageResponse.message.content).toEqual(robotMessage.response);
       expect(appendMessageResponse.message.role).toEqual('assistant');
     });
   });
@@ -104,6 +106,19 @@ describe('use chat send', () => {
     await waitFor(() => {
       expect(sendMessages).toHaveBeenCalled();
       expect(appendMessage.mock.calls[0][0].message.content).toEqual(`\n\n${promptText}`);
+    });
+  });
+  it('handleRegenerateResponse removes the last message of the conversation, resends the convo to GenAI, and appends the message received', async () => {
+    const { result } = renderHook(() =>
+      useChatSend({ ...testProps, currentConversation: welcomeConvo })
+    );
+
+    result.current.handleRegenerateResponse();
+    expect(removeLastMessage).toHaveBeenCalledWith('Welcome');
+
+    await waitFor(() => {
+      expect(sendMessages).toHaveBeenCalled();
+      expect(appendMessage.mock.calls[0][0].message.content).toEqual(robotMessage.response);
     });
   });
 });

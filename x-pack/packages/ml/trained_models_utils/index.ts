@@ -20,4 +20,9 @@ export {
   type ModelDefinitionResponse,
   type ElserVersion,
   type GetElserOptions,
+  ELSER_ID_V1,
+  ELASTIC_MODEL_TAG,
+  ELASTIC_MODEL_TYPE,
+  MODEL_STATE,
+  type ModelState,
 } from './src/constants/trained_models';

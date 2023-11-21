@@ -33,6 +33,9 @@ export function createCoreStartMock() {
     coreUsageData: coreUsageDataServiceMock.createStartContract(),
     executionContext: executionContextServiceMock.createInternalStartContract(),
     customBranding: customBrandingServiceMock.createStartContract(),
+    plugins: {
+      onStart: jest.fn(),
+    },
   };
 
   return mock;

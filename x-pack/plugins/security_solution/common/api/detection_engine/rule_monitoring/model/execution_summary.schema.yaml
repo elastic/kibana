@@ -1,0 +1,35 @@
+openapi: 3.0.0
+info:
+  title: Execution Summary Schema
+  version: not applicable
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    RuleExecutionSummary:
+      type: object
+      properties:
+        last_execution:
+          type: object
+          properties:
+            date:
+              description: Date of the last execution
+              type: string
+              format: date-time
+            status:
+              description: Status of the last execution
+              $ref: './execution_status.schema.yaml#/components/schemas/RuleExecutionStatus'
+            status_order:
+              $ref: './execution_status.schema.yaml#/components/schemas/RuleExecutionStatusOrder'
+            message:
+              type: string
+            metrics:
+              $ref: './execution_metrics.schema.yaml#/components/schemas/RuleExecutionMetrics'
+          required:
+            - date
+            - status
+            - status_order
+            - message
+            - metrics
+      required:
+        - last_execution

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { inputConsoleCommand, submitCommand } from './response_console';
 import type { UserAuthzAccessLevel } from '../screens';
 import { loadPage, request } from './common';
 import { resolvePathVariables } from '../../../common/utils/resolve_path_variables';
@@ -66,6 +67,28 @@ export const visitRuleActions = (ruleId: string) => {
   cy.getByTestSubj('stepPanelProgress').should('not.exist');
 };
 
+export const getRunningProcesses = (command: string): Cypress.Chainable<number> => {
+  inputConsoleCommand('processes');
+  submitCommand();
+  cy.contains('Action pending.').should('exist');
+
+  // on success
+  // find pid of process
+  // traverse back from last column to the second column that has pid
+  return cy
+    .getByTestSubj('getProcessListTable', { timeout: 120000 })
+    .findByTestSubj('process_list_command')
+    .contains(command)
+    .parents('td')
+    .siblings('td')
+    .eq(1)
+    .find('span')
+    .then((span) => {
+      // get pid
+      return Number(span.text());
+    });
+};
+
 export const tryAddingDisabledResponseAction = (itemNumber = 0) => {
   cy.getByTestSubj('response-actions-wrapper').within(() => {
     cy.getByTestSubj('Endpoint Security-response-action-type-selection-option').should(
@@ -105,7 +128,7 @@ export const waitForActionToComplete = (
           return false;
         });
       },
-      { timeout }
+      { timeout, interval: 2000 }
     )
     .then(() => {
       if (!action) {
@@ -172,7 +195,6 @@ export const ensureResponseActionAuthzAccess = (
       {
         const file = new File(['foo'], 'foo.txt');
         const formData = new FormData();
-
         formData.append('file', file, file.name);
 
         for (const [key, value] of Object.entries(apiPayload as object)) {
@@ -199,6 +221,8 @@ export const ensureResponseActionAuthzAccess = (
     },
     failOnStatusCode: false,
     body: apiPayload as Cypress.RequestBody,
+    // Increased timeout due to `upload` action. It seems to take much longer to complete due to file upload
+    timeout: 120000,
   };
 
   if (accessLevel === 'none') {

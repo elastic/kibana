@@ -43,7 +43,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'count',
         field: 'Records',
       });
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
+      await PageObjects.lens.waitForVisualization('lnsSuggestion-countOfRecords');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('1');
     });
 
@@ -52,7 +52,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.lens.enableTimeShift();
       await PageObjects.lens.setTimeShift('3d');
 
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
+      await PageObjects.lens.waitForVisualization('lnsSuggestion-countOfRecords3D');
       expect(await PageObjects.lens.getDatatableCellText(0, 0)).to.eql('2');
     });
   });

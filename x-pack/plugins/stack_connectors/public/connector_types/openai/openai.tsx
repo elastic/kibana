@@ -21,7 +21,7 @@ export function getConnectorType(): OpenAIConnector {
     id: OPENAI_CONNECTOR_ID,
     iconClass: lazy(() => import('./logo')),
     selectMessage: i18n.translate('xpack.stackConnectors.components.genAi.selectMessageText', {
-      defaultMessage: 'Send a request to OpenAI systems.',
+      defaultMessage: 'Send a request to an OpenAI or Azure OpenAI service.',
     }),
     actionTypeTitle: OPENAI_TITLE,
     validateParams: async (
@@ -57,5 +57,6 @@ export function getConnectorType(): OpenAIConnector {
     },
     actionConnectorFields: lazy(() => import('./connector')),
     actionParamsFields: lazy(() => import('./params')),
+    actionReadOnlyExtraComponent: lazy(() => import('./dashboard_link')),
   };
 }

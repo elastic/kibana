@@ -45,6 +45,7 @@ export default function ({ getService }: FtrProviderContext) {
         .filter((t: string) => !TEST_TYPES.includes(t))
         .sort();
       expect(types).to.eql([
+        'Fleet-Metrics-Task',
         'Fleet-Usage-Logger',
         'Fleet-Usage-Sender',
         'ML:saved-objects-sync',
@@ -81,7 +82,6 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:apm.transaction_duration',
         'alerting:apm.transaction_error_rate',
         'alerting:logs.alert.document.count',
-        'alerting:metrics.alert.anomaly',
         'alerting:metrics.alert.inventory.threshold',
         'alerting:metrics.alert.threshold',
         'alerting:monitoring_alert_cluster_health',
@@ -100,6 +100,7 @@ export default function ({ getService }: FtrProviderContext) {
         'alerting:monitoring_shard_size',
         'alerting:observability.rules.custom_threshold',
         'alerting:siem.eqlRule',
+        'alerting:siem.esqlRule',
         'alerting:siem.indicatorRule',
         'alerting:siem.mlRule',
         'alerting:siem.newTermsRule',
@@ -139,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         'osquery:telemetry-saved-queries',
         'report:execute',
         'reports:monitor',
+        'risk_engine:risk_scoring',
         'security:endpoint-diagnostics',
         'security:endpoint-meta-telemetry',
         'security:telemetry-configuration',

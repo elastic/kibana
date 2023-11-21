@@ -26,6 +26,7 @@ import type { ConnectorPersistedFields } from '../common/types/connectors';
 import type { CasePersistedAttributes } from '../common/types/case';
 import { CasePersistedSeverity, CasePersistedStatus } from '../common/types/case';
 import type { ExternalServicePersisted } from '../common/types/external_service';
+import type { SOWithErrors } from '../common/types';
 
 /**
  * This is only a utility interface to help with constructing test cases. After the migration, the ES format will no longer
@@ -163,6 +164,7 @@ export const basicCaseFields: CaseAttributes = {
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
   category: null,
+  customFields: [],
 };
 
 export const createCaseSavedObjectResponse = ({
@@ -270,3 +272,14 @@ export const mockPointInTimeFinder =
       },
     });
   };
+
+export const createErrorSO = <T = unknown>(type: string): SOWithErrors<T> => ({
+  id: '1',
+  type,
+  error: {
+    error: 'error',
+    message: 'message',
+    statusCode: 500,
+  },
+  references: [],
+});

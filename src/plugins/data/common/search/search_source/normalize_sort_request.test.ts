@@ -67,7 +67,7 @@ describe('SearchSource#normalizeSortRequest', function () {
 
   it('should append default sort options', function () {
     const defaultSortOptions = {
-      unmapped_type: 'boolean',
+      unmapped_type: 'boolean' as 'boolean',
     };
     const result = normalizeSortRequest(
       [{ someField: SortDirection.desc }],

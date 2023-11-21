@@ -122,6 +122,13 @@ export const CONNECTOR_SETUP_SKIP = i18n.translate(
   }
 );
 
+export const CONNECTOR_SETUP_COMPLETE = i18n.translate(
+  'xpack.elasticAssistant.assistant.connectors.setup.complete',
+  {
+    defaultMessage: 'Connector setup complete!',
+  }
+);
+
 export const MISSING_CONNECTOR_CALLOUT_TITLE = i18n.translate(
   'xpack.elasticAssistant.assistant.connectors.connectorMissingCallout.calloutTitle',
   {

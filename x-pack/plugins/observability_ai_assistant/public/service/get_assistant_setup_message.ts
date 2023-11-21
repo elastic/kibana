@@ -7,9 +7,9 @@
 
 import { without } from 'lodash';
 import { MessageRole } from '../../common';
-import { ContextDefinition } from '../../common/types';
+import type { ContextDefinition, Message } from '../../common/types';
 
-export function getAssistantSetupMessage({ contexts }: { contexts: ContextDefinition[] }) {
+export function getAssistantSetupMessage({ contexts }: { contexts: ContextDefinition[] }): Message {
   const coreContext = contexts.find((context) => context.name === 'core')!;
 
   const otherContexts = without(contexts.concat(), coreContext);

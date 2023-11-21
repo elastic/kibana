@@ -16,8 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   // aiops lives in the ML UI so we need some related services.
   const ml = getService('ml');
 
-  // Failing: See https://github.com/elastic/kibana/issues/160986
-  describe.skip('change point detection', async function () {
+  describe('change point detection', async function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
@@ -85,6 +84,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage
         .getTable(0)
         .invokeAction(0, 'aiopsChangePointFilterForValue');
+      await aiops.changePointDetectionPage.getTable(0).waitForTableToLoad();
       const resultFor = await aiops.changePointDetectionPage.getTable(0).parseTable();
       expect(resultFor.length).to.eql(1);
     });
@@ -93,6 +93,14 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await aiops.changePointDetectionPage.assertPanelExist(0);
       await aiops.changePointDetectionPage.addChangePointConfig();
       await aiops.changePointDetectionPage.assertPanelExist(1);
+    });
+
+    it('attaches change point charts to a dashboard', async () => {
+      await aiops.changePointDetectionPage.assertPanelExist(0);
+      await aiops.changePointDetectionPage.attachChartsToDashboard(0, {
+        applyTimeRange: true,
+        maxSeries: 1,
+      });
     });
   });
 }

@@ -267,6 +267,18 @@ describe('Options list popover', () => {
     expect(optionsText).toEqual(['By document count. Checked option.']);
   });
 
+  test('when sorting suggestions, show "By date" sorting option for date fields', async () => {
+    const popover = await mountComponent({
+      componentState: { field: { name: 'Test date field', type: 'date' } as FieldSpec },
+    });
+    const sortButton = findTestSubject(popover, 'optionsListControl__sortingOptionsButton');
+    sortButton.simulate('click');
+
+    const sortingOptionsDiv = findTestSubject(popover, 'optionsListControl__sortingOptions');
+    const optionsText = sortingOptionsDiv.find('ul li').map((element) => element.text().trim());
+    expect(optionsText).toEqual(['By document count. Checked option.', 'By date']);
+  });
+
   test('ensure warning icon does not show up when testAllowExpensiveQueries = true/undefined', async () => {
     const popover = await mountComponent({
       componentState: { field: { name: 'Test keyword field', type: 'keyword' } as FieldSpec },

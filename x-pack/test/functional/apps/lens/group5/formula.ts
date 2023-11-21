@@ -174,7 +174,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         operation: 'formula',
       });
 
-      await PageObjects.lens.waitForVisualization('legacyMtrVis');
+      await PageObjects.lens.waitForVisualization();
       expect(await PageObjects.lens.getWorkspaceErrorCount()).to.eql(0);
     });
 

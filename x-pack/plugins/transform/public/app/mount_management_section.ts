@@ -46,6 +46,7 @@ export async function mountManagementSection(
   const {
     data,
     dataViews,
+    dataViewEditor,
     share,
     spaces,
     triggersActionsUi,
@@ -69,6 +70,7 @@ export async function mountManagementSection(
     application,
     chrome,
     data,
+    dataViewEditor,
     dataViews,
     docLinks,
     http,

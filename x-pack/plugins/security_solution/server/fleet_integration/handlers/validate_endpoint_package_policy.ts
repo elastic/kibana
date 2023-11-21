@@ -8,6 +8,7 @@
 import moment from 'moment';
 
 import type { NewPackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { getControlledArtifactCutoffDate } from '../../../common/endpoint/utils/controlled_artifact_rollout';
 
 export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) => {
   const input = inputs.find((i) => i.type === 'endpoint');
@@ -22,15 +23,18 @@ export const validateEndpointPackagePolicy = (inputs: NewPackagePolicyInput[]) =
         );
       }
 
-      const maxAllowedDate = moment.utc().subtract(18, 'months');
+      const maxAllowedDate = getControlledArtifactCutoffDate();
       if (parsedDate.isBefore(maxAllowedDate)) {
         throw createManifestVersionError(
-          'Global manifest version is too far in the past. Use "latest" or a date within the last 18 months. UTC time.'
+          'Global manifest version is too far in the past. Please use either "latest" or a date within the last 18 months. The earliest valid date is October 1, 2023, in UTC time.'
         );
       }
-      if (parsedDate.isAfter(moment.utc())) {
+      const minAllowedDate = moment.utc().subtract(1, 'day');
+      if (parsedDate.isAfter(minAllowedDate)) {
         throw createManifestVersionError(
-          'Global manifest version cannot be in the future. UTC time.'
+          `Global manifest version cannot be in the future. Latest selectable date is ${minAllowedDate.format(
+            'MMMM DD, YYYY'
+          )} UTC time.`
         );
       }
     }

@@ -33,7 +33,6 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
   buttonSize,
   onChange,
 }) => {
-  // TODO: replace with new Eui icons once available
   return (
     <div data-test-subj={dataTestSubj}>
       <IconButtonGroup
@@ -48,7 +47,7 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
                   label: i18n.translate('unifiedFieldList.fieldListSidebar.expandSidebarButton', {
                     defaultMessage: 'Show sidebar',
                   }),
-                  iconType: 'menuRight',
+                  iconType: 'transitionLeftIn',
                   'data-test-subj': `${dataTestSubj}-expand`,
                   onClick: () => onChange(false),
                 },
@@ -58,7 +57,7 @@ export const SidebarToggleButton: React.FC<SidebarToggleButtonProps> = ({
                   label: i18n.translate('unifiedFieldList.fieldListSidebar.collapseSidebarButton', {
                     defaultMessage: 'Hide sidebar',
                   }),
-                  iconType: 'menuLeft',
+                  iconType: 'transitionLeftOut',
                   'data-test-subj': `${dataTestSubj}-collapse`,
                   onClick: () => onChange(true),
                 },

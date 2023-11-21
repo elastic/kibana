@@ -31,11 +31,16 @@ export interface DocumentMigrateOptions {
    * Defaults to `false`.
    */
   allowDowngrade?: boolean;
+  /**
+   * If specified, will migrate to the given version instead of the latest known version.
+   */
+  targetTypeVersion?: string;
 }
 
 interface TransformOptions {
   convertNamespaceTypes?: boolean;
   allowDowngrade?: boolean;
+  targetTypeVersion?: string;
 }
 
 interface DocumentMigratorOptions {
@@ -149,10 +154,11 @@ export class DocumentMigrator implements VersionedTransformer {
    */
   public migrate(
     doc: SavedObjectUnsanitizedDoc,
-    { allowDowngrade = false }: DocumentMigrateOptions = {}
+    { allowDowngrade = false, targetTypeVersion }: DocumentMigrateOptions = {}
   ): SavedObjectUnsanitizedDoc {
     const { document } = this.transform(doc, {
       allowDowngrade,
+      targetTypeVersion,
     });
     return document;
   }
@@ -171,15 +177,20 @@ export class DocumentMigrator implements VersionedTransformer {
 
   private transform(
     doc: SavedObjectUnsanitizedDoc,
-    { convertNamespaceTypes = false, allowDowngrade = false }: TransformOptions = {}
+    {
+      convertNamespaceTypes = false,
+      allowDowngrade = false,
+      targetTypeVersion,
+    }: TransformOptions = {}
   ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
     }
     const typeMigrations = this.migrations[doc.type];
-    if (downgradeRequired(doc, typeMigrations?.latestVersion ?? {})) {
+    if (downgradeRequired(doc, typeMigrations?.latestVersion ?? {}, targetTypeVersion)) {
       const currentVersion = doc.typeMigrationVersion ?? doc.migrationVersion?.[doc.type];
-      const latestVersion = this.migrations[doc.type].latestVersion[TransformType.Migrate];
+      const latestVersion =
+        targetTypeVersion ?? this.migrations[doc.type].latestVersion[TransformType.Migrate];
       if (!allowDowngrade) {
         throw Boom.badData(
           `Document "${doc.id}" belongs to a more recent version of Kibana [${currentVersion}] when the last known version is [${latestVersion}].`
@@ -187,13 +198,16 @@ export class DocumentMigrator implements VersionedTransformer {
       }
       return this.transformDown(doc, { targetTypeVersion: latestVersion! });
     } else {
-      return this.transformUp(doc, { convertNamespaceTypes });
+      return this.transformUp(doc, { convertNamespaceTypes, targetTypeVersion });
     }
   }
 
   private transformUp(
     doc: SavedObjectUnsanitizedDoc,
-    { convertNamespaceTypes }: { convertNamespaceTypes: boolean }
+    {
+      convertNamespaceTypes,
+      targetTypeVersion,
+    }: { convertNamespaceTypes: boolean; targetTypeVersion?: string }
   ) {
     if (!this.migrations) {
       throw new Error('Migrations are not ready. Make sure prepareMigrations is called first.');
@@ -201,6 +215,7 @@ export class DocumentMigrator implements VersionedTransformer {
 
     const pipeline = new DocumentUpgradePipeline({
       document: doc,
+      targetTypeVersion,
       migrations: this.migrations,
       kibanaVersion: this.options.kibanaVersion,
       convertNamespaceTypes,

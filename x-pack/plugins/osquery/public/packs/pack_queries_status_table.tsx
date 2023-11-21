@@ -397,7 +397,9 @@ const ScheduledQueryLastResults: React.FC<ScheduledQueryLastResultsProps> = ({
               </>
             }
           >
-            <FormattedRelative value={lastResultsData['@timestamp']} />
+            <div data-test-subj="last-results-date">
+              <FormattedRelative value={lastResultsData['@timestamp']} />
+            </div>
           </EuiToolTip>
         ) : (
           '-'
@@ -424,7 +426,7 @@ const DocsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionId,
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge color="subdued">
+        <EuiNotificationBadge color="subdued" data-test-subj="docs-count-badge">
           {lastResultsData?.docCount ?? 0}
         </EuiNotificationBadge>
       </EuiFlexItem>
@@ -448,7 +450,7 @@ const AgentsColumnResults: React.FC<ScheduledQueryLastResultsProps> = ({ actionI
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center">
       <EuiFlexItem grow={false}>
-        <EuiNotificationBadge color="subdued">
+        <EuiNotificationBadge color="subdued" data-test-subj="agent-count-badge">
           {lastResultsData?.uniqueAgentsCount ?? 0}
         </EuiNotificationBadge>
       </EuiFlexItem>

@@ -24,12 +24,14 @@ import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-manag
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 import type { SavedSearchPublicPluginStart } from '@kbn/saved-search-plugin/public';
 import type { PluginInitializerContext } from '@kbn/core/public';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import { registerFeature } from './register_feature';
 import { getTransformHealthRuleType } from './alerting';
 
 export interface PluginsDependencies {
   charts: ChartsPluginStart;
   data: DataPublicPluginStart;
+  dataViewEditor?: DataViewEditorStart;
   unifiedSearch: UnifiedSearchPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
   management: ManagementSetup;

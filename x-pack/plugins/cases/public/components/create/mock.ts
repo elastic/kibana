@@ -28,6 +28,7 @@ export const sampleData: CasePostRequest = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  customFields: [],
   category: null,
 };
 

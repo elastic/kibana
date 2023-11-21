@@ -50,6 +50,7 @@ const ruleTypes = [
       context: [],
       state: [],
     },
+    category: 'test',
     producer: 'test',
     enabledInLicense: true,
     defaultScheduleInterval: '10m',

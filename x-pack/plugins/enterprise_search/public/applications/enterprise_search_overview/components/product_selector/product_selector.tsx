@@ -17,7 +17,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { Chat } from '@kbn/cloud-chat-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { WelcomeBanner } from '@kbn/search-api-panels';
 
@@ -41,7 +40,19 @@ import { IngestionSelector } from './ingestion_selector';
 
 import './product_selector.scss';
 
-export const ProductSelector: React.FC = () => {
+interface ProductSelectorProps {
+  access: {
+    hasAppSearchAccess?: boolean;
+    hasWorkplaceSearchAccess?: boolean;
+  };
+  isWorkplaceSearchAdmin: boolean;
+}
+
+export const ProductSelector: React.FC<ProductSelectorProps> = ({
+  access,
+  isWorkplaceSearchAdmin,
+}) => {
+  const { hasAppSearchAccess, hasWorkplaceSearchAccess } = access;
   const { config } = useValues(KibanaLogic);
   const { errorConnectingMessage } = useValues(HttpLogic);
   const { security } = useValues(KibanaLogic);
@@ -139,16 +150,21 @@ export const ProductSelector: React.FC = () => {
             <EuiFlexItem>
               <ElasticsearchProductCard />
             </EuiFlexItem>
-            <EuiFlexItem>
-              <EnterpriseSearchProductCard />
-            </EuiFlexItem>
+            {(hasAppSearchAccess || hasWorkplaceSearchAccess) && (
+              <EuiFlexItem>
+                <EnterpriseSearchProductCard
+                  hasAppSearchAccess={hasAppSearchAccess ?? false}
+                  hasWorkplaceSearchAccess={hasWorkplaceSearchAccess ?? false}
+                  isWorkplaceSearchAdmin={isWorkplaceSearchAdmin}
+                />
+              </EuiFlexItem>
+            )}
             {!config.host && config.canDeployEntSearch && (
               <EuiFlexItem>
                 <SetupGuideCta />
               </EuiFlexItem>
             )}
           </EuiFlexGroup>
-          <Chat />
         </EuiPageTemplate.Section>
       </EnterpriseSearchOverviewPageTemplate>
     </>

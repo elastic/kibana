@@ -71,6 +71,10 @@ import {
 import { APM_AGENT_CONFIGURATION_INDEX } from '../../../routes/settings/apm_indices/apm_system_index_constants';
 import { IndicesStatsResponse, TelemetryClient } from '../telemetry_client';
 import { RollupInterval } from '../../../../common/rollup';
+import {
+  APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+  SavedApmCustomDashboard,
+} from '../../../../common/custom_dashboards';
 
 type ISavedObjectsClient = Pick<SavedObjectsClient, 'find'>;
 const TIME_RANGES = ['1d', 'all'] as const;
@@ -590,6 +594,43 @@ export const tasks: TelemetryTask[] = [
     },
   },
   {
+    name: 'global_labels',
+    executor: async ({ telemetryClient }) => {
+      const metricConsistingGlobalLabels = [
+        'service_summary',
+        'service_transaction',
+        'transaction',
+        'service_destination',
+      ];
+
+      const index = metricConsistingGlobalLabels
+        .map((metric) => `metrics-apm.${metric}*`)
+        .join(',');
+
+      const response = await telemetryClient.fieldCaps({
+        index,
+        fields: 'labels.*',
+        expand_wildcards: 'all',
+        index_filter: range1d,
+      });
+
+      const globalLabelCount = Object.keys(response.fields).length;
+
+      // Skip the top level Labels field which is sometimes present in the response
+      const count = response.fields?.labels
+        ? globalLabelCount - 1
+        : globalLabelCount;
+
+      return {
+        counts: {
+          global_labels: {
+            '1d': count,
+          },
+        },
+      };
+    },
+  },
+  {
     name: 'services',
     executor: async ({ indices, telemetryClient }) => {
       const servicesPerAgent = await AGENT_NAMES.reduce(
@@ -637,8 +678,37 @@ export const tasks: TelemetryTask[] = [
         Promise.resolve({} as Record<AgentName, number>)
       );
 
+      const services = await telemetryClient.search({
+        index: [
+          indices.error,
+          indices.span,
+          indices.metric,
+          indices.transaction,
+        ],
+        body: {
+          size: 0,
+          track_total_hits: true,
+          terminate_after: 1,
+          query: {
+            bool: {
+              filter: [
+                {
+                  exists: {
+                    field: SERVICE_NAME,
+                  },
+                },
+                range1d,
+              ],
+            },
+          },
+          timeout,
+        },
+      });
+
       return {
-        has_any_services: sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services_per_official_agent:
+          sum(Object.values(servicesPerAgent)) > 0,
+        has_any_services: services?.hits?.total?.value > 0,
         services_per_agent: servicesPerAgent,
       };
     },
@@ -1448,6 +1518,32 @@ export const tasks: TelemetryTask[] = [
 
       return {
         service_groups: {
+          kuery_fields: uniq(kueryFields),
+          total: response.total ?? 0,
+        },
+      };
+    },
+  },
+  {
+    name: 'custom_dashboards',
+    executor: async ({ savedObjectsClient }) => {
+      const response = await savedObjectsClient.find<SavedApmCustomDashboard>({
+        type: APM_CUSTOM_DASHBOARDS_SAVED_OBJECT_TYPE,
+        page: 1,
+        perPage: 500,
+        sortField: 'updated_at',
+        sortOrder: 'desc',
+        namespaces: ['*'],
+      });
+
+      const kueryNodes = response.saved_objects.map(
+        ({ attributes: { kuery } }) => fromKueryExpression(kuery ?? '')
+      );
+
+      const kueryFields = getKueryFields(kueryNodes);
+
+      return {
+        custom_dashboards: {
           kuery_fields: uniq(kueryFields),
           total: response.total ?? 0,
         },

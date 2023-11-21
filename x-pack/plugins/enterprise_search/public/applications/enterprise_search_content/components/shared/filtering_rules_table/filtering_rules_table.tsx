@@ -11,9 +11,13 @@ import { EuiBasicTable, EuiBasicTableColumn, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { FilteringRule, FilteringPolicy, FilteringRuleRule } from '@kbn/search-connectors';
-
-import { filteringPolicyToText, filteringRuleToText } from '../../../utils/filtering_rule_helpers';
+import {
+  filteringPolicyToText,
+  filteringRuleToText,
+  FilteringRule,
+  FilteringPolicy,
+  FilteringRuleRule,
+} from '@kbn/search-connectors';
 
 interface FilteringRulesTableProps {
   filteringRules: FilteringRule[];

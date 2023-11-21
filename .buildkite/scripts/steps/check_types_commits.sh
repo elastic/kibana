@@ -2,40 +2,92 @@
 
 set -euo pipefail
 
-# This script will collect typescript projects and run typecheck on projects between the given 2 parameters
-# Could be used for selective typechecking on projects that might be affected for a given PR.
+# This script detects the files changed in a given set of commits, finds the related tsconfig.json files, and scope the TypeScript type check to those.
+# In CI, this script can be used for selective type-checking on projects that might be affected for a given PR.
 # (The accuracy for finding related projects is not a 100%)
 
-if [[ "${CI-}" == "true" ]]; then
-  .buildkite/scripts/bootstrap.sh
-
-  sha1=$(git merge-base $GITHUB_PR_TARGET_BRANCH $GITHUB_PR_TRIGGERED_SHA)
-  sha2="${GITHUB_PR_TRIGGERED_SHA-}"
-else
-  if [[ "${1-}" == "--cached" ]]; then
-    # Only check staged files
-    sha1=$1
-    sha2=""
-  else
-    # Script take between 0 and 2 arguments representing two commit SHA's:
-    # If 0, it will diff HEAD and HEAD^
-    # If 1 (SHA1), it will diff SHA1 and SHA1^
-    # If 2 (SHA1, SHA2), it will diff SHA1 and SHA2
-    sha1="${1-HEAD}"
-    sha2="${2-$sha1^}"
-  fi
-fi
-
+argv=( "$@" )
+diffArgs=("--name-only")
 uniq_dirs=()
 uniq_tsconfigs=()
 
-if [[ "$sha1" == "--cached" ]]; then
-  echo "Detecting files changed in staging area..."
-else
-  echo "Detecting files changed between $sha1 and $sha2..."
+is_flag_set () {
+  flag=$1
+  if [ ${#argv[@]} -gt 0 ] && [[ ${argv[@]} =~ $flag ]]; then
+    true
+  else
+    false
+  fi
+}
+
+get_args_for_flag_result=()
+get_args_for_flag () {
+  flag=$1
+  found=false
+  get_args_for_flag_result=()
+  if [ ${#argv[@]} -gt 0 ]; then
+    for i in "${!argv[@]}"; do
+      arg="${argv[$i]}"
+      if [ "$found" == false ] && [[ "$arg" == "$flag" ]]; then
+        found=true
+      elif [ "$found" == true ]; then
+        if [[ "$arg" == -* ]]; then
+          return
+        else
+          get_args_for_flag_result+=("$arg")
+        fi
+      fi
+    done
+  fi
+}
+
+if is_flag_set "--help" || is_flag_set "-h"; then
+  echo "Detects the files changed in a given set of commits, finds the related"
+  echo "tsconfig.json files, and scope the TypeScript type check to those."
+  echo
+  echo "Usage:"
+  echo "  $0 [options]"
+  echo "  $0 [<ref1> [<ref2>]]"
+  echo
+  echo "Options:"
+  echo "  --help, -h    Show this help"
+  echo "  --cached      Check staged changes"
+  echo "  --merge-base [<ref1> [<ref2>]]"
+  echo "                Check changes between nearest common ansestor (merge-base) of"
+  echo "                ref1 and ref2. Defaults: 'main' and 'HEAD'"
+  echo
+  echo "If no options are provided, the script takes between 0 and 2 arguments"
+  echo "representing two git refs:"
+  echo "  If 0, it will diff HEAD and HEAD^"
+  echo "  If 1 (REF1), it will diff REF1 and REF1^"
+  echo "  If 2 (REF1, REF2), it will diff REF1 and REF2"
+  exit
 fi
 
-files=($(git diff --name-only $sha1 $sha2))
+if [[ "${CI-}" == "true" ]]; then
+  # Buildkite only
+  .buildkite/scripts/bootstrap.sh
+
+  targetBranch="${GITHUB_PR_TARGET_BRANCH-}"
+  git fetch origin $targetBranch
+  sha=$(git merge-base "origin/$targetBranch" "${GITHUB_PR_TRIGGERED_SHA-}")
+  diffArgs+=("$sha" "${GITHUB_PR_TRIGGERED_SHA-}")
+elif is_flag_set "--merge-base"; then
+  # Similar to when CI=true, but locally
+  get_args_for_flag "--merge-base"
+  diffArgs+=("--merge-base" "${get_args_for_flag_result[0]-main}" "${get_args_for_flag_result[1]-HEAD}")
+elif is_flag_set "--cached"; then
+  # Only check staged files
+  diffArgs+=("--cached")
+else
+  # Full manual mode!
+  ref1="${1-HEAD}"
+  diffArgs+=("$ref1" "${2-$ref1^}")
+fi
+
+echo "Detecting files changed..."
+echo "DEBUG: git diff args: ${diffArgs[@]}"
+files=($(git diff "${diffArgs[@]}"))
 
 add_dir () {
   new_dir=$1
@@ -117,11 +169,7 @@ if [ ${#uniq_dirs[@]} -gt 0 ]; then
 fi
 
 if [ ${#uniq_tsconfigs[@]} -eq 0 ]; then
-  if [[ "$sha1" == "--cached" ]]; then
-    echo "No tsconfig.json files found for staged changes"
-  else
-    echo "No tsconfig.json files found for changes between $sha1 and $sha2"
-  fi
+  echo "No tsconfig.json files found"
   exit
 fi
 

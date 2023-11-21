@@ -6,6 +6,7 @@
  */
 
 import { RRuleAttributes } from '../../r_rule/types';
+import { MaintenanceWindowCategoryIdTypes } from '../constants';
 
 export interface MaintenanceWindowEventAttributes {
   gte: string;
@@ -23,4 +24,5 @@ export interface MaintenanceWindowAttributes {
   updatedBy: string | null;
   createdAt: string;
   updatedAt: string;
+  categoryIds?: MaintenanceWindowCategoryIdTypes[] | null;
 }

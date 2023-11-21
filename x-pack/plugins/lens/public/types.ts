@@ -33,7 +33,7 @@ import type { IndexPatternAggRestrictions } from '@kbn/data-plugin/public';
 import type { FieldSpec, DataViewSpec, DataView } from '@kbn/data-views-plugin/common';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
-import { SearchResponseWarning } from '@kbn/data-plugin/public/search/types';
+import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { EuiButtonIconProps } from '@elastic/eui';
 import { SearchRequest } from '@kbn/data-plugin/public';
 import { estypes } from '@elastic/elasticsearch';
@@ -285,7 +285,7 @@ export interface UserMessage {
   uniqueId?: string;
   severity: 'error' | 'warning' | 'info';
   shortMessage: string;
-  longMessage: React.ReactNode | string;
+  longMessage: string | React.ReactNode | ((closePopover: () => void) => React.ReactNode);
   fixableInEditor: boolean;
   displayLocations: UserMessageDisplayLocation[];
 }
@@ -460,7 +460,7 @@ export interface Datasource<T = unknown, P = unknown> {
   getUserMessages: (
     state: T,
     deps: {
-      frame: FrameDatasourceAPI;
+      frame: FramePublicAPI;
       setState: StateSetter<T>;
       visualizationInfo?: VisualizationInfo;
     }
@@ -513,7 +513,7 @@ export interface Datasource<T = unknown, P = unknown> {
 
 export interface DatasourceFixAction<T> {
   label: string;
-  newState: (frame: FrameDatasourceAPI) => Promise<T>;
+  newState: (frame: FramePublicAPI) => Promise<T>;
 }
 
 /**
@@ -780,6 +780,7 @@ export type VisualizationDimensionEditorProps<T = unknown> = VisualizationConfig
   addLayer: (layerType: LayerType) => void;
   removeLayer: (layerId: string) => void;
   panelRef: MutableRefObject<HTMLDivElement | null>;
+  isInlineEditing?: boolean;
 };
 
 export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
@@ -820,6 +821,7 @@ export type VisualizationDimensionGroupConfig = SharedDimensionProps & {
   paramEditorCustomProps?: ParamEditorCustomProps;
   enableFormatSelector?: boolean;
   labels?: { buttonAriaLabel: string; buttonLabel: string };
+  isHidden?: boolean;
 };
 
 export interface VisualizationDimensionChangeProps<T> {
@@ -923,6 +925,8 @@ export interface VisualizationSuggestion<T = unknown> {
 export type DatasourceLayers = Partial<Record<string, DatasourcePublicAPI>>;
 
 export interface FramePublicAPI {
+  query: Query;
+  filters: Filter[];
   datasourceLayers: DatasourceLayers;
   dateRange: DateRange;
   /**
@@ -932,11 +936,6 @@ export interface FramePublicAPI {
    */
   activeData?: Record<string, Datatable>;
   dataViews: DataViewsState;
-}
-
-export interface FrameDatasourceAPI extends FramePublicAPI {
-  query: Query;
-  filters: Filter[];
 }
 
 /**
@@ -1417,6 +1416,7 @@ export type LensTopNavMenuEntryGenerator = (props: {
 export interface LensCellValueAction {
   id: string;
   iconType: string;
+  type?: string;
   displayName: string;
   execute: (data: CellValueContext['data']) => void;
 }

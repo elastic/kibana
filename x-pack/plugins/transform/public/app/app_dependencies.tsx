@@ -37,6 +37,7 @@ import { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { GetMlSharedImportsReturnType } from '../shared_imports';
 
 export interface AppDependencies {
@@ -45,6 +46,7 @@ export interface AppDependencies {
   charts: ChartsPluginStart;
   chrome: ChromeStart;
   data: DataPublicPluginStart;
+  dataViewEditor?: DataViewEditorStart;
   dataViews: DataViewsPublicPluginStart;
   docLinks: DocLinksStart;
   fieldFormats: FieldFormatsStart;

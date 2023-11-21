@@ -23,7 +23,13 @@ import {
 import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
 import { PopoverTooltip } from '../../shared/popover_tooltip';
 
-export function SystemIntegrationBanner() {
+export type SystemIntegrationBannerState = 'pending' | 'resolved' | 'rejected';
+
+export function SystemIntegrationBanner({
+  onStatusChange,
+}: {
+  onStatusChange: (status: SystemIntegrationBannerState) => void;
+}) {
   const { navigateToAppUrl } = useKibanaNavigation();
   const [integrationVersion, setIntegrationVersion] = useState<string>();
   const [error, setError] = useState<SystemIntegrationError>();
@@ -31,15 +37,17 @@ export function SystemIntegrationBanner() {
   const onIntegrationCreationSuccess = useCallback(
     ({ version }: { version?: string }) => {
       setIntegrationVersion(version);
+      onStatusChange('resolved');
     },
-    []
+    [onStatusChange]
   );
 
   const onIntegrationCreationFailure = useCallback(
     (e: SystemIntegrationError) => {
       setError(e);
+      onStatusChange('rejected');
     },
-    []
+    [onStatusChange]
   );
 
   const { performRequest, requestState } = useInstallSystemIntegration({

@@ -13,35 +13,40 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import { useKibana } from '@kbn/kibana-react-plugin/public';
-import { default as React, useCallback, useEffect, useState } from 'react';
 import {
+  AllDatasetsLocatorParams,
+  ALL_DATASETS_LOCATOR_ID,
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
-import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
+import { i18n } from '@kbn/i18n';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { default as React, useCallback, useEffect, useState } from 'react';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import { useKibanaNavigation } from '../../../hooks/use_kibana_navigation';
+import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
+import { BackButton } from '../../shared/back_button';
 import {
   ElasticAgentPlatform,
   getElasticAgentSetupCommand,
 } from '../../shared/get_elastic_agent_setup_command';
 import {
+  EuiStepStatus,
   InstallElasticAgentSteps,
   ProgressStepId,
-  EuiStepStatus,
 } from '../../shared/install_elastic_agent_steps';
 import {
   StepPanel,
   StepPanelContent,
   StepPanelFooter,
 } from '../../shared/step_panel';
-import { ApiKeyBanner } from '../custom_logs/api_key_banner';
-import { WindowsInstallStep } from '../../shared/windows_install_step';
-import { SystemIntegrationBanner } from './system_integration_banner';
 import { TroubleshootingLink } from '../../shared/troubleshooting_link';
+import { WindowsInstallStep } from '../../shared/windows_install_step';
+import { ApiKeyBanner } from '../custom_logs/api_key_banner';
+import {
+  SystemIntegrationBanner,
+  SystemIntegrationBannerState,
+} from './system_integration_banner';
 
 export function InstallElasticAgent() {
   const {
@@ -52,22 +57,38 @@ export function InstallElasticAgent() {
     share.url.locators.get<SingleDatasetLocatorParams>(
       SINGLE_DATASET_LOCATOR_ID
     );
+  const allDataSetsLocator = share.url.locators.get<AllDatasetsLocatorParams>(
+    ALL_DATASETS_LOCATOR_ID
+  );
 
-  const { navigateToKibanaUrl } = useKibanaNavigation();
-  const { getState, setState } = useWizard();
+  const { goBack, getState, setState } = useWizard();
   const wizardState = getState();
   const [elasticAgentPlatform, setElasticAgentPlatform] =
     useState<ElasticAgentPlatform>('linux-tar');
+  const [systemIntegrationStatus, setSystemIntegrationStatus] =
+    useState<SystemIntegrationBannerState>('pending');
+
+  const onIntegrationStatusChange = useCallback(
+    (status: SystemIntegrationBannerState) => {
+      setSystemIntegrationStatus(status);
+    },
+    []
+  );
 
   const datasetName = 'system-logs';
 
-  function onBack() {
-    navigateToKibanaUrl('/app/observabilityOnboarding');
-  }
   async function onContinue() {
+    if (systemIntegrationStatus === 'rejected') {
+      await allDataSetsLocator!.navigate({
+        origin: { id: 'application-log-onboarding' },
+      });
+      return;
+    }
+
     await singleDatasetLocator!.navigate({
       integration: 'system',
       dataset: 'system.syslog',
+      origin: { id: 'application-log-onboarding' },
     });
   }
 
@@ -198,16 +219,7 @@ export function InstallElasticAgent() {
       panelFooter={
         <StepPanelFooter
           items={[
-            <EuiButton
-              data-test-subj="observabilityOnboardingInstallElasticAgentBackButton"
-              color="text"
-              onClick={onBack}
-            >
-              {i18n.translate(
-                'xpack.observability_onboarding.systemLogs.back',
-                { defaultMessage: 'Back' }
-              )}
-            </EuiButton>,
+            <BackButton onBack={goBack} />,
             <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -216,6 +228,7 @@ export function InstallElasticAgent() {
                   iconType="magnifyWithPlus"
                   onClick={onContinue}
                   data-test-subj="obltOnboardingExploreLogs"
+                  disabled={systemIntegrationStatus === 'pending'}
                 >
                   {i18n.translate(
                     'xpack.observability_onboarding.steps.exploreLogs',
@@ -241,7 +254,7 @@ export function InstallElasticAgent() {
           </p>
         </EuiText>
         <EuiSpacer size="m" />
-        <SystemIntegrationBanner />
+        <SystemIntegrationBanner onStatusChange={onIntegrationStatusChange} />
         <EuiSpacer size="m" />
         {apiKeyEncoded && onboardingId ? (
           <ApiKeyBanner

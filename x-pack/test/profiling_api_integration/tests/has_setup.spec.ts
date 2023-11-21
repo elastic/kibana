@@ -11,7 +11,7 @@ import { ProfilingStatus } from '@kbn/profiling-utils';
 import { getBettertest } from '../common/bettertest';
 import { FtrProviderContext } from '../common/ftr_provider_context';
 import { deletePackagePolicy, getProfilingPackagePolicyIds } from '../utils/fleet';
-import { loadProfilingData, setupProfiling } from '../utils/profiling_data';
+import { cleanUpProfilingData, loadProfilingData, setupProfiling } from '../utils/profiling_data';
 
 const profilingRoutePaths = getRoutePaths();
 
@@ -26,6 +26,9 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
   // Failing: See https://github.com/elastic/kibana/issues/167076
   registry.when.skip('Profiling status check', { config: 'cloud' }, () => {
     describe('Profiling is not set up and no data is loaded', () => {
+      before(async () => {
+        await cleanUpProfilingData({ es, logger, bettertest });
+      });
       describe('Admin user', () => {
         let statusCheck: ProfilingStatus;
         before(async () => {

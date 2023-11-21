@@ -46,6 +46,7 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         defaultMessage: 'Alerts',
       }),
       href: http.basePath.prepend('/app/observability/alerts'),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       text: i18n.translate('xpack.observability.breadcrumbs.rulesLinkText', {
@@ -150,7 +151,8 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
             setRefresh(new Date());
             return Promise.resolve();
           }}
-          useRuleProducer={true}
+          hideGrouping
+          useRuleProducer
         />
       )}
     </ObservabilityPageTemplate>

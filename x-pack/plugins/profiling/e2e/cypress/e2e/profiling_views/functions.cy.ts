@@ -4,6 +4,11 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import {
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
+} from '@kbn/observability-plugin/common';
 
 describe('Functions page', () => {
   const rangeFrom = '2023-04-18T00:00:00.000Z';
@@ -80,11 +85,10 @@ describe('Functions page', () => {
     cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
     cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
     cy.wait('@getTopNFunctions');
-    cy.get('.euiDataGridRow').should('have.length.gt', 1);
+    const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
+    cy.get(firstRowSelector).eq(2).contains('vmlinux');
     cy.addKqlFilter({ key: 'Stacktrace.id', value: '-7DvnP1mizQYw8mIIpgbMg' });
     cy.wait('@getTopNFunctions');
-    cy.get('.euiDataGridRow').should('have.length', 1);
-    const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
     cy.get(firstRowSelector).eq(2).contains('libjvm.so');
   });
 
@@ -96,50 +100,50 @@ describe('Functions page', () => {
       {
         columnKey: 'rank',
         columnIndex: 1,
-        highRank: 388,
+        highRank: 4481,
         lowRank: 1,
-        highValue: 388,
+        highValue: 4481,
         lowValue: 1,
       },
       {
         columnKey: 'samples',
         columnIndex: 7,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: 28,
-        lowValue: 1,
+        lowValue: 0,
       },
       {
         columnKey: 'selfCPU',
         columnIndex: 3,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: '5.46%',
-        lowValue: '0.19%',
+        lowValue: '0.00%',
       },
       {
         columnKey: 'totalCPU',
         columnIndex: 4,
-        highRank: 338,
+        highRank: 3623,
         lowRank: 44,
-        highValue: '10.33%',
+        highValue: '60.43%',
         lowValue: '0.19%',
       },
       {
         columnKey: 'annualizedCo2',
         columnIndex: 5,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: '1.84 lbs / 0.84 kg',
-        lowValue: '0.07 lbs / 0.03 kg',
+        lowValue: undefined,
       },
       {
         columnKey: 'annualizedDollarCost',
         columnIndex: 6,
         highRank: 1,
-        lowRank: 44,
+        lowRank: 389,
         highValue: '$17.37',
-        lowValue: '$0.62',
+        lowValue: undefined,
       },
     ].forEach(({ columnKey, columnIndex, highRank, highValue, lowRank, lowValue }) => {
       cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
@@ -151,7 +155,11 @@ describe('Functions page', () => {
       cy.get(`[data-test-subj="dataGridHeaderCell-${columnKey}"]`).click();
       cy.contains('Sort Low-High').click();
       cy.get(firstRowSelector).eq(1).contains(lowRank);
-      cy.get(firstRowSelector).eq(columnIndex).contains(lowValue);
+      if (lowValue !== undefined) {
+        cy.get(firstRowSelector).eq(columnIndex).contains(lowValue);
+      } else {
+        cy.get(firstRowSelector).eq(columnIndex).should('not.have.value');
+      }
     });
 
     cy.get(`[data-test-subj="dataGridHeaderCell-frame"]`).click();
@@ -164,5 +172,63 @@ describe('Functions page', () => {
     cy.contains('Sort A-Z').click();
     cy.get(firstRowSelector).eq(1).contains('371');
     cy.get(firstRowSelector).eq(2).contains('/');
+  });
+
+  describe('Test changing CO2 settings', () => {
+    afterEach(() => {
+      cy.updateAdvancedSettings({
+        [profilingCo2PerKWH]: 0.000379069,
+        [profilingDatacenterPUE]: 1.7,
+        [profilingPerCoreWatt]: 7,
+      });
+    });
+
+    it('changes CO2 settings and validate values in the table', () => {
+      cy.intercept('GET', '/internal/profiling/topn/functions?*').as('getTopNFunctions');
+      cy.visitKibana('/app/profiling/functions', { rangeFrom, rangeTo });
+      cy.wait('@getTopNFunctions');
+      const firstRowSelector = '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"]';
+      cy.get(firstRowSelector).eq(1).contains('1');
+      cy.get(firstRowSelector).eq(2).contains('vmlinux');
+      cy.get(firstRowSelector).eq(5).contains('1.84 lbs / 0.84 kg');
+      cy.contains('Settings').click();
+      cy.contains('Advanced Settings');
+      cy.get(`[data-test-subj="advancedSetting-editField-${profilingCo2PerKWH}"]`)
+        .clear()
+        .type('0.12345');
+      cy.get(`[data-test-subj="advancedSetting-editField-${profilingDatacenterPUE}"]`)
+        .clear()
+        .type('2.4');
+      cy.get(`[data-test-subj="advancedSetting-editField-${profilingPerCoreWatt}"]`)
+        .clear()
+        .type('20');
+      cy.contains('Save changes').click();
+      cy.getByTestSubj('kbnLoadingMessage').should('exist');
+      cy.getByTestSubj('kbnLoadingMessage').should('not.exist', {
+        timeout: 50000,
+      });
+      cy.go('back');
+      cy.wait('@getTopNFunctions');
+      cy.get(firstRowSelector).eq(5).contains('24.22k lbs / 10.99k');
+      const firstRowSelectorActionButton =
+        '[data-grid-row-index="0"] [data-test-subj="dataGridRowCell"] .euiButtonIcon';
+      cy.get(firstRowSelectorActionButton).click();
+      [
+        { parentKey: 'impactEstimates', key: 'co2Emission', value: '0.02 lbs / 0.01 kg' },
+        { parentKey: 'impactEstimates', key: 'selfCo2Emission', value: '0.02 lbs / 0.01 kg' },
+        {
+          parentKey: 'impactEstimates',
+          key: 'annualizedCo2Emission',
+          value: '24.22k lbs / 10.99k kg',
+        },
+        {
+          parentKey: 'impactEstimates',
+          key: 'annualizedSelfCo2Emission',
+          value: '24.22k lbs / 10.99k kg',
+        },
+      ].forEach(({ parentKey, key, value }) => {
+        cy.get(`[data-test-subj="${parentKey}_${key}"]`).contains(value);
+      });
+    });
   });
 });

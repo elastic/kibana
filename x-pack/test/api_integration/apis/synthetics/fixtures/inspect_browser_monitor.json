@@ -80,5 +80,6 @@
   },
   "service": {
     "name": ""
-  }
+  },
+  "max_attempts": 2
 }

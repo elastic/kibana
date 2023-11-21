@@ -6,7 +6,10 @@
  */
 import { keyBy } from 'lodash';
 import type { StackFrameMetadata, TopNFunctions } from '@kbn/profiling-utils';
-import { calculateImpactEstimates } from '../../../common/calculate_impact_estimates';
+import {
+  CalculateImpactEstimates,
+  ImpactEstimates,
+} from '../../hooks/use_calculate_impact_estimates';
 
 export function getColorLabel(percent: number) {
   if (percent === 0) {
@@ -37,7 +40,7 @@ export interface IFunctionRow {
   totalCPU: number;
   selfCPUPerc: number;
   totalCPUPerc: number;
-  impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+  impactEstimates?: ImpactEstimates;
   diff?: {
     rank: number;
     samples: number;
@@ -45,7 +48,7 @@ export interface IFunctionRow {
     totalCPU: number;
     selfCPUPerc: number;
     totalCPUPerc: number;
-    impactEstimates?: ReturnType<typeof calculateImpactEstimates>;
+    impactEstimates?: ImpactEstimates;
   };
 }
 
@@ -55,12 +58,14 @@ export function getFunctionsRows({
   comparisonTopNFunctions,
   topNFunctions,
   totalSeconds,
+  calculateImpactEstimates,
 }: {
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
   comparisonTopNFunctions?: TopNFunctions;
   topNFunctions?: TopNFunctions;
   totalSeconds: number;
+  calculateImpactEstimates: CalculateImpactEstimates;
 }): IFunctionRow[] {
   if (!topNFunctions || !topNFunctions.TotalCount || topNFunctions.TotalCount === 0) {
     return [];
@@ -70,7 +75,7 @@ export function getFunctionsRows({
     ? keyBy(comparisonTopNFunctions.TopN, 'Id')
     : {};
 
-  return topNFunctions.TopN.filter((topN) => topN.CountExclusive > 0).map((topN, i) => {
+  return topNFunctions.TopN.filter((topN) => topN.CountExclusive >= 0).map((topN, i) => {
     const comparisonRow = comparisonDataById?.[topN.Id];
 
     const scaledSelfCPU = scaleValue({

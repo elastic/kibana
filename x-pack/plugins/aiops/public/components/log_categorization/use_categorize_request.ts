@@ -9,7 +9,7 @@ import { useRef, useCallback, useMemo } from 'react';
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
-import { isCompleteResponse } from '@kbn/data-plugin/public';
+import { isRunningResponse } from '@kbn/data-plugin/public';
 import { useStorage } from '@kbn/ml-local-storage';
 
 import { createCategoryRequest } from '../../../common/api/log_categorization/create_category_request';
@@ -83,7 +83,7 @@ export function useCategorizeRequest() {
           )
           .subscribe({
             next: (result) => {
-              if (isCompleteResponse(result)) {
+              if (!isRunningResponse(result)) {
                 resolve(processCategoryResults(result, field, unwrap));
               } else {
                 // partial results

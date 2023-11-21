@@ -254,7 +254,125 @@ describe('HeatmapComponent', function () {
       expect(component.find(Heatmap).prop('colorScale')).toEqual({
         bands: [
           { color: 'rgb(0, 0, 0)', end: 0, start: 0 },
-          { color: 'rgb(112, 38, 231)', end: Infinity, start: 571.806 },
+          { color: 'rgb(112, 38, 231)', end: Infinity, start: 0 },
+        ],
+        type: 'bands',
+      });
+    });
+  });
+
+  it('computes should recompute the bands when range is relative (percent)', async () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 3 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [19.98, 39.88, 60, 80, 100],
+            range: 'percent',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: 0,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    await act(async () => {
+      expect(component.find(Heatmap).prop('colorScale')).toEqual({
+        bands: [
+          {
+            start: 3,
+            end: 3,
+            color: '#6092c0',
+          },
+          {
+            start: 3,
+            end: 3,
+            color: '#a8bfda',
+          },
+          {
+            start: 3,
+            end: 3,
+            color: '#ebeff5',
+          },
+          {
+            start: 3,
+            end: 3,
+            color: '#ecb385',
+          },
+          {
+            start: 3,
+            end: Infinity,
+            color: '#e7664c',
+          },
+        ],
+        type: 'bands',
+      });
+    });
+  });
+
+  it('computed the bands correctly for number range palettes when a single value is provided', () => {
+    const newData: Datatable = {
+      type: 'datatable',
+      rows: [{ 'col-0-1': 2 }],
+      columns: [{ id: 'col-0-1', name: 'Count', meta: { type: 'number' } }],
+    };
+    const newProps = {
+      ...wrapperProps,
+      data: newData,
+      args: {
+        ...wrapperProps.args,
+        palette: {
+          params: {
+            colors: ['#6092c0', '#a8bfda', '#ebeff5', '#ecb385', '#e7664c'],
+            stops: [323.39, 362.8, 402.2, 500, 501],
+            range: 'number',
+            gradient: true,
+            continuity: 'above',
+            rangeMin: 284,
+            rangeMax: null,
+          },
+        },
+      },
+    } as unknown as HeatmapRenderProps;
+    const component = mountWithIntl(<HeatmapComponent {...newProps} />);
+    act(() => {
+      expect(component.find(Heatmap).prop('colorScale')).toEqual({
+        bands: [
+          {
+            start: 284,
+            end: 323.39,
+            color: '#6092c0',
+          },
+          {
+            start: 323.39,
+            end: 362.8,
+            color: '#a8bfda',
+          },
+          {
+            start: 362.8,
+            end: 402.2,
+            color: '#ebeff5',
+          },
+          {
+            start: 402.2,
+            end: 500,
+            color: '#ecb385',
+          },
+          {
+            start: 500,
+            end: Infinity,
+            color: '#e7664c',
+          },
         ],
         type: 'bands',
       });

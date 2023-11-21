@@ -5,11 +5,10 @@
  * 2.0.
  */
 import { notImplemented } from '@hapi/boom';
-import { IncomingMessage } from 'http';
 import * as t from 'io-ts';
 import { toBooleanRt } from '@kbn/io-ts-utils';
 import type { CreateChatCompletionResponse } from 'openai';
-import { MessageRole } from '../../../common';
+import { Readable } from 'stream';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { messageRt } from '../runtime_types';
 
@@ -39,7 +38,7 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }),
     t.partial({ query: t.type({ stream: toBooleanRt }) }),
   ]),
-  handler: async (resources): Promise<IncomingMessage | CreateChatCompletionResponse> => {
+  handler: async (resources): Promise<Readable | CreateChatCompletionResponse> => {
     const { request, params, service } = resources;
 
     const client = await service.getClient({ request });
@@ -49,24 +48,11 @@ const chatRoute = createObservabilityAIAssistantServerRoute({
     }
 
     const {
-      body: { messages, connectorId, functions, functionCall: givenFunctionCall },
+      body: { messages, connectorId, functions, functionCall },
       query = { stream: true },
     } = params;
 
     const stream = query.stream;
-
-    let functionCall = givenFunctionCall;
-
-    if (!functionCall) {
-      const isStartOfConversation =
-        messages.some((message) => message.message.role === MessageRole.Assistant) === false;
-
-      const isRecallFunctionAvailable = functions.some((fn) => fn.name === 'recall') === true;
-
-      const willUseRecall = isStartOfConversation && isRecallFunctionAvailable;
-
-      functionCall = willUseRecall ? 'recall' : undefined;
-    }
 
     return client.chat({
       messages,

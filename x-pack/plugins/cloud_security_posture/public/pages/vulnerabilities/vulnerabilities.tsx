@@ -29,7 +29,6 @@ import type { VulnerabilitiesQueryData } from './types';
 import { LATEST_VULNERABILITIES_INDEX_PATTERN } from '../../../common/constants';
 import { ErrorCallout } from '../configurations/layout/error_callout';
 import { FindingsSearchBar } from '../configurations/layout/findings_search_bar';
-import { useFilteredDataView } from '../../common/api/use_filtered_data_view';
 import { CVSScoreBadge, SeverityStatusBadge } from '../../components/vulnerability_badges';
 import { EmptyState } from '../../components/empty_state';
 import { VulnerabilityFindingFlyout } from './vulnerabilities_finding_flyout/vulnerability_finding_flyout';
@@ -55,6 +54,7 @@ import { findingsNavigation } from '../../common/navigation/constants';
 import { VulnerabilitiesByResource } from './vulnerabilities_by_resource/vulnerabilities_by_resource';
 import { ResourceVulnerabilities } from './vulnerabilities_by_resource/resource_vulnerabilities/resource_vulnerabilities';
 import { getVulnerabilitiesGridCellActions } from './utils/get_vulnerabilities_grid_cell_actions';
+import { useLatestFindingsDataView } from '../../common/api/use_latest_findings_data_view';
 
 const getDefaultQuery = ({ query, filters }: any): any => ({
   query,
@@ -163,6 +163,11 @@ const VulnerabilitiesDataGrid = ({
     });
   }, [data?.page, dataView, pageSize, setUrlQuery, urlQuery.filters]);
 
+  // Column visibility
+  const [visibleColumns, setVisibleColumns] = useState(
+    columns.map(({ id }) => id) // initialize to the full set of columns
+  );
+
   const flyoutVulnerabilityIndex = urlQuery?.vulnerabilityIndex;
 
   const selectedVulnerabilityIndex = flyoutVulnerabilityIndex
@@ -263,27 +268,19 @@ const VulnerabilitiesDataGrid = ({
     isFetching,
   ]);
 
-  const onPaginateFlyout = useCallback(
-    (nextVulnerabilityIndex: number) => {
-      // the index of the vulnerability in the current page
-      const newVulnerabilityIndex = nextVulnerabilityIndex % pageSize;
-
-      // if the vulnerability is not in the current page, we need to change the page
-      const flyoutPageIndex = Math.floor(nextVulnerabilityIndex / pageSize);
-
-      setUrlQuery({
-        pageIndex: flyoutPageIndex,
-        vulnerabilityIndex: newVulnerabilityIndex,
-      });
-    },
-    [pageSize, setUrlQuery]
-  );
-
   const showVulnerabilityFlyout = flyoutVulnerabilityIndex > invalidIndex;
 
   if (data?.page.length === 0) {
     return <EmptyState onResetFilters={onResetFilters} />;
   }
+
+  const dataTableStyle = {
+    // Change the height of the grid to fit the page
+    // If there are filters, leave space for the filter bar
+    // Todo: Replace this component with EuiAutoSizer
+    height: `calc(100vh - ${urlQuery.filters.length > 0 ? 403 : 363}px)`,
+    minHeight: 400,
+  };
 
   return (
     <>
@@ -294,70 +291,71 @@ const VulnerabilitiesDataGrid = ({
           opacity: isFetching ? 1 : 0,
         }}
       />
-      <EuiDataGrid
-        className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
-        aria-label={VULNERABILITIES}
-        columns={columns}
-        columnVisibility={{
-          visibleColumns: columns.map(({ id }) => id),
-          setVisibleColumns: () => {},
-        }}
-        schemaDetectors={[severitySchemaConfig]}
-        rowCount={limitedTotalItemCount}
-        toolbarVisibility={{
-          showColumnSelector: false,
-          showDisplaySelector: false,
-          showKeyboardShortcuts: false,
-          showFullScreenSelector: false,
-          additionalControls: {
-            left: {
-              prepend: (
-                <>
-                  <EuiButtonEmpty size="xs" color="text">
-                    {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
-                      defaultMessage:
-                        '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
-                      values: { total: data?.total },
-                    })}
-                  </EuiButtonEmpty>
-                </>
+      <div style={dataTableStyle}>
+        <EuiDataGrid
+          className={cx({ [styles.gridStyle]: true }, { [styles.highlightStyle]: showHighlight })}
+          aria-label={VULNERABILITIES}
+          columns={columns}
+          columnVisibility={{ visibleColumns, setVisibleColumns }}
+          schemaDetectors={[severitySchemaConfig]}
+          rowCount={limitedTotalItemCount}
+          toolbarVisibility={{
+            showColumnSelector: false,
+            showDisplaySelector: false,
+            showKeyboardShortcuts: false,
+            showFullScreenSelector: false,
+            additionalControls: {
+              left: {
+                append: (
+                  <>
+                    <EuiButtonEmpty size="xs" color="text">
+                      {i18n.translate('xpack.csp.vulnerabilities.totalVulnerabilities', {
+                        defaultMessage:
+                          '{total, plural, one {# Vulnerability} other {# Vulnerabilities}}',
+                        values: { total: data?.total },
+                      })}
+                    </EuiButtonEmpty>
+                  </>
+                ),
+              },
+              right: (
+                <EuiFlexItem grow={false} className={styles.groupBySelector}>
+                  <FindingsGroupBySelector
+                    type="default"
+                    pathnameHandler={vulnerabilitiesPathnameHandler}
+                  />
+                </EuiFlexItem>
               ),
             },
-            right: (
-              <EuiFlexItem grow={false} className={styles.groupBySelector}>
-                <FindingsGroupBySelector
-                  type="default"
-                  pathnameHandler={vulnerabilitiesPathnameHandler}
-                />
-              </EuiFlexItem>
-            ),
-          },
-        }}
-        gridStyle={{
-          border: 'horizontal',
-          cellPadding: 'l',
-          stripes: false,
-          rowHover: 'none',
-          header: 'underline',
-        }}
-        renderCellValue={renderCellValue}
-        inMemory={{ level: 'enhancements' }}
-        sorting={{ columns: sort, onSort: onSortHandler }}
-        pagination={{
-          pageIndex,
-          pageSize,
-          pageSizeOptions: [10, 25, 100],
-          onChangeItemsPerPage,
-          onChangePage,
-        }}
-      />
-      {isLastLimitedPage && <LimitedResultsBar />}
+          }}
+          gridStyle={{
+            border: 'horizontal',
+            cellPadding: 'l',
+            stripes: false,
+            rowHover: 'none',
+            header: 'underline',
+          }}
+          renderCellValue={renderCellValue}
+          inMemory={{ level: 'enhancements' }}
+          sorting={{ columns: sort, onSort: onSortHandler }}
+          pagination={{
+            pageIndex,
+            pageSize,
+            pageSizeOptions: [10, 25, 100],
+            onChangeItemsPerPage,
+            onChangePage,
+          }}
+          virtualizationOptions={{
+            overscanRowCount: 20,
+          }}
+        />
+        {isLastLimitedPage && <LimitedResultsBar />}
+      </div>
       {showVulnerabilityFlyout && selectedVulnerability && (
         <VulnerabilityFindingFlyout
           flyoutIndex={selectedVulnerabilityIndex}
           vulnerabilityRecord={selectedVulnerability}
           totalVulnerabilitiesCount={limitedTotalItemCount}
-          onPaginate={onPaginateFlyout}
           closeFlyout={onCloseFlyout}
           isLoading={isFetching}
         />
@@ -451,7 +449,10 @@ const VulnerabilitiesContent = ({ dataView }: { dataView: DataView }) => {
 };
 
 export const Vulnerabilities = () => {
-  const { data, isLoading, error } = useFilteredDataView(LATEST_VULNERABILITIES_INDEX_PATTERN);
+  const { data, isLoading, error } = useLatestFindingsDataView(
+    LATEST_VULNERABILITIES_INDEX_PATTERN
+  );
+
   const getSetupStatus = useCspSetupStatusApi();
 
   if (getSetupStatus?.data?.vuln_mgmt?.status !== 'indexed') return <NoVulnerabilitiesStates />;

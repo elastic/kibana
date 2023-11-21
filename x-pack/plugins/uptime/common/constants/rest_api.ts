@@ -6,7 +6,7 @@
  */
 
 export enum API_URLS {
-  DYNAMIC_SETTINGS = `/internal/uptime/dynamic_settings`,
+  DYNAMIC_SETTINGS = `/api/uptime/settings`,
   INDEX_STATUS = '/internal/uptime/index_status',
   MONITOR_LIST = `/internal/uptime/monitor/list`,
   MONITOR_LOCATIONS = `/internal/uptime/monitor/locations`,

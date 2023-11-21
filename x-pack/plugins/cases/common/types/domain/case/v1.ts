@@ -11,6 +11,7 @@ import { ExternalServiceRt } from '../external_service/v1';
 import { CaseAssigneesRt, UserRt } from '../user/v1';
 import { CaseConnectorRt } from '../connector/v1';
 import { AttachmentRt } from '../attachment/v1';
+import { CaseCustomFieldsRt } from '../custom_field/v1';
 
 export { CaseStatuses };
 
@@ -92,6 +93,11 @@ const CaseBasicRt = rt.strict({
    * The category of the case.
    */
   category: rt.union([rt.string, rt.null]),
+  /**
+   * An array containing the possible,
+   * user-configured custom fields.
+   */
+  customFields: CaseCustomFieldsRt,
 });
 
 export const CaseAttributesRt = rt.intersection([

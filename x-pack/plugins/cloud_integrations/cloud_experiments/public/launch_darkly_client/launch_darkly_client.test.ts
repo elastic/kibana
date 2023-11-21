@@ -40,6 +40,9 @@ describe('LaunchDarklyClient - browser', () => {
           avatar: 'fake-blue-avatar',
           ip: 'my-weird-ip',
           country: 'distributed',
+          // intentionally adding this to make sure the code is overriding appropriately
+          kind: 'other kind',
+          key: 'other user',
         };
 
         const extraFields = {
@@ -52,9 +55,10 @@ describe('LaunchDarklyClient - browser', () => {
         expect(launchDarklyLibraryMock.initialize).toHaveBeenCalledWith(
           'fake-client-id',
           {
-            key: 'fake-user-id',
             ...topFields,
-            custom: extraFields,
+            ...extraFields,
+            kind: 'user',
+            key: 'fake-user-id',
           },
           {
             application: { id: 'kibana-browser', version: 'version' },
@@ -73,8 +77,9 @@ describe('LaunchDarklyClient - browser', () => {
         expect(launchDarklyLibraryMock.initialize).toHaveBeenCalledWith(
           'fake-client-id',
           {
+            kind: 'user',
             key: 'fake-user-id',
-            custom: { kibanaVersion: 'version' },
+            kibanaVersion: 'version',
           },
           {
             application: { id: 'kibana-browser', version: 'version' },
@@ -92,8 +97,9 @@ describe('LaunchDarklyClient - browser', () => {
         expect(launchDarklyLibraryMock.initialize).toHaveBeenCalledWith(
           'fake-client-id',
           {
+            kind: 'user',
             key: 'fake-user-id',
-            custom: { kibanaVersion: 'version' },
+            kibanaVersion: 'version',
           },
           {
             application: { id: 'kibana-browser', version: 'version' },
@@ -107,8 +113,9 @@ describe('LaunchDarklyClient - browser', () => {
         // Update user metadata a 2nd time
         await client.updateUserMetadata({ userId: 'fake-user-id', kibanaVersion: 'version' });
         expect(ldClientMock.identify).toHaveBeenCalledWith({
+          kind: 'user',
           key: 'fake-user-id',
-          custom: { kibanaVersion: 'version' },
+          kibanaVersion: 'version',
         });
       });
     });

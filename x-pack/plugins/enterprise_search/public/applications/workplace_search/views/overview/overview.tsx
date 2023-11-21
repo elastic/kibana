@@ -15,11 +15,11 @@ import { i18n } from '@kbn/i18n';
 import { AppLogic } from '../../app_logic';
 import { WorkplaceSearchPageTemplate } from '../../components/layout';
 
+import { WorkplaceSearchGatePage } from './gated_form_page';
 import { OnboardingSteps } from './onboarding_steps';
 import { OrganizationStats } from './organization_stats';
 import { OverviewLogic } from './overview_logic';
 import { RecentActivity } from './recent_activity';
-import { WorkplaceSearchGatePage } from './workplace_search_gate_form';
 
 const ONBOARDING_HEADER_TITLE = i18n.translate(
   'xpack.enterpriseSearch.workplaceSearch.overviewOnboardingHeader.title',

@@ -39,7 +39,6 @@
     "@kbn/home-plugin",
 
     // requiredBundles from ./kibana.json
-    "@kbn/cloud-chat-plugin",
     "@kbn/kibana-react-plugin",
     "@kbn/es-ui-shared-plugin",
     "@kbn/logs-shared-plugin",
@@ -102,5 +101,6 @@
     "@kbn/core-http-common",
     "@kbn/dashboard-plugin",
     "@kbn/cloud",
+    "@kbn/config",
   ]
 }

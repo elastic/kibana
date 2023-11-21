@@ -6,9 +6,10 @@
  */
 import { i18n } from '@kbn/i18n';
 import { merge, omit } from 'lodash';
-import { Dispatch, SetStateAction, useState } from 'react';
+import { Dispatch, SetStateAction, useCallback, useMemo, useState } from 'react';
 import { type Conversation, type Message } from '../../common';
-import type { ConversationCreateRequest } from '../../common/types';
+import { ConversationCreateRequest, MessageRole } from '../../common/types';
+import { getAssistantSetupMessage } from '../service/get_assistant_setup_message';
 import { ObservabilityAIAssistantChatService } from '../types';
 import { useAbortableAsync, type AbortableAsyncState } from './use_abortable_async';
 import { useKibana } from './use_kibana';
@@ -19,14 +20,17 @@ export function useConversation({
   conversationId,
   chatService,
   connectorId,
+  initialMessages = [],
 }: {
   conversationId?: string;
-  chatService?: ObservabilityAIAssistantChatService;
+  chatService?: ObservabilityAIAssistantChatService; // will eventually resolve to a non-nullish value
   connectorId: string | undefined;
+  initialMessages?: Message[];
 }): {
   conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined>;
   displayedMessages: Message[];
   setDisplayedMessages: Dispatch<SetStateAction<Message[]>>;
+  getSystemMessage: () => Message;
   save: (messages: Message[], handleRefreshConversations?: () => void) => Promise<Conversation>;
   saveTitle: (
     title: string,
@@ -39,7 +43,25 @@ export function useConversation({
     services: { notifications },
   } = useKibana();
 
-  const [displayedMessages, setDisplayedMessages] = useState<Message[]>([]);
+  const [displayedMessages, setDisplayedMessages] = useState<Message[]>(initialMessages);
+
+  const getSystemMessage = useCallback(() => {
+    return getAssistantSetupMessage({ contexts: chatService?.getContexts() || [] });
+  }, [chatService]);
+
+  const displayedMessagesWithHardcodedSystemMessage = useMemo(() => {
+    if (!chatService) {
+      return displayedMessages;
+    }
+
+    const systemMessage = getSystemMessage();
+
+    if (displayedMessages[0]?.message.role === MessageRole.User) {
+      return [systemMessage, ...displayedMessages];
+    }
+
+    return [systemMessage, ...displayedMessages.slice(1)];
+  }, [displayedMessages, chatService, getSystemMessage]);
 
   const conversation: AbortableAsyncState<ConversationCreateRequest | Conversation | undefined> =
     useAbortableAsync(
@@ -71,8 +93,9 @@ export function useConversation({
 
   return {
     conversation,
-    displayedMessages,
+    displayedMessages: displayedMessagesWithHardcodedSystemMessage,
     setDisplayedMessages,
+    getSystemMessage,
     save: (messages: Message[], handleRefreshConversations?: () => void) => {
       const conversationObject = conversation.value!;
 
@@ -92,7 +115,13 @@ export function useConversation({
                         id: conversationId,
                       },
                     },
-                    omit(conversationObject, 'conversation.last_updated', 'namespace', 'user'),
+                    omit(
+                      conversationObject,
+                      'conversation.last_updated',
+                      'namespace',
+                      'user',
+                      'messages'
+                    ),
                     { messages }
                   ),
                 },

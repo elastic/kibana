@@ -100,7 +100,7 @@ export {
 export type {
   EmbeddablePhase,
   EmbeddablePhaseEvent,
-  EmbeddableContainerContext,
+  EmbeddableAppContext,
 } from './embeddable_panel/types';
 
 export { AttributeService, ATTRIBUTE_SERVICE_KEY } from './lib/attribute_service';

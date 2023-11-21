@@ -11,6 +11,7 @@
     "requiredPlugins": [
       "navigation",
       "data",
+      "dataViews",
       "fleet",
       "unifiedSearch",
       "taskManager",
@@ -19,7 +20,8 @@
       "discover",
       "cloud",
       "licensing",
-      "share"
+      "share",
+      "kibanaUtils"
     ],
     "optionalPlugins": ["usageCollection"],
     "requiredBundles": ["kibanaReact", "usageCollection"]

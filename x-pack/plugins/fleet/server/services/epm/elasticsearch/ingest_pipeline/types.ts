@@ -10,7 +10,7 @@ import type { RegistryDataStream } from '../../../../types';
 export interface PipelineInstall {
   nameForInstallation: string;
   contentForInstallation: string;
-  customIngestPipelineNameForInstallation?: string;
+  shouldInstallCustomPipelines?: boolean;
   extension: string;
   dataStream?: RegistryDataStream;
 }

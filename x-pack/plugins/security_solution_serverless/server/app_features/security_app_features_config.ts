@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExperimentalFeatures } from '@kbn/security-solution-plugin/common';
 import type {
   AppFeatureKeys,
   AppFeatureKibanaConfig,
@@ -15,12 +14,14 @@ import {
   createEnabledAppFeaturesConfigMap,
 } from '@kbn/security-solution-features/config';
 import { AppFeatureSecurityKey, SecuritySubFeatureId } from '@kbn/security-solution-features/keys';
+import type { ExperimentalFeatures } from '../../common/experimental_features';
 
 export const getSecurityAppFeaturesConfigurator =
-  (enabledAppFeatureKeys: AppFeatureKeys) =>
   (
+    enabledAppFeatureKeys: AppFeatureKeys,
     _: ExperimentalFeatures // currently un-used, but left here as a convenience for possible future use
-  ): AppFeaturesSecurityConfig => {
+  ) =>
+  (): AppFeaturesSecurityConfig => {
     return createEnabledAppFeaturesConfigMap(securityAppFeaturesConfig, enabledAppFeatureKeys);
   };
 

@@ -8,14 +8,16 @@
 import { TypeRegistry } from '@kbn/triggers-actions-ui-plugin/public/application/type_registry';
 import { registerConnectorTypes } from '..';
 import type { ActionTypeModel } from '@kbn/triggers-actions-ui-plugin/public/types';
-import { registrationServicesMock } from '../../mocks';
+import { experimentalFeaturesMock, registrationServicesMock } from '../../mocks';
 import { SUB_ACTION } from '../../../common/openai/constants';
+import { ExperimentalFeaturesService } from '../../common/experimental_features_service';
 
 const ACTION_TYPE_ID = '.gen-ai';
 let actionTypeModel: ActionTypeModel;
 
 beforeAll(() => {
   const connectorTypeRegistry = new TypeRegistry<ActionTypeModel>();
+  ExperimentalFeaturesService.init({ experimentalFeatures: experimentalFeaturesMock });
   registerConnectorTypes({ connectorTypeRegistry, services: registrationServicesMock });
   const getResult = connectorTypeRegistry.get(ACTION_TYPE_ID);
   if (getResult !== null) {
@@ -26,7 +28,9 @@ beforeAll(() => {
 describe('actionTypeRegistry.get() works', () => {
   test('connector type static data is as expected', () => {
     expect(actionTypeModel.id).toEqual(ACTION_TYPE_ID);
-    expect(actionTypeModel.selectMessage).toBe('Send a request to OpenAI systems.');
+    expect(actionTypeModel.selectMessage).toBe(
+      'Send a request to an OpenAI or Azure OpenAI service.'
+    );
     expect(actionTypeModel.actionTypeTitle).toBe('OpenAI');
   });
 });

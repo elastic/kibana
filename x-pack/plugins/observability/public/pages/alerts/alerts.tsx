@@ -14,6 +14,7 @@ import { loadRuleAggregations } from '@kbn/triggers-actions-ui-plugin/public';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { MaintenanceWindowCallout } from '@kbn/alerts-ui-shared';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 
 import { rulesLocatorID } from '../../../common';
 import { RulesParams } from '../../locators/rules';
@@ -195,7 +196,10 @@ function InternalAlertsPage() {
         <HeaderMenu />
         <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <MaintenanceWindowCallout kibanaServices={kibanaServices} />
+            <MaintenanceWindowCallout
+              kibanaServices={kibanaServices}
+              categories={[DEFAULT_APP_CATEGORIES.observability.id]}
+            />
           </EuiFlexItem>
           <EuiFlexItem>
             <ObservabilityAlertSearchBar
@@ -220,10 +224,8 @@ function InternalAlertsPage() {
                 alertsTableConfigurationRegistry={alertsTableConfigurationRegistry}
                 configurationId={AlertConsumers.OBSERVABILITY}
                 id={ALERTS_TABLE_ID}
-                flyoutSize="s"
                 featureIds={observabilityAlertFeatureIds}
                 query={esQuery}
-                showExpandToDetails={false}
                 showAlertStatusWithFlapping
                 pageSize={ALERTS_PER_PAGE}
               />

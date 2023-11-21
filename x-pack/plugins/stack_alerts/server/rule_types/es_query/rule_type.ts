@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { CoreSetup } from '@kbn/core/server';
+import { CoreSetup, DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
 import { StackAlert } from '@kbn/alerts-as-data-utils';
@@ -199,6 +199,7 @@ export function getRuleType(
     executor: async (options: ExecutorOptions<EsQueryRuleParams>) => {
       return await executor(core, options);
     },
+    category: DEFAULT_APP_CATEGORIES.management.id,
     producer: STACK_ALERTS_FEATURE_ID,
     doesSetRecoveryContext: true,
     alerts: STACK_ALERTS_AAD_CONFIG,
