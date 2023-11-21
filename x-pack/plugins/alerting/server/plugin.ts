@@ -466,7 +466,6 @@ export class AlertingPlugin {
       maintenanceWindowClientFactory,
       security,
       licenseState,
-      backfillClient,
     } = this;
 
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
@@ -480,8 +479,6 @@ export class AlertingPlugin {
         ? plugins.spaces.spacesService.spaceIdToNamespace(spaceId)
         : undefined;
     };
-
-    backfillClient?.startCheck(plugins.taskManager);
 
     alertingAuthorizationClientFactory.initialize({
       ruleTypeRegistry: ruleTypeRegistry!,

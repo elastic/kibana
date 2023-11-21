@@ -7,7 +7,7 @@
 
 import { ObjectType } from '@kbn/config-schema';
 import { Logger } from '@kbn/core/server';
-import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction } from './task';
+import { TaskDefinition, taskDefinitionSchema, TaskRunCreatorFunction, TaskPriority } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
 
 /**
@@ -43,6 +43,12 @@ export interface TaskRegisterDefinition {
    * the task will be re-attempted.
    */
   timeout?: string;
+
+  /**
+   * An optional definition of task priority
+   */
+  priority?: TaskPriority;
+
   /**
    * An optional more detailed description of what this task does.
    */
@@ -145,6 +151,11 @@ export class TaskTypeDictionary {
         // see up to 8 tasks running at a time but one per Kibana instance. This is helpful for
         // reporting purposes but not for many other cases and are better off not setting this value.
         throw new Error(`maxConcurrency setting isn't allowed for task type: ${taskType}`);
+      }
+
+      // Default to normal priority if priority is not specified in the definition
+      if (taskDefinitions[taskType].priority === undefined) {
+        taskDefinitions[taskType].priority = TaskPriority.Normal;
       }
     }
 

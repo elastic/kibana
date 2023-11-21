@@ -5,16 +5,12 @@
  * 2.0.
  */
 
-import {
-  CoreStart,
-  ISavedObjectsRepository,
-  Logger,
-  SavedObjectsClientContract,
-} from '@kbn/core/server';
+import { CoreStart, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   RunContext,
   TaskManagerSetupContract,
   TaskManagerStartContract,
+  TaskPriority,
 } from '@kbn/task-manager-plugin/server';
 import type {
   ScheduleBackfillOptions,
@@ -23,9 +19,7 @@ import type {
 import { RuleDomain } from '../application/rule/types';
 import { AlertingPluginsStart } from '../plugin';
 import { TaskRunnerFactory } from '../task_runner';
-import { AdHocRuleRunParams } from '../types';
-
-const BACKFILL_CONCURRENCY = 1;
+import { AdHocRuleRunParams, RuleTypeRegistry } from '../types';
 
 interface ConstructorOpts {
   taskManager: TaskManagerSetupContract;
@@ -38,60 +32,28 @@ interface BulkQueueOpts {
   unsecuredSavedObjectsClient: SavedObjectsClientContract;
   rules: RuleDomain[];
   spaceId: string;
+  ruleTypeRegistry: RuleTypeRegistry;
   options: ScheduleBackfillOptions;
 }
 
 export class BackfillClient {
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
-  private savedObjectsRepository?: ISavedObjectsRepository;
   private coreStartServices: Promise<[CoreStart, AlertingPluginsStart, unknown]>;
-  private readonly checkerTaskType = 'Backfill-Check';
   private readonly backfillTaskType = 'Backfill';
-  private readonly checkerTaskTimeout = '1m';
-  private readonly checkerTaskInterval = '1m';
 
   constructor(opts: ConstructorOpts) {
     this.logger = opts.logger;
     this.coreStartServices = opts.coreStartServices;
 
-    // Register the task that checks if there are any backfills
-    // in the queue and schedules the run if there are
-    opts.taskManager.registerTaskDefinitions({
-      [this.checkerTaskType]: {
-        title: 'Alerting Backfill Check',
-        timeout: this.checkerTaskTimeout,
-        createTaskRunner: () => ({
-          run: async () => this.runCheckTask(),
-        }),
-      },
-    });
-
     // Registers the task that handles the backfill using the ad hoc task runner
     opts.taskManager.registerTaskDefinitions({
       [this.backfillTaskType]: {
         title: 'Alerting Backfill',
+        priority: TaskPriority.Low,
         createTaskRunner: (context: RunContext) => opts.taskRunnerFactory.createAdHoc(context),
       },
     });
-  }
-
-  public async startCheck(taskManager: TaskManagerStartContract) {
-    this.taskManager = taskManager;
-
-    try {
-      await taskManager.ensureScheduled({
-        id: this.checkerTaskType,
-        taskType: this.checkerTaskType,
-        schedule: {
-          interval: this.checkerTaskInterval,
-        },
-        state: {},
-        params: {},
-      });
-    } catch (e) {
-      this.logger.error(`Error scheduling ${this.checkerTaskType}, received ${e.message}`);
-    }
   }
 
   public async bulkQueue({
@@ -99,6 +61,7 @@ export class BackfillClient {
     rules,
     spaceId,
     options,
+    ruleTypeRegistry,
   }: BulkQueueOpts): Promise<ScheduleBackfillResults> {
     const bulkResponse = await unsecuredSavedObjectsClient.bulkCreate<AdHocRuleRunParams>(
       rules.map((rule: RuleDomain) => ({
@@ -136,6 +99,28 @@ export class BackfillClient {
     );
 
     this.logger.info(`queue response ${JSON.stringify(bulkResponse)}`);
+
+    // Bulk schedule the backfill
+    const taskManager = await this.getTaskManager();
+    await taskManager.bulkSchedule(
+      bulkResponse.saved_objects
+        .filter((so) => !so.error)
+        .map((so) => {
+          const ruleTypeTimeout = ruleTypeRegistry.get(
+            so.attributes.rule.alertTypeId
+          ).ruleTaskTimeout;
+          return {
+            id: this.backfillTaskType,
+            taskType: this.backfillTaskType,
+            ...(ruleTypeTimeout ? { timeoutOverride: ruleTypeTimeout } : {}),
+            state: {},
+            params: {
+              adHocRuleRunParamsId: so.id,
+              spaceId,
+            },
+          };
+        })
+    );
     // TODO retry errors
     return bulkResponse.saved_objects.map((so, index) => ({
       ruleId: rules[index].id,
@@ -143,72 +128,13 @@ export class BackfillClient {
     }));
   }
 
-  private async getSavedObjectsRepository(): Promise<ISavedObjectsRepository> {
-    if (this.savedObjectsRepository) {
-      return this.savedObjectsRepository;
+  private async getTaskManager(): Promise<TaskManagerStartContract> {
+    if (this.taskManager) {
+      return this.taskManager;
     }
 
-    const [coreStart] = await this.coreStartServices;
-    this.savedObjectsRepository = coreStart.savedObjects.createInternalRepository([
-      'backfill_params',
-    ]);
-    return this.savedObjectsRepository;
+    const [_, alertingStart] = await this.coreStartServices;
+    this.taskManager = alertingStart.taskManager;
+    return this.taskManager;
   }
-
-  private runCheckTask = async () => {
-    this.logger.info(`Running backfill check task`);
-    try {
-      // Ensure no backfill task is currently running
-      try {
-        this.logger.info(`Trying to get task with ID ${this.backfillTaskType}`);
-        await this.taskManager?.get(this.backfillTaskType);
-        this.logger.info(`Found existing task, not scheduling another`);
-        // found a backfill task, don't schedule another one
-        return;
-      } catch (err) {
-        this.logger.info(`No current backfill task found - proceeding`);
-        // no backfill task found, proceed
-      }
-
-      // Check if there are any ad hoc rule runs queued up
-      const savedObjectsRepository = await this.getSavedObjectsRepository();
-      const findResponse = await savedObjectsRepository.find<AdHocRuleRunParams>({
-        type: 'backfill_params',
-        sortField: 'createdAt',
-        sortOrder: 'asc',
-        perPage: 1,
-      });
-      this.logger.info(`Find result for backfill_params SO: ${JSON.stringify(findResponse)}`);
-
-      if (findResponse.saved_objects.length > 0) {
-        const backfillRun = findResponse.saved_objects[0];
-
-        this.logger.info(
-          `Scheduling task ${JSON.stringify({
-            id: this.backfillTaskType,
-            taskType: this.backfillTaskType,
-            state: {},
-            params: {
-              adHocRuleRunParamsId: backfillRun.id,
-              spaceId: backfillRun.attributes.spaceId,
-            },
-          })}`
-        );
-        // Schedule the backfill
-        await this.taskManager?.schedule({
-          id: this.backfillTaskType,
-          taskType: this.backfillTaskType,
-          state: {},
-          params: {
-            adHocRuleRunParamsId: backfillRun.id,
-            spaceId: backfillRun.attributes.spaceId,
-          },
-        });
-      } else {
-        this.logger.info(`No backfills queued`);
-      }
-    } catch (error) {
-      this.logger.warn(`Error running backfill check task: ${error}`);
-    }
-  };
 }

@@ -10,6 +10,12 @@ import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
 
+export enum TaskPriority {
+  Normal = 50,
+  Low = 1,
+  High = 100,
+}
+
 /*
  * Type definitions and validations for tasks.
  */
@@ -130,6 +136,8 @@ export const taskDefinitionSchema = schema.object(
      * A brief, human-friendly title for this task.
      */
     title: schema.maybe(schema.string()),
+
+    priority: schema.maybe(schema.number()),
     /**
      * An optional more detailed description of what this task does.
      */
@@ -327,6 +335,8 @@ export interface TaskInstance {
    * Indicates the number of skipped executions.
    */
   numSkippedRuns?: number;
+
+  timeoutOverride?: string;
 }
 
 /**

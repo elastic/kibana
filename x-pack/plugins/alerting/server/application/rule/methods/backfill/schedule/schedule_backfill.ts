@@ -128,8 +128,17 @@ export async function scheduleBackfill(
 
   const scheduleResponses = [];
   for await (const response of rulesFinder.find()) {
+    const anyDisabledRules = response.saved_objects.filter(({ attributes }) => !attributes.enabled);
+    if (anyDisabledRules.length > 0) {
+      throw Boom.badRequest(
+        `Cannot schedule backfill for rules [${anyDisabledRules
+          .map(({ id }) => id)
+          .join(',')}] - rule is disabled`
+      );
+    }
     const scheduleResponse = await context.backfillClient.bulkQueue({
       unsecuredSavedObjectsClient: context.unsecuredSavedObjectsClient,
+      ruleTypeRegistry: context.ruleTypeRegistry,
       rules: response.saved_objects.map(({ id, attributes, references }) => {
         const ruleType = context.ruleTypeRegistry.get(attributes.alertTypeId!);
         return transformRuleAttributesToRuleDomain(attributes as RuleAttributes, {

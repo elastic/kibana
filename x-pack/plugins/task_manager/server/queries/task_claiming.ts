@@ -8,6 +8,7 @@
 /*
  * This module contains helpers for managing the task manager storage layer.
  */
+import type { estypes } from '@elastic/elasticsearch';
 import apm from 'elastic-apm-node';
 import minimatch from 'minimatch';
 import { Subject, Observable, from, of } from 'rxjs';
@@ -17,7 +18,7 @@ import { groupBy, pick, isPlainObject } from 'lodash';
 import { Logger } from '@kbn/core/server';
 
 import { asOk, asErr, Result } from '../lib/result_type';
-import { ConcreteTaskInstance } from '../task';
+import { ConcreteTaskInstance, TaskPriority } from '../task';
 import { TaskClaim, asTaskClaimEvent, startTaskTimer, TaskTiming } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from './query_clauses';
 
@@ -248,7 +249,13 @@ export class TaskClaiming {
       });
 
     const docs = tasksUpdated > 0 ? await this.sweepForClaimedTasks(taskTypes, size) : [];
-
+    this.logger.info(
+      `Claimed the following tasks in order: ${JSON.stringify(
+        docs.map((a) => `${a.taskType} => ${a.id}`),
+        null,
+        2
+      )}`
+    );
     this.emitEvents(docs.map((doc) => asTaskClaimEvent(doc.id, asOk(doc))));
 
     const stats = {
@@ -293,7 +300,7 @@ export class TaskClaiming {
       shouldBeOneOf(IdleTaskWithExpiredRunAt, RunningOrClaimingTaskWithExpiredRetryAt)
     );
 
-    const sort: NonNullable<SearchOpts['sort']> = [SortByRunAtAndRetryAt];
+    const sort: NonNullable<SearchOpts['sort']> = this.getClaimSort();
     const query = matchesClauses(queryForScheduledTasks, filterDownBy(InactiveTasks));
     const script = updateFieldsAndMarkAsFailed({
       fieldUpdates: {
@@ -344,11 +351,36 @@ export class TaskClaiming {
     const { docs } = await this.taskStore.fetch({
       query: claimedTasksQuery,
       size,
-      sort: SortByRunAtAndRetryAt,
+      sort: this.getClaimSort(),
       seq_no_primary_term: true,
     });
 
     return docs;
+  }
+
+  private getClaimSort(): estypes.SortCombinations[] {
+    // Sort by descending priority, then by ascending runAt/retryAt time
+    return [
+      {
+        _script: {
+          type: 'number',
+          order: 'desc',
+          script: {
+            lang: 'painless',
+            source: `return params.priority_map[doc['task.taskType'].value]`,
+            params: {
+              priority_map: this.definitions
+                .getAllDefinitions()
+                .reduce<Record<string, TaskPriority>>((acc, taskDefinition) => {
+                  acc[taskDefinition.type] = taskDefinition.priority ?? TaskPriority.Normal;
+                  return acc;
+                }, {}),
+            },
+          },
+        },
+      },
+      SortByRunAtAndRetryAt,
+    ];
   }
 }
 
