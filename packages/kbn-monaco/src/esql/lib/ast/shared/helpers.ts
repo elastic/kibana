@@ -53,7 +53,7 @@ export function isLiteralItem(arg: ESQLAstItem): arg is ESQLLiteral {
 }
 
 export function isTimeIntervalItem(arg: ESQLAstItem): arg is ESQLTimeInterval {
-  return !Array.isArray(arg) && arg.type === 'timeInterval';
+  return arg && !Array.isArray(arg) && arg.type === 'timeInterval';
 }
 
 export function isAssignment(arg: ESQLAstItem): arg is ESQLFunction {
@@ -383,4 +383,8 @@ export function sourceExists(index: string, sources: Set<string>) {
 
 export function getLastCharFromTrimmed(text: string) {
   return text[text.trimEnd().length - 1];
+}
+
+export function isRestartingExpression(text: string) {
+  return getLastCharFromTrimmed(text) === ',';
 }

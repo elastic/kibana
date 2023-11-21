@@ -227,7 +227,7 @@ function getUnitDuration(unit: number = 1) {
     const result = /s$/.test(name);
     return unit > 1 ? result : !result;
   });
-  return filteredTimeLiteral.map(({ name }) => name);
+  return filteredTimeLiteral.map(({ name }) => `${unit} ${name}`);
 }
 
 export function getCompatibleLiterals(commandName: string, types: string[], names?: string[]) {
@@ -238,11 +238,14 @@ export function getCompatibleLiterals(commandName: string, types: string[], name
   }
   if (types.includes('time_literal')) {
     // filter plural for now and suggest only unit + singular
-
     suggestions.push(...buildConstantsDefinitions(getUnitDuration(1))); // i.e. 1 year
   }
+  // this is a special type built from the suggestion system, not inherited from the AST
+  if (types.includes('time_literal_unit')) {
+    suggestions.push(...buildConstantsDefinitions(timeLiterals.map(({ name }) => name))); // i.e. year, month, ...
+  }
   if (types.includes('chrono_literal')) {
-    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY
+    suggestions.push(...buildConstantsDefinitions(chronoLiterals.map(({ name }) => name))); // i.e. EPOC_DAY, ...
   }
   if (types.includes('string')) {
     if (names) {

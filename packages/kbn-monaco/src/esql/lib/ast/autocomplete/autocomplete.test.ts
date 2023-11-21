@@ -15,6 +15,7 @@ import { AstListener } from '../ast_factory';
 import { evalFunctionsDefinitions } from '../definitions/functions';
 import { builtinFunctions } from '../definitions/builtin';
 import { statsAggregationFunctionDefinitions } from '../definitions/aggs';
+import { chronoLiterals, timeLiterals } from '../definitions/literals';
 
 const triggerCharacters = [',', '(', '=', ' '];
 
@@ -100,6 +101,17 @@ function getFieldNamesByType(requestedType: string) {
   return fields
     .filter(({ type }) => requestedType === 'any' || type === requestedType)
     .map(({ name }) => name);
+}
+
+function getLiteralsByType(type: string) {
+  if (type === 'time_literal') {
+    // return only singular
+    return timeLiterals.map(({ name }) => `1 ${name}`).filter((s) => !/s$/.test(s));
+  }
+  if (type === 'chrono_literal') {
+    return chronoLiterals.map(({ name }) => name);
+  }
+  return [];
 }
 
 function createCustomCallbackMocks(
@@ -344,9 +356,7 @@ describe('autocomplete', () => {
     );
     testSuggestions('from a | stats a=min(b) ', ['by', '|', ',']);
     testSuggestions('from a | stats a=min(b) by ', [...fields.map(({ name }) => name)]);
-    // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | stats a=min(b),', ['var0 =', ...allAggFunctions]);
-    // @TODO: remove last 2 suggestions if possible
     testSuggestions('from a | stats var0=min(b),var1=c,', ['var2 =', ...allAggFunctions]);
     testSuggestions('from a | stats a=min(b), b=max()', [
       ...fields.filter(({ type }) => type === 'number').map(({ name }) => name),
@@ -416,8 +426,8 @@ describe('autocomplete', () => {
   describe('eval', () => {
     testSuggestions('from a | eval ', [
       'var0 =',
-      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
       ...fields.map(({ name }) => name),
+      ...getFunctionSignaturesByReturnType('eval', 'any', { evalMath: true }),
     ]);
     testSuggestions('from a | eval numberField ', [
       ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
@@ -440,9 +450,9 @@ describe('autocomplete', () => {
       '('
     );
     testSuggestions('from a | eval a=round(numberField) ', [
+      ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
       '|',
       ',',
-      ...getFunctionSignaturesByReturnType('eval', 'number', { builtin: true }),
     ]);
     testSuggestions('from a | eval a=round(numberField),', [
       'var0 =',
@@ -451,6 +461,7 @@ describe('autocomplete', () => {
     testSuggestions('from a | eval a=round(numberField) + ', [
       ...getFieldNamesByType('number'),
       ...getFunctionSignaturesByReturnType('eval', 'number', { evalMath: true }),
+      'a', // @TODO remove this
     ]);
     testSuggestions(
       'from a | eval a=round(numberField), b=round()',
@@ -460,33 +471,72 @@ describe('autocomplete', () => {
       ],
       '('
     );
+    // Test suggestions for each possible param, within each signature variation, for each function
+    for (const fn of evalFunctionsDefinitions) {
+      // skip this fn for the moment as it's quite hard to test
+      if (fn.name !== 'auto_bucket') {
+        for (const signature of fn.signatures) {
+          signature.params.forEach((param, i) => {
+            if (i < signature.params.length - 1) {
+              const canHaveMoreArgs =
+                signature.params.filter(({ optional }, j) => !optional && j > i).length > i;
+              testSuggestions(
+                `from a | eval ${fn.name}(${Array(i).fill('field').join(', ')}${i ? ',' : ''} )`,
+                [
+                  ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
+                  ...getFunctionSignaturesByReturnType('eval', param.type, { evalMath: true }).map(
+                    (l) => (canHaveMoreArgs ? `${l},` : l)
+                  ),
+                  ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
+                ]
+              );
+              testSuggestions(
+                `from a | eval var0 = ${fn.name}(${Array(i).fill('field').join(', ')}${
+                  i ? ',' : ''
+                } )`,
+                [
+                  ...getFieldNamesByType(param.type).map((f) => (canHaveMoreArgs ? `${f},` : f)),
+                  ...getFunctionSignaturesByReturnType('eval', param.type, { evalMath: true }).map(
+                    (l) => (canHaveMoreArgs ? `${l},` : l)
+                  ),
+                  ...getLiteralsByType(param.type).map((d) => (canHaveMoreArgs ? `${d},` : d)),
+                ]
+              );
+            }
+          });
+        }
+      }
+    }
 
-    describe.skip('date math', () => {
-      const dateSuggestions = [
-        'year',
-        'month',
-        'week',
-        'day',
-        'hour',
-        'minute',
-        'second',
-        'millisecond',
-      ].flatMap((v) => [v, `${v}s`]);
-      const dateMathSymbols = ['+', '-'];
-      testSuggestions('from a | eval a = 1 ', dateMathSymbols.concat(dateSuggestions, ['|']));
-      testSuggestions('from a | eval a = 1 year ', dateMathSymbols.concat(dateSuggestions, ['|']));
+    describe('date math', () => {
+      const dateSuggestions = timeLiterals.map(({ name }) => name);
+      // If a literal number is detected then suggest also date period keywords
+      testSuggestions('from a | eval a = 1 ', [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
+        ...dateSuggestions,
+        '|',
+        ',',
+      ]);
+      testSuggestions('from a | eval a = 1 year ', [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['time_interval']),
+        '|',
+        ',',
+      ]);
+      testSuggestions('from a | eval a = 1 day + 2 ', [
+        ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true }, ['number']),
+        ...dateSuggestions,
+        '|',
+        ',',
+      ]);
       testSuggestions(
-        'from a | eval a = 1 day + 2 ',
-        dateMathSymbols.concat(dateSuggestions, ['|'])
+        'from a | eval var0=date_trunc()',
+        [...getLiteralsByType('time_literal').map((t) => `${t},`)],
+        '('
       );
-      //   testSuggestions(
-      //     'from a | eval var0=date_trunc(',
-      //     ['FieldIdentifier'].concat(...getDurationItemsWithQuantifier().map(({ label }) => label))
-      //   );
-      testSuggestions(
-        'from a | eval var0=date_trunc(2 ',
-        [')', 'FieldIdentifier'].concat(dateSuggestions)
-      );
+      testSuggestions('from a | eval var0=date_trunc(2 )', [
+        ...dateSuggestions.map((t) => `${t},`),
+        ',',
+      ]);
     });
   });
 });

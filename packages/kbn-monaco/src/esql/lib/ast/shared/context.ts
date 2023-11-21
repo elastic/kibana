@@ -84,7 +84,9 @@ function mapToNonMarkerNode(arg: ESQLAstItem): ESQLAstItem {
   return Array.isArray(arg) ? arg.filter(isNotMarkerNodeOrArray).map(mapToNonMarkerNode) : arg;
 }
 
-export function removeMarkerArgFromArgsList(node: ESQLCommand | ESQLSingleAstItem | undefined) {
+export function removeMarkerArgFromArgsList<T extends ESQLSingleAstItem | ESQLCommand>(
+  node: T | undefined
+) {
   if (!node) {
     return;
   }
@@ -103,13 +105,9 @@ function findAstPosition(ast: ESQLAst, offset: number) {
     return { command: undefined, node: undefined, option: undefined };
   }
   return {
-    command: removeMarkerArgFromArgsList(command) as ESQLCommand,
-    option: removeMarkerArgFromArgsList(findOption(command.args, offset)) as
-      | ESQLCommandOption
-      | undefined,
-    node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))) as
-      | ESQLSingleAstItem
-      | undefined,
+    command: removeMarkerArgFromArgsList(command)!,
+    option: removeMarkerArgFromArgsList(findOption(command.args, offset)),
+    node: removeMarkerArgFromArgsList(cleanMarkerNode(findNode(command.args, offset))),
   };
 }
 
