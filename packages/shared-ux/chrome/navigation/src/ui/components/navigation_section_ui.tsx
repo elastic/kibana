@@ -29,6 +29,8 @@ import { isAbsoluteLink, getNavigationNodeHref } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
+type EuiCollapsibleNavSubItemPropsEnhanced = EuiCollapsibleNavSubItemProps & { path?: string };
+
 const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 const DEFAULT_IS_COLLAPSED = true;
 const DEFAULT_IS_COLLAPSIBLE = true;
@@ -72,8 +74,8 @@ const getRenderAs = (navNode: ChromeProjectNavigationNode): RenderAs => {
 };
 
 const getTestSubj = (navNode: ChromeProjectNavigationNode, isActive = false): string => {
-  const { id, deepLink } = navNode;
-  return classnames(`nav-item`, `nav-item-${id}`, {
+  const { id, path, deepLink } = navNode;
+  return classnames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isActive,
@@ -148,7 +150,7 @@ const renderBlockTitle: (
 
 const renderGroup = (
   navGroup: ChromeProjectNavigationNode,
-  groupItems: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps>,
+  groupItems: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>,
   { spaceBefore = DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS }: { spaceBefore?: EuiThemeSize | null } = {}
 ): Required<EuiCollapsibleNavItemProps>['items'] => {
   let itemPrepend: EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps | null = null;
@@ -195,7 +197,7 @@ const nodeToEuiCollapsibleNavProps = (
     deepLinks: Readonly<ChromeNavLink[]>;
   }
 ): {
-  items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps>;
+  items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced>;
   isVisible: boolean;
 } => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
@@ -219,7 +221,7 @@ const nodeToEuiCollapsibleNavProps = (
   }
 
   if (renderAs === 'panelOpener') {
-    const items: EuiCollapsibleNavSubItemProps[] = [
+    const items: EuiCollapsibleNavSubItemPropsEnhanced[] = [
       {
         renderItem: () => <NavigationItemOpenPanel item={navNode} navigateToUrl={navigateToUrl} />,
       },
@@ -290,9 +292,10 @@ const nodeToEuiCollapsibleNavProps = (
   // Render as an accordion or a link (handled by EUI) depending if
   // "items" is undefined or not. If it is undefined --> a link, otherwise an
   // accordion is rendered.
-  const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemProps> = [
+  const items: Array<EuiCollapsibleNavItemProps | EuiCollapsibleNavSubItemPropsEnhanced> = [
     {
       id,
+      path,
       title,
       isSelected,
       linkProps,
@@ -371,10 +374,18 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   const [itemsAccordionState, setItemsAccordionState] = useState<AccordionItemsState>(() => {
     return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
       if (node.children) {
+        let isCollapsed = !node.isActive ?? DEFAULT_IS_COLLAPSED;
+        let doCollapseFromActiveState = true;
+
+        if (node.defaultIsCollapsed !== undefined) {
+          isCollapsed = node.defaultIsCollapsed;
+          doCollapseFromActiveState = false;
+        }
+
         acc[_id] = {
-          isCollapsed: !node.isActive ?? DEFAULT_IS_COLLAPSED,
+          isCollapsed,
           isCollapsible: node.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE,
-          doCollapseFromActiveState: true,
+          doCollapseFromActiveState,
         };
       }
       return acc;
@@ -499,11 +510,11 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
     // Serializer to add recursively the accordionProps to each of the items
     // that will control its "open"/"closed" state + handler to toggle the state.
     const serializeAccordionItems = (
-      _items?: EuiCollapsibleNavSubItemProps[]
+      _items?: EuiCollapsibleNavSubItemPropsEnhanced[]
     ): EuiCollapsibleNavSubItemProps[] | undefined => {
       if (!_items) return;
 
-      return _items.map((item: EuiCollapsibleNavSubItemProps) => {
+      return _items.map((item) => {
         if (item.renderItem) {
           return item;
         }
@@ -511,7 +522,9 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
           ...item,
           items: serializeAccordionItems(item.items),
           accordionProps:
-            item.items !== undefined ? getAccordionProps(item.id!, item.accordionProps) : undefined,
+            item.items !== undefined
+              ? getAccordionProps(item.path ?? item.id!, item.accordionProps)
+              : undefined,
         };
         return parsed;
       });
@@ -529,7 +542,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
       {...props}
       className={className}
       items={subItems}
-      accordionProps={getAccordionProps(navNode.id)}
+      accordionProps={getAccordionProps(navNode.path)}
     />
   );
 });
