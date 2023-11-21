@@ -7,10 +7,18 @@
 
 import { concatMap, delay, finalize, Observable, of, scan, timestamp } from 'rxjs';
 import type { Dispatch, SetStateAction } from 'react';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { PromptObservableState } from './types';
 import { API_ERROR } from '../translations';
 const MIN_DELAY = 35;
 
+interface StreamObservable {
+  connectorTypeTitle: string;
+  reader: ReadableStreamDefaultReader<Uint8Array>;
+  setLoading: Dispatch<SetStateAction<boolean>>;
+  isError: boolean;
+}
 /**
  * Returns an Observable that reads data from a ReadableStream and emits values representing the state of the data processing.
  *
@@ -19,22 +27,26 @@ const MIN_DELAY = 35;
  * @param isError - indicates whether the reader response is an error message or not
  * @returns {Observable<PromptObservableState>} An Observable that emits PromptObservableState
  */
-export const getStreamObservable = (
-  reader: ReadableStreamDefaultReader<Uint8Array>,
-  setLoading: Dispatch<SetStateAction<boolean>>,
-  isError: boolean
-): Observable<PromptObservableState> =>
+export const getStreamObservable = ({
+  connectorTypeTitle,
+  isError,
+  reader,
+  setLoading,
+}: StreamObservable): Observable<PromptObservableState> =>
   new Observable<PromptObservableState>((observer) => {
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
     const chunks: string[] = [];
     let lineBuffer: string = '';
-    function read() {
+    function readOpenAI() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
+              if (lineBuffer) {
+                chunks.push(lineBuffer);
+              }
               observer.next({
                 chunks,
                 message: chunks.join(''),
@@ -52,7 +64,7 @@ export const getStreamObservable = (
               const lines = decoded.split('\n');
               lines[0] = lineBuffer + lines[0];
               lineBuffer = lines.pop() || '';
-              nextChunks = getNextChunks(lines);
+              nextChunks = getOpenAIChunks(lines);
             }
             nextChunks.forEach((chunk: string) => {
               chunks.push(chunk);
@@ -66,13 +78,56 @@ export const getStreamObservable = (
             observer.error(err);
             return;
           }
-          read();
+          readOpenAI();
         })
         .catch((err) => {
           observer.error(err);
         });
     }
-    read();
+    function readBedrock() {
+      reader
+        .read()
+        .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
+          try {
+            if (done) {
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: false,
+              });
+              observer.complete();
+              return;
+            }
+            const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+            let content;
+            if (isError) {
+              content = `${API_ERROR}\n\n${JSON.parse(decoder.decode(value)).message}`;
+            } else if (value != null) {
+              const event = awsDecoder.decode(value);
+              const body = JSON.parse(
+                Buffer.from(JSON.parse(decoder.decode(event.body)).bytes, 'base64').toString()
+              );
+              content = body.completion;
+            }
+            chunks.push(content);
+            observer.next({
+              chunks,
+              message: chunks.join(''),
+              loading: true,
+            });
+          } catch (err) {
+            observer.error(err);
+            return;
+          }
+          readBedrock();
+        })
+        .catch((err) => {
+          observer.error(err);
+        });
+    }
+    if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
+    else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     return () => {
       reader.cancel();
     };
@@ -107,7 +162,7 @@ export const getStreamObservable = (
     finalize(() => setLoading(false))
   );
 
-const getNextChunks = (lines: string[]): string[] => {
+const getOpenAIChunks = (lines: string[]): string[] => {
   const nextChunk = lines
     .map((str) => str.substring(6))
     .filter((str) => !!str && str !== '[DONE]')

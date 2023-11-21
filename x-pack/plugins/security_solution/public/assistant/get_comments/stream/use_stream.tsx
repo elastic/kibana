@@ -13,6 +13,7 @@ interface UseStreamProps {
   amendMessage: (message: string) => void;
   isError: boolean;
   content?: string;
+  connectorTypeTitle: string;
   reader?: ReadableStreamDefaultReader<Uint8Array>;
 }
 interface UseStream {
@@ -38,6 +39,7 @@ interface UseStream {
 export const useStream = ({
   amendMessage,
   content,
+  connectorTypeTitle,
   reader,
   isError,
 }: UseStreamProps): UseStream => {
@@ -48,9 +50,9 @@ export const useStream = ({
   const observer$ = useMemo(
     () =>
       content == null && reader != null
-        ? getStreamObservable(reader, setLoading, isError)
+        ? getStreamObservable({ connectorTypeTitle, reader, setLoading, isError })
         : getPlaceholderObservable(),
-    [content, isError, reader]
+    [content, isError, reader, connectorTypeTitle]
   );
   const onCompleteStream = useCallback(() => {
     subscription?.unsubscribe();

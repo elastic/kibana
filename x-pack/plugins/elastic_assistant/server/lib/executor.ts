@@ -31,15 +31,7 @@ export const executeAction = async ({
 
   const actionResult = await actionsClient.execute({
     actionId: connectorId,
-    params: {
-      ...request.body.params,
-      subAction: 'stream',
-      subActionParams:
-        // attempting stream without invokeStream
-        request.body.params.subAction === 'invokeAI'
-          ? request.body.params.subActionParams
-          : { body: JSON.stringify(request.body.params.subActionParams), stream: true },
-    },
+    params: request.body.params,
   });
 
   if (actionResult.status === 'error') {

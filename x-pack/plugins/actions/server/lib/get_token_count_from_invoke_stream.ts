@@ -9,6 +9,8 @@ import { Logger } from '@kbn/logging';
 import { encode } from 'gpt-tokenizer';
 import { Readable } from 'stream';
 import { finished } from 'stream/promises';
+import { EventStreamCodec } from '@smithy/eventstream-codec';
+import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 
 export interface InvokeBody {
   messages: Array<{
@@ -26,10 +28,12 @@ export interface InvokeBody {
  * @param logger the logger
  */
 export async function getTokenCountFromInvokeStream({
+  actionTypeId,
   responseStream,
   body,
   logger,
 }: {
+  actionTypeId: string;
   responseStream: Readable;
   body: InvokeBody;
   logger: Logger;
@@ -49,8 +53,19 @@ export async function getTokenCountFromInvokeStream({
 
   let responseBody: string = '';
 
-  responseStream.on('data', (chunk: string) => {
-    responseBody += chunk.toString();
+  const isBedrock = actionTypeId === '.bedrock';
+  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+  responseStream.on('data', (chunk) => {
+    if (isBedrock) {
+      const event = awsDecoder.decode(chunk);
+      const parsed = JSON.parse(
+        Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+      );
+      responseBody += parsed.completion;
+    } else {
+      responseBody += chunk.toString();
+    }
   });
   try {
     await finished(responseStream);
@@ -58,7 +73,9 @@ export async function getTokenCountFromInvokeStream({
     logger.error('An error occurred while calculating streaming response tokens');
   }
 
-  const completionTokens = encode(responseBody).length;
+  const parsedResponse = isBedrock ? responseBody : parseOpenAIResponse(responseBody);
+
+  const completionTokens = encode(parsedResponse).length;
 
   return {
     prompt: promptTokens,
@@ -66,3 +83,30 @@ export async function getTokenCountFromInvokeStream({
     total: promptTokens + completionTokens,
   };
 }
+
+const parseOpenAIResponse = (responseBody: string) => {
+  return responseBody
+    .split('\n')
+    .filter((line) => {
+      return line.startsWith('data: ') && !line.endsWith('[DONE]');
+    })
+    .map((line) => {
+      return JSON.parse(line.replace('data: ', ''));
+    })
+    .filter(
+      (
+        line
+      ): line is {
+        choices: Array<{
+          delta: { content?: string; function_call?: { name?: string; arguments: string } };
+        }>;
+      } => {
+        return 'object' in line && line.object === 'chat.completion.chunk';
+      }
+    )
+    .reduce((prev, line) => {
+      const msg = line.choices[0].delta!;
+      prev += msg.content || '';
+      return prev;
+    }, '');
+};
