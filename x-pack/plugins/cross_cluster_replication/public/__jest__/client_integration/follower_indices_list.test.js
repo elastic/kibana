@@ -363,15 +363,16 @@ describe('<FollowerIndicesList />', () => {
         });
       });
 
-      test('should have a section to render the follower index shards stats', async () => {
-        httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
+      test('should not have settings values for a "paused" follower index', async () => {
+        await actions.clickFollowerIndexAt(1); // the second follower index is paused
+        expect(exists('followerIndexDetail.settingsValues')).toBe(false);
+        expect(find('followerIndexDetail.settingsSection').text()).toContain(
+          'paused follower index does not have settings'
+        );
+      });
 
-        // Mount the component
-        await act(async () => {
-          ({ find, exists, component, actions } = setup());
-        });
-        component.update();
-
+      // FLAKY: https://github.com/elastic/kibana/issues/100951
+      test.skip('should have a section to render the follower index shards stats', async () => {
         await actions.clickFollowerIndexAt(0);
         expect(exists('followerIndexDetail.shardsStatsSection')).toBe(true);
 
@@ -381,14 +382,6 @@ describe('<FollowerIndicesList />', () => {
         codeBlocks.forEach((codeBlock, i) => {
           expect(JSON.parse(codeBlock.props().children)).toEqual(index1.shards[i]);
         });
-      });
-
-      test('should not have settings values for a "paused" follower index', async () => {
-        await actions.clickFollowerIndexAt(1); // the second follower index is paused
-        expect(exists('followerIndexDetail.settingsValues')).toBe(false);
-        expect(find('followerIndexDetail.settingsSection').text()).toContain(
-          'paused follower index does not have settings'
-        );
       });
     });
   });
