@@ -9,7 +9,7 @@
           "privileges": ["read", "view_index_metadata"]
         },
         {
-          "names": [".alerts*", ".preview.alerts*", ".internal.alerts-security.alerts-*"],
+          "names": [".alerts*", ".preview.alerts*"],
           "privileges": ["read", "view_index_metadata"]
         },
         {
@@ -64,7 +64,7 @@
           "privileges": ["read", "view_index_metadata", "write", "maintenance"]
         },
         {
-          "names": [".alerts*", ".preview.alerts*", ".internal.alerts*", "risk-score.risk-score-*"],
+          "names": [".alerts*", ".preview.alerts*", "risk-score.risk-score-*"],
           "privileges": ["read", "view_index_metadata", "write", "maintenance"]
         },
         {
