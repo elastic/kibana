@@ -3,7 +3,7 @@
   "info": {
     "title": "Connectors",
     "description": "OpenAPI schema for connectors in Serverless projects",
-    "version": "0.1",
+    "version": "0.2",
     "contact": {
       "name": "Connectors Team"
     },
