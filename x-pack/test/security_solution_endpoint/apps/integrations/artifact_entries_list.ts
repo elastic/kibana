@@ -246,7 +246,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     };
 
     for (const testData of getArtifactsListTestsData()) {
-      describe(`When on the ${testData.title} entries list`, function () {
+      // FLAKY: https://github.com/elastic/kibana/issues/171489
+      // FLAKY: https://github.com/elastic/kibana/issues/171475
+      describe.skip(`When on the ${testData.title} entries list`, function () {
         beforeEach(async () => {
           policyInfo = await policyTestResources.createPolicy();
           await removeAllArtifacts();
@@ -332,7 +334,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     }
 
-    describe('Should check artifacts are correctly generated when multiple entries', function () {
+    // FLAKY: https://github.com/elastic/kibana/issues/171476
+    describe.skip('Should check artifacts are correctly generated when multiple entries', function () {
       let firstPolicy: PolicyTestResourceInfo;
       let secondPolicy: PolicyTestResourceInfo;
 
