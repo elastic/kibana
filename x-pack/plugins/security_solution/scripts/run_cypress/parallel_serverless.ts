@@ -159,21 +159,17 @@ async function resetCredentials(
         },
       }
     );
-    if (response.status !== 200) {
-      throw new Error('Credentials have not been reset. Retrying in 20s...');
-    } else {
-      log.info('Credentials have ben reset');
-      return {
-        password: response.data.password,
-        username: response.data.username,
-      };
-    }
+    log.info('Credentials have ben reset');
+    return {
+      password: response.data.password,
+      username: response.data.username,
+    };
   };
 
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. Retrying in 20s...');
+        log.info('Project is not reachable. A retry will be triggered soon..');
       } else {
         log.info(error);
       }
