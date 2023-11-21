@@ -53,7 +53,7 @@ export function DashboardEmptyScreen() {
   const originatingApp = embeddableAppContext?.currentAppId;
 
   const goToLens = useCallback(() => {
-    if (!lensAlias || !('path' in lensAlias.alias)) return;
+    if (!lensAlias || !lensAlias.alias) return;
     const trackUiMetric = usageCollection.reportUiCounter?.bind(
       usageCollection,
       DASHBOARD_UI_METRIC_ID
