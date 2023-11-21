@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { PluginInitializerContext } from '@kbn/core/server';
-import { ReportingConfigType } from './config';
+import type { PluginInitializerContext } from '@kbn/core/server';
+import type { ReportingConfigType } from '@kbn/reporting-server';
 
 export { config } from './config';
 
