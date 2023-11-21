@@ -12,6 +12,7 @@ import {
   bedrockSuccessResponse,
 } from '@kbn/actions-simulators-plugin/server/bedrock_simulation';
 import { DEFAULT_TOKEN_LIMIT } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
+import { PassThrough } from 'stream';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 
@@ -405,6 +406,43 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
               status: 'ok',
               connector_id: bedrockActionId,
               data: { message: bedrockSuccessResponse.completion },
+            });
+          });
+
+          it('should invoke stream with assistant AI body argument formatted to bedrock expectations', async () => {
+            await new Promise<void>((resolve, reject) => {
+              let responseBody: string = '';
+
+              const passThrough = new PassThrough();
+
+              supertest
+                .post(`/internal/elastic_assistant/actions/connector/${bedrockActionId}/_execute`)
+                .set('kbn-xsrf', 'foo')
+                .on('error', reject)
+                .send({
+                  params: {
+                    subAction: 'invokeStream',
+                    subActionParams: {
+                      messages: [
+                        {
+                          role: 'user',
+                          content: 'Hello world',
+                        },
+                      ],
+                    },
+                  },
+                  assistantLangChain: false,
+                })
+                .pipe(passThrough);
+
+              passThrough.on('data', (chunk) => {
+                responseBody += chunk.toString();
+              });
+
+              passThrough.on('end', () => {
+                expect(responseBody).to.eql('Hello world, what a unique string!');
+                resolve();
+              });
             });
           });
         });
