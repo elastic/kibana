@@ -13,14 +13,14 @@ import type {
   AlertWithCommonFieldsLatest,
   SuppressionFieldsLatest,
 } from '@kbn/rule-registry-plugin/common/schemas';
-import type { IRuleExecutionLogForExecutors } from '../../../rule_monitoring';
-import { makeFloatString } from '../../utils/utils';
+import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import { makeFloatString } from './utils';
 import type {
   BaseFieldsLatest,
   WrappedFieldsLatest,
-} from '../../../../../../common/api/detection_engine/model/alerts';
-import type { RuleServices } from '../../types';
-import { createEnrichEventsFunction } from '../../utils/enrichments';
+} from '../../../../../common/api/detection_engine/model/alerts';
+import type { RuleServices } from '../types';
+import { createEnrichEventsFunction } from './enrichments';
 
 export interface GenericBulkCreateResponse<T extends BaseFieldsLatest> {
   success: boolean;

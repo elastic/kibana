@@ -18,8 +18,8 @@ import type { RunOpts } from '../types';
 import type { CompleteRule, ThresholdRuleParams } from '../../rule_schema';
 import type { BaseFieldsLatest } from '../../../../../common/api/detection_engine/model/alerts';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
-import { bulkCreateWithSuppression } from '../query/alert_suppression/bulk_create_with_suppression';
-import type { GenericBulkCreateResponse } from '../query/alert_suppression/bulk_create_with_suppression';
+import { bulkCreateWithSuppression } from '../utils/bulk_create_with_suppression';
+import type { GenericBulkCreateResponse } from '../utils/bulk_create_with_suppression';
 import { wrapSuppressedThresholdALerts } from './wrap_suppressed_threshold_alerts';
 
 interface BulkCreateSuppressedThresholdAlertsParams {
