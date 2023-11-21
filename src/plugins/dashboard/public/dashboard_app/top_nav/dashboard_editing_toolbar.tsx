@@ -58,7 +58,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
           // this visualization is not an alias
           appId = 'visualize';
           path = `#/create?type=${encodeURIComponent(visType.name)}`;
-        } else if ('path' in visType.alias) {
+        } else if (visType.alias && 'path' in visType.alias) {
           // this visualization **is** an alias, and it has an app to redirect to for creation
           appId = visType.alias.app;
           path = visType.alias.path;

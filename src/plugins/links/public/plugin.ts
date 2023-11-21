@@ -12,6 +12,7 @@ import {
 } from '@kbn/content-management-plugin/public';
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import { VisualizationsSetup } from '@kbn/visualizations-plugin/public';
@@ -21,7 +22,7 @@ import { LinksCrudTypes } from '../common/content_management';
 import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { LinksFactoryDefinition } from './embeddable';
-import { LinksByReferenceInput, LinksInput } from './embeddable/types';
+import { LinksByReferenceInput } from './embeddable/types';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
@@ -56,9 +57,15 @@ export class LinksPlugin
         name: APP_NAME,
       });
 
-      const onEdit = async (savedObjectId: string) => {
+      const getExplicitInput = async ({
+        savedObjectId,
+        parent,
+      }: {
+        savedObjectId?: string;
+        parent?: DashboardContainer;
+      }) => {
         try {
-          await linksFactory.getExplicitInput({ savedObjectId } as LinksByReferenceInput);
+          await linksFactory.getExplicitInput({ savedObjectId } as LinksByReferenceInput, parent);
         } catch {
           // swallow any errors - this just means that the user cancelled editing
         }
@@ -66,9 +73,6 @@ export class LinksPlugin
       };
 
       plugins.visualizations.registerAlias({
-        alias: {
-          onEdit,
-        },
         disableCreate: true, // do not allow creation through visualization listing page
         name: CONTENT_ID,
         title: APP_NAME,
@@ -87,7 +91,7 @@ export class LinksPlugin
               return {
                 id,
                 title,
-                editor: { onEdit },
+                editor: { onEdit: (savedObjectId: string) => getExplicitInput({ savedObjectId }) },
                 description,
                 updatedAt,
                 icon: APP_ICON,

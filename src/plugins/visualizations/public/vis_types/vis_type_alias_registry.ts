@@ -87,16 +87,14 @@ export interface VisualizationsAppExtension {
 }
 
 export interface VisTypeAlias {
-  alias:
-    | {
-        app: string;
-        path: string;
-      }
-    /**
-     * Use this when your visualization uses inline editing and does not have a specific app
-     * to redirect to.
-     */
-    | { onEdit: (savedObjectId: string) => Promise<void> };
+  /**
+   * Provide `alias` when your visualization has a dedicated app for creation.
+   * TODO: Provide a generic callback to create visualizations inline.
+   */
+  alias?: {
+    app: string;
+    path: string;
+  };
   name: string;
   title: string;
   icon: string;

@@ -144,7 +144,7 @@ class NewVisModal extends React.Component<TypeSelectionProps, TypeSelectionState
 
     let params;
     if ('alias' in visType) {
-      if ('path' in visType.alias) {
+      if (visType.alias && 'path' in visType.alias) {
         params = visType.alias.path;
         this.props.onClose();
         this.navigate(visType.alias.app, visType.alias.path);
