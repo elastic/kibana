@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { omit } from 'lodash';
+
 import {
   comment as commentObj,
   userActions,
@@ -28,9 +30,16 @@ import {
   formatComments,
   addKibanaInformationToDescription,
   fillMissingCustomFields,
+  normalizeCreateCaseRequest,
 } from './utils';
 import type { CaseCustomFields } from '../../../common/types/domain';
-import { CaseStatuses, CustomFieldTypes, UserActionActions } from '../../../common/types/domain';
+import {
+  CaseStatuses,
+  CustomFieldTypes,
+  UserActionActions,
+  CaseSeverity,
+  ConnectorTypes,
+} from '../../../common/types/domain';
 import { flattenCaseSavedObject } from '../../common/utils';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { casesConnectors } from '../../connectors';
@@ -1468,6 +1477,99 @@ describe('utils', () => {
           customFields,
         })
       ).toEqual(customFields);
+    });
+  });
+});
+
+describe('normalizeCreateCaseRequest', () => {
+  const theCase = {
+    title: 'My Case',
+    tags: [],
+    description: 'testing sir',
+    connector: {
+      id: '.none',
+      name: 'None',
+      type: ConnectorTypes.none,
+      fields: null,
+    },
+    settings: { syncAlerts: true },
+    severity: CaseSeverity.LOW,
+    owner: SECURITY_SOLUTION_OWNER,
+    assignees: [{ uid: '1' }],
+    category: 'my category',
+    customFields: [],
+  };
+
+  it('should trim title', async () => {
+    expect(normalizeCreateCaseRequest({ ...theCase, title: 'title with spaces      ' })).toEqual({
+      ...theCase,
+      title: 'title with spaces',
+    });
+  });
+
+  it('should trim description', async () => {
+    expect(
+      normalizeCreateCaseRequest({
+        ...theCase,
+        description: 'this is a description with spaces!!      ',
+      })
+    ).toEqual({
+      ...theCase,
+      description: 'this is a description with spaces!!',
+    });
+  });
+
+  it('should trim tags', async () => {
+    expect(
+      normalizeCreateCaseRequest({
+        ...theCase,
+        tags: ['pepsi     ', 'coke'],
+      })
+    ).toEqual({
+      ...theCase,
+      tags: ['pepsi', 'coke'],
+    });
+  });
+
+  it('should trim category', async () => {
+    expect(
+      normalizeCreateCaseRequest({
+        ...theCase,
+        category: 'reporting       ',
+      })
+    ).toEqual({
+      ...theCase,
+      category: 'reporting',
+    });
+  });
+
+  it('should set the category to null if missing', async () => {
+    expect(normalizeCreateCaseRequest(omit(theCase, 'category'))).toEqual({
+      ...theCase,
+      category: null,
+    });
+  });
+
+  it('should fill out missing custom fields', async () => {
+    expect(
+      normalizeCreateCaseRequest(omit(theCase, 'customFields'), [
+        {
+          key: 'first_key',
+          type: CustomFieldTypes.TEXT,
+          label: 'foo',
+          required: false,
+        },
+      ])
+    ).toEqual({
+      ...theCase,
+      customFields: [{ key: 'first_key', type: CustomFieldTypes.TEXT, value: null }],
+    });
+  });
+
+  it('should set the customFields to an empty array if missing', async () => {
+    expect(normalizeCreateCaseRequest(omit(theCase, 'customFields'))).toEqual({
+      ...theCase,
+      customFields: [],
     });
   });
 });

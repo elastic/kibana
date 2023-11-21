@@ -21,20 +21,20 @@ export interface ChartProps extends AssetXYChartProps {
 }
 
 export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProps) => {
-  const { parsedDateRange, searchCriteria } = useUnifiedSearchContext();
+  const { searchCriteria } = useUnifiedSearchContext();
   const { dataView } = useMetricsDataViewContext();
-  const { requestTs, loading } = useHostsViewContext();
+  const { loading, searchSessionId } = useHostsViewContext();
   const { currentPage } = useHostsTableContext();
 
   const shouldUseSearchCriteria = currentPage.length === 0;
 
-  // prevents requestTs and searchCriteria state from reloading the chart
+  // prevents searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
   const { afterLoadedState } = useAfterLoadedState(loading, {
-    lastReloadRequestTime: requestTs,
-    dateRange: parsedDateRange,
+    dateRange: searchCriteria.dateRange,
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
+    searchSessionId,
   });
 
   const filters = useMemo(() => {
@@ -58,10 +58,10 @@ export const Chart = ({ id, title, layers, visualOptions, overrides }: ChartProp
       height={METRIC_CHART_HEIGHT}
       layers={layers}
       visualOptions={visualOptions}
-      lastReloadRequestTime={afterLoadedState.lastReloadRequestTime}
       loading={loading}
       filters={filters}
       query={afterLoadedState.query}
+      searchSessionId={afterLoadedState.searchSessionId}
       title={title}
       overrides={overrides}
       visualizationType="lnsXY"

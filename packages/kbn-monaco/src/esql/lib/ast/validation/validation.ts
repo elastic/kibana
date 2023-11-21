@@ -33,6 +33,8 @@ import {
   inKnownTimeInterval,
   printFunctionSignature,
   sourceExists,
+  columnExists,
+  hasWildcard,
 } from '../shared/helpers';
 import { collectVariables } from '../shared/variables';
 import type {
@@ -383,7 +385,8 @@ function validateOption(
   // use dedicate validate fn if provided
   if (optionDef.validate) {
     messages.push(...optionDef.validate(option));
-  } else {
+  }
+  if (!optionDef.skipCommonValidation) {
     option.args.forEach((arg, index) => {
       if (!Array.isArray(arg)) {
         if (!optionDef.signature.multipleParams) {
@@ -461,22 +464,36 @@ function validateSource(
         locations: source.location,
       })
     );
-  } else if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownIndex',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
-  } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
-    messages.push(
-      getMessageFromId({
-        messageId: 'unknownPolicy',
-        values: { name: source.name },
-        locations: source.location,
-      })
-    );
+  } else {
+    const isWildcardAndNotSupported =
+      hasWildcard(source.name) && !commandDef.signature.params.some(({ wildcards }) => wildcards);
+    if (isWildcardAndNotSupported) {
+      messages.push(
+        getMessageFromId({
+          messageId: 'wildcardNotSupportedForCommand',
+          values: { command: commandName, value: source.name },
+          locations: source.location,
+        })
+      );
+    } else {
+      if (source.sourceType === 'index' && !sourceExists(source.name, sources)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownIndex',
+            values: { name: source.name },
+            locations: source.location,
+          })
+        );
+      } else if (source.sourceType === 'policy' && !policies.has(source.name)) {
+        messages.push(
+          getMessageFromId({
+            messageId: 'unknownPolicy',
+            values: { name: source.name },
+            locations: source.location,
+          })
+        );
+      }
+    }
   }
   return messages;
 }
@@ -504,30 +521,48 @@ function validateColumnForCommand(
       );
     }
   } else {
-    const commandDef = getCommandDefinition(commandName);
-    const columnRef = getColumnHit(column.name, references);
-    if (columnRef) {
+    const columnCheck = columnExists(column.name, references);
+    if (columnCheck) {
+      const commandDef = getCommandDefinition(commandName);
       const columnParamsWithInnerTypes = commandDef.signature.params.filter(
         ({ type, innerType }) => type === 'column' && innerType
       );
 
-      if (
-        columnParamsWithInnerTypes.every(({ innerType }) => {
-          return innerType !== columnRef.type;
-        }) &&
-        columnParamsWithInnerTypes.length
-      ) {
-        const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
+      if (columnParamsWithInnerTypes.length) {
+        // this should be guaranteed by the columnCheck above
+        const columnRef = getColumnHit(column.name, references)!;
+        if (
+          columnParamsWithInnerTypes.every(({ innerType }) => {
+            return innerType !== columnRef.type;
+          })
+        ) {
+          const supportedTypes = columnParamsWithInnerTypes.map(({ innerType }) => innerType);
 
+          messages.push(
+            getMessageFromId({
+              messageId: 'unsupportedColumnTypeForCommand',
+              values: {
+                command: capitalize(commandName),
+                type: supportedTypes.join(', '),
+                typeCount: supportedTypes.length,
+                givenType: columnRef.type,
+                column: column.name,
+              },
+              locations: column.location,
+            })
+          );
+        }
+      }
+      if (
+        hasWildcard(column.name) &&
+        !commandDef.signature.params.some(({ type, wildcards }) => type === 'column' && wildcards)
+      ) {
         messages.push(
           getMessageFromId({
-            messageId: 'unsupportedColumnTypeForCommand',
+            messageId: 'wildcardNotSupportedForCommand',
             values: {
-              command: capitalize(commandName),
-              type: supportedTypes.join(', '),
-              typeCount: supportedTypes.length,
-              givenType: columnRef.type,
-              column: column.name,
+              command: commandName,
+              value: column.name,
             },
             locations: column.location,
           })
@@ -557,6 +592,10 @@ function validateCommand(command: ESQLCommand, references: ReferenceMaps): ESQLM
   }
   // do not check the command exists, the grammar is already picking that up
   const commandDef = getCommandDefinition(command.name);
+
+  if (commandDef.validate) {
+    messages.push(...commandDef.validate(command));
+  }
 
   // Now validate arguments
   for (const commandArg of command.args) {

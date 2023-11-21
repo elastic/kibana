@@ -25,11 +25,12 @@ type ExtraProps = Pick<LensAppProps, 'initialInput'> &
 
 export type SaveModalContainerProps = {
   originatingApp?: string;
+  getOriginatingPath?: (dashboardId: string) => string;
   persistedDoc?: Document;
   lastKnownDoc?: Document;
   returnToOriginSwitchLabel?: string;
   onClose: () => void;
-  onSave?: () => void;
+  onSave?: (saveProps: SaveProps) => void;
   runSave?: (saveProps: SaveProps, options: { saveToLibrary: boolean }) => void;
   isSaveable?: boolean;
   getAppNameFromId?: () => string | undefined;
@@ -44,6 +45,7 @@ export function SaveModalContainer({
   runSave,
   persistedDoc,
   originatingApp,
+  getOriginatingPath,
   initialInput,
   redirectTo,
   redirectToOrigin,
@@ -119,6 +121,7 @@ export function SaveModalContainer({
           redirectTo,
           redirectToOrigin,
           originatingApp,
+          getOriginatingPath,
           getIsByValueMode: () => false,
           onAppLeave: () => {},
           savedObjectStore: lensServices.savedObjectStore,
@@ -126,7 +129,7 @@ export function SaveModalContainer({
         saveProps,
         options
       ).then(() => {
-        onSave?.();
+        onSave?.(saveProps);
         onClose();
       });
     }
@@ -137,6 +140,7 @@ export function SaveModalContainer({
   return (
     <SaveModal
       originatingApp={originatingApp}
+      getOriginatingPath={getOriginatingPath}
       savingToLibraryPermitted={savingToLibraryPermitted}
       allowByValueEmbeddables={dashboardFeatureFlag?.allowByValueEmbeddables}
       savedObjectsTagging={savedObjectsTagging}
@@ -150,6 +154,7 @@ export function SaveModalContainer({
       description={description}
       savedObjectId={savedObjectId}
       returnToOriginSwitchLabel={returnToOriginSwitchLabel}
+      returnToOrigin={redirectToOrigin != null}
     />
   );
 }
@@ -158,11 +163,15 @@ const redirectToDashboard = ({
   embeddableInput,
   dashboardFeatureFlag,
   dashboardId,
+  originatingApp,
+  getOriginatingPath,
   stateTransfer,
 }: {
   embeddableInput: LensEmbeddableInput;
   dashboardId: string;
   dashboardFeatureFlag: LensAppServices['dashboardFeatureFlag'];
+  originatingApp?: string;
+  getOriginatingPath?: (dashboardId: string) => string | undefined;
   stateTransfer: LensAppServices['stateTransfer'];
 }) => {
   if (!dashboardFeatureFlag.allowByValueEmbeddables) {
@@ -174,8 +183,11 @@ const redirectToDashboard = ({
     type: LENS_EMBEDDABLE_TYPE,
   };
 
-  const path = dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`;
-  stateTransfer.navigateToWithEmbeddablePackage('dashboards', {
+  const path =
+    getOriginatingPath?.(dashboardId) ??
+    (dashboardId === 'new' ? '#/create' : `#/view/${dashboardId}`);
+  const appId = originatingApp ?? 'dashboards';
+  stateTransfer.navigateToWithEmbeddablePackage(appId, {
     state,
     path,
   });
@@ -208,6 +220,7 @@ export const runSaveLensVisualization = async (
     getIsByValueMode: () => boolean;
     persistedDoc?: Document;
     originatingApp?: string;
+    getOriginatingPath?: (dashboardId: string) => string;
     textBasedLanguageSave?: boolean;
     switchDatasource?: () => void;
     savedObjectStore: SavedObjectIndexStore;
@@ -248,7 +261,6 @@ export const runSaveLensVisualization = async (
       persistedDoc && savedObjectsTagging
         ? savedObjectsTagging.ui.getTagIdsFromReferences(persistedDoc.references)
         : [];
-
     references = savedObjectsTagging.ui.updateTagsReferences(
       references,
       saveProps.newTags || tagsIds
@@ -305,7 +317,6 @@ export const runSaveLensVisualization = async (
         timeRange: saveProps.panelTimeRange,
       };
     }
-
     if (saveProps.returnToOrigin && redirectToOrigin) {
       // disabling the validation on app leave because the document has been saved.
       onAppLeave?.((actions) => {
@@ -323,6 +334,8 @@ export const runSaveLensVisualization = async (
         dashboardId: saveProps.dashboardId,
         stateTransfer,
         dashboardFeatureFlag,
+        originatingApp: props.originatingApp,
+        getOriginatingPath: props.getOriginatingPath,
       });
       return;
     }

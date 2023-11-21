@@ -5,8 +5,9 @@ enterpriseSearch.enabled: false
 xpack.cloudSecurityPosture.enabled: false
 xpack.infra.enabled: true
 xpack.securitySolution.enabled: false
-xpack.uptime.enabled: false
-xpack.legacy_uptime.enabled: false
+
+## Cloud settings
+xpack.cloud.serverless.project_type: observability
 
 ## Enable the Serverless Observability plugin
 xpack.serverless.observability.enabled: true
@@ -25,6 +26,11 @@ xpack.serverless.plugin.developer.projectSwitcher.currentType: 'observability'
 ## Disable adding the component template `.fleet_agent_id_verification-1` to every index template for each datastream for each integration
 xpack.fleet.agentIdVerificationEnabled: false
 
+## Enable the capability for the observability feature ID in the serverless environment to take ownership of the rules.
+## The value need to be a featureId observability Or stackAlerts Or siem
+xpack.alerting.rules.overwriteProducer: 'observability'
+xpack.observability.createO11yGenericFeatureId: true
+
 ## APM Serverless Onboarding flow
 xpack.apm.serverlessOnboarding: true
 
@@ -39,21 +45,26 @@ xpack.fleet.internal.registry.excludePackages: [
     'endpoint',
     'beaconing',
     'osquery_manager',
+
     # synthetics is not enabled yet
     'synthetics',
     'synthetics_dashboards',
+
     # Removed in 8.11 integrations
     'cisco',
     'microsoft',
     'symantec',
     'cyberark',
+
+    # ML integrations
+    'dga',
   ]
 
 ## Required for force installation of APM Package
 xpack.fleet.packages:
   - name: apm
     version: latest
-# fleet_server package installed to publish agent metrics
+  # fleet_server package installed to publish agent metrics
   - name: fleet_server
     version: latest
 ## Disable APM UI components and API calls
@@ -71,3 +82,4 @@ telemetry.labels.serverless: observability
 xpack.ml.ad.enabled: true
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: false
+xpack.ml.compatibleModuleType: 'observability'

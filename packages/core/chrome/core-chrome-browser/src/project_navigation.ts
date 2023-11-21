@@ -83,11 +83,7 @@ interface NodeDefinitionBase {
    */
   breadcrumbStatus?: 'hidden' | 'visible';
   /**
-   * Optional status to for the side navigation. "hidden" and "visible" are self explanatory.
-   * The `renderAsItem` status is _only_ for group nodes (nodes with children declared or with
-   * the "nodeType" set to `group`) and allow to render the node as an "item" instead of the head of
-   * a group. This is usefull to have sub-pages declared in the tree that will correctly be mapped
-   * in the Breadcrumbs, but are not rendered in the side navigation.
+   * Optional status to indicate if the node should be hidden in the side nav (but still present in the navigation tree).
    * @default 'visible'
    */
   sideNavStatus?: SideNavNodeStatus;

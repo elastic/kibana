@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { stringifyZodError } from '@kbn/securitysolution-es-utils';
-import { expectParseError, expectParseSuccess } from '../../../../test/zod_helpers';
+import { expectParseError, expectParseSuccess, stringifyZodError } from '@kbn/zod-helpers';
 import type { ErrorSchema } from '../../model/error_schema.gen';
 import { ImportRulesResponse } from './import_rules_route.gen';
 

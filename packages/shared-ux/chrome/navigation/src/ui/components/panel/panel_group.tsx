@@ -69,6 +69,7 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
   const removePaddingTop = !hasTitle && !isFirstInList;
   const someChildIsGroup = filteredChildren?.some((child) => !!child.children);
   const firstChildIsGroup = !!filteredChildren?.[0]?.children;
+  const groupTestSubj = `panelGroup panelGroupId-${navNode.id}`;
 
   let spaceBefore = _spaceBefore;
   if (spaceBefore === undefined) {
@@ -106,6 +107,10 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
           buttonContent={title}
           className={classNames.accordion}
           buttonClassName={accordionButtonClassName}
+          data-test-subj={groupTestSubj}
+          buttonProps={{
+            'data-test-subj': `panelAccordionBtnId-${navNode.id}`,
+          }}
         >
           <>
             {!firstChildIsGroup && <EuiSpacer size="s" />}
@@ -118,10 +123,14 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
   }
 
   return (
-    <>
+    <div data-test-subj={groupTestSubj}>
       {spaceBefore !== null && <EuiSpacer size={spaceBefore} />}
       {hasTitle && (
-        <EuiTitle size="xxxs" className={classNames.title}>
+        <EuiTitle
+          size="xxxs"
+          className={classNames.title}
+          data-test-subj={`panelGroupTitleId-${navNode.id}`}
+        >
           <h2>{title}</h2>
         </EuiTitle>
       )}
@@ -139,6 +148,6 @@ export const PanelGroup: FC<Props> = ({ navNode, isFirstInList, hasHorizontalRul
         {renderChildren()}
       </EuiListGroup>
       {appendHorizontalRule && <EuiHorizontalRule margin="xs" />}
-    </>
+    </div>
   );
 };

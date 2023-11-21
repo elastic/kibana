@@ -72,6 +72,7 @@ describe('ContextAppContent test', () => {
       isLegacy: isLegacy ?? true,
       setAppState: () => {},
       addFilter: () => {},
+      interceptedWarnings: [],
     } as unknown as ContextAppContentProps;
 
     const component = mountWithIntl(

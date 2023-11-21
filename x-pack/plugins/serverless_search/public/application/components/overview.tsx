@@ -32,13 +32,12 @@ import {
   getConsoleRequest,
 } from '@kbn/search-api-panels';
 
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import type {
   LanguageDefinition,
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
-import { useQuery } from '@tanstack/react-query';
-import { Connector } from '@kbn/search-connectors';
+import { useLocation } from 'react-router-dom';
 import { docLinks } from '../../../common/doc_links';
 import { PLUGIN_ID } from '../../../common';
 import { useKibanaServices } from '../hooks/use_kibana';
@@ -52,6 +51,7 @@ import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
+import { ConnectorsCallout } from './connectors_callout';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -70,12 +70,16 @@ export const ElasticsearchOverview = () => {
     apiKey: clientApiKey,
     cloudId,
   };
-
-  const { data: _data } = useQuery({
-    queryKey: ['fetchConnectors'],
-    queryFn: () =>
-      http.fetch<{ connectors: Connector[] }>('/internal/serverless_search/connectors'),
-  });
+  const { hash } = useLocation();
+  useEffect(() => {
+    if (hash) {
+      const id = hash.replace('#', '');
+      const element = document.getElementById(id);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth' });
+      }
+    }
+  }, [hash]);
 
   return (
     <EuiPageTemplate offset={0} grow restrictWidth data-test-subj="svlSearchOverviewPage">
@@ -89,7 +93,7 @@ export const ElasticsearchOverview = () => {
         bottomBorder="extended"
         data-test-subj="select-client-section"
       >
-        <SelectClientPanel docLinks={docLinks} http={http}>
+        <SelectClientPanel docLinks={docLinks} http={http} callout={<ConnectorsCallout />}>
           <EuiFlexItem>
             <LanguageGrid
               assetBasePath={assetBasePath}
@@ -279,6 +283,7 @@ export const ElasticsearchOverview = () => {
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
+        id="ingestData"
         color="subdued"
         bottomBorder="extended"
         data-test-subj="ingest-client-section"

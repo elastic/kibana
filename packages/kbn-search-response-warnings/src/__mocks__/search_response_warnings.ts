@@ -10,7 +10,7 @@ import type { SearchResponseWarning } from '../types';
 
 export const searchResponseIncompleteWarningLocalCluster: SearchResponseWarning = {
   type: 'incomplete',
-  message: 'The data might be incomplete or wrong.',
+  requestName: 'My request',
   clusters: {
     '(local)': {
       status: 'partial',

@@ -34,6 +34,7 @@ import {
   PLUGIN_ID,
   type ConfigSchema,
   initEnabledFeatures,
+  type CompatibleModule,
 } from '../common/constants/app';
 import { initMlServerLog } from './lib/log';
 import { annotationRoutes } from './routes/annotations';
@@ -100,13 +101,18 @@ export class MlServerPlugin
     dfa: true,
     nlp: true,
   };
+  private compatibleModuleType: CompatibleModule | null = null;
 
   constructor(ctx: PluginInitializerContext<ConfigSchema>) {
     this.log = ctx.logger.get();
     this.mlLicense = new MlLicense();
     this.isMlReady = new Promise((resolve) => (this.setMlReady = resolve));
     this.savedObjectsSyncService = new SavedObjectsSyncService(this.log);
-    initEnabledFeatures(this.enabledFeatures, ctx.config.get());
+
+    const config = ctx.config.get();
+    initEnabledFeatures(this.enabledFeatures, config);
+    this.compatibleModuleType = config.compatibleModuleType ?? null;
+    this.enabledFeatures = Object.freeze(this.enabledFeatures);
   }
 
   public setup(coreSetup: CoreSetup<PluginsStart>, plugins: PluginsSetup): MlPluginSetup {
@@ -189,7 +195,9 @@ export class MlServerPlugin
       if (this.capabilities === null) {
         return null;
       }
-      const capabilities = await this.capabilities.resolveCapabilities(request);
+      const capabilities = await this.capabilities.resolveCapabilities(request, {
+        capabilityPath: 'ml.*',
+      });
       return capabilities.ml as MlCapabilities;
     };
 
@@ -204,7 +212,8 @@ export class MlServerPlugin
       () => this.uiSettings,
       () => this.fieldsFormat,
       getDataViews,
-      () => this.isMlReady
+      () => this.isMlReady,
+      this.compatibleModuleType
     );
 
     const routeInit: RouteInitialization = {
@@ -220,7 +229,7 @@ export class MlServerPlugin
         coreSetup.getStartServices
       ),
       mlLicense: this.mlLicense,
-      getEnabledFeatures: () => Object.assign({}, this.enabledFeatures),
+      getEnabledFeatures: () => this.enabledFeatures,
     };
 
     // Register Anomaly Detection routes
@@ -228,7 +237,7 @@ export class MlServerPlugin
       annotationRoutes(routeInit, plugins.security);
       calendars(routeInit);
       dataFeedRoutes(routeInit);
-      dataRecognizer(routeInit);
+      dataRecognizer(routeInit, this.compatibleModuleType);
       filtersRoutes(routeInit);
       jobAuditMessagesRoutes(routeInit);
       jobRoutes(routeInit);
@@ -239,7 +248,7 @@ export class MlServerPlugin
 
     // Register Data Frame Analytics routes
     if (this.enabledFeatures.dfa) {
-      dataFrameAnalyticsRoutes(routeInit);
+      dataFrameAnalyticsRoutes(routeInit, plugins.cloud);
     }
 
     // Register Trained Model Management routes

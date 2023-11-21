@@ -1,7 +1,7 @@
 {
   "type": "plugin",
   "id": "@kbn/observability-log-explorer-plugin",
-  "owner": "@elastic/infra-monitoring-ui",
+  "owner": "@elastic/obs-ux-logs-team",
   "description": "This plugin exposes and registers observability log consumption features.",
   "plugin": {
     "id": "observabilityLogExplorer",
@@ -15,6 +15,7 @@
       "data",
       "discover",
       "logExplorer",
+      "logsShared",
       "observabilityShared",
       "share",
       "kibanaUtils",

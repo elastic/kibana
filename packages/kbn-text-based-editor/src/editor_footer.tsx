@@ -148,7 +148,7 @@ interface EditorFooterProps {
   lines: number;
   containerCSS: Interpolation<Theme>;
   errors?: MonacoMessage[];
-  warning?: MonacoMessage[];
+  warnings?: MonacoMessage[];
   detectTimestamp: boolean;
   onErrorClick: (error: MonacoMessage) => void;
   refreshErrors: () => void;
@@ -159,7 +159,7 @@ export const EditorFooter = memo(function EditorFooter({
   lines,
   containerCSS,
   errors,
-  warning,
+  warnings,
   detectTimestamp,
   onErrorClick,
   refreshErrors,
@@ -191,10 +191,10 @@ export const EditorFooter = memo(function EditorFooter({
               onErrorClick={onErrorClick}
             />
           )}
-          {warning && warning.length > 0 && (
+          {warnings && warnings.length > 0 && (
             <ErrorsWarningsPopover
               isPopoverOpen={isWarningPopoverOpen}
-              items={warning}
+              items={warnings}
               type="warning"
               setIsPopoverOpen={(isOpen) => {
                 if (isOpen) {

@@ -36,6 +36,7 @@ function getCallbackMocks() {
               name: `listField`,
               type: `list`,
             },
+            { name: '@timestamp', type: 'date' },
           ]
         : [
             { name: 'otherField', type: 'string' },
@@ -224,7 +225,11 @@ describe('validation logic', () => {
       'SyntaxError: expected {<EOF>, PIPE, COMMA, OPENING_BRACKET} but found "(metadata"',
     ]);
     testErrorsAndWarnings(`from ind*, other*`, []);
-    testErrorsAndWarnings(`from index*`, ['Unknown index [index*]']);
+    testErrorsAndWarnings(`from index*`, []);
+    testErrorsAndWarnings(`from *ex`, []);
+    testErrorsAndWarnings(`from in*ex`, []);
+    testErrorsAndWarnings(`from ind*ex`, []);
+    testErrorsAndWarnings(`from indexes*`, ['Unknown index [indexes*]']);
   });
 
   describe('row', () => {
@@ -470,6 +475,14 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
+    testErrorsAndWarnings('from index | keep s*', []);
+    testErrorsAndWarnings('from index | keep *Field', []);
+    testErrorsAndWarnings('from index | keep s*Field', []);
+    testErrorsAndWarnings('from index | keep string*Field', []);
+    testErrorsAndWarnings('from index | keep s*, n*', []);
+    testErrorsAndWarnings('from index | keep m*', ['Unknown column [m*]']);
+    testErrorsAndWarnings('from index | keep *m', ['Unknown column [*m]']);
+    testErrorsAndWarnings('from index | keep d*m', ['Unknown column [d*m]']);
   });
 
   describe('drop', () => {
@@ -489,6 +502,28 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from index | project missingField, numberField, dateField', [
       'Unknown column [missingField]',
     ]);
+    testErrorsAndWarnings('from index | drop s*', []);
+    testErrorsAndWarnings('from index | drop *Field', []);
+    testErrorsAndWarnings('from index | drop s*Field', []);
+    testErrorsAndWarnings('from index | drop string*Field', []);
+    testErrorsAndWarnings('from index | drop s*, n*', []);
+    testErrorsAndWarnings('from index | drop m*', ['Unknown column [m*]']);
+    testErrorsAndWarnings('from index | drop *m', ['Unknown column [*m]']);
+    testErrorsAndWarnings('from index | drop d*m', ['Unknown column [d*m]']);
+    testErrorsAndWarnings('from index | drop *', ['Removing all fields is not allowed [*]']);
+    testErrorsAndWarnings('from index | drop stringField, *', [
+      'Removing all fields is not allowed [*]',
+    ]);
+    testErrorsAndWarnings(
+      'from index | drop @timestamp',
+      [],
+      ['Drop [@timestamp] will remove all time filters to the search results']
+    );
+    testErrorsAndWarnings(
+      'from index | drop stringField, @timestamp',
+      [],
+      ['Drop [@timestamp] will remove all time filters to the search results']
+    );
   });
 
   describe('mv_expand', () => {
@@ -535,6 +570,10 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | eval numberField + 1 | rename `numberField + 1` as ', [
       "SyntaxError: missing {SRC_UNQUOTED_IDENTIFIER, SRC_QUOTED_IDENTIFIER} at '<EOF>'",
     ]);
+    testErrorsAndWarnings('from a | rename s* as strings', [
+      'Using wildcards (*) in rename is not allowed [s*]',
+      'Unknown column [strings]',
+    ]);
   });
 
   describe('dissect', () => {
@@ -576,6 +615,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | dissect stringField "%{a}" append_separator = true', [
       'Invalid value for dissect append_separator: expected a string, but was [true]',
     ]);
+    // testErrorsAndWarnings('from a | dissect s* "%{a}"', [
+    //   'Using wildcards (*) in dissect is not allowed [s*]',
+    // ]);
   });
 
   describe('grok', () => {
@@ -596,6 +638,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings('from a | grok numberField "%{a}"', [
       'Grok only supports string type values, found [numberField] of type number',
     ]);
+    // testErrorsAndWarnings('from a | grok s* "%{a}"', [
+    //   'Using wildcards (*) in grok is not allowed [s*]',
+    // ]);
   });
 
   describe('where', () => {
@@ -1185,6 +1230,9 @@ describe('validation logic', () => {
     testErrorsAndWarnings(`from a | enrich policy with otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy | eval otherField`, []);
     testErrorsAndWarnings(`from a | enrich policy with var0 = otherField | eval var0`, []);
+    testErrorsAndWarnings('from a | enrich my-pol*', [
+      'Using wildcards (*) in enrich is not allowed [my-pol*]',
+    ]);
   });
 
   describe('shadowing', () => {

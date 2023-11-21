@@ -163,7 +163,6 @@ const formatFooterNodesFromLinks = (
           title: category.label,
           icon: category.iconType,
           breadcrumbStatus: 'hidden',
-          defaultIsCollapsed: true,
           children:
             category.linkIds?.reduce<NodeDefinition[]>((acc, linkId) => {
               const projectNavLink = projectNavLinks.find(({ id }) => id === linkId);

@@ -26,8 +26,6 @@ delete:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 get:
   summary: Retrieves an alert by its identifier.
@@ -58,8 +56,6 @@ get:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 post:
   summary: Create an alert.
@@ -176,8 +172,6 @@ post:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
 
 put:
   summary: Updates the attributes for an alert.
@@ -283,8 +277,3 @@ put:
         application/json:
           schema:
             $ref: '../components/schemas/401_response.yaml'
-  servers:
-    - url: https://localhost:5601
-
-servers:
-  - url: https://localhost:5601

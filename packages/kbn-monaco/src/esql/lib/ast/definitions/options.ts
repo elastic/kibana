@@ -80,6 +80,7 @@ export const appendSeparatorOption: CommandOptionsDefinition = {
     params: [{ name: 'separator', type: 'string' }],
   },
   optional: true,
+  skipCommonValidation: true, // tell the validation engine to use only the validate function here
   validate: (option: ESQLCommandOption) => {
     const messages: ESQLMessage[] = [];
     const [firstArg] = option.args;

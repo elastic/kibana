@@ -447,7 +447,7 @@ export default ({ getService }: FtrProviderContext): void => {
             .expect(400);
 
           expect(body.message).to.eql(
-            '[request body]: Invalid value "["foo"]" supplied to "investigation_fields"'
+            '[request body]: 0.investigation_fields: Expected object, received array, 0.type: Invalid literal value, expected "eql", 0.language: Invalid literal value, expected "eql", 0.investigation_fields: Expected object, received array, 0.investigation_fields: Expected object, received array, and 22 more'
           );
         });
       });

@@ -8,7 +8,6 @@ import React, { memo, useState, useEffect } from 'react';
 import { EuiText, EuiHorizontalRule, EuiSpacer, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { Rule } from '../../../../detection_engine/rule_management/logic';
 import { usePreviewPanelContext } from '../context';
 import { ExpandableSection } from '../../right/components/expandable_section';
 import { useRuleWithFallback } from '../../../../detection_engine/rule_management/logic/use_rule_with_fallback';
@@ -18,7 +17,6 @@ import { RuleAboutSection } from '../../../../detection_engine/rule_management/c
 import { RuleScheduleSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_schedule_section';
 import { RuleDefinitionSection } from '../../../../detection_engine/rule_management/components/rule_details/rule_definition_section';
 import { StepRuleActionsReadOnly } from '../../../../detections/components/rules/step_rule_actions';
-import { castRuleAsRuleResponse } from '../../../../detection_engine/rule_details_ui/pages/rule_details/cast_rule_as_rule_response';
 import { FlyoutLoading } from '../../../shared/components/flyout_loading';
 import { FlyoutError } from '../../../shared/components/flyout_error';
 import {
@@ -29,12 +27,21 @@ import {
   RULE_PREVIEW_ACTIONS_TEST_ID,
   RULE_PREVIEW_LOADING_TEST_ID,
 } from './test_ids';
+import type { RuleResponse } from '../../../../../common/api/detection_engine';
 
 const panelViewStyle = css`
   dt {
     font-size: 90% !important;
   }
   text-overflow: ellipsis;
+  .euiFlexGroup {
+    flex-wrap: inherit;
+  }
+
+  .euiFlexItem {
+    inline-size: inherit;
+    flex-basis: inherit;
+  }
 `;
 
 /**
@@ -42,7 +49,7 @@ const panelViewStyle = css`
  */
 export const RulePreview: React.FC = memo(() => {
   const { ruleId } = usePreviewPanelContext();
-  const [rule, setRule] = useState<Rule | null>(null);
+  const [rule, setRule] = useState<RuleResponse | null>(null);
   const {
     rule: maybeRule,
     loading: ruleLoading,
@@ -88,7 +95,7 @@ export const RulePreview: React.FC = memo(() => {
         <EuiText size="s">{rule.description}</EuiText>
         <EuiSpacer size="s" />
         <RuleAboutSection
-          rule={castRuleAsRuleResponse(rule)}
+          rule={rule}
           hideName
           hideDescription
           type="row"
@@ -108,7 +115,7 @@ export const RulePreview: React.FC = memo(() => {
         data-test-subj={RULE_PREVIEW_DEFINITION_TEST_ID}
       >
         <RuleDefinitionSection
-          rule={castRuleAsRuleResponse(rule)}
+          rule={rule}
           type="row"
           rowGutterSize="s"
           className={panelViewStyle}
@@ -125,12 +132,7 @@ export const RulePreview: React.FC = memo(() => {
         expanded={false}
         data-test-subj={RULE_PREVIEW_SCHEDULE_TEST_ID}
       >
-        <RuleScheduleSection
-          rule={castRuleAsRuleResponse(rule)}
-          type="row"
-          rowGutterSize="s"
-          className={panelViewStyle}
-        />
+        <RuleScheduleSection rule={rule} type="row" rowGutterSize="s" className={panelViewStyle} />
       </ExpandableSection>
       <EuiHorizontalRule margin="l" />
       {hasActions && (

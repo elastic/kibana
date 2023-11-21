@@ -6,37 +6,39 @@
  */
 
 import {
-  EuiFormRow,
-  EuiFlexItem,
-  EuiFlexGroup,
-  EuiSelect,
   EuiComboBox,
   EuiComboBoxOptionOption,
-  EuiPopover,
   EuiExpression,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiPopover,
+  EuiSelect,
 } from '@elastic/eui';
-import React, { useMemo, useCallback, useState } from 'react';
-import { get } from 'lodash';
-import { i18n } from '@kbn/i18n';
-import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
 import { DataViewBase } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  Aggregators,
-  CustomMetricAggTypes,
-} from '../../../../../common/custom_threshold_rule/types';
-import { MetricRowControls } from './metric_row_controls';
-import { NormalizedFields, MetricRowBaseProps } from './types';
-import { ClosablePopoverTitle } from '../closable_popover_title';
+import { ValidNormalizedTypes } from '@kbn/triggers-actions-ui-plugin/public';
+import { get } from 'lodash';
+import React, { useCallback, useMemo, useState } from 'react';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import { RuleFlyoutKueryBar } from '../../../rule_kql_filter/kuery_bar';
+import { ClosablePopoverTitle } from '../closable_popover_title';
+import { MetricRowControls } from './metric_row_controls';
+import { MetricRowBaseProps, NormalizedFields } from './types';
 
 interface MetricRowWithAggProps extends MetricRowBaseProps {
-  aggType?: CustomMetricAggTypes;
+  aggType?: Aggregators;
   field?: string;
   dataView: DataViewBase;
   filter?: string;
   fields: NormalizedFields;
 }
+
+const DEFAULT_COUNT_FILTER_TITLE = i18n.translate(
+  'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.defaultCountFilterTitle',
+  { defaultMessage: 'all documents' }
+);
 
 export function MetricRowWithAgg({
   name,
@@ -88,8 +90,8 @@ export function MetricRowWithAgg({
     (customAggType: string) => {
       onChange({
         name,
-        field,
-        aggType: customAggType as CustomMetricAggTypes,
+        field: customAggType === Aggregators.COUNT ? undefined : field,
+        aggType: customAggType as Aggregators,
       });
     },
     [name, field, onChange]
@@ -121,17 +123,19 @@ export function MetricRowWithAgg({
                   'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
                   { defaultMessage: 'Aggregation {name}', values: { name } }
                 )}
-                isInvalid={aggType !== Aggregators.COUNT && !field}
               >
                 <EuiExpression
                   data-test-subj="aggregationName"
                   description={aggregationTypes[aggType].text}
-                  value={aggType === Aggregators.COUNT ? filter : field}
+                  value={
+                    aggType === Aggregators.COUNT ? filter || DEFAULT_COUNT_FILTER_TITLE : field
+                  }
                   isActive={aggTypePopoverOpen}
                   display="columns"
                   onClick={() => {
                     setAggTypePopoverOpen(true);
                   }}
+                  isInvalid={aggType !== Aggregators.COUNT && !field}
                 />
               </EuiFormRow>
             }
@@ -160,7 +164,6 @@ export function MetricRowWithAgg({
                       'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationType',
                       { defaultMessage: 'Aggregation type' }
                     )}
-                    isInvalid={isAggInvalid}
                   >
                     <EuiSelect
                       data-test-subj="aggregationTypeSelect"
@@ -176,6 +179,7 @@ export function MetricRowWithAgg({
                           value,
                         };
                       })}
+                      isInvalid={isAggInvalid}
                     />
                   </EuiFormRow>
                 </EuiFlexItem>
@@ -201,7 +205,6 @@ export function MetricRowWithAgg({
                         'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.fieldLabel',
                         { defaultMessage: 'Field name' }
                       )}
-                      isInvalid={isFieldInvalid}
                     >
                       <EuiComboBox
                         fullWidth

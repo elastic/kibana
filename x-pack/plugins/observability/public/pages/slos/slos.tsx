@@ -44,6 +44,7 @@ export function SlosPage() {
       text: i18n.translate('xpack.observability.breadcrumbs.slosLinkText', {
         defaultMessage: 'SLOs',
       }),
+      deepLinkId: 'observability-overview:slos',
     },
   ]);
 

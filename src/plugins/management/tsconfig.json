@@ -27,7 +27,8 @@
     "@kbn/serverless",
     "@kbn/management-settings-application",
     "@kbn/react-kibana-context-render",
-    "@kbn/shared-ux-utility"
+    "@kbn/shared-ux-utility",
+    "@kbn/shared-ux-error-boundary"
   ],
   "exclude": [
     "target/**/*"

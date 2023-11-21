@@ -49,11 +49,21 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   consumer: rule.consumer,
   schedule: rule.schedule,
   actions: rule.actions.map(
-    ({ group, id, actionTypeId, params, frequency, uuid, alertsFilter }) => ({
+    ({
+      group,
+      id,
+      actionTypeId,
+      params,
+      frequency,
+      uuid,
+      alertsFilter,
+      useAlertDataForTemplate,
+    }) => ({
       group,
       id,
       params,
       connector_type_id: actionTypeId,
+      use_alert_data_for_template: useAlertDataForTemplate ?? false,
       ...(frequency
         ? {
             frequency: {
@@ -82,6 +92,7 @@ export const transformRuleToRuleResponse = <Params extends RuleParams = never>(
   mute_all: rule.muteAll,
   ...(rule.notifyWhen !== undefined ? { notify_when: rule.notifyWhen } : {}),
   muted_alert_ids: rule.mutedInstanceIds,
+  ...(rule.scheduledTaskId !== undefined ? { scheduled_task_id: rule.scheduledTaskId } : {}),
   execution_status: {
     status: rule.executionStatus.status,
     ...(rule.executionStatus.error ? { error: rule.executionStatus.error } : {}),

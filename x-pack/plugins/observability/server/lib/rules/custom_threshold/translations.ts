@@ -7,23 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const FIRED_ACTIONS = {
-  id: 'custom_threshold.fired',
-  name: i18n.translate('xpack.observability.customThreshold.rule.alerting.custom_threshold.fired', {
-    defaultMessage: 'Alert',
-  }),
-};
-
-export const NO_DATA_ACTIONS = {
-  id: 'custom_threshold.nodata',
-  name: i18n.translate(
-    'xpack.observability.customThreshold.rule.alerting.custom_threshold.nodata',
-    {
-      defaultMessage: 'No Data',
-    }
-  ),
-};
-
 export const DOCUMENT_COUNT_I18N = i18n.translate(
   'xpack.observability.customThreshold.rule.aggregators.documentCount',
   {
@@ -77,6 +60,38 @@ export const CUSTOM_EQUATION_I18N = i18n.translate(
     defaultMessage: 'Custom equation',
   }
 );
+
+// Comparators
+
+export const BELOW_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.below',
+  {
+    defaultMessage: 'below',
+  }
+);
+
+export const ABOVE_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.above',
+  {
+    defaultMessage: 'above',
+  }
+);
+
+export const BETWEEN_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.between',
+  {
+    defaultMessage: 'between',
+  }
+);
+
+export const NOT_BETWEEN_TEXT = i18n.translate(
+  'xpack.observability.customThreshold.rule.threshold.notBetween',
+  {
+    defaultMessage: 'not between',
+  }
+);
+
+// Action variable descriptions
 
 export const groupByKeysActionVariableDescription = i18n.translate(
   'xpack.observability.customThreshold.rule.groupByKeysActionVariableDescription',

@@ -8,16 +8,15 @@
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
 import { isNotFoundError } from '@kbn/securitysolution-t-grid';
 import { useEffect, useMemo } from 'react';
-import type { InvestigationFieldsCombined } from '../../../../server/lib/detection_engine/rule_schema';
-import type { InvestigationFields } from '../../../../common/api/detection_engine';
+import type { InvestigationFields, RuleResponse } from '../../../../common/api/detection_engine';
 import { expandDottedObject } from '../../../../common/utils/expand_dotted';
+import type { InvestigationFieldsCombined } from '../../../../server/lib/detection_engine/rule_schema';
 import { useAppToasts } from '../../../common/hooks/use_app_toasts';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
 import type { AlertSearchResponse } from '../../../detections/containers/detection_engine/alerts/types';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { transformInput } from '../../../detections/containers/detection_engine/rules/transforms';
 import * as i18n from './translations';
-import type { Rule } from './types';
 import { useRule } from './use_rule';
 
 interface UseRuleWithFallback {
@@ -25,7 +24,7 @@ interface UseRuleWithFallback {
   loading: boolean;
   isExistingRule: boolean;
   refresh: () => void;
-  rule: Rule | null;
+  rule: RuleResponse | null;
 }
 
 interface AlertHit {
@@ -34,11 +33,11 @@ interface AlertHit {
   _source: {
     '@timestamp': string;
     signal?: {
-      rule?: Rule;
+      rule?: RuleResponse;
     };
     kibana?: {
       alert?: {
-        rule?: Rule;
+        rule?: RuleResponse;
       };
     };
   };
@@ -96,7 +95,7 @@ export const useRuleWithFallback = (ruleId: string): UseRuleWithFallback => {
     }
   }, [addError, error]);
 
-  const rule = useMemo<Rule | undefined>(() => {
+  const rule = useMemo<RuleResponse | undefined>(() => {
     const result = isExistingRule
       ? ruleData
       : alertsData == null
@@ -144,7 +143,9 @@ export const migrateLegacyInvestigationFields = (
  * @param rule Rule
  * @returns Rule
  */
-export const migrateRuleWithLegacyInvestigationFieldsFromAlertHit = (rule: Rule): Rule => {
+export const migrateRuleWithLegacyInvestigationFieldsFromAlertHit = (
+  rule: RuleResponse
+): RuleResponse => {
   if (!rule) return rule;
 
   return {
@@ -159,7 +160,7 @@ export const migrateRuleWithLegacyInvestigationFieldsFromAlertHit = (rule: Rule)
  */
 export const transformRuleFromAlertHit = (
   data: AlertSearchResponse<AlertHit>
-): Rule | undefined => {
+): RuleResponse | undefined => {
   // if results empty, return rule as undefined
   if (data.hits.hits.length === 0) {
     return undefined;
@@ -177,7 +178,7 @@ export const transformRuleFromAlertHit = (
       ...expandedRuleWithParams?.kibana?.alert?.rule?.parameters,
     };
     delete expandedRule.parameters;
-    return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(expandedRule as Rule);
+    return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(expandedRule as RuleResponse);
   }
 
   return migrateRuleWithLegacyInvestigationFieldsFromAlertHit(rule);

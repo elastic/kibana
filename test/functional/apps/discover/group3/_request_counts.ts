@@ -156,7 +156,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await queryBar.clickQuerySubmitButton();
         await waitForLoadingToFinish();
         await expectSearches(type, 2, async () => {
-          await PageObjects.discover.clickResetSavedSearchButton();
+          await PageObjects.discover.revertUnsavedChanges();
         });
         // clearing the saved search
         await expectSearches('ese', 2, async () => {

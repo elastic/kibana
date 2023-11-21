@@ -99,6 +99,10 @@ export interface ValidationErrors {
     message: string;
     type: { command: string; value: string };
   };
+  wildcardNotSupportedForCommand: {
+    mesage: string;
+    type: { command: string; value: string };
+  };
 }
 
 export type ErrorTypes = keyof ValidationErrors;

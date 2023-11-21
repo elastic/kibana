@@ -9,11 +9,11 @@ xpack.observabilityLogExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.securitySolution.enabled: false
 xpack.serverless.observability.enabled: false
-xpack.uptime.enabled: false
-xpack.legacy_uptime.enabled: false
 enterpriseSearch.enabled: false
-monitoring.ui.enabled: false
 xpack.fleet.enabled: false
+
+## Cloud settings
+xpack.cloud.serverless.project_type: search
 
 ## Enable the Serverless Search plugin
 xpack.serverless.search.enabled: true
@@ -40,3 +40,4 @@ xpack.painless_lab.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false
 xpack.ml.nlp.enabled: true
+xpack.ml.compatibleModuleType: 'search'

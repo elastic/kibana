@@ -8,7 +8,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default function ({ getPageObjects }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['svlCommonPage', 'svlCommonNavigation']);
+  const PageObjects = getPageObjects(['header', 'svlCommonPage', 'svlCommonNavigation']);
 
   const allLabels = [{ search: 'transform', label: 'Data / Transforms', expected: true }];
   const expectedLabels = allLabels.filter((l) => l.expected);
@@ -26,6 +26,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
     describe('list features', () => {
       if (expectedLabels.length > 0) {
         it('has the correct features enabled', async () => {
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.svlCommonNavigation.search.showSearch();
 
           for (const expectedLabel of expectedLabels) {
@@ -44,6 +45,7 @@ export default function ({ getPageObjects }: FtrProviderContext) {
 
       if (notExpectedLabels.length > 0) {
         it('has the correct features disabled', async () => {
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await PageObjects.svlCommonNavigation.search.showSearch();
 
           for (const notExpectedLabel of notExpectedLabels) {

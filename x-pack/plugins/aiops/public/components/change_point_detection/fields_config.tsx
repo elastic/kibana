@@ -236,6 +236,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         }),
                   icon: 'plusInCircle',
                   panel: 'attachMainPanel',
+                  'data-test-subj': 'aiopsChangePointDetectionAttachButton',
                 },
               ]
             : []),
@@ -248,6 +249,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
             disabled: removeDisabled,
           },
         ],
+        'data=test-subj': 'aiopsChangePointDetectionContextMenuPanel',
       },
       {
         id: 'attachMainPanel',
@@ -269,6 +271,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     defaultMessage: 'To dashboard',
                   }),
                   panel: 'attachToDashboardPanel',
+                  'data-test-subj': 'aiopsChangePointDetectionAttachToDashboardButton',
                 },
               ]
             : []),
@@ -290,6 +293,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                         ),
                       }
                     : {}),
+                  'data-test-subj': 'aiopsChangePointDetectionAttachToCaseButton',
                   onClick: () => {
                     openCasesModalCallback({
                       timeRange,
@@ -308,6 +312,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
               ]
             : []),
         ],
+        'data-test-subj': 'aiopsChangePointDetectionAttachChartPanel',
       },
       {
         id: 'attachToDashboardPanel',
@@ -318,7 +323,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
         content: (
           <EuiPanel paddingSize={'s'}>
             <EuiSpacer size={'s'} />
-            <EuiForm>
+            <EuiForm data-test-subj="aiopsChangePointDetectionDashboardAttachmentForm">
               <EuiFormRow fullWidth>
                 <EuiSwitch
                   label={i18n.translate('xpack.aiops.changePointDetection.applyTimeRangeLabel', {
@@ -334,6 +339,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
                     })
                   }
                   compressed
+                  data-test-subj="aiopsChangePointDetectionAttachToDashboardApplyTimeRangeSwitch"
                 />
               </EuiFormRow>
               {isDefined(fieldConfig.splitField) && selectedPartitions.length === 0 ? (
