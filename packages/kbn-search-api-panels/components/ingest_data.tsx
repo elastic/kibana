@@ -76,7 +76,11 @@ export const IngestData: React.FC<IngestDataProps> = ({
       </EuiTitle>
       <EuiSpacer size="m" />
 
-      <IngestionsPanel docLinks={docLinks} additionalIngestionPanel={additionalIngestionPanel} />
+      <IngestionsPanel
+        assetBasePath={assetBasePath}
+        docLinks={docLinks}
+        additionalIngestionPanel={additionalIngestionPanel}
+      />
     </OverviewPanel>
   );
 };

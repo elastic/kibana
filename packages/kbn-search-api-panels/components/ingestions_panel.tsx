@@ -8,25 +8,20 @@
 
 import React from 'react';
 
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiTitle,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-} from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer, EuiText, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { GithubLink } from './github_link';
 
 interface IngestionPanelProps {
   additionalIngestionPanel?: React.ReactNode;
   docLinks: { beats: string; logstash: string };
+  assetBasePath: string;
 }
 
 export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
   additionalIngestionPanel,
   docLinks,
+  assetBasePath,
 }) => {
   const panels = [
     {
@@ -55,13 +50,8 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
         },
         {
           href: 'https://github.com/elastic/logstash',
-          icon: 'logoGithub',
-          label: i18n.translate(
-            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.logstashGithubLabel',
-            {
-              defaultMessage: 'logstash',
-            }
-          ),
+          isGithubLink: true,
+          label: 'logstash',
         },
       ],
     },
@@ -83,7 +73,7 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
         {
           href: docLinks.beats,
           label: i18n.translate(
-            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.BeatsDocumentationLabel',
+            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.beatsDocumentationLabel',
             {
               defaultMessage: 'Documentation',
             }
@@ -91,13 +81,8 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
         },
         {
           href: 'https://github.com/elastic/beats',
-          icon: 'logoGithub',
-          label: i18n.translate(
-            'searchApiPanels.welcomeBanner.ingestData.alternativeOptions.BeatsGithubLabel',
-            {
-              defaultMessage: 'Beats',
-            }
-          ),
+          isGithubLink: true,
+          label: 'beats',
         },
       ],
     },
@@ -124,12 +109,10 @@ export const IngestionsPanel: React.FC<IngestionPanelProps> = ({
           {links && links.length > 0 && (
             <>
               <EuiFlexGroup direction="row" justifyContent="flexStart" alignItems="center">
-                {links.map(({ label, href, icon }, linksIndex) => (
+                {links.map(({ label, href, isGithubLink }, linksIndex) => (
                   <EuiFlexItem grow={false} key={linksIndex}>
-                    {icon ? (
-                      <EuiButtonEmpty color="primary" iconType={icon} size="s">
-                        {label}
-                      </EuiButtonEmpty>
+                    {isGithubLink ? (
+                      <GithubLink assetBasePath={assetBasePath} label={label} href={href} />
                     ) : (
                       <EuiLink href={href} target="_blank">
                         {label}

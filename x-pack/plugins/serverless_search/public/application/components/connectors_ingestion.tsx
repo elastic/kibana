@@ -12,14 +12,15 @@ import {
   EuiSpacer,
   EuiText,
   EuiLink,
-  EuiButtonEmpty,
+  EuiIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { GithubLink } from '@kbn/search-api-panels';
 
 import React from 'react';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
 
-export const ConnectorIngestionPanel = () => {
+export const ConnectorIngestionPanel: React.FC<{ assetBasePath: string }> = ({ assetBasePath }) => {
   const { createConnector } = useCreateConnector();
   return (
     <EuiFlexGroup direction="column" justifyContent="spaceEvenly" gutterSize="s">
@@ -59,34 +60,33 @@ export const ConnectorIngestionPanel = () => {
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="primary"
-            iconType="logoGithub"
-            size="s"
-            href="https://github.com/elastic/connectors-python"
-          >
-            {i18n.translate(
-              'xpack.serverlessSearch.ingestData.alternativeOptions.connectorPythonGithubLabel',
-              {
-                defaultMessage: 'connectors-python',
-              }
-            )}
-          </EuiButtonEmpty>
+          <GithubLink
+            href="https://github.com/elastic/connectors"
+            label="connectors"
+            assetBasePath={assetBasePath}
+          />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty
-            color="primary"
-            iconType="logoDocker"
-            size="s"
-            href="https://github.com/elastic/connectors-python/blob/main/docs/DOCKER.md"
-          >
-            {i18n.translate(
-              'xpack.serverlessSearch.ingestData.alternativeOptions.connectorDockerLabel',
-              {
-                defaultMessage: 'Docker',
-              }
-            )}
-          </EuiButtonEmpty>
+          <EuiFlexGroup alignItems="center" gutterSize="xs">
+            <EuiFlexItem grow={false}>
+              <EuiIcon size="s" type="logoDocker" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <EuiLink
+                  target="_blank"
+                  href="https://github.com/elastic/connectors-python/blob/main/docs/DOCKER.md"
+                >
+                  {i18n.translate(
+                    'xpack.serverlessSearch.ingestData.alternativeOptions.connectorDockerLabel',
+                    {
+                      defaultMessage: 'Docker',
+                    }
+                  )}
+                </EuiLink>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />

@@ -303,7 +303,7 @@ export const ElasticsearchOverview = () => {
           docLinks={docLinks}
           application={application}
           sharePlugin={share}
-          additionalIngestionPanel={<ConnectorIngestionPanel />}
+          additionalIngestionPanel={<ConnectorIngestionPanel assetBasePath={assetBasePath} />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section
