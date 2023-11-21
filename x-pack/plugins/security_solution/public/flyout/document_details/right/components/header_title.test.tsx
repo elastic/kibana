@@ -11,7 +11,6 @@ import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
 import { RightPanelContext } from '../context';
 import {
   RISK_SCORE_VALUE_TEST_ID,
-  SEVERITY_VALUE_TEST_ID,
   FLYOUT_HEADER_TITLE_TEST_ID,
   STATUS_BUTTON_TEST_ID,
 } from './test_ids';
