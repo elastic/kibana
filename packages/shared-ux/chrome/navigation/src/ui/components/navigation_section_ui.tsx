@@ -98,7 +98,6 @@ const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {
 
   const serialized: ChromeProjectNavigationNode = {
     ...navNode,
-    id: navNode.path,
     children: filterChildren(navNode.children),
     href,
   };
@@ -202,12 +201,12 @@ const nodeToEuiCollapsibleNavProps = (
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
   const isActive = navNode.isActive ?? isActiveFromUrl(navNode.path, activeNodes);
 
-  const { id, title, href, icon, renderAs, spaceBefore: _spaceBefore } = navNode;
+  const { id, path, title, href, icon, renderAs, spaceBefore: _spaceBefore } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
 
   const isAccordion = hasChildren && !isItem;
   const isAccordionExpanded =
-    (itemsAccordionState[id]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
+    (itemsAccordionState[path]?.isCollapsed ?? DEFAULT_IS_COLLAPSED) === false;
   const isSelected = isAccordion && isAccordionExpanded ? false : isActive;
 
   const dataTestSubj = getTestSubj(navNode, isSelected);
