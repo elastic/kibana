@@ -40,7 +40,7 @@ export const getStreamObservable = (
               }
               observer.next({
                 chunks,
-                message: chunks.join(''),
+                message: chunks.join(' '),
                 loading: false,
               });
               observer.complete();
@@ -48,28 +48,24 @@ export const getStreamObservable = (
             }
 
             const decoded = decoder.decode(value);
+            let content;
             if (isError) {
-              const content = `${API_ERROR}\n\n${JSON.parse(decoded).message}`;
-              chunks.push(content);
-              observer.next({
-                chunks,
-                message: chunks.join(''),
-                loading: true,
-              });
+              content = `${API_ERROR}\n\n${JSON.parse(decoded).message}`;
             } else {
               const lines = decoded.split('\n');
-
               lines[0] = lineBuffer + lines[0];
               lineBuffer = lines.pop() || '';
-              const content = getNextChunk(lines);
-              chunks.push(content);
-
+              content = getNextChunk(lines);
+            }
+            const characters = content.split(' ');
+            characters.forEach((char) => {
+              chunks.push(char);
               observer.next({
                 chunks,
-                message: chunks.join(''),
+                message: chunks.join(' '),
                 loading: true,
               });
-            }
+            });
           } catch (err) {
             observer.error(err);
             return;
@@ -107,11 +103,9 @@ export const getStreamObservable = (
     concatMap((value) => {
       const now = Date.now();
       const delayFor = value.timestamp - now;
-
       if (delayFor <= 0) {
         return of(value.value);
       }
-
       return of(value.value).pipe(delay(delayFor));
     }),
     // set loading to false when the observable completes or errors out
