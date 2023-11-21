@@ -19,6 +19,7 @@ export interface BuildkiteBuildExtract {
   url: string;
   buildNumber: number;
   slug: string;
+  commit: string;
 }
 
 export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBuildExtract | null> {
@@ -51,6 +52,7 @@ export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBu
     slug: KIBANA_PR_BUILD_SLUG,
     url: buildkiteURL,
     buildNumber: buildkiteBuildNumber,
+    commit: commitHash,
   };
 }
 
@@ -64,6 +66,7 @@ export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtr
       url: build.web_url,
       slug: QA_FTR_TEST_SLUG,
       buildNumber: build.number,
+      commit: build.commit,
     }))
     .reverse();
 }
@@ -83,6 +86,47 @@ export async function getArtifactBuildJob(
     url: build.web_url,
     slug: KIBANA_ARTIFACT_BUILD_SLUG,
     buildNumber: build.number,
+    commit: build.commit,
+  };
+}
+
+export async function getQAReleaseContainingCommit(
+  commitSha: string,
+  qafBuilds: BuildkiteBuildExtract[]
+) {
+  const commmitShaList = (
+    await octokit.request('GET /repos/{owner}/{repo}/commits/', {
+      owner: 'elastic',
+      repo: 'kibana',
+      ref: commitSha,
+      headers: {
+        accept: 'application/vnd.github.v3+json',
+        'X-GitHub-Api-Version': '2022-11-28',
+      },
+    })
+  ).data;
+  const build = qafBuilds.find((kbBuild) => {
+    // is build.commit after commitSha?
+    const buildkiteBuildShaIndex = commmitShaList.data.findIndex(
+      (c: { sha: string }) => c.sha === kbBuild.commit
+    );
+    const commitShaIndex = commmitShaList.data.findIndex(
+      (c: { sha: string }) => c.sha === commitSha
+    );
+    return commitShaIndex !== -1 && buildkiteBuildShaIndex < commitShaIndex;
+  });
+
+  if (!build) {
+    return null;
+  }
+
+  return {
+    success: build.success,
+    stateEmoji: build.stateEmoji,
+    url: build.url,
+    slug: build.slug,
+    buildNumber: build.buildNumber,
+    commit: build.commit,
   };
 }
 
