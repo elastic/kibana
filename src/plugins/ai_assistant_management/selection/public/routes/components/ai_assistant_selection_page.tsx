@@ -84,33 +84,6 @@ export function AiAssistantSelectionPage() {
             }
           />
         </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiCard
-            description={
-              <div>
-                <EuiLink
-                  external
-                  href="https://www.elastic.co/guide/en/security/8.9/security-assistant.html"
-                >
-                  {i18n.translate(
-                    'aiAssistantManagement.aiAssistantSettingsPage.securityAssistant.documentationLinkLabel',
-                    { defaultMessage: 'Documentation' }
-                  )}
-                </EuiLink>
-              </div>
-            }
-            display="plain"
-            hasBorder
-            href={'/security'}
-            icon={<EuiIcon size="l" type="logoSecurity" />}
-            layout="horizontal"
-            title={i18n.translate('aiAssistantManagement.aiAssistantSelectionPage.securityLabel', {
-              defaultMessage: 'Elastic AI Assistant for Security',
-            })}
-            titleSize="xs"
-          />
-        </EuiFlexItem>
       </EuiFlexGrid>
     </>
   );

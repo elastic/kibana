@@ -33,7 +33,6 @@ export function useImportKnowledgeBaseEntries() {
     ({ entries }) => {
       const body = JSON.stringify({ entries });
 
-      console.log('/internal/management/ai_assistant/observability/kb/entries/import');
       return http.post(`/internal/management/ai_assistant/observability/kb/entries/import`, {
         body,
       });

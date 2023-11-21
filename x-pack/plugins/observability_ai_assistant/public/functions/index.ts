@@ -35,7 +35,7 @@ export async function registerFunctions({
   signal: AbortSignal;
 }) {
   return service
-    .callApi('GET /internal/observability_ai_assistant/functions/kb_status', {
+    .callApi('GET /internal/observability_ai_assistant/kb/status', {
       signal,
     })
     .then((response) => {

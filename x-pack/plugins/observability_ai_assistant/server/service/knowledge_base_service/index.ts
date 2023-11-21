@@ -245,6 +245,8 @@ export class KnowledgeBaseService {
   }
 
   queue(operations: KnowledgeBaseEntryOperation[]): void {
+    this.dependencies.logger.info(`setup? ${String(this.hasSetup)}`);
+
     if (!operations.length) {
       return;
     }

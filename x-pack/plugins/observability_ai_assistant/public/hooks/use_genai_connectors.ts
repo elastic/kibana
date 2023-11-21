@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { FindActionResult } from '@kbn/actions-plugin/server';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { useObservabilityAIAssistant } from './use_observability_ai_assistant';
@@ -16,6 +16,7 @@ export interface UseGenAIConnectorsResult {
   loading: boolean;
   error?: Error;
   selectConnector: (id: string) => void;
+  reloadConnectors: () => void;
 }
 
 export function useGenAIConnectors(): UseGenAIConnectorsResult {
@@ -32,11 +33,9 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
 
   const [error, setError] = useState<Error | undefined>(undefined);
 
-  useEffect(() => {
-    setLoading(true);
+  const controller = useMemo(() => new AbortController(), []);
 
-    const controller = new AbortController();
-
+  const fetchConnectors = useCallback(async () => {
     assistant
       .callApi('GET /internal/observability_ai_assistant/connectors', {
         signal: controller.signal,
@@ -59,11 +58,17 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
       .finally(() => {
         setLoading(false);
       });
+  }, [assistant, controller.signal, setSelectedConnector]);
+
+  useEffect(() => {
+    setLoading(true);
+
+    fetchConnectors();
 
     return () => {
       controller.abort();
     };
-  }, [assistant, setSelectedConnector]);
+  }, [assistant, controller, fetchConnectors, setSelectedConnector]);
 
   return {
     connectors,
@@ -72,6 +77,9 @@ export function useGenAIConnectors(): UseGenAIConnectorsResult {
     selectedConnector: selectedConnector || connectors?.[0]?.id,
     selectConnector: (id: string) => {
       setSelectedConnector(id);
+    },
+    reloadConnectors: () => {
+      fetchConnectors();
     },
   };
 }
