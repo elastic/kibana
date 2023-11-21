@@ -8,7 +8,6 @@
 
 export {
   FieldPicker,
-  TruncatedLabel,
   NameInput,
   DebouncedInput,
   useDebouncedValue,
