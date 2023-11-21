@@ -288,6 +288,7 @@ export class WebElementWrapper {
         // This fixes a bug in recent selenium versions where just the backspace press doesn't
         // delete selected characters.
         await this.pressKeys([this.Keys.SPACE, this.Keys.BACK_SPACE]);
+        await this.pressKeys(this.Keys.BACK_SPACE);
       }
     }
   }
