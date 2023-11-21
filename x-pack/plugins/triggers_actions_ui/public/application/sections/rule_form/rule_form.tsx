@@ -158,6 +158,8 @@ interface RuleFormProps<MetaData = Record<string, any>> {
   useRuleProducer?: boolean;
 }
 
+const EMPTY_ARRAY: string[] = [];
+
 export const RuleForm = ({
   rule,
   config,
@@ -172,7 +174,7 @@ export const RuleForm = ({
   ruleTypeRegistry,
   actionTypeRegistry,
   metadata,
-  filteredRuleTypes: ruleTypeToFilter = [],
+  filteredRuleTypes: ruleTypeToFilter = EMPTY_ARRAY,
   hideGrouping = false,
   hideInterval,
   connectorFeatureId = AlertingConnectorFeatureId,

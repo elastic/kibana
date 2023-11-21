@@ -7,6 +7,7 @@
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
 import { ALERTS_FEATURE_ID } from '@kbn/alerting-plugin/common';
+import { useMemo } from 'react';
 import { loadRuleTypes } from '../lib/rule_api/rule_types';
 import { useKibana } from '../../common/lib/kibana';
 import { RuleType, RuleTypeIndex } from '../../types';
@@ -31,8 +32,7 @@ const getFilteredIndex = (data: Array<RuleType<string, string>>, filteredRuleTyp
   return filteredIndex;
 };
 
-export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
-  const { filteredRuleTypes } = props;
+export const useLoadRuleTypesQuery = ({ filteredRuleTypes }: UseLoadRuleTypesQueryProps) => {
   const {
     http,
     notifications: { toasts },
@@ -58,12 +58,13 @@ export const useLoadRuleTypesQuery = (props: UseLoadRuleTypesQueryProps) => {
     staleTime: 60 * 1000,
   });
 
-  const filteredIndex = data
-    ? getFilteredIndex(data, filteredRuleTypes)
-    : new Map<string, RuleType>();
+  const filteredIndex = useMemo(
+    () => (data ? getFilteredIndex(data, filteredRuleTypes) : new Map<string, RuleType>()),
+    [data, filteredRuleTypes]
+  );
 
   const hasAnyAuthorizedRuleType = filteredIndex.size > 0;
-  const authorizedRuleTypes = [...filteredIndex.values()];
+  const authorizedRuleTypes = useMemo(() => [...filteredIndex.values()], [filteredIndex]);
   const authorizedToCreateAnyRules = authorizedRuleTypes.some(
     (ruleType) => ruleType.authorizedConsumers[ALERTS_FEATURE_ID]?.all
   );

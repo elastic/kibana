@@ -27,6 +27,7 @@ import ActionForm from '@kbn/triggers-actions-ui-plugin/public/application/secti
 import { Legacy } from '../legacy_shims';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 interface AlertAction {
   group: string;
@@ -43,9 +44,12 @@ const { loadActionTypes } = jest.requireMock(
   '@kbn/triggers-actions-ui-plugin/public/application/lib/action_connector_api'
 );
 
-jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api', () => ({
-  loadAlertTypes: jest.fn(),
+jest.mock('@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api/rule_types', () => ({
+  loadRuleTypes: jest.fn(),
 }));
+const { loadRuleTypes } = jest.requireMock(
+  '@kbn/triggers-actions-ui-plugin/public/application/lib/rule_api/rule_types'
+);
 
 jest.mock('@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting', () => ({
   useUiSetting: jest.fn().mockImplementation((_, defaultValue) => defaultValue),
@@ -109,6 +113,7 @@ describe('alert_form', () => {
     let wrapper: ReactWrapper<any>;
 
     beforeEach(async () => {
+      loadRuleTypes.mockResolvedValue([]);
       ruleTypeRegistry.list.mockReturnValue([ruleType]);
       ruleTypeRegistry.get.mockReturnValue(ruleType);
       ruleTypeRegistry.has.mockReturnValue(true);
@@ -136,19 +141,31 @@ describe('alert_form', () => {
       wrapper = mountWithIntl(
         <I18nProvider>
           <KibanaReactContext.Provider>
-            <RuleForm
-              rule={initialAlert}
-              config={{
-                isUsingSecurity: true,
-                minimumScheduleInterval: { value: '1m', enforce: false },
-              }}
-              dispatch={() => {}}
-              errors={{ name: [], 'schedule.interval': [] }}
-              operation="create"
-              actionTypeRegistry={actionTypeRegistry}
-              ruleTypeRegistry={ruleTypeRegistry}
-              onChangeMetaData={() => {}}
-            />
+            <QueryClientProvider
+              client={
+                new QueryClient({
+                  defaultOptions: {
+                    queries: {
+                      retry: false,
+                    },
+                  },
+                })
+              }
+            >
+              <RuleForm
+                rule={initialAlert}
+                config={{
+                  isUsingSecurity: true,
+                  minimumScheduleInterval: { value: '1m', enforce: false },
+                }}
+                dispatch={() => {}}
+                errors={{ name: [], 'schedule.interval': [] }}
+                operation="create"
+                actionTypeRegistry={actionTypeRegistry}
+                ruleTypeRegistry={ruleTypeRegistry}
+                onChangeMetaData={() => {}}
+              />
+            </QueryClientProvider>
           </KibanaReactContext.Provider>
         </I18nProvider>
       );
