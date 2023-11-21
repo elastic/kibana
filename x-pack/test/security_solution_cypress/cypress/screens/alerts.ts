@@ -41,6 +41,8 @@ export const CLOSE_SELECTED_ALERTS_BTN = '[data-test-subj="closed-alert-status"]
 
 export const CLOSED_ALERTS_FILTER_BTN = '[data-test-subj="closedAlerts"]';
 
+export const ACKNOWLDEGED_ALERTS_FILTER_BTN = '[data-test-subj="acknowledgedAlerts"]';
+
 export const EMPTY_ALERT_TABLE = '[data-test-subj="alertsStateTableEmptyState"]';
 
 export const EXPAND_ALERT_BTN = '[data-test-subj="expand-event"]';

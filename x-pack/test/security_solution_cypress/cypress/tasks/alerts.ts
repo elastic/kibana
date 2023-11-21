@@ -51,6 +51,7 @@ import {
   ALERT_TABLE_EVENT_RENDERED_VIEW_OPTION,
   HOVER_ACTIONS_CONTAINER,
   ALERT_TABLE_GRID_VIEW_OPTION,
+  ACKNOWLDEGED_ALERTS_FILTER_BTN,
 } from '../screens/alerts';
 import { LOADING_INDICATOR, REFRESH_BUTTON } from '../screens/security_header';
 import { TIMELINE_COLUMN_SPINNER } from '../screens/timeline';
@@ -276,6 +277,13 @@ export const selectAlertsHistogram = () => {
   cy.get(SELECT_HISTOGRAM).click({ force: true });
 };
 
+export const goToAcknowledgedAlertsOnRuleDetailsPage = () => {
+  cy.get(ACKNOWLDEGED_ALERTS_FILTER_BTN).click();
+  cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
+  cy.get(REFRESH_BUTTON).should('have.attr', 'aria-label', 'Refresh query');
+  cy.get(TIMELINE_COLUMN_SPINNER).should('not.exist');
+};
+
 export const goToAcknowledgedAlerts = () => {
   /*
    * below line commented because alertPageFiltersEnabled feature flag
@@ -362,14 +370,6 @@ export const showTopNAlertProperty = (propertySelector: string, rowIndex: number
 };
 
 export const waitForAlerts = () => {
-  /*
-   * below line commented because alertpagefiltersenabled feature flag
-   * is disabled by default
-   * target: enable by default in v8.8
-   *
-   * waitforpagefilters();
-   *
-   * */
   waitForPageFilters();
   cy.get(REFRESH_BUTTON).should('not.have.attr', 'aria-label', 'Needs updating');
   cy.get(DATAGRID_CHANGES_IN_PROGRESS).should('not.be.true');
