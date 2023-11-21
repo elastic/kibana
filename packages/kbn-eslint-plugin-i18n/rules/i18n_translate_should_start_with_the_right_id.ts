@@ -59,7 +59,8 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
 
           report({
             node: node as any,
-            message: 'i18n.translate id should start with the correct i18n identifier.',
+            message:
+              'First parameter passed to i18n.translate should start with the correct i18n identifier for this file. Correct it or use the autofix suggestion.',
             fix(fixer) {
               return [
                 fixer.replaceTextRange(node.range, suggestion),
