@@ -23,13 +23,10 @@ import {
   */
 {{/description}}
 {{#if x-recursive}}
-export type {{@key}} = z.infer<typeof {{x-base-type}}> & { {{x-recursive-prop}} {{#if x-recursive-prop-optional}}?{{/if}}:{{x-recursive-value}} };
+export type {{@key}} = z.infer<typeof {{x-base-type}}> & { {{x-recursive-prop}}?:{{x-recursive-value}} };
 {{else}} export type {{@key}} = z.infer<typeof {{@key}}>;
 {{/if}}
-{{#if x-recursive}}
-export const {{@key}}: z.ZodType<{{@key}}> = {{> zod_schema_item}};
-{{else}} export const {{@key}} = {{> zod_schema_item}};
-{{/if}}
+export const {{@key}}{{#if x-recursive}}: z.ZodType<{{@key}}>{{/if}} = {{> zod_schema_item}};
 {{#if enum}}
 {{#unless (isSingle enum)}}
 export type {{@key}}Enum = typeof {{@key}}.enum;
