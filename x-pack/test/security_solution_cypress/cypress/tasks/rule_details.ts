@@ -54,7 +54,7 @@ export function visitRuleDetailsPage(ruleId: string, options?: VisitRuleDetailsP
   visit(ruleDetailsUrl(ruleId, options?.tab), { role: options?.role });
 }
 
-export const enablesRule = () => {
+export const clickEnableDisableSwitch = () => {
   // Rules get enabled via _bulk_action endpoint
   cy.intercept('POST', '/api/detection_engine/rules/_bulk_action?dry_run=false').as('bulk_action');
   cy.get(RULE_SWITCH).should('be.visible');
