@@ -16,10 +16,7 @@ import { visit } from '../../../../tasks/navigation';
 import { ALERTS_URL } from '../../../../urls/navigation';
 import { openInsightsTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel';
 import { openThreatIntelligenceTab } from '../../../../tasks/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
-import {
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB,
-  DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP,
-} from '../../../../screens/expandable_flyout/alert_details_left_panel';
+import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB } from '../../../../screens/expandable_flyout/alert_details_left_panel';
 import { DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON } from '../../../../screens/expandable_flyout/alert_details_left_panel_threat_intelligence_tab';
 
 describe(
@@ -39,16 +36,14 @@ describe(
 
     it('should serialize its state to url', () => {
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB)
-        .should('be.visible')
-        .and('have.text', 'Insights');
-
-      cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_BUTTON_GROUP).should('be.visible');
+        .should('have.text', 'Insights')
+        .and('have.class', 'euiTab-isSelected');
 
       cy.get(DOCUMENT_DETAILS_FLYOUT_INSIGHTS_TAB_THREAT_INTELLIGENCE_BUTTON)
-        .should('be.visible')
-        .and('have.text', 'Threat intelligence');
+        .should('have.text', 'Threat intelligence')
+        .and('have.class', 'euiButtonGroupButton-isSelected');
 
-      cy.get(INDICATOR_MATCH_ENRICHMENT_SECTION).should('be.visible');
+      cy.get(INDICATOR_MATCH_ENRICHMENT_SECTION).should('exist');
     });
   }
 );

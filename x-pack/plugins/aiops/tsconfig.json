@@ -23,7 +23,6 @@
     "@kbn/data-views-plugin",
     "@kbn/datemath",
     "@kbn/es-query",
-    "@kbn/es-types",
     "@kbn/field-formats-plugin",
     "@kbn/field-types",
     "@kbn/i18n-react",
