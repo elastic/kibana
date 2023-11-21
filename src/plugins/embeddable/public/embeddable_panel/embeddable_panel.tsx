@@ -50,7 +50,6 @@ const getEventStatus = (output: EmbeddableOutput): EmbeddablePhase => {
 export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
   const { hideHeader, showShadow, embeddable, hideInspector, onPanelStatusChange } = panelProps;
   const [node, setNode] = useState<ReactNode | undefined>();
-  const [initialRenderComplete, setInitialRenderComplete] = useState(false);
   const embeddableRoot: React.RefObject<HTMLDivElement> = useMemo(() => React.createRef(), []);
 
   const headerId = useMemo(() => htmlIdGenerator()(), []);
@@ -129,6 +128,8 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
    * Select state from the embeddable
    */
   const loading = useSelectFromEmbeddableOutput('loading', embeddable);
+  const loadingFinished = loading === false;
+
   const viewMode = useSelectFromEmbeddableInput('viewMode', embeddable);
 
   /**
@@ -145,7 +146,6 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
       if (cancelled) return;
 
       setNode(nextNode);
-      setInitialRenderComplete(true);
     };
 
     render(embeddableRoot.current);
@@ -217,8 +217,13 @@ export const EmbeddablePanel = (panelProps: UnwrappedEmbeddablePanelProps) => {
           </EuiFlexItem>
         </EuiFlexGroup>
       )}
-      <div className="embPanel__content" ref={embeddableRoot} {...contentAttrs}>
-        <span>{!initialRenderComplete && <PanelLoader />}</span>
+      {!loadingFinished && <PanelLoader />}
+      <div
+        css={{ display: loadingFinished ? 'block' : 'none !important' }}
+        className="embPanel__content"
+        ref={embeddableRoot}
+        {...contentAttrs}
+      >
         {node}
       </div>
     </EuiPanel>
