@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import { setMockValues } from '../../../../../__mocks__/kea_logic';
+import { setMockValues } from '../../../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
 import { shallow } from 'enzyme';
 
 import { DeployModel } from './deploy_model';
-import { ModelDeployed } from './model_deployed';
-import { ModelDeploymentInProgress } from './model_deployment_in_progress';
-import { ModelStarted } from './model_started';
+import { ModelDeployed } from '../model_deployed';
+import { ModelDeploymentInProgress } from '../model_deployment_in_progress';
+import { ModelStarted } from '../model_started';
 import { TextExpansionCallOut } from './text_expansion_callout';
 import { TextExpansionErrors } from './text_expansion_errors';
 

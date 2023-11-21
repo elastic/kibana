@@ -14,7 +14,7 @@ import { shallow } from 'enzyme';
 import { EuiButton } from '@elastic/eui';
 
 import { ModelDeployed } from './model_deployed';
-import { TextExpansionDismissButton } from './text_expansion_callout';
+import { TextExpansionDismissButton } from './text_expansion/text_expansion_callout';
 
 const DEFAULT_VALUES = {
   startTextExpansionModelError: undefined,
