@@ -85,12 +85,6 @@ const RuleAdd = ({
       ...(initialValues ? initialValues : {}),
     };
   }, [ruleTypeId, consumer, initialValues]);
-
-  const selectableConsumer = useMemo(
-    () => ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(ruleTypeId),
-    [ruleTypeId]
-  );
-
   const [{ rule }, dispatch] = useReducer(ruleReducer as InitialRuleReducer, {
     rule: initialRule,
   });
@@ -103,6 +97,11 @@ const RuleAdd = ({
     props.ruleTypeIndex
   );
   const [changedFromDefaultInterval, setChangedFromDefaultInterval] = useState<boolean>(false);
+
+  const selectableConsumer = useMemo(
+    () => rule.ruleTypeId && MULTI_CONSUMER_RULE_TYPE_IDS.includes(rule.ruleTypeId),
+    [rule]
+  );
   const [selectedConsumer, setSelectedConsumer] = useState<
     RuleCreationValidConsumer | null | undefined
   >(selectableConsumer ? initialSelectedConsumer : null);
