@@ -7,7 +7,11 @@
 
 import type { ESQuery } from '../../../../typed_json';
 import { RISKY_HOSTS_INDEX_PREFIX, RISKY_USERS_INDEX_PREFIX } from '../../../../constants';
-import { RiskScoreEntity, getRiskScoreLatestIndex } from '../../../../risk_engine';
+import {
+  RiskScoreEntity,
+  getRiskScoreLatestIndex,
+  getRiskScoreTimeSeriesIndex,
+} from '../../../../risk_engine';
 export { RiskQueries } from '../../../../api/search_strategy';
 
 /**
@@ -30,7 +34,9 @@ export const getUserRiskIndex = (
   isNewRiskScoreModuleInstalled: boolean
 ): string => {
   return isNewRiskScoreModuleInstalled
-    ? getRiskScoreLatestIndex(spaceId)
+    ? onlyLatest
+      ? getRiskScoreLatestIndex(spaceId)
+      : getRiskScoreTimeSeriesIndex(spaceId)
     : `${RISKY_USERS_INDEX_PREFIX}${onlyLatest ? 'latest_' : ''}${spaceId}`;
 };
 
