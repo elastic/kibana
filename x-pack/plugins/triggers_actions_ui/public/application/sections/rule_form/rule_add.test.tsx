@@ -34,6 +34,7 @@ import { useKibana } from '../../../common/lib/kibana';
 import { triggersActionsUiConfig } from '../../../common/lib/config_api';
 import { triggersActionsUiHealth } from '../../../common/lib/health_api';
 import { loadActionTypes, loadAllActions } from '../../lib/action_connector_api';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('../../../common/lib/kibana');
 
@@ -192,19 +193,31 @@ describe('rule_add', () => {
     actionTypeRegistry.has.mockReturnValue(true);
 
     wrapper = mountWithIntl(
-      <RuleAdd
-        consumer={ALERTS_FEATURE_ID}
-        onClose={onClose}
-        initialValues={initialValues}
-        onSave={() => {
-          return new Promise<void>(() => {});
-        }}
-        actionTypeRegistry={actionTypeRegistry}
-        ruleTypeRegistry={ruleTypeRegistry}
-        metadata={{ test: 'some value', fields: ['test'] }}
-        ruleTypeId={ruleTypeId}
-        validConsumers={validConsumers}
-      />
+      <QueryClientProvider
+        client={
+          new QueryClient({
+            defaultOptions: {
+              queries: {
+                retry: false,
+              },
+            },
+          })
+        }
+      >
+        <RuleAdd
+          consumer={ALERTS_FEATURE_ID}
+          onClose={onClose}
+          initialValues={initialValues}
+          onSave={() => {
+            return new Promise<void>(() => {});
+          }}
+          actionTypeRegistry={actionTypeRegistry}
+          ruleTypeRegistry={ruleTypeRegistry}
+          metadata={{ test: 'some value', fields: ['test'] }}
+          ruleTypeId={ruleTypeId}
+          validConsumers={validConsumers}
+        />
+      </QueryClientProvider>
     );
 
     // Wait for active space to resolve before requesting the component to update
