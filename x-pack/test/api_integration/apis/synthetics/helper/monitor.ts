@@ -13,7 +13,7 @@ export function omitResponseTimestamps(monitor: object) {
 }
 
 export function omitEmptyValues(monitor: object) {
-  const { url, ...rest } = omit(monitor, ['created_at', 'updated_at']) as any;
+  const { url, ...rest } = omit(monitor, ['created_at', 'updated_at', 'form_monitor_type']) as any;
 
   return omitBy(
     {

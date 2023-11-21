@@ -5,14 +5,13 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omit, omitBy } from 'lodash';
+import { omit } from 'lodash';
 import { HTTPFields } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
-import { addMonitorAPIHelper } from './add_monitor';
+import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('EnableDefaultAlerting', function () {
@@ -75,7 +74,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      expect(apiResponse).eql(omitBy(newMonitor, removeMonitorEmptyValues));
+      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
 
       await retry.tryForTime(30 * 1000, async () => {
         const res = await supertest
