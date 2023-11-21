@@ -126,6 +126,14 @@ export interface Benchmark {
   rules_count: number;
 }
 
+export interface BenchmarkVersion2 {
+  benchmark_id: string;
+  benchmark_name: string;
+  benchmark_version: string;
+  benchmark_score: number;
+  benchmark_evaluation: number;
+}
+
 export type BenchmarkId = CspRuleTemplateMetadata['benchmark']['id'];
 export type BenchmarkName = CspRuleTemplateMetadata['benchmark']['name'];
 export type RuleSection = CspRuleTemplateMetadata['section'];

@@ -7,19 +7,27 @@
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { AgentPolicy, ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
+import { QueryDslQueryContainer } from '@kbn/data-views-plugin/common/types';
+import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { getSafePostureTypeRuntimeMapping } from '../../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
+
 import { CspRuleTemplate } from '../../../common/schemas';
-import { CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE } from '../../../common/constants';
+import {
+  CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+  LATEST_FINDINGS_INDEX_DEFAULT_NS,
+} from '../../../common/constants';
 import {
   BENCHMARKS_ROUTE_PATH,
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
   POSTURE_TYPE_ALL,
 } from '../../../common/constants';
 import { benchmarksQueryParamsSchema } from '../../../common/schemas/benchmark';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark, BenchmarkVersion2 } from '../../../common/types';
 import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkFilter,
   isNonNullable,
+  getBenchmarkRulesFilter,
 } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 import {
@@ -29,6 +37,8 @@ import {
   getCspPackagePolicies,
 } from '../../lib/fleet_util';
 import { BenchmarkId } from '../../../common/types';
+import { getStats } from '../compliance_dashboard/get_stats';
+import { getClusters } from '../compliance_dashboard/get_clusters';
 
 export const PACKAGE_POLICY_SAVED_OBJECT_TYPE = 'ingest-package-policies';
 
@@ -45,11 +55,39 @@ export const getRulesCountForPolicy = async (
   return rules.total;
 };
 
+export const getRulesVersion = async (
+  soClient: SavedObjectsClientContract,
+  benchmarkId: BenchmarkId
+): Promise<string> => {
+  const rules = await soClient.find<CspRuleTemplate>({
+    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    filter: getBenchmarkFilter(benchmarkId),
+    perPage: 1,
+  });
+
+  return rules.saved_objects[0].attributes.metadata.benchmark.version;
+};
+
+export const getRulesVersion2 = async (
+  soClient: SavedObjectsClientContract,
+  benchmarkId: BenchmarkId,
+  packagePolicyId: string
+): Promise<string> => {
+  const rules = await soClient.find<CspRuleTemplate>({
+    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    filter: getBenchmarkRulesFilter(benchmarkId, packagePolicyId),
+    perPage: 1,
+  });
+
+  return rules.saved_objects[0].attributes.metadata.benchmark.version;
+};
+
 const createBenchmarks = (
   soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[],
   agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,
-  cspPackagePolicies: PackagePolicy[]
+  cspPackagePolicies: PackagePolicy[],
+  cspContext?: any
 ): Promise<Benchmark[]> => {
   const cspPackagePoliciesMap = new Map(
     cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
@@ -72,13 +110,174 @@ const createBenchmarks = (
           name: agentPolicy.name,
           agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
         };
+        //TEST
+        const rulesVersion = await getRulesVersion(soClient, benchmarkId);
+        const esClient = cspContext.esClient.asCurrentUser;
+        const { id: pitId } = await esClient.openPointInTime({
+          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+          keep_alive: '30s',
+        });
+        const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+        const query: QueryDslQueryContainer = {
+          bool: {
+            filter: [
+              { term: { 'rule.benchmark.version': rulesVersion } },
+              { term: { safe_posture_type: cspPackage?.vars?.posture.value } },
+            ],
+          },
+        };
+        const score = await getStats(esClient, query, pitId, runtimeMappings);
+        const cluster = await getClusters(esClient, query, pitId, runtimeMappings);
+        //TEST
         return {
           package_policy: cspPackage,
           agent_policy: agentPolicyStatus,
           rules_count: rulesCount,
+          trial: {
+            rules_version: rulesVersion,
+            integration_type: benchmarkId,
+            compliance_score: score,
+            clusters: cluster,
+            number_of_package: cluster.length,
+          },
         };
       });
 
+      return benchmarks;
+    })
+  );
+};
+
+const getBenchmarks = async (
+  soClient: SavedObjectsClientContract,
+  cspContext?: any
+): Promise<BenchmarkVersion2[]> => {
+  // Returns a list of benchmark based on their Version and Benchmark ID
+  const esClient = cspContext.esClient.asCurrentUser;
+  const benchmarksResponse = await soClient.find<CspRuleTemplate>({
+    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
+    aggs: {
+      benchmark_id: {
+        terms: {
+          field: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.id`,
+        },
+        aggs: {
+          name: {
+            terms: {
+              field: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.name`,
+            },
+            aggs: {
+              version: {
+                terms: {
+                  field: `${CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE}.attributes.metadata.benchmark.version`,
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+    perPage: 0,
+  });
+
+  // console.log(JSON.stringify(benchmarksResponse.aggregations.benchmark_id.buckets));
+  // const result = benchmarksResponse.aggregations.benchmark_id.buckets.flatMap((x) => {return {a: x}})
+  // console.log(result)
+
+  const benchmarkAgg: any = benchmarksResponse.aggregations;
+  const { id: pitId } = await esClient.openPointInTime({
+    index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+    keep_alive: '30s',
+  });
+  // Transform response to a benchmark row: {id, name, version}
+  // For each Benchmark entry : Calculate Score, Get amount of enrolled agents
+  const result = await Promise.all(
+    benchmarkAgg.benchmark_id.buckets.flatMap(async (benchmark: any) => {
+      const benchmarkId = benchmark.key;
+      const benchmarkName = benchmark.name.buckets[0].key;
+      const benchmarkVersion = benchmark.name.buckets[0].version.buckets[0].key;
+
+      const postureType = benchmarkId === 'cis_eks' || benchmarkId === 'cis_k8s' ? 'kspm' : 'cspm';
+      const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+      const query: QueryDslQueryContainer = {
+        bool: {
+          filter: [
+            { term: { 'rule.benchmark.id': benchmarkId } },
+            { term: { 'rule.benchmark.version': benchmarkVersion } },
+            { term: { safe_posture_type: postureType } },
+          ],
+        },
+      };
+      const benchmarkScore = await getStats(esClient, query, pitId, runtimeMappings);
+      const benchmarkEvaluation = await getClusters(esClient, query, pitId, runtimeMappings);
+      return {
+        benchmark_id: benchmarkId,
+        benchmark_name: benchmarkName,
+        benchmark_version: benchmarkVersion,
+        benchmark_score: benchmarkScore,
+        benchmark_evaluation: benchmarkEvaluation.length,
+      };
+    })
+  );
+
+  return result;
+};
+
+const createBenchmarks2 = (
+  soClient: SavedObjectsClientContract,
+  agentPolicies: AgentPolicy[],
+  agentStatusByAgentPolicyId: AgentStatusByAgentPolicyMap,
+  cspPackagePolicies: PackagePolicy[],
+  cspContext?: any
+): Promise<any[]> => {
+  const cspPackagePoliciesMap = new Map(
+    cspPackagePolicies.map((packagePolicy) => [packagePolicy.id, packagePolicy])
+  );
+
+  return Promise.all(
+    agentPolicies.flatMap((agentPolicy) => {
+      const cspPackagesOnAgent =
+        agentPolicy.package_policies
+          ?.map(({ id: pckPolicyId }) => {
+            return cspPackagePoliciesMap.get(pckPolicyId);
+          })
+          .filter(isNonNullable) ?? [];
+      const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
+        const benchmarkId = getBenchmarkFromPackagePolicy(cspPackage.inputs);
+        //TEST
+        const rulesVersion = await getRulesVersion(soClient, benchmarkId);
+        // const TEST = await getRulesVersion2(soClient, benchmarkId, cspPackage.id);
+        const esClient = cspContext.esClient.asCurrentUser;
+        const { id: pitId } = await esClient.openPointInTime({
+          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
+          keep_alive: '30s',
+        });
+        const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
+        const query: QueryDslQueryContainer = {
+          bool: {
+            filter: [
+              { term: { 'cloud_security_posture.package_policy.id': cspPackage.id } },
+              { term: { 'rule.benchmark.id': benchmarkId } },
+              { term: { 'rule.benchmark.version': rulesVersion } },
+              { term: { safe_posture_type: cspPackage?.vars?.posture.value } },
+            ],
+          },
+        };
+        const score = await getStats(esClient, query, pitId, runtimeMappings);
+        const cluster = await getClusters(esClient, query, pitId, runtimeMappings);
+        const numberOfAgents = agentStatusByAgentPolicyId[agentPolicy.id]?.total;
+        // const TEST = await getRulesVersionZ(esClient, query, pitId, runtimeMappings);
+        // console.log(TEST)
+        //TEST
+        return {
+          rules_version: rulesVersion,
+          integration_type: benchmarkId,
+          compliance_score: score,
+          clusters: cluster,
+          number_of_clusters: cluster.length,
+          number_of_agents: numberOfAgents,
+        };
+      });
       return benchmarks;
     })
   );
@@ -108,8 +307,11 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
         }
 
         const cspContext = await context.csp;
+
         const excludeVulnMgmtPackages = true;
         try {
+          await getBenchmarks(cspContext.soClient, cspContext);
+          // await getBenchmarks2(cspContext.soClient, cspContext);
           const packagePolicies: ListResult<PackagePolicy> = await getCspPackagePolicies(
             cspContext.soClient,
             cspContext.packagePolicyService,
@@ -135,12 +337,37 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
             cspContext.soClient,
             agentPolicies,
             agentStatusesByAgentPolicyId,
-            packagePolicies.items
+            packagePolicies.items,
+            cspContext
           );
+          const benchmarks2 = await createBenchmarks2(
+            cspContext.soClient,
+            agentPolicies,
+            agentStatusesByAgentPolicyId,
+            packagePolicies.items,
+            cspContext
+          );
+          const helper: any = {};
+          const benchmarksNew = benchmarks2.reduce(function (r, o) {
+            const key = o.rules_version + '-' + o.integration_type;
 
+            if (!helper[key]) {
+              helper[key] = Object.assign({}, o); // create a copy of o
+              r.push(helper[key]);
+            } else {
+              helper[key].compliance_score.totalPassed += o.compliance_score.totalPassed;
+              helper[key].compliance_score.totalFailed += o.compliance_score.totalFailed;
+              helper[key].number_of_package += o.number_of_package;
+            }
+
+            return r;
+          }, []);
+          const benchmarksNeo = await getBenchmarks(cspContext.soClient, cspContext);
           const getBenchmarkResponse = {
             ...packagePolicies,
             items: benchmarks,
+            items_trial_lama: benchmarksNew,
+            items_test: benchmarksNeo,
           };
 
           return response.ok({
