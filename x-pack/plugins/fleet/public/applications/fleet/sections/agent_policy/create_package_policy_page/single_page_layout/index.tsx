@@ -32,11 +32,7 @@ import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
 import { AGENTLESS_FEATURE_FLAG, AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
-import type {
-  AgentPolicy,
-  NewAgentPolicy,
-  PackagePolicyEditExtensionComponentProps,
-} from '../../../../types';
+import type { AgentPolicy, NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupType } from '../../../../types';
 import {
   sendGetAgentStatus,
@@ -435,7 +431,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
-  if (selectedSetupType !== 'agentless') {
+  if (selectedSetupType !== SetupType.AGENTLESS) {
     steps.push({
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
         defaultMessage: 'Where to add this integration?',
