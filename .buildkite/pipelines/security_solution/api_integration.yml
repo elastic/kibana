@@ -10,6 +10,8 @@ steps:
         - exit_status: "-1"
           limit: 3
     if: env('KIBANA_LATEST') == "1"
+    # soft_fail:
+      # - exit_status: 1
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/upload_runtime_info.sh
     label: "Upload runtime info"

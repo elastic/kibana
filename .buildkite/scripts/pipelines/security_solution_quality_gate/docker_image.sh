@@ -23,7 +23,7 @@ trap 'docker logout docker.elastic.co' EXIT
 echo "Checking manifest for $KIBANA_IMAGE"
 if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
-  exit 1
+  exit 0
 fi
 
 echo "--- Build images"
@@ -60,14 +60,6 @@ docker manifest create \
   --amend "$KIBANA_IMAGE-amd64"
 docker manifest push "$KIBANA_IMAGE"
 
-if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-  docker manifest create \
-    "$KIBANA_BASE_IMAGE:latest" \
-    --amend "$KIBANA_IMAGE-arm64" \
-    --amend "$KIBANA_IMAGE-amd64"
-  docker manifest push "$KIBANA_BASE_IMAGE:latest"
-fi
-
 docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
@@ -79,20 +71,3 @@ cat << EOF | buildkite-agent annotate --style "info" --context image
 
   ARM64: \`$KIBANA_IMAGE-arm64\`
 EOF
-
-if [[ "${BUILDKITE_PULL_REQUEST:-false}" != "false" ]]; then
-  buildkite-agent meta-data set pr_comment:build_serverless:head "* Kibana Serverless Image: \`$KIBANA_IMAGE\`"
-  buildkite-agent meta-data set pr_comment:early_comment_job_id "$BUILDKITE_JOB_ID"
-fi
-
-echo "--- Build dependencies report"
-node scripts/licenses_csv_report "--csv=target/dependencies-$GIT_ABBREV_COMMIT.csv"
-
-echo "--- Upload artifacts"
-cd target
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-x86_64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-linux-aarch64.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image.tar.gz"
-buildkite-agent artifact upload "kibana-$BASE_VERSION-docker-image-aarch64.tar.gz"
-buildkite-agent artifact upload "dependencies-$GIT_ABBREV_COMMIT.csv"
-cd -
