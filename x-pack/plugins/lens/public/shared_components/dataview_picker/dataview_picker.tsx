@@ -10,6 +10,7 @@ import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-coun
 import React, { useState } from 'react';
 import { EuiPopover, EuiPopoverTitle, EuiSelectableProps } from '@elastic/eui';
 import { DataViewsList } from '@kbn/unified-search-plugin/public';
+import { css } from '@emotion/react';
 import { type IndexPatternRef } from '../../types';
 import { type ChangeIndexPatternTriggerProps, TriggerButton } from './trigger';
 
@@ -54,9 +55,9 @@ export function ChangeIndexPattern({
       ownFocus
     >
       <div
-        css={{
-          width: calculateWidthFromCharCount(maxLabelLength, { minWidth: 300, maxWidth: 600 }),
-        }}
+        css={css`
+          width: ${calculateWidthFromCharCount(maxLabelLength, { minWidth: 320, maxWidth: 600 })}px;
+        `}
       >
         <EuiPopoverTitle paddingSize="s">
           {i18n.translate('xpack.lens.indexPattern.changeDataViewTitle', {
