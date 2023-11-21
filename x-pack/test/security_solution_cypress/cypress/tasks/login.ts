@@ -210,7 +210,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       (provider) => provider.type === 'basic'
     );
 
-    return rootRequest({
+    cy.request({
       url: `${baseUrl}/internal/security/login`,
       method: 'POST',
       body: {
@@ -219,6 +219,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
+      headers: API_HEADERS,
     });
   });
 };
