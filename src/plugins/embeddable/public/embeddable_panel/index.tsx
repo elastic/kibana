@@ -17,7 +17,10 @@ import { useEmbeddablePanel } from './use_embeddable_panel';
  */
 export const EmbeddablePanel = (props: EmbeddablePanelProps) => {
   const result = useEmbeddablePanel({ embeddable: props.embeddable });
-  if (!result) return <PanelLoader dataTestSubj="embeddablePanelLoadingIndicator" />;
+  if (!result)
+    return (
+      <PanelLoader showShadow={props.showShadow} dataTestSubj="embeddablePanelLoadingIndicator" />
+    );
   const { embeddable, ...passThroughProps } = props;
   return <result.Panel embeddable={result.unwrappedEmbeddable} {...passThroughProps} />;
 };

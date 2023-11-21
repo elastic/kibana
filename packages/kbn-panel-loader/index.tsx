@@ -9,12 +9,12 @@
 import React from 'react';
 import { EuiLoadingChart, EuiPanel } from '@elastic/eui';
 
-export const PanelLoader = (props: { dataTestSubj?: string }) => {
+export const PanelLoader = (props: { showShadow?: boolean; dataTestSubj?: string }) => {
   return (
     <EuiPanel
       role="figure"
       paddingSize="none"
-      hasShadow={false}
+      hasShadow={props.showShadow ?? false}
       className={'embPanel embPanel--loading embPanel-isLoading'}
       data-test-subj={props.dataTestSubj}
     >
