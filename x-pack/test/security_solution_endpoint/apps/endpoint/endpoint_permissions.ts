@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const endpointTestResources = getService('endpointTestResources');
 
   // FLAKY: https://github.com/elastic/kibana/issues/171649
+  // FLAKY: https://github.com/elastic/kibana/issues/171650
   describe.skip('Endpoint permissions:', function () {
     targetTags(this, ['@ess']);
 
