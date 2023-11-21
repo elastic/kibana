@@ -81,7 +81,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
   }
 
   .udtTimeline .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
-    ${({ theme }) => `background-color: ${theme.eui.euiColorLightShade};`};
+    ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`};
   }
 
   .udtTimeline .siemEventsTable__trSupplement--summary {
