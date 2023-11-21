@@ -652,7 +652,7 @@ export class AnalyticsManager {
         // Fetch trained model for incoming job id and add node and edge
         const { modelElement, modelDetails, edgeElement } = this.getAnalyticsModelElements(
           analyticsId,
-          jobData?.create_time!
+          jobData?.create_time
         );
         if (isAnalyticsMapNodeElement(modelElement)) {
           result.elements.push(modelElement);
