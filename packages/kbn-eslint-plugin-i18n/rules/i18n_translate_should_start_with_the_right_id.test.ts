@@ -7,7 +7,10 @@
  */
 
 import { RuleTester } from 'eslint';
-import { I18nTranslateShouldStartWithTheRightId } from './i18n_translate_should_start_with_the_right_id';
+import {
+  I18nTranslateShouldStartWithTheRightId,
+  RULE_WARNING_MESSAGE,
+} from './i18n_translate_should_start_with_the_right_id';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -51,7 +54,7 @@ function TestComponent() {
     errors: [
       {
         line: 5,
-        message: `i18n.translate id should start with the correct i18n identifier.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -73,7 +76,7 @@ function TestComponent() {
     errors: [
       {
         line: 5,
-        message: `i18n.translate id should start with the correct i18n identifier.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `

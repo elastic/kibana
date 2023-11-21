@@ -7,7 +7,10 @@
  */
 
 import { RuleTester } from 'eslint';
-import { StringsShouldBeTranslatedWithFormattedMessage } from './strings_should_be_translated_with_formatted_message';
+import {
+  StringsShouldBeTranslatedWithFormattedMessage,
+  RULE_WARNING_MESSAGE,
+} from './strings_should_be_translated_with_formatted_message';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -53,7 +56,7 @@ function TestComponent() {
     errors: [
       {
         line: 6,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -90,7 +93,7 @@ function AnotherComponent() {
     errors: [
       {
         line: 9,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -129,7 +132,7 @@ function YetAnotherComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -163,7 +166,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -191,7 +194,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -219,7 +222,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with <FormattedMessage />. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `

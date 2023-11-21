@@ -7,7 +7,10 @@
  */
 
 import { RuleTester } from 'eslint';
-import { StringsShouldBeTranslatedWithI18n } from './strings_should_be_translated_with_i18n';
+import {
+  StringsShouldBeTranslatedWithI18n,
+  RULE_WARNING_MESSAGE,
+} from './strings_should_be_translated_with_i18n';
 
 const tsTester = [
   '@typescript-eslint/parser',
@@ -53,7 +56,7 @@ function TestComponent() {
     errors: [
       {
         line: 6,
-        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -86,7 +89,7 @@ function AnotherComponent() {
     errors: [
       {
         line: 9,
-        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -121,7 +124,7 @@ function YetAnotherComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -151,7 +154,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -179,7 +182,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `
@@ -207,7 +210,7 @@ function TestComponent() {
     errors: [
       {
         line: 7,
-        message: `Strings should be translated with i18n. Use the autofix suggestion or add your own.`,
+        message: RULE_WARNING_MESSAGE,
       },
     ],
     output: `

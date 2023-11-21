@@ -14,6 +14,9 @@ import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { cleanString, isTruthy } from '../helpers/utils';
 
+export const RULE_WARNING_MESSAGE =
+  'Strings should be translated with i18n. Use the autofix suggestion or add your own.';
+
 export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -53,8 +56,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         // Show warning to developer and offer autofix suggestion
         report({
           node: node as any,
-          message:
-            'Strings should be translated with i18n. Use the autofix suggestion or add your own.',
+          message: RULE_WARNING_MESSAGE,
           fix(fixer) {
             return [
               fixer.replaceText(
@@ -112,8 +114,7 @@ export const StringsShouldBeTranslatedWithI18n: Rule.RuleModule = {
         // Show warning to developer and offer autofix suggestion
         report({
           node: node as any,
-          message:
-            'Strings should be translated with i18n. Use the autofix suggestion or add your own.',
+          message: RULE_WARNING_MESSAGE,
           fix(fixer) {
             return [
               fixer.replaceTextRange(

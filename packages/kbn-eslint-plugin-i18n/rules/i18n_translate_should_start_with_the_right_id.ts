@@ -13,6 +13,9 @@ import { getFunctionName } from '../helpers/get_function_name';
 import { getI18nImportFixer } from '../helpers/get_i18n_import_fixer';
 import { isTruthy } from '../helpers/utils';
 
+export const RULE_WARNING_MESSAGE =
+  'First parameter passed to i18n.translate should start with the correct i18n identifier for this file. Correct it or use the autofix suggestion.';
+
 export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
   meta: {
     type: 'suggestion',
@@ -59,8 +62,7 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
 
           report({
             node: node as any,
-            message:
-              'First parameter passed to i18n.translate should start with the correct i18n identifier for this file. Correct it or use the autofix suggestion.',
+            message: RULE_WARNING_MESSAGE,
             fix(fixer) {
               return [
                 fixer.replaceTextRange(node.range, suggestion),
