@@ -50,6 +50,7 @@ export function getConnectorType(): ConnectorTypeModel<
         summary: new Array<string>(),
         timestamp: new Array<string>(),
         dedupKey: new Array<string>(),
+        links: new Array<string>(),
       };
       const validationResult = { errors };
       if (
@@ -78,6 +79,17 @@ export function getConnectorType(): ConnectorTypeModel<
             })
           );
         }
+      }
+      if (Array.isArray(actionParams.links)) {
+        actionParams.links.forEach(({ href, text }) => {
+          if (!href) {
+            errors.links.push('href fields must be URLs.');
+          }
+
+          if (!text) {
+            errors.links.push('Text fields cannot be empty.');
+          }
+        });
       }
       return validationResult;
     },
