@@ -64,7 +64,7 @@ export const riskEngineInitRoute = (
         // TODO: after enabling asset criticality by default, we don't need assetCriticalityInstallFailed
         let assetCriticalityInstallFailed = false;
         if (isAssetCriticalityEnabled) {
-          initResultResponse.asset_criticality_installed = initResult.assetCriticalityInstalled;
+          initResultResponse.asset_criticality_resources_installed = initResult.assetCriticalityInstalled;
           assetCriticalityInstallFailed = !initResult.assetCriticalityInstalled;
         }
 

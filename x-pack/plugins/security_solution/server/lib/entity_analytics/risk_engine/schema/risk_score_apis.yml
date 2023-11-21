@@ -237,7 +237,7 @@ components:
               type: boolean
             legacy_risk_engine_disabled:
               type: boolean
-            asset_criticality_installed:
+            asset_criticality_resources_installed:
               type: boolean
               required: false
             errors: 
