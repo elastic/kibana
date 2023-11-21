@@ -73,7 +73,7 @@ export const HeaderTitle: FC = memo(() => {
       <EuiSpacer size="xs" />
       {isAlert && !isEmpty(ruleName) ? ruleTitle : eventTitle}
       <EuiSpacer size="m" />
-      <EuiFlexGroup direction="row" gutterSize="m">
+      <EuiFlexGroup direction="row" gutterSize="m" responsive={false}>
         <EuiFlexItem grow={false}>
           <DocumentStatus />
         </EuiFlexItem>

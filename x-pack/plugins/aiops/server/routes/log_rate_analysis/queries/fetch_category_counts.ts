@@ -33,24 +33,18 @@ export const getCategoryCountRequest = (
 ): estypes.SearchRequest => {
   const { index } = params;
 
-  const query = getQueryWithParams({
-    params,
-  });
-
   const categoryQuery = getCategoryQuery(fieldName, [category]);
 
-  if (Array.isArray(query.bool?.filter)) {
-    query.bool?.filter?.push(categoryQuery);
-    query.bool?.filter?.push({
-      range: {
-        [params.timeFieldName]: {
-          gte: from,
-          lte: to,
-          format: 'epoch_millis',
-        },
-      },
-    });
-  }
+  const query = getQueryWithParams({
+    // This will override the original start/end params if
+    // the optional from/to args are provided.
+    params: {
+      ...params,
+      ...(from ? { start: from } : {}),
+      ...(to ? { end: to } : {}),
+    },
+    filter: categoryQuery,
+  });
 
   return {
     index,
@@ -61,6 +55,19 @@ export const getCategoryCountRequest = (
     },
   };
 };
+
+export const getCategoryCountMSearchRequest = (
+  params: AiopsLogRateAnalysisSchema,
+  fieldName: string,
+  categories: FetchCategoriesResponse['categories'],
+  from: number | undefined,
+  to: number | undefined
+): estypes.MsearchRequestItem[] =>
+  categories.flatMap((category) => [
+    { index: params.index },
+    getCategoryCountRequest(params, fieldName, category, from, to)
+      .body as estypes.MsearchMultisearchBody,
+  ]);
 
 export const fetchCategoryCounts = async (
   esClient: ElasticsearchClient,
@@ -75,11 +82,13 @@ export const fetchCategoryCounts = async (
 ): Promise<FetchCategoriesResponse> => {
   const updatedCategories = cloneDeep(categories);
 
-  const searches = categories.categories.flatMap((category) => [
-    { index: params.index },
-    getCategoryCountRequest(params, fieldName, category, from, to)
-      .body as estypes.MsearchMultisearchBody,
-  ]);
+  const searches = getCategoryCountMSearchRequest(
+    params,
+    fieldName,
+    categories.categories,
+    from,
+    to
+  );
 
   let mSearchresponse;
 
