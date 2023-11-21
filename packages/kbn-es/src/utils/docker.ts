@@ -486,19 +486,12 @@ export async function setupServerlessVolumes(log: ToolingLog, options: Serverles
   log.info(chalk.bold(`Checking for local serverless ES object store at ${objectStorePath}`));
   log.indent(4);
 
-  let exists = null;
-  try {
-    await Fsp.access(objectStorePath);
-    exists = true;
-  } catch (e) {
-    exists = false;
-  }
-  if (clean && exists) {
+  if (clean && fs.existsSync(objectStorePath)) {
     log.info('Cleaning existing object store.');
     await Fsp.rm(objectStorePath, { recursive: true, force: true });
   }
 
-  if (clean || !exists) {
+  if (clean || !fs.existsSync(objectStorePath)) {
     await Fsp.mkdir(objectStorePath, { recursive: true }).then(() =>
       log.info('Created new object store.')
     );
