@@ -6,16 +6,10 @@
  */
 
 import {
-  EuiBasicTable,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
   EuiDataGridColumn,
-  EuiDataGridColumnCellAction,
   EuiDataGridSorting,
-  EuiPopover,
-  EuiPopoverTitle,
-  EuiText,
-  EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -28,15 +22,15 @@ import {
   TopNFunctionSortField,
 } from '@kbn/profiling-utils';
 import { orderBy } from 'lodash';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
-import { CPULabelWithHint } from '../cpu_label_with_hint';
-import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from '../topn_functions/function_row';
 import { getFunctionsRows, IFunctionRow } from '../topn_functions/utils';
+import { getColumns } from './get_columns';
+import { getCompareFrameAction } from './get_compare_frame_action';
 
 const removeComparisonFromId = (id: string) => id.replace('comparison_', '');
-const isComparisonColumn = (id: string) => id.startsWith('comparison_');
+export const isComparisonColumn = (id: string) => id.startsWith('comparison_');
 
 type SortDirection = 'asc' | 'desc';
 
@@ -60,7 +54,7 @@ export type OnChangeSortParams =
       comparisonSortDirection: SortDirection;
     };
 
-function getFrameIdentification(frame: StackFrameMetadata) {
+export function getFrameIdentification(frame: StackFrameMetadata) {
   return [
     frame.SourceFilename,
     frame.FunctionName,
@@ -68,6 +62,11 @@ function getFrameIdentification(frame: StackFrameMetadata) {
     frame.FileID,
     frame.AddressOrLine,
   ].join('|');
+}
+
+export interface SelectedFrame {
+  currentFrameId?: string;
+  isComparison: boolean;
 }
 
 interface Props {
@@ -102,9 +101,7 @@ export function DifferentialTopNFunctionsGrid({
   comparisonSortField,
 }: Props) {
   const calculateImpactEstimates = useCalculateImpactEstimate();
-  const [selectedFrameId, setSelectedFrameId] = useState<
-    { currentFrameId?: string; isComparison: boolean } | undefined
-  >();
+  const [selectedFrame, setSelectedFrame] = useState<SelectedFrame | undefined>();
   const theme = useEuiTheme();
 
   const totalCount = useMemo(() => {
@@ -166,98 +163,15 @@ export function DifferentialTopNFunctionsGrid({
     totalSeconds,
   ]);
 
-  const compareFrameAction: EuiDataGridColumnCellAction = useCallback(
-    ({ rowIndex, columnId, Component }) => {
-      const isComparison = isComparisonColumn(columnId);
-      const currentRow = isComparison ? comparisonRows[rowIndex] : baseRows[rowIndex];
-      if (currentRow === undefined) {
-        return null;
-      }
-      const currentFrameId = getFrameIdentification(currentRow.frame);
-
-      const isOpen = selectedFrameId
-        ? selectedFrameId.currentFrameId === currentFrameId &&
-          selectedFrameId.isComparison === isComparison
-        : false;
-
-      const compareRow = isComparison
-        ? baseRows.find((item) => getFrameIdentification(item.frame) === currentFrameId)
-        : comparisonRows.find((item) => getFrameIdentification(item.frame) === currentFrameId);
-
-      return (
-        <EuiPopover
-          button={
-            <Component
-              onClick={() => {
-                setSelectedFrameId({ currentFrameId, isComparison });
-              }}
-              iconType="inspect"
-            >
-              {i18n.translate('xpack.profiling.compareFrame.component.findLabel', {
-                defaultMessage: 'Find corresponding frame',
-              })}
-            </Component>
-          }
-          isOpen={isOpen}
-          closePopover={() => {
-            setSelectedFrameId(undefined);
-          }}
-          anchorPosition="upRight"
-          css={css`
-            .euiPopover__anchor {
-              align-items: start;
-              display: flex;
-            }
-          `}
-        >
-          {compareRow ? (
-            <div style={{ maxWidth: 400 }}>
-              <EuiPopoverTitle paddingSize="s">
-                {isComparison
-                  ? i18n.translate('xpack.profiling.diffTopNFunctions.baseLineFunction', {
-                      defaultMessage: 'Baseline function',
-                    })
-                  : i18n.translate('xpack.profiling.diffTopNFunctions.comparisonLineFunction', {
-                      defaultMessage: 'Comparison function',
-                    })}
-              </EuiPopoverTitle>
-              <EuiTitle size="xs">
-                <EuiText>{getCalleeFunction(compareRow.frame)}</EuiText>
-              </EuiTitle>
-              <EuiBasicTable
-                items={[compareRow]}
-                columns={[
-                  { field: 'rank', name: 'Rank' },
-                  {
-                    field: 'samples',
-                    name: 'Samples',
-                    render: (_, value) => value.samples.toLocaleString(),
-                  },
-                  {
-                    field: 'selfCPUPerc',
-                    name: 'Self CPU',
-                    render: (_, value) => `${value.selfCPUPerc.toFixed(2)}%`,
-                  },
-                  {
-                    field: 'totalCPUPerc',
-                    name: 'Total CPU',
-                    render: (_, value) => `${value.totalCPUPerc.toFixed(2)}%`,
-                  },
-                ]}
-              />
-            </div>
-          ) : (
-            <EuiText color="subdued" size="s">
-              {i18n.translate('xpack.profiling.diffTopNFunctions.noCorrespondingValueFound', {
-                defaultMessage: 'No corresponding value found',
-              })}
-            </EuiText>
-          )}
-        </EuiPopover>
-      );
-    },
-    [baseRows, comparisonRows, selectedFrameId]
-  );
+  const columns: EuiDataGridColumn[] = useMemo(() => {
+    const compareFrameAction = getCompareFrameAction({
+      baseRows,
+      comparisonRows,
+      onClick: setSelectedFrame,
+      selectedFrame,
+    });
+    return getColumns(compareFrameAction);
+  }, [baseRows, comparisonRows, selectedFrame]);
 
   const sortedBaseRows = useMemo(() => {
     return sortRows(baseRows, sortField, sortDirection);
@@ -271,147 +185,9 @@ export function DifferentialTopNFunctionsGrid({
     );
   }, [comparisonRows, comparisonSortDirection, comparisonSortField]);
 
-  const columns: EuiDataGridColumn[] = useMemo(
-    () => [
-      {
-        id: TopNFunctionSortField.Rank,
-        actions: { showHide: false },
-        displayAsText: 'Rank',
-        initialWidth: 65,
-        schema: 'numeric',
-      },
-      {
-        id: TopNFunctionSortField.Frame,
-        actions: { showHide: false },
-        displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
-          defaultMessage: 'Function',
-        }),
-        cellActions: [compareFrameAction],
-      },
-      {
-        id: TopNFunctionSortField.Samples,
-        initialWidth: 120,
-        schema: 'numeric',
-        actions: { showHide: false },
-        display: (
-          <LabelWithHint
-            label={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
-              defaultMessage: 'Samples',
-            })}
-            hint={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel.hint', {
-              defaultMessage: 'Estimated values',
-            })}
-            labelSize="s"
-            labelStyle={{ fontWeight: 700 }}
-            iconSize="s"
-          />
-        ),
-      },
-      {
-        id: TopNFunctionSortField.SelfCPU,
-        actions: { showHide: false },
-        schema: 'numeric',
-        initialWidth: 120,
-        display: (
-          <CPULabelWithHint
-            type="self"
-            labelSize="s"
-            labelStyle={{ fontWeight: 700 }}
-            iconSize="s"
-          />
-        ),
-      },
-      {
-        id: TopNFunctionSortField.TotalCPU,
-        actions: { showHide: false },
-        schema: 'numeric',
-        initialWidth: 120,
-        display: (
-          <CPULabelWithHint
-            type="total"
-            labelSize="s"
-            labelStyle={{ fontWeight: 700 }}
-            iconSize="s"
-          />
-        ),
-      },
-      {
-        id: TopNComparisonFunctionSortField.ComparisonRank,
-        actions: { showHide: false },
-        schema: 'numeric',
-        displayAsText: 'Rank',
-        initialWidth: 69,
-        displayHeaderCellProps: { className: 'thickBorderLeft' },
-      },
-      {
-        id: TopNComparisonFunctionSortField.ComparisonFrame,
-        actions: { showHide: false },
-        displayAsText: i18n.translate('xpack.profiling.functionsView.functionColumnLabel', {
-          defaultMessage: 'Function',
-        }),
-        cellActions: [compareFrameAction],
-      },
-      {
-        id: TopNComparisonFunctionSortField.ComparisonSamples,
-        actions: { showHide: false },
-        schema: 'numeric',
-        initialWidth: 120,
-        display: (
-          <LabelWithHint
-            label={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel', {
-              defaultMessage: 'Samples',
-            })}
-            hint={i18n.translate('xpack.profiling.functionsView.samplesColumnLabel.hint', {
-              defaultMessage: 'Estimated values',
-            })}
-            labelSize="s"
-            labelStyle={{ fontWeight: 700 }}
-            iconSize="s"
-          />
-        ),
-      },
-      {
-        id: TopNComparisonFunctionSortField.ComparisonSelfCPU,
-        actions: { showHide: false },
-        schema: 'numeric',
-        initialWidth: 120,
-        display: (
-          <CPULabelWithHint
-            type="self"
-            labelSize="s"
-            labelStyle={{ fontWeight: 700 }}
-            iconSize="s"
-          />
-        ),
-      },
-      {
-        id: TopNComparisonFunctionSortField.ComparisonTotalCPU,
-        actions: { showHide: false },
-        schema: 'numeric',
-        initialWidth: 120,
-        display: (
-          <CPULabelWithHint
-            type="total"
-            labelSize="s"
-            labelStyle={{ fontWeight: 700 }}
-            iconSize="s"
-          />
-        ),
-      },
-      {
-        displayAsText: 'Diff',
-        actions: { showHide: false },
-        id: TopNComparisonFunctionSortField.ComparisonDiff,
-        initialWidth: 70,
-        isSortable: false,
-      },
-    ],
-    [compareFrameAction]
-  );
-
   const [visibleColumns, setVisibleColumns] = useState(columns.map(({ id }) => id));
 
-  function RenderCellValue({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) {
+  function CellValue({ rowIndex, columnId, setCellProps }: EuiDataGridCellValueElementProps) {
     const isComparison = isComparisonColumn(columnId);
     const data = isComparison ? sortedComparisonRows[rowIndex] : sortedBaseRows[rowIndex];
 
@@ -445,12 +221,12 @@ export function DifferentialTopNFunctionsGrid({
     );
   }
 
-  const rowCount = Math.max(sortedBaseRows.length, sortedComparisonRows.length);
+  const rowCount = Math.min(Math.max(sortedBaseRows.length, sortedComparisonRows.length), 100);
 
   return (
     <div>
       <EuiDataGrid
-        data-test-subj="DiffTopNFunctions"
+        data-test-subj="profilingDiffTopNFunctionsGrid"
         css={css`
           .thickBorderLeft {
             border-left: ${theme.euiTheme.border.thick} !important;
@@ -462,8 +238,8 @@ export function DifferentialTopNFunctionsGrid({
         )}
         columns={columns}
         columnVisibility={{ visibleColumns, setVisibleColumns }}
-        rowCount={rowCount > 100 ? 100 : rowCount}
-        renderCellValue={RenderCellValue}
+        rowCount={rowCount}
+        renderCellValue={CellValue}
         sorting={{
           columns: [
             { id: sortField, direction: sortDirection },
