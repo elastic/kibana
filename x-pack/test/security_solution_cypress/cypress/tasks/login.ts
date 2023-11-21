@@ -18,7 +18,7 @@ import {
   ELASTICSEARCH_USERNAME,
   IS_SERVERLESS,
 } from '../env_var_names_constants';
-import { rootRequest } from './api_calls/common';
+import { API_HEADERS, rootRequest } from './api_calls/common';
 
 /**
  * Credentials in the `kibana.dev.yml` config file will be used to authenticate
