@@ -53,7 +53,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();
   const { title, deepLink, isActive, children } = item;
-  const id = item.path;
+  const { id, path } = item;
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
@@ -64,12 +64,12 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
     getStyles(euiTheme)
   );
 
-  const dataTestSubj = classNames(`nav-item`, `nav-item-${id}`, {
+  const dataTestSubj = classNames(`nav-item`, `nav-item-${path}`, {
     [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
     [`nav-item-id-${id}`]: id,
     [`nav-item-isActive`]: isActive,
   });
-  const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${id}`, {
+  const buttonDataTestSubj = classNames(`panelOpener`, `panelOpener-${path}`, {
     [`panelOpener-deepLinkId-${deepLink?.id}`]: !!deepLink,
   });
 
@@ -112,7 +112,7 @@ export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Prop
       {isIconVisible && (
         <EuiFlexItem grow={0} style={{ flexBasis: '15%' }}>
           <EuiButtonIcon
-            display={selectedNode?.path === id ? 'base' : 'empty'}
+            display={selectedNode?.path === path ? 'base' : 'empty'}
             size="s"
             color="text"
             onClick={onIconClick}

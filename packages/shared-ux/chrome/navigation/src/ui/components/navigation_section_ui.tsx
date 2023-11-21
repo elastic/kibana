@@ -35,13 +35,11 @@ const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 const DEFAULT_IS_COLLAPSED = true;
 const DEFAULT_IS_COLLAPSIBLE = true;
 
-function isSamePath(pathA: string | string[] | null, pathB: string | string[] | null) {
+function isSamePath(pathA: string | null, pathB: string | null) {
   if (pathA === null || pathB === null) {
     return false;
   }
-  const pathAToString = Array.isArray(pathA) ? pathA.join('.') : pathA;
-  const pathBToString = Array.isArray(pathB) ? pathB.join('.') : pathB;
-  return pathAToString === pathBToString;
+  return pathA === pathB;
 }
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>

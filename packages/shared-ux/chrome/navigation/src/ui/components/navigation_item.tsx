@@ -75,9 +75,8 @@ function NavigationItemComp<
 
   if (isRootLevel) {
     const href = getNavigationNodeHref(navNode);
-    const { deepLink } = navNode;
     const dataTestSubj = classNames(`nav-item`, {
-      [`nav-item-deepLinkId-${deepLink?.id}`]: !!deepLink,
+      [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
       [`nav-item-isActive`]: navNode.isActive,
     });
 
