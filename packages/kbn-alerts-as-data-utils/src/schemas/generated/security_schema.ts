@@ -195,6 +195,7 @@ const SecurityAlertOptional = rt.partial({
   'kibana.alert.url': schemaString,
   'kibana.alert.workflow_reason': schemaString,
   'kibana.alert.workflow_status': schemaString,
+  'kibana.alert.workflow_status_updated_at': schemaDate,
   'kibana.alert.workflow_tags': schemaStringArray,
   'kibana.alert.workflow_user': schemaString,
   'kibana.version': schemaString,
