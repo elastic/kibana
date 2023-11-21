@@ -106,6 +106,9 @@ async function createSecurityProject(
         },
       })
       .catch(catchAxiosErrorFormatAndThrow);
+
+    log.verbose('Create Security Project response:\n', response);
+
     return {
       name: response.data.name,
       id: response.data.id,
@@ -166,6 +169,9 @@ async function resetCredentials(
         }
       )
       .catch(catchAxiosErrorFormatAndThrow);
+
+    log.verbose('credentials reset response:\n', response);
+
     return {
       password: response.data.password,
       username: response.data.username,
