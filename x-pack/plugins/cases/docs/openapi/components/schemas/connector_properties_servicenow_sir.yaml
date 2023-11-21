@@ -63,6 +63,7 @@ properties:
   type:
     description: The type of connector.
     type: string
-    example: .servicenow-sir
+    examples:
+      - .servicenow-sir
     enum:
       - .servicenow-sir

@@ -12,18 +12,22 @@ properties:
     type:
       - "string"
       - "null"
-    example: null
+    examples:
+      - null
   id:
     description: The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
     type: string
-    example: none
+    examples:
+      - none
   name:
     description: The name of the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
     type: string
-    example: none
+    examples:
+      - none
   type: 
     description: The type of connector. To create a case without a connector, use `.none`. To update a case to remove the connector, specify `.none`.
     type: string
-    example: .none
+    examples:
+      - .none
     enum:
       - .none

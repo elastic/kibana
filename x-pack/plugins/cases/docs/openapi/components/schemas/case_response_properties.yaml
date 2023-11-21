@@ -63,7 +63,8 @@ properties:
   created_at:
     type: string
     format: date-time
-    example: '2022-05-13T09:16:17.416Z'
+    examples:
+      - '2022-05-13T09:16:17.416Z'
   created_by:
     $ref: 'case_response_created_by_properties.yaml'
   customFields:
@@ -76,7 +77,8 @@ properties:
         $ref: 'case_customfields.yaml'
   description:
     type: string
-    example: A case description.
+    examples:
+      - A case description.
   duration:
     type:
       - "integer"
@@ -86,12 +88,14 @@ properties:
       If the case has not been closed, the duration is set to null. If the case
       was closed after less than half a second, the duration is rounded down to
       zero.
-    example: 120
+    examples:
+      - 120
   external_service:
     $ref: 'external_service.yaml'
   id:
     type: string
-    example: 66b9aa00-94fa-11ea-9f74-e7e108796192
+    examples:
+      - 66b9aa00-94fa-11ea-9f74-e7e108796192
   owner:
     $ref: 'owners.yaml'
   settings:
@@ -104,17 +108,20 @@ properties:
     type: array
     items:
       type: string
-    example:
-      - tag-1
+    examples:
+      - [tag-1]
   title:
     type: string
-    example: Case title 1
+    examples:
+      - Case title 1
   totalAlerts:
     type: integer
-    example: 0
+    examples:
+      - 0
   totalComment:
     type: integer
-    example: 0
+    examples:
+      - 0
   updated_at:
     type:
       - "string"
@@ -124,4 +131,5 @@ properties:
     $ref: 'case_response_updated_by_properties.yaml'
   version:
     type: string
-    example: WzUzMiwxXQ==
+    examples:
+      - WzUzMiwxXQ==

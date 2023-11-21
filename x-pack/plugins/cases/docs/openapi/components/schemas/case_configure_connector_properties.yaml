@@ -6,10 +6,12 @@ fields:
 id:
   description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
   type: string
-  example: none
+  examples:
+    - none
 name:
   description: The name of the connector. If you do not want a default connector, use `none`. To retrieve connector names, use the find connectors API.
   type: string
-  example: none
+  examples:
+    - none
 type:
   $ref: 'connector_types.yaml'

@@ -15,7 +15,8 @@ connector:
 created_at:
   type: string
   format: date-time
-  example: 2022-06-01T17:07:17.767Z
+  examples:
+    - 2022-06-01T17:07:17.767Z
 created_by:
   type: object
   required:
@@ -28,10 +29,12 @@ error:
   type:
     - "string"
     - "null"
-  example: null
+  examples:
+    - null
 id:
   type: string
-  example: 4a97a440-e1cd-11ec-be9b-9b1838238ee6
+  examples:
+    - 4a97a440-e1cd-11ec-be9b-9b1838238ee6
 mappings:
   type: array
   items:
@@ -39,13 +42,16 @@ mappings:
     properties:
       action_type:
         type: string
-        example: overwrite
+        examples:
+          - overwrite
       source:
         type: string
-        example: title
+        examples:
+          - title
       target:
         type: string
-        example: summary
+        examples:
+          - summary
 owner:
   $ref: 'owners.yaml'
 updated_at:
@@ -53,7 +59,8 @@ updated_at:
     - "string"
     - "null"
   format: date-time
-  example: 2022-06-01T19:58:48.169Z
+  examples:
+    - 2022-06-01T19:58:48.169Z
 updated_by:
   type:
     - "object"
@@ -66,4 +73,5 @@ updated_by:
     $ref: 'user_properties.yaml'
 version:
   type: string
-  example: WzIwNzMsMV0=
+  examples:
+    - WzIwNzMsMV0=

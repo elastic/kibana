@@ -11,4 +11,5 @@ items:
     uid:
       type: string
       description: A unique identifier for the user profile. These identifiers can be found by using the suggest user profile API.
-      example: u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
+      examples:
+        - u_0wpfV1MqYDaXzLtRVY-gLMrddKDEmfz51Fszhj7hWC8_0
