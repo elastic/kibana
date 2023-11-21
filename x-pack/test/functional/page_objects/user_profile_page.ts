@@ -15,7 +15,7 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   const getThemeTag = async (): Promise<void> => {
-    return await browser.driver.executeScript('return __kbnThemeTag__');
+    return await browser.execute('return __kbnThemeTag__');
   };
 
   const getSaveProfileChangesButton = async () => {
@@ -64,7 +64,7 @@ export function UserProfilePageProvider({ getService }: FtrProviderContext) {
       return await testSubjects.setValue('userProfileFullName', newFullName);
     },
 
-    async setEmailInputField(newEmailAddress: string, clearWithKeyboard: boolean) {
+    async setEmailInputField(newEmailAddress: string, clearWithKeyboard?: boolean = false) {
       return await testSubjects.setValue('userProfileEmail', newEmailAddress, {
         clearWithKeyboard,
       });
