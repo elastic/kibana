@@ -12,6 +12,7 @@ import { PROVIDER_BADGE } from '../../../../screens/timeline';
 import { removeKqlFilter } from '../../../../tasks/search_bar';
 import { COLUMN_HEADER, FILTER_BADGE, TIMESTAMP_COLUMN } from '../../../../screens/alerts';
 import {
+  DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_HOST_OS_BUILD_ROW,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ROW_CELL_COPY_TO_CLIPBOARD,
   DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_CELL,
@@ -19,7 +20,6 @@ import {
 } from '../../../../screens/expandable_flyout/alert_details_right_panel_table_tab';
 import {
   addToTimelineTableTabTable,
-  clearFilterTableTabTable,
   filterInTableTabTable,
   filterOutTableTabTable,
   filterTableTabTable,
@@ -48,11 +48,23 @@ describe(
     });
 
     it('should display and filter the table', () => {
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW).should('be.visible');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW).should('be.visible');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW)
+        .should('be.visible')
+        .and('contain.text', '@timestamp');
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_ID_ROW)
+        .should('be.visible')
+        .and('contain.text', '_id');
+
+      // this entry is the last one of the first page of the table and should not be visible
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_HOST_OS_BUILD_ROW)
+        .should('not.be.visible')
+        .and('contain.text', 'host.os.build');
+
       filterTableTabTable('timestamp');
-      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW).should('be.visible');
-      clearFilterTableTabTable();
+
+      cy.get(DOCUMENT_DETAILS_FLYOUT_TABLE_TAB_TIMESTAMP_ROW)
+        .should('be.visible')
+        .and('contain.text', '@timestamp');
     });
 
     it('should test cell actions', () => {
