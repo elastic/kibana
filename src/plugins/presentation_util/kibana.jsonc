@@ -14,8 +14,7 @@
       "embeddable",
       "expressions",
       "dataViews",
-      "uiActions",
-      "unifiedSearch"
+      "uiActions"
     ],
     "extraPublicDirs": ["common"]
   }

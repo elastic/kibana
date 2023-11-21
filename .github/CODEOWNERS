@@ -62,6 +62,7 @@ x-pack/plugins/cases @elastic/response-ops
 packages/kbn-cell-actions @elastic/security-threat-hunting-explore
 src/plugins/chart_expressions/common @elastic/kibana-visualizations
 packages/kbn-chart-icons @elastic/kibana-visualizations
+packages/kbn-calculate-width-from-char-count @elastic/kibana-visualizations
 src/plugins/charts @elastic/kibana-visualizations
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-ci-stats-core @elastic/kibana-operations

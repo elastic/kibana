@@ -32,7 +32,7 @@
     "@kbn/saved-objects-finder-plugin",
     "@kbn/content-management-plugin",
     "@kbn/shared-ux-button-toolbar",
-    "@kbn/unified-search-plugin"
+    "@kbn/calculate-width-from-char-count"
   ],
   "exclude": ["target/**/*"]
 }

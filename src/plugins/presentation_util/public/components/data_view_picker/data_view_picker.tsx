@@ -9,7 +9,7 @@
 import React, { useState } from 'react';
 import { EuiSelectable, EuiInputPopover, EuiSelectableProps } from '@elastic/eui';
 import { DataViewListItem } from '@kbn/data-views-plugin/common';
-import { calculateWidthFromLabel } from '@kbn/unified-search-plugin/public';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 
 import { ToolbarButton, ToolbarButtonProps } from '@kbn/shared-ux-button-toolbar';
 
@@ -72,7 +72,7 @@ export function DataViewPicker({
       isOpen={isPopoverOpen}
       input={createTrigger()}
       closePopover={() => setPopoverIsOpen(false)}
-      panelMinWidth={calculateWidthFromLabel(maxLabelLength)}
+      panelMinWidth={calculateWidthFromCharCount(maxLabelLength)}
       panelProps={{
         'data-test-subj': 'data-view-picker-popover',
       }}

@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { calculateWidthFromLabel } from './calculate_width_from_label';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 
 const MIN_WIDTH = 300;
 
@@ -22,7 +22,7 @@ export const changeDataViewStyles = ({
       maxWidth: fullWidth ? undefined : MIN_WIDTH,
     },
     popoverContent: {
-      width: calculateWidthFromLabel(maxLabelLength, { minWidth: MIN_WIDTH }),
+      width: calculateWidthFromCharCount(maxLabelLength, { minWidth: MIN_WIDTH }),
     },
   };
 };

@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import { EuiComboBox, EuiComboBoxProps } from '@elastic/eui';
 import { FieldIcon } from '@kbn/field-utils/src/components/field_icon';
-import { calculateWidthFromLabel } from '@kbn/unified-search-plugin/public';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import type { FieldOptionValue, FieldOption } from './types';
 
 export interface FieldPickerProps<T extends FieldOptionValue>
@@ -93,7 +93,7 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       selectedOptions={selectedOptions}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
-      inputPopoverProps={{ panelMinWidth: calculateWidthFromLabel(maxLabelLength) }}
+      inputPopoverProps={{ panelMinWidth: calculateWidthFromCharCount(maxLabelLength) }}
       onChange={(choices) => {
         if (choices.length === 0) {
           onDelete?.();

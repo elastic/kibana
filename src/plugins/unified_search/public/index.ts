@@ -7,6 +7,7 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
+import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { ConfigSchema } from '../config';
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';
@@ -23,7 +24,6 @@ export { FilterItem, FilterItems } from './filter_bar';
 export { FilterBadgeGroup } from './filter_badge';
 
 export { DataViewPicker, DataViewSelector, DataViewsList } from './dataview_picker';
-export { calculateWidthFromLabel } from './dataview_picker/calculate_width_from_label';
 export type { DataViewPickerProps } from './dataview_picker';
 
 export type { ApplyGlobalFilterActionContext } from './actions';

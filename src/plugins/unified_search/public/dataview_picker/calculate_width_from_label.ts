@@ -28,7 +28,7 @@ const defaultPanelWidths: PANEL_WIDTHS = {
   avCharWidth: AVERAGE_CHAR_WIDTH,
 };
 
-export function calculateWidthFromLabel(
+export function calculateWidthFromCharCount(
   labelLength: number,
   overridesPanelWidths?: Partial<PANEL_WIDTHS>
 ) {
