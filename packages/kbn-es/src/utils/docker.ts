@@ -7,7 +7,6 @@
  */
 import chalk from 'chalk';
 import execa from 'execa';
-import fs from 'fs';
 import Fsp from 'fs/promises';
 import { resolve, basename, join } from 'path';
 import { Client, ClientOptions, HttpConnection } from '@elastic/elasticsearch';
@@ -738,26 +737,30 @@ export async function runServerlessCluster(log: ToolingLog, options: ServerlessO
     portCmd[1].lastIndexOf(':')
   )}`;
 
+  let clientExtOptions = {};
+  if (options.ssl) {
+    const ca = await Fsp.readFile(CA_CERT_PATH);
+    clientExtOptions = {
+      tls: {
+        ca,
+        // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
+        // for the ip which is not validated. As such we are getting the error
+        // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
+        // To work around that we are overriding the function checkServerIdentity too
+        checkServerIdentity: () => {
+          return undefined;
+        },
+      },
+    };
+  }
+
   const client = getESClient({
     node: esNodeUrl,
     auth: {
       username: ELASTIC_SERVERLESS_SUPERUSER,
       password: ELASTIC_SERVERLESS_SUPERUSER_PASSWORD,
     },
-    ...(options.ssl
-      ? {
-          tls: {
-            ca: [fs.readFileSync(CA_CERT_PATH)],
-            // NOTE: Even though we've added ca into the tls options, we are using 127.0.0.1 instead of localhost
-            // for the ip which is not validated. As such we are getting the error
-            // Hostname/IP does not match certificate's altnames: IP: 127.0.0.1 is not in the cert's list:
-            // To work around that we are overriding the function checkServerIdentity too
-            checkServerIdentity: () => {
-              return undefined;
-            },
-          },
-        }
-      : {}),
+    ...clientExtOptions,
   });
 
   const readyPromise = waitUntilClusterReady({ client, expectedStatus: 'green', log }).then(
