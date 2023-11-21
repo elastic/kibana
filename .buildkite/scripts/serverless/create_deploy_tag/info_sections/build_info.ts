@@ -99,14 +99,26 @@ export async function getArtifactBuildJob(
 export async function getQAFBuildContainingCommit(
   commitSha: string,
   qafBuilds: BuildkiteBuildExtract[],
-  commits: GitCommitExtract[]
+  commits: GitCommitExtract[] = []
 ) {
+  const commitShaList = commits.length
+    ? commits.map((e) => e.sha)
+    : (
+        await octokit.request('GET /repos/{owner}/{repo}/commits/', {
+          owner: 'elastic',
+          repo: 'kibana',
+          ref: 'main',
+          headers: {
+            accept: 'application/vnd.github.v3+json',
+            'X-GitHub-Api-Version': '2022-11-28',
+          },
+        })
+      ).data.map((e: { sha: string }) => e.sha);
+
   const build = qafBuilds.find((kbBuild) => {
     // is build.commit after commitSha?
-    const buildkiteBuildShaIndex = commits.findIndex(
-      (c: { sha: string }) => c.sha === kbBuild.commit
-    );
-    const commitShaIndex = commits.findIndex((c: { sha: string }) => c.sha === commitSha);
+    const buildkiteBuildShaIndex = commitShaList.findIndex((c: string) => c === kbBuild.commit);
+    const commitShaIndex = commitShaList.findIndex((c: string) => c === commitSha);
     return commitShaIndex !== -1 && buildkiteBuildShaIndex < commitShaIndex;
   });
 
