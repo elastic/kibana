@@ -21,7 +21,6 @@ import {
   deleteAllRules,
   installPrebuiltRulesAndTimelines,
   installPrebuiltRules,
-  // createNonSecurityRule,
   getCustomQueryRuleParams,
 } from '../../utils';
 import { getCoverageOverview } from '../../utils/rules/get_coverage_overview';
