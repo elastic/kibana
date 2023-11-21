@@ -103,6 +103,8 @@
     "@kbn/monaco",
     "@kbn/shared-svg",
     "@kbn/deeplinks-observability",
+    "@kbn/custom-icons",
+    "@kbn/elastic-agent-utils",
     "@kbn/shared-ux-link-redirect-app"
   ],
   "exclude": ["target/**/*"]
