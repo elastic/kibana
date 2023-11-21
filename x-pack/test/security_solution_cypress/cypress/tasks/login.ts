@@ -202,31 +202,24 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
     throw Error(`Cypress config baseUrl not set!`);
   }
 
-  if (Cypress.env(CLOUD_SERVERLESS)) {
-    cy.visit('/login');
-    cy.get('[data-test-subj="loginUsername"]').type(username);
-    cy.get('[data-test-subj="loginPassword"]').type(password);
-    cy.get('[data-test-subj="loginSubmit"]').click();
-  } else {
-    // Programmatically authenticate without interacting with the Kibana login page.
-    rootRequest<LoginState>({
-      url: `${baseUrl}/internal/security/login_state`,
-    }).then((loginState) => {
-      const basicProvider = loginState.body.selector.providers.find(
-        (provider) => provider.type === 'basic'
-      );
+  // Programmatically authenticate without interacting with the Kibana login page.
+  rootRequest<LoginState>({
+    url: `${baseUrl}/internal/security/login_state`,
+  }).then((loginState) => {
+    const basicProvider = loginState.body.selector.providers.find(
+      (provider) => provider.type === 'basic'
+    );
 
-      cy.request({
-        url: `${baseUrl}/internal/security/login`,
-        method: 'POST',
-        body: {
-          providerType: basicProvider?.type,
-          providerName: basicProvider?.name,
-          currentURL: `${baseUrl}/internal/security/login`,
-          params: { username, password },
-        },
-        headers: API_HEADERS,
-      });
+    cy.request({
+      url: `${baseUrl}/internal/security/login`,
+      method: 'POST',
+      body: {
+        providerType: basicProvider?.type,
+        providerName: basicProvider?.name,
+        currentURL: `${baseUrl}/internal/security/login`,
+        params: { username, password },
+      },
+      headers: API_HEADERS,
     });
-  }
+  });
 };
