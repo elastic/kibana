@@ -25,6 +25,10 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import type { GuideFilterValues, GuideId, GuideState } from '@kbn/guided-onboarding';
 
 import { GuideCards, GuideFilters } from '@kbn/guided-onboarding';
+import {
+  GuideCardConstants,
+  guideCards,
+} from '@kbn/guided-onboarding/src/components/landing_page/guide_cards.constants';
 import { getServices } from '../../kibana_services';
 import { KEY_ENABLE_WELCOME } from '../home';
 
@@ -48,6 +52,7 @@ export const GettingStarted = () => {
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [isError, setIsError] = useState<boolean>(false);
+  const [filteredCards, setFilteredCards] = useState<GuideCardConstants[]>();
   const { search } = useLocation();
   const query = parse(search);
 
@@ -126,6 +131,12 @@ export const GettingStarted = () => {
     [guidedOnboardingService]
   );
 
+  // filter cards for solution
+  useEffect(() => {
+    const tempFiltered = guideCards.filter((card: GuideCardConstants) => card.solution === filter);
+    setFilteredCards(tempFiltered);
+  }, [filter]);
+
   if (isLoading) {
     return (
       <KibanaPageTemplate.EmptyPrompt
@@ -202,7 +213,7 @@ export const GettingStarted = () => {
           navigateToApp={application.navigateToApp}
           activeFilter={filter}
           guidesState={guidesState}
-          solutionName={filter}
+          filteredCards={filteredCards}
         />
         <EuiSpacer />
         <div className="eui-textCenter">
