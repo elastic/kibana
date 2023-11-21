@@ -9,7 +9,7 @@ import { EuiButton } from '@elastic/eui';
 import { useExpandableFlyoutContext } from '@kbn/expandable-flyout';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useRightPanelContext } from '../context';
-import { LeftPanelKey, LeftPanelResponseTab } from '../../left';
+import { DocumentDetailsLeftPanelKey, LeftPanelResponseTab } from '../../left';
 import { RESPONSE_BUTTON_TEST_ID } from './test_ids';
 
 /**
@@ -21,7 +21,7 @@ export const ResponseButton: React.FC = () => {
 
   const goToResponseTab = useCallback(() => {
     openLeftPanel({
-      id: LeftPanelKey,
+      id: DocumentDetailsLeftPanelKey,
       path: { tab: LeftPanelResponseTab },
       params: {
         id: eventId,
