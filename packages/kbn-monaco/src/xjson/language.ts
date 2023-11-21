@@ -46,7 +46,7 @@ monaco.languages.onLanguage(ID, async () => {
   };
 
   const onModelAdd = (model: monaco.editor.IModel) => {
-    if (model.getModeId() !== ID) {
+    if (model.getLanguageId() !== ID) {
       return;
     }
 

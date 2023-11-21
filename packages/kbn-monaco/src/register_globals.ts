@@ -37,9 +37,8 @@ registerTheme(ESQL_THEME_ID, buildESQlTheme());
 
 const monacoBundleDir = (window as any).__kbnPublicPath__?.['kbn-monaco'];
 
-// @ts-ignore
 window.MonacoEnvironment = {
-  // needed for functional tests so that we can get value from 'editor'
+  // @ts-expect-error needed for functional tests so that we can get value from 'editor'
   monaco,
   getWorkerUrl: monacoBundleDir
     ? (_: string, languageId: string) => {
@@ -48,5 +47,5 @@ window.MonacoEnvironment = {
           : DEFAULT_WORKER_ID;
         return `${monacoBundleDir}${workerId}.editor.worker.js`;
       }
-    : () => undefined,
+    : () => '',
 };
