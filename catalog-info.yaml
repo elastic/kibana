@@ -54,6 +54,8 @@ spec:
       provider_settings:
         trigger_mode: none
       teams:
+        kibana-release-operators:
+          access_level: MANAGE_BUILD_AND_READ
         kibana-operations:
           access_level: MANAGE_BUILD_AND_READ
         appex-qa:
