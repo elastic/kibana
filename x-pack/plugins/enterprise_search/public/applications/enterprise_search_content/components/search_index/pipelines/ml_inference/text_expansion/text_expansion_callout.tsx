@@ -16,9 +16,9 @@ import { KibanaLogic } from '../../../../../../shared/kibana';
 import { IndexViewLogic } from '../../../index_view_logic';
 
 import { DeployModel } from './deploy_model';
-import { ModelDeployed } from '../model_deployed';
-import { ModelDeploymentInProgress } from '../model_deployment_in_progress';
-import { ModelStarted } from '../model_started';
+import { ModelDeployed } from './model_deployed';
+import { ModelDeploymentInProgress } from './model_deployment_in_progress';
+import { ModelStarted } from './model_started';
 import { useTextExpansionCallOutData } from './text_expansion_callout_data';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 import { TextExpansionErrors } from './text_expansion_errors';

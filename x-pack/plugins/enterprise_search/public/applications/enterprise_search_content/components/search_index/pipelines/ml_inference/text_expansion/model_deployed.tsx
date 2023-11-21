@@ -24,8 +24,8 @@ import {
   TextExpansionCallOutState,
   TextExpansionDismissButton,
   FineTuneModelsButton,
-} from './text_expansion/text_expansion_callout';
-import { TextExpansionCalloutLogic } from './text_expansion/text_expansion_callout_logic';
+} from './text_expansion_callout';
+import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
 
 export const ModelDeployed = ({
   dismiss,
