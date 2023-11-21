@@ -30,7 +30,6 @@ export interface AlertSummaryWidgetFullSizeProps {
   recoveredAlertCount: number;
   dateFormat?: string;
   hideChart?: boolean;
-  isLoading?: boolean;
 }
 
 export const AlertSummaryWidgetFullSize = ({
@@ -40,7 +39,6 @@ export const AlertSummaryWidgetFullSize = ({
   dateFormat,
   recoveredAlertCount,
   hideChart,
-  isLoading,
 }: AlertSummaryWidgetFullSizeProps) => {
   const chartTheme = [
     theme,
