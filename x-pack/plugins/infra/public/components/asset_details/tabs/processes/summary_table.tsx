@@ -6,7 +6,6 @@
  */
 
 import React, { useMemo } from 'react';
-import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import {
   EuiLoadingSpinner,
@@ -17,7 +16,7 @@ import {
   EuiDescriptionListDescription,
   EuiHorizontalRule,
 } from '@elastic/eui';
-import { euiStyled } from '@kbn/kibana-react-plugin/common';
+import { css } from '@emotion/react';
 import type { ProcessListAPIResponse } from '../../../../../common/http_api';
 import { STATE_NAMES } from './states';
 import { NOT_AVAILABLE_LABEL } from '../../translations';
@@ -28,8 +27,8 @@ interface Props {
 }
 
 type SummaryRecord = {
-  total: number;
-} & Record<keyof typeof STATE_NAMES, number>;
+  total: number | string;
+} & Record<keyof typeof STATE_NAMES, number | string>;
 
 const processSummaryNotAvailable = {
   total: NOT_AVAILABLE_LABEL,
@@ -43,26 +42,32 @@ const processSummaryNotAvailable = {
 };
 
 export const SummaryTable = ({ processSummary, isLoading }: Props) => {
-  const summary = !processSummary?.total ? processSummaryNotAvailable : processSummary;
-
-  const processCount = useMemo(
-    () =>
-      ({
-        total: isLoading ? -1 : summary.total,
-        ...mapValues(STATE_NAMES, () => (isLoading ? -1 : 0)),
-        ...(isLoading ? {} : summary),
-      } as SummaryRecord),
-    [summary, isLoading]
+  const mergedSummary: SummaryRecord = useMemo(
+    () => ({
+      ...processSummaryNotAvailable,
+      ...Object.fromEntries(Object.entries(processSummary).filter(([_, v]) => !!v)),
+    }),
+    [processSummary]
   );
+
   return (
     <>
-      <EuiFlexGroup gutterSize="m" responsive={false} wrap={true}>
-        {Object.entries(processCount).map(([field, value]) => (
+      <EuiFlexGroup gutterSize="m" responsive={false} wrap>
+        {Object.entries(mergedSummary).map(([field, value]) => (
           <EuiFlexItem key={field}>
-            <EuiDescriptionList data-test-subj="infraProcessesSummaryTableItem" compressed>
-              <ColumnTitle>{columnTitles[field as keyof SummaryRecord]}</ColumnTitle>
+            <EuiDescriptionList
+              data-test-subj="infraAssetDetailsProcessesSummaryTableItem"
+              compressed
+            >
+              <EuiDescriptionListTitle
+                css={css`
+                  white-space: nowrap;
+                `}
+              >
+                {columnTitles[field as keyof SummaryRecord]}
+              </EuiDescriptionListTitle>
               <EuiDescriptionListDescription>
-                {value === -1 ? <LoadingSpinner /> : value}
+                {isLoading ? <EuiLoadingSpinner size="m" /> : value}
               </EuiDescriptionListDescription>
             </EuiDescriptionList>
           </EuiFlexItem>
@@ -79,12 +84,3 @@ const columnTitles = {
   }),
   ...STATE_NAMES,
 };
-
-const LoadingSpinner = euiStyled(EuiLoadingSpinner).attrs({ size: 'm' })`
-  margin-top: 2px;
-  margin-bottom: 3px;
-`;
-
-const ColumnTitle = euiStyled(EuiDescriptionListTitle)`
-  white-space: nowrap;
-`;

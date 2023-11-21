@@ -9,7 +9,7 @@ import { ElasticsearchAssetType, KibanaAssetType } from '../types/models';
 
 export const PACKAGES_SAVED_OBJECT_TYPE = 'epm-packages';
 export const ASSETS_SAVED_OBJECT_TYPE = 'epm-packages-assets';
-export const MAX_TIME_COMPLETE_INSTALL = 60000;
+export const MAX_TIME_COMPLETE_INSTALL = 30 * 60 * 1000; // 30 minutes
 
 export const FLEET_SYSTEM_PACKAGE = 'system';
 export const FLEET_ELASTIC_AGENT_PACKAGE = 'elastic_agent';

@@ -9,8 +9,8 @@ import { useCallback, useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../../../state';
 import { useMonitorQueryId } from '../hooks/use_monitor_query_id';
+import { fetchMonitorManagementList, getMonitorListPageStateWithDefaults } from '../../../state';
 
 const HISTORY_LENGTH = 5;
 

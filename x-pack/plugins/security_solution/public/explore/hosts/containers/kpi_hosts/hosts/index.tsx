@@ -10,14 +10,12 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import type { KpiHostsRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  HostsKpiHostsRequestOptions,
-  HostsKpiHostsStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { HostsKpiHostsStrategyResponse } from '../../../../../../common/search_strategy';
 import { HostsKpiQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -55,7 +53,7 @@ export const useHostsKpiHosts = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [hostsKpiHostsRequest, setHostsKpiHostsRequest] =
-    useState<HostsKpiHostsRequestOptions | null>(null);
+    useState<KpiHostsRequestOptionsInput | null>(null);
 
   const [hostsKpiHostsResponse, setHostsKpiHostsResponse] = useState<HostsKpiHostsArgs>({
     hosts: 0,
@@ -71,7 +69,7 @@ export const useHostsKpiHosts = ({
   const { addError, addWarning } = useAppToasts();
 
   const hostsKpiHostsSearch = useCallback(
-    (request: HostsKpiHostsRequestOptions | null) => {
+    (request: KpiHostsRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -80,7 +78,7 @@ export const useHostsKpiHosts = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<HostsKpiHostsRequestOptions, HostsKpiHostsStrategyResponse>(request, {
+          .search<KpiHostsRequestOptionsInput, HostsKpiHostsStrategyResponse>(request, {
             strategy: 'securitySolutionSearchStrategy',
             abortSignal: abortCtrl.current.signal,
           })
@@ -121,7 +119,7 @@ export const useHostsKpiHosts = ({
 
   useEffect(() => {
     setHostsKpiHostsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: KpiHostsRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: HostsKpiQueries.kpiHosts,

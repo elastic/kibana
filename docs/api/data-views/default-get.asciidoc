@@ -6,6 +6,11 @@
 
 experimental[] Retrieve a default data view ID. Kibana UI uses the default data view unless user picks a different one.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/src/plugins/data_views/docs/openapi[open API specification].
+====
 
 [[data-views-api-default-get-request]]
 ==== Request

@@ -11,7 +11,7 @@ import { DatatableArgs } from './datatable';
 
 import { transposeTable } from './transpose_helpers';
 
-describe('transpose_helpes', () => {
+describe('transpose_helpers', () => {
   function buildTable(): Datatable {
     // 3 buckets, 2 metrics
     // first bucket goes A/B/C
@@ -289,5 +289,27 @@ describe('transpose_helpes', () => {
     expect(Object.values(table.rows[2]).filter((val) => val !== undefined).length).toEqual(
       1 + 18 - 2
     );
+  });
+
+  it('should not fail for no data', () => {
+    const table = buildTable();
+    const updatedTable = {
+      ...table,
+      rows: [],
+    };
+    const args = buildArgs();
+    const updatedArgs = {
+      ...args,
+      columns: [
+        {
+          type: 'lens_datatable_column',
+          columnId: 'bucket1',
+          isTransposed: true,
+          transposable: false,
+        },
+      ],
+    } as DatatableArgs;
+    transposeTable(updatedArgs, updatedTable, buildFormatters());
+    expect(args.columns.length).toEqual(5);
   });
 });

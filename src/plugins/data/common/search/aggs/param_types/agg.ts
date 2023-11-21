@@ -52,6 +52,6 @@ export class AggParamType<
     }
 
     this.makeAgg = config.makeAgg;
-    this.valueType = AggConfig;
+    this.getValueType = () => AggConfig;
   }
 }

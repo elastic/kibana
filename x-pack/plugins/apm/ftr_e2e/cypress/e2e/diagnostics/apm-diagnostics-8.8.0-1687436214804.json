@@ -1,0 +1,4545 @@
+{
+  "created_at": "2023-06-22T12:16:54.010Z",
+  "diagnosticsPrivileges": {
+    "index": {
+      "apm-*": {
+        "read": true
+      },
+      "logs-apm*": {
+        "read": true
+      },
+      "metrics-apm*": {
+        "read": true
+      },
+      "remote_cluster:apm-*": {
+        "read": true
+      },
+      "remote_cluster:logs-apm*": {
+        "read": true
+      },
+      "remote_cluster:metrics-apm*": {
+        "read": true
+      },
+      "remote_cluster:traces-apm*": {
+        "read": true
+      },
+      "traces-apm*": {
+        "read": true
+      }
+    },
+    "cluster": {
+      "read_pipeline": true,
+      "manage_index_templates": true,
+      "monitor": true
+    },
+    "hasAllPrivileges": true
+  },
+  "elasticsearchVersion": "8.8.0",
+  "esResponses": {
+    "fieldCaps": {
+      "fields": {
+        "service.name": {
+          "keyword": {
+            "type": "keyword",            "metadata_field": false,
+            "searchable": true,
+            "aggregatable": true
+          }
+        }
+      }
+    },
+    "indices": {
+      ".ds-logs-apm.error-default-2023.06.05-000022": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-logs-apm.error-default-2023.06.05-000022",
+            "default_pipeline": "logs-apm.error-8.8.0"
+          }
+        },
+        "data_stream": "logs-apm.error-default"
+      },
+      ".ds-metrics-apm.internal-default-2023.03.13-000011": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.internal-default-2023.03.13-000011",
+            "default_pipeline": "metrics-apm.internal-8.6.0"
+          }
+        },
+        "data_stream": "metrics-apm.internal-default"
+      },
+      ".ds-metrics-apm.internal-default-2023.04.12-000014": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.internal-default-2023.04.12-000014",
+            "default_pipeline": "metrics-apm.internal-8.6.0"
+          }
+        },
+        "data_stream": "metrics-apm.internal-default"
+      },
+      ".ds-metrics-apm.internal-default-2023.04.16-000015": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.internal-default-2023.04.16-000015",
+            "default_pipeline": "metrics-apm.internal-8.7.0"
+          }
+        },
+        "data_stream": "metrics-apm.internal-default"
+      },
+      ".ds-metrics-apm.internal-default-2023.05.16-000017": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.internal-default-2023.05.16-000017",
+            "default_pipeline": "metrics-apm.internal-8.7.0"
+          }
+        },
+        "data_stream": "metrics-apm.internal-default"
+      },
+      ".ds-metrics-apm.internal-default-2023.06.05-000018": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.internal-default-2023.06.05-000018",
+            "default_pipeline": "metrics-apm.internal-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.internal-default"
+      },
+      ".ds-metrics-apm.service_destination.1m-default-2023.04.17-000001": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_destination.1m-default-2023.04.17-000001",
+            "default_pipeline": "metrics-apm.service_destination.1m-8.7.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_destination.1m-default"
+      },
+      ".ds-metrics-apm.service_destination.1m-default-2023.06.05-000002": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_destination.1m-default-2023.06.05-000002",
+            "default_pipeline": "metrics-apm.service_destination.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_destination.1m-default"
+      },
+      ".ds-metrics-apm.service_destination.1m-default-2023.06.12-000003": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_destination.1m-default-2023.06.12-000003",
+            "default_pipeline": "metrics-apm.service_destination.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_destination.1m-default"
+      },
+      ".ds-metrics-apm.service_destination.1m-default-2023.06.19-000004": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_destination.1m-default-2023.06.19-000004",
+            "default_pipeline": "metrics-apm.service_destination.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_destination.1m-default"
+      },
+      ".ds-metrics-apm.service_summary.1m-default-2023.04.17-000001": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_summary.1m-default-2023.04.17-000001",
+            "default_pipeline": "metrics-apm.service_summary.1m-8.7.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_summary.1m-default"
+      },
+      ".ds-metrics-apm.service_summary.1m-default-2023.06.05-000002": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_summary.1m-default-2023.06.05-000002",
+            "default_pipeline": "metrics-apm.service_summary.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_summary.1m-default"
+      },
+      ".ds-metrics-apm.service_summary.1m-default-2023.06.12-000003": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_summary.1m-default-2023.06.12-000003",
+            "default_pipeline": "metrics-apm.service_summary.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_summary.1m-default"
+      },
+      ".ds-metrics-apm.service_summary.1m-default-2023.06.19-000004": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_summary.1m-default-2023.06.19-000004",
+            "default_pipeline": "metrics-apm.service_summary.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_summary.1m-default"
+      },
+      ".ds-metrics-apm.service_transaction.1m-default-2023.04.17-000001": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_transaction.1m-default-2023.04.17-000001",
+            "default_pipeline": "metrics-apm.service_transaction.1m-8.7.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_transaction.1m-default"
+      },
+      ".ds-metrics-apm.service_transaction.1m-default-2023.06.05-000002": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_transaction.1m-default-2023.06.05-000002",
+            "default_pipeline": "metrics-apm.service_transaction.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_transaction.1m-default"
+      },
+      ".ds-metrics-apm.service_transaction.1m-default-2023.06.12-000003": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_transaction.1m-default-2023.06.12-000003",
+            "default_pipeline": "metrics-apm.service_transaction.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_transaction.1m-default"
+      },
+      ".ds-metrics-apm.service_transaction.1m-default-2023.06.19-000004": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.service_transaction.1m-default-2023.06.19-000004",
+            "default_pipeline": "metrics-apm.service_transaction.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.service_transaction.1m-default"
+      },
+      ".ds-metrics-apm.transaction.1m-default-2023.04.17-000001": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.transaction.1m-default-2023.04.17-000001",
+            "default_pipeline": "metrics-apm.transaction.1m-8.7.0"
+          }
+        },
+        "data_stream": "metrics-apm.transaction.1m-default"
+      },
+      ".ds-metrics-apm.transaction.1m-default-2023.06.05-000002": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.transaction.1m-default-2023.06.05-000002",
+            "default_pipeline": "metrics-apm.transaction.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.transaction.1m-default"
+      },
+      ".ds-metrics-apm.transaction.1m-default-2023.06.12-000003": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.transaction.1m-default-2023.06.12-000003",
+            "default_pipeline": "metrics-apm.transaction.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.transaction.1m-default"
+      },
+      ".ds-metrics-apm.transaction.1m-default-2023.06.19-000004": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-metrics-apm.transaction.1m-default-2023.06.19-000004",
+            "default_pipeline": "metrics-apm.transaction.1m-8.8.0"
+          }
+        },
+        "data_stream": "metrics-apm.transaction.1m-default"
+      },
+      ".ds-traces-apm-default-2023.06.05-000022": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-traces-apm-default-2023.06.05-000022",
+            "default_pipeline": "traces-apm-8.8.0"
+          }
+        },
+        "data_stream": "traces-apm-default"
+      },
+      ".ds-traces-apm.rum-default-2023.03.15-000002": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-traces-apm.rum-default-2023.03.15-000002",
+            "default_pipeline": "traces-apm.rum-8.7.0"
+          }
+        },
+        "data_stream": "traces-apm.rum-default"
+      },
+      ".ds-traces-apm.rum-default-2023.04.14-000003": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-traces-apm.rum-default-2023.04.14-000003",
+            "default_pipeline": "traces-apm.rum-8.7.0"
+          }
+        },
+        "data_stream": "traces-apm.rum-default"
+      },
+      ".ds-traces-apm.rum-default-2023.05.14-000004": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-traces-apm.rum-default-2023.05.14-000004",
+            "default_pipeline": "traces-apm.rum-8.7.0"
+          }
+        },
+        "data_stream": "traces-apm.rum-default"
+      },
+      ".ds-traces-apm.rum-default-2023.06.05-000005": {
+        "settings": {
+          "index": {
+            "provided_name": ".ds-traces-apm.rum-default-2023.06.05-000005",
+            "default_pipeline": "traces-apm.rum-8.8.0"
+          }
+        },
+        "data_stream": "traces-apm.rum-default"
+      },
+      "apm-7.14.0-error-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000001>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000002>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000003>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000004>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000005>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000006>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000007>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000008>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000009>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000010>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000011>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000012>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000013": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000013>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000014": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000014>"
+          }
+        }
+      },
+      "apm-7.14.0-error-000015": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-error-000015>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000001>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000002>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000003>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000004>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000005>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000006>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000007>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000008>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000009>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000010>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000011>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000012>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000013": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000013>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000014": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000014>"
+          }
+        }
+      },
+      "apm-7.14.0-metric-000015": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-metric-000015>"
+          }
+        }
+      },
+      "apm-7.14.0-onboarding-2021.09.09": {
+        "settings": {
+          "index": {
+            "provided_name": "apm-7.14.0-onboarding-2021.09.09"
+          }
+        }
+      },
+      "apm-7.14.0-onboarding-2021.11.02": {
+        "settings": {
+          "index": {
+            "provided_name": "apm-7.14.0-onboarding-2021.11.02"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000001>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000002>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000003>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000004>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000005>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000006>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000007>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000008>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000009>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000010>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000011>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000012>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000013": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000013>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000014": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000014>"
+          }
+        }
+      },
+      "apm-7.14.0-profile-000015": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-profile-000015>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000001>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000002>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000003>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000004>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000005>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000006>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000007>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000008>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000009>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000010>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000011>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000012>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000013": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000013>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000014": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000014>"
+          }
+        }
+      },
+      "apm-7.14.0-span-000015": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-span-000015>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000001>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000002>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000003>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000004>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000005>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000006>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000007>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000008>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000009>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000010>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000011>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000012>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000013": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000013>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000014": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000014>"
+          }
+        }
+      },
+      "apm-7.14.0-transaction-000015": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.14.0-transaction-000015>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000001>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000002>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000003>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000004>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000005>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000006>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000007>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000008>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000009>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000010>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000011>"
+          }
+        }
+      },
+      "apm-7.15.0-error-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-error-000012>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000001>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000002>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000003>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000004>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000005>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000006>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000007>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000008>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000009>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000010>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000011>"
+          }
+        }
+      },
+      "apm-7.15.0-metric-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-metric-000012>"
+          }
+        }
+      },
+      "apm-7.15.0-onboarding-2021.12.08": {
+        "settings": {
+          "index": {
+            "provided_name": "apm-7.15.0-onboarding-2021.12.08"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000001>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000002>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000003>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000004>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000005>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000006>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000007>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000008>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000009>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000010>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000011>"
+          }
+        }
+      },
+      "apm-7.15.0-profile-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-profile-000012>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000001>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000002>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000003>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000004>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000005>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000006>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000007>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000008>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000009>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000010>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000011>"
+          }
+        }
+      },
+      "apm-7.15.0-span-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-span-000012>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000001": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000001>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000002": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000002>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000003": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000003>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000004": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000004>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000005": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000005>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000006": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000006>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000007": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000007>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000008": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000008>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000009": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000009>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000010": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000010>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000011": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000011>"
+          }
+        }
+      },
+      "apm-7.15.0-transaction-000012": {
+        "settings": {
+          "index": {
+            "provided_name": "<apm-7.15.0-transaction-000012>"
+          }
+        }
+      }
+    },
+    "ingestPipelines": {
+      "logs-apm.error-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.internal-8.6.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.internal-8.7.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.internal-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.service_destination.1m-8.7.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.service_destination.1m-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.service_summary.1m-8.7.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.service_summary.1m-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.service_transaction.1m-8.7.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.service_transaction.1m-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.transaction.1m-8.7.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "metrics-apm.transaction.1m-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "traces-apm-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "traces-apm.rum-8.7.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      },
+      "traces-apm.rum-8.8.0": {
+        "processors": [
+          {
+            "grok": {
+              "field": "observer.version",
+              "patterns": [
+                "%{DIGITS:observer.version_major:int}.%{DIGITS:observer.version_minor:int}.%{DIGITS:observer.version_patch:int}(?:[-+].*)?"
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "existingIndexTemplates": [
+      {
+        "name": "logs-apm.app",
+        "index_template": {
+          "index_patterns": [
+            "logs-apm.app.*-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "logs-apm.app@package",
+            "logs-apm.app@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 150,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "logs-apm.error",
+        "index_template": {
+          "index_patterns": [
+            "logs-apm.error-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "logs-apm.error@package",
+            "logs-apm.error@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.app",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.app.*-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.app@package",
+            "metrics-apm.app@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 150,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.internal",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.internal-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.internal@package",
+            "metrics-apm.internal@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "traces-apm.rum",
+        "index_template": {
+          "index_patterns": [
+            "traces-apm.rum-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "traces-apm.rum@package",
+            "traces-apm.rum@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "traces-apm.sampled",
+        "index_template": {
+          "index_patterns": [
+            "traces-apm.sampled-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "traces-apm.sampled@package",
+            "traces-apm.sampled@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "traces-apm",
+        "index_template": {
+          "index_patterns": [
+            "traces-apm-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "traces-apm@package",
+            "traces-apm@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_destination.1m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_destination.1m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_destination.1m@package",
+            "metrics-apm.service_destination.1m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_summary.1m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_summary.1m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_summary.1m@package",
+            "metrics-apm.service_summary.1m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_transaction.1m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_transaction.1m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_transaction.1m@package",
+            "metrics-apm.service_transaction.1m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.transaction.1m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.transaction.1m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.transaction.1m@package",
+            "metrics-apm.transaction.1m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": false,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_destination.10m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_destination.10m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_destination.10m@package",
+            "metrics-apm.service_destination.10m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_summary.10m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_summary.10m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_summary.10m@package",
+            "metrics-apm.service_summary.10m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_transaction.10m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_transaction.10m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_transaction.10m@package",
+            "metrics-apm.service_transaction.10m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.transaction.10m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.transaction.10m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.transaction.10m@package",
+            "metrics-apm.transaction.10m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_destination.60m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_destination.60m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_destination.60m@package",
+            "metrics-apm.service_destination.60m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_summary.60m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_summary.60m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_summary.60m@package",
+            "metrics-apm.service_summary.60m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.service_transaction.60m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.service_transaction.60m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.service_transaction.60m@package",
+            "metrics-apm.service_transaction.60m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      },
+      {
+        "name": "metrics-apm.transaction.60m",
+        "index_template": {
+          "index_patterns": [
+            "metrics-apm.transaction.60m-*"
+          ],
+          "template": {
+            "settings": {},
+            "mappings": {
+              "_meta": {
+                "package": {
+                  "name": "apm"
+                },
+                "managed_by": "fleet",
+                "managed": true
+              }
+            }
+          },
+          "composed_of": [
+            "metrics-apm.transaction.60m@package",
+            "metrics-apm.transaction.60m@custom",
+            ".fleet_globals-1",
+            ".fleet_agent_id_verification-1"
+          ],
+          "priority": 200,
+          "_meta": {
+            "package": {
+              "name": "apm"
+            },
+            "managed_by": "fleet",
+            "managed": true
+          },
+          "data_stream": {
+            "hidden": true,
+            "allow_custom_routing": false
+          }
+        }
+      }
+    ]
+  },
+  "apmIndexTemplates": [
+    {
+      "name": "logs-apm.app",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "logs-apm.error",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.app",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.internal",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "traces-apm.rum",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "traces-apm.sampled",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "traces-apm",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_destination.1m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_summary.1m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_transaction.1m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.transaction.1m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_destination.10m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_summary.10m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_transaction.10m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.transaction.10m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_destination.60m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_summary.60m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.service_transaction.60m",
+      "exists": true,
+      "isNonStandard": false
+    },
+    {
+      "name": "metrics-apm.transaction.60m",
+      "exists": true,
+      "isNonStandard": false
+    }
+  ],
+  "invalidIndices": [
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000013"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000014"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-error-000015"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000013"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000014"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-metric-000015"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-onboarding-2021.09.09"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-onboarding-2021.11.02"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000013"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000014"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-profile-000015"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000013"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000014"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-span-000015"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000013"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000014"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.14.0-transaction-000015"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-error-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-metric-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-onboarding-2021.12.08"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-profile-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-span-000012"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000001"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000002"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000003"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000004"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000005"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000006"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000007"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000008"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000009"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000010"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000011"
+    },
+    {
+      "isValid": false,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": false
+      },
+      "index": "apm-7.15.0-transaction-000012"
+    }
+  ],
+  "validIndices": [
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "logs-apm.error-8.8.0"
+      },
+      "index": ".ds-logs-apm.error-default-2023.06.05-000022",
+      "dataStream": "logs-apm.error-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.internal-8.6.0"
+      },
+      "index": ".ds-metrics-apm.internal-default-2023.03.13-000011",
+      "dataStream": "metrics-apm.internal-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.internal-8.6.0"
+      },
+      "index": ".ds-metrics-apm.internal-default-2023.04.12-000014",
+      "dataStream": "metrics-apm.internal-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.internal-8.7.0"
+      },
+      "index": ".ds-metrics-apm.internal-default-2023.04.16-000015",
+      "dataStream": "metrics-apm.internal-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.internal-8.7.0"
+      },
+      "index": ".ds-metrics-apm.internal-default-2023.05.16-000017",
+      "dataStream": "metrics-apm.internal-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.internal-8.8.0"
+      },
+      "index": ".ds-metrics-apm.internal-default-2023.06.05-000018",
+      "dataStream": "metrics-apm.internal-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_destination.1m-8.7.0"
+      },
+      "index": ".ds-metrics-apm.service_destination.1m-default-2023.04.17-000001",
+      "dataStream": "metrics-apm.service_destination.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_destination.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_destination.1m-default-2023.06.05-000002",
+      "dataStream": "metrics-apm.service_destination.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_destination.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_destination.1m-default-2023.06.12-000003",
+      "dataStream": "metrics-apm.service_destination.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_destination.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_destination.1m-default-2023.06.19-000004",
+      "dataStream": "metrics-apm.service_destination.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_summary.1m-8.7.0"
+      },
+      "index": ".ds-metrics-apm.service_summary.1m-default-2023.04.17-000001",
+      "dataStream": "metrics-apm.service_summary.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_summary.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_summary.1m-default-2023.06.05-000002",
+      "dataStream": "metrics-apm.service_summary.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_summary.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_summary.1m-default-2023.06.12-000003",
+      "dataStream": "metrics-apm.service_summary.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_summary.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_summary.1m-default-2023.06.19-000004",
+      "dataStream": "metrics-apm.service_summary.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_transaction.1m-8.7.0"
+      },
+      "index": ".ds-metrics-apm.service_transaction.1m-default-2023.04.17-000001",
+      "dataStream": "metrics-apm.service_transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_transaction.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_transaction.1m-default-2023.06.05-000002",
+      "dataStream": "metrics-apm.service_transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_transaction.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_transaction.1m-default-2023.06.12-000003",
+      "dataStream": "metrics-apm.service_transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.service_transaction.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.service_transaction.1m-default-2023.06.19-000004",
+      "dataStream": "metrics-apm.service_transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.transaction.1m-8.7.0"
+      },
+      "index": ".ds-metrics-apm.transaction.1m-default-2023.04.17-000001",
+      "dataStream": "metrics-apm.transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.transaction.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.transaction.1m-default-2023.06.05-000002",
+      "dataStream": "metrics-apm.transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.transaction.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.transaction.1m-default-2023.06.12-000003",
+      "dataStream": "metrics-apm.transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "metrics-apm.transaction.1m-8.8.0"
+      },
+      "index": ".ds-metrics-apm.transaction.1m-default-2023.06.19-000004",
+      "dataStream": "metrics-apm.transaction.1m-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "traces-apm-8.8.0"
+      },
+      "index": ".ds-traces-apm-default-2023.06.05-000022",
+      "dataStream": "traces-apm-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "traces-apm.rum-8.7.0"
+      },
+      "index": ".ds-traces-apm.rum-default-2023.03.15-000002",
+      "dataStream": "traces-apm.rum-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "traces-apm.rum-8.7.0"
+      },
+      "index": ".ds-traces-apm.rum-default-2023.04.14-000003",
+      "dataStream": "traces-apm.rum-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "traces-apm.rum-8.7.0"
+      },
+      "index": ".ds-traces-apm.rum-default-2023.05.14-000004",
+      "dataStream": "traces-apm.rum-default"
+    },
+    {
+      "isValid": true,
+      "fieldMappings": {
+        "isValid": true
+      },
+      "ingestPipeline": {
+        "isValid": true,
+        "id": "traces-apm.rum-8.8.0"
+      },
+      "index": ".ds-traces-apm.rum-default-2023.06.05-000005",
+      "dataStream": "traces-apm.rum-default"
+    }
+  ],
+  "indexTemplatesByIndexPattern": [
+    {
+      "indexPattern": "logs-apm*",
+      "indexTemplates": [
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "logs-apm.error-*"
+          ],
+          "templateName": "logs-apm.error"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 150,
+          "templateIndexPatterns": [
+            "logs-apm.app.*-*"
+          ],
+          "templateName": "logs-apm.app"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 100,
+          "templateIndexPatterns": [
+            "logs-*-*"
+          ],
+          "templateName": "logs"
+        }
+      ]
+    },
+    {
+      "indexPattern": "apm-*",
+      "indexTemplates": [
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.15.0-error*"
+          ],
+          "templateName": "apm-7.15.0-error"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.14.0-error*"
+          ],
+          "templateName": "apm-7.14.0-error"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.14.0-metric*"
+          ],
+          "templateName": "apm-7.14.0-metric"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.14.0-transaction*"
+          ],
+          "templateName": "apm-7.14.0-transaction"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.15.0-profile*"
+          ],
+          "templateName": "apm-7.15.0-profile"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.14.0-profile*"
+          ],
+          "templateName": "apm-7.14.0-profile"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.15.0-transaction*"
+          ],
+          "templateName": "apm-7.15.0-transaction"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.15.0-metric*"
+          ],
+          "templateName": "apm-7.15.0-metric"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.15.0-span*"
+          ],
+          "templateName": "apm-7.15.0-span"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.15.0*"
+          ],
+          "templateName": "apm-7.15.0"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.14.0-span*"
+          ],
+          "templateName": "apm-7.14.0-span"
+        },
+        {
+          "isNonStandard": true,
+          "templateIndexPatterns": [
+            "apm-7.14.0*"
+          ],
+          "templateName": "apm-7.14.0"
+        }
+      ]
+    },
+    {
+      "indexPattern": "metrics-apm*",
+      "indexTemplates": [
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_transaction.60m-*"
+          ],
+          "templateName": "metrics-apm.service_transaction.60m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_destination.10m-*"
+          ],
+          "templateName": "metrics-apm.service_destination.10m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.transaction.1m-*"
+          ],
+          "templateName": "metrics-apm.transaction.1m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_destination.1m-*"
+          ],
+          "templateName": "metrics-apm.service_destination.1m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_transaction.10m-*"
+          ],
+          "templateName": "metrics-apm.service_transaction.10m"
+        },
+        {
+          "isNonStandard": true,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.profiling-*"
+          ],
+          "templateName": "metrics-apm.profiling"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_transaction.1m-*"
+          ],
+          "templateName": "metrics-apm.service_transaction.1m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.transaction.60m-*"
+          ],
+          "templateName": "metrics-apm.transaction.60m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_destination.60m-*"
+          ],
+          "templateName": "metrics-apm.service_destination.60m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_summary.1m-*"
+          ],
+          "templateName": "metrics-apm.service_summary.1m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.transaction.10m-*"
+          ],
+          "templateName": "metrics-apm.transaction.10m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.internal-*"
+          ],
+          "templateName": "metrics-apm.internal"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_summary.10m-*"
+          ],
+          "templateName": "metrics-apm.service_summary.10m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "metrics-apm.service_summary.60m-*"
+          ],
+          "templateName": "metrics-apm.service_summary.60m"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 150,
+          "templateIndexPatterns": [
+            "metrics-apm.app.*-*"
+          ],
+          "templateName": "metrics-apm.app"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 100,
+          "templateIndexPatterns": [
+            "metrics-*-*"
+          ],
+          "templateName": "metrics"
+        }
+      ]
+    },
+    {
+      "indexPattern": "traces-apm*",
+      "indexTemplates": [
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "traces-apm-*"
+          ],
+          "templateName": "traces-apm"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "traces-apm.rum-*"
+          ],
+          "templateName": "traces-apm.rum"
+        },
+        {
+          "isNonStandard": false,
+          "priority": 200,
+          "templateIndexPatterns": [
+            "traces-apm.sampled-*"
+          ],
+          "templateName": "traces-apm.sampled"
+        }
+      ]
+    }
+  ],
+  "dataStreams": [
+    {
+      "name": "logs-apm.error-default",
+      "template": "logs-apm.error"
+    },
+    {
+      "name": "metrics-apm.internal-default",
+      "template": "metrics-apm.internal"
+    },
+    {
+      "name": "metrics-apm.service_destination.1m-default",
+      "template": "metrics-apm.service_destination.1m"
+    },
+    {
+      "name": "metrics-apm.service_summary.1m-default",
+      "template": "metrics-apm.service_summary.1m"
+    },
+    {
+      "name": "metrics-apm.service_transaction.1m-default",
+      "template": "metrics-apm.service_transaction.1m"
+    },
+    {
+      "name": "metrics-apm.transaction.1m-default",
+      "template": "metrics-apm.transaction.1m"
+    },
+    {
+      "name": "traces-apm-default",
+      "template": "traces-apm"
+    },
+    {
+      "name": "traces-apm.rum-default",
+      "template": "traces-apm.rum"
+    }
+  ],
+  "nonDataStreamIndices": [
+    "apm-7.14.0-error-000001",
+    "apm-7.14.0-error-000002",
+    "apm-7.14.0-error-000003",
+    "apm-7.14.0-error-000004",
+    "apm-7.14.0-error-000005",
+    "apm-7.14.0-error-000006",
+    "apm-7.14.0-error-000007",
+    "apm-7.14.0-error-000008",
+    "apm-7.14.0-error-000009",
+    "apm-7.14.0-error-000010",
+    "apm-7.14.0-error-000011",
+    "apm-7.14.0-error-000012",
+    "apm-7.14.0-error-000013",
+    "apm-7.14.0-error-000014",
+    "apm-7.14.0-error-000015",
+    "apm-7.14.0-metric-000001",
+    "apm-7.14.0-metric-000002",
+    "apm-7.14.0-metric-000003",
+    "apm-7.14.0-metric-000004",
+    "apm-7.14.0-metric-000005",
+    "apm-7.14.0-metric-000006",
+    "apm-7.14.0-metric-000007",
+    "apm-7.14.0-metric-000008",
+    "apm-7.14.0-metric-000009",
+    "apm-7.14.0-metric-000010",
+    "apm-7.14.0-metric-000011",
+    "apm-7.14.0-metric-000012",
+    "apm-7.14.0-metric-000013",
+    "apm-7.14.0-metric-000014",
+    "apm-7.14.0-metric-000015",
+    "apm-7.14.0-onboarding-2021.09.09",
+    "apm-7.14.0-onboarding-2021.11.02",
+    "apm-7.14.0-profile-000001",
+    "apm-7.14.0-profile-000002",
+    "apm-7.14.0-profile-000003",
+    "apm-7.14.0-profile-000004",
+    "apm-7.14.0-profile-000005",
+    "apm-7.14.0-profile-000006",
+    "apm-7.14.0-profile-000007",
+    "apm-7.14.0-profile-000008",
+    "apm-7.14.0-profile-000009",
+    "apm-7.14.0-profile-000010",
+    "apm-7.14.0-profile-000011",
+    "apm-7.14.0-profile-000012",
+    "apm-7.14.0-profile-000013",
+    "apm-7.14.0-profile-000014",
+    "apm-7.14.0-profile-000015",
+    "apm-7.14.0-span-000001",
+    "apm-7.14.0-span-000002",
+    "apm-7.14.0-span-000003",
+    "apm-7.14.0-span-000004",
+    "apm-7.14.0-span-000005",
+    "apm-7.14.0-span-000006",
+    "apm-7.14.0-span-000007",
+    "apm-7.14.0-span-000008",
+    "apm-7.14.0-span-000009",
+    "apm-7.14.0-span-000010",
+    "apm-7.14.0-span-000011",
+    "apm-7.14.0-span-000012",
+    "apm-7.14.0-span-000013",
+    "apm-7.14.0-span-000014",
+    "apm-7.14.0-span-000015",
+    "apm-7.14.0-transaction-000001",
+    "apm-7.14.0-transaction-000002",
+    "apm-7.14.0-transaction-000003",
+    "apm-7.14.0-transaction-000004",
+    "apm-7.14.0-transaction-000005",
+    "apm-7.14.0-transaction-000006",
+    "apm-7.14.0-transaction-000007",
+    "apm-7.14.0-transaction-000008",
+    "apm-7.14.0-transaction-000009",
+    "apm-7.14.0-transaction-000010",
+    "apm-7.14.0-transaction-000011",
+    "apm-7.14.0-transaction-000012",
+    "apm-7.14.0-transaction-000013",
+    "apm-7.14.0-transaction-000014",
+    "apm-7.14.0-transaction-000015",
+    "apm-7.15.0-error-000001",
+    "apm-7.15.0-error-000002",
+    "apm-7.15.0-error-000003",
+    "apm-7.15.0-error-000004",
+    "apm-7.15.0-error-000005",
+    "apm-7.15.0-error-000006",
+    "apm-7.15.0-error-000007",
+    "apm-7.15.0-error-000008",
+    "apm-7.15.0-error-000009",
+    "apm-7.15.0-error-000010",
+    "apm-7.15.0-error-000011",
+    "apm-7.15.0-error-000012",
+    "apm-7.15.0-metric-000001",
+    "apm-7.15.0-metric-000002",
+    "apm-7.15.0-metric-000003",
+    "apm-7.15.0-metric-000004",
+    "apm-7.15.0-metric-000005",
+    "apm-7.15.0-metric-000006",
+    "apm-7.15.0-metric-000007",
+    "apm-7.15.0-metric-000008",
+    "apm-7.15.0-metric-000009",
+    "apm-7.15.0-metric-000010",
+    "apm-7.15.0-metric-000011",
+    "apm-7.15.0-metric-000012",
+    "apm-7.15.0-onboarding-2021.12.08",
+    "apm-7.15.0-profile-000001",
+    "apm-7.15.0-profile-000002",
+    "apm-7.15.0-profile-000003",
+    "apm-7.15.0-profile-000004",
+    "apm-7.15.0-profile-000005",
+    "apm-7.15.0-profile-000006",
+    "apm-7.15.0-profile-000007",
+    "apm-7.15.0-profile-000008",
+    "apm-7.15.0-profile-000009",
+    "apm-7.15.0-profile-000010",
+    "apm-7.15.0-profile-000011",
+    "apm-7.15.0-profile-000012",
+    "apm-7.15.0-span-000001",
+    "apm-7.15.0-span-000002",
+    "apm-7.15.0-span-000003",
+    "apm-7.15.0-span-000004",
+    "apm-7.15.0-span-000005",
+    "apm-7.15.0-span-000006",
+    "apm-7.15.0-span-000007",
+    "apm-7.15.0-span-000008",
+    "apm-7.15.0-span-000009",
+    "apm-7.15.0-span-000010",
+    "apm-7.15.0-span-000011",
+    "apm-7.15.0-span-000012",
+    "apm-7.15.0-transaction-000001",
+    "apm-7.15.0-transaction-000002",
+    "apm-7.15.0-transaction-000003",
+    "apm-7.15.0-transaction-000004",
+    "apm-7.15.0-transaction-000005",
+    "apm-7.15.0-transaction-000006",
+    "apm-7.15.0-transaction-000007",
+    "apm-7.15.0-transaction-000008",
+    "apm-7.15.0-transaction-000009",
+    "apm-7.15.0-transaction-000010",
+    "apm-7.15.0-transaction-000011",
+    "apm-7.15.0-transaction-000012"
+  ],
+  "apmEvents": [
+    {
+      "name": "Metric: Service destination",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"service_destination\"",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 4036,
+      "intervals": {
+        "1m": 18899
+      }
+    },
+    {
+      "name": "Metric: Service transaction (with summary field)",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"service_transaction\" AND transaction.duration.summary :* ",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 1122,
+      "intervals": {
+        "1m": 33017
+      }
+    },
+    {
+      "name": "Metric: Transaction (with summary field)",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"transaction\" AND transaction.duration.summary :* ",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 2873,
+      "intervals": {
+        "1m": 33017
+      }
+    },
+    {
+      "name": "Metric: Service transaction (without summary field)",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"service_transaction\" AND not transaction.duration.summary :* ",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 0,
+      "intervals": {}
+    },
+    {
+      "name": "Metric: Transaction (without summary field)",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"transaction\" AND not transaction.duration.summary :* ",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 0,
+      "intervals": {}
+    },
+    {
+      "name": "Metric: Span breakdown",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"span_breakdown\"",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 6603,
+      "intervals": {}
+    },
+    {
+      "name": "Metric: Service summary",
+      "kuery": "processor.event: \"metric\" AND metricset.name: \"service_summary\"",
+      "index": [
+        "metrics-apm*",
+        "apm-*"
+      ],
+      "docCount": 1409,
+      "intervals": {
+        "1m": 1409
+      }
+    },
+    {
+      "name": "Event: Transaction",
+      "kuery": "processor.event: \"transaction\"",
+      "index": [
+        "traces-apm*",
+        "apm-*"
+      ],
+      "docCount": 32941
+    },
+    {
+      "name": "Event: Span",
+      "kuery": "processor.event: \"span\"",
+      "index": [
+        "traces-apm*",
+        "apm-*"
+      ],
+      "docCount": 39666
+    },
+    {
+      "name": "Event: Error",
+      "kuery": "processor.event: \"error\"",
+      "index": [
+        "logs-apm*",
+        "apm-*"
+      ],
+      "docCount": 259
+    }
+  ],
+  "params": {
+    "start": 1687212000000,
+    "end": 1687298400000
+  },
+  "fleetPackageInfo": {
+    "version": "8.8.0",
+    "isInstalled": "installed"
+  },
+  "kibanaVersion": "8.8.0"
+}

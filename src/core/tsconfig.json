@@ -151,6 +151,10 @@
     "@kbn/core-elasticsearch-client-server-internal",
     "@kbn/tooling-log",
     "@kbn/stdio-dev-helpers",
+    "@kbn/safer-lodash-set",
+    "@kbn/core-test-helpers-model-versions",
+    "@kbn/core-plugins-contracts-browser",
+    "@kbn/core-plugins-contracts-server",
   ],
   "exclude": [
     "target/**/*",

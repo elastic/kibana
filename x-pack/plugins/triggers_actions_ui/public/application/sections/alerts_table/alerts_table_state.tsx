@@ -12,7 +12,6 @@ import {
   EuiProgress,
   EuiDataGridSorting,
   EuiEmptyPrompt,
-  EuiFlyoutSize,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
@@ -45,7 +44,6 @@ import {
   TableUpdateHandlerArgs,
 } from '../../../types';
 import { ALERTS_TABLE_CONF_ERROR_MESSAGE, ALERTS_TABLE_CONF_ERROR_TITLE } from './translations';
-import { TypeRegistry } from '../../type_registry';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import { useColumns } from './hooks/use_columns';
 import { InspectButtonContainer } from './toolbar/components/inspect';
@@ -53,6 +51,7 @@ import { alertsTableQueryClient } from './query_client';
 import { useBulkGetCases } from './hooks/use_bulk_get_cases';
 import { useBulkGetMaintenanceWindows } from './hooks/use_bulk_get_maintenance_windows';
 import { CasesService } from './types';
+import { AlertTableConfigRegistry } from '../../alert_table_config_registry';
 
 const DefaultPagination = {
   pageSize: 10,
@@ -60,14 +59,12 @@ const DefaultPagination = {
 };
 
 export type AlertsTableStateProps = {
-  alertsTableConfigurationRegistry: TypeRegistry<AlertsTableConfigurationRegistry>;
+  alertsTableConfigurationRegistry: AlertTableConfigRegistry;
   configurationId: string;
   id: string;
   featureIds: ValidFeatureId[];
-  flyoutSize?: EuiFlyoutSize;
   query: Pick<QueryDslQueryContainer, 'bool' | 'ids'>;
   pageSize?: number;
-  showExpandToDetails: boolean;
   browserFields?: BrowserFields;
   onUpdate?: (args: TableUpdateHandlerArgs) => void;
   runtimeMappings?: MappingRuntimeFields;
@@ -77,6 +74,10 @@ export type AlertsTableStateProps = {
    * Allows to consumers of the table to decide to highlight a row based on the current alert.
    */
   shouldHighlightRow?: (alert: Alert) => boolean;
+  /**
+   * Enable when rows may have variable heights (disables virtualization)
+   */
+  dynamicRowHeight?: boolean;
 } & Partial<EuiDataGridProps>;
 
 export interface AlertsTableStorage {
@@ -148,10 +149,8 @@ const AlertsTableStateWithQueryProvider = ({
   configurationId,
   id,
   featureIds,
-  flyoutSize,
   query,
   pageSize,
-  showExpandToDetails,
   leadingControlColumns,
   rowHeightsOptions,
   renderCellValue,
@@ -163,6 +162,7 @@ const AlertsTableStateWithQueryProvider = ({
   showAlertStatusWithFlapping,
   toolbarVisibility,
   shouldHighlightRow,
+  dynamicRowHeight,
 }: AlertsTableStateProps) => {
   const { cases: casesService } = useKibana<{ cases?: CasesService }>().services;
 
@@ -178,7 +178,7 @@ const AlertsTableStateWithQueryProvider = ({
     : EmptyConfiguration;
 
   const storage = useRef(new Storage(window.localStorage));
-  const localAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
+  const localStorageAlertsTableConfig = storage.current.get(id) as Partial<AlertsTableStorage>;
   const persistentControls = alertsTableConfiguration?.usePersistentControls?.();
   const showInspectButton = alertsTableConfiguration?.showInspectButton ?? false;
 
@@ -186,25 +186,25 @@ const AlertsTableStateWithQueryProvider = ({
     propColumns && !isEmpty(propColumns) ? propColumns : alertsTableConfiguration?.columns ?? [];
 
   const columnsLocal =
-    localAlertsTableConfig &&
-    localAlertsTableConfig.columns &&
-    !isEmpty(localAlertsTableConfig?.columns)
-      ? localAlertsTableConfig?.columns ?? []
+    localStorageAlertsTableConfig &&
+    localStorageAlertsTableConfig.columns &&
+    !isEmpty(localStorageAlertsTableConfig?.columns)
+      ? localStorageAlertsTableConfig?.columns
       : columnConfigByClient;
 
   const getStorageConfig = () => ({
     columns: columnsLocal,
     sort:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.sort &&
-      !isEmpty(localAlertsTableConfig?.sort)
-        ? localAlertsTableConfig?.sort ?? []
+      localStorageAlertsTableConfig &&
+      localStorageAlertsTableConfig.sort &&
+      !isEmpty(localStorageAlertsTableConfig?.sort)
+        ? localStorageAlertsTableConfig?.sort
         : alertsTableConfiguration?.sort ?? [],
     visibleColumns:
-      localAlertsTableConfig &&
-      localAlertsTableConfig.visibleColumns &&
-      !isEmpty(localAlertsTableConfig?.visibleColumns)
-        ? localAlertsTableConfig?.visibleColumns ?? []
+      localStorageAlertsTableConfig &&
+      localStorageAlertsTableConfig.visibleColumns &&
+      !isEmpty(localStorageAlertsTableConfig?.visibleColumns)
+        ? localStorageAlertsTableConfig?.visibleColumns
         : columnsLocal.map((c) => c.id),
   });
   const storageAlertsTable = useRef<AlertsTableStorage>(getStorageConfig());
@@ -262,6 +262,14 @@ const AlertsTableStateWithQueryProvider = ({
     sort,
     skip: false,
   });
+
+  useEffect(() => {
+    alertsTableConfigurationRegistry.update(configurationId, {
+      ...alertsTableConfiguration,
+      actions: { toggleColumn: onToggleColumn },
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [onToggleColumn]);
 
   useEffect(() => {
     if (onUpdate) {
@@ -378,12 +386,10 @@ const AlertsTableStateWithQueryProvider = ({
       bulkActions: [],
       deletedEventIds: [],
       disabledCellActions: [],
-      flyoutSize,
       pageSize: pagination.pageSize,
       pageSizeOptions: [10, 20, 50, 100],
       id,
       leadingControlColumns: leadingControlColumns ?? [],
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       trailingControlColumns: [],
       useFetchAlertsData,
@@ -403,17 +409,17 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
+      featureIds,
     }),
     [
       alertsTableConfiguration,
       memoizedCases,
       memoizedMaintenanceWindows,
       columns,
-      flyoutSize,
       pagination.pageSize,
       id,
       leadingControlColumns,
-      showExpandToDetails,
       showAlertStatusWithFlapping,
       useFetchAlertsData,
       visibleColumns,
@@ -431,6 +437,8 @@ const AlertsTableStateWithQueryProvider = ({
       showInspectButton,
       toolbarVisibility,
       shouldHighlightRow,
+      dynamicRowHeight,
+      featureIds,
     ]
   );
 

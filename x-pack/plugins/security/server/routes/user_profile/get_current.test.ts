@@ -10,6 +10,7 @@ import type { RequestHandler, RouteConfig } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 
+import { defineGetCurrentUserProfileRoute } from './get_current';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { userProfileMock } from '../../../common/model/user_profile.mock';
 import { authenticationServiceMock } from '../../authentication/authentication_service.mock';
@@ -17,7 +18,6 @@ import type { SecurityRequestHandlerContext, SecurityRouter } from '../../types'
 import type { UserProfileServiceStartInternal } from '../../user_profile';
 import { userProfileServiceMock } from '../../user_profile/user_profile_service.mock';
 import { routeDefinitionParamsMock } from '../index.mock';
-import { defineGetCurrentUserProfileRoute } from './get_current';
 
 function getMockContext() {
   return {

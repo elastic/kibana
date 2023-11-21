@@ -21,9 +21,17 @@ import { isIllegalArgumentException } from '../../../../utils/identify_exception
  */
 export const updateMlInferenceMappings = async (
   indexName: string,
+  modelId: string,
   fieldMappings: FieldMapping[],
   esClient: ElasticsearchClient
 ) => {
+  // Check if the model is of text_expansion type, if not, skip the mapping update
+  if (!(await isTextExpansionModel(modelId, esClient))) {
+    return {
+      acknowledged: false,
+    };
+  }
+
   const sourceFields = fieldMappings.map(({ sourceField }) => sourceField);
 
   const nonDefaultTargetFields = fieldMappings
@@ -69,7 +77,7 @@ const generateTextExpansionMappingProperties = (sourceFields: string[], targetFi
               type: 'keyword',
             },
             predicted_value: {
-              type: 'rank_features',
+              type: 'sparse_vector',
             },
           },
         },
@@ -89,11 +97,17 @@ const formDefaultElserMappingProps = (sourceFields: string[]) => {
             type: 'keyword',
           },
           predicted_value: {
-            type: 'rank_features',
+            type: 'sparse_vector',
           },
         },
       },
     }),
     {}
   );
+};
+
+const isTextExpansionModel = async (modelId: string, esClient: ElasticsearchClient) => {
+  const models = await esClient.ml.getTrainedModels({ model_id: modelId });
+
+  return models.trained_model_configs[0]?.inference_config?.text_expansion !== undefined;
 };

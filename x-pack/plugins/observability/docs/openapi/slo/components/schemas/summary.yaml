@@ -1,15 +1,13 @@
 title: Summary
 type: object
 description: The SLO computed data
+required:
+  - status
+  - sliValue
+  - errorBudget
 properties:
   status:
-    type: string
-    enum: 
-      - NO_DATA
-      - HEALTHY
-      - DEGRADING
-      - VIOLATED
-    example: "HEALTHY"
+    $ref: './summary_status.yaml'
   sliValue:
     type: number
     example: 0.9836

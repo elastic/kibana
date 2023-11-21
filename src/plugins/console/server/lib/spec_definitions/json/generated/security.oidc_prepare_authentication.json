@@ -6,6 +6,10 @@
     "patterns": [
       "_security/oidc/prepare"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-oidc-prepare-authentication.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-oidc-prepare-authentication.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

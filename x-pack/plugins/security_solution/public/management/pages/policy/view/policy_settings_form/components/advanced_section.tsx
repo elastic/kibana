@@ -197,18 +197,25 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                     <EuiFormRow
                       key={key}
                       fullWidth
+                      data-test-subj={getTestId(`${key}-container`)}
                       label={
                         <EuiFlexGroup responsive={false}>
-                          <EuiFlexItem grow={true}>{key}</EuiFlexItem>
+                          <EuiFlexItem grow={true} data-test-subj={getTestId(`${key}-label`)}>
+                            {key}
+                          </EuiFlexItem>
                           {documentation && (
                             <EuiFlexItem grow={false}>
-                              <EuiIconTip content={documentation} position="right" />
+                              <EuiIconTip
+                                content={documentation}
+                                position="right"
+                                anchorProps={{ 'data-test-subj': getTestId(`${key}-tooltipIcon`) }}
+                              />
                             </EuiFlexItem>
                           )}
                         </EuiFlexGroup>
                       }
                       labelAppend={
-                        <EuiText size="xs">
+                        <EuiText size="xs" data-test-subj={getTestId(`${key}-versionInfo`)}>
                           {lastVersion ? `${firstVersion}-${lastVersion}` : `${firstVersion}+`}
                         </EuiText>
                       }
@@ -220,10 +227,11 @@ export const AdvancedSection = memo<AdvancedSectionProps>(
                           name={key}
                           value={value as string}
                           onChange={handleAdvancedSettingUpdate}
-                          disabled={!isEditMode}
                         />
                       ) : (
-                        <EuiText size="xs">{value || getEmptyValue()}</EuiText>
+                        <EuiText size="xs" data-test-subj={getTestId(`${key}-viewValue`)}>
+                          {value || getEmptyValue()}
+                        </EuiText>
                       )}
                     </EuiFormRow>
                   );

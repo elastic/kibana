@@ -15,7 +15,7 @@ import {
   MetricsExplorerChartType,
   MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
-  MetricsExplorerTimestampsRT,
+  MetricsExplorerTimestamp,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {
@@ -56,7 +56,7 @@ export const timeRange: MetricsExplorerTimeOptions = {
   interval: '>=10s',
 };
 
-export const timestamps: MetricsExplorerTimestampsRT = {
+export const timestamps: MetricsExplorerTimestamp = {
   fromTimestamp: 1678376367166,
   toTimestamp: 1678379973620,
   interval: '>=10s',

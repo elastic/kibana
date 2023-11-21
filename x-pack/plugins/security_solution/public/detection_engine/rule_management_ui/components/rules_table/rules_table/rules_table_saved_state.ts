@@ -5,41 +5,45 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
-import { enumeration } from '@kbn/securitysolution-io-ts-types';
-import { SortingOptions, PaginationOptions } from '../../../../rule_management/logic';
-import { TRuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
+import * as z from 'zod';
+import { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
+import { PaginationOptions, SortingOptions } from '../../../../rule_management/logic';
 
 export enum RuleSource {
   Prebuilt = 'prebuilt',
   Custom = 'custom',
 }
 
-export type RulesTableSavedFilter = t.TypeOf<typeof RulesTableSavedFilter>;
-export const RulesTableSavedFilter = t.partial({
-  searchTerm: t.string,
-  source: enumeration('RuleSource', RuleSource),
-  tags: t.array(t.string),
-  enabled: t.boolean,
-  ruleExecutionStatus: TRuleExecutionStatus,
-});
+export const RulesTableSavedFilter = z
+  .object({
+    searchTerm: z.string(),
+    source: z.nativeEnum(RuleSource),
+    tags: z.array(z.string()),
+    enabled: z.boolean(),
+    ruleExecutionStatus: RuleExecutionStatus,
+  })
+  .partial();
 
-export type RulesTableSavedSorting = t.TypeOf<typeof RulesTableSavedSorting>;
-export const RulesTableSavedSorting = t.partial({
-  field: SortingOptions.props.field,
-  order: SortingOptions.props.order,
-});
+export type RulesTableSavedFilter = z.infer<typeof RulesTableSavedFilter>;
 
-export type RulesTableStorageSavedPagination = t.TypeOf<typeof RulesTableStorageSavedPagination>;
-export const RulesTableStorageSavedPagination = t.partial({
-  perPage: PaginationOptions.props.perPage,
-});
+export const RulesTableSavedSorting = SortingOptions.pick({
+  field: true,
+  order: true,
+}).partial();
 
-export type RulesTableUrlSavedPagination = t.TypeOf<typeof RulesTableUrlSavedPagination>;
-export const RulesTableUrlSavedPagination = t.partial({
-  page: PaginationOptions.props.page,
-  perPage: PaginationOptions.props.perPage,
-});
+export type RulesTableSavedSorting = z.infer<typeof RulesTableSavedSorting>;
+
+export const RulesTableStorageSavedPagination = PaginationOptions.pick({
+  perPage: true,
+}).partial();
+
+export type RulesTableStorageSavedPagination = z.infer<typeof RulesTableStorageSavedPagination>;
+
+export type RulesTableUrlSavedPagination = z.infer<typeof RulesTableUrlSavedPagination>;
+export const RulesTableUrlSavedPagination = PaginationOptions.pick({
+  page: true,
+  perPage: true,
+}).partial();
 
 export type RulesTableStorageSavedState = RulesTableSavedFilter &
   RulesTableSavedSorting &

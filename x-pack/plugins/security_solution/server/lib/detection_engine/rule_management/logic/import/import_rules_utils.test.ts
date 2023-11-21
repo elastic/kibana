@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getImportRulesSchemaMock } from '../../../../../../common/detection_engine/rule_management/mocks';
+import { getImportRulesSchemaMock } from '../../../../../../common/api/detection_engine/rule_management/mocks';
 import { getQueryRuleParams } from '../../../rule_schema/mocks';
 
 import { requestContextMock } from '../../../routes/__mocks__';
@@ -44,10 +44,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -60,10 +57,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -91,10 +85,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -118,10 +109,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -150,10 +138,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -177,10 +162,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -212,10 +194,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: false,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 
@@ -246,10 +225,7 @@ describe('importRules', () => {
       rulesResponseAcc: [],
       mlAuthz,
       overwriteRules: true,
-      savedObjectsClient: context.core.savedObjects.client,
       rulesClient: context.alerting.getRulesClient(),
-      exceptionsClient: context.lists?.getExceptionListClient(),
-      spaceId: 'default',
       existingLists: {},
     });
 

@@ -140,6 +140,14 @@
             "section": "def-common.IBasePath",
             "text": "IBasePath"
           },
+          "; staticAssets: ",
+          {
+            "pluginId": "@kbn/core-http-browser",
+            "scope": "common",
+            "docId": "kibKbnCoreHttpBrowserPluginApi",
+            "section": "def-common.IStaticAssets",
+            "text": "IStaticAssets"
+          },
           "; anonymousPaths: ",
           {
             "pluginId": "@kbn/core-http-browser",
@@ -164,7 +172,7 @@
             "section": "def-common.HttpInterceptor",
             "text": "HttpInterceptor"
           },
-          "]>; fetch: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; fetch: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -172,7 +180,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; delete: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; delete: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -180,7 +188,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; get: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; get: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -188,7 +196,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; head: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; head: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -196,7 +204,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; options: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; options: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -204,7 +212,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; patch: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; patch: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -212,7 +220,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; post: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; post: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -220,7 +228,7 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; put: jest.MockInstance<Promise<unknown>, [options: ",
+          "], unknown>; put: jest.MockInstance<Promise<unknown>, [options: ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -228,11 +236,11 @@
             "section": "def-common.HttpFetchOptionsWithPath",
             "text": "HttpFetchOptionsWithPath"
           },
-          "]>; addLoadingCountSource: jest.MockInstance<void, [countSource$: ",
+          "], unknown>; addLoadingCountSource: jest.MockInstance<void, [countSource$: ",
           "Observable",
-          "<number>]>; getLoadingCount$: jest.MockInstance<",
+          "<number>], unknown>; getLoadingCount$: jest.MockInstance<",
           "Observable",
-          "<number>, []>; } & ",
+          "<number>, [], unknown>; } & ",
           {
             "pluginId": "@kbn/core-http-browser",
             "scope": "common",
@@ -401,7 +409,7 @@
             "label": "createBasePath",
             "description": [],
             "signature": [
-              "({ publicBaseUrl, serverBasePath, }?: { publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; }) => jest.Mocked<",
+              "({ publicBaseUrl, serverBasePath, assetsHrefBase, }?: { publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; assetsHrefBase?: string | undefined; }) => jest.Mocked<",
               {
                 "pluginId": "@kbn/core-http-browser",
                 "scope": "common",
@@ -424,7 +432,7 @@
                 "label": "__0",
                 "description": [],
                 "signature": [
-                  "{ publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; }"
+                  "{ publicBaseUrl?: string | undefined; serverBasePath?: string | undefined; assetsHrefBase?: string | undefined; }"
                 ],
                 "path": "packages/core/http/core-http-browser-mocks/src/base_path.mock.ts",
                 "deprecated": false,

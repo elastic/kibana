@@ -11,8 +11,8 @@ import { createFleetAuthzMock } from '@kbn/fleet-plugin/common/mocks';
 import { createLicenseServiceMock } from '../../../license/mocks';
 import type { EndpointAuthzKeyList } from '../../types/authz';
 import {
-  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   CONSOLE_RESPONSE_ACTION_COMMANDS,
+  RESPONSE_CONSOLE_ACTION_COMMANDS_TO_RBAC_FEATURE_CONTROL,
   type ResponseConsoleRbacControls,
 } from '../response_actions/constants';
 
@@ -150,6 +150,14 @@ describe('Endpoint Authz service', () => {
       expect(authz[auth]).toBe(true);
     });
 
+    it.each<[EndpointAuthzKeyList[number], string]>([
+      ['canReadEndpointExceptions', 'showEndpointExceptions'],
+      ['canWriteEndpointExceptions', 'crudEndpointExceptions'],
+    ])('%s should be true if `endpointExceptionsPrivileges.%s` is `true`', (auth) => {
+      const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
+      expect(authz[auth]).toBe(true);
+    });
+
     it.each<[EndpointAuthzKeyList[number], string[]]>([
       ['canWriteEndpointList', ['writeEndpointList']],
       ['canReadEndpointList', ['readEndpointList']],
@@ -181,6 +189,20 @@ describe('Endpoint Authz service', () => {
       privileges.forEach((privilege) => {
         fleetAuthz.packagePrivileges!.endpoint.actions[privilege].executePackageAction = false;
       });
+
+      const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
+      expect(authz[auth]).toBe(false);
+    });
+
+    it.each<[EndpointAuthzKeyList[number], string[]]>([
+      ['canReadEndpointExceptions', ['showEndpointExceptions']],
+      ['canWriteEndpointExceptions', ['crudEndpointExceptions']],
+    ])('%s should be false if `endpointExceptionsPrivileges.%s` is `false`', (auth, privileges) => {
+      privileges.forEach((privilege) => {
+        // @ts-ignore
+        fleetAuthz.endpointExceptionsPrivileges!.actions[privilege] = false;
+      });
+
       const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
       expect(authz[auth]).toBe(false);
     });
@@ -235,7 +257,15 @@ describe('Endpoint Authz service', () => {
         ].executePackageAction = true;
 
         const authz = calculateEndpointAuthz(licenseService, fleetAuthz, userRoles);
-        expect(authz.canAccessResponseConsole).toBe(true);
+
+        // Having ONLY host isolation Release response action can only be true in a
+        // downgrade scenario, where we allow the user to continue to release isolated
+        // hosts. In that scenario, we don't show access to the response console
+        if (responseConsolePrivilege === 'writeHostIsolationRelease') {
+          expect(authz.canAccessResponseConsole).toBe(false);
+        } else {
+          expect(authz.canAccessResponseConsole).toBe(true);
+        }
       }
     );
   });
@@ -273,6 +303,8 @@ describe('Endpoint Authz service', () => {
         canReadBlocklist: false,
         canWriteEventFilters: false,
         canReadEventFilters: false,
+        canReadEndpointExceptions: false,
+        canWriteEndpointExceptions: false,
       });
     });
   });

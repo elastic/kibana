@@ -16,70 +16,75 @@ import type { SetupPlugins } from '../../../../../plugin';
 import { buildRouteValidationWithExcess } from '../../../../../utils/build_validation/route_validation';
 import { getDraftTimeline, persistTimeline } from '../../../saved_object/timelines';
 import { draftTimelineDefaults } from '../../../utils/default_timeline';
-import { getDraftTimelineSchema } from '../../../schemas/draft_timelines';
+import { getDraftTimelineSchema } from '../../../../../../common/api/timeline';
 
 export const getDraftTimelinesRoute = (
   router: SecuritySolutionPluginRouter,
   _: ConfigType,
   security: SetupPlugins['security']
 ) => {
-  router.get(
-    {
+  router.versioned
+    .get({
       path: TIMELINE_DRAFT_URL,
-      validate: {
-        query: buildRouteValidationWithExcess(getDraftTimelineSchema),
-      },
       options: {
         tags: ['access:securitySolution'],
       },
-    },
-    async (context, request, response) => {
-      const frameworkRequest = await buildFrameworkRequest(context, security, request);
-      const siemResponse = buildSiemResponse(response);
+      access: 'public',
+    })
+    .addVersion(
+      {
+        validate: {
+          request: { query: buildRouteValidationWithExcess(getDraftTimelineSchema) },
+        },
+        version: '2023-10-31',
+      },
+      async (context, request, response) => {
+        const frameworkRequest = await buildFrameworkRequest(context, security, request);
+        const siemResponse = buildSiemResponse(response);
 
-      try {
-        const {
-          timeline: [draftTimeline],
-        } = await getDraftTimeline(frameworkRequest, request.query.timelineType);
+        try {
+          const {
+            timeline: [draftTimeline],
+          } = await getDraftTimeline(frameworkRequest, request.query.timelineType);
 
-        if (draftTimeline?.savedObjectId) {
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: {
-                  timeline: draftTimeline,
+          if (draftTimeline?.savedObjectId) {
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: {
+                    timeline: draftTimeline,
+                  },
                 },
               },
-            },
+            });
+          }
+
+          const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
+            ...draftTimelineDefaults,
+            timelineType: request.query.timelineType,
           });
-        }
 
-        const newTimelineResponse = await persistTimeline(frameworkRequest, null, null, {
-          ...draftTimelineDefaults,
-          timelineType: request.query.timelineType,
-        });
-
-        if (newTimelineResponse.code === 200) {
-          return response.ok({
-            body: {
-              data: {
-                persistTimeline: {
-                  timeline: newTimelineResponse.timeline,
+          if (newTimelineResponse.code === 200) {
+            return response.ok({
+              body: {
+                data: {
+                  persistTimeline: {
+                    timeline: newTimelineResponse.timeline,
+                  },
                 },
               },
-            },
+            });
+          }
+
+          return response.ok({});
+        } catch (err) {
+          const error = transformError(err);
+
+          return siemResponse.error({
+            body: error.message,
+            statusCode: error.statusCode,
           });
         }
-
-        return response.ok({});
-      } catch (err) {
-        const error = transformError(err);
-
-        return siemResponse.error({
-          body: error.message,
-          statusCode: error.statusCode,
-        });
       }
-    }
-  );
+    );
 };

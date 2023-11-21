@@ -6,11 +6,15 @@
  */
 
 export const API_AUTH = Object.freeze({
-  user: Cypress.env('ELASTICSEARCH_USERNAME'),
-  pass: Cypress.env('ELASTICSEARCH_PASSWORD'),
+  user: Cypress.env('KIBANA_USERNAME') ?? Cypress.env('ELASTICSEARCH_USERNAME'),
+  pass: Cypress.env('KIBANA_PASSWORD') ?? Cypress.env('ELASTICSEARCH_PASSWORD'),
 });
 
-export const COMMON_API_HEADERS = { 'kbn-xsrf': 'cypress' };
+export const COMMON_API_HEADERS = Object.freeze({
+  'kbn-xsrf': 'cypress',
+  'x-elastic-internal-origin': 'security-solution',
+  'Elastic-Api-Version': '2023-10-31',
+});
 
 export const waitForPageToBeLoaded = () => {
   cy.getByTestSubj('globalLoadingIndicator-hidden').should('exist');
@@ -28,6 +32,26 @@ export const request = <T = unknown>({
 }: Partial<Cypress.RequestOptions>): Cypress.Chainable<Cypress.Response<T>> =>
   cy.request<T>({
     auth: API_AUTH,
-    headers: Object.freeze({ ...COMMON_API_HEADERS, ...headers }),
+    headers: { ...COMMON_API_HEADERS, ...headers },
     ...options,
   });
+
+const API_HEADERS = Object.freeze({ 'kbn-xsrf': 'cypress' });
+export const rootRequest = <T = unknown>(
+  options: Partial<Cypress.RequestOptions>
+): Cypress.Chainable<Cypress.Response<T>> =>
+  cy.request<T>({
+    auth: API_AUTH,
+    headers: API_HEADERS,
+    ...options,
+  });
+
+export const disableExpandableFlyoutAdvancedSettings = () => {
+  const body = { changes: { 'securitySolution:enableExpandableFlyout': false } };
+  rootRequest({
+    method: 'POST',
+    url: 'internal/kibana/settings',
+    body,
+    headers: { 'kbn-xsrf': 'cypress-creds' },
+  });
+};

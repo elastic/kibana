@@ -10,14 +10,12 @@ import { noop } from 'lodash/fp';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Subscription } from 'rxjs';
 
+import type { AuthenticationsKpiRequestOptionsInput } from '../../../../../../common/api/search_strategy';
 import { useAppToasts } from '../../../../../common/hooks/use_app_toasts';
 import type { inputsModel } from '../../../../../common/store';
 import { createFilter } from '../../../../../common/containers/helpers';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type {
-  UsersKpiAuthenticationsRequestOptions,
-  UsersKpiAuthenticationsStrategyResponse,
-} from '../../../../../../common/search_strategy';
+import type { UsersKpiAuthenticationsStrategyResponse } from '../../../../../../common/search_strategy';
 import { UsersQueries } from '../../../../../../common/search_strategy';
 import type { ESTermQuery } from '../../../../../../common/typed_json';
 
@@ -56,7 +54,7 @@ export const useUsersKpiAuthentications = ({
   const searchSubscription$ = useRef(new Subscription());
   const [loading, setLoading] = useState(false);
   const [usersKpiAuthenticationsRequest, setUsersKpiAuthenticationsRequest] =
-    useState<UsersKpiAuthenticationsRequestOptions | null>(null);
+    useState<AuthenticationsKpiRequestOptionsInput | null>(null);
 
   const [usersKpiAuthenticationsResponse, setUsersKpiAuthenticationsResponse] =
     useState<UsersKpiAuthenticationsArgs>({
@@ -75,7 +73,7 @@ export const useUsersKpiAuthentications = ({
   const { addError, addWarning } = useAppToasts();
 
   const usersKpiAuthenticationsSearch = useCallback(
-    (request: UsersKpiAuthenticationsRequestOptions | null) => {
+    (request: AuthenticationsKpiRequestOptionsInput | null) => {
       if (request == null || skip) {
         return;
       }
@@ -85,7 +83,7 @@ export const useUsersKpiAuthentications = ({
         setLoading(true);
 
         searchSubscription$.current = data.search
-          .search<UsersKpiAuthenticationsRequestOptions, UsersKpiAuthenticationsStrategyResponse>(
+          .search<AuthenticationsKpiRequestOptionsInput, UsersKpiAuthenticationsStrategyResponse>(
             request,
             {
               strategy: 'securitySolutionSearchStrategy',
@@ -131,7 +129,7 @@ export const useUsersKpiAuthentications = ({
 
   useEffect(() => {
     setUsersKpiAuthenticationsRequest((prevRequest) => {
-      const myRequest = {
+      const myRequest: AuthenticationsKpiRequestOptionsInput = {
         ...(prevRequest ?? {}),
         defaultIndex: indexNames,
         factoryQueryType: UsersQueries.kpiAuthentications,

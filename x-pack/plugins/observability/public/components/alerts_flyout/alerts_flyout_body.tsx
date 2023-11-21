@@ -16,6 +16,7 @@ import {
   EuiFlyoutBody,
 } from '@elastic/eui';
 import {
+  AlertStatus,
   ALERT_DURATION,
   ALERT_EVALUATION_THRESHOLD,
   ALERT_EVALUATION_VALUE,
@@ -23,8 +24,7 @@ import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
   ALERT_RULE_UUID,
-  ALERT_STATUS_ACTIVE,
-  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS,
 } from '@kbn/rule-data-utils';
 import { i18n } from '@kbn/i18n';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
@@ -32,7 +32,7 @@ import moment from 'moment-timezone';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '../../utils/kibana_react';
 import { asDuration } from '../../../common/utils/formatters';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import { formatAlertEvaluationValue } from '../../utils/format_alert_evaluation_value';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
 import type { TopAlert } from '../../typings/alerts';
@@ -64,7 +64,7 @@ export function AlertsFlyoutBody({ alert, id: pageId }: FlyoutProps) {
       }),
       description: (
         <AlertLifecycleStatusBadge
-          alertStatus={alert.active ? ALERT_STATUS_ACTIVE : ALERT_STATUS_RECOVERED}
+          alertStatus={alert.fields[ALERT_STATUS] as AlertStatus}
           flapping={alert.fields[ALERT_FLAPPING]}
         />
       ),

@@ -13,6 +13,7 @@ import type { IndexSummaryTableItem } from './helpers';
 import { getShowPagination } from './helpers';
 import { defaultSort, MIN_PAGE_SIZE } from '../pattern/helpers';
 import { SortConfig } from '../../types';
+import { useDataQualityContext } from '../data_quality_context';
 
 export interface Props {
   formatBytes: (value: number | undefined) => string;
@@ -21,12 +22,14 @@ export interface Props {
     formatBytes,
     formatNumber,
     itemIdToExpandedRowMap,
+    isILMAvailable,
     pattern,
     toggleExpanded,
   }: {
     formatBytes: (value: number | undefined) => string;
     formatNumber: (value: number | undefined) => string;
     itemIdToExpandedRowMap: Record<string, React.ReactNode>;
+    isILMAvailable: boolean;
     pattern: string;
     toggleExpanded: (indexName: string) => void;
   }) => Array<EuiBasicTableColumn<IndexSummaryTableItem>>;
@@ -57,16 +60,26 @@ const SummaryTableComponent: React.FC<Props> = ({
   sorting,
   toggleExpanded,
 }) => {
+  const { isILMAvailable } = useDataQualityContext();
   const columns = useMemo(
     () =>
       getTableColumns({
         formatBytes,
         formatNumber,
         itemIdToExpandedRowMap,
+        isILMAvailable,
         pattern,
         toggleExpanded,
       }),
-    [formatBytes, formatNumber, getTableColumns, itemIdToExpandedRowMap, pattern, toggleExpanded]
+    [
+      formatBytes,
+      formatNumber,
+      getTableColumns,
+      isILMAvailable,
+      itemIdToExpandedRowMap,
+      pattern,
+      toggleExpanded,
+    ]
   );
   const getItemId = useCallback((item: IndexSummaryTableItem) => item.indexName, []);
 

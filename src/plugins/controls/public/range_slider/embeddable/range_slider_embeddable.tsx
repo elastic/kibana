@@ -12,7 +12,7 @@ import { isEmpty } from 'lodash';
 import { batch } from 'react-redux';
 import { get, isEqual } from 'lodash';
 import deepEqual from 'fast-deep-equal';
-import { Subscription, lastValueFrom } from 'rxjs';
+import { Subscription, lastValueFrom, switchMap } from 'rxjs';
 import { distinctUntilChanged, skip, map } from 'rxjs/operators';
 
 import {
@@ -61,14 +61,6 @@ interface RangeSliderDataFetchProps {
   filters?: ControlInput['filters'];
   validate?: boolean;
 }
-
-const fieldMissingError = (fieldName: string) =>
-  new Error(
-    i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
-      defaultMessage: 'Could not locate field: {fieldName}',
-      values: { fieldName },
-    })
-  );
 
 export const RangeSliderControlContext = createContext<RangeSliderEmbeddable | null>(null);
 export const useRangeSlider = (): RangeSliderEmbeddable => {
@@ -147,15 +139,14 @@ export class RangeSliderEmbeddable
     try {
       await this.runRangeSliderQuery();
       await this.buildFilter();
-      if (initialValue) {
-        this.setInitializationFinished();
-      }
     } catch (e) {
-      batch(() => {
-        this.dispatch.setLoading(false);
-        this.dispatch.setErrorMessage(e.message);
-      });
+      this.onLoadingError(e.message);
     }
+
+    if (initialValue) {
+      this.setInitializationFinished();
+    }
+
     this.setupSubscriptions();
   };
 
@@ -177,14 +168,18 @@ export class RangeSliderEmbeddable
 
     // fetch available min/max when input changes
     this.subscriptions.add(
-      dataFetchPipe.subscribe(async (changes) => {
-        try {
-          await this.runRangeSliderQuery();
-          await this.buildFilter();
-        } catch (e) {
-          this.dispatch.setErrorMessage(e.message);
-        }
-      })
+      dataFetchPipe
+        .pipe(
+          switchMap(async (changes) => {
+            try {
+              await this.runRangeSliderQuery();
+              await this.buildFilter();
+            } catch (e) {
+              this.onLoadingError(e.message);
+            }
+          })
+        )
+        .subscribe()
     );
 
     // build filters when value changes
@@ -192,9 +187,10 @@ export class RangeSliderEmbeddable
       this.getInput$()
         .pipe(
           distinctUntilChanged((a, b) => isEqual(a.value ?? ['', ''], b.value ?? ['', ''])),
-          skip(1) // skip the first input update because initial filters will be built by initialize.
+          skip(1), // skip the first input update because initial filters will be built by initialize.
+          switchMap(this.buildFilter)
         )
-        .subscribe(this.buildFilter)
+        .subscribe()
     );
   };
 
@@ -209,34 +205,27 @@ export class RangeSliderEmbeddable
     if (!this.dataView || this.dataView.id !== dataViewId) {
       try {
         this.dataView = await this.dataViewsService.get(dataViewId);
-        if (!this.dataView) {
-          throw new Error(
-            i18n.translate('controls.rangeSlider.errors.dataViewNotFound', {
-              defaultMessage: 'Could not locate data view: {dataViewId}',
-              values: { dataViewId },
-            })
-          );
-        }
         this.dispatch.setDataViewId(this.dataView.id);
       } catch (e) {
-        this.dispatch.setErrorMessage(e.message);
+        this.onLoadingError(e.message);
       }
     }
 
     if (this.dataView && (!this.field || this.field.name !== fieldName)) {
-      try {
-        this.field = this.dataView.getFieldByName(fieldName);
-        if (this.field === undefined) {
-          throw fieldMissingError(fieldName);
-        }
-
+      this.field = this.dataView.getFieldByName(fieldName);
+      if (this.field) {
         this.dispatch.setField(this.field?.toSpec());
-      } catch (e) {
-        this.dispatch.setErrorMessage(e.message);
+      } else {
+        this.onLoadingError(
+          i18n.translate('controls.rangeSlider.errors.fieldNotFound', {
+            defaultMessage: 'Could not locate field: {fieldName}',
+            values: { fieldName },
+          })
+        );
       }
     }
 
-    return { dataView: this.dataView, field: this.field! };
+    return { dataView: this.dataView, field: this.field };
   };
 
   private runRangeSliderQuery = async () => {
@@ -244,16 +233,6 @@ export class RangeSliderEmbeddable
 
     const { dataView, field } = await this.getCurrentDataViewAndField();
     if (!dataView || !field) return;
-
-    const { fieldName } = this.getInput();
-
-    if (!field) {
-      batch(() => {
-        this.dispatch.setLoading(false);
-        this.dispatch.publishFilters([]);
-      });
-      throw fieldMissingError(fieldName);
-    }
 
     const embeddableInput = this.getInput();
     const { ignoreParentSettings, timeRange: globalTimeRange, timeslice } = embeddableInput;
@@ -278,13 +257,11 @@ export class RangeSliderEmbeddable
     const { min, max } = await this.fetchMinMax({
       dataView,
       field,
-    }).catch((e) => {
-      throw e;
     });
 
     this.dispatch.setMinMax({
-      min: `${min ?? '-Infinity'}`,
-      max: `${max ?? 'Infinity'}`,
+      min,
+      max,
     });
   };
 
@@ -332,9 +309,7 @@ export class RangeSliderEmbeddable
     };
     searchSource.setField('aggs', aggs);
 
-    const resp = await lastValueFrom(searchSource.fetch$()).catch((e) => {
-      throw e;
-    });
+    const resp = await lastValueFrom(searchSource.fetch$());
     const min = get(resp, 'rawResponse.aggregations.minAgg.value');
     const max = get(resp, 'rawResponse.aggregations.maxAgg.value');
 
@@ -397,11 +372,8 @@ export class RangeSliderEmbeddable
         searchSource.setField('query', query);
       }
 
-      const {
-        rawResponse: {
-          hits: { total },
-        },
-      } = await lastValueFrom(searchSource.fetch$());
+      const resp = await lastValueFrom(searchSource.fetch$());
+      const total = resp?.rawResponse?.hits?.total;
 
       const docCount = typeof total === 'number' ? total : total?.value;
       if (!docCount) {
@@ -425,6 +397,14 @@ export class RangeSliderEmbeddable
     });
   };
 
+  private onLoadingError(errorMessage: string) {
+    batch(() => {
+      this.dispatch.setLoading(false);
+      this.dispatch.publishFilters([]);
+      this.dispatch.setErrorMessage(errorMessage);
+    });
+  }
+
   public clearSelections() {
     this.dispatch.setSelectedRange(['', '']);
   }
@@ -434,7 +414,7 @@ export class RangeSliderEmbeddable
       await this.runRangeSliderQuery();
       await this.buildFilter();
     } catch (e) {
-      this.dispatch.setErrorMessage(e.message);
+      this.onLoadingError(e.message);
     }
   };
 

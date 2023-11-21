@@ -8,18 +8,18 @@
 import type SuperTest from 'supertest';
 import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
-  Comments,
-  BulkCreateCommentRequest,
-  BulkGetAttachmentsResponse,
-  Case,
-  CommentPatchRequest,
-  CommentRequest,
-  Comment,
-  CommentsFindResponse,
-  CommentType,
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
+import { Case, AttachmentType } from '@kbn/cases-plugin/common';
+import {
+  BulkGetAttachmentsResponse,
+  AttachmentRequest,
+  BulkCreateAttachmentsRequest,
+  AttachmentPatchRequest,
+  AttachmentsFindResponse,
+} from '@kbn/cases-plugin/common/types/api';
+import { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -59,7 +59,7 @@ export const createComment = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
-  params: CommentRequest;
+  params: AttachmentRequest;
   auth?: { user: User; space: string | null } | null;
   expectedHttpCode?: number;
   headers?: Record<string, unknown>;
@@ -88,7 +88,7 @@ export const bulkCreateAttachments = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
-  params: BulkCreateCommentRequest;
+  params: BulkCreateAttachmentsRequest;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
@@ -114,7 +114,7 @@ export const createCaseAndBulkCreateAttachments = async ({
   numberOfAttachments?: number;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<{ theCase: Case; attachments: BulkCreateCommentRequest }> => {
+}): Promise<{ theCase: Case; attachments: BulkCreateAttachmentsRequest }> => {
   const postedCase = await createCase(supertest, postCaseReq);
   const attachments = getAttachments(numberOfAttachments);
   const patchedCase = await bulkCreateAttachments({
@@ -126,18 +126,18 @@ export const createCaseAndBulkCreateAttachments = async ({
   return { theCase: patchedCase, attachments };
 };
 
-export const getAttachments = (numberOfAttachments: number): BulkCreateCommentRequest => {
+export const getAttachments = (numberOfAttachments: number): BulkCreateAttachmentsRequest => {
   return [...Array(numberOfAttachments)].map((_, index) => {
     if (index % 10 === 0) {
       return {
-        type: CommentType.user,
+        type: AttachmentType.user,
         comment: `Test ${index + 1}`,
         owner: 'securitySolutionFixture',
       };
     }
 
     return {
-      type: CommentType.alert,
+      type: AttachmentType.alert,
       alertId: [`test-id-${index + 1}`],
       index: [`test-index-${index + 1}`],
       rule: {
@@ -203,7 +203,7 @@ export const getAllComments = async ({
   caseId: string;
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
-}): Promise<Comments> => {
+}): Promise<Attachments> => {
   const { body: comments } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments`)
     .auth(auth.user.username, auth.user.password)
@@ -224,7 +224,7 @@ export const getComment = async ({
   commentId: string;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<Comment> => {
+}): Promise<Attachment> => {
   const { body: comment } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/comments/${commentId}`)
     .auth(auth.user.username, auth.user.password)
@@ -243,7 +243,7 @@ export const updateComment = async ({
 }: {
   supertest: SuperTest.SuperTest<SuperTest.Test>;
   caseId: string;
-  req: CommentPatchRequest;
+  req: AttachmentPatchRequest;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null } | null;
   headers?: Record<string, unknown>;
@@ -295,7 +295,7 @@ export const findAttachments = async ({
   query?: Record<string, unknown>;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
-}): Promise<CommentsFindResponse> => {
+}): Promise<AttachmentsFindResponse> => {
   const { body } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
     .set('kbn-xsrf', 'true')

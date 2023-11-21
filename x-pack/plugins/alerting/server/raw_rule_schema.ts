@@ -10,6 +10,7 @@ import { schema } from '@kbn/config-schema';
 const executionStatusWarningReason = schema.oneOf([
   schema.literal('maxExecutableActions'),
   schema.literal('maxAlerts'),
+  schema.literal('maxQueuedActions'),
 ]);
 
 const executionStatusErrorReason = schema.oneOf([
@@ -168,7 +169,7 @@ const rawRuleAlertsFilterSchema = schema.object({
             params: schema.maybe(schema.recordOf(schema.string(), schema.any())), // better type?
             value: schema.maybe(schema.string()),
           }),
-          state$: schema.maybe(
+          $state: schema.maybe(
             schema.object({
               store: schema.oneOf([schema.literal('appState'), schema.literal('globalState')]),
             })

@@ -53,6 +53,7 @@ import type {
   GetLimitedPackagesRequestSchema,
   GetBulkAssetsRequestSchema,
   CreateCustomIntegrationRequestSchema,
+  GetInputsRequestSchema,
 } from '../../types';
 import {
   bulkInstallPackages,
@@ -67,6 +68,7 @@ import {
   getLimitedPackages,
   getInstallation,
   getBulkAssets,
+  getTemplateInputs,
 } from '../../services/epm/packages';
 import type { BulkInstallResponse } from '../../services/epm/packages';
 import { defaultFleetErrorHandler, fleetErrorToResponseOptions, FleetError } from '../../errors';
@@ -84,6 +86,8 @@ import type {
   InstallationInfo,
 } from '../../types';
 import { getDataStreams } from '../../services/epm/data_streams';
+import { NamingCollisionError } from '../../services/epm/packages/custom_integrations/validation/check_naming_collision';
+import { DatasetNamePrefixError } from '../../services/epm/packages/custom_integrations/validation/check_dataset_name_format';
 
 const CACHE_CONTROL_10_MINUTES_HEADER: HttpResponseOptions['headers'] = {
   'cache-control': 'max-age=600',
@@ -390,6 +394,8 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     ignoreConstraints: request.body?.ignore_constraints,
     prerelease: request.query?.prerelease,
     authorizationHeader,
+    ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
 
   if (!res.error) {
@@ -419,28 +425,47 @@ export const createCustomIntegrationHandler: FleetRequestHandler<
   const spaceId = fleetContext.spaceId;
   const { integrationName, force, datasets } = request.body;
 
-  const res = await installPackage({
-    installSource: 'custom',
-    savedObjectsClient,
-    pkgName: integrationName,
-    datasets,
-    esClient,
-    spaceId,
-    force,
-    authorizationHeader,
-    kibanaVersion,
-  });
+  try {
+    const res = await installPackage({
+      installSource: 'custom',
+      savedObjectsClient,
+      pkgName: integrationName,
+      datasets,
+      esClient,
+      spaceId,
+      force,
+      authorizationHeader,
+      kibanaVersion,
+    });
 
-  if (!res.error) {
-    const body: InstallPackageResponse = {
-      items: res.assets || [],
-      _meta: {
-        install_source: res.installSource,
-      },
-    };
-    return response.ok({ body });
-  } else {
-    return await defaultFleetErrorHandler({ error: res.error, response });
+    if (!res.error) {
+      const body: InstallPackageResponse = {
+        items: res.assets || [],
+        _meta: {
+          install_source: res.installSource,
+        },
+      };
+      return response.ok({ body });
+    } else {
+      return await defaultFleetErrorHandler({ error: res.error, response });
+    }
+  } catch (error) {
+    if (error instanceof NamingCollisionError) {
+      return response.customError({
+        statusCode: 409,
+        body: {
+          message: error.message,
+        },
+      });
+    } else if (error instanceof DatasetNamePrefixError) {
+      return response.customError({
+        statusCode: 422,
+        body: {
+          message: error.message,
+        },
+      });
+    }
+    return await defaultFleetErrorHandler({ error, response });
   }
 };
 
@@ -488,7 +513,7 @@ export const bulkInstallPackagesFromRegistryHandler: FleetRequestHandler<
 
 export const installPackageByUploadHandler: FleetRequestHandler<
   undefined,
-  undefined,
+  TypeOf<typeof InstallPackageByUploadRequestSchema.query>,
   TypeOf<typeof InstallPackageByUploadRequestSchema.body>
 > = async (context, request, response) => {
   const coreContext = await context.core;
@@ -510,6 +535,8 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     spaceId,
     contentType,
     authorizationHeader,
+    ignoreMappingUpdateErrors: request.query?.ignoreMappingUpdateErrors,
+    skipDataStreamRollover: request.query?.skipDataStreamRollover,
   });
   if (!res.error) {
     const body: InstallPackageResponse = {
@@ -527,7 +554,7 @@ export const installPackageByUploadHandler: FleetRequestHandler<
 
 export const deletePackageHandler: FleetRequestHandler<
   TypeOf<typeof DeletePackageRequestSchema.params>,
-  undefined,
+  TypeOf<typeof DeletePackageRequestSchema.query>,
   TypeOf<typeof DeletePackageRequestSchema.body>
 > = async (context, request, response) => {
   try {
@@ -541,7 +568,7 @@ export const deletePackageHandler: FleetRequestHandler<
       pkgName,
       pkgVersion,
       esClient,
-      force: request.body?.force,
+      force: request.query?.force,
     });
     const body: DeletePackageResponse = {
       items: res,
@@ -620,6 +647,28 @@ export const reauthorizeTransformsHandler: FleetRequestHandler<
     });
 
     return response.ok({ body: resp });
+  } catch (error) {
+    return defaultFleetErrorHandler({ error, response });
+  }
+};
+
+export const getInputsHandler: FleetRequestHandler<
+  TypeOf<typeof GetInputsRequestSchema.params>,
+  TypeOf<typeof GetInputsRequestSchema.query>,
+  undefined
+> = async (context, request, response) => {
+  const soClient = (await context.fleet).internalSoClient;
+
+  try {
+    const { pkgName, pkgVersion } = request.params;
+    const { format } = request.query;
+    let body;
+    if (format === 'json') {
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'json');
+    } else if (format === 'yml' || format === 'yaml') {
+      body = await getTemplateInputs(soClient, pkgName, pkgVersion, 'yml');
+    }
+    return response.ok({ body });
   } catch (error) {
     return defaultFleetErrorHandler({ error, response });
   }

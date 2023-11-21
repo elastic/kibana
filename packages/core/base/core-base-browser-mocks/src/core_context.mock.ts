@@ -26,6 +26,7 @@ function createCoreContext({ production = false }: { production?: boolean } = {}
         buildSha: 'buildSha',
         dist: false,
         buildDate: new Date('2023-05-15T23:12:09.000Z'),
+        buildFlavor: 'traditional',
       },
     },
   };

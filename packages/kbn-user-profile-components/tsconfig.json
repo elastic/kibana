@@ -13,7 +13,11 @@
   ],
   "kbn_references": [
     "@kbn/i18n",
-    "@kbn/i18n-react"
+    "@kbn/i18n-react",
+    "@kbn/core-notifications-browser",
+    "@kbn/core",
+    "@kbn/core-theme-browser",
+    "@kbn/core-mount-utils-browser",
   ],
   "exclude": [
     "target/**/*",

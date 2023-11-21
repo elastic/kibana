@@ -18,7 +18,9 @@ export const textBasedLanguagedEditorStyles = (
   editorHeight: number,
   isCodeEditorExpanded: boolean,
   hasErrors: boolean,
-  isCodeEditorExpandedFocused: boolean
+  hasWarning: boolean,
+  isCodeEditorExpandedFocused: boolean,
+  hasReference: boolean
 ) => {
   let position = isCompactFocused ? ('absolute' as 'absolute') : ('relative' as 'relative'); // cast string to type 'relative' | 'absolute'
   if (isCodeEditorExpanded) {
@@ -40,7 +42,7 @@ export const textBasedLanguagedEditorStyles = (
     },
     resizableContainer: {
       display: 'flex',
-      width: isCodeEditorExpanded ? '100%' : 'calc(100% - 80px)',
+      width: isCodeEditorExpanded ? '100%' : `calc(100% - ${hasReference ? 80 : 40}px)`,
       alignItems: isCompactFocused ? 'flex-start' : 'center',
       border: !isCompactFocused ? euiTheme.border.thin : 'none',
       borderTopLeftRadius: '6px',
@@ -51,7 +53,7 @@ export const textBasedLanguagedEditorStyles = (
     linesBadge: {
       position: 'absolute' as 'absolute', // cast string to type 'absolute',
       zIndex: 1,
-      right: hasErrors ? '60px' : '12px',
+      right: hasErrors || hasWarning ? '60px' : '12px',
       top: '50%',
       transform: 'translate(0, -50%)',
     },

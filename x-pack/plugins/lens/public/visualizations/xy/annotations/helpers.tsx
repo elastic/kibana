@@ -8,14 +8,12 @@
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import {
-  getAnnotationAccessor,
   isQueryAnnotationConfig,
-} from '@kbn/event-annotation-plugin/public';
-import {
+  getAnnotationAccessor,
   createCopiedAnnotation,
-  EventAnnotationConfig,
-  getDefaultQueryAnnotation,
-} from '@kbn/event-annotation-plugin/common';
+} from '@kbn/event-annotation-components';
+import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
+import { getDefaultQueryAnnotation } from '@kbn/event-annotation-common';
 import { IconChartBarAnnotations } from '@kbn/chart-icons';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { getUniqueLabelGenerator, isDraggedDataViewField } from '../../../utils';
@@ -364,7 +362,6 @@ export const onAnnotationDrop: Visualization<XYState>['onDrop'] = ({
     default:
       return prevState;
   }
-  return prevState;
 };
 
 export const setAnnotationsDimension: Visualization<XYState>['setDimension'] = ({

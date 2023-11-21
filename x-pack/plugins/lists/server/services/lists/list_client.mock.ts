@@ -24,8 +24,8 @@ import {
 import { ListClient } from './list_client';
 
 export class ListClientMock extends ListClient {
-  public getListIndex = jest.fn().mockReturnValue(LIST_INDEX);
-  public getListItemIndex = jest.fn().mockReturnValue(LIST_ITEM_INDEX);
+  public getListName = jest.fn().mockReturnValue(LIST_INDEX);
+  public getListItemName = jest.fn().mockReturnValue(LIST_ITEM_INDEX);
   public getList = jest.fn().mockResolvedValue(getListResponseMock());
   public createList = jest.fn().mockResolvedValue(getListResponseMock());
   public createListIfItDoesNotExist = jest.fn().mockResolvedValue(getListResponseMock());

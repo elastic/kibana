@@ -17,27 +17,29 @@ import { nodeBuilder, fromKueryExpression, escapeKuery } from '@kbn/es-query';
 import { spaceIdToNamespace } from '@kbn/spaces-plugin/server/lib/utils/namespace';
 
 import type {
-  CaseStatuses,
-  CommentRequest,
   CaseSeverity,
-  CommentRequestExternalReferenceType,
-  CasesFindRequest,
-} from '../../common/api';
-import type { SavedObjectFindOptionsKueryNode } from '../common/types';
-import type { CasesFindQueryParams } from './types';
-
+  CaseStatuses,
+  CustomFieldsConfiguration,
+  ExternalReferenceAttachmentPayload,
+} from '../../common/types/domain';
 import {
-  OWNER_FIELD,
-  AlertCommentRequestRt,
-  ActionsCommentRequestRt,
-  ContextTypeUserRt,
+  ActionsAttachmentPayloadRt,
+  AlertAttachmentPayloadRt,
+  ExternalReferenceNoSOAttachmentPayloadRt,
+  ExternalReferenceSOAttachmentPayloadRt,
   ExternalReferenceStorageType,
-  ExternalReferenceSORt,
-  ExternalReferenceNoSORt,
-  PersistableStateAttachmentRt,
-  decodeWithExcessOrThrow,
-} from '../../common/api';
-import { CASE_SAVED_OBJECT, NO_ASSIGNEES_FILTERING_KEYWORD } from '../../common/constants';
+  PersistableStateAttachmentPayloadRt,
+  UserCommentAttachmentPayloadRt,
+} from '../../common/types/domain';
+import type { SavedObjectFindOptionsKueryNode } from '../common/types';
+import type { CasesSearchParams } from './types';
+
+import { decodeWithExcessOrThrow } from '../../common/api';
+import {
+  CASE_SAVED_OBJECT,
+  NO_ASSIGNEES_FILTERING_KEYWORD,
+  OWNER_FIELD,
+} from '../../common/constants';
 import {
   isCommentRequestTypeExternalReference,
   isCommentRequestTypePersistableState,
@@ -52,18 +54,21 @@ import {
   assertUnreachable,
 } from '../common/utils';
 import type { ExternalReferenceAttachmentTypeRegistry } from '../attachment_framework/external_reference_registry';
+import type { AttachmentRequest, CasesFindRequestSortFields } from '../../common/types/api';
+import type { ICasesCustomField } from '../custom_fields';
+import { casesCustomFields } from '../custom_fields';
 
 // TODO: I think we can remove most of this function since we're using a different excess
 export const decodeCommentRequest = (
-  comment: CommentRequest,
+  comment: AttachmentRequest,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (isCommentRequestTypeUser(comment)) {
-    decodeWithExcessOrThrow(ContextTypeUserRt)(comment);
+    decodeWithExcessOrThrow(UserCommentAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeActions(comment)) {
-    decodeWithExcessOrThrow(ActionsCommentRequestRt)(comment);
+    decodeWithExcessOrThrow(ActionsAttachmentPayloadRt)(comment);
   } else if (isCommentRequestTypeAlert(comment)) {
-    decodeWithExcessOrThrow(AlertCommentRequestRt)(comment);
+    decodeWithExcessOrThrow(AlertAttachmentPayloadRt)(comment);
 
     const { ids, indices } = getIDsAndIndicesAsArrays(comment);
 
@@ -110,7 +115,7 @@ export const decodeCommentRequest = (
   } else if (isCommentRequestTypeExternalReference(comment)) {
     decodeExternalReferenceAttachment(comment, externalRefRegistry);
   } else if (isCommentRequestTypePersistableState(comment)) {
-    decodeWithExcessOrThrow(PersistableStateAttachmentRt)(comment);
+    decodeWithExcessOrThrow(PersistableStateAttachmentPayloadRt)(comment);
   } else {
     /**
      * This assertion ensures that TS will show an error
@@ -122,13 +127,13 @@ export const decodeCommentRequest = (
 };
 
 const decodeExternalReferenceAttachment = (
-  attachment: CommentRequestExternalReferenceType,
+  attachment: ExternalReferenceAttachmentPayload,
   externalRefRegistry: ExternalReferenceAttachmentTypeRegistry
 ) => {
   if (attachment.externalReferenceStorage.type === ExternalReferenceStorageType.savedObject) {
-    decodeWithExcessOrThrow(ExternalReferenceSORt)(attachment);
+    decodeWithExcessOrThrow(ExternalReferenceSOAttachmentPayloadRt)(attachment);
   } else {
-    decodeWithExcessOrThrow(ExternalReferenceNoSORt)(attachment);
+    decodeWithExcessOrThrow(ExternalReferenceNoSOAttachmentPayloadRt)(attachment);
   }
 
   const metadata = attachment.externalReferenceMetadata;
@@ -142,7 +147,7 @@ const decodeExternalReferenceAttachment = (
 /**
  * Return the alert IDs from the comment if it is an alert style comment. Otherwise return an empty array.
  */
-export const getAlertIds = (comment: CommentRequest): string[] => {
+export const getAlertIds = (comment: AttachmentRequest): string[] => {
   if (isCommentRequestTypeAlert(comment)) {
     return Array.isArray(comment.alertId) ? comment.alertId : [comment.alertId];
   }
@@ -163,9 +168,7 @@ const addSeverityFilter = (severity: CaseSeverity): KueryNode => {
   );
 };
 
-const buildCategoryFilter = (
-  categories: CasesFindQueryParams['category']
-): KueryNode | undefined => {
+const buildCategoryFilter = (categories: CasesSearchParams['category']): KueryNode | undefined => {
   if (categories === undefined) {
     return;
   }
@@ -300,7 +303,7 @@ export const buildRangeFilter = ({
 export const buildAssigneesFilter = ({
   assignees,
 }: {
-  assignees: CasesFindQueryParams['assignees'];
+  assignees: CasesSearchParams['assignees'];
 }): KueryNode | undefined => {
   if (assignees === undefined) {
     return;
@@ -334,28 +337,91 @@ export const buildAssigneesFilter = ({
   return nodeBuilder.or([...assigneesFilter, filterCasesWithoutAssigneesKueryNode]);
 };
 
+export const buildCustomFieldsFilter = ({
+  customFields,
+  customFieldsConfiguration,
+}: {
+  customFields: CasesSearchParams['customFields'];
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): KueryNode | undefined => {
+  if (!customFields || !customFieldsConfiguration?.length) {
+    return;
+  }
+
+  const customFieldsMappings: Array<Record<string, ICasesCustomField>> = [];
+
+  Object.keys(customFields).forEach((item: string) => {
+    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === item);
+
+    if (!customFieldConfig) {
+      return;
+    }
+
+    const mapping = casesCustomFields.get(customFieldConfig.type);
+
+    if (!mapping) {
+      return;
+    }
+
+    customFieldsMappings.push({ [item]: mapping });
+  });
+
+  if (!customFieldsMappings.length) {
+    return;
+  }
+
+  const customFieldsFilter = Object.entries(customFields).map(([key, value]) => {
+    const customFieldMapping = customFieldsMappings.find((mapping) => mapping[key]) ?? {};
+
+    if (!Object.values(value).length) {
+      return fromKueryExpression(`${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key}}`);
+    }
+
+    return nodeBuilder.or(
+      Object.values(value).map((filterValue) => {
+        if (filterValue === null) {
+          return fromKueryExpression(
+            `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and (not value:*)}`
+          );
+        }
+
+        return fromKueryExpression(
+          `${CASE_SAVED_OBJECT}.attributes.customFields:{key: ${key} and value.${customFieldMapping[key].savedObjectMappingType}: ${filterValue}}`
+        );
+      })
+    );
+  });
+
+  return nodeBuilder.and([...customFieldsFilter]);
+};
+
 export const constructQueryOptions = ({
   tags,
   reporters,
   status,
   severity,
-  sortByField,
+  sortField,
   owner,
   authorizationFilter,
   from,
   to,
   assignees,
   category,
-}: CasesFindQueryParams): SavedObjectFindOptionsKueryNode => {
+  customFields,
+  customFieldsConfiguration,
+}: CasesSearchParams & {
+  customFieldsConfiguration?: CustomFieldsConfiguration;
+}): SavedObjectFindOptionsKueryNode => {
   const tagsFilter = buildFilter({ filters: tags, field: 'tags', operator: 'or' });
   const reportersFilter = createReportersFilter(reporters);
-  const sortField = convertSortField(sortByField);
+  const sortByField = convertSortField(sortField);
   const ownerFilter = buildFilter({ filters: owner, field: OWNER_FIELD, operator: 'or' });
   const statusFilter = status != null ? addStatusFilter(status) : undefined;
   const severityFilter = severity != null ? addSeverityFilter(severity) : undefined;
   const rangeFilter = buildRangeFilter({ from, to });
   const assigneesFilter = buildAssigneesFilter({ assignees });
   const categoryFilter = buildCategoryFilter(category);
+  const customFieldsFilter = buildCustomFieldsFilter({ customFields, customFieldsConfiguration });
 
   const filters = combineFilters([
     statusFilter,
@@ -366,11 +432,12 @@ export const constructQueryOptions = ({
     ownerFilter,
     assigneesFilter,
     categoryFilter,
+    customFieldsFilter,
   ]);
 
   return {
     filter: combineFilterWithAuthorizationFilter(filters, authorizationFilter),
-    sortField,
+    sortField: sortByField,
   };
 };
 
@@ -475,22 +542,21 @@ enum SortFieldCase {
   category = 'category',
 }
 
-export const convertSortField = (sortField: string | undefined): SortFieldCase => {
+export const convertSortField = (
+  sortField: CasesFindRequestSortFields | undefined
+): SortFieldCase => {
   switch (sortField) {
     case 'status':
       return SortFieldCase.status;
     case 'createdAt':
-    case 'created_at':
       return SortFieldCase.createdAt;
     case 'closedAt':
-    case 'closed_at':
       return SortFieldCase.closedAt;
     case 'title':
       return SortFieldCase.title;
     case 'severity':
       return SortFieldCase.severity;
     case 'updatedAt':
-    case 'updated_at':
       return SortFieldCase.updatedAt;
     case 'category':
       return SortFieldCase.category;
@@ -503,7 +569,7 @@ export const constructSearch = (
   search: string | undefined,
   spaceId: string,
   savedObjectsSerializer: ISavedObjectsSerializer
-): Pick<CasesFindRequest, 'search' | 'rootSearchFields'> | undefined => {
+): { search: string; rootSearchFields?: string[] } | undefined => {
   if (!search) {
     return undefined;
   }

@@ -1,6 +1,10 @@
 {
   "ml.stop_trained_model_deployment": {
     "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
       "allow_no_match": "__flag__",
       "force": "__flag__"
     },
@@ -10,6 +14,10 @@
     "patterns": [
       "_ml/trained_models/{model_id}/deployment/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/stop-trained-model-deployment.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/stop-trained-model-deployment.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

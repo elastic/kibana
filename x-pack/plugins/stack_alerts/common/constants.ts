@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
+export const MAX_SELECTABLE_GROUP_BY_TERMS = 4;

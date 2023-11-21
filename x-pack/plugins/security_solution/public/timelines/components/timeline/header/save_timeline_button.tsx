@@ -5,90 +5,143 @@
  * 2.0.
  */
 
-import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { useUserPrivileges } from '../../../../common/components/user_privileges';
-
-import { TimelineId } from '../../../../../common/types/timeline';
+import { EuiButton, EuiToolTip, EuiTourStep, EuiCode, EuiText, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { getTimelineStatusByIdSelector } from '../../flyout/header/selectors';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
-import { timelineActions } from '../../../store/timeline';
-import { getTimelineSaveModalByIdSelector } from './selectors';
-import { TimelineTitleAndDescription } from './title_and_description';
+import { TimelineStatus } from '../../../../../common/api/timeline';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
+import { useLocalStorage } from '../../../../common/components/local_storage';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+
+import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
 
-export interface SaveTimelineComponentProps {
-  initialFocus: 'title' | 'description';
+export interface SaveTimelineButtonProps {
   timelineId: string;
-  toolTip?: string;
 }
 
-export const SaveTimelineButton = React.memo<SaveTimelineComponentProps>(
-  ({ initialFocus, timelineId, toolTip }) => {
-    const dispatch = useDispatch();
-    const getTimelineSaveModal = useMemo(() => getTimelineSaveModalByIdSelector(), []);
-    const show = useDeepEqualSelector((state) => getTimelineSaveModal(state, timelineId));
-    const [showSaveTimelineOverlay, setShowSaveTimelineOverlay] = useState<boolean>(false);
+const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
+const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTourSeen';
 
-    const closeSaveTimeline = useCallback(() => {
-      setShowSaveTimelineOverlay(false);
-      if (show) {
-        dispatch(
-          timelineActions.toggleModalSaveTimeline({
-            id: TimelineId.active,
-            showModalSaveTimeline: false,
-          })
-        );
-      }
-    }, [dispatch, setShowSaveTimelineOverlay, show]);
+export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
+  const isTimelineSaveTourSaveTourDisabled =
+    useIsExperimentalFeatureEnabled('disableTimelineSaveTour');
+  const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
 
-    const openSaveTimeline = useCallback(() => {
-      setShowSaveTimelineOverlay(true);
-    }, [setShowSaveTimelineOverlay]);
+  const closeSaveTimeline = useCallback(() => {
+    setShowEditTimelineOverlay(false);
+  }, []);
 
-    // Case: 1
-    // check if user has crud privileges so that user can be allowed to edit the timeline
-    // Case: 2
-    // TODO: User may have Crud privileges but they may not have access to timeline index.
-    // Do we need to check that?
-    const {
-      kibanaSecuritySolutionsPrivileges: { crud: hasKibanaCrud },
-    } = useUserPrivileges();
+  const openEditTimeline = useCallback(() => {
+    setShowEditTimelineOverlay(true);
+  }, []);
 
-    const finalTooltipMsg = useMemo(
-      () => (hasKibanaCrud ? toolTip : timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG),
-      [toolTip, hasKibanaCrud]
-    );
+  // Case: 1
+  // check if user has crud privileges so that user can be allowed to edit the timeline
+  // Case: 2
+  // TODO: User may have Crud privileges but they may not have access to timeline index.
+  // Do we need to check that?
+  const {
+    kibanaSecuritySolutionsPrivileges: { crud: canEditTimeline },
+  } = useUserPrivileges();
+  const getTimelineStatus = useMemo(() => getTimelineStatusByIdSelector(), []);
+  const {
+    status: timelineStatus,
+    isSaving,
+    isLoading,
+    show: isVisible,
+  } = useDeepEqualSelector((state) => getTimelineStatus(state, timelineId));
 
-    const saveTimelineButtonIcon = useMemo(
-      () => (
-        <EuiButtonIcon
-          aria-label={timelineTranslations.EDIT}
-          isDisabled={!hasKibanaCrud}
-          onClick={openSaveTimeline}
-          iconType="pencil"
-          data-test-subj="save-timeline-button-icon"
-        />
-      ),
-      [openSaveTimeline, hasKibanaCrud]
-    );
+  const isSaveButtonMounted = useIsElementMounted(SAVE_BUTTON_ELEMENT_ID);
+  const [hasSeenTimelineSaveTour, setHasSeenTimelineSaveTour] = useLocalStorage({
+    defaultValue: false,
+    key: LOCAL_STORAGE_KEY,
+  });
+  // Why are we checking for so many flags here?
+  // The tour popup should only show when timeline is fully populated and all necessary
+  // elements are visible on screen. If we would not check for all these flags, the tour
+  // popup would show too early and in the wrong place in the DOM.
+  // The last flag, checks if the tour has been dismissed before.
+  const showTimelineSaveTour =
+    // The timeline save tour could be disabled on a plugin level
+    !isTimelineSaveTourSaveTourDisabled &&
+    canEditTimeline &&
+    isVisible &&
+    !isLoading &&
+    isSaveButtonMounted &&
+    !hasSeenTimelineSaveTour;
 
-    return (initialFocus === 'title' && show) || showSaveTimelineOverlay ? (
+  const markTimelineSaveTourAsSeen = useCallback(() => {
+    setHasSeenTimelineSaveTour(true);
+  }, [setHasSeenTimelineSaveTour]);
+
+  const isUnsaved = timelineStatus === TimelineStatus.draft;
+  const tooltipContent = canEditTimeline ? null : timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
+
+  return (
+    <EuiToolTip
+      content={tooltipContent}
+      position="bottom"
+      data-test-subj="save-timeline-btn-tooltip"
+    >
       <>
-        {saveTimelineButtonIcon}
-        <TimelineTitleAndDescription
-          closeSaveTimeline={closeSaveTimeline}
-          initialFocus={initialFocus}
-          timelineId={timelineId}
-          showWarning={initialFocus === 'title' && show}
-        />
+        <EuiButton
+          fill
+          color="primary"
+          onClick={openEditTimeline}
+          iconType="save"
+          isLoading={isSaving}
+          disabled={!canEditTimeline}
+          data-test-subj="save-timeline-btn"
+          id={SAVE_BUTTON_ELEMENT_ID}
+        >
+          {timelineTranslations.SAVE}
+        </EuiButton>
+        {showEditTimelineOverlay && canEditTimeline ? (
+          <SaveTimelineModal
+            closeSaveTimeline={closeSaveTimeline}
+            initialFocusOn={isUnsaved ? 'title' : 'save'}
+            timelineId={timelineId}
+            showWarning={false}
+          />
+        ) : null}
+        {showTimelineSaveTour && (
+          <EuiTourStep
+            anchor={`#${SAVE_BUTTON_ELEMENT_ID}`}
+            content={
+              <EuiText>
+                <FormattedMessage
+                  id="xpack.securitySolution.timeline.flyout.saveTour.description"
+                  defaultMessage="Click {saveButton} to manually save changes."
+                  values={{
+                    saveButton: <EuiCode>{timelineTranslations.SAVE}</EuiCode>,
+                  }}
+                />
+              </EuiText>
+            }
+            isStepOpen={true}
+            minWidth={300}
+            step={1}
+            stepsTotal={1}
+            onFinish={markTimelineSaveTourAsSeen}
+            footerAction={
+              <EuiButtonEmpty
+                onClick={markTimelineSaveTourAsSeen}
+                data-test-subj="timeline-save-tour-close-button"
+              >
+                {timelineTranslations.SAVE_TOUR_CLOSE}
+              </EuiButtonEmpty>
+            }
+            title={timelineTranslations.SAVE_TOUR_TITLE}
+            anchorPosition="downCenter"
+          />
+        )}
       </>
-    ) : (
-      <EuiToolTip content={finalTooltipMsg ?? ''} data-test-subj="save-timeline-btn-tooltip">
-        {saveTimelineButtonIcon}
-      </EuiToolTip>
-    );
-  }
-);
+    </EuiToolTip>
+  );
+});
 
 SaveTimelineButton.displayName = 'SaveTimelineButton';

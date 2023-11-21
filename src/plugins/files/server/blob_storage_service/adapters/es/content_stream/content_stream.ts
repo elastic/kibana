@@ -271,6 +271,7 @@ export class ContentStream extends Duplex {
    * of holding, at most, 2 full chunks in memory.
    */
   private indexRequestBuffer: undefined | IndexRequestParams;
+
   private async writeChunk(data: Buffer) {
     const chunkId = this.getChunkId(this.chunksWritten);
 

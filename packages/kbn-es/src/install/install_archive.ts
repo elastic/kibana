@@ -19,15 +19,7 @@ import { BASE_PATH, ES_CONFIG, ES_KEYSTORE_BIN } from '../paths';
 import { Artifact } from '../artifact';
 import { parseSettings, SettingsFilter } from '../settings';
 import { log as defaultLog } from '../utils/log';
-
-interface InstallArchiveOptions {
-  license?: string;
-  password?: string;
-  basePath?: string;
-  installPath?: string;
-  log?: ToolingLog;
-  esArgs?: string[];
-}
+import { InstallArchiveOptions } from './types';
 
 const isHttpUrl = (str: string) => {
   try {
@@ -40,7 +32,7 @@ const isHttpUrl = (str: string) => {
 /**
  * Extracts an ES archive and optionally installs plugins
  */
-export async function installArchive(archive: string, options: InstallArchiveOptions = {}) {
+export async function installArchive(archive: string, options?: InstallArchiveOptions) {
   const {
     license = 'basic',
     password = 'changeme',
@@ -48,7 +40,7 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
     installPath = path.resolve(basePath, path.basename(archive, '.tar.gz')),
     log = defaultLog,
     esArgs = [],
-  } = options;
+  } = options || {};
 
   let dest = archive;
   if (isHttpUrl(archive)) {
@@ -74,17 +66,15 @@ export async function installArchive(archive: string, options: InstallArchiveOpt
   fs.mkdirSync(tmpdir, { recursive: true });
   log.info('created %s', chalk.bold(tmpdir));
 
-  if (license !== 'oss') {
-    // starting in 6.3, security is disabled by default. Since we bootstrap
-    // the keystore, we can enable security ourselves.
-    await appendToConfig(installPath, 'xpack.security.enabled', 'true');
+  // starting in 6.3, security is disabled by default. Since we bootstrap
+  // the keystore, we can enable security ourselves.
+  await appendToConfig(installPath, 'xpack.security.enabled', 'true');
 
-    await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
-    await configureKeystore(installPath, log, [
-      ['bootstrap.password', password],
-      ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
-    ]);
-  }
+  await appendToConfig(installPath, 'xpack.license.self_generated.type', license);
+  await configureKeystore(installPath, log, [
+    ['bootstrap.password', password],
+    ...parseSettings(esArgs, { filter: SettingsFilter.SecureOnly }),
+  ]);
 
   return { installPath };
 }

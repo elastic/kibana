@@ -68,6 +68,19 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       expect(initialSize.width).to.be.greaterThan(afterSize.width);
     });
 
+    it('should return statusCode 400 to unsupported HTTP verbs', async () => {
+      const expectedResponseContains = '"statusCode": 400';
+      await PageObjects.console.enterRequest('\n OPTIONS /');
+      await PageObjects.console.clickPlay();
+      await retry.try(async () => {
+        const actualResponse = await PageObjects.console.getResponse();
+        log.debug(actualResponse);
+        expect(actualResponse).to.contain(expectedResponseContains);
+
+        expect(await PageObjects.console.hasSuccessBadge()).to.be(false);
+      });
+    });
+
     describe('with kbn: prefix in request', () => {
       before(async () => {
         await PageObjects.console.clearTextArea();

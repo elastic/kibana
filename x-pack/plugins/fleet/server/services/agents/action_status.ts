@@ -13,8 +13,8 @@ import type {
   FleetServerAgentAction,
   ActionStatus,
   ActionErrorResult,
-  ListWithKuery,
   AgentActionType,
+  ActionStatusOptions,
 } from '../../types';
 import {
   AGENT_ACTIONS_INDEX,
@@ -29,7 +29,7 @@ import { appContextService } from '..';
  */
 export async function getActionStatuses(
   esClient: ElasticsearchClient,
-  options: ListWithKuery & { errorSize: number }
+  options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const actions = await _getActions(esClient, options);
   const cancelledActions = await getCancelledActions(esClient);
@@ -218,7 +218,7 @@ export async function getCancelledActions(
 
 async function _getActions(
   esClient: ElasticsearchClient,
-  options: ListWithKuery
+  options: ActionStatusOptions
 ): Promise<ActionStatus[]> {
   const res = await esClient.search<FleetServerAgentAction>({
     index: AGENT_ACTIONS_INDEX,

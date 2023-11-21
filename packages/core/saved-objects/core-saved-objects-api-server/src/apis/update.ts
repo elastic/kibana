@@ -18,6 +18,7 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
   /**
    * An opaque version number which changes on each successful write operation.
    * Can be used for implementing optimistic concurrency control.
+   * Unused for multi-namespace objects
    */
   version?: string;
   /** {@inheritdoc SavedObjectReference} */
@@ -31,6 +32,8 @@ export interface SavedObjectsUpdateOptions<Attributes = unknown> extends SavedOb
    * Defaults to `0` when `version` is provided, `3` otherwise.
    */
   retryOnConflict?: number;
+  /** {@link SavedObjectsRawDocParseOptions.migrationVersionCompatibility} */
+  migrationVersionCompatibility?: 'compatible' | 'raw';
 }
 
 /**

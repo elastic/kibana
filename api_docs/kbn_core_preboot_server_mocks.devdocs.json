@@ -30,7 +30,7 @@
         "label": "InternalPrebootServicePrebootMock",
         "description": [],
         "signature": [
-          "{ readonly isSetupOnHold: jest.MockInstance<boolean, []>; readonly holdSetupUntilResolved: jest.MockInstance<void, [pluginName: string, reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>]>; readonly waitUntilCanSetup: jest.MockInstance<Promise<{ shouldReloadConfig: boolean; }>, []>; } & ",
+          "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [pluginName: string, reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; readonly waitUntilCanSetup: jest.MockInstance<Promise<{ shouldReloadConfig: boolean; }>, [], unknown>; } & ",
           "InternalPrebootServicePreboot"
         ],
         "path": "packages/core/preboot/core-preboot-server-mocks/src/preboot_service.mock.ts",
@@ -46,7 +46,7 @@
         "label": "PrebootServicePrebootMock",
         "description": [],
         "signature": [
-          "{ readonly isSetupOnHold: jest.MockInstance<boolean, []>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>]>; } & ",
+          "{ readonly isSetupOnHold: jest.MockInstance<boolean, [], unknown>; readonly holdSetupUntilResolved: jest.MockInstance<void, [reason: string, promise: Promise<{ shouldReloadConfig: boolean; } | undefined>], unknown>; } & ",
           {
             "pluginId": "@kbn/core-preboot-server",
             "scope": "common",

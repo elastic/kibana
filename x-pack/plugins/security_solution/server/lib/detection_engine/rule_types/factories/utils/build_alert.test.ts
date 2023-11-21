@@ -165,6 +165,7 @@ describe('buildAlert', () => {
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        investigation_fields: undefined,
       },
       [ALERT_RULE_INDICES]: completeRule.ruleParams.index,
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
@@ -358,6 +359,7 @@ describe('buildAlert', () => {
         index: ['auditbeat-*', 'filebeat-*', 'packetbeat-*', 'winlogbeat-*'],
         query: 'user.name: root or user.name: admin',
         filters: [{ query: { match_phrase: { 'host.name': 'some-host' } } }],
+        investigation_fields: undefined,
       },
       ...flattenWithPrefix(ALERT_RULE_NAMESPACE, {
         actions: [],

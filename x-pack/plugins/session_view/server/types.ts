@@ -8,9 +8,11 @@ import {
   RuleRegistryPluginSetupContract as RuleRegistryPluginSetup,
   RuleRegistryPluginStartContract as RuleRegistryPluginStart,
 } from '@kbn/rule-registry-plugin/server';
+import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
 export interface SessionViewSetupPlugins {
   ruleRegistry: RuleRegistryPluginSetup;
+  usageCollection: UsageCollectionSetup;
 }
 
 export interface SessionViewStartPlugins {

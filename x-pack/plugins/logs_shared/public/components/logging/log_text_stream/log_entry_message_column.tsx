@@ -114,3 +114,6 @@ const renderMessageSegments = (messageSegments: LogMessagePart[]): string => {
     })
     .join(' ');
 };
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryMessageColumn;

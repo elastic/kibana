@@ -43,7 +43,7 @@ export type DiscoveredPlugins = {
 };
 
 /** @internal */
-export interface PluginsServiceSetup {
+export interface InternalPluginsServiceSetup {
   /** Indicates whether or not plugins were initialized. */
   initialized: boolean;
   /** Setup contracts returned by plugins. */
@@ -51,7 +51,7 @@ export interface PluginsServiceSetup {
 }
 
 /** @internal */
-export interface PluginsServiceStart {
+export interface InternalPluginsServiceStart {
   /** Start contracts returned by plugins. */
   contracts: Map<PluginName, unknown>;
 }
@@ -72,7 +72,9 @@ export interface PluginsServiceDiscoverDeps {
 }
 
 /** @internal */
-export class PluginsService implements CoreService<PluginsServiceSetup, PluginsServiceStart> {
+export class PluginsService
+  implements CoreService<InternalPluginsServiceSetup, InternalPluginsServiceStart>
+{
   private readonly log: Logger;
   private readonly prebootPluginsSystem: PluginsSystem<PluginType.preboot>;
   private arePrebootPluginsStopped = false;
@@ -199,7 +201,7 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
     this.log.debug('Stopping plugins service');
 
     if (!this.arePrebootPluginsStopped) {
-      this.arePrebootPluginsStopped = false;
+      this.arePrebootPluginsStopped = true;
       await this.prebootPluginsSystem.stopPlugins();
     }
 
@@ -277,6 +279,14 @@ export class PluginsService implements CoreService<PluginsServiceSetup, PluginsS
             Array.isArray(plugin.configPath) ? plugin.configPath.join('.') : plugin.configPath,
             getFlattenedObject(configDescriptor.exposeToUsage)
           );
+        }
+        if (configDescriptor.dynamicConfig) {
+          const configKeys = Object.entries(getFlattenedObject(configDescriptor.dynamicConfig))
+            .filter(([, value]) => value === true)
+            .map(([key]) => key);
+          if (configKeys.length > 0) {
+            this.coreContext.configService.addDynamicConfigPaths(plugin.configPath, configKeys);
+          }
         }
         this.coreContext.configService.setSchema(plugin.configPath, configDescriptor.schema);
       }

@@ -14,7 +14,7 @@ const ALLOWED_RULE_TYPES = ['apm.transaction_duration'];
 const isUnsafeAlertDetailsFlag = (
   subject: string
 ): subject is keyof ConfigSchema['unsafe']['alertDetails'] =>
-  ['uptime', 'logs', 'metrics'].includes(subject);
+  ['uptime', 'logs', 'metrics', 'observability'].includes(subject);
 
 // We are mapping the ruleTypeId from the feature flag with the ruleTypeId from the alert
 // to know whether the feature flag is enabled or not.

@@ -82,9 +82,7 @@ describe('GettingStartedPage', () => {
           loading: false,
         },
         agentPolicies: {
-          data: {
-            total: 0,
-          },
+          data: [],
           isAddingNewPrivateLocation: true,
         },
       },
@@ -109,10 +107,7 @@ describe('GettingStartedPage', () => {
           loading: false,
         },
         agentPolicies: {
-          data: {
-            total: 1,
-            items: [{}],
-          },
+          data: [{}],
           isAddingNewPrivateLocation: true,
         },
       },
@@ -141,10 +136,7 @@ describe('GettingStartedPage', () => {
             loading: false,
           },
           agentPolicies: {
-            data: {
-              total: 1,
-              items: [{}],
-            },
+            data: [{}],
             isAddingNewPrivateLocation: true,
           },
         },

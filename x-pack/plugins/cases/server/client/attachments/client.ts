@@ -5,14 +5,12 @@
  * 2.0.
  */
 
+import type { Case, Attachments, Attachment } from '../../../common/types/domain';
 import type {
   AlertResponse,
-  Comments,
+  AttachmentsFindResponse,
   BulkGetAttachmentsResponse,
-  Case,
-  Comment,
-  CommentsFindResponse,
-} from '../../../common/api';
+} from '../../../common/types/api';
 import type { CasesClient } from '../client';
 
 import type { CasesClientInternal } from '../client_internal';
@@ -60,7 +58,7 @@ export interface AttachmentsSubClient {
   /**
    * Retrieves all comments matching the search criteria.
    */
-  find(findArgs: FindCommentsArgs): Promise<CommentsFindResponse>;
+  find(findArgs: FindCommentsArgs): Promise<AttachmentsFindResponse>;
   /**
    * Retrieves all alerts attach to a case given a single case ID
    */
@@ -68,11 +66,11 @@ export interface AttachmentsSubClient {
   /**
    * Gets all attachments for a single case.
    */
-  getAll(getAllArgs: GetAllArgs): Promise<Comments>;
+  getAll(getAllArgs: GetAllArgs): Promise<Attachments>;
   /**
    * Retrieves a single attachment for a case.
    */
-  get(getArgs: GetArgs): Promise<Comment>;
+  get(getArgs: GetArgs): Promise<Attachment>;
   /**
    * Updates a specific attachment.
    *

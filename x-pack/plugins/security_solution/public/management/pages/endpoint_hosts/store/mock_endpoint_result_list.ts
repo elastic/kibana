@@ -32,6 +32,8 @@ import type { GetPolicyListResponse } from '../../policy/types';
 import { pendingActionsResponseMock } from '../../../../common/lib/endpoint_pending_actions/mocks';
 import {
   ACTION_STATUS_ROUTE,
+  ENDPOINT_DEFAULT_SORT_DIRECTION,
+  ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../../common/endpoint/constants';
@@ -67,6 +69,8 @@ export const mockEndpointResultList: (options?: {
     total,
     page,
     pageSize,
+    sortDirection: ENDPOINT_DEFAULT_SORT_DIRECTION,
+    sortField: ENDPOINT_DEFAULT_SORT_FIELD,
   };
   return mock;
 };
@@ -121,6 +125,8 @@ const endpointListApiPathHandlerMocks = ({
         total: endpointsResults?.length || 0,
         page: 0,
         pageSize: 10,
+        sortDirection: ENDPOINT_DEFAULT_SORT_DIRECTION,
+        sortField: ENDPOINT_DEFAULT_SORT_FIELD,
       };
     },
 

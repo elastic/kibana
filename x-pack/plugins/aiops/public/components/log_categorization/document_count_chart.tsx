@@ -8,11 +8,16 @@
 import React, { FC, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import { DocumentCountChart as DocumentCountChartRoot } from '../document_count_content/document_count_chart';
-import { TotalCountHeader } from '../document_count_content/total_count_header';
-import type { Category, SparkLinesPerCategory } from './use_categorize_request';
-import type { EventRate } from './use_categorize_request';
+import { DocumentCountChart as DocumentCountChartRoot } from '@kbn/aiops-components';
+
+import type { Category, SparkLinesPerCategory } from '../../../common/api/log_categorization/types';
+
+import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { DocumentCountStats } from '../../get_document_stats';
+
+import { TotalCountHeader } from '../document_count_content/total_count_header';
+
+import type { EventRate } from './use_categorize_request';
 
 interface Props {
   totalCount: number;
@@ -31,6 +36,8 @@ export const DocumentCountChart: FC<Props> = ({
   selectedCategory,
   documentCountStats,
 }) => {
+  const { data, uiSettings, fieldFormats, charts } = useAiopsAppContext();
+
   const chartPointsSplitLabel = i18n.translate(
     'xpack.aiops.logCategorization.chartPointsSplitLabel',
     {
@@ -42,8 +49,10 @@ export const DocumentCountChart: FC<Props> = ({
     return eventRate.map(({ key, docCount }) => {
       let value = docCount;
       if (category && sparkLines[category.key] && sparkLines[category.key][key]) {
-        value -= sparkLines[category.key][key];
+        const val = sparkLines[category.key][key];
+        value = val > docCount ? 0 : docCount - val;
       }
+
       return { time: key, value };
     });
   }, [eventRate, pinnedCategory, selectedCategory, sparkLines]);
@@ -51,11 +60,13 @@ export const DocumentCountChart: FC<Props> = ({
   const chartPointsSplit = useMemo(() => {
     const category = selectedCategory ?? pinnedCategory ?? null;
     return category !== null
-      ? eventRate.map(({ key }) => {
-          const value =
+      ? eventRate.map(({ key, docCount }) => {
+          const val =
             sparkLines && sparkLines[category.key] && sparkLines[category.key][key]
               ? sparkLines[category.key][key]
               : 0;
+          const value = val > docCount ? docCount : val;
+
           return { time: key, value };
         })
       : undefined;
@@ -69,6 +80,7 @@ export const DocumentCountChart: FC<Props> = ({
     <>
       <TotalCountHeader totalCount={totalCount} />
       <DocumentCountChartRoot
+        dependencies={{ data, uiSettings, fieldFormats, charts }}
         chartPoints={chartPoints}
         chartPointsSplit={chartPointsSplit}
         timeRangeEarliest={eventRate[0].key}

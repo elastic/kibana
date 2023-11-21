@@ -19,6 +19,7 @@ export enum CREATED_BY_LABEL {
   SINGLE_METRIC = 'single-metric-wizard',
   MULTI_METRIC = 'multi-metric-wizard',
   POPULATION = 'population-wizard',
+  ADVANCED = 'advanced-wizard',
   CATEGORIZATION = 'categorization-wizard',
   RARE = 'rare-wizard',
   GEO = 'geo-wizard',
@@ -33,3 +34,5 @@ export const DEFAULT_RARE_BUCKET_SPAN = '1h';
 export const DEFAULT_QUERY_DELAY = '60s';
 
 export const SHARED_RESULTS_INDEX_NAME = 'shared';
+
+export const NUMBER_OF_CATEGORY_EXAMPLES = 5;

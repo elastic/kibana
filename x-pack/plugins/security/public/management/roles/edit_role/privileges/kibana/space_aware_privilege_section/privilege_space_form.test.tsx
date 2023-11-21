@@ -11,13 +11,13 @@ import React from 'react';
 import type { Space } from '@kbn/spaces-plugin/public';
 import { findTestSubject, mountWithIntl } from '@kbn/test-jest-helpers';
 
+import { PrivilegeSpaceForm } from './privilege_space_form';
+import { SpaceSelector } from './space_selector';
 import type { Role } from '../../../../../../../common/model';
 import { createFeature, kibanaFeatures } from '../../../../__fixtures__/kibana_features';
 import { createKibanaPrivileges } from '../../../../__fixtures__/kibana_privileges';
 import { FeatureTable } from '../feature_table';
 import { getDisplayedFeaturePrivileges } from '../feature_table/__fixtures__';
-import { PrivilegeSpaceForm } from './privilege_space_form';
-import { SpaceSelector } from './space_selector';
 
 const createRole = (kibana: Role['kibana'] = []): Role => {
   return {

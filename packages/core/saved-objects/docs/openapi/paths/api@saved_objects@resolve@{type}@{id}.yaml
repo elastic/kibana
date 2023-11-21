@@ -1,0 +1,26 @@
+get:
+  summary: Retrieve a single Kibana saved object by identifier using any legacy URL alias if it exists.
+  operationId: resolveSavedObject
+  description: >
+    Under certain circumstances, when Kibana is upgraded, saved object migrations may necessitate regenerating some object IDs to enable new features.
+    When an object's ID is regenerated, a legacy URL alias is created for that object, preserving its old ID.
+    In such a scenario, that object can be retrieved using either its new ID or its old ID.
+  deprecated: true
+  tags:
+    - saved objects
+  parameters:
+    - $ref: '../components/parameters/saved_object_id.yaml'
+    - $ref: '../components/parameters/saved_object_type.yaml'
+  responses:
+    '200':
+      description: Indicates a successful call.
+      content:
+         application/json:
+          schema:
+            type: object
+    '400':
+      description: Bad request.
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'

@@ -16,7 +16,7 @@ import { useLicense } from '../../hooks/use_license';
 import { SlosWelcomePage } from './slos_welcome';
 import { emptySloList, sloList } from '../../data/slo/slo';
 import { useCapabilities } from '../../hooks/slo/use_capabilities';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 
 jest.mock('@kbn/observability-shared-plugin/public');
 jest.mock('../../utils/kibana_react');
@@ -36,6 +36,7 @@ const mockNavigate = jest.fn();
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
     services: {
+      theme: {},
       application: { navigateToUrl: mockNavigate },
       http: {
         basePath: {
@@ -55,10 +56,12 @@ describe('SLOs Welcome Page', () => {
 
   describe('when the incorrect license is found', () => {
     it('renders the welcome message with subscription buttons', async () => {
-      useFetchSloListMock.mockReturnValue({ isLoading: false, sloList: emptySloList });
+      useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       useLicenseMock.mockReturnValue({ hasAtLeast: () => false });
       useGlobalDiagnosisMock.mockReturnValue({
-        isError: false,
+        data: {
+          userPrivileges: { write: { has_all_requested: true }, read: { has_all_requested: true } },
+        },
       });
 
       render(<SlosWelcomePage />);
@@ -79,7 +82,7 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and no results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, emptySloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: emptySloList });
       });
 
       it('disables the create slo button when no write capabilities', async () => {
@@ -103,7 +106,12 @@ describe('SLOs Welcome Page', () => {
           hasReadCapabilities: true,
         });
         useGlobalDiagnosisMock.mockReturnValue({
-          isError: true,
+          data: {
+            userPrivileges: {
+              write: { has_all_requested: false },
+              read: { has_all_requested: true },
+            },
+          },
         });
 
         render(<SlosWelcomePage />);
@@ -115,7 +123,12 @@ describe('SLOs Welcome Page', () => {
 
       it('should display the welcome message with a Create new SLO button which should navigate to the SLO Creation page', async () => {
         useGlobalDiagnosisMock.mockReturnValue({
-          isError: false,
+          data: {
+            userPrivileges: {
+              write: { has_all_requested: true },
+              read: { has_all_requested: true },
+            },
+          },
         });
 
         render(<SlosWelcomePage />);
@@ -133,9 +146,14 @@ describe('SLOs Welcome Page', () => {
 
     describe('when loading is done and results are found', () => {
       beforeEach(() => {
-        useFetchSloListMock.mockReturnValue({ isLoading: false, sloList });
+        useFetchSloListMock.mockReturnValue({ isLoading: false, data: sloList });
         useGlobalDiagnosisMock.mockReturnValue({
-          isError: false,
+          data: {
+            userPrivileges: {
+              write: { has_all_requested: true },
+              read: { has_all_requested: true },
+            },
+          },
         });
       });
 

@@ -134,4 +134,24 @@ describe('Expand Dotted', () => {
       },
     });
   });
+  it('should merge objects when field represented as an object followed by similar dotted field', () => {
+    const dottedObj = {
+      kibana: { test2: 'b', test3: 'c' },
+      'kibana.test1': 'a',
+      'kibana.test3': 'd',
+    };
+    expect(expandDottedObject(dottedObj)).toEqual({
+      kibana: { test1: 'a', test2: 'b', test3: 'd' },
+    });
+  });
+  it('should merge objects when dotted field followed by similar field represented as an object', () => {
+    const dottedObj = {
+      'kibana.test1': 'a',
+      'kibana.test3': 'd',
+      kibana: { test2: 'b', test3: 'c' },
+    };
+    expect(expandDottedObject(dottedObj)).toEqual({
+      kibana: { test1: 'a', test2: 'b', test3: 'c' },
+    });
+  });
 });

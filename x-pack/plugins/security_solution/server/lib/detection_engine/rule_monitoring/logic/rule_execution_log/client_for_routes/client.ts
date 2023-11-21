@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 import type {
   GetRuleExecutionEventsResponse,
   GetRuleExecutionResultsResponse,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
 import type { IEventLogReader } from '../event_log/event_log_reader';

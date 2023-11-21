@@ -49,22 +49,14 @@ export const filterAndConvertFields = (
     if (indexPattern === INDEX_NAME) {
       filteredFields = fields.filter((field) => field.name.startsWith(fieldPrefix));
     } else {
-      // Concatenate the fields with the prefix
-      const withPrefix = fields.map((field) => {
-        return !field.name.startsWith(fieldPrefix)
-          ? { ...field, name: `${fieldPrefix}.${field.name}` }
-          : field;
-      });
       // filter out fields that have names to be hidden
-      filteredFields = withPrefix.filter((field) => {
-        if (field.name.startsWith(fieldPrefix)) {
-          for (const hiddenField of HIDDEN_FIELDS) {
-            if (field.name.includes(hiddenField)) {
-              return false;
-            }
+      filteredFields = fields.filter((field) => {
+        for (const hiddenField of HIDDEN_FIELDS) {
+          if (field.name.includes(hiddenField)) {
+            return false;
           }
-          return true;
         }
+        return true;
       });
     }
   } else {

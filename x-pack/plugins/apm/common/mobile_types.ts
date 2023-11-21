@@ -5,16 +5,15 @@
  * 2.0.
  */
 
-export enum MobilePropertyType {
+export enum MobileProperty {
   Device = 'device',
   NetworkConnectionType = 'netConnectionType',
   OsVersion = 'osVersion',
   AppVersion = 'appVersion',
 }
 
-export type MobilePropertyNctType = MobilePropertyType.NetworkConnectionType;
-
-export type MobilePropertyDeviceOsAppVersionType =
-  | MobilePropertyType.Device
-  | MobilePropertyType.OsVersion
-  | MobilePropertyType.AppVersion;
+export type MobilePropertyType =
+  | MobileProperty.Device
+  | MobileProperty.OsVersion
+  | MobileProperty.AppVersion
+  | MobileProperty.NetworkConnectionType;

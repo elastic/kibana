@@ -16,11 +16,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { InferenceConfiguration } from './inference_config';
 import { MLInferenceLogic } from './ml_inference_logic';
 import { MultiFieldMapping, SelectedFieldMappings } from './multi_field_selector';
-import { SingleFieldMapping } from './single_field_selector';
 
 export const ConfigureFields: React.FC = () => {
   const {
-    isTextExpansionModelSelected,
     addInferencePipelineModal: { configuration },
   } = useValues(MLInferenceLogic);
   const areInputsDisabled = configuration.existingPipeline !== false;
@@ -73,19 +71,16 @@ export const ConfigureFields: React.FC = () => {
           </EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="m" />
+      <EuiSpacer size="s" />
       <EuiForm component="form">
-        {isTextExpansionModelSelected ? (
+        {areInputsDisabled || (
           <>
-            {areInputsDisabled || <MultiFieldMapping />}
-            <SelectedFieldMappings isReadOnly={areInputsDisabled} />
-          </>
-        ) : (
-          <>
-            <SingleFieldMapping />
-            <InferenceConfiguration />
+            <MultiFieldMapping />
+            <EuiSpacer size="s" />
           </>
         )}
+        <SelectedFieldMappings isReadOnly={areInputsDisabled} />
+        <InferenceConfiguration />
       </EuiForm>
     </>
   );

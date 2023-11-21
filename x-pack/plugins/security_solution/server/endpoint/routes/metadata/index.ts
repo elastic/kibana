@@ -7,6 +7,10 @@
 
 import { schema } from '@kbn/config-schema';
 
+import {
+  GetMetadataListRequestSchema,
+  GetMetadataRequestSchema,
+} from '../../../../common/api/endpoint';
 import { HostStatus } from '../../../../common/endpoint/types';
 import type { EndpointAppContext } from '../../types';
 import {
@@ -21,7 +25,6 @@ import {
   HOST_METADATA_LIST_ROUTE,
   METADATA_TRANSFORMS_STATUS_ROUTE,
 } from '../../../../common/endpoint/constants';
-import { GetMetadataListRequestSchema } from '../../../../common/endpoint/schema/metadata';
 import { withEndpointAuthz } from '../with_endpoint_authz';
 
 /* Filters that can be applied to the endpoint fetch route */
@@ -39,10 +42,6 @@ export const endpointFilters = schema.object({
     )
   ),
 });
-
-export const GetMetadataRequestSchema = {
-  params: schema.object({ id: schema.string() }),
-};
 
 export function registerEndpointRoutes(
   router: SecuritySolutionPluginRouter,
@@ -104,7 +103,7 @@ export function registerEndpointRoutes(
       withEndpointAuthz(
         { all: ['canReadSecuritySolution'] },
         logger,
-        getMetadataTransformStatsHandler(logger)
+        getMetadataTransformStatsHandler(endpointAppContext, logger)
       )
     );
 }

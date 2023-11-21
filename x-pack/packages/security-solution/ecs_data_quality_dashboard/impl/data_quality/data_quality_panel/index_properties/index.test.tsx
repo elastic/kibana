@@ -109,6 +109,7 @@ const defaultProps: Props = {
   formatBytes,
   formatNumber,
   getGroupByFieldsOnClick: jest.fn(),
+  indexId: '1xxx',
   ilmPhase: 'hot',
   indexName: 'auditbeat-custom-index-1',
   isAssistantEnabled: true,

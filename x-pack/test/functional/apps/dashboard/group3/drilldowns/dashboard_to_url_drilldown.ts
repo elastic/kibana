@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('Dashboard to URL drilldown', function () {
     before(async () => {
       log.debug('Dashboard to URL:initTests');
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.preserveCrossAppState();
     });
 

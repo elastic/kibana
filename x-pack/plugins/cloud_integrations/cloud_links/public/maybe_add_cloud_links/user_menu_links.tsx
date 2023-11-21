@@ -9,17 +9,17 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { SecurityPluginStart, UserMenuLink } from '@kbn/security-plugin/public';
-import { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import { ThemDarkModeToggle } from './theme_darkmode_toggle';
+import type { CoreStart } from '@kbn/core/public';
+import { ThemeDarkModeToggle } from './theme_darkmode_toggle';
 
 export const createUserMenuLinks = ({
+  core,
   cloud,
   security,
-  uiSettingsClient,
 }: {
+  core: CoreStart;
   cloud: CloudStart;
   security: SecurityPluginStart;
-  uiSettingsClient: IUiSettingsClient;
 }): UserMenuLink[] => {
   const { profileUrl, billingUrl, organizationUrl } = cloud;
 
@@ -60,7 +60,7 @@ export const createUserMenuLinks = ({
   }
 
   userMenuLinks.push({
-    content: <ThemDarkModeToggle security={security} uiSettingsClient={uiSettingsClient} />,
+    content: <ThemeDarkModeToggle core={core} security={security} />,
     order: 400,
     label: '',
     iconType: '',

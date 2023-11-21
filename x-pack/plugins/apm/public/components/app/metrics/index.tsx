@@ -8,8 +8,8 @@
 import React from 'react';
 import {
   isJavaAgentName,
-  isJRubyAgent,
-  isAWSLambdaAgent,
+  isJRubyAgentName,
+  isAWSLambdaAgentName,
 } from '../../../../common/agent_name';
 import { useApmServiceContext } from '../../../context/apm_service/use_apm_service_context';
 import { ServerlessMetrics } from './serverless_metrics';
@@ -20,14 +20,7 @@ import { hasDashboardFile } from './static_dashboard/helper';
 
 export function Metrics() {
   const { agentName, runtimeName, serverlessType } = useApmServiceContext();
-  const isAWSLambda = isAWSLambdaAgent(serverlessType);
-
-  if (
-    !isAWSLambda &&
-    (isJavaAgentName(agentName) || isJRubyAgent(agentName, runtimeName))
-  ) {
-    return <JvmMetricsOverview />;
-  }
+  const isAWSLambda = isAWSLambdaAgentName(serverlessType);
 
   if (isAWSLambda) {
     return <ServerlessMetrics />;
@@ -38,6 +31,7 @@ export function Metrics() {
     runtimeName,
     serverlessType,
   });
+
   if (hasStaticDashboard) {
     return (
       <JsonMetricsDashboard
@@ -46,6 +40,13 @@ export function Metrics() {
         serverlessType={serverlessType}
       />
     );
+  }
+
+  if (
+    !isAWSLambda &&
+    (isJavaAgentName(agentName) || isJRubyAgentName(agentName, runtimeName))
+  ) {
+    return <JvmMetricsOverview />;
   }
 
   return <ServiceMetrics />;

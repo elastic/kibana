@@ -7,11 +7,11 @@
 
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 
+import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 import { DEFAULT_SPACE_ID } from '../../common/constants';
 import { spacesClientServiceMock } from '../spaces_client/spaces_client_service.mock';
 import { SpacesService } from '../spaces_service';
 import { spacesServiceMock } from '../spaces_service/spaces_service.mock';
-import { createSpacesTutorialContextFactory } from './spaces_tutorial_context_factory';
 
 const service = new SpacesService();
 

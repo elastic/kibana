@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { CaseMetricsFeature } from '../../../common/types/api';
 import type { CasesClientMock } from '../mocks';
 import { getCasesMetrics } from './get_cases_metrics';
 import { createMockClientArgs, createMockClient } from './test_utils/client';
@@ -35,19 +36,23 @@ describe('getCasesMetrics', () => {
     it('throws with excess fields', async () => {
       await expect(
         // @ts-expect-error: excess attribute
-        getCasesMetrics({ features: ['mttr'], foo: 'bar' }, client, clientArgs)
+        getCasesMetrics({ features: [CaseMetricsFeature.MTTR], foo: 'bar' }, client, clientArgs)
       ).rejects.toThrow('invalid keys "foo"');
     });
 
     it('returns the mttr metric', async () => {
-      const metrics = await getCasesMetrics({ features: ['mttr'] }, client, clientArgs);
+      const metrics = await getCasesMetrics(
+        { features: [CaseMetricsFeature.MTTR] },
+        client,
+        clientArgs
+      );
       expect(metrics).toEqual({ mttr: 5 });
     });
 
     it('calls the executeAggregations correctly', async () => {
       await getCasesMetrics(
         {
-          features: ['mttr'],
+          features: [CaseMetricsFeature.MTTR],
           from: '2022-04-28T15:18:00.000Z',
           to: '2022-04-28T15:22:00.000Z',
           owner: 'cases',
@@ -127,6 +132,21 @@ describe('getCasesMetrics', () => {
           },
         }
       `);
+    });
+  });
+
+  describe('validation', () => {
+    beforeEach(() => {
+      mockServices.services.caseService.executeAggregations.mockResolvedValue({
+        mttr: { value: 5 },
+      });
+    });
+
+    it('throws with unknown feature value', async () => {
+      // @ts-expect-error: invalid feature value
+      await expect(getCasesMetrics({ features: ['foobar'] }, client, clientArgs)).rejects.toThrow(
+        'Invalid value "foobar" supplied to "features"'
+      );
     });
   });
 });

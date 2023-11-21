@@ -25,7 +25,7 @@ export interface AggParamsCardinality extends BaseAggParams {
 export const getCardinalityMetricAgg = () =>
   new MetricAggType({
     name: METRIC_TYPES.CARDINALITY,
-    valueType: 'number',
+    getValueType: () => 'number',
     expressionName: aggCardinalityFnName,
     title: uniqueCountTitle,
     enableEmptyAsNull: true,

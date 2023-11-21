@@ -8,6 +8,10 @@
 import expect from '@kbn/expect';
 import { SuperTest } from 'supertest';
 import { CSV_QUOTE_VALUES_SETTING } from '@kbn/share-plugin/common/constants';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function featureControlsTests({ getService }: FtrProviderContext) {
@@ -52,7 +56,7 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .post(`${basePath}/api/kibana/settings`)
+      .post(`${basePath}/internal/kibana/settings`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
       .send({ changes: { [CSV_QUOTE_VALUES_SETTING]: null } })
@@ -64,9 +68,11 @@ export default function featureControlsTests({ getService }: FtrProviderContext)
     const basePath = spaceId ? `/s/${spaceId}` : '';
 
     return await supertest
-      .post(`${basePath}/api/telemetry/v2/optIn`)
+      .post(`${basePath}/internal/telemetry/optIn`)
       .auth(username, password)
       .set('kbn-xsrf', 'foo')
+      .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+      .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send({ enabled: true })
       .then((response: any) => ({ error: undefined, response }))
       .catch((error: any) => ({ error, response: undefined }));

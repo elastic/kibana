@@ -60,6 +60,7 @@ export interface ActionAccordionFormProps {
   defaultActionMessage?: string;
   setActionIdByIndex: (id: string, index: number) => void;
   setActionGroupIdByIndex?: (group: string, index: number) => void;
+  setActionUseAlertDataForTemplate?: (enabled: boolean, index: number) => void;
   setActions: (actions: RuleAction[]) => void;
   setActionParamsProperty: (key: string, value: RuleActionParam, index: number) => void;
   setActionFrequencyProperty: (key: string, value: RuleActionParam, index: number) => void;
@@ -70,6 +71,7 @@ export interface ActionAccordionFormProps {
   ) => void;
   featureId: string;
   producerId: string;
+  ruleTypeId?: string;
   messageVariables?: ActionVariables;
   summaryMessageVariables?: ActionVariables;
   setHasActionsDisabled?: (value: boolean) => void;
@@ -80,11 +82,10 @@ export interface ActionAccordionFormProps {
   hideActionHeader?: boolean;
   hideNotifyWhen?: boolean;
   defaultSummaryMessage?: string;
-  hasSummary?: boolean;
+  hasAlertsMappings?: boolean;
   minimumThrottleInterval?: [number | undefined, string];
   notifyWhenSelectOptions?: NotifyWhenSelectOptions[];
   defaultRuleFrequency?: RuleActionFrequency;
-  ruleTypeId?: string;
   hasFieldsForAAD?: boolean;
   disableErrorMessages?: boolean;
 }
@@ -99,6 +100,7 @@ export const ActionForm = ({
   defaultActionGroupId,
   setActionIdByIndex,
   setActionGroupIdByIndex,
+  setActionUseAlertDataForTemplate,
   setActions,
   setActionParamsProperty,
   setActionFrequencyProperty,
@@ -116,7 +118,7 @@ export const ActionForm = ({
   hideActionHeader,
   hideNotifyWhen,
   defaultSummaryMessage,
-  hasSummary,
+  hasAlertsMappings,
   minimumThrottleInterval,
   notifyWhenSelectOptions,
   defaultRuleFrequency = DEFAULT_FREQUENCY,
@@ -437,6 +439,7 @@ export const ActionForm = ({
               actionConnector={actionConnector}
               index={index}
               key={`action-form-action-at-${actionItem.uuid}`}
+              setActionUseAlertDataForTemplate={setActionUseAlertDataForTemplate}
               setActionParamsProperty={setActionParamsProperty}
               setActionFrequencyProperty={setActionFrequencyProperty}
               setActionAlertsFilterProperty={setActionAlertsFilterProperty}
@@ -493,7 +496,7 @@ export const ActionForm = ({
               }}
               hideNotifyWhen={hideNotifyWhen}
               defaultSummaryMessage={defaultSummaryMessage}
-              hasSummary={hasSummary}
+              hasAlertsMappings={hasAlertsMappings}
               minimumThrottleInterval={minimumThrottleInterval}
               notifyWhenSelectOptions={notifyWhenSelectOptions}
               defaultNotifyWhenValue={defaultRuleFrequency.notifyWhen}

@@ -29,7 +29,7 @@ import { ExplorerChartSingleMetric } from './explorer_chart_single_metric';
 import { ExplorerChartLabel } from './components/explorer_chart_label';
 
 import { CHART_TYPE } from '../explorer_constants';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../common/constants/search';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { MlTooltipComponent } from '../../components/chart_tooltip';
@@ -238,7 +238,7 @@ function ExplorerChartContainer({
       {/* so that we can use chart's ref which controls the activeCursor api */}
       <div style={{ width: 0, height: 0 }}>
         <Chart ref={chartRef}>
-          <Settings noResults={<div />} width={0} height={0} />
+          <Settings noResults={<div />} width={0} height={0} locale={i18n.getLocale()} />
           {/* Just need an empty chart to access cursor service */}
           <BarSeries id={'count'} xAccessor="x" yAccessors={['y']} data={[]} />
         </Chart>

@@ -12,18 +12,17 @@ import { Redirect, RouteChildrenProps } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { i18n } from '@kbn/i18n';
-import { I18nProvider } from '@kbn/i18n-react';
 
 import { LocationDescriptor } from 'history';
-import { KibanaThemeProvider } from '@kbn/kibana-react-plugin/public';
 import { url } from '@kbn/kibana-utils-plugin/public';
 import { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { StartServicesAccessor } from '@kbn/core/public';
+import type { SectionRegistryStart } from '@kbn/management-settings-section-registry';
+import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 
 import { QUERY } from './advanced_settings';
 import { Settings } from './settings';
-import { ComponentRegistry } from '../types';
 
 import './index.scss';
 
@@ -56,11 +55,12 @@ const redirectUrl = ({ match, location }: RedirectUrlProps): LocationDescriptor 
 export async function mountManagementSection(
   getStartServices: StartServicesAccessor,
   params: ManagementAppMountParams,
-  componentRegistry: ComponentRegistry['start'],
+  sectionRegistry: SectionRegistryStart,
   usageCollection?: UsageCollectionSetup
 ) {
   params.setBreadcrumbs(crumb);
-  const [{ settings, notifications, docLinks, application, chrome }] = await getStartServices();
+  const [{ settings, notifications, docLinks, application, chrome, i18n: i18nStart, theme }] =
+    await getStartServices();
 
   const { advancedSettings, globalSettings } = application.capabilities;
   const canSaveAdvancedSettings = advancedSettings.save as boolean;
@@ -74,34 +74,32 @@ export async function mountManagementSection(
   chrome.docTitle.change(title);
 
   ReactDOM.render(
-    <KibanaThemeProvider theme$={params.theme$}>
-      <I18nProvider>
-        <Router history={params.history}>
-          <Routes>
-            {/* TODO: remove route param (`query`) in 7.13 */}
-            <Route path={`/:${QUERY}`}>
-              {(props: RedirectUrlProps) => <Redirect to={redirectUrl(props)} />}
-            </Route>
-            <Route path="/">
-              <Settings
-                history={params.history}
-                enableSaving={{
-                  namespace: canSaveAdvancedSettings,
-                  global: canSaveGlobalSettings,
-                }}
-                enableShowing={{ namespace: true, global: canShowGlobalSettings }}
-                toasts={notifications.toasts}
-                docLinks={docLinks.links}
-                settingsService={settings}
-                theme={params.theme$}
-                componentRegistry={componentRegistry}
-                trackUiMetric={trackUiMetric}
-              />
-            </Route>
-          </Routes>
-        </Router>
-      </I18nProvider>
-    </KibanaThemeProvider>,
+    <KibanaRenderContextProvider {...{ i18n: i18nStart, theme }}>
+      <Router history={params.history}>
+        <Routes>
+          {/* TODO: remove route param (`query`) in 7.13 */}
+          <Route path={`/:${QUERY}`}>
+            {(props: RedirectUrlProps) => <Redirect to={redirectUrl(props)} />}
+          </Route>
+          <Route path="/">
+            <Settings
+              history={params.history}
+              enableSaving={{
+                namespace: canSaveAdvancedSettings,
+                global: canSaveGlobalSettings,
+              }}
+              enableShowing={{ namespace: true, global: canShowGlobalSettings }}
+              toasts={notifications.toasts}
+              docLinks={docLinks.links}
+              settingsService={settings}
+              theme={params.theme$}
+              sectionRegistry={sectionRegistry}
+              trackUiMetric={trackUiMetric}
+            />
+          </Route>
+        </Routes>
+      </Router>
+    </KibanaRenderContextProvider>,
     params.element
   );
   return () => {

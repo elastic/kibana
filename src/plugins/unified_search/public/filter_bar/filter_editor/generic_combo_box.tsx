@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme } from '@elastic/eui';
+import { EuiComboBox, EuiComboBoxOptionOption, useEuiTheme, EuiComboBoxProps } from '@elastic/eui';
 import React from 'react';
 import { genericComboBoxStyle } from './generic_combo_box.styles';
 
@@ -20,6 +20,8 @@ export interface GenericComboBoxProps<T> {
     searchValue: string,
     OPTION_CONTENT_CLASSNAME: string
   ) => React.ReactNode;
+  inputRef?: ((instance: HTMLInputElement | null) => void) | undefined;
+  truncationProps?: EuiComboBoxProps<T>['truncationProps'];
   [propName: string]: any;
 }
 

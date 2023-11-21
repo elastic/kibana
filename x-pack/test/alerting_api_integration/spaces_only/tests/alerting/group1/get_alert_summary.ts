@@ -25,8 +25,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
   const retry = getService('retry');
   const alertUtils = new AlertUtils({ space: Spaces.space1, supertestWithoutAuth });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/156792
-  describe.skip('getAlertSummary', () => {
+  describe('getAlertSummary', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     afterEach(() => objectRemover.removeAll());
@@ -184,6 +183,7 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           status: 'OK',
           muted: true,
           flapping: false,
+          tracked: true,
         },
       });
     });
@@ -249,11 +249,13 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertA.activeStartDate,
           flapping: false,
+          tracked: true,
         },
         alertB: {
           status: 'OK',
           muted: false,
           flapping: false,
+          tracked: true,
         },
         alertC: {
           status: 'Active',
@@ -261,17 +263,39 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertC.activeStartDate,
           flapping: false,
+          tracked: true,
         },
         alertD: {
           status: 'OK',
           muted: true,
           flapping: false,
+          tracked: true,
         },
       };
       expect(actualAlerts).to.eql(expectedAlerts);
     });
 
     it('handles multi-alert status during maintenance window', async () => {
+      const { body: createdMaintenanceWindow } = await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          title: 'test-maintenance-window',
+          duration: 60 * 60 * 1000, // 1 hr
+          r_rule: {
+            dtstart: new Date().toISOString(),
+            tzid: 'UTC',
+            freq: 2, // weekly
+          },
+        });
+      objectRemover.add(
+        Spaces.space1.id,
+        createdMaintenanceWindow.id,
+        'rules/maintenance_window',
+        'alerting',
+        true
+      );
+
       // pattern of when the rule should fire
       const pattern = {
         alertA: [true, true, true, true],
@@ -293,27 +317,6 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
 
       objectRemover.add(Spaces.space1.id, createdRule.id, 'rule', 'alerting');
 
-      const { body: createdMaintenanceWindow } = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/internal/alerting/rules/maintenance_window`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          title: 'test-maintenance-window',
-          duration: 60 * 60 * 1000, // 1 hr
-          r_rule: {
-            dtstart: new Date().toISOString(),
-            tzid: 'UTC',
-            freq: 2, // weekly
-          },
-        });
-
-      objectRemover.add(
-        Spaces.space1.id,
-        createdMaintenanceWindow.id,
-        'rules/maintenance_window',
-        'alerting',
-        true
-      );
-
       await alertUtils.muteInstance(createdRule.id, 'alertC');
       await alertUtils.muteInstance(createdRule.id, 'alertD');
       await waitForEvents(createdRule.id, ['new-instance', 'recovered-instance']);
@@ -334,12 +337,14 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertA.activeStartDate,
           flapping: false,
+          tracked: true,
           maintenanceWindowIds: [createdMaintenanceWindow.id],
         },
         alertB: {
           status: 'OK',
           muted: false,
           flapping: false,
+          tracked: true,
           maintenanceWindowIds: [createdMaintenanceWindow.id],
         },
         alertC: {
@@ -348,12 +353,14 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
           actionGroupId: 'default',
           activeStartDate: actualAlerts.alertC.activeStartDate,
           flapping: false,
+          tracked: true,
           maintenanceWindowIds: [createdMaintenanceWindow.id],
         },
         alertD: {
           status: 'OK',
           muted: true,
           flapping: false,
+          tracked: true,
         },
       };
       expect(actualAlerts).to.eql(expectedAlerts);
@@ -400,11 +407,13 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
             actionGroupId: 'default',
             activeStartDate: actualAlerts.alertA.activeStartDate,
             flapping: false,
+            tracked: true,
           },
           alertB: {
             status: 'OK',
             muted: false,
             flapping: false,
+            tracked: true,
           },
           alertC: {
             status: 'Active',
@@ -412,11 +421,13 @@ export default function createGetAlertSummaryTests({ getService }: FtrProviderCo
             actionGroupId: 'default',
             activeStartDate: actualAlerts.alertC.activeStartDate,
             flapping: false,
+            tracked: true,
           },
           alertD: {
             status: 'OK',
             muted: true,
             flapping: false,
+            tracked: true,
           },
         };
         expect(actualAlerts).to.eql(expectedAlerts);

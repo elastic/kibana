@@ -26,7 +26,7 @@ export const ManageEmptyState: FC<{
 }) => {
   const { data: agentPolicies } = useSelector(selectAgentPolicies);
 
-  if (agentPolicies?.total === 0 && showNeedAgentPolicy) {
+  if (agentPolicies?.length === 0 && showNeedAgentPolicy) {
     return <AgentPolicyNeeded />;
   }
 

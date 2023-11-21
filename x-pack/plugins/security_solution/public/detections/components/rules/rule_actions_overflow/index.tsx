@@ -16,7 +16,7 @@ import React, { useCallback, useMemo } from 'react';
 import styled from 'styled-components';
 import { APP_UI_ID, SecurityPageName } from '../../../../../common/constants';
 import { DuplicateOptions } from '../../../../../common/detection_engine/rule_management/constants';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { getRulesUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { useBoolState } from '../../../../common/hooks/use_bool_state';
 import { SINGLE_RULE_ACTIONS } from '../../../../common/lib/apm/user_actions';
@@ -49,6 +49,7 @@ interface RuleActionsOverflowComponentProps {
   userHasPermissions: boolean;
   canDuplicateRuleWithActions: boolean;
   showBulkDuplicateExceptionsConfirmation: () => Promise<string | null>;
+  confirmDeletion: () => Promise<boolean>;
 }
 
 /**
@@ -59,6 +60,7 @@ const RuleActionsOverflowComponent = ({
   userHasPermissions,
   canDuplicateRuleWithActions,
   showBulkDuplicateExceptionsConfirmation,
+  confirmDeletion,
 }: RuleActionsOverflowComponentProps) => {
   const [isPopoverOpen, , closePopover, togglePopover] = useBoolState();
   const { navigateToApp } = useKibana().services.application;
@@ -92,7 +94,7 @@ const RuleActionsOverflowComponent = ({
                   return;
                 }
                 const result = await executeBulkAction({
-                  type: BulkActionType.duplicate,
+                  type: BulkActionTypeEnum.duplicate,
                   ids: [rule.id],
                   duplicatePayload: {
                     include_exceptions:
@@ -145,10 +147,16 @@ const RuleActionsOverflowComponent = ({
               disabled={!userHasPermissions}
               data-test-subj="rules-details-delete-rule"
               onClick={async () => {
-                startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 closePopover();
+
+                if ((await confirmDeletion()) === false) {
+                  // User has canceled deletion
+                  return;
+                }
+
+                startTransaction({ name: SINGLE_RULE_ACTIONS.DELETE });
                 await executeBulkAction({
-                  type: BulkActionType.delete,
+                  type: BulkActionTypeEnum.delete,
                   ids: [rule.id],
                 });
 
@@ -171,6 +179,7 @@ const RuleActionsOverflowComponent = ({
       startTransaction,
       userHasPermissions,
       downloadExportedRules,
+      confirmDeletion,
     ]
   );
 

@@ -75,7 +75,10 @@ export class FatalErrorsScreen extends React.Component<Props, State> {
 
   public render() {
     return (
-      <EuiPage style={{ minHeight: '100vh', alignItems: 'center' }}>
+      <EuiPage
+        style={{ minHeight: '100vh', alignItems: 'center' }}
+        data-test-subj="fatalErrorScreen"
+      >
         <EuiPageBody>
           <EuiPageSection alignment="center">
             <EuiEmptyPrompt

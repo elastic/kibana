@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CaseSeverity, CaseStatuses } from '../../common/api';
+import { CaseSeverity, CaseStatuses } from '../../common/types/domain';
 import { CASE_COMMENT_SAVED_OBJECT, CASE_SAVED_OBJECT } from '../../common/constants';
 import { CasePersistedSeverity, CasePersistedStatus } from './types/case';
 

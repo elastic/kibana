@@ -10,7 +10,7 @@ import type { RuleParamsAndRefs } from '@kbn/alerting-plugin/server';
 
 import type { RuleParams } from '../../rule_schema';
 
-import { isMachineLearningParams } from '../utils/utils';
+import { isMachineLearningParams, isEsqlParams } from '../utils/utils';
 
 import { extractExceptionsList } from './extract_exceptions_list';
 import { extractDataView } from './extract_data_view';
@@ -51,7 +51,7 @@ export const extractReferences = <TParams extends RuleParams>({
 
   // if statement is needed here because dataViewId is not on the base rule params
   // much like how the index property is not on the base rule params either
-  if (!isMachineLearningParams(params)) {
+  if (!isMachineLearningParams(params) && !isEsqlParams(params)) {
     returnReferences = [
       ...returnReferences,
       ...extractDataView({

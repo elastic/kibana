@@ -164,7 +164,7 @@ const baseColumns = [
         )}
         tooltipContent={i18n.translate(
           'xpack.csp.findings.findingsTable.findingsTableColumn.ruleBenchmarkColumnTooltipLabel',
-          { defaultMessage: 'The benchmark(s) rules used to evaluate this resource came from' }
+          { defaultMessage: 'The benchmark used to evaluate this resource' }
         )}
       />
     ),
@@ -303,7 +303,7 @@ const FilterableCell: React.FC<{
 export const LimitedResultsBar = () => (
   <>
     <EuiSpacer size="xxl" />
-    <EuiBottomBar data-test-subj="test-bottom-bar">
+    <EuiBottomBar data-test-subj="test-bottom-bar" paddingSize="s">
       <EuiText textAlign="center">
         <FormattedMessage
           id="xpack.csp.findings..bottomBarLabel"

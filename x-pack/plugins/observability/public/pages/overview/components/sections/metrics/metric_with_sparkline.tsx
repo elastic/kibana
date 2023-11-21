@@ -8,6 +8,7 @@
 import { Chart, Settings, AreaSeries, TooltipType, Tooltip } from '@elastic/charts';
 import { EuiFlexItem, EuiFlexGroup, EuiIcon, EuiTextColor } from '@elastic/eui';
 import React, { useContext } from 'react';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EUI_CHARTS_THEME_DARK,
   EUI_CHARTS_THEME_LIGHT,
@@ -15,6 +16,7 @@ import {
 } from '@elastic/eui/dist/eui_charts_theme';
 import { ThemeContext } from 'styled-components';
 
+import { i18n } from '@kbn/i18n';
 import { NumberOrNull } from '../../../../..';
 
 interface Props {
@@ -38,7 +40,11 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
     return (
       <EuiTextColor color="subdued">
         <EuiIcon type="visLine" />
-        &nbsp;N/A
+         
+        <FormattedMessage
+          id="xpack.observability.metricWithSparkline.nATextColorLabel"
+          defaultMessage="N/A"
+        />
       </EuiTextColor>
     );
   }
@@ -47,7 +53,7 @@ export function MetricWithSparkline({ id, formatter, value, timeseries, color }:
       <EuiFlexItem grow={false}>
         <Chart size={{ height: 18, width: 40 }}>
           <Tooltip type={TooltipType.None} />
-          <Settings theme={theme} showLegend={false} />
+          <Settings theme={theme} showLegend={false} locale={i18n.getLocale()} />
           <AreaSeries
             id={id}
             data={timeseries}

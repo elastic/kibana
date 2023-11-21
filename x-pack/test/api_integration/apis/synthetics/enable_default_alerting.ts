@@ -55,6 +55,7 @@ export default function ({ getService }: FtrProviderContext) {
         'nextRun',
         'lastRun',
         'snoozeSchedule',
+        'viewInAppRelativeUrl',
       ];
 
       const statusRule = apiResponse.body.statusRule;
@@ -72,12 +73,14 @@ export default function ({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'true')
         .send(newMonitor);
 
-      expect(apiResponse.body.attributes).eql(
+      expect(apiResponse.body).eql(
         omit(
           {
             ...newMonitor,
             [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
             [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            created_at: apiResponse.body.created_at,
+            updated_at: apiResponse.body.updated_at,
           },
           secretKeys
         )
@@ -102,7 +105,7 @@ const defaultAlertRules = {
     consumer: 'uptime',
     alertTypeId: 'xpack.synthetics.alerts.monitorStatus',
     tags: ['SYNTHETICS_DEFAULT_ALERT'],
-    name: 'Synthetics status internal alert',
+    name: 'Synthetics status internal rule',
     enabled: true,
     throttle: null,
     apiKeyOwner: 'elastic',
@@ -126,6 +129,7 @@ const defaultAlertRules = {
       lastDuration: 64,
     },
     ruleTypeId: 'xpack.synthetics.alerts.monitorStatus',
+    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
   tlsRule: {
     id: '574eaa00-1672-11ee-8e7d-c985c0ef6c2e',
@@ -133,7 +137,7 @@ const defaultAlertRules = {
     consumer: 'uptime',
     alertTypeId: 'xpack.synthetics.alerts.tls',
     tags: ['SYNTHETICS_DEFAULT_ALERT'],
-    name: 'Synthetics internal TLS alert',
+    name: 'Synthetics internal TLS rule',
     enabled: true,
     throttle: null,
     apiKeyOwner: 'elastic',
@@ -157,5 +161,6 @@ const defaultAlertRules = {
       lastDuration: 193,
     },
     ruleTypeId: 'xpack.synthetics.alerts.tls',
+    viewInAppRelativeUrl: '/app/observability/alerts/rules/574e82f0-1672-11ee-8e7d-c985c0ef6c2e',
   },
 };

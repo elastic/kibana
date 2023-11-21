@@ -18,15 +18,18 @@ export default ({ loadTestFile }: FtrProviderContext) => {
       loadTestFile(require.resolve('./metrics_source_configuration'));
       loadTestFile(require.resolve('./metrics_anomalies'));
       loadTestFile(require.resolve('./metrics_explorer'));
+      loadTestFile(require.resolve('./node_details'));
       loadTestFile(require.resolve('./hosts_view'));
     });
 
     describe('Logs UI', function () {
-      loadTestFile(require.resolve('./log_entry_categories_tab'));
-      loadTestFile(require.resolve('./log_entry_rate_tab'));
-      loadTestFile(require.resolve('./logs_source_configuration'));
-      loadTestFile(require.resolve('./link_to'));
-      loadTestFile(require.resolve('./log_stream'));
+      loadTestFile(require.resolve('./logs/log_entry_categories_tab'));
+      loadTestFile(require.resolve('./logs/log_entry_rate_tab'));
+      loadTestFile(require.resolve('./logs/logs_source_configuration'));
+      loadTestFile(require.resolve('./logs/log_stream_date_nano'));
+      loadTestFile(require.resolve('./logs/link_to'));
+      loadTestFile(require.resolve('./logs/log_stream'));
+      loadTestFile(require.resolve('./logs/ml_job_id_formats/tests'));
     });
   });
 };

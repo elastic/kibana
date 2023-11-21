@@ -12,7 +12,7 @@ import type {
   UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
-import type { EndpointSuggestionsBody } from '../../../../../common/endpoint/schema/suggestions';
+import type { EndpointSuggestionsBody } from '../../../../../common/api/endpoint';
 import { SUGGESTIONS_ROUTE } from '../../../../../common/endpoint/constants';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
 import { ExceptionsListApiClient } from '../../../services/exceptions_list/exceptions_list_api_client';
@@ -57,7 +57,7 @@ export class EventFiltersApiClient extends ExceptionsListApiClient {
     const result: string[] = await this.getHttp().post(
       resolvePathVariables(SUGGESTIONS_ROUTE, { suggestion_type: 'eventFilters' }),
       {
-        version: '2023-10-31',
+        version: this.version,
         body: JSON.stringify(body),
       }
     );

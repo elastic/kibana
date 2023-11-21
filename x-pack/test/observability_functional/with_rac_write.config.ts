@@ -84,6 +84,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     uiSettings: {
       defaults: {
         'dateFormat:tz': 'UTC',
+        'observability:enableLegacyUptimeApp': true,
       },
     },
     testFiles: [resolve(__dirname, './apps/observability')],

@@ -17,6 +17,7 @@ import { useKibana } from '../../utils/kibana_react';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { useFetchRuleTypes } from '../../hooks/use_fetch_rule_types';
+import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { PageTitle } from './components/page_title';
 import { DeleteConfirmationModal } from './components/delete_confirmation_modal';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';
@@ -32,12 +33,13 @@ import {
   RULE_DETAILS_ALERTS_TAB,
   RULE_DETAILS_TAB_URL_STORAGE_KEY,
 } from './constants';
-import { paths } from '../../routes/paths';
+import { paths } from '../../../common/locators/paths';
 import {
   defaultTimeRange,
   getDefaultAlertSummaryTimeRange,
 } from '../../utils/alert_summary_widget';
 import type { AlertStatus } from '../../../common/typings';
+import { HeaderMenu } from '../overview/components/header_menu/header_menu';
 
 export type TabId = typeof RULE_DETAILS_ALERTS_TAB | typeof RULE_DETAILS_EXECUTION_TAB;
 
@@ -63,7 +65,7 @@ export function RuleDetailsPage() {
       getRuleStatusPanel: RuleStatusPanel,
     },
   } = useKibana().services;
-  const { ObservabilityPageTemplate, observabilityRuleTypeRegistry } = usePluginContext();
+  const { ObservabilityPageTemplate } = usePluginContext();
 
   const { ruleId } = useParams<RuleDetailsPathParams>();
   const { search } = useLocation();
@@ -72,9 +74,9 @@ export function RuleDetailsPage() {
   const baseTheme = useChartsBaseTheme();
 
   const { rule, isLoading, isError, refetch } = useFetchRule({ ruleId });
-
+  const filteredRuleTypes = useGetFilteredRuleTypes();
   const { ruleTypes } = useFetchRuleTypes({
-    filterByRuleTypeIds: observabilityRuleTypeRegistry.list(),
+    filterByRuleTypeIds: filteredRuleTypes,
   });
 
   useBreadcrumbs([
@@ -83,6 +85,7 @@ export function RuleDetailsPage() {
         defaultMessage: 'Alerts',
       }),
       href: basePath.prepend(paths.observability.alerts),
+      deepLinkId: 'observability-overview:alerts',
     },
     {
       href: basePath.prepend(paths.observability.rules),
@@ -217,6 +220,7 @@ export function RuleDetailsPage() {
         ],
       }}
     >
+      <HeaderMenu />
       <EuiFlexGroup wrap gutterSize="m">
         <EuiFlexItem style={{ minWidth: 350 }}>
           <RuleStatusPanel

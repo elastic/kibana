@@ -20,7 +20,7 @@ export type OpenContentEditorParams = Pick<
 
 export function useOpenContentEditor() {
   const services = useServices();
-  const { openFlyout, theme$ } = services;
+  const { openFlyout } = services;
   const flyout = useRef<OverlayRef | null>(null);
 
   return useCallback(
@@ -35,12 +35,7 @@ export function useOpenContentEditor() {
       };
 
       flyout.current = openFlyout(
-        <ContentEditorLoader
-          {...args}
-          onCancel={closeFlyout}
-          services={services}
-          theme$={theme$}
-        />,
+        <ContentEditorLoader {...args} onCancel={closeFlyout} services={services} />,
         {
           maxWidth: 600,
           size: 'm',
@@ -51,6 +46,6 @@ export function useOpenContentEditor() {
 
       return closeFlyout;
     },
-    [openFlyout, services, theme$]
+    [openFlyout, services]
   );
 }

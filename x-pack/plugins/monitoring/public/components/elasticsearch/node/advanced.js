@@ -8,7 +8,7 @@
 import React from 'react';
 import {
   EuiPage,
-  EuiPageContent_Deprecated as EuiPageContent,
+  EuiPageSection,
   EuiPageBody,
   EuiPanel,
   EuiSpacer,
@@ -54,7 +54,7 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
         </EuiPanel>
         <EuiSpacer size="m" />
         <AlertsCallout alerts={alerts} />
-        <EuiPageContent>
+        <EuiPageSection>
           <EuiFlexGrid columns={2} gutterSize="s">
             {metricsToShow.map((metric, index) => (
               <EuiFlexItem key={index}>
@@ -63,7 +63,7 @@ export const AdvancedNode = ({ nodeSummary, metrics, alerts, ...props }) => {
               </EuiFlexItem>
             ))}
           </EuiFlexGrid>
-        </EuiPageContent>
+        </EuiPageSection>
       </EuiPageBody>
     </EuiPage>
   );

@@ -77,9 +77,9 @@ export const isKeyEqual = (
  */
 export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   panels: async ({ currentValue, lastValue, container }) => {
-    if (!getPanelLayoutsAreEqual(currentValue, lastValue)) return false;
+    if (!getPanelLayoutsAreEqual(currentValue ?? {}, lastValue ?? {})) return false;
 
-    const explicitInputComparePromises = Object.values(currentValue).map(
+    const explicitInputComparePromises = Object.values(currentValue ?? {}).map(
       (panel) =>
         new Promise<boolean>((resolve, reject) => {
           const embeddableId = panel.explicitInput.id;
@@ -111,8 +111,8 @@ export const unsavedChangesDiffingFunctions: DashboardDiffFunctions = {
   // exclude pinned filters from comparision because pinned filters are not part of application state
   filters: ({ currentValue, lastValue }) =>
     compareFilters(
-      currentValue.filter((f) => !isFilterPinned(f)),
-      lastValue.filter((f) => !isFilterPinned(f)),
+      (currentValue ?? []).filter((f) => !isFilterPinned(f)),
+      (lastValue ?? []).filter((f) => !isFilterPinned(f)),
       COMPARE_ALL_OPTIONS
     ),
 

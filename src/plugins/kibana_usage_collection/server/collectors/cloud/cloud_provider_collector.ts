@@ -7,7 +7,6 @@
  */
 
 import { firstValueFrom, type Observable } from 'rxjs';
-import AbortController from 'abort-controller';
 import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { CloudDetector } from './detector';
 

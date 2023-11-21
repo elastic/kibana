@@ -13,19 +13,20 @@ import {
   EuiTabbedContent,
   EuiTabbedContentTab,
 } from '@elastic/eui';
-import { SLOWithSummaryResponse } from '@kbn/slo-schema';
-import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ALL_VALUE, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import React, { Fragment, useEffect, useState } from 'react';
 
 import { useLocation } from 'react-router-dom';
 import { useFetchActiveAlerts } from '../../../hooks/slo/use_fetch_active_alerts';
-import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { useFetchHistoricalSummary } from '../../../hooks/slo/use_fetch_historical_summary';
+import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
+import { BurnRates } from './burn_rates';
 import { ErrorBudgetChartPanel } from './error_budget_chart_panel';
+import { EventsChartPanel } from './events_chart_panel';
 import { Overview } from './overview/overview';
 import { SliChartPanel } from './sli_chart_panel';
 import { SloDetailsAlerts } from './slo_detail_alerts';
-import { BurnRates } from './burn_rates';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -35,20 +36,49 @@ export interface Props {
 const TAB_ID_URL_PARAM = 'tabId';
 const OVERVIEW_TAB_ID = 'overview';
 const ALERTS_TAB_ID = 'alerts';
+const DAY_IN_MILLISECONDS = 24 * 60 * 60 * 1000;
 
 type TabId = typeof OVERVIEW_TAB_ID | typeof ALERTS_TAB_ID;
 
 export function SloDetails({ slo, isAutoRefreshing }: Props) {
   const { search } = useLocation();
-  const { data: activeAlerts } = useFetchActiveAlerts({ sloIds: [slo.id] });
-  const { isLoading: historicalSummaryLoading, data: historicalSummaryBySlo = {} } =
-    useFetchHistoricalSummary({ sloIds: [slo.id], shouldRefetch: isAutoRefreshing });
+  const { data: activeAlerts } = useFetchActiveAlerts({
+    sloIdsAndInstanceIds: [[slo.id, slo.instanceId ?? ALL_VALUE]],
+    shouldRefetch: isAutoRefreshing,
+  });
+  const { isLoading: historicalSummaryLoading, data: historicalSummaries = [] } =
+    useFetchHistoricalSummary({
+      list: [{ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE }],
+      shouldRefetch: isAutoRefreshing,
+    });
+
+  const sloHistoricalSummary = historicalSummaries.find(
+    (historicalSummary) =>
+      historicalSummary.sloId === slo.id &&
+      historicalSummary.instanceId === (slo.instanceId ?? ALL_VALUE)
+  );
+
+  const [range, setRange] = useState({
+    start: new Date().getTime() - DAY_IN_MILLISECONDS,
+    end: new Date().getTime(),
+  });
+
+  useEffect(() => {
+    let intervalId: any;
+    if (isAutoRefreshing) {
+      intervalId = setInterval(() => {
+        setRange({ start: new Date().getTime() - DAY_IN_MILLISECONDS, end: new Date().getTime() });
+      }, 60 * 1000);
+    }
+
+    return () => clearInterval(intervalId);
+  }, [isAutoRefreshing]);
 
   const errorBudgetBurnDownData = formatHistoricalData(
-    historicalSummaryBySlo[slo.id],
+    sloHistoricalSummary?.data,
     'error_budget_remaining'
   );
-  const historicalSliData = formatHistoricalData(historicalSummaryBySlo[slo.id], 'sli_value');
+  const historicalSliData = formatHistoricalData(sloHistoricalSummary?.data, 'sli_value');
 
   const tabs: EuiTabbedContentTab[] = [
     {
@@ -82,6 +112,11 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
                   slo={slo}
                 />
               </EuiFlexItem>
+              {slo.indicator.type !== 'sli.metric.timeslice' ? (
+                <EuiFlexItem>
+                  <EventsChartPanel slo={slo} range={range} />
+                </EuiFlexItem>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexGroup>
         </Fragment>
@@ -95,7 +130,7 @@ export function SloDetails({ slo, isAutoRefreshing }: Props) {
       'data-test-subj': 'alertsTab',
       append: (
         <EuiNotificationBadge className="eui-alignCenter" size="m">
-          {(activeAlerts && activeAlerts[slo.id]?.count) ?? 0}
+          {(activeAlerts && activeAlerts.get(slo)) ?? 0}
         </EuiNotificationBadge>
       ),
       content: <SloDetailsAlerts slo={slo} />,

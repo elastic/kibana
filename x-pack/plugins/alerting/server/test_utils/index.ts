@@ -6,6 +6,7 @@
  */
 
 import { RawAlertInstance } from '../../common';
+import { AlertingConfig } from '../config';
 
 interface Resolvable<T> {
   resolve: (arg: T) => void;
@@ -44,4 +45,31 @@ export function alertsWithAnyUUID(
     newAlerts[id] = alertWithAnyUUID(rawAlerts[id]);
   }
   return newAlerts;
+}
+
+export function generateAlertingConfig(): AlertingConfig {
+  return {
+    healthCheck: {
+      interval: '5m',
+    },
+    enableFrameworkAlerts: false,
+    invalidateApiKeysTask: {
+      interval: '5m',
+      removalDelay: '1h',
+    },
+    maxEphemeralActionsPerAlert: 10,
+    cancelAlertsOnRuleTimeout: true,
+    rules: {
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      run: {
+        actions: {
+          max: 1000,
+        },
+        alerts: {
+          max: 1000,
+        },
+      },
+    },
+  };
 }

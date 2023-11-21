@@ -41,7 +41,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('new map', () => {
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.clickNewDashboard();
         await dashboardAddPanel.clickEditorMenuButton();
         await dashboardAddPanel.clickVisType('maps');
@@ -73,7 +73,7 @@ export default function ({ getPageObjects, getService }) {
 
     describe('edit existing map', () => {
       beforeEach(async () => {
-        await PageObjects.common.navigateToApp('dashboard');
+        await PageObjects.dashboard.navigateToApp();
         await PageObjects.dashboard.loadSavedDashboard('map embeddable example');
         await PageObjects.dashboard.switchToEditMode();
         await dashboardPanelActions.editPanelByTitle('join example');

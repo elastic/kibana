@@ -7,9 +7,6 @@
 
 import type { IEsSearchResponse } from '@kbn/data-plugin/common';
 import type { Inspect, Maybe } from '../../../../common';
-import type { RequestBasicOptions } from '../../..';
-
-export type NetworkKpiTlsHandshakesRequestOptions = RequestBasicOptions;
 
 export interface NetworkKpiTlsHandshakesStrategyResponse extends IEsSearchResponse {
   tlsHandshakes: number;

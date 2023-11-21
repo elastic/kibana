@@ -9,7 +9,6 @@ import { flatten } from 'lodash';
 
 import type { FeatureKibanaPrivileges, KibanaFeature } from '@kbn/features-plugin/server';
 
-import type { Actions } from '../../actions';
 import { FeaturePrivilegeAlertingBuilder } from './alerting';
 import { FeaturePrivilegeApiBuilder } from './api';
 import { FeaturePrivilegeAppBuilder } from './app';
@@ -20,6 +19,7 @@ import { FeaturePrivilegeManagementBuilder } from './management';
 import { FeaturePrivilegeNavlinkBuilder } from './navlink';
 import { FeaturePrivilegeSavedObjectBuilder } from './saved_object';
 import { FeaturePrivilegeUIBuilder } from './ui';
+import type { Actions } from '../../actions';
 
 export type { CasesSupportedOperations } from './cases';
 export type { FeaturePrivilegeBuilder };

@@ -7,7 +7,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 
-import type { InstalledIntegrationArray } from '../../../../../common/detection_engine/fleet_integrations';
+import type { InstalledIntegrationArray } from '../../../../../common/api/detection_engine/fleet_integrations';
 import { fleetIntegrationsApi } from '../../../../detection_engine/fleet_integrations';
 // import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 // import * as i18n from './translations';

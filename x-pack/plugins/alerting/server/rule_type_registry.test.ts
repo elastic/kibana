@@ -17,7 +17,7 @@ import { inMemoryMetricsMock } from './monitoring/in_memory_metrics.mock';
 import { alertsServiceMock } from './alerts_service/alerts_service.mock';
 import { schema } from '@kbn/config-schema';
 import { RecoveredActionGroupId } from '../common';
-import { rawRuleSchema } from './raw_rule_schema';
+import { AlertingConfig } from './config';
 
 const logger = loggingSystemMock.create().get();
 let mockedLicenseState: jest.Mocked<ILicenseState>;
@@ -28,9 +28,10 @@ const inMemoryMetrics = inMemoryMetricsMock.create();
 const alertsService = alertsServiceMock.create();
 
 beforeEach(() => {
-  jest.resetAllMocks();
+  jest.clearAllMocks();
   mockedLicenseState = licenseStateMock.create();
   ruleTypeRegistryParams = {
+    config: {} as AlertingConfig,
     logger,
     taskManager,
     taskRunnerFactory: new TaskRunnerFactory(),
@@ -64,6 +65,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -88,6 +90,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -97,16 +100,18 @@ describe('Create Lifecycle', () => {
 
       const invalidCharacters = [' ', ':', '*', '*', '/'];
       for (const char of invalidCharacters) {
-        expect(() => registry.register({ ...ruleType, id: `${ruleType.id}${char}` })).toThrowError(
-          new Error(`expected RuleType Id not to include invalid character: ${char}`)
+        expect(() =>
+          registry.register({ ...ruleType, id: `${ruleType.id}${char}` })
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"expected RuleType Id not to include invalid character: ${char}"`
         );
       }
 
       const [first, second] = invalidCharacters;
       expect(() =>
         registry.register({ ...ruleType, id: `${first}${ruleType.id}${second}` })
-      ).toThrowError(
-        new Error(`expected RuleType Id not to include invalid characters: ${first}, ${second}`)
+      ).toThrowErrorMatchingInlineSnapshot(
+        `"expected RuleType Id not to include invalid characters: ${first}, ${second}"`
       );
     });
 
@@ -124,6 +129,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -131,8 +137,8 @@ describe('Create Lifecycle', () => {
       };
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
 
-      expect(() => registry.register(ruleType)).toThrowError(
-        new Error(`expected value of type [string] but got [number]`)
+      expect(() => registry.register(ruleType)).toThrowErrorMatchingInlineSnapshot(
+        `"expected value of type [string] but got [number]"`
       );
     });
 
@@ -151,6 +157,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -180,6 +187,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: 'foobar',
         validate: {
@@ -209,6 +217,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
@@ -238,6 +247,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         defaultScheduleInterval: '10s',
         validate: {
@@ -287,6 +297,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -318,6 +329,7 @@ describe('Create Lifecycle', () => {
             name: 'Back To Awesome',
           },
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -355,6 +367,7 @@ describe('Create Lifecycle', () => {
           defaultActionGroupId: 'default',
           ruleTaskTimeout: '13m',
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           minimumLicenseRequired: 'basic',
           isExportable: true,
@@ -398,6 +411,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -426,6 +440,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         ruleTaskTimeout: '20m',
         validate: {
@@ -435,17 +450,12 @@ describe('Create Lifecycle', () => {
       const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
       registry.register(ruleType);
       expect(taskManager.registerTaskDefinitions).toHaveBeenCalledTimes(1);
-      expect(taskManager.registerTaskDefinitions.mock.calls[0]).toEqual([
-        {
-          'alerting:test': {
-            createTaskRunner: expect.any(Function),
-            paramsSchema: expect.any(Object),
-            indirectParamsSchema: rawRuleSchema,
-            timeout: '20m',
-            title: 'Test',
-          },
+      expect(taskManager.registerTaskDefinitions.mock.calls[0][0]).toMatchObject({
+        'alerting:test': {
+          timeout: '20m',
+          title: 'Test',
         },
-      ]);
+      });
     });
 
     test('shallow clones the given rule type', () => {
@@ -462,6 +472,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -488,6 +499,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -507,6 +519,7 @@ describe('Create Lifecycle', () => {
           minimumLicenseRequired: 'basic',
           isExportable: true,
           executor: jest.fn(),
+          category: 'test',
           producer: 'alerts',
           validate: {
             params: { validate: (params) => params },
@@ -530,6 +543,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         alerts: {
           context: 'test',
@@ -561,6 +575,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -568,6 +583,63 @@ describe('Create Lifecycle', () => {
       });
 
       expect(alertsService.register).not.toHaveBeenCalled();
+    });
+
+    test('registers rule with no overwrite on producer', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry(ruleTypeRegistryParams);
+      registry.register(ruleType);
+      expect(registry.get('test').producer).toEqual('alerts');
+    });
+  });
+
+  describe('register() with overwriteProducer', () => {
+    test('registers rule and overwrite producer', () => {
+      const ruleType: RuleType<never, never, never, never, never, 'default', 'recovered', {}> = {
+        id: 'test',
+        name: 'Test',
+        actionGroups: [
+          {
+            id: 'default',
+            name: 'Default',
+          },
+        ],
+        defaultActionGroupId: 'default',
+        minimumLicenseRequired: 'basic',
+        isExportable: true,
+        executor: jest.fn(),
+        category: 'test',
+        producer: 'alerts',
+        ruleTaskTimeout: '20m',
+        validate: {
+          params: { validate: (params) => params },
+        },
+      };
+      const registry = new RuleTypeRegistry({
+        ...ruleTypeRegistryParams,
+        config: { rules: { overwriteProducer: 'observability' } } as unknown as AlertingConfig,
+      });
+      registry.register(ruleType);
+      expect(registry.get('test').producer).toEqual('observability');
     });
   });
 
@@ -587,6 +659,7 @@ describe('Create Lifecycle', () => {
         minimumLicenseRequired: 'basic',
         isExportable: true,
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: { validate: (params) => params },
@@ -594,40 +667,42 @@ describe('Create Lifecycle', () => {
       });
       const ruleType = registry.get('test');
       expect(ruleType).toMatchInlineSnapshot(`
-              Object {
-                "actionGroups": Array [
-                  Object {
-                    "id": "default",
-                    "name": "Default",
-                  },
-                  Object {
-                    "id": "recovered",
-                    "name": "Recovered",
-                  },
-                ],
-                "actionVariables": Object {
-                  "context": Array [],
-                  "params": Array [],
-                  "state": Array [],
-                },
-                "defaultActionGroupId": "default",
-                "executor": [MockFunction],
-                "id": "test",
-                "isExportable": true,
-                "minimumLicenseRequired": "basic",
-                "name": "Test",
-                "producer": "alerts",
-                "recoveryActionGroup": Object {
-                  "id": "recovered",
-                  "name": "Recovered",
-                },
-                "validate": Object {
-                  "params": Object {
-                    "validate": [Function],
-                  },
-                },
-              }
-          `);
+        Object {
+          "actionGroups": Array [
+            Object {
+              "id": "default",
+              "name": "Default",
+            },
+            Object {
+              "id": "recovered",
+              "name": "Recovered",
+            },
+          ],
+          "actionVariables": Object {
+            "context": Array [],
+            "params": Array [],
+            "state": Array [],
+          },
+          "category": "test",
+          "defaultActionGroupId": "default",
+          "executor": [MockFunction],
+          "id": "test",
+          "isExportable": true,
+          "minimumLicenseRequired": "basic",
+          "name": "Test",
+          "producer": "alerts",
+          "recoveryActionGroup": Object {
+            "id": "recovered",
+            "name": "Recovered",
+          },
+          "validLegacyConsumers": Array [],
+          "validate": Object {
+            "params": Object {
+              "validate": [Function],
+            },
+          },
+        }
+      `);
     });
 
     test(`should throw an error if type isn't registered`, () => {
@@ -662,6 +737,7 @@ describe('Create Lifecycle', () => {
         ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -701,12 +777,13 @@ describe('Create Lifecycle', () => {
                 },
               },
             },
+            "category": "test",
             "defaultActionGroupId": "testActionGroup",
             "defaultScheduleInterval": undefined,
             "doesSetRecoveryContext": false,
             "enabledInLicense": false,
+            "hasAlertsMappings": true,
             "hasFieldsForAAD": false,
-            "hasGetSummarizedAlerts": false,
             "id": "test",
             "isExportable": true,
             "minimumLicenseRequired": "basic",
@@ -717,6 +794,7 @@ describe('Create Lifecycle', () => {
               "name": "Recovered",
             },
             "ruleTaskTimeout": "20m",
+            "validLegacyConsumers": Array [],
           },
         }
       `);
@@ -781,6 +859,7 @@ describe('Create Lifecycle', () => {
         ruleTaskTimeout: '20m',
         minimumLicenseRequired: 'basic',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         validate: {
           params: schema.any(),
@@ -807,6 +886,7 @@ describe('Create Lifecycle', () => {
         ],
         defaultActionGroupId: 'default',
         executor: jest.fn(),
+        category: 'test',
         producer: 'alerts',
         isExportable: true,
         minimumLicenseRequired: 'basic',
@@ -857,6 +937,7 @@ function ruleTypeWithVariables<ActionGroupIds extends string>(
     async executor() {
       return { state: {} };
     },
+    category: 'test',
     producer: 'alerts',
     validate: {
       params: { validate: (params) => params },

@@ -82,7 +82,7 @@ export class MarkdownStorybookMock extends AbstractStorybookMock<
     };
   }
 
-  getServices() {
+  getServices(): MarkdownProps {
     return { ...this.getProps() };
   }
 }

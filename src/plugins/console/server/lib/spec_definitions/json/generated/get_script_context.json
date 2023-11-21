@@ -1,11 +1,21 @@
 {
   "get_script_context": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_script_context"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/painless/master/painless-contexts.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/painless/master/painless-contexts.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

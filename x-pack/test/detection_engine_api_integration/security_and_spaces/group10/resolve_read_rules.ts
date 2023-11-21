@@ -41,7 +41,11 @@ export default ({ getService }: FtrProviderContext) => {
       it('should create a "migrated" rule where querying for the new SO _id will resolve the new object and not return the outcome field when outcome === exactMatch', async () => {
         // link to the new URL with migrated SO id 74f3e6d7-b7bb-477d-ac28-92ee22728e6e
         const URL = `/s/${spaceId}${DETECTION_ENGINE_RULES_URL}?id=90e3ca0e-71f7-513a-b60a-ac678efd8887`;
-        const readRulesAliasMatchRes = await supertest.get(URL).set('kbn-xsrf', 'true').send();
+        const readRulesAliasMatchRes = await supertest
+          .get(URL)
+          .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
+          .send();
         expect(readRulesAliasMatchRes.body.outcome).to.eql('aliasMatch');
         expect(readRulesAliasMatchRes.body.alias_purpose).to.eql('savedObjectConversion');
 
@@ -51,6 +55,7 @@ export default ({ getService }: FtrProviderContext) => {
         const readRulesExactMatchRes = await supertest
           .get(exactMatchURL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send();
         expect(readRulesExactMatchRes.body.outcome).to.eql(undefined);
       });
@@ -149,6 +154,7 @@ export default ({ getService }: FtrProviderContext) => {
         const readRulesConflictRes = await supertest
           .get(conflictURL)
           .set('kbn-xsrf', 'true')
+          .set('elastic-api-version', '2023-10-31')
           .send()
           .expect(200);
         expect(readRulesConflictRes.body.outcome).to.eql('conflict');

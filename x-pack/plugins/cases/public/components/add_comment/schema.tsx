@@ -8,7 +8,7 @@
 import type { FormSchema } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { FIELD_TYPES } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type { CommentRequestUserType } from '../../../common/api';
+import type { UserCommentAttachmentPayload } from '../../../common/types/domain';
 import { MAX_COMMENT_LENGTH } from '../../../common/constants';
 
 import * as i18n from './translations';
@@ -16,7 +16,7 @@ import * as i18n from './translations';
 const { emptyField, maxLengthField } = fieldValidators;
 
 export interface AddCommentFormSchema {
-  comment: CommentRequestUserType['comment'];
+  comment: UserCommentAttachmentPayload['comment'];
 }
 
 export const schema: FormSchema<AddCommentFormSchema> = {

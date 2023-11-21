@@ -30,3 +30,10 @@ export const SEARCH_PLACEHOLDER = i18n.translate(
     defaultMessage: 'Search by rule name',
   }
 );
+
+export const UPDATE_BUTTON_LABEL = i18n.translate(
+  'xpack.securitySolution.detectionEngine.ruleDetails.updateButtonLabel',
+  {
+    defaultMessage: 'Update',
+  }
+);

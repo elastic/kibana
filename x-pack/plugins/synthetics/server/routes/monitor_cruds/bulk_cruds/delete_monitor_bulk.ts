@@ -16,7 +16,7 @@ import {
   ConfigKey,
   MonitorFields,
   SyntheticsMonitor,
-  EncryptedSyntheticsMonitor,
+  EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitorWithId,
 } from '../../../../common/runtime_types';
 import { SyntheticsMonitorClient } from '../../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
@@ -31,7 +31,7 @@ export const deleteMonitorBulk = async ({
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   server: SyntheticsServerSetup;
-  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitor>>;
+  monitors: Array<SavedObject<SyntheticsMonitor | EncryptedSyntheticsMonitorAttributes>>;
   syntheticsMonitorClient: SyntheticsMonitorClient;
   request: KibanaRequest;
 }) => {
@@ -47,7 +47,6 @@ export const deleteMonitorBulk = async ({
         ...normalizedMonitor.attributes,
         id: normalizedMonitor.attributes[ConfigKey.MONITOR_QUERY_ID],
       })) as SyntheticsMonitorWithId[],
-      request,
       savedObjectsClient,
       spaceId
     );

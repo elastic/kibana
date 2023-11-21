@@ -12,7 +12,7 @@ import styled from 'styled-components';
 import { toMountPoint } from '@kbn/kibana-react-plugin/public';
 import { isValidOwner } from '../../common/utils/owner';
 import type { CaseUI } from '../../common';
-import { CommentType } from '../../common';
+import { AttachmentType } from '../../common/types/domain';
 import { useKibana, useToasts } from './lib/kibana';
 import { generateCaseViewPath } from './navigation';
 import type { CaseAttachmentsWithoutOwner, ServerError } from '../types';
@@ -43,7 +43,7 @@ const EuiTextStyled = styled(EuiText)`
 function getAlertsCount(attachments: CaseAttachmentsWithoutOwner): number {
   let alertsCount = 0;
   for (const attachment of attachments) {
-    if (attachment.type === CommentType.alert) {
+    if (attachment.type === AttachmentType.alert) {
       // alertId might be an array
       if (Array.isArray(attachment.alertId) && attachment.alertId.length > 1) {
         alertsCount += attachment.alertId.length;
@@ -91,7 +91,7 @@ function getToastContent({
   }
   if (attachments !== undefined) {
     for (const attachment of attachments) {
-      if (attachment.type === CommentType.alert && theCase.settings.syncAlerts) {
+      if (attachment.type === AttachmentType.alert && theCase.settings.syncAlerts) {
         return CASE_ALERT_SUCCESS_SYNC_TEXT;
       }
     }

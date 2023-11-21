@@ -36,11 +36,7 @@ export const nodesListRouteFactory = (
 });
 
 const PageWrapper: FC = () => {
-  const { context } = useRouteResolver(
-    'full',
-    ['canGetJobs', 'canGetDataFrameAnalytics', 'canGetTrainedModels'],
-    basicResolvers()
-  );
+  const { context } = useRouteResolver('full', [], basicResolvers());
 
   return (
     <PageLoader context={context}>

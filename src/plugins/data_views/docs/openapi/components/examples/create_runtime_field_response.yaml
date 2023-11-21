@@ -1,0 +1,6 @@
+summary: The API returns created runtime field object array and updated data view object.
+value: 
+  {
+    "data_view": {...},
+    "fields": [...]
+   }

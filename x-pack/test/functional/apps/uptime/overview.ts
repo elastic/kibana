@@ -11,14 +11,13 @@ import { FtrProviderContext } from '../../ftr_provider_context';
 export const UPTIME_HEARTBEAT_DATA = 'x-pack/test/functional/es_archives/uptime/full_heartbeat';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
-  const { uptime } = getPageObjects(['uptime']);
+  const { uptime, common } = getPageObjects(['uptime', 'common']);
   const retry = getService('retry');
   const esArchiver = getService('esArchiver');
 
   const testSubjects = getService('testSubjects');
 
-  // FLAKY: https://github.com/elastic/kibana/issues/89072
-  describe.skip('overview page', function () {
+  describe('overview page', function () {
     const DEFAULT_DATE_START = 'Sep 10, 2019 @ 12:40:08.078';
     const DEFAULT_DATE_END = 'Sep 11, 2019 @ 19:40:08.078';
 
@@ -105,7 +104,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
       await uptime.setMonitorListPageSize(50);
       // the pagination parameter should be cleared after a size change
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+      await common.sleep(1000);
       await retry.try(async () => {
         await uptime.pageUrlContains('pagination', false);
       });
@@ -199,7 +198,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       it('can change query syntax to kql', async () => {
         await testSubjects.click('switchQueryLanguageButton');
-        await testSubjects.click('languageToggle');
+        await testSubjects.click('kqlLanguageMenuItem');
       });
 
       it('runs filter query without issues', async () => {

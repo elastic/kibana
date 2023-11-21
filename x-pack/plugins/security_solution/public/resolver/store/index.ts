@@ -8,13 +8,13 @@
 import type { Store, AnyAction } from 'redux';
 import { createStore, applyMiddleware } from 'redux';
 import { composeWithDevTools } from 'redux-devtools-extension/developmentOnly';
-import type { AnalyzerState, DataAccessLayer } from '../types';
+import type { AnalyzerById, DataAccessLayer } from '../types';
 import { analyzerReducer } from './reducer';
 import { resolverMiddlewareFactory } from './middleware';
 
 export const resolverStoreFactory = (
   dataAccessLayer: DataAccessLayer
-): Store<AnalyzerState, AnyAction> => {
+): Store<AnalyzerById, AnyAction> => {
   const actionsDenylist: Array<AnyAction['type']> = ['userMovedPointer'];
   const composeEnhancers = composeWithDevTools({
     name: 'Resolver',

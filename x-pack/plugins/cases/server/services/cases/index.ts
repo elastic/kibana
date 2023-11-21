@@ -23,14 +23,19 @@ import type {
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { nodeBuilder } from '@kbn/es-query';
 
+import type { Case, CaseStatuses, User } from '../../../common/types/domain';
+import { caseStatuses } from '../../../common/types/domain';
 import {
   CASE_COMMENT_SAVED_OBJECT,
   CASE_SAVED_OBJECT,
   MAX_DOCS_PER_PAGE,
 } from '../../../common/constants';
-import type { Case, User, CaseStatuses } from '../../../common/api';
-import { decodeOrThrow, caseStatuses } from '../../../common/api';
-import type { SavedObjectFindOptionsKueryNode, SOWithErrors } from '../../common/types';
+import { decodeOrThrow } from '../../../common/api';
+import type {
+  SavedObjectFindOptionsKueryNode,
+  SavedObjectsBulkResponseWithErrors,
+  SOWithErrors,
+} from '../../common/types';
 import { defaultSortField, flattenCaseSavedObject, isSOError } from '../../common/utils';
 import { DEFAULT_PAGE, DEFAULT_PER_PAGE } from '../../routes/api';
 import { combineFilters } from '../../client/utils';
@@ -66,10 +71,11 @@ import type {
   FindCaseCommentsArgs,
   GetReportersArgs,
   GetTagsArgs,
-  PostCaseArgs,
+  CreateCaseArgs,
   PatchCaseArgs,
   PatchCasesArgs,
   GetCategoryArgs,
+  BulkCreateCasesArgs,
 } from './types';
 import type { AttachmentTransformedAttributes } from '../../common/types/attachments';
 import { bulkDecodeSOAttributes } from '../utils';
@@ -588,13 +594,13 @@ export class CasesService {
     }
   }
 
-  public async postNewCase({
+  public async createCase({
     attributes,
     id,
     refresh,
-  }: PostCaseArgs): Promise<CaseSavedObjectTransformed> {
+  }: CreateCaseArgs): Promise<CaseSavedObjectTransformed> {
     try {
-      this.log.debug(`Attempting to POST a new case`);
+      this.log.debug(`Attempting to create a new case`);
 
       const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
       const transformedAttributes = transformAttributesToESModel(decodedAttributes);
@@ -613,7 +619,57 @@ export class CasesService {
 
       return { ...res, attributes: decodedRes };
     } catch (error) {
-      this.log.error(`Error on POST a new case: ${error}`);
+      this.log.error(`Error on creating a new case: ${error}`);
+      throw error;
+    }
+  }
+
+  public async bulkCreateCases({
+    cases,
+    refresh,
+  }: BulkCreateCasesArgs): Promise<SavedObjectsBulkResponseWithErrors<CaseTransformedAttributes>> {
+    try {
+      this.log.debug(`Attempting to bulk create cases`);
+
+      const bulkCreateRequest = cases.map(({ id, ...attributes }) => {
+        const decodedAttributes = decodeOrThrow(CaseTransformedAttributesRt)(attributes);
+
+        const { attributes: transformedAttributes, referenceHandler } =
+          transformAttributesToESModel(decodedAttributes);
+
+        transformedAttributes.total_alerts = -1;
+        transformedAttributes.total_comments = -1;
+
+        return {
+          type: CASE_SAVED_OBJECT,
+          id,
+          attributes: transformedAttributes,
+          references: referenceHandler.build(),
+        };
+      });
+
+      const bulkCreateResponse =
+        await this.unsecuredSavedObjectsClient.bulkCreate<CasePersistedAttributes>(
+          bulkCreateRequest,
+          {
+            refresh,
+          }
+        );
+
+      const res = bulkCreateResponse.saved_objects.map((theCase) => {
+        if (isSOError<CasePersistedAttributes>(theCase)) {
+          return theCase;
+        }
+
+        const transformedCase = transformSavedObjectToExternalModel(theCase);
+        const decodedRes = decodeOrThrow(CaseTransformedAttributesRt)(transformedCase.attributes);
+
+        return { ...transformedCase, attributes: decodedRes };
+      });
+
+      return { saved_objects: res };
+    } catch (error) {
+      this.log.error(`Case Service: Error on bulk creating cases: ${error}`);
       throw error;
     }
   }

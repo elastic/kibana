@@ -40,7 +40,7 @@ import { FieldItem } from '../common/field_item';
 
 export type Props = Omit<
   DatasourceDataPanelProps<FormBasedPrivateState>,
-  'core' | 'onChangeIndexPattern' | 'dragDropContext'
+  'core' | 'onChangeIndexPattern'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;
@@ -183,7 +183,7 @@ export const InnerFormBasedDataPanel = function InnerFormBasedDataPanel({
   activeIndexPatterns,
 }: Omit<
   DatasourceDataPanelProps,
-  'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns' | 'dragDropContext'
+  'state' | 'setState' | 'core' | 'onChangeIndexPattern' | 'usedIndexPatterns'
 > & {
   data: DataPublicPluginStart;
   dataViews: DataViewsPublicPluginStart;

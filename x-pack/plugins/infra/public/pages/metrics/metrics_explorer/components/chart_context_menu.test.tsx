@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { MetricsExplorerChartContextMenu, createNodeDetailLink, Props } from './chart_context_menu';
+import { MetricsExplorerChartContextMenu, Props } from './chart_context_menu';
 import { ReactWrapper, mount } from 'enzyme';
 import {
   options,
@@ -39,6 +39,16 @@ const mountComponentWithProviders = (props: Props): ReactWrapper => {
     </KibanaContextProvider>
   );
 };
+
+jest.mock('../../../link_to', () => ({
+  useNodeDetailsRedirect: jest.fn(() => ({
+    getNodeDetailUrl: jest.fn(() => ({
+      app: 'metrics',
+      pathname: 'link-to/pod-detail/example-01',
+      search: { from: '1546340400000', to: '1546344000000' },
+    })),
+  })),
+}));
 
 describe('MetricsExplorerChartContextMenu', () => {
   describe('component', () => {
@@ -151,19 +161,6 @@ describe('MetricsExplorerChartContextMenu', () => {
         chartOptions,
       });
       expect(component.find('button').length).toBe(1);
-    });
-  });
-
-  describe('helpers', () => {
-    test('createNodeDetailLink()', () => {
-      const fromDateStrig = '2019-01-01T11:00:00Z';
-      const toDateStrig = '2019-01-01T12:00:00Z';
-      const link = createNodeDetailLink('host', 'example-01', fromDateStrig, toDateStrig);
-      expect(link).toStrictEqual({
-        app: 'metrics',
-        pathname: 'link-to/host-detail/example-01',
-        search: { from: '1546340400000', to: '1546344000000' },
-      });
     });
   });
 });

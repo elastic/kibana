@@ -26,11 +26,13 @@ import { DEFAULT_SEVERITY, SelectSeverity, SEVERITY_OPTIONS } from './select_sev
 import { monitorIdSelector } from '../../../../state/selectors';
 
 interface Props {
+  id?: string;
+  stackVersion?: string;
   ruleParams: { [key: string]: any };
   setRuleParams: (key: string, value: any) => void;
 }
 
-export function AnomalyAlertComponent({ setRuleParams, ruleParams }: Props) {
+export function AnomalyAlertComponent({ setRuleParams, ruleParams, id, stackVersion }: Props) {
   const [severity, setSeverity] = useState(DEFAULT_SEVERITY);
 
   const monitorIdStore = useSelector(monitorIdSelector);
@@ -44,6 +46,12 @@ export function AnomalyAlertComponent({ setRuleParams, ruleParams }: Props) {
   useEffect(() => {
     setRuleParams('severity', severity.val);
   }, [severity, setRuleParams]);
+
+  useEffect(() => {
+    if (!id && stackVersion && !ruleParams.stackVersion) {
+      setRuleParams('stackVersion', stackVersion);
+    }
+  }, [ruleParams, id, stackVersion, setRuleParams]);
 
   useEffect(() => {
     if (ruleParams.severity !== undefined) {

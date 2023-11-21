@@ -14,15 +14,9 @@ import {
 import { SearchRequest } from '@kbn/data-plugin/common';
 import { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/core/server';
-import { getSafeVulnerabilitiesQueryFilter } from '../../common/utils/get_safe_vulnerabilities_query_filter';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import {
-  FindingsStatsTaskResult,
-  TaskHealthStatus,
-  ScoreByPolicyTemplateBucket,
-  VulnSeverityAggs,
-} from './types';
+import { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -32,6 +26,12 @@ import {
 } from '../../common/constants';
 import { scheduleTaskSafe, removeTaskSafe } from '../lib/task_manager_util';
 import { CspServerPluginStartServices } from '../types';
+import {
+  stateSchemaByVersion,
+  emptyState,
+  type LatestTaskStateSchema,
+  type TaskHealthStatus,
+} from './task_state';
 
 const CSPM_FINDINGS_STATS_TASK_ID = 'cloud_security_posture-findings_stats';
 const CSPM_FINDINGS_STATS_TASK_TYPE = 'cloud_security_posture-stats_task';
@@ -49,7 +49,7 @@ export async function scheduleFindingsStatsTask(
       schedule: {
         interval: CSPM_FINDINGS_STATS_INTERVAL,
       },
-      state: {},
+      state: emptyState,
       params: {},
     },
     logger
@@ -72,6 +72,7 @@ export function setupFindingsStatsTask(
     taskManager.registerTaskDefinitions({
       [CSPM_FINDINGS_STATS_TASK_TYPE]: {
         title: 'Aggregate latest findings index for score calculation',
+        stateSchemaByVersion,
         createTaskRunner: taskRunner(coreStartServices, logger),
       },
     });
@@ -86,28 +87,30 @@ export function setupFindingsStatsTask(
 
 export function taskRunner(coreStartServices: CspServerPluginStartServices, logger: Logger) {
   return ({ taskInstance }: RunContext) => {
-    const { state } = taskInstance;
+    const state = taskInstance.state as LatestTaskStateSchema;
     return {
       async run(): Promise<FindingsStatsTaskResult> {
         try {
           logger.info(`Runs task: ${CSPM_FINDINGS_STATS_TASK_TYPE}`);
           const esClient = (await coreStartServices)[0].elasticsearch.client.asInternalUser;
-          const status = await aggregateLatestFindings(esClient, state.runs, logger);
+          const status = await aggregateLatestFindings(esClient, logger);
 
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            health_status: status,
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: status,
-            },
+            state: updatedState,
           };
         } catch (errMsg) {
           const error = transformError(errMsg);
           logger.warn(`Error executing alerting health check task: ${error.message}`);
+          const updatedState: LatestTaskStateSchema = {
+            runs: state.runs + 1,
+            health_status: 'error',
+          };
           return {
-            state: {
-              runs: (state.runs || 0) + 1,
-              health_status: 'error',
-            },
+            state: updatedState,
           };
         }
       },
@@ -182,7 +185,9 @@ const getScoreQuery = (): SearchRequest => ({
 const getVulnStatsTrendQuery = (): SearchRequest => ({
   index: LATEST_VULNERABILITIES_INDEX_DEFAULT_NS,
   size: 0,
-  query: getSafeVulnerabilitiesQueryFilter(),
+  query: {
+    match_all: {},
+  },
   aggs: {
     critical: {
       filter: { term: { 'vulnerability.severity': VULNERABILITIES_SEVERITY.CRITICAL } },
@@ -303,7 +308,6 @@ const getVulnStatsTrendDocIndexingPromises = (
 
 export const aggregateLatestFindings = async (
   esClient: ElasticsearchClient,
-  stateRuns: number,
   logger: Logger
 ): Promise<TaskHealthStatus> => {
   try {

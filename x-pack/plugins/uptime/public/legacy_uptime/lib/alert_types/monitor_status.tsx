@@ -32,6 +32,8 @@ let validateFunc: (ruleParams: any) => ValidationResult;
 export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   core,
   plugins,
+  isHidden,
+  stackVersion,
 }): ObservabilityRuleTypeModel => ({
   id: CLIENT_ALERT_TYPES.MONITOR_STATUS,
   description,
@@ -40,7 +42,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
     return `${docLinks.links.observability.monitorStatus}`;
   },
   ruleParamsExpression: (params: any) => (
-    <MonitorStatusAlert core={core} plugins={plugins} params={params} />
+    <MonitorStatusAlert core={core} plugins={plugins} params={params} stackVersion={stackVersion} />
   ),
   validate: (ruleParams: any) => {
     if (!validateFunc) {
@@ -55,7 +57,7 @@ export const initMonitorStatusAlertType: AlertTypeInitializer = ({
   },
   defaultActionMessage,
   defaultRecoveryMessage,
-  requiresAppContext: false,
+  requiresAppContext: isHidden,
   format: ({ fields }) => ({
     reason: fields[ALERT_REASON] || '',
     link: getMonitorRouteFromMonitorId({

@@ -5,32 +5,36 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { ContentStorage, StorageContext } from '@kbn/content-management-plugin/server';
-import type {
-  SavedObject,
-  SavedObjectReference,
-  SavedObjectsFindOptions,
-} from '@kbn/core-saved-objects-api-server';
+import type { SavedObjectsFindOptions } from '@kbn/core-saved-objects-api-server';
+import type { StorageContext } from '@kbn/content-management-plugin/server';
+import { SOContentStorage, tagsToFindOptions } from '@kbn/content-management-utils';
+import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import type { Logger } from '@kbn/logging';
 
-import { CONTENT_ID } from '../../common/content_management';
-import { cmServicesDefinition } from '../../common/content_management/cm_services';
-import type {
-  LensSavedObjectAttributes,
-  LensSavedObject,
-  PartialLensSavedObject,
-  LensContentType,
-  LensGetOut,
-  LensCreateIn,
-  LensCreateOut,
-  CreateOptions,
-  LensUpdateIn,
-  LensUpdateOut,
-  UpdateOptions,
-  LensDeleteOut,
-  LensSearchQuery,
-  LensSearchOut,
+import {
+  CONTENT_ID,
+  type LensCrudTypes,
+  type LensSavedObject,
+  type LensSavedObjectAttributes,
+  type PartialLensSavedObject,
 } from '../../common/content_management';
+import { cmServicesDefinition } from '../../common/content_management/cm_services';
+
+const searchArgsToSOFindOptions = (args: LensCrudTypes['SearchIn']): SavedObjectsFindOptions => {
+  const { query, contentTypeId, options } = args;
+
+  return {
+    type: contentTypeId,
+    searchFields: ['title^3', 'description'],
+    fields: ['description', 'title'],
+    search: query.text,
+    perPage: query.limit,
+    page: query.cursor ? +query.cursor : undefined,
+    defaultSearchOperator: 'AND',
+    ...options,
+    ...tagsToFindOptions(query.tags),
+  };
+};
 
 const savedObjectClientFromRequest = async (ctx: StorageContext) => {
   if (!ctx.requestHandlerContext) {
@@ -44,16 +48,6 @@ const savedObjectClientFromRequest = async (ctx: StorageContext) => {
 type PartialSavedObject<T> = Omit<SavedObject<Partial<T>>, 'references'> & {
   references: SavedObjectReference[] | undefined;
 };
-
-function savedObjectToLensSavedObject(
-  savedObject: SavedObject<LensSavedObjectAttributes>,
-  partial: false
-): LensSavedObject;
-
-function savedObjectToLensSavedObject(
-  savedObject: PartialSavedObject<LensSavedObjectAttributes>,
-  partial: true
-): PartialLensSavedObject;
 
 function savedObjectToLensSavedObject(
   savedObject:
@@ -88,110 +82,34 @@ function savedObjectToLensSavedObject(
   };
 }
 
-const SO_TYPE: LensContentType = 'lens';
-
-export class LensStorage implements ContentStorage<LensSavedObject, PartialLensSavedObject> {
-  constructor() {}
-
-  async get(ctx: StorageContext, id: string): Promise<LensGetOut> {
-    const {
-      utils: { getTransforms },
-      version: { request: requestVersion },
-    } = ctx;
-    const transforms = getTransforms(cmServicesDefinition, requestVersion);
-    const soClient = await savedObjectClientFromRequest(ctx);
-
-    // Save data in DB
-    const {
-      saved_object: savedObject,
-      alias_purpose: aliasPurpose,
-      alias_target_id: aliasTargetId,
-      outcome,
-    } = await soClient.resolve<LensSavedObjectAttributes>(SO_TYPE, id);
-
-    const response: LensGetOut = {
-      item: savedObjectToLensSavedObject(savedObject, false),
-      meta: {
-        aliasPurpose,
-        aliasTargetId,
-        outcome,
-      },
-    };
-
-    // Validate DB response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.get.out.result.down<LensGetOut, LensGetOut>(
-      response
-    );
-
-    if (resultError) {
-      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
+export class LensStorage extends SOContentStorage<LensCrudTypes> {
+  constructor(
+    private params: {
+      logger: Logger;
+      throwOnResultValidationError: boolean;
     }
-
-    return value;
-  }
-
-  async bulkGet(): Promise<never> {
-    // Not implemented. Lens does not use bulkGet
-    throw new Error(`[bulkGet] has not been implemented. See LensStorage class.`);
-  }
-
-  async create(
-    ctx: StorageContext,
-    data: LensCreateIn['data'],
-    options: CreateOptions
-  ): Promise<LensCreateOut> {
-    const {
-      utils: { getTransforms },
-      version: { request: requestVersion },
-    } = ctx;
-    const transforms = getTransforms(cmServicesDefinition, requestVersion);
-
-    // Validate input (data & options) & UP transform them to the latest version
-    const { value: dataToLatest, error: dataError } = transforms.create.in.data.up<
-      LensSavedObjectAttributes,
-      LensSavedObjectAttributes
-    >(data);
-    if (dataError) {
-      throw Boom.badRequest(`Invalid data. ${dataError.message}`);
-    }
-
-    const { value: optionsToLatest, error: optionsError } = transforms.create.in.options.up<
-      CreateOptions,
-      CreateOptions
-    >(options);
-    if (optionsError) {
-      throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
-    }
-
-    // Save data in DB
-    const soClient = await savedObjectClientFromRequest(ctx);
-    const savedObject = await soClient.create<LensSavedObjectAttributes>(
-      SO_TYPE,
-      dataToLatest,
-      optionsToLatest
-    );
-
-    // Validate DB response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.create.out.result.down<
-      LensCreateOut,
-      LensCreateOut
-    >({
-      item: savedObjectToLensSavedObject(savedObject, false),
+  ) {
+    super({
+      savedObjectType: CONTENT_ID,
+      cmServicesDefinition,
+      searchArgsToSOFindOptions,
+      enableMSearch: true,
+      allowedSavedObjectAttributes: ['title', 'description', 'visualizationType', 'state'],
+      logger: params.logger,
+      throwOnResultValidationError: params.throwOnResultValidationError,
     });
-
-    if (resultError) {
-      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-    }
-
-    return value;
   }
 
+  /**
+   * Lens requires a custom update function because of https://github.com/elastic/kibana/issues/160116
+   * where a forced create with overwrite flag is used instead of regular update
+   */
   async update(
     ctx: StorageContext,
     id: string,
-    data: LensUpdateIn['data'],
-    options: UpdateOptions
-  ): Promise<LensUpdateOut> {
+    data: LensCrudTypes['UpdateIn']['data'],
+    options: LensCrudTypes['UpdateOptions']
+  ): Promise<LensCrudTypes['UpdateOut']> {
     const {
       utils: { getTransforms },
       version: { request: requestVersion },
@@ -208,8 +126,8 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     }
 
     const { value: optionsToLatest, error: optionsError } = transforms.update.in.options.up<
-      CreateOptions,
-      CreateOptions
+      LensCrudTypes['CreateOptions'],
+      LensCrudTypes['CreateOptions']
     >(options);
     if (optionsError) {
       throw Boom.badRequest(`Invalid options. ${optionsError.message}`);
@@ -218,94 +136,34 @@ export class LensStorage implements ContentStorage<LensSavedObject, PartialLensS
     // Save data in DB
     const soClient = await savedObjectClientFromRequest(ctx);
 
-    const savedObject = await soClient.create<LensSavedObjectAttributes>(SO_TYPE, dataToLatest, {
+    const savedObject = await soClient.create<LensSavedObjectAttributes>(CONTENT_ID, dataToLatest, {
       id,
       overwrite: true,
       ...optionsToLatest,
     });
 
-    // Validate DB response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.update.out.result.down<
-      LensUpdateOut,
-      LensUpdateOut
-    >({
-      item: savedObjectToLensSavedObject(savedObject, true),
-    });
-
-    if (resultError) {
-      throw Boom.badRequest(`Invalid response. ${resultError.message}`);
-    }
-
-    return value;
-  }
-
-  async delete(ctx: StorageContext, id: string): Promise<LensDeleteOut> {
-    const soClient = await savedObjectClientFromRequest(ctx);
-    await soClient.delete(SO_TYPE, id);
-    return { success: true };
-  }
-
-  async search(
-    ctx: StorageContext,
-    query: SearchQuery,
-    options: LensSearchQuery = {}
-  ): Promise<LensSearchOut> {
-    const {
-      utils: { getTransforms },
-      version: { request: requestVersion },
-    } = ctx;
-    const transforms = getTransforms(cmServicesDefinition, requestVersion);
-    const soClient = await savedObjectClientFromRequest(ctx);
-
-    // Validate and UP transform the options
-    const { value: optionsToLatest, error: optionsError } = transforms.search.in.options.up<
-      LensSearchQuery,
-      LensSearchQuery
-    >(options);
-    if (optionsError) {
-      throw Boom.badRequest(`Invalid payload. ${optionsError.message}`);
-    }
-    const { searchFields = ['title^3', 'description'], types = [CONTENT_ID] } = optionsToLatest;
-
-    const { included, excluded } = query.tags ?? {};
-    const hasReference: SavedObjectsFindOptions['hasReference'] = included
-      ? included.map((id) => ({
-          id,
-          type: 'tag',
-        }))
-      : undefined;
-
-    const hasNoReference: SavedObjectsFindOptions['hasNoReference'] = excluded
-      ? excluded.map((id) => ({
-          id,
-          type: 'tag',
-        }))
-      : undefined;
-
-    const soQuery: SavedObjectsFindOptions = {
-      type: types,
-      search: query.text,
-      perPage: query.limit,
-      page: query.cursor ? Number(query.cursor) : undefined,
-      defaultSearchOperator: 'AND',
-      searchFields,
-      hasReference,
-      hasNoReference,
+    const result = {
+      item: savedObjectToLensSavedObject(savedObject),
     };
 
-    // Execute the query in the DB
-    const response = await soClient.find<LensSavedObjectAttributes>(soQuery);
+    const validationError = transforms.update.out.result.validate(result);
+    if (validationError) {
+      if (this.params.throwOnResultValidationError) {
+        throw Boom.badRequest(`Invalid response. ${validationError.message}`);
+      } else {
+        this.params.logger.warn(`Invalid response. ${validationError.message}`);
+      }
+    }
 
-    // Validate the response and DOWN transform to the request version
-    const { value, error: resultError } = transforms.search.out.result.down<
-      LensSearchOut,
-      LensSearchOut
-    >({
-      hits: response.saved_objects.map((so) => savedObjectToLensSavedObject(so, false)),
-      pagination: {
-        total: response.total,
-      },
-    });
+    // Validate DB response and DOWN transform to the request version
+    const { value, error: resultError } = transforms.update.out.result.down<
+      LensCrudTypes['UpdateOut'],
+      LensCrudTypes['UpdateOut']
+    >(
+      result,
+      undefined, // do not override version
+      { validate: false } // validation is done above
+    );
 
     if (resultError) {
       throw Boom.badRequest(`Invalid response. ${resultError.message}`);

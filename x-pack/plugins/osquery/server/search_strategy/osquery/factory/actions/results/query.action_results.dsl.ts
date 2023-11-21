@@ -7,27 +7,41 @@
 
 import type { ISearchRequestParams } from '@kbn/data-plugin/common';
 import { AGENT_ACTIONS_RESULTS_INDEX } from '@kbn/fleet-plugin/common';
+import { isEmpty } from 'lodash';
+import moment from 'moment';
 import { ACTION_RESPONSES_INDEX } from '../../../../../../common/constants';
 import type { ActionResultsRequestOptions } from '../../../../../../common/search_strategy';
-import { createQueryFilterClauses } from '../../../../../../common/utils/build_query';
+import { getQueryFilter } from '../../../../../utils/build_query';
 
 export const buildActionResultsQuery = ({
   actionId,
-  filterQuery,
-  // pagination: { activePage, querySize },
+  kuery,
+  startDate,
   sort,
   componentTemplateExists,
 }: ActionResultsRequestOptions): ISearchRequestParams => {
-  const filter = [
-    ...createQueryFilterClauses(filterQuery),
-    {
-      match_phrase: {
-        action_id: actionId,
-      },
-    },
-  ];
+  let filter = `action_id: ${actionId}`;
+  if (!isEmpty(kuery)) {
+    filter = filter + ` AND ${kuery}`;
+  }
 
-  const dslQuery = {
+  const timeRangeFilter =
+    startDate && !isEmpty(startDate)
+      ? [
+          {
+            range: {
+              started_at: {
+                gte: startDate,
+                lte: moment(startDate).clone().add(30, 'minutes').toISOString(),
+              },
+            },
+          },
+        ]
+      : [];
+
+  const filterQuery = [...timeRangeFilter, getQueryFilter({ filter })];
+
+  return {
     allow_no_indices: true,
     index: componentTemplateExists
       ? `${ACTION_RESPONSES_INDEX}-default*`
@@ -70,7 +84,7 @@ export const buildActionResultsQuery = ({
           },
         },
       },
-      query: { bool: { filter } },
+      query: { bool: { filter: filterQuery } },
       // from: activePage * querySize,
       size: 10000, // querySize,
       track_total_hits: true,
@@ -84,6 +98,4 @@ export const buildActionResultsQuery = ({
       ],
     },
   };
-
-  return dslQuery;
 };

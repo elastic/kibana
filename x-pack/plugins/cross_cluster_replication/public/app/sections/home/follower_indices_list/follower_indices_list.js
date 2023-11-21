@@ -9,13 +9,7 @@ import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiPageContent_Deprecated as EuiPageContent,
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiText,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiButton, EuiText, EuiSpacer, EuiPageTemplate } from '@elastic/eui';
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { extractQueryParams, PageLoading, PageError } from '../../../../shared_imports';
@@ -94,46 +88,39 @@ export class FollowerIndicesList extends PureComponent {
 
   renderEmpty() {
     return (
-      <EuiPageContent
-        hasShadow={false}
-        paddingSize="none"
-        verticalPosition="center"
-        horizontalPosition="center"
-      >
-        <EuiEmptyPrompt
-          iconType="managementApp"
-          data-test-subj="emptyPrompt"
-          title={
-            <h1>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
-                defaultMessage="Create your first follower index"
-              />
-            </h1>
-          }
-          body={
-            <p>
-              <FormattedMessage
-                id="xpack.crossClusterReplication.followerIndexList.emptyPromptDescription"
-                defaultMessage="Use a follower index to replicate a leader index on a remote cluster."
-              />
-            </p>
-          }
-          actions={
-            <EuiButton
-              {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
-              fill
-              iconType="plusInCircle"
-              data-test-subj="createFollowerIndexButton"
-            >
-              <FormattedMessage
-                id="xpack.crossClusterReplication.addFollowerButtonLabel"
-                defaultMessage="Create a follower index"
-              />
-            </EuiButton>
-          }
-        />
-      </EuiPageContent>
+      <EuiPageTemplate.EmptyPrompt
+        iconType="managementApp"
+        data-test-subj="emptyPrompt"
+        title={
+          <h1>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.emptyPromptTitle"
+              defaultMessage="Create your first follower index"
+            />
+          </h1>
+        }
+        body={
+          <p>
+            <FormattedMessage
+              id="xpack.crossClusterReplication.followerIndexList.emptyPromptDescription"
+              defaultMessage="Use a follower index to replicate a leader index on a remote cluster."
+            />
+          </p>
+        }
+        actions={
+          <EuiButton
+            {...reactRouterNavigate(this.props.history, `/follower_indices/add`)}
+            fill
+            iconType="plusInCircle"
+            data-test-subj="createFollowerIndexButton"
+          >
+            <FormattedMessage
+              id="xpack.crossClusterReplication.addFollowerButtonLabel"
+              defaultMessage="Create a follower index"
+            />
+          </EuiButton>
+        }
+      />
     );
   }
 

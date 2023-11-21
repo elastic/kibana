@@ -41,9 +41,14 @@ const AutoRefreshButtonComponent = ({
   setIsRefreshOn,
 }: AutoRefreshButtonProps) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const closePopover = useCallback(() => setIsPopoverOpen(false), [setIsPopoverOpen]);
+  const togglePopover = useCallback(
+    () => setIsPopoverOpen((prevState) => !prevState),
+    [setIsPopoverOpen]
+  );
 
   const handleAutoRefreshSwitch = useCallback(
-    (closePopover: () => void) => (e: EuiSwitchEvent) => {
+    (e: EuiSwitchEvent) => {
       const refreshOn = e.target.checked;
       if (refreshOn) {
         reFetchRules();
@@ -51,18 +56,35 @@ const AutoRefreshButtonComponent = ({
       setIsRefreshOn(refreshOn);
       closePopover();
     },
-    [reFetchRules, setIsRefreshOn]
+    [reFetchRules, setIsRefreshOn, closePopover]
   );
 
-  const handleGetRefreshSettingsPopoverContent = useCallback(
-    (closePopover: () => void) => (
+  return (
+    <EuiPopover
+      isOpen={isPopoverOpen}
+      closePopover={closePopover}
+      button={
+        <EuiButtonEmpty
+          data-test-subj="autoRefreshButton"
+          color={'text'}
+          iconType={'timeRefresh'}
+          onClick={togglePopover}
+          disabled={isDisabled}
+          css={css`
+            margin-left: 10px;
+          `}
+        >
+          {isRefreshOn ? 'On' : 'Off'}
+        </EuiButtonEmpty>
+      }
+    >
       <EuiContextMenuPanel
         items={[
           <EuiSwitch
             key="allRulesAutoRefreshSwitch"
             label={i18n.REFRESH_RULE_POPOVER_DESCRIPTION}
             checked={isRefreshOn ?? false}
-            onChange={handleAutoRefreshSwitch(closePopover)}
+            onChange={handleAutoRefreshSwitch}
             compressed
             disabled={isDisabled}
             data-test-subj="refreshSettingsSwitch"
@@ -82,30 +104,6 @@ const AutoRefreshButtonComponent = ({
             : []),
         ]}
       />
-    ),
-    [isRefreshOn, handleAutoRefreshSwitch, isDisabled]
-  );
-
-  return (
-    <EuiPopover
-      isOpen={isPopoverOpen}
-      closePopover={() => setIsPopoverOpen(false)}
-      button={
-        <EuiButtonEmpty
-          data-test-subj="autoRefreshButton"
-          color={'text'}
-          iconType={'timeRefresh'}
-          onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-          disabled={isDisabled}
-          css={css`
-            margin-left: 10px;
-          `}
-        >
-          {isRefreshOn ? 'On' : 'Off'}
-        </EuiButtonEmpty>
-      }
-    >
-      {handleGetRefreshSettingsPopoverContent(() => setIsPopoverOpen(false))}
     </EuiPopover>
   );
 };

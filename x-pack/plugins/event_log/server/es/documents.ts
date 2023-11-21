@@ -25,41 +25,13 @@ export function getIndexTemplate(esNames: EsNames) {
         hidden: true,
         number_of_shards: 1,
         auto_expand_replicas: '0-1',
-        'index.lifecycle.name': esNames.ilmPolicy,
+      },
+      lifecycle: {
+        data_retention: '90d',
       },
       mappings,
     },
   };
 
   return indexTemplateBody;
-}
-
-// returns the body of an ilm policy used in an ES PUT _ilm/policy call
-export function getIlmPolicy() {
-  return {
-    policy: {
-      _meta: {
-        description:
-          'ilm policy the Kibana event log, created initially by Kibana, but updated by the user, not Kibana',
-        managed: false,
-      },
-      phases: {
-        hot: {
-          actions: {
-            rollover: {
-              max_size: '50GB',
-              max_age: '30d',
-              // max_docs: 1, // you know, for testing
-            },
-          },
-        },
-        delete: {
-          min_age: '90d',
-          actions: {
-            delete: {},
-          },
-        },
-      },
-    },
-  };
 }

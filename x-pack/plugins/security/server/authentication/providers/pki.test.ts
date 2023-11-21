@@ -17,13 +17,13 @@ import { TLSSocket } from 'tls';
 import type { KibanaRequest, ScopeableRequest } from '@kbn/core/server';
 import { elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 
+import type { MockAuthenticationProviderOptions } from './base.mock';
+import { mockAuthenticationProviderOptions } from './base.mock';
+import { PKIAuthenticationProvider } from './pki';
 import { mockAuthenticatedUser } from '../../../common/model/authenticated_user.mock';
 import { securityMock } from '../../mocks';
 import { AuthenticationResult } from '../authentication_result';
 import { DeauthenticationResult } from '../deauthentication_result';
-import type { MockAuthenticationProviderOptions } from './base.mock';
-import { mockAuthenticationProviderOptions } from './base.mock';
-import { PKIAuthenticationProvider } from './pki';
 
 interface MockPeerCertificate extends Partial<PeerCertificate> {
   issuerCertificate: MockPeerCertificate;

@@ -27,6 +27,8 @@ export class MyPlugin {
 }
 ----
 
+
+
 The services that core provides are:
 
 * <<application-service, Application service>>
@@ -36,3 +38,5 @@ The services that core provides are:
 * <<logging-service, Logging service>>
 * <<saved-objects-service, Saved Objects service>>
 * <<ui-settings-service, UI settings service>>
+
+NOTE: Core provides the {kib} building blocks for plugins and is implemented as a collection of <<core-packages, packages>>.

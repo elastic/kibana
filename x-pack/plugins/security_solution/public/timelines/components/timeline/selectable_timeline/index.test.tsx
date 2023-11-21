@@ -10,7 +10,7 @@ import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow, mount } from 'enzyme';
 
-import { SortFieldTimeline, TimelineType } from '../../../../../common/types/timeline/api';
+import { SortFieldTimeline, TimelineType } from '../../../../../common/api/timeline';
 import { SelectableTimeline, ORIGINAL_PAGE_SIZE } from '.';
 import { Direction } from '../../../../../common/search_strategy';
 

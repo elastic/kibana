@@ -84,6 +84,11 @@ export default function ({ getService }: FtrProviderContext) {
         },
         modelMemory: '5mb',
         createIndexPattern: true,
+        advancedEditorContent: [
+          '{',
+          '  "description": "Outlier detection job based on ft_ihp_outlier dataset with runtime fields",',
+          '  "source": {',
+        ],
         expected: {
           histogramCharts: [
             { chartAvailable: true, id: '1stFlrSF', legend: '334 - 4692' },
@@ -130,14 +135,7 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: [
-                  'STOPPED',
-                  'Create time',
-                  'Model memory limit',
-                  '2mb',
-                  'Version',
-                  '8.10.0',
-                ],
+                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '2mb', 'Version'],
               },
               {
                 section: 'stats',
@@ -313,6 +311,14 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.testExecution.logTestStep('checks validation callouts exist');
           await ml.dataFrameAnalyticsCreation.assertValidationCalloutsExists();
           await ml.dataFrameAnalyticsCreation.assertAllValidationCalloutsPresent(1);
+
+          // switch to json editor and back
+          await ml.testExecution.logTestStep('switches to advanced editor then back to form');
+          await ml.dataFrameAnalyticsCreation.openAdvancedEditor();
+          await ml.dataFrameAnalyticsCreation.assertAdvancedEditorCodeEditorContent(
+            testData.advancedEditorContent
+          );
+          await ml.dataFrameAnalyticsCreation.closeAdvancedEditor();
 
           await ml.testExecution.logTestStep('continues to the create step');
           await ml.dataFrameAnalyticsCreation.continueToCreateStep();

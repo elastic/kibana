@@ -12,7 +12,7 @@ import { useParams } from 'react-router-dom';
 import { DeleteTimelineModal } from './delete_timeline_modal';
 
 import * as i18n from '../translations';
-import { TimelineType } from '../../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../../common/api/timeline';
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');

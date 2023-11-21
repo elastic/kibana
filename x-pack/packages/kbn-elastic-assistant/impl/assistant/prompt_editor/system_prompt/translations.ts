@@ -34,3 +34,10 @@ export const ADD_NEW_SYSTEM_PROMPT = i18n.translate(
     defaultMessage: 'Add new system prompt...',
   }
 );
+
+export const EMPTY_PROMPT = i18n.translate(
+  'xpack.elasticAssistant.assistant.firstPromptEditor.emptyPrompt',
+  {
+    defaultMessage: '(empty prompt)',
+  }
+);

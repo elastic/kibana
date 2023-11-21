@@ -59,6 +59,11 @@ test('throws parsing another config with forbidden paths', () => {
   ).toThrowErrorMatchingInlineSnapshot(`"Forbidden path detected: test.hello.__proto__"`);
 });
 
+test('merging two configs', () => {
+  const config = getConfigFromFiles([fixtureFile('merge_1.yml'), fixtureFile('merge_2.yml')]);
+  expect(config).toMatchSnapshot();
+});
+
 describe('different cwd()', () => {
   const originalCwd = process.cwd();
   const tempCwd = resolve(__dirname);

@@ -13,7 +13,7 @@ import { Observable } from 'rxjs';
 import { licenseStateMock } from '../../lib/license_state.mock';
 import { rulesClientMock } from '../../rules_client.mock';
 import { mockHandlerArguments } from '../_mock_handler_arguments';
-import { registerValueSuggestionsRoute } from './values_suggestion_rules';
+import { registerRulesValueSuggestionsRoute } from './values_suggestion_rules';
 
 jest.mock('@kbn/unified-search-plugin/server/autocomplete/terms_agg', () => {
   return {
@@ -27,7 +27,7 @@ jest.mock('../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-describe('registerValueSuggestionsRoute', () => {
+describe('registerRulesValueSuggestionsRoute', () => {
   const rulesClient = rulesClientMock.create();
   let config$: Observable<ConfigSchema>;
 
@@ -43,7 +43,7 @@ describe('registerValueSuggestionsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    registerValueSuggestionsRoute(router, licenseState, config$);
+    registerRulesValueSuggestionsRoute(router, licenseState, config$);
 
     const [config, handler] = router.post.mock.calls[0];
 

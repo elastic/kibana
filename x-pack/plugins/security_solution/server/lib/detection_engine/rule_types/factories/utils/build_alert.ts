@@ -85,7 +85,7 @@ import { transformAlertToRuleAction } from '../../../../../../common/detection_e
 import type {
   AncestorLatest,
   BaseFieldsLatest,
-} from '../../../../../../common/detection_engine/schemas/alerts';
+} from '../../../../../../common/api/detection_engine/model/alerts';
 
 export const generateAlertId = (alert: BaseFieldsLatest) => {
   return createHash('sha256')

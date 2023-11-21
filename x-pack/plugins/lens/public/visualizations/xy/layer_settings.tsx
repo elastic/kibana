@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { IgnoreGlobalFilterRowControl } from '../../shared_components/ignore_global_filter';
 import type { VisualizationLayerSettingsProps } from '../../types';
 import type { XYState } from './types';
@@ -32,6 +33,9 @@ export function LayerSettings({
         const newLayer = { ...layer, ignoreGlobalFilters: !layer.ignoreGlobalFilters };
         const newLayers = [...state.layers];
         newLayers[layerIndex] = newLayer;
+        trackUiCounterEvents(
+          newLayer.ignoreGlobalFilters ? `ignore_global_filters` : `use_global_filters`
+        );
         setState({ ...state, layers: newLayers });
       }}
     />

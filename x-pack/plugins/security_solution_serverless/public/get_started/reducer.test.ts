@@ -6,31 +6,42 @@
  */
 
 import { ProductLine } from '../../common/product';
+import { setupActiveSections } from './helpers';
 import {
   reducer,
   getFinishedStepsInitialStates,
+  getActiveProductsInitialStates,
   getActiveSectionsInitialStates,
-  getActiveCardsInitialStates,
 } from './reducer';
+import type { ExpandedCardSteps } from './types';
 import {
   GetSetUpCardId,
   GetStartedPageActions,
   IntroductionSteps,
   SectionId,
-  GetMoreFromElasticSecurityCardId,
-  type ActiveCards,
   type CardId,
   type StepId,
   type ToggleProductAction,
   type AddFinishedStepAction,
+  ConfigureSteps,
+  ExploreSteps,
 } from './types';
 
 describe('reducer', () => {
   it('should toggle section correctly', () => {
+    const activeProducts = new Set([ProductLine.security]);
+    const finishedSteps = {} as Record<CardId, Set<StepId>>;
+    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
+      finishedSteps,
+      activeProducts
+    );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
-      finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeCards: {} as ActiveCards | null,
+      finishedSteps,
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
+      expandedCardSteps: {} as ExpandedCardSteps,
     };
 
     const action: ToggleProductAction = {
@@ -41,29 +52,30 @@ describe('reducer', () => {
     const nextState = reducer(initialState, action);
 
     expect(nextState.activeProducts.has(ProductLine.security)).toBe(false);
-    expect(nextState.activeCards).toBeNull();
+    expect(nextState.activeSections).toBeNull();
   });
 
   it('should add a finished step correctly', () => {
+    const activeProducts = new Set([ProductLine.security]);
+    const finishedSteps = {} as Record<CardId, Set<StepId>>;
+    const { activeSections, totalStepsLeft, totalActiveSteps } = setupActiveSections(
+      finishedSteps,
+      activeProducts
+    );
     const initialState = {
       activeProducts: new Set([ProductLine.security]),
-      finishedSteps: {} as Record<CardId, Set<StepId>>,
-      activeCards: {
-        getSetUp: {
-          [GetSetUpCardId.introduction]: {
-            id: GetSetUpCardId.introduction,
-            stepsLeft: 1,
-            timeInMins: 3,
-          },
-        },
-      } as unknown as ActiveCards | null,
+      finishedSteps,
+      activeSections,
+      totalStepsLeft,
+      totalActiveSteps,
+      expandedCardSteps: {} as ExpandedCardSteps,
     };
 
     const action: AddFinishedStepAction = {
       type: GetStartedPageActions.AddFinishedStep,
       payload: {
         cardId: GetSetUpCardId.introduction,
-        stepId: IntroductionSteps.watchOverviewVideo,
+        stepId: IntroductionSteps.getToKnowElasticSecurity,
         sectionId: SectionId.getSetUp,
       },
     };
@@ -71,14 +83,32 @@ describe('reducer', () => {
     const nextState = reducer(initialState, action);
 
     expect(nextState.finishedSteps[GetSetUpCardId.introduction]).toEqual(
-      new Set([IntroductionSteps.watchOverviewVideo])
+      new Set([IntroductionSteps.getToKnowElasticSecurity])
     );
-    expect(nextState.activeCards).toEqual({
+    expect(nextState.activeSections).toEqual({
       getSetUp: {
         [GetSetUpCardId.introduction]: {
           id: GetSetUpCardId.introduction,
           stepsLeft: 0,
           timeInMins: 0,
+          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
+        },
+        [GetSetUpCardId.configure]: {
+          id: GetSetUpCardId.configure,
+          stepsLeft: 4,
+          timeInMins: 0,
+          activeStepIds: [
+            ConfigureSteps.learnAbout,
+            ConfigureSteps.deployElasticAgent,
+            ConfigureSteps.connectToDataSources,
+            ConfigureSteps.enablePrebuiltRules,
+          ],
+        },
+        [GetSetUpCardId.explore]: {
+          id: GetSetUpCardId.explore,
+          stepsLeft: 2,
+          timeInMins: 0,
+          activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
         },
       },
     });
@@ -88,37 +118,44 @@ describe('reducer', () => {
 describe('getFinishedStepsInitialStates', () => {
   it('should return the initial states of finished steps correctly', () => {
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: [IntroductionSteps.watchOverviewVideo],
-      [GetSetUpCardId.bringInYourData]: [],
+      [GetSetUpCardId.introduction]: [IntroductionSteps.getToKnowElasticSecurity],
+      [GetSetUpCardId.configure]: [],
     } as unknown as Record<CardId, StepId[]>;
 
     const initialStates = getFinishedStepsInitialStates({ finishedSteps });
 
     expect(initialStates[GetSetUpCardId.introduction]).toEqual(
-      new Set([IntroductionSteps.watchOverviewVideo])
+      new Set([IntroductionSteps.getToKnowElasticSecurity])
     );
-    expect(initialStates[GetSetUpCardId.bringInYourData]).toEqual(new Set([]));
+    expect(initialStates[GetSetUpCardId.configure]).toEqual(new Set([]));
   });
 });
 
-describe('getActiveSectionsInitialStates', () => {
+describe('getActiveProductsInitialStates', () => {
   it('should return the initial states of active sections correctly', () => {
     const activeProducts = [ProductLine.security];
 
-    const initialStates = getActiveSectionsInitialStates({ activeProducts });
+    const initialStates = getActiveProductsInitialStates({ activeProducts });
 
     expect(initialStates.has(ProductLine.security)).toBe(true);
   });
 });
 
-describe('getActiveCardsInitialStates', () => {
+describe('getActiveSectionsInitialStates', () => {
   it('should return the initial states of active cards correctly', () => {
     const activeProducts = new Set([ProductLine.security]);
     const finishedSteps = {
-      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.watchOverviewVideo]),
+      [GetSetUpCardId.introduction]: new Set([IntroductionSteps.getToKnowElasticSecurity]),
     } as unknown as Record<CardId, Set<StepId>>;
 
-    const initialStates = getActiveCardsInitialStates({ activeProducts, finishedSteps });
+    const {
+      activeSections: initialStates,
+      totalActiveSteps,
+      totalStepsLeft,
+    } = getActiveSectionsInitialStates({
+      activeProducts,
+      finishedSteps,
+    });
 
     expect(initialStates).toEqual({
       [SectionId.getSetUp]: {
@@ -126,35 +163,29 @@ describe('getActiveCardsInitialStates', () => {
           id: GetSetUpCardId.introduction,
           timeInMins: 0,
           stepsLeft: 0,
+          activeStepIds: [IntroductionSteps.getToKnowElasticSecurity],
         },
-        [GetSetUpCardId.bringInYourData]: {
-          id: GetSetUpCardId.bringInYourData,
+        [GetSetUpCardId.configure]: {
+          id: GetSetUpCardId.configure,
           timeInMins: 0,
-          stepsLeft: 0,
+          stepsLeft: 4,
+          activeStepIds: [
+            ConfigureSteps.learnAbout,
+            ConfigureSteps.deployElasticAgent,
+            ConfigureSteps.connectToDataSources,
+            ConfigureSteps.enablePrebuiltRules,
+          ],
         },
-        [GetSetUpCardId.activateAndCreateRules]: {
-          id: GetSetUpCardId.activateAndCreateRules,
+        [GetSetUpCardId.explore]: {
+          id: GetSetUpCardId.explore,
           timeInMins: 0,
-          stepsLeft: 0,
-        },
-      },
-      [SectionId.getMoreFromElasticSecurity]: {
-        [GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow]: {
-          id: GetMoreFromElasticSecurityCardId.masterTheInvestigationsWorkflow,
-          stepsLeft: 0,
-          timeInMins: 0,
-        },
-        [GetMoreFromElasticSecurityCardId.respondToThreats]: {
-          id: GetMoreFromElasticSecurityCardId.respondToThreats,
-          stepsLeft: 0,
-          timeInMins: 0,
-        },
-        [GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace]: {
-          id: GetMoreFromElasticSecurityCardId.optimizeYourWorkSpace,
-          stepsLeft: 0,
-          timeInMins: 0,
+          stepsLeft: 2,
+          activeStepIds: [ExploreSteps.viewAlerts, ExploreSteps.analyzeData],
         },
       },
     });
+
+    expect(totalActiveSteps).toEqual(7);
+    expect(totalStepsLeft).toEqual(6);
   });
 });

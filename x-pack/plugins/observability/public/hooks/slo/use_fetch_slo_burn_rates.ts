@@ -10,9 +10,10 @@ import {
   RefetchQueryFilters,
   useQuery,
 } from '@tanstack/react-query';
-import { GetSLOBurnRatesResponse } from '@kbn/slo-schema';
+import { ALL_VALUE, GetSLOBurnRatesResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { useKibana } from '../../utils/kibana_react';
 import { sloKeys } from './query_key_factory';
+import { SLO_LONG_REFETCH_INTERVAL } from '../../constants';
 
 export interface UseFetchSloBurnRatesResponse {
   isInitialLoading: boolean;
@@ -26,29 +27,27 @@ export interface UseFetchSloBurnRatesResponse {
   ) => Promise<QueryObserverResult<GetSLOBurnRatesResponse | undefined, unknown>>;
 }
 
-const LONG_REFETCH_INTERVAL = 1000 * 60; // 1 minute
-
 interface UseFetchSloBurnRatesParams {
-  sloId: string;
+  slo: SLOWithSummaryResponse;
   windows: Array<{ name: string; duration: string }>;
   shouldRefetch?: boolean;
 }
 
 export function useFetchSloBurnRates({
-  sloId,
+  slo,
   windows,
   shouldRefetch,
 }: UseFetchSloBurnRatesParams): UseFetchSloBurnRatesResponse {
   const { http } = useKibana().services;
   const { isInitialLoading, isLoading, isError, isSuccess, isRefetching, data, refetch } = useQuery(
     {
-      queryKey: sloKeys.burnRates(sloId),
+      queryKey: sloKeys.burnRates(slo.id, slo.instanceId),
       queryFn: async ({ signal }) => {
         try {
           const response = await http.post<GetSLOBurnRatesResponse>(
-            `/internal/observability/slos/${sloId}/_burn_rates`,
+            `/internal/observability/slos/${slo.id}/_burn_rates`,
             {
-              body: JSON.stringify({ windows }),
+              body: JSON.stringify({ windows, instanceId: slo.instanceId ?? ALL_VALUE }),
               signal,
             }
           );
@@ -58,7 +57,7 @@ export function useFetchSloBurnRates({
           // ignore error
         }
       },
-      refetchInterval: shouldRefetch ? LONG_REFETCH_INTERVAL : undefined,
+      refetchInterval: shouldRefetch ? SLO_LONG_REFETCH_INTERVAL : undefined,
       refetchOnWindowFocus: false,
       keepPreviousData: true,
     }

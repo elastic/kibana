@@ -19,7 +19,7 @@ import {
   TestSecrets,
   TestExecutor,
 } from './mocks';
-import { IService } from './types';
+import { IService, ServiceParams } from './types';
 
 describe('Executor', () => {
   const actionId = 'test-action-id';
@@ -40,7 +40,8 @@ describe('Executor', () => {
         config: TestConfigSchema,
         secrets: TestSecretsSchema,
       },
-      Service,
+      getService: (serviceParams: ServiceParams<TestConfig, TestSecrets>) =>
+        new Service(serviceParams),
     };
 
     return buildExecutor({ configurationUtilities: mockedActionsConfig, logger, connector });

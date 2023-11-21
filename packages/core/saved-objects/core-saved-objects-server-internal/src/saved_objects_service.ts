@@ -7,7 +7,7 @@
  */
 
 import { Subject, Observable, firstValueFrom, of } from 'rxjs';
-import { filter, take, switchMap } from 'rxjs/operators';
+import { filter, switchMap } from 'rxjs/operators';
 import type { Logger } from '@kbn/logging';
 import { stripVersionQualifier } from '@kbn/std';
 import type { ServiceStatus } from '@kbn/core-status-common';
@@ -15,7 +15,10 @@ import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type { DocLinksServiceStart } from '@kbn/core-doc-links-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
-import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import type {
+  ElasticsearchClient,
+  ElasticsearchCapabilities,
+} from '@kbn/core-elasticsearch-server';
 import type {
   InternalElasticsearchServiceSetup,
   InternalElasticsearchServiceStart,
@@ -54,12 +57,13 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
-import { MAIN_SAVED_OBJECT_INDEX, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { registerRoutes } from './routes';
 import { calculateStatus$ } from './status';
 import { registerCoreObjectTypes } from './object_types';
 import { getSavedObjectsDeprecationsProvider } from './deprecations';
 import { applyTypeDefaults } from './apply_type_defaults';
+import { getAllIndices } from './utils';
 
 /**
  * @internal
@@ -199,7 +203,6 @@ export class SavedObjectsService
       },
       getTypeRegistry: () => this.typeRegistry,
       getDefaultIndex: () => MAIN_SAVED_OBJECT_INDEX,
-      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
     };
   }
 
@@ -223,7 +226,8 @@ export class SavedObjectsService
       elasticsearch.client.asInternalUser,
       docLinks,
       waitForMigrationCompletion,
-      node
+      node,
+      elasticsearch.getCapabilities()
     );
 
     this.migrator$.next(migrator);
@@ -258,20 +262,25 @@ export class SavedObjectsService
         'Waiting until all Elasticsearch nodes are compatible with Kibana before starting saved objects migrations...'
       );
 
-      // The Elasticsearch service should already ensure that, but let's double check just in case.
-      // Should it be replaced with elasticsearch.status$ API instead?
-      const compatibleNodes = await this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
-        filter((nodes) => nodes.isCompatible),
-        take(1)
-      ).toPromise();
-
-      // Running migrations only if we got compatible nodes.
-      // It may happen that the observable completes due to Kibana shutting down
-      // and the promise above fulfils as undefined. We shouldn't trigger migrations at that point.
-      if (compatibleNodes) {
-        this.logger.info('Starting saved objects migrations');
-        await migrator.runMigrations();
+      try {
+        // The Elasticsearch service should already ensure that, but let's double check just in case.
+        // Should it be replaced with elasticsearch.status$ API instead?
+        await firstValueFrom(
+          this.setupDeps!.elasticsearch.esNodesCompatibility$.pipe(
+            filter((nodes) => nodes.isCompatible)
+          )
+        );
+      } catch (e) {
+        // EmptyError means esNodesCompatibility$ was closed before emitting
+        // which should only occur if the server is shutdown before being fully started.
+        if (e.name === 'EmptyError') {
+          throw new Error('esNodesCompatibility$ was closed before emitting');
+        }
+        throw e;
       }
+
+      this.logger.info('Starting saved objects migrations');
+      await migrator.runMigrations();
     }
 
     const createRepository = (
@@ -322,6 +331,8 @@ export class SavedObjectsService
       clientProvider.setClientFactory(clientFactory);
     }
 
+    const allIndices = getAllIndices({ registry: this.typeRegistry });
+
     this.started = true;
 
     return {
@@ -357,7 +368,7 @@ export class SavedObjectsService
         });
         return [...indices];
       },
-      getAllIndices: () => [...ALL_SAVED_OBJECT_INDICES],
+      getAllIndices: () => [...allIndices],
     };
   }
 
@@ -368,7 +379,8 @@ export class SavedObjectsService
     client: ElasticsearchClient,
     docLinks: DocLinksServiceStart,
     waitForMigrationCompletion: boolean,
-    nodeInfo: NodeInfo
+    nodeInfo: NodeInfo,
+    esCapabilities: ElasticsearchCapabilities
   ): IKibanaMigrator {
     return new KibanaMigrator({
       typeRegistry: this.typeRegistry,
@@ -381,6 +393,7 @@ export class SavedObjectsService
       docLinks,
       waitForMigrationCompletion,
       nodeRoles: nodeInfo.roles,
+      esCapabilities,
     });
   }
 }

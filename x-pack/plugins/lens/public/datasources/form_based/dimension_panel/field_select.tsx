@@ -11,16 +11,12 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import {
-  FieldOption,
-  FieldOptionValue,
-  FieldPicker,
-} from '@kbn/visualization-ui-components/public';
+import { FieldOption, FieldOptionValue, FieldPicker } from '@kbn/visualization-ui-components';
+import { getFieldIconType } from '@kbn/field-utils';
 import type { OperationType } from '../form_based';
 import type { OperationSupportMatrix } from './operation_support';
 import { fieldContainsData } from '../../../shared_components';
 import type { IndexPattern } from '../../../types';
-import { getFieldType } from '../pure_utils';
 
 export type FieldChoiceWithOperationType = FieldOptionValue & {
   operationType: OperationType;
@@ -37,6 +33,7 @@ export interface FieldSelectProps extends EuiComboBoxProps<EuiComboBoxOptionOpti
   fieldIsInvalid: boolean;
   markAllFieldsCompatible?: boolean;
   'data-test-subj'?: string;
+  showTimeSeriesDimensions: boolean;
 }
 
 export function FieldSelect({
@@ -50,6 +47,7 @@ export function FieldSelect({
   fieldIsInvalid,
   markAllFieldsCompatible,
   ['data-test-subj']: dataTestSub,
+  showTimeSeriesDimensions,
 }: FieldSelectProps) {
   const { hasFieldData } = useExistingFieldsReader();
   const memoizedFieldOptions = useMemo(() => {
@@ -70,7 +68,15 @@ export function FieldSelect({
       return fieldContainsData(fieldName, currentIndexPattern, hasFieldData);
     }
 
-    function fieldNamesToOptions(items: string[]) {
+    interface FieldOption {
+      label: string;
+      value: { type: 'field'; field: string; dataType: string | undefined; operationType: string };
+      exists: boolean;
+      compatible: number;
+      'data-test-subj': string;
+    }
+
+    function fieldNamesToOptions(items: string[]): FieldOption[] {
       return items
         .filter((field) => currentIndexPattern.getFieldByName(field)?.displayName)
         .map((field) => {
@@ -79,11 +85,11 @@ export function FieldSelect({
           const exists = containsData(field);
           const fieldInstance = currentIndexPattern.getFieldByName(field);
           return {
-            label: currentIndexPattern.getFieldByName(field)?.displayName,
+            label: currentIndexPattern.getFieldByName(field)?.displayName ?? field,
             value: {
-              type: 'field',
+              type: 'field' as const,
               field,
-              dataType: fieldInstance ? getFieldType(fieldInstance) : undefined,
+              dataType: fieldInstance ? getFieldIconType(fieldInstance) : undefined,
               // Use the operation directly, or choose the first compatible operation.
               // All fields are guaranteed to have at least one operation because they
               // won't appear in the list otherwise
@@ -106,21 +112,47 @@ export function FieldSelect({
     );
     const [availableFields, emptyFields] = partition(nonMetaFields, containsData);
 
-    const constructFieldsOptions = (fieldsArr: string[], label: string) =>
+    const constructFieldsOptions = (
+      fieldsArr: string[],
+      label: string
+    ): { label: string; options: FieldOption[] } | false =>
       fieldsArr.length > 0 && {
         label,
         options: fieldNamesToOptions(fieldsArr),
       };
 
-    const availableFieldsOptions = constructFieldsOptions(
+    const isTimeSeriesFields = (field: string) => {
+      return (
+        showTimeSeriesDimensions && currentIndexPattern.getFieldByName(field)?.timeSeriesDimension
+      );
+    };
+
+    const [availableTimeSeriesFields, availableNonTimeseriesFields] = partition(
       availableFields,
+      isTimeSeriesFields
+    );
+    const [emptyTimeSeriesFields, emptyNonTimeseriesFields] = partition(
+      emptyFields,
+      isTimeSeriesFields
+    );
+
+    const timeSeriesFieldsOptions = constructFieldsOptions(
+      // This group includes both available and empty fields
+      availableTimeSeriesFields.concat(emptyTimeSeriesFields),
+      i18n.translate('xpack.lens.indexPattern.timeSeriesFieldsLabel', {
+        defaultMessage: 'Time series dimensions',
+      })
+    );
+
+    const availableFieldsOptions = constructFieldsOptions(
+      availableNonTimeseriesFields,
       i18n.translate('xpack.lens.indexPattern.availableFieldsLabel', {
         defaultMessage: 'Available fields',
       })
     );
 
     const emptyFieldsOptions = constructFieldsOptions(
-      emptyFields,
+      emptyNonTimeseriesFields,
       i18n.translate('xpack.lens.indexPattern.emptyFieldsLabel', {
         defaultMessage: 'Empty fields',
       })
@@ -135,17 +167,19 @@ export function FieldSelect({
 
     return [
       ...fieldNamesToOptions(specialFields),
+      timeSeriesFieldsOptions,
       availableFieldsOptions,
       emptyFieldsOptions,
       metaFieldsOptions,
     ].filter(Boolean);
   }, [
+    operationByField,
     incompleteOperation,
     selectedOperationType,
     currentIndexPattern,
-    operationByField,
     hasFieldData,
     markAllFieldsCompatible,
+    showTimeSeriesDimensions,
   ]);
 
   return (

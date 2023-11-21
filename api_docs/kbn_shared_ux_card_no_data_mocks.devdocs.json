@@ -44,7 +44,7 @@
             "text": "AbstractStorybookMock"
           },
           "<",
-          "NoDataCardProps",
+          "NoDataCardComponentProps",
           ", ",
           "NoDataCardServices",
           ", PropArguments, ServiceArguments>"
@@ -344,7 +344,7 @@
                 "text": "Params"
               },
               " | undefined) => ",
-              "NoDataCardProps"
+              "NoDataCardComponentProps"
             ],
             "path": "packages/shared-ux/card/no_data/mocks/src/storybook.ts",
             "deprecated": false,

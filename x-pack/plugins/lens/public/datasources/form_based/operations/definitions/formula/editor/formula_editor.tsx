@@ -106,7 +106,6 @@ export function FormulaEditor({
   dataViews,
   toggleFullscreen,
   isFullscreen,
-  setIsCloseable,
   dateHistogramInterval,
   hasData,
   dateRange,
@@ -175,7 +174,6 @@ export function FormulaEditor({
   }, []);
 
   useUnmount(() => {
-    setIsCloseable(true);
     // If the text is not synced, update the column.
     if (text !== currentColumn.params.formula) {
       paramEditorUpdater(
@@ -792,20 +790,6 @@ export function FormulaEditor({
                   if (model) {
                     editorModel.current = model;
                   }
-                  disposables.current.push(
-                    editor.onDidFocusEditorWidget(() => {
-                      setTimeout(() => {
-                        setIsCloseable(false);
-                      });
-                    })
-                  );
-                  disposables.current.push(
-                    editor.onDidBlurEditorWidget(() => {
-                      setTimeout(() => {
-                        setIsCloseable(true);
-                      });
-                    })
-                  );
                   // If we ever introduce a second Monaco editor, we need to toggle
                   // the typing handler to the active editor to maintain the cursor
                   disposables.current.push(

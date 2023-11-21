@@ -6,7 +6,7 @@
  */
 
 import * as rt from 'io-ts';
-import { ItemTypeRT } from '../inventory_models/types';
+import { ItemTypeRT } from '@kbn/metrics-data-access-plugin/common';
 
 export const InfraMetadataRequestRT = rt.type({
   nodeId: rt.string,
@@ -83,6 +83,14 @@ export const InfraMetadataInfoRT = rt.partial({
   cloud: InfraMetadataCloudRT,
   host: InfraMetadataHostRT,
   agent: InfraMetadataAgentRT,
+  '@timestamp': rt.string,
+});
+
+export const InfraMetadataInfoResponseRT = rt.partial({
+  cloud: InfraMetadataCloudRT,
+  host: InfraMetadataHostRT,
+  agent: InfraMetadataAgentRT,
+  timestamp: rt.string,
 });
 
 const InfraMetadataRequiredRT = rt.type({
@@ -92,7 +100,7 @@ const InfraMetadataRequiredRT = rt.type({
 });
 
 const InfraMetadataOptionalRT = rt.partial({
-  info: InfraMetadataInfoRT,
+  info: InfraMetadataInfoResponseRT,
 });
 
 export const InfraMetadataRT = rt.intersection([InfraMetadataRequiredRT, InfraMetadataOptionalRT]);

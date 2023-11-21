@@ -23,7 +23,7 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
 
   router.versioned
     .get({
-      path: `/${FONTS_API_PATH}/{fontstack}/{range}`,
+      path: `${FONTS_API_PATH}/{fontstack}/{range}`,
       access: 'internal',
     })
     .addVersion(
@@ -62,7 +62,7 @@ export async function initRoutes(coreSetup: CoreSetup, logger: Logger): Promise<
 
   router.versioned
     .get({
-      path: `/${INDEX_SETTINGS_API_PATH}`,
+      path: INDEX_SETTINGS_API_PATH,
       access: 'internal',
     })
     .addVersion(

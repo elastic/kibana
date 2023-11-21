@@ -2,21 +2,29 @@
   "extends": "../../../../tsconfig.base.json",
   "include": [
     "**/*",
-    "../cypress.config.ts"
+    "./cypress.config.ts",
+    "./serverless_cypress.config.ts",
+    "../../../test_serverless/shared/lib",
   ],
   "exclude": [
-    "target/**/*"
+    "target/**/*",
+    "../../../test_serverless/shared/lib/security/default_http_headers.ts"
   ],
   "compilerOptions": {
     "outDir": "target/types",
     "types": [
       "cypress",
       "node",
-      "cypress-react-selector"
     ],
     "resolveJsonModule": true,
   },
   "kbn_references": [
+    {
+      "path": "../../../test_serverless/tsconfig.json"
+    },
+    {
+      "path": "../../../test/security_solution_cypress/cypress/tsconfig.json"
+    },
     "@kbn/cypress-config",
     // cypress projects that are nested inside of other ts project use code
     // from the parent ts project in ways that can't be automatically deteceted
@@ -25,9 +33,9 @@
       "path": "../tsconfig.json",
       "force": true
     },
-    "@kbn/security-plugin",
     "@kbn/security-solution-plugin",
     "@kbn/fleet-plugin",
-    "@kbn/cases-plugin"
+    "@kbn/cases-plugin",
+    "@kbn/security-solution-plugin/public/management/cypress",
   ]
 }

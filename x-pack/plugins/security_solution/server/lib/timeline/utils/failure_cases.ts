@@ -6,17 +6,16 @@
  */
 
 import { isEmpty } from 'lodash/fp';
-import type {
-  TimelineTypeLiteral,
-  TimelineSavedObject,
-} from '../../../../common/types/timeline/api';
-import { TimelineStatus } from '../../../../common/types/timeline/api';
+import type { TimelineTypeLiteral, TimelineSavedObject } from '../../../../common/api/timeline';
+import { TimelineStatus } from '../../../../common/api/timeline';
 
 export const UPDATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new timelines with PATCH. Use POST instead.';
 export const UPDATE_TEMPLATE_TIMELINE_ERROR_MESSAGE =
   'You cannot create new Timeline templates with PATCH. Use POST instead (templateTimelineId does not exist).';
 export const NO_MATCH_VERSION_ERROR_MESSAGE =
+  'Timeline version conflict. The provided timelineVersion does not match the current timeline.';
+export const NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE =
   'Timeline template version conflict. The provided templateTimelineVersion does not match the current template.';
 export const NO_MATCH_ID_ERROR_MESSAGE =
   'There are no Timeline templates that match the provided templateTimelineId.';
@@ -114,7 +113,7 @@ const commonUpdateTemplateTimelineCheck = (
     if (existTemplateTimeline != null && existTemplateTimeline.version !== version) {
       // throw error 409 conflict timeline
       return {
-        body: NO_MATCH_VERSION_ERROR_MESSAGE,
+        body: NO_MATCH_TEMPLATE_VERSION_ERROR_MESSAGE,
         statusCode: 409,
       };
     }

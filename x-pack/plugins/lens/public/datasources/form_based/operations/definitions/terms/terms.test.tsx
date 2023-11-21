@@ -8,7 +8,14 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
+import {
+  EuiButtonGroup,
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFieldNumber,
+  EuiSelect,
+  EuiSwitch,
+} from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -26,7 +33,7 @@ import {
   operationDefinitionMap,
 } from '..';
 import { FormBasedLayer, FormBasedPrivateState } from '../../../types';
-import { FrameDatasourceAPI } from '../../../../../types';
+import { FramePublicAPI } from '../../../../../types';
 import { DateHistogramIndexPatternColumn } from '../date_histogram';
 import { getOperationSupportMatrix } from '../../../dimension_panel/operation_support';
 import { FieldSelect } from '../../../dimension_panel/field_select';
@@ -1170,10 +1177,32 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top 3 values of source');
+    });
+
+    it('should not fail if dataview is not given', () => {
+      expect(
+        termsOperation.getDefaultLabel(
+          {
+            dataType: 'string',
+            isBucketed: true,
+
+            // Private
+            operationType: 'terms',
+            params: {
+              orderBy: { type: 'alphabetical', fallback: true },
+              size: 3,
+              orderDirection: 'asc',
+            },
+            sourceField: 'source',
+          } as TermsIndexPatternColumn,
+          {},
+          undefined
+        )
+      ).toBe('Top 3 values of Missing field');
     });
 
     it('should return main value with single counter for two fields', () => {
@@ -1193,8 +1222,8 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top values of source + 1 other');
     });
@@ -1216,8 +1245,8 @@ describe('terms', () => {
             },
             sourceField: 'source',
           } as TermsIndexPatternColumn,
-          createMockedIndexPattern(),
-          {}
+          {},
+          createMockedIndexPattern()
         )
       ).toBe('Top values of source + 2 others');
     });
@@ -1225,7 +1254,7 @@ describe('terms', () => {
 
   describe('field input', () => {
     // @ts-expect-error
-    window['__react-beautiful-dnd-disable-dev-warnings'] = true; // issue with enzyme & react-beautiful-dnd throwing errors: https://github.com/atlassian/react-beautiful-dnd/issues/1593
+    window['__@hello-pangea/dnd-disable-dev-warnings'] = true; // issue with enzyme & @hello-pangea/dnd throwing errors: https://github.com/hello-pangea/dnd/issues/644
 
     const defaultFieldInputProps = {
       indexPattern: defaultProps.indexPattern,
@@ -2477,7 +2506,9 @@ describe('terms', () => {
       const functionComboBox = refEditor
         .find(EuiComboBox)
         .filter('[data-test-subj="indexPattern-reference-function"]');
-      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      const option = functionComboBox
+        .prop('options')!
+        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
 
       act(() => {
         functionComboBox.prop('onChange')!([option]);
@@ -2546,7 +2577,7 @@ describe('terms', () => {
 
       const option = fieldComboBox
         .prop('options')[0]
-        .options!.find(({ label }) => label === 'memory')!;
+        .options!.find(({ label }: EuiComboBoxOptionOption) => label === 'memory')!;
       act(() => {
         fieldComboBox.prop('onChange')!([option]);
       });
@@ -2627,7 +2658,9 @@ describe('terms', () => {
       const functionComboBox = comboBoxes.filter(
         '[data-test-subj="indexPattern-reference-function"]'
       );
-      const option = functionComboBox.prop('options')!.find(({ label }) => label === 'Average')!;
+      const option = functionComboBox
+        .prop('options')!
+        .find(({ label }: EuiComboBoxOptionOption) => label === 'Average')!;
       act(() => {
         functionComboBox.prop('onChange')!([option]);
       });
@@ -2669,6 +2702,7 @@ describe('terms', () => {
             params: {
               ...(layer.columns.col1 as TermsIndexPatternColumn).params,
               size: 7,
+              otherBucket: true,
             },
           },
         },
@@ -2833,7 +2867,7 @@ describe('terms', () => {
               fromDate: '2020',
               toDate: '2021',
             },
-          } as unknown as FrameDatasourceAPI,
+          } as unknown as FramePublicAPI,
           'first'
         );
         expect(newLayer.columns.col1).toEqual(

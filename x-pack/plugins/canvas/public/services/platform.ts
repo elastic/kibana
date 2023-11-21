@@ -15,7 +15,7 @@ import {
 } from '@kbn/core/public';
 
 import { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
+import { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
 
 export interface CanvasPlatformService {
   getBasePath: () => string;
@@ -33,5 +33,5 @@ export interface CanvasPlatformService {
   getLegacyUrlConflict?: SpacesPluginStart['ui']['components']['getLegacyUrlConflict'];
   getUISettings: () => IUiSettingsClient;
   getHttp: () => HttpStart;
-  getSavedObjectsManagement: () => SavedObjectsManagementPluginStart;
+  getContentManagement: () => ContentManagementPublicStart;
 }

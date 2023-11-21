@@ -13,11 +13,11 @@ import { useRuleManagementFilters } from '../../../../rule_management/logic/use_
 import { RULES_TABLE_ACTIONS } from '../../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../../common/lib/apm/use_start_transaction';
 import * as i18n from '../../../../../detections/pages/detection_engine/rules/translations';
-import type { RuleExecutionStatus } from '../../../../../../common/detection_engine/rule_monitoring/model/execution_status';
 import { useRulesTableContext } from '../rules_table/rules_table_context';
 import { TagsFilterPopover } from './tags_filter_popover';
 import { RuleExecutionStatusSelector } from './rule_execution_status_selector';
 import { RuleSearchField } from './rule_search_field';
+import type { RuleExecutionStatus } from '../../../../../../common/api/detection_engine';
 
 const FilterWrapper = styled(EuiFlexGroup)`
   margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};

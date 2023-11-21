@@ -11,7 +11,6 @@ const createNamesMock = () => {
   const mock: jest.Mocked<EsNames> = {
     base: '.kibana',
     dataStream: '.kibana-event-log-8.0.0',
-    ilmPolicy: 'kibana-event-log-policy',
     indexPattern: '.kibana-event-log-*',
     indexTemplate: '.kibana-event-log-8.0.0-template',
   };

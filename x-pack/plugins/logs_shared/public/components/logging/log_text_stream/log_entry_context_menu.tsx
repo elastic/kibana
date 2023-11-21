@@ -120,3 +120,6 @@ const AbsoluteWrapper = euiStyled.div`
 const ButtonWrapper = euiStyled.div`
   transform: translate(-6px, -6px);
 `;
+
+// eslint-disable-next-line import/no-default-export
+export default LogEntryContextMenu;

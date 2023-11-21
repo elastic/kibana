@@ -13,18 +13,18 @@ import { EuiButtonEmpty } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 export interface LinkToApmServicesProps {
-  nodeName: string;
+  assetName: string;
   apmField: string;
 }
 
-export const LinkToApmServices = ({ nodeName, apmField }: LinkToApmServicesProps) => {
+export const LinkToApmServices = ({ assetName, apmField }: LinkToApmServicesProps) => {
   const { services } = useKibanaContextForPlugin();
   const { http } = services;
 
   const queryString = new URLSearchParams(
     encode(
       stringify({
-        kuery: `${apmField}:"${nodeName}"`,
+        kuery: `${apmField}:"${assetName}"`,
       })
     )
   );
@@ -34,15 +34,13 @@ export const LinkToApmServices = ({ nodeName, apmField }: LinkToApmServicesProps
   return (
     <RedirectAppLinks coreStart={services}>
       <EuiButtonEmpty
-        data-test-subj="hostsView-flyout-apm-services-link"
+        data-test-subj="infraAssetDetailsViewAPMServicesButton"
         size="xs"
-        iconSide="left"
-        iconType="popout"
         flush="both"
         href={linkToApmServices}
       >
         <FormattedMessage
-          id="xpack.infra.hostsViewPage.flyout.apmServicesLinkLabel"
+          id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
           defaultMessage="APM Services"
         />
       </EuiButtonEmpty>

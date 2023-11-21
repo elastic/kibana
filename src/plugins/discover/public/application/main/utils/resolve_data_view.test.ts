@@ -7,7 +7,7 @@
  */
 
 import { loadDataView } from './resolve_data_view';
-import { dataViewMock } from '../../../__mocks__/data_view';
+import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { discoverServiceMock as services } from '../../../__mocks__/services';
 
 describe('Resolve data view tests', () => {

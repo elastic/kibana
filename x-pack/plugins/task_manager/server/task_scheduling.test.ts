@@ -21,6 +21,7 @@ import { mockLogger } from './test_utils';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { ephemeralTaskLifecycleMock } from './ephemeral_task_lifecycle.mock';
 import { taskManagerMock } from './mocks';
+import { omit } from 'lodash';
 
 let fakeTimer: sinon.SinonFakeTimers;
 jest.mock('uuid', () => ({
@@ -370,6 +371,135 @@ describe('TaskScheduling', () => {
     });
   });
 
+  describe('bulkUpdateState', () => {
+    const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
+    beforeEach(() => {
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: taskManagerMock.createTask() }])
+      );
+    });
+
+    test('should split search on chunks when input ids array too large', async () => {
+      mockTaskStore.bulkGet.mockResolvedValue([]);
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+
+      await taskScheduling.bulkUpdateState(Array.from({ length: 1250 }), jest.fn());
+
+      expect(mockTaskStore.bulkGet).toHaveBeenCalledTimes(13);
+    });
+
+    test('should transform response into correct format', async () => {
+      const successfulTask = taskManagerMock.createTask({
+        id: 'task-1',
+        enabled: false,
+        schedule: { interval: '1h' },
+        state: {
+          'hello i am a state that has been modified': "not really but we're going to pretend",
+        },
+      });
+      const failedToUpdateTask = taskManagerMock.createTask({
+        id: 'task-2',
+        enabled: true,
+        schedule: { interval: '1h' },
+        state: { 'this state is unchangeable': 'none shall update me' },
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([
+          { tag: 'ok', value: successfulTask },
+          {
+            tag: 'err',
+            error: {
+              type: 'task',
+              id: failedToUpdateTask.id,
+              error: {
+                statusCode: 400,
+                error: 'fail',
+                message: 'fail',
+              },
+            },
+          },
+        ])
+      );
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(successfulTask), asOk(failedToUpdateTask)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      const result = await taskScheduling.bulkUpdateState(
+        [successfulTask.id, failedToUpdateTask.id],
+        jest.fn()
+      );
+
+      expect(result).toEqual({
+        tasks: [successfulTask],
+        errors: [
+          {
+            type: 'task',
+            id: failedToUpdateTask.id,
+            error: {
+              statusCode: 400,
+              error: 'fail',
+              message: 'fail',
+            },
+          },
+        ],
+      });
+    });
+
+    test('should execute updater function on tasks', async () => {
+      const task = taskManagerMock.createTask({
+        id,
+        enabled: false,
+        schedule: { interval: '3h' },
+        runAt: new Date('1969-09-13T21:33:58.285Z'),
+        scheduledAt: new Date('1969-09-10T21:33:58.285Z'),
+        state: { removeMe: 'please remove me i dont like being in this task manager state' },
+      });
+      const updaterFn = jest.fn((state) => {
+        return {
+          ...omit(state, 'removeMe'),
+          expectedValue: 'HELLO I AM AN EXPECTED VALUE IT IS VERY NICE TO MEET YOU',
+        };
+      });
+      mockTaskStore.bulkUpdate.mockImplementation(() =>
+        Promise.resolve([{ tag: 'ok', value: task }])
+      );
+      mockTaskStore.bulkGet.mockResolvedValue([asOk(task)]);
+
+      const taskScheduling = new TaskScheduling(taskSchedulingOpts);
+      await taskScheduling.bulkUpdateState([id], updaterFn);
+
+      const bulkUpdatePayload = mockTaskStore.bulkUpdate.mock.calls[0][0];
+
+      expect(bulkUpdatePayload).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "attempts": 0,
+            "enabled": false,
+            "id": "01ddff11-e88a-4d13-bc4e-256164e755e2",
+            "ownerId": "123",
+            "params": Object {
+              "hello": "world",
+            },
+            "retryAt": null,
+            "runAt": 1969-09-13T21:33:58.285Z,
+            "schedule": Object {
+              "interval": "3h",
+            },
+            "scheduledAt": 1969-09-10T21:33:58.285Z,
+            "scope": undefined,
+            "startedAt": null,
+            "state": Object {
+              "expectedValue": "HELLO I AM AN EXPECTED VALUE IT IS VERY NICE TO MEET YOU",
+            },
+            "status": "idle",
+            "taskType": "foo",
+            "user": undefined,
+            "version": "123",
+          },
+        ]
+      `);
+    });
+  });
+
   describe('bulkUpdateSchedules', () => {
     const id = '01ddff11-e88a-4d13-bc4e-256164e755e2';
     beforeEach(() => {
@@ -700,6 +830,7 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Success,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );
@@ -743,6 +874,7 @@ describe('TaskScheduling', () => {
             },
             result: TaskRunResult.Failed,
             persistence: TaskPersistence.Ephemeral,
+            isExpired: false,
           })
         )
       );

@@ -5,45 +5,24 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiPanel,
-  EuiSwitch,
-  EuiText,
-  EuiTitle,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../shared/doc_links';
-import { DOCUMENTS_API_JSON_EXAMPLE } from '../new_index/constants';
-
-import { SettingsLogic } from '../settings/settings_logic';
-
-import { ClientLibrariesPopover } from './components/client_libraries_popover/popover';
-import { CurlRequest } from './components/curl_request/curl_request';
 import { GenerateApiKeyModal } from './components/generate_api_key_modal/modal';
-import { ManageKeysPopover } from './components/manage_api_keys_popover/popover';
 
+import { APIGettingStarted } from './components/getting_started/getting_started';
 import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
 
 export const GenerateApiKeyPanel: React.FC = () => {
-  const { apiKey, isGenerateModalOpen } = useValues(OverviewLogic);
-  const { indexName, ingestionMethod, isHiddenIndex } = useValues(IndexViewLogic);
+  const { isGenerateModalOpen } = useValues(OverviewLogic);
+  const { indexName, isHiddenIndex } = useValues(IndexViewLogic);
   const { closeGenerateModal } = useActions(OverviewLogic);
-  const { defaultPipeline } = useValues(SettingsLogic);
-
-  const [optimizedRequest, setOptimizedRequest] = useState(true);
-
   return (
     <>
       {isGenerateModalOpen && (
@@ -51,7 +30,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
       )}
       <EuiFlexGroup>
         <EuiFlexItem>
-          <EuiPanel hasBorder>
+          <EuiPanel hasBorder paddingSize="xl">
             {isHiddenIndex ? (
               <EuiEmptyPrompt
                 body={
@@ -71,84 +50,7 @@ export const GenerateApiKeyPanel: React.FC = () => {
                 }
               />
             ) : (
-              <EuiFlexGroup direction="column">
-                <EuiFlexItem>
-                  <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-                    <EuiFlexItem>
-                      <EuiFlexGroup direction="column">
-                        <EuiFlexItem>
-                          <EuiTitle size="s">
-                            <h2>
-                              {i18n.translate(
-                                'xpack.enterpriseSearch.content.overview.documentExample.title',
-                                { defaultMessage: 'Adding documents to your index' }
-                              )}
-                            </h2>
-                          </EuiTitle>
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <EuiText size="s">
-                            <p>
-                              <FormattedMessage
-                                id="xpack.enterpriseSearch.content.overview.documentExample.description.text"
-                                defaultMessage="Generate an API key and read the {documentation} on how to send documents to the Elasticsearch API endpoint. Use Elastic  {clients} for streamlined integration."
-                                values={{
-                                  clients: (
-                                    <EuiLink href={docLinks.clientsGuide} external>
-                                      {i18n.translate(
-                                        'xpack.enterpriseSearch.content.overview.documentExample.description.clientsLink',
-                                        { defaultMessage: 'programming language clients' }
-                                      )}
-                                    </EuiLink>
-                                  ),
-                                  documentation: (
-                                    <EuiLink href={docLinks.indexApi} external>
-                                      {i18n.translate(
-                                        'xpack.enterpriseSearch.content.overview.documentExample.description.documentationLink',
-                                        { defaultMessage: 'documentation' }
-                                      )}
-                                    </EuiLink>
-                                  ),
-                                }}
-                              />
-                            </p>
-                          </EuiText>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
-                        <EuiFlexItem>
-                          <ClientLibrariesPopover />
-                        </EuiFlexItem>
-                        <EuiFlexItem>
-                          <ManageKeysPopover />
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiFlexItem>
-
-                <EuiFlexItem grow={false}>
-                  <EuiSwitch
-                    data-telemetry-id={`entSearchContent-${ingestionMethod}-overview-generateApiKey-optimizedRequest`}
-                    onChange={(event) => setOptimizedRequest(event.target.checked)}
-                    label={i18n.translate(
-                      'xpack.enterpriseSearch.content.overview.optimizedRequest.label',
-                      { defaultMessage: 'View Enterprise Search optimized request' }
-                    )}
-                    checked={optimizedRequest}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem>
-                  <CurlRequest
-                    apiKey={apiKey}
-                    document={DOCUMENTS_API_JSON_EXAMPLE}
-                    indexName={indexName}
-                    pipeline={optimizedRequest ? defaultPipeline : undefined}
-                  />
-                </EuiFlexItem>
-              </EuiFlexGroup>
+              <APIGettingStarted />
             )}
           </EuiPanel>
         </EuiFlexItem>

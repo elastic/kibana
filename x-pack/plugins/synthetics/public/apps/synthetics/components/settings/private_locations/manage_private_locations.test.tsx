@@ -46,12 +46,7 @@ describe('<ManagePrivateLocations />', () => {
       const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
           agentPolicies: {
-            data: {
-              items: [],
-              total: 0,
-              page: 1,
-              perPage: 20,
-            },
+            data: [],
             loading: false,
             error: null,
             isManageFlyoutOpen: false,
@@ -85,12 +80,7 @@ describe('<ManagePrivateLocations />', () => {
       const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
           agentPolicies: {
-            data: {
-              items: [{}],
-              total: 1,
-              page: 1,
-              perPage: 20,
-            },
+            data: [{}],
             loading: false,
             error: null,
             isManageFlyoutOpen: false,
@@ -131,7 +121,6 @@ describe('<ManagePrivateLocations />', () => {
             id: 'lkjlere',
             agentPolicyId: 'lkjelrje',
             isServiceManaged: false,
-            concurrentMonitors: 2,
           },
         ],
         onDelete: jest.fn(),
@@ -140,12 +129,7 @@ describe('<ManagePrivateLocations />', () => {
       const { getByText, getByRole, findByText } = render(<ManagePrivateLocations />, {
         state: {
           agentPolicies: {
-            data: {
-              items: [{}],
-              total: 1,
-              page: 1,
-              perPage: 20,
-            },
+            data: [{}],
             loading: false,
             error: null,
             isManageFlyoutOpen: false,

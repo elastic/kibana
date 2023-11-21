@@ -25,6 +25,7 @@ export const InstallManagedAgentStep = ({
   isK8s,
   cloudSecurityIntegration,
   enrollToken,
+  fleetServerHost,
   isComplete,
   fullCopyButton,
   onCopy,
@@ -34,6 +35,7 @@ export const InstallManagedAgentStep = ({
   isK8s?: K8sMode;
   cloudSecurityIntegration?: CloudSecurityIntegration | undefined;
   enrollToken?: string;
+  fleetServerHost?: string;
   installCommand: CommandsByPlatform;
   isComplete?: boolean;
   fullCopyButton?: boolean;
@@ -55,6 +57,7 @@ export const InstallManagedAgentStep = ({
           enrollToken={enrollToken}
           onCopy={onCopy}
           fullCopyButton={fullCopyButton}
+          fleetServerHost={fleetServerHost}
         />
       ) : (
         <React.Fragment />

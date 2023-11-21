@@ -1,5 +1,11 @@
 {
   "ccr.get_auto_follow_pattern": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
@@ -7,6 +13,10 @@
       "_ccr/auto_follow",
       "_ccr/auto_follow/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/ccr-get-auto-follow-pattern.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/ccr-get-auto-follow-pattern.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

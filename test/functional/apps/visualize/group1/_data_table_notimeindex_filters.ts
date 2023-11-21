@@ -64,7 +64,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     // test to cover bug #54548 - add this visualization to a dashboard and filter
     it('should add to dashboard and allow filtering', async function () {
-      await PageObjects.common.navigateToApp('dashboard');
+      await PageObjects.dashboard.navigateToApp();
       await PageObjects.dashboard.clickNewDashboard();
       await dashboardAddPanel.addVisualization(vizName1);
 

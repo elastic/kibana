@@ -54,11 +54,14 @@ export class SavedObjectTaggingPlugin
     features.registerKibanaFeature(savedObjectsTaggingFeature);
 
     if (usageCollection) {
-      const kibanaIndices = savedObjects.getAllIndices();
+      const getKibanaIndices = () =>
+        getStartServices()
+          .then(([core]) => core.savedObjects.getAllIndices())
+          .catch(() => []);
       usageCollection.registerCollector(
         createTagUsageCollector({
           usageCollection,
-          kibanaIndices,
+          getKibanaIndices,
         })
       );
     }

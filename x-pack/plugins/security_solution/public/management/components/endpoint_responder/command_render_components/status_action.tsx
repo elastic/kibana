@@ -252,7 +252,7 @@ export const EndpointStatusActionResult = memo<
       <EuiDescriptionList
         compressed
         type="column"
-        className="descriptionList-20_80"
+        columnWidths={[1, 4]}
         listItems={statusData}
         data-test-subj={'agent-status-console-output'}
       />

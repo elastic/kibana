@@ -5,21 +5,34 @@
  * 2.0.
  */
 
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { services as xpackFunctionalServices } from '../../../test/functional/services';
+import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
 
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
 import { SvlObltNavigationServiceProvider } from './svl_oblt_navigation';
 import { SvlSearchNavigationServiceProvider } from './svl_search_navigation';
 import { SvlSecNavigationServiceProvider } from './svl_sec_navigation';
+import { SvlCommonScreenshotsProvider } from './svl_common_screenshots';
+import { SvlCasesServiceProvider } from '../../api_integration/services/svl_cases';
+import { MachineLearningProvider } from './ml';
+import { SvlReportingServiceProvider } from './svl_reporting';
+import { LogsSynthtraceProvider } from './log';
 
 export const services = {
-  ...xpackFunctionalServices,
-  ...svlSharedServices,
+  // deployment agnostic FTR services
+  ...deploymentAgnosticFunctionalServices,
 
+  // serverless FTR services
+  ...svlSharedServices,
   svlCommonNavigation: SvlCommonNavigationServiceProvider,
   svlObltNavigation: SvlObltNavigationServiceProvider,
   svlSearchNavigation: SvlSearchNavigationServiceProvider,
   svlSecNavigation: SvlSecNavigationServiceProvider,
+  svlCommonScreenshots: SvlCommonScreenshotsProvider,
+  svlCases: SvlCasesServiceProvider,
+  svlMl: MachineLearningProvider,
+  svlReportingApi: SvlReportingServiceProvider,
+
+  // log services
+  svlLogsSynthtraceClient: LogsSynthtraceProvider,
 };

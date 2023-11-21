@@ -11,9 +11,10 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useToggle from 'react-use/lib/useToggle';
+import type { Field } from '../tabs/metadata/utils';
 
 interface ExpandableContentProps {
-  values: string | string[] | undefined;
+  values?: Field['value'];
 }
 export const ExpandableContent = (props: ExpandableContentProps) => {
   const { values } = props;
@@ -31,7 +32,10 @@ export const ExpandableContent = (props: ExpandableContentProps) => {
         {shouldShowMore && (
           <>
             {' ... '}
-            <EuiLink data-test-subj="infraExpandableContentCountMoreLink" onClick={toggle}>
+            <EuiLink
+              data-test-subj="infraAssetDetailsExpandableContentCountMoreLink"
+              onClick={toggle}
+            >
               <FormattedMessage
                 id="xpack.infra.nodeDetails.tabs.metadata.seeMore"
                 defaultMessage="+{count} more"

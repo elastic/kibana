@@ -21,14 +21,18 @@ import { format } from './formatter';
 
 import { MONITORS_ROUTE } from '../../../../../../common/constants';
 
-export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
+export const ActionBar = ({
+  readOnly = false,
+  canUsePublicLocations = true,
+}: {
+  readOnly: boolean;
+  canUsePublicLocations?: boolean;
+}) => {
   const { monitorId } = useParams<{ monitorId: string }>();
   const history = useHistory();
   const {
     handleSubmit,
-    formState: { errors, defaultValues },
-    getValues,
-    getFieldState,
+    formState: { defaultValues, isValid },
   } = useFormContext();
 
   const [monitorPendingDeletion, setMonitorPendingDeletion] = useState<SyntheticsMonitor | null>(
@@ -42,12 +46,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
   const canEditSynthetics = useCanEditSynthetics();
 
   const formSubmitter = (formData: Record<string, any>) => {
-    // An additional invalid field check to account for customHook managed validation
-    const isAnyFieldInvalid = Object.keys(getValues()).some(
-      (fieldKey) => getFieldState(fieldKey).invalid
-    );
-
-    if (!Object.keys(errors).length && !isAnyFieldInvalid) {
+    if (isValid) {
       setMonitorData(format(formData, readOnly));
     }
   };
@@ -66,6 +65,7 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
                 onClick={() => {
                   setMonitorPendingDeletion(defaultValues as SyntheticsMonitor);
                 }}
+                isDisabled={!canEditSynthetics || !canUsePublicLocations}
               >
                 {DELETE_MONITOR_LABEL}
               </EuiButton>
@@ -82,16 +82,19 @@ export const ActionBar = ({ readOnly = false }: { readOnly: boolean }) => {
           </EuiLink>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <RunTestButton />
+          <RunTestButton canUsePublicLocations={canUsePublicLocations} />
         </EuiFlexItem>
         <EuiFlexItem grow={false} css={{ marginLeft: 'auto' }}>
-          <NoPermissionsTooltip canEditSynthetics={canEditSynthetics}>
+          <NoPermissionsTooltip
+            canEditSynthetics={canEditSynthetics}
+            canUsePublicLocations={canUsePublicLocations}
+          >
             <EuiButton
               fill
               isLoading={loading}
               onClick={handleSubmit(formSubmitter)}
               data-test-subj="syntheticsMonitorConfigSubmitButton"
-              disabled={!canEditSynthetics}
+              disabled={!canEditSynthetics || !canUsePublicLocations}
             >
               {isEdit ? UPDATE_MONITOR_LABEL : CREATE_MONITOR_LABEL}
             </EuiButton>

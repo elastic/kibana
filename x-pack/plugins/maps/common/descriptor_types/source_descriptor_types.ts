@@ -104,6 +104,7 @@ export type ESSearchSourceDescriptor = AbstractESSourceDescriptor & {
   sortField: string;
   sortOrder: SortDirection;
   scalingType: SCALING_TYPES;
+  topHitsGroupByTimeseries: boolean;
   topHitsSplitField: string;
   topHitsSize: number;
 };

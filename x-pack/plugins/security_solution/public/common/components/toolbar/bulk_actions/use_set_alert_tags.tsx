@@ -8,7 +8,7 @@
 import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback, useEffect, useRef } from 'react';
-import type { AlertTags } from '../../../../../common/detection_engine/schemas/common';
+import type { AlertTags } from '../../../../../common/api/detection_engine';
 import { useAppToasts } from '../../../hooks/use_app_toasts';
 import * as i18n from './translations';
 import { setAlertTags } from '../../../containers/alert_tags/api';
@@ -38,7 +38,7 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
   const setAlertTagsRef = useRef<SetAlertTagsFunc | null>(null);
 
   const onUpdateSuccess = useCallback(
-    (updated: number) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
+    (updated: number = 0) => addSuccess(i18n.UPDATE_ALERT_TAGS_SUCCESS_TOAST(updated)),
     [addSuccess]
   );
 
@@ -60,7 +60,7 @@ export const useSetAlertTags = (): ReturnSetAlertTags => {
         if (!ignore) {
           onSuccess();
           setTableLoading(false);
-          onUpdateSuccess(response.items.length);
+          onUpdateSuccess(response.updated);
         }
       } catch (error) {
         if (!ignore) {

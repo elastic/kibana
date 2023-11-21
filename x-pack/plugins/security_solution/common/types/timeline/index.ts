@@ -37,6 +37,7 @@ export enum TimelineTabs {
   eql = 'eql',
   session = 'session',
   securityAssistant = 'securityAssistant',
+  esql = 'esql',
 }
 
 /*
@@ -47,7 +48,6 @@ export enum TimelineId {
   active = 'timeline-1',
   casePage = 'timeline-case',
   test = 'timeline-test', // Reserved for testing purposes
-  detectionsAlertDetailsPage = 'detections-alert-details-page',
 }
 
 export type TimelineEventsType = 'all' | 'raw' | 'alert' | 'signal' | 'custom' | 'eql';

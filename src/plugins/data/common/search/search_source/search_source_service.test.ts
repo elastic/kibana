@@ -19,6 +19,7 @@ describe('SearchSource service', () => {
       getConfig: jest.fn(),
       search: jest.fn(),
       onResponse: jest.fn(),
+      scriptedFieldsEnabled: true,
     };
   });
 

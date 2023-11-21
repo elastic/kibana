@@ -14,9 +14,9 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { FeatureTable } from './feature_table';
 import type { Space } from '../../../../common';
 import { SectionPanel } from '../section_panel';
-import { FeatureTable } from './feature_table';
 
 interface Props {
   space: Partial<Space>;

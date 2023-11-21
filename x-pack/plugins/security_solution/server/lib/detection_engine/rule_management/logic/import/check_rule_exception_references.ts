@@ -6,7 +6,7 @@
  */
 import type { ListArray, ExceptionListSchema } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { RuleToImport } from '../../../../../../common/detection_engine/rule_management';
+import type { RuleToImport } from '../../../../../../common/api/detection_engine/rule_management';
 import type { BulkError } from '../../../routes/utils';
 import { createBulkErrorObject } from '../../../routes/utils';
 

@@ -9,7 +9,7 @@
 import { EuiHeader } from '@elastic/eui';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
 import { docLinksServiceMock } from '@kbn/core-doc-links-browser-mocks';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen } from '@testing-library/react';
 import React from 'react';
 import * as Rx from 'rxjs';
 import { ProjectHeader, Props as ProjectHeaderProps } from './header';
@@ -34,6 +34,7 @@ describe('Header', () => {
     navControlsCenter$: Rx.of([]),
     navControlsRight$: Rx.of([]),
     prependBasePath: (str) => `hello/world/${str}`,
+    toggleSideNav: jest.fn(),
   };
 
   it('renders', async () => {
@@ -43,32 +44,7 @@ describe('Header', () => {
       </ProjectHeader>
     );
 
-    expect(await screen.findByTestId('toggleNavButton')).toBeVisible();
+    expect(await screen.findByTestId('euiCollapsibleNavButton')).toBeVisible();
     expect(await screen.findByText('Hello, world!')).toBeVisible();
-  });
-
-  it('can collapse and uncollapse', async () => {
-    render(
-      <ProjectHeader {...mockProps}>
-        <EuiHeader>Hello, goodbye!</EuiHeader>
-      </ProjectHeader>
-    );
-
-    expect(await screen.findByTestId('toggleNavButton')).toBeVisible();
-    expect(await screen.findByText('Hello, goodbye!')).toBeVisible(); // title is shown
-
-    const toggleNav = async () => {
-      fireEvent.click(await screen.findByTestId('toggleNavButton')); // click
-
-      expect(screen.queryAllByText('Hello, goodbye!')).toHaveLength(0); // title is not shown
-
-      fireEvent.click(await screen.findByTestId('toggleNavButton')); // click again
-
-      expect(await screen.findByText('Hello, goodbye!')).toBeVisible(); // title is shown
-    };
-
-    await toggleNav();
-    await toggleNav();
-    await toggleNav();
   });
 });

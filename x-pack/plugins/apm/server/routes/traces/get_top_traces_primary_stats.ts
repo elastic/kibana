@@ -19,7 +19,7 @@ import { calculateImpactBuilder } from './calculate_impact_builder';
 import { calculateThroughputWithRange } from '../../lib/helpers/calculate_throughput';
 import {
   getDurationFieldForTransactions,
-  getDocumentTypeFilterForTransactions,
+  getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
   isRootTransaction,
 } from '../../lib/helpers/transactions';
@@ -87,7 +87,7 @@ export async function getTopTracesPrimaryStats({
             bool: {
               filter: [
                 ...termQuery(TRANSACTION_NAME, transactionName),
-                ...getDocumentTypeFilterForTransactions(
+                ...getBackwardCompatibleDocumentTypeFilter(
                   searchAggregatedTransactions
                 ),
                 ...rangeQuery(start, end),

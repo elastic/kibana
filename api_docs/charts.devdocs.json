@@ -15,6 +15,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "ColorPickerProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
@@ -357,6 +365,14 @@
         "signature": [
           "React.ForwardRefExoticComponent<",
           "LegendToggleProps",
+          " & ",
+          {
+            "pluginId": "@kbn/shared-ux-utility",
+            "scope": "common",
+            "docId": "kibKbnSharedUxUtilityPluginApi",
+            "section": "def-common.WithSuspenseExtendedDeps",
+            "text": "WithSuspenseExtendedDeps"
+          },
           " & React.RefAttributes<{}>>"
         ],
         "path": "src/plugins/charts/public/static/components/index.ts",
@@ -1350,7 +1366,15 @@
                 "section": "def-common.Datatable",
                 "text": "Datatable"
               },
-              ", \"rows\" | \"columns\">; column: number; value: any[]; }; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
+              ", \"rows\" | \"columns\">; cells: { column: number; row: number; }[]; relation?: ",
+              {
+                "pluginId": "@kbn/es-query",
+                "scope": "common",
+                "docId": "kibKbnEsQueryPluginApi",
+                "section": "def-common.BooleanRelation",
+                "text": "BooleanRelation"
+              },
+              " | undefined; }[]; timeFieldName?: string | undefined; negate?: boolean | undefined; }"
             ],
             "path": "src/plugins/charts/public/index.ts",
             "deprecated": false,
@@ -1568,13 +1592,10 @@
       {
         "parentPluginId": "charts",
         "id": "def-public.defaultCountLabel",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "defaultCountLabel",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -1652,7 +1673,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -1860,13 +1881,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Blues.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1922,13 +1940,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Greens.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -1984,13 +1999,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Greys.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2046,13 +2058,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.Reds.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2108,13 +2117,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.YellowToRed.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -2170,13 +2176,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-public.vislibColorMaps.ColorSchemas.GreenToRed.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3366,7 +3369,7 @@
         "label": "AllowedSettingsOverrides",
         "description": [],
         "signature": [
-          "{ settings?: { debug?: boolean | undefined; theme?: ",
+          "{ settings?: { theme?: ",
           "MakeOverridesSerializable",
           "<",
           "RecursivePartial",
@@ -3382,7 +3385,7 @@
           "LegendPositionConfig",
           " | undefined; rotation?: ",
           "Rotation",
-          " | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
+          " | undefined; debug?: boolean | undefined; locale?: string | undefined; ariaLabelHeadingLevel?: \"h1\" | \"h2\" | \"h3\" | \"h4\" | \"h5\" | \"h6\" | \"p\" | undefined; ariaUseDefaultSummary?: boolean | undefined; flatLegend?: boolean | undefined; legendMaxDepth?: number | undefined; legendSize?: number | undefined; showLegendExtra?: boolean | undefined; rendering?: ",
           "Rendering",
           " | undefined; animateData?: boolean | undefined; externalPointerEvents?: ",
           "MakeOverridesSerializable",
@@ -3462,13 +3465,10 @@
       {
         "parentPluginId": "charts",
         "id": "def-common.defaultCountLabel",
-        "type": "Any",
+        "type": "string",
         "tags": [],
         "label": "defaultCountLabel",
         "description": [],
-        "signature": [
-          "any"
-        ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
         "trackAdoption": false,
@@ -3615,7 +3615,7 @@
         "label": "LabelRotation",
         "description": [],
         "signature": [
-          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; }"
+          "{ readonly Horizontal: number; readonly Vertical: number; readonly Angled: number; readonly VerticalRotation: number; }"
         ],
         "path": "src/plugins/charts/common/static/components/collections.ts",
         "deprecated": false,
@@ -3823,13 +3823,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Blues.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3885,13 +3882,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Greens.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -3947,13 +3941,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Greys.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4009,13 +4000,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.Reds.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4071,13 +4059,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.YellowToRed.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false
@@ -4133,13 +4118,10 @@
               {
                 "parentPluginId": "charts",
                 "id": "def-common.vislibColorMaps.ColorSchemas.GreenToRed.label",
-                "type": "Any",
+                "type": "string",
                 "tags": [],
                 "label": "label",
                 "description": [],
-                "signature": [
-                  "any"
-                ],
                 "path": "src/plugins/charts/common/static/color_maps/color_maps.ts",
                 "deprecated": false,
                 "trackAdoption": false

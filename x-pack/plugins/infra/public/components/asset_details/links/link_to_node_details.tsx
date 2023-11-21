@@ -8,35 +8,42 @@ import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiButtonEmpty } from '@elastic/eui';
 import { useLinkProps } from '@kbn/observability-shared-plugin/public';
-import { getNodeDetailUrl } from '../../../pages/link_to';
-import { findInventoryModel } from '../../../../common/inventory_models';
-import type { InventoryItemType } from '../../../../common/inventory_models/types';
+import { parse } from '@kbn/datemath';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { useNodeDetailsRedirect } from '../../../pages/link_to';
+
+import { useAssetDetailsUrlState } from '../hooks/use_asset_details_url_state';
 
 export interface LinkToNodeDetailsProps {
-  currentTime: number;
-  nodeName: string;
-  nodeType: InventoryItemType;
+  assetId: string;
+  assetName?: string;
+  assetType: InventoryItemType;
 }
 
-export const LinkToNodeDetails = ({ nodeName, nodeType, currentTime }: LinkToNodeDetailsProps) => {
-  const inventoryModel = findInventoryModel(nodeType);
-  const nodeDetailFrom = currentTime - inventoryModel.metrics.defaultTimeRangeInSeconds * 1000;
+export const LinkToNodeDetails = ({ assetId, assetName, assetType }: LinkToNodeDetailsProps) => {
+  const [state] = useAssetDetailsUrlState();
+  const { getNodeDetailUrl } = useNodeDetailsRedirect();
+
+  // don't propagate the autoRefresh to the details page
+  const { dateRange, autoRefresh: _, ...assetDetails } = state ?? {};
 
   const nodeDetailMenuItemLinkProps = useLinkProps({
     ...getNodeDetailUrl({
-      nodeType,
-      nodeId: nodeName,
-      from: nodeDetailFrom,
-      to: currentTime,
+      assetType,
+      assetId,
+      search: {
+        ...assetDetails,
+        name: assetName,
+        from: parse(dateRange?.from ?? '')?.valueOf(),
+        to: parse(dateRange?.to ?? '')?.valueOf(),
+      },
     }),
   });
 
   return (
     <EuiButtonEmpty
-      data-test-subj="infraNodeContextPopoverOpenAsPageButton"
+      data-test-subj="infraAssetDetailsOpenAsPageButton"
       size="xs"
-      iconSide="left"
-      iconType="popout"
       flush="both"
       {...nodeDetailMenuItemLinkProps}
     >

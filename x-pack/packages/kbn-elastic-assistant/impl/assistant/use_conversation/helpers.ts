@@ -6,6 +6,8 @@
  */
 
 import React from 'react';
+import { Prompt } from '../types';
+import { Conversation } from '../../assistant_context/types';
 
 export interface CodeBlockDetails {
   type: QueryType;
@@ -16,7 +18,7 @@ export interface CodeBlockDetails {
   button?: React.ReactNode;
 }
 
-export type QueryType = 'eql' | 'kql' | 'dsl' | 'json' | 'no-type';
+export type QueryType = 'eql' | 'esql' | 'kql' | 'dsl' | 'json' | 'no-type' | 'sql';
 
 /**
  * `analyzeMarkdown` is a helper that enriches content returned from a query
@@ -33,6 +35,7 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   // If your codeblocks aren't getting tagged with the right language, add keywords to the array.
   const types = {
     eql: ['Event Query Language', 'EQL sequence query', 'EQL'],
+    esql: ['Elasticsearch Query Language', 'ESQL', 'ES|QL', 'SQL'],
     kql: ['Kibana Query Language', 'KQL Query', 'KQL'],
     dsl: [
       'Elasticsearch QueryDSL',
@@ -63,4 +66,25 @@ export const analyzeMarkdown = (markdown: string): CodeBlockDetails[] => {
   });
 
   return result;
+};
+
+/**
+ * Returns the default system prompt for a given conversation
+ *
+ * @param allSystemPrompts All available System Prompts
+ * @param conversation Conversation to get the default system prompt for
+ */
+export const getDefaultSystemPrompt = ({
+  allSystemPrompts,
+  conversation,
+}: {
+  allSystemPrompts: Prompt[];
+  conversation: Conversation | undefined;
+}): Prompt | undefined => {
+  const conversationSystemPrompt = allSystemPrompts.find(
+    (prompt) => prompt.id === conversation?.apiConfig?.defaultSystemPromptId
+  );
+  const defaultNewSystemPrompt = allSystemPrompts.find((prompt) => prompt.isNewConversationDefault);
+
+  return conversationSystemPrompt ?? defaultNewSystemPrompt ?? allSystemPrompts?.[0];
 };

@@ -24,7 +24,13 @@ import type { IAssignmentService, ITagsClient } from '@kbn/saved-objects-tagging
 import { PACKAGES_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getAsset, getPathParts } from '../../archive';
 import { KibanaAssetType, KibanaSavedObjectType } from '../../../../types';
-import type { AssetType, AssetReference, AssetParts, Installation } from '../../../../types';
+import type {
+  AssetType,
+  AssetReference,
+  AssetParts,
+  Installation,
+  PackageSpecTags,
+} from '../../../../types';
 import { savedObjectTypes } from '../../packages';
 import { indexPatternTypes, getIndexPatternSavedObjects } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
@@ -45,7 +51,12 @@ type SavedObjectToBe = Required<Pick<SavedObjectsBulkCreateObject, keyof Archive
 };
 export type ArchiveAsset = Pick<
   SavedObject,
-  'id' | 'attributes' | 'migrationVersion' | 'references'
+  | 'id'
+  | 'attributes'
+  | 'migrationVersion' // deprecated
+  | 'references'
+  | 'coreMigrationVersion'
+  | 'typeMigrationVersion'
 > & {
   type: KibanaSavedObjectType;
 };
@@ -81,13 +92,24 @@ export async function getKibanaAsset(key: string): Promise<ArchiveAsset> {
 
 export function createSavedObjectKibanaAsset(asset: ArchiveAsset): SavedObjectToBe {
   // convert that to an object
-  return {
+  const so: Partial<SavedObjectToBe> = {
     type: asset.type,
     id: asset.id,
     attributes: asset.attributes,
     references: asset.references || [],
-    migrationVersion: asset.migrationVersion || {},
   };
+
+  // migrating deprecated migrationVersion to typeMigrationVersion
+  if (asset.migrationVersion && asset.migrationVersion[asset.type]) {
+    so.typeMigrationVersion = asset.migrationVersion[asset.type];
+  }
+  if (asset.coreMigrationVersion) {
+    so.coreMigrationVersion = asset.coreMigrationVersion;
+  }
+  if (asset.typeMigrationVersion) {
+    so.typeMigrationVersion = asset.typeMigrationVersion;
+  }
+  return so as SavedObjectToBe;
 }
 
 export async function installKibanaAssets(options: {
@@ -118,15 +140,21 @@ export async function installKibanaAssets(options: {
     return [];
   }
 
-  // As we use `import` to create our saved objects, we have to install
-  // their references (the index patterns) at the same time
-  // to prevent a reference error
+  // Create index patterns separately with `overwrite: false` to prevent blowing away users' runtime fields.
+  // These don't get retried on conflict, because we expect that they exist once an integration has been installed.
   const indexPatternSavedObjects = getIndexPatternSavedObjects() as ArchiveAsset[];
+  await savedObjectsImporter.import({
+    overwrite: false,
+    readStream: createListStream(indexPatternSavedObjects),
+    createNewCopies: false,
+    refresh: false,
+    managed: true,
+  });
 
   const installedAssets = await installKibanaSavedObjects({
     logger,
     savedObjectsImporter,
-    kibanaAssets: [...indexPatternSavedObjects, ...assetsToInstall],
+    kibanaAssets: assetsToInstall,
   });
 
   return installedAssets;
@@ -143,6 +171,7 @@ export async function installKibanaAssetsAndReferences({
   paths,
   installedPkg,
   spaceId,
+  assetTags,
 }: {
   savedObjectsClient: SavedObjectsClientContract;
   savedObjectsImporter: Pick<ISavedObjectsImporter, 'import' | 'resolveImportErrors'>;
@@ -154,6 +183,7 @@ export async function installKibanaAssetsAndReferences({
   paths: string[];
   installedPkg?: SavedObject<Installation>;
   spaceId: string;
+  assetTags?: PackageSpecTags[];
 }) {
   const kibanaAssets = await getKibanaAssets(paths);
   if (installedPkg) await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg });
@@ -179,6 +209,7 @@ export async function installKibanaAssetsAndReferences({
       pkgName,
       spaceId,
       importedAssets,
+      assetTags,
     })
   );
 
@@ -295,6 +326,7 @@ export async function installKibanaSavedObjects({
         readStream: createListStream(toBeSavedObjects),
         createNewCopies: false,
         refresh: false,
+        managed: true,
       })
     );
 
@@ -346,6 +378,7 @@ export async function installKibanaSavedObjects({
         await savedObjectsImporter.resolveImportErrors({
           readStream: createListStream(toBeSavedObjects),
           createNewCopies: false,
+          managed: true,
           retries,
         });
 

@@ -6,17 +6,20 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
-import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import { chunk, flatMap, isEmpty, keys } from 'lodash';
+import { ALERT_INSTANCE_ID, ALERT_RULE_UUID, ALERT_STATUS, ALERT_UUID } from '@kbn/rule-data-utils';
+import { chunk, flatMap, get, isEmpty, keys } from 'lodash';
 import { SearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Alert } from '@kbn/alerts-as-data-utils';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { DeepPartial } from '@kbn/utility-types';
+import { UntypedNormalizedRuleType } from '../rule_type_registry';
 import {
+  SummarizedAlerts,
   AlertInstanceContext,
   AlertInstanceState,
   RuleAlertData,
   WithoutReservedActionGroups,
+  DataStreamAdapter,
 } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import {
@@ -24,8 +27,8 @@ import {
   IIndexPatternString,
 } from '../alerts_service/resource_installer_utils';
 import { CreateAlertsClientParams } from '../alerts_service/alerts_service';
+import type { AlertRule, SearchResult } from './types';
 import {
-  type AlertRule,
   IAlertsClient,
   InitializeExecutionOpts,
   ProcessAndLogAlertsOpts,
@@ -33,6 +36,7 @@ import {
   ReportedAlert,
   ReportedAlertData,
   UpdateableAlert,
+  GetSummarizedAlertsParams,
 } from './types';
 import {
   buildNewAlert,
@@ -40,7 +44,12 @@ import {
   buildUpdatedRecoveredAlert,
   buildRecoveredAlert,
   formatRule,
+  getHitsWithCount,
+  getLifecycleAlertsQueries,
+  getContinualAlertsQuery,
 } from './lib';
+import { isValidAlertIndexName } from '../alerts_service';
+import { resolveAlertConflicts } from './lib/alert_conflict_resolver';
 
 // Term queries can take up to 10,000 terms
 const CHUNK_SIZE = 10000;
@@ -48,6 +57,7 @@ const CHUNK_SIZE = 10000;
 export interface AlertsClientParams extends CreateAlertsClientParams {
   elasticsearchClientPromise: Promise<ElasticsearchClient>;
   kibanaVersion: string;
+  dataStreamAdapter: DataStreamAdapter;
 }
 
 export class AlertsClient<
@@ -72,13 +82,18 @@ export class AlertsClient<
   private fetchedAlerts: {
     indices: Record<string, string>;
     data: Record<string, Alert & AlertData>;
+    seqNo: Record<string, number | undefined>;
+    primaryTerm: Record<string, number | undefined>;
   };
 
-  private rule: AlertRule = {};
+  private startedAtString: string | null = null;
+  private rule: AlertRule;
+  private ruleType: UntypedNormalizedRuleType;
 
   private indexTemplateAndPattern: IIndexPatternString;
 
   private reportedAlerts: Record<string, DeepPartial<AlertData>> = {};
+  private _isUsingDataStreams: boolean;
 
   constructor(private readonly options: AlertsClientParams) {
     this.legacyAlertsClient = new LegacyAlertsClient<
@@ -93,13 +108,19 @@ export class AlertsClient<
         ? this.options.namespace
         : DEFAULT_NAMESPACE_STRING,
     });
-    this.fetchedAlerts = { indices: {}, data: {} };
+    this.fetchedAlerts = { indices: {}, data: {}, seqNo: {}, primaryTerm: {} };
     this.rule = formatRule({ rule: this.options.rule, ruleType: this.options.ruleType });
+    this.ruleType = options.ruleType;
+    this._isUsingDataStreams = this.options.dataStreamAdapter.isUsingDataStreams();
   }
 
   public async initializeExecution(opts: InitializeExecutionOpts) {
+    this.startedAtString = opts.startedAt ? opts.startedAt.toISOString() : null;
     await this.legacyAlertsClient.initializeExecution(opts);
 
+    if (!this.ruleType.alerts?.shouldWrite) {
+      return;
+    }
     // Get tracked alert UUIDs to query for
     // TODO - we can consider refactoring to store the previous execution UUID and query
     // for active and recovered alerts from the previous execution using that UUID
@@ -118,8 +139,9 @@ export class AlertsClient<
     }
 
     const queryByUuid = async (uuids: string[]) => {
-      return await this.search({
+      const result = await this.search({
         size: uuids.length,
+        seq_no_primary_term: true,
         query: {
           bool: {
             filter: [
@@ -137,6 +159,7 @@ export class AlertsClient<
           },
         },
       });
+      return result.hits;
     };
 
     try {
@@ -146,31 +169,36 @@ export class AlertsClient<
 
       for (const hit of results.flat()) {
         const alertHit: Alert & AlertData = hit._source as Alert & AlertData;
-        const alertUuid = alertHit.kibana.alert.uuid;
-        const alertId = alertHit.kibana.alert.instance.id;
+        const alertUuid = get(alertHit, ALERT_UUID);
+        const alertId = get(alertHit, ALERT_INSTANCE_ID);
 
         // Keep track of existing alert document so we can copy over data if alert is ongoing
         this.fetchedAlerts.data[alertId] = alertHit;
 
         // Keep track of index so we can update the correct document
         this.fetchedAlerts.indices[alertUuid] = hit._index;
+        this.fetchedAlerts.seqNo[alertUuid] = hit._seq_no;
+        this.fetchedAlerts.primaryTerm[alertUuid] = hit._primary_term;
       }
     } catch (err) {
       this.options.logger.error(`Error searching for tracked alerts by UUID - ${err.message}`);
     }
   }
 
-  public async search(queryBody: SearchRequest['body']) {
+  public async search(queryBody: SearchRequest['body']): Promise<SearchResult<AlertData>> {
     const esClient = await this.options.elasticsearchClientPromise;
-
+    const index = this.isUsingDataStreams()
+      ? this.indexTemplateAndPattern.alias
+      : this.indexTemplateAndPattern.pattern;
     const {
-      hits: { hits },
+      hits: { hits, total },
     } = await esClient.search<Alert & AlertData>({
-      index: this.indexTemplateAndPattern.pattern,
+      index,
       body: queryBody,
+      ignore_unavailable: true,
     });
 
-    return hits;
+    return { hits, total };
   }
 
   public report(
@@ -201,7 +229,7 @@ export class AlertsClient<
 
     return {
       uuid: legacyAlert.getUuid(),
-      start: legacyAlert.getStart(),
+      start: legacyAlert.getStart() ?? this.startedAtString,
     };
   }
 
@@ -248,14 +276,20 @@ export class AlertsClient<
   }
 
   public async persistAlerts() {
-    const currentTime = new Date().toISOString();
+    if (!this.ruleType.alerts?.shouldWrite) {
+      this.options.logger.debug(
+        `Resources registered and installed for ${this.ruleType.alerts?.context} context but "shouldWrite" is set to false.`
+      );
+      return;
+    }
+    const currentTime = this.startedAtString ?? new Date().toISOString();
     const esClient = await this.options.elasticsearchClientPromise;
 
     const { alertsToReturn, recoveredAlertsToReturn } =
       this.legacyAlertsClient.getAlertsToSerialize(false);
 
-    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('activeCurrent');
-    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recoveredCurrent');
+    const activeAlerts = this.legacyAlertsClient.getProcessedAlerts('active');
+    const recoveredAlerts = this.legacyAlertsClient.getProcessedAlerts('recovered');
 
     // TODO - Lifecycle alerts set some other fields based on alert status
     // Example: workflow status - default to 'open' if not set
@@ -264,41 +298,47 @@ export class AlertsClient<
     const activeAlertsToIndex: Array<Alert & AlertData> = [];
     for (const id of keys(alertsToReturn)) {
       // See if there's an existing active alert document
-      if (
-        this.fetchedAlerts.data.hasOwnProperty(id) &&
-        this.fetchedAlerts.data[id].kibana.alert.status === 'active'
-      ) {
-        activeAlertsToIndex.push(
-          buildOngoingAlert<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            alert: this.fetchedAlerts.data[id],
-            legacyAlert: activeAlerts[id],
-            rule: this.rule,
-            timestamp: currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.options.kibanaVersion,
-          })
-        );
+      if (!!activeAlerts[id]) {
+        if (
+          this.fetchedAlerts.data.hasOwnProperty(id) &&
+          get(this.fetchedAlerts.data[id], ALERT_STATUS) === 'active'
+        ) {
+          activeAlertsToIndex.push(
+            buildOngoingAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              alert: this.fetchedAlerts.data[id],
+              legacyAlert: activeAlerts[id],
+              rule: this.rule,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
+        } else {
+          activeAlertsToIndex.push(
+            buildNewAlert<
+              AlertData,
+              LegacyState,
+              LegacyContext,
+              ActionGroupIds,
+              RecoveryActionGroupId
+            >({
+              legacyAlert: activeAlerts[id],
+              rule: this.rule,
+              timestamp: currentTime,
+              payload: this.reportedAlerts[id],
+              kibanaVersion: this.options.kibanaVersion,
+            })
+          );
+        }
       } else {
-        activeAlertsToIndex.push(
-          buildNewAlert<
-            AlertData,
-            LegacyState,
-            LegacyContext,
-            ActionGroupIds,
-            RecoveryActionGroupId
-          >({
-            legacyAlert: activeAlerts[id],
-            rule: this.rule,
-            timestamp: currentTime,
-            payload: this.reportedAlerts[id],
-            kibanaVersion: this.options.kibanaVersion,
-          })
+        this.options.logger.error(
+          `Error writing alert(${id}) to ${this.indexTemplateAndPattern.alias} - alert(${id}) doesn't exist in active alerts`
         );
       }
     }
@@ -333,7 +373,7 @@ export class AlertsClient<
               })
         );
       } else {
-        this.options.logger.warn(
+        this.options.logger.debug(
           `Could not find alert document to update for recovered alert with id ${id} and uuid ${recoveredAlerts[
             id
           ].getUuid()}`
@@ -341,49 +381,92 @@ export class AlertsClient<
       }
     }
 
-    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex];
+    const alertsToIndex = [...activeAlertsToIndex, ...recoveredAlertsToIndex].filter(
+      (alert: Alert & AlertData) => {
+        const alertUuid = get(alert, ALERT_UUID);
+        const alertIndex = this.fetchedAlerts.indices[alertUuid];
+        if (!alertIndex) {
+          return true;
+        } else if (!isValidAlertIndexName(alertIndex)) {
+          this.options.logger.warn(
+            `Could not update alert ${alertUuid} in ${alertIndex}. Partial and restored alert indices are not supported.`
+          );
+          return false;
+        }
+        return true;
+      }
+    );
     if (alertsToIndex.length > 0) {
+      const bulkBody = flatMap(
+        alertsToIndex.map((alert: Alert & AlertData) => {
+          const alertUuid = get(alert, ALERT_UUID);
+          return [
+            getBulkMeta(
+              alertUuid,
+              this.fetchedAlerts.indices[alertUuid],
+              this.fetchedAlerts.seqNo[alertUuid],
+              this.fetchedAlerts.primaryTerm[alertUuid],
+              this.isUsingDataStreams()
+            ),
+            alert,
+          ];
+        })
+      );
+
       try {
         const response = await esClient.bulk({
-          refresh: 'wait_for',
+          refresh: true,
           index: this.indexTemplateAndPattern.alias,
-          require_alias: true,
-          body: flatMap(
-            [...activeAlertsToIndex, ...recoveredAlertsToIndex].map((alert: Alert & AlertData) => [
-              {
-                index: {
-                  _id: alert.kibana.alert.uuid,
-                  // If we know the concrete index for this alert, specify it
-                  ...(this.fetchedAlerts.indices[alert.kibana.alert.uuid]
-                    ? {
-                        _index: this.fetchedAlerts.indices[alert.kibana.alert.uuid],
-                        require_alias: false,
-                      }
-                    : {}),
-                },
-              },
-              alert,
-            ])
-          ),
+          require_alias: !this.isUsingDataStreams(),
+          body: bulkBody,
         });
 
         // If there were individual indexing errors, they will be returned in the success response
         if (response && response.errors) {
-          const errorsInResponse = (response.items ?? [])
-            .map((item) => (item && item.index && item.index.error ? item.index.error : null))
-            .filter((item) => item != null);
-
-          this.options.logger.error(
-            `Error writing ${errorsInResponse.length} out of ${
-              alertsToIndex.length
-            } alerts - ${JSON.stringify(errorsInResponse)}`
-          );
+          await resolveAlertConflicts({
+            logger: this.options.logger,
+            esClient,
+            bulkRequest: {
+              refresh: 'wait_for',
+              index: this.indexTemplateAndPattern.alias,
+              require_alias: !this.isUsingDataStreams(),
+              operations: bulkBody,
+            },
+            bulkResponse: response,
+          });
         }
       } catch (err) {
         this.options.logger.error(
           `Error writing ${alertsToIndex.length} alerts to ${this.indexTemplateAndPattern.alias} - ${err.message}`
         );
       }
+    }
+
+    function getBulkMeta(
+      uuid: string,
+      index: string | undefined,
+      seqNo: number | undefined,
+      primaryTerm: number | undefined,
+      isUsingDataStreams: boolean
+    ) {
+      if (index && seqNo != null && primaryTerm != null) {
+        return {
+          index: {
+            _id: uuid,
+            _index: index,
+            if_seq_no: seqNo,
+            if_primary_term: primaryTerm,
+            require_alias: false,
+          },
+        };
+      }
+
+      return {
+        create: {
+          _id: uuid,
+          ...(isUsingDataStreams ? {} : { require_alias: true }),
+        },
+      };
     }
   }
 
@@ -400,6 +483,61 @@ export class AlertsClient<
 
   public factory() {
     return this.legacyAlertsClient.factory();
+  }
+
+  public async getSummarizedAlerts({
+    ruleId,
+    spaceId,
+    excludedAlertInstanceIds,
+    alertsFilter,
+    start,
+    end,
+    executionUuid,
+  }: GetSummarizedAlertsParams): Promise<SummarizedAlerts> {
+    if (!ruleId || !spaceId) {
+      throw new Error(`Must specify both rule ID and space ID for AAD alert query.`);
+    }
+    const queryByExecutionUuid: boolean = !!executionUuid;
+    const queryByTimeRange: boolean = !!start && !!end;
+    // Either executionUuid or start/end dates must be specified, but not both
+    if (
+      (!queryByExecutionUuid && !queryByTimeRange) ||
+      (queryByExecutionUuid && queryByTimeRange)
+    ) {
+      throw new Error(`Must specify either execution UUID or time range for AAD alert query.`);
+    }
+
+    const getQueryParams = {
+      executionUuid,
+      start,
+      end,
+      ruleId,
+      excludedAlertInstanceIds,
+      alertsFilter,
+    };
+
+    const formatAlert = this.ruleType.alerts?.formatAlert;
+
+    const isLifecycleAlert = this.ruleType.autoRecoverAlerts ?? false;
+
+    if (isLifecycleAlert) {
+      const queryBodies = getLifecycleAlertsQueries(getQueryParams);
+      const responses = await Promise.all(queryBodies.map((queryBody) => this.search(queryBody)));
+
+      return {
+        new: getHitsWithCount(responses[0], formatAlert),
+        ongoing: getHitsWithCount(responses[1], formatAlert),
+        recovered: getHitsWithCount(responses[2], formatAlert),
+      };
+    }
+
+    const response = await this.search(getContinualAlertsQuery(getQueryParams));
+
+    return {
+      new: getHitsWithCount(response, formatAlert),
+      ongoing: { count: 0, data: [] },
+      recovered: { count: 0, data: [] },
+    };
   }
 
   public client() {
@@ -427,5 +565,9 @@ export class AlertsClient<
         }));
       },
     };
+  }
+
+  public isUsingDataStreams(): boolean {
+    return this._isUsingDataStreams;
   }
 }

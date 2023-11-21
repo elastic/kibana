@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { API_URLS } from '@kbn/uptime-plugin/common/constants';
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -18,7 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
       const data = apiResponse.body;
       expect(data).to.eql({
         indexExists: true,
-        indices: 'heartbeat-8*,heartbeat-7*',
+        indices: 'heartbeat-*',
       });
     });
   });

@@ -13,8 +13,8 @@ import {
   EuiFlexItem,
   EuiInMemoryTable,
   EuiLink,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPageHeader,
+  EuiPageSection,
   EuiSpacer,
   EuiSwitch,
 } from '@elastic/eui';
@@ -85,7 +85,7 @@ export class UsersGridPage extends Component<Props, State> {
     if (permissionDenied) {
       return (
         <EuiFlexGroup gutterSize="none">
-          <EuiPageContent verticalPosition="center" horizontalPosition="center" color="danger">
+          <EuiPageSection alignment="center" color="danger">
             <EuiEmptyPrompt
               iconType="securityApp"
               title={
@@ -105,7 +105,7 @@ export class UsersGridPage extends Component<Props, State> {
                 </p>
               }
             />
-          </EuiPageContent>
+          </EuiPageSection>
         </EuiFlexGroup>
       );
     }

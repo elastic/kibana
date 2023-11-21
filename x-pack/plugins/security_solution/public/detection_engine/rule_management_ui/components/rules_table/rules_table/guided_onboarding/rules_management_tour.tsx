@@ -12,7 +12,7 @@ import React, { useCallback, useEffect, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { siemGuideId } from '../../../../../../../common/guided_onboarding/siem_guide_config';
-import { BulkActionType } from '../../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../../../common/api/detection_engine/rule_management';
 import { useKibana } from '../../../../../../common/lib/kibana';
 import { useFindRulesQuery } from '../../../../../rule_management/api/hooks/use_find_rules_query';
 import { useExecuteBulkAction } from '../../../../../rule_management/logic/bulk_actions/use_execute_bulk_action';
@@ -32,7 +32,7 @@ const GUIDED_ONBOARDING_RULES_FILTER = {
   filter: '',
   showCustomRules: false,
   showElasticRules: true,
-  tags: ['Guided Onboarding'],
+  tags: ['Use Case: Guided Onboarding'],
 };
 
 export enum GuidedOnboardingRulesStatus {
@@ -44,12 +44,12 @@ export enum GuidedOnboardingRulesStatus {
 }
 
 export const RulesManagementTour = () => {
-  const { guidedOnboardingApi } = useKibana().services.guidedOnboarding;
+  const { guidedOnboarding } = useKibana().services;
   const { executeBulkAction } = useExecuteBulkAction();
   const { actions } = useRulesTableContext();
 
   const isRulesStepActive = useObservable(
-    guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
+    guidedOnboarding?.guidedOnboardingApi?.isGuideStepActive$(siemGuideId, 'rules') ?? of(false),
     false
   );
 
@@ -84,7 +84,7 @@ export const RulesManagementTour = () => {
     }
 
     if (onboardingRules.total === 0) {
-      // Onboarding rules are not installed - show the install/update rules step
+      // Onboarding rules are not installed - show the navigate to Add Rules page step
       return GuidedOnboardingRulesStatus.installRules;
     }
 
@@ -106,14 +106,14 @@ export const RulesManagementTour = () => {
   // Synchronize the current "internal" tour step with the global one
   useEffect(() => {
     if (isRulesStepActive && tourStatus === GuidedOnboardingRulesStatus.completed) {
-      guidedOnboardingApi?.completeGuideStep('siem', 'rules');
+      guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('siem', 'rules');
     }
-  }, [guidedOnboardingApi, isRulesStepActive, tourStatus]);
+  }, [guidedOnboarding, isRulesStepActive, tourStatus]);
 
   const enableDemoRule = useCallback(async () => {
     if (demoRule) {
       await executeBulkAction({
-        type: BulkActionType.enable,
+        type: BulkActionTypeEnum.enable,
         ids: [demoRule.id],
       });
     }

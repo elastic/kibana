@@ -27,7 +27,6 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
         'explain',
         'row',
         'limit',
-        'project',
         'ws',
         'assign',
         'comma',
@@ -55,25 +54,48 @@ export const buildESQlTheme = (): monaco.editor.IStandaloneThemeData => ({
     ...buildRuleGroup(
       [
         'from',
+        'metadata',
+        'mv_expand',
         'stats',
+        'dissect',
+        'grok',
+        'project',
+        'keep',
+        'rename',
+        'drop',
         'eval',
         'sort',
         'by',
         'where',
+        'not',
+        'is',
+        'like',
+        'rlike',
+        'in',
+        'as',
         'expr_ws',
         'row',
+        'show',
         'limit',
+        'cidr_match',
         'nulls_ordering_direction',
         'nulls_ordering',
         'null',
         'boolean_value',
         'comparison_operator',
+        'enrich',
+        'on',
+        'with',
       ],
       euiThemeVars.euiColorPrimaryText
     ),
 
-    // math functions
+    // aggregation functions
     ...buildRuleGroup(['unary_function'], euiThemeVars.euiColorPrimaryText),
+    // is null functions
+    ...buildRuleGroup(['where_functions'], euiThemeVars.euiColorPrimaryText),
+    // math functions
+    ...buildRuleGroup(['math_function'], euiThemeVars.euiColorPrimaryText),
 
     // operators
     ...buildRuleGroup(

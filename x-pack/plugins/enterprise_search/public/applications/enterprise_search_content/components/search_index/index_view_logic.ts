@@ -9,13 +9,9 @@ import { kea, MakeLogicType } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
+import { Connector, FeatureName, IngestPipelineParams, SyncStatus } from '@kbn/search-connectors';
+
 import { Status } from '../../../../../common/types/api';
-import {
-  Connector,
-  FeatureName,
-  IngestPipelineParams,
-  SyncStatus,
-} from '../../../../../common/types/connectors';
 import { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
@@ -29,6 +25,10 @@ import {
   StartIncrementalSyncArgs,
 } from '../../api/connector/start_incremental_sync_api_logic';
 import { StartSyncApiLogic, StartSyncArgs } from '../../api/connector/start_sync_api_logic';
+import {
+  ConnectorConfigurationApiLogic,
+  PostConnectorConfigurationActions,
+} from '../../api/connector/update_connector_configuration_api_logic';
 import {
   CachedFetchIndexApiLogic,
   CachedFetchIndexApiLogicActions,
@@ -73,6 +73,7 @@ export interface IndexViewActions {
   startSync(): void;
   stopFetchIndexPoll(): CachedFetchIndexApiLogicActions['stopPolling'];
   stopFetchIndexPoll(): void;
+  updateConfigurationApiSuccess: PostConnectorConfigurationActions['apiSuccess'];
 }
 
 export interface IndexViewValues {
@@ -128,6 +129,8 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
         'startPolling as startFetchIndexPoll',
         'stopPolling as stopFetchIndexPoll',
       ],
+      ConnectorConfigurationApiLogic,
+      ['apiSuccess as updateConfigurationApiSuccess'],
       StartSyncApiLogic,
       ['apiSuccess as startSyncApiSuccess', 'makeRequest as makeStartSyncRequest'],
       StartIncrementalSyncApiLogic,
@@ -206,6 +209,14 @@ export const IndexViewLogic = kea<MakeLogicType<IndexViewValues, IndexViewAction
     startSync: () => {
       if (isConnectorIndex(values.fetchIndexApiData)) {
         actions.makeStartSyncRequest({ connectorId: values.fetchIndexApiData.connector.id });
+      }
+    },
+    updateConfigurationApiSuccess: ({ configuration }) => {
+      if (isConnectorIndex(values.fetchIndexApiData)) {
+        actions.fetchIndexApiSuccess({
+          ...values.fetchIndexApiData,
+          connector: { ...values.fetchIndexApiData.connector, configuration },
+        });
       }
     },
   }),

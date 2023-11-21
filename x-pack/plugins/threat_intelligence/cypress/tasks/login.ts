@@ -10,12 +10,12 @@ import Url from 'url';
 
 import * as yaml from 'js-yaml';
 
+import { encode } from '@kbn/rison';
+import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
 import {
   LOADING_INDICATOR,
   LOADING_INDICATOR_HIDDEN,
-} from '@kbn/security-solution-plugin/cypress/screens/security_header';
-import { encode } from '@kbn/rison';
-import { NEW_FEATURES_TOUR_STORAGE_KEYS } from '@kbn/security-solution-plugin/common/constants';
+} from '../../../../test/security_solution_cypress/cypress/screens/security_header';
 import type { ROLES } from './privileges';
 
 const LOGIN_API_ENDPOINT = '/internal/security/login';

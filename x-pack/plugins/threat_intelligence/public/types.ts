@@ -174,9 +174,9 @@ export type TIPage = 'indicators';
  * This needs to match the threat intelligence page entries in SecurityPageName` (x-pack/plugins/security_solution/common/constants.ts).
  *
  * Example to add more IDs:
- *   export type TIPageId = 'threat_intelligence-indicators' | 'threat_intelligence-feed';
+ *   export type TIPageId = 'threat_intelligence' | 'threat_intelligence-feed';
  */
-export type TIPageId = 'threat_intelligence-indicators';
+export type TIPageId = 'threat_intelligence';
 
 /**
  * A record of all the properties that will be used to build deeplinks, links and navtabs objects.

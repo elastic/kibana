@@ -14,7 +14,6 @@ import { LocatorPublic } from '@kbn/share-plugin/common';
 import { SharePluginSetup } from '@kbn/share-plugin/server';
 import { UMServerLibs } from '../../lib';
 import { UptimeCorePluginsSetup, UptimeServerSetup } from '../../adapters';
-import type { UptimeRouter } from '../../../../types';
 import { getUptimeESMockClient } from '../../requests/test_helpers';
 
 /**
@@ -28,7 +27,6 @@ export const bootstrapDependencies = (
   customRequests?: any,
   customPlugins: any = { observability: { getAlertDetailsConfig: () => ({ uptime: true }) } }
 ) => {
-  const router = {} as UptimeRouter;
   const basePath = {
     prepend: (url: string) => {
       return `/hfe${url}`;
@@ -52,7 +50,6 @@ export const bootstrapDependencies = (
   // these server/libs parameters don't have any functionality, which is fine
   // because we aren't testing them here
   const server = {
-    router,
     config: {},
     basePath,
     share,

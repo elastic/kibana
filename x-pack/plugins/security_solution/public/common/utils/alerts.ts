@@ -124,7 +124,7 @@ export interface Alert {
 
 // generates default grouping option for alerts table
 export const getDefaultGroupingOptions = (tableId: TableId): GroupOption[] => {
-  if (tableId === TableId.alertsOnAlertsPage) {
+  if (tableId === TableId.alertsOnAlertsPage || tableId === TableId.alertsRiskInputs) {
     return [
       {
         label: i18n.ruleName,

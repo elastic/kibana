@@ -7,7 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { EuiContextMenuItem, EuiButtonEmpty, EuiButtonIcon, EuiToolTip } from '@elastic/eui';
-import { DraggableId } from 'react-beautiful-dnd';
+import { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux';

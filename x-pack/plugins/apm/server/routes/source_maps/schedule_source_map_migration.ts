@@ -12,7 +12,7 @@ import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import { CoreStart, Logger } from '@kbn/core/server';
 import { getApmArtifactClient } from '../fleet/source_maps';
 import { bulkCreateApmSourceMaps } from './bulk_create_apm_source_maps';
-import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/get_apm_indices';
+import { APM_SOURCE_MAP_INDEX } from '../settings/apm_indices/apm_system_index_constants';
 import { ApmSourceMap } from './create_apm_source_map_index_template';
 import { APMPluginStartDependencies } from '../../types';
 import { createApmSourceMapIndexTemplate } from './create_apm_source_map_index_template';

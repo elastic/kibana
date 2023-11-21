@@ -23,6 +23,7 @@ import { LogsSharedBackendLibs, LogsSharedDomainLibs } from './lib/logs_shared_t
 import { LogsSharedLogEntriesDomain } from './lib/domains/log_entries_domain';
 import { LogsSharedKibanaLogEntriesAdapter } from './lib/adapters/log_entries/kibana_log_entries_adapter';
 import { LogEntriesService } from './services/log_entries';
+import { LogsSharedConfig } from '../common/plugin_config';
 
 export class LogsSharedPlugin
   implements
@@ -34,11 +35,13 @@ export class LogsSharedPlugin
     >
 {
   private readonly logger: Logger;
+  private config: LogsSharedConfig;
   private libs!: LogsSharedBackendLibs;
   private logViews: LogViewsService;
   private usageCollector: UsageCollector;
 
-  constructor(context: PluginInitializerContext) {
+  constructor(context: PluginInitializerContext<LogsSharedConfig>) {
+    this.config = context.config.get();
     this.logger = context.logger.get();
     this.usageCollector = {};
 
@@ -50,8 +53,13 @@ export class LogsSharedPlugin
 
     const logViews = this.logViews.setup();
 
-    // Register saved objects
-    core.savedObjects.registerType(logViewSavedObjectType);
+    if (this.config.savedObjects.logView.enabled) {
+      // Conditionally register log view saved objects
+      core.savedObjects.registerType(logViewSavedObjectType);
+    } else {
+      // Register a static internal view to use as a fallback when the log view SO is not registered
+      logViews.defineInternalLogView('default', {});
+    }
 
     const domainLibs: LogsSharedDomainLibs = {
       logEntries: new LogsSharedLogEntriesDomain(new LogsSharedKibanaLogEntriesAdapter(framework), {
@@ -63,10 +71,11 @@ export class LogsSharedPlugin
     this.libs = {
       ...domainLibs,
       basePath: core.http.basePath,
+      config: this.config,
       framework,
       getStartServices: () => core.getStartServices(),
-      logger: this.logger,
       getUsageCollector: () => this.usageCollector,
+      logger: this.logger,
     };
 
     // Register server side APIs

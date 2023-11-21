@@ -1,11 +1,21 @@
 {
   "security.saml_service_provider_metadata": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_security/saml/metadata/{realm_name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-sp-metadata.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/current/security-api-saml-sp-metadata.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

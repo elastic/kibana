@@ -34,6 +34,7 @@ export const buildResponseActionsQuery = (
     ignore_unavailable: true,
     body: {
       fields,
+      _source: false,
       query: {
         bool: {
           minimum_should_match: 2,

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { SelectOption, SwitchOption } from '@kbn/vis-default-editor-plugin/public';
-import { Labels } from '@kbn/charts-plugin/public';
+import type { LabelRotation, Labels } from '@kbn/charts-plugin/public';
 
 import { TruncateLabelsOption } from '../../common';
 import { getRotateOptions } from '../../../collections';
@@ -34,7 +34,8 @@ function LabelOptions({
 }: LabelOptionsProps) {
   const setAxisLabelRotate = useCallback(
     (paramName: 'rotate', value: Labels['rotate']) => {
-      setAxisLabel(paramName, Number(value));
+      const rotation = Number(value) as LabelRotation;
+      setAxisLabel(paramName, rotation);
     },
     [setAxisLabel]
   );
@@ -96,6 +97,7 @@ function LabelOptions({
               options={rotateOptions}
               paramName="rotate"
               value={axisLabels.rotate}
+              // @ts-ignore ts upgrade v4.7.4
               setValue={setAxisLabelRotate}
             />
           </EuiToolTip>

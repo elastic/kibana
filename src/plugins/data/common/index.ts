@@ -9,7 +9,14 @@
 // TODO: https://github.com/elastic/kibana/issues/109904
 /* eslint-disable @kbn/eslint/no_export_all */
 
-export { DEFAULT_QUERY_LANGUAGE, KIBANA_USER_QUERY_LANGUAGE_KEY, UI_SETTINGS } from './constants';
+export {
+  DEFAULT_QUERY_LANGUAGE,
+  KIBANA_USER_QUERY_LANGUAGE_KEY,
+  KQL_TELEMETRY_ROUTE_LATEST_VERSION,
+  SAVED_QUERY_BASE_URL,
+  SCRIPT_LANGUAGES_ROUTE_LATEST_VERSION,
+  UI_SETTINGS,
+} from './constants';
 export type { ValueSuggestionsMethod } from './constants';
 export { DatatableUtilitiesService } from './datatable_utilities';
 export { getEsQueryConfig } from './es_query';

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { waitFor } from '@testing-library/react';
+import { act, fireEvent, render, waitFor } from '@testing-library/react';
 import { ThemeProvider } from 'styled-components';
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
@@ -25,7 +25,7 @@ import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import {
   getRulesEqlSchemaMock,
   getRulesSchemaMock,
-} from '../../../../../common/detection_engine/rule_schema/mocks';
+} from '../../../../../common/api/detection_engine/model/rule_schema/mocks';
 
 import { getMockTheme } from '../../../../common/lib/kibana/kibana_react.mock';
 import { getExceptionBuilderComponentLazy } from '@kbn/lists-plugin/public';
@@ -34,6 +34,7 @@ import { useFetchIndexPatterns } from '../../logic/use_exception_flyout_data';
 import { useCreateOrUpdateException } from '../../logic/use_create_update_exception';
 import { useFindExceptionListReferences } from '../../logic/use_find_references';
 import * as i18n from './translations';
+import { MAX_COMMENT_LENGTH } from '../../../../../common/constants';
 
 const mockTheme = getMockTheme({
   eui: {
@@ -160,7 +161,6 @@ describe('When the edit exception modal is opened', () => {
 
   afterEach(() => {
     jest.clearAllMocks();
-    jest.restoreAllMocks();
   });
 
   describe('when the modal is loading', () => {
@@ -693,6 +693,61 @@ describe('When the edit exception modal is opened', () => {
       expect(
         wrapper.find('button[data-test-subj="editExceptionConfirmButton"]').getDOMNode()
       ).toBeDisabled();
+    });
+
+    test('when there is a comment error has submit button disabled', async () => {
+      const { getByLabelText, queryByText, getByTestId } = render(
+        <TestProviders>
+          <EditExceptionFlyout
+            list={{
+              ...getExceptionListSchemaMock(),
+              type: 'detection',
+              namespace_type: 'single',
+              list_id: 'my_list_id',
+              id: '1234',
+            }}
+            rule={
+              {
+                ...getRulesEqlSchemaMock(),
+                id: '345',
+                name: 'My rule',
+                rule_id: 'my_rule_id',
+                query:
+                  'sequence [process where process.name = "test.exe"] [process where process.name = "explorer.exe"]',
+                exceptions_list: [
+                  {
+                    id: '1234',
+                    list_id: 'my_list_id',
+                    type: 'detection',
+                    namespace_type: 'single',
+                  },
+                ],
+              } as Rule
+            }
+            itemToEdit={getExceptionListItemSchemaMock()}
+            showAlertCloseOptions
+            onCancel={jest.fn()}
+            onConfirm={jest.fn()}
+          />
+        </TestProviders>
+      );
+
+      const commentInput = getByLabelText('Comment Input');
+
+      const commentErrorMessage = `The length of the comment is too long. The maximum length is ${MAX_COMMENT_LENGTH} characters.`;
+      expect(queryByText(commentErrorMessage)).toBeNull();
+
+      // Put comment with the length above maximum allowed
+      act(() => {
+        fireEvent.change(commentInput, {
+          target: {
+            value: [...new Array(MAX_COMMENT_LENGTH + 1).keys()].map((_) => 'a').join(''),
+          },
+        });
+        fireEvent.blur(commentInput);
+      });
+      expect(queryByText(commentErrorMessage)).not.toBeNull();
+      expect(getByTestId('editExceptionConfirmButton')).toBeDisabled();
     });
   });
 });

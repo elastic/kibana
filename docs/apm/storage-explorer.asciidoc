@@ -1,8 +1,6 @@
 [[storage-explorer]]
 === Storage Explorer
 
-beta::[]
-
 Analyze your APM data and manage costs with **storage explorer**.
 For example, analyze the storage footprint of each of your services to see which are producing
 large amounts of data--then change the sample rate of a service to lower the amount of data ingested.

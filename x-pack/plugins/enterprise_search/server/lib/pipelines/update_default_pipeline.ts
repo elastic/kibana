@@ -7,10 +7,9 @@
 
 import { IScopedClusterClient } from '@kbn/core/server';
 
-import { CURRENT_CONNECTORS_INDEX } from '../..';
+import { CURRENT_CONNECTORS_INDEX, IngestPipelineParams } from '@kbn/search-connectors';
 
 import { DefaultConnectorsPipelineMeta } from '../../../common/constants';
-import { IngestPipelineParams } from '../../../common/types/connectors';
 
 export const updateDefaultPipeline = async (
   client: IScopedClusterClient,

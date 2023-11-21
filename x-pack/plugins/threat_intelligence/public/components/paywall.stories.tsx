@@ -14,5 +14,5 @@ export default {
 };
 
 export function BasicPaywall() {
-  return <Paywall licenseManagementHref="https://elastic.co" />;
+  return <Paywall />;
 }

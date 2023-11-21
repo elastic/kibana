@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
@@ -13,7 +13,6 @@ import {
   EuiComboBox,
   EuiIconTip,
   EuiCheckboxGroup,
-  EuiButton,
   EuiLink,
   EuiFieldNumber,
   EuiFieldText,
@@ -41,10 +40,11 @@ import { useStartServices, useConfig, useGetAgentPolicies, useLicense } from '..
 import { AgentPolicyPackageBadge } from '../../../../components';
 import { UninstallCommandFlyout } from '../../../../../../components';
 
-import { AgentPolicyDeleteProvider } from '../agent_policy_delete_provider';
 import type { ValidationResults } from '../agent_policy_validation';
 
-import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../../services';
+import { ExperimentalFeaturesService } from '../../../../services';
+
+import { policyHasEndpointSecurity as hasElasticDefend } from '../../../../../../../common/services';
 
 import {
   useOutputOptions,
@@ -58,7 +58,6 @@ interface Props {
   updateAgentPolicy: (u: Partial<NewAgentPolicy | AgentPolicy>) => void;
   validation: ValidationResults;
   isEditing?: boolean;
-  onDelete?: () => void;
 }
 
 export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> = ({
@@ -66,7 +65,6 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   updateAgentPolicy,
   validation,
   isEditing = false,
-  onDelete = () => {},
 }) => {
   const { docLinks } = useStartServices();
   const config = useConfig();
@@ -99,13 +97,10 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   // agent monitoring checkbox group can appear multiple times in the DOM, ids have to be unique to work correctly
   const monitoringCheckboxIdSuffix = Date.now();
 
-  const hasManagedPackagePolicy =
-    'package_policies' in agentPolicy &&
-    agentPolicy?.package_policies?.some((packagePolicy) => packagePolicy.is_managed);
-
   const { agentTamperProtectionEnabled } = ExperimentalFeaturesService.get();
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
+  const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
 
   return (
     <>
@@ -317,13 +312,34 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           }
         >
           <EuiSwitch
-            label={i18n.translate('xpack.fleet.agentPolicyForm.tamperingSwitchLabel', {
-              defaultMessage: 'Prevent agent tampering',
-            })}
+            label={
+              <>
+                <FormattedMessage
+                  id="xpack.fleet.agentPolicyForm.tamperingSwitchLabel"
+                  defaultMessage="Prevent agent tampering"
+                />{' '}
+                {!policyHasElasticDefend && (
+                  <span data-test-subj="tamperMissingIntegrationTooltip">
+                    <EuiIconTip
+                      type="iInCircle"
+                      color="subdued"
+                      content={i18n.translate(
+                        'xpack.fleet.agentPolicyForm.tamperingSwitchLabel.disabledWarning',
+                        {
+                          defaultMessage:
+                            'Elastic Defend integration is required to enable this feature',
+                        }
+                      )}
+                    />
+                  </span>
+                )}
+              </>
+            }
             checked={agentPolicy.is_protected ?? false}
             onChange={(e) => {
               updateAgentPolicy({ is_protected: e.target.checked });
             }}
+            disabled={!policyHasElasticDefend}
             data-test-subj="tamperProtectionSwitch"
           />
           {agentPolicy.id && (
@@ -333,7 +349,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
                 onClick={() => {
                   setIsUninstallCommandFlyoutOpen(true);
                 }}
-                disabled={agentPolicy.is_protected === false}
+                disabled={!agentPolicy.is_protected || !policyHasElasticDefend}
                 data-test-subj="uninstallCommandLink"
               >
                 {i18n.translate('xpack.fleet.agentPolicyForm.tamperingUninstallLink', {
@@ -701,57 +717,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           />
         </EuiFormRow>
       </EuiDescribedFormGroup>
-      {isEditing && 'id' in agentPolicy && !agentPolicy.is_managed ? (
-        <EuiDescribedFormGroup
-          title={
-            <h4>
-              <FormattedMessage
-                id="xpack.fleet.policyForm.deletePolicyGroupTitle"
-                defaultMessage="Delete policy"
-              />
-            </h4>
-          }
-          description={
-            <>
-              <FormattedMessage
-                id="xpack.fleet.policyForm.deletePolicyGroupDescription"
-                defaultMessage="Existing data will not be deleted."
-              />
-              <EuiSpacer size="s" />
-              <AgentPolicyDeleteProvider
-                hasFleetServer={policyHasFleetServer(agentPolicy as AgentPolicy)}
-              >
-                {(deleteAgentPolicyPrompt) => {
-                  return (
-                    <EuiToolTip
-                      content={
-                        hasManagedPackagePolicy ? (
-                          <FormattedMessage
-                            id="xpack.fleet.policyForm.deletePolicyActionText.disabled"
-                            defaultMessage="Agent policy with managed package policies cannot be deleted."
-                          />
-                        ) : undefined
-                      }
-                    >
-                      <EuiButton
-                        data-test-subj="agentPolicyForm.downloadSource.deleteBtn"
-                        color="danger"
-                        onClick={() => deleteAgentPolicyPrompt(agentPolicy.id!, onDelete)}
-                        isDisabled={hasManagedPackagePolicy}
-                      >
-                        <FormattedMessage
-                          id="xpack.fleet.policyForm.deletePolicyActionText"
-                          defaultMessage="Delete policy"
-                        />
-                      </EuiButton>
-                    </EuiToolTip>
-                  );
-                }}
-              </AgentPolicyDeleteProvider>
-            </>
-          }
-        />
-      ) : null}
+      <EuiSpacer size="l" />
     </>
   );
 };

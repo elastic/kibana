@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiTextColor,
   EuiIconTip,
+  EuiSpacer,
 } from '@elastic/eui';
 
 import { ThemeContext } from 'styled-components';
@@ -35,7 +36,16 @@ const TITLES = {
   }),
 };
 
-interface SettingCardProps {
+export const SettingCardHeader = memo<{ children: React.ReactNode; 'data-test-subj'?: string }>(
+  ({ children, 'data-test-subj': dataTestSubj }) => (
+    <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
+      <h5>{children}</h5>
+    </EuiTitle>
+  )
+);
+SettingCardHeader.displayName = 'SettingCardHeader';
+
+export type SettingCardProps = React.PropsWithChildren<{
   /**
    * A subtitle for this component.
    **/
@@ -48,19 +58,21 @@ interface SettingCardProps {
   dataTestSubj?: string;
   /** React Node to be put on the right corner of the card */
   rightCorner?: ReactNode;
-}
-
-export const SettingCardHeader = memo<{ children: React.ReactNode; 'data-test-subj'?: string }>(
-  ({ children, 'data-test-subj': dataTestSubj }) => (
-    <EuiTitle size="xxs" data-test-subj={dataTestSubj}>
-      <h5>{children}</h5>
-    </EuiTitle>
-  )
-);
-SettingCardHeader.displayName = 'SettingCardHeader';
+  mode?: 'edit' | 'view';
+  selected?: boolean;
+}>;
 
 export const SettingCard: FC<SettingCardProps> = memo(
-  ({ type, supportedOss, osRestriction, dataTestSubj, rightCorner, children }) => {
+  ({
+    type,
+    supportedOss,
+    osRestriction,
+    dataTestSubj,
+    rightCorner,
+    children,
+    selected = true,
+    mode = 'edit',
+  }) => {
     const paddingSize = useContext(ThemeContext).eui.euiPanelPaddingModifiers.paddingMedium;
     const getTestId = useTestIdGenerator(dataTestSubj);
 
@@ -73,19 +85,26 @@ export const SettingCard: FC<SettingCardProps> = memo(
           style={{ padding: `${paddingSize} ${paddingSize} 0 ${paddingSize}` }}
         >
           <EuiFlexItem grow={1}>
-            <SettingCardHeader data-test-subj={getTestId('title')}>{TITLES.type}</SettingCardHeader>
-            <EuiText size="s">{type}</EuiText>
+            <SettingCardHeader>{TITLES.type}</SettingCardHeader>
+            <EuiText size="s" data-test-subj={getTestId('type')}>
+              {type}
+            </EuiText>
           </EuiFlexItem>
           <EuiFlexItem grow={2}>
-            <SettingCardHeader data-test-subj={getTestId('osTitle')}>{TITLES.os}</SettingCardHeader>
-            <EuiFlexGroup direction="row" gutterSize="s" alignItems="center">
+            <SettingCardHeader>{TITLES.os}</SettingCardHeader>
+            <EuiFlexGroup
+              direction="row"
+              gutterSize="s"
+              alignItems="center"
+              data-test-subj={getTestId('osValueContainer')}
+            >
               <EuiFlexItem grow={false}>
                 <EuiText size="s" data-test-subj={getTestId('osValues')}>
                   {supportedOss.map((os) => OS_TITLES[os]).join(', ')}{' '}
                 </EuiText>
               </EuiFlexItem>
               {osRestriction && (
-                <EuiFlexItem grow={false}>
+                <EuiFlexItem grow={false} data-test-subj={getTestId('osRestriction')}>
                   <EuiFlexGroup direction="row" gutterSize="xs">
                     <EuiFlexItem grow={false}>
                       <EuiTextColor color="subdued">
@@ -96,7 +115,12 @@ export const SettingCard: FC<SettingCardProps> = memo(
                       </EuiTextColor>
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiIconTip type="warning" color="warning" content={osRestriction} />
+                      <EuiIconTip
+                        type="warning"
+                        color="warning"
+                        content={osRestriction}
+                        anchorProps={{ 'data-test-subj': getTestId('osRestrictionTooltipIcon') }}
+                      />
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
@@ -106,18 +130,29 @@ export const SettingCard: FC<SettingCardProps> = memo(
           <EuiShowFor sizes={['m', 'l', 'xl']}>
             <EuiFlexItem grow={3}>
               <EuiFlexGroup direction="row" gutterSize="none" justifyContent="flexEnd">
-                <EuiFlexItem grow={false}>{rightCorner}</EuiFlexItem>
+                <EuiFlexItem grow={false} data-test-subj={getTestId('rightCornerContainer')}>
+                  {rightCorner}
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFlexItem>
           </EuiShowFor>
           <EuiShowFor sizes={rightCorner ? ['s', 'xs'] : []}>
-            <EuiFlexItem>{rightCorner}</EuiFlexItem>
+            <EuiFlexItem data-test-subj={getTestId('rightCornerContainer')}>
+              {rightCorner}
+            </EuiFlexItem>
           </EuiShowFor>
         </EuiFlexGroup>
 
-        <EuiHorizontalRule margin="m" />
-
-        <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>{children}</div>
+        {mode === 'edit' || selected ? (
+          <>
+            <EuiHorizontalRule margin="m" />
+            <div style={{ padding: `0 ${paddingSize} ${paddingSize} ${paddingSize}` }}>
+              {children}
+            </div>
+          </>
+        ) : (
+          <EuiSpacer size="m" />
+        )}
       </EuiPanel>
     );
   }

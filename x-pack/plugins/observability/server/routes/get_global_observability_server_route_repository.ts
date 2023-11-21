@@ -6,19 +6,13 @@
  */
 
 import { ObservabilityConfig } from '..';
-import { compositeSloRouteRepository } from './composite_slo/route';
-import { observabilityCoPilotRouteRepository } from './copilot/route';
 import { rulesRouteRepository } from './rules/route';
 import { sloRouteRepository } from './slo/route';
 
 export function getObservabilityServerRouteRepository(config: ObservabilityConfig) {
-  const isCompositeSloFeatureEnabled = config.compositeSlo.enabled;
-
   const repository = {
     ...rulesRouteRepository,
     ...sloRouteRepository,
-    ...(isCompositeSloFeatureEnabled ? compositeSloRouteRepository : {}),
-    ...observabilityCoPilotRouteRepository,
   };
   return repository;
 }

@@ -90,21 +90,14 @@ export default function getActionTests({ getService }: FtrProviderContext) {
         });
     });
 
-    it('should handle get a system connector', async () => {
+    it('should return 404 when trying to get a system connector', async () => {
       await supertest
         .get(
           `${getUrlPrefix(
             Spaces.space1.id
           )}/api/actions/connector/system-connector-test.system-action`
         )
-        .expect(200, {
-          id: 'system-connector-test.system-action',
-          connector_type_id: 'test.system-action',
-          name: 'System action: test.system-action',
-          is_preconfigured: false,
-          is_system_action: true,
-          is_deprecated: false,
-        });
+        .expect(404);
     });
 
     it('should handle get a deprecated connector', async () => {
@@ -206,21 +199,14 @@ export default function getActionTests({ getService }: FtrProviderContext) {
           });
       });
 
-      it('should handle get a system connector', async () => {
+      it('should return 404 when trying to get a system connector', async () => {
         await supertest
           .get(
             `${getUrlPrefix(
               Spaces.space1.id
             )}/api/actions/action/system-connector-test.system-action`
           )
-          .expect(200, {
-            id: 'system-connector-test.system-action',
-            actionTypeId: 'test.system-action',
-            name: 'System action: test.system-action',
-            isPreconfigured: false,
-            isSystemAction: true,
-            isDeprecated: false,
-          });
+          .expect(404);
       });
     });
   });

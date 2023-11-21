@@ -207,21 +207,22 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'customClick',
-          selector: 'button[title="agent.type"]',
+          selector: 'button[title="agent.ephemeral_id"]',
         },
         {
           type: 'click',
           selector: 'valuesAutocompleteMatch',
         },
         {
-          type: 'customClick',
-          selector: 'button[title="endpoint"]',
+          type: 'input',
+          selector: 'valuesAutocompleteMatch',
+          value: 'endpoint',
         },
       ],
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.typeIS endpoint',
+          value: 'AND agent.ephemeral_idIS endpoint',
         },
       ],
     },
@@ -242,8 +243,13 @@ export const getArtifactsListTestsData = () => [
           selector: 'fieldAutocompleteComboBox',
         },
         {
+          type: 'input',
+          selector: 'fieldAutocompleteComboBox',
+          value: 'agent.id',
+        },
+        {
           type: 'customClick',
-          selector: 'button[title="agent.name"]',
+          selector: 'button[title="agent.id"]',
         },
         {
           type: 'input',
@@ -258,7 +264,7 @@ export const getArtifactsListTestsData = () => [
       checkResults: [
         {
           selector: 'EventFiltersListPage-card-criteriaConditions-condition',
-          value: 'AND agent.nameIS test super large value',
+          value: 'AND agent.idIS test super large value',
         },
         {
           selector: 'EventFiltersListPage-card-header-title',
@@ -269,7 +275,7 @@ export const getArtifactsListTestsData = () => [
           value: 'This is the event filter description edited',
         },
       ],
-      waitForValue: 'AND agent.nameIS test super large value',
+      waitForValue: 'AND agent.idIS test super large value',
     },
     delete: {
       confirmSelector: 'EventFiltersListPage-deleteModal-submitButton',
@@ -283,17 +289,17 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedtArtifactWhenCreate: (): ArtifactElasticsearchProperties => ({
         type: 'eventfilterlist',
         identifier: 'endpoint-eventfilterlist-windows-v1',
-        body: 'eJxVzFEKgCAQBNC77Ld0AK8SEYtusWAqukYh3b1F+on5ezNMB4pSmCrYuYPcmcBC5SMHAvPrNqbgtcRddRpLAylTQUlFnaMLzZNX/W7oQierwzrwxNCGRp8TR4Fn0bwiRSx6',
+        body: 'eJxVjEEKwzAMBP+ic+kD8pUSgrA3qUCxha2EltC/Vwm9lL0sM8sehOJN0Gl4HORvAw3UZTUF3f7cLNAckpegd9gTKxrrJDmG1aJ7beGlJN0yTvq7w4uTT4n7BXfW7aIlW5Xi9BkjX6sIL5c=',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
-          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/54e692d3d896a72ba8b0ccc1e174d9c24d43e427ea88a42ddba8ec0839a37fec',
+          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/b3373c93ffc795d954f22c625c084dc5874a156ec0cb3d4af1c3dab0b965fa30',
         compression_algorithm: 'zlib',
-        decoded_size: 128,
-        decoded_sha256: '54e692d3d896a72ba8b0ccc1e174d9c24d43e427ea88a42ddba8ec0839a37fec',
+        decoded_size: 136,
+        decoded_sha256: 'b3373c93ffc795d954f22c625c084dc5874a156ec0cb3d4af1c3dab0b965fa30',
         encryption_algorithm: 'none',
-        encoded_sha256: '3f3f689efc895ada36b232b71d63f93b9b9552f84d395689f828429017016b46',
-        encoded_size: 99,
+        encoded_sha256: 'c1b30df9457ba007065fff1388c026ad269e63fbed535b506ac559fd616aabe9',
+        encoded_size: 107,
       }),
       getExpectedUpdatedArtifactBodyWhenCreate: (): ArtifactBodyType => ({
         entries: [
@@ -301,7 +307,7 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
-                field: 'agent.type',
+                field: 'agent.ephemeral_id',
                 operator: 'included',
                 type: 'exact_cased',
                 value: 'endpoint',
@@ -313,17 +319,17 @@ export const getArtifactsListTestsData = () => [
       getExpectedUpdatedArtifactWhenUpdate: (): ArtifactElasticsearchProperties => ({
         type: 'eventfilterlist',
         identifier: 'endpoint-eventfilterlist-windows-v1',
-        body: 'eJxVjFEKgzAQRK8S9rt4AK8ipSzJKIE1huxGWsS7u9L+lPl7b2YOQrGWoTROB9mngkbSvFYBPf7cnCHJJS9Oh8LrXdgqGtvWnOcSpSckp78bvDnaK7JCoOp8Z+m3MKgF7b4Nwm1B+Irz6bkASPAywg==',
+        body: 'eJxVzEEKwkAMheGrDFmLB+hVikiYeS2B2A6TjCildze1biS77+dlIyzeBEbDuJG/K2ggk0dV0OWvTQItEXkOvUqJvFY09rWFypK1Fxz6e4IXZ79nti8+WfuhDvNkPYZJuc1IZ9hvcR86lDCb',
         package_name: 'endpoint',
         created: '2000-01-01T00:00:00.000Z',
         relative_url:
-          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/49b7181f97ea4c92dd8457cabb6d67bde7e05d02a7f41ce8ae40ff2e5819e098',
+          '/api/fleet/artifacts/endpoint-eventfilterlist-windows-v1/e4f00c88380d2c429eeb2741ad19383b94d76f79744b098b095befc24003e158',
         compression_algorithm: 'zlib',
-        decoded_size: 145,
-        decoded_sha256: '49b7181f97ea4c92dd8457cabb6d67bde7e05d02a7f41ce8ae40ff2e5819e098',
+        decoded_size: 140,
+        decoded_sha256: 'e4f00c88380d2c429eeb2741ad19383b94d76f79744b098b095befc24003e158',
         encryption_algorithm: 'none',
-        encoded_sha256: 'f852031403be242a4190b9c5ea2726706877bb0d45fe9b21f8b297ed11ab1d7c',
-        encoded_size: 112,
+        encoded_sha256: '99386e3d9a67eac88f0a4cc4ac36ad42cfda42598ce0ee1c11a8afc50bf004fe',
+        encoded_size: 108,
       }),
       getExpectedUpdatedArtifactBodyWhenUpdate: (): ArtifactBodyType => ({
         entries: [
@@ -331,9 +337,9 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
-                field: 'agent.name',
+                field: 'agent.id',
                 operator: 'included',
-                type: 'exact_caseless',
+                type: 'exact_cased',
                 value: 'test super large value',
               },
             ],
@@ -368,7 +374,8 @@ export const getArtifactsListTestsData = () => [
         {
           type: 'input',
           selector: 'blocklist-form-values-input',
-          value: 'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+          value:
+            'A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476,aedb279e378BED6C2DB3C9DC9e12ba635e0b391c,741462ab431a22233C787BAAB9B653C7',
         },
         {
           type: 'click',
@@ -379,7 +386,7 @@ export const getArtifactsListTestsData = () => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS Windows\nAND file.hash.*IS ONE OF\nA4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+            'OSIS Windows\nAND file.hash.*IS ONE OF\n741462ab431a22233c787baab9b653c7\naedb279e378bed6c2db3c9dc9e12ba635e0b391c\na4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
         },
       ],
     },
@@ -401,12 +408,20 @@ export const getArtifactsListTestsData = () => [
         },
         {
           type: 'click',
-          selector: 'blocklist-form-file.path',
+          selector: 'blocklist-form-file.path.caseless',
         },
         {
           type: 'clear',
           selector:
-            'blocklist-form-values-input-A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+            'blocklist-form-values-input-a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476',
+        },
+        {
+          type: 'clear',
+          selector: 'blocklist-form-values-input-741462ab431a22233c787baab9b653c7',
+        },
+        {
+          type: 'clear',
+          selector: 'blocklist-form-values-input-aedb279e378bed6c2db3c9dc9e12ba635e0b391c',
         },
         {
           type: 'input',
@@ -422,7 +437,7 @@ export const getArtifactsListTestsData = () => [
         {
           selector: 'blocklistPage-card-criteriaConditions',
           value:
-            'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+            'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
         },
         {
           selector: 'blocklistPage-card-header-title',
@@ -434,7 +449,7 @@ export const getArtifactsListTestsData = () => [
         },
       ],
       waitForValue:
-        'OSIS Windows\nAND file.pathIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
+        'OSIS Windows\nAND file.path.caselessIS ONE OF\nc:\\randomFolder\\randomFile.exe\nc:\\randomFolder\\randomFile2.exe',
     },
     delete: {
       confirmSelector: 'blocklistDeletionConfirm',
@@ -449,14 +464,14 @@ export const getArtifactsListTestsData = () => [
         type: 'blocklist',
         identifier: 'endpoint-blocklist-windows-v1',
         relative_url:
-          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/d2b12779ee542a6c4742d505cd0c684b0f55436a97074c62e7de7155344c74bc',
-        body: 'eJxVzEEKgzAUBNC7ZF0kMRqjOyt4CSnym/+DgVTFxFKR3r0pdFNmN2+Yk9EcN0eBNcPJ4rESa1hwj9UTu/yZdeQxoXWesgnClIUJ8lKl2bLSBnHZkrrZ+B0JU/s7oxeYOBoIhCPMR4In+D3JwNpCVrzjXa+F0qrjV1WrvlW5EqZGSRy14EAVL+CuJRda1mgtllgKkduiUuz2/uYDrE49EA==',
+          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/637f1e8795406904980ae2ab4a69cea967756571507f6bd7fc94cde0add20df2',
+        body: 'eJylzsFqwzAMgOF38bkU27Jlu69SQpEtmQTSNCTpWCl595qyy45bj9IvxPdUMm3LIKs6nZ9qe8yiTmodrvMo6vCr1UFGbrEOoxx7WvvjlX27uc2y0HZbWhqmMt5ZuG1/Psk3le1SaBW+0PRo4YvGeytnFZxxaCk7MGStBSghhkyUU0bfBtXt3X74q2ntyXyAIuFsQxIIMQtjsZyhJC5JjM2E4EVnSKb8G2c9fsJzEHTRpUaDEYvOmLASWjQNCaI5Gk0StKMcQZsIiWtlz94YW13AN7vbX9OOoO0=',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 160,
-        encoded_sha256: '8620957e33599029c5f96fa689e0df2206960f582130ccdea64f22403fc05e50',
-        decoded_size: 196,
-        decoded_sha256: 'd2b12779ee542a6c4742d505cd0c684b0f55436a97074c62e7de7155344c74bc',
+        encoded_size: 218,
+        encoded_sha256: '751aacf865573055bef82795d23d99b7ab695eb5fb2a36f1231f02f52da8adc0',
+        decoded_size: 501,
+        decoded_sha256: '637f1e8795406904980ae2ab4a69cea967756571507f6bd7fc94cde0add20df2',
         compression_algorithm: 'zlib',
         created: '2000-01-01T00:00:00.000Z',
       }),
@@ -466,10 +481,32 @@ export const getArtifactsListTestsData = () => [
             type: 'simple',
             entries: [
               {
+                field: 'file.hash.md5',
+                operator: 'included',
+                type: 'exact_cased_any',
+                value: ['741462ab431a22233c787baab9b653c7'],
+              },
+            ],
+          },
+          {
+            type: 'simple',
+            entries: [
+              {
+                field: 'file.hash.sha1',
+                operator: 'included',
+                type: 'exact_cased_any',
+                value: ['aedb279e378bed6c2db3c9dc9e12ba635e0b391c'],
+              },
+            ],
+          },
+          {
+            type: 'simple',
+            entries: [
+              {
                 field: 'file.hash.sha256',
                 operator: 'included',
                 type: 'exact_cased_any',
-                value: ['A4370C0CF81686C0B696FA6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
+                value: ['a4370c0cf81686c0b696fa6261c9d3e0d810ae704ab8301839dffd5d5112f476'],
               },
             ],
           },
@@ -479,14 +516,14 @@ export const getArtifactsListTestsData = () => [
         type: 'blocklist',
         identifier: 'endpoint-blocklist-windows-v1',
         relative_url:
-          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/2df413b3c01b54be7e9106e92c39297ca72d32bcd626c3f7eb7d395db8e905fe',
-        body: 'eJx9jcEKwjAQRH9F9iwePOYD/IlWypKdYmCbhCSVltJ/dysieJE5zbxhZiPEVgIquW6jtmaQoxqmrKDzDxsDVAyOQXHJ3B7GU0bhlorFIXqdBWLpZwUL+zZ4rpCB42rgyTob6ci7vi8cJU23pILydcc2luP69K9zfZfu+6EXorpEbA==',
+          '/api/fleet/artifacts/endpoint-blocklist-windows-v1/3ead6ce4e34cb4411083a44bfe813d9442d296981ee8d56e727e6cff14dea0f0',
+        body: 'eJx9jUEKwzAQA79S9lx66NEP6CeSEhZboYaNbWynJIT8vetSArkUnaQR0kYINXsUMt1GdU0gQ8VPSUDXExs9xCkcveCWuL6Ux4TMNWaNfbAyOzhNfytY2NbBcoGglIHDquzNMivsyJq+zxxcnB5RHPLh2jyW9n7517l/S8+96QOI6kW/',
         encryption_algorithm: 'none',
         package_name: 'endpoint',
-        encoded_size: 130,
-        encoded_sha256: '3fb42b56c16ef38f8ecb62c082a7f3dddf4a52998a83c97d16688e854e15a502',
-        decoded_size: 194,
-        decoded_sha256: '2df413b3c01b54be7e9106e92c39297ca72d32bcd626c3f7eb7d395db8e905fe',
+        encoded_size: 132,
+        encoded_sha256: '9f81934389ff29599c0b0f16aa91b9f5cebd95d51271a47ea469662a61a29884',
+        decoded_size: 197,
+        decoded_sha256: '3ead6ce4e34cb4411083a44bfe813d9442d296981ee8d56e727e6cff14dea0f0',
         compression_algorithm: 'zlib',
         created: '2000-01-01T00:00:00.000Z',
       }),
@@ -498,7 +535,7 @@ export const getArtifactsListTestsData = () => [
               {
                 field: 'file.path',
                 operator: 'included',
-                type: 'exact_cased_any',
+                type: 'exact_caseless_any',
                 value: ['c:\\randomFolder\\randomFile.exe', ' c:\\randomFolder\\randomFile2.exe'],
               },
             ],

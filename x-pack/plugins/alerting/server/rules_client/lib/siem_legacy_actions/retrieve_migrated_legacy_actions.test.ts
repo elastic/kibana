@@ -69,7 +69,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).not.toHaveBeenCalled();
@@ -92,7 +93,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).not.toHaveBeenCalled();
@@ -116,7 +118,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).not.toHaveBeenCalled();
@@ -146,7 +149,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).toHaveBeenCalledWith(expect.any(Object), { id: '456' });
@@ -192,7 +196,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).toHaveBeenCalledWith(expect.any(Object), { id: '456' });
@@ -237,7 +242,8 @@ describe('Legacy rule action migration logic', () => {
           unsecuredSavedObjectsClient: savedObjectsClient,
           logger,
         } as unknown as RulesClientContext,
-        { ruleId }
+        { ruleId },
+        () => Promise.resolve()
       );
 
       expect(deleteRuleMock).toHaveBeenCalledWith(expect.any(Object), { id: '456' });
@@ -262,6 +268,48 @@ describe('Legacy rule action migration logic', () => {
         ],
         legacyActionsReferences: [{ id: '456', name: 'action_0', type: 'action' }],
       });
+    });
+
+    test('it calls validateLegacyActions on migration a rule with legacy actions', async () => {
+      // siem.notifications is not created for a rule with no actions
+      findMock.mockResolvedValueOnce({
+        page: 1,
+        perPage: 1,
+        total: 1,
+        data: [legacyGetDailyNotificationResult(connectorId, ruleId)],
+      });
+      // siem-detection-engine-rule-actions SO is still created
+      savedObjectsClient.find.mockResolvedValueOnce(
+        legacyGetSiemNotificationRuleActionsSOResultWithSingleHit(['daily'], ruleId, connectorId)
+      );
+
+      const validateLegacyActions = jest.fn();
+      await retrieveMigratedLegacyActions(
+        {
+          unsecuredSavedObjectsClient: savedObjectsClient,
+          logger,
+        } as unknown as RulesClientContext,
+        { ruleId },
+        validateLegacyActions
+      );
+
+      expect(validateLegacyActions).toHaveBeenCalledWith(
+        [
+          {
+            actionRef: 'action_0',
+            actionTypeId: '.email',
+            frequency: { notifyWhen: 'onThrottleInterval', summary: true, throttle: '1d' },
+            group: 'default',
+            params: {
+              message: 'Rule {{context.rule.name}} generated {{state.signals_count}} alerts',
+              subject: 'Test Actions',
+              to: ['test@test.com'],
+            },
+            uuid: expect.any(String),
+          },
+        ],
+        [{ id: '456', name: 'action_0', type: 'action' }]
+      );
     });
   });
 });

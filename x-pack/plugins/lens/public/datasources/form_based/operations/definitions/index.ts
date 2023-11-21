@@ -51,7 +51,7 @@ import {
 import { staticValueOperation } from './static_value';
 import { lastValueOperation } from './last_value';
 import type {
-  FrameDatasourceAPI,
+  FramePublicAPI,
   IndexPattern,
   IndexPatternField,
   OperationMetadata,
@@ -192,7 +192,6 @@ export interface ParamEditorProps<
   paramEditorUpdater: (setter: U) => void;
   ReferenceEditor?: (props: ReferenceEditorProps) => JSX.Element | null;
   toggleFullscreen: () => void;
-  setIsCloseable: (isCloseable: boolean) => void;
   isFullscreen: boolean;
   columnId: string;
   layerId: string;
@@ -268,8 +267,8 @@ interface BaseOperationDefinitionProps<
    */
   getDefaultLabel: (
     column: C,
-    indexPattern: IndexPattern,
-    columns: Record<string, GenericIndexPatternColumn>
+    columns: Record<string, GenericIndexPatternColumn>,
+    indexPattern?: IndexPattern
   ) => string;
   /**
    * This function is called if another column in the same layer changed or got added/removed.
@@ -478,7 +477,7 @@ export type FieldBasedOperationErrorMessage =
         newState: (
           data: DataPublicPluginStart,
           core: CoreStart,
-          frame: FrameDatasourceAPI,
+          frame: FramePublicAPI,
           layerId: string
         ) => Promise<FormBasedLayer>;
       };

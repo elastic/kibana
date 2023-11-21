@@ -1,0 +1,21 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`junit_transformer updates the file in place, applying the expected transformation 1`] = `
+"<?xml version=\\"1.0\\" encoding=\\"UTF-8\\" standalone=\\"yes\\"?>
+<testsuites name=\\"Mocha Tests\\" time=\\"350.7660\\" tests=\\"8\\" failures=\\"1\\">
+  <testsuite name=\\"Root Suite\\" timestamp=\\"2023-07-20T18:55:26\\" tests=\\"0\\" file=\\"cypress/e2e/urls/compatibility.cy.ts\\" time=\\"0.0000\\" failures=\\"0\\"/>
+  <testsuite name=\\"URL compatibility\\" timestamp=\\"2023-07-20T18:55:26\\" tests=\\"8\\" time=\\"350.7620\\" failures=\\"1\\">
+    <testcase name=\\"URL compatibility Redirects to alerts from old siem Detections URL Redirects to alerts from old siem Detections URL\\" time=\\"10.4490\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+    <testcase name=\\"URL compatibility Redirects to alerts from old Detections URL Redirects to alerts from old Detections URL\\" time=\\"5.9170\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+    <testcase name=\\"URL compatibility Redirects to rules from old Detections rules URL Redirects to rules from old Detections rules URL\\" time=\\"5.1660\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+    <testcase name=\\"URL compatibility Redirects to rules creation from old Detections rules creation URL Redirects to rules creation from old Detections rules creation URL\\" time=\\"152.5400\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\">
+      <failure message=\\"Timed out retrying after 150000ms: expected 'http://localhost:5647/app/security/rules/create' to include 'app/security/rules/create1'\\" type=\\"AssertionError\\">AssertionError: Timed out retrying after 150000ms: expected 'http://localhost:5647/app/security/rules/create' to include 'app/security/rules/create1'
+    at Context.eval (webpack:///./e2e/urls/compatibility.cy.ts:65:13)</failure>
+    </testcase>
+    <testcase name=\\"URL compatibility Redirects to rule details from old Detections rule details URL Redirects to rule details from old Detections rule details URL\\" time=\\"5.6040\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+    <testcase name=\\"URL compatibility Redirects to rule details alerts tab from old Detections rule details URL Redirects to rule details alerts tab from old Detections rule details URL\\" time=\\"6.0160\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+    <testcase name=\\"URL compatibility Redirects to rule edit from old Detections rule edit URL Redirects to rule edit from old Detections rule edit URL\\" time=\\"5.5470\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+    <testcase name=\\"URL compatibility sets the global start and end dates from the url with timestamps sets the global start and end dates from the url with timestamps\\" time=\\"5.8890\\" classname=\\"Security Solution Cypress.x-pack/plugins/security_solution/cypress/e2e/urls/compatibility·cy·ts\\"/>
+  </testsuite>
+</testsuites>"
+`;

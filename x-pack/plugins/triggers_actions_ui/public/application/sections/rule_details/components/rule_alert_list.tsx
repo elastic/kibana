@@ -10,8 +10,12 @@ import moment, { Duration } from 'moment';
 import { padStart, chunk } from 'lodash';
 import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { RIGHT_ALIGNMENT } from '@elastic/eui/lib/services';
-import { AlertStatus, ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
+import {
+  AlertStatus,
+  ALERT_STATUS_ACTIVE,
+  ALERT_STATUS_RECOVERED,
+  ALERT_STATUS_UNTRACKED,
+} from '@kbn/rule-data-utils';
 import { AlertStatusValues, MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { DEFAULT_SEARCH_PAGE_SIZE } from '../../../constants';
 import { Pagination } from '../../../../types';
@@ -21,7 +25,13 @@ import { AlertLifecycleStatusBadge } from '../../../components/alert_lifecycle_s
 import { useBulkGetMaintenanceWindows } from '../../alerts_table/hooks/use_bulk_get_maintenance_windows';
 import { MaintenanceWindowBaseCell } from '../../alerts_table/maintenance_windows/cell';
 
-export const getConvertedAlertStatus = (status: AlertStatusValues): AlertStatus => {
+export const getConvertedAlertStatus = (
+  status: AlertStatusValues,
+  alert: AlertListItem
+): AlertStatus => {
+  if (!alert.tracked) {
+    return ALERT_STATUS_UNTRACKED;
+  }
   if (status === 'Active') {
     return ALERT_STATUS_ACTIVE;
   }
@@ -152,7 +162,7 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
         ),
         width: '15%',
         render: (value: AlertStatusValues, alert: AlertListItem) => {
-          const convertedStatus = getConvertedAlertStatus(value);
+          const convertedStatus = getConvertedAlertStatus(value, alert);
           return (
             <AlertLifecycleStatusBadge alertStatus={convertedStatus} flapping={alert.flapping} />
           );
@@ -213,7 +223,7 @@ export const RuleAlertList = (props: RuleAlertListProps) => {
       },
       {
         field: '',
-        align: RIGHT_ALIGNMENT,
+        align: 'right' as const,
         width: '60px',
         name: i18n.translate(
           'xpack.triggersActionsUI.sections.ruleDetails.alertsList.columns.mute',

@@ -66,6 +66,7 @@ export const nextActionMap = (context: MigratorContext) => {
         client,
         indexName: state.currentIndex,
         mappings: state.indexMappings,
+        esCapabilities: context.esCapabilities,
       }),
     UPDATE_INDEX_MAPPINGS: (state: UpdateIndexMappingsState) =>
       Actions.updateAndPickupMappings({

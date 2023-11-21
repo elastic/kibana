@@ -31,11 +31,27 @@ export const SHOWING_SELECTED_CASES = (totalRules: number) =>
     defaultMessage: 'Selected {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
 
-export const SHOWING_CASES = (totalRules: number) =>
+export const SHOWING_CASES = (totalRules: number, pageSize: number) =>
   i18n.translate('xpack.cases.caseTable.showingCasesTitle', {
-    values: { totalRules },
-    defaultMessage: 'Showing {totalRules} {totalRules, plural, =1 {case} other {cases}}',
+    values: { totalRules, pageSize },
+    defaultMessage:
+      'Showing {pageSize} of {totalRules} {totalRules, plural, =1 {case} other {cases}}',
   });
+
+export const MAX_CASES = (maxCases: number) =>
+  i18n.translate('xpack.cases.caseTable.maxCases', {
+    values: { maxCases },
+    defaultMessage:
+      'The results were capped at {maxCases} to maintain performance. Try limiting your search to reduce the results.',
+  });
+
+export const DISMISS = i18n.translate('xpack.cases.caseTable.dismiss', {
+  defaultMessage: 'Dismiss',
+});
+
+export const NOT_SHOW_AGAIN = i18n.translate('xpack.cases.caseTable.notShowAgain', {
+  defaultMessage: 'Do not show again',
+});
 
 export const UNIT = (totalCount: number) =>
   i18n.translate('xpack.cases.caseTable.unit', {
@@ -138,6 +154,12 @@ export const NO_ASSIGNEES = i18n.translate(
   }
 );
 
+export const MAX_SELECTED_FILTER = (count: number, field: string) =>
+  i18n.translate('xpack.cases.userProfile.maxSelectedAssigneesFilter', {
+    defaultMessage: "You've selected the maximum number of {count} {field}",
+    values: { count, field },
+  });
+
 export const SHOW_LESS = i18n.translate('xpack.cases.allCasesView.showLessAvatars', {
   defaultMessage: 'show less',
 });
@@ -154,3 +176,30 @@ export const NO_ATTACHMENTS_ADDED = i18n.translate(
     defaultMessage: 'No attachments added to the case',
   }
 );
+
+export const COLUMNS = i18n.translate('xpack.cases.allCasesView.columnSelection', {
+  defaultMessage: 'Columns',
+});
+
+export const SHOW_ALL = i18n.translate('xpack.cases.allCasesView.columnSelectionShowAll', {
+  defaultMessage: 'Show All',
+});
+
+export const HIDE_ALL = i18n.translate('xpack.cases.allCasesView.columnSelectionHideAll', {
+  defaultMessage: 'Hide All',
+});
+
+export const SEARCH = i18n.translate('xpack.cases.allCasesView.columnSelectionSearch', {
+  defaultMessage: 'Search',
+});
+
+export const SEARCH_COLUMNS = i18n.translate(
+  'xpack.cases.allCasesView.columnSelectionSearchColumns',
+  {
+    defaultMessage: 'Search Columns',
+  }
+);
+
+export const DRAG_HANDLE = i18n.translate('xpack.cases.allCasesView.columnSelectionDragHandle', {
+  defaultMessage: 'Drag Handle',
+});

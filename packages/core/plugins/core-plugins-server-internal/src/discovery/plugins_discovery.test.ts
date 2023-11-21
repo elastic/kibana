@@ -217,7 +217,7 @@ describe('plugins discovery system', () => {
   afterEach(() => {
     mockFs.restore();
     // restore the console.log behavior
-    jest.restoreAllMocks();
+    jest.clearAllMocks();
   });
 
   it('discovers plugins in the search locations', async () => {
@@ -278,7 +278,7 @@ describe('plugins discovery system', () => {
       .toPromise();
 
     expect(errors).toContain(
-      `Error: Unexpected token o in JSON at position 1 (invalid-manifest, ${manifestPath(
+      `Error: Unexpected token 'o', "not-json" is not valid JSON (invalid-manifest, ${manifestPath(
         'plugin_a'
       )})`
     );

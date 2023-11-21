@@ -7,15 +7,17 @@
  */
 
 import { createMemoryHistory } from 'history';
-import { firstValueFrom, lastValueFrom, take } from 'rxjs';
+import { firstValueFrom, lastValueFrom, take, BehaviorSubject } from 'rxjs';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
-import type { ChromeNavLinks } from '@kbn/core-chrome-browser';
+import type { ChromeNavLinks, ChromeBreadcrumb, AppDeepLinkId } from '@kbn/core-chrome-browser';
 import { ProjectNavigationService } from './project_navigation_service';
 
 const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) => {
   const projectNavigationService = new ProjectNavigationService();
   const history = createMemoryHistory();
+  const chromeBreadcrumbs$ = new BehaviorSubject<ChromeBreadcrumb[]>([]);
+
   history.replace(locationPathName);
   const projectNavigation = projectNavigationService.start({
     application: {
@@ -24,23 +26,26 @@ const setup = ({ locationPathName = '/' }: { locationPathName?: string } = {}) =
     },
     navLinks: {} as unknown as ChromeNavLinks,
     http: httpServiceMock.createStartContract(),
+    chromeBreadcrumbs$,
   });
 
-  return { projectNavigation, history };
+  return { projectNavigation, history, chromeBreadcrumbs$ };
 };
 
 describe('breadcrumbs', () => {
   const setupWithNavTree = () => {
     const currentLocationPathName = '/foo/item1';
-    const { projectNavigation, history } = setup({ locationPathName: currentLocationPathName });
+    const { projectNavigation, chromeBreadcrumbs$, history } = setup({
+      locationPathName: currentLocationPathName,
+    });
 
-    projectNavigation.setProjectNavigation({
+    const mockNavigation = {
       navigationTree: [
         {
           id: 'root',
           title: 'Root',
           path: ['root'],
-          breadcrumbStatus: 'hidden',
+          breadcrumbStatus: 'hidden' as 'hidden',
           children: [
             {
               id: 'subNav',
@@ -64,8 +69,9 @@ describe('breadcrumbs', () => {
           ],
         },
       ],
-    });
-    return { projectNavigation, history };
+    };
+    projectNavigation.setProjectNavigation(mockNavigation);
+    return { projectNavigation, history, mockNavigation, chromeBreadcrumbs$ };
   };
 
   test('should set breadcrumbs home / nav / custom', async () => {
@@ -80,13 +86,38 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "text": "Project",
         },
         Object {
+          "deepLinkId": "navItem1",
           "href": "/foo/item1",
           "text": "Nav Item 1",
         },
@@ -117,11 +148,35 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "href": "/",
-          "text": <EuiIcon
-            type="home"
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
           />,
-          "title": "Home",
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "text": "Project",
         },
         Object {
           "href": "/custom1",
@@ -130,6 +185,61 @@ describe('breadcrumbs', () => {
         Object {
           "href": "/custom1/custom2",
           "text": "custom2",
+        },
+      ]
+    `);
+  });
+
+  test('should merge nav breadcrumbs and chrome breadcrumbs', async () => {
+    const { projectNavigation, chromeBreadcrumbs$ } = setupWithNavTree();
+
+    projectNavigation.setProjectBreadcrumbs([]);
+    chromeBreadcrumbs$.next([
+      { text: 'Kibana' },
+      { deepLinkId: 'navItem1' as AppDeepLinkId, text: 'Nav Item 1 from Chrome' },
+      { text: 'Deep context from Chrome' },
+    ]);
+
+    const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toMatchInlineSnapshot(`
+      Array [
+        Object {
+          "popoverContent": <EuiContextMenuPanelClass
+            items={
+              Array [
+                <EuiContextMenuItem
+                  icon="gear"
+                >
+                  <FormattedMessage
+                    defaultMessage="Manage project"
+                    id="core.ui.primaryNav.cloud.linkToProject"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+                <EuiContextMenuItem
+                  icon="grid"
+                >
+                  <FormattedMessage
+                    defaultMessage="View all projects"
+                    id="core.ui.primaryNav.cloud.linkToAllProjects"
+                    values={Object {}}
+                  />
+                </EuiContextMenuItem>,
+              ]
+            }
+            size="s"
+          />,
+          "popoverProps": Object {
+            "panelPaddingSize": "none",
+          },
+          "text": "Project",
+        },
+        Object {
+          "deepLinkId": "navItem1",
+          "text": "Nav Item 1 from Chrome",
+        },
+        Object {
+          "text": "Deep context from Chrome",
         },
       ]
     `);
@@ -147,6 +257,42 @@ describe('breadcrumbs', () => {
     history.push('/foo/item2');
     breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
     expect(breadcrumbs).toHaveLength(1); // only home is left
+  });
+
+  // this handles race condition where the final `setProjectNavigation` update happens after the app called `setProjectBreadcrumbs`
+  test("shouldn't reset initial deep context breadcrumbs", async () => {
+    const { projectNavigation, mockNavigation } = setupWithNavTree();
+    projectNavigation.setProjectNavigation({ navigationTree: [] }); // reset simulating initial state
+    projectNavigation.setProjectBreadcrumbs([
+      { text: 'custom1', href: '/custom1' },
+      { text: 'custom2', href: '/custom1/custom2' },
+    ]);
+    projectNavigation.setProjectNavigation(mockNavigation); // restore navigation
+
+    const breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
+  });
+
+  test("shouldn't reset custom breadcrumbs when nav node contents changes, but not the path", async () => {
+    const { projectNavigation, mockNavigation } = setupWithNavTree();
+    projectNavigation.setProjectBreadcrumbs([
+      { text: 'custom1', href: '/custom1' },
+      { text: 'custom2', href: '/custom1/custom2' },
+    ]);
+    let breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
+
+    // navigation node contents changed, but not the path
+    projectNavigation.setProjectNavigation({
+      navigationTree: [
+        { ...mockNavigation.navigationTree[0], title: 'Changed title' },
+        ...mockNavigation.navigationTree,
+      ],
+    });
+
+    // context breadcrumbs should not reset
+    breadcrumbs = await firstValueFrom(projectNavigation.getProjectBreadcrumbs$());
+    expect(breadcrumbs).toHaveLength(4);
   });
 });
 

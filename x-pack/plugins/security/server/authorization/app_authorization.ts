@@ -20,10 +20,11 @@ class ProtectedApplications {
     // we wait until we actually need to consume these before getting them
     if (this.applications == null) {
       this.applications = new Set(
-        this.featuresService
-          .getKibanaFeatures()
-          .map((feature) => feature.app)
-          .flat()
+        this.featuresService.getKibanaFeatures().flatMap((feature) => {
+          // If the feature has explicitly opted out of our RBAC by setting the `privileges` field to `null`, we
+          // shouldn't check permissions when the app defined by such feature is accessed.
+          return feature.privileges === null ? [] : feature.app;
+        })
       );
     }
 

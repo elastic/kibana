@@ -11,10 +11,10 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import type { LicenseCheck } from '@kbn/licensing-plugin/server';
 
+import { definePutRolesRoutes } from './put';
 import { GLOBAL_RESOURCE } from '../../../../common/constants';
 import { securityFeatureUsageServiceMock } from '../../../feature_usage/index.mock';
 import { routeDefinitionParamsMock } from '../../index.mock';
-import { definePutRolesRoutes } from './put';
 
 const application = 'kibana-.kibana';
 const privilegeMap = {

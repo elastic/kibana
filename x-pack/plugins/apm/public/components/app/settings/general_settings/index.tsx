@@ -19,11 +19,15 @@ import {
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableAgentExplorerView,
+  apmEnableProfilingIntegration,
 } from '@kbn/observability-plugin/common';
 import { isEmpty } from 'lodash';
 import React from 'react';
+import {
+  useEditableSettings,
+  useUiTracker,
+} from '@kbn/observability-shared-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
-import { useApmEditableSettings } from '../../../../hooks/use_apm_editable_settings';
 import { BottomBarActions } from '../bottom_bar_actions';
 
 const apmSettingsKeys = [
@@ -37,9 +41,11 @@ const apmSettingsKeys = [
   apmEnableServiceMetrics,
   apmEnableContinuousRollups,
   enableAgentExplorerView,
+  apmEnableProfilingIntegration,
 ];
 
 export function GeneralSettings() {
+  const trackApmEvent = useUiTracker({ app: 'apm' });
   const { docLinks, notifications } = useApmPluginContext().core;
   const {
     handleFieldChange,
@@ -48,14 +54,15 @@ export function GeneralSettings() {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useApmEditableSettings(apmSettingsKeys);
+  } = useEditableSettings('apm', apmSettingsKeys);
 
   async function handleSave() {
     try {
       const reloadPage = Object.keys(unsavedChanges).some((key) => {
         return settingsEditableConfig[key].requiresPageReload;
       });
-      await saveAll({ trackMetricName: 'general_settings_save' });
+      await saveAll();
+      trackApmEvent({ metric: 'general_settings_save' });
       if (reloadPage) {
         window.location.reload();
       }

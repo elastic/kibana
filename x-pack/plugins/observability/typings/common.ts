@@ -17,7 +17,8 @@ export type ObservabilityApp =
   | 'observability-overview'
   | 'stack_monitoring'
   | 'ux'
-  | 'fleet';
+  | 'fleet'
+  | 'universal_profiling';
 
 export type { Coordinates } from '../public/typings/fetch_overview_data';
 

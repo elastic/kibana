@@ -121,6 +121,8 @@ describe('duration anomaly alert', () => {
     jest.spyOn(Intl, 'DateTimeFormat').mockImplementation(() => ({
       format: jest.fn(),
       formatToParts: jest.fn(),
+      formatRange: jest.fn(),
+      formatRangeToParts: jest.fn(),
       resolvedOptions: () => ({
         locale: '',
         calendar: '',

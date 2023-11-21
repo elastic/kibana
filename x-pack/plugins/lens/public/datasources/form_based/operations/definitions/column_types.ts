@@ -27,6 +27,8 @@ export interface ValueFormatConfig {
     suffix?: string;
     compact?: boolean;
     pattern?: string;
+    fromUnit?: string;
+    toUnit?: string;
   };
 }
 

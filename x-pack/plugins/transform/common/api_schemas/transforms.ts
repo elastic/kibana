@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import { schema, type TypeOf } from '@kbn/config-schema';
 
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
 
@@ -148,16 +148,29 @@ export interface PutTransformsPivotRequestSchema
 
 export type PutTransformsLatestRequestSchema = Omit<PutTransformsRequestSchema, 'pivot'>;
 
+export const putTransformsQuerySchema = schema.object({
+  createDataView: schema.boolean({ defaultValue: false }),
+  timeFieldName: schema.maybe(schema.string()),
+});
+
+export type PutTransformsQuerySchema = TypeOf<typeof putTransformsQuerySchema>;
+
 interface TransformCreated {
   transform: TransformId;
 }
-interface TransformCreatedError {
-  id: TransformId;
+interface DataViewCreated {
+  id: string;
+}
+interface CreatedError {
+  id: string;
   error: any;
 }
+
 export interface PutTransformsResponseSchema {
   transformsCreated: TransformCreated[];
-  errors: TransformCreatedError[];
+  dataViewsCreated: DataViewCreated[];
+  dataViewsErrors: CreatedError[];
+  errors: CreatedError[];
 }
 
 // POST transforms/_preview

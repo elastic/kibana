@@ -17,6 +17,8 @@
     "@kbn/tooling-log",
     "@kbn/repo-info",
     "@kbn/std",
+    "@kbn/test-subj-selector",
+    "@kbn/core-http-common",
   ],
   "exclude": [
     "target/**/*",

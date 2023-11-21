@@ -416,251 +416,65 @@
           }
         ],
         "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-server.MapsEmsPlugin",
-        "type": "Class",
-        "tags": [],
-        "label": "MapsEmsPlugin",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "mapsEms",
-            "scope": "server",
-            "docId": "kibMapsEmsPluginApi",
-            "section": "def-server.MapsEmsPlugin",
-            "text": "MapsEmsPlugin"
-          },
-          " implements ",
-          {
-            "pluginId": "@kbn/core-plugins-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsServerPluginApi",
-            "section": "def-common.Plugin",
-            "text": "Plugin"
-          },
-          "<",
-          {
-            "pluginId": "mapsEms",
-            "scope": "server",
-            "docId": "kibMapsEmsPluginApi",
-            "section": "def-server.MapsEmsPluginServerSetup",
-            "text": "MapsEmsPluginServerSetup"
-          },
-          ", void, object, object>"
-        ],
-        "path": "src/plugins/maps_ems/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-server.MapsEmsPlugin._initializerContext",
-            "type": "Object",
-            "tags": [],
-            "label": "_initializerContext",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/core-plugins-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsServerPluginApi",
-                "section": "def-common.PluginInitializerContext",
-                "text": "PluginInitializerContext"
-              },
-              "<Readonly<{} & { tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; includeElasticMapsService: boolean; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }>>"
-            ],
-            "path": "src/plugins/maps_ems/server/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-server.MapsEmsPlugin.Unnamed",
-            "type": "Function",
-            "tags": [],
-            "label": "Constructor",
-            "description": [],
-            "signature": [
-              "any"
-            ],
-            "path": "src/plugins/maps_ems/server/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "mapsEms",
-                "id": "def-server.MapsEmsPlugin.Unnamed.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "initializerContext",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-plugins-server",
-                    "scope": "common",
-                    "docId": "kibKbnCorePluginsServerPluginApi",
-                    "section": "def-common.PluginInitializerContext",
-                    "text": "PluginInitializerContext"
-                  },
-                  "<Readonly<{} & { tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; includeElasticMapsService: boolean; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }>>"
-                ],
-                "path": "src/plugins/maps_ems/server/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-server.MapsEmsPlugin.setup",
-            "type": "Function",
-            "tags": [],
-            "label": "setup",
-            "description": [],
-            "signature": [
-              "(core: ",
-              {
-                "pluginId": "@kbn/core-lifecycle-server",
-                "scope": "common",
-                "docId": "kibKbnCoreLifecycleServerPluginApi",
-                "section": "def-common.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>, plugins: MapsEmsSetupServerDependencies) => { config: Readonly<{} & { tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; includeElasticMapsService: boolean; emsUrl: string; emsFileApiUrl: string; emsTileApiUrl: string; emsLandingPageUrl: string; emsFontLibraryUrl: string; emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }>; createEMSSettings: () => ",
-              {
-                "pluginId": "mapsEms",
-                "scope": "common",
-                "docId": "kibMapsEmsPluginApi",
-                "section": "def-common.EMSSettings",
-                "text": "EMSSettings"
-              },
-              "; }"
-            ],
-            "path": "src/plugins/maps_ems/server/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "mapsEms",
-                "id": "def-server.MapsEmsPlugin.setup.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "core",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/core-lifecycle-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreLifecycleServerPluginApi",
-                    "section": "def-common.CoreSetup",
-                    "text": "CoreSetup"
-                  },
-                  "<object, unknown>"
-                ],
-                "path": "src/plugins/maps_ems/server/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "mapsEms",
-                "id": "def-server.MapsEmsPlugin.setup.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "plugins",
-                "description": [],
-                "signature": [
-                  "MapsEmsSetupServerDependencies"
-                ],
-                "path": "src/plugins/maps_ems/server/index.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-server.MapsEmsPlugin.start",
-            "type": "Function",
-            "tags": [],
-            "label": "start",
-            "description": [],
-            "signature": [
-              "() => void"
-            ],
-            "path": "src/plugins/maps_ems/server/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
       }
     ],
     "functions": [],
-    "interfaces": [
-      {
-        "parentPluginId": "mapsEms",
-        "id": "def-server.MapsEmsPluginServerSetup",
-        "type": "Interface",
-        "tags": [],
-        "label": "MapsEmsPluginServerSetup",
-        "description": [],
-        "path": "src/plugins/maps_ems/server/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-server.MapsEmsPluginServerSetup.config",
-            "type": "Object",
-            "tags": [],
-            "label": "config",
-            "description": [],
-            "signature": [
-              "{ readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly includeElasticMapsService: boolean; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }"
-            ],
-            "path": "src/plugins/maps_ems/server/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "mapsEms",
-            "id": "def-server.MapsEmsPluginServerSetup.createEMSSettings",
-            "type": "Function",
-            "tags": [],
-            "label": "createEMSSettings",
-            "description": [],
-            "signature": [
-              "() => ",
-              {
-                "pluginId": "mapsEms",
-                "scope": "common",
-                "docId": "kibMapsEmsPluginApi",
-                "section": "def-common.EMSSettings",
-                "text": "EMSSettings"
-              }
-            ],
-            "path": "src/plugins/maps_ems/server/index.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [],
-            "returnComment": []
-          }
-        ],
-        "initialIsOpen": false
-      }
-    ],
+    "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [],
+    "setup": {
+      "parentPluginId": "mapsEms",
+      "id": "def-server.MapsEmsPluginServerSetup",
+      "type": "Interface",
+      "tags": [],
+      "label": "MapsEmsPluginServerSetup",
+      "description": [],
+      "path": "src/plugins/maps_ems/server/plugin.ts",
+      "deprecated": false,
+      "trackAdoption": false,
+      "children": [
+        {
+          "parentPluginId": "mapsEms",
+          "id": "def-server.MapsEmsPluginServerSetup.config",
+          "type": "Object",
+          "tags": [],
+          "label": "config",
+          "description": [],
+          "signature": [
+            "{ readonly tilemap: Readonly<{ url?: string | undefined; } & { options: Readonly<{ default?: boolean | undefined; tileSize?: number | undefined; subdomains?: string[] | undefined; errorTileUrl?: string | undefined; tms?: boolean | undefined; reuseTiles?: boolean | undefined; bounds?: number[] | undefined; } & { attribution: string; minZoom: number; maxZoom: number; }>; }>; readonly includeElasticMapsService: boolean; readonly emsUrl: string; readonly emsFileApiUrl: string; readonly emsTileApiUrl: string; readonly emsLandingPageUrl: string; readonly emsFontLibraryUrl: string; readonly emsTileLayerId: Readonly<{} & { dark: string; bright: string; desaturated: string; }>; }"
+          ],
+          "path": "src/plugins/maps_ems/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
+        },
+        {
+          "parentPluginId": "mapsEms",
+          "id": "def-server.MapsEmsPluginServerSetup.createEMSSettings",
+          "type": "Function",
+          "tags": [],
+          "label": "createEMSSettings",
+          "description": [],
+          "signature": [
+            "() => ",
+            {
+              "pluginId": "mapsEms",
+              "scope": "common",
+              "docId": "kibMapsEmsPluginApi",
+              "section": "def-common.EMSSettings",
+              "text": "EMSSettings"
+            }
+          ],
+          "path": "src/plugins/maps_ems/server/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false,
+          "children": [],
+          "returnComment": []
+        }
+      ],
+      "lifecycle": "setup",
+      "initialIsOpen": true
+    }
   },
   "common": {
     "classes": [
@@ -1014,7 +828,22 @@
         "label": "DEFAULT_EMS_LANDING_PAGE_URL",
         "description": [],
         "signature": [
-          "\"https://maps.elastic.co/v8.7\""
+          "\"https://maps.elastic.co\""
+        ],
+        "path": "src/plugins/maps_ems/common/ems_defaults.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "mapsEms",
+        "id": "def-common.DEFAULT_EMS_REST_VERSION",
+        "type": "string",
+        "tags": [],
+        "label": "DEFAULT_EMS_REST_VERSION",
+        "description": [],
+        "signature": [
+          "\"2023-10-31\""
         ],
         "path": "src/plugins/maps_ems/common/ems_defaults.ts",
         "deprecated": false,

@@ -315,22 +315,30 @@ export function jobsProvider(
     return { jobs, jobsMap };
   }
 
-  async function getJobForCloning(jobId: string) {
-    const [jobResults, datafeedResult] = await Promise.all([
+  async function getJobForCloning(jobId: string, retainCreatedBy = false) {
+    const [jobResults, datafeedResult, fullJobResults] = await Promise.all([
       mlClient.getJobs({ job_id: jobId, exclude_generated: true }),
       getDatafeedByJobId(jobId, true),
+      ...(retainCreatedBy ? [mlClient.getJobs({ job_id: jobId })] : []),
     ]);
     const result: { datafeed?: Datafeed; job?: Job } = { job: undefined, datafeed: undefined };
     if (datafeedResult && datafeedResult.job_id === jobId) {
       result.datafeed = datafeedResult;
     }
 
-    if (jobResults && jobResults.jobs) {
-      const job = jobResults.jobs.find((j) => j.job_id === jobId);
-      if (job) {
-        removeUnClonableCustomSettings(job);
-        result.job = job;
+    if (jobResults?.jobs?.length > 0) {
+      const job = jobResults.jobs[0];
+      removeUnClonableCustomSettings(job);
+
+      // to retain the created by property we need to add it back in
+      // from the job which hasn't been loaded with exclude_generated: true
+      if (retainCreatedBy && fullJobResults?.jobs?.length > 0) {
+        const fullJob = fullJobResults.jobs[0];
+        if (fullJob.custom_settings?.created_by) {
+          job.custom_settings.created_by = fullJob.custom_settings.created_by;
+        }
       }
+      result.job = job;
     }
     return result;
   }

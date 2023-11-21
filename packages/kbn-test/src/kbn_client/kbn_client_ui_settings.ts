@@ -10,7 +10,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 
 import { KbnClientRequester, pathWithSpace } from './kbn_client_requester';
 
-export type UiSettingValues = Record<string, string | number | boolean>;
+export type UiSettingValues = Record<string, string | number | boolean | string[]>;
 interface UiSettingsApiResponse {
   settings: {
     [key: string]: {
@@ -47,7 +47,7 @@ export class KbnClientUiSettings {
    */
   async unset(setting: string, { space }: { space?: string } = {}) {
     const { data } = await this.requester.request<any>({
-      path: pathWithSpace(space)`/api/kibana/settings/${setting}`,
+      path: pathWithSpace(space)`/internal/kibana/settings/${setting}`,
       method: 'DELETE',
     });
     return data;
@@ -76,7 +76,7 @@ export class KbnClientUiSettings {
 
     await this.requester.request({
       method: 'POST',
-      path: pathWithSpace(space)`/api/kibana/settings`,
+      path: pathWithSpace(space)`/internal/kibana/settings`,
       body: { changes },
       retries,
     });
@@ -89,7 +89,7 @@ export class KbnClientUiSettings {
     this.log.debug('applying update to kibana config: %j', updates);
 
     await this.requester.request({
-      path: pathWithSpace(space)`/api/kibana/settings`,
+      path: pathWithSpace(space)`/internal/kibana/settings`,
       method: 'POST',
       body: {
         changes: updates,
@@ -100,7 +100,7 @@ export class KbnClientUiSettings {
 
   private async getAll({ space }: { space?: string } = {}) {
     const { data } = await this.requester.request<UiSettingsApiResponse>({
-      path: pathWithSpace(space)`/api/kibana/settings`,
+      path: pathWithSpace(space)`/internal/kibana/settings`,
       method: 'GET',
     });
 

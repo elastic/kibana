@@ -7,11 +7,11 @@
 
 import { schema } from '@kbn/config-schema';
 import { RequestHandlerContext } from '@kbn/core/server';
-import { ASSET_MANAGER_API_BASE } from '../constants';
+import { ASSET_MANAGER_API_BASE } from '../../common/constants_routes';
 import { getSampleAssetDocs, sampleAssets } from '../lib/sample_assets';
 import { writeAssets } from '../lib/write_assets';
 import { SetupRouteOptions } from './types';
-import { getEsClientFromContext } from './utils';
+import { getClientsFromContext } from './utils';
 
 export type WriteSamplesPostBody = {
   baseDateTime?: string | number;
@@ -62,12 +62,12 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
           },
         });
       }
-      const esClient = await getEsClientFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
       const assetDocs = getSampleAssetDocs({ baseDateTime: parsed, excludeEans });
 
       try {
         const response = await writeAssets({
-          esClient,
+          elasticsearchClient,
           assetDocs,
           namespace: 'sample_data',
           refresh,
@@ -101,40 +101,40 @@ export function sampleAssetsRoutes<T extends RequestHandlerContext>({
       validate: {},
     },
     async (context, req, res) => {
-      const esClient = await getEsClientFromContext(context);
+      const { elasticsearchClient } = await getClientsFromContext(context);
 
-      const sampleDataIndices = await esClient.indices.get({
-        index: 'assets-*-sample_data',
+      const sampleDataStreams = await elasticsearchClient.indices.getDataStream({
+        name: 'assets-*-sample_data',
         expand_wildcards: 'all',
       });
 
-      const deletedIndices: string[] = [];
+      const deletedDataStreams: string[] = [];
       let errorWhileDeleting: string | null = null;
-      const indicesToDelete = Object.keys(sampleDataIndices);
+      const dataStreamsToDelete = sampleDataStreams.data_streams.map((ds) => ds.name);
 
-      for (let i = 0; i < indicesToDelete.length; i++) {
-        const index = indicesToDelete[i];
+      for (let i = 0; i < dataStreamsToDelete.length; i++) {
+        const dsName = dataStreamsToDelete[i];
         try {
-          await esClient.indices.delete({ index });
-          deletedIndices.push(index);
+          await elasticsearchClient.indices.deleteDataStream({ name: dsName });
+          deletedDataStreams.push(dsName);
         } catch (error: any) {
           errorWhileDeleting =
             typeof error.message === 'string'
               ? error.message
-              : `Unknown error occurred while deleting indices, at index ${index}`;
+              : `Unknown error occurred while deleting sample data streams, at data stream name: ${dsName}`;
           break;
         }
       }
 
-      if (deletedIndices.length === indicesToDelete.length) {
-        return res.ok({ body: { deleted: deletedIndices } });
+      if (!errorWhileDeleting && deletedDataStreams.length === dataStreamsToDelete.length) {
+        return res.ok({ body: { deleted: deletedDataStreams } });
       } else {
         return res.custom({
           statusCode: 500,
           body: {
-            message: ['Not all matching indices were deleted', errorWhileDeleting].join(' - '),
-            deleted: deletedIndices,
-            matching: indicesToDelete,
+            message: ['Not all found data streams were deleted', errorWhileDeleting].join(' - '),
+            deleted: deletedDataStreams,
+            matching: dataStreamsToDelete,
           },
         });
       }

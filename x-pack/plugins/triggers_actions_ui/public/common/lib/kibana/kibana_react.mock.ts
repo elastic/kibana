@@ -21,6 +21,7 @@ import {
   AlertsTableConfigurationRegistryContract,
 } from '../../../types';
 import { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
+import { expressionsPluginMock } from '@kbn/expressions-plugin/public/mocks';
 
 export const createStartServicesMock = (): TriggersAndActionsUiServices => {
   const core = coreMock.createStart();
@@ -60,7 +61,9 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
       has: jest.fn(),
       register: jest.fn(),
       get: jest.fn(),
+      getActions: jest.fn(),
       list: jest.fn(),
+      update: jest.fn(),
     } as AlertsTableConfigurationRegistryContract,
     charts: chartPluginMock.createStartContract(),
     isCloud: false,
@@ -70,6 +73,8 @@ export const createStartServicesMock = (): TriggersAndActionsUiServices => {
     } as unknown as HTMLElement,
     theme$: themeServiceMock.createTheme$(),
     licensing: licensingPluginMock,
+    expressions: expressionsPluginMock.createStartContract(),
+    isServerless: false,
   } as TriggersAndActionsUiServices;
 };
 

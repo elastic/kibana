@@ -78,7 +78,7 @@ export function useTransactionLatencyChartsFetcher({
                 start,
                 end,
                 transactionType,
-                useDurationSummary: shouldUseDurationSummary,
+                useDurationSummary: !!shouldUseDurationSummary,
                 transactionName: transactionName || undefined,
                 latencyAggregationType,
                 offset:

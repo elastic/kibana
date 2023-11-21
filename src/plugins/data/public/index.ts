@@ -167,9 +167,7 @@ export type {
   SerializedSearchSourceFields,
   // errors
   IEsError,
-  Reason,
   WaitUntilNextSessionCompletesOptions,
-  SearchResponseWarning,
 } from './search';
 
 export {
@@ -196,7 +194,7 @@ export type {
 } from './search';
 
 export type { ISearchOptions } from '../common';
-export { isErrorResponse, isCompleteResponse, isPartialResponse } from '../common';
+export { isRunningResponse } from '../common';
 
 // Search namespace
 export const search = {
@@ -271,9 +269,6 @@ export type {
   TimefilterSetup,
   GlobalQueryStateFromUrl,
 } from './query';
-
-export type { ShardFailureRequest } from './shard_failure_modal';
-export { ShardFailureOpenModalButton } from './shard_failure_modal';
 
 export type { AggsStart } from './search/aggs';
 

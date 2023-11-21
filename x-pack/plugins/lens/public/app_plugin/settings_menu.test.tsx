@@ -6,81 +6,60 @@
  */
 
 import React from 'react';
-import { EuiSwitch, EuiSwitchEvent, EuiWrappingPopover } from '@elastic/eui';
-import { getMountWithProviderParams } from '../mocks';
+import { renderWithReduxStore } from '../mocks';
 import { SettingsMenu } from './settings_menu';
-import { selectAutoApplyEnabled } from '../state_management';
-import { mount, ReactWrapper } from 'enzyme';
-import { EnhancedStore } from '@reduxjs/toolkit';
-import { I18nProvider } from '@kbn/i18n-react';
-
-class Harness {
-  private _instance: ReactWrapper;
-
-  constructor(instance: ReactWrapper) {
-    this._instance = instance;
-  }
-
-  triggerClose() {
-    this._instance.find(EuiWrappingPopover).props().closePopover();
-  }
-
-  private get autoApplySwitch() {
-    return this._instance.find(EuiSwitch);
-  }
-
-  public toggleAutoApply() {
-    this.autoApplySwitch.props().onChange({} as EuiSwitchEvent);
-    this._instance.update();
-  }
-
-  public get autoApplyEnabled() {
-    return this.autoApplySwitch.props().checked;
-  }
-}
+import { screen, waitFor } from '@testing-library/react';
 
 describe('settings menu', () => {
-  const anchorButton = document.createElement('button');
-  let onCloseMock: jest.Mock;
-  let instance: ReactWrapper;
-  let harness: Harness;
-  let lensStore: EnhancedStore;
+  const onCloseMock = jest.fn();
 
-  beforeEach(() => {
-    onCloseMock = jest.fn();
-
-    // not using mountWithProvider since it wraps the mount call in ReactTestUtils.act
-    // which causes the EuiPopover to close
-    const { mountArgs, lensStore: _lensStore } = getMountWithProviderParams(
-      <I18nProvider>
-        <SettingsMenu anchorElement={anchorButton} isOpen onClose={onCloseMock} />
-      </I18nProvider>
+  const renderSettingsMenu = (propsOverrides = {}) => {
+    const rtlRender = renderWithReduxStore(
+      <SettingsMenu
+        anchorElement={document.createElement('button')}
+        isOpen
+        onClose={onCloseMock}
+        {...propsOverrides}
+      />
     );
 
-    lensStore = _lensStore;
-    instance = mount(mountArgs.component, mountArgs.options);
-    harness = new Harness(instance);
+    const toggleAutoApply = () => {
+      const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
+      autoApplyToggle.click();
+    };
+
+    const isAutoApplyOn = () => {
+      const autoApplyToggle = screen.getByTestId('lnsToggleAutoApply');
+      return autoApplyToggle.getAttribute('aria-checked') === 'true';
+    };
+
+    return {
+      toggleAutoApply,
+      isAutoApplyOn,
+      ...rtlRender,
+    };
+  };
+
+  afterEach(() => {
+    onCloseMock.mockClear();
   });
 
-  it('should call onClose when popover closes', async () => {
-    harness.triggerClose();
-    expect(onCloseMock).toHaveBeenCalledTimes(1);
+  it('should call onClose when popover closes after toggling', async () => {
+    const { toggleAutoApply } = renderSettingsMenu();
+    toggleAutoApply();
+
+    await waitFor(() => expect(onCloseMock).toHaveBeenCalledTimes(1));
   });
 
   it('should toggle auto-apply', async () => {
-    const enabledInState = () => selectAutoApplyEnabled(lensStore.getState());
+    const { toggleAutoApply, isAutoApplyOn } = renderSettingsMenu();
 
-    expect(harness.autoApplyEnabled).toBeTruthy();
-    expect(enabledInState()).toBeTruthy();
+    expect(isAutoApplyOn()).toBeTruthy();
 
-    harness.toggleAutoApply();
+    toggleAutoApply();
+    expect(isAutoApplyOn()).toBeFalsy();
 
-    expect(harness.autoApplyEnabled).toBeFalsy();
-    expect(enabledInState()).toBeFalsy();
-
-    harness.toggleAutoApply();
-
-    expect(harness.autoApplyEnabled).toBeTruthy();
-    expect(enabledInState()).toBeTruthy();
+    toggleAutoApply();
+    expect(isAutoApplyOn()).toBeTruthy();
   });
 });

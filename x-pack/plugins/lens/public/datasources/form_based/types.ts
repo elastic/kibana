@@ -67,7 +67,6 @@ export type PersistedIndexPatternLayer = Omit<FormBasedLayer, 'indexPatternId'>;
 export interface FormBasedPrivateState {
   currentIndexPatternId: string;
   layers: Record<string, FormBasedLayer>;
-  isDimensionClosePrevented?: boolean;
 }
 
 export interface DataViewDragDropOperation extends DragDropOperation {

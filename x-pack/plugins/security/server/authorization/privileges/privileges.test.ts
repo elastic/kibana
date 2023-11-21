@@ -8,9 +8,9 @@
 import { KibanaFeature } from '@kbn/features-plugin/server';
 import { featuresPluginMock } from '@kbn/features-plugin/server/mocks';
 
+import { privilegesFactory } from './privileges';
 import { licenseMock } from '../../../common/licensing/index.mock';
 import { Actions } from '../actions';
-import { privilegesFactory } from './privileges';
 
 const actions = new Actions();
 

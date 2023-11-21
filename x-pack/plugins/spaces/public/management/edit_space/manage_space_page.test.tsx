@@ -17,11 +17,11 @@ import { KibanaFeature } from '@kbn/features-plugin/public';
 import { featuresPluginMock } from '@kbn/features-plugin/public/mocks';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { SpacesManager } from '../../spaces_manager';
-import { spacesManagerMock } from '../../spaces_manager/mocks';
 import { ConfirmAlterActiveSpaceModal } from './confirm_alter_active_space_modal';
 import { EnabledFeatures } from './enabled_features';
 import { ManageSpacePage } from './manage_space_page';
+import type { SpacesManager } from '../../spaces_manager';
+import { spacesManagerMock } from '../../spaces_manager/mocks';
 
 // To be resolved by EUI team.
 // https://github.com/elastic/eui/issues/3712

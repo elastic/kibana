@@ -1,6 +1,6 @@
 post:
   summary: Enables an SLO
-  operationId: enableSlo
+  operationId: enableSloOp
   description: >
     You must have the `write` privileges for the **SLOs** feature in the
     **Observability** section of the Kibana feature privileges.

@@ -12,6 +12,11 @@ export type {
   AgentPolicyStatus,
   CloudDefendPolicy,
   PoliciesQueryParams,
+  SelectorType,
+  SelectorCondition,
+  ResponseAction,
+  Selector,
+  Response,
 } from './latest';
 
 export { policiesQueryParamsSchema } from './latest';

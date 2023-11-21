@@ -5,20 +5,13 @@
  * 2.0.
  */
 
-import React, { useState, FC } from 'react';
-
-import {
-  EuiCallOut,
-  EuiSpacer,
-  EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
-} from '@elastic/eui';
-
+import React, { FC, useState } from 'react';
+import { EuiCallOut, EuiPageBody, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNestedProperty } from '@kbn/ml-nested-property';
 import { SavedObjectFinder } from '@kbn/saved-objects-finder-plugin/public';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-
+import { CreateDataViewButton } from '../../../../../components/create_data_view_button';
 import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import {
@@ -31,11 +24,10 @@ const fixedPageSize: number = 20;
 export const SourceSelection: FC = () => {
   const {
     services: {
-      http,
-      uiSettings,
-      savedObjectsManagement,
       savedSearch: savedSearchService,
       data: { dataViews: dataViewsService },
+      contentManagement,
+      uiSettings,
     },
   } = useMlKibana();
   const navigateToPath = useNavigateToPath();
@@ -47,8 +39,8 @@ export const SourceSelection: FC = () => {
   const onSearchSelected = async (
     id: string,
     type: string,
-    fullName: string,
-    savedObject: SavedObjectCommon
+    fullName?: string,
+    savedObject?: SavedObjectCommon
   ) => {
     // Kibana data views including `:` are cross-cluster search indices
     // and are not supported by Data Frame Analytics yet. For saved searches
@@ -56,7 +48,7 @@ export const SourceSelection: FC = () => {
     // the selection before redirecting and show an error callout instead.
     let dataViewName = '';
 
-    if (type === 'index-pattern') {
+    if (type === 'index-pattern' && savedObject) {
       dataViewName = getNestedProperty(savedObject, 'attributes.title');
     } else if (type === 'search') {
       try {
@@ -80,7 +72,7 @@ export const SourceSelection: FC = () => {
       }
     }
 
-    if (isCcsIndexPattern(dataViewName)) {
+    if (isCcsIndexPattern(dataViewName) && savedObject) {
       setIsCcsCallOut(true);
       if (type === 'search') {
         setCcsCallOutBodyText(
@@ -111,7 +103,7 @@ export const SourceSelection: FC = () => {
   return (
     <div data-test-subj="mlDFAPageSourceSelection">
       <EuiPageBody restrictWidth={1200}>
-        <EuiPageContent hasShadow={false} hasBorder={true}>
+        <EuiPanel hasShadow={false} hasBorder>
           {isCcsCallOut && (
             <>
               <EuiCallOut
@@ -159,17 +151,17 @@ export const SourceSelection: FC = () => {
                     defaultMessage: 'Data view',
                   }
                 ),
-                defaultSearchField: 'name',
               },
             ]}
             fixedPageSize={fixedPageSize}
             services={{
+              contentClient: contentManagement.client,
               uiSettings,
-              http,
-              savedObjectsManagement,
             }}
-          />
-        </EuiPageContent>
+          >
+            <CreateDataViewButton onDataViewCreated={onSearchSelected} allowAdHocDataView={true} />
+          </SavedObjectFinder>
+        </EuiPanel>
       </EuiPageBody>
     </div>
   );

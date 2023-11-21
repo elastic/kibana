@@ -16,3 +16,5 @@ export * from '../common/util/validators';
 export * from './application/formatters/metric_change_description';
 export * from './application/components/field_stats_flyout';
 export * from './application/data_frame_analytics/common';
+
+export { useFieldStatsFlyoutContext } from './application/components/field_stats_flyout/use_field_stats_flytout_context';

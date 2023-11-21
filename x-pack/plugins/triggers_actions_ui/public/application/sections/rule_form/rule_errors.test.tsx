@@ -29,6 +29,7 @@ describe('rule_errors', () => {
         'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: [],
+        consumer: [],
       });
     });
 
@@ -41,6 +42,7 @@ describe('rule_errors', () => {
         'schedule.interval': ['Check interval is required.'],
         ruleTypeId: [],
         actionConnectors: [],
+        consumer: [],
       });
     });
 
@@ -53,6 +55,7 @@ describe('rule_errors', () => {
         'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: [],
+        consumer: [],
       });
     });
 
@@ -68,6 +71,7 @@ describe('rule_errors', () => {
         'schedule.interval': ['Interval must be at least 1 minute.'],
         ruleTypeId: [],
         actionConnectors: [],
+        consumer: [],
       });
     });
 
@@ -80,6 +84,33 @@ describe('rule_errors', () => {
         'schedule.interval': [],
         ruleTypeId: ['Rule type is required.'],
         actionConnectors: [],
+        consumer: [],
+      });
+    });
+
+    it('should get an error when consumer is null', () => {
+      const rule = mockRule();
+      rule.consumer = null as unknown as string;
+      const result = validateBaseProperties(rule, config);
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
+        consumer: ['Scope is required.'],
+      });
+    });
+
+    it('should not get an error when consumer is undefined', () => {
+      const rule = mockRule();
+      rule.consumer = undefined as unknown as string;
+      const result = validateBaseProperties(rule, config);
+      expect(result.errors).toStrictEqual({
+        name: [],
+        'schedule.interval': [],
+        ruleTypeId: [],
+        actionConnectors: [],
+        consumer: [],
       });
     });
 
@@ -101,6 +132,7 @@ describe('rule_errors', () => {
         'schedule.interval': [],
         ruleTypeId: [],
         actionConnectors: ['Action for myActionType connector is required.'],
+        consumer: [],
       });
     });
   });
@@ -127,6 +159,7 @@ describe('rule_errors', () => {
           'schedule.interval': [],
           ruleTypeId: [],
           actionConnectors: [],
+          consumer: [],
         },
         ruleErrors: {
           name: ['Name is required.'],
@@ -134,6 +167,7 @@ describe('rule_errors', () => {
           'schedule.interval': [],
           ruleTypeId: [],
           actionConnectors: [],
+          consumer: [],
         },
       });
     });

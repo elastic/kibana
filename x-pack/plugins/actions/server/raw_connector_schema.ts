@@ -14,7 +14,7 @@ export const rawConnectorSchema = schema.object({
   config: schema.recordOf(schema.string(), schema.any()),
   secrets: schema.recordOf(schema.string(), schema.any()),
   isPreconfigured: schema.maybe(schema.boolean()),
-  isSystemAction: schema.boolean(),
+  isSystemAction: schema.maybe(schema.boolean()),
   id: schema.maybe(schema.string()),
   isDeprecated: schema.maybe(schema.boolean()),
 });

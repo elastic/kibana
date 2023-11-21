@@ -22,7 +22,9 @@ export type PackagePolicyFormState =
   | 'LOADING'
   | 'SUBMITTED'
   | 'SUBMITTED_NO_AGENTS'
-  | 'SUBMITTED_CLOUD_FORMATION';
+  | 'SUBMITTED_AZURE_ARM_TEMPLATE'
+  | 'SUBMITTED_CLOUD_FORMATION'
+  | 'SUBMITTED_GOOGLE_CLOUD_SHELL';
 
 export interface AddToPolicyParams {
   pkgkey: string;

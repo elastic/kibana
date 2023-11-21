@@ -7,13 +7,12 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { ALERT_REASON } from '@kbn/rule-data-utils';
+import { ALERT_REASON, ApmRuleType } from '@kbn/rule-data-utils';
 import type { ObservabilityRuleTypeRegistry } from '@kbn/observability-plugin/public';
 import {
   getAlertUrlErrorCount,
   getAlertUrlTransaction,
 } from '../../../../common/utils/formatters';
-import { ApmRuleType } from '../../../../common/rules/apm_rule_types';
 import {
   anomalyMessage,
   errorCountMessage,
@@ -55,6 +54,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: errorCountMessage,
+    priority: 80,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -92,6 +92,7 @@ export function registerApmRuleTypes(
     ),
     requiresAppContext: false,
     defaultActionMessage: transactionDurationMessage,
+    priority: 60,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -124,6 +125,7 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: transactionErrorRateMessage,
+    priority: 70,
   });
 
   observabilityRuleTypeRegistry.register({
@@ -153,5 +155,6 @@ export function registerApmRuleTypes(
     }),
     requiresAppContext: false,
     defaultActionMessage: anomalyMessage,
+    priority: 90,
   });
 }

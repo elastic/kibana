@@ -1,11 +1,21 @@
 {
   "ingest.processor_grok": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_ingest/processor/grok"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/grok-processor.html#grok-processor-rest-get"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/grok-processor.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
   }
 }

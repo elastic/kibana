@@ -11,7 +11,11 @@ import { createSelector } from 'reselect';
 import { matchPath } from 'react-router-dom';
 import { decode } from '@kbn/rison';
 import type { Query } from '@kbn/es-query';
-import type { EndpointPendingActions, Immutable } from '../../../../../common/endpoint/types';
+import type {
+  EndpointPendingActions,
+  EndpointSortableField,
+  Immutable,
+} from '../../../../../common/endpoint/types';
 import type { EndpointIndexUIQueryParams, EndpointState } from '../types';
 import { extractListPaginationParams } from '../../../common/routing';
 import {
@@ -34,6 +38,12 @@ export const listData = (state: Immutable<EndpointState>) => state.hosts;
 export const pageIndex = (state: Immutable<EndpointState>): number => state.pageIndex;
 
 export const pageSize = (state: Immutable<EndpointState>): number => state.pageSize;
+
+export const sortField = (state: Immutable<EndpointState>): EndpointSortableField =>
+  state.sortField;
+
+export const sortDirection = (state: Immutable<EndpointState>): 'asc' | 'desc' =>
+  state.sortDirection;
 
 export const totalHits = (state: Immutable<EndpointState>): number => state.total;
 
@@ -94,6 +104,8 @@ export const uiQueryParams: (
         'selected_endpoint',
         'show',
         'admin_query',
+        'sort_field',
+        'sort_direction',
       ];
 
       const allowedShowValues: Array<EndpointIndexUIQueryParams['show']> = [
@@ -117,6 +129,12 @@ export const uiQueryParams: (
             if (allowedShowValues.includes(value as EndpointIndexUIQueryParams['show'])) {
               data[key] = value as EndpointIndexUIQueryParams['show'];
             }
+          } else if (key === 'sort_direction') {
+            if (['asc', 'desc'].includes(value)) {
+              data[key] = value as EndpointIndexUIQueryParams['sort_direction'];
+            }
+          } else if (key === 'sort_field') {
+            data[key] = value as EndpointSortableField;
           } else {
             data[key] = value;
           }

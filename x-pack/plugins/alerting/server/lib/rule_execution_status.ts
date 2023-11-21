@@ -6,6 +6,7 @@
  */
 
 import { Logger } from '@kbn/core/server';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   RuleExecutionStatus,
   RuleExecutionStatusValues,
@@ -16,7 +17,7 @@ import {
 } from '../types';
 import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
-import { ActionsCompletion, RuleExecutionStatuses } from '../../common';
+import { RuleExecutionStatuses } from '../../common';
 import { translations } from '../constants/translations';
 import { RuleTaskStateAndMetrics } from '../task_runner/types';
 import { RuleRunMetrics } from './rule_run_metrics_store';
@@ -46,10 +47,17 @@ export function executionStatusFromState(
     };
   } else if (stateWithMetrics.metrics.triggeredActionsStatus === ActionsCompletion.PARTIAL) {
     status = RuleExecutionStatusValues[5];
-    warning = {
-      reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
-      message: translations.taskRunner.warning.maxExecutableActions,
-    };
+    if (stateWithMetrics.metrics.hasReachedQueuedActionsLimit) {
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.MAX_QUEUED_ACTIONS,
+        message: translations.taskRunner.warning.maxQueuedActions,
+      };
+    } else {
+      warning = {
+        reason: RuleExecutionStatusWarningReasons.MAX_EXECUTABLE_ACTIONS,
+        message: translations.taskRunner.warning.maxExecutableActions,
+      };
+    }
   }
 
   return {

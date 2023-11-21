@@ -553,7 +553,7 @@ describe('saved query route handler context', () => {
   describe('delete', function () {
     it('should delete the saved query for the given ID', async () => {
       await context.delete('foo');
-      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo');
+      expect(mockSavedObjectsClient.delete).toHaveBeenCalledWith('query', 'foo', { force: true });
     });
   });
 

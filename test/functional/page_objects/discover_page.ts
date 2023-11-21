@@ -168,10 +168,30 @@ export class DiscoverPageObject extends FtrService {
     await this.testSubjects.click('discoverOpenButton');
   }
 
-  public async clickResetSavedSearchButton() {
-    await this.testSubjects.moveMouseTo('resetSavedSearch');
-    await this.testSubjects.click('resetSavedSearch');
+  public async revertUnsavedChanges() {
+    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
+    await this.testSubjects.click('unsavedChangesBadge');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+    });
+    await this.testSubjects.click('revertUnsavedChangesButton');
     await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
+  }
+
+  public async saveUnsavedChanges() {
+    await this.testSubjects.moveMouseTo('unsavedChangesBadge');
+    await this.testSubjects.click('unsavedChangesBadge');
+    await this.retry.waitFor('popover is open', async () => {
+      return Boolean(await this.testSubjects.find('unsavedChangesBadgeMenuPanel'));
+    });
+    await this.testSubjects.click('saveUnsavedChangesButton');
+    await this.retry.waitFor('modal is open', async () => {
+      return Boolean(await this.testSubjects.find('confirmSaveSavedObjectButton'));
+    });
+    await this.testSubjects.click('confirmSaveSavedObjectButton');
+    await this.header.waitUntilLoadingHasFinished();
+    await this.waitUntilSearchingHasFinished();
   }
 
   public async closeLoadSavedSearchPanel() {
@@ -197,6 +217,10 @@ export class DiscoverPageObject extends FtrService {
 
   public async chooseBreakdownField(field: string) {
     await this.comboBox.set('unifiedHistogramBreakdownFieldSelector', field);
+  }
+
+  public async clearBreakdownField() {
+    await this.comboBox.clear('unifiedHistogramBreakdownFieldSelector');
   }
 
   public async chooseLensChart(chart: string) {
@@ -363,6 +387,11 @@ export class DiscoverPageObject extends FtrService {
     return await this.find.byClassName('monaco-editor');
   }
 
+  public async findFieldByNameInDocViewer(name: string) {
+    const fieldSearch = await this.testSubjects.find('unifiedDocViewerFieldsSearchInput');
+    await fieldSearch.type(name);
+  }
+
   public async getMarks() {
     const table = await this.docTable.getTable();
     const marks = await table.findAllByTagName('mark');
@@ -370,27 +399,28 @@ export class DiscoverPageObject extends FtrService {
   }
 
   public async toggleSidebarCollapse() {
-    return await this.testSubjects.click('collapseSideBarButton');
+    return await this.testSubjects.click('unifiedFieldListSidebar__toggle');
   }
 
   public async closeSidebar() {
     await this.retry.tryForTime(2 * 1000, async () => {
-      await this.toggleSidebarCollapse();
-      await this.testSubjects.missingOrFail('discover-sidebar');
+      await this.testSubjects.click('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.missingOrFail('unifiedFieldListSidebar__toggle-collapse');
+      await this.testSubjects.missingOrFail('fieldList');
     });
   }
 
   public async editField(field: string) {
     await this.retry.try(async () => {
-      await this.unifiedFieldList.clickFieldListItem(field);
-      await this.testSubjects.click(`discoverFieldListPanelEdit-${field}`);
+      await this.unifiedFieldList.pressEnterFieldListItemToggle(field);
+      await this.testSubjects.pressEnter(`discoverFieldListPanelEdit-${field}`);
       await this.find.byClassName('indexPatternFieldEditor__form');
     });
   }
 
   public async removeField(field: string) {
-    await this.unifiedFieldList.clickFieldListItem(field);
-    await this.testSubjects.click(`discoverFieldListPanelDelete-${field}`);
+    await this.unifiedFieldList.pressEnterFieldListItemToggle(field);
+    await this.testSubjects.pressEnter(`discoverFieldListPanelDelete-${field}`);
     await this.retry.waitFor('modal to open', async () => {
       return await this.testSubjects.exists('runtimeFieldDeleteConfirmModal');
     });
@@ -447,12 +477,8 @@ export class DiscoverPageObject extends FtrService {
     return await this.testSubjects.exists('discoverNoResultsTimefilter');
   }
 
-  public noResultsErrorVisible() {
-    return this.testSubjects.exists('discoverNoResultsError');
-  }
-
-  public mainErrorVisible() {
-    return this.testSubjects.exists('discoverMainError');
+  public showsErrorCallout() {
+    return this.testSubjects.existOrFail('discoverErrorCalloutTitle');
   }
 
   public getDiscoverErrorMessage() {
@@ -500,11 +526,9 @@ export class DiscoverPageObject extends FtrService {
     return items;
   }
 
-  public async selectTextBaseLang(lang: 'SQL') {
+  public async selectTextBaseLang() {
     await this.testSubjects.click('discover-dataView-switch-link');
-    await this.find.clickByCssSelector(
-      `[data-test-subj="text-based-languages-switcher"] [title="${lang}"]`
-    );
+    await this.testSubjects.click('select-text-based-language-panel');
     await this.header.waitUntilLoadingHasFinished();
   }
 

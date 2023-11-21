@@ -13,7 +13,6 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../../../common/constants
 import type {
   NetworkTopCountriesStrategyResponse,
   NetworkQueries,
-  NetworkTopCountriesRequestOptions,
   NetworkTopCountriesEdges,
 } from '../../../../../../common/search_strategy/security_solution/network';
 
@@ -24,14 +23,14 @@ import { getTopCountriesEdges } from './helpers';
 import { buildTopCountriesQuery } from './query.top_countries_network.dsl';
 
 export const networkTopCountries: SecuritySolutionFactory<NetworkQueries.topCountries> = {
-  buildDsl: (options: NetworkTopCountriesRequestOptions) => {
+  buildDsl: (options) => {
     if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     return buildTopCountriesQuery(options);
   },
   parse: async (
-    options: NetworkTopCountriesRequestOptions,
+    options,
     response: IEsSearchResponse<unknown>
   ): Promise<NetworkTopCountriesStrategyResponse> => {
     const { activePage, cursorStart, fakePossibleCount, querySize } = options.pagination;

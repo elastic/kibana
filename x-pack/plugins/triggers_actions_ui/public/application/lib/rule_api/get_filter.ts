@@ -10,10 +10,12 @@ export const getFilter = ({
   message,
   outcomeFilter,
   runId,
+  ruleTypeIds,
 }: {
   message?: string;
   outcomeFilter?: string[];
   runId?: string;
+  ruleTypeIds?: string[];
 }) => {
   const filter: string[] = [];
 
@@ -31,6 +33,10 @@ export const getFilter = ({
 
   if (runId) {
     filter.push(`kibana.alert.rule.execution.uuid: ${runId}`);
+  }
+
+  if (ruleTypeIds?.length) {
+    filter.push(`kibana.alert.rule.rule_type_id:(${ruleTypeIds.join(' or ')})`);
   }
 
   return filter;

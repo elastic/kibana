@@ -12,7 +12,8 @@ import { Controller, useFormContext } from 'react-hook-form';
 import { CreateSLOForm } from '../types';
 
 export function SloEditFormObjectiveSectionTimeslices() {
-  const { control, getFieldState } = useFormContext<CreateSLOForm>();
+  const { control, getFieldState, watch } = useFormContext<CreateSLOForm>();
+  const indicator = watch('indicator.type');
 
   return (
     <>
@@ -43,17 +44,18 @@ export function SloEditFormObjectiveSectionTimeslices() {
               min: 0.001,
               max: 99.999,
             }}
-            render={({ field: { ref, ...field }, fieldState }) => (
+            render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
                 required
+                disabled={indicator === 'sli.metric.timeslice'}
                 isInvalid={fieldState.invalid}
-                value={String(field.value)}
+                value={field.value}
                 data-test-subj="sloFormObjectiveTimesliceTargetInput"
                 min={0.001}
                 max={99.999}
                 step={0.001}
-                onChange={(event) => field.onChange(Number(event.target.value))}
+                onChange={(event) => onChange(event.target.value)}
               />
             )}
           />
@@ -82,17 +84,17 @@ export function SloEditFormObjectiveSectionTimeslices() {
             defaultValue="1"
             control={control}
             rules={{ required: true, min: 1, max: 120 }}
-            render={({ field: { ref, ...field }, fieldState }) => (
+            render={({ field: { ref, onChange, ...field }, fieldState }) => (
               <EuiFieldNumber
                 {...field}
                 isInvalid={fieldState.invalid}
                 required
                 data-test-subj="sloFormObjectiveTimesliceWindowInput"
-                value={String(field.value)}
+                value={field.value}
                 min={1}
                 max={120}
                 step={1}
-                onChange={(event) => field.onChange(String(Number(event.target.value)))}
+                onChange={(event) => onChange(String(parseInt(event.target.value, 10)))}
               />
             )}
           />

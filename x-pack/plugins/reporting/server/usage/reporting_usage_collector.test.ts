@@ -5,22 +5,21 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
 import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { loggerMock } from '@kbn/logging-mocks';
+import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 import {
   Collector,
   createCollectorFetchContextMock,
   usageCollectionPluginMock,
 } from '@kbn/usage-collection-plugin/server/mocks';
-import { getExportTypesRegistry } from '../lib/export_types_registry';
-import { createMockConfigSchema, createMockReportingCore } from '../test_helpers';
 import { FeaturesAvailability } from '.';
+import { ExportTypesRegistry } from '../lib';
+import { createMockReportingCore } from '../test_helpers';
 import {
   getReportingUsageCollector,
   registerReportingUsageCollector,
 } from './reporting_usage_collector';
-
-const exportTypesRegistry = getExportTypesRegistry();
 
 const getLicenseMock =
   (licenseType = 'gold') =>
@@ -40,11 +39,15 @@ const getMockFetchClients = (resp: any) => {
 };
 
 const usageCollectionSetup = usageCollectionPluginMock.createSetupContract();
+let exportTypesRegistry: ExportTypesRegistry;
 
 describe('license checks', () => {
   describe('with a basic license', () => {
     let usageStats: any;
     beforeAll(async () => {
+      const mockReporting = await createMockReportingCore(createMockConfigSchema());
+      exportTypesRegistry = mockReporting.getExportTypesRegistry();
+
       const collector = getReportingUsageCollector(
         usageCollectionSetup,
         getLicenseMock('basic'),

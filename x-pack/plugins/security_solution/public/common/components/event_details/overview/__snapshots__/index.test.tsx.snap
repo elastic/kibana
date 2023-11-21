@@ -91,6 +91,7 @@ exports[`Event Details Overview Cards renders rows and spacers correctly 1`] = `
                   <button
                     aria-label="Click to change alert status"
                     class="euiBadge c3 emotion-euiBadge-primary-clickable"
+                    data-test-subj="rule-status-badge"
                   >
                     <span
                       class="euiBadge__content emotion-euiBadge__content"

@@ -7,43 +7,36 @@
 
 import Url from 'url';
 
-import { startRuntimeServices } from '@kbn/security-solution-plugin/scripts/endpoint/endpoint_agent_runner/runtime';
+import { verifyDockerInstalled, maybeCreateDockerNetwork } from '@kbn/es';
+import { createToolingLogger } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/utils';
+import { prefixedOutputLogger } from '@kbn/security-solution-plugin/scripts/endpoint/common/utils';
 import { FtrProviderContext } from './ftr_provider_context';
 
 import { AgentManager } from './agent';
 import { FleetManager } from './fleet_server';
-import { getLatestAvailableAgentVersion } from './utils';
+import { createAgentPolicy } from './utils';
 
 async function setupFleetAgent({ getService }: FtrProviderContext) {
-  const log = getService('log');
+  // Un-comment line below to set tooling log levels to verbose. Useful when debugging
+  // createToolingLogger.defaultLogLevel = 'verbose';
+
+  // const log = getService('log');
   const config = getService('config');
   const kbnClient = getService('kibanaServer');
 
-  const elasticUrl = Url.format(config.get('servers.elasticsearch'));
-  const kibanaUrl = Url.format(config.get('servers.kibana'));
-  const fleetServerUrl = Url.format({
-    protocol: config.get('servers.kibana.protocol'),
-    hostname: config.get('servers.kibana.hostname'),
-    port: config.get('servers.fleetserver.port'),
-  });
-  const username = config.get('servers.elasticsearch.username');
-  const password = config.get('servers.elasticsearch.password');
+  const log = prefixedOutputLogger('cy.OSQuery', createToolingLogger());
 
-  await startRuntimeServices({
-    log,
-    elasticUrl,
-    kibanaUrl,
-    fleetServerUrl,
-    username,
-    password,
-    version: await getLatestAvailableAgentVersion(kbnClient),
-  });
+  await verifyDockerInstalled(log);
+  await maybeCreateDockerNetwork(log);
+  await new FleetManager(kbnClient, log, config.get('servers.fleetserver.port')).setup();
 
-  const fleetManager = new FleetManager(kbnClient, log);
-  const agentManager = new AgentManager(kbnClient, config.get('servers.fleetserver.port'), log);
+  const policyEnrollmentKey = await createAgentPolicy(kbnClient, log, `Default policy`);
+  const policyEnrollmentKeyTwo = await createAgentPolicy(kbnClient, log, `Osquery policy`);
 
-  await fleetManager.setup();
-  await agentManager.setup();
+  const port = config.get('servers.fleetserver.port');
+
+  await new AgentManager(policyEnrollmentKey, port, log, kbnClient).setup();
+  await new AgentManager(policyEnrollmentKeyTwo, port, log, kbnClient).setup();
 }
 
 export async function startOsqueryCypress(context: FtrProviderContext) {

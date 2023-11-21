@@ -10,8 +10,8 @@ import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import * as i18n from './translations';
 
 import type { ConnectorFieldsPreviewProps } from '../types';
-import type { ServiceNowITSMFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
+import type { ServiceNowITSMFieldsType } from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import { useKibana } from '../../../common/lib/kibana';
 import { ConnectorCard } from '../card';
 import { useGetChoices } from './use_get_choices';

@@ -79,4 +79,4 @@ export type NoDataCardComponentProps = Partial<
 /**
  * Props for the `NoDataCard` sevice-connected component.
  */
-export type NoDataCardProps = Omit<NoDataCardComponentProps, 'canAccessFleet'>;
+export type NoDataCardProps = NoDataCardComponentProps;

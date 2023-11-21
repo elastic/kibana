@@ -41,7 +41,9 @@ export const ClassificationDecisionPath: FC<ClassificationDecisionPathProps> = (
   baseline,
 }) => {
   const [currentClass, setCurrentClass] = useState<string>(
-    getStringBasedClassName(topClasses[0].class_name)
+    Array.isArray(topClasses) && topClasses.length > 0
+      ? getStringBasedClassName(topClasses[0].class_name)
+      : ''
   );
   const selectedClass = topClasses.find(
     (t) => getStringBasedClassName(t.class_name) === getStringBasedClassName(currentClass)

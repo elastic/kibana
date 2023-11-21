@@ -11,7 +11,7 @@ import {
   EuiFlexItem,
   EuiButtonIcon,
   EuiButton,
-  EuiBetaBadge,
+  EuiThemeProvider,
 } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { CoreStart } from '@kbn/core/public';
@@ -28,9 +28,10 @@ import {
   POLICIES_PAGE_PATH,
   SECURITY_APP_ID,
 } from '../../../common/constants';
+import { SessionViewTelemetryKey } from '../../types';
 import { useFetchIOEvents, useIOLines, useXtermPlayer } from './hooks';
 import { TTYPlayerControls } from '../tty_player_controls';
-import { BETA, TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
+import { TOGGLE_TTY_PLAYER, DETAIL_PANEL } from '../session_view/translations';
 
 export interface TTYPlayerDeps {
   index: string;
@@ -42,6 +43,7 @@ export interface TTYPlayerDeps {
   onJumpToEvent(event: ProcessEvent): void;
   autoSeekToEntityId?: string;
   canReadPolicyManagement?: boolean;
+  trackEvent(name: SessionViewTelemetryKey): void;
 }
 
 export const TTYPlayer = ({
@@ -54,6 +56,7 @@ export const TTYPlayer = ({
   onJumpToEvent,
   autoSeekToEntityId,
   canReadPolicyManagement,
+  trackEvent,
 }: TTYPlayerDeps) => {
   const ref = useRef<HTMLDivElement>(null);
   const { ref: scrollRef, height: containerHeight = 1 } = useResizeObserver<HTMLDivElement>({});
@@ -153,7 +156,13 @@ export const TTYPlayer = ({
       seekToLine(0);
     }
     setIsPlaying(!isPlaying);
-  }, [currentLine, isPlaying, lines.length, seekToLine]);
+
+    if (isPlaying) {
+      trackEvent('tty_playback_started');
+    } else {
+      trackEvent('tty_playback_stopped');
+    }
+  }, [currentLine, isPlaying, lines.length, seekToLine, trackEvent]);
 
   useEffect(() => {
     if (isPlaying) {
@@ -165,9 +174,6 @@ export const TTYPlayer = ({
     <div css={styles.container}>
       <EuiPanel hasShadow={false} borderRadius="none" hasBorder={false} css={styles.header}>
         <EuiFlexGroup alignItems="center" gutterSize="s">
-          <EuiFlexItem grow={false}>
-            <EuiBetaBadge label={BETA} size="s" css={styles.betaBadge} />
-          </EuiFlexItem>
           <EuiFlexItem data-test-subj="sessionView:TTYSearch">
             <TTYSearchBar
               lines={lines}
@@ -218,26 +224,28 @@ export const TTYPlayer = ({
         <div ref={ref} data-test-subj="sessionView:TTYPlayer" css={styles.terminal} />
       </div>
 
-      <TTYPlayerControls
-        currentProcessEvent={currentProcessEvent}
-        processStartMarkers={processStartMarkers}
-        isPlaying={isPlaying}
-        currentLine={currentLine}
-        linesLength={lines.length}
-        onSeekLine={onSeekLine}
-        onTogglePlayback={onTogglePlayback}
-        onClose={onClose}
-        onJumpToEvent={onJumpToEvent}
-        textSizer={
-          <TTYTextSizer
-            tty={tty}
-            containerHeight={containerHeight}
-            fontSize={fontSize}
-            onFontSizeChanged={setFontSize}
-            isFullscreen={isFullscreen}
-          />
-        }
-      />
+      <EuiThemeProvider colorMode="dark">
+        <TTYPlayerControls
+          currentProcessEvent={currentProcessEvent}
+          processStartMarkers={processStartMarkers}
+          isPlaying={isPlaying}
+          currentLine={currentLine}
+          linesLength={lines.length}
+          onSeekLine={onSeekLine}
+          onTogglePlayback={onTogglePlayback}
+          onClose={onClose}
+          onJumpToEvent={onJumpToEvent}
+          textSizer={
+            <TTYTextSizer
+              tty={tty}
+              containerHeight={containerHeight}
+              fontSize={fontSize}
+              onFontSizeChanged={setFontSize}
+              isFullscreen={isFullscreen}
+            />
+          }
+        />
+      </EuiThemeProvider>
     </div>
   );
 };

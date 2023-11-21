@@ -20,7 +20,6 @@ import type {
   NamespaceType,
   EntryNested,
   OsTypeArray,
-  ExceptionListType,
   ExceptionListItemSchema,
   UpdateExceptionListItemSchema,
   ExceptionListSchema,
@@ -38,7 +37,6 @@ import type {
   ExceptionsBuilderReturnExceptionItem,
 } from '@kbn/securitysolution-list-utils';
 import { getNewExceptionItem, addIdToEntries } from '@kbn/securitysolution-list-utils';
-import type { DataViewBase } from '@kbn/es-query';
 import { removeIdFromExceptionItemsEntries } from '@kbn/securitysolution-list-hooks';
 
 import type { EcsSecurityExtension as Ecs, CodeSignature } from '@kbn/securitysolution-ecs';
@@ -48,10 +46,6 @@ import * as i18n from './translations';
 import type { AlertData, Flattened } from './types';
 
 import { WithCopyToClipboard } from '../../../common/lib/clipboard/with_copy_to_clipboard';
-import exceptionableLinuxFields from './exceptionable_linux_fields.json';
-import exceptionableWindowsMacFields from './exceptionable_windows_mac_fields.json';
-import exceptionableEndpointFields from './exceptionable_endpoint_fields.json';
-import { EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS } from '../../../../common/endpoint/exceptions/exceptionable_endpoint_event_fields';
 import { ALERT_ORIGINAL_EVENT } from '../../../../common/field_maps/field_names';
 import {
   EVENT_CODE,
@@ -64,36 +58,6 @@ import {
   KIBANA_ALERT_RULE_UUID,
   ENDPOINT_ALERT,
 } from './highlighted_fields_config';
-
-export const filterIndexPatterns = (
-  patterns: DataViewBase,
-  type: ExceptionListType,
-  osTypes?: OsTypeArray
-): DataViewBase => {
-  switch (type) {
-    case 'endpoint':
-      const osFilterForEndpoint: (name: string) => boolean = osTypes?.includes('linux')
-        ? (name: string) =>
-            exceptionableLinuxFields.includes(name) || exceptionableEndpointFields.includes(name)
-        : (name: string) =>
-            exceptionableWindowsMacFields.includes(name) ||
-            exceptionableEndpointFields.includes(name);
-
-      return {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) => osFilterForEndpoint(name)),
-      };
-    case 'endpoint_events':
-      return {
-        ...patterns,
-        fields: patterns.fields.filter(({ name }) =>
-          EXCEPTIONABLE_ENDPOINT_EVENT_FIELDS.includes(name)
-        ),
-      };
-    default:
-      return patterns;
-  }
-};
 
 /**
  * Formats os value array to a displayable string
@@ -910,6 +874,9 @@ export const buildRuleExceptionWithConditions = ({
  Generate exception conditions based on the highlighted fields of the alert that 
  have corresponding values in the alert data.
  For the initial implementation the nested conditions are not considered
+ Converting a singular value to a string or an array of strings
+ is necessary because the "Match" or "Match any" operators
+ are designed to operate with string value(s).
  */
 export const buildExceptionEntriesFromAlertFields = ({
   highlightedFields,
@@ -920,18 +887,24 @@ export const buildExceptionEntriesFromAlertFields = ({
 }): EntriesArray => {
   return Object.values(highlightedFields).reduce((acc: EntriesArray, field) => {
     const fieldKey = field.id;
-    const fieldValue = get(alertData, fieldKey) || get(alertData, getKibanaAlertIdField(fieldKey));
+    const fieldValue = get(alertData, fieldKey) ?? get(alertData, getKibanaAlertIdField(fieldKey));
 
-    if (fieldValue) {
+    if (fieldValue !== null && fieldValue !== undefined) {
+      const listOperatorType = Array.isArray(fieldValue)
+        ? ListOperatorTypeEnum.MATCH_ANY
+        : ListOperatorTypeEnum.MATCH;
+
+      const fieldValueAsString = Array.isArray(fieldValue)
+        ? fieldValue.map(String)
+        : fieldValue.toString();
       acc.push({
         field: fieldKey,
         operator: ListOperatorEnum.INCLUDED,
-        type: Array.isArray(fieldValue)
-          ? ListOperatorTypeEnum.MATCH_ANY
-          : ListOperatorTypeEnum.MATCH,
-        value: fieldValue,
+        type: listOperatorType,
+        value: fieldValueAsString,
       });
     }
+
     return acc;
   }, []);
 };
@@ -944,14 +917,19 @@ export const buildExceptionEntriesFromAlertFields = ({
 export const getPrepopulatedRuleExceptionWithHighlightFields = ({
   alertData,
   exceptionItemName,
+  ruleCustomHighlightedFields,
 }: {
   alertData: AlertData;
   exceptionItemName: string;
+  ruleCustomHighlightedFields: string[];
 }): ExceptionsBuilderExceptionItem | null => {
-  const highlightedFields = getAlertHighlightedFields(alertData);
+  const highlightedFields = getAlertHighlightedFields(alertData, ruleCustomHighlightedFields);
   if (!highlightedFields.length) return null;
 
-  const exceptionEntries = buildExceptionEntriesFromAlertFields({ highlightedFields, alertData });
+  const exceptionEntries = buildExceptionEntriesFromAlertFields({
+    highlightedFields,
+    alertData,
+  });
   if (!exceptionEntries.length) return null;
 
   return buildRuleExceptionWithConditions({
@@ -987,11 +965,13 @@ export const filterHighlightedFields = (
  * * Alert field ids filters
  * @param alertData The Alert data object
  */
-export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryField[] => {
+export const getAlertHighlightedFields = (
+  alertData: AlertData,
+  ruleCustomHighlightedFields: string[]
+): EventSummaryField[] => {
   const eventCategory = get(alertData, EVENT_CATEGORY);
   const eventCode = get(alertData, EVENT_CODE);
   const eventRuleType = get(alertData, KIBANA_ALERT_RULE_TYPE);
-
   const eventCategories = {
     primaryEventCategory: Array.isArray(eventCategory) ? eventCategory[0] : eventCategory,
     allEventCategories: [eventCategory],
@@ -1001,6 +981,7 @@ export const getAlertHighlightedFields = (alertData: AlertData): EventSummaryFie
     eventCategories,
     eventCode,
     eventRuleType,
+    highlightedFieldsOverride: ruleCustomHighlightedFields,
   });
   return filterHighlightedFields(fieldsToDisplay, highlightedFieldsPrefixToExclude, alertData);
 };

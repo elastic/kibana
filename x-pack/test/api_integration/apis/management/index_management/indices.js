@@ -9,6 +9,7 @@ import expect from '@kbn/expect';
 
 import { initElasticsearchHelpers } from './lib';
 import { registerHelpers } from './indices.helpers';
+import { sortedExpectedIndexKeys } from './constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -186,31 +187,9 @@ export default function ({ getService }) {
         // Find the "test_index" created to verify expected keys
         const indexCreated = indices.find((index) => index.name === 'test_index');
 
-        const expectedKeys = [
-          'health',
-          'hidden',
-          'status',
-          'name',
-          'uuid',
-          'primary',
-          'replica',
-          'documents',
-          'documents_deleted',
-          'size',
-          'primary_size',
-          'isFrozen',
-          'aliases',
-          // Cloud disables CCR, so wouldn't expect follower indices.
-          'isFollowerIndex', // data enricher
-          'ilm', // data enricher
-          'isRollupIndex', // data enricher
-        ];
-        // We need to sort the keys before comparing then, because race conditions
-        // can cause enrichers to register in non-deterministic order.
-        const sortedExpectedKeys = expectedKeys.sort();
         const sortedReceivedKeys = Object.keys(indexCreated).sort();
 
-        expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
+        expect(sortedReceivedKeys).to.eql(sortedExpectedIndexKeys);
       });
     });
 
@@ -222,32 +201,10 @@ export default function ({ getService }) {
           // create an index to assert against, otherwise the test is flaky
           await createIndex('reload-test-index');
           const { body } = await reload().expect(200);
-          const expectedKeys = [
-            'health',
-            'hidden',
-            'status',
-            'name',
-            'uuid',
-            'primary',
-            'replica',
-            'documents',
-            'documents_deleted',
-            'size',
-            'primary_size',
-            'isFrozen',
-            'aliases',
-            // Cloud disables CCR, so wouldn't expect follower indices.
-            'isFollowerIndex', // data enricher
-            'ilm', // data enricher
-            'isRollupIndex', // data enricher
-          ];
-          // We need to sort the keys before comparing then, because race conditions
-          // can cause enrichers to register in non-deterministic order.
-          const sortedExpectedKeys = expectedKeys.sort();
 
           const indexCreated = body.find((index) => index.name === 'reload-test-index');
           const sortedReceivedKeys = Object.keys(indexCreated).sort();
-          expect(sortedReceivedKeys).to.eql(sortedExpectedKeys);
+          expect(sortedReceivedKeys).to.eql(sortedExpectedIndexKeys);
           expect(body.length > 1).to.be(true); // to contrast it with the next test
         });
       });

@@ -29,6 +29,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
       context: [],
       params: [],
     },
+    category: 'kibana',
     producer: 'alertsFixture',
     minimum_license_required: 'basic',
     is_exportable: true,
@@ -38,7 +39,7 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
     },
     enabled_in_license: true,
     has_fields_for_a_a_d: false,
-    has_get_summarized_alerts: false,
+    has_alerts_mappings: false,
     rule_task_timeout: '5m',
   };
 
@@ -60,12 +61,13 @@ export default function listRuleTypes({ getService }: FtrProviderContext) {
       context: [],
       params: [],
     },
+    category: 'kibana',
     producer: 'alertsRestrictedFixture',
     minimum_license_required: 'basic',
     is_exportable: true,
     enabled_in_license: true,
     has_fields_for_a_a_d: false,
-    has_get_summarized_alerts: false,
+    has_alerts_mappings: false,
     rule_task_timeout: '5m',
   };
 

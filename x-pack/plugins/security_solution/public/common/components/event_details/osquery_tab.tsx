@@ -20,7 +20,7 @@ import { useIsExperimentalFeatureEnabled } from '../../hooks/use_experimental_fe
 import { useKibana } from '../../lib/kibana';
 import { EventsViewType } from './event_details';
 import * as i18n from './translations';
-import { RESPONSE_ACTION_TYPES } from '../../../../common/detection_engine/rule_response_actions/schemas/response_actions';
+import { ResponseActionTypesEnum } from '../../../../common/api/detection_engine/model/rule_response_actions';
 
 const TabContentWrapper = styled.div`
   height: 100%;
@@ -61,7 +61,7 @@ export const useOsqueryTab = ({
   const { OsqueryResults, fetchAllLiveQueries } = osquery;
 
   const { data: actionsData } = fetchAllLiveQueries({
-    filterQuery: { term: { alert_ids: alertId } },
+    kuery: `alert_ids: ( ${alertId} )`,
     alertId,
     skip: shouldEarlyReturn,
   });
@@ -71,7 +71,7 @@ export const useOsqueryTab = ({
   }
 
   const osqueryResponseActions = responseActions.filter(
-    (responseAction) => responseAction.action_type_id === RESPONSE_ACTION_TYPES.OSQUERY
+    (responseAction) => responseAction.action_type_id === ResponseActionTypesEnum['.osquery']
   );
 
   if (!osqueryResponseActions?.length) {

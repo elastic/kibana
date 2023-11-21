@@ -25,7 +25,6 @@ import {
   useLensSelector,
   useLensDispatch,
   LensAppState,
-  DispatchSetState,
   switchAndCleanDatasource,
 } from '../state_management';
 import {
@@ -314,7 +313,7 @@ export const LensTopNavMenu = ({
   } = useLensSelector((state) => state.lens);
 
   const dispatch = useLensDispatch();
-  const dispatchSetState: DispatchSetState = React.useCallback(
+  const dispatchSetState = React.useCallback(
     (state: Partial<LensAppState>) => dispatch(setState(state)),
     [dispatch]
   );
@@ -1055,7 +1054,11 @@ export const LensTopNavMenu = ({
     <AggregateQueryTopNavMenu
       setMenuMountPoint={setHeaderActionMenu}
       config={topNavConfig}
-      showSaveQuery={Boolean(application.capabilities.visualize.saveQuery)}
+      saveQueryMenuVisibility={
+        application.capabilities.visualize.saveQuery
+          ? 'allowed_by_app_privilege'
+          : 'globally_managed'
+      }
       savedQuery={savedQuery}
       onQuerySubmit={onQuerySubmitWrapped}
       onSaved={onSavedWrapped}

@@ -10,6 +10,12 @@ Remove multiple {kib} saved objects.
 
 WARNING: Once you delete a saved object, _it cannot be recovered_.
 
+[NOTE]
+====
+For the most up-to-date API details, refer to the
+{kib-repo}/tree/{branch}/packages/core/saved-objects/docs/openapi[open API specification].
+====
+
 ==== Request
 
 `POST <kibana host>:<port>/api/saved_objects/_bulk_delete`

@@ -5,41 +5,44 @@
  * 2.0.
  */
 
+import { Component, Fragment, default as React } from 'react';
+import { Subscription } from 'rxjs';
+
 import {
   EuiBasicTable,
+  EuiBasicTableColumn,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
+  EuiLink,
   EuiLoadingSpinner,
   EuiPageHeader,
   EuiSpacer,
-  EuiBasicTableColumn,
-  EuiIconTip,
-  EuiLink,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { Component, default as React, Fragment } from 'react';
-import { Subscription } from 'rxjs';
 import { ILicense } from '@kbn/licensing-plugin/public';
+import { durationToNumber } from '@kbn/reporting-common';
+
+import { ListingProps as Props } from '.';
 import { REPORT_TABLE_ID, REPORT_TABLE_ROW_ID } from '../../common/constants';
 import { prettyPrintJobType } from '../../common/job_utils';
 import { Poller } from '../../common/poller';
-import { durationToNumber } from '../../common/schema_utils';
 import { useIlmPolicyStatus } from '../lib/ilm_policy_status_context';
 import { Job } from '../lib/job';
 import { checkLicense } from '../lib/license_check';
 import { useInternalApiClient } from '../lib/reporting_api_client';
 import { useKibana } from '../shared_imports';
-import { ListingProps as Props } from '.';
 import {
   IlmPolicyLink,
   MigrateIlmPolicyCallOut,
   ReportDeleteButton,
   ReportDiagnostic,
-  ReportStatusIndicator,
   ReportInfoFlyout,
+  ReportStatusIndicator,
 } from './components';
 import { guessAppIconTypeFromObjectType } from './utils';
+
 import './report_listing.scss';
 
 type TableColumn = EuiBasicTableColumn<Job>;
@@ -81,7 +84,15 @@ class ReportListingUi extends Component<Props, State> {
   }
 
   public render() {
-    const { ilmPolicyContextValue, urlService, navigateToUrl, capabilities } = this.props;
+    const {
+      apiClient,
+      toasts,
+      ilmPolicyContextValue,
+      urlService,
+      navigateToUrl,
+      capabilities,
+      config,
+    } = this.props;
     const ilmLocator = urlService.locators.get('ILM_LOCATOR_ID');
     const hasIlmPolicy = ilmPolicyContextValue.status !== 'policy-not-found';
     const showIlmPolicyLink = Boolean(ilmLocator && hasIlmPolicy);
@@ -101,7 +112,7 @@ class ReportListingUi extends Component<Props, State> {
           }
         />
 
-        <MigrateIlmPolicyCallOut toasts={this.props.toasts} />
+        {config.statefulSettings.enabled ? <MigrateIlmPolicyCallOut toasts={toasts} /> : null}
 
         <EuiSpacer size={'l'} />
         <div>{this.renderTable()}</div>
@@ -120,7 +131,7 @@ class ReportListingUi extends Component<Props, State> {
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
-            <ReportDiagnostic apiClient={this.props.apiClient} />
+            <ReportDiagnostic clientConfig={config} apiClient={apiClient} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>
@@ -138,8 +149,8 @@ class ReportListingUi extends Component<Props, State> {
 
   public componentDidMount() {
     this.mounted = true;
-    const { pollConfig, license$ } = this.props;
-    const pollFrequencyInMillis = durationToNumber(pollConfig.jobsRefresh.interval);
+    const { config, license$ } = this.props;
+    const pollFrequencyInMillis = durationToNumber(config.poll.jobsRefresh.interval);
     this.poller = new Poller({
       functionToPoll: () => {
         return this.fetchJobs();
@@ -147,7 +158,7 @@ class ReportListingUi extends Component<Props, State> {
       pollFrequencyInMillis,
       trailing: false,
       continuePollingOnError: true,
-      pollFrequencyErrorMultiplier: pollConfig.jobsRefresh.intervalErrorMultiplier,
+      pollFrequencyErrorMultiplier: config.poll.jobsRefresh.intervalErrorMultiplier,
     });
     this.poller.start();
     this.licenseSubscription = license$.subscribe(this.licenseHandler);
@@ -318,7 +329,7 @@ class ReportListingUi extends Component<Props, State> {
           return (
             <div data-test-subj="reportingListItemObjectTitle">
               <EuiLink
-                data-test-subj={`viewReportingLink${job.id}`}
+                data-test-subj={`viewReportingLink-${job.id}`}
                 onClick={() => this.setState({ selectedJob: job })}
               >
                 {objectTitle ||
@@ -499,7 +510,10 @@ class ReportListingUi extends Component<Props, State> {
 }
 
 export const ReportListing = (
-  props: Omit<Props, 'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities'>
+  props: Omit<
+    Props,
+    'ilmPolicyContextValue' | 'intl' | 'apiClient' | 'capabilities' | 'configAllowsImages'
+  >
 ) => {
   const ilmPolicyStatusValue = useIlmPolicyStatus();
   const { apiClient } = useInternalApiClient();

@@ -204,7 +204,9 @@ function compileParametrizedValue(value, compilingContext, template) {
   value = value.substr(1, value.length - 2).toLowerCase();
   let component = compilingContext.parametrizedComponentFactories.getComponent(value, true);
   if (!component) {
-    throw new Error("no factory found for '" + value + "'");
+    console.warn("[Console] no factory found for '" + value + "'");
+    // using upper case as an indication that this value is a parameter
+    return new ConstantComponent(value.toUpperCase());
   }
   component = component(value, null, template);
   if (!_.isUndefined(template)) {
@@ -264,7 +266,7 @@ function compileCondition(description, compiledObject) {
       return new RegExp(description.lines_regex, 'm').test(lines);
     }, compiledObject);
   } else {
-    throw 'unknown condition type - got: ' + JSON.stringify(description);
+    throw new Error(`unknown condition type - got: ${JSON.stringify(description)}`);
   }
 }
 
@@ -279,7 +281,7 @@ export function globalsOnlyAutocompleteComponents() {
  * @param endpointComponentResolver a function (endpoint,context,editor) which should resolve an endpoint
  *        to it's list of compiled components.
  * @param parametrizedComponentFactories a dict of the following structure
- * that will be used as a fall back for pattern keys (i.e.: {type} ,resolved without the $s)
+ * that will be used as a fall back for pattern keys (i.e.: {index}, resolved without the {})
  * {
  *   TYPE: function (part, parent, endpoint) {
  *      return new SharedComponent(part, parent)

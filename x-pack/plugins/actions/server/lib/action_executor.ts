@@ -8,11 +8,13 @@
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { Logger, KibanaRequest } from '@kbn/core/server';
 import { cloneDeep } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import { IEventLogger, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
+import { getGenAiTokenTracking, shouldTrackGenAiToken } from './gen_ai_token_tracking';
 import {
   validateParams,
   validateConfig,
@@ -36,6 +38,7 @@ import { ActionExecutionSource } from './action_execution_source';
 import { RelatedSavedObjects } from './related_saved_objects';
 import { createActionEventLogRecordObject } from './create_action_event_log_record_object';
 import { ActionExecutionError, ActionExecutionErrorReason } from './errors/action_execution_error';
+import type { ActionsAuthorization } from '../authorization/actions_authorization';
 
 // 1,000,000 nanoseconds in 1 millisecond
 const Millis2Nanos = 1000 * 1000;
@@ -49,6 +52,7 @@ export interface ActionExecutorContext {
   actionTypeRegistry: ActionTypeRegistryContract;
   eventLogger: IEventLogger;
   inMemoryConnectors: InMemoryConnector[];
+  getActionsAuthorizationWithRequest: (request: KibanaRequest) => ActionsAuthorization;
 }
 
 export interface TaskInfo {
@@ -108,6 +112,7 @@ export class ActionExecutor {
     if (!this.isInitialized) {
       throw new Error('ActionExecutor not initialized');
     }
+
     return withSpan(
       {
         name: `execute_action`,
@@ -117,12 +122,19 @@ export class ActionExecutor {
         },
       },
       async (span) => {
-        const { spaces, getServices, actionTypeRegistry, eventLogger, security } =
-          this.actionExecutorContext!;
+        const {
+          spaces,
+          getServices,
+          actionTypeRegistry,
+          eventLogger,
+          security,
+          getActionsAuthorizationWithRequest,
+        } = this.actionExecutorContext!;
 
         const services = getServices(request);
         const spaceId = spaces && spaces.getSpaceId(request);
         const namespace = spaceId && spaceId !== 'default' ? { namespace: spaceId } : {};
+        const authorization = getActionsAuthorizationWithRequest(request);
 
         const actionInfo =
           actionInfoFromTaskRunner ||
@@ -223,6 +235,19 @@ export class ActionExecutor {
 
         let rawResult: ActionTypeExecutorRawResult<unknown>;
         try {
+          /**
+           * Ensures correct permissions for execution and
+           * performs authorization checks for system actions.
+           * It will thrown an error in case of failure.
+           */
+          await ensureAuthorizedToExecute({
+            params,
+            actionId,
+            actionTypeId,
+            actionTypeRegistry,
+            authorization,
+          });
+
           rawResult = await actionType.executor({
             actionId,
             services,
@@ -236,7 +261,10 @@ export class ActionExecutor {
             source,
           });
         } catch (err) {
-          if (err.reason === ActionExecutionErrorReason.Validation) {
+          if (
+            err.reason === ActionExecutionErrorReason.Validation ||
+            err.reason === ActionExecutionErrorReason.Authorization
+          ) {
             rawResult = err.result;
           } else {
             rawResult = {
@@ -250,8 +278,6 @@ export class ActionExecutor {
           }
         }
 
-        eventLogger.stopTiming(event);
-
         // allow null-ish return to indicate success
         const result = rawResult || {
           actionId,
@@ -260,69 +286,78 @@ export class ActionExecutor {
 
         event.event = event.event || {};
 
-        // start gen_ai extension
-        // add event.kibana.action.execution.gen_ai to event log when GenerativeAi Connector is executed
-        if (result.status === 'ok' && actionTypeId === '.gen-ai') {
-          const data = result.data as unknown as {
-            usage: { prompt_tokens?: number; completion_tokens?: number; total_tokens?: number };
-          };
-          event.kibana = event.kibana || {};
-          event.kibana.action = event.kibana.action || {};
-          event.kibana = {
-            ...event.kibana,
-            action: {
-              ...event.kibana.action,
-              execution: {
-                ...event.kibana.action.execution,
-                gen_ai: {
-                  usage: {
-                    total_tokens: data.usage?.total_tokens,
-                    prompt_tokens: data.usage?.prompt_tokens,
-                    completion_tokens: data.usage?.completion_tokens,
-                  },
-                },
-              },
-            },
-          };
-        }
-        // end gen_ai extension
-
-        const currentUser = security?.authc.getCurrentUser(request);
-
-        event.user = event.user || {};
-        event.user.name = currentUser?.username;
-        event.user.id = currentUser?.profile_uid;
-
-        if (result.status === 'ok') {
-          span?.setOutcome('success');
-          event.event.outcome = 'success';
-          event.message = `action executed: ${actionLabel}`;
-        } else if (result.status === 'error') {
-          span?.setOutcome('failure');
-          event.event.outcome = 'failure';
-          event.message = `action execution failure: ${actionLabel}`;
-          event.error = event.error || {};
-          event.error.message = actionErrorToMessage(result);
-          if (result.error) {
-            logger.error(result.error, {
-              tags: [actionTypeId, actionId, 'action-run-failed'],
-              error: { stack_trace: result.error.stack },
-            });
-          }
-          logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
-        } else {
-          span?.setOutcome('failure');
-          event.event.outcome = 'failure';
-          event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
-          event.error = event.error || {};
-          event.error.message = 'action execution returned unexpected result';
-          logger.warn(
-            `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
-          );
-        }
-
-        eventLogger.logEvent(event);
         const { error, ...resultWithoutError } = result;
+
+        function completeEventLogging() {
+          eventLogger.stopTiming(event);
+
+          const currentUser = security?.authc.getCurrentUser(request);
+
+          event.user = event.user || {};
+          event.user.name = currentUser?.username;
+          event.user.id = currentUser?.profile_uid;
+
+          if (result.status === 'ok') {
+            span?.setOutcome('success');
+            event.event!.outcome = 'success';
+            event.message = `action executed: ${actionLabel}`;
+          } else if (result.status === 'error') {
+            span?.setOutcome('failure');
+            event.event!.outcome = 'failure';
+            event.message = `action execution failure: ${actionLabel}`;
+            event.error = event.error || {};
+            event.error.message = actionErrorToMessage(result);
+            if (result.error) {
+              logger.error(result.error, {
+                tags: [actionTypeId, actionId, 'action-run-failed'],
+                error: { stack_trace: result.error.stack },
+              });
+            }
+            logger.warn(`action execution failure: ${actionLabel}: ${event.error.message}`);
+          } else {
+            span?.setOutcome('failure');
+            event.event!.outcome = 'failure';
+            event.message = `action execution returned unexpected result: ${actionLabel}: "${result.status}"`;
+            event.error = event.error || {};
+            event.error.message = 'action execution returned unexpected result';
+            logger.warn(
+              `action execution failure: ${actionLabel}: returned unexpected result "${result.status}"`
+            );
+          }
+
+          eventLogger.logEvent(event);
+        }
+
+        // start genai extension
+        if (result.status === 'ok' && shouldTrackGenAiToken(actionTypeId)) {
+          getGenAiTokenTracking({
+            actionTypeId,
+            logger,
+            result,
+            validatedParams,
+          })
+            .then((tokenTracking) => {
+              if (tokenTracking != null) {
+                set(event, 'kibana.action.execution.gen_ai.usage', {
+                  total_tokens: tokenTracking.total_tokens,
+                  prompt_tokens: tokenTracking.prompt_tokens,
+                  completion_tokens: tokenTracking.completion_tokens,
+                });
+              }
+            })
+            .catch((err) => {
+              logger.error('Failed to calculate tokens from streaming response');
+              logger.error(err);
+            })
+            .finally(() => {
+              completeEventLogging();
+            });
+          return resultWithoutError;
+        }
+        // end genai extension
+
+        completeEventLogging();
+
         return resultWithoutError;
       }
     );
@@ -507,3 +542,37 @@ function validateAction(
     });
   }
 }
+
+interface EnsureAuthorizedToExecuteOpts {
+  actionId: string;
+  actionTypeId: string;
+  params: Record<string, unknown>;
+  actionTypeRegistry: ActionTypeRegistryContract;
+  authorization: ActionsAuthorization;
+}
+
+const ensureAuthorizedToExecute = async ({
+  actionId,
+  actionTypeId,
+  params,
+  actionTypeRegistry,
+  authorization,
+}: EnsureAuthorizedToExecuteOpts) => {
+  try {
+    if (actionTypeRegistry.isSystemActionType(actionTypeId)) {
+      const additionalPrivileges = actionTypeRegistry.getSystemActionKibanaPrivileges(
+        actionTypeId,
+        params
+      );
+
+      await authorization.ensureAuthorized({ operation: 'execute', additionalPrivileges });
+    }
+  } catch (error) {
+    throw new ActionExecutionError(error.message, ActionExecutionErrorReason.Authorization, {
+      actionId,
+      status: 'error',
+      message: error.message,
+      retry: false,
+    });
+  }
+};

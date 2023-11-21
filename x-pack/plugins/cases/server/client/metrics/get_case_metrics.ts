@@ -6,12 +6,9 @@
  */
 import { merge } from 'lodash';
 
-import type { SingleCaseMetricsResponse } from '../../../common/api';
-import {
-  SingleCaseMetricsResponseRt,
-  SingleCaseMetricsRequestRt,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
+import type { SingleCaseMetricsResponse } from '../../../common/types/api';
+import { SingleCaseMetricsResponseRt, SingleCaseMetricsRequestRt } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
 import { Operations } from '../../authorization';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';

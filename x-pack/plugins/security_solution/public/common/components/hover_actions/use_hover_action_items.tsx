@@ -7,7 +7,7 @@
 
 import { EuiContextMenuItem } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
-import type { DraggableId } from 'react-beautiful-dnd';
+import type { DraggableId } from '@hello-pangea/dnd';
 
 import { isEmpty } from 'lodash';
 

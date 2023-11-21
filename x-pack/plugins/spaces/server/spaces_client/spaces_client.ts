@@ -7,12 +7,12 @@
 
 import Boom from '@hapi/boom';
 
-import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 import type {
   ISavedObjectsPointInTimeFinder,
   ISavedObjectsRepository,
   SavedObject,
 } from '@kbn/core/server';
+import type { LegacyUrlAliasTarget } from '@kbn/core-saved-objects-common';
 
 import { isReservedSpace } from '../../common';
 import type { spaceV1 as v1 } from '../../common';

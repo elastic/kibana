@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { Fragment, memo, useCallback, useEffect, useRef, useState } from 'react';
 import './index.scss';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { debounce } from 'lodash';
 import { EuiButtonEmpty } from '@elastic/eui';
-import { SAMPLE_SIZE_SETTING } from '../../../common';
 import { DocTableProps, DocTableRenderProps, DocTableWrapper } from './doc_table_wrapper';
 import { SkipBottomButton } from '../../application/main/components/skip_bottom_button';
 import { shouldLoadNextDocPatch } from './utils/should_load_next_doc_patch';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
+import { getAllowedSampleSize } from '../../utils/get_allowed_sample_size';
+import { useAppStateSelector } from '../../application/main/services/discover_app_state_container';
 
 const FOOTER_PADDING = { padding: 0 };
 
@@ -38,8 +39,9 @@ const DocTableInfiniteContent = ({
   onBackToTop,
 }: DocTableInfiniteContentProps) => {
   const { uiSettings } = useDiscoverServices();
-
-  const sampleSize = useMemo(() => uiSettings.get(SAMPLE_SIZE_SETTING, 500), [uiSettings]);
+  const sampleSize = useAppStateSelector((state) =>
+    getAllowedSampleSize(state.sampleSize, uiSettings)
+  );
 
   const onSkipBottomButton = useCallback(() => {
     onSetMaxLimit();

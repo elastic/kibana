@@ -11,7 +11,7 @@ import type { Filter, KueryNode } from '@kbn/es-query';
 import { FilterStateStore, fromKueryExpression } from '@kbn/es-query';
 
 import type { TimelineEventsDetailsItem } from '../../../../common/search_strategy';
-import { TimelineType } from '../../../../common/types/timeline/api';
+import { TimelineType } from '../../../../common/api/timeline';
 import type {
   DataProvider,
   DataProvidersAnd,
@@ -224,7 +224,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
     range: {
       '@timestamp': {
         gte: from,
-        lt: to,
+        lte: to,
         format: 'strict_date_optional_time',
       },
     },
@@ -236,7 +236,7 @@ export const buildTimeRangeFilter = (from: string, to: string): Filter[] => [
       key: '@timestamp',
       params: {
         gte: from,
-        lt: to,
+        lte: to,
         format: 'strict_date_optional_time',
       },
     },

@@ -77,8 +77,7 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { of } = require('rxjs');
   const mockedUiSettingsKeys = {} as typeof UI_SETTINGS;
-  const mockedToMountPoint = jest.fn();
-  const mockedWrapWithTheme = jest.fn();
+  const mockedI18n = jest.fn();
 
   return () => ({
     notifications: {
@@ -121,8 +120,7 @@ const mockContextFactory = (addWarning: jest.Mock<void, []>) => {
       theme$: of(),
     },
     uiSettingsKeys: mockedUiSettingsKeys,
-    toMountPoint: mockedToMountPoint,
-    wrapWithTheme: mockedWrapWithTheme,
+    i18n: mockedI18n,
   });
 };
 

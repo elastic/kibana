@@ -245,6 +245,7 @@ describe('useTimeRange', () => {
         timeRange,
         timeInterval,
         isPlainRecord: true,
+        timeField: '@timestamp',
       })
     );
     expect(result.current.timeRangeDisplay).toMatchInlineSnapshot(`
@@ -266,5 +267,18 @@ describe('useTimeRange', () => {
         2022-11-17T00:00:00.000Z - 2022-11-17T12:00:00.000Z 
       </EuiText>
     `);
+  });
+
+  it('should not render a text for text based languages when not timeField is provided', () => {
+    const { result } = renderHook(() =>
+      useTimeRange({
+        uiSettings,
+        bucketInterval,
+        timeRange,
+        timeInterval,
+        isPlainRecord: true,
+      })
+    );
+    expect(result.current.timeRangeDisplay).toBeNull();
   });
 });

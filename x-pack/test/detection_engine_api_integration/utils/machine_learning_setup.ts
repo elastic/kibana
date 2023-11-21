@@ -6,6 +6,7 @@
  */
 
 import type SuperTest from 'supertest';
+import { getCommonRequestHeader } from '../../functional/services/ml/common_api';
 
 export const executeSetupModuleRequest = async ({
   module,
@@ -18,7 +19,7 @@ export const executeSetupModuleRequest = async ({
 }) => {
   const { body } = await supertest
     .post(`/internal/ml/modules/setup/${module}`)
-    .set('kbn-xsrf', 'true')
+    .set(getCommonRequestHeader('1'))
     .send({
       prefix: '',
       groups: ['auditbeat'],
@@ -42,8 +43,8 @@ export const forceStartDatafeeds = async ({
   supertest: SuperTest.SuperTest<SuperTest.Test>;
 }) => {
   const { body } = await supertest
-    .post(`/supertest/ml/jobs/force_start_datafeeds`)
-    .set('kbn-xsrf', 'true')
+    .post(`/internal/ml/jobs/force_start_datafeeds`)
+    .set(getCommonRequestHeader('1'))
     .send({
       datafeedIds: [`datafeed-${jobId}`],
       start: new Date().getUTCMilliseconds(),

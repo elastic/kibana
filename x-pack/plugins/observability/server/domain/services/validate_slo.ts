@@ -85,13 +85,8 @@ function isValidTargetNumber(value: number): boolean {
 }
 
 function isValidRollingTimeWindowDuration(duration: Duration): boolean {
-  return [
-    DurationUnit.Day,
-    DurationUnit.Week,
-    DurationUnit.Month,
-    DurationUnit.Quarter,
-    DurationUnit.Year,
-  ].includes(duration.unit);
+  // 7, 30 or 90days accepted
+  return duration.unit === DurationUnit.Day && [7, 30, 90].includes(duration.value);
 }
 
 function isValidCalendarAlignedTimeWindowDuration(duration: Duration): boolean {

@@ -222,22 +222,22 @@ export class ControlGroupContainer extends Container<
 
   public async addDataControlFromField(controlProps: AddDataControlProps) {
     const panelState = await getDataControlPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public addOptionsListControl(controlProps: AddOptionsListControlProps) {
     const panelState = getOptionsListPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public addRangeSliderControl(controlProps: AddRangeSliderControlProps) {
     const panelState = getRangeSliderPanelState(this.getInput(), controlProps);
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public addTimeSliderControl() {
     const panelState = getTimeSliderPanelState(this.getInput());
-    return this.createAndSaveEmbeddable(panelState.type, panelState);
+    return this.createAndSaveEmbeddable(panelState.type, panelState, this.getInput().panels);
   }
 
   public openAddDataControlFlyout = openAddDataControlFlyout;
@@ -283,15 +283,19 @@ export class ControlGroupContainer extends Container<
 
   protected createNewPanelState<TEmbeddableInput extends ControlInput = ControlInput>(
     factory: EmbeddableFactory<ControlInput, ControlOutput, ControlEmbeddable>,
-    partial: Partial<TEmbeddableInput> = {}
-  ): ControlPanelState<TEmbeddableInput> {
-    const panelState = super.createNewPanelState(factory, partial);
+    partial: Partial<TEmbeddableInput> = {},
+    otherPanels: ControlGroupInput['panels']
+  ) {
+    const { newPanel } = super.createNewPanelState(factory, partial);
     return {
-      order: getNextPanelOrder(this.getInput().panels),
-      width: this.getInput().defaultControlWidth,
-      grow: this.getInput().defaultControlGrow,
-      ...panelState,
-    } as ControlPanelState<TEmbeddableInput>;
+      newPanel: {
+        order: getNextPanelOrder(this.getInput().panels),
+        width: this.getInput().defaultControlWidth,
+        grow: this.getInput().defaultControlGrow,
+        ...newPanel,
+      } as ControlPanelState<TEmbeddableInput>,
+      otherPanels,
+    };
   }
 
   protected onRemoveEmbeddable(idToRemove: string) {

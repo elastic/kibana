@@ -7,9 +7,9 @@
 import { createAppContextStartContractMock } from '../../../../mocks';
 import { appContextService } from '../../..';
 import { loadFieldsFromYaml } from '../../fields/field';
-import type { RegistryDataStream } from '../../../../types';
+import type { ArchivePackage, RegistryDataStream } from '../../../../types';
 
-import { prepareTemplate } from './install';
+import { prepareTemplate, prepareToInstallTemplates } from './install';
 
 jest.mock('../../fields/field', () => ({
   ...jest.requireActual('../../fields/field'),
@@ -379,5 +379,104 @@ describe('EPM index template install', () => {
         },
       })
     );
+  });
+
+  it('test prepareTemplate to set a lifecycle field in index_template if ILM policies are disabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: { disableILMPolicies: true },
+      } as any)
+    );
+
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      lifecycle: {
+        data_retention: '3d',
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    expect(packageTemplate).toHaveProperty('lifecycle');
+    if (!('lifecycle' in packageTemplate)) {
+      throw new Error('no lifecycle on package template');
+    }
+
+    expect(packageTemplate.lifecycle).toEqual({ data_retention: '3d' });
+  });
+
+  it('test prepareTemplate to not set a lifecycle field in index_template if ILM policies are enabled', () => {
+    appContextService.start(
+      createAppContextStartContractMock({
+        internal: { disableILMPolicies: false },
+      } as any)
+    );
+
+    const dataStream = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+      lifecycle: {
+        data_retention: '3d',
+      },
+    } as RegistryDataStream;
+
+    const pkg = {
+      name: 'package',
+      version: '0.0.1',
+    };
+
+    const { componentTemplates } = prepareTemplate({
+      pkg,
+      dataStream,
+    });
+
+    const packageTemplate = componentTemplates['logs-package.dataset@package'].template;
+
+    expect(packageTemplate).not.toHaveProperty('lifecycle');
+  });
+
+  test('test prepareToInstallTemplates does not include stack component templates in tracked assets', () => {
+    const dataStreamDatasetIsPrefixUnset = {
+      type: 'logs',
+      dataset: 'package.dataset',
+      title: 'test data stream',
+      release: 'experimental',
+      package: 'package',
+      path: 'path',
+      ingest_pipeline: 'default',
+    } as RegistryDataStream;
+
+    const { assetsToAdd } = prepareToInstallTemplates(
+      {
+        name: 'package',
+        version: '0.0.1',
+        data_streams: [dataStreamDatasetIsPrefixUnset],
+      } as ArchivePackage,
+      [],
+      []
+    );
+
+    expect(assetsToAdd).not.toContainEqual({ id: 'logs@settings', type: 'component_template' });
   });
 });

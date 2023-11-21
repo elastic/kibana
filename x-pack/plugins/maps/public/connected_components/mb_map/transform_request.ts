@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import {
   FONTS_API_PATH,
   MVT_GETTILE_API_PATH,
@@ -22,7 +25,10 @@ export function transformRequest(url: string, resourceType: string | undefined) 
     return {
       url,
       method: 'GET' as 'GET',
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
     };
   }
 
@@ -30,7 +36,10 @@ export function transformRequest(url: string, resourceType: string | undefined) 
     return {
       url,
       method: 'GET' as 'GET',
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
     };
   }
 
@@ -38,7 +47,10 @@ export function transformRequest(url: string, resourceType: string | undefined) 
     return {
       url,
       method: 'GET' as 'GET',
-      headers: { [ELASTIC_HTTP_VERSION_HEADER]: '1' },
+      headers: {
+        [ELASTIC_HTTP_VERSION_HEADER]: '1',
+        [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'kibana',
+      },
     };
   }
 

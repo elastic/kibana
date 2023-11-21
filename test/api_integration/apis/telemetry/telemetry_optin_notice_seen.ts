@@ -7,17 +7,26 @@
  */
 
 import expect from '@kbn/expect';
+import {
+  ELASTIC_HTTP_VERSION_HEADER,
+  X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
+} from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function optInTest({ getService }: FtrProviderContext) {
   const client = getService('kibanaServer');
   const supertest = getService('supertest');
 
-  describe('/api/telemetry/v2/userHasSeenNotice API Telemetry User has seen OptIn Notice', () => {
+  describe('/internal/telemetry/userHasSeenNotice API Telemetry User has seen OptIn Notice', () => {
     it('should update telemetry setting field via PUT', async () => {
       await client.savedObjects.delete({ type: 'telemetry', id: 'telemetry' });
 
-      await supertest.put('/api/telemetry/v2/userHasSeenNotice').set('kbn-xsrf', 'xxx').expect(200);
+      await supertest
+        .put('/internal/telemetry/userHasSeenNotice')
+        .set('kbn-xsrf', 'xxx')
+        .set(ELASTIC_HTTP_VERSION_HEADER, '2')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .expect(200);
 
       const {
         attributes: { userHasSeenNotice },

@@ -29,7 +29,7 @@ const referencesSchema = schema.arrayOf(referenceSchema);
 const visualizeAttributesSchema = schema.object(
   {
     title: schema.string(),
-    description: schema.maybe(schema.string()),
+    description: schema.maybe(schema.nullable(schema.string())),
     version: schema.maybe(schema.number()),
     kibanaSavedObjectMeta: schema.maybe(schema.object({ searchSourceJSON: schema.string() })),
     uiStateJSON: schema.maybe(schema.string()),

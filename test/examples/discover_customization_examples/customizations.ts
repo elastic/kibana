@@ -19,6 +19,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   const kibanaServer = getService('kibanaServer');
   const testSubjects = getService('testSubjects');
   const browser = getService('browser');
+  const dataGrid = getService('dataGrid');
   const defaultSettings = { defaultIndex: 'logstash-*' };
 
   describe('Customizations', () => {
@@ -67,6 +68,34 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       };
       expect(title).to.eql(expected.title);
       expect(description).to.eql(expected.description);
+    });
+
+    it('Search bar Prepend Filters exists and should apply filter properly', async () => {
+      // Validate custom filters are present
+      await testSubjects.existOrFail('customPrependedFilter');
+      await testSubjects.click('customPrependedFilter');
+      await testSubjects.existOrFail('optionsList-control-selection-exists');
+
+      // Retrieve option list popover
+      const optionsListControl = await testSubjects.find('optionsList-control-popover');
+      const optionsItems = await optionsListControl.findAllByCssSelector(
+        '[data-test-subj*="optionsList-control-selection-"]'
+      );
+
+      // Retrieve second item in the options along with the count of documents
+      const item = optionsItems[1];
+      const countBadge = await item.findByCssSelector(
+        '[data-test-subj="optionsList-document-count-badge"]'
+      );
+      const documentsCount = parseInt(await countBadge.getVisibleText(), 10);
+
+      // Click the item to apply filter
+      await item.click();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+
+      // Validate that filter is applied
+      const rows = await dataGrid.getDocTableRows();
+      await expect(documentsCount).to.eql(rows.length);
     });
   });
 };

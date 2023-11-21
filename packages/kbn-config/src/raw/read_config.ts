@@ -27,15 +27,27 @@ function replaceEnvVarRefs(val: string) {
 }
 
 function merge(target: Record<string, any>, value: any, key?: string) {
-  if ((isPlainObject(value) || Array.isArray(value)) && Object.keys(value).length > 0) {
+  if (isPlainObject(value) && Object.keys(value).length > 0) {
     for (const [subKey, subVal] of Object.entries(value)) {
       merge(target, subVal, key ? `${key}.${subKey}` : subKey);
     }
   } else if (key !== undefined) {
-    set(target, key, typeof value === 'string' ? replaceEnvVarRefs(value) : value);
+    set(target, key, recursiveReplaceEnvVar(value));
   }
 
   return target;
+}
+
+function recursiveReplaceEnvVar(value: any) {
+  if (isPlainObject(value) || Array.isArray(value)) {
+    for (const [subKey, subVal] of Object.entries(value)) {
+      set(value, subKey, recursiveReplaceEnvVar(subVal));
+    }
+  }
+  if (typeof value === 'string') {
+    return replaceEnvVarRefs(value);
+  }
+  return value;
 }
 
 /** @internal */

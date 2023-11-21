@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render, forNearestButton } from '../rtl_helpers';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 import { AddToCaseAction } from './add_to_case_action';
 import * as useCaseHook from '../hooks/use_add_to_case';
 import * as datePicker from '../components/date_range_picker';
@@ -110,6 +110,7 @@ describe('AddToCaseAction', function () {
           update: false,
           delete: false,
           push: false,
+          connectors: false,
         },
       })
     );

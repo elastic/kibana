@@ -9,7 +9,8 @@ import type { NavigateToAppOptions } from '@kbn/core/public';
 import { useCallback } from 'react';
 import type { BulkActionResponse } from '..';
 import { APP_UI_ID } from '../../../../../common/constants';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionType } from '../../../../../common/api/detection_engine/rule_management';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { SecurityPageName } from '../../../../app/types';
 import { getEditRuleUrl } from '../../../../common/components/link_to/redirect_to_detection_engine';
 import { METRIC_TYPE, TELEMETRY_EVENT, track } from '../../../../common/lib/telemetry';
@@ -58,7 +59,7 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
             actionType: bulkAction.type,
             summary: response.attributes.summary,
             editPayload:
-              bulkAction.type === BulkActionType.edit ? bulkAction.editPayload : undefined,
+              bulkAction.type === BulkActionTypeEnum.edit ? bulkAction.editPayload : undefined,
           });
         }
 
@@ -83,14 +84,14 @@ export const useExecuteBulkAction = (options?: UseExecuteBulkActionOptions) => {
 };
 
 function sendTelemetry(action: BulkActionType, response: BulkActionResponse): void {
-  if (action !== BulkActionType.disable && action !== BulkActionType.enable) {
+  if (action !== BulkActionTypeEnum.disable && action !== BulkActionTypeEnum.enable) {
     return;
   }
 
   if (response.attributes.results.updated.some((rule) => rule.immutable)) {
     track(
       METRIC_TYPE.COUNT,
-      action === BulkActionType.enable
+      action === BulkActionTypeEnum.enable
         ? TELEMETRY_EVENT.SIEM_RULE_ENABLED
         : TELEMETRY_EVENT.SIEM_RULE_DISABLED
     );
@@ -99,7 +100,7 @@ function sendTelemetry(action: BulkActionType, response: BulkActionResponse): vo
   if (response.attributes.results.updated.some((rule) => !rule.immutable)) {
     track(
       METRIC_TYPE.COUNT,
-      action === BulkActionType.disable
+      action === BulkActionTypeEnum.disable
         ? TELEMETRY_EVENT.CUSTOM_RULE_DISABLED
         : TELEMETRY_EVENT.CUSTOM_RULE_ENABLED
     );

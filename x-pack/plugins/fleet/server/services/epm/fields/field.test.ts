@@ -671,6 +671,60 @@ describe('processFields', () => {
     `);
   });
 
+  test('handle wildcard field inside group', () => {
+    const wildcardFields = [
+      {
+        name: 'prometheus',
+        type: 'group',
+        fields: [
+          {
+            name: 'metrics.*',
+            type: 'double',
+            metric_type: 'gauge',
+          },
+          {
+            name: 'child_group',
+            type: 'group',
+            fields: [
+              {
+                name: 'child.*',
+                type: 'double',
+                metric_type: 'gauge',
+              },
+            ],
+          },
+        ],
+      },
+    ];
+
+    expect(processFieldsWithWildcard(wildcardFields)).toEqual([
+      {
+        name: 'prometheus',
+        type: 'group',
+        fields: [
+          {
+            name: 'metrics.*',
+            type: 'object',
+            object_type: 'double',
+            metric_type: 'gauge',
+          },
+          {
+            name: 'child_group',
+            type: 'group',
+            fields: [
+              {
+                name: 'child.*',
+                type: 'object',
+                object_type: 'double',
+                metric_type: 'gauge',
+              },
+            ],
+          },
+        ],
+      },
+    ]);
+  });
+
   describe('processFieldsWithWildcard', () => {
     const wildcardWithObjectTypeYml = `
     - name: a.*.b

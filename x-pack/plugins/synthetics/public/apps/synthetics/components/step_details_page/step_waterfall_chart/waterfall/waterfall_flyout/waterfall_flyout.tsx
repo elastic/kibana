@@ -83,7 +83,7 @@ export const WaterfallFlyout = ({
 
   return (
     <div
-      tab-index={-1}
+      tabIndex={-1}
       ref={flyoutRef}
       data-test-subj="waterfallFlyout"
       aria-labelledby="flyoutTitle"

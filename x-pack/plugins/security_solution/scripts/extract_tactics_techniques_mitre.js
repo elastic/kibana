@@ -19,7 +19,7 @@ const OUTPUT_DIRECTORY = resolve('public', 'detections', 'mitre');
 // Every release we should update the version of MITRE ATT&CK content and regenerate the model in our code.
 // This version must correspond to the one used for prebuilt rules in https://github.com/elastic/detection-rules.
 // This version is basically a tag on https://github.com/mitre/cti/tags, or can be a branch name like `master`.
-const MITRE_CONTENT_VERSION = 'ATT&CK-v12.1'; // last updated when preparing for 8.7.0 release
+const MITRE_CONTENT_VERSION = 'ATT&CK-v13.1'; // last updated when preparing for 8.10.3 release
 const MITRE_CONTENT_URL = `https://raw.githubusercontent.com/mitre/cti/${MITRE_CONTENT_VERSION}/enterprise-attack/enterprise-attack.json`;
 
 const getTacticsOptions = (tactics) =>
@@ -28,7 +28,7 @@ const getTacticsOptions = (tactics) =>
   id: '${t.id}',
   name: '${t.name}',
   reference: '${t.reference}',
-  text: i18n.translate(
+  label: i18n.translate(
     'xpack.securitySolution.detectionEngine.mitreAttackTactics.${camelCase(t.name)}Description', {
       defaultMessage: '${t.name} (${t.id})'
   }),
@@ -48,7 +48,7 @@ const getTechniquesOptions = (techniques) =>
   id: '${t.id}',
   name: '${t.name}',
   reference: '${t.reference}',
-  tactics: '${t.tactics.join()}',
+  tactics: [${t.tactics.map((tactic) => `'${tactic.trim()}'`)}],
   value: '${camelCase(t.name)}'
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
   );
@@ -65,7 +65,7 @@ const getSubtechniquesOptions = (subtechniques) =>
   id: '${t.id}',
   name: '${t.name}',
   reference: '${t.reference}',
-  tactics: '${t.tactics.join()}',
+  tactics: [${t.tactics.map((tactic) => `'${tactic.trim()}'`)}],
   techniqueId: '${t.techniqueId}',
   value: '${camelCase(t.name)}'
 }`.replace(/(\r\n|\n|\r)/gm, ' ')
@@ -82,6 +82,8 @@ const getIdReference = (references) => {
     return { id: '', reference: '' };
   }
 };
+
+const isCurrentData = (mitreObj) => !mitreObj.revoked && !mitreObj.x_mitre_deprecated;
 
 const extractTacticsData = (mitreData) => {
   const tactics = mitreData
@@ -115,7 +117,8 @@ const extractTechniques = (mitreData) => {
     .filter(
       (obj) =>
         obj.type === 'attack-pattern' &&
-        (obj.x_mitre_is_subtechnique === false || obj.x_mitre_is_subtechnique === undefined)
+        (obj.x_mitre_is_subtechnique === false || obj.x_mitre_is_subtechnique === undefined) &&
+        isCurrentData(obj)
     )
     .reduce((acc, item) => {
       let tactics = [];
@@ -142,7 +145,7 @@ const extractTechniques = (mitreData) => {
 
 const extractSubtechniques = (mitreData) => {
   const subtechniques = mitreData
-    .filter((obj) => obj.x_mitre_is_subtechnique === true)
+    .filter((obj) => obj.x_mitre_is_subtechnique === true && isCurrentData(obj))
     .reduce((acc, item) => {
       let tactics = [];
       const { id, reference } = getIdReference(item.external_references);
@@ -203,25 +206,19 @@ async function main() {
 
           import { i18n } from '@kbn/i18n';
 
-          import { MitreTacticsOptions, MitreTechniquesOptions, MitreSubtechniquesOptions } from './types';
+          import { MitreTactic, MitreTechnique, MitreSubTechnique } from './types';
 
-          export const tactics = ${JSON.stringify(tactics, null, 2)};
-
-          export const tacticsOptions: MitreTacticsOptions[] =
+          export const tactics: MitreTactic[] =
             ${JSON.stringify(getTacticsOptions(tactics), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
 
-          export const technique = ${JSON.stringify(techniques, null, 2)};
-
-          export const techniquesOptions: MitreTechniquesOptions[] =
+          export const techniques: MitreTechnique[] =
             ${JSON.stringify(getTechniquesOptions(techniques), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};
 
-          export const subtechniques = ${JSON.stringify(subtechniques, null, 2)};
-
-          export const subtechniquesOptions: MitreSubtechniquesOptions[] =
+          export const subtechniques: MitreSubTechnique[] =
             ${JSON.stringify(getSubtechniquesOptions(subtechniques), null, 2)
               .replace(/}"/g, '}')
               .replace(/"{/g, '{')};

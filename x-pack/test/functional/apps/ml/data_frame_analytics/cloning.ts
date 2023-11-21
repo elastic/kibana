@@ -197,6 +197,9 @@ export default function ({ getService }: FtrProviderContext) {
             testData.job as DataFrameAnalyticsConfig
           );
           await ml.dataFrameAnalyticsCreation.setJobId(cloneJobId);
+          // open the dest index input
+          await ml.dataFrameAnalyticsCreation.assertDestIndexSameAsIdSwitchExists();
+          await ml.dataFrameAnalyticsCreation.setDestIndexSameAsIdCheckState(false);
           await ml.dataFrameAnalyticsCreation.setDestIndex(cloneDestIndex);
 
           await ml.testExecution.logTestStep('should continue to the validation step');

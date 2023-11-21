@@ -27,6 +27,7 @@ import {
   SMALL_BYTES,
   LARGE_BYTES,
   LARGE_ABBREVIATED,
+  LARGE,
 } from '../../../../common/formatting';
 
 const indexingRateTitle = i18n.translate('xpack.monitoring.metrics.es.indexingRateTitle', {
@@ -1397,6 +1398,7 @@ export const metrics = {
     }),
     type: 'index',
     format: LARGE_ABBREVIATED,
+    legendFormat: LARGE,
     metricAgg: 'max',
     units: '',
   }),

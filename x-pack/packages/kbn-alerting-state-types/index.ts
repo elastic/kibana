@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-export type {
-  ThrottledActions,
-  LastScheduledActions,
-  AlertInstanceMeta,
-  AlertInstanceState,
-  AlertInstanceContext,
-  RawAlertInstance,
-} from './src/alert_instance';
-export { rawAlertInstance } from './src/alert_instance';
-
-export { DateFromString } from './src/date_from_string';
+export type { AlertInstanceContext } from './src/alert_instance';
 
 export type { TrackedLifecycleAlertState, WrappedLifecycleRuleState } from './src/lifecycle_state';
 export { wrappedStateRt } from './src/lifecycle_state';
 
-export type { RuleTaskState, RuleTaskParams } from './src/rule_task_instance';
-export { ActionsCompletion, ruleStateSchema, ruleParamsSchema } from './src/rule_task_instance';
+export type { RuleTaskParams } from './src/rule_task_instance';
+export { ActionsCompletion, ruleParamsSchema } from './src/rule_task_instance';
+
+export type {
+  LatestTaskStateSchema as RuleTaskState,
+  MutableLatestTaskStateSchema as MutableRuleTaskState,
+  LatestRawAlertInstanceSchema as RawAlertInstance,
+  LatestAlertInstanceMetaSchema as AlertInstanceMeta,
+  MutableLatestAlertInstanceMetaSchema as MutableAlertInstanceMeta,
+  LatestAlertInstanceStateSchema as AlertInstanceState,
+  LatestThrottledActionSchema as ThrottledActions,
+  LatestLastScheduledActionsSchema as LastScheduledActions,
+} from './src/task_state';
+export { stateSchemaByVersion, emptyState as emptyTaskState } from './src/task_state';

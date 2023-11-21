@@ -206,6 +206,7 @@ export function AnalyticsIdSelector({
     },
     onSelectionChange: (selectedItem: TableItem[]) => {
       const item = selectedItem[0];
+
       if (!item) {
         setSelected(undefined);
         return;
@@ -216,7 +217,7 @@ export function AnalyticsIdSelector({
 
       setSelected({
         model_id: isDFA ? undefined : item.model_id,
-        job_id: isDFA ? item.id : item.metadata?.analytics_config.id,
+        job_id: isDFA ? item.id : item.metadata?.analytics_config?.id,
         analysis_type: analysisType,
       });
     },

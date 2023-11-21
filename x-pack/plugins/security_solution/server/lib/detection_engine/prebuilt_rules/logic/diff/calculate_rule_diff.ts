@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import type { DiffableRule } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/diffable_rule/diffable_rule';
-import type { FullRuleDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
-import type { ThreeWayDiff } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import { MissingVersion } from '../../../../../../common/detection_engine/prebuilt_rules/model/diff/three_way_diff/three_way_diff';
-import type { RuleResponse } from '../../../../../../common/detection_engine/rule_schema';
+import type {
+  DiffableRule,
+  FullRuleDiff,
+  ThreeWayDiff,
+} from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import { MissingVersion } from '../../../../../../common/api/detection_engine/prebuilt_rules';
+import type { RuleResponse } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
 

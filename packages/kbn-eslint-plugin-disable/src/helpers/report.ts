@@ -6,12 +6,12 @@
  * Side Public License, v 1.
  */
 
-import type Eslint from 'eslint';
+import type { AST } from 'eslint';
 import { ESLINT_DISABLE_VALUE, ParsedEslintDisableComment } from './regex';
 
 export function getReportLocFromComment(
   comment: ParsedEslintDisableComment
-): Eslint.AST.SourceLocation | undefined {
+): AST.SourceLocation | undefined {
   const cStart = comment?.loc?.start;
   const cEnd = comment?.loc?.end;
   const cStartLine = comment?.loc?.start?.line;

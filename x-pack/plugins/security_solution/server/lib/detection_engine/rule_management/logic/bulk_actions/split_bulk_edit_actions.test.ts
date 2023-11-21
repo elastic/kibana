@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-import type { BulkActionEditPayload } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import type { BulkActionEditPayload } from '../../../../../../common/api/detection_engine/rule_management';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 
 import { splitBulkEditActions } from './split_bulk_edit_actions';
 
 const bulkEditActions: BulkActionEditPayload[] = [
-  { type: BulkActionEditType.add_index_patterns, value: ['test'] },
-  { type: BulkActionEditType.set_index_patterns, value: ['test'] },
-  { type: BulkActionEditType.delete_index_patterns, value: ['test'] },
-  { type: BulkActionEditType.add_tags, value: ['test'] },
-  { type: BulkActionEditType.delete_tags, value: ['test'] },
-  { type: BulkActionEditType.set_tags, value: ['test'] },
+  { type: BulkActionEditTypeEnum.add_index_patterns, value: ['test'] },
+  { type: BulkActionEditTypeEnum.set_index_patterns, value: ['test'] },
+  { type: BulkActionEditTypeEnum.delete_index_patterns, value: ['test'] },
+  { type: BulkActionEditTypeEnum.add_tags, value: ['test'] },
+  { type: BulkActionEditTypeEnum.delete_tags, value: ['test'] },
+  { type: BulkActionEditTypeEnum.set_tags, value: ['test'] },
   {
-    type: BulkActionEditType.set_timeline,
+    type: BulkActionEditTypeEnum.set_timeline,
     value: { timeline_id: 'a-1', timeline_title: 'Test title' },
   },
 ];
@@ -28,16 +28,16 @@ describe('splitBulkEditActions', () => {
     const { attributesActions, paramsActions } = splitBulkEditActions(bulkEditActions);
 
     expect(attributesActions).toEqual([
-      { type: BulkActionEditType.add_tags, value: ['test'] },
-      { type: BulkActionEditType.delete_tags, value: ['test'] },
-      { type: BulkActionEditType.set_tags, value: ['test'] },
+      { type: BulkActionEditTypeEnum.add_tags, value: ['test'] },
+      { type: BulkActionEditTypeEnum.delete_tags, value: ['test'] },
+      { type: BulkActionEditTypeEnum.set_tags, value: ['test'] },
     ]);
     expect(paramsActions).toEqual([
-      { type: BulkActionEditType.add_index_patterns, value: ['test'] },
-      { type: BulkActionEditType.set_index_patterns, value: ['test'] },
-      { type: BulkActionEditType.delete_index_patterns, value: ['test'] },
+      { type: BulkActionEditTypeEnum.add_index_patterns, value: ['test'] },
+      { type: BulkActionEditTypeEnum.set_index_patterns, value: ['test'] },
+      { type: BulkActionEditTypeEnum.delete_index_patterns, value: ['test'] },
       {
-        type: BulkActionEditType.set_timeline,
+        type: BulkActionEditTypeEnum.set_timeline,
         value: { timeline_id: 'a-1', timeline_title: 'Test title' },
       },
     ]);

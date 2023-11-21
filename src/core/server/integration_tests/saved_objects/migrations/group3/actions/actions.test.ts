@@ -13,6 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { TaskEither } from 'fp-ts/lib/TaskEither';
 import type { SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { createTestServers, type TestElasticsearchUtils } from '@kbn/core-test-helpers-kbn-server';
 import {
   bulkOverwriteTransformedDocuments,
@@ -59,16 +60,19 @@ let esServer: TestElasticsearchUtils;
 
 describe('migration actions', () => {
   let client: ElasticsearchClient;
+  let esCapabilities: ReturnType<typeof elasticsearchServiceMock.createCapabilities>;
 
   beforeAll(async () => {
     esServer = await startES();
     client = esServer.es.getClient().child(MIGRATION_CLIENT_OPTIONS);
+    esCapabilities = elasticsearchServiceMock.createCapabilities();
 
     // Create test fixture data:
     await createIndex({
       client,
       indexName: 'existing_index_with_docs',
       aliases: ['existing_index_with_docs_alias'],
+      esCapabilities,
       mappings: {
         dynamic: true,
         properties: {
@@ -98,11 +102,17 @@ describe('migration actions', () => {
       refresh: 'wait_for',
     })();
 
-    await createIndex({ client, indexName: 'existing_index_2', mappings: { properties: {} } })();
+    await createIndex({
+      client,
+      indexName: 'existing_index_2',
+      mappings: { properties: {} },
+      esCapabilities,
+    })();
     await createIndex({
       client,
       indexName: 'existing_index_with_write_block',
       mappings: { properties: {} },
+      esCapabilities,
     })();
     await bulkOverwriteTransformedDocuments({
       client,
@@ -276,6 +286,7 @@ describe('migration actions', () => {
         client,
         indexName: 'new_index_without_write_block',
         mappings: { properties: {} },
+        esCapabilities,
       })();
     });
     it('resolves right when setting the write block succeeds', async () => {
@@ -341,11 +352,13 @@ describe('migration actions', () => {
         client,
         indexName: 'existing_index_without_write_block_2',
         mappings: { properties: {} },
+        esCapabilities,
       })();
       await createIndex({
         client,
         indexName: 'existing_index_with_write_block_2',
         mappings: { properties: {} },
+        esCapabilities,
       })();
       await setWriteBlock({ client, index: 'existing_index_with_write_block_2' })();
     });
@@ -514,6 +527,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_target_1',
+        esCapabilities,
       });
       expect.assertions(3);
       await expect(task()).resolves.toMatchInlineSnapshot(`
@@ -557,6 +571,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_red_then_green_index',
+        esCapabilities,
       })();
 
       let indexGreen = false;
@@ -609,6 +624,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '1s',
+        esCapabilities,
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -637,6 +653,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '1s',
+        esCapabilities,
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -665,6 +682,7 @@ describe('migration actions', () => {
         source: 'existing_index_with_write_block',
         target: 'clone_red_index',
         timeout: '30s',
+        esCapabilities,
       })();
 
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
@@ -679,7 +697,12 @@ describe('migration actions', () => {
     });
     it('resolves left index_not_found_exception if the source index does not exist', async () => {
       expect.assertions(1);
-      const task = cloneIndex({ client, source: 'no_such_index', target: 'clone_target_3' });
+      const task = cloneIndex({
+        client,
+        source: 'no_such_index',
+        target: 'clone_target_3',
+        esCapabilities,
+      });
       await expect(task()).resolves.toMatchInlineSnapshot(`
         Object {
           "_tag": "Left",
@@ -697,6 +720,7 @@ describe('migration actions', () => {
         client,
         source: 'existing_index_with_write_block',
         target: 'clone_target_4',
+        esCapabilities,
       })();
       await expect(cloneIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
@@ -866,7 +890,12 @@ describe('migration actions', () => {
       expect.assertions(2);
       // Simulate a reindex that only adds some of the documents from the
       // source index into the target index
-      await createIndex({ client, indexName: 'reindex_target_4', mappings: { properties: {} } })();
+      await createIndex({
+        client,
+        indexName: 'reindex_target_4',
+        mappings: { properties: {} },
+        esCapabilities,
+      })();
       const response = await client.search({ index: 'existing_index_with_docs', size: 1000 });
       const sourceDocs = (response.hits?.hits as SavedObjectsRawDoc[])
         .slice(0, 2)
@@ -931,6 +960,7 @@ describe('migration actions', () => {
             /** no title field */
           },
         },
+        esCapabilities,
       })();
 
       const {
@@ -971,6 +1001,7 @@ describe('migration actions', () => {
           dynamic: false,
           properties: { title: { type: 'integer' } }, // integer is incompatible with string title
         },
+        esCapabilities,
       })();
 
       const {
@@ -1464,6 +1495,7 @@ describe('migration actions', () => {
           dynamic: false,
           properties: {},
         },
+        esCapabilities,
       })();
       const sourceDocs = [
         { _source: { title: 'doc 1' } },
@@ -1769,6 +1801,7 @@ describe('migration actions', () => {
         indexName: 'create_new_index',
         mappings: undefined as any,
         timeout: '1nanos',
+        esCapabilities,
       })();
       await expect(createIndexPromise).resolves.toEqual({
         _tag: 'Right',
@@ -1809,6 +1842,7 @@ describe('migration actions', () => {
         client,
         indexName: 'red_then_yellow_index',
         mappings: undefined as any,
+        esCapabilities,
       })();
       let indexYellow = false;
 
@@ -1861,6 +1895,7 @@ describe('migration actions', () => {
         client,
         indexName: 'yellow_then_green_index',
         mappings: undefined as any,
+        esCapabilities,
       })();
       let indexGreen = false;
 
@@ -1893,6 +1928,7 @@ describe('migration actions', () => {
         client,
         indexName: 'create_index_1',
         mappings: undefined as any,
+        esCapabilities,
       })();
       await expect(createIndexPromise).resolves.toMatchInlineSnapshot(`
         Object {
@@ -1907,7 +1943,12 @@ describe('migration actions', () => {
       // Creating an index with the same name as an existing alias to induce
       // failure
       await expect(
-        createIndex({ client, indexName: 'existing_index_2_alias', mappings: undefined as any })()
+        createIndex({
+          client,
+          indexName: 'existing_index_2_alias',
+          mappings: undefined as any,
+          esCapabilities,
+        })()
       ).rejects.toThrow('invalid_index_name_exception');
     });
   });

@@ -8,26 +8,24 @@
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import { sloDetailsLocatorID } from '../../common';
-import { SLOS_PATH } from '../routes/paths';
+import { SLOS_PATH } from '../../common/locators/paths';
 
-// eslint-disable-next-line @typescript-eslint/consistent-type-definitions
-export type SloDetailsParams = {
+export interface SloDetailsLocatorParams extends SerializableRecord {
   sloId?: string;
-};
-
-export interface SloDetailsLocatorParams extends SloDetailsParams, SerializableRecord {}
-
-export const getSloDetailsPath = (sloId: string) => {
-  return `/${SLOS_PATH}/${encodeURI(sloId)}`;
-};
+  instanceId?: string;
+}
 
 export class SloDetailsLocatorDefinition implements LocatorDefinition<SloDetailsLocatorParams> {
   public readonly id = sloDetailsLocatorID;
 
-  public readonly getLocation = async ({ sloId = '' }: SloDetailsLocatorParams) => {
+  public readonly getLocation = async ({ sloId, instanceId }: SloDetailsLocatorParams) => {
+    const queryParams =
+      !!instanceId && instanceId !== '*' ? `?instanceId=${encodeURI(instanceId)}` : '';
+    const path = !!sloId ? `${SLOS_PATH}/${encodeURI(sloId)}${queryParams}` : SLOS_PATH;
+
     return {
       app: 'observability',
-      path: getSloDetailsPath(sloId),
+      path,
       state: {},
     };
   };

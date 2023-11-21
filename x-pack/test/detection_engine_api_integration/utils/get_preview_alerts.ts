@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { ALERT_RULE_UUID } from '@kbn/rule-data-utils';
-import { DetectionAlert } from '@kbn/security-solution-plugin/common/detection_engine/schemas/alerts';
+import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { RiskEnrichmentFields } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/utils/enrichments/types';
 import { refreshIndex } from './refresh_index';
 

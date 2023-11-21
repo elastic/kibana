@@ -13,8 +13,8 @@ import { useGetIncidentTypes } from './use_get_incident_types';
 import { useGetSeverity } from './use_get_severity';
 
 import * as i18n from './translations';
-import type { ResilientFieldsType } from '../../../../common/api';
-import { ConnectorTypes } from '../../../../common/api';
+import type { ResilientFieldsType } from '../../../../common/types/domain';
+import { ConnectorTypes } from '../../../../common/types/domain';
 import { ConnectorCard } from '../card';
 
 const ResilientFieldsComponent: React.FunctionComponent<

@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+/* eslint-disable cypress/no-unnecessary-waiting */
+
+import { openAlertDetailsView } from '../screens/alerts';
 import type { ActionDetails } from '../../../../common/endpoint/types';
 import { loadPage } from './common';
 
@@ -38,15 +41,33 @@ export const isolateHostWithComment = (comment: string, hostname: string): void 
   cy.getByTestSubj('host_isolation_comment').type(comment);
 };
 
+export const isolateHostFromEndpointList = (index: number = 0): void => {
+  // open the action menu and click isolate action
+  cy.getByTestSubj('endpointTableRowActions').eq(index).click();
+  cy.getByTestSubj('isolateLink').click();
+  // isolation form, click confirm button
+  cy.getByTestSubj('hostIsolateConfirmButton').click();
+  // return to endpoint details
+  cy.getByTestSubj('hostIsolateSuccessCompleteButton').click();
+  // close details flyout
+  cy.getByTestSubj('euiFlyoutCloseButton').click();
+
+  // ensure the host is isolated, wait for 3 minutes for the host to be isolated
+  cy.wait(18000);
+
+  cy.getByTestSubj('endpointListTable').within(() => {
+    cy.get('tbody tr')
+      .eq(index)
+      .within(() => {
+        cy.get('td').eq(1).should('contain.text', 'Isolated');
+      });
+  });
+};
+
 export const releaseHostWithComment = (comment: string, hostname: string): void => {
   cy.contains(`${hostname} is currently isolated.`);
   cy.getByTestSubj('endpointHostIsolationForm');
   cy.getByTestSubj('host_isolation_comment').type(comment);
-};
-
-export const openAlertDetails = (): void => {
-  cy.getByTestSubj('expand-event').first().click();
-  cy.getByTestSubj('take-action-dropdown-btn').click();
 };
 
 export const openCaseAlertDetails = (alertId: string): void => {
@@ -82,7 +103,7 @@ export const checkFlyoutEndpointIsolation = (): void => {
     } else {
       cy.getByTestSubj('euiFlyoutCloseButton').click();
       cy.wait(5000);
-      openAlertDetails();
+      openAlertDetailsView();
       cy.getByTestSubj('event-field-agent.status').within(() => {
         cy.contains('Isolated');
       });
@@ -114,7 +135,7 @@ export const filterOutEndpoints = (endpointHostname: string): void => {
 };
 
 export const filterOutIsolatedHosts = (): void => {
-  cy.getByTestSubj('adminSearchBar').click().type('united.endpoint.Endpoint.state.isolation: true');
+  cy.getByTestSubj('adminSearchBar').type('united.endpoint.Endpoint.state.isolation: true');
   cy.getByTestSubj('querySubmitButton').click();
 };
 

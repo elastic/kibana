@@ -11,12 +11,14 @@ import {
   Case,
   CaseSeverity,
   CaseStatuses,
-  CommentRequestUserType,
-  CommentType,
+  UserCommentAttachmentPayload,
+  AttachmentType,
+  CreateCaseUserAction,
   ConnectorTypes,
-  getCaseUserActionUrl,
-} from '@kbn/cases-plugin/common/api';
-import { CreateCaseUserAction } from '@kbn/cases-plugin/common/api/cases/user_actions/create_case';
+  CustomFieldTypes,
+  CaseCustomFields,
+} from '@kbn/cases-plugin/common/types/domain';
+import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 import { postCaseReq, postCommentUserReq, getPostCaseRequest } from '../../../../common/lib/mock';
 import {
@@ -30,6 +32,8 @@ import {
   deleteComment,
   extractWarningValueFromWarningHeader,
   getCaseUserActions,
+  createConfiguration,
+  getConfigurationRequest,
 } from '../../../../common/lib/api';
 import {
   globalRead,
@@ -72,7 +76,7 @@ export default ({ getService }: FtrProviderContext): void => {
     it('creates a create case user action when a case is created', async () => {
       const theCase = await createCase(supertest, postCaseReq);
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const createCaseUserAction = userActions[0] as CreateCaseUserAction;
+      const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
 
       expect(userActions.length).to.eql(1);
       expect(createCaseUserAction.action).to.eql('create');
@@ -84,6 +88,10 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(createCaseUserAction.payload.settings).to.eql(postCaseReq.settings);
       expect(createCaseUserAction.payload.owner).to.eql(postCaseReq.owner);
       expect(createCaseUserAction.payload.connector).to.eql(postCaseReq.connector);
+      expect(createCaseUserAction.payload.assignees).to.eql(postCaseReq.assignees);
+      expect(createCaseUserAction.payload.severity).to.eql(postCaseReq.severity);
+      expect(createCaseUserAction.payload.category).to.eql(null);
+      expect(createCaseUserAction.payload.customFields).to.eql([]);
     });
 
     it('deletes all user actions when a case is deleted', async () => {
@@ -252,12 +260,12 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
-      const titleUserAction = userActions[1];
+      const descUserAction = userActions[1];
 
       expect(userActions.length).to.eql(2);
-      expect(titleUserAction.type).to.eql('description');
-      expect(titleUserAction.action).to.eql('update');
-      expect(titleUserAction.payload).to.eql({ description: newDesc });
+      expect(descUserAction.type).to.eql('description');
+      expect(descUserAction.action).to.eql('update');
+      expect(descUserAction.payload).to.eql({ description: newDesc });
     });
 
     it('creates a create comment user action', async () => {
@@ -294,7 +302,7 @@ export default ({ getService }: FtrProviderContext): void => {
           id: caseWithComments.comments![0].id,
           version: caseWithComments.comments![0].version,
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -309,7 +317,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(commentUserAction.payload).to.eql({
         comment: {
           comment: newComment,
-          type: CommentType.user,
+          type: AttachmentType.user,
           owner: 'securitySolutionFixture',
         },
       });
@@ -333,7 +341,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const commentUserAction = userActions[2];
       const { id, version: _, ...restComment } = caseWithComments.comments![0];
 
-      const castedUserComment = restComment as CommentRequestUserType;
+      const castedUserComment = restComment as UserCommentAttachmentPayload;
 
       expect(userActions.length).to.eql(3);
       expect(commentUserAction.type).to.eql('comment');
@@ -346,6 +354,111 @@ export default ({ getService }: FtrProviderContext): void => {
           type: castedUserComment.type,
           owner: castedUserComment.owner,
         },
+      });
+    });
+
+    it('creates user actions for custom fields correctly', async () => {
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({
+          overrides: {
+            customFields: [
+              {
+                key: 'test_custom_field_1',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+              {
+                key: 'test_custom_field_2',
+                label: 'toggle',
+                type: CustomFieldTypes.TOGGLE,
+                required: false,
+              },
+              {
+                key: 'test_custom_field_3',
+                label: 'text',
+                type: CustomFieldTypes.TEXT,
+                required: false,
+              },
+            ],
+          },
+        })
+      );
+
+      const customFields: CaseCustomFields = [
+        {
+          key: 'test_custom_field_1',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value',
+        },
+        {
+          key: 'test_custom_field_2',
+          type: CustomFieldTypes.TOGGLE,
+          value: true,
+        },
+        {
+          key: 'test_custom_field_3',
+          type: CustomFieldTypes.TEXT,
+          value: 'this is a text field value 3',
+        },
+      ];
+
+      const theCase = await createCase(supertest, {
+        ...postCaseReq,
+        customFields: [customFields[0], customFields[2]],
+      });
+
+      await updateCase({
+        supertest,
+        params: {
+          cases: [
+            {
+              id: theCase.id,
+              version: theCase.version,
+              customFields: [
+                {
+                  key: 'test_custom_field_1',
+                  type: CustomFieldTypes.TEXT,
+                  value: 'new value',
+                },
+              ],
+            },
+          ],
+        },
+      });
+
+      const userActions = await getCaseUserActions({ supertest, caseID: theCase.id });
+      expect(userActions.length).to.eql(3);
+
+      const createCaseUserAction = userActions[0] as unknown as CreateCaseUserAction;
+      const updateCustomFieldCaseUserAction = userActions[1];
+      const updateCustomFieldCaseUserAction2 = userActions[2];
+
+      expect(createCaseUserAction.payload.customFields).to.eql([customFields[0], customFields[2]]);
+
+      expect(updateCustomFieldCaseUserAction.type).to.eql('customFields');
+      expect(updateCustomFieldCaseUserAction.action).to.eql('update');
+      expect(updateCustomFieldCaseUserAction.payload).to.eql({
+        customFields: [
+          {
+            key: 'test_custom_field_1',
+            type: CustomFieldTypes.TEXT,
+            value: 'new value',
+          },
+        ],
+      });
+
+      expect(updateCustomFieldCaseUserAction2.type).to.eql('customFields');
+      expect(updateCustomFieldCaseUserAction2.action).to.eql('update');
+      expect(updateCustomFieldCaseUserAction2.payload).to.eql({
+        customFields: [
+          {
+            key: 'test_custom_field_3',
+            type: CustomFieldTypes.TEXT,
+            value: null,
+          },
+        ],
       });
     });
 

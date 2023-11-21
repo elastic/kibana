@@ -28,6 +28,7 @@ import {
   SAVED_QUERY_RULE_TYPE_ID,
   SIGNALS_ID,
   THRESHOLD_RULE_TYPE_ID,
+  ESQL_RULE_TYPE_ID,
 } from '@kbn/securitysolution-rules';
 import type {
   SearchHit,
@@ -507,6 +508,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
                       'alert.alertTypeId': [
                         SIGNALS_ID,
                         EQL_RULE_TYPE_ID,
+                        ESQL_RULE_TYPE_ID,
                         ML_RULE_TYPE_ID,
                         QUERY_RULE_TYPE_ID,
                         SAVED_QUERY_RULE_TYPE_ID,

@@ -13,16 +13,11 @@ import type { CoreStart } from '@kbn/core/public';
 import type { FilterManager } from '@kbn/data-plugin/public';
 import type { TableById } from '@kbn/securitysolution-data-table';
 import type { ColumnHeaderOptions, SortColumnTimeline } from '../../../../common/types';
-import type { RowRendererId } from '../../../../common/types/timeline/api';
+import type { RowRendererId } from '../../../../common/api/timeline';
 import type { inputsModel } from '../../../common/store/inputs';
 import type { NotesById } from '../../../common/store/app/model';
 
 import type { TimelineModel } from './model';
-
-export interface AutoSavedWarningMsg {
-  timelineId: string | null;
-  newTimelineModel: TimelineModel | null;
-}
 
 /** A map of id to timeline  */
 export interface TimelineById {
@@ -41,7 +36,6 @@ export const EMPTY_TIMELINE_BY_ID: TimelineById = {}; // stable reference
 /** The state of all timelines is stored here */
 export interface TimelineState {
   timelineById: TimelineById;
-  autoSavedWarningMsg: AutoSavedWarningMsg;
   showCallOutUnauthorizedMsg: boolean;
   insertTimeline: InsertTimeline | null;
 }

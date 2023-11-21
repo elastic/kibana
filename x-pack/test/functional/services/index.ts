@@ -68,6 +68,7 @@ import { ActionsServiceProvider } from './actions';
 import { RulesServiceProvider } from './rules';
 import { AiopsProvider } from './aiops';
 import { SampleDataServiceProvider } from './sample_data';
+import { DataStreamProvider } from './data_stream';
 
 // define the name and providers for services that should be
 // available to your tests. If you don't specify anything here
@@ -129,4 +130,5 @@ export const services = {
   cases: CasesServiceProvider,
   aiops: AiopsProvider,
   sampleData: SampleDataServiceProvider,
+  dataStreams: DataStreamProvider,
 };

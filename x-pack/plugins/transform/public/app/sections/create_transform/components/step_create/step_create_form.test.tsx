@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 import { StepCreateForm, StepCreateFormProps } from './step_create_form';
 
@@ -16,6 +17,7 @@ jest.mock('../../../../app_dependencies');
 describe('Transform: <StepCreateForm />', () => {
   test('Minimal initialization', () => {
     // Arrange
+    const queryClient = new QueryClient();
     const props: StepCreateFormProps = {
       createDataView: false,
       transformId: 'the-transform-id',
@@ -35,7 +37,11 @@ describe('Transform: <StepCreateForm />', () => {
       onChange() {},
     };
 
-    const { getByText } = render(<StepCreateForm {...props} />);
+    const { getByText } = render(
+      <QueryClientProvider client={queryClient}>
+        <StepCreateForm {...props} />
+      </QueryClientProvider>
+    );
 
     // Act
     // Assert

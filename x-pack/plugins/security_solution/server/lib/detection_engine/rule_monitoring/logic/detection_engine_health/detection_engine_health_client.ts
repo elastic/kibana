@@ -16,20 +16,23 @@ import type {
   RuleHealthSnapshot,
   SpaceHealthParameters,
   SpaceHealthSnapshot,
-} from '../../../../../../common/detection_engine/rule_monitoring';
+} from '../../../../../../common/api/detection_engine/rule_monitoring';
 
 import type { IEventLogHealthClient } from './event_log/event_log_health_client';
 import type { IRuleObjectsHealthClient } from './rule_objects/rule_objects_health_client';
+import type { IRuleSpacesClient } from './rule_spaces/rule_spaces_client';
 import type { IDetectionEngineHealthClient } from './detection_engine_health_client_interface';
 import { installAssetsForRuleMonitoring } from './assets/install_assets_for_rule_monitoring';
 
 export const createDetectionEngineHealthClient = (
+  ruleSpacesClient: IRuleSpacesClient,
   ruleObjectsHealthClient: IRuleObjectsHealthClient,
   eventLogHealthClient: IEventLogHealthClient,
   savedObjectsImporter: ISavedObjectsImporter,
-  logger: Logger,
-  currentSpaceId: string
+  logger: Logger
 ): IDetectionEngineHealthClient => {
+  const currentSpaceId = ruleSpacesClient.getCurrentSpaceId();
+
   return {
     calculateRuleHealth: (args: RuleHealthParameters): Promise<RuleHealthSnapshot> => {
       return withSecuritySpan('IDetectionEngineHealthClient.calculateRuleHealth', async () => {
@@ -41,7 +44,7 @@ export const createDetectionEngineHealthClient = (
           const statsBasedOnEventLog = await eventLogHealthClient.calculateRuleHealth(args);
 
           return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
             stats_over_interval: statsBasedOnEventLog.stats_over_interval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {
@@ -73,7 +76,7 @@ export const createDetectionEngineHealthClient = (
           ]);
 
           return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
             stats_over_interval: statsBasedOnEventLog.stats_over_interval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {
@@ -104,7 +107,7 @@ export const createDetectionEngineHealthClient = (
           ]);
 
           return {
-            stats_at_the_moment: statsBasedOnRuleObjects.stats_at_the_moment,
+            state_at_the_moment: statsBasedOnRuleObjects.state_at_the_moment,
             stats_over_interval: statsBasedOnEventLog.stats_over_interval,
             history_over_interval: statsBasedOnEventLog.history_over_interval,
             debug: {

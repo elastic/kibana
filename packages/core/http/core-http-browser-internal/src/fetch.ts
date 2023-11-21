@@ -23,6 +23,7 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 import { HttpFetchError } from './http_fetch_error';
 import { HttpInterceptController } from './http_intercept_controller';
 import { interceptRequest, interceptResponse } from './intercept';
@@ -31,6 +32,7 @@ import { HttpInterceptHaltError } from './http_intercept_halt_error';
 interface Params {
   basePath: IBasePath;
   kibanaVersion: string;
+  buildNumber: number;
   executionContext: ExecutionContextSetup;
 }
 
@@ -135,6 +137,7 @@ export class Fetch {
         'Content-Type': 'application/json',
         ...options.headers,
         'kbn-version': this.params.kibanaVersion,
+        [KIBANA_BUILD_NR_HEADER]: this.params.buildNumber,
         [ELASTIC_HTTP_VERSION_HEADER]: version,
         [X_ELASTIC_INTERNAL_ORIGIN_REQUEST]: 'Kibana',
         ...(!isEmpty(context) ? new ExecutionContextContainer(context).toHeader() : {}),

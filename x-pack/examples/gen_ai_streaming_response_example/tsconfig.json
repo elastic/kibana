@@ -1,0 +1,30 @@
+{
+  "extends": "../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types"
+  },
+  "include": [
+    "index.ts",
+    "public/**/*.ts",
+    "public/**/*.tsx",
+    "server/**/*.ts",
+    "../../../typings/**/*",
+  ],
+  "exclude": [
+    "target/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/kibana-react-plugin",
+    "@kbn/triggers-actions-ui-plugin",
+    "@kbn/developer-examples-plugin",
+    "@kbn/i18n",
+    "@kbn/config-schema",
+    "@kbn/stack-connectors-plugin",
+    "@kbn/alerting-plugin",
+    "@kbn/charts-plugin",
+    "@kbn/data-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/ml-response-stream",
+  ]
+}

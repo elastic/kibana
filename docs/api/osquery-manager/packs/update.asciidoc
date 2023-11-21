@@ -38,6 +38,8 @@ WARNING: You are unable to update a prebuilt pack (`read_only = true`).
 
 `policy_ids`:: (Optional, array) A list of agent policy IDs.
 
+`shards`:: (Optional, object) An object with shard configuration for policies included in the pack. For each policy, set the shard configuration to a percentage (1–100) of target hosts.
+
 `queries`:: (Required, object) An object of queries.
 
 

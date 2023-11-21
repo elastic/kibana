@@ -78,6 +78,7 @@ export const AddPrebuiltRulesTable = React.memo(() => {
                   <AddPrebuiltRulesTableFilters />
                 </EuiFlexItem>
               </EuiFlexGroup>
+
               <EuiInMemoryTable
                 items={filteredRules}
                 sorting

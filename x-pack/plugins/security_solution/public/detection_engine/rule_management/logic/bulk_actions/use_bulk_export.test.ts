@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react-hooks';
-import { BulkActionType } from '../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionTypeEnum } from '../../../../../common/api/detection_engine/rule_management';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useRulesTableContextOptional } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import { useBulkExportMutation } from '../../api/hooks/use_bulk_export_mutation';
@@ -92,7 +92,7 @@ describe('useBulkExport', () => {
 
       expect(setLoadingRules).toHaveBeenCalledWith({
         ids: ['ruleId1', 'ruleId2'],
-        action: BulkActionType.export,
+        action: BulkActionTypeEnum.export,
       });
     });
 
@@ -101,7 +101,7 @@ describe('useBulkExport', () => {
 
       expect(setLoadingRules).toHaveBeenCalledWith({
         ids: [],
-        action: BulkActionType.export,
+        action: BulkActionTypeEnum.export,
       });
     });
 

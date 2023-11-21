@@ -16,6 +16,7 @@ import { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { StartDeps } from '../types';
 import { TodoApp } from './todos';
 import { MSearchApp } from './msearch';
+import { FinderApp } from './finder';
 
 export const renderApp = (
   core: CoreStart,
@@ -45,6 +46,12 @@ export const renderApp = (
                       'data-test-subj': 'msearchExample',
                       href: '/app/contentManagementExamples/msearch',
                     },
+                    {
+                      id: 'finder',
+                      name: 'Finder',
+                      'data-test-subj': 'finderExample',
+                      href: '/app/contentManagementExamples/finder',
+                    },
                   ],
                 },
               ]}
@@ -59,6 +66,13 @@ export const renderApp = (
               </Route>
               <Route path="/msearch">
                 <MSearchApp
+                  contentClient={contentManagement.client}
+                  core={core}
+                  savedObjectsTagging={savedObjectsTaggingOss}
+                />
+              </Route>
+              <Route path="/finder">
+                <FinderApp
                   contentClient={contentManagement.client}
                   core={core}
                   savedObjectsTagging={savedObjectsTaggingOss}

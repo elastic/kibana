@@ -14,6 +14,14 @@ import * as range from './range';
 import * as exists from './exists';
 import * as nested from './nested';
 
+export { KQL_FUNCTION_AND } from './and';
+export { KQL_FUNCTION_EXISTS } from './exists';
+export { KQL_FUNCTION_IS } from './is';
+export { KQL_FUNCTION_NESTED } from './nested';
+export { KQL_FUNCTION_NOT } from './not';
+export { KQL_FUNCTION_OR } from './or';
+export { KQL_FUNCTION_RANGE } from './range';
+
 export const functions = {
   is,
   and,

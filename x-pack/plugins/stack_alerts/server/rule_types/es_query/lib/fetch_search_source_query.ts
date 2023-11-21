@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import { omit, pickBy, mapValues } from 'lodash';
 import { buildRangeFilter, Filter } from '@kbn/es-query';
 import {
   DataView,
   DataViewsContract,
-  getTime,
   ISearchSource,
   ISearchStartSearchSource,
   SortDirection,
@@ -41,6 +39,8 @@ export interface FetchSearchSourceQueryOpts {
     share: SharePluginStart;
     dataViews: DataViewsContract;
   };
+  dateStart: string;
+  dateEnd: string;
 }
 
 export async function fetchSearchSourceQuery({
@@ -50,6 +50,8 @@ export async function fetchSearchSourceQuery({
   latestTimestamp,
   spacePrefix,
   services,
+  dateStart,
+  dateEnd,
 }: FetchSearchSourceQueryOpts) {
   const { logger, searchSourceClient } = services;
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -58,11 +60,13 @@ export async function fetchSearchSourceQuery({
   const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
 
   const index = initialSearchSource.getField('index') as DataView;
-  const { searchSource, dateStart, dateEnd } = updateSearchSource(
+  const searchSource = updateSearchSource(
     initialSearchSource,
     index,
     params,
     latestTimestamp,
+    dateStart,
+    dateEnd,
     alertLimit
   );
 
@@ -88,8 +92,7 @@ export async function fetchSearchSourceQuery({
     numMatches: Number(searchResult.hits.total),
     searchResult,
     parsedResults: parseAggregationResults({ isCountAgg, isGroupAgg, esResult: searchResult }),
-    dateStart,
-    dateEnd,
+    index: [index.name],
   };
 }
 
@@ -98,6 +101,8 @@ export function updateSearchSource(
   index: DataView,
   params: OnlySearchSourceRuleParams,
   latestTimestamp: string | undefined,
+  dateStart: string,
+  dateEnd: string,
   alertLimit?: number
 ) {
   const isGroupAgg = isGroupAggregation(params.termField);
@@ -109,20 +114,19 @@ export function updateSearchSource(
 
   searchSource.setField('size', isGroupAgg ? 0 : params.size);
 
-  const timeRange = {
-    from: `now-${params.timeWindowSize}${params.timeWindowUnit}`,
-    to: 'now',
-  };
-  const timerangeFilter = getTime(index, timeRange);
-  const dateStart = timerangeFilter?.query.range[timeFieldName].gte;
-  const dateEnd = timerangeFilter?.query.range[timeFieldName].lte;
-  const filters = [timerangeFilter];
+  const field = index.fields.find((f) => f.name === timeFieldName);
+  const filters = [
+    buildRangeFilter(
+      field!,
+      { lte: dateEnd, gte: dateStart, format: 'strict_date_optional_time' },
+      index
+    ),
+  ];
 
   if (params.excludeHitsFromPreviousRun) {
     if (latestTimestamp && latestTimestamp > dateStart) {
       // add additional filter for documents with a timestamp greater then
       // the timestamp of the previous run, so that those documents are not counted twice
-      const field = index.fields.find((f) => f.name === timeFieldName);
       const addTimeRangeField = buildRangeFilter(
         field!,
         { gt: latestTimestamp, format: 'strict_date_optional_time' },
@@ -160,11 +164,7 @@ export function updateSearchSource(
       ...(isGroupAgg ? { topHitsSize: params.size } : {}),
     })
   );
-  return {
-    searchSource: searchSourceChild,
-    dateStart,
-    dateEnd,
-  };
+  return searchSourceChild;
 }
 
 async function generateLink(
@@ -221,19 +221,5 @@ function updateFilterReferences(filters: Filter[], fromDataView: string, toDataV
 export function getSmallerDataViewSpec(
   dataView: DataView
 ): DiscoverAppLocatorParams['dataViewSpec'] {
-  const dataViewSpec = dataView.toSpec(false);
-
-  if (dataViewSpec.fieldAttrs) {
-    // remove `count` props
-    dataViewSpec.fieldAttrs = pickBy(
-      mapValues(dataViewSpec.fieldAttrs, (fieldAttrs) => omit(fieldAttrs, 'count')),
-      (trimmedFieldAttrs) => Object.keys(trimmedFieldAttrs).length > 0
-    );
-
-    if (Object.keys(dataViewSpec.fieldAttrs).length === 0) {
-      dataViewSpec.fieldAttrs = undefined;
-    }
-  }
-
-  return dataViewSpec;
+  return dataView.toMinimalSpec();
 }

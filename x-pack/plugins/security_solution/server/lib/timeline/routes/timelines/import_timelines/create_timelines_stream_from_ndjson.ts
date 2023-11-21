@@ -19,7 +19,7 @@ import {
 } from '../../../../../utils/read_stream/create_stream_from_ndjson';
 
 import type { ImportTimelineResponse } from './types';
-import { ImportTimelinesSchemaRt } from '../../../schemas/timelines/import_timelines_schema';
+import { ImportTimelinesSchemaRt } from '../../../../../../common/api/timeline';
 import { throwErrors } from '../../../utils/common';
 
 type ErrorFactory = (message: string) => Error;

@@ -27,7 +27,7 @@ export const PROFILING_FEATURE = {
         read: [],
       },
       ui: ['show'],
-      api: [PROFILING_SERVER_FEATURE_ID, 'ai_assistant'],
+      api: [PROFILING_SERVER_FEATURE_ID],
     },
     read: {
       app: [PROFILING_SERVER_FEATURE_ID, 'ux', 'kibana'],
@@ -36,7 +36,7 @@ export const PROFILING_FEATURE = {
         read: [],
       },
       ui: ['show'],
-      api: [PROFILING_SERVER_FEATURE_ID, 'ai_assistant'],
+      api: [PROFILING_SERVER_FEATURE_ID],
     },
   },
 };

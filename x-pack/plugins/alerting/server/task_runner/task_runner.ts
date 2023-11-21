@@ -6,11 +6,16 @@
  */
 
 import apm from 'elastic-apm-node';
-import { omit } from 'lodash';
+import { omit, some } from 'lodash';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import { Logger } from '@kbn/core/server';
-import { ConcreteTaskInstance, throwUnrecoverableError } from '@kbn/task-manager-plugin/server';
+import {
+  ConcreteTaskInstance,
+  throwUnrecoverableError,
+  createTaskRunError,
+  TaskErrorSource,
+} from '@kbn/task-manager-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import { ExecutionHandler, RunResult } from './execution_handler';
@@ -47,9 +52,9 @@ import {
   parseDuration,
   RawAlertInstance,
   RuleLastRunOutcomeOrderMap,
-  MaintenanceWindow,
   RuleAlertData,
   SanitizedRule,
+  RuleNotifyWhen,
 } from '../../common';
 import { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
@@ -79,6 +84,8 @@ import { RunningHandler } from './running_handler';
 import { RuleResultService } from '../monitoring/rule_result_service';
 import { LegacyAlertsClient } from '../alerts_client';
 import { IAlertsClient } from '../alerts_client/types';
+import { MaintenanceWindow } from '../application/maintenance_window/types';
+import { getTimeRange } from '../lib/get_time_range';
 
 const FALLBACK_RETRY_INTERVAL = '5m';
 const CONNECTIVITY_RETRY_INTERVAL = '5m';
@@ -323,6 +330,7 @@ export class TaskRunner<
 
     const rulesSettingsClient = this.context.getRulesSettingsClientWithRequest(fakeRequest);
     const flappingSettings = await rulesSettingsClient.flapping().get();
+    const queryDelaySettings = await rulesSettingsClient.queryDelay().get();
 
     const alertsClientParams = {
       logger: this.logger,
@@ -378,6 +386,7 @@ export class TaskRunner<
       maxAlerts: this.maxAlerts,
       ruleLabel,
       flappingSettings,
+      startedAt: this.taskInstance.startedAt!,
       activeAlertsFromState: alertRawInstances,
       recoveredAlertsFromState: alertRecoveredRawInstances,
     });
@@ -413,9 +422,20 @@ export class TaskRunner<
       );
     }
 
-    const maintenanceWindowIds = activeMaintenanceWindows.map(
-      (maintenanceWindow) => maintenanceWindow.id
-    );
+    const maintenanceWindowIds = activeMaintenanceWindows
+      .filter(({ categoryIds }) => {
+        // If category IDs array doesn't exist: allow all
+        if (!Array.isArray(categoryIds)) {
+          return true;
+        }
+        // If category IDs array exist: check category
+        if ((categoryIds as string[]).includes(ruleType.category)) {
+          return true;
+        }
+        return false;
+      })
+      .map(({ id }) => id);
+
     if (maintenanceWindowIds.length) {
       this.alertingEventLogger.setMaintenanceWindowIds(maintenanceWindowIds);
     }
@@ -501,6 +521,8 @@ export class TaskRunner<
               logger: this.logger,
               flappingSettings,
               ...(maintenanceWindowIds.length ? { maintenanceWindowIds } : {}),
+              getTimeRange: (timeWindow) =>
+                getTimeRange(this.logger, queryDelaySettings, timeWindow),
             })
           );
 
@@ -546,7 +568,9 @@ export class TaskRunner<
         ruleRunMetricsStore,
         shouldLogAlerts: this.shouldLogAndScheduleActionsForAlerts(),
         flappingSettings,
-        notifyWhen,
+        notifyOnActionGroupChange:
+          notifyWhen === RuleNotifyWhen.CHANGE ||
+          some(actions, (action) => action.frequency?.notifyWhen === RuleNotifyWhen.CHANGE),
         maintenanceWindowIds,
       });
     });
@@ -570,6 +594,7 @@ export class TaskRunner<
       alertingEventLogger: this.alertingEventLogger,
       actionsClient: await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest),
       maintenanceWindowIds,
+      alertsClient,
     });
 
     let executionHandlerRunResult: RunResult = { throttledSummaryActions: {} };
@@ -855,7 +880,7 @@ export class TaskRunner<
     ): RuleTaskState => {
       return {
         ...omit(runStateWithMetrics, ['metrics']),
-        previousStartedAt: startedAt,
+        previousStartedAt: startedAt?.toISOString(),
       };
     };
 
@@ -917,7 +942,9 @@ export class TaskRunner<
         return { interval: retryInterval };
       }),
       monitoring: this.ruleMonitoring.getMonitoring(),
-      hasError: isErr(schedule),
+      ...(isErr(schedule)
+        ? { taskRunError: createTaskRunError(schedule.error, TaskErrorSource.FRAMEWORK) }
+        : {}),
     };
   }
 

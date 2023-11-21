@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import {
   EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFocusTrap,
+  EuiHorizontalRule,
+  EuiIcon,
   EuiListGroup,
   EuiListGroupItem,
   EuiOutsideClickDetector,
@@ -26,30 +28,36 @@ import {
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
-  type SolutionSideNavItem,
-  type LinkCategories,
   isAccordionLinkCategory,
   isTitleLinkCategory,
   isSeparatorLinkCategory,
-} from './types';
+  type LinkCategories,
+  type TitleLinkCategory,
+  type AccordionLinkCategory,
+  type SeparatorLinkCategory,
+} from '@kbn/security-solution-navigation';
+import type { SolutionSideNavItem } from './types';
 import { BetaBadge } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';
 import {
   SolutionSideNavPanelStyles,
-  panelClass,
   SolutionSideNavCategoryTitleStyles,
   SolutionSideNavTitleStyles,
   SolutionSideNavCategoryAccordionStyles,
   SolutionSideNavPanelLinksGroupStyles,
+  panelClassName,
+  accordionButtonClassName,
 } from './solution_side_nav_panel.styles';
 
-export interface SolutionSideNavPanelProps {
-  onClose: () => void;
-  onOutsideClick: () => void;
+export interface SolutionSideNavPanelContentProps {
   title: string;
+  onClose: () => void;
   items: SolutionSideNavItem[];
   categories?: LinkCategories;
+}
+export interface SolutionSideNavPanelProps extends SolutionSideNavPanelContentProps {
+  onOutsideClick: () => void;
   bottomOffset?: string;
   topOffset?: string;
 }
@@ -78,8 +86,7 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
       $bottomOffset,
       $topOffset,
     });
-    const panelClasses = classNames(panelClass, 'eui-yScroll', solutionSideNavPanelStyles);
-    const titleClasses = classNames(SolutionSideNavTitleStyles(euiTheme));
+    const panelClasses = classNames(panelClassName, 'eui-yScroll', solutionSideNavPanelStyles);
 
     // ESC key closes PanelNav
     const onKeyDown = useCallback(
@@ -104,29 +111,44 @@ export const SolutionSideNavPanel: React.FC<SolutionSideNavPanelProps> = React.m
                 paddingSize="m"
                 data-test-subj="solutionSideNavPanel"
               >
-                <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
-                  <EuiFlexItem>
-                    <EuiTitle size="xs" className={titleClasses}>
-                      <strong>{title}</strong>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem style={{ width: '100%' }}>
-                    {categories ? (
-                      <SolutionSideNavPanelCategories
-                        categories={categories}
-                        items={items}
-                        onClose={onClose}
-                      />
-                    ) : (
-                      <SolutionSideNavPanelItems items={items} onClose={onClose} />
-                    )}
-                  </EuiFlexItem>
-                </EuiFlexGroup>
+                <SolutionSideNavPanelContent
+                  title={title}
+                  categories={categories}
+                  items={items}
+                  onClose={onClose}
+                />
               </EuiPanel>
             </EuiOutsideClickDetector>
           </EuiFocusTrap>
         </EuiPortal>
       </>
+    );
+  }
+);
+
+export const SolutionSideNavPanelContent: React.FC<SolutionSideNavPanelContentProps> = React.memo(
+  function SolutionSideNavPanelContent({ title, onClose, categories, items }) {
+    const { euiTheme } = useEuiTheme();
+    const titleClasses = classNames(SolutionSideNavTitleStyles(euiTheme));
+    return (
+      <EuiFlexGroup direction="column" gutterSize="m" alignItems="flexStart">
+        <EuiFlexItem>
+          <EuiTitle size="xs" className={titleClasses}>
+            <strong>{title}</strong>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem style={{ width: '100%' }}>
+          {categories ? (
+            <SolutionSideNavPanelCategories
+              categories={categories}
+              items={items}
+              onClose={onClose}
+            />
+          ) : (
+            <SolutionSideNavPanelItems items={items} onClose={onClose} />
+          )}
+        </EuiFlexItem>
+      </EuiFlexGroup>
     );
   }
 );
@@ -145,42 +167,32 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
     return (
       <>
         {categories.map((category, index) => {
-          const categoryItems = category.linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
-            const link = items.find((item) => item.id === linkId);
-            if (link) {
-              acc.push(link);
-            }
-            return acc;
-          }, []);
-
-          if (!categoryItems.length) {
-            return null;
-          }
-
           if (isTitleLinkCategory(category)) {
             return (
               <SolutionSideNavPanelTitleCategory
-                label={category.label}
-                items={categoryItems}
+                key={`${category.label}-${index}`}
+                category={category}
+                items={items}
                 onClose={onClose}
-                key={category.label}
               />
             );
           }
           if (isAccordionLinkCategory(category)) {
             return (
               <SolutionSideNavPanelAccordionCategory
-                label={category.label}
-                items={categoryItems}
+                key={`${category.label}-${index}`}
+                category={category}
+                items={items}
                 onClose={onClose}
-                key={category.label}
+                index={index}
               />
             );
           }
           if (isSeparatorLinkCategory(category)) {
             return (
               <SolutionSideNavPanelSeparatorCategory
-                items={categoryItems}
+                category={category}
+                items={items}
                 onClose={onClose}
                 key={index}
               />
@@ -193,50 +205,101 @@ const SolutionSideNavPanelCategories: React.FC<SolutionSideNavPanelCategoriesPro
   }
 );
 
-interface SolutionSideNavPanelTitleCategoryProps {
-  label: string;
+/** Helper to retrieve the items for a given category */
+const useCategoryItems = ({
+  items,
+  linkIds,
+}: {
   items: SolutionSideNavItem[];
+  linkIds: readonly string[];
+}) => {
+  return useMemo(
+    () =>
+      linkIds.reduce<SolutionSideNavItem[]>((acc, linkId) => {
+        const link = items.find((item) => item.id === linkId);
+        if (link) {
+          acc.push(link);
+        }
+        return acc;
+      }, []),
+    [items, linkIds]
+  );
+};
+
+interface SolutionSideNavPanelTitleCategoryProps {
+  items: SolutionSideNavItem[];
+  category: TitleLinkCategory;
   onClose: () => void;
 }
 /**
  * Renders a title category for the secondary navigation panel.
  */
 const SolutionSideNavPanelTitleCategory: React.FC<SolutionSideNavPanelTitleCategoryProps> =
-  React.memo(function SolutionSideNavPanelTitleCategory({ label, onClose, items }) {
+  React.memo(function SolutionSideNavPanelTitleCategory({
+    category: { linkIds, label },
+    items,
+    onClose,
+  }) {
     const { euiTheme } = useEuiTheme();
     const titleClasses = classNames(SolutionSideNavCategoryTitleStyles(euiTheme));
+    const categoryItems = useCategoryItems({ items, linkIds });
+    if (!categoryItems?.length) {
+      return null;
+    }
     return (
       <>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="l" />
         <EuiTitle size="xxxs" className={titleClasses}>
           <h2>{label}</h2>
         </EuiTitle>
-        <SolutionSideNavPanelItems items={items} onClose={onClose} />
-        <EuiSpacer size="s" />
+        <SolutionSideNavPanelItems items={categoryItems} onClose={onClose} />
       </>
     );
   });
 
 interface SolutionSideNavPanelAccordionCategoryProps {
-  label: string;
+  category: AccordionLinkCategory;
   items: SolutionSideNavItem[];
   onClose: () => void;
+  index: number;
 }
 /**
  * Renders an accordion category for the secondary navigation panel.
  */
 const SolutionSideNavPanelAccordionCategory: React.FC<SolutionSideNavPanelAccordionCategoryProps> =
-  React.memo(function SolutionSideNavPanelAccordionCategory({ label, onClose, items }) {
+  React.memo(function SolutionSideNavPanelAccordionCategory({
+    category: { label, categories },
+    items,
+    onClose,
+    index,
+  }) {
     const { euiTheme } = useEuiTheme();
     const accordionClasses = classNames(SolutionSideNavCategoryAccordionStyles(euiTheme));
     return (
-      <EuiAccordion id={label} buttonContent={label} className={accordionClasses}>
-        <SolutionSideNavPanelItems items={items} onClose={onClose} />
-      </EuiAccordion>
+      <>
+        {index > 0 && <EuiHorizontalRule margin="xs" />}
+        <EuiSpacer size="m" />
+        <EuiAccordion
+          id={label}
+          buttonContent={label}
+          className={accordionClasses}
+          buttonClassName={accordionButtonClassName}
+        >
+          {categories && (
+            <SolutionSideNavPanelCategories
+              categories={categories}
+              items={items}
+              onClose={onClose}
+            />
+          )}
+          {/* This component can be extended to render SolutionSideNavPanelItems when `linkIds` is defined in the category */}
+        </EuiAccordion>
+      </>
     );
   });
 
 interface SolutionSideNavPanelSeparatorCategoryProps {
+  category: SeparatorLinkCategory;
   items: SolutionSideNavItem[];
   onClose: () => void;
 }
@@ -244,12 +307,19 @@ interface SolutionSideNavPanelSeparatorCategoryProps {
  * Renders a separator category for the secondary navigation panel.
  */
 const SolutionSideNavPanelSeparatorCategory: React.FC<SolutionSideNavPanelSeparatorCategoryProps> =
-  React.memo(function SolutionSideNavPanelSeparatorCategory({ onClose, items }) {
+  React.memo(function SolutionSideNavPanelSeparatorCategory({
+    category: { linkIds },
+    items,
+    onClose,
+  }) {
+    const categoryItems = useCategoryItems({ items, linkIds });
+    if (!categoryItems?.length) {
+      return null;
+    }
     return (
       <>
         <EuiSpacer size="m" />
-        <SolutionSideNavPanelItems items={items} onClose={onClose} />
-        <EuiSpacer size="s" />
+        <SolutionSideNavPanelItems items={categoryItems} onClose={onClose} />
       </>
     );
   });
@@ -265,38 +335,64 @@ const SolutionSideNavPanelItems: React.FC<SolutionSideNavPanelItemsProps> = Reac
   function SolutionSideNavPanelItems({ items, onClose }) {
     const { euiTheme } = useEuiTheme();
     const panelLinksGroupClassNames = classNames(SolutionSideNavPanelLinksGroupStyles(euiTheme));
-    const panelLinkClassNames = classNames('solutionSideNavPanelLink');
-    const { tracker } = useTelemetryContext();
     return (
       <EuiListGroup className={panelLinksGroupClassNames}>
-        {items.map(({ id, href, onClick, label, iconType, isBeta, betaOptions }) => {
-          const itemLabel = !isBeta ? (
-            label
-          ) : (
-            <>
-              {label} <BetaBadge text={betaOptions?.text} />
-            </>
-          );
-
-          return (
-            <EuiListGroupItem
-              key={id}
-              label={itemLabel}
-              wrapText
-              className={panelLinkClassNames}
-              size="s"
-              data-test-subj={`solutionSideNavPanelLink-${id}`}
-              href={href}
-              iconType={iconType}
-              onClick={(ev) => {
-                tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION}${id}`);
-                onClose();
-                onClick?.(ev);
-              }}
-            />
-          );
-        })}
+        {items.map((item) => (
+          <SolutionSideNavPanelItem key={item.id} item={item} onClose={onClose} />
+        ))}
       </EuiListGroup>
     );
   }
 );
+
+interface SolutionSideNavPanelItemProps {
+  item: SolutionSideNavItem;
+  onClose: () => void;
+}
+/**
+ * Renders one item for the secondary navigation panel.
+ * */
+const SolutionSideNavPanelItem: React.FC<SolutionSideNavPanelItemProps> = React.memo(
+  function SolutionSideNavPanelItem({ item, onClose }) {
+    const { tracker } = useTelemetryContext();
+    const panelLinkClassNames = classNames('solutionSideNavPanelLink');
+    const { id, href, onClick, iconType, openInNewTab } = item;
+    const onClickHandler = useCallback<React.MouseEventHandler>(
+      (ev) => {
+        tracker?.(METRIC_TYPE.CLICK, `${TELEMETRY_EVENT.PANEL_NAVIGATION}${id}`);
+        onClose();
+        onClick?.(ev);
+      },
+      [id, onClick, onClose, tracker]
+    );
+
+    return (
+      <EuiListGroupItem
+        key={id}
+        label={<ItemLabel item={item} />}
+        wrapText
+        className={panelLinkClassNames}
+        size="s"
+        data-test-subj={`solutionSideNavPanelLink-${id}`}
+        href={href}
+        iconType={iconType}
+        onClick={onClickHandler}
+        target={openInNewTab ? '_blank' : undefined}
+      />
+    );
+  }
+);
+
+/**
+ * Renders the navigation item label
+ **/
+const ItemLabel: React.FC<{ item: SolutionSideNavItem }> = React.memo(function ItemLabel({
+  item: { label, openInNewTab, isBeta, betaOptions },
+}) {
+  return (
+    <>
+      {label} {openInNewTab && <EuiIcon type="popout" size="s" />}
+      {isBeta && <BetaBadge text={betaOptions?.text} />}
+    </>
+  );
+});

@@ -59,7 +59,8 @@ function valueSchemaToConfigSchema(value: TelemetrySchemaValue): Type<unknown> {
       case 'keyword':
       case 'text':
       case 'date':
-        return schema.string();
+        // Some plugins return `null` when there is no value to report
+        return schema.oneOf([schema.string(), schema.literal(null)]);
       case 'byte':
       case 'double':
       case 'float':

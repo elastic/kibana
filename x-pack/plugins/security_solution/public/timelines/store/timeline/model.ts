@@ -25,8 +25,8 @@ import type {
   RowRendererId,
   TimelineStatus,
   TimelineType,
-} from '../../../../common/types/timeline/api';
-import type { PinnedEvent } from '../../../../common/types/timeline/pinned_event/api';
+  PinnedEvent,
+} from '../../../../common/api/timeline';
 import type { ResolveTimelineConfig } from '../../components/open_timeline/types';
 
 export type KqlMode = 'filter' | 'search';
@@ -133,6 +133,11 @@ export interface TimelineModel {
   isSelectAllChecked: boolean;
   isLoading: boolean;
   selectAll: boolean;
+  /* discover saved search Id */
+  savedSearchId: string | null;
+  isDiscoverSavedSearchLoaded?: boolean;
+  /** used to mark the timeline as unsaved in the UI */
+  changed?: boolean;
 }
 
 export type SubsetTimelineModel = Readonly<
@@ -186,12 +191,16 @@ export type SubsetTimelineModel = Readonly<
     | 'status'
     | 'filters'
     | 'filterManager'
+    | 'savedSearchId'
+    | 'isDiscoverSavedSearchLoaded'
+    | 'changed'
   >
 >;
 
 export interface TimelineUrl {
   activeTab?: TimelineTabs;
-  id: string;
+  id?: string;
   isOpen: boolean;
   graphEventId?: string;
+  savedSearchId?: string;
 }

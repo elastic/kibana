@@ -34,6 +34,7 @@ import {
   TRAINING_PERCENT_MAX,
 } from '@kbn/ml-data-frame-analytics-utils';
 import { DataGrid } from '@kbn/ml-data-grid';
+import { SEARCH_QUERY_LANGUAGE } from '@kbn/ml-query-utils';
 import { useMlKibana } from '../../../../../contexts/kibana';
 import {
   EuiComboBoxWithFieldStats,
@@ -62,7 +63,6 @@ import { fetchExplainData } from '../shared';
 import { useIndexData } from '../../hooks';
 import { ExplorationQueryBar } from '../../../analytics_exploration/components/exploration_query_bar';
 import { useSavedSearch, SavedSearchQuery } from './use_saved_search';
-import { SEARCH_QUERY_LANGUAGE } from '../../../../../../../common/constants/search';
 import { ExplorationQueryBarProps } from '../../../analytics_exploration/components/exploration_query_bar/exploration_query_bar';
 
 import { ScatterplotMatrix } from '../../../../../components/scatterplot_matrix';

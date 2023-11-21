@@ -1,11 +1,21 @@
 {
   "ingest.geo_ip_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
     "methods": [
       "GET"
     ],
     "patterns": [
       "_ingest/geoip/stats"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/geoip-stats-api.html"
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/geoip-processor.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
   }
 }

@@ -37,7 +37,7 @@ export function elasticsearchErrorHandler<ContextType, RequestType, ResponseType
         enterpriseSearchError = {
           errorCode: ErrorCode.UNCAUGHT_EXCEPTION,
           message: i18n.translate('xpack.enterpriseSearch.server.routes.uncaughtExceptionError', {
-            defaultMessage: 'Enterprise Search encountered an error.',
+            defaultMessage: 'Search encountered an error.',
           }),
           statusCode: 502,
         };

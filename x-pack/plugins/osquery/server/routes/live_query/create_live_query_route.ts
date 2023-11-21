@@ -11,11 +11,11 @@ import markdown from 'remark-parse-no-trim';
 import { some, filter } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import type { ECSMappingOrUndefined } from '@kbn/osquery-io-ts-types';
+import type { CreateLiveQueryRequestBodySchema } from '../../../common/api';
+import { createLiveQueryRequestBodySchema } from '../../../common/api';
 import { API_VERSIONS } from '../../../common/constants';
 import { PARAMETER_NOT_FOUND } from '../../../common/translations/errors';
 import { replaceParamsQuery } from '../../../common/utils/replace_params_query';
-import { createLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
-import type { CreateLiveQueryRequestBodySchema } from '../../../common/schemas/routes/live_query';
 import { buildRouteValidation } from '../../utils/build_validation/route_validation';
 import type { OsqueryAppContext } from '../../lib/osquery_app_context_services';
 import { createActionHandler } from '../../handlers';
@@ -45,7 +45,9 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
 
         const {
           osquery: { writeLiveQueries, runSavedQueries },
-        } = await coreStartServices.capabilities.resolveCapabilities(request);
+        } = await coreStartServices.capabilities.resolveCapabilities(request, {
+          capabilityPath: 'osquery.*',
+        });
 
         const isInvalid = !(
           writeLiveQueries ||

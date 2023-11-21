@@ -11,7 +11,7 @@ export default function ({ getService }: FtrProviderContext) {
   const a11y = getService('a11y');
   const transform = getService('transform');
 
-  describe('transform Accessibility', () => {
+  describe('transform Accessibility', function () {
     const esArchiver = getService('esArchiver');
 
     before(async () => {
@@ -147,7 +147,7 @@ export default function ({ getService }: FtrProviderContext) {
           await a11y.testAppSnapshot();
         });
 
-        it('create pivot transform configuration step JSON editor', async () => {
+        it.skip('create pivot transform configuration step JSON editor', async () => {
           await transform.testExecution.logTestStep('displays the JSON pivot configuration');
           await transform.wizard.assertAdvancedPivotEditorSwitchExists();
           await transform.wizard.enableAdvancedPivotEditor();

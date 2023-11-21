@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BulkActionEditType } from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+import { BulkActionEditTypeEnum } from '../../../../../../common/api/detection_engine/rule_management';
 import type {
   BulkActionEditPayload,
   BulkActionEditForRuleAttributes,
   BulkActionEditForRuleParams,
-} from '../../../../../../common/detection_engine/rule_management/api/rules/bulk_actions/request_schema';
+} from '../../../../../../common/api/detection_engine/rule_management';
 
 /**
  * Split bulk edit actions in 2 chunks: actions applied to params and
@@ -29,15 +29,15 @@ export const splitBulkEditActions = (actions: BulkActionEditPayload[]) => {
 
   return actions.reduce((acc, action) => {
     switch (action.type) {
-      case BulkActionEditType.set_schedule:
+      case BulkActionEditTypeEnum.set_schedule:
         acc.attributesActions.push(action);
         acc.paramsActions.push(action);
         break;
-      case BulkActionEditType.add_tags:
-      case BulkActionEditType.set_tags:
-      case BulkActionEditType.delete_tags:
-      case BulkActionEditType.add_rule_actions:
-      case BulkActionEditType.set_rule_actions:
+      case BulkActionEditTypeEnum.add_tags:
+      case BulkActionEditTypeEnum.set_tags:
+      case BulkActionEditTypeEnum.delete_tags:
+      case BulkActionEditTypeEnum.add_rule_actions:
+      case BulkActionEditTypeEnum.set_rule_actions:
         acc.attributesActions.push(action);
         break;
       default:

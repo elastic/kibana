@@ -21,6 +21,8 @@
     "@kbn/rison",
     "@kbn/crypto-browser",
     "@kbn/core-notifications-browser-mocks",
+    "@kbn/react-kibana-context-theme",
+    "@kbn/core-theme-browser",
   ],
   "exclude": [
     "target/**/*",

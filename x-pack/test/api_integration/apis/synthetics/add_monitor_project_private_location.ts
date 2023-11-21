@@ -18,6 +18,7 @@ export default function ({ getService }: FtrProviderContext) {
     this.tags('skipCloud');
 
     const supertest = getService('supertest');
+    const kibanaServer = getService('kibanaServer');
 
     let projectMonitors: ProjectMonitorsRequest;
 
@@ -46,6 +47,10 @@ export default function ({ getService }: FtrProviderContext) {
       await testPrivateLocations.setTestLocations([testPolicyId]);
     });
 
+    after(async () => {
+      await kibanaServer.savedObjects.cleanStandardList();
+    });
+
     beforeEach(() => {
       projectMonitors = setUniqueIds({
         monitors: getFixtureJson('project_browser_monitor').monitors,
@@ -58,17 +63,21 @@ export default function ({ getService }: FtrProviderContext) {
       const secondMonitor = {
         ...projectMonitors.monitors[0],
         id: 'test-id-2',
-        privateLocations: ['Test private location 0'],
+        privateLocations: ['Test private location 7'],
       };
       const testMonitors = [
         projectMonitors.monitors[0],
-        { ...secondMonitor, name: '!@#$%^&*()_++[\\-\\]- wow name' },
+        {
+          ...secondMonitor,
+          name: '!@#$%^&*()_++[\\-\\]- wow name',
+        },
       ];
       try {
-        const body = await monitorTestService.addProjectMonitors(project, testMonitors);
+        const { body, status } = await monitorTestService.addProjectMonitors(project, testMonitors);
+        expect(status).eql(200);
         expect(body.createdMonitors.length).eql(1);
         expect(body.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
+          "Couldn't save or update monitor because of an invalid configuration."
         );
       } finally {
         await Promise.all([
@@ -88,32 +97,37 @@ export default function ({ getService }: FtrProviderContext) {
         privateLocations: ['Test private location 0'],
       };
       const testMonitors = [projectMonitors.monitors[0], secondMonitor];
-      try {
-        const body = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(body.createdMonitors.length).eql(2);
-        const editedBody = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(editedBody.createdMonitors.length).eql(0);
-        expect(editedBody.updatedMonitors.length).eql(2);
+      const { body, status: status0 } = await monitorTestService.addProjectMonitors(
+        project,
+        testMonitors
+      );
+      expect(status0).eql(200);
 
-        testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+      expect(body.createdMonitors.length).eql(2);
+      const { body: editedBody, status: editedStatus } =
+        await monitorTestService.addProjectMonitors(project, testMonitors);
+      expect(editedStatus).eql(200);
 
-        const editedBodyError = await monitorTestService.addProjectMonitors(project, testMonitors);
-        expect(editedBodyError.createdMonitors.length).eql(0);
-        expect(editedBodyError.updatedMonitors.length).eql(1);
-        expect(editedBodyError.failedMonitors.length).eql(1);
-        expect(editedBodyError.failedMonitors[0].details).eql(
-          'Failed to update journey: test-id-2'
-        );
-        expect(editedBodyError.failedMonitors[0].reason).eql(
-          'unknown escape sequence at line 3, column 34:\n    name: "!@#$,%,^,&,*,(,),_,+,+,[,\\,\\,-,\\,\\,],-, ,w,o,w, ,n,a,m,e,"\n                                     ^'
-        );
-      } finally {
-        await Promise.all([
-          testMonitors.map((monitor) => {
-            return monitorTestService.deleteMonitorByJourney(projectMonitors, monitor.id, project);
-          }),
-        ]);
-      }
+      expect(editedBody.createdMonitors.length).eql(0);
+      expect(editedBody.updatedMonitors.length).eql(2);
+
+      testMonitors[1].name = '!@#$%^&*()_++[\\-\\]- wow name';
+      testMonitors[1].privateLocations = ['Test private location 8'];
+
+      const { body: editedBodyError, status } = await monitorTestService.addProjectMonitors(
+        project,
+        testMonitors
+      );
+      expect(status).eql(200);
+      expect(editedBodyError.createdMonitors.length).eql(0);
+      expect(editedBodyError.updatedMonitors.length).eql(1);
+      expect(editedBodyError.failedMonitors.length).eql(1);
+      expect(editedBodyError.failedMonitors[0].details).eql(
+        'Invalid private location: "Test private location 8". Remove it or replace it with a valid private location.'
+      );
+      expect(editedBodyError.failedMonitors[0].reason).eql(
+        "Couldn't save or update monitor because of an invalid configuration."
+      );
     });
   });
 }

@@ -202,6 +202,7 @@ export function AgentConfigurationList({
             name: '',
             render: (config: Config) => (
               <EuiButtonIcon
+                data-test-subj="apmColumnsButton"
                 aria-label="Edit"
                 iconType="pencil"
                 href={apmRouter.link('/settings/agent-configuration/edit', {
@@ -218,6 +219,7 @@ export function AgentConfigurationList({
             name: '',
             render: (config: Config) => (
               <EuiButtonIcon
+                data-test-subj="apmColumnsButton"
                 aria-label="Delete"
                 iconType="trash"
                 onClick={() => setConfigToBeDeleted(config)}

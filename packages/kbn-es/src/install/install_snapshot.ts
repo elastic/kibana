@@ -7,23 +7,13 @@
  */
 
 import path from 'path';
-
 import chalk from 'chalk';
-import { ToolingLog } from '@kbn/tooling-log';
 
 import { BASE_PATH } from '../paths';
 import { installArchive } from './install_archive';
 import { log as defaultLog } from '../utils/log';
-import { Artifact, ArtifactLicense } from '../artifact';
-
-interface DownloadSnapshotOptions {
-  version: string;
-  license?: ArtifactLicense;
-  basePath?: string;
-  installPath?: string;
-  log?: ToolingLog;
-  useCached?: boolean;
-}
+import { Artifact } from '../artifact';
+import { DownloadSnapshotOptions, InstallSnapshotOptions } from './types';
 
 /**
  * Download an ES snapshot
@@ -47,11 +37,6 @@ export async function downloadSnapshot({
   return {
     downloadPath: dest,
   };
-}
-
-interface InstallSnapshotOptions extends DownloadSnapshotOptions {
-  password?: string;
-  esArgs?: string[];
 }
 
 /**

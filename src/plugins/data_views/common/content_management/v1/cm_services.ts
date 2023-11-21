@@ -27,6 +27,7 @@ const dataViewAttributesSchema = schema.object(
       schema.arrayOf(
         schema.object({
           value: schema.string(),
+          clientId: schema.maybe(schema.oneOf([schema.string(), schema.number()])),
         })
       )
     ),
@@ -45,6 +46,7 @@ const dataViewAttributesSchema = schema.object(
     allowNoIndex: schema.maybe(schema.boolean()),
     runtimeFieldMap: schema.maybe(schema.any()),
     name: schema.maybe(schema.string()),
+    allowHidden: schema.maybe(schema.boolean()),
   },
   { unknowns: 'forbid' }
 );

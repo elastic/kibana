@@ -8,8 +8,13 @@
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
-  describe('serverless security API', function () {
-    loadTestFile(require.resolve('./fleet'));
-    loadTestFile(require.resolve('./snapshot_telemetry'));
+  describe('Serverless security API', function () {
+    this.tags(['esGate']);
+
+    loadTestFile(require.resolve('./telemetry/snapshot_telemetry'));
+    loadTestFile(require.resolve('./telemetry/telemetry_config'));
+    loadTestFile(require.resolve('./fleet/fleet'));
+    loadTestFile(require.resolve('./cases'));
+    loadTestFile(require.resolve('./cloud_security_posture'));
   });
 }

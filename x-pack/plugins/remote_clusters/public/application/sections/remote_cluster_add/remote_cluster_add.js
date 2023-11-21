@@ -8,11 +8,13 @@
 import React, { PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageSection, EuiPageBody } from '@elastic/eui';
 
 import { extractQueryParams } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
-import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
+import { RemoteClusterPageTitle } from '../components';
+import { RemoteClusterWizard } from './wizard_form';
 
 export class RemoteClusterAdd extends PureComponent {
   static propTypes = {
@@ -35,7 +37,7 @@ export class RemoteClusterAdd extends PureComponent {
     this.props.addCluster(clusterConfig);
   };
 
-  cancel = () => {
+  redirectToList = () => {
     const {
       history,
       route: {
@@ -56,29 +58,31 @@ export class RemoteClusterAdd extends PureComponent {
     const { isAddingCluster, addClusterError } = this.props;
 
     return (
-      <>
-        <RemoteClusterPageTitle
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.addTitle"
-              defaultMessage="Add remote cluster"
-            />
-          }
-          description={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClustersDescription"
-              defaultMessage="Add a remote cluster that connects to seed nodes or to a single proxy address."
-            />
-          }
-        />
+      <EuiPageBody data-test-subj="remote-clusters-add">
+        <EuiPageSection paddingSize="none">
+          <RemoteClusterPageTitle
+            title={
+              <FormattedMessage
+                id="xpack.remoteClusters.addTitle"
+                defaultMessage="Add remote cluster"
+              />
+            }
+            description={
+              <FormattedMessage
+                id="xpack.remoteClusters.remoteClustersDescription"
+                defaultMessage="Create a connection from this cluster to other Elasticsearch clusters."
+              />
+            }
+          />
 
-        <RemoteClusterForm
-          isSaving={isAddingCluster}
-          saveError={addClusterError}
-          save={this.save}
-          cancel={this.cancel}
-        />
-      </>
+          <RemoteClusterWizard
+            saveRemoteClusterConfig={this.save}
+            onCancel={this.redirectToList}
+            isSaving={isAddingCluster}
+            addClusterError={addClusterError}
+          />
+        </EuiPageSection>
+      </EuiPageBody>
     );
   }
 }

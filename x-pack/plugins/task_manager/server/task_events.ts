@@ -12,9 +12,10 @@ import { ConcreteTaskInstance } from './task';
 import { Result, Err } from './lib/result_type';
 import { ClaimAndFillPoolResult } from './lib/fill_pool';
 import { PollingError } from './polling';
-import { TaskRunResult } from './task_running';
+import { DecoratedError, TaskRunResult } from './task_running';
 import { EphemeralTaskInstanceRequest } from './ephemeral_task_lifecycle';
 import type { EventLoopDelayConfig } from './config';
+import { TaskManagerMetrics } from './metrics/task_metrics_collector';
 
 export enum TaskPersistence {
   Recurring = 'recurring',
@@ -28,6 +29,7 @@ export enum TaskEventType {
   TASK_RUN = 'TASK_RUN',
   TASK_RUN_REQUEST = 'TASK_RUN_REQUEST',
   TASK_POLLING_CYCLE = 'TASK_POLLING_CYCLE',
+  TASK_MANAGER_METRIC = 'TASK_MANAGER_METRIC',
   TASK_MANAGER_STAT = 'TASK_MANAGER_STAT',
   EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY = 'EPHEMERAL_TASK_DELAYED_DUE_TO_CAPACITY',
 }
@@ -70,9 +72,10 @@ export interface RanTask {
   task: ConcreteTaskInstance;
   persistence: TaskPersistence;
   result: TaskRunResult;
+  isExpired: boolean;
 }
 export type ErroredTask = RanTask & {
-  error: Error;
+  error: DecoratedError;
 };
 
 export type TaskMarkRunning = TaskEvent<ConcreteTaskInstance, Error>;
@@ -81,6 +84,7 @@ export type TaskClaim = TaskEvent<ConcreteTaskInstance, Error>;
 export type TaskRunRequest = TaskEvent<ConcreteTaskInstance, Error>;
 export type EphemeralTaskRejectedDueToCapacity = TaskEvent<EphemeralTaskInstanceRequest, Error>;
 export type TaskPollingCycle<T = string> = TaskEvent<ClaimAndFillPoolResult, PollingError<T>>;
+export type TaskManagerMetric = TaskEvent<TaskManagerMetrics, Error>;
 
 export type TaskManagerStats =
   | 'load'
@@ -88,7 +92,8 @@ export type TaskManagerStats =
   | 'claimDuration'
   | 'queuedEphemeralTasks'
   | 'ephemeralTaskDelay'
-  | 'workerUtilization';
+  | 'workerUtilization'
+  | 'runDelay';
 export type TaskManagerStat = TaskEvent<number, never, TaskManagerStats>;
 
 export type OkResultOf<EventType> = EventType extends TaskEvent<infer OkResult, infer ErrorResult>
@@ -173,6 +178,15 @@ export function asTaskManagerStatEvent(
   };
 }
 
+export function asTaskManagerMetricEvent(
+  event: Result<TaskManagerMetrics, never>
+): TaskManagerMetric {
+  return {
+    type: TaskEventType.TASK_MANAGER_METRIC,
+    event,
+  };
+}
+
 export function asEphemeralTaskRejectedDueToCapacityEvent(
   id: string,
   event: Result<EphemeralTaskInstanceRequest, Error>,
@@ -216,6 +230,11 @@ export function isTaskManagerWorkerUtilizationStatEvent(
   taskEvent: TaskEvent<unknown, unknown>
 ): taskEvent is TaskManagerStat {
   return taskEvent.type === TaskEventType.TASK_MANAGER_STAT && taskEvent.id === 'workerUtilization';
+}
+export function isTaskManagerMetricEvent(
+  taskEvent: TaskEvent<unknown, unknown>
+): taskEvent is TaskManagerStat {
+  return taskEvent.type === TaskEventType.TASK_MANAGER_METRIC;
 }
 export function isEphemeralTaskRejectedDueToCapacityEvent(
   taskEvent: TaskEvent<unknown, unknown>

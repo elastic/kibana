@@ -9,8 +9,8 @@ import fs from 'fs';
 import mustache from 'mustache';
 import { join } from 'path';
 import { assertNever } from '@elastic/eui';
+import { CaseStatuses, CaseSeverity } from '../../../../../common/types/domain';
 import type { CaseSavedObjectTransformed } from '../../../../common/types/case';
-import { CaseStatuses, CaseSeverity } from '../../../../../common/api';
 import { getTemplateFilePath } from '../utils';
 
 const TAG_LIMIT = 3;

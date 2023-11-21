@@ -18,31 +18,26 @@ export type {
   QueryPointEventAnnotationArgs,
   QueryPointEventAnnotationOutput,
 } from './query_point_event_annotation/types';
-export {
-  manualPointEventAnnotation,
-  manualRangeEventAnnotation,
-  getDefaultManualAnnotation,
-} from './manual_event_annotation';
-export {
-  queryPointEventAnnotation,
-  getDefaultQueryAnnotation,
-} from './query_point_event_annotation';
-export { createCopiedAnnotation } from './create_copied_annotation';
+export { manualPointEventAnnotation, manualRangeEventAnnotation } from './manual_event_annotation';
+export { queryPointEventAnnotation } from './query_point_event_annotation';
 export { eventAnnotationGroup } from './event_annotation_group';
 export type { EventAnnotationGroupArgs } from './event_annotation_group';
 
 export type { FetchEventAnnotationsArgs } from './fetch_event_annotations/types';
-export type {
-  EventAnnotationConfig,
-  EventAnnotationGroupConfig,
-  EventAnnotationArgs,
-  RangeEventAnnotationConfig,
-  PointInTimeEventAnnotationConfig,
-  QueryPointEventAnnotationConfig,
-  AvailableAnnotationIcon,
-  EventAnnotationOutput,
-  EventAnnotationGroupAttributes,
-} from './types';
+export type { EventAnnotationOutput } from './types';
 
-export type { EventAnnotationGroupSavedObjectAttributes } from './content_management';
-export { EVENT_ANNOTATION_GROUP_TYPE, ANNOTATIONS_LISTING_VIEW_ID } from './constants';
+export type {
+  EventAnnotationGroupGetIn,
+  EventAnnotationGroupGetOut,
+  EventAnnotationGroupSavedObjectAttributes,
+  EventAnnotationGroupCreateIn,
+  EventAnnotationGroupCreateOut,
+  EventAnnotationGroupUpdateIn,
+  EventAnnotationGroupSearchIn,
+  EventAnnotationGroupSearchOut,
+  EventAnnotationGroupDeleteIn,
+  EventAnnotationGroupDeleteOut,
+  EventAnnotationGroupCrudTypes,
+} from './content_management';
+export { CONTENT_ID } from './content_management';
+export { ANNOTATIONS_LISTING_VIEW_ID } from './constants';

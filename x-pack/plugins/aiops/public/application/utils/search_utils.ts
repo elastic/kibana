@@ -26,27 +26,11 @@ import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWith
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SimpleSavedObject } from '@kbn/core/public';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
-
-const DEFAULT_QUERY = {
-  bool: {
-    must: [
-      {
-        match_all: {},
-      },
-    ],
-  },
-};
-
-export const SEARCH_QUERY_LANGUAGE = {
-  KUERY: 'kuery',
-  LUCENE: 'lucene',
-} as const;
-
-export type SearchQueryLanguage = typeof SEARCH_QUERY_LANGUAGE[keyof typeof SEARCH_QUERY_LANGUAGE];
-
-export function getDefaultQuery() {
-  return cloneDeep(DEFAULT_QUERY);
-}
+import {
+  getDefaultDSLQuery,
+  type SearchQueryLanguage,
+  SEARCH_QUERY_LANGUAGE,
+} from '@kbn/ml-query-utils';
 
 export type SavedSearchSavedObject = SimpleSavedObject<any>;
 
@@ -94,7 +78,7 @@ export function createMergedEsQuery(
   dataView?: DataView,
   uiSettings?: IUiSettingsClient
 ) {
-  let combinedQuery: QueryDslQueryContainer = getDefaultQuery();
+  let combinedQuery: QueryDslQueryContainer = getDefaultDSLQuery();
 
   // FIXME: Add support for AggregateQuery type #150091
   if (isQuery(query) && query.language === SEARCH_QUERY_LANGUAGE.KUERY) {
@@ -171,7 +155,7 @@ export function getEsQueryFromSavedSearch({
     // Flattened query from search source may contain a clause that narrows the time range
     // which might interfere with global time pickers so we need to remove
     const savedQuery =
-      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultQuery();
+      cloneDeep(savedSearch.searchSource.getSearchRequestBody()?.query) ?? getDefaultDSLQuery();
     const timeField = savedSearch.searchSource.getField('index')?.timeFieldName;
 
     if (Array.isArray(savedQuery.bool.filter) && timeField !== undefined) {

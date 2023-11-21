@@ -7,7 +7,9 @@
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCallOut,
   EuiFlexGroup,
+  useEuiTheme,
   EuiFlexItem,
   EuiLoadingSpinner,
   EuiModalBody,
@@ -19,6 +21,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import React, { useEffect, useState, useMemo } from 'react';
 import styled from 'styled-components';
 import { isEmpty } from 'lodash';
@@ -44,7 +47,6 @@ const MODAL_HEADER_HEIGHT = 180;
 const MODAL_FOOTER_HEIGHT = 80;
 
 const Container = styled.div`
-  width: 600px;
   height: ${MAX_CONTAINER_HEIGHT}px;
 `;
 
@@ -71,20 +73,14 @@ export function SelectServices({
     string | undefined
   >();
 
+  const { euiTheme } = useEuiTheme();
+
   useEffect(() => {
     if (isEdit) {
       setKuery(serviceGroup.kuery);
       setStagedKuery(serviceGroup.kuery);
     }
   }, [isEdit, serviceGroup.kuery]);
-
-  useEffect(() => {
-    if (!stagedKuery) {
-      return;
-    }
-    const { message } = validateServiceGroupKuery(stagedKuery);
-    setKueryValidationMessage(message);
-  }, [stagedKuery]);
 
   const { start, end } = useMemo(
     () =>
@@ -110,6 +106,18 @@ export function SelectServices({
 
   const isServiceListPreviewLoading = status === FETCH_STATUS.LOADING;
 
+  const handleOnSubmit = () => {
+    if (!stagedKuery) {
+      return;
+    }
+    const { message } = validateServiceGroupKuery(stagedKuery);
+    setKueryValidationMessage(message);
+
+    if (!message) {
+      setKuery(stagedKuery);
+    }
+  };
+
   return (
     <Container>
       <EuiModalHeader>
@@ -132,11 +140,6 @@ export function SelectServices({
               }
             )}
           </EuiText>
-          {kueryValidationMessage && (
-            <EuiText color="danger" size="s">
-              {kueryValidationMessage}
-            </EuiText>
-          )}
           <EuiSpacer size="s" />
           <EuiFlexGroup gutterSize="s">
             <EuiFlexItem>
@@ -145,9 +148,7 @@ export function SelectServices({
                   'xpack.apm.serviceGroups.selectServicesForm.kql',
                   { defaultMessage: 'E.g. labels.team: "web"' }
                 )}
-                onSubmit={(value) => {
-                  setKuery(value);
-                }}
+                onSubmit={handleOnSubmit}
                 onChange={(value) => {
                   setStagedKuery(value);
                 }}
@@ -169,9 +170,7 @@ export function SelectServices({
             <EuiFlexItem grow={false}>
               <EuiButton
                 data-test-subj="apmSelectServicesButton"
-                onClick={() => {
-                  setKuery(stagedKuery);
-                }}
+                onClick={handleOnSubmit}
                 iconType={!kuery ? 'search' : 'refresh'}
                 isDisabled={isServiceListPreviewLoading || !stagedKuery}
               >
@@ -215,7 +214,36 @@ export function SelectServices({
         >
           <EuiFlexItem>
             <EuiPanel hasShadow={false} hasBorder paddingSize="s">
-              {!kuery && (
+              {!data && isServiceListPreviewLoading && <EuiLoadingSpinner />}
+              {kueryValidationMessage?.length ? (
+                <CentralizedContainer>
+                  <EuiCallOut
+                    title={i18n.translate(
+                      'xpack.apm.serviceGroups.searchResults.error',
+                      {
+                        defaultMessage: 'Error retrieving search results',
+                      }
+                    )}
+                    color="danger"
+                    iconType="error"
+                  >
+                    <p
+                      css={css`
+                        white-space: break-spaces;
+                        font-family: ${euiTheme.font.familyCode};
+                      `}
+                      data-test-subj="discoverErrorCalloutMessage"
+                    >
+                      {kueryValidationMessage}
+                    </p>
+                  </EuiCallOut>
+                </CentralizedContainer>
+              ) : kuery && data ? (
+                <ServiceListPreview
+                  items={data.items}
+                  isLoading={isServiceListPreviewLoading}
+                />
+              ) : (
                 <CentralizedContainer>
                   <EuiText size="s" color="subdued">
                     {i18n.translate(
@@ -224,17 +252,6 @@ export function SelectServices({
                     )}
                   </EuiText>
                 </CentralizedContainer>
-              )}
-              {!data && isServiceListPreviewLoading && (
-                <CentralizedContainer>
-                  <EuiLoadingSpinner />
-                </CentralizedContainer>
-              )}
-              {kuery && data && (
-                <ServiceListPreview
-                  items={data.items}
-                  isLoading={isServiceListPreviewLoading}
-                />
               )}
             </EuiPanel>
           </EuiFlexItem>
@@ -279,7 +296,9 @@ export function SelectServices({
               onClick={() => {
                 onSaveClick({ ...serviceGroup, kuery });
               }}
-              isDisabled={isLoading || !kuery}
+              isDisabled={
+                isLoading || !kuery || !isEmpty(kueryValidationMessage)
+              }
             >
               {i18n.translate(
                 'xpack.apm.serviceGroups.selectServicesForm.saveGroup',

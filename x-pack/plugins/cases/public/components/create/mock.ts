@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { CasePostRequest } from '../../../common/api';
-import { CaseSeverity, ConnectorTypes } from '../../../common/api';
+import { CaseSeverity, ConnectorTypes } from '../../../common/types/domain';
+import type { CasePostRequest } from '../../../common/types/api';
 import { SECURITY_SOLUTION_OWNER } from '../../../common/constants';
 import { choices } from '../connectors/mock';
 
@@ -28,6 +28,7 @@ export const sampleData: CasePostRequest = {
   },
   owner: SECURITY_SOLUTION_OWNER,
   assignees: [],
+  customFields: [],
   category: null,
 };
 

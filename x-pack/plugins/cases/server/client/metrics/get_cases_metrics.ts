@@ -7,12 +7,9 @@
 
 import { merge } from 'lodash';
 
-import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/api';
-import {
-  CasesMetricsRequestRt,
-  CasesMetricsResponseRt,
-  decodeWithExcessOrThrow,
-} from '../../../common/api';
+import type { CasesMetricsRequest, CasesMetricsResponse } from '../../../common/types/api';
+import { decodeWithExcessOrThrow } from '../../../common/api';
+import { CasesMetricsRequestRt, CasesMetricsResponseRt } from '../../../common/types/api';
 import { createCaseError } from '../../common/error';
 import type { CasesClient } from '../client';
 import type { CasesClientArgs } from '../types';

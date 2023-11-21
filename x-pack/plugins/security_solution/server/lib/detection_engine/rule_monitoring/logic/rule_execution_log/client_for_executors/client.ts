@@ -5,30 +5,30 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import { sum } from 'lodash';
 import type { Duration } from 'moment';
-import type { Logger } from '@kbn/core/server';
 
 import type {
-  PublicRuleResultService,
   PublicRuleMonitoringService,
+  PublicRuleResultService,
 } from '@kbn/alerting-plugin/server/types';
 import type {
-  RuleExecutionMetrics,
   RuleExecutionSettings,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
-import {
+  RuleExecutionStatus,
   LogLevel,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
+import {
   logLevelFromExecutionStatus,
   LogLevelSetting,
   logLevelToNumber,
-  RuleExecutionStatus,
-} from '../../../../../../../common/detection_engine/rule_monitoring';
+  RuleExecutionStatusEnum,
+} from '../../../../../../../common/api/detection_engine/rule_monitoring';
 
 import { assertUnreachable } from '../../../../../../../common/utility_types';
 import { withSecuritySpan } from '../../../../../../utils/with_security_span';
-import { truncateValue } from '../../utils/normalization';
 import type { ExtMeta } from '../../utils/console_logging';
+import { truncateValue } from '../../utils/normalization';
 import { getCorrelationIds } from './correlation_ids';
 
 import type { IEventLogWriter } from '../event_log/event_log_writer';
@@ -37,6 +37,8 @@ import type {
   RuleExecutionContext,
   StatusChangeArgs,
 } from './client_interface';
+import type { RuleExecutionMetrics } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
+import { LogLevelEnum } from '../../../../../../../common/api/detection_engine/rule_monitoring/model';
 
 export const createRuleExecutionLogClientForExecutors = (
   settings: RuleExecutionSettings,
@@ -58,23 +60,23 @@ export const createRuleExecutionLogClientForExecutors = (
     },
 
     trace(...messages: string[]): void {
-      writeMessage(messages, LogLevel.trace);
+      writeMessage(messages, LogLevelEnum.trace);
     },
 
     debug(...messages: string[]): void {
-      writeMessage(messages, LogLevel.debug);
+      writeMessage(messages, LogLevelEnum.debug);
     },
 
     info(...messages: string[]): void {
-      writeMessage(messages, LogLevel.info);
+      writeMessage(messages, LogLevelEnum.info);
     },
 
     warn(...messages: string[]): void {
-      writeMessage(messages, LogLevel.warn);
+      writeMessage(messages, LogLevelEnum.warn);
     },
 
     error(...messages: string[]): void {
-      writeMessage(messages, LogLevel.error);
+      writeMessage(messages, LogLevelEnum.error);
     },
 
     async logStatusChange(args: StatusChangeArgs): Promise<void> {
@@ -106,19 +108,19 @@ export const createRuleExecutionLogClientForExecutors = (
 
   const writeMessageToConsole = (message: string, logLevel: LogLevel, logMeta: ExtMeta): void => {
     switch (logLevel) {
-      case LogLevel.trace:
+      case LogLevelEnum.trace:
         logger.trace(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.debug:
+      case LogLevelEnum.debug:
         logger.debug(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.info:
+      case LogLevelEnum.info:
         logger.info(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.warn:
+      case LogLevelEnum.warn:
         logger.warn(`${message} ${baseLogSuffix}`, logMeta);
         break;
-      case LogLevel.error:
+      case LogLevelEnum.error:
         logger.error(`${message} ${baseLogSuffix}`, logMeta);
         break;
       default:
@@ -151,7 +153,7 @@ export const createRuleExecutionLogClientForExecutors = (
 
   const writeExceptionToConsole = (e: unknown, message: string, logMeta: ExtMeta): void => {
     const logReason = e instanceof Error ? e.stack ?? e.message : String(e);
-    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevel.error, logMeta);
+    writeMessageToConsole(`${message}. Reason: ${logReason}`, LogLevelEnum.error, logMeta);
   };
 
   const writeStatusChangeToConsole = (args: NormalizedStatusChangeArgs, logMeta: ExtMeta): void => {
@@ -164,7 +166,7 @@ export const createRuleExecutionLogClientForExecutors = (
   const writeStatusChangeToRuleObject = async (args: NormalizedStatusChangeArgs): Promise<void> => {
     const { newStatus, message, metrics } = args;
 
-    if (newStatus === RuleExecutionStatus.running) {
+    if (newStatus === RuleExecutionStatusEnum.running) {
       return;
     }
 
@@ -186,9 +188,9 @@ export const createRuleExecutionLogClientForExecutors = (
       ruleMonitoringService.setLastRunMetricsGapDurationS(executionGapDurationS);
     }
 
-    if (newStatus === RuleExecutionStatus.failed) {
+    if (newStatus === RuleExecutionStatusEnum.failed) {
       ruleResultService.addLastRunError(message);
-    } else if (newStatus === RuleExecutionStatus['partial failure']) {
+    } else if (newStatus === RuleExecutionStatusEnum['partial failure']) {
       ruleResultService.addLastRunWarning(message);
     }
 
@@ -234,7 +236,7 @@ interface NormalizedStatusChangeArgs {
 }
 
 const normalizeStatusChangeArgs = (args: StatusChangeArgs): NormalizedStatusChangeArgs => {
-  if (args.newStatus === RuleExecutionStatus.running) {
+  if (args.newStatus === RuleExecutionStatusEnum.running) {
     return {
       newStatus: args.newStatus,
       message: '',

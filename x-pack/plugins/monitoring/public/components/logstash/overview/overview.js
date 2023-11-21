@@ -9,7 +9,6 @@ import React, { PureComponent } from 'react';
 import {
   EuiPage,
   EuiPageBody,
-  EuiPageContent_Deprecated as EuiPageContent,
   EuiPanel,
   EuiSpacer,
   EuiFlexGrid,
@@ -44,7 +43,7 @@ export class Overview extends PureComponent {
             <ClusterStatus stats={stats} />
           </EuiPanel>
           <EuiSpacer size="m" />
-          <EuiPageContent>
+          <EuiPanel>
             <EuiFlexGrid columns={2} gutterSize="s">
               {metricsToShow.map((metric, index) => (
                 <EuiFlexItem key={index}>
@@ -53,7 +52,7 @@ export class Overview extends PureComponent {
                 </EuiFlexItem>
               ))}
             </EuiFlexGrid>
-          </EuiPageContent>
+          </EuiPanel>
         </EuiPageBody>
       </EuiPage>
     );

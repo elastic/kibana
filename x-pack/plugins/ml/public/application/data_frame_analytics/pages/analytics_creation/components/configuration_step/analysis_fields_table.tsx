@@ -6,10 +6,16 @@
  */
 
 import React, { FC, Fragment, useEffect, useState } from 'react';
-import { EuiCallOut, EuiFormRow, EuiPanel, EuiSpacer, EuiText } from '@elastic/eui';
+import {
+  EuiCallOut,
+  EuiFormRow,
+  EuiPanel,
+  EuiSpacer,
+  EuiText,
+  LEFT_ALIGNMENT,
+  SortableProperties,
+} from '@elastic/eui';
 import { isEqual } from 'lodash';
-// @ts-ignore no declaration
-import { LEFT_ALIGNMENT, SortableProperties } from '@elastic/eui/lib/services';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
@@ -54,7 +60,7 @@ export const AnalysisFieldsTable: FC<{
     unsupportedFieldsError,
     setUnsupportedFieldsError,
   }) => {
-    const [sortableProperties, setSortableProperties] = useState();
+    const [sortableProperties, setSortableProperties] = useState<SortableProperties<any>>();
     const [currentPaginationData, setCurrentPaginationData] = useState<{
       pageIndex: number;
       itemsPerPage: number;

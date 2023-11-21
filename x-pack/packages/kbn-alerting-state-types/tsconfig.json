@@ -13,5 +13,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": []
+  "kbn_references": ["@kbn/config-schema"]
 }

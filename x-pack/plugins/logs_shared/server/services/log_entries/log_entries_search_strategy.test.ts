@@ -95,6 +95,7 @@ describe('LogEntries search strategy', () => {
   });
 
   it('handles subsequent polling requests', async () => {
+    const date = new Date(1605116827143).toISOString();
     const esSearchStrategyMock = createEsSearchStrategyMock({
       id: 'ASYNC_REQUEST_ID',
       isRunning: false,
@@ -112,12 +113,12 @@ describe('LogEntries search strategy', () => {
               _score: 0,
               _source: null,
               fields: {
-                '@timestamp': [1605116827143],
+                '@timestamp': [date],
                 'event.dataset': ['HIT_DATASET'],
                 message: ['HIT_MESSAGE'],
                 'container.id': ['HIT_CONTAINER_ID'],
               },
-              sort: [1605116827143 as any, 1 as any], // incorrectly typed as string upstream
+              sort: [date as any, 1 as any], // incorrectly typed as string upstream
             },
           ],
         },
@@ -164,13 +165,13 @@ describe('LogEntries search strategy', () => {
         id: 'HIT_ID',
         index: 'HIT_INDEX',
         cursor: {
-          time: 1605116827143,
+          time: date,
           tiebreaker: 1,
         },
         columns: [
           {
             columnId: 'TIMESTAMP_COLUMN_ID',
-            timestamp: 1605116827143,
+            time: date,
           },
           {
             columnId: 'DATASET_COLUMN_ID',
@@ -298,6 +299,7 @@ const createSearchStrategyDependenciesMock = (): SearchStrategyDependencies => (
   savedObjectsClient: savedObjectsClientMock.create(),
   searchSessionsClient: createSearchSessionsClientMock(),
   request: httpServerMock.createKibanaRequest(),
+  rollupsEnabled: true,
 });
 
 // using the official data mock from within x-pack doesn't type-check successfully,

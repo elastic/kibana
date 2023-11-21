@@ -11,8 +11,9 @@ import styled from 'styled-components';
 import { EuiFlexGroup, EuiFlexItem, EuiFieldSearch, EuiFilterGroup, EuiButton } from '@elastic/eui';
 
 import type { CaseStatusWithAllStatus, CaseSeverityWithAll } from '../../../common/ui/types';
+import { MAX_TAGS_FILTER_LENGTH, MAX_CATEGORY_FILTER_LENGTH } from '../../../common/constants';
 import { StatusAll } from '../../../common/ui/types';
-import { CaseStatuses } from '../../../common/api';
+import { CaseStatuses } from '../../../common/types/domain';
 import type { FilterOptions } from '../../containers/types';
 import { FilterPopover } from '../filter_popover';
 import { SolutionFilter } from './solution_filter';
@@ -227,6 +228,8 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedTags}
             options={tags}
             optionsEmptyLabel={i18n.NO_TAGS_AVAILABLE}
+            limit={MAX_TAGS_FILTER_LENGTH}
+            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_TAGS_FILTER_LENGTH, 'tags')}
           />
           <FilterPopover
             buttonLabel={i18n.CATEGORIES}
@@ -234,6 +237,8 @@ const CasesTableFiltersComponent = ({
             selectedOptions={selectedCategories}
             options={categories}
             optionsEmptyLabel={i18n.NO_CATEGORIES_AVAILABLE}
+            limit={MAX_CATEGORY_FILTER_LENGTH}
+            limitReachedMessage={i18n.MAX_SELECTED_FILTER(MAX_CATEGORY_FILTER_LENGTH, 'categories')}
           />
           {availableSolutions.length > 1 && (
             <SolutionFilter

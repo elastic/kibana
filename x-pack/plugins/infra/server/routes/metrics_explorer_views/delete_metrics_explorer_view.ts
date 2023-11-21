@@ -13,6 +13,13 @@ import {
 } from '../../../common/http_api/latest';
 import type { InfraBackendLibs } from '../../lib/infra_types';
 
+const NON_STARTED_SERVICE_ERROR = {
+  statusCode: 500,
+  body: {
+    message: `Handler for "DELETE ${METRICS_EXPLORER_VIEW_URL_ENTITY}" was registered but MetricsViewService has not started.`,
+  },
+};
+
 export const initDeleteMetricsExplorerViewRoute = ({
   framework,
   getStartServices,
@@ -28,6 +35,11 @@ export const initDeleteMetricsExplorerViewRoute = ({
     async (_requestContext, request, response) => {
       const { params } = request;
       const [, , { metricsExplorerViews }] = await getStartServices();
+
+      if (metricsExplorerViews === undefined) {
+        return response.customError(NON_STARTED_SERVICE_ERROR);
+      }
+
       const metricsExplorerViewsClient = metricsExplorerViews.getScopedClient(request);
 
       try {

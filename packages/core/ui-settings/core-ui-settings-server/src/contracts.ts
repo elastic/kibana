@@ -48,6 +48,19 @@ export interface UiSettingsServiceSetup {
    * ```
    */
   registerGlobal(settings: Record<string, UiSettingsParams>): void;
+
+  /**
+   * Sets an allowlist of setting keys.
+   * @param keys
+   *
+   * @example
+   * ```ts
+   * setup(core: CoreSetup){
+   *  core.uiSettings.setAllowlist(['csv:quoteValues', 'dateFormat:dow']);
+   * }
+   * ```
+   */
+  setAllowlist(keys: string[]): void;
 }
 
 /** @public */
