@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { EuiAccordion, EuiSpacer, EuiTitle, useEuiTheme, EuiPanel } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiTitle, useEuiTheme, useEuiFontSize } from '@elastic/eui';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -33,27 +33,21 @@ export const ObservedUser = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const observedItems = useObservedUserItems(observedUser);
-  const [isObservedDataToggleOpen, setObservedDataToggleOpen] = useState(false);
-  const onToggleObservedData = useCallback(() => {
-    setObservedDataToggleOpen((isOpen) => !isOpen);
-  }, [setObservedDataToggleOpen]);
+
   const observedUserTableColumns = useMemo(
     () => getObservedUserTableColumns(contextID, scopeId, isDraggable),
     [contextID, scopeId, isDraggable]
   );
+  const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   return (
     <>
-      <EuiTitle size="s">
-        <h5>{i18n.OBSERVED_DATA_TITLE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="l" />
       <InspectButtonContainer>
         <EuiAccordion
+          initialIsOpen={false}
           isLoading={observedUser.isLoading}
           id="observedUser-data"
           data-test-subj="observedUser-data"
-          forceState={isObservedDataToggleOpen ? 'open' : 'closed'}
           buttonProps={{
             'data-test-subj': 'observedUser-accordion-button',
             css: css`
@@ -61,11 +55,10 @@ export const ObservedUser = ({
             `,
           }}
           buttonContent={
-            isObservedDataToggleOpen
-              ? i18n.HIDE_OBSERVED_DATA_BUTTON
-              : i18n.SHOW_OBSERVED_DATA_BUTTON
+            <EuiTitle size="xs">
+              <h3>{i18n.OBSERVED_DATA_TITLE}</h3>
+            </EuiTitle>
           }
-          onToggle={onToggleObservedData}
           extraAction={
             <>
               <span
@@ -79,19 +72,25 @@ export const ObservedUser = ({
                 />
               </span>
               {observedUser.lastSeen.date && (
-                <FormattedMessage
-                  id="xpack.securitySolution.timeline.userDetails.observedUserUpdatedTime"
-                  defaultMessage="Updated {time}"
-                  values={{
-                    time: (
-                      <FormattedRelativePreferenceDate
-                        value={observedUser.lastSeen.date}
-                        dateFormat="MMM D, YYYY"
-                        relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                      />
-                    ),
-                  }}
-                />
+                <span
+                  css={css`
+                    font-size: ${xsFontSize};
+                  `}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.timeline.userDetails.observedUserUpdatedTime"
+                    defaultMessage="Updated {time}"
+                    values={{
+                      time: (
+                        <FormattedRelativePreferenceDate
+                          value={observedUser.lastSeen.date}
+                          dateFormat="MMM D, YYYY"
+                          relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                        />
+                      ),
+                    }}
+                  />
+                </span>
               )}
             </>
           }
@@ -101,19 +100,19 @@ export const ObservedUser = ({
             }
           `}
         >
-          <EuiPanel color="subdued">
-            <BasicTable
-              loading={
-                observedUser.isLoading ||
-                observedUser.firstSeen.isLoading ||
-                observedUser.lastSeen.isLoading ||
-                observedUser.anomalies.isLoading
-              }
-              data-test-subj="observedUser-table"
-              columns={observedUserTableColumns}
-              items={observedItems}
-            />
-          </EuiPanel>
+          <EuiSpacer size="m" />
+
+          <BasicTable
+            loading={
+              observedUser.isLoading ||
+              observedUser.firstSeen.isLoading ||
+              observedUser.lastSeen.isLoading ||
+              observedUser.anomalies.isLoading
+            }
+            data-test-subj="observedUser-table"
+            columns={observedUserTableColumns}
+            items={observedItems}
+          />
         </EuiAccordion>
       </InspectButtonContainer>
     </>
