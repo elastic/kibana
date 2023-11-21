@@ -14,7 +14,7 @@ import type {
 } from '..';
 import type {
   CASES_CONNECTORS_CAPABILITY,
-  EDIT_CASES_SETTINGS_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
   PUSH_CASES_CAPABILITY,
 } from '../constants';
 import type { SnakeToCamelCase } from '../types';
@@ -313,5 +313,5 @@ export interface CasesCapabilities {
   [DELETE_CASES_CAPABILITY]: boolean;
   [PUSH_CASES_CAPABILITY]: boolean;
   [CASES_CONNECTORS_CAPABILITY]: boolean;
-  [EDIT_CASES_SETTINGS_CAPABILITY]: boolean;
+  [CASES_SETTINGS_CAPABILITY]: boolean;
 }

@@ -109,7 +109,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             groupType: 'independent',
             privileges: [
               {
-                id: 'edit_cases_settings',
+                id: 'cases_settings',
                 name: i18n.translate('xpack.cases.features.configureSubFeatureDetails', {
                   defaultMessage: 'Edit Case Settings',
                 }),
@@ -121,7 +121,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
                 cases: {
                   settings: [APP_ID],
                 },
-                ui: capabilities.configure,
+                ui: capabilities.settings,
               },
             ],
           },

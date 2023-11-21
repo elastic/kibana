@@ -53,7 +53,7 @@ export {
   CASE_COMMENT_SAVED_OBJECT,
   CASES_CONNECTORS_CAPABILITY,
   GET_CONNECTORS_CONFIGURE_API_TAG,
-  EDIT_CASES_SETTINGS_CAPABILITY,
+  CASES_SETTINGS_CAPABILITY,
 } from './constants';
 
 export type { AttachmentAttributes } from './types/domain';

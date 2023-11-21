@@ -70,7 +70,7 @@ export const noCasesCapabilities = () =>
     delete_cases: false,
     push_cases: false,
     cases_connectors: false,
-    edit_cases_settings: false,
+    cases_settings: false,
   });
 export const readCasesCapabilities = () =>
   buildCasesCapabilities({
@@ -78,7 +78,7 @@ export const readCasesCapabilities = () =>
     update_cases: false,
     delete_cases: false,
     push_cases: false,
-    edit_cases_settings: false,
+    cases_settings: false,
   });
 export const writeCasesCapabilities = () => {
   return buildCasesCapabilities({
@@ -86,7 +86,9 @@ export const writeCasesCapabilities = () => {
   });
 };
 
-export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) => {
+export const buildCasesCapabilities = (
+  overrides?: Partial<CasesCapabilities>
+): CasesCapabilities => {
   return {
     create_cases: overrides?.create_cases ?? true,
     read_cases: overrides?.read_cases ?? true,
@@ -94,6 +96,6 @@ export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) =
     delete_cases: overrides?.delete_cases ?? true,
     push_cases: overrides?.push_cases ?? true,
     cases_connectors: overrides?.cases_connectors ?? true,
-    edit_cases_settings: overrides?.edit_cases_settings ?? true,
+    cases_settings: overrides?.cases_settings ?? true,
   };
 };

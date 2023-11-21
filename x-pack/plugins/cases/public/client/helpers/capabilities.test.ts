@@ -166,7 +166,7 @@ describe('getUICapabilities', () => {
   });
 
   it('returns true for configure when it is set to true in the ui capabilities', () => {
-    expect(getUICapabilities({ edit_cases_settings: true })).toMatchInlineSnapshot(`
+    expect(getUICapabilities({ cases_settings: true })).toMatchInlineSnapshot(`
       Object {
         "all": false,
         "connectors": false,

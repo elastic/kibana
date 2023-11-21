@@ -56,7 +56,6 @@ describe(`cases`, () => {
           cases: {
             [operation]: [featureID],
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -91,7 +90,6 @@ describe(`cases`, () => {
             read: ['obs'],
             settings: ['security'],
           },
-
           savedObject: {
             all: [],
             read: [],
@@ -148,7 +146,6 @@ describe(`cases`, () => {
             all: ['security', 'other-security'],
             read: ['obs', 'other-obs'],
           },
-
           savedObject: {
             all: [],
             read: [],

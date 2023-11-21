@@ -19,7 +19,7 @@ describe('createUICapabilities', () => {
           "cases_connectors",
         ],
         "configure": Array [
-          "edit_cases_settings",
+          "cases_settings",
         ],
         "delete": Array [
           "delete_cases",

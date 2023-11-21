@@ -73,7 +73,7 @@ export const getCasesSubFeaturesMap = ({
         groupType: 'independent',
         privileges: [
           {
-            id: 'edit_cases_settings',
+            id: 'cases_settings',
             name: i18n.translate(
               'securitySolutionPackages.features.featureRegistry.configureSubFeatureDetails',
               {
@@ -88,7 +88,7 @@ export const getCasesSubFeaturesMap = ({
             cases: {
               settings: [APP_ID],
             },
-            ui: uiCapabilities.configure,
+            ui: uiCapabilities.settings,
           },
         ],
       },
