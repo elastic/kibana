@@ -18,7 +18,6 @@ import type { ReactWrapper } from 'enzyme';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import { searchSourceInstanceMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import { of } from 'rxjs';
-import { HitsCounter } from '../hits_counter';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { dataViewMock } from '../__mocks__/data_view';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
@@ -191,16 +190,6 @@ describe('Chart', () => {
         .simulate('click');
     });
     expect(mockUseEditVisualization).toHaveBeenCalled();
-  });
-
-  it('should render HitsCounter when hits is defined', async () => {
-    const component = await mountComponent();
-    expect(component.find(HitsCounter).exists()).toBeTruthy();
-  });
-
-  it('should not render HitsCounter when hits is undefined', async () => {
-    const component = await mountComponent({ noHits: true });
-    expect(component.find(HitsCounter).exists()).toBeFalsy();
   });
 
   it('should render the element passed to appendHistogram', async () => {
