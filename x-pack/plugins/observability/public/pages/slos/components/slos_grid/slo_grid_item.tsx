@@ -20,6 +20,7 @@ import { SLOWithSummaryResponse, HistoricalSummaryResponse } from '@kbn/slo-sche
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import { euiLightVars } from '@kbn/ui-theme';
+import { SloCardBadges } from '../badges/slo_card_badges';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { sloKeys } from '../../../../hooks/slo/query_key_factory';
@@ -27,9 +28,8 @@ import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule
 import { useKibana } from '../../../../utils/kibana_react';
 import { sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
-import { SLOGridItemBadges } from './slo_grid_item_badges';
 import { useSLOSummary } from '../../hooks/use_slo_summary';
-import { SLOGridItemActions } from './slo_grid_item_actions';
+import { SloGridItemActions } from './slo_grid_item_actions';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 
@@ -65,7 +65,7 @@ export const getColor = (
   }
 };
 
-export function SLOGridItem({ slo, rules, activeAlerts, historicalSummary }: Props) {
+export function SloGridItem({ slo, rules, activeAlerts, historicalSummary }: Props) {
   const {
     application: { navigateToUrl },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
@@ -120,6 +120,7 @@ export function SLOGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
           overflow: 'hidden',
           position: 'relative',
         }}
+        title={slo.summary.status}
       >
         <Chart>
           <Settings
@@ -131,7 +132,7 @@ export function SLOGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
             }}
           />
           <Metric
-            id="1"
+            id={`${slo.id}-${slo.instanceId}`}
             data={[
               [
                 {
@@ -169,14 +170,15 @@ export function SLOGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
             ]}
           />
         </Chart>
-        <SLOGridItemBadges
+        <SloCardBadges
+          isLoading={!slo.summary}
           slo={slo}
           rules={rules}
           activeAlerts={activeAlerts}
-          handleCreateRule={handleCreateRule}
+          onClickRuleBadge={handleCreateRule}
         />
         {(isMouseOver || isActionsPopoverOpen) && (
-          <SLOGridItemActions
+          <SloGridItemActions
             slo={slo}
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}

@@ -8,7 +8,7 @@ import React from 'react';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import styled from 'styled-components';
 import { useEuiShadow } from '@elastic/eui';
-import { SLOItemActions } from '../slo_item_actions';
+import { SloItemActions } from '../slo_item_actions';
 
 type PopoverPosition = 'relative' | 'default';
 
@@ -43,12 +43,12 @@ interface Props {
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
 }
 
-export function SLOGridItemActions(props: Props) {
+export function SloGridItemActions(props: Props) {
   const euiShadow = useEuiShadow('l');
 
   return (
     <Container boxShadow={euiShadow} position={'relative'}>
-      <SLOItemActions
+      <SloItemActions
         {...props}
         btnProps={{
           iconType: 'boxesHorizontal',

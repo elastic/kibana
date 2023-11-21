@@ -10,7 +10,7 @@ import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@k
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
-import { SLOItemActions } from './slo_item_actions';
+import { SloItemActions } from './slo_item_actions';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 import { sloFeatureId } from '../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
@@ -119,7 +119,7 @@ export function SloListItem({
 
         {/* ACTIONS */}
         <EuiFlexItem grow={false}>
-          <SLOItemActions
+          <SloItemActions
             slo={slo}
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}

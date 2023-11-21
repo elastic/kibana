@@ -28,7 +28,7 @@ const Container = styled.div`
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
 `;
 
-export function SLOGridItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
+export function SloGridItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
   return (
     <Container>
       <SloBadges
@@ -37,7 +37,7 @@ export function SLOGridItemBadges({ slo, activeAlerts, rules, handleCreateRule }
         rules={rules}
         slo={slo}
         onClickRuleBadge={handleCreateRule}
-        cardView={true}
+        viewMode={true}
       />
     </Container>
   );

@@ -57,7 +57,7 @@ function IconPanel({ children, hasPanel }: { children: JSX.Element; hasPanel: bo
   );
 }
 
-export function SLOItemActions({
+export function SloItemActions({
   slo,
   isActionsPopoverOpen,
   setIsActionsPopoverOpen,

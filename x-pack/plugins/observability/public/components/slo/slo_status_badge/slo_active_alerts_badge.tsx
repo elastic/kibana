@@ -14,12 +14,12 @@ import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 
 export interface Props {
-  compact?: boolean;
+  viewMode?: 'compact' | 'default';
   activeAlerts?: number;
   slo: SLOWithSummaryResponse;
 }
 
-export function SloActiveAlertsBadge({ slo, activeAlerts, compact }: Props) {
+export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }: Props) {
   const {
     application: { navigateToUrl },
     http: { basePath },
@@ -51,7 +51,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, compact }: Props) {
         )}
         data-test-subj="o11ySloActiveAlertsBadge"
       >
-        {compact
+        {viewMode
           ? activeAlerts
           : i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
               defaultMessage: '{count, plural, one {# alert} other {# alerts}}',

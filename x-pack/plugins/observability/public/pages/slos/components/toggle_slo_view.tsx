@@ -52,9 +52,11 @@ export function ToggleSLOView({ sloView, setSLOView, setGridSize }: Props) {
           isIconOnly
         />
       </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <ViewSettings setGridSize={setGridSize} />
-      </EuiFlexItem>
+      {sloView === 'cardView' && (
+        <EuiFlexItem grow={false}>
+          <ViewSettings setGridSize={setGridSize} />
+        </EuiFlexItem>
+      )}
     </EuiFlexGroup>
   );
 }

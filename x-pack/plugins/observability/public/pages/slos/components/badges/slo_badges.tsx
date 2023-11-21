@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiSkeletonRectangle, EuiSpacer } from '@elastic/eui';
+import { EuiFlexGroup, EuiSkeletonRectangle } from '@elastic/eui';
 import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 
@@ -17,14 +17,14 @@ import { SloTimeWindowBadge } from './slo_time_window_badge';
 import { SloRulesBadge } from './slo_rules_badge';
 import type { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloGroupByBadge } from '../../../../components/slo/slo_status_badge/slo_group_by_badge';
+export type ViewMode = 'default' | 'compact';
 
-export interface Props {
+export interface SloBadgesProps {
   activeAlerts?: number;
   isLoading: boolean;
   rules: Array<Rule<SloRule>> | undefined;
   slo: SLOWithSummaryResponse;
   onClickRuleBadge: () => void;
-  cardView?: boolean;
 }
 
 export function SloBadges({
@@ -33,55 +33,49 @@ export function SloBadges({
   rules,
   slo,
   onClickRuleBadge,
-  cardView,
-}: Props) {
+}: SloBadgesProps) {
   return (
-    <>
-      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
-        {isLoading ? (
-          <>
-            <EuiSkeletonRectangle
-              isLoading
-              contentAriaLabel="Loading"
-              width="54.16px"
-              height="20px"
-              borderRadius="s"
-            />
-            <EuiSkeletonRectangle
-              isLoading
-              contentAriaLabel="Loading"
-              width="54.16px"
-              height="20px"
-              borderRadius="s"
-            />
-            <EuiSkeletonRectangle
-              isLoading
-              contentAriaLabel="Loading"
-              width="54.16px"
-              height="20px"
-              borderRadius="s"
-            />
-          </>
-        ) : (
-          <>
-            {!cardView && <SloStatusBadge slo={slo} />}
-            {!cardView && <SloGroupByBadge slo={slo} cardView={cardView} />}
-            <SloIndicatorTypeBadge slo={slo} cardView={cardView} />
-            <SloTimeWindowBadge slo={slo} cardView={cardView} />
-            <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} compact={cardView} />
-            <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
-          </>
-        )}
-      </EuiFlexGroup>
-
-      {cardView && (
+    <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
+      {isLoading ? (
+        <LoadingBadges />
+      ) : (
         <>
-          <EuiSpacer size="s" />
-          <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
-            <SloGroupByBadge slo={slo} cardView={cardView} />
-          </EuiFlexGroup>
+          <SloStatusBadge slo={slo} />
+          <SloGroupByBadge slo={slo} />
+          <SloIndicatorTypeBadge slo={slo} />
+          <SloTimeWindowBadge slo={slo} />
+          <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} />
+          <SloRulesBadge rules={rules} onClick={onClickRuleBadge} />
         </>
       )}
+    </EuiFlexGroup>
+  );
+}
+
+export function LoadingBadges() {
+  return (
+    <>
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
+      <EuiSkeletonRectangle
+        isLoading
+        contentAriaLabel="Loading"
+        width="54.16px"
+        height="20px"
+        borderRadius="s"
+      />
     </>
   );
 }

@@ -9,10 +9,12 @@ import React from 'react';
 import { EuiFlexGrid, EuiFlexItem, EuiPanel, EuiSkeletonText } from '@elastic/eui';
 import { SLOWithSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { EuiFlexGridProps } from '@elastic/eui/src/components/flex/flex_grid';
+import { SloListEmpty } from '../slo_list_empty';
+import { SloListError } from '../slo_list_error';
 import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
-import { SLOGridItem } from './slo_grid_item';
+import { SloGridItem } from './slo_grid_item';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -21,7 +23,7 @@ export interface Props {
   gridSize?: string;
 }
 
-export function SLOGrid({ sloList, loading, error, gridSize }: Props) {
+export function SloGrid({ sloList, loading, error, gridSize }: Props) {
   const sloIdsAndInstanceIds = sloList.map(
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
@@ -35,15 +37,22 @@ export function SLOGrid({ sloList, loading, error, gridSize }: Props) {
       list: sloList.map((slo) => ({ sloId: slo.id, instanceId: slo.instanceId ?? ALL_VALUE })),
     });
 
+  if (!loading && !error && sloList.length === 0) {
+    return <SloListEmpty />;
+  }
+  if (!loading && error) {
+    return <SloListError />;
+  }
+
   if (loading && sloList.length === 0) {
-    return <LoadingSLOGrid gridSize={Number(gridSize)} />;
+    return <LoadingSloGrid gridSize={Number(gridSize)} />;
   }
 
   return (
     <EuiFlexGrid columns={Number(gridSize) as EuiFlexGridProps['columns']}>
       {sloList.map((slo) => (
         <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
-          <SLOGridItem
+          <SloGridItem
             slo={slo}
             loading={loading}
             error={error}
@@ -64,7 +73,7 @@ export function SLOGrid({ sloList, loading, error, gridSize }: Props) {
   );
 }
 
-function LoadingSLOGrid({ gridSize }: { gridSize: number }) {
+function LoadingSloGrid({ gridSize }: { gridSize: number }) {
   const ROWS = 4;
   const COLUMNS = gridSize;
   const loaders = Array(ROWS * COLUMNS).fill(null);
