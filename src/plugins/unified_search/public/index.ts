@@ -7,7 +7,6 @@
  */
 
 import { PluginInitializerContext } from '@kbn/core/public';
-import { calculateWidthFromCharCount } from '@kbn/calculate-width-from-char-count';
 import { ConfigSchema } from '../config';
 export type { IndexPatternSelectProps } from './index_pattern_select';
 export type { QueryStringInputProps } from './query_string_input';
