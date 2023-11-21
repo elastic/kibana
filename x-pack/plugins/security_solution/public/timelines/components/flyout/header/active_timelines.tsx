@@ -37,6 +37,10 @@ interface ActiveTimelinesProps {
 }
 
 const StyledEuiButtonEmpty = styled(EuiButtonEmpty)`
+  &:active,
+  &:focus {
+    background: transparent;
+  }
   > span {
     padding: 0;
   }

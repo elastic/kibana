@@ -40,10 +40,11 @@ const ActiveTimelinesContainer = styled(EuiFlexItem)`
   overflow: hidden;
 `;
 
-const TimelinePanel = euiStyled(EuiPanel)`
+const TimelinePanel = euiStyled(EuiPanel)<{ $isOpen?: boolean }>`
   backgroundColor: ${(props) => props.theme.eui.euiColorEmptyShade};
   color: ${(props) => props.theme.eui.euiTextColor};
   padding-inline: ${(props) => props.theme.eui.euiSizeM};
+  border-radius: ${({ $isOpen, theme }) => ($isOpen ? theme.eui.euiBorderRadius : '0px')};
 `;
 
 const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timelineId }) => {
@@ -121,7 +122,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
 
   return (
     <TimelinePanel
-      borderRadius="none"
+      $isOpen={show}
       grow={false}
       paddingSize="s"
       hasShadow={false}
