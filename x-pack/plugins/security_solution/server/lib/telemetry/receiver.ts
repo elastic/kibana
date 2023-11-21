@@ -827,9 +827,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
   }
 
   public fetchDiagnosticTimelineEndpointAlerts(
-    interval: number
+    rangeFrom: string,
+    rangeTo: string
   ): Promise<Array<SearchHit<EnhancedAlertEvent>>> {
-    return this.fetchTimelineAlerts(DEFAULT_DIAGNOSTIC_INDEX, interval);
+    return this.fetchTimelineAlerts(DEFAULT_DIAGNOSTIC_INDEX, rangeFrom, rangeTo);
   }
 
   public async buildProcessTree(
