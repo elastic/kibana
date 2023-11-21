@@ -13,6 +13,7 @@ import {
   CommitWithStatuses,
   octokit,
 } from '../shared';
+import { GitCommitExtract } from './commit_info';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
 const KIBANA_ARTIFACT_BUILD_SLUG = 'kibana-artifacts-container-image';
@@ -97,27 +98,15 @@ export async function getArtifactBuildJob(
 
 export async function getQAFBuildContainingCommit(
   commitSha: string,
-  qafBuilds: BuildkiteBuildExtract[]
+  qafBuilds: BuildkiteBuildExtract[],
+  commits: GitCommitExtract[]
 ) {
-  const commmitShaList = (
-    await octokit.request('GET /repos/{owner}/{repo}/commits/', {
-      owner: 'elastic',
-      repo: 'kibana',
-      ref: commitSha,
-      headers: {
-        accept: 'application/vnd.github.v3+json',
-        'X-GitHub-Api-Version': '2022-11-28',
-      },
-    })
-  ).data;
   const build = qafBuilds.find((kbBuild) => {
     // is build.commit after commitSha?
-    const buildkiteBuildShaIndex = commmitShaList.data.findIndex(
+    const buildkiteBuildShaIndex = commits.findIndex(
       (c: { sha: string }) => c.sha === kbBuild.commit
     );
-    const commitShaIndex = commmitShaList.data.findIndex(
-      (c: { sha: string }) => c.sha === commitSha
-    );
+    const commitShaIndex = commits.findIndex((c: { sha: string }) => c.sha === commitSha);
     return commitShaIndex !== -1 && buildkiteBuildShaIndex < commitShaIndex;
   });
 

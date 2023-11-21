@@ -70,7 +70,7 @@ async function enrichWithStatuses(commits: GitCommitExtract[]): Promise<CommitWi
       }
 
       const nextFTRBuilds = await getQAFTestBuilds(commit.date);
-      const nextFTRBuild = await getQAFBuildContainingCommit(commit.sha, nextFTRBuilds);
+      const nextFTRBuild = await getQAFBuildContainingCommit(commit.sha, nextFTRBuilds, commits);
       const artifactBuild = await getArtifactBuildJob(commit.sha);
 
       return {
