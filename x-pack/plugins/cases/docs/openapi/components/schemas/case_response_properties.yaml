@@ -26,13 +26,15 @@ properties:
   assignees:
     $ref: 'assignees.yaml'
   category:
-    type: string
+    type:
+      - "string"
+      - "null"
     description: The case category.
-    nullable: true
   closed_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
   closed_by:
     $ref: 'case_response_closed_by_properties.yaml'
   comments:
@@ -76,13 +78,14 @@ properties:
     type: string
     example: A case description.
   duration:
-    type: integer
+    type:
+      - "integer"
+      - "null"
     description: >
       The elapsed time from the creation of the case to its closure (in seconds).
       If the case has not been closed, the duration is set to null. If the case
       was closed after less than half a second, the duration is rounded down to
       zero.
-    nullable: true
     example: 120
   external_service:
     $ref: 'external_service.yaml'
@@ -113,9 +116,10 @@ properties:
     type: integer
     example: 0
   updated_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
   updated_by:
     $ref: 'case_response_updated_by_properties.yaml'
   version:

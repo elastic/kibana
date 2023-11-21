@@ -9,8 +9,9 @@ type: object
 properties:
   fields:
     description: An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.
-    nullable: true
-    type: string
+    type:
+      - "string"
+      - "null"
     example: null
   id:
     description: The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.

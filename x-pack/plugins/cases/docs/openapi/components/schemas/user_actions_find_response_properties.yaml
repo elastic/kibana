@@ -13,8 +13,9 @@ properties:
   action:
     $ref: 'actions.yaml'
   comment_id:
-    type: string
-    nullable: true
+    type:
+      - "string"
+      - "null"
     example: 578608d0-03b1-11ed-920c-974bfa104448
   created_at:
     type: string

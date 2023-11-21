@@ -1,5 +1,5 @@
 {
-  "openapi": "3.0.1",
+  "openapi": "3.1.0",
   "info": {
     "title": "Cases",
     "description": "OpenAPI schema for Cases endpoints",
@@ -417,8 +417,10 @@
                         "properties": {
                           "fields": {
                             "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                            "nullable": true,
-                            "type": "object"
+                            "type": [
+                              "object",
+                              "null"
+                            ]
                           },
                           "id": {
                             "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -449,29 +451,37 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "profile_uid": {
                             "type": "string",
                             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": "elastic"
                           }
                         }
                       },
                       "error": {
-                        "type": "string",
-                        "nullable": true,
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "example": null
                       },
                       "id": {
@@ -502,13 +512,18 @@
                         "$ref": "#/components/schemas/owners"
                       },
                       "updated_at": {
-                        "type": "string",
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "format": "date-time",
-                        "nullable": true,
                         "example": "2022-06-01T19:58:48.169Z"
                       },
                       "updated_by": {
-                        "type": "object",
+                        "type": [
+                          "object",
+                          "null"
+                        ],
                         "required": [
                           "email",
                           "full_name",
@@ -516,26 +531,31 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "profile_uid": {
                             "type": "string",
                             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": "elastic"
                           }
-                        },
-                        "nullable": true
+                        }
                       },
                       "version": {
                         "type": "string",
@@ -640,8 +660,10 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -672,29 +694,37 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "example": null
                     },
                     "id": {
@@ -725,13 +755,18 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
                       "example": "2022-06-01T19:58:48.169Z"
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -739,26 +774,31 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
@@ -867,8 +907,10 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -899,29 +941,37 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "example": null
                     },
                     "id": {
@@ -952,13 +1002,18 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
                       "example": "2022-06-01T19:58:48.169Z"
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -966,26 +1021,31 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
@@ -1044,23 +1104,29 @@
                     ],
                     "properties": {
                       "email": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "example": null
                       },
                       "full_name": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
-                      },
-                      "username": {
-                        "type": "string",
-                        "example": "elastic",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "example": null
                       },
                       "profile_uid": {
                         "type": "string",
                         "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                      },
+                      "username": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "example": "elastic"
                       }
                     }
                   }
@@ -1569,8 +1635,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "nullable": true
+                "type": [
+                  "object",
+                  "null"
+                ]
               }
             }
           }
@@ -2194,8 +2262,10 @@
                         "properties": {
                           "fields": {
                             "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                            "nullable": true,
-                            "type": "object"
+                            "type": [
+                              "object",
+                              "null"
+                            ]
                           },
                           "id": {
                             "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -2226,29 +2296,37 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "profile_uid": {
                             "type": "string",
                             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": "elastic"
                           }
                         }
                       },
                       "error": {
-                        "type": "string",
-                        "nullable": true,
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "example": null
                       },
                       "id": {
@@ -2279,13 +2357,18 @@
                         "$ref": "#/components/schemas/owners"
                       },
                       "updated_at": {
-                        "type": "string",
+                        "type": [
+                          "string",
+                          "null"
+                        ],
                         "format": "date-time",
-                        "nullable": true,
                         "example": "2022-06-01T19:58:48.169Z"
                       },
                       "updated_by": {
-                        "type": "object",
+                        "type": [
+                          "object",
+                          "null"
+                        ],
                         "required": [
                           "email",
                           "full_name",
@@ -2293,26 +2376,31 @@
                         ],
                         "properties": {
                           "email": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "full_name": {
-                            "type": "string",
-                            "example": null,
-                            "nullable": true
-                          },
-                          "username": {
-                            "type": "string",
-                            "example": "elastic",
-                            "nullable": true
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": null
                           },
                           "profile_uid": {
                             "type": "string",
                             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                          },
+                          "username": {
+                            "type": [
+                              "string",
+                              "null"
+                            ],
+                            "example": "elastic"
                           }
-                        },
-                        "nullable": true
+                        }
                       },
                       "version": {
                         "type": "string",
@@ -2420,8 +2508,10 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -2452,29 +2542,37 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "example": null
                     },
                     "id": {
@@ -2505,13 +2603,18 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
                       "example": "2022-06-01T19:58:48.169Z"
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -2519,26 +2622,31 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
@@ -2650,8 +2758,10 @@
                       "properties": {
                         "fields": {
                           "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                          "nullable": true,
-                          "type": "object"
+                          "type": [
+                            "object",
+                            "null"
+                          ]
                         },
                         "id": {
                           "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -2682,29 +2792,37 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
                       }
                     },
                     "error": {
-                      "type": "string",
-                      "nullable": true,
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "example": null
                     },
                     "id": {
@@ -2735,13 +2853,18 @@
                       "$ref": "#/components/schemas/owners"
                     },
                     "updated_at": {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "format": "date-time",
-                      "nullable": true,
                       "example": "2022-06-01T19:58:48.169Z"
                     },
                     "updated_by": {
-                      "type": "object",
+                      "type": [
+                        "object",
+                        "null"
+                      ],
                       "required": [
                         "email",
                         "full_name",
@@ -2749,26 +2872,31 @@
                       ],
                       "properties": {
                         "email": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "full_name": {
-                          "type": "string",
-                          "example": null,
-                          "nullable": true
-                        },
-                        "username": {
-                          "type": "string",
-                          "example": "elastic",
-                          "nullable": true
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": null
                         },
                         "profile_uid": {
                           "type": "string",
                           "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                        },
+                        "username": {
+                          "type": [
+                            "string",
+                            "null"
+                          ],
+                          "example": "elastic"
                         }
-                      },
-                      "nullable": true
+                      }
                     },
                     "version": {
                       "type": "string",
@@ -2909,23 +3037,29 @@
                     ],
                     "properties": {
                       "email": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "example": null
                       },
                       "full_name": {
-                        "type": "string",
-                        "example": null,
-                        "nullable": true
-                      },
-                      "username": {
-                        "type": "string",
-                        "example": "elastic",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "example": null
                       },
                       "profile_uid": {
                         "type": "string",
                         "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+                      },
+                      "username": {
+                        "type": [
+                          "string",
+                          "null"
+                        ],
+                        "example": "elastic"
                       }
                     }
                   }
@@ -3515,8 +3649,10 @@
           "content": {
             "application/json": {
               "schema": {
-                "type": "object",
-                "nullable": true
+                "type": [
+                  "object",
+                  "null"
+                ]
               }
             }
           }
@@ -4043,10 +4179,12 @@
     },
     "schemas": {
       "assignees": {
-        "type": "array",
+        "type": [
+          "array",
+          "null"
+        ],
         "description": "An array containing users that are assigned to the case.",
         "maxItems": 10,
-        "nullable": true,
         "items": {
           "type": "object",
           "required": [
@@ -4074,8 +4212,10 @@
         "properties": {
           "fields": {
             "description": "An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.",
-            "nullable": true,
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "example": null
           },
           "id": {
@@ -4110,8 +4250,10 @@
         "type": "object",
         "properties": {
           "fields": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "example": null
           },
           "id": {
@@ -4154,18 +4296,24 @@
             "properties": {
               "issueType": {
                 "description": "The type of issue.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "parent": {
                 "description": "The key of the parent issue, when the issue type is sub-task.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "priority": {
                 "description": "The priority of the issue.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4200,8 +4348,10 @@
         "properties": {
           "fields": {
             "description": "An object containing the connector fields. If you want to omit any individual field, specify null as its value.",
-            "type": "object",
-            "nullable": true,
+            "type": [
+              "object",
+              "null"
+            ],
             "required": [
               "issueTypes",
               "severityCode"
@@ -4262,28 +4412,38 @@
             "properties": {
               "category": {
                 "description": "The category of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "impact": {
                 "description": "The effect an incident had on business.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "severity": {
                 "description": "The severity of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "subcategory": {
                 "description": "The subcategory of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "urgency": {
                 "description": "The extent to which the incident resolution can be delayed.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4331,38 +4491,52 @@
             "properties": {
               "category": {
                 "description": "The category of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "destIp": {
                 "description": "Indicates whether cases will send a comma-separated list of destination IPs.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "malwareHash": {
                 "description": "Indicates whether cases will send a comma-separated list of malware hashes.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "malwareUrl": {
                 "description": "Indicates whether cases will send a comma-separated list of malware URLs.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "priority": {
                 "description": "The priority of the issue.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               },
               "sourceIp": {
                 "description": "Indicates whether cases will send a comma-separated list of source IPs.",
-                "type": "boolean",
-                "nullable": true
+                "type": [
+                  "boolean",
+                  "null"
+                ]
               },
               "subcategory": {
                 "description": "The subcategory of the incident.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4404,8 +4578,10 @@
             "properties": {
               "caseId": {
                 "description": "The case identifier for Swimlane connectors.",
-                "type": "string",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ]
               }
             }
           },
@@ -4566,10 +4742,12 @@
                   "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
                   "oneOf": [
                     {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "minLength": 1,
-                      "maxLength": 160,
-                      "nullable": true
+                      "maxLength": 160
                     },
                     {
                       "type": "boolean"
@@ -4583,27 +4761,35 @@
       },
       "case_response_closed_by_properties": {
         "title": "Case response properties for closed_by",
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "profile_uid": {
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "elastic"
           }
         },
         "required": [
@@ -4640,23 +4826,29 @@
             ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "profile_uid": {
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": "elastic"
               }
             }
           },
@@ -4675,13 +4867,18 @@
             "$ref": "#/components/schemas/owners"
           },
           "pushed_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "example": null,
-            "nullable": true
+            "example": null
           },
           "pushed_by": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
             "required": [
               "email",
               "full_name",
@@ -4689,26 +4886,31 @@
             ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "profile_uid": {
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": "elastic"
               }
-            },
-            "nullable": true
+            }
           },
           "rule": {
             "type": "object",
@@ -4733,13 +4935,17 @@
             ]
           },
           "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "updated_by": {
-            "type": "object",
-            "nullable": true,
+            "type": [
+              "object",
+              "null"
+            ],
             "required": [
               "email",
               "full_name",
@@ -4747,23 +4953,29 @@
             ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "profile_uid": {
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": "elastic"
               }
             }
           },
@@ -4778,23 +4990,29 @@
         "type": "object",
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "profile_uid": {
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "elastic"
           }
         },
         "required": [
@@ -4805,27 +5023,35 @@
       },
       "case_response_pushed_by_properties": {
         "title": "Case response properties for pushed_by",
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "profile_uid": {
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "elastic"
           }
         },
         "required": [
@@ -4836,27 +5062,35 @@
       },
       "case_response_updated_by_properties": {
         "title": "Case response properties for updated_by",
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "email": {
-            "type": "string",
-            "example": null,
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "full_name": {
-            "type": "string",
-            "example": null,
-            "nullable": true
-          },
-          "username": {
-            "type": "string",
-            "example": "elastic",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": null
           },
           "profile_uid": {
             "type": "string",
             "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+          },
+          "username": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "example": "elastic"
           }
         },
         "required": [
@@ -4892,9 +5126,11 @@
             "$ref": "#/components/schemas/owners"
           },
           "pushed_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "nullable": true,
             "example": null
           },
           "pushed_by": {
@@ -4908,9 +5144,11 @@
             ]
           },
           "updated_at": {
-            "type": "string",
+            "type": [
+              "string",
+              "null"
+            ],
             "format": "date-time",
-            "nullable": true,
             "example": null
           },
           "updated_by": {
@@ -4923,8 +5161,10 @@
         }
       },
       "external_service": {
-        "type": "object",
-        "nullable": true,
+        "type": [
+          "object",
+          "null"
+        ],
         "properties": {
           "connector_id": {
             "type": "string"
@@ -4946,29 +5186,37 @@
             "format": "date-time"
           },
           "pushed_by": {
-            "type": "object",
+            "type": [
+              "object",
+              "null"
+            ],
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "profile_uid": {
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": "elastic"
               }
-            },
-            "nullable": true
+            }
           }
         }
       },
@@ -5012,14 +5260,18 @@
             "$ref": "#/components/schemas/assignees"
           },
           "category": {
-            "type": "string",
-            "description": "The case category.",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "description": "The case category."
           },
           "closed_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "closed_by": {
             "$ref": "#/components/schemas/case_response_closed_by_properties"
@@ -5103,10 +5355,12 @@
                   "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
                   "oneOf": [
                     {
-                      "type": "string",
+                      "type": [
+                        "string",
+                        "null"
+                      ],
                       "minLength": 1,
-                      "maxLength": 160,
-                      "nullable": true
+                      "maxLength": 160
                     },
                     {
                       "type": "boolean"
@@ -5121,9 +5375,11 @@
             "example": "A case description."
           },
           "duration": {
-            "type": "integer",
+            "type": [
+              "integer",
+              "null"
+            ],
             "description": "The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.\n",
-            "nullable": true,
             "example": 120
           },
           "external_service": {
@@ -5167,9 +5423,11 @@
             "example": 0
           },
           "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
           },
           "updated_by": {
             "$ref": "#/components/schemas/case_response_updated_by_properties"
@@ -5280,10 +5538,12 @@
                         "description": "The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.\n",
                         "oneOf": [
                           {
-                            "type": "string",
+                            "type": [
+                              "string",
+                              "null"
+                            ],
                             "minLength": 1,
-                            "maxLength": 160,
-                            "nullable": true
+                            "maxLength": 160
                           },
                           {
                             "type": "boolean"
@@ -5384,8 +5644,10 @@
             "properties": {
               "fields": {
                 "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                "nullable": true,
-                "type": "object"
+                "type": [
+                  "object",
+                  "null"
+                ]
               },
               "id": {
                 "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -5472,8 +5734,10 @@
             "properties": {
               "fields": {
                 "description": "The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.",
-                "nullable": true,
-                "type": "object"
+                "type": [
+                  "object",
+                  "null"
+                ]
               },
               "id": {
                 "description": "The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.",
@@ -5881,9 +6145,11 @@
             "type": "object",
             "properties": {
               "fields": {
-                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
-                "nullable": true,
-                "type": "object",
+                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.\n",
+                "type": [
+                  "object",
+                  "null"
+                ],
                 "properties": {
                   "caseId": {
                     "description": "The case identifier for Swimlane connectors.",
@@ -5895,8 +6161,10 @@
                   },
                   "destIp": {
                     "description": "Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "impact": {
                     "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
@@ -5915,13 +6183,17 @@
                   },
                   "malwareHash": {
                     "description": "Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "malwareUrl": {
                     "description": "Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "parent": {
                     "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
@@ -5941,8 +6213,10 @@
                   },
                   "sourceIp": {
                     "description": "Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "subcategory": {
                     "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
@@ -5982,9 +6256,11 @@
             "type": "object",
             "properties": {
               "fields": {
-                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.",
-                "nullable": true,
-                "type": "object",
+                "description": "An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.\n",
+                "type": [
+                  "object",
+                  "null"
+                ],
                 "properties": {
                   "caseId": {
                     "description": "The case identifier for Swimlane connectors.",
@@ -5996,8 +6272,10 @@
                   },
                   "destIp": {
                     "description": "Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "impact": {
                     "description": "The effect an incident had on business for ServiceNow ITSM connectors.",
@@ -6016,13 +6294,17 @@
                   },
                   "malwareHash": {
                     "description": "Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "malwareUrl": {
                     "description": "Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "parent": {
                     "description": "The key of the parent issue, when the issue type is sub-task for Jira connectors.",
@@ -6042,8 +6324,10 @@
                   },
                   "sourceIp": {
                     "description": "Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.",
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "subcategory": {
                     "description": "The subcategory of the incident for ServiceNow ITSM connectors.",
@@ -6101,9 +6385,11 @@
         }
       },
       "payload_delete": {
-        "type": "object",
-        "description": "If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable.",
-        "nullable": true
+        "type": [
+          "object",
+          "null"
+        ],
+        "description": "If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable."
       },
       "payload_description": {
         "type": "object",
@@ -6234,8 +6520,10 @@
             "example": "22df07d0-03b1-11ed-920c-974bfa104448"
           },
           "comment_id": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "578608d0-03b1-11ed-920c-974bfa104448"
           },
           "created_at": {
@@ -6247,23 +6535,29 @@
             "type": "object",
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "profile_uid": {
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": "elastic"
               }
             },
             "required": [
@@ -6341,8 +6635,10 @@
             "$ref": "#/components/schemas/actions"
           },
           "comment_id": {
-            "type": "string",
-            "nullable": true,
+            "type": [
+              "string",
+              "null"
+            ],
             "example": "578608d0-03b1-11ed-920c-974bfa104448"
           },
           "created_at": {
@@ -6354,23 +6650,29 @@
             "type": "object",
             "properties": {
               "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": null
               },
               "profile_uid": {
                 "type": "string",
                 "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
+              },
+              "username": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "example": "elastic"
               }
             },
             "required": [

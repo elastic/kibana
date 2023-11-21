@@ -25,8 +25,9 @@ created_by:
   properties:
     $ref: 'user_properties.yaml'
 error:
-  type: string
-  nullable: true
+  type:
+    - "string"
+    - "null"
   example: null
 id:
   type: string
@@ -48,19 +49,21 @@ mappings:
 owner:
   $ref: 'owners.yaml'
 updated_at:
-  type: string
+  type:
+    - "string"
+    - "null"
   format: date-time
-  nullable: true
   example: 2022-06-01T19:58:48.169Z
 updated_by:
-  type: object
+  type:
+    - "object"
+    - "null"
   required:
       - email
       - full_name
       - username
   properties:
     $ref: 'user_properties.yaml'
-  nullable: true
 version:
   type: string
   example: WzIwNzMsMV0=

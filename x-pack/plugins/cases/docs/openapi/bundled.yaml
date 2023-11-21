@@ -1,4 +1,4 @@
-openapi: 3.0.1
+openapi: 3.1.0
 info:
   title: Cases
   description: OpenAPI schema for Cases endpoints
@@ -258,8 +258,9 @@ paths:
                       properties:
                         fields:
                           description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                          nullable: true
-                          type: object
+                          type:
+                            - object
+                            - 'null'
                         id:
                           description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                           type: string
@@ -282,23 +283,27 @@ paths:
                         - username
                       properties:
                         email:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
                         full_name:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
                         profile_uid:
                           type: string
                           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          example: elastic
                     error:
-                      type: string
-                      nullable: true
+                      type:
+                        - string
+                        - 'null'
                       example: null
                     id:
                       type: string
@@ -320,33 +325,38 @@ paths:
                     owner:
                       $ref: '#/components/schemas/owners'
                     updated_at:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       format: date-time
-                      nullable: true
                       example: '2022-06-01T19:58:48.169Z'
                     updated_by:
-                      type: object
+                      type:
+                        - object
+                        - 'null'
                       required:
                         - email
                         - full_name
                         - username
                       properties:
                         email:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
                         full_name:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
                         profile_uid:
                           type: string
                           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                      nullable: true
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          example: elastic
                     version:
                       type: string
                       example: WzIwNzMsMV0=
@@ -419,8 +429,9 @@ paths:
                     properties:
                       fields:
                         description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                        nullable: true
-                        type: object
+                        type:
+                          - object
+                          - 'null'
                       id:
                         description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                         type: string
@@ -443,23 +454,27 @@ paths:
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   error:
-                    type: string
-                    nullable: true
+                    type:
+                      - string
+                      - 'null'
                     example: null
                   id:
                     type: string
@@ -481,33 +496,38 @@ paths:
                   owner:
                     $ref: '#/components/schemas/owners'
                   updated_at:
-                    type: string
+                    type:
+                      - string
+                      - 'null'
                     format: date-time
-                    nullable: true
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
-                    type: object
+                    type:
+                      - object
+                      - 'null'
                     required:
                       - email
                       - full_name
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    nullable: true
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   version:
                     type: string
                     example: WzIwNzMsMV0=
@@ -582,8 +602,9 @@ paths:
                     properties:
                       fields:
                         description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                        nullable: true
-                        type: object
+                        type:
+                          - object
+                          - 'null'
                       id:
                         description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                         type: string
@@ -606,23 +627,27 @@ paths:
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   error:
-                    type: string
-                    nullable: true
+                    type:
+                      - string
+                      - 'null'
                     example: null
                   id:
                     type: string
@@ -644,33 +669,38 @@ paths:
                   owner:
                     $ref: '#/components/schemas/owners'
                   updated_at:
-                    type: string
+                    type:
+                      - string
+                      - 'null'
                     format: date-time
-                    nullable: true
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
-                    type: object
+                    type:
+                      - object
+                      - 'null'
                     required:
                       - email
                       - full_name
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    nullable: true
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   version:
                     type: string
                     example: WzIwNzMsMV0=
@@ -709,20 +739,23 @@ paths:
                     - username
                   properties:
                     email:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       example: null
-                      nullable: true
                     full_name:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       example: null
-                      nullable: true
-                    username:
-                      type: string
-                      example: elastic
-                      nullable: true
                     profile_uid:
                       type: string
                       example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                    username:
+                      type:
+                        - string
+                        - 'null'
+                      example: elastic
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
@@ -1028,8 +1061,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              nullable: true
+              type:
+                - object
+                - 'null'
       responses:
         '200':
           description: Indicates a successful call.
@@ -1409,8 +1443,9 @@ paths:
                       properties:
                         fields:
                           description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                          nullable: true
-                          type: object
+                          type:
+                            - object
+                            - 'null'
                         id:
                           description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                           type: string
@@ -1433,23 +1468,27 @@ paths:
                         - username
                       properties:
                         email:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
                         full_name:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
                         profile_uid:
                           type: string
                           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          example: elastic
                     error:
-                      type: string
-                      nullable: true
+                      type:
+                        - string
+                        - 'null'
                       example: null
                     id:
                       type: string
@@ -1471,33 +1510,38 @@ paths:
                     owner:
                       $ref: '#/components/schemas/owners'
                     updated_at:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       format: date-time
-                      nullable: true
                       example: '2022-06-01T19:58:48.169Z'
                     updated_by:
-                      type: object
+                      type:
+                        - object
+                        - 'null'
                       required:
                         - email
                         - full_name
                         - username
                       properties:
                         email:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
                         full_name:
-                          type: string
+                          type:
+                            - string
+                            - 'null'
                           example: null
-                          nullable: true
-                        username:
-                          type: string
-                          example: elastic
-                          nullable: true
                         profile_uid:
                           type: string
                           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                      nullable: true
+                        username:
+                          type:
+                            - string
+                            - 'null'
+                          example: elastic
                     version:
                       type: string
                       example: WzIwNzMsMV0=
@@ -1571,8 +1615,9 @@ paths:
                     properties:
                       fields:
                         description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                        nullable: true
-                        type: object
+                        type:
+                          - object
+                          - 'null'
                       id:
                         description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                         type: string
@@ -1595,23 +1640,27 @@ paths:
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   error:
-                    type: string
-                    nullable: true
+                    type:
+                      - string
+                      - 'null'
                     example: null
                   id:
                     type: string
@@ -1633,33 +1682,38 @@ paths:
                   owner:
                     $ref: '#/components/schemas/owners'
                   updated_at:
-                    type: string
+                    type:
+                      - string
+                      - 'null'
                     format: date-time
-                    nullable: true
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
-                    type: object
+                    type:
+                      - object
+                      - 'null'
                     required:
                       - email
                       - full_name
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    nullable: true
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   version:
                     type: string
                     example: WzIwNzMsMV0=
@@ -1735,8 +1789,9 @@ paths:
                     properties:
                       fields:
                         description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-                        nullable: true
-                        type: object
+                        type:
+                          - object
+                          - 'null'
                       id:
                         description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
                         type: string
@@ -1759,23 +1814,27 @@ paths:
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   error:
-                    type: string
-                    nullable: true
+                    type:
+                      - string
+                      - 'null'
                     example: null
                   id:
                     type: string
@@ -1797,33 +1856,38 @@ paths:
                   owner:
                     $ref: '#/components/schemas/owners'
                   updated_at:
-                    type: string
+                    type:
+                      - string
+                      - 'null'
                     format: date-time
-                    nullable: true
                     example: '2022-06-01T19:58:48.169Z'
                   updated_by:
-                    type: object
+                    type:
+                      - object
+                      - 'null'
                     required:
                       - email
                       - full_name
                       - username
                     properties:
                       email:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
                       full_name:
-                        type: string
+                        type:
+                          - string
+                          - 'null'
                         example: null
-                        nullable: true
-                      username:
-                        type: string
-                        example: elastic
-                        nullable: true
                       profile_uid:
                         type: string
                         example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-                    nullable: true
+                      username:
+                        type:
+                          - string
+                          - 'null'
+                        example: elastic
                   version:
                     type: string
                     example: WzIwNzMsMV0=
@@ -1913,20 +1977,23 @@ paths:
                     - username
                   properties:
                     email:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       example: null
-                      nullable: true
                     full_name:
-                      type: string
+                      type:
+                        - string
+                        - 'null'
                       example: null
-                      nullable: true
-                    username:
-                      type: string
-                      example: elastic
-                      nullable: true
                     profile_uid:
                       type: string
                       example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+                    username:
+                      type:
+                        - string
+                        - 'null'
+                      example: elastic
               examples:
                 getReportersResponse:
                   $ref: '#/components/examples/get_reporters_response'
@@ -2269,8 +2336,9 @@ paths:
         content:
           application/json:
             schema:
-              type: object
-              nullable: true
+              type:
+                - object
+                - 'null'
       responses:
         '200':
           description: Indicates a successful call.
@@ -2637,10 +2705,11 @@ components:
         example: default
   schemas:
     assignees:
-      type: array
+      type:
+        - array
+        - 'null'
       description: An array containing users that are assigned to the case.
       maxItems: 10
-      nullable: true
       items:
         type: object
         required:
@@ -2662,8 +2731,9 @@ components:
       properties:
         fields:
           description: An object containing the connector fields. To create a case without a connector, specify null. To update a case to remove the connector, specify null.
-          nullable: true
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
         id:
           description: The identifier for the connector. To create a case without a connector, use `none`. To update a case to remove the connector, specify `none`.
@@ -2690,8 +2760,9 @@ components:
       type: object
       properties:
         fields:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
           example: null
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
@@ -2725,16 +2796,19 @@ components:
           properties:
             issueType:
               description: The type of issue.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             parent:
               description: The key of the parent issue, when the issue type is sub-task.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             priority:
               description: The priority of the issue.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2759,8 +2833,9 @@ components:
       properties:
         fields:
           description: An object containing the connector fields. If you want to omit any individual field, specify null as its value.
-          type: object
-          nullable: true
+          type:
+            - object
+            - 'null'
           required:
             - issueTypes
             - severityCode
@@ -2807,24 +2882,29 @@ components:
           properties:
             category:
               description: The category of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             impact:
               description: The effect an incident had on business.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             severity:
               description: The severity of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             subcategory:
               description: The subcategory of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             urgency:
               description: The extent to which the incident resolution can be delayed.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2861,32 +2941,39 @@ components:
           properties:
             category:
               description: The category of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             destIp:
               description: Indicates whether cases will send a comma-separated list of destination IPs.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             malwareHash:
               description: Indicates whether cases will send a comma-separated list of malware hashes.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             malwareUrl:
               description: Indicates whether cases will send a comma-separated list of malware URLs.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             priority:
               description: The priority of the issue.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
             sourceIp:
               description: Indicates whether cases will send a comma-separated list of source IPs.
-              type: boolean
-              nullable: true
+              type:
+                - boolean
+                - 'null'
             subcategory:
               description: The subcategory of the incident.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -2917,8 +3004,9 @@ components:
           properties:
             caseId:
               description: The case identifier for Swimlane connectors.
-              type: string
-              nullable: true
+              type:
+                - string
+                - 'null'
         id:
           description: The identifier for the connector. To retrieve connector IDs, use the find connectors API.
           type: string
@@ -3036,31 +3124,36 @@ components:
                 description: |
                   The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
                 oneOf:
-                  - type: string
+                  - type:
+                      - string
+                      - 'null'
                     minLength: 1
                     maxLength: 160
-                    nullable: true
                   - type: boolean
     case_response_closed_by_properties:
       title: Case response properties for closed_by
-      type: object
-      nullable: true
+      type:
+        - object
+        - 'null'
       properties:
         email:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
         full_name:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          example: elastic
       required:
         - email
         - full_name
@@ -3088,20 +3181,23 @@ components:
             - username
           properties:
             email:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
             full_name:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              example: elastic
         id:
           type: string
           example: 73362370-ab1a-11ec-985f-97e55adae8b9
@@ -3113,33 +3209,38 @@ components:
         owner:
           $ref: '#/components/schemas/owners'
         pushed_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
           example: null
-          nullable: true
         pushed_by:
-          type: object
+          type:
+            - object
+            - 'null'
           required:
             - email
             - full_name
             - username
           properties:
             email:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
             full_name:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-          nullable: true
+            username:
+              type:
+                - string
+                - 'null'
+              example: elastic
         rule:
           type: object
           properties:
@@ -3157,32 +3258,37 @@ components:
           enum:
             - alert
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
         updated_by:
-          type: object
-          nullable: true
+          type:
+            - object
+            - 'null'
           required:
             - email
             - full_name
             - username
           properties:
             email:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
             full_name:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              example: elastic
         version:
           type: string
           example: WzMwNDgsMV0=
@@ -3191,68 +3297,79 @@ components:
       type: object
       properties:
         email:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
         full_name:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          example: elastic
       required:
         - email
         - full_name
         - username
     case_response_pushed_by_properties:
       title: Case response properties for pushed_by
-      type: object
-      nullable: true
+      type:
+        - object
+        - 'null'
       properties:
         email:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
         full_name:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          example: elastic
       required:
         - email
         - full_name
         - username
     case_response_updated_by_properties:
       title: Case response properties for updated_by
-      type: object
-      nullable: true
+      type:
+        - object
+        - 'null'
       properties:
         email:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
         full_name:
-          type: string
+          type:
+            - string
+            - 'null'
           example: null
-          nullable: true
-        username:
-          type: string
-          example: elastic
-          nullable: true
         profile_uid:
           type: string
           example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+        username:
+          type:
+            - string
+            - 'null'
+          example: elastic
       required:
         - email
         - full_name
@@ -3278,9 +3395,10 @@ components:
         owner:
           $ref: '#/components/schemas/owners'
         pushed_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
           example: null
         pushed_by:
           $ref: '#/components/schemas/case_response_pushed_by_properties'
@@ -3290,9 +3408,10 @@ components:
           enum:
             - user
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
           example: null
         updated_by:
           $ref: '#/components/schemas/case_response_updated_by_properties'
@@ -3300,8 +3419,9 @@ components:
           type: string
           example: WzIwNDMxLDFd
     external_service:
-      type: object
-      nullable: true
+      type:
+        - object
+        - 'null'
       properties:
         connector_id:
           type: string
@@ -3317,24 +3437,28 @@ components:
           type: string
           format: date-time
         pushed_by:
-          type: object
+          type:
+            - object
+            - 'null'
           properties:
             email:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
             full_name:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-          nullable: true
+            username:
+              type:
+                - string
+                - 'null'
+              example: elastic
     status:
       type: string
       description: The status of the case.
@@ -3371,13 +3495,15 @@ components:
         assignees:
           $ref: '#/components/schemas/assignees'
         category:
-          type: string
+          type:
+            - string
+            - 'null'
           description: The case category.
-          nullable: true
         closed_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
         closed_by:
           $ref: '#/components/schemas/case_response_closed_by_properties'
         comments:
@@ -3431,19 +3557,21 @@ components:
                 description: |
                   The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
                 oneOf:
-                  - type: string
+                  - type:
+                      - string
+                      - 'null'
                     minLength: 1
                     maxLength: 160
-                    nullable: true
                   - type: boolean
         description:
           type: string
           example: A case description.
         duration:
-          type: integer
+          type:
+            - integer
+            - 'null'
           description: |
             The elapsed time from the creation of the case to its closure (in seconds). If the case has not been closed, the duration is set to null. If the case was closed after less than half a second, the duration is rounded down to zero.
-          nullable: true
           example: 120
         external_service:
           $ref: '#/components/schemas/external_service'
@@ -3474,9 +3602,10 @@ components:
           type: integer
           example: 0
         updated_at:
-          type: string
+          type:
+            - string
+            - 'null'
           format: date-time
-          nullable: true
         updated_by:
           $ref: '#/components/schemas/case_response_updated_by_properties'
         version:
@@ -3556,10 +3685,11 @@ components:
                       description: |
                         The custom field value. If the custom field is required, it cannot be explicitly set to null. However, for cases that existed when the required custom field was added, the default value stored in Elasticsearch is `undefined`. The value returned in the API and user interface in this case is `null`.
                       oneOf:
-                        - type: string
+                        - type:
+                            - string
+                            - 'null'
                           minLength: 1
                           maxLength: 160
-                          nullable: true
                         - type: boolean
               description:
                 description: An updated description for the case.
@@ -3630,8 +3760,9 @@ components:
           properties:
             fields:
               description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-              nullable: true
-              type: object
+              type:
+                - object
+                - 'null'
             id:
               description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
               type: string
@@ -3699,8 +3830,9 @@ components:
           properties:
             fields:
               description: The fields specified in the case configuration are not used and are not propagated to individual cases, therefore it is recommended to set it to `null`.
-              nullable: true
-              type: object
+              type:
+                - object
+                - 'null'
             id:
               description: The identifier for the connector. If you do not want a default connector, use `none`. To retrieve connector IDs, use the find connectors API.
               type: string
@@ -3996,9 +4128,11 @@ components:
           type: object
           properties:
             fields:
-              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-              nullable: true
-              type: object
+              description: |
+                An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+              type:
+                - object
+                - 'null'
               properties:
                 caseId:
                   description: The case identifier for Swimlane connectors.
@@ -4008,8 +4142,9 @@ components:
                   type: string
                 destIp:
                   description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 impact:
                   description: The effect an incident had on business for ServiceNow ITSM connectors.
                   type: string
@@ -4023,12 +4158,14 @@ components:
                     type: string
                 malwareHash:
                   description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 malwareUrl:
                   description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 parent:
                   description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                   type: string
@@ -4043,8 +4180,9 @@ components:
                   type: string
                 sourceIp:
                   description: Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 subcategory:
                   description: The subcategory of the incident for ServiceNow ITSM connectors.
                   type: string
@@ -4071,9 +4209,11 @@ components:
           type: object
           properties:
             fields:
-              description: An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
-              nullable: true
-              type: object
+              description: |
+                An object containing the connector fields. To create a case without a connector, specify null. If you want to omit any individual field, specify null as its value.
+              type:
+                - object
+                - 'null'
               properties:
                 caseId:
                   description: The case identifier for Swimlane connectors.
@@ -4083,8 +4223,9 @@ components:
                   type: string
                 destIp:
                   description: Indicates whether cases will send a comma-separated list of destination IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 impact:
                   description: The effect an incident had on business for ServiceNow ITSM connectors.
                   type: string
@@ -4098,12 +4239,14 @@ components:
                     type: string
                 malwareHash:
                   description: Indicates whether cases will send a comma-separated list of malware hashes for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 malwareUrl:
                   description: Indicates whether cases will send a comma-separated list of malware URLs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 parent:
                   description: The key of the parent issue, when the issue type is sub-task for Jira connectors.
                   type: string
@@ -4118,8 +4261,9 @@ components:
                   type: string
                 sourceIp:
                   description: Indicates whether cases will send a comma-separated list of source IPs for ServiceNow SecOps connectors.
-                  type: boolean
-                  nullable: true
+                  type:
+                    - boolean
+                    - 'null'
                 subcategory:
                   description: The subcategory of the incident for ServiceNow ITSM connectors.
                   type: string
@@ -4156,9 +4300,10 @@ components:
         title:
           type: string
     payload_delete:
-      type: object
+      type:
+        - object
+        - 'null'
       description: If the `action` is `delete` and the `type` is `delete_case`, the payload is nullable.
-      nullable: true
     payload_description:
       type: object
       properties:
@@ -4251,8 +4396,9 @@ components:
           type: string
           example: 22df07d0-03b1-11ed-920c-974bfa104448
         comment_id:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
           example: 578608d0-03b1-11ed-920c-974bfa104448
         created_at:
           type: string
@@ -4262,20 +4408,23 @@ components:
           type: object
           properties:
             email:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
             full_name:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              example: elastic
           required:
             - email
             - full_name
@@ -4315,8 +4464,9 @@ components:
         action:
           $ref: '#/components/schemas/actions'
         comment_id:
-          type: string
-          nullable: true
+          type:
+            - string
+            - 'null'
           example: 578608d0-03b1-11ed-920c-974bfa104448
         created_at:
           type: string
@@ -4326,20 +4476,23 @@ components:
           type: object
           properties:
             email:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
             full_name:
-              type: string
+              type:
+                - string
+                - 'null'
               example: null
-              nullable: true
-            username:
-              type: string
-              example: elastic
-              nullable: true
             profile_uid:
               type: string
               example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
+            username:
+              type:
+                - string
+                - 'null'
+              example: elastic
           required:
             - email
             - full_name

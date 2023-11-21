@@ -18,9 +18,10 @@ properties:
   owner:
     $ref: 'owners.yaml'
   pushed_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
     example: null
   pushed_by:
     $ref: 'case_response_pushed_by_properties.yaml'
@@ -30,9 +31,10 @@ properties:
     enum:
       - user
   updated_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
     example: null
   updated_by:
     $ref: 'case_response_updated_by_properties.yaml'

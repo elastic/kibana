@@ -31,19 +31,21 @@ properties:
   owner:
     $ref: 'owners.yaml'
   pushed_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
     example: null
-    nullable: true
   pushed_by:
-    type: object
+    type:
+      - "object"
+      - "null"
     required:
       - email
       - full_name
       - username
     properties:
       $ref: 'user_properties.yaml'
-    nullable: true
   rule:
     type: object
     properties:
@@ -54,12 +56,14 @@ properties:
     enum:
       - alert
   updated_at:
-    type: string
+    type:
+      - "string"
+      - "null"
     format: date-time
-    nullable: true
   updated_by:
-    type: object
-    nullable: true
+    type:
+      - "object"
+      - "null"
     required:
       - email
       - full_name
