@@ -39,15 +39,14 @@ export async function loadAction({
 
   const stats = createStats(name, log);
   const readable$Fns = readableFactory(log)(inputDir)(name);
-  const mode = {
-    objectMode: true,
-  };
 
   await createPromiseFromStreams([
     // a single stream that emits records from all archive files, in
     // order, so that createIndexStream can track the state of indexes
     // across archives and properly skip docs from existing indexes
-    concatStreamProviders((await ordered(inputDir)).map(readable$Fns), mode),
+    concatStreamProviders((await ordered(inputDir)).map(readable$Fns), {
+      objectMode: true,
+    }),
     createCreateIndexStream({
       client,
       stats,

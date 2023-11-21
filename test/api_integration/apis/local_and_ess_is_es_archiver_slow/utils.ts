@@ -459,7 +459,7 @@ const xpack = [
   'x-pack/test/saved_object_tagging/common/fixtures/es_archiver/logstash_functional',
   ...recentlyFound,
 ];
-// const single = ['test/functional/fixtures/es_archiver/alias'];
+// const single = ['x-pack/test/functional/es_archives/logstash_functional'];
 const _archives = [
   // ...single,
   ...fixed,
