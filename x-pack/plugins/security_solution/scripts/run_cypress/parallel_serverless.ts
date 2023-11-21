@@ -199,7 +199,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
       }
     );
     if (response.data.phase !== 'initialized') {
-      throw new Error('Project is not initialized. Retrying in 20s...');
+      throw new Error('Project is not initialized. A retry will be triggered soon...');
     } else {
       log.info('Project is initialized');
     }
@@ -207,7 +207,7 @@ function waitForProjectInitialized(projectId: string, apiKey: string): Promise<v
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. Retrying in 20s...');
+        log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
         log.info(error);
       }
@@ -258,7 +258,7 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
       },
     });
     if (response.data.status.overall.level !== 'available') {
-      throw new Error(`${runnerId}: Kibana is not available. Retrying in 20s...`);
+      throw new Error(`${runnerId}: Kibana is not available. A retry will be triggered soon...`);
     } else {
       log.info(`${runnerId}: Kibana status overall is ${response.data.status.overall.level}.`);
     }
@@ -266,7 +266,9 @@ function waitForKibanaAvailable(kbUrl: string, auth: string, runnerId: string): 
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info(`${runnerId}: The Kibana URL is not yet reachable. Retrying in 20s...`);
+        log.info(
+          `${runnerId}: The Kibana URL is not yet reachable. A retry will be triggered soon...`
+        );
       } else {
         log.info(`${runnerId}: ${error}`);
       }
@@ -283,17 +285,11 @@ function waitForEsAccess(esUrl: string, auth: string, runnerId: string): Promise
   const fetchEsAccessAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if can be accessed.`);
 
-    const response = await axios.get(`${esUrl}`, {
+    await axios.get(`${esUrl}`, {
       headers: {
         Authorization: `Basic ${auth}`,
       },
     });
-
-    if (response.status !== 200) {
-      throw new Error('Cannot access. Retrying in 20s...');
-    } else {
-      log.info('Access performed successfully');
-    }
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
@@ -321,19 +317,14 @@ function waitForKibanaLogin(kbUrl: string, credentials: Credentials): Promise<vo
 
   const fetchLoginStatusAttempt = async (attemptNum: number) => {
     log.info(`Retry number ${attemptNum} to check if login can be performed.`);
-    const response = await axios.post(`${kbUrl}/internal/security/login`, body, {
+    axios.post(`${kbUrl}/internal/security/login`, body, {
       headers: API_HEADERS,
     });
-    if (response.status !== 200) {
-      throw new Error('Cannot login. Retrying in 20s...');
-    } else {
-      log.info('Login can be performed successfully');
-    }
   };
   const retryOptions = {
     onFailedAttempt: (error: Error | AxiosError) => {
       if (error instanceof AxiosError && error.code === 'ENOTFOUND') {
-        log.info('Project is not reachable. Retrying login in 20s...');
+        log.info('Project is not reachable. A retry will be triggered soon...');
       } else {
         log.info(error);
       }
