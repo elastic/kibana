@@ -109,7 +109,7 @@ export const addExceptionEntryFieldValueAndSelectSuggestion = (field: string, in
 };
 
 export const addExceptionEntryOperatorValue = (operator: string, index = 0) => {
-  cy.get(OPERATOR_INPUT).eq(index).type(`${operator}{enter}`);
+  cy.get(OPERATOR_INPUT).eq(index).type(`{selectall}${operator}{enter}`);
   cy.get(EXCEPTION_FLYOUT_TITLE).click();
 };
 
@@ -189,7 +189,7 @@ export const submitNewExceptionItem = () => {
   cy.get(CONFIRM_BTN).should('exist');
   /* Sometimes a toaster error message unrelated with the test performed is displayed.
    The toaster is blocking the confirm button we have to click. Using force true would solve the issue, but should not be used.
-   There are some tests that use the closeErrorToast() method to close error toasters before continuing with the interactions with the page. 
+   There are some tests that use the closeErrorToast() method to close error toasters before continuing with the interactions with the page.
    In this case we check if a toaster is displayed and if so, close it to continue with the test.
    */
   cy.root().then(($page) => {
