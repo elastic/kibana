@@ -113,7 +113,7 @@ describe('getDatasetIndex', () => {
     });
     expect(result).toMatchInlineSnapshot(`
       Object {
-        "index": "kibana_sample_data_e*",
+        "index": "test_index",
         "timeFieldName": "@timestamp",
       }
     `);

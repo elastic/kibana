@@ -34,7 +34,7 @@ function getBreakdownType(field: string, dataview: DataView) {
     case 'date':
       return 'dateHistogram';
     default:
-      return 'filters';
+      return 'topValues';
   }
 }
 export const getBreakdownColumn = ({

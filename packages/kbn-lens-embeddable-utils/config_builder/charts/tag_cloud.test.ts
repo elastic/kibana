@@ -132,7 +132,7 @@ test('generates metric chart config', async () => {
           "orientation": "single",
           "showLabel": true,
           "tagAccessor": "category",
-          "valueAccessor": undefined,
+          "valueAccessor": "count",
         },
       },
       "title": "test",

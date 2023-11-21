@@ -29,7 +29,7 @@ function buildVisualizationState(config: LensTagCloudConfig): TagcloudState {
   const isFormula = isFormulaDataset(config.dataset) || isFormulaDataset(layer.dataset);
   return {
     layerId: DEFAULT_LAYER_ID,
-    valueAccessor: !isFormula ? layer.query : ACCESSOR,
+    valueAccessor: !isFormula ? layer.value : ACCESSOR,
     maxFontSize: 72,
     minFontSize: 12,
     orientation: 'single',

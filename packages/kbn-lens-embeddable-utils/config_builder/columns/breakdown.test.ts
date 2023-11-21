@@ -14,13 +14,13 @@ const dataView = {
     getByName: (name: string) => {
       switch (name) {
         case '@timestamp':
-          return 'datetime';
+          return { type: 'date' };
         case 'category':
-          return 'string';
+          return { type: 'string' };
         case 'price':
-          return 'number';
+          return { type: 'number' };
         default:
-          return 'string';
+          return { type: 'string' };
       }
     },
   },
@@ -47,5 +47,5 @@ test('uses intervals when field is a number', () => {
     options: 'price',
     dataView: dataView as unknown as DataView,
   });
-  expect(column.operationType).toEqual('intervals');
+  expect(column.operationType).toEqual('range');
 });
