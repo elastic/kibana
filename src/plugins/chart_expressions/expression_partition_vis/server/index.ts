@@ -6,9 +6,8 @@
  * Side Public License, v 1.
  */
 
-import { ExpressionPartitionVisPlugin } from './plugin';
-
-export function plugin() {
+export async function plugin() {
+  const { ExpressionPartitionVisPlugin } = await import('./plugin');
   return new ExpressionPartitionVisPlugin();
 }
 

@@ -20,14 +20,14 @@ import {
 import { EuiLoadingChart, EuiTextColor } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { SignificantTermHistogramItem } from '@kbn/ml-agg-utils';
+import type { SignificantItemHistogramItem } from '@kbn/ml-agg-utils';
 
 import { i18n } from '@kbn/i18n';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 import { useEuiTheme } from '../../hooks/use_eui_theme';
 
 interface MiniHistogramProps {
-  chartData?: SignificantTermHistogramItem[];
+  chartData?: SignificantItemHistogramItem[];
   isLoading: boolean;
   label: string;
   /** Optional color override for the default bar color for charts */
@@ -126,7 +126,7 @@ export const MiniHistogram: FC<MiniHistogramProps> = ({
           xScaleType={ScaleType.Time}
           yScaleType={ScaleType.Linear}
           xAccessor={'key'}
-          yAccessors={['doc_count_significant_term']}
+          yAccessors={['doc_count_significant_item']}
           data={chartData}
           stackAccessors={[0]}
           color={barHighlightColor}

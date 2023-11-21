@@ -31,6 +31,7 @@ import { getAllPermissionsExceptFrom, isReadOnlyPermissions } from '../../utils/
 import { useIsLoadingCases } from './use_is_loading_cases';
 import { useAllCasesState } from './use_all_cases_state';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
+import { useCasesColumnsSelection } from './use_cases_columns_selection';
 
 const ProgressLoader = styled(EuiProgress)`
   ${({ $isShow }: { $isShow: boolean }) =>
@@ -149,14 +150,16 @@ export const AllCasesList = React.memo<AllCasesListProps>(
       [deselectCases, setFilterOptions]
     );
 
-    const { columns } = useCasesColumns({
+    const { selectedColumns, setSelectedColumns } = useCasesColumnsSelection();
+
+    const { columns, isLoadingColumns } = useCasesColumns({
       filterStatus: filterOptions.status ?? [],
       userProfiles: userProfiles ?? new Map(),
       isSelectorView,
       connectors,
       onRowClick,
-      showSolutionColumn: !hasOwner && availableSolutions.length > 1,
       disableActions: selectedCases.length > 0,
+      selectedColumns,
     });
 
     const pagination = useMemo(
@@ -196,7 +199,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           size="xs"
           color="accent"
           className="essentialAnimation"
-          $isShow={isLoading || isLoadingCases}
+          $isShow={isLoading || isLoadingCases || isLoadingColumns}
         />
         {!isSelectorView ? <CasesMetrics /> : null}
         <CasesTableFilters
@@ -217,6 +220,7 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           data={data}
           goToCreateCase={onRowClick ? onCreateCasePressed : undefined}
           isCasesLoading={isLoadingCases}
+          isLoadingColumns={isLoadingColumns}
           isCommentUpdating={isLoadingCases}
           isDataEmpty={isDataEmpty}
           isSelectorView={isSelectorView}
@@ -228,6 +232,8 @@ export const AllCasesList = React.memo<AllCasesListProps>(
           tableRef={tableRef}
           tableRowProps={tableRowProps}
           deselectCases={deselectCases}
+          selectedColumns={selectedColumns}
+          onSelectedColumnsChange={setSelectedColumns}
         />
       </>
     );

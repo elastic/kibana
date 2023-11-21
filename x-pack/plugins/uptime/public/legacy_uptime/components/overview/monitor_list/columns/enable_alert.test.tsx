@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EnableMonitorAlert } from './enable_alert';
-import { fireEvent } from '@testing-library/dom';
+import { fireEvent } from '@testing-library/react';
 
 import { DYNAMIC_SETTINGS_DEFAULTS } from '../../../../../../common/constants';
 import { makePing } from '../../../../../../common/runtime_types/ping';
