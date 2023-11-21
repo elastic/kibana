@@ -7,7 +7,7 @@
 
 import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
   rootRequest<TimelineResponse>({

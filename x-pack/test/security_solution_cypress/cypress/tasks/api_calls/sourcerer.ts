@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const deleteRuntimeField = (dataView: string, fieldName: string) => {
   const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;

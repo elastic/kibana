@@ -13,7 +13,7 @@ import type {
 } from '@kbn/securitysolution-io-ts-list-types';
 import { ENDPOINT_LIST_ITEM_URL, ENDPOINT_LIST_URL } from '@kbn/securitysolution-list-constants';
 import type { ExceptionList, ExceptionListItem, RuleExceptionItem } from '../../objects/exception';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const createEndpointExceptionList = () =>
   rootRequest<ExceptionListSchema>({

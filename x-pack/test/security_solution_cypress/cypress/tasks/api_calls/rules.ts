@@ -16,7 +16,7 @@ import type {
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FetchRulesResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { internalAlertingSnoozeRule } from '../../urls/routes';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const findAllRules = () => {
   return rootRequest<FetchRulesResponse>({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 /**
  * Deletes all existing Fleet packages, package policies and agent policies.

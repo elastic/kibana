@@ -13,7 +13,7 @@ import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common/d
 import type { PrePackagedRulesStatusResponse } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
 import { getPrebuiltRuleWithExceptionsMock } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules/mocks';
 import { createRuleAssetSavedObject } from '../../helpers/rules';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const getPrebuiltRulesStatus = () => {
   return rootRequest<PrePackagedRulesStatusResponse>({

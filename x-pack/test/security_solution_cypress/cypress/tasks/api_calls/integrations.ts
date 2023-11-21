@@ -16,7 +16,7 @@ import {
   NewAgentPolicySchema,
   SimplifiedCreatePackagePolicyRequestBodySchema,
 } from '@kbn/fleet-plugin/server/types';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 interface Package {
   name: string;

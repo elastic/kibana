@@ -7,7 +7,7 @@
 
 import { SECURITY_SOLUTION_SHOW_RELATED_INTEGRATIONS_ID } from '@kbn/management-settings-ids';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '@kbn/security-solution-plugin/common/constants';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const setKibanaSetting = (key: string, value: boolean | number | string) => {
   rootRequest({
