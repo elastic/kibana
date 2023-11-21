@@ -15,8 +15,8 @@ export interface LogRateAnalysisPageUrlState {
 }
 /**
  * To avoid long urls, we store the window parameters in the url state not with
- * their full parameters names but with abbrevations. `windowParameters2AppState` and
- * `appState2WindowParameters` are used to transform the data structure.
+ * their full parameters names but with abbrevations. `windowParametersToAppState` and
+ * `appStateToWindowParameters` are used to transform the data structure.
  */
 export interface LogRateAnalysisAppState extends AiOpsFullIndexBasedAppState {
   /** Window parameters */
@@ -35,7 +35,7 @@ export interface LogRateAnalysisAppState extends AiOpsFullIndexBasedAppState {
 /**
  * Transforms a full window parameters object to the abbreviated url state version.
  */
-export const windowParameters2AppState = (wp?: WindowParameters): LogRateAnalysisAppState['wp'] =>
+export const windowParameterstoAppState = (wp?: WindowParameters): LogRateAnalysisAppState['wp'] =>
   wp && {
     bMin: wp.baselineMin,
     bMax: wp.baselineMax,
@@ -46,7 +46,7 @@ export const windowParameters2AppState = (wp?: WindowParameters): LogRateAnalysi
 /**
  * Transforms an abbreviated url state version of window parameters to its full version.
  */
-export const appState2WindowParameters = (
+export const appStateToWindowParameters = (
   wp: LogRateAnalysisAppState['wp']
 ): WindowParameters | undefined =>
   wp && {

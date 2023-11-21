@@ -22,8 +22,8 @@ import { useData } from '../../hooks/use_data';
 import { useSearch } from '../../hooks/use_search';
 import {
   getDefaultLogRateAnalysisAppState,
-  appState2WindowParameters,
-  windowParameters2AppState,
+  appStateToWindowParameters,
+  windowParametersToAppState,
   type LogRateAnalysisPageUrlState,
 } from '../../application/url_state/log_rate_analysis';
 import { AIOPS_TELEMETRY_ID } from '../../../common/constants';
@@ -139,7 +139,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
   const onWindowParametersHandler = (wp?: WindowParameters) => {
     if (!isEqual(wp, stateFromUrl.wp)) {
       setUrlState({
-        wp: windowParameters2AppState(wp),
+        wp: windowParametersToAppState(wp),
       });
     }
   };
@@ -160,7 +160,7 @@ export const LogRateAnalysisPage: FC<Props> = ({ stickyHistogram }) => {
             />
           </EuiFlexItem>
           <LogRateAnalysisContent
-            initialAnalysisStart={appState2WindowParameters(stateFromUrl.wp)}
+            initialAnalysisStart={appStateToWindowParameters(stateFromUrl.wp)}
             dataView={dataView}
             embeddingOrigin={AIOPS_TELEMETRY_ID.AIOPS_DEFAULT_SOURCE}
             esSearchQuery={searchQuery}
