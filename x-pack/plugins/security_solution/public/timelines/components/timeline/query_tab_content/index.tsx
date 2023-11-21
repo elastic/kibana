@@ -62,7 +62,6 @@ import { getDefaultControlColumn } from '../body/control_columns';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useLicense } from '../../../../common/hooks/use_license';
 import { HeaderActions } from '../../../../common/components/header_actions/header_actions';
-import { TimelineKpi } from '../kpi';
 const QueryTabHeaderContainer = styled.div`
   /* margin-top: 6px; */
   width: 100%;
@@ -367,9 +366,11 @@ export const QueryTabContentComponent: React.FC<Props> = ({
                   />
                 </QueryTabHeaderContainer>
               </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <TimelineKpi timelineId={timelineId} />
-              </EuiFlexItem>
+              {/* TODO: This is a temporary solution to hide the KPIs until lens components play nicely with timelines */}
+              {/* https://github.com/elastic/kibana/issues/17156 */}
+              {/* <EuiFlexItem grow={false}> */}
+              {/*   <TimelineKpi timelineId={timelineId} /> */}
+              {/* </EuiFlexItem> */}
             </EuiFlexGroup>
           </StyledEuiFlyoutHeader>
           <EventDetailsWidthProvider>
