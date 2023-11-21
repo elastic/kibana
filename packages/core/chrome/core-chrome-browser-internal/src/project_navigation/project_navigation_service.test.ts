@@ -114,6 +114,9 @@ describe('breadcrumbs', () => {
           "popoverProps": Object {
             "panelPaddingSize": "none",
           },
+          "style": Object {
+            "maxWidth": "320px",
+          },
           "text": "Project",
         },
         Object {
@@ -176,6 +179,9 @@ describe('breadcrumbs', () => {
           "popoverProps": Object {
             "panelPaddingSize": "none",
           },
+          "style": Object {
+            "maxWidth": "320px",
+          },
           "text": "Project",
         },
         Object {
@@ -231,6 +237,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },
