@@ -59,7 +59,7 @@ export const RISK_SCORE_MODULE_STATUS_OFF = i18n.translate(
 export const ENTITY_RISK_SCORING = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.entityRiskScoring',
   {
-    defaultMessage: 'How is the risk score calculated',
+    defaultMessage: 'How is the risk score calculated?',
   }
 );
 

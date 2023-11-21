@@ -23,8 +23,12 @@ const RiskScoreDocLinkComponent = ({
   title?: string | React.ReactNode;
 }) => {
   const docLink = useMemo(() => {
-    if (!riskScoreEntity) return RISKY_ENTITY_SCORE_DOC_LINK;
-    if (riskScoreEntity === RiskScoreEntity.user) return RISKY_USERS_DOC_LINK;
+    if (!riskScoreEntity) {
+      return RISKY_ENTITY_SCORE_DOC_LINK;
+    }
+    if (riskScoreEntity === RiskScoreEntity.user) {
+      return RISKY_USERS_DOC_LINK;
+    }
     return RISKY_HOSTS_DOC_LINK;
   }, [riskScoreEntity]);
 
