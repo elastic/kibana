@@ -93,7 +93,11 @@ export class PointInTimeFinder<T = unknown, A = unknown>
         await this.close();
       }
 
-      yield results;
+      // do not yield if batch is empty (skip first/last empty batch)
+      if (lastResultsCount > 0) {
+        yield results;
+      }
+
       // We've reached the end when there are fewer hits than our perPage size,
       // or when `close()` has been called.
     } while (this.#open && lastResultsCount >= this.#findOptions.perPage!);
