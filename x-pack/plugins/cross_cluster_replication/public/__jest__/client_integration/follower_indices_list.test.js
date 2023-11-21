@@ -372,6 +372,14 @@ describe('<FollowerIndicesList />', () => {
       });
 
       test('should have a section to render the follower index shards stats', async () => {
+        httpRequestsMockHelpers.setLoadFollowerIndicesResponse({ indices: followerIndices });
+
+        // Mount the component
+        await act(async () => {
+          ({ find, exists, component, actions } = setup());
+        });
+        component.update();
+
         await actions.clickFollowerIndexAt(0);
         expect(exists('followerIndexDetail.shardsStatsSection')).toBe(true);
 
