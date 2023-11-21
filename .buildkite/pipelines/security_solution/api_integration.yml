@@ -1,5 +1,5 @@
 steps:
-  - command: .buildkite/scripts/steps/artifacts/docker_image.sh
+  - command: .buildkite/scripts/pipelines/security_solution_quality_gate/docker_image.sh
     label: Build serverless container images
     key: build_artifact
     agents:
