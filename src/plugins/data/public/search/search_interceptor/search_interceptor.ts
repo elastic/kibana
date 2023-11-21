@@ -8,8 +8,6 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
-import { Sha256 } from '@kbn/crypto-browser';
-import stringify from 'json-stable-stringify';
 import {
   BehaviorSubject,
   EMPTY,
@@ -79,6 +77,7 @@ import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';
 import { SearchConfigSchema } from '../../../config';
 import type { SearchServiceStartDependencies } from '../search_service';
+import { createRequestHash } from './create_request_hash';
 
 export interface SearchInterceptorDeps {
   bfetch: BfetchPublicSetup;
@@ -95,10 +94,6 @@ export interface SearchInterceptorDeps {
 
 const MAX_CACHE_ITEMS = 50;
 const MAX_CACHE_SIZE_MB = 10;
-
-async function createRequestHash(keys: Record<string, any>) {
-  return new Sha256().update(stringify(keys), 'utf8').digest('hex');
-}
 
 export class SearchInterceptor {
   private uiSettingsSubs: Subscription[] = [];
