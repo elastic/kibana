@@ -16,10 +16,9 @@ import {
 } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
-import { omit, omitBy } from 'lodash';
+import { omit } from 'lodash';
 import { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';
-import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 import { comparePolicies, getTestSyntheticsPolicy } from './sample_data/test_policy';
@@ -27,7 +26,7 @@ import {
   INSTALLED_VERSION,
   PrivateLocationTestService,
 } from './services/private_location_test_service';
-import { addMonitorAPIHelper } from './add_monitor';
+import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('PrivateLocationAddMonitor', function () {
@@ -151,7 +150,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body, rawBody } = await addMonitorAPI(newMonitor);
 
-      expect(body).eql(omitBy(newMonitor, removeMonitorEmptyValues));
+      expect(body).eql(omitMonitorKeys(newMonitor));
       newMonitorId = rawBody.id;
     });
 
@@ -200,17 +199,14 @@ export default function ({ getService }: FtrProviderContext) {
       expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
       expect(apiResponse.body).eql(
-        omitBy(
-          {
-            ...omit(httpMonitorJson, ['urls']),
-            url: httpMonitorJson.urls,
-            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-            updated_at: updatedAt,
-            revision: 2,
-          },
-          removeMonitorEmptyValues
-        )
+        omitMonitorKeys({
+          ...omit(httpMonitorJson, ['urls']),
+          url: httpMonitorJson.urls,
+          [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+          [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+          updated_at: updatedAt,
+          revision: 2,
+        })
       );
     });
 
@@ -365,21 +361,15 @@ export default function ({ getService }: FtrProviderContext) {
         expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
 
         expect(apiResponse.body).eql(
-          omit(
-            omitBy(
-              {
-                ...monitor,
-                [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
-                [ConfigKey.CONFIG_ID]: apiResponse.body.id,
-                [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
-                url: apiResponse.body.url,
-                created_at: createdAt,
-                updated_at: updatedAt,
-              },
-              removeMonitorEmptyValues
-            ),
-            ['urls']
-          )
+          omitMonitorKeys({
+            ...monitor,
+            [ConfigKey.MONITOR_QUERY_ID]: apiResponse.body.id,
+            [ConfigKey.CONFIG_ID]: apiResponse.body.id,
+            [ConfigKey.NAMESPACE]: formatKibanaNamespace(SPACE_ID),
+            url: apiResponse.body.url,
+            created_at: createdAt,
+            updated_at: updatedAt,
+          })
         );
         monitorId = apiResponse.body.id;
 

@@ -86,7 +86,6 @@ describe('mergeSourceMonitor', () => {
       config_id: 'ae88f0aa-9c7d-4a5f-96dc-89d65a0ca947',
       custom_heartbeat_id: 'todos-lightweight-test-projects-default',
       enabled: true,
-      form_monitor_type: 'http',
       id: 'todos-lightweight-test-projects-default',
       ipv4: true,
       ipv6: true,

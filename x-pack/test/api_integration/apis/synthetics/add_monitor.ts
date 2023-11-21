@@ -26,6 +26,14 @@ import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/m
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { getFixtureJson } from './helper/get_fixture_json';
 
+export const monitorKeysToOmit = [
+  ConfigKey.URLS,
+  ConfigKey.HOSTS,
+  ConfigKey.CONFIG_HASH,
+  ConfigKey.JOURNEY_ID,
+  ConfigKey.FORM_MONITOR_TYPE,
+];
+
 export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statusCode = 200) => {
   const result = await supertestAPI
     .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
@@ -35,32 +43,25 @@ export const addMonitorAPIHelper = async (supertestAPI: any, monitor: any, statu
   expect(result.status).eql(statusCode, JSON.stringify(result.body));
 
   if (statusCode === 200) {
-    const {
-      created_at: createdAt,
-      updated_at: updatedAt,
-      id,
-      config_id: configId,
-      url,
-    } = result.body;
+    const { created_at: createdAt, updated_at: updatedAt, id, config_id: configId } = result.body;
     expect(id).not.empty();
     expect(configId).not.empty();
     expect([createdAt, updatedAt].map((d) => moment(d).isValid())).eql([true, true]);
     return {
       rawBody: result.body,
       body: {
-        ...omit(result.body, [
-          'created_at',
-          'updated_at',
-          'url',
-          'id',
-          'config_id',
-          'form_monitor_type',
-        ]),
-        ...(url ? { urls: url } : {}),
+        ...omit(result.body, ['created_at', 'updated_at', 'id', 'config_id', 'form_monitor_type']),
       },
     };
   }
   return result.body;
+};
+
+export const omitMonitorKeys = (monitor: any) => {
+  if (monitor.urls) {
+    monitor.url = monitor.urls;
+  }
+  return omitBy(omit(monitor, monitorKeysToOmit), removeMonitorEmptyValues);
 };
 
 export default function ({ getService }: FtrProviderContext) {
@@ -93,7 +94,7 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
-      expect(apiResponse).eql(omitBy(newMonitor, removeMonitorEmptyValues));
+      expect(apiResponse).eql(omitMonitorKeys(newMonitor));
     });
 
     it('returns bad request if payload is invalid for HTTP monitor', async () => {
@@ -133,13 +134,10 @@ export default function ({ getService }: FtrProviderContext) {
       const { body: apiResponse } = await addMonitorAPI(newMonitor);
 
       expect(apiResponse).eql(
-        omitBy(
-          {
-            ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
-            ...newMonitor,
-          },
-          removeMonitorEmptyValues
-        )
+        omitMonitorKeys({
+          ...DEFAULT_FIELDS[MonitorTypeEnum.HTTP],
+          ...newMonitor,
+        })
       );
     });
 

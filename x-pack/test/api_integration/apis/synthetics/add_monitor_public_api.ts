@@ -5,12 +5,12 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import { omit, omitBy } from 'lodash';
-import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
+import { omitBy } from 'lodash';
 
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';
 import { removeMonitorEmptyValues } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/helper';
 import { FtrProviderContext } from '../../ftr_provider_context';
+import { addMonitorAPIHelper, omitMonitorKeys } from './add_monitor';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('AddNewMonitorsPublicAPI', function () {
@@ -20,22 +20,7 @@ export default function ({ getService }: FtrProviderContext) {
     const kibanaServer = getService('kibanaServer');
 
     async function addMonitorAPI(monitor: any, statusCode: number = 200) {
-      const res = await supertestAPI
-        .post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS)
-        .set('kbn-xsrf', 'true')
-        .send(monitor);
-
-      if (statusCode) {
-        expect(res.status).eql(statusCode, JSON.stringify(res.body));
-      }
-
-      if (statusCode === 200) {
-        const omitKeys = ['id', 'config_id', 'created_at', 'updated_at'];
-        expect(res.body).to.have.keys(omitKeys);
-        return omit(res.body, omitKeys);
-      }
-
-      return res.body;
+      return await addMonitorAPIHelper(supertestAPI, monitor, statusCode);
     }
 
     before(async () => {
@@ -87,7 +72,6 @@ export default function ({ getService }: FtrProviderContext) {
       );
     });
 
-    const omitKeys = ['urls', 'hash', 'journey_id'];
     const localLoc = {
       id: 'localhost',
       label: 'Local Synthetics Service',
@@ -123,18 +107,15 @@ export default function ({ getService }: FtrProviderContext) {
           locations: ['localhost'],
           url: 'https://www.google.com',
         };
-        const result = await addMonitorAPI(monitor);
+        const { body: result } = await addMonitorAPI(monitor);
 
         expect(result).eql(
-          omit(
-            {
-              ...defaultFields,
-              ...monitor,
-              locations: [localLoc],
-              name: 'https://www.google.com',
-            },
-            omitKeys
-          )
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name: 'https://www.google.com',
+          })
         );
       });
     });
@@ -148,18 +129,15 @@ export default function ({ getService }: FtrProviderContext) {
           locations: ['localhost'],
           host: 'https://www.google.com/',
         };
-        const result = await addMonitorAPI(monitor);
+        const { body: result } = await addMonitorAPI(monitor);
 
         expect(result).eql(
-          omit(
-            {
-              ...defaultFields,
-              ...monitor,
-              locations: [localLoc],
-              name: 'https://www.google.com/',
-            },
-            omitKeys
-          )
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name: 'https://www.google.com/',
+          })
         );
       });
     });
@@ -173,18 +151,15 @@ export default function ({ getService }: FtrProviderContext) {
           locations: ['localhost'],
           host: 'https://8.8.8.8',
         };
-        const result = await addMonitorAPI(monitor);
+        const { body: result } = await addMonitorAPI(monitor);
 
         expect(result).eql(
-          omit(
-            {
-              ...defaultFields,
-              ...monitor,
-              locations: [localLoc],
-              name: 'https://8.8.8.8',
-            },
-            omitKeys
-          )
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+            name: 'https://8.8.8.8',
+          })
         );
       });
     });
@@ -218,17 +193,14 @@ export default function ({ getService }: FtrProviderContext) {
           name: 'simple journey',
           'source.inline.script': 'step("simple journey", async () => {});',
         };
-        const result = await addMonitorAPI(monitor);
+        const { body: result } = await addMonitorAPI(monitor);
 
         expect(result).eql(
-          omit(
-            {
-              ...defaultFields,
-              ...monitor,
-              locations: [localLoc],
-            },
-            omitKeys
-          )
+          omitMonitorKeys({
+            ...defaultFields,
+            ...monitor,
+            locations: [localLoc],
+          })
         );
       });
     });
