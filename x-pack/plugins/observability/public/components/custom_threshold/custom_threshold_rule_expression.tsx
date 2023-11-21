@@ -376,7 +376,7 @@ export default function Expressions(props: Props) {
       {ruleParams.criteria &&
         ruleParams.criteria.map((e, idx) => {
           return (
-            <div key={JSON.stringify(e) + idx}>
+            <div key={idx}>
               {idx > 0 && <EuiHorizontalRule margin="s" />}
               <ExpressionRow
                 canDelete={(ruleParams.criteria && ruleParams.criteria.length > 1) || false}

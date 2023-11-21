@@ -118,14 +118,20 @@ export function MetricRowWithAgg({
           button={
             <EuiFormRow
               fullWidth
-              label={i18n.translate(
-                'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
-                { defaultMessage: 'Aggregation {name}', values: { name } }
-              )}
-              labelAppend={
-                !disableDelete ? (
-                  <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
-                ) : undefined
+              label={
+                <EuiFlexGroup gutterSize="s" alignItems="center">
+                  <EuiFlexItem grow={false}>
+                    {i18n.translate(
+                      'xpack.observability.customThreshold.rule.alertFlyout.customEquationEditor.aggregationLabel',
+                      { defaultMessage: 'Aggregation {name}', values: { name } }
+                    )}
+                  </EuiFlexItem>
+                  {!disableDelete && (
+                    <EuiFlexItem grow={false}>
+                      <MetricRowControls onDelete={handleDelete} disableDelete={disableDelete} />
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
               }
             >
               <EuiExpression
