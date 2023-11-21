@@ -179,7 +179,6 @@ components:
       x-recursive: true
       x-recursive-prop: and
       x-recursive-value: DataProviderResult[]
-      x-recursive-prop-optional: true
       x-base-type: BaseDataProviderResult
       allOf:
         - $ref: '#/components/schemas/BaseDataProviderResult'
