@@ -86,9 +86,7 @@ export const writeCasesCapabilities = () => {
   });
 };
 
-export const buildCasesCapabilities = (
-  overrides?: Partial<CasesCapabilities>
-): CasesCapabilities => {
+export const buildCasesCapabilities = (overrides?: Partial<CasesCapabilities>) => {
   return {
     create_cases: overrides?.create_cases ?? true,
     read_cases: overrides?.read_cases ?? true,
