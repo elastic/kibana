@@ -176,7 +176,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
           ],
         },
         {
-          name: i18n.translate('xpack.cases.features.configureSubFeatureName', {
+          name: i18n.translate('xpack.observability.featureRegistry.settingsSubFeatureName', {
             defaultMessage: 'Case Settings',
           }),
           privilegeGroups: [
@@ -186,7 +186,7 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
                 {
                   id: 'cases_settings',
                   name: i18n.translate(
-                    'xpack.observability.featureRegistry.configureSubFeatureDetails',
+                    'xpack.observability.featureRegistry.settingsSubFeatureDetails',
                     {
                       defaultMessage: 'Edit Case Settings',
                     }
