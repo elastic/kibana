@@ -42,8 +42,8 @@ export default ({ getService }: FtrProviderContext) => {
   const testJobConfigs: Array<DeepPartial<DataFrameAnalyticsConfig>> = [
     'Test delete job only',
     'Test delete job and target index',
-    'Test delete job and index pattern',
-    'Test delete job, target index, and index pattern',
+    'Test delete job and data view',
+    'Test delete job, target index, and data view',
   ].map((description, idx) => {
     const analyticsId = `${jobId}_${idx + 1}`;
     return {
@@ -159,7 +159,7 @@ export default ({ getService }: FtrProviderContext) => {
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          // Mimic real job by creating index pattern after job is created
+          // Mimic real job by creating data view after job is created
           await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
         });
 
@@ -167,7 +167,7 @@ export default ({ getService }: FtrProviderContext) => {
           await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
-        it('should delete job and index pattern by id', async () => {
+        it('should delete job and data view by id', async () => {
           const { body, status } = await supertest
             .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndexPattern: true })
@@ -188,7 +188,7 @@ export default ({ getService }: FtrProviderContext) => {
         const destinationIndex = generateDestinationIndex(analyticsId);
 
         before(async () => {
-          // Mimic real job by creating target index & index pattern after DFA job is created
+          // Mimic real job by creating target index & data view after DFA job is created
           await ml.api.createIndex(destinationIndex);
           await ml.api.assertIndicesExist(destinationIndex);
           await ml.testResources.createIndexPatternIfNeeded(destinationIndex);
@@ -199,7 +199,7 @@ export default ({ getService }: FtrProviderContext) => {
           await ml.testResources.deleteIndexPatternByTitle(destinationIndex);
         });
 
-        it('should delete job, target index, and index pattern by id', async () => {
+        it('should delete job, target index, and data view by id', async () => {
           const { body, status } = await supertest
             .delete(`/internal/ml/data_frame/analytics/${analyticsId}`)
             .query({ deleteDestIndex: true, deleteDestIndexPattern: true })
