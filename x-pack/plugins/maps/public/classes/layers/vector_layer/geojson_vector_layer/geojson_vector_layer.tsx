@@ -28,7 +28,7 @@ import { DataRequestContext } from '../../../../actions';
 import { IVectorStyle, VectorStyle } from '../../../styles/vector/vector_style';
 import { ISource } from '../../../sources/source';
 import { IVectorSource } from '../../../sources/vector_source';
-import { AbstractLayer, LayerError, LayerIcon } from '../../layer';
+import { AbstractLayer, LayerMessage, LayerIcon } from '../../layer';
 import {
   AbstractVectorLayer,
   noResultsIcon,
@@ -158,7 +158,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
     );
   }
 
-  getErrors(): LayerError[] {
+  getErrors(): LayerMessage[] {
     const errors = super.getErrors();
 
     this.getValidJoins().forEach((join) => {
@@ -168,7 +168,7 @@ export class GeoJsonVectorLayer extends AbstractVectorLayer {
           title: i18n.translate('xpack.maps.geojsonVectorLayer.joinErrorTitle', {
             defaultMessage: `An error occurred when adding join metrics to layer features`,
           }),
-          error: joinDescriptor.error,
+          body: joinDescriptor.error,
         });
       }
     });
