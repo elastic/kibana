@@ -19,10 +19,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ESApiModal } from '../modal';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
@@ -107,7 +107,7 @@ export const GuideCard = ({
         maxWidth: 400,
         'data-test-subj': 'link-modal',
       }
-    )
+    );
   };
 
   return (

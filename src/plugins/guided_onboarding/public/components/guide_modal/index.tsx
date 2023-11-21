@@ -76,11 +76,7 @@ export const GuidePanelFlyout = ({
   );
 
   const hasError = !guideConfig || !pluginState || (pluginState && pluginState.status === 'error');
-  const {
-    flyoutContentWrapper,
-    flyoutContainerError,
-    flyoutContainer,
-  } = styles.flyoutOverrides;
+  const { flyoutContentWrapper, flyoutContainerError, flyoutContainer } = styles.flyoutOverrides;
 
   return (
     <EuiPortal>
@@ -89,11 +85,11 @@ export const GuidePanelFlyout = ({
           <EuiModal
             data-test-subj="guideModal"
             aria-labelledby={guideModalTitleId}
-            css={hasError ? flyoutContainerError : flyoutContainer} children={undefined} 
-            onClose={onclose}          >
-            <div css={flyoutContentWrapper}>
-                
-            </div>
+            css={hasError ? flyoutContainerError : flyoutContainer}
+            children={undefined}
+            onClose={onclose}
+          >
+            <div css={flyoutContentWrapper} />
           </EuiModal>
         </EuiFocusTrap>
       </EuiOverlayMask>

@@ -47,7 +47,16 @@ const skipText = i18n.translate('home.guidedOnboarding.gettingStarted.skip.butto
 });
 
 export const GettingStarted = () => {
-  const { application, trackUiMetric, chrome, guidedOnboardingService, cloud, openModal, theme, i18nStart } = getServices();
+  const {
+    application,
+    trackUiMetric,
+    chrome,
+    guidedOnboardingService,
+    cloud,
+    openModal,
+    theme,
+    i18nStart,
+  } = getServices();
 
   const [guidesState, setGuidesState] = useState<GuideState[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
