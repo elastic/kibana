@@ -17,6 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
 
   // FLAKY: https://github.com/elastic/kibana/issues/171667
+  // FLAKY: https://github.com/elastic/kibana/issues/171666
   describe.skip('Endpoint `execute` response action', function () {
     targetTags(this, ['@ess', '@serverless']);
 
