@@ -10,6 +10,7 @@ import { DataTableRecord } from '@kbn/discover-utils/src/types';
 import { AgentIcon, CloudProvider, CloudProviderIcon } from '@kbn/custom-icons';
 import { useMeasure } from 'react-use/lib';
 import { AgentName } from '@kbn/elastic-agent-utils';
+import { first } from 'lodash';
 import { FlyoutDoc } from './types';
 import * as constants from '../../../common/constants';
 import { HighlightField } from './sub_components/highlight_field';
@@ -60,7 +61,11 @@ export function FlyoutHighlights({
               data-test-subj="logExplorerFlyoutService"
               field={constants.SERVICE_NAME_FIELD}
               formattedValue={formattedDoc[constants.SERVICE_NAME_FIELD]}
-              icon={<AgentIcon agentName={formattedDoc[constants.AGENT_NAME_FIELD] as AgentName} />}
+              icon={
+                <AgentIcon
+                  agentName={first((flattenedDoc[constants.AGENT_NAME_FIELD] ?? []) as AgentName[])}
+                />
+              }
               label={flyoutServiceLabel}
               value={flattenedDoc[constants.SERVICE_NAME_FIELD]}
               width={fieldWidth}
@@ -119,7 +124,9 @@ export function FlyoutHighlights({
               formattedValue={formattedDoc[constants.CLOUD_PROVIDER_FIELD]}
               icon={
                 <CloudProviderIcon
-                  cloudProvider={flattenedDoc[constants.CLOUD_PROVIDER_FIELD] as CloudProvider}
+                  cloudProvider={first(
+                    (flattenedDoc[constants.CLOUD_PROVIDER_FIELD] ?? []) as CloudProvider[]
+                  )}
                 />
               }
               label={flyoutCloudProviderLabel}
