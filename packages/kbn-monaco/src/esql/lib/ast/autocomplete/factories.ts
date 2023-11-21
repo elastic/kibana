@@ -22,6 +22,11 @@ import { buildDocumentation, buildFunctionDocumentation } from './documentation_
 
 const allFunctions = statsAggregationFunctionDefinitions.concat(evalFunctionsDefinitions);
 
+export const TRIGGER_SUGGESTION_COMMAND = {
+  title: 'Trigger Suggestion Dialog',
+  id: 'editor.action.triggerSuggest',
+};
+
 export function getAutocompleteFunctionDefinition(fn: FunctionDefinition) {
   const fullSignatures = getFunctionSignatures(fn);
   return {
@@ -48,6 +53,7 @@ export function getAutocompleteBuiltinDefinition(fn: FunctionDefinition) {
       value: '',
     },
     sortText: 'D',
+    command: TRIGGER_SUGGESTION_COMMAND,
   };
 }
 
