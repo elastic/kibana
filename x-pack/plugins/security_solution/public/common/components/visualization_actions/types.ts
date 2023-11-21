@@ -79,6 +79,10 @@ export interface LensEmbeddableComponentProps {
   timerange: { from: string; to: string };
   width?: string | number;
   withActions?: boolean;
+  /**
+   * Disable the on click filter for the visualization.
+   */
+  disableOnClickFilter?: boolean;
 }
 
 export enum RequestStatus {
