@@ -17,8 +17,9 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useMemo, useState } from 'react';
-import { ProfilingSearchBarFilter } from '@kbn/observability-shared-plugin/public';
+import { EmbeddableProfilingSearchBar } from '@kbn/observability-shared-plugin/public';
+import React, { useMemo } from 'react';
+import { useHistory } from 'react-router-dom';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { useApmParams } from '../../../hooks/use_apm_params';
 import { useLocalStorage } from '../../../hooks/use_local_storage';
@@ -26,17 +27,19 @@ import { usePreferredDataSourceAndBucketSize } from '../../../hooks/use_preferre
 import { useProfilingPlugin } from '../../../hooks/use_profiling_plugin';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import { ApmPluginStartDeps } from '../../../plugin';
+import { push } from '../../shared/links/url_helpers';
 import { ProfilingFlamegraph } from './profiling_flamegraph';
 import { ProfilingTopNFunctions } from './profiling_top_functions';
 
 export function ProfilingOverview() {
+  const history = useHistory();
   const { services } = useKibana<ApmPluginStartDeps>();
   const {
     path: { serviceName },
     query: { rangeFrom, rangeTo, environment, kuery },
   } = useApmParams('/services/{serviceName}/profiling');
   const { isProfilingAvailable } = useProfilingPlugin();
-  const { start, end } = useTimeRange({ rangeFrom, rangeTo });
+  const { start, end, refreshTimeRange } = useTimeRange({ rangeFrom, rangeTo });
   const preferred = usePreferredDataSourceAndBucketSize({
     start,
     end,
@@ -44,11 +47,6 @@ export function ProfilingOverview() {
     type: ApmDocumentType.TransactionMetric,
     numBuckets: 20,
   });
-  const [searchBarFilter, setSearchBarFilter] =
-    useState<ProfilingSearchBarFilter>({
-      id: '',
-      filters: '',
-    });
 
   const [
     apmUniversalProfilingShowCallout,
@@ -74,8 +72,7 @@ export function ProfilingOverview() {
               end={end}
               environment={environment}
               dataSource={preferred?.source}
-              searchBarFilter={searchBarFilter}
-              onSearchBarFilterChange={setSearchBarFilter}
+              kuery={kuery}
             />
           </>
         ),
@@ -96,21 +93,13 @@ export function ProfilingOverview() {
               startIndex={0}
               endIndex={10}
               dataSource={preferred?.source}
-              searchBarFilter={searchBarFilter}
-              onSearchBarFilterChange={setSearchBarFilter}
+              kuery={kuery}
             />
           </>
         ),
       },
     ];
-  }, [
-    end,
-    environment,
-    preferred?.source,
-    searchBarFilter,
-    serviceName,
-    start,
-  ]);
+  }, [end, environment, kuery, preferred?.source, serviceName, start]);
 
   if (!isProfilingAvailable) {
     return null;
@@ -165,6 +154,22 @@ export function ProfilingOverview() {
           <EuiSpacer />
         </>
       )}
+      <EmbeddableProfilingSearchBar
+        kuery={kuery}
+        rangeFrom={rangeFrom}
+        rangeTo={rangeTo}
+        onQuerySubmit={(next) => {
+          push(history, {
+            query: {
+              kuery: next.query,
+              rangeFrom: next.dateRange.from,
+              rangeTo: next.dateRange.to,
+            },
+          });
+        }}
+        onRefresh={refreshTimeRange}
+      />
+      <EuiSpacer />
       <EuiTabbedContent
         tabs={tabs}
         initialSelectedTab={tabs[0]}

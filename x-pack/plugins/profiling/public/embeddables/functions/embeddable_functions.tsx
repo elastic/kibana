@@ -8,15 +8,13 @@ import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin
 import { EMBEDDABLE_FUNCTIONS } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
-import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
-import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 import {
   ProfilingEmbeddableProvider,
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
-import { ProfilingEmbeddableSearchBar } from '../profiling_embeddable_search_bar';
+import { EmbeddableFunctionsEmbeddableInput } from './embeddable_functions_factory';
+import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 
 export class EmbeddableFunctions extends Embeddable<
   EmbeddableFunctionsEmbeddableInput,
@@ -35,28 +33,15 @@ export class EmbeddableFunctions extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { data, isLoading, rangeFrom, rangeTo, onSearchBarFilterChange, searchBarFilter } =
-      this.input;
+    const { data, isLoading, rangeFrom, rangeTo } = this.input;
     const totalSeconds = (rangeTo - rangeFrom) / 1000;
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
-        <EuiFlexGroup direction="column">
-          {onSearchBarFilterChange ? (
-            <EuiFlexItem grow={false}>
-              <ProfilingEmbeddableSearchBar
-                onQuerySubmit={onSearchBarFilterChange}
-                kuery={searchBarFilter?.filters}
-              />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <AsyncEmbeddableComponent isLoading={isLoading}>
-              <div style={{ width: '100%' }}>
-                <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
-              </div>
-            </AsyncEmbeddableComponent>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AsyncEmbeddableComponent isLoading={isLoading}>
+          <div style={{ width: '100%' }}>
+            <EmbeddableFunctionsGrid data={data} totalSeconds={totalSeconds} />
+          </div>
+        </AsyncEmbeddableComponent>
       </ProfilingEmbeddableProvider>,
       domNode
     );

@@ -13,10 +13,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFlamegraph,
-  ProfilingSearchBarFilter,
-} from '@kbn/observability-shared-plugin/public';
+import { EmbeddableFlamegraph } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
@@ -42,8 +39,7 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
-  searchBarFilter: ProfilingSearchBarFilter;
-  onSearchBarFilterChange: (next: ProfilingSearchBarFilter) => void;
+  kuery: string;
 }
 
 export function ProfilingFlamegraph({
@@ -52,8 +48,7 @@ export function ProfilingFlamegraph({
   serviceName,
   environment,
   dataSource,
-  searchBarFilter,
-  onSearchBarFilterChange,
+  kuery,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -71,14 +66,14 @@ export function ProfilingFlamegraph({
                 environment,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
-                kuery: searchBarFilter.filters,
+                kuery,
               },
             },
           }
         );
       }
     },
-    [dataSource, serviceName, start, end, environment, searchBarFilter]
+    [dataSource, serviceName, start, end, environment, kuery]
   );
 
   const hostNamesKueryFormat = toKueryFilterFormat(
@@ -97,10 +92,7 @@ export function ProfilingFlamegraph({
             <EuiLink
               data-test-subj="apmProfilingFlamegraphGoToFlamegraphLink"
               href={profilingLocators?.flamegraphLocator.getRedirectUrl({
-                kuery: mergeKueries([
-                  `(${hostNamesKueryFormat})`,
-                  searchBarFilter.filters,
-                ]),
+                kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
               })}
             >
               {i18n.translate('xpack.apm.profiling.flamegraph.link', {
@@ -127,8 +119,6 @@ export function ProfilingFlamegraph({
           data={data?.flamegraph}
           isLoading={isPending(status)}
           height="60vh"
-          onSearchBarFilterChange={onSearchBarFilterChange}
-          searchBarFilter={searchBarFilter}
         />
       )}
     </>

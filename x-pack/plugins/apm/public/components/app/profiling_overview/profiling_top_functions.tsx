@@ -7,10 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  EmbeddableFunctions,
-  ProfilingSearchBarFilter,
-} from '@kbn/observability-shared-plugin/public';
+import { EmbeddableFunctions } from '@kbn/observability-shared-plugin/public';
 import React from 'react';
 import { ApmDataSourceWithSummary } from '../../../../common/data_source';
 import { ApmDocumentType } from '../../../../common/document_type';
@@ -33,8 +30,7 @@ interface Props {
   dataSource?: ApmDataSourceWithSummary<
     ApmDocumentType.TransactionMetric | ApmDocumentType.TransactionEvent
   >;
-  searchBarFilter: ProfilingSearchBarFilter;
-  onSearchBarFilterChange: (next: ProfilingSearchBarFilter) => void;
+  kuery: string;
 }
 
 export function ProfilingTopNFunctions({
@@ -45,8 +41,7 @@ export function ProfilingTopNFunctions({
   startIndex,
   endIndex,
   dataSource,
-  searchBarFilter,
-  onSearchBarFilterChange,
+  kuery,
 }: Props) {
   const { profilingLocators } = useProfilingPlugin();
 
@@ -66,7 +61,7 @@ export function ProfilingTopNFunctions({
                 endIndex,
                 documentType: dataSource.documentType,
                 rollupInterval: dataSource.rollupInterval,
-                kuery: searchBarFilter.filters,
+                kuery,
               },
             },
           }
@@ -81,7 +76,7 @@ export function ProfilingTopNFunctions({
       environment,
       startIndex,
       endIndex,
-      searchBarFilter,
+      kuery,
     ]
   );
 
@@ -101,10 +96,7 @@ export function ProfilingTopNFunctions({
             <EuiLink
               data-test-subj="apmProfilingTopNFunctionsGoToUniversalProfilingFlamegraphLink"
               href={profilingLocators?.topNFunctionsLocator.getRedirectUrl({
-                kuery: mergeKueries([
-                  `(${hostNamesKueryFormat})`,
-                  searchBarFilter.filters,
-                ]),
+                kuery: mergeKueries([`(${hostNamesKueryFormat})`, kuery]),
               })}
             >
               {i18n.translate('xpack.apm.profiling.topnFunctions.link', {
@@ -120,8 +112,6 @@ export function ProfilingTopNFunctions({
         isLoading={isPending(status)}
         rangeFrom={new Date(start).valueOf()}
         rangeTo={new Date(end).valueOf()}
-        onSearchBarFilterChange={onSearchBarFilterChange}
-        searchBarFilter={searchBarFilter}
       />
     </>
   );

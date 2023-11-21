@@ -28,6 +28,7 @@ interface Props {
   showSubmitButton?: boolean;
   dataTestSubj?: string;
   showDatePicker?: boolean;
+  showQueryMenu?: boolean;
 }
 
 export function ProfilingSearchBar({
@@ -40,6 +41,7 @@ export function ProfilingSearchBar({
   showSubmitButton = true,
   dataTestSubj = 'profilingUnifiedSearchBar',
   showDatePicker = true,
+  showQueryMenu = true,
 }: Props) {
   const {
     start: { dataViews },
@@ -82,6 +84,7 @@ export function ProfilingSearchBar({
       onRefresh={onRefresh}
       displayStyle="inPage"
       dataTestSubj={dataTestSubj}
+      showQueryMenu={showQueryMenu}
     />
   );
 }

@@ -4,7 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { Embeddable, EmbeddableOutput, IContainer } from '@kbn/embeddable-plugin/public';
 import { EMBEDDABLE_FLAMEGRAPH } from '@kbn/observability-shared-plugin/public';
 import { createFlameGraph } from '@kbn/profiling-utils';
@@ -16,7 +15,6 @@ import {
   ProfilingEmbeddableProvider,
   ProfilingEmbeddablesDependencies,
 } from '../profiling_embeddable_provider';
-import { ProfilingEmbeddableSearchBar } from '../profiling_embeddable_search_bar';
 import { EmbeddableFlamegraphEmbeddableInput } from './embeddable_flamegraph_factory';
 
 export class EmbeddableFlamegraph extends Embeddable<
@@ -36,30 +34,18 @@ export class EmbeddableFlamegraph extends Embeddable<
 
   render(domNode: HTMLElement) {
     this._domNode = domNode;
-    const { data, isLoading, onSearchBarFilterChange, searchBarFilter } = this.input;
+    const { data, isLoading } = this.input;
     const flamegraph = !isLoading && data ? createFlameGraph(data) : undefined;
 
     render(
       <ProfilingEmbeddableProvider deps={this.deps}>
-        <EuiFlexGroup direction="column">
-          {onSearchBarFilterChange ? (
-            <EuiFlexItem grow={false}>
-              <ProfilingEmbeddableSearchBar
-                onQuerySubmit={onSearchBarFilterChange}
-                kuery={searchBarFilter?.filters}
-              />
-            </EuiFlexItem>
-          ) : null}
-          <EuiFlexItem>
-            <AsyncEmbeddableComponent isLoading={isLoading}>
-              <>
-                {flamegraph && (
-                  <FlameGraph primaryFlamegraph={flamegraph} id="embddable_profiling" isEmbedded />
-                )}
-              </>
-            </AsyncEmbeddableComponent>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <AsyncEmbeddableComponent isLoading={isLoading}>
+          <>
+            {flamegraph && (
+              <FlameGraph primaryFlamegraph={flamegraph} id="embddable_profiling" isEmbedded />
+            )}
+          </>
+        </AsyncEmbeddableComponent>
       </ProfilingEmbeddableProvider>,
       domNode
     );
