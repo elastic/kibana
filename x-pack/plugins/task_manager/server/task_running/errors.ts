@@ -94,6 +94,13 @@ export function isUserError(error: Error | DecoratedError) {
   return false;
 }
 
+export function getErrorSource(error: Error | DecoratedError): TaskErrorSource {
+  if (isTaskRunError(error) && error[source]) {
+    return error[source];
+  }
+  throw new Error("The error doesn't have a source data");
+}
+
 export function isEphemeralTaskRejectedDueToCapacityError(
   error: Error | EphemeralTaskRejectedDueToCapacityError
 ) {
