@@ -205,7 +205,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
       <>
         {createdBy && (
           <>
-            <EuiSpacer size="m" />
             <EuiTitle size="xs">
               <h4>{CREATED_BY}</h4>
             </EuiTitle>
@@ -227,7 +226,6 @@ const NotesTabContentComponent: React.FC<NotesTabContentProps> = ({ timelineId }
           <EuiTitle>
             <h3>{NOTES}</h3>
           </EuiTitle>
-          <EuiSpacer />
           <NotePreviews
             eventIdToNoteIds={eventIdToNoteIds}
             notes={notes}
