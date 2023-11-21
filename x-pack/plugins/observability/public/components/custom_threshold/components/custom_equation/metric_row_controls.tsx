@@ -24,6 +24,7 @@ export function MetricRowControls({ onDelete, disableDelete }: MetricRowControlP
       disabled={disableDelete}
       title={DELETE_LABEL}
       size="xs"
+      css={{ height: 16 }}
     />
   );
 }
