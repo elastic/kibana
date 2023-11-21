@@ -130,18 +130,19 @@ export function useModelActions({
   return useMemo(
     () => [
       {
-        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel', {
+        name: i18n.translate('xpack.ml.trainedModels.modelsList.viewTrainingDataNameActionLabel', {
           defaultMessage: 'View training data',
         }),
         description: i18n.translate(
           'xpack.ml.trainedModels.modelsList.viewTrainingDataActionLabel',
           {
-            defaultMessage: 'View training data',
+            defaultMessage: 'Training data can be viewed when data frame analytics job exists.',
           }
         ),
         icon: 'visTable',
         type: 'icon',
         available: (item) => !!item.metadata?.analytics_config?.id,
+        enabled: (item) => item.origin_job_exists === true,
         onClick: async (item) => {
           if (item.metadata?.analytics_config === undefined) return;
 
@@ -164,7 +165,6 @@ export function useModelActions({
 
           await navigateToUrl(url);
         },
-        isPrimary: true,
       },
       {
         name: i18n.translate('xpack.ml.inference.modelsList.analyticsMapActionLabel', {
