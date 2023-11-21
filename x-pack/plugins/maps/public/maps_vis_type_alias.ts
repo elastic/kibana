@@ -47,8 +47,10 @@ export function getMapsVisTypeAlias() {
             title,
             description,
             updatedAt,
-            editUrl: getEditPath(id),
-            editApp: APP_ID,
+            editor: {
+              editUrl: getEditPath(id),
+              editApp: APP_ID,
+            },
             icon: APP_ICON,
             stage: 'production' as VisualizationStage,
             savedObjectType: type,

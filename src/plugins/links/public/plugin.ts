@@ -21,6 +21,7 @@ import { LinksCrudTypes } from '../common/content_management';
 import { LinksStrings } from './components/links_strings';
 import { getLinksClient } from './content_management/links_content_management_client';
 import { LinksFactoryDefinition } from './embeddable';
+import { LinksByReferenceInput, LinksInput } from './embeddable/types';
 import { setKibanaServices } from './services/kibana_services';
 
 export interface LinksSetupDependencies {
@@ -43,7 +44,9 @@ export class LinksPlugin
 
   public setup(core: CoreSetup<LinksStartDependencies>, plugins: LinksSetupDependencies) {
     core.getStartServices().then(([_, deps]) => {
-      plugins.embeddable.registerEmbeddableFactory(CONTENT_ID, new LinksFactoryDefinition());
+      const linksFactory = new LinksFactoryDefinition();
+
+      plugins.embeddable.registerEmbeddableFactory(CONTENT_ID, linksFactory);
 
       plugins.contentManagement.registry.register({
         id: CONTENT_ID,
@@ -53,8 +56,19 @@ export class LinksPlugin
         name: APP_NAME,
       });
 
+      const onEdit = async (savedObjectId: string) => {
+        try {
+          await linksFactory.getExplicitInput({ savedObjectId } as LinksByReferenceInput);
+        } catch {
+          // swallow any errors - this just means that the user cancelled editing
+        }
+        return;
+      };
+
       plugins.visualizations.registerAlias({
-        alias: { embeddableType: CONTENT_ID },
+        alias: {
+          onEdit,
+        },
         disableCreate: true, // do not allow creation through visualization listing page
         name: CONTENT_ID,
         title: APP_NAME,
@@ -73,6 +87,7 @@ export class LinksPlugin
               return {
                 id,
                 title,
+                editor: { onEdit },
                 description,
                 updatedAt,
                 icon: APP_ICON,

@@ -36,7 +36,6 @@ import {
   TableListViewProps,
 } from '@kbn/content-management-table-list-view';
 import { TableListViewTable } from '@kbn/content-management-table-list-view-table';
-import { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 
 import { findListItems } from '../../utils/saved_visualize_utils';
 import { updateBasicSoAttributes } from '../../utils/saved_objects_utils/update_basic_attributes';
@@ -51,18 +50,17 @@ import { getNoItemsMessage, getCustomColumn } from '../utils';
 import { getVisualizeListItemLink } from '../utils/get_visualize_list_item_link';
 import type { VisualizationStage } from '../../vis_types/vis_type_alias_registry';
 
-interface VisualizeUserContent extends VisualizationListItem, UserContentCommonSchema {
-  type: string;
-  attributes: {
-    id: string;
-    title: string;
-    description?: string;
-    editApp: string;
-    editUrl: string;
-    readOnly: boolean;
-    error?: string;
+type VisualizeUserContent = VisualizationListItem &
+  UserContentCommonSchema & {
+    type: string;
+    attributes: {
+      id: string;
+      title: string;
+      description?: string;
+      readOnly: boolean;
+      error?: string;
+    };
   };
-}
 
 const toTableListViewSavedObject = (savedObject: Record<string, unknown>): VisualizeUserContent => {
   return {
@@ -70,20 +68,17 @@ const toTableListViewSavedObject = (savedObject: Record<string, unknown>): Visua
     updatedAt: savedObject.updatedAt as string,
     references: savedObject.references as Array<{ id: string; type: string; name: string }>,
     type: savedObject.savedObjectType as string,
-    editUrl: savedObject.editUrl as string,
-    editApp: savedObject.editApp as string,
     icon: savedObject.icon as string,
     stage: savedObject.stage as VisualizationStage,
     savedObjectType: savedObject.savedObjectType as string,
     typeTitle: savedObject.typeTitle as string,
     title: (savedObject.title as string) ?? '',
     error: (savedObject.error as string) ?? '',
+    editor: savedObject.editor as any,
     attributes: {
       id: savedObject.id as string,
       title: (savedObject.title as string) ?? '',
       description: savedObject.description as string,
-      editApp: savedObject.editApp as string,
-      editUrl: savedObject.editUrl as string,
       readOnly: savedObject.readOnly as boolean,
       error: savedObject.error as string,
     },
@@ -114,7 +109,6 @@ const useTableListViewProps = (
       toastNotifications,
       visualizeCapabilities,
       contentManagement,
-      embeddable,
     },
   } = useKibana<VisualizeServices>();
 
@@ -125,21 +119,13 @@ const useTableListViewProps = (
   }, [closeNewVisModal]);
 
   const editItem = useCallback(
-    async ({ type, attributes: { editUrl, editApp, id } }: VisualizeUserContent) => {
-      if (!editApp && !editUrl) {
-        /*
-         * This is a visualization alias **without** an editor app - so, use the embeddable
-         * factory to edit the visualized saved object instead.
-         */
-        const factory = embeddable.getEmbeddableFactory(type);
-        try {
-          await factory?.getExplicitInput({ savedObjectId: id } as Partial<EmbeddableInput>);
-        } catch {
-          // swallow any errors - this just means that the user cancelled editing
-        }
+    async ({ attributes: { id }, editor }: VisualizeUserContent) => {
+      if (!('editApp' in editor || 'editUrl' in editor)) {
+        await editor.onEdit(id);
         return;
       }
 
+      const { editApp, editUrl } = editor;
       if (editApp) {
         application.navigateToApp(editApp, { path: editUrl });
         return;
@@ -147,7 +133,7 @@ const useTableListViewProps = (
       // for visualizations the edit and view URLs are the same
       history.push(editUrl);
     },
-    [application, history, embeddable]
+    [application, history]
   );
 
   const noItemsFragment = useMemo(() => getNoItemsMessage(createNewVis), [createNewVis]);
@@ -405,10 +391,16 @@ export const VisualizeListing = () => {
             onClickTitle={(item) => {
               tableViewProps.editItem?.(item);
             }}
-            getDetailViewLink={({ attributes: { editApp, editUrl, error, readOnly } }) =>
-              readOnly
+            getDetailViewLink={({ editor, attributes: { error, readOnly } }) =>
+              readOnly || (editor && 'onEdit' in editor)
                 ? undefined
-                : getVisualizeListItemLink(application, kbnUrlStateStorage, editApp, editUrl, error)
+                : getVisualizeListItemLink(
+                    application,
+                    kbnUrlStateStorage,
+                    editor.editApp,
+                    editor.editUrl,
+                    error
+                  )
             }
             tableCaption={visualizeLibraryTitle}
             {...tableViewProps}

@@ -19,8 +19,6 @@ import { BaseVisType } from './base_vis_type';
 export type VisualizationStage = 'experimental' | 'beta' | 'production';
 
 export interface VisualizationListItem {
-  editUrl?: string;
-  editApp?: string;
   error?: string;
   icon: string;
   id: string;
@@ -32,6 +30,9 @@ export interface VisualizationListItem {
   typeTitle: string;
   image?: string;
   type?: BaseVisType | string;
+  editor:
+    | { editUrl: string; editApp?: string }
+    | { onEdit: (savedObjectId: string) => Promise<void> };
 }
 
 export interface SerializableAttributes {
@@ -93,10 +94,9 @@ export interface VisTypeAlias {
       }
     /**
      * Use this when your visualization uses inline editing and does not have a specific app
-     * to redirect to. This will default to the embeddable factory's editing method (`getExplicitInput`),
-     * which should handle the inline editing.
+     * to redirect to.
      */
-    | { embeddableType: string };
+    | { onEdit: (savedObjectId: string) => Promise<void> };
   name: string;
   title: string;
   icon: string;
