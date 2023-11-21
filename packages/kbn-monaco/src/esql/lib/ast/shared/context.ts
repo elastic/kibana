@@ -136,14 +136,16 @@ export function getAstContext(innerText: string, ast: ESQLAst, offset: number) {
       return { type: 'option' as const, command, node, option };
     }
   }
+
+  if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
+    //   // ... | <here>
+    return { type: 'newCommand' as const, command: undefined, node, option };
+  }
+
   if (command && command.args.length) {
     if (option) {
       return { type: 'option' as const, command, node, option };
     }
-  }
-  if (!command || (innerText.length <= offset && getLastCharFromTrimmed(innerText) === '|')) {
-    //   // ... | <here>
-    return { type: 'newCommand' as const, command: undefined, node, option };
   }
 
   // command a ... <here> OR command a = ... <here>
