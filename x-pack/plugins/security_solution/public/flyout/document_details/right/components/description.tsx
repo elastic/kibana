@@ -20,7 +20,11 @@ import {
   DESCRIPTION_TITLE_TEST_ID,
   RULE_SUMMARY_BUTTON_TEST_ID,
 } from './test_ids';
-import { PreviewPanelKey, type PreviewPanelProps, RulePreviewPanel } from '../../preview';
+import {
+  DocumentDetailsPreviewPanelKey,
+  type PreviewPanelProps,
+  RulePreviewPanel,
+} from '../../preview';
 
 /**
  * Displays the description of a document.
@@ -35,7 +39,7 @@ export const Description: FC = () => {
   const openRulePreview = useCallback(() => {
     const PreviewPanelRulePreview: PreviewPanelProps['path'] = { tab: RulePreviewPanel };
     openPreviewPanel({
-      id: PreviewPanelKey,
+      id: DocumentDetailsPreviewPanelKey,
       path: PreviewPanelRulePreview,
       params: {
         id: eventId,
