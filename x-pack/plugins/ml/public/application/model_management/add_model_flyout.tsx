@@ -78,7 +78,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                   >
                     {modelDownloads.map((model) => {
                       return (
-                        <>
+                        <React.Fragment key={model.model_id}>
                           <EuiCheckableCard
                             id={model.model_id}
                             label={
@@ -112,10 +112,20 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                             onChange={() => setSelectedModelId(model.model_id)}
                           />
                           <EuiSpacer size="m" />
-                        </>
+                        </React.Fragment>
                       );
                     })}
                   </EuiFormFieldset>
+                  <EuiButton
+                    onClick={onSubmit.bind(null, selectedModelId!)}
+                    fill
+                    disabled={!selectedModelId}
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.addModelFlyout.downloadButtonLabel"
+                      defaultMessage="Download"
+                    />
+                  </EuiButton>
                 </>
               ),
             },
@@ -278,6 +288,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
     docLinks.links.clients.eland,
     docLinks.links.ml.nlpImportModel,
     modelDownloads,
+    onSubmit,
     selectedModelId,
   ]);
 
@@ -301,6 +312,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
         <EuiTabs>
           {tabs.map((tab) => (
             <EuiTab
+              key={tab.id}
               isSelected={selectedTabId === tab.id}
               onClick={setSelectedTabId.bind(null, tab.id)}
             >
@@ -320,18 +332,6 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={onSubmit.bind(null, selectedModelId!)}
-              fill
-              disabled={!selectedModelId}
-            >
-              <FormattedMessage
-                id="xpack.ml.trainedModels.addModelFlyout.downloadButtonLabel"
-                defaultMessage="Download"
-              />
-            </EuiButton>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
