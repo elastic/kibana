@@ -127,6 +127,10 @@ export interface CodeEditorProps {
 
   isCopyable?: boolean;
   allowFullScreen?: boolean;
+  /**
+   * Alternate text to display, when an attempt is made to edit read only content. (Defaults to "Cannot edit in read-only editor")
+   */
+  readOnlyMessage?: string;
 }
 
 export const CodeEditor: React.FC<CodeEditorProps> = ({
@@ -151,6 +155,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   isCopyable = false,
   allowFullScreen = false,
+  readOnlyMessage = i18n.translate('sharedUXPackages.codeEditor.readOnlyMessage', {
+    defaultMessage: 'Cannot edit in read-only editor',
+  }),
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -389,6 +396,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       editor.onKeyDown(onKeydownMonaco);
       editor.onDidBlurEditorText(onBlurMonaco);
 
+      const messageContribution = editor.getContribution('editor.contrib.messageController');
+      editor.onDidAttemptReadOnlyEdit(() => {
+        // @ts-expect-error the show message API does exist and is documented here
+        // https://github.com/microsoft/vscode/commit/052f02175f4752c36024c18cfbca4e13403e10c3
+        messageContribution?.showMessage(readOnlyMessage, editor.getPosition());
+      });
+
       // "widget" is not part of the TS interface but does exist
       // @ts-expect-errors
       const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
@@ -407,7 +421,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       editorDidMount?.(editor);
     },
-    [editorDidMount, onBlurMonaco, onKeydownMonaco]
+    [editorDidMount, onBlurMonaco, onKeydownMonaco, readOnlyMessage]
   );
 
   useEffect(() => {
@@ -499,6 +513,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             fontFamily: 'Roboto Mono',
             fontSize: isFullScreen ? 16 : 12,
             lineHeight: isFullScreen ? 24 : 21,
+            // @ts-expect-error, see https://github.com/microsoft/monaco-editor/issues/3829
+            'bracketPairColorization.enabled': false,
             ...options,
           }}
         />

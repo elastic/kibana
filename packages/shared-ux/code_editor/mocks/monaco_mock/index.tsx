@@ -57,6 +57,7 @@ function createEditorInstance() {
     onKeyDown: jest.fn((listener) => {
       keyDownListeners.push(listener);
     }),
+    onDidAttemptReadOnlyEdit: jest.fn(),
     onDidBlurEditorText: jest.fn(),
     onDidChangeModelContent: jest.fn((cb) => cb()),
     onDidFocusEditorText: jest.fn((cb) => cb()),

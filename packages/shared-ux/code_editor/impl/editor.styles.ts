@@ -136,6 +136,8 @@ export function createTheme(
       'list.hoverBackground': euiTheme.euiColorLightShade,
       'list.highlightForeground': euiTheme.euiColorPrimary,
       'editor.lineHighlightBorder': euiTheme.euiColorLightestShade,
+      'editorHoverWidget.foreground': euiTheme.euiColorDarkestShade,
+      'editorHoverWidget.background': euiTheme.euiFormBackgroundColor,
     },
   };
 }
