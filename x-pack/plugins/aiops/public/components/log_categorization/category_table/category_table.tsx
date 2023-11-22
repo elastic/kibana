@@ -30,7 +30,7 @@ import type {
 } from '../../../../common/api/log_categorization/types';
 
 import { useEuiTheme } from '../../../hooks/use_eui_theme';
-import type { LogCategorizationAppState } from '../../../application/utils/url_state';
+import type { LogCategorizationAppState } from '../../../application/url_state/log_pattern_analysis';
 
 import { MiniHistogram } from '../../mini_histogram';
 

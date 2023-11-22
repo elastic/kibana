@@ -38,21 +38,3 @@ export const getDefaultAiOpsListState = (
   filters: [],
   ...overrides,
 });
-
-export interface LogCategorizationPageUrlState {
-  pageKey: 'logCategorization';
-  pageUrlState: LogCategorizationAppState;
-}
-
-export interface LogCategorizationAppState extends AiOpsFullIndexBasedAppState {
-  field: string | undefined;
-}
-
-export const getDefaultLogCategorizationAppState = (
-  overrides?: Partial<LogCategorizationAppState>
-): LogCategorizationAppState => {
-  return {
-    field: undefined,
-    ...getDefaultAiOpsListState(overrides),
-  };
-};
