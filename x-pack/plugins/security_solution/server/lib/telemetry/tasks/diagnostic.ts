@@ -11,7 +11,7 @@ import type { ITelemetryEventsSender } from '../sender';
 import type { TelemetryEvent } from '../types';
 import type { ITelemetryReceiver } from '../receiver';
 import type { TaskExecutionPeriod } from '../task';
-import { TASK_METRICS_CHANNEL } from '../constants';
+import { TELEMETRY_CHANNEL_ENDPOINT_ALERTS, TASK_METRICS_CHANNEL } from '../constants';
 
 export function createTelemetryDiagnosticsTaskConfig() {
   return {
@@ -49,14 +49,15 @@ export function createTelemetryDiagnosticsTaskConfig() {
           return 0;
         }
         tlog(logger, `Received ${hits.length} diagnostic alerts`);
-        const diagAlerts: TelemetryEvent[] = hits.flatMap((h) =>
+        const alerts: TelemetryEvent[] = hits.flatMap((h) =>
           h._source != null ? [h._source] : []
         );
-        sender.queueTelemetryEvents(diagAlerts);
+
+        await sender.sendOnDemand(TELEMETRY_CHANNEL_ENDPOINT_ALERTS, alerts);
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, true, startTime),
         ]);
-        return diagAlerts.length;
+        return alerts.length;
       } catch (err) {
         await sender.sendOnDemand(TASK_METRICS_CHANNEL, [
           createTaskMetric(taskName, false, startTime, err.message),
