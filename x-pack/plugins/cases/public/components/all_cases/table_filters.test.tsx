@@ -12,7 +12,7 @@ import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import { waitForComponentToUpdate } from '../../common/test_utils';
 
-import { CaseStatuses } from '../../../common/types/domain';
+import { CaseStatuses, CustomFieldTypes } from '../../../common/types/domain';
 import { SECURITY_SOLUTION_OWNER, OBSERVABILITY_OWNER } from '../../../common/constants';
 import type { AppMockRenderer } from '../../common/mock';
 import { createAppMockRenderer } from '../../common/mock';
@@ -307,6 +307,110 @@ describe('CasesTableFilters ', () => {
       await waitForComponentToUpdate();
       // NOTE: intentionally checking no arguments are passed
       expect(onCreateCasePressed).toHaveBeenCalledWith();
+    });
+  });
+
+  describe('toggle type custom field filter', () => {
+    const customFieldKey = 'toggleKey';
+    const uiCustomFieldKey = `${CUSTOM_FIELD_KEY_PREFIX}${customFieldKey}`;
+
+    beforeEach(() => {
+      const previousState = [{ key: uiCustomFieldKey, isActive: true }];
+      localStorage.setItem(
+        'testAppId.cases.list.tableFiltersConfig',
+        JSON.stringify(previousState)
+      );
+      getCaseConfigureMock.mockImplementation(() => {
+        return {
+          customFields: [{ type: 'toggle', key: customFieldKey, label: 'Toggle', required: false }],
+        };
+      });
+    });
+
+    afterEach(() => {
+      jest.clearAllMocks();
+      localStorage.clear();
+    });
+
+    it('should render its options', async () => {
+      appMockRender.render(<CasesTableFilters {...props} />);
+
+      userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
+      await waitForEuiPopoverOpen();
+
+      const allOptions = screen.getAllByRole('option');
+      expect(allOptions).toHaveLength(2);
+      expect(allOptions[0]).toHaveTextContent('On');
+      expect(allOptions[1]).toHaveTextContent('Off');
+    });
+
+    it('should call onFilterChange when On option changes', async () => {
+      appMockRender.render(<CasesTableFilters {...props} />);
+
+      userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(screen.getByTestId('options-filter-popover-item-on'));
+
+      expect(onFilterChanged).toBeCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        customFields: {
+          toggleKey: {
+            type: 'toggle',
+            options: ['on'],
+          },
+        },
+      });
+    });
+
+    it('should call onFilterChange when Off option changes', async () => {
+      appMockRender.render(<CasesTableFilters {...props} />);
+
+      userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(screen.getByTestId('options-filter-popover-item-off'));
+
+      expect(onFilterChanged).toBeCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        customFields: {
+          toggleKey: {
+            type: 'toggle',
+            options: ['off'],
+          },
+        },
+      });
+    });
+
+    it('should call onFilterChange when second option is clicked', async () => {
+      const customProps = {
+        ...props,
+        filterOptions: {
+          ...props.filterOptions,
+          customFields: {
+            toggleKey: {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['on'],
+            },
+          },
+        },
+      };
+      appMockRender.render(<CasesTableFilters {...customProps} />);
+
+      userEvent.click(await screen.findByRole('button', { name: 'Toggle' }));
+      await waitForEuiPopoverOpen();
+
+      userEvent.click(screen.getByTestId('options-filter-popover-item-off'));
+
+      expect(onFilterChanged).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        customFields: {
+          toggleKey: {
+            type: 'toggle',
+            options: ['on', 'off'],
+          },
+        },
+      });
     });
   });
 
