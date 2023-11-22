@@ -20,7 +20,7 @@ import {
   EuiHighlight,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ToolbarButton } from '@kbn/kibana-react-plugin/public';
+import { ToolbarButton } from '@kbn/shared-ux-button-toolbar';
 import { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
 
 import { pluginServices } from '../../services';
@@ -122,19 +122,20 @@ export function DashboardPicker({ isDisabled, onChange, idsToOmit }: DashboardPi
           isLoading={isLoading}
           data-test-subj="open-dashboard-picker"
           onClick={() => setIsPopoverOpen(!isPopoverOpen)}
-        >
-          <EuiText
-            size="s"
-            css={css`
-              color: ${selectedDashboard ? euiTheme.colors.text : euiTheme.colors.disabledText};
-            `}
-          >
-            {selectedDashboard?.label ??
-              i18n.translate('presentationUtil.dashboardPicker.noDashboardOptionLabel', {
-                defaultMessage: 'Select dashboard',
-              })}
-          </EuiText>
-        </ToolbarButton>
+          label={
+            <EuiText
+              size="s"
+              css={css`
+                color: ${selectedDashboard ? euiTheme.colors.text : euiTheme.colors.disabledText};
+              `}
+            >
+              {selectedDashboard?.label ??
+                i18n.translate('presentationUtil.dashboardPicker.noDashboardOptionLabel', {
+                  defaultMessage: 'Select dashboard',
+                })}
+            </EuiText>
+          }
+        />
       }
       isOpen={isPopoverOpen}
       closePopover={() => setIsPopoverOpen(false)}

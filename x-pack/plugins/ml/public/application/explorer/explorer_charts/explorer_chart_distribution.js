@@ -177,7 +177,7 @@ export class ExplorerChartDistribution extends React.Component {
           .rangePoints([rowMargin, chartHeight - rowMargin])
           .domain(scaleCategories);
       } else {
-        throw `chartType '${chartType}' not supported`;
+        throw new Error(`chartType '${chartType}' not supported`);
       }
 
       const yAxis = d3.svg
