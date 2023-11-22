@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
+export interface Integration {
+  name: string;
+  title?: string;
+  version?: string;
+  icons?: IntegrationIcon[];
+}
 
-export const dataStreamTypesRt = t.partial({
-  type: t.union([
-    t.literal('logs'),
-    t.literal('metrics'),
-    t.literal('traces'),
-    t.literal('synthetics'),
-    t.literal('profiling'),
-  ]),
-});
+export interface IntegrationIcon {
+  path: string;
+  src: string;
+  title?: string;
+  size?: string;
+  type?: string;
+}
