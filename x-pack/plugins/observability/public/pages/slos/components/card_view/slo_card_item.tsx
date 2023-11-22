@@ -15,11 +15,11 @@ import {
   DARK_THEME,
   MetricTrendShape,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
+import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { SLOWithSummaryResponse, HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
-import { SloCardItemBadges } from './slo_card_item_badges';
+import { i18n } from '@kbn/i18n';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { sloKeys } from '../../../../hooks/slo/query_key_factory';
@@ -31,6 +31,7 @@ import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
+import { SloCardItemBadges } from './slo_card_item_badges';
 
 export interface Props {
   slo: SLOWithSummaryResponse;
@@ -105,7 +106,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
         }}
         paddingSize="none"
         style={{
-          height: '200px',
+          height: '182px',
           overflow: 'hidden',
           position: 'relative',
         }}
@@ -119,6 +120,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
                 navigateToUrl(sloDetailsUrl);
               }
             }}
+            locale={i18n.getLocale()}
           />
           <Metric
             id={`${slo.id}-${slo.instanceId}`}
@@ -126,6 +128,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
               [
                 {
                   title: slo.name,
+                  subtitle: `${slo.groupBy}: ${slo.instanceId}`,
                   value: sliValue,
                   trendShape: MetricTrendShape.Area,
                   trend: historicalSliData?.map((d) => ({
@@ -133,24 +136,13 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
                     y: d.value as number,
                   })),
                   extra: (
-                    <EuiFlexGroup
-                      alignItems="center"
-                      gutterSize="xs"
-                      justifyContent="flexEnd"
-                      // empty title to prevent default title from showing
-                      title=""
-                      component="span"
-                    >
-                      <EuiFlexItem grow={false} component="span">
-                        <FormattedMessage
-                          id="xpack.observability.sLOGridItem.targetFlexItemLabel"
-                          defaultMessage="Target {target}"
-                          values={{
-                            target: sloTarget,
-                          }}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
+                    <FormattedMessage
+                      id="xpack.observability.sLOGridItem.targetFlexItemLabel"
+                      defaultMessage="Target {target}"
+                      values={{
+                        target: sloTarget,
+                      }}
+                    />
                   ),
                   icon: () => <EuiIcon type="visGauge" size="l" />,
                   color: cardColor,

@@ -9,7 +9,12 @@ import { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import styled from 'styled-components';
-import { SloCardBadges } from '../badges/slo_card_badges';
+import { EuiFlexGroup } from '@elastic/eui';
+import { LoadingBadges } from '../badges/slo_badges';
+import { SloIndicatorTypeBadge } from '../badges/slo_indicator_type_badge';
+import { SloTimeWindowBadge } from '../badges/slo_time_window_badge';
+import { SloActiveAlertsBadge } from '../../../../components/slo/slo_status_badge/slo_active_alerts_badge';
+import { SloRulesBadge } from '../badges/slo_rules_badge';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 
 interface Props {
@@ -22,8 +27,8 @@ interface Props {
 const Container = styled.div`
   position: absolute;
   display: inline-block;
-  top: 35px;
-  left: 8px;
+  top: 55px;
+  left: 7px;
   z-index: 1;
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
 `;
@@ -31,13 +36,18 @@ const Container = styled.div`
 export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
   return (
     <Container>
-      <SloCardBadges
-        activeAlerts={activeAlerts}
-        isLoading={!slo.summary}
-        rules={rules}
-        slo={slo}
-        onClickRuleBadge={handleCreateRule}
-      />
+      <EuiFlexGroup direction="row" responsive={false} gutterSize="s" alignItems="center" wrap>
+        {!slo.summary ? (
+          <LoadingBadges />
+        ) : (
+          <>
+            <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
+            <SloIndicatorTypeBadge slo={slo} color="default" />
+            <SloTimeWindowBadge slo={slo} color="default" />
+            <SloRulesBadge rules={rules} onClick={handleCreateRule} />
+          </>
+        )}
+      </EuiFlexGroup>
     </Container>
   );
 }
