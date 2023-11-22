@@ -16,7 +16,7 @@
       "uiActionsEnhanced",
       "kibanaUtils"
     ],
-    "optionalPlugins": ["triggersActionsUi"],
+    "optionalPlugins": ["triggersActionsUi", "usageCollection"],
     "requiredBundles": ["savedObjects"]
   }
 }
