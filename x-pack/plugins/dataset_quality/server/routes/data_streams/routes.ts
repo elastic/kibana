@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { dataStreamTypesRt, sortOrderRt } from '../../types/api_types';
+import { dataStreamTypesRt } from '../../types/api_types';
 import { DataStreamsStatResponse } from '../../types/data_stream';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
@@ -21,7 +21,6 @@ const statsRoute = createDatasetQualityServerRoute({
       t.partial({
         datasetQuery: t.string,
       }),
-      sortOrderRt,
     ]),
   }),
   options: {

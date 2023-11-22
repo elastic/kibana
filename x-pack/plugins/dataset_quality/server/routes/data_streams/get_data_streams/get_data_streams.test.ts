@@ -114,7 +114,6 @@ describe('getDataStreams', () => {
       esClient: esClientMock,
       type: 'logs',
       datasetQuery: 'nginx',
-      sortOrder: 'asc',
       uncategorisedOnly: true,
     });
     expect(dataStreamService.getMatchingDataStreams).toHaveBeenCalledWith(expect.anything(), {
@@ -129,7 +128,6 @@ describe('getDataStreams', () => {
         esClient: esClientMock,
         type: 'logs',
         datasetQuery: 'nginx',
-        sortOrder: 'asc',
         uncategorisedOnly: true,
       });
       expect(results.items.length).toBe(1);
@@ -140,34 +138,9 @@ describe('getDataStreams', () => {
         esClient: esClientMock,
         type: 'logs',
         datasetQuery: 'nginx',
-        sortOrder: 'asc',
         uncategorisedOnly: false,
       });
       expect(results.items.length).toBe(5);
-    });
-  });
-  describe('Can be sorted', () => {
-    it('Ascending', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-      const results = await getDataStreams({
-        esClient: esClientMock,
-        type: 'logs',
-        datasetQuery: 'nginx',
-        sortOrder: 'asc',
-        uncategorisedOnly: false,
-      });
-      expect(results.items[0].name).toBe('logs-elastic_agent-default');
-    });
-    it('Descending', async () => {
-      const esClientMock = elasticsearchServiceMock.createElasticsearchClient();
-      const results = await getDataStreams({
-        esClient: esClientMock,
-        type: 'logs',
-        datasetQuery: 'nginx',
-        sortOrder: 'desc',
-        uncategorisedOnly: false,
-      });
-      expect(results.items[0].name).toBe('logs-test.test-default');
     });
   });
   it('Formats the items correctly', async () => {
@@ -175,7 +148,6 @@ describe('getDataStreams', () => {
     const results = await getDataStreams({
       esClient: esClientMock,
       type: 'logs',
-      sortOrder: 'desc',
       uncategorisedOnly: false,
     });
     expect(results.items).toEqual([

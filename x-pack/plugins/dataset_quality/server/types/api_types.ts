@@ -16,7 +16,3 @@ export const dataStreamTypesRt = t.partial({
     t.literal('profiling'),
   ]),
 });
-
-export const sortOrderRt = t.partial({
-  sortOrder: t.union([t.literal('asc'), t.literal('desc')]),
-});
