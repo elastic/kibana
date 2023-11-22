@@ -287,5 +287,5 @@ export function getAvailableOperationsByMetadata(
 // Memoize based on a custom key
 export const memoizedGetAvailableOperationsByMetadata = memoize(
   getAvailableOperationsByMetadata,
-  (indexPattern, opsMap) => `${indexPattern.id}-${Object.keys(opsMap).join('-')}`
+  (indexPattern, opsMap) => `${indexPattern.id}-${Object.keys(opsMap || {}).join('-')}`
 );
