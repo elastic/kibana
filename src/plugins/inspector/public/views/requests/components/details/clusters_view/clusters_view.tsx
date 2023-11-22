@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { EuiSpacer } from '@elastic/eui';
+import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
@@ -22,6 +22,11 @@ export class ClustersView extends Component<DetailViewProps> {
       (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
         (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
     );
+
+  _onSearchChange = ({ query, error }) => {
+    console.log(error);
+    console.log(query);
+  };
 
   render() {
     const rawResponse = (
@@ -44,7 +49,21 @@ export class ClustersView extends Component<DetailViewProps> {
     return this.props.request.response?.json ? (
       <>
         <EuiSpacer size="m" />
-        {Object.keys(clusters).length > 1 ? <ClustersHealth clusters={clusters} /> : null}
+        {Object.keys(clusters).length > 1 
+          ? 
+            <>
+              <EuiSearchBar
+                box={{
+                  placeholder: 'Search by cluster name',
+                  incremental: true,
+                }}
+                onChange={this._onSearchChange}
+              />
+              <EuiSpacer size="m" />
+              <ClustersHealth clusters={clusters} /> 
+            </>
+          : null
+        }
         <ClustersTable key={this.props.request.id} clusters={clusters} />
       </>
     ) : null;
