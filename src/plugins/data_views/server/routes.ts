@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { HttpServiceSetup, StartServicesAccessor, KibanaRequest } from '@kbn/core/server';
+import { HttpServiceSetup, StartServicesAccessor } from '@kbn/core/server';
 import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { routes } from './rest_api_routes/public';
 import type { DataViewsServerPluginStart, DataViewsServerPluginStartDependencies } from './types';
@@ -24,7 +24,6 @@ interface RegisterRoutesArgs {
   >;
   isRollupsEnabled: () => boolean;
   dataViewRestCounter?: UsageCounter;
-  getUserIdGetter: () => (request: KibanaRequest) => Promise<string | undefined>;
 }
 
 export function registerRoutes({
@@ -32,7 +31,6 @@ export function registerRoutes({
   getStartServices,
   dataViewRestCounter,
   isRollupsEnabled,
-  getUserIdGetter,
 }: RegisterRoutesArgs) {
   const router = http.createRouter();
 
@@ -40,6 +38,6 @@ export function registerRoutes({
 
   registerExistingIndicesPath(router);
   registerFieldForWildcard(router, getStartServices, isRollupsEnabled);
-  registerFields(router, getStartServices, isRollupsEnabled, getUserIdGetter);
+  registerFields(router, getStartServices, isRollupsEnabled);
   registerHasDataViewsRoute(router);
 }
