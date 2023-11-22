@@ -51,7 +51,7 @@ export function SloActiveAlertsBadge({ slo, activeAlerts, viewMode = 'default' }
         )}
         data-test-subj="o11ySloActiveAlertsBadge"
       >
-        {viewMode
+        {viewMode !== 'default'
           ? activeAlerts
           : i18n.translate('xpack.observability.slo.slo.activeAlertsBadge.label', {
               defaultMessage: '{count, plural, one {# alert} other {# alerts}}',
