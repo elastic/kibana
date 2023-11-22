@@ -5,6 +5,16 @@
  * 2.0.
  */
 
-export function foo() {
-  return 'hello world';
+interface DataViewCreated {
+  id: string;
+}
+
+interface DataViewError {
+  id: string;
+  error: any;
+}
+
+export interface DataViewApiResponseSchema {
+  dataViewsCreated: DataViewCreated[];
+  dataViewsErrors: DataViewError[];
 }

@@ -13,6 +13,7 @@ import {
   type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 
 import { type MlFeatures, ML_INTERNAL_BASE_PATH } from '../../common/constants/app';
 import { wrapError } from '../client/error_wrapper';
@@ -352,34 +353,16 @@ export function dataFrameAnalyticsRoutes(
           }
 
           if (createDataView) {
-            const dataViewsService = await getDataViewsService();
+            const { dataViewsCreated, dataViewsErrors } = await createDataViewFn({
+              dataViewsService: await getDataViewsService(),
+              dataViewName: request.body.dest.index,
+              runtimeMappings: request.body.source.runtime_mappings as Record<string, RuntimeField>,
+              timeFieldName,
+              errorFallbackId: analyticsId,
+            });
 
-            const dataViewName = request.body.dest.index;
-            const runtimeMappings = request.body.source.runtime_mappings as Record<
-              string,
-              RuntimeField
-            >;
-
-            try {
-              const dataViewsResp = await dataViewsService.createAndSave(
-                {
-                  title: dataViewName,
-                  timeFieldName,
-                  runtimeFieldMap: runtimeMappings,
-                  allowNoIndex: true,
-                },
-                false,
-                true
-              );
-
-              if (dataViewsResp.id) {
-                fullResponse.dataViewsCreated = [{ id: dataViewsResp.id }];
-              }
-            } catch (error) {
-              // For the error id we use the analytics id
-              // because in case of an error we don't get a data view id.
-              fullResponse.dataViewsErrors = [{ id: analyticsId, error }];
-            }
+            fullResponse.dataViewsCreated = dataViewsCreated;
+            fullResponse.dataViewsErrors = dataViewsErrors;
           }
 
           return response.ok({ body: fullResponse });

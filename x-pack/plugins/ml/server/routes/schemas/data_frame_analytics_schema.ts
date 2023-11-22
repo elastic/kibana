@@ -6,6 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import type { DataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_response_schema';
+
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
 export const dataFrameAnalyticsJobConfigSchema = schema.object({
@@ -123,17 +125,12 @@ export const putDataFrameAnalyticsQuerySchema = schema.object({
 interface DataFrameAnalyticsJobsCreated {
   id: string;
 }
-interface DataViewCreated {
-  id: string;
-}
 interface CreatedError {
   id: string;
   error: any;
 }
 
-export interface PutDataFrameAnalyticsResponseSchema {
+export interface PutDataFrameAnalyticsResponseSchema extends DataViewApiResponseSchema {
   dataFrameAnalyticsJobsCreated: DataFrameAnalyticsJobsCreated[];
   dataFrameAnalyticsJobsErrors: CreatedError[];
-  dataViewsCreated: DataViewCreated[];
-  dataViewsErrors: CreatedError[];
 }
