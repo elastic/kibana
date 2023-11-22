@@ -58,6 +58,7 @@ export enum FieldsGroupNames {
   EmptyFields = 'EmptyFields',
   MetaFields = 'MetaFields',
   UnmappedFields = 'UnmappedFields',
+  NewFields = 'NewFields',
 }
 
 export interface FieldsGroupDetails {
@@ -70,6 +71,7 @@ export interface FieldsGroupDetails {
   hideDetails?: boolean;
   defaultNoFieldsMessage?: string;
   hideIfEmpty?: boolean;
+  loadMappingFn?: () => void;
 }
 
 export interface FieldsGroup<T extends FieldListItem> extends FieldsGroupDetails {

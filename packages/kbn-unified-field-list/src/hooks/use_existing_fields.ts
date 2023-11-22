@@ -24,6 +24,7 @@ const generateId = htmlIdGenerator();
 export interface ExistingFieldsInfo {
   fetchStatus: ExistenceFetchStatus;
   existingFieldsByFieldNameMap: Record<string, boolean>;
+  newFieldsByFieldNameMap: Record<string, boolean>;
   numberOfFetches: number;
   hasDataViewRestrictions?: boolean;
 }
@@ -55,12 +56,14 @@ export interface ExistingFieldsReader {
   hasFieldData: (dataViewId: string, fieldName: string) => boolean;
   getFieldsExistenceStatus: (dataViewId: string) => ExistenceFetchStatus;
   isFieldsExistenceInfoUnavailable: (dataViewId: string) => boolean;
+  isNewField: (dataViewId: string, fieldName: string) => boolean;
 }
 
 const initialData: ExistingFieldsByDataViewMap = {};
 const unknownInfo: ExistingFieldsInfo = {
   fetchStatus: ExistenceFetchStatus.unknown,
   existingFieldsByFieldNameMap: {},
+  newFieldsByFieldNameMap: {},
   numberOfFetches: 0,
 };
 
@@ -162,6 +165,7 @@ export const useExistingFieldsFetcher = (
           }
 
           info.existingFieldsByFieldNameMap = booleanMap(existingFieldNames);
+          info.newFieldsByFieldNameMap = booleanMap(result.newFields.map((field) => field.name));
           info.fetchStatus = ExistenceFetchStatus.succeeded;
         } catch (error) {
           info.fetchStatus = ExistenceFetchStatus.failed;
@@ -291,6 +295,19 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
     [existingFieldsByDataViewMap]
   );
 
+  const isNewField = useCallback(
+    (dataViewId: string, fieldName: string) => {
+      const info = existingFieldsByDataViewMap[dataViewId];
+
+      if (info?.fetchStatus === ExistenceFetchStatus.succeeded) {
+        return info?.hasDataViewRestrictions || Boolean(info?.newFieldsByFieldNameMap[fieldName]);
+      }
+
+      return true;
+    },
+    [existingFieldsByDataViewMap]
+  );
+
   const getFieldsExistenceInfo = useCallback(
     (dataViewId: string) => {
       return dataViewId ? existingFieldsByDataViewMap[dataViewId] : unknownInfo;
@@ -323,11 +340,12 @@ export const useExistingFieldsReader: () => ExistingFieldsReader = () => {
 
   return useMemo(
     () => ({
+      isNewField,
       hasFieldData,
       getFieldsExistenceStatus,
       isFieldsExistenceInfoUnavailable,
     }),
-    [hasFieldData, getFieldsExistenceStatus, isFieldsExistenceInfoUnavailable]
+    [isNewField, hasFieldData, getFieldsExistenceStatus, isFieldsExistenceInfoUnavailable]
   );
 };
 

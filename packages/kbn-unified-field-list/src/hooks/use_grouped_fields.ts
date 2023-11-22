@@ -119,6 +119,10 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
       return dataViewId ? hasFieldDataHandler(dataViewId, field.name) : true;
     };
 
+    const isNewField = (field: T) => {
+      return dataViewId ? fieldsExistenceReader.isNewField(dataViewId, field.name) : false;
+    };
+
     const selectedFields = sortedSelectedFields || [];
     const sortedFields = [...(allFields || [])].sort(sortFields);
     const groupedFields = {
@@ -127,6 +131,11 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
         if (!sortedSelectedFields && onSelectedFieldFilter && onSelectedFieldFilter(field)) {
           selectedFields.push(field);
         }
+
+        if (isNewField && isNewField(field)) {
+          return 'newFields';
+        }
+
         if (onSupportedFieldFilter && !onSupportedFieldFilter(field)) {
           return 'skippedFields';
         }
@@ -285,6 +294,23 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
           }
         ),
       },
+      NewFields: {
+        fields: groupedFields.newFields,
+        fieldCount: groupedFields.newFields.length,
+        isAffectedByGlobalFilter: false,
+        isAffectedByTimeFilter: false,
+        isInitiallyOpen: true,
+        showInAccordion: true,
+        hideDetails: false,
+        hideIfEmpty: !groupedFields.newFields.length,
+        title: i18n.translate('unifiedFieldList.useGroupedFields.newFieldsLabel', {
+          defaultMessage: 'New fields',
+        }),
+        defaultNoFieldsMessage: i18n.translate('unifiedFieldList.useGroupedFields.noNewFields', {
+          defaultMessage: `There are no new fields.`,
+        }),
+        loadMappingFn: () => Promise.resolve(true),
+      },
     };
 
     // do not show empty field accordion if there is no existence information
@@ -311,18 +337,19 @@ export function useGroupedFields<T extends FieldListItem = DataViewField>({
 
     return fieldGroupDefinitions;
   }, [
+    sortedSelectedFields,
     allFields,
-    onSupportedFieldFilter,
-    onSelectedFieldFilter,
-    onOverrideFieldGroupDetails,
-    dataView,
-    dataViewId,
-    hasFieldDataHandler,
-    fieldsExistenceInfoUnavailable,
+    popularFieldsLimit,
     isAffectedByGlobalFilter,
     isAffectedByTimeFilter,
-    popularFieldsLimit,
-    sortedSelectedFields,
+    dataViewId,
+    fieldsExistenceInfoUnavailable,
+    onOverrideFieldGroupDetails,
+    hasFieldDataHandler,
+    fieldsExistenceReader,
+    onSelectedFieldFilter,
+    onSupportedFieldFilter,
+    dataView,
   ]);
 
   const fieldGroups: FieldListGroups<T> = useMemo(() => {
@@ -403,5 +430,6 @@ function getDefaultFieldGroups() {
     metaFields: [],
     unmappedFields: [],
     skippedFields: [],
+    newFields: [],
   };
 }

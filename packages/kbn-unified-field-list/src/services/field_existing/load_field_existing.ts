@@ -28,6 +28,7 @@ export type LoadFieldExistingHandler = (params: FetchFieldExistenceParams) => Pr
   existingFieldNames: string[];
   indexPatternTitle: string;
   hasNewFields: boolean;
+  newFields: any[];
 }>;
 
 export const loadFieldExisting: LoadFieldExistingHandler = async ({

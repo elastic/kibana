@@ -55,13 +55,14 @@ export async function fetchFieldExistence({
     pattern: '',
     indexFilter: toQuery(timeFieldName, fromDate, toDate, dslQuery),
   });
-  const hasNewFields = existingFieldList.some(
+  const newFields = existingFieldList.filter(
     (field) => dataView.getFieldByName(field.name) === undefined
   );
   return {
     indexPatternTitle: dataView.title,
     existingFieldNames: existingFields(existingFieldList, allFields),
-    hasNewFields,
+    hasNewFields: Boolean(newFields.length),
+    newFields,
   };
 }
 
