@@ -23,7 +23,6 @@ export * from './file_storage';
 export * from './message_signing_keys';
 export * from './locators';
 export * from './secrets';
-export * from './setup_type';
 export * from './uninstall_token';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates

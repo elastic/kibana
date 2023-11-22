@@ -61,8 +61,6 @@ export {
   FLEET_ENROLLMENT_API_PREFIX,
   API_VERSIONS,
   APP_API_ROUTES,
-  SETUP_TYPE_AGENT_BASED,
-  SETUP_TYPE_AGENTLESS,
 } from './constants';
 export {
   // Route services

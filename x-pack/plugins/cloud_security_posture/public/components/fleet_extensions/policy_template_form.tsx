@@ -25,7 +25,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupType } from '@kbn/fleet-plugin/public';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -511,19 +511,19 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const SetupTypeSelector = ({
-  setupType,
-  onSetupTypeChange,
+const SetupTechnologySelector = ({
+  setupTechnology,
+  onSetupTechnologyChange,
 }: {
-  setupType: SetupType;
-  onSetupTypeChange: (value: SetupType) => void;
+  setupTechnology: SetupTechnology;
+  onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
   const options = [
     {
-      value: SetupType.AGENTLESS,
+      value: SetupTechnology.AGENTLESS,
       inputDisplay: (
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupType.agentlessInputDisplay"
+          id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
           defaultMessage="Agentless"
         />
       ),
@@ -531,14 +531,14 @@ const SetupTypeSelector = ({
         <>
           <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupType.agentlessDrowpownDisplay"
+              id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
               defaultMessage="Agentless"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupType.agentlessDrowpownDescription"
+                id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription"
                 defaultMessage="Set up the integration without an agent"
               />
             </p>
@@ -547,10 +547,10 @@ const SetupTypeSelector = ({
       ),
     },
     {
-      value: SetupType.AGENT_BASED,
+      value: SetupTechnology.AGENT_BASED,
       inputDisplay: (
         <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupType.agentbasedInputDisplay"
+          id="xpack.csp.fleetIntegration.setupTechnology.agentbasedInputDisplay"
           defaultMessage="Agent-based"
         />
       ),
@@ -558,14 +558,14 @@ const SetupTypeSelector = ({
         <>
           <strong>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupType.agentbasedDrowpownDisplay"
+              id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDisplay"
               defaultMessage="Agent-based"
             />
           </strong>
           <EuiText size="s" color="subdued">
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupType.agentbasedDrowpownDescription"
+                id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDescription"
                 defaultMessage="Set up the integration with an agent"
               />
             </p>
@@ -583,7 +583,7 @@ const SetupTypeSelector = ({
         buttonContent={
           <EuiLink>
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupType.advancedOptionsLabel"
+              id="xpack.csp.fleetIntegration.setupTechnology.advancedOptionsLabel"
               defaultMessage="Advanced options"
             />
           </EuiLink>
@@ -594,21 +594,21 @@ const SetupTypeSelector = ({
           fullWidth
           label={
             <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupType.setupTechnologyLabel"
+              id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyLabel"
               defaultMessage="Setup technology"
             />
           }
         >
           <EuiSuperSelect
             options={options}
-            valueOfSelected={setupType}
+            valueOfSelected={setupTechnology}
             placeholder={
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupType.setupTechnologyPlaceholder"
+                id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyPlaceholder"
                 defaultMessage="Select the setup technology"
               />
             }
-            onChange={onSetupTypeChange}
+            onChange={onSetupTechnologyChange}
             itemLayoutAlign="top"
             hasDividers
             fullWidth
@@ -626,7 +626,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     validationResults,
     isEditPage,
     packageInfo,
-    handleSetupTypeChange,
+    handleSetupTechnologyChange,
     agentlessPolicy,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
@@ -635,24 +635,24 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const [setupType, setSetupType] = useState<SetupType>(SetupType.AGENT_BASED);
+    const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(SetupTechnology.AGENT_BASED);
     const input = getSelectedOption(newPolicy.inputs, integration);
     const isCspmAws = input.type === CLOUDBEAT_AWS;
     const isAgentlessAvailable = isCspmAws && agentlessPolicy;
 
     useEffect(() => {
       if (isAgentlessAvailable) {
-        setSetupType(SetupType.AGENTLESS);
+        setSetupTechnology(SetupTechnology.AGENTLESS);
       } else {
-        setSetupType(SetupType.AGENT_BASED);
+        setSetupTechnology(SetupTechnology.AGENT_BASED);
       }
     }, [isAgentlessAvailable]);
 
     useEffect(() => {
-      if (handleSetupTypeChange) {
-        handleSetupTypeChange(setupType);
+      if (handleSetupTechnologyChange) {
+        handleSetupTechnologyChange(setupTechnology);
       }
-    }, [handleSetupTypeChange, setupType]);
+    }, [handleSetupTechnologyChange, setupTechnology]);
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
@@ -847,7 +847,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {isAgentlessAvailable && (
-          <SetupTypeSelector setupType={setupType} onSetupTypeChange={setSetupType} />
+          <SetupTechnologySelector setupTechnology={setupTechnology} onSetupTechnologyChange={setSetupTechnology} />
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}

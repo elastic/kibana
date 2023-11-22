@@ -32,7 +32,7 @@ import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
 import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
-import { SetupType } from '../../../../types';
+import { SetupTechnology } from '../../../../types';
 import {
   sendGetAgentStatus,
   useConfig,
@@ -62,7 +62,7 @@ import {
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { useDevToolsRequest, useOnSubmit, useSetupType } from './hooks';
+import { useDevToolsRequest, useOnSubmit, useSetupTechnology } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/post_install_azure_arm_template_modal';
@@ -296,12 +296,13 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  const { agentlessPolicy, handleSetupTypeChange, selectedSetupType } = useSetupType({
-    newAgentPolicy,
-    updateNewAgentPolicy,
-    updateAgentPolicy,
-    setSelectedPolicyTab,
-  });
+  const { agentlessPolicy, handleSetupTechnologyChange, selectedSetupTechnology } =
+    useSetupTechnology({
+      newAgentPolicy,
+      updateNewAgentPolicy,
+      updateAgentPolicy,
+      setSelectedPolicyTab,
+    });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
@@ -316,7 +317,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             onChange={handleExtensionViewOnChange}
             validationResults={validationResults}
             isEditPage={false}
-            handleSetupTypeChange={handleSetupTypeChange}
+            handleSetupTechnologyChange={handleSetupTechnologyChange}
             agentlessPolicy={agentlessPolicy}
           />
         </ExtensionWrapper>
@@ -388,7 +389,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     },
   ];
 
-  if (selectedSetupType !== SetupType.AGENTLESS) {
+  if (selectedSetupTechnology !== SetupTechnology.AGENTLESS) {
     steps.push({
       title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
         defaultMessage: 'Where to add this integration?',
