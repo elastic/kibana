@@ -8,13 +8,9 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiFlexItem } from '@elastic/eui';
 import { type DataView } from '@kbn/data-views-plugin/common';
-import numeral from '@elastic/numeral';
 import { FieldsSelectorModal } from './fields_selector';
 import { useStyles } from './use_styles';
-
-const formatNumber = (value: number) => {
-  return value < 1000 ? value : numeral(value).format('0.0a');
-};
+import { getAbbreviatedNumber } from '../../common/utils/get_abbreviated_number';
 
 const GroupSelectorWrapper: React.FC = ({ children }) => {
   const styles = useStyles();
@@ -60,7 +56,7 @@ export const AdditionalControls = ({
         />
       )}
       <EuiFlexItem grow={0}>
-        <span className="cspDataTableTotal">{`${formatNumber(total)} ${title}`}</span>
+        <span className="cspDataTableTotal">{`${getAbbreviatedNumber(total)} ${title}`}</span>
       </EuiFlexItem>
       <EuiFlexItem grow={0}>
         <EuiButtonEmpty
