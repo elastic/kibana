@@ -19,7 +19,7 @@ import { findClusters } from './find_clusters';
 
 interface State {
   clusters: Record<string, ClusterDetails>;
-  showSearchAndStatusBar: boolean; 
+  showSearchAndStatusBar: boolean;
 }
 
 export class ClustersView extends Component<DetailViewProps, State> {
@@ -34,13 +34,13 @@ export class ClustersView extends Component<DetailViewProps, State> {
     const clusters = findClusters(this.props.request);
     this.state = {
       clusters,
-      showSearchAndStatusBar: Object.keys(clusters).length > 1
+      showSearchAndStatusBar: Object.keys(clusters).length > 1,
     };
   }
 
   _onSearchChange = ({ query, error }) => {
     if (!error) {
-      this.setState({ clusters: findClusters(this.props.request, query)})
+      this.setState({ clusters: findClusters(this.props.request, query) });
     }
   };
 
@@ -48,49 +48,58 @@ export class ClustersView extends Component<DetailViewProps, State> {
     return (
       <>
         <EuiSpacer size="m" />
-        {this.state.showSearchAndStatusBar
-          ? 
-            <>
-              <EuiSearchBar
-                box={{
-                  placeholder: 'Search by cluster name',
-                  incremental: true,
-                }}
-                filters={[
-                  {
-                    type: 'field_value_selection',
-                    field: 'status',
-                    name: i18n.translate('inspector.requests.clusters.view.statusFilterLabel', {
-                      defaultMessage: 'Status',
-                    }),
-                    multiSelect: 'or',
-                    options: [
-                      {
-                        value: 'successful',
-                        name: <ClusterHealth status="successful" textProps={{ size: 'm', color: 'text' }}/>,
-                      },
-                      {
-                        value: 'partial',
-                        name: <ClusterHealth status="partial" textProps={{ size: 'm', color: 'text' }}/>,
-                      },
-                      {
-                        value: 'skipped',
-                        name: <ClusterHealth status="skipped" textProps={{ size: 'm', color: 'text' }}/>,
-                      },
-                      {
-                        value: 'failed',
-                        name: <ClusterHealth status="failed" textProps={{ size: 'm', color: 'text' }}/>,
-                      },
-                    ],
-                  }
-                ]}
-                onChange={this._onSearchChange}
-              />
-              <EuiSpacer size="m" />
-              <ClustersHealth clusters={this.state.clusters} /> 
-            </>
-          : null
-        }
+        {this.state.showSearchAndStatusBar ? (
+          <>
+            <EuiSearchBar
+              box={{
+                placeholder: 'Search by cluster name',
+                incremental: true,
+              }}
+              filters={[
+                {
+                  type: 'field_value_selection',
+                  field: 'status',
+                  name: i18n.translate('inspector.requests.clusters.view.statusFilterLabel', {
+                    defaultMessage: 'Status',
+                  }),
+                  multiSelect: 'or',
+                  options: [
+                    {
+                      value: 'successful',
+                      name: (
+                        <ClusterHealth
+                          status="successful"
+                          textProps={{ size: 'm', color: 'text' }}
+                        />
+                      ),
+                    },
+                    {
+                      value: 'partial',
+                      name: (
+                        <ClusterHealth status="partial" textProps={{ size: 'm', color: 'text' }} />
+                      ),
+                    },
+                    {
+                      value: 'skipped',
+                      name: (
+                        <ClusterHealth status="skipped" textProps={{ size: 'm', color: 'text' }} />
+                      ),
+                    },
+                    {
+                      value: 'failed',
+                      name: (
+                        <ClusterHealth status="failed" textProps={{ size: 'm', color: 'text' }} />
+                      ),
+                    },
+                  ],
+                },
+              ]}
+              onChange={this._onSearchChange}
+            />
+            <EuiSpacer size="m" />
+            <ClustersHealth clusters={this.state.clusters} />
+          </>
+        ) : null}
         <ClustersTable key={this.props.request.id} clusters={this.state.clusters} />
       </>
     );

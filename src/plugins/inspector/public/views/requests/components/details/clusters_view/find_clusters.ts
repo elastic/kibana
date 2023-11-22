@@ -13,9 +13,8 @@ import { Request } from '../../../../../common/adapters/request/types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 
 export function findClusters(request: Request, query?: Query): Record<string, ClusterDetails> {
-  const rawResponse = (
-      request.response?.json as { rawResponse?: estypes.SearchResponse }
-    )?.rawResponse;
+  const rawResponse = (request.response?.json as { rawResponse?: estypes.SearchResponse })
+    ?.rawResponse;
   if (!rawResponse) {
     return {};
   }
@@ -29,12 +28,12 @@ export function findClusters(request: Request, query?: Query): Record<string, Cl
     : {
         [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
       };
-        
+
   if (!query) {
     return clusters;
   }
 
-  const clusterItems = Object.keys(clusters).map(key => {
+  const clusterItems = Object.keys(clusters).map((key) => {
     return {
       name: key,
       status: clusters[key].status,

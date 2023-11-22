@@ -20,7 +20,7 @@ interface Props {
 const defaultTextProps: EuiTextProps = {
   size: 'xs',
   color: 'subdued',
-}
+};
 
 export function ClusterHealth({ count, status, textProps = defaultTextProps }: Props) {
   if (typeof count === 'number' && count === 0) {
@@ -54,9 +54,7 @@ export function ClusterHealth({ count, status, textProps = defaultTextProps }: P
   const label = typeof count === 'number' ? `${count} ${statusLabel}` : statusLabel;
   return (
     <EuiHealth color={color}>
-      <EuiText {...textProps}>
-        {label}
-      </EuiText>
+      <EuiText {...textProps}>{label}</EuiText>
     </EuiHealth>
   );
 }

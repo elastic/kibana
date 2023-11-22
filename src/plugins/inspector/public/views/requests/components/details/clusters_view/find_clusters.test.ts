@@ -28,11 +28,11 @@ const request = {
               status: 'failed',
               took: 90,
             },
-          }
-        }
-      }
-    }
-  }
+          },
+        },
+      },
+    },
+  },
 };
 
 describe('findClusters', () => {
@@ -47,12 +47,18 @@ describe('findClusters', () => {
   });
 
   test('should filter clusters by cluster name and status', () => {
-    const clusters = findClusters(request, EuiSearchBar.Query.parse('remo status:(successful or skipped)'));
+    const clusters = findClusters(
+      request,
+      EuiSearchBar.Query.parse('remo status:(successful or skipped)')
+    );
     expect(Object.keys(clusters)).toEqual(['remote1']);
   });
 
   test('should filter by multiple status values', () => {
-    const clusters = findClusters(request, EuiSearchBar.Query.parse('status:(successful or skipped)'));
+    const clusters = findClusters(
+      request,
+      EuiSearchBar.Query.parse('status:(successful or skipped)')
+    );
     expect(Object.keys(clusters)).toEqual([LOCAL_CLUSTER_KEY, 'remote1']);
   });
 });

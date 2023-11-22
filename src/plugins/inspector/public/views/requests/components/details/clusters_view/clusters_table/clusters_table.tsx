@@ -9,7 +9,14 @@
 import React, { useMemo, useState, ReactNode } from 'react';
 import type { ClusterDetails } from '@kbn/es-types';
 import { i18n } from '@kbn/i18n';
-import { Comparators, EuiBasicTable, type EuiBasicTableColumn, EuiButtonIcon, EuiText, Criteria } from '@elastic/eui';
+import {
+  Comparators,
+  EuiBasicTable,
+  type EuiBasicTableColumn,
+  EuiButtonIcon,
+  EuiText,
+  Criteria,
+} from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';
 import { LOCAL_CLUSTER_KEY } from '../local_cluster';
@@ -125,9 +132,10 @@ export function ClustersTable({ clusters }: Props) {
 
   return (
     <EuiBasicTable
-      items={sortField
-        ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
-        : items
+      items={
+        sortField
+          ? items.sort(Comparators.property(sortField, Comparators.default(sortDirection)))
+          : items
       }
       isExpandable={true}
       itemIdToExpandedRowMap={expandedRows}
@@ -147,11 +155,9 @@ export function ClustersTable({ clusters }: Props) {
           setSortDirection(sort.direction);
         }
       }}
-      noItemsMessage={
-        i18n.translate('inspector.requests.clusters.table.noItemsFound', {
-          defaultMessage: 'No clusters found',
-        })
-      }
+      noItemsMessage={i18n.translate('inspector.requests.clusters.table.noItemsFound', {
+        defaultMessage: 'No clusters found',
+      })}
     />
   );
 }
