@@ -36,13 +36,11 @@ export class DataStreamStat {
       sizeBytes: dataStreamStat.size_bytes,
       lastActivity: dataStreamStat.last_activity,
       // TODO: replace this code
-      integration: Integration.create({ name: 'kubernetes' }),
+      integration: dataStreamStat.integration
+        ? Integration.create(dataStreamStat.integration)
+        : undefined,
     };
 
     return new DataStreamStat(dataStreamStatProps);
   }
 }
-
-// integration: dataStreamStat.integration
-//         ? Integration.create(dataStreamStat.integration)
-//         : undefined,

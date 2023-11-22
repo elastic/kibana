@@ -22,7 +22,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getDataStreamsStats(
-    params: GetDataStreamsStatsQuery = { datasetQuery: '*' }
+    params: GetDataStreamsStatsQuery = { type: 'logs' }
   ): Promise<DataStreamStatServiceResponse> {
     const { dataStreamsStats, integrations } = await this.http
       .get<GetDataStreamsStatsResponse>(DATA_STREAMS_STATS_URL, {
@@ -32,16 +32,11 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       .catch((error) => {
         throw new GetDataStreamsStatsError(`Failed to fetch data streams stats": ${error}`);
       });
+
     const mergedDataStreamsStats = values(
       merge(keyBy(dataStreamsStats, 'name'), keyBy(integrations, 'name'))
     );
 
-    // TODO: remove code below
-    return [
-      ...mergedDataStreamsStats.map(DataStreamStat.create),
-      ...mergedDataStreamsStats.map(DataStreamStat.create),
-      ...mergedDataStreamsStats.map(DataStreamStat.create),
-      ...mergedDataStreamsStats.map(DataStreamStat.create),
-    ];
+    return mergedDataStreamsStats.map(DataStreamStat.create);
   }
 }

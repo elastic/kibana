@@ -29,10 +29,6 @@ const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivity
   defaultMessage: 'Last Activity',
 });
 
-const actionsColumnName = i18n.translate('xpack.datasetQuality.actionsColumnName', {
-  defaultMessage: 'Actions',
-});
-
 export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
