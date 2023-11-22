@@ -1416,7 +1416,7 @@ describe('Exception helpers', () => {
       'execute',
       'upload_file',
     ];
-    const alertData = {
+    const alertData: AlertData = {
       'kibana.alert.rule.category': 'Custom Query Rule',
       'kibana.alert.rule.consumer': 'siem',
       'kibana.alert.rule.execution.uuid': '28b687e3-8e16-48aa-91b8-bf044d366c2d',
@@ -1471,6 +1471,7 @@ describe('Exception helpers', () => {
         port: 443,
       },
       source: {
+        // @ts-expect-error
         ports: [1, 2, 4],
       },
       flow: {
@@ -1775,6 +1776,11 @@ describe('Exception helpers', () => {
               label: 'Agent status',
             },
             {
+              id: 'observer.serial_number',
+              overrideField: 'agent.status',
+              label: 'Agent status',
+            },
+            {
               id: 'cloud.provider',
             },
             {
@@ -1793,6 +1799,11 @@ describe('Exception helpers', () => {
           id: 'agent.id',
           label: 'Agent status',
           overrideField: 'agent.status',
+        },
+        {
+          id: 'observer.serial_number',
+          overrideField: 'agent.status',
+          label: 'Agent status',
         },
         {
           id: 'user.name',

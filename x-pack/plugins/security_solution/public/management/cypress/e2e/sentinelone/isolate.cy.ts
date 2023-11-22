@@ -15,7 +15,7 @@ import { disableExpandableFlyoutAdvancedSettings } from '../../tasks/common';
 import { waitForAlertsToPopulate } from '../../tasks/alerts';
 
 // Currently it supports only Multipass, so it's not possible to test it on CI, Vagrant support will be added later.
-describe(
+describe.skip(
   'Isolate command',
   {
     tags: [
@@ -41,10 +41,10 @@ describe(
               name: 'preconfigured-sentinelone',
               actionTypeId: '.sentinelone',
               config: {
-                url: process.env.SENTINELONE_URL,
+                url: Cypress.env().SENTINELONE_URL,
               },
               secrets: {
-                token: process.env.SENTINELONE_TOKEN,
+                token: Cypress.env().SENTINELONE_TOKEN,
               },
             },
           })}`,

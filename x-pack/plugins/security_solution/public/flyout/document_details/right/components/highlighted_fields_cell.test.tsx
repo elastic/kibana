@@ -35,14 +35,16 @@ const renderHighlightedFieldsCell = (values: string[], field: string) =>
   render(
     <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
       <RightPanelContext.Provider value={panelContextValue}>
-        <HighlightedFieldsCell values={values} field={field} />
+        <HighlightedFieldsCell values={values} originalField={field} field={field} />
       </RightPanelContext.Provider>
     </ExpandableFlyoutContext.Provider>
   );
 
 describe('<HighlightedFieldsCell />', () => {
   it('should render a basic cell', () => {
-    const { getByTestId } = render(<HighlightedFieldsCell values={['value']} field={'field'} />);
+    const { getByTestId } = render(
+      <HighlightedFieldsCell values={['value']} originalField={'field'} field={'field'} />
+    );
 
     expect(getByTestId(HIGHLIGHTED_FIELDS_BASIC_CELL_TEST_ID)).toBeInTheDocument();
   });
@@ -78,7 +80,11 @@ describe('<HighlightedFieldsCell />', () => {
     (useGetEndpointDetails as jest.Mock).mockReturnValue({});
     const { getByTestId } = render(
       <TestProviders>
-        <HighlightedFieldsCell values={['value']} field={'agent.status'} />
+        <HighlightedFieldsCell
+          values={['value']}
+          originalField={'agent.id'}
+          field={'agent.status'}
+        />
       </TestProviders>
     );
 
@@ -86,7 +92,9 @@ describe('<HighlightedFieldsCell />', () => {
   });
 
   it('should render agent status component if override field is agent.status', () => {
-    const { container } = render(<HighlightedFieldsCell values={null} field={'field'} />);
+    const { container } = render(
+      <HighlightedFieldsCell values={null} originalField={'field'} field={'field'} />
+    );
 
     expect(container).toBeEmptyDOMElement();
   });
