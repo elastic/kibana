@@ -63,7 +63,10 @@ export const HitsCounter: React.FC<HitsCounterProps> = ({ mode, stateContainer }
       data-test-subj="discoverQueryTotalHits"
     >
       <EuiFlexItem grow={false} aria-live="polite" css={hitsCounterTextCss}>
-        <EuiText className="eui-textTruncate">
+        <EuiText
+          className="eui-textTruncate"
+          size={mode === HitsCounterMode.standalone ? 'm' : 's'}
+        >
           {hitsStatus === FetchStatus.PARTIAL &&
             (mode === HitsCounterMode.standalone ? (
               <FormattedMessage
