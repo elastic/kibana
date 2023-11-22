@@ -128,7 +128,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               title={
                 <FormattedMessage
                   id="xpack.ml.trainedModels.addModelFlyout.thirdParty.calloutTitle"
-                  defaultMessage="Requires our Eland Python client"
+                  defaultMessage="Requires the Eland Python client"
                 />
               }
               iconType="iInCircle"
