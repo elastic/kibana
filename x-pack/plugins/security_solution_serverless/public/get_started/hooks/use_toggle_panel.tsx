@@ -5,29 +5,75 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useReducer } from 'react';
-import { ProductLine } from '../../common/product';
-import type { SecurityProductTypes } from '../../common/config';
-import { getStartedStorage } from './storage';
+import { useCallback, useEffect, useMemo, useReducer } from 'react';
+import { useLocation } from 'react-router-dom';
+import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
+import { ProductLine } from '../../../common/product';
+import type { SecurityProductTypes } from '../../../common/config';
+import { getStartedStorage } from '../storage';
 import {
   getActiveSectionsInitialStates,
   getActiveProductsInitialStates,
   getFinishedStepsInitialStates,
   reducer,
-} from './reducer';
-import type { OnCardClicked, OnStepButtonClicked, OnStepClicked, Switch } from './types';
-import { GetStartedPageActions } from './types';
+} from '../reducer';
+import type {
+  Card,
+  ExpandedCardSteps,
+  OnStepButtonClicked,
+  OnStepClicked,
+  Step,
+  Switch,
+} from '../types';
+import { GetStartedPageActions } from '../types';
+import { findCardByStepId } from '../helpers';
+import { useKibana } from '../../common/services';
+
+const syncExpandedCardStepsToStorageFromURL = (maybeStepId: string) => {
+  const { matchedCard, matchedStep } = findCardByStepId(maybeStepId);
+
+  if (matchedCard && matchedStep) {
+    getStartedStorage.resetAllExpandedCardStepsToStorage();
+    getStartedStorage.addExpandedCardStepToStorage(matchedCard.id, matchedStep.id);
+  }
+};
+
+const syncExpandedCardStepsFromStorageToURL = (
+  expandedCardSteps: ExpandedCardSteps,
+  callback: ({
+    matchedCard,
+    matchedStep,
+  }: {
+    matchedCard: Card | null;
+    matchedStep: Step | null;
+  }) => void
+) => {
+  const expandedCardStep = Object.values(expandedCardSteps).find(
+    (expandedCard) => expandedCard.expandedSteps.length > 0
+  );
+
+  if (expandedCardStep?.expandedSteps[0]) {
+    const { matchedCard, matchedStep } = findCardByStepId(expandedCardStep?.expandedSteps[0]);
+
+    callback?.({ matchedCard, matchedStep });
+  }
+};
 
 export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProductTypes }) => {
+  const { navigateToApp } = useKibana().services.application;
+
+  const { hash: detailName } = useLocation();
+  const stepIdFromHash = detailName.split('#')[1];
+
   const {
     getAllFinishedStepsFromStorage,
     getActiveProductsFromStorage,
     toggleActiveProductsInStorage,
-    resetAllExpandedCardStepsToStorage,
+    addExpandedCardStepToStorage,
     addFinishedStepToStorage,
     removeFinishedStepFromStorage,
-    addExpandedCardStepToStorage,
     removeExpandedCardStepFromStorage,
+    resetAllExpandedCardStepsToStorage,
     getAllExpandedCardStepsFromStorage,
   } = getStartedStorage;
 
@@ -59,10 +105,26 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [activeProductsInitialStates, finishedStepsInitialStates]
   );
 
-  const expandedCardsInitialStates = useMemo(
-    () => getAllExpandedCardStepsFromStorage(),
-    [getAllExpandedCardStepsFromStorage]
-  );
+  const expandedCardsInitialStates: ExpandedCardSteps = useMemo(() => {
+    if (stepIdFromHash) {
+      syncExpandedCardStepsToStorageFromURL(stepIdFromHash);
+    }
+
+    return getAllExpandedCardStepsFromStorage();
+  }, [getAllExpandedCardStepsFromStorage, stepIdFromHash]);
+
+  useEffect(() => {
+    syncExpandedCardStepsFromStorageToURL(
+      expandedCardsInitialStates,
+      ({ matchedStep }: { matchedStep: Step | null }) => {
+        if (!matchedStep) return;
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.landing,
+          path: `#${matchedStep.id}`,
+        });
+      }
+    );
+  }, [expandedCardsInitialStates, getAllExpandedCardStepsFromStorage, navigateToApp]);
 
   const [state, dispatch] = useReducer(reducer, {
     activeProducts: activeProductsInitialStates,
@@ -74,7 +136,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
   });
 
   const onStepClicked: OnStepClicked = useCallback(
-    ({ stepId, cardId, sectionId, isExpanded }) => {
+    ({ stepId, cardId, isExpanded }) => {
       dispatch({
         type: GetStartedPageActions.ToggleExpandedCardStep,
         payload: { stepId, cardId, isStepExpanded: isExpanded },
@@ -92,21 +154,6 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
       removeExpandedCardStepFromStorage,
       resetAllExpandedCardStepsToStorage,
     ]
-  );
-
-  const onCardClicked: OnCardClicked = useCallback(
-    ({ cardId, isExpanded }) => {
-      dispatch({
-        type: GetStartedPageActions.ToggleExpandedCardStep,
-        payload: { cardId, isCardExpanded: isExpanded },
-      });
-      if (isExpanded) {
-        addExpandedCardStepToStorage(cardId);
-      } else {
-        removeExpandedCardStepFromStorage(cardId);
-      }
-    },
-    [addExpandedCardStepToStorage, removeExpandedCardStepFromStorage]
   );
 
   const onStepButtonClicked: OnStepButtonClicked = useCallback(
@@ -134,5 +181,5 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
     [toggleActiveProductsInStorage]
   );
 
-  return { state, onCardClicked, onStepClicked, onStepButtonClicked, onProductSwitchChanged };
+  return { state, onStepClicked, onStepButtonClicked, onProductSwitchChanged };
 };

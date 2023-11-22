@@ -116,7 +116,7 @@ export const getStartedStorage = {
     storage.set(
       EXPANDED_CARDS_STORAGE_KEY,
       Object.entries(activeCards).reduce((acc, [cardId, card]) => {
-        acc[cardId as CardId] = { ...card, expandedSteps: [] };
+        acc[cardId as CardId] = defaultExpandedCards[cardId as CardId] ?? card;
         return acc;
       }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
     );
@@ -125,9 +125,9 @@ export const getStartedStorage = {
     const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
       getStartedStorage.getAllExpandedCardStepsFromStorage();
     const card = activeCards[cardId]
-      ? { ...activeCards[cardId], isExpanded: true }
+      ? { ...activeCards[cardId], isExpanded: activeCards[cardId].expandedSteps.length > 0 }
       : {
-          isExpanded: true,
+          isExpanded: false,
           expandedSteps: [],
         };
 
@@ -149,6 +149,7 @@ export const getStartedStorage = {
       const index = card.expandedSteps.indexOf(stepId);
       if (index >= 0) {
         card.expandedSteps.splice(index, 1);
+        card.isExpanded = false;
       }
     }
     storage.set(EXPANDED_CARDS_STORAGE_KEY, { ...activeCards, [cardId]: card });

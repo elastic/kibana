@@ -7,7 +7,7 @@
 
 import type { ProductLine } from '../../common/product';
 import { getSections } from './sections';
-import type { ActiveCard, ActiveSections, CardId, SectionId, Step, StepId } from './types';
+import type { ActiveCard, ActiveSections, Card, CardId, SectionId, Step, StepId } from './types';
 import { CreateProjectSteps, QuickStartSectionCardsId } from './types';
 
 export const defaultFinishedSteps: Partial<Record<CardId, StepId[]>> = {
@@ -51,6 +51,20 @@ const getfinishedActiveSteps = (
   }, [] as StepId[]);
 
   return new Set(finishedActiveSteps);
+};
+
+export const findCardByStepId = (
+  stepId: string
+): { matchedCard: Card | null; matchedStep: Step | null } => {
+  const cards = getSections().flatMap((s) => s.cards);
+  let matchedStep: Step | null = null;
+  const matchedCard =
+    cards.find((c) => {
+      matchedStep = c.steps?.find((step) => stepId === step.id) ?? null;
+      return matchedStep != null;
+    }) ?? null;
+
+  return { matchedCard, matchedStep };
 };
 
 export const getCard = ({ cardId, sectionId }: { cardId: CardId; sectionId: SectionId }) => {

@@ -7,7 +7,7 @@
 import React from 'react';
 import { render } from '@testing-library/react';
 import { TogglePanel } from './toggle_panel';
-import { useSetUpSections } from './use_setup_sections';
+import { useSetUpSections } from './hooks/use_setup_sections';
 import type { ActiveSections, CardId, ExpandedCardSteps, StepId } from './types';
 import { GetSetUpCardId, IntroductionSteps, SectionId } from './types';
 import { ProductLine } from '../../common/product';
@@ -67,7 +67,6 @@ describe('TogglePanel', () => {
         finishedSteps={finishedSteps}
         activeSections={activeSections}
         expandedCardSteps={{} as ExpandedCardSteps}
-        onCardClicked={jest.fn()}
         onStepClicked={onStepClicked}
         onStepButtonClicked={onStepButtonClicked}
       />
@@ -86,7 +85,6 @@ describe('TogglePanel', () => {
         finishedSteps={finishedSteps}
         activeSections={activeSections}
         expandedCardSteps={{} as ExpandedCardSteps}
-        onCardClicked={jest.fn()}
         onStepClicked={onStepClicked}
         onStepButtonClicked={onStepButtonClicked}
       />

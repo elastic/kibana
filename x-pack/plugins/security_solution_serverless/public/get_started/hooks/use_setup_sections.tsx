@@ -13,31 +13,23 @@ import type {
   ActiveSections,
   CardId,
   ExpandedCardSteps,
-  OnCardClicked,
   OnStepButtonClicked,
   OnStepClicked,
   SectionId,
   StepId,
-} from './types';
+} from '../types';
 
-import { CardItem } from './card_item';
-import { getSections } from './sections';
-import type { ProductLine } from '../../common/product';
+import { CardItem } from '../card_item';
+import { getSections } from '../sections';
+import type { ProductLine } from '../../../common/product';
 
-export const useSetUpSections = ({
-  euiTheme,
-  shadow = '',
-}: {
-  euiTheme: EuiThemeComputed;
-  shadow?: string;
-}) => {
+export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) => {
   const setUpCards = useCallback(
     ({
       activeProducts,
       activeSections,
       expandedCardSteps,
       finishedSteps,
-      onCardClicked,
       onStepButtonClicked,
       onStepClicked,
       sectionId,
@@ -46,7 +38,6 @@ export const useSetUpSections = ({
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      onCardClicked: OnCardClicked;
       onStepButtonClicked: OnStepButtonClicked;
       onStepClicked: OnStepClicked;
       sectionId: SectionId;
@@ -63,19 +54,15 @@ export const useSetUpSections = ({
                 expandedCardSteps={expandedCardSteps}
                 euiTheme={euiTheme}
                 finishedSteps={finishedSteps}
-                onCardClicked={onCardClicked}
                 onStepButtonClicked={onStepButtonClicked}
                 onStepClicked={onStepClicked}
                 sectionId={sectionId}
-                shadow={shadow}
-                stepsLeft={cardItem.stepsLeft}
-                timeInMins={cardItem.timeInMins}
               />
             </EuiFlexItem>
           ))
         : null;
     },
-    [euiTheme, shadow]
+    [euiTheme]
   );
 
   const setUpSections = useCallback(
@@ -84,7 +71,6 @@ export const useSetUpSections = ({
       activeSections,
       expandedCardSteps,
       finishedSteps,
-      onCardClicked,
       onStepButtonClicked,
       onStepClicked,
     }: {
@@ -92,7 +78,6 @@ export const useSetUpSections = ({
       activeSections: ActiveSections | null;
       expandedCardSteps: ExpandedCardSteps;
       finishedSteps: Record<CardId, Set<StepId>>;
-      onCardClicked: OnCardClicked;
       onStepButtonClicked: OnStepButtonClicked;
       onStepClicked: OnStepClicked;
     }) =>
@@ -102,7 +87,6 @@ export const useSetUpSections = ({
           activeSections,
           expandedCardSteps,
           finishedSteps,
-          onCardClicked,
           onStepButtonClicked,
           onStepClicked,
           sectionId: currentSection.id,
@@ -122,6 +106,7 @@ export const useSetUpSections = ({
                 background-color: ${euiTheme.colors.lightestShade};
               `}
               key={currentSection.id}
+              id={currentSection.id}
               data-test-subj={`section-${currentSection.id}`}
             >
               <span

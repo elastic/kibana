@@ -11,7 +11,7 @@ import type React from 'react';
 import type { ProductLine } from '../../common/product';
 
 export interface Section {
-  cards?: Card[];
+  cards: Card[];
   icon?: EuiIconProps;
   id: SectionId;
   title: string;
@@ -35,7 +35,8 @@ export interface Step {
   id: StepId;
   productLineRequired?: ProductLine[];
   splitPanel?: React.ReactNode;
-  title: string;
+  title?: string;
+  icon?: EuiIconProps;
   timeInMinutes?: number;
 }
 
@@ -45,34 +46,32 @@ export type CardId =
   | GetStartedWithAlertsCardsId;
 
 export interface Card {
-  icon?: EuiIconProps;
   id: CardId;
   steps?: Step[];
-  title: string;
   hideSteps?: boolean;
 }
 
 export type ActiveSections = Partial<Record<SectionId, Partial<Record<CardId, ActiveCard>>>>;
 
 export enum SectionId {
-  quickStart = 'quickStart',
-  addAndValidateYourData = 'addAndValidateYourData',
-  getStartedWithAlerts = 'getStartedWithAlerts',
+  quickStart = 'quick_start',
+  addAndValidateYourData = 'add_and_validate_your_data',
+  getStartedWithAlerts = 'get_started_with_alerts',
 }
 
 export enum QuickStartSectionCardsId {
-  createFirstProject = 'createFirstProject',
-  watchTheOverviewVideo = 'watchTheOverviewVideo',
+  createFirstProject = 'create_first_project',
+  watchTheOverviewVideo = 'watch_the_overview_video',
 }
 
 export enum AddAndValidateYourDataCardsId {
-  addIntegrations = 'addIntegrations',
-  viewDashboards = 'viewDashboards',
+  addIntegrations = 'add_integrations',
+  viewDashboards = 'view_dashboards',
 }
 
 export enum GetStartedWithAlertsCardsId {
-  enablePrebuiltRules = 'enablePrebuiltRules',
-  viewAlerts = 'viewAlerts',
+  enablePrebuiltRules = 'enable_prebuilt_rules',
+  viewAlerts = 'view_alerts',
 }
 
 export enum BadgeId {
@@ -82,27 +81,27 @@ export enum BadgeId {
 }
 
 export enum CreateProjectSteps {
-  createFirstProject = 'createFirstProject',
+  createFirstProject = 'create_your_first_project',
 }
 
 export enum OverviewSteps {
-  getToKnowElasticSecurity = 'getToKnowElasticSecurity',
+  getToKnowElasticSecurity = 'watch_the_overview_video',
 }
 
 export enum AddIntegrationsSteps {
-  connectToDataSources = 'connectToDataSources',
-}
-
-export enum EnablePrebuiltRulesSteps {
-  enablePrebuiltRules = 'enablePrebuiltRules',
+  connectToDataSources = 'add_integrations',
 }
 
 export enum ViewDashboardSteps {
-  analyzeData = 'analyzeData',
+  analyzeData = 'view_and_analyze_your_data',
+}
+
+export enum EnablePrebuiltRulesSteps {
+  enablePrebuiltRules = 'enable_prebuilt_rules',
 }
 
 export enum ViewAlertsSteps {
-  viewAlerts = 'viewAlerts',
+  viewAlerts = 'view_alerts',
 }
 
 export interface ActiveCard {
@@ -111,6 +110,7 @@ export interface ActiveCard {
   stepsLeft: number;
   activeStepIds: StepId[] | undefined;
 }
+
 export interface ExpandedCardStep {
   isExpanded: boolean;
   expandedSteps: StepId[];
@@ -142,7 +142,7 @@ export interface RemoveFinishedStepAction {
 
 export interface ToggleCardStepAction {
   type: GetStartedPageActions.ToggleExpandedCardStep;
-  payload: { stepId?: StepId; cardId: CardId; isCardExpanded?: boolean; isStepExpanded?: boolean };
+  payload: { stepId: StepId; cardId: CardId; isCardExpanded?: boolean; isStepExpanded?: boolean };
 }
 
 export type ReducerActions =
@@ -175,12 +175,12 @@ export type OnStepClicked = ({
   isExpanded: boolean;
 }) => void;
 
-export type OnCardClicked = ({
-  cardId,
-  isExpanded,
+export type HandleStepClicked = ({
+  stepId,
+  isExpandedStep,
 }: {
-  cardId: CardId;
-  isExpanded: boolean;
+  stepId: StepId;
+  isExpandedStep: boolean;
 }) => void;
 
 export type OnStepButtonClicked = ({

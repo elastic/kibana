@@ -6,6 +6,7 @@
  */
 import React from 'react';
 
+import type { StepId } from './types';
 import {
   SectionId,
   QuickStartSectionCardsId,
@@ -35,13 +36,15 @@ import overviewVideo from './images/overview_video.svg';
 export const createProjectSteps = [
   {
     id: CreateProjectSteps.createFirstProject,
-    title: i18n.CREATE_PROJECT_TITLE,
+    title: i18n.SECTION_1_CARD_1_TITLE,
+    icon: { type: 'addDataApp', size: 'xl' as const },
   },
 ];
 export const overviewVideoSteps = [
   {
+    icon: { type: overviewVideo, size: 'xl' as const },
+    title: i18n.SECTION_1_CARD_2_TITLE,
     id: OverviewSteps.getToKnowElasticSecurity,
-    title: i18n.INTRODUCTION_STEP1,
     description: [i18n.INTRODUCTION_STEP1_DESCRIPTION1, i18n.INTRODUCTION_STEP1_DESCRIPTION2],
     splitPanel: (
       <iframe
@@ -54,7 +57,7 @@ export const overviewVideoSteps = [
         sandbox="allow-scripts allow-same-origin"
         scrolling="no"
         src="//play.vidyard.com/K6kKDBbP9SpXife9s2tHNP.html?"
-        title={i18n.WATCH_OVERVIEW_VIDEO_HEADER}
+        title={i18n.SECTION_1_CARD_2_TITLE_TASK_1_BUTTON_TITLE}
       />
     ),
   },
@@ -62,11 +65,17 @@ export const overviewVideoSteps = [
 
 export const addIntegrationsSteps = [
   {
+    icon: { type: 'fleetApp', size: 'xl' as const },
     id: AddIntegrationsSteps.connectToDataSources,
-    title: i18n.CONFIGURE_STEP3,
+    title: i18n.SECTION_2_CARD_1_TITLE,
     description: [i18n.CONFIGURE_STEP3_DESCRIPTION1, <AddIntegrationButton />],
     splitPanel: (
-      <img src={connectToDataSources} alt={i18n.CONFIGURE_STEP3} height="100%" width="100%" />
+      <img
+        src={connectToDataSources}
+        alt={i18n.SECTION_2_CARD_1_TITLE_TASK_1_BUTTON_TITLE}
+        height="100%"
+        width="100%"
+      />
     ),
   },
 ];
@@ -74,49 +83,65 @@ export const addIntegrationsSteps = [
 export const viewDashboardSteps = [
   {
     id: ViewDashboardSteps.analyzeData,
-    title: i18n.EXPLORE_STEP2,
+    icon: { type: 'dashboardApp', size: 'xl' as const },
+    title: i18n.SECTION_2_CARD_2_TITLE,
     description: [i18n.EXPLORE_STEP2_DESCRIPTION1, <DashboardButton />],
     splitPanel: (
-      <img src={analyzeDataUsingDashboards} alt={i18n.EXPLORE_STEP2} height="100%" width="100%" />
+      <img
+        src={analyzeDataUsingDashboards}
+        alt={i18n.SECTION_2_CARD_2_TASK_1_BUTTON_TITLE}
+        height="100%"
+        width="100%"
+      />
     ),
   },
 ];
 
 export const enablePrebuildRuleSteps = [
   {
+    title: i18n.SECTION_3_CARD_1_TITLE,
+    icon: { type: 'advancedSettingsApp', size: 'xl' as const },
     id: EnablePrebuiltRulesSteps.enablePrebuiltRules,
-    title: i18n.CONFIGURE_STEP4,
     description: [i18n.CONFIGURE_STEP4_DESCRIPTION1, <AddElasticRulesButton />],
     splitPanel: (
-      <img src={enablePrebuiltRules} alt={i18n.CONFIGURE_STEP4} height="100%" width="100%" />
+      <img
+        src={enablePrebuiltRules}
+        alt={i18n.SECTION_3_CARD_1_TASK_1_BUTTON_TITLE}
+        height="100%"
+        width="100%"
+      />
     ),
   },
 ];
 
 export const viewAlertSteps = [
   {
+    icon: { type: 'watchesApp', size: 'xl' as const },
+    title: i18n.SECTION_3_CARD_2_TITLE,
     id: ViewAlertsSteps.viewAlerts,
-    title: i18n.EXPLORE_STEP1,
     description: [i18n.EXPLORE_STEP1_DESCRIPTION1, <AlertsButton />],
-    splitPanel: <img src={viewAlerts} alt={i18n.EXPLORE_STEP1} height="100%" width="100%" />,
+    splitPanel: (
+      <img
+        src={viewAlerts}
+        alt={i18n.SECTION_3_CARD_2_TASK_1_BUTTON_TITLE}
+        height="100%"
+        width="100%"
+      />
+    ),
   },
 ];
 
 export const sections: Section[] = [
   {
     id: SectionId.quickStart,
-    title: i18n.QUICK_START_SECTION_TITLE,
+    title: i18n.SECTION_1_TITLE,
     cards: [
       {
-        title: i18n.CREATE_PROJECT_TITLE,
-        icon: { type: 'addDataApp', size: 'xl' },
         id: QuickStartSectionCardsId.createFirstProject,
         steps: createProjectSteps,
         hideSteps: true,
       },
       {
-        icon: { type: overviewVideo, size: 'xl' },
-        title: i18n.OVERVIEW_VIDEO_TITLE,
         id: QuickStartSectionCardsId.watchTheOverviewVideo,
         steps: overviewVideoSteps,
       },
@@ -124,17 +149,13 @@ export const sections: Section[] = [
   },
   {
     id: SectionId.addAndValidateYourData,
-    title: i18n.ADD_AND_VALIDATE_DATA_TITLE,
+    title: i18n.SECTION_2_TITLE,
     cards: [
       {
-        title: i18n.ADD_INTEGRATION_TITLE,
-        icon: { type: 'fleetApp', size: 'xl' },
         id: AddAndValidateYourDataCardsId.addIntegrations,
         steps: addIntegrationsSteps,
       },
       {
-        icon: { type: 'dashboardApp', size: 'xl' },
-        title: i18n.VIEW_DASHBOARD_TITLE,
         id: AddAndValidateYourDataCardsId.viewDashboards,
         steps: viewDashboardSteps,
       },
@@ -142,17 +163,13 @@ export const sections: Section[] = [
   },
   {
     id: SectionId.getStartedWithAlerts,
-    title: i18n.GET_STARTED_WITH_ALERTS_TITLE,
+    title: i18n.SECTION_3_TITLE,
     cards: [
       {
-        title: i18n.CONFIGURE_STEP4,
-        icon: { type: 'advancedSettingsApp', size: 'xl' },
         id: GetStartedWithAlertsCardsId.enablePrebuiltRules,
         steps: enablePrebuildRuleSteps,
       },
       {
-        icon: { type: 'watchesApp', size: 'xl' },
-        title: i18n.EXPLORE_STEP1,
         id: GetStartedWithAlertsCardsId.viewAlerts,
         steps: viewAlertSteps,
       },
@@ -161,3 +178,8 @@ export const sections: Section[] = [
 ];
 
 export const getSections = () => sections;
+
+export const getCardById = (stepId: StepId) => {
+  const cards = sections.flatMap((s) => s.cards);
+  return cards.find((c) => c.steps?.find((step) => stepId === step.id));
+};

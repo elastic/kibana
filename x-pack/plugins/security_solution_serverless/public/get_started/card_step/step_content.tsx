@@ -31,71 +31,72 @@ const StepContentComponent = ({
   const shadow = useEuiShadow('s');
 
   return hasStepContent && isExpandedStep ? (
-    <>
-      <EuiFlexGroup
-        color="plain"
-        css={css`
-          margin-top: 20px;
-          margin-left: ${euiTheme.size.l};
-          transition: opacity ${euiTheme.animation.normal};
-          overflow: hidden;
-        `}
-        data-test-subj={`${stepId}-content`}
-        direction="row"
-        gutterSize="none"
-      >
-        {description && (
-          <EuiFlexItem
-            grow={false}
-            css={css`
-              padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
-              width: ${LEFT_CONTENT_PANEL_WIDTH}px;
-            `}
-          >
-            <EuiText size="s">
-              {description?.map((desc, index) => (
-                <p
-                  data-test-subj={`${stepId}-description-${index}`}
-                  key={`${stepId}-description-${index}`}
-                  className="eui-displayBlock"
-                  css={css`
-                    margin-bottom: ${euiTheme.base * 2}px;
-                    margin-block-end: ${euiTheme.base * 2}px !important;
-                    line-height: ${euiTheme.size.l};
-                  `}
-                >
-                  {desc}
-                </p>
-              ))}
-            </EuiText>
-          </EuiFlexItem>
-        )}
-        {splitPanel && (
-          <EuiFlexItem
-            grow={false}
-            data-test-subj="split-panel"
-            css={css`
-              padding: 0 6px 0 ${euiTheme.size.l};
-              width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
-            `}
-          >
-            {splitPanel && (
-              <div
+    <EuiFlexGroup
+      color="plain"
+      css={css`
+        justify-content: space-between;
+        margin-top: ${euiTheme.size.l};
+        padding: ${euiTheme.size.l};
+        transition: opacity ${euiTheme.animation.normal};
+        overflow: hidden;
+        border: 1px solid ${euiTheme.colors.lightShade};
+        border-radius: ${euiTheme.border.radius.medium};
+      `}
+      data-test-subj={`${stepId}-content`}
+      direction="row"
+      gutterSize="none"
+    >
+      {description && (
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            padding: 0 ${euiTheme.size.l} 0 ${euiTheme.size.s};
+            width: ${LEFT_CONTENT_PANEL_WIDTH}px;
+          `}
+        >
+          <EuiText size="s">
+            {description?.map((desc, index) => (
+              <p
+                data-test-subj={`${stepId}-description-${index}`}
+                key={`${stepId}-description-${index}`}
+                className="eui-displayBlock"
                 css={css`
-                  height: ${RIGHT_CONTENT_HEIGHT}px;
-                  width: ${RIGHT_CONTENT_WIDTH}px;
-                  border-radius: ${euiTheme.border.radius.medium};
-                  overflow: hidden;
-                  box-shadow: ${shadow};
+                  margin-bottom: ${euiTheme.base * 2}px;
+                  margin-block-end: ${euiTheme.base * 2}px !important;
+                  line-height: ${euiTheme.size.l};
                 `}
               >
-                {splitPanel}
-              </div>
-            )}
-          </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
-    </>
+                {desc}
+              </p>
+            ))}
+          </EuiText>
+        </EuiFlexItem>
+      )}
+      {splitPanel && (
+        <EuiFlexItem
+          grow={false}
+          data-test-subj="split-panel"
+          css={css`
+            padding: 0 6px 0 ${euiTheme.size.l};
+            width: ${RIGHT_CONTENT_PANEL_WIDTH}px;
+          `}
+        >
+          {splitPanel && (
+            <div
+              css={css`
+                height: ${RIGHT_CONTENT_HEIGHT}px;
+                width: ${RIGHT_CONTENT_WIDTH}px;
+                border-radius: ${euiTheme.border.radius.medium};
+                overflow: hidden;
+                box-shadow: ${shadow};
+              `}
+            >
+              {splitPanel}
+            </div>
+          )}
+        </EuiFlexItem>
+      )}
+    </EuiFlexGroup>
   ) : null;
 };
 export const StepContent = React.memo(StepContentComponent);
