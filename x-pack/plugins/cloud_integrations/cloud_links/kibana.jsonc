@@ -16,7 +16,7 @@
       "kibanaReact"
     ],
     "requiredPlugins": [
-      "share",
+    "share",
     ]
   }
 }

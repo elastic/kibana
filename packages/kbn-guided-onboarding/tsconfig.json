@@ -18,7 +18,8 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-overlays-browser",
     "@kbn/core-theme-browser",
-    "@kbn/core-i18n-browser"
+    "@kbn/core-i18n-browser",
+    "@kbn/cloud-links-plugin"
   ],
   "exclude": [
     "target/**/*",

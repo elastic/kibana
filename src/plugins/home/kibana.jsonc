@@ -8,6 +8,6 @@
     "browser": true,
     "requiredPlugins": ["dataViews", "share", "urlForwarding", "cloudLinks"],
     "optionalPlugins": ["usageCollection", "customIntegrations", "cloud", "guidedOnboarding"],
-    "requiredBundles": ["kibanaReact"]
+    "requiredBundles": ["kibanaReact", "cloudLinks"]
   }
 }
