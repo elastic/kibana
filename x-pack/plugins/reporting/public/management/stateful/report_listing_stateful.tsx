@@ -38,11 +38,14 @@ export const ReportListingStateful: FC<ListingPropsInternal> = (props) => {
         data-test-subj="reportingPageHeader"
         bottomBorder
         pageTitle={
-          <FormattedMessage id="xpack.reporting.listing.reportstitle" defaultMessage="Reports" />
+          <FormattedMessage
+            id="xpack.reporting.listing.reports.titleStateful"
+            defaultMessage="Reports"
+          />
         }
         description={
           <FormattedMessage
-            id="xpack.reporting.listing.reports.subtitle"
+            id="xpack.reporting.listing.reports.subtitleStateful"
             defaultMessage="Get reports generated in Kibana applications."
           />
         }
