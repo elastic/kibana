@@ -97,7 +97,7 @@ export const HeaderTitle: FC = memo(() => {
         <EuiFlexItem grow={false}>
           <RiskScore />
         </EuiFlexItem>
-        {scopeId !== TableId.rulePreview && (
+        {isAlert && scopeId !== TableId.rulePreview && (
           <EuiFlexItem grow={false}>
             <Assignees
               eventId={eventId}
