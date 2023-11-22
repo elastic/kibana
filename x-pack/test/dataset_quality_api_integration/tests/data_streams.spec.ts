@@ -25,7 +25,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         query: {
           type: 'logs',
-          sortOrder: 'asc',
         },
       },
     });
@@ -46,10 +45,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
     describe('when required privileges are set', () => {
       describe('and uncategorized datastreams', () => {
         const integration = 'my-custom-integration';
-        const managedBy = 'my-custom-manager';
 
         before(async () => {
-          await addIntegrationToLogIndexTemplate({ esClient: es, name: integration, managedBy });
+          await addIntegrationToLogIndexTemplate({ esClient: es, name: integration });
 
           await synthtrace.index([
             timerange('2023-11-20T15:00:00.000Z', '2023-11-20T15:01:00.000Z')
@@ -67,8 +65,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const stats = await callApiAs('datasetQualityLogsUser');
 
           expect(stats.body.items.length).to.be(1);
-          expect(stats.body.items[0].integration?.name).to.be(integration);
-          expect(stats.body.items[0].integration?.managed_by).to.be(managedBy);
+          expect(stats.body.items[0].integration).to.be(integration);
           expect(stats.body.items[0].size).not.empty();
           expect(stats.body.items[0].size_bytes).greaterThan(0);
           expect(stats.body.items[0].last_activity).greaterThan(0);
@@ -98,8 +95,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const stats = await callApiAs('datasetQualityLogsUser');
 
           expect(stats.body.items.length).to.be(1);
-          expect(stats.body.items[0].integration?.name).not.ok();
-          expect(stats.body.items[0].integration?.managed_by).not.ok();
+          expect(stats.body.items[0].integration).not.ok();
           expect(stats.body.items[0].size).not.empty();
           expect(stats.body.items[0].size_bytes).greaterThan(0);
           expect(stats.body.items[0].last_activity).greaterThan(0);
