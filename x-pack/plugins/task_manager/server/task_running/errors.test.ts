@@ -54,8 +54,8 @@ describe('Error Types', () => {
       );
     });
 
-    it('getErrorSource return null when there is no source data', () => {
-      expect(getErrorSource(new Error('OMG'))).toBe(null);
+    it('getErrorSource return undefined when there is no source data', () => {
+      expect(getErrorSource(new Error('OMG'))).toBeUndefined();
     });
   });
 });
