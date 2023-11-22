@@ -1684,12 +1684,12 @@
           {
             "parentPluginId": "maps",
             "id": "def-public.GeoJsonWithMeta.meta",
-            "type": "Object",
+            "type": "CompoundType",
             "tags": [],
             "label": "meta",
             "description": [],
             "signature": [
-              "ESSearchSourceResponseMeta",
+              "DataRequestMeta",
               " | undefined"
             ],
             "path": "x-pack/plugins/maps/public/classes/sources/vector_source/vector_source.tsx",

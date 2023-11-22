@@ -282,7 +282,7 @@ describe('install', () => {
       expect(response.error).toBeUndefined();
 
       expect(install._installPackage).toHaveBeenCalledWith(
-        expect.objectContaining({ installSource: 'upload' })
+        expect.objectContaining({ installSource: 'bundled' })
       );
     });
 

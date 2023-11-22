@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { differenceWith, intersectionWith } from 'lodash';
+import { differenceWith, intersectionWith, isEmpty } from 'lodash';
 import Boom from '@hapi/boom';
 import type { CustomFieldsConfiguration } from '../../../common/types/domain';
-import type { CaseRequestCustomFields } from '../../../common/types/api';
+import type { CaseRequestCustomFields, CasesSearchRequest } from '../../../common/types/api';
 import { validateDuplicatedCustomFieldKeysInRequest } from '../validators';
+import type { ICasesCustomField } from '../../custom_fields';
+import { casesCustomFields } from '../../custom_fields';
+import { MAX_CUSTOM_FIELDS_PER_CASE } from '../../../common/constants';
 
 interface CustomFieldValidationParams {
   requestCustomFields?: CaseRequestCustomFields;
@@ -132,4 +135,44 @@ export const validateRequiredCustomFields = ({
       `Missing required custom fields: ${missingRequiredCustomFields.join(', ')}`
     );
   }
+};
+
+export const validateSearchCasesCustomFields = ({
+  customFieldsConfiguration,
+  customFields,
+}: {
+  customFieldsConfiguration: CustomFieldsConfiguration;
+  customFields: CasesSearchRequest['customFields'];
+}) => {
+  let customFieldsMapping: ICasesCustomField | null = null;
+
+  if (!customFields || isEmpty(customFields)) {
+    return;
+  }
+
+  if (!customFieldsConfiguration.length) {
+    throw Boom.badRequest('No custom fields configured.');
+  }
+
+  if (Object.keys(customFields).length > MAX_CUSTOM_FIELDS_PER_CASE) {
+    throw Boom.badRequest(`Maximum ${MAX_CUSTOM_FIELDS_PER_CASE} customFields are allowed.`);
+  }
+
+  Object.entries(customFields).forEach(([key, value]) => {
+    const customFieldConfig = customFieldsConfiguration.find((config) => config.key === key);
+
+    if (!customFieldConfig) {
+      throw Boom.badRequest(`Invalid custom field key: ${key}.`);
+    }
+
+    customFieldsMapping = casesCustomFields.get(customFieldConfig.type);
+
+    if (!customFieldsMapping?.isFilterable) {
+      throw Boom.badRequest(
+        `Filtering by custom field of type ${customFieldConfig.type} is not allowed.`
+      );
+    }
+
+    customFieldsMapping?.validateFilteringValues(value);
+  });
 };
