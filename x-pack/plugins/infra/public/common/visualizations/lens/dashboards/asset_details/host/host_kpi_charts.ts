@@ -10,9 +10,7 @@ import { hostLensFormulas } from '../../../formulas';
 import { METRICS_TOOLTIP } from '../../translations';
 import type { KPIChartProps } from '../../types';
 
-const BACKGROUND_COLOR = '#e6f1fa';
-
-export const hostKPICharts: KPIChartProps[] = [
+export const hostKPICharts = (backgroundColor: string): KPIChartProps[] => [
   {
     id: 'cpuUsage',
     title: i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.cpuUsage.title', {
@@ -31,7 +29,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: BACKGROUND_COLOR,
+        backgroundColor,
         showTrendLine: true,
       },
       type: 'visualization',
@@ -59,7 +57,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: BACKGROUND_COLOR,
+        backgroundColor,
         showTrendLine: true,
       },
       type: 'visualization',
@@ -84,7 +82,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: BACKGROUND_COLOR,
+        backgroundColor,
         showTrendLine: true,
       },
       type: 'visualization',
@@ -109,7 +107,7 @@ export const hostKPICharts: KPIChartProps[] = [
           : undefined,
       },
       options: {
-        backgroundColor: BACKGROUND_COLOR,
+        backgroundColor,
         showTrendLine: true,
       },
       type: 'visualization',
