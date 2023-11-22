@@ -13,6 +13,7 @@
 
 import { cleanup, generate } from '@kbn/infra-forge';
 import expect from '@kbn/expect';
+import { SLO_SUMMARY_ENRICH_POLICY_NAME } from '@kbn/observability-plugin/server/assets/constants';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -100,6 +101,13 @@ export default function ({ getService }: FtrProviderContext) {
           },
           groupBy: '*',
         });
+
+        try {
+          // Triggering the enrich policy manually so we don't rely on the task manager and lose a couple of seconds
+          await esClient.enrich.executePolicy({ name: SLO_SUMMARY_ENRICH_POLICY_NAME });
+        } catch (err) {
+          // noop
+        }
 
         const createdRule = await alertingApi.createRule({
           tags: ['observability'],

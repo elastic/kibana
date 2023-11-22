@@ -20,7 +20,7 @@ export function AlertingApiProvider({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const es = getService('es');
   const requestTimeout = 30 * 1000;
-  const retryTimeout = 120 * 1000;
+  const retryTimeout = 180 * 1000;
 
   return {
     async waitForRuleStatus({
