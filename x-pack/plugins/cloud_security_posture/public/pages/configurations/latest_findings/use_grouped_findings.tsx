@@ -25,9 +25,34 @@ export interface FindingsGroupingAggregation {
   groupsCount?: {
     value?: NumberOrNull;
   };
+  failedFindings?: {
+    doc_count?: NumberOrNull;
+  };
   groupByFields?: {
     buckets?: GenericBuckets[];
   };
+  description?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceName?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceSubType?: {
+    buckets?: GenericBuckets[];
+  };
+  resourceType?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkName?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkVersion?: {
+    buckets?: GenericBuckets[];
+  };
+  benchmarkId?: {
+    buckets?: GenericBuckets[];
+  };
+  isLoading?: boolean;
 }
 
 export const getGroupedFindingsQuery = (query: GroupingQuery) => ({
