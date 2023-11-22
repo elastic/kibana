@@ -6,6 +6,4 @@
  * Side Public License, v 1.
  */
 
-export * from './builtin_action_groups_types';
-export * from './rule_type';
-export * from './action_group_types';
+export const MAINTENANCE_WINDOW_FEATURE_ID = 'maintenanceWindow';

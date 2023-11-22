@@ -9,7 +9,7 @@ import type { LicenseType } from '@kbn/licensing-plugin/common/types';
 import type { 
   RecoveredActionGroupId, 
   DefaultActionGroupId 
-} from './built_action_groups_types';
+} from './builtin_action_groups_types';
 import { ActionGroup } from './action_group_types';
 
 interface ConsumerPrivileges {
