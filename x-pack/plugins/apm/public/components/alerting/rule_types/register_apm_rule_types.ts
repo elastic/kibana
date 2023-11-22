@@ -147,9 +147,7 @@ export function registerApmRuleTypes(
     documentationUrl(docLinks) {
       return `${docLinks.links.alerting.apmRules}`;
     },
-    ruleParamsExpression: lazy(
-      () => import('./transaction_duration_anomaly_rule_type')
-    ),
+    ruleParamsExpression: lazy(() => import('./anomaly_rule_type')),
     validate: () => ({
       errors: [],
     }),

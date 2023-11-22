@@ -26,6 +26,13 @@ import {
   AnomalySeverity,
   SelectAnomalySeverity,
 } from './select_anomaly_severity';
+import { SelectAnomalyConector } from './select_anomaly_conector';
+
+enum ML_ANOMALY_CONECTOR {
+  LATENCY = 'latency',
+  THROUGHPUT = 'throughput',
+  FAILED_TRANSACTION_RATE = 'failed_transaction_rate',
+}
 
 interface AlertParams {
   anomalySeverityType?:
@@ -33,6 +40,10 @@ interface AlertParams {
     | ML_ANOMALY_SEVERITY.MAJOR
     | ML_ANOMALY_SEVERITY.MINOR
     | ML_ANOMALY_SEVERITY.WARNING;
+  anomalyConectorType:
+    | ML_ANOMALY_CONECTOR.LATENCY
+    | ML_ANOMALY_CONECTOR.THROUGHPUT
+    | ML_ANOMALY_CONECTOR.FAILED_TRANSACTION_RATE;
   environment?: string;
   serviceName?: string;
   transactionType?: string;
@@ -47,7 +58,7 @@ interface Props {
   setRuleProperty: (key: string, value: any) => void;
 }
 
-export function TransactionDurationAnomalyRuleType(props: Props) {
+export function AnomalyRuleType(props: Props) {
   const { services } = useKibana();
   const { ruleParams, metadata, setRuleParams, setRuleProperty } = props;
 
@@ -90,6 +101,19 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
       serviceName={params.serviceName}
     />,
     <PopoverExpression
+      value={params.anomalySeverityType}
+      title={i18n.translate('xpack.apm.anomalyRuleType.anomalyConector', {
+        defaultMessage: 'Metric',
+      })}
+    >
+      <SelectAnomalyConector
+        value={params.anomalyConectorType}
+        onChange={(value) => {
+          setRuleParams('anomalyConectorType', value);
+        }}
+      />
+    </PopoverExpression>,
+    <PopoverExpression
       value={<AnomalySeverity type={params.anomalySeverityType} />}
       title={i18n.translate(
         'xpack.apm.transactionDurationAnomalyRuleType.anomalySeverity',
@@ -120,4 +144,4 @@ export function TransactionDurationAnomalyRuleType(props: Props) {
 // Default export is required for React.lazy loading
 //
 // eslint-disable-next-line import/no-default-export
-export default TransactionDurationAnomalyRuleType;
+export default AnomalyRuleType;

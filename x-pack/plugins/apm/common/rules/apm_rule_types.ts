@@ -294,6 +294,34 @@ export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
 
+export const ANOMALY_ALERT_DETECTOR_TYPES = [
+  {
+    type: 'latency',
+    label: i18n.translate('xpack.apm.alerts.anomalyConector.latencyLabel', {
+      defaultMessage: 'latency',
+    }),
+  },
+  {
+    type: 'throughput',
+    label: i18n.translate('xpack.apm.alerts.anomalyConector.throughputLabel', {
+      defaultMessage: 'throughput',
+    }),
+  },
+  {
+    type: 'failed_transaction_rate',
+    label: i18n.translate(
+      'xpack.apm.alerts.anomalyConector.failedTransactionRateLabel',
+      {
+        defaultMessage: 'failed transaction rate',
+      }
+    ),
+  },
+];
+
+export type AnomalyAlertConectorType = ValuesType<
+  typeof ANOMALY_ALERT_DETECTOR_TYPES
+>['type'];
+
 // Server side registrations
 // x-pack/plugins/apm/server/lib/alerts/<alert>.ts
 // x-pack/plugins/apm/server/lib/alerts/register_apm_alerts.ts
