@@ -32,7 +32,11 @@ import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
 import { AGENTLESS_FEATURE_FLAG, AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
-import type { AgentPolicy, NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
+import type {
+  AgentPolicy,
+  NewAgentPolicy,
+  PackagePolicyEditExtensionComponentProps,
+} from '../../../../types';
 import { SetupType } from '../../../../types';
 import {
   sendGetAgentStatus,
