@@ -180,7 +180,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.condaInstallLabel"
-                          defaultMessage="and can also be installed with Conda from Conda Forge:"
+                          defaultMessage="or it can also be installed with Conda from Conda Forge:"
                         />
                       </p>
                       <p>
