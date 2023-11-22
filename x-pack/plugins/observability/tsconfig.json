@@ -95,7 +95,8 @@
     "@kbn/lens-embeddable-utils",
     "@kbn/serverless",
     "@kbn/dashboard-plugin",
-    "@kbn/calculate-auto"
+    "@kbn/calculate-auto",
+    "@kbn/task-manager-plugin"
   ],
   "exclude": [
     "target/**/*"
