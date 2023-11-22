@@ -88,7 +88,7 @@ Array [
                 class="euiTitle emotion-euiTitle-xxs"
                 data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
               >
-                Assigned:
+                Assignees:
               </h3>
             </div>
             <div
@@ -265,7 +265,7 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
                   class="euiTitle emotion-euiTitle-xxs"
                   data-test-subj="securitySolutionFlyoutHeaderAssigneesTitle"
                 >
-                  Assigned:
+                  Assignees:
                 </h3>
               </div>
               <div

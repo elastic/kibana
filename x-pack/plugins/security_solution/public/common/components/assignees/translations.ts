@@ -16,7 +16,7 @@ export const ASSIGNEES_SELECTION_STATUS_MESSAGE = (total: number) =>
 export const ASSIGNEES_APPLY_BUTTON = i18n.translate(
   'xpack.securitySolution.assignees.applyButtonTitle',
   {
-    defaultMessage: 'Apply assignees',
+    defaultMessage: 'Apply',
   }
 );
 

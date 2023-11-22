@@ -229,13 +229,13 @@ export const UPDATE_ALERT_ASSIGNEES_FAILURE = i18n.translate(
 export const ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE = i18n.translate(
   'xpack.securitySolution.bulkActions.alertAssigneesContextMenuItemTitle',
   {
-    defaultMessage: 'Apply alert assignees',
+    defaultMessage: 'Assign alert',
   }
 );
 
 export const REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE = i18n.translate(
   'xpack.securitySolution.bulkActions.removeAlertAssignessContextMenuTitle',
   {
-    defaultMessage: 'Remove all assignees',
+    defaultMessage: 'Unassign alert',
   }
 );

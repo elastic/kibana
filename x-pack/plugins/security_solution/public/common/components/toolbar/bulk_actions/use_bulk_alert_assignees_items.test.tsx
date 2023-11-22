@@ -128,7 +128,7 @@ describe('useBulkAlertAssigneesItems', () => {
     expect(mockSetAlertAssignees).toHaveBeenCalled();
   });
 
-  it('should call setAlertAssignees with the correct parameters on `Remove all assignees` button click', () => {
+  it('should call setAlertAssignees with the correct parameters on `Unassign alert` button click', () => {
     const mockSetAlertAssignees = jest.fn();
     (useSetAlertAssignees as jest.Mock).mockReturnValue(mockSetAlertAssignees);
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {

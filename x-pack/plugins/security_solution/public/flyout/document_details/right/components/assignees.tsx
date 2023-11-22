@@ -29,7 +29,7 @@ const UpdateAssigneesButton: FC<{ togglePopover: () => void; isDisabled: boolean
       content={i18n.translate(
         'xpack.securitySolution.flyout.right.visualizations.assignees.popoverTooltip',
         {
-          defaultMessage: 'Assignees',
+          defaultMessage: 'Assign alert',
         }
       )}
     >
@@ -109,7 +109,7 @@ export const Assignees: FC<AssigneesProps> = memo(
             <h3>
               <FormattedMessage
                 id="xpack.securitySolution.flyout.right.header.assignedTitle"
-                defaultMessage="Assigned:"
+                defaultMessage="Assignees:"
               />
             </h3>
           </EuiTitle>
