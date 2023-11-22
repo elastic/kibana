@@ -15,11 +15,10 @@ import {
   DARK_THEME,
   MetricTrendShape,
 } from '@elastic/charts';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { SLOWithSummaryResponse, HistoricalSummaryResponse } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
-import { euiLightVars } from '@kbn/ui-theme';
 import { SloCardItemBadges } from './slo_card_item_badges';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
@@ -43,26 +42,15 @@ export interface Props {
   error: boolean;
 }
 
-export const getColor = (
-  isEnabled: boolean,
-  status?: SLOWithSummaryResponse['summary']['status']
-) => {
-  if (!isEnabled) {
-    return euiLightVars.euiColorLightestShade;
-  }
+const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
+  const colors = {
+    DEGRADING: useEuiBackgroundColor('warning'),
+    VIOLATED: useEuiBackgroundColor('danger'),
+    HEALTHY: useEuiBackgroundColor('success'),
+    NO_DATA: useEuiBackgroundColor('subdued'),
+  };
 
-  switch (status) {
-    case 'DEGRADING':
-      return euiLightVars.euiColorVis7_behindText;
-    case 'VIOLATED':
-      return euiLightVars.euiColorVis9_behindText;
-    case 'HEALTHY':
-      return euiLightVars.euiColorVis0_behindText;
-    case 'NO_DATA':
-      return euiLightVars.euiColorGhost;
-    default:
-      return euiLightVars.euiColorVis0_behindText;
-  }
+  return colors[status ?? 'NO_DATA'];
 };
 
 export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Props) {
@@ -80,6 +68,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
   const { mutate: deleteSlo } = useDeleteSlo();
+  const cardColor = useCardColor(slo.summary.status);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
@@ -164,7 +153,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
                     </EuiFlexGroup>
                   ),
                   icon: () => <EuiIcon type="visGauge" size="l" />,
-                  color: getColor(true, slo.summary.status),
+                  color: cardColor,
                 },
               ],
             ]}
