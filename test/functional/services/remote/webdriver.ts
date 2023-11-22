@@ -10,7 +10,7 @@ import { resolve } from 'path';
 import Fs from 'fs';
 
 import * as Rx from 'rxjs';
-import { mergeMap, map, takeUntil, catchError, ignoreElements } from 'rxjs/operators';
+import { mergeMap, map, takeUntil, catchError, ignoreElements, takeWhile } from 'rxjs/operators';
 import { Lifecycle } from '@kbn/test';
 import { ToolingLog } from '@kbn/tooling-log';
 import chromeDriver from 'chromedriver';
@@ -25,7 +25,7 @@ import { getLogger } from 'selenium-webdriver/lib/logging';
 import { installDriver } from 'ms-chromium-edge-driver';
 
 import { REPO_ROOT } from '@kbn/repo-info';
-import { pollForLogEntry$ } from './poll_for_log_entry';
+import { FINAL_LOG_ENTRY_PREFIX, pollForLogEntry$ } from './poll_for_log_entry';
 import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
@@ -176,7 +176,9 @@ async function attemptToCreateCommand(
         return {
           session,
           consoleLog$: pollForLogEntry$(session, logging.Type.BROWSER, config.logPollingMs).pipe(
-            takeUntil(lifecycle.cleanup.after$),
+            takeWhile((loggingEntry: logging.Entry) =>
+              loggingEntry.message.startsWith(FINAL_LOG_ENTRY_PREFIX)
+            ),
             map(({ message, level: { name: level } }) => ({
               message: message.replace(/\\n/g, '\n'),
               level,
