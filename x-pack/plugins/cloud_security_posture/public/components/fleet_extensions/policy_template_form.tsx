@@ -10,19 +10,15 @@ import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import {
-  EuiAccordion,
   EuiCallOut,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
-  EuiLink,
   EuiLoadingSpinner,
   EuiSpacer,
-  EuiSuperSelect,
   EuiText,
   EuiTitle,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
@@ -63,6 +59,7 @@ import {
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { gcpField, getInputVarsFields } from './gcp_credential_form';
+import { SetupTechnologySelector } from './setup_technology_selector';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -524,114 +521,6 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
   </div>
 );
 
-const SetupTechnologySelector = ({
-  setupTechnology,
-  onSetupTechnologyChange,
-}: {
-  setupTechnology: SetupTechnology;
-  onSetupTechnologyChange: (value: SetupTechnology) => void;
-}) => {
-  const options = [
-    {
-      value: SetupTechnology.AGENTLESS,
-      inputDisplay: (
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
-          defaultMessage="Agentless"
-        />
-      ),
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
-              defaultMessage="Agentless"
-            />
-          </strong>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription"
-                defaultMessage="Set up the integration without an agent"
-              />
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-    {
-      value: SetupTechnology.AGENT_BASED,
-      inputDisplay: (
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentbasedInputDisplay"
-          defaultMessage="Agent-based"
-        />
-      ),
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDisplay"
-              defaultMessage="Agent-based"
-            />
-          </strong>
-          <EuiText size="s" color="subdued">
-            <p>
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDescription"
-                defaultMessage="Set up the integration with an agent"
-              />
-            </p>
-          </EuiText>
-        </>
-      ),
-    },
-  ];
-
-  return (
-    <>
-      <EuiSpacer size="l" />
-      <EuiAccordion
-        id={useGeneratedHtmlId({ prefix: 'setup-type' })}
-        buttonContent={
-          <EuiLink>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.advancedOptionsLabel"
-              defaultMessage="Advanced options"
-            />
-          </EuiLink>
-        }
-      >
-        <EuiSpacer size="l" />
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyLabel"
-              defaultMessage="Setup technology"
-            />
-          }
-        >
-          <EuiSuperSelect
-            options={options}
-            valueOfSelected={setupTechnology}
-            placeholder={
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyPlaceholder"
-                defaultMessage="Select the setup technology"
-              />
-            }
-            onChange={onSetupTechnologyChange}
-            itemLayoutAlign="top"
-            hasDividers
-            fullWidth
-          />
-        </EuiFormRow>
-      </EuiAccordion>
-    </>
-  );
-};
-
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
     newPolicy,
@@ -648,7 +537,9 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(SetupTechnology.AGENT_BASED);
+    const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
+      SetupTechnology.AGENT_BASED
+    );
     const input = getSelectedOption(newPolicy.inputs, integration);
     const isCspmAws = input.type === CLOUDBEAT_AWS;
     const isAgentlessAvailable = isCspmAws && agentlessPolicy;
@@ -861,7 +752,10 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
         />
 
         {isAgentlessAvailable && (
-          <SetupTechnologySelector setupTechnology={setupTechnology} onSetupTechnologyChange={setSetupTechnology} />
+          <SetupTechnologySelector
+            setupTechnology={setupTechnology}
+            onSetupTechnologyChange={setSetupTechnology}
+          />
         )}
 
         {/* Defines the vars of the enabled input of the active policy template */}
