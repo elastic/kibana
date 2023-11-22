@@ -102,7 +102,7 @@ const TotalIntegrationsCount = ({
     <EuiTextColor color="subdued">
       <FormattedMessage
         id="xpack.csp.benchmarks.totalIntegrationsCountMessage"
-        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# integration} other {# integrations}}"
+        defaultMessage="Showing {pageCount} of {totalCount, plural, one {# benchmark} other {# benchmarks}}"
         values={{ pageCount, totalCount }}
       />
     </EuiTextColor>
@@ -126,7 +126,7 @@ const BenchmarkSearchField = ({
           isLoading={isLoading}
           placeholder={i18n.translate(
             'xpack.csp.benchmarks.benchmarkSearchField.searchPlaceholder',
-            { defaultMessage: 'Search by Integration Name' }
+            { defaultMessage: 'Search by Benchmark Name' }
           )}
           incremental
         />
@@ -146,16 +146,17 @@ export const Benchmarks = () => {
   });
 
   const queryResult = useCspBenchmarkIntegrations(query);
-  const totalItemCount = queryResult.data?.total || 0;
-
+  const totalItemCount = queryResult.data?.items.length || 0;
+  console.log('HELLO')
+console.log(queryResult)
   return (
     <CloudPosturePage>
       <EuiPageHeader
         data-test-subj={TEST_SUBJ.BENCHMARKS_PAGE_HEADER}
         pageTitle={
           <CloudPosturePageTitle
-            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarkRulesTitle', {
-              defaultMessage: 'Benchmark Rules',
+            title={i18n.translate('xpack.csp.benchmarks.benchmarksPageHeader.benchmarksTitle', {
+              defaultMessage: 'Benchmarks',
             })}
           />
         }

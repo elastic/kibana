@@ -15,6 +15,8 @@ import {
   EuiToolTip,
   EuiAvatar,
   EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
 } from '@elastic/eui';
 import React from 'react';
 import { generatePath } from 'react-router-dom';
@@ -23,21 +25,27 @@ import { i18n } from '@kbn/i18n';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TimestampTableCell } from '../../components/timestamp_table_cell';
-import type { Benchmark } from '../../../common/types';
+import type { Benchmark, BenchmarkVersion2, BenchmarkScore } from '../../../common/types';
 import { useKibana } from '../../common/hooks/use_kibana';
 import { benchmarksNavigation } from '../../common/navigation/constants';
 import * as TEST_SUBJ from './test_subjects';
 import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_csp_integration_details';
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
+import { ComplianceScoreBar } from '../../components/compliance_score_bar';
+import { getBenchmarkNameClean, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
+import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
 
 interface BenchmarksTableProps
-  extends Pick<EuiBasicTableProps<Benchmark>, 'loading' | 'error' | 'noItemsMessage' | 'sorting'>,
+  extends Pick<
+      EuiBasicTableProps<BenchmarkVersion2>,
+      'loading' | 'error' | 'noItemsMessage' | 'sorting'
+    >,
     Pagination {
-  benchmarks: Benchmark[];
-  setQuery(pagination: CriteriaWithPagination<Benchmark>): void;
+  benchmarks: BenchmarkVersion2[];
+  setQuery(pagination: CriteriaWithPagination<BenchmarkVersion2>): void;
   'data-test-subj'?: string;
 }
 
@@ -210,6 +218,73 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
   },
 ];
 
+const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVersion2>> = [
+  {
+    field: 'benchmark_id',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkVersion', {
+      defaultMessage: 'Benchmark',
+    }),
+    truncateText: true,
+    sortable: true,
+    render: (benchmarkId: string) => {
+      return getBenchmarkNameClean(benchmarkId);
+    },
+    'data-test-subj': 'TEST_1',
+  },
+  {
+    field: 'benchmark_version',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkVersion', {
+      defaultMessage: 'Version',
+    }),
+    truncateText: true,
+    sortable: true,
+    'data-test-subj': 'TEST_1',
+  },
+  {
+    field: 'benchmark_id',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.applicableTo', {
+      defaultMessage: 'Applicable To',
+    }),
+    truncateText: true,
+    'data-test-subj': 'TEST_2',
+    render: (benchmarkId: string) => {
+      return (
+        <>
+          {/* <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+          {getBenchmarkApplicableTo(benchmarkId)} */}
+          <EuiFlexGroup gutterSize="xs" alignItems="center">
+            <EuiFlexItem grow={false}>
+              <CISBenchmarkIcon type={benchmarkId} size={'l'} />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>{getBenchmarkApplicableTo(benchmarkId)}</EuiFlexItem>
+          </EuiFlexGroup>
+        </>
+      );
+    },
+  },
+  {
+    field: 'benchmark_evaluation',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.evaluated', {
+      defaultMessage: 'Evaluated',
+    }),
+    dataType: 'string',
+    truncateText: true,
+    'data-test-subj': 'TEST_3',
+  },
+  {
+    field: 'benchmark_score',
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.score', {
+      defaultMessage: 'Compliance',
+    }),
+    dataType: 'string',
+    truncateText: true,
+    'data-test-subj': 'TEST_4',
+    render: (data: BenchmarkScore) => {
+      return <ComplianceScoreBar totalPassed={data.totalPassed} totalFailed={data.totalFailed} />;
+    },
+  },
+];
+
 export const BenchmarksTable = ({
   benchmarks,
   pageIndex,
@@ -228,7 +303,7 @@ export const BenchmarksTable = ({
     totalItemCount,
   };
 
-  const onChange = ({ page, sort }: CriteriaWithPagination<Benchmark>) => {
+  const onChange = ({ page, sort }: CriteriaWithPagination<BenchmarkVersion2>) => {
     setQuery({ page: { ...page, index: page.index + 1 }, sort });
   };
 
@@ -240,8 +315,8 @@ export const BenchmarksTable = ({
     <EuiBasicTable
       data-test-subj={rest['data-test-subj']}
       items={benchmarks}
-      columns={BENCHMARKS_TABLE_COLUMNS}
-      itemId={(item) => [item.agent_policy.id, item.package_policy.id].join('/')}
+      columns={BENCHMARKS_TABLE_COLUMNS_VERSION_2}
+      // itemId={(item) => [item.agent_policy.id, item.package_policy.id].join('/')}
       pagination={pagination}
       onChange={onChange}
       tableLayout="fixed"

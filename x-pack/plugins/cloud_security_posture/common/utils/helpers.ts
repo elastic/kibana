@@ -172,3 +172,33 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
   // nothing to do, return unmutated policy
   return packagePolicy;
 };
+
+export const getBenchmarkNameClean = (benchmarkId: string) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'CIS Kubernetes';
+    case 'cis_azure':
+      return 'CIS Azure';
+    case 'cis_aws':
+      return 'CIS AWS';
+    case 'cis_eks':
+      return 'CIS EKS';
+    case 'cis_gcp':
+      return 'CIS_GCP';
+  }
+};
+
+export const getBenchmarkApplicableTo = (benchmarkId: string) => {
+  switch (benchmarkId) {
+    case 'cis_k8s':
+      return 'Kubernetes';
+    case 'cis_azure':
+      return 'Microsoft Azure';
+    case 'cis_aws':
+      return 'Amazon Web Services';
+    case 'cis_eks':
+      return 'Amazon Elastic Kubernetes Service';
+    case 'cis_gcp':
+      return 'Google Cloud Provider';
+  }
+};

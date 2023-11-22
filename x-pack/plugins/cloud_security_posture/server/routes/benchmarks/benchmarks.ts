@@ -27,7 +27,6 @@ import {
   getBenchmarkFromPackagePolicy,
   getBenchmarkFilter,
   isNonNullable,
-  getBenchmarkRulesFilter,
 } from '../../../common/utils/helpers';
 import { CspRouter } from '../../types';
 import {
@@ -68,20 +67,6 @@ export const getRulesVersion = async (
   return rules.saved_objects[0].attributes.metadata.benchmark.version;
 };
 
-export const getRulesVersion2 = async (
-  soClient: SavedObjectsClientContract,
-  benchmarkId: BenchmarkId,
-  packagePolicyId: string
-): Promise<string> => {
-  const rules = await soClient.find<CspRuleTemplate>({
-    type: CSP_RULE_TEMPLATE_SAVED_OBJECT_TYPE,
-    filter: getBenchmarkRulesFilter(benchmarkId, packagePolicyId),
-    perPage: 1,
-  });
-
-  return rules.saved_objects[0].attributes.metadata.benchmark.version;
-};
-
 const createBenchmarks = (
   soClient: SavedObjectsClientContract,
   agentPolicies: AgentPolicy[],
@@ -110,36 +95,10 @@ const createBenchmarks = (
           name: agentPolicy.name,
           agents: agentStatusByAgentPolicyId[agentPolicy.id]?.total,
         };
-        //TEST
-        const rulesVersion = await getRulesVersion(soClient, benchmarkId);
-        const esClient = cspContext.esClient.asCurrentUser;
-        const { id: pitId } = await esClient.openPointInTime({
-          index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
-          keep_alive: '30s',
-        });
-        const runtimeMappings: MappingRuntimeFields = getSafePostureTypeRuntimeMapping();
-        const query: QueryDslQueryContainer = {
-          bool: {
-            filter: [
-              { term: { 'rule.benchmark.version': rulesVersion } },
-              { term: { safe_posture_type: cspPackage?.vars?.posture.value } },
-            ],
-          },
-        };
-        const score = await getStats(esClient, query, pitId, runtimeMappings);
-        const cluster = await getClusters(esClient, query, pitId, runtimeMappings);
-        //TEST
         return {
           package_policy: cspPackage,
           agent_policy: agentPolicyStatus,
           rules_count: rulesCount,
-          trial: {
-            rules_version: rulesVersion,
-            integration_type: benchmarkId,
-            compliance_score: score,
-            clusters: cluster,
-            number_of_package: cluster.length,
-          },
         };
       });
 
@@ -213,7 +172,7 @@ const getBenchmarks = async (
       return {
         benchmark_id: benchmarkId,
         benchmark_name: benchmarkName,
-        benchmark_version: benchmarkVersion,
+        benchmark_version: benchmarkVersion.replace('v', ''),
         benchmark_score: benchmarkScore,
         benchmark_evaluation: benchmarkEvaluation.length,
       };
@@ -244,9 +203,7 @@ const createBenchmarks2 = (
           .filter(isNonNullable) ?? [];
       const benchmarks = cspPackagesOnAgent.map(async (cspPackage) => {
         const benchmarkId = getBenchmarkFromPackagePolicy(cspPackage.inputs);
-        //TEST
         const rulesVersion = await getRulesVersion(soClient, benchmarkId);
-        // const TEST = await getRulesVersion2(soClient, benchmarkId, cspPackage.id);
         const esClient = cspContext.esClient.asCurrentUser;
         const { id: pitId } = await esClient.openPointInTime({
           index: LATEST_FINDINGS_INDEX_DEFAULT_NS,
@@ -266,9 +223,6 @@ const createBenchmarks2 = (
         const score = await getStats(esClient, query, pitId, runtimeMappings);
         const cluster = await getClusters(esClient, query, pitId, runtimeMappings);
         const numberOfAgents = agentStatusByAgentPolicyId[agentPolicy.id]?.total;
-        // const TEST = await getRulesVersionZ(esClient, query, pitId, runtimeMappings);
-        // console.log(TEST)
-        //TEST
         return {
           rules_version: rulesVersion,
           integration_type: benchmarkId,
@@ -365,7 +319,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           const benchmarksNeo = await getBenchmarks(cspContext.soClient, cspContext);
           const getBenchmarkResponse = {
             ...packagePolicies,
-            items: benchmarks,
+            items: benchmarksNeo,
             items_trial_lama: benchmarksNew,
             items_test: benchmarksNeo,
           };

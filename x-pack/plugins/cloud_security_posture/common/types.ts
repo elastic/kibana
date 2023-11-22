@@ -126,6 +126,14 @@ export interface Benchmark {
   rules_count: number;
 }
 
+export interface BenchmarkScore {
+  postureScore: number;
+  resourcesEvaluated: number;
+  totalFailed: number;
+  totalFindings: number;
+  totalPassed: number;
+}
+
 export interface BenchmarkVersion2 {
   benchmark_id: string;
   benchmark_name: string;
