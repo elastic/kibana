@@ -8,7 +8,7 @@ import type { RequestHandler } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
-import { EndpointActionProvider } from '../../services/actions/providers';
+import { EndpointActionsClient } from '../../services/actions/clients';
 import type {
   NoParametersRequestSchema,
   ResponseActionsRequestBody,
@@ -265,7 +265,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
-    const actionProvider = new EndpointActionProvider({
+    const actionProvider = new EndpointActionsClient({
       esClient,
       casesClient,
       endpointContext,
