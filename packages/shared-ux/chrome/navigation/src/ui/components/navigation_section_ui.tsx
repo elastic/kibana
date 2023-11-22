@@ -25,7 +25,7 @@ import type { EuiThemeSize, RenderAs } from '@kbn/core-chrome-browser/src/projec
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { useNavigation } from './navigation';
-import { isAbsoluteLink, getNavigationNodeHref } from '../../utils';
+import { isAbsoluteLink, getNavigationNodeHref, isActiveFromUrl } from '../../utils';
 import { PanelContext, usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 
@@ -34,13 +34,6 @@ type EuiCollapsibleNavSubItemPropsEnhanced = EuiCollapsibleNavSubItemProps & { p
 const DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS: EuiThemeSize = 'm';
 const DEFAULT_IS_COLLAPSED = true;
 const DEFAULT_IS_COLLAPSIBLE = true;
-
-function isSamePath(pathA: string | null, pathB: string | null) {
-  if (pathA === null || pathB === null) {
-    return false;
-  }
-  return pathA === pathB;
-}
 
 const nodeHasLink = (navNode: ChromeProjectNavigationNode) =>
   Boolean(navNode.deepLink) || Boolean(navNode.href);
@@ -85,12 +78,6 @@ const filterChildren = (
 ): ChromeProjectNavigationNode[] | undefined => {
   if (!children) return undefined;
   return children.filter(itemIsVisible);
-};
-
-const isActiveFromUrl = (nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) => {
-  return activeNodes.reduce((acc, nodesBranch) => {
-    return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
-  }, false);
 };
 
 const serializeNavNode = (navNode: ChromeProjectNavigationNode) => {

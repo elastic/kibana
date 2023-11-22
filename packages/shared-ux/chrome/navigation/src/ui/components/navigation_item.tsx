@@ -6,16 +6,17 @@
  * Side Public License, v 1.
  */
 
-import React, { Fragment, useMemo } from 'react';
-import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
+import React, { Fragment, useEffect, useMemo, useRef } from 'react';
+import type { AppDeepLinkId, ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { EuiCollapsibleNavItem } from '@elastic/eui';
 import classNames from 'classnames';
+import deepEqual from 'react-fast-compare';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
 import type { NodeProps, NodePropsEnhanced } from '../types';
 import { useNavigation } from './navigation';
-import { getNavigationNodeHref } from '../../utils';
+import { getNavigationNodeHref, isActiveFromUrl } from '../../utils';
 import { initNavNode } from '../../navnode_utils';
 
 export interface Props<
@@ -24,6 +25,7 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
+  order?: number;
 }
 
 function NavigationItemComp<
@@ -32,8 +34,10 @@ function NavigationItemComp<
   ChildrenId extends string = Id
 >(props: Props<LinkId, Id, ChildrenId>) {
   const { cloudLinks, navigateToUrl, navLinks$ } = useNavigationServices();
-  const navigationContext = useNavigation();
+  const { unstyled: unstyledFromContext, register, activeNodes } = useNavigation();
   const deepLinks = useObservable(navLinks$, []);
+  const { order } = props;
+  const navNodeRef = useRef<ChromeProjectNavigationNode>();
 
   const { children, node } = useMemo(() => {
     const { children: _children, ...rest } = props;
@@ -49,12 +53,31 @@ function NavigationItemComp<
       node: nodeEnhanced,
     };
   }, [props]);
-  const unstyled = props.unstyled ?? navigationContext.unstyled;
+  const unstyled = props.unstyled ?? unstyledFromContext;
 
-  const navNode = useMemo(
-    () => initNavNode(node, { cloudLinks, deepLinks }),
-    [node, cloudLinks, deepLinks]
-  );
+  const navNode = useMemo(() => {
+    const _navNode = initNavNode(node, { cloudLinks, deepLinks });
+    if (!_navNode) return null;
+
+    const hasChanged = deepEqual(_navNode, navNodeRef.current) === false;
+    if (hasChanged) {
+      navNodeRef.current = _navNode;
+    }
+
+    if (navNodeRef.current === undefined) {
+      // Adding this check for TS purpose, it should never be undefined.
+      throw new Error('Navnode ref is undefined.');
+    }
+
+    return navNodeRef.current;
+  }, [node, cloudLinks, deepLinks]);
+
+  useEffect(() => {
+    if (navNode) {
+      register(navNode, order);
+    }
+    return undefined;
+  }, [register, navNode, order]);
 
   if (!navNode) {
     return null;
@@ -71,7 +94,8 @@ function NavigationItemComp<
     return <Fragment>{navNode.title}</Fragment>;
   }
 
-  const isRootLevel = navNode.path.length === 1;
+  const isRootLevel = navNode.path.split('.').length === 1;
+  const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
   if (isRootLevel) {
     const href = getNavigationNodeHref(navNode);
@@ -86,7 +110,7 @@ function NavigationItemComp<
         title={navNode.title}
         icon={navNode.icon}
         iconProps={{ size: 'm' }}
-        isSelected={navNode.isActive}
+        isSelected={isActive}
         data-test-subj={dataTestSubj}
         linkProps={{
           href,

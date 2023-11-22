@@ -183,8 +183,12 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
   }, [navigationTree, projectNavigationTree]);
 
   const renderNodes = useCallback(
-    (nodes: Array<RootNavigationItemDefinition | NodeDefinition> = []) => {
-      return nodes.map((navNode, i) => {
+    (nodes: Array<RootNavigationItemDefinition | NodeDefinition> = [], nodesCountStart = 0) => {
+      let nodesCount = nodesCountStart;
+
+      const jsxNodes = nodes.map((navNode, i) => {
+        nodesCount += 1;
+
         if (isPresetDefinition(navNode)) {
           return <Navigation.Group preset={navNode.preset} key={`${navNode.preset}-${i}`} />;
         }
@@ -194,33 +198,46 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
         }
 
         if (isGroupDefinition(navNode)) {
+          const { jsxNodes: jsxChildrenNodes, nodesCount: _nodesCount } = renderNodes(
+            navNode.children,
+            nodesCount
+          );
+          nodesCount += _nodesCount;
           return (
-            <Navigation.Group {...navNode} key={navNode.id}>
+            <Navigation.Group {...navNode} key={navNode.id} order={nodesCount}>
               {/* Recursively build the tree */}
-              {renderNodes(navNode.children)}
+              {jsxChildrenNodes}
             </Navigation.Group>
           );
         }
 
-        return <Navigation.Item {...navNode} key={navNode.id} />;
+        return <Navigation.Item {...navNode} key={navNode.id} order={nodesCount} />;
       });
+
+      return {
+        jsxNodes,
+        nodesCount,
+      };
     },
     []
   );
 
-  const { body } = navigationDefinition;
+  const { body, footer } = navigationDefinition;
 
-  const jsxNodes = useMemo(() => {
+  const { jsxNodes: jsxNodesBody, nodesCount: nodesCountBody } = useMemo(() => {
     return renderNodes(body);
   }, [renderNodes, body]);
+
+  const { jsxNodes: jsxNodesFooter } = useMemo(() => {
+    if (!footer) return { jsxNodes: null };
+    return renderNodes(footer, nodesCountBody);
+  }, [renderNodes, footer, nodesCountBody]);
 
   return (
     <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
       <>
-        {jsxNodes}
-        {navigationDefinition.footer && (
-          <NavigationFooter>{renderNodes(navigationDefinition.footer)}</NavigationFooter>
-        )}
+        {jsxNodesBody}
+        {jsxNodesFooter && <NavigationFooter>{jsxNodesFooter}</NavigationFooter>}
       </>
     </Navigation>
   );

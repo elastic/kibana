@@ -190,4 +190,7 @@ export type UnRegisterFunction = () => void;
  *
  * A function to register a navigation node on its parent.
  */
-export type RegisterFunction = (navNode: ChromeProjectNavigationNode) => UnRegisterFunction;
+export type RegisterFunction = (
+  navNode: ChromeProjectNavigationNode,
+  order?: number
+) => UnRegisterFunction;

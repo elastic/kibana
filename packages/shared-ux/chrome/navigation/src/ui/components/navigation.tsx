@@ -98,9 +98,9 @@ export function Navigation({
   );
 
   const register = useCallback<RegisterFunction>(
-    (navNode): UnRegisterFunction => {
+    (navNode, order): UnRegisterFunction => {
       if (orderChildrenRef.current[navNode.id] === undefined) {
-        orderChildrenRef.current[navNode.id] = idx.current++;
+        orderChildrenRef.current[navNode.id] = order ?? idx.current++;
       }
 
       const updatedRef = { ...navigationItemsRef.current, [navNode.id]: navNode };

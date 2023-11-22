@@ -41,3 +41,16 @@ export function getNavigationNodeHref({
 }: Pick<ChromeProjectNavigationNode, 'href' | 'deepLink'>): string | undefined {
   return deepLink?.url ?? href;
 }
+
+function isSamePath(pathA: string | null, pathB: string | null) {
+  if (pathA === null || pathB === null) {
+    return false;
+  }
+  return pathA === pathB;
+}
+
+export function isActiveFromUrl(nodePath: string, activeNodes: ChromeProjectNavigationNode[][]) {
+  return activeNodes.reduce((acc, nodesBranch) => {
+    return acc === true ? acc : nodesBranch.some((branch) => isSamePath(branch.path, nodePath));
+  }, false);
+}

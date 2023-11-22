@@ -111,6 +111,7 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
+  order?: number;
 }
 
 function NavigationGroupInternalComp<
@@ -121,6 +122,7 @@ function NavigationGroupInternalComp<
   const { cloudLinks, navLinks$ } = useNavigationServices();
   const { register } = useNavigation();
   const deepLinks = useObservable(navLinks$, []);
+  const { order } = props;
 
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
   const childrenNodesRef = useRef<ChromeProjectNavigationNode[]>();
@@ -162,10 +164,10 @@ function NavigationGroupInternalComp<
   /** Register when mounting and whenever the internal nav node changes */
   useEffect(() => {
     if (navNode) {
-      register(navNode);
+      register(navNode, order);
     }
     return undefined;
-  }, [register, navNode]);
+  }, [register, navNode, order]);
 
   if (!navNode || navNode.sideNavStatus === 'hidden') {
     return null;
