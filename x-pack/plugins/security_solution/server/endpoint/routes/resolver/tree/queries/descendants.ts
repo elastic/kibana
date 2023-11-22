@@ -62,7 +62,6 @@ export class DescendantsQuery extends BaseResolverQuery {
                 should: [
                   { term: { 'event.category': 'process' } },
                   { term: { 'event.category': 'malware' } },
-                  // { term: { 'event.category': 'dns' } },
                 ],
               },
             },
@@ -154,7 +153,6 @@ export class DescendantsQuery extends BaseResolverQuery {
                 should: [
                   { term: { 'event.category': 'process' } },
                   { term: { 'event.category': 'malware' } },
-                  // { term: { 'event.category': 'dns' } },
                 ],
               },
             },
