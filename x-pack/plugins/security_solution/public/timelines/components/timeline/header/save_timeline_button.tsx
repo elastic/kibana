@@ -14,7 +14,6 @@ import { TimelineStatus } from '../../../../../common/api/timeline';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { useIsElementMounted } from '../../../../detection_engine/rule_management_ui/components/rules_table/rules_table/guided_onboarding/use_is_element_mounted';
 import { useLocalStorage } from '../../../../common/components/local_storage';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
@@ -27,8 +26,6 @@ const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
 const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTourSeen';
 
 export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
-  const isTimelineSaveTourSaveTourDisabled =
-    useIsExperimentalFeatureEnabled('disableTimelineSaveTour');
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
 
   const closeSaveTimeline = useCallback(() => {
@@ -56,8 +53,8 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   } = useDeepEqualSelector((state) => getTimelineStatus(state, timelineId));
 
   const isSaveButtonMounted = useIsElementMounted(SAVE_BUTTON_ELEMENT_ID);
-  const [hasSeenTimelineSaveTour, setHasSeenTimelineSaveTour] = useLocalStorage({
-    defaultValue: false,
+  const [timelineTourStatus, setTimelineTourStatus] = useLocalStorage({
+    defaultValue: { isTourActive: true },
     key: LOCAL_STORAGE_KEY,
   });
   // Why are we checking for so many flags here?
@@ -66,17 +63,15 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   // popup would show too early and in the wrong place in the DOM.
   // The last flag, checks if the tour has been dismissed before.
   const showTimelineSaveTour =
-    // The timeline save tour could be disabled on a plugin level
-    !isTimelineSaveTourSaveTourDisabled &&
     canEditTimeline &&
     isVisible &&
     !isLoading &&
     isSaveButtonMounted &&
-    !hasSeenTimelineSaveTour;
+    timelineTourStatus.isTourActive;
 
   const markTimelineSaveTourAsSeen = useCallback(() => {
-    setHasSeenTimelineSaveTour(true);
-  }, [setHasSeenTimelineSaveTour]);
+    setTimelineTourStatus({ isTourActive: false });
+  }, [setTimelineTourStatus]);
 
   const isUnsaved = timelineStatus === TimelineStatus.draft;
   const tooltipContent = canEditTimeline ? null : timelineTranslations.CALL_OUT_UNAUTHORIZED_MSG;
