@@ -10,6 +10,7 @@ import { safeLoad, safeDump } from 'js-yaml';
 
 import type { PackagePolicyConfigRecord } from '../../../../common/types';
 import { toCompiledSecretRef } from '../../secrets';
+import { FleetError } from '../../../errors';
 
 const handlebars = Handlebars.create();
 
@@ -20,7 +21,7 @@ export function compileTemplate(variables: PackagePolicyConfigRecord, templateSt
     const template = handlebars.compile(templateStr, { noEscape: true });
     compiledTemplate = template(vars);
   } catch (err) {
-    throw new Error(`Error while compiling agent template: ${err.message}`);
+    throw new FleetError(`Error while compiling agent template: ${err.message}`);
   }
 
   compiledTemplate = replaceRootLevelYamlVariables(yamlValues, compiledTemplate);
@@ -78,7 +79,7 @@ function buildTemplateVariables(variables: PackagePolicyConfigRecord, templateSt
     let varPart = acc;
     for (const keyPart of keyParts) {
       if (!isValidKey(keyPart)) {
-        throw new Error('Invalid key');
+        throw new FleetError(`Invalid key ${keyPart}`);
       }
       if (!varPart[keyPart]) {
         varPart[keyPart] = {};

@@ -29,7 +29,7 @@ export async function updatePackage(
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
-    throw new FleetError(`package ${pkgName} is not installed`);
+    throw new FleetError(`Package ${pkgName} is not installed`);
   }
 
   auditLoggingService.writeCustomSoAuditLog({

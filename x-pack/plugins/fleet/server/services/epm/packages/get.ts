@@ -44,7 +44,6 @@ import type {
 } from '../../../../common/types';
 import type { Installation, PackageInfo, PackagePolicySOAttributes } from '../../../types';
 import {
-  FleetError,
   PackageFailedVerificationError,
   PackageNotFoundError,
   RegistryResponseError,
@@ -118,7 +117,7 @@ export async function getPackages(
             return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
           } catch (err) {
             if (err instanceof PackageInvalidArchiveError) {
-              logger.warn(
+              logger.error(
                 `Installed package ${pkg.id} ${pkg.attributes.version} is not a valid package anymore`
               );
               return null;
@@ -417,12 +416,14 @@ export async function getPackageInfo({
   ignoreUnverified?: boolean;
   prerelease?: boolean;
 }): Promise<PackageInfo> {
+  const logger = appContextService.getLogger();
   const [savedObject, latestPackage] = await Promise.all([
     getInstallationObject({ savedObjectsClient, pkgName }),
     Registry.fetchFindLatestPackageOrUndefined(pkgName, { prerelease }),
   ]);
 
   if (!savedObject && !latestPackage) {
+    logger.error(`[${pkgName}] package not installed or found in registry`);
     throw new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
   }
 
@@ -575,6 +576,7 @@ export async function getPackageFromSource(options: {
         logger.debug(`retrieved installed package ${pkgName}-${pkgVersion}`);
       } catch (error) {
         if (error instanceof PackageFailedVerificationError) {
+          logger.error(`package ${pkgName}-${pkgVersion} failed verification`);
           throw error;
         }
         // treating this is a 404 as no status code returned
@@ -600,7 +602,8 @@ export async function getPackageFromSource(options: {
     }
   }
   if (!res) {
-    throw new FleetError(`package info for ${pkgName}-${pkgVersion} does not exist`);
+    logger.error(`Package info for ${pkgName}-${pkgVersion} does not exist`);
+    throw new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {
     paths: res.paths,

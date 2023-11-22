@@ -43,6 +43,7 @@ import {
   PackageNotFoundError,
   RegistryResponseError,
   PackageFailedVerificationError,
+  PackageUnsupportedMediaTypeError,
 } from '../../../errors';
 
 import { getBundledPackageByName } from '../packages/bundled_packages';
@@ -363,9 +364,14 @@ export async function getPackage(
 }
 
 function ensureContentType(archivePath: string) {
+  const logger = appContextService.getLogger();
   const contentType = mime.lookup(archivePath);
+
   if (!contentType) {
-    throw new Error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    logger.error(`Unknown compression format for '${archivePath}'. Please use .zip or .gz`);
+    throw new PackageUnsupportedMediaTypeError(
+      `Unknown compression format for '${archivePath}'. Please use .zip or .gz`
+    );
   }
   return contentType;
 }

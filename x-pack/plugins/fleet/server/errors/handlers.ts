@@ -34,6 +34,10 @@ import {
   PackagePolicyNotFoundError,
   FleetUnauthorizedError,
   PackagePolicyNameExistsError,
+  PackageOutdatedError,
+  PackageInvalidArchiveError,
+  BundledPackageLocationNotFoundError,
+  PackageRemovalError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -69,6 +73,15 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof PackageFailedVerificationError) {
     return 400; // Bad Request
   }
+  if (error instanceof PackageOutdatedError) {
+    return 400; // Bad Request
+  }
+  if (error instanceof PackageInvalidArchiveError) {
+    return 400; // Bad Request
+  }
+  if (error instanceof PackageRemovalError) {
+    return 400; // Bad Request
+  }
   if (error instanceof ConcurrentInstallOperationError) {
     return 409; // Conflict
   }
@@ -85,6 +98,9 @@ const getHTTPResponseCode = (error: FleetError): number => {
     return 409; // Conflict
   }
   if (error instanceof UninstallTokenError) {
+    return 500; // Internal Error
+  }
+  if (error instanceof BundledPackageLocationNotFoundError) {
     return 500; // Internal Error
   }
   return 400; // Bad Request
@@ -115,7 +131,7 @@ export function fleetErrorToResponseOptions(error: IngestErrorHandlerParams['err
     };
   }
 
-  // not sure what type of error this is. log as much as possible
+  // default response is 500
   logger.error(error);
   return {
     statusCode: 500,

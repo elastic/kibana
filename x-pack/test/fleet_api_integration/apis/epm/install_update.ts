@@ -32,7 +32,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     it('should return 404 if package does not exist', async function () {
-      await supertest
+      const response = await supertest
         .post(`/api/fleet/epm/packages/nonexistent/0.1.0`)
         .set('kbn-xsrf', 'xxxx')
         .expect(404);
