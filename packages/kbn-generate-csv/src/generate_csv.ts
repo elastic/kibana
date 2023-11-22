@@ -327,7 +327,7 @@ export class CsvGenerator {
     let first = true;
     let currentRecord = -1;
     let totalRecords: number | undefined;
-    let totalRelation = 'eq';
+    let totalRelation = 'unknown';
     let searchAfter: estypes.SortResults | undefined;
 
     let pitId = await this.openPointInTime(indexPatternTitle, settings);
@@ -367,10 +367,10 @@ export class CsvGenerator {
             totalRecords = hits.total;
           } else {
             totalRecords = hits.total?.value;
-            totalRelation = hits.total?.relation ?? 'unknown';
+            totalRelation = hits.total?.relation ?? totalRelation; // looking to capture "eq"
           }
-          this.logger.info(`Total hits ${totalRelation} ${totalRecords}.`);
         }
+        this.logger.debug(`Total hits: ${totalRecords}. (Relational accuracy: ${totalRelation})`);
 
         if (!results) {
           this.logger.warn(`Search results are undefined!`);
