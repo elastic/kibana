@@ -49,7 +49,7 @@ export async function getBuckets({
         bool: {
           filter: [
             ...termQuery(ERROR_TYPE, 'crash'),
-            { term: { [SERVICE_NAME]: serviceName } },
+           ...termQuery(SERVICE_NAME, serviceName),
             ...rangeQuery(start, end),
             ...environmentQuery(environment),
             ...kqlQuery(kuery),
