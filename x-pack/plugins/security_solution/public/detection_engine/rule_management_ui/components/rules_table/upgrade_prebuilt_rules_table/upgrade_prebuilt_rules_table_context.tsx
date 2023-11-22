@@ -33,7 +33,11 @@ import * as i18n from './translations';
 import { MlJobUpgradeModal } from '../../../../../detections/components/modals/ml_job_upgrade_modal';
 
 // import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab';
-import { RuleDiffTab } from '../../../../rule_management/components/rule_details/rule_diff_tab_2';
+import { RuleDiffTab as RuleDiffTab1 } from '../../../../rule_management/components/rule_details/rule_diff_tab_1';
+import { RuleDiffTab as RuleDiffTab2 } from '../../../../rule_management/components/rule_details/rule_diff_tab_2';
+import { RuleDiffTab as RuleDiffTab3 } from '../../../../rule_management/components/rule_details/rule_diff_tab_3';
+import { RuleDiffTab as RuleDiffTab4 } from '../../../../rule_management/components/rule_details/rule_diff_tab_4';
+import { RuleDiffTab as RuleDiffTab5 } from '../../../../rule_management/components/rule_details/rule_diff_tab_5';
 // import * as ruleDetailsI18n from '../../../../rule_management/components/rule_details/translations.ts';
 
 export interface UpgradePrebuiltRulesTableState {
@@ -296,23 +300,84 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
               </EuiButton>
             }
             getRuleTabs={(rule, defaultTabs) => {
-              const diff = filteredRules.find(({ id }) => rule.id)?.diff;
+              const activeRule = filteredRules.find(({ id }) => rule.id);
+              const diff = activeRule?.diff;
 
               if (!diff) {
                 return defaultTabs;
               }
 
-              const diffTab = {
-                id: 'diff',
-                name: 'ruleDetailsI18n.DIFF_TAB_LABEL',
+              const diffTab1 = {
+                id: 'diff1',
+                name: 'elastic-poc',
                 content: (
                   <TabContentPadding>
-                    <RuleDiffTab fields={diff.fields} />
+                    <RuleDiffTab1
+                      currentRule={activeRule.current_rule}
+                      mergedRule={activeRule.target_rule}
+                      fields={diff.fields}
+                    />
                   </TabContentPadding>
                 ),
               };
 
-              return [diffTab, ...defaultTabs];
+              const diffTab2 = {
+                id: 'diff2',
+                name: 'react-diff-viewer-continued',
+                content: (
+                  <TabContentPadding>
+                    <RuleDiffTab2
+                      currentRule={activeRule.current_rule}
+                      mergedRule={activeRule.target_rule}
+                      fields={diff.fields}
+                    />
+                  </TabContentPadding>
+                ),
+              };
+
+              const diffTab3 = {
+                id: 'diff3',
+                name: 'react-diff-view',
+                content: (
+                  <TabContentPadding>
+                    <RuleDiffTab3
+                      currentRule={activeRule.current_rule}
+                      mergedRule={activeRule.target_rule}
+                      fields={diff.fields}
+                    />
+                  </TabContentPadding>
+                ),
+              };
+
+              const diffTab4 = {
+                id: 'diff4',
+                name: 'monaco',
+                content: (
+                  <TabContentPadding>
+                    <RuleDiffTab4
+                      currentRule={activeRule.current_rule}
+                      mergedRule={activeRule.target_rule}
+                      fields={diff.fields}
+                    />
+                  </TabContentPadding>
+                ),
+              };
+
+              const diffTab5 = {
+                id: 'diff5',
+                name: 'diff2html',
+                content: (
+                  <TabContentPadding>
+                    <RuleDiffTab5
+                      currentRule={activeRule.current_rule}
+                      mergedRule={activeRule.target_rule}
+                      fields={diff.fields}
+                    />
+                  </TabContentPadding>
+                ),
+              };
+
+              return [diffTab2, diffTab3, diffTab4, diffTab5, diffTab1, ...defaultTabs];
             }}
           />
         )}

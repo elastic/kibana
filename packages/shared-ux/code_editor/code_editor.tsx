@@ -8,7 +8,7 @@
 
 import React, { useState, useRef, useCallback, useMemo, useEffect, KeyboardEvent } from 'react';
 import { useResizeDetector } from 'react-resize-detector';
-import ReactMonacoEditor from 'react-monaco-editor';
+import ReactMonacoEditor, { MonacoDiffEditor } from 'react-monaco-editor';
 import {
   htmlIdGenerator,
   EuiToolTip,
@@ -151,6 +151,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }),
   isCopyable = false,
   allowFullScreen = false,
+  original,
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const useDarkTheme = useDarkThemeProp ?? colorMode === 'DARK';
@@ -162,6 +163,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       typeof ReactMonacoEditor === 'function' && ReactMonacoEditor.name === 'JestMockEditor';
     return isMockedComponent
       ? (ReactMonacoEditor as unknown as () => typeof ReactMonacoEditor)()
+      : original
+      ? MonacoDiffEditor
       : ReactMonacoEditor;
   }, []);
 
@@ -386,23 +389,27 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         textboxMutationObserver.current.observe(textbox, { attributes: true });
       }
 
-      editor.onKeyDown(onKeydownMonaco);
-      editor.onDidBlurEditorText(onBlurMonaco);
+      if (editor.onKeyDown && editor.onDidBlurEditorText) {
+        editor.onKeyDown(onKeydownMonaco);
+        editor.onDidBlurEditorText(onBlurMonaco);
+      }
 
-      // "widget" is not part of the TS interface but does exist
-      // @ts-expect-errors
-      const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
-        ?.value;
+      if (editor.getContribution) {
+        // "widget" is not part of the TS interface but does exist
+        // @ts-expect-errors
+        const suggestionWidget = editor.getContribution('editor.contrib.suggestController')?.widget
+          ?.value;
 
-      // As I haven't found official documentation for "onDidShow" and "onDidHide"
-      // we guard from possible changes in the underlying lib
-      if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
-        suggestionWidget.onDidShow(() => {
-          isSuggestionMenuOpen.current = true;
-        });
-        suggestionWidget.onDidHide(() => {
-          isSuggestionMenuOpen.current = false;
-        });
+        // As I haven't found official documentation for "onDidShow" and "onDidHide"
+        // we guard from possible changes in the underlying lib
+        if (suggestionWidget && suggestionWidget.onDidShow && suggestionWidget.onDidHide) {
+          suggestionWidget.onDidShow(() => {
+            isSuggestionMenuOpen.current = true;
+          });
+          suggestionWidget.onDidHide(() => {
+            isSuggestionMenuOpen.current = false;
+          });
+        }
       }
 
       editorDidMount?.(editor);
@@ -472,6 +479,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <MonacoEditor
           theme={theme}
           language={languageId}
+          original={original ?? undefined}
           value={value}
           onChange={onChange}
           width={isFullScreen ? '100vw' : width}
