@@ -1066,6 +1066,8 @@
       "@kbn/ml-string-hash/*": ["x-pack/packages/ml/string_hash/*"],
       "@kbn/ml-trained-models-utils": ["x-pack/packages/ml/trained_models_utils"],
       "@kbn/ml-trained-models-utils/*": ["x-pack/packages/ml/trained_models_utils/*"],
+      "@kbn/ml-ui-actions": ["x-pack/packages/ml/ui_actions"],
+      "@kbn/ml-ui-actions/*": ["x-pack/packages/ml/ui_actions/*"],
       "@kbn/ml-url-state": ["x-pack/packages/ml/url_state"],
       "@kbn/ml-url-state/*": ["x-pack/packages/ml/url_state/*"],
       "@kbn/monaco": ["packages/kbn-monaco"],
