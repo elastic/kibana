@@ -145,9 +145,8 @@ describe('AddInferencePipelineFlyout', () => {
   describe('AddInferencePipelineHorizontalSteps', () => {
     const CONFIGURE_STEP_INDEX = 0;
     const FIELDS_STEP_INDEX = 1;
-    const MAPPINGS_STEP_INDEX = 2;
-    const TEST_STEP_INDEX = 3;
-    const REVIEW_STEP_INDEX = 4;
+    const TEST_STEP_INDEX = 2;
+    const REVIEW_STEP_INDEX = 3;
     const onAddInferencePipelineStepChange = jest.fn();
     beforeEach(() => {
       setMockActions({
@@ -286,13 +285,6 @@ describe('AddInferencePipelineFlyout', () => {
         isConfigureStepValid: false,
       });
       testCannotClickInvalidStep(FIELDS_STEP_INDEX);
-    });
-    it('cannot click mappings step when data is invalid', () => {
-      setMockValues({
-        ...DEFAULT_VALUES,
-        isPipelineDataValid: false,
-      });
-      testCannotClickInvalidStep(MAPPINGS_STEP_INDEX);
     });
     it('cannot click test step when data is invalid', () => {
       setMockValues({
