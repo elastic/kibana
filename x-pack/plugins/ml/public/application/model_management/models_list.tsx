@@ -85,6 +85,12 @@ export type ModelItem = TrainedModelConfigResponse & {
   putModelConfig?: object;
   state: ModelState;
   recommended?: boolean;
+  /**
+   * Model name, e.g. elser
+   */
+  modelName?: string;
+  os?: string;
+  arch?: string;
 };
 
 export type ModelItemFull = Required<ModelItem>;
@@ -271,6 +277,9 @@ export const ModelsList: FC<Props> = ({
               description: modelDefinition.description,
               state: MODEL_STATE.NOT_DOWNLOADED,
               recommended: !!modelDefinition.recommended,
+              modelName: modelDefinition.modelName,
+              os: modelDefinition.os,
+              arch: modelDefinition.arch,
             } as ModelItem;
           });
         resultItems = [...resultItems, ...notDownloaded];

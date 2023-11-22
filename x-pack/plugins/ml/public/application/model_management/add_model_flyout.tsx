@@ -25,11 +25,13 @@ import {
   EuiTabs,
   EuiText,
   EuiTitle,
+  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState, type FC } from 'react';
+import { groupBy } from 'lodash';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import { ModelItem } from './models_list';
@@ -66,56 +68,96 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               ),
               content: (
                 <>
-                  <EuiFormFieldset
-                    legend={{
-                      children: (
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.addModelFlyout.chooseModelLabel"
-                          defaultMessage="Choose a model"
-                        />
-                      ),
-                    }}
-                  >
-                    {modelDownloads.map((model) => {
+                  {Object.entries(groupBy(modelDownloads, 'modelName')).map(
+                    ([modelName, models]) => {
                       return (
-                        <React.Fragment key={model.model_id}>
-                          <EuiCheckableCard
-                            id={model.model_id}
-                            label={
-                              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-                                <EuiFlexItem grow={false}>
-                                  <EuiIcon type="logoElastic" size="l" />
-                                </EuiFlexItem>
-                                <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
-                                {model.recommended ? (
-                                  <EuiFlexItem grow={false}>
-                                    <EuiToolTip
-                                      content={
-                                        <FormattedMessage
-                                          id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                                          defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                                        />
-                                      }
-                                    >
-                                      <FormattedMessage
-                                        id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                                        defaultMessage="(Recommended)"
-                                      />
-                                    </EuiToolTip>
-                                  </EuiFlexItem>
-                                ) : null}
-                              </EuiFlexGroup>
-                            }
-                            name={model.model_id}
-                            value={model.model_id}
-                            checked={model.model_id === selectedModelId}
-                            onChange={() => setSelectedModelId(model.model_id)}
-                          />
-                          <EuiSpacer size="m" />
+                        <React.Fragment key={modelName}>
+                          {modelName === 'elser' ? (
+                            <div>
+                              <EuiTitle size={'s'}>
+                                <h3>
+                                  <FormattedMessage
+                                    id="xpack.ml.trainedModels.modelsList.elserTitle"
+                                    defaultMessage="Elastic Learned Sparse EncodeR (ELSER)"
+                                  />
+                                </h3>
+                              </EuiTitle>
+                              <EuiSpacer size="s" />
+                              <p>
+                                <EuiText color={'subdued'} size={'s'}>
+                                  <FormattedMessage
+                                    id="xpack.ml.trainedModels.modelsList.elserDescription"
+                                    defaultMessage="ELSER is designed to efficiently use context in natural language queries with better results than BM25 alone."
+                                  />
+                                </EuiText>
+                              </p>
+                              <EuiSpacer size="s" />
+                              <p>
+                                <EuiLink href={docLinks.links.ml.nlpElser} external>
+                                  <FormattedMessage
+                                    id="xpack.ml.trainedModels.modelsList.elserViewDocumentationLinkLabel"
+                                    defaultMessage="View documentation"
+                                  />
+                                </EuiLink>
+                              </p>
+                              <EuiSpacer size={'m'} />
+                            </div>
+                          ) : null}
+
+                          <EuiFormFieldset
+                            legend={{
+                              children: (
+                                <FormattedMessage
+                                  id="xpack.ml.trainedModels.addModelFlyout.chooseModelLabel"
+                                  defaultMessage="Choose a model"
+                                />
+                              ),
+                            }}
+                          >
+                            {models.map((model) => {
+                              return (
+                                <React.Fragment key={model.model_id}>
+                                  <EuiCheckableCard
+                                    id={model.model_id}
+                                    label={
+                                      <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                                        <EuiFlexItem grow={false}>
+                                          <EuiIcon type="logoElastic" size="l" />
+                                        </EuiFlexItem>
+                                        <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
+                                        {model.recommended ? (
+                                          <EuiFlexItem grow={false}>
+                                            <EuiToolTip
+                                              content={
+                                                <FormattedMessage
+                                                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                                                  defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                                                />
+                                              }
+                                            >
+                                              <FormattedMessage
+                                                id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                                                defaultMessage="(Recommended)"
+                                              />
+                                            </EuiToolTip>
+                                          </EuiFlexItem>
+                                        ) : null}
+                                      </EuiFlexGroup>
+                                    }
+                                    name={model.model_id}
+                                    value={model.model_id}
+                                    checked={model.model_id === selectedModelId}
+                                    onChange={() => setSelectedModelId(model.model_id)}
+                                  />
+                                  <EuiSpacer size="m" />
+                                </React.Fragment>
+                              );
+                            })}
+                          </EuiFormFieldset>
                         </React.Fragment>
                       );
-                    })}
-                  </EuiFormFieldset>
+                    }
+                  )}
                   <EuiButton
                     onClick={onSubmit.bind(null, selectedModelId!)}
                     fill
@@ -286,6 +328,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
   }, [
     canCreateTrainedModels,
     docLinks.links.clients.eland,
+    docLinks.links.ml.nlpElser,
     docLinks.links.ml.nlpImportModel,
     modelDownloads,
     onSubmit,
@@ -320,7 +363,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
             </EuiTab>
           ))}
         </EuiTabs>
-        <EuiSpacer size={'m'} />
+        <EuiSpacer size={'l'} />
         {selectedTabContent}
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
