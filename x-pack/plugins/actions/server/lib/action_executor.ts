@@ -272,6 +272,7 @@ export class ActionExecutor {
               serviceMessage: err.message,
               error: err,
               retry: true,
+              errorSource: TaskErrorSource.USER,
             };
           }
         }
