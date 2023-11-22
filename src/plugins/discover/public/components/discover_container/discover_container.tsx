@@ -16,6 +16,8 @@ import type { DiscoverServices } from '../../build_services';
 import type { CustomizationCallback } from '../../customizations';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
+import { useSingleton } from '../../application/main/hooks/use_singleton';
+import { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
   /*
@@ -69,6 +71,11 @@ export const DiscoverContainerInternal = ({
     return { ...discoverServices, ...overrideServices };
   }, [discoverServices, overrideServices]);
 
+  const customizationContext = useSingleton<DiscoverCustomizationContext>(() => ({
+    displayMode: 'embedded',
+    showLogExplorerTabs: false,
+  }));
+
   if (!initialized || !services || isLoading) {
     return (
       <EuiFlexGroup css={discoverContainerWrapperCss}>
@@ -90,7 +97,7 @@ export const DiscoverContainerInternal = ({
         <KibanaContextProvider services={services}>
           <DiscoverMainRoute
             customizationCallbacks={customizationCallbacks}
-            displayMode="embedded"
+            customizationContext={customizationContext}
             isDev={isDev}
           />
         </KibanaContextProvider>

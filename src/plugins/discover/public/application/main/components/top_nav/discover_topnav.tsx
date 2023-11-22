@@ -23,13 +23,14 @@ import { useInternalStateSelector } from '../../services/discover_internal_state
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { getTopNavLinks } from './get_top_nav_links';
 import { getTopNavBadges } from './get_top_nav_badges';
-import { getHeaderActionMenuMounter, getLogExplorerTabs } from '../../../../kibana_services';
+import { getHeaderActionMenuMounter } from '../../../../kibana_services';
 import { DiscoverStateContainer } from '../../services/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
 import { addLog } from '../../../../utils/add_log';
 import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
 import { useAppStateSelector } from '../../services/discover_app_state_container';
+import type { DiscoverCustomizationContext } from '../../../types';
 
 export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
@@ -237,6 +238,7 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
+  const { customizationContext } = stateContainer;
   const topNavProps = services.serverless
     ? {
         topNavBadges,
@@ -250,8 +252,8 @@ export const DiscoverTopNav = ({
 
   return (
     <>
-      {Boolean(services.serverless) && stateContainer.displayMode === 'standalone' && (
-        <ServerlessTopNav {...topNavProps} />
+      {Boolean(services.serverless) && customizationContext.displayMode === 'standalone' && (
+        <ServerlessTopNav customizationContext={customizationContext} {...topNavProps} />
       )}
       <SearchBar
         {...(!services.serverless && topNavProps)}
@@ -293,9 +295,11 @@ export const DiscoverTopNav = ({
 };
 
 const ServerlessTopNav = ({
+  customizationContext,
   topNavMenu,
   topNavBadges,
 }: {
+  customizationContext: DiscoverCustomizationContext;
   topNavMenu?: TopNavMenuData[];
   topNavBadges?: TopNavMenuBadgeProps[];
 }) => {
@@ -306,7 +310,7 @@ const ServerlessTopNav = ({
 
   return (
     <EuiHeader css={{ flexShrink: 0, boxShadow: 'none' }}>
-      {getLogExplorerTabs().enabled && (
+      {customizationContext.showLogExplorerTabs && (
         <EuiHeaderSection>
           <EuiHeaderSectionItem>
             <LogExplorerTabs

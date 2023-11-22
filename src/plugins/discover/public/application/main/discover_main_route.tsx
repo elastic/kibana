@@ -34,7 +34,7 @@ import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,
 } from '../../customizations';
-import type { DiscoverDisplayMode } from '../types';
+import type { DiscoverCustomizationContext } from '../types';
 
 const DiscoverMainAppMemoized = memo(DiscoverMainApp);
 
@@ -45,12 +45,12 @@ interface DiscoverLandingParams {
 export interface MainRouteProps {
   customizationCallbacks: CustomizationCallback[];
   isDev: boolean;
-  displayMode?: DiscoverDisplayMode;
+  customizationContext: DiscoverCustomizationContext;
 }
 
 export function DiscoverMainRoute({
   customizationCallbacks,
-  displayMode = 'standalone',
+  customizationContext,
 }: MainRouteProps) {
   const history = useHistory();
   const services = useDiscoverServices();
@@ -68,7 +68,7 @@ export function DiscoverMainRoute({
     getDiscoverStateContainer({
       history,
       services,
-      displayMode,
+      customizationContext,
     })
   );
   const { customizationService, isInitialized: isCustomizationServiceInitialized } =
@@ -153,7 +153,7 @@ export function DiscoverMainRoute({
           dataView: nextDataView,
           dataViewSpec: historyLocationState?.dataViewSpec,
         });
-        if (displayMode === 'standalone') {
+        if (customizationContext.displayMode === 'standalone') {
           if (currentSavedSearch?.id) {
             chrome.recentlyAccessed.add(
               getSavedSearchFullPathUrl(currentSavedSearch.id),
@@ -198,17 +198,17 @@ export function DiscoverMainRoute({
     },
     [
       checkData,
-      stateContainer,
+      stateContainer.actions,
       savedSearchId,
       historyLocationState?.dataViewSpec,
-      chrome,
+      customizationContext.displayMode,
       services,
+      chrome.recentlyAccessed,
       history,
       core.application.navigateToApp,
       core.theme,
       basePath,
       toastNotifications,
-      displayMode,
     ]
   );
 

@@ -21,10 +21,12 @@ import { ViewAlertRoute } from './view_alert';
 import type { CustomizationCallback } from '../customizations';
 import type { DiscoverProfileRegistry } from '../customizations/profile_registry';
 import { addProfile } from '../../common/customizations';
+import type { DiscoverCustomizationContext } from './types';
 
 interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
+  customizationContext: DiscoverCustomizationContext;
   isDev: boolean;
 }
 
@@ -66,6 +68,7 @@ export const DiscoverRoutes = ({ prefix, ...mainRouteProps }: DiscoverRoutesProp
 
 interface CustomDiscoverRoutesProps {
   profileRegistry: DiscoverProfileRegistry;
+  customizationContext: DiscoverCustomizationContext;
   isDev: boolean;
 }
 
@@ -92,6 +95,7 @@ export const CustomDiscoverRoutes = ({ profileRegistry, ...props }: CustomDiscov
 export interface DiscoverRouterProps {
   services: DiscoverServices;
   profileRegistry: DiscoverProfileRegistry;
+  customizationContext: DiscoverCustomizationContext;
   history: History;
   isDev: boolean;
 }

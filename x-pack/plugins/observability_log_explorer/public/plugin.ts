@@ -44,7 +44,7 @@ export class ObservabilityLogExplorerPlugin
     core: CoreSetup<ObservabilityLogExplorerStartDeps, ObservabilityLogExplorerPluginStart>,
     _pluginsSetup: ObservabilityLogExplorerSetupDeps
   ) {
-    const { share } = _pluginsSetup;
+    const { share, serverless, discover } = _pluginsSetup;
     const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
     core.application.register({
@@ -69,6 +69,10 @@ export class ObservabilityLogExplorerPlugin
       },
     });
 
+    if (serverless) {
+      discover.showLogExplorerTabs();
+    }
+
     // Register Locators
     const singleDatasetLocator = share.url.locators.create(
       new SingleDatasetLocatorDefinition({
@@ -91,11 +95,7 @@ export class ObservabilityLogExplorerPlugin
     };
   }
 
-  public start(_core: CoreStart, pluginsStart: ObservabilityLogExplorerStartDeps) {
-    if (pluginsStart.serverless) {
-      pluginsStart.discover.showLogExplorerTabs();
-    }
-
+  public start(_core: CoreStart, _pluginsStart: ObservabilityLogExplorerStartDeps) {
     return {};
   }
 }
