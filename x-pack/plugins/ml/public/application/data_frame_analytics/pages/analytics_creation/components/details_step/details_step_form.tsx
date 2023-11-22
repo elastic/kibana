@@ -10,6 +10,7 @@ import { debounce } from 'lodash';
 import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
@@ -18,7 +19,6 @@ import { ContinueButton } from '../continue_button';
 import { ANALYTICS_STEPS } from '../../page';
 import { ml } from '../../../../../services/ml_api_service';
 import { useDataSource } from '../../../../../contexts/ml';
-import { DetailsStepTimeField } from './details_step_time_field';
 import { AdditionalSection } from './additional_section';
 
 const DEFAULT_RESULTS_FIELD = 'ml';
@@ -37,8 +37,18 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   setCurrentStep,
 }) => {
   const {
-    services: { docLinks, notifications },
+    services: {
+      docLinks,
+      notifications,
+      application: { capabilities },
+    },
   } = useMlKibana();
+
+  const canCreateDataView = useMemo(
+    () =>
+      capabilities.savedObjectsManagement.edit === true || capabilities.indexPatterns.save === true,
+    [capabilities]
+  );
 
   const { selectedDataView } = useDataSource();
 
@@ -46,7 +56,9 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
   const { setFormState } = actions;
   const { form, cloneJob, hasSwitchedToEditor, isJobCreated } = state;
   const {
+    createDataView,
     description,
+    destinationDataViewTitleExists,
     destinationIndex,
     destinationIndexNameEmpty,
     destinationIndexNameExists,
@@ -110,7 +122,8 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
     jobIdExists === true ||
     jobIdValid === false ||
     destinationIndexNameEmpty === true ||
-    destinationIndexNameValid === false;
+    destinationIndexNameValid === false ||
+    (createDataView && destinationDataViewTitleExists === true);
 
   const debouncedIndexCheck = debounce(async () => {
     try {
@@ -377,13 +390,15 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           />
         </EuiFormRow>
       )}
-      {destinationIndexNameValid && dataViewAvailableTimeFields.length > 0 ? (
-        <DetailsStepTimeField
-          dataViewAvailableTimeFields={dataViewAvailableTimeFields}
-          dataViewTimeField={timeFieldName}
-          onTimeFieldChanged={onTimeFieldChanged}
-        />
-      ) : null}
+      <CreateDataViewForm
+        canCreateDataView={canCreateDataView}
+        createDataView={createDataView}
+        dataViewTitleExists={destinationDataViewTitleExists}
+        setCreateDataView={() => setFormState({ createDataView: !createDataView })}
+        dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+        dataViewTimeField={timeFieldName}
+        onTimeFieldChanged={onTimeFieldChanged}
+      />
       <EuiSpacer size="s" />
       <AdditionalSection formState={state.form} setFormState={setFormState} />
       <EuiSpacer />
