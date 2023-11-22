@@ -150,14 +150,9 @@ describe('getDataStreams', () => {
       type: 'logs',
       uncategorisedOnly: false,
     });
-    expect(results.items).toEqual([
-      { name: 'logs-test.test-default' },
+    expect(results.items.sort()).toEqual([
       {
-        name: 'logs-elastic_agent.metricbeat-default',
-        integration: 'elastic_agent',
-      },
-      {
-        name: 'logs-elastic_agent.fleet_server-default',
+        name: 'logs-elastic_agent-default',
         integration: 'elastic_agent',
       },
       {
@@ -165,9 +160,14 @@ describe('getDataStreams', () => {
         integration: 'elastic_agent',
       },
       {
-        name: 'logs-elastic_agent-default',
+        name: 'logs-elastic_agent.fleet_server-default',
         integration: 'elastic_agent',
       },
+      {
+        name: 'logs-elastic_agent.metricbeat-default',
+        integration: 'elastic_agent',
+      },
+      { name: 'logs-test.test-default' },
     ]);
   });
 });
