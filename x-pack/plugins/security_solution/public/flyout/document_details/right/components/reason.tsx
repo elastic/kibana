@@ -13,7 +13,7 @@ import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getField } from '../../shared/utils';
-import { AlertReasonPreviewPanel, PreviewPanelKey } from '../../preview';
+import { AlertReasonPreviewPanel, DocumentDetailsPreviewPanelKey } from '../../preview';
 import {
   REASON_DETAILS_PREVIEW_BUTTON_TEST_ID,
   REASON_DETAILS_TEST_ID,
@@ -34,7 +34,7 @@ export const Reason: FC = () => {
   const { openPreviewPanel } = useExpandableFlyoutContext();
   const openRulePreview = useCallback(() => {
     openPreviewPanel({
-      id: PreviewPanelKey,
+      id: DocumentDetailsPreviewPanelKey,
       path: { tab: AlertReasonPreviewPanel },
       params: {
         id: eventId,

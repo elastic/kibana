@@ -14,6 +14,8 @@ import type { CoreStart } from '@kbn/core/public';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CellActionsProvider } from '@kbn/cell-actions';
+import { NavigationProvider } from '@kbn/security-solution-navigation';
+import { CASES_FEATURE_ID } from '../../../common';
 import { createStore } from '../store';
 import { mockGlobalState } from './global_state';
 import { SUB_PLUGINS_REDUCER } from './utils';
@@ -39,10 +41,35 @@ const uiSettings = {
 const coreMock = {
   application: {
     getUrlForApp: () => {},
+    capabilities: { [CASES_FEATURE_ID]: {} },
+  },
+  lens: {
+    EmbeddableComponent: () => <span />,
+  },
+  cases: {
+    helpers: {
+      getUICapabilities: () => ({}),
+    },
+    hooks: {
+      useCasesAddToExistingCaseModal: () => {},
+      useCasesAddToNewCaseFlyout: () => {},
+    },
   },
   data: {
     query: {
       filterManager: {},
+    },
+    search: {
+      session: React.createRef(),
+    },
+    actions: {
+      createFiltersFromValueClickAction: () => {},
+    },
+  },
+  settings: {
+    client: {
+      get: () => {},
+      set: () => {},
     },
   },
   uiSettings,
@@ -78,13 +105,15 @@ export const StorybookProviders: React.FC = ({ children }) => {
   return (
     <I18nProvider>
       <KibanaReactContext.Provider>
-        <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
-          <ReduxStoreProvider store={store}>
-            <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
-              {children}
-            </ThemeProvider>
-          </ReduxStoreProvider>
-        </CellActionsProvider>
+        <NavigationProvider core={coreMock}>
+          <CellActionsProvider getTriggerCompatibleActions={() => Promise.resolve([])}>
+            <ReduxStoreProvider store={store}>
+              <ThemeProvider theme={() => ({ eui: euiLightVars, darkMode: false })}>
+                {children}
+              </ThemeProvider>
+            </ReduxStoreProvider>
+          </CellActionsProvider>
+        </NavigationProvider>
       </KibanaReactContext.Provider>
     </I18nProvider>
   );
