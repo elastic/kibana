@@ -7,3 +7,4 @@
 
 export { useDevToolsRequest } from './devtools_request';
 export { useOnSubmit } from './form';
+export { useSetupType } from './setup_type';
