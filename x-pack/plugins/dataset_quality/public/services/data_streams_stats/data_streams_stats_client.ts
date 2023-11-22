@@ -7,6 +7,7 @@
 
 import { HttpStart } from '@kbn/core/public';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
+import { keyBy, merge, values } from 'lodash';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { DATA_STREAMS_STATS_URL } from '../../../common/constants';
 import {
@@ -17,17 +18,13 @@ import {
 } from '../../../common/data_streams_stats';
 import { IDataStreamsStatsClient } from './types';
 
-const defaultIntegrationsParams: GetDataStreamsStatsQuery = {
-  sortOrder: 'desc',
-};
-
 export class DataStreamsStatsClient implements IDataStreamsStatsClient {
   constructor(private readonly http: HttpStart) {}
 
   public async getDataStreamsStats(
-    params: GetDataStreamsStatsQuery = defaultIntegrationsParams
+    params: GetDataStreamsStatsQuery = { datasetQuery: '*' }
   ): Promise<DataStreamStatServiceResponse> {
-    const response = await this.http
+    const { dataStreamsStats, integrations } = await this.http
       .get<GetDataStreamsStatsResponse>(DATA_STREAMS_STATS_URL, {
         query: params,
         version: API_VERSIONS.public.v1,
@@ -35,13 +32,16 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       .catch((error) => {
         throw new GetDataStreamsStatsError(`Failed to fetch data streams stats": ${error}`);
       });
+    const mergedDataStreamsStats = values(
+      merge(keyBy(dataStreamsStats, 'name'), keyBy(integrations, 'name'))
+    );
 
-    // TODO: shel el habal dh
+    // TODO: remove code below
     return [
-      ...response.items.map(DataStreamStat.create),
-      ...response.items.map(DataStreamStat.create),
-      ...response.items.map(DataStreamStat.create),
-      ...response.items.map(DataStreamStat.create),
+      ...mergedDataStreamsStats.map(DataStreamStat.create),
+      ...mergedDataStreamsStats.map(DataStreamStat.create),
+      ...mergedDataStreamsStats.map(DataStreamStat.create),
+      ...mergedDataStreamsStats.map(DataStreamStat.create),
     ];
   }
 }

@@ -59,7 +59,9 @@ const statsRoute = createDatasetQualityServerRoute({
       }));
 
     return {
-      items: values(merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      dataStreamsStats: values(
+        merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))
+      ),
       integrations,
     };
   },

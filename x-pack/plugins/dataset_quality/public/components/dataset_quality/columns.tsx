@@ -9,8 +9,8 @@ import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiText } from '@elasti
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { Integration } from '../../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import { IntegrationType } from '../../../common/data_streams_stats';
 import { useFormattedTime } from '../../hooks';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
@@ -44,7 +44,7 @@ export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataSt
     {
       name: integrationColumnName,
       field: 'integration',
-      render: (integration?: IntegrationType) => {
+      render: (integration?: Integration) => {
         if (!integration) return ' - ';
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
@@ -52,7 +52,7 @@ export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataSt
               <PackageIcon packageName={integration.name!} version={'1.0.0'} size="m" tryApi />
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText>{integration.name}</EuiText>
+              <EuiText>{integration.title}</EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
         );

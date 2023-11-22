@@ -15,5 +15,5 @@ export type GetDataStreamsStatsParams = APIClientRequestParamsOf<
 export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
 export type GetDataStreamsStatsResponse = APIReturnType<typeof GET_DATA_STREAMS_STATS_URL>;
 export type DataStreamStatServiceResponse = DataStreamStat[];
-export type DataStreamStatType = GetDataStreamsStatsResponse['items'][0];
-export type IntegrationType = NonNullable<DataStreamStatType['integration']>;
+export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
+export type IntegrationType = GetDataStreamsStatsResponse['integrations'][0];

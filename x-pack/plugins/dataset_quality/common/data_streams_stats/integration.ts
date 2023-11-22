@@ -9,11 +9,15 @@ import { IntegrationType } from './types';
 
 export class Integration {
   name: IntegrationType['name'];
-  managedBy?: IntegrationType['managed_by'];
+  title: IntegrationType['title'];
+  version?: IntegrationType['version'];
+  icons?: IntegrationType['icons'];
 
   private constructor(integration: Integration) {
     this.name = integration.name;
-    this.managedBy = integration.managedBy ?? '';
+    this.title = integration.title || integration.name;
+    this.version = integration.version;
+    this.icons = integration.icons;
   }
 
   public static create(integration: IntegrationType) {
@@ -21,8 +25,7 @@ export class Integration {
 
     const integrationProps = {
       ...integration,
-      name: integration.name,
-      managedBy: integration.managed_by ?? '',
+      title: integration.title || integration.name,
     };
 
     return new Integration(integrationProps);

@@ -6,7 +6,7 @@
  */
 
 import { Integration } from './integration';
-import { DataStreamStatType } from './types';
+import { DataStreamStatType, IntegrationType } from './types';
 
 export class DataStreamStat {
   name: DataStreamStatType['name'];
@@ -14,7 +14,7 @@ export class DataStreamStat {
   size?: DataStreamStatType['size'];
   sizeBytes?: DataStreamStatType['size_bytes'];
   lastActivity?: DataStreamStatType['last_activity'];
-  integration?: DataStreamStatType['integration'];
+  integration?: IntegrationType;
 
   private constructor(dataStreamStat: DataStreamStat) {
     this.name = dataStreamStat.name;
@@ -36,7 +36,7 @@ export class DataStreamStat {
       sizeBytes: dataStreamStat.size_bytes,
       lastActivity: dataStreamStat.last_activity,
       // TODO: replace this code
-      integration: Integration.create({ name: 'kubernetes', managed_by: 'fleet' }),
+      integration: Integration.create({ name: 'kubernetes' }),
     };
 
     return new DataStreamStat(dataStreamStatProps);
