@@ -15,10 +15,10 @@ interface ESApiModalProps {
 }
 
 export const ESApiModal = ({ onClose, title }: ESApiModalProps) => {
-    console.log('can this open?')
+  console.log('can this open?');
   return (
     <EuiModal onClose={onClose} data-test-subj="guideModal" aria-labelledby="">
-        <title/>
+      <title />
       Can this open? this is a placeholder
     </EuiModal>
   );

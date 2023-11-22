@@ -17,7 +17,8 @@
     "@kbn/i18n-react",
     "@kbn/react-kibana-mount",
     "@kbn/core-overlays-browser",
-    "@kbn/core-lifecycle-browser"
+    "@kbn/core-theme-browser",
+    "@kbn/core-i18n-browser"
   ],
   "exclude": [
     "target/**/*",

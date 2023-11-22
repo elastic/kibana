@@ -28,7 +28,7 @@ export interface GuideCardConstants {
   telemetryId: string;
   order: number;
   icon: string;
-  // the guide will open a specific modal ESApiModal 
+  // the guide will open a specific modal ESApiModal
   openModal: boolean;
 }
 

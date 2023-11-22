@@ -6,4 +6,4 @@
  * Side Public License, v 1.
  */
 
-export { ESApiModal } from './es_api_modal'
+export { ESApiModal } from './es_api_modal';
