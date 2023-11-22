@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type {
@@ -35,7 +36,7 @@ export const createRule = async (
   const response = await supertest
     .post(route)
     .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
     .send(rule);
   if (response.status === 409) {
     if (rule.rule_id != null) {

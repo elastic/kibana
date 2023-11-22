@@ -9,9 +9,11 @@
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';
 import type { InternalInjectedMetadataStart } from '@kbn/core-injected-metadata-browser-internal';
+import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 
 /** @internal */
-export interface InternalCoreStart extends Omit<CoreStart, 'application' | 'plugins'> {
+export interface InternalCoreStart extends Omit<CoreStart, 'application' | 'plugins' | 'http'> {
   application: InternalApplicationStart;
   injectedMetadata: InternalInjectedMetadataStart;
+  http: InternalHttpStart;
 }
