@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { SentinelOneActionProvider } from './sentinelone_action_provider';
-export { EndpointActionProvider } from './endpoint_action_provider';
+export { EndpointActionsClient } from './endpoint_actions_client';

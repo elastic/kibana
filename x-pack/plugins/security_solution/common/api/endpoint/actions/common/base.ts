@@ -7,7 +7,6 @@
 
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import { RESPONSE_ACTION_AGENT_TYPE } from '../../../../endpoint/service/response_actions/constants';
 
 export const BaseActionRequestSchema = {
   /** A list of endpoint IDs whose hosts will be isolated (Fleet Agent IDs will be retrieved for these) */
@@ -40,14 +39,6 @@ export const BaseActionRequestSchema = {
         }
       },
     })
-  ),
-  // TODO:PT place this behind a feature flag??? Possible?
-  agentType: schema.maybe(
-    schema.oneOf(
-      // @ts-expect-error TS2769: No overload matches this call
-      RESPONSE_ACTION_AGENT_TYPE.map((type) => schema.literal(type)),
-      { defaultValue: 'endpoint' }
-    )
   ),
   comment: schema.maybe(schema.string()),
   parameters: schema.maybe(schema.object({})),

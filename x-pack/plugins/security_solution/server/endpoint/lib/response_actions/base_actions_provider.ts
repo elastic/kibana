@@ -40,7 +40,7 @@ export interface BaseActionsProviderOptions {
   username: string;
 }
 
-export abstract class BaseActionsProvider implements ResponseActionsProvider {
+export abstract class BaseResponseActionsClient implements ResponseActionsProvider {
   protected readonly log: Logger;
 
   constructor(protected readonly options: BaseActionsProviderOptions) {
