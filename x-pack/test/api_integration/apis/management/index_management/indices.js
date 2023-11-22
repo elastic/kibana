@@ -8,12 +8,10 @@
 import expect from '@kbn/expect';
 
 import { initElasticsearchHelpers } from './lib';
-import { registerHelpers } from './indices.helpers';
+import { indicesApi } from './lib/indices.api';
 import { sortedExpectedIndexKeys } from './constants';
 
 export default function ({ getService }) {
-  const supertest = getService('supertest');
-
   const {
     createIndex,
     catIndex,
@@ -32,9 +30,9 @@ export default function ({ getService }) {
     list,
     reload,
     clearCache,
-  } = registerHelpers({ supertest });
+  } = indicesApi({ getService });
 
-  describe('indices', () => {
+  describe.only('indices', () => {
     after(() => Promise.all([cleanUpEsResources()]));
 
     describe('clear cache', () => {
@@ -45,9 +43,6 @@ export default function ({ getService }) {
     });
 
     describe('close', function () {
-      // The Cloud backend disallows users from closing indices.
-      this.tags(['skipCloud']);
-
       it('should close an index', async () => {
         const index = await createIndex();
 
@@ -68,10 +63,6 @@ export default function ({ getService }) {
     });
 
     describe('open', function () {
-      // The Cloud backend disallows users from closing indices, so there's no point testing
-      // the open behavior.
-      this.tags(['skipCloud']);
-
       it('should open an index', async () => {
         const index = await createIndex();
 
@@ -175,8 +166,6 @@ export default function ({ getService }) {
     });
 
     describe('list', function () {
-      this.tags(['skipCloud']);
-
       it('should list all the indices with the expected properties and data enrichers', async function () {
         // Create an index that we can assert against
         await createIndex('test_index');
@@ -194,19 +183,15 @@ export default function ({ getService }) {
     });
 
     describe('reload', function () {
-      describe('(not on Cloud)', function () {
-        this.tags(['skipCloud']);
+      it('should list all the indices with the expected properties and data enrichers', async function () {
+        // create an index to assert against, otherwise the test is flaky
+        await createIndex('reload-test-index');
+        const { body } = await reload().expect(200);
 
-        it('should list all the indices with the expected properties and data enrichers', async function () {
-          // create an index to assert against, otherwise the test is flaky
-          await createIndex('reload-test-index');
-          const { body } = await reload().expect(200);
-
-          const indexCreated = body.find((index) => index.name === 'reload-test-index');
-          const sortedReceivedKeys = Object.keys(indexCreated).sort();
-          expect(sortedReceivedKeys).to.eql(sortedExpectedIndexKeys);
-          expect(body.length > 1).to.be(true); // to contrast it with the next test
-        });
+        const indexCreated = body.find((index) => index.name === 'reload-test-index');
+        const sortedReceivedKeys = Object.keys(indexCreated).sort();
+        expect(sortedReceivedKeys).to.eql(sortedExpectedIndexKeys);
+        expect(body.length > 1).to.be(true); // to contrast it with the next test
       });
 
       it('should allow reloading only certain indices', async () => {
