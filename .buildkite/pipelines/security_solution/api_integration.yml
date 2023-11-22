@@ -25,6 +25,7 @@ steps:
   - label: Running exception_workflows:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless
     key: exception_workflows:qa:serverless
+    depends_on: build_image
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -36,6 +37,7 @@ steps:
   - label: Running exception_operators_date_numeric_types:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_date_numeric_types:qa:serverless
     key: exception_operators_date_numeric_types:qa:serverless
+    depends_on: build_image
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -47,6 +49,7 @@ steps:
   - label: Running exception_operators_keyword:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_keyword:qa:serverless
     key: exception_operators_keyword:qa:serverless
+    depends_on: build_image
     agents:
       queue: n2-4-spot
     timeout_in_minutes: 120
@@ -57,6 +60,7 @@ steps:
 
   - label: Running exception_operators_ips:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_ips:qa:serverless
+    depends_on: build_image
     key: exception_operators_ips:qa:serverless
     agents:
       queue: n2-4-spot
@@ -68,6 +72,7 @@ steps:
 
   - label: Running exception_operators_long:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_long:qa:serverless
+    depends_on: build_image
     key: exception_operators_long:qa:serverless
     agents:
       queue: n2-4-spot
@@ -79,6 +84,7 @@ steps:
 
   - label: Running exception_operators_text:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_text:qa:serverless
+    depends_on: build_image
     key: exception_operators_text:qa:serverless
     agents:
       queue: n2-4-spot
@@ -90,6 +96,7 @@ steps:
 
   - label: Running rule_creation:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_creation:qa:serverless
+    depends_on: build_image
     key: rule_creation:qa:serverless
     agents:
       queue: n2-4-spot
@@ -101,6 +108,7 @@ steps:
 
   - label: Running actions:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh actions:qa:serverless
+    depends_on: build_image
     key: actions:qa:serverless
     agents:
       queue: n2-4-spot
@@ -112,6 +120,7 @@ steps:
 
   - label: Running entity_analytics:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh entity_analytics:qa:serverless
+    depends_on: build_image
     key: entity_analytics:qa:serverless
     agents:
       queue: n2-4-spot
@@ -123,6 +132,7 @@ steps:
 
   - label: Running prebuilt_rules_management:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_management:qa:serverless
+    depends_on: build_image
     key: prebuilt_rules_management:qa:serverless
     agents:
       queue: n2-4-spot
@@ -134,6 +144,7 @@ steps:
 
   - label: Running prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
+    depends_on: build_image
     key: prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
     agents:
       queue: n2-4-spot
@@ -145,6 +156,7 @@ steps:
 
   - label: Running prebuilt_rules_large_prebuilt_rules_package:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_large_prebuilt_rules_package:qa:serverless
+    depends_on: build_image
     key: prebuilt_rules_large_prebuilt_rules_package:qa:serverless
     agents:
       queue: n2-4-spot
@@ -156,6 +168,7 @@ steps:
 
   - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless
+    depends_on: build_image
     key: prebuilt_rules_update_prebuilt_rules_package:qa:serverless
     agents:
       queue: n2-4-spot
@@ -167,6 +180,7 @@ steps:
 
   - label: Running rule_execution_logic:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_execution_logic:qa:serverless
+    depends_on: build_image
     key: rule_execution_logic:qa:serverless
     agents:
       queue: n2-4-spot
@@ -178,6 +192,7 @@ steps:
 
   - label: Running user_roles:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh user_roles:qa:serverless
+    depends_on: build_image
     key: user_roles:qa:serverless
     agents:
       queue: n2-4-spot
@@ -189,6 +204,7 @@ steps:
 
   - label: Running telemetry:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh telemetry:qa:serverless
+    depends_on: build_image
     key: telemetry:qa:serverless
     agents:
       queue: n2-4-spot
