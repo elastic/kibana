@@ -98,6 +98,7 @@ export type TrainedModelConfigResponse = estypes.MlTrainedModelConfig & {
    * Associated pipelines. Extends response from the ES endpoint.
    */
   pipelines?: Record<string, PipelineDefinition> | null;
+  origin_job_exists?: boolean;
 
   metadata?: {
     analytics_config: DataFrameAnalyticsConfig;
