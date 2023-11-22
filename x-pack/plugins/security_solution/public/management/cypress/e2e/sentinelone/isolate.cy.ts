@@ -41,10 +41,10 @@ describe.skip(
               name: 'preconfigured-sentinelone',
               actionTypeId: '.sentinelone',
               config: {
-                url: Cypress.env().SENTINELONE_URL,
+                url: process.env.CYPRESS_SENTINELONE_URL,
               },
               secrets: {
-                token: Cypress.env().SENTINELONE_TOKEN,
+                token: process.env.CYPRESS_SENTINELONE_TOKEN,
               },
             },
           })}`,
@@ -56,7 +56,7 @@ describe.skip(
     before(() => {
       cy.dataSession(
         'SENTINELONE_HOST', // data name
-        () => cy.task('createSentinelOneHost', {}, { timeout: 100000000 }),
+        () => cy.task('createSentinelOneHost', {}, { timeout: 1000000 }),
         () => true
       );
       cy.dataSession('SENTINELONE_POLICY', () => cy.task('createSentinelOneAgentPolicy'), true);
@@ -110,7 +110,7 @@ describe.skip(
       it('should isolate and release host', () => {
         toggleRuleOffAndOn(ruleName);
         visitRuleAlerts(ruleName);
-        waitForAlertsToPopulate();
+        waitForAlertsToPopulate(1, 10000, 600000);
 
         closeAllToasts();
         openAlertDetailsView();
@@ -132,8 +132,8 @@ describe.skip(
           (text) => text === 'Release host',
           {
             log: true,
-            delay: 5000,
-            timeout: 60000,
+            delay: 30000,
+            timeout: 600000,
             post: () => cy.getByTestSubj('euiFlyoutCloseButton').click(),
           }
         );

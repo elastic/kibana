@@ -67,9 +67,10 @@ export const parseTestFileConfig = (filePath: string): SecuritySolutionDescribeB
     plugins: ['typescript'],
   });
 
-  const expressionStatement = _.find(ast.program.body, ['type', 'ExpressionStatement']) as
-    | ExpressionStatement
-    | undefined;
+  const expressionStatement = _.find(ast.program.body, {
+    type: 'ExpressionStatement',
+    expression: { callee: { name: 'describe' } },
+  }) as ExpressionStatement | undefined;
 
   const callExpression = expressionStatement?.expression;
   // @ts-expect-error

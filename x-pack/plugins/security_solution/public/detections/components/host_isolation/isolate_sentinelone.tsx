@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo, useState, useCallback } from 'react';
-import { EuiSpacer, EuiCallOut } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 import { SENTINELONE_CONNECTOR_ID, SUB_ACTION } from '@kbn/stack-connectors-plugin/public/common';
 import { useLoadConnectors } from '../../../common/components/response_actions/use_load_connectors';
 import { useSubActionMutation } from '../../../timelines/components/side_panel/event_details/flyout/use_sub_action_mutation';
@@ -67,19 +67,8 @@ export const IsolateSentinelOneHost = React.memo(
       );
     }, [backToAlertDetails]);
 
-    const hostNotIsolated = useMemo(() => {
-      if (!connector) {
-        return (
-          <>
-            <EuiSpacer size="m" />
-            <EuiCallOut title="Sorry, there was an error" color="danger" iconType="error">
-              <p>{`You need to create SentinelOne connector in order to isolate hosts.`}</p>
-            </EuiCallOut>
-          </>
-        );
-      }
-
-      return (
+    const hostNotIsolated = useMemo(
+      () => (
         <>
           <EuiSpacer size="m" />
           <EndpointIsolateForm
@@ -91,8 +80,9 @@ export const IsolateSentinelOneHost = React.memo(
             hideCommentField
           />
         </>
-      );
-    }, [connector, hostName, backToAlertDetails, confirmHostIsolation, isLoading, onChange]);
+      ),
+      [connector, hostName, backToAlertDetails, confirmHostIsolation, isLoading, onChange]
+    );
 
     return isIsolated ? hostIsolatedSuccessButton : hostNotIsolated;
   }

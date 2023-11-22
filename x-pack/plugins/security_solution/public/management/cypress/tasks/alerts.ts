@@ -232,7 +232,11 @@ export const waitForAlerts = () => {
   cy.get(LOADING_INDICATOR).should('not.exist');
 };
 
-export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
+export const waitForAlertsToPopulate = (
+  alertCountThreshold = 1,
+  interval = 500,
+  timeout = 12000
+) => {
   cy.waitUntil(
     () => {
       cy.log('Waiting for alerts to appear');
@@ -249,7 +253,7 @@ export const waitForAlertsToPopulate = (alertCountThreshold = 1) => {
         return alertCount >= alertCountThreshold;
       });
     },
-    { interval: 500, timeout: 12000 }
+    { interval, timeout }
   );
   waitForAlerts();
 };

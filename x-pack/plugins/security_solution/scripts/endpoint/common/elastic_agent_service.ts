@@ -93,7 +93,7 @@ export const startElasticAgentWithDocker = async ({
       {
         log.info('Waiting for Elastic Agent to show up in Kibana Fleet');
 
-        const elasticAgent = await waitForHostToEnroll(kbnClient, hostname, 120000);
+        const elasticAgent = await waitForHostToEnroll(kbnClient, log, hostname, 120000);
 
         log.verbose(`Enrolled agent:\n${JSON.stringify(elasticAgent, null, 2)}`);
       }

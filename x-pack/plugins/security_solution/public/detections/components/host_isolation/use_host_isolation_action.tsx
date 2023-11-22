@@ -6,6 +6,7 @@
  */
 import { useCallback, useMemo } from 'react';
 import type { SentinelOneAgent } from '@kbn/stack-connectors-plugin/common/sentinelone/types';
+import { useKibana } from '../../../common/lib/kibana/kibana_react';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import {
   getSentinelOneAgentId,
@@ -35,6 +36,8 @@ export const useHostIsolationAction = ({
   isHostIsolationPanelOpen,
   onAddIsolationStatusClick,
 }: UseHostIsolationActionProps): AlertTableContextMenuItem[] => {
+  const hasActionsAllPrivileges = useKibana().services.application.capabilities.save;
+
   const sentinelOneManualHostActionsEnabled = useIsExperimentalFeatureEnabled(
     'sentinelOneManualHostActionsEnabled'
   );
@@ -154,40 +157,44 @@ export const useHostIsolationAction = ({
   );
 
   return useMemo(() => {
-    if ((!isEndpointAlert && !isSentinelOneAlert) || isHostIsolationPanelOpen) {
+    if (
+      isHostIsolationPanelOpen ||
+      !isEndpointAlert ||
+      !isSentinelOneAlert ||
+      !canIsolateHost ||
+      (isHostIsolated && !canUnIsolateHost)
+    ) {
       return [];
     }
 
-    if (isEndpointAlert && (!doesHostSupportIsolation || loadingHostIsolationStatus)) {
-      return [];
-    }
-
-    if (!sentinelOneManualHostActionsEnabled && isSentinelOneAlert) {
-      return [];
+    if (isEndpointAlert && doesHostSupportIsolation && !loadingHostIsolationStatus) {
+      return menuItems;
     }
 
     if (
       sentinelOneManualHostActionsEnabled &&
       isSentinelOneAlert &&
       sentinelOneAgentId &&
-      !sentinelOneAgentData
+      sentinelOneAgentData &&
+      hasActionsAllPrivileges
     ) {
-      return [];
+      return menuItems;
     }
 
-    return canIsolateHost || (isHostIsolated && canUnIsolateHost) ? menuItems : [];
+    return [];
   }, [
+    isHostIsolationPanelOpen,
     isEndpointAlert,
     isSentinelOneAlert,
-    isHostIsolationPanelOpen,
+    canIsolateHost,
+    isHostIsolated,
+    canUnIsolateHost,
     doesHostSupportIsolation,
     loadingHostIsolationStatus,
     sentinelOneManualHostActionsEnabled,
     sentinelOneAgentId,
     sentinelOneAgentData,
-    canIsolateHost,
-    isHostIsolated,
-    canUnIsolateHost,
+    hasActionsAllPrivileges,
     menuItems,
   ]);
 };

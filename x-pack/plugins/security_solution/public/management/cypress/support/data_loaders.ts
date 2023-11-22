@@ -332,6 +332,12 @@ export const dataLoadersForRealEndpoints = (
         s1Client,
       });
 
+      // wait 30s before running malicious action
+      await new Promise((resolve) => setTimeout(resolve, 30000));
+
+      // nslookup triggers an alert on S1
+      await getHostVmClient(vmName).exec('nslookup amazon.com');
+
       log.info(`Done!
 
 ${hostVm.info()}
