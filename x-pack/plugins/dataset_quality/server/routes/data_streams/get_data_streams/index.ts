@@ -30,14 +30,7 @@ export async function getDataStreams(options: {
 
   const mappedDataStreams = filteredDataStreams.map((dataStream) => ({
     name: dataStream.name,
-    ...(dataStream._meta
-      ? {
-          integration: {
-            name: dataStream._meta?.package?.name,
-            managed_by: dataStream._meta?.managed_by,
-          },
-        }
-      : {}),
+    integration: dataStream._meta?.package?.name,
   }));
 
   return {
