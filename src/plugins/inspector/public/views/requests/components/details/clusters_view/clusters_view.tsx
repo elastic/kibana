@@ -9,47 +9,46 @@
 import React, { Component } from 'react';
 import { estypes } from '@elastic/elasticsearch';
 import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
 import type { DetailViewProps } from '../types';
-import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
-import { ClustersHealth } from './clusters_health';
+import { ClusterHealth, ClustersHealth } from './clusters_health';
 import { ClustersTable } from './clusters_table';
+import { findClusters } from './find_clusters';
 
-export class ClustersView extends Component<DetailViewProps> {
+interface State {
+  clusters: Record<string, ClusterDetails>;
+  showSearchAndStatusBar: boolean; 
+}
+
+export class ClustersView extends Component<DetailViewProps, State> {
   static shouldShow = (request: Request) =>
     Boolean(
       (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._shards ||
         (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
     );
 
+  constructor(props: Props) {
+    super(props);
+    const clusters = findClusters(this.props.request);
+    this.state = {
+      clusters,
+      showSearchAndStatusBar: Object.keys(clusters).length > 1
+    };
+  }
+
   _onSearchChange = ({ query, error }) => {
-    console.log(error);
-    console.log(query);
+    if (!error) {
+      this.setState({ clusters: findClusters(this.props.request, query)})
+    }
   };
 
   render() {
-    const rawResponse = (
-      this.props.request.response?.json as { rawResponse?: estypes.SearchResponse }
-    )?.rawResponse;
-    if (!rawResponse) {
-      return null;
-    }
-
-    const clusters = rawResponse._clusters
-      ? (
-          rawResponse._clusters as estypes.ClusterStatistics & {
-            details: Record<string, ClusterDetails>;
-          }
-        ).details
-      : {
-          [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
-        };
-
-    return this.props.request.response?.json ? (
+    return (
       <>
         <EuiSpacer size="m" />
-        {Object.keys(clusters).length > 1 
+        {this.state.showSearchAndStatusBar
           ? 
             <>
               <EuiSearchBar
@@ -57,15 +56,43 @@ export class ClustersView extends Component<DetailViewProps> {
                   placeholder: 'Search by cluster name',
                   incremental: true,
                 }}
+                filters={[
+                  {
+                    type: 'field_value_selection',
+                    field: 'status',
+                    name: i18n.translate('inspector.requests.clusters.view.statusFilterLabel', {
+                      defaultMessage: 'Status',
+                    }),
+                    multiSelect: 'or',
+                    options: [
+                      {
+                        value: 'successful',
+                        name: <ClusterHealth status="successful" textProps={{ size: 'm', color: 'text' }}/>,
+                      },
+                      {
+                        value: 'partial',
+                        name: <ClusterHealth status="partial" textProps={{ size: 'm', color: 'text' }}/>,
+                      },
+                      {
+                        value: 'skipped',
+                        name: <ClusterHealth status="skipped" textProps={{ size: 'm', color: 'text' }}/>,
+                      },
+                      {
+                        value: 'failed',
+                        name: <ClusterHealth status="failed" textProps={{ size: 'm', color: 'text' }}/>,
+                      },
+                    ],
+                  }
+                ]}
                 onChange={this._onSearchChange}
               />
               <EuiSpacer size="m" />
-              <ClustersHealth clusters={clusters} /> 
+              <ClustersHealth clusters={this.state.clusters} /> 
             </>
           : null
         }
-        <ClustersTable key={this.props.request.id} clusters={clusters} />
+        <ClustersTable key={this.props.request.id} clusters={this.state.clusters} />
       </>
-    ) : null;
+    );
   }
 }
