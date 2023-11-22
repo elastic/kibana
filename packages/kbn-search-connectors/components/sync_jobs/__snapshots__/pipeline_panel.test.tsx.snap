@@ -33,7 +33,7 @@ exports[`PipelinePanel renders 1`] = `
         },
         Object {
           "setting": "Machine learning inference",
-          "value": false,
+          "value": true,
         },
       ]
     }
