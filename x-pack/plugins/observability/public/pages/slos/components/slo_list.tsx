@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { SLO_CARD_VIEW_PER_ROW_SIZE } from './card_view/cards_per_row';
 import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
 import { SloListCardView } from './card_view/slos_card_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
@@ -48,7 +49,7 @@ export function SloList({ autoRefresh }: Props) {
   const isCloningSlo = Boolean(useIsMutating(['cloningSlo']));
   const isUpdatingSlo = Boolean(useIsMutating(['updatingSlo']));
   const isDeletingSlo = Boolean(useIsMutating(['deleteSlo']));
-  const [gridSize, setGridSize] = useLocalStorage('slo-view-grid-size', '4');
+  const [cardsPerRow, setCardsPerRow] = useLocalStorage(SLO_CARD_VIEW_PER_ROW_SIZE, '4');
 
   const handlePageClick = (pageNumber: number) => {
     setPage(pageNumber);
@@ -78,7 +79,7 @@ export function SloList({ autoRefresh }: Props) {
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <ToggleSLOView sloView={sloView} setSLOView={setSLOView} setGridSize={setGridSize} />
+        <ToggleSLOView sloView={sloView} setSLOView={setSLOView} setCardsPerRow={setCardsPerRow} />
       </EuiFlexItem>
       {sloView === 'cardView' ? (
         <EuiFlexItem>
@@ -86,7 +87,7 @@ export function SloList({ autoRefresh }: Props) {
             sloList={results}
             loading={isLoading || isRefetching}
             error={isError}
-            gridSize={gridSize}
+            gridSize={cardsPerRow}
           />
         </EuiFlexItem>
       ) : (
