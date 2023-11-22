@@ -7,71 +7,75 @@
  */
 
 import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
-import { DataViewSpec } from '@kbn/data-views-plugin/public';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-  RefreshInterval,
-} from '@kbn/deeplinks-observability';
-import { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
+import type { DataViewSpec } from '@kbn/data-views-plugin/public';
+import { AllDatasetsLocatorParams, ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
-import type { LocatorClient } from '@kbn/share-plugin/common/url_service';
 import React, { MouseEvent } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
 import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '../../../common';
+import type { DiscoverServices } from '../../build_services';
 
 export interface LogExplorerTabsParams {
-  timeRange?: TimeRange;
-  refreshInterval?: RefreshInterval;
-  query?: Query | AggregateQuery;
   columns?: string[];
   sort?: string[][];
-  filters?: Filter[];
   dataViewSpec?: DataViewSpec;
 }
 
 export interface LogExplorerTabsProps {
-  locators: LocatorClient;
+  services: Pick<DiscoverServices, 'share' | 'data'>;
   params: LogExplorerTabsParams;
   selectedTab: 'discover' | 'log-explorer';
 }
 
-export const LogExplorerTabs = ({ locators, params, selectedTab }: LogExplorerTabsProps) => {
+export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTabsProps) => {
   const { euiTheme } = useEuiTheme();
-  const discoverLocator = locators.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
-  const logExplorerLocator = locators.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
-  const discoverUrl = discoverLocator?.getRedirectUrl({ ...params });
-  const logExplorerUrl = logExplorerLocator?.getRedirectUrl({ ...params });
+  const { share, data } = services;
+  const locators = share?.url.locators;
+  const {
+    time: timeRange,
+    refreshInterval,
+    query,
+    filters,
+  } = useObservable(data.query.state$.pipe(map(({ state }) => state)), data.query.getState());
+  const mergedParams = { ...params, timeRange, refreshInterval, query, filters };
+  const discoverLocator = locators?.get<DiscoverAppLocatorParams>(DISCOVER_APP_LOCATOR);
+  const logExplorerLocator = locators?.get<AllDatasetsLocatorParams>(ALL_DATASETS_LOCATOR_ID);
+  const discoverUrl = discoverLocator?.getRedirectUrl(mergedParams);
+  const logExplorerUrl = logExplorerLocator?.getRedirectUrl(mergedParams);
+
   const navigateToDiscover = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    discoverLocator?.navigate({ ...params });
+    discoverLocator?.navigate(mergedParams);
   };
+
   const navigateToLogExplorer = (e: MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    logExplorerLocator?.navigate({ ...params });
+    logExplorerLocator?.navigate(mergedParams);
   };
 
   return (
     <EuiTabs bottomBorder={false}>
       <EuiTab
         isSelected={selectedTab === 'discover'}
-        href={discoverUrl}
+        href={selectedTab === 'discover' ? undefined : discoverUrl}
         onClick={selectedTab === 'discover' ? undefined : navigateToDiscover}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
       >
-        {i18n.translate('discover.logExplorerTabs.dataViews', {
-          defaultMessage: 'Data Views',
+        {i18n.translate('discover.logExplorerTabs.discover', {
+          defaultMessage: 'Discover',
         })}
       </EuiTab>
       <EuiTab
         isSelected={selectedTab === 'log-explorer'}
-        href={logExplorerUrl}
+        href={selectedTab === 'log-explorer' ? undefined : logExplorerUrl}
         onClick={selectedTab === 'log-explorer' ? undefined : navigateToLogExplorer}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
       >
         {i18n.translate('discover.logExplorerTabs.logExplorer', {
-          defaultMessage: 'Log Explorer',
+          defaultMessage: 'Logs Explorer',
         })}
       </EuiTab>
     </EuiTabs>

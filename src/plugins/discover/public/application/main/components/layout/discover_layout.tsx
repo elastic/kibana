@@ -267,7 +267,6 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
       </h1>
       <TopNavMemoized
         onOpenInspector={onOpenInspector}
-        query={query}
         savedQuery={savedQuery}
         stateContainer={stateContainer}
         updateQuery={stateContainer.actions.onUpdateQuery}

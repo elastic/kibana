@@ -73,20 +73,15 @@ const ServerlessTopNav = ({
   services,
   state$,
 }: Pick<LogExplorerTopNavMenuProps, 'services' | 'state$'>) => {
-  const discoverLinkParams = useDiscoverLinkParams(state$);
+  const { columns, sort, dataViewSpec } = useDiscoverLinkParams(state$);
 
   return (
     <EuiHeader data-test-subj="logExplorerHeaderMenu" css={{ boxShadow: 'none' }}>
       <EuiHeaderSection>
         <EuiHeaderSectionItem>
           <LogExplorerTabs
-            locators={services.share?.url.locators!}
-            params={{
-              ...discoverLinkParams,
-              timeRange: services.data.query.timefilter.timefilter.getTime(),
-              refreshInterval: services.data.query.timefilter.timefilter.getRefreshInterval(),
-              filters: services.data.query.filterManager.getFilters(),
-            }}
+            services={services}
+            params={{ columns, sort, dataViewSpec }}
             selectedTab="log-explorer"
           />
         </EuiHeaderSectionItem>
@@ -268,8 +263,20 @@ const useDiscoverLinkParams = (state$: BehaviorSubject<LogExplorerStateContainer
       distinctUntilChanged<LogExplorerStateContainer>((prev, curr) => {
         if (!prev.appState || !curr.appState) return false;
         return deepEqual(
-          [prev.appState.columns, prev.appState.filters, prev.appState.index, prev.appState.query],
-          [curr.appState.columns, curr.appState.filters, curr.appState.index, curr.appState.query]
+          [
+            prev.appState.columns,
+            prev.appState.sort,
+            prev.appState.filters,
+            prev.appState.index,
+            prev.appState.query,
+          ],
+          [
+            curr.appState.columns,
+            curr.appState.sort,
+            curr.appState.filters,
+            curr.appState.index,
+            curr.appState.query,
+          ]
         );
       })
     ),
@@ -278,6 +285,7 @@ const useDiscoverLinkParams = (state$: BehaviorSubject<LogExplorerStateContainer
 
   return {
     columns: appState?.columns,
+    sort: appState?.sort,
     filters: appState?.filters,
     query: appState?.query,
     dataViewSpec: logExplorerState?.datasetSelection?.selection.dataset.toDataviewSpec(),

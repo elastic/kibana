@@ -12,7 +12,12 @@ import { DataViewType, type DataView } from '@kbn/data-views-plugin/public';
 import type { DataViewPickerProps } from '@kbn/unified-search-plugin/public';
 import { ENABLE_ESQL } from '@kbn/discover-utils';
 import { EuiHeader, EuiHeaderSection, EuiHeaderSectionItem } from '@elastic/eui';
-import { TopNavMenuBadges, TopNavMenuItems } from '@kbn/navigation-plugin/public';
+import {
+  TopNavMenuBadgeProps,
+  TopNavMenuBadges,
+  TopNavMenuData,
+  TopNavMenuItems,
+} from '@kbn/navigation-plugin/public';
 import { useSavedSearchInitial } from '../../services/discover_state_provider';
 import { useInternalStateSelector } from '../../services/discover_internal_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -28,7 +33,6 @@ import { useAppStateSelector } from '../../services/discover_app_state_container
 
 export interface DiscoverTopNavProps {
   onOpenInspector: () => void;
-  query?: Query | AggregateQuery;
   savedQuery?: string;
   updateQuery: (
     payload: { dateRange: TimeRange; query?: Query | AggregateQuery },
@@ -43,7 +47,6 @@ export interface DiscoverTopNavProps {
 
 export const DiscoverTopNav = ({
   onOpenInspector,
-  query,
   savedQuery,
   stateContainer,
   updateQuery,
@@ -52,6 +55,7 @@ export const DiscoverTopNav = ({
   textBasedLanguageModeWarning,
   onFieldEdited,
 }: DiscoverTopNavProps) => {
+  const query = useAppStateSelector((state) => state.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);
@@ -233,10 +237,11 @@ export const DiscoverTopNav = ({
     [services, stateContainer]
   );
 
-  const columns = useAppStateSelector((state) => state.columns);
-  const sort = useAppStateSelector((state) => state.sort);
-  const statefulTopNavProps = services.serverless
-    ? {}
+  const topNavProps = services.serverless
+    ? {
+        topNavBadges,
+        topNavMenu,
+      }
     : {
         badges: topNavBadges,
         config: topNavMenu,
@@ -246,38 +251,10 @@ export const DiscoverTopNav = ({
   return (
     <>
       {Boolean(services.serverless) && stateContainer.displayMode === 'standalone' && (
-        <EuiHeader css={{ flexShrink: 0, boxShadow: 'none' }}>
-          {getLogExplorerTabs().enabled && (
-            <EuiHeaderSection>
-              <EuiHeaderSectionItem>
-                <LogExplorerTabs
-                  locators={services.share?.url.locators!}
-                  params={{
-                    timeRange: services.timefilter.getTime(),
-                    refreshInterval: services.timefilter.getRefreshInterval(),
-                    query,
-                    columns,
-                    sort,
-                    filters: services.filterManager.getFilters(),
-                    dataViewSpec: dataView?.toMinimalSpec(),
-                  }}
-                  selectedTab="discover"
-                />
-              </EuiHeaderSectionItem>
-            </EuiHeaderSection>
-          )}
-          <EuiHeaderSection side="right">
-            <EuiHeaderSectionItem>
-              <TopNavMenuBadges badges={topNavBadges} />
-            </EuiHeaderSectionItem>
-            <EuiHeaderSectionItem>
-              <TopNavMenuItems config={topNavMenu} />
-            </EuiHeaderSectionItem>
-          </EuiHeaderSection>
-        </EuiHeader>
+        <ServerlessTopNav {...topNavProps} />
       )}
       <SearchBar
-        {...statefulTopNavProps}
+        {...(!services.serverless && topNavProps)}
         appName="discover"
         indexPatterns={[dataView]}
         onQuerySubmit={updateQuery}
@@ -312,5 +289,42 @@ export const DiscoverTopNav = ({
         }
       />
     </>
+  );
+};
+
+const ServerlessTopNav = ({
+  topNavMenu,
+  topNavBadges,
+}: {
+  topNavMenu?: TopNavMenuData[];
+  topNavBadges?: TopNavMenuBadgeProps[];
+}) => {
+  const services = useDiscoverServices();
+  const columns = useAppStateSelector((state) => state.columns);
+  const sort = useAppStateSelector((state) => state.sort);
+  const dataView = useInternalStateSelector((state) => state.dataView!);
+
+  return (
+    <EuiHeader css={{ flexShrink: 0, boxShadow: 'none' }}>
+      {getLogExplorerTabs().enabled && (
+        <EuiHeaderSection>
+          <EuiHeaderSectionItem>
+            <LogExplorerTabs
+              services={services}
+              params={{ columns, sort, dataViewSpec: dataView?.toMinimalSpec() }}
+              selectedTab="discover"
+            />
+          </EuiHeaderSectionItem>
+        </EuiHeaderSection>
+      )}
+      <EuiHeaderSection side="right">
+        <EuiHeaderSectionItem>
+          <TopNavMenuBadges badges={topNavBadges} />
+        </EuiHeaderSectionItem>
+        <EuiHeaderSectionItem>
+          <TopNavMenuItems config={topNavMenu} />
+        </EuiHeaderSectionItem>
+      </EuiHeaderSection>
+    </EuiHeader>
   );
 };

@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 
 export const logExplorerAppTitle = i18n.translate('xpack.observabilityLogExplorer.appTitle', {
-  defaultMessage: 'Log Explorer',
+  defaultMessage: 'Logs Explorer',
 });
 
 export const betaBadgeTitle = i18n.translate('xpack.observabilityLogExplorer.betaBadgeTitle', {
