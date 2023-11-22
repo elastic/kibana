@@ -8,7 +8,7 @@
 import { union } from 'lodash';
 import React, { useCallback, useMemo } from 'react';
 
-import { EuiFlexGroup, EuiIconTip, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ALERT_WORKFLOW_ASSIGNEE_IDS } from '@kbn/rule-data-utils';
 import type {
   BulkActionsConfig,
@@ -52,9 +52,9 @@ export const useBulkAlertAssigneesItems = ({
     onAssigneesUpdate?.();
   }, [onAssigneesUpdate]);
 
-  const onActionClick = useCallback<Required<BulkActionsConfig>['onClick']>(
-    async (items, isSelectAllChecked, setAlertLoading, clearSelection, refresh) => {
-      const ids: string[] | undefined = items.map((item) => item._id);
+  const onRemoveAllAssignees = useCallback<Required<BulkActionsConfig>['onClick']>(
+    async (items, _, setAlertLoading) => {
+      const ids: string[] = items.map((item) => item._id);
       const assignedUserIds = union(
         ...items.map(
           (item) =>
@@ -65,8 +65,8 @@ export const useBulkAlertAssigneesItems = ({
         return;
       }
       const assignees = {
-        assignees_to_add: [],
-        assignees_to_remove: assignedUserIds,
+        add: [],
+        remove: assignedUserIds,
       };
       if (setAlertAssignees) {
         await setAlertAssignees(assignees, ids, onSuccess, setAlertLoading);
@@ -93,23 +93,17 @@ export const useBulkAlertAssigneesItems = ({
               name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               disableOnQuery: false,
-              onClick: onActionClick,
+              onClick: onRemoveAllAssignees,
             },
           ]
         : [],
-    [hasIndexWrite, onActionClick]
+    [hasIndexWrite, onRemoveAllAssignees]
   );
 
   const TitleContent = useMemo(
     () => (
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>{i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TITLE}</EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiIconTip
-            content={i18n.ALERT_ASSIGNEES_CONTEXT_MENU_ITEM_TOOLTIP_INFO}
-            position="right"
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
     ),
     []

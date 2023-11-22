@@ -62,7 +62,7 @@ describe('setAlertAssigneesRoute', () => {
 
       expect(response.body).toEqual({
         message: [
-          `Duplicate assignees [\"assignee-id-1\"] were found in the assignees_to_add and assignees_to_remove parameters.`,
+          `Duplicate assignees [\"assignee-id-1\"] were found in the add and remove parameters.`,
         ],
         status_code: 400,
       });

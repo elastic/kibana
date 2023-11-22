@@ -7,12 +7,12 @@
 
 import * as t from 'io-ts';
 
-import { alert_assignee_ids, alert_assignees } from '../../model';
+import { alert_ids, alert_assignees } from '../../model';
 
 export const setAlertAssigneesRequestBody = t.exact(
   t.type({
     assignees: alert_assignees,
-    ids: alert_assignee_ids,
+    ids: alert_ids,
   })
 );
 

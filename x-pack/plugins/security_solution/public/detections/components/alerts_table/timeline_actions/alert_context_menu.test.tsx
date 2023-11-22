@@ -301,8 +301,8 @@ describe('Alert table context menu', () => {
     });
   });
 
-  describe('Apply alert assignees action', () => {
-    test('it renders the apply alert assignees action button', () => {
+  describe('Assign alert action', () => {
+    test('it renders the assign alert action button', () => {
       const wrapper = mount(<AlertContextMenu {...props} scopeId={TimelineId.active} />, {
         wrappingComponent: TestProviders,
       });

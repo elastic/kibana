@@ -921,7 +921,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           await cases.common.setSearchTextInAssigneesPopover('case');
           await cases.common.selectFirstRowInAssigneesPopover();
 
-          await (await find.byButtonText('Remove all assignees')).click();
+          await (await find.byButtonText('Unassign alert')).click();
           await cases.singleCase.closeAssigneesPopover();
           await testSubjects.missingOrFail('user-profile-assigned-user-abc-remove-group');
         });

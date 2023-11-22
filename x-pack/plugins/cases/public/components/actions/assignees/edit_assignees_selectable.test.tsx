@@ -441,15 +441,15 @@ describe('EditAssigneesSelectable', () => {
     });
   });
 
-  it('remove all assignees', async () => {
+  it('unassign alert', async () => {
     const result = appMock.render(<EditAssigneesSelectable {...propsMultipleCases} />);
 
     await waitFor(() => {
       expect(result.getByTestId('cases-actions-assignees-edit-selectable')).toBeInTheDocument();
     });
 
-    expect(result.getByRole('button', { name: 'Remove all assignees' })).toBeInTheDocument();
-    userEvent.click(result.getByRole('button', { name: 'Remove all assignees' }));
+    expect(result.getByRole('button', { name: 'Unassign alert' })).toBeInTheDocument();
+    userEvent.click(result.getByRole('button', { name: 'Unassign alert' }));
 
     expect(propsMultipleCases.onChangeAssignees).toBeCalledTimes(1);
     expect(propsMultipleCases.onChangeAssignees).toBeCalledWith({

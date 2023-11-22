@@ -12,6 +12,6 @@ export const getSetAlertAssigneesRequestMock = (
   assigneesToRemove: string[] = [],
   ids: string[] = []
 ): SetAlertAssigneesRequestBody => ({
-  assignees: { assignees_to_add: assigneesToAdd, assignees_to_remove: assigneesToRemove },
+  assignees: { add: assigneesToAdd, remove: assigneesToRemove },
   ids,
 });

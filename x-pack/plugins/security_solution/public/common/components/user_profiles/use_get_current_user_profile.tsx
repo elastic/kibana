@@ -14,7 +14,7 @@ import { CURRENT_USER_PROFILE_FAILURE } from './translations';
 import { useKibana } from '../../lib/kibana';
 import { useAppToasts } from '../../hooks/use_app_toasts';
 
-export const getCurrentUser = async ({
+export const getCurrentUserProfile = async ({
   security,
 }: {
   security: SecurityPluginStart;
@@ -22,14 +22,14 @@ export const getCurrentUser = async ({
   return security.userProfiles.getCurrent({ dataPath: 'avatar' });
 };
 
-export const useGetCurrentUser = () => {
+export const useGetCurrentUserProfile = () => {
   const { security } = useKibana().services;
   const { addError } = useAppToasts();
 
   return useQuery<UserProfileWithAvatar>(
-    ['useGetCurrentUser'],
+    ['useGetCurrentUserProfile'],
     async () => {
-      return getCurrentUser({ security });
+      return getCurrentUserProfile({ security });
     },
     {
       retry: false,

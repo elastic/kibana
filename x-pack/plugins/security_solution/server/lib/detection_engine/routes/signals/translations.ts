@@ -25,5 +25,5 @@ export const ALERT_ASSIGNEES_VALIDATION_ERROR = (duplicates: string) =>
   i18n.translate('xpack.securitySolution.api.alertAssignees.validationError', {
     values: { duplicates },
     defaultMessage:
-      'Duplicate assignees { duplicates } were found in the assignees_to_add and assignees_to_remove parameters.',
+      'Duplicate assignees { duplicates } were found in the add and remove parameters.',
   });

@@ -13,7 +13,7 @@ import { EuiButton } from '@elastic/eui';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';
 
 import { isEmpty } from 'lodash';
-import { useGetCurrentUser } from '../user_profiles/use_get_current_user';
+import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
 import * as i18n from './translations';
 import type { AssigneesIdsSelection, AssigneesProfilesSelection } from './types';
 import { NO_ASSIGNEES_VALUE } from './constants';
@@ -50,7 +50,7 @@ export interface AssigneesApplyPanelProps {
 }
 
 /**
- * The popover to allow user assignees selection for the alert
+ * The popover to allow selection of users from a list
  */
 export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
   ({
@@ -60,7 +60,7 @@ export const AssigneesApplyPanel: FC<AssigneesApplyPanelProps> = memo(
     onSelectionChange,
     onAssigneesApply,
   }) => {
-    const { data: currentUserProfile } = useGetCurrentUser();
+    const { data: currentUserProfile } = useGetCurrentUserProfile();
     const existingIds = useMemo(
       () => new Set(removeNoAssigneesSelection(assignedUserIds)),
       [assignedUserIds]

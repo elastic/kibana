@@ -21,12 +21,9 @@ export const validateAlertTagsArrays = (tags: AlertTags, ids: string[]) => {
   return validationErrors;
 };
 
-export const validateAlertAssigneesArrays = (assignees: AlertAssignees, ids: string[]) => {
+export const validateAlertAssigneesArrays = (assignees: AlertAssignees) => {
   const validationErrors = [];
-  if (ids.length === 0) {
-    validationErrors.push(i18n.NO_IDS_VALIDATION_ERROR);
-  }
-  const { assignees_to_add: assigneesToAdd, assignees_to_remove: assigneesToRemove } = assignees;
+  const { add: assigneesToAdd, remove: assigneesToRemove } = assignees;
   const duplicates = assigneesToAdd.filter((assignee) => assigneesToRemove.includes(assignee));
   if (duplicates.length) {
     validationErrors.push(i18n.ALERT_ASSIGNEES_VALIDATION_ERROR(JSON.stringify(duplicates)));

@@ -7,7 +7,6 @@
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { getCasesFromAlertsUrl } from '@kbn/cases-plugin/common';
-import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import type { ResponseActionApiResponse, HostInfo } from '../../../../../common/endpoint/types';
 import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
@@ -16,7 +15,6 @@ import {
   DETECTION_ENGINE_PRIVILEGES_URL,
   ALERTS_AS_DATA_FIND_URL,
   DETECTION_ENGINE_ALERTS_INDEX_URL,
-  DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
 } from '../../../../../common/constants';
 import { HOST_METADATA_GET_ROUTE } from '../../../../../common/endpoint/constants';
 import { KibanaServices } from '../../../../common/lib/kibana';
@@ -30,7 +28,6 @@ import type {
   CasesFromAlertsResponse,
   CheckSignalIndex,
   UpdateAlertStatusByIdsProps,
-  SuggestUsersProps,
 } from './types';
 import { isolateHost, unIsolateHost } from '../../../../common/lib/endpoint_isolation';
 import { resolvePathVariables } from '../../../../common/utils/resolve_path_variables';
@@ -259,19 +256,3 @@ export const getHostMetadata = async ({
     resolvePathVariables(HOST_METADATA_GET_ROUTE, { id: agentId }),
     { method: 'GET', signal, version: '2023-10-31' }
   );
-
-/**
- * Fetches suggested user profiles
- */
-export const suggestUsers = async ({
-  searchTerm,
-}: SuggestUsersProps): Promise<UserProfileWithAvatar[]> => {
-  return KibanaServices.get().http.fetch<UserProfileWithAvatar[]>(
-    DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
-    {
-      method: 'GET',
-      version: '2023-10-31',
-      query: { searchTerm },
-    }
-  );
-};

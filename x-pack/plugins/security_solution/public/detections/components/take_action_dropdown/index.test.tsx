@@ -252,7 +252,7 @@ describe('take action dropdown', () => {
         ).toEqual(ALERT_TAGS_CONTEXT_MENU_ITEM_TITLE);
       });
     });
-    test('should render "Apply alert assignees"', async () => {
+    test('should render "Assign alert"', async () => {
       await waitFor(() => {
         expect(
           wrapper.find('[data-test-subj="alert-assignees-context-menu-item"]').first().text()
