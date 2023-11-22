@@ -31,8 +31,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   let mlJobHelper: MlJobHelper;
 
   describe('ML job ID formats', function () {
-    this.tags('includeFirefox');
-
     this.beforeAll(async () => {
       // Access to ml.api has to happen inside a test or test hook
       mlJobHelper = createMlJobHelper(ml.api);
