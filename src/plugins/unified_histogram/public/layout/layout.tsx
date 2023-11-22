@@ -7,8 +7,9 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
+import React, { PropsWithChildren, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
+import classnames from 'classnames';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -107,10 +108,6 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   topPanelHeight?: number;
   /**
-   * Append a custom element to the right of the hits count
-   */
-  appendHitsCounter?: ReactElement;
-  /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
   disableAutoFetching?: boolean;
@@ -197,7 +194,6 @@ export const UnifiedHistogramLayout = ({
   breakdown,
   container,
   topPanelHeight,
-  appendHitsCounter,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
@@ -233,7 +229,13 @@ export const UnifiedHistogramLayout = ({
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
   const [mainPanelNode] = useState(() =>
-    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
+    createHtmlPortalNode({
+      attributes: {
+        class: classnames('eui-fullHeight', {
+          'unifiedHistogramLayoutMainPanel--emptyChart': !chart,
+        }),
+      },
+    })
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);
@@ -284,7 +286,6 @@ export const UnifiedHistogramLayout = ({
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
-          appendHitsCounter={appendHitsCounter}
           appendHistogram={<EuiSpacer size="s" />}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}

@@ -46,7 +46,7 @@ export const useChartStyles = (chartVisible: boolean) => {
   `;
   const breakdownFieldSelectorItemCss = css`
     min-width: 0;
-    align-items: flex-end;
+    align-items: flex-start;
     padding-left: ${euiTheme.size.s};
   `;
   const suggestionsSelectorItemCss = css`

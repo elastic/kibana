@@ -58,9 +58,9 @@ export const BreakdownFieldSelector = ({
   const { euiTheme } = useEuiTheme();
   const breakdownCss = css`
     width: 100%;
-    max-width: ${euiTheme.base * 22}px;
+    max-width: ${euiTheme.base * 10}px;
     &:focus-within {
-      max-width: ${euiTheme.base * 30}px;
+      max-width: ${euiTheme.base * 24}px;
     }
   `;
 
@@ -72,11 +72,8 @@ export const BreakdownFieldSelector = ({
     >
       <EuiComboBox
         data-test-subj="unifiedHistogramBreakdownFieldSelector"
-        prepend={i18n.translate('unifiedHistogram.breakdownFieldSelectorLabel', {
-          defaultMessage: 'Break down by',
-        })}
-        placeholder={i18n.translate('unifiedHistogram.breakdownFieldSelectorPlaceholder', {
-          defaultMessage: 'Select field',
+        placeholder={i18n.translate('unifiedHistogram.noBreakdownFieldPlaceholder', {
+          defaultMessage: 'No breakdown',
         })}
         aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
           defaultMessage: 'Break down by',

@@ -8,15 +8,8 @@
 
 import React, { ReactElement, useMemo, useState, useEffect, useCallback, memo } from 'react';
 import type { Observable } from 'rxjs';
-import {
-  EuiButtonIcon,
-  EuiContextMenu,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiToolTip,
-  EuiProgress,
-} from '@elastic/eui';
+import { IconButtonGroup, type IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
+import { EuiContextMenu, EuiFlexGroup, EuiFlexItem, EuiPopover, EuiProgress } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type {
   EmbeddableComponentProps,
@@ -251,27 +244,48 @@ export function Chart({
     lensAttributes: lensAttributesContext.attributes,
     isPlainRecord,
   });
+
+  if (!chart) {
+    return <div data-test-subj="unifiedHistogramChartEmpty" />;
+  }
+
   const LensSaveModalComponent = services.lens.SaveModalComponent;
   const canSaveVisualization =
     chartVisible && currentSuggestion && services.capabilities.dashboard?.showWriteControls;
-
-  const renderEditButton = useMemo(
-    () => (
-      <EuiButtonIcon
-        size="xs"
-        iconType="pencil"
-        onClick={() => setIsFlyoutVisible(true)}
-        data-test-subj="unifiedHistogramEditFlyoutVisualization"
-        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
-          defaultMessage: 'Edit visualization',
-        })}
-        disabled={isFlyoutVisible}
-      />
-    ),
-    [isFlyoutVisible]
-  );
-
   const canEditVisualizationOnTheFly = currentSuggestion && chartVisible;
+
+  const actions: IconButtonGroupProps['buttons'] = [];
+
+  if (canEditVisualizationOnTheFly) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.editVisualizationButton', {
+        defaultMessage: 'Edit visualization',
+      }),
+      iconType: 'pencil',
+      isDisabled: isFlyoutVisible,
+      'data-test-subj': 'unifiedHistogramEditVisualizationOnTheFly',
+      onClick: () => setIsFlyoutVisible(true),
+    });
+  } else if (onEditVisualization) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.editVisualizationButton', {
+        defaultMessage: 'Edit visualization',
+      }),
+      iconType: 'lensApp',
+      'data-test-subj': 'unifiedHistogramEditVisualization',
+      onClick: onEditVisualization,
+    });
+  }
+  if (canSaveVisualization) {
+    actions.push({
+      label: i18n.translate('unifiedHistogram.saveVisualizationButton', {
+        defaultMessage: 'Save visualization',
+      }),
+      iconType: 'save',
+      'data-test-subj': 'unifiedHistogramSaveVisualization',
+      onClick: () => setIsSaveModalVisible(true),
+    });
+  }
 
   return (
     <EuiFlexGroup
@@ -316,80 +330,37 @@ export function Chart({
                     />
                   </EuiFlexItem>
                 )}
-                {canSaveVisualization && (
-                  <>
-                    <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.saveVisualizationButton', {
-                          defaultMessage: 'Save visualization',
-                        })}
-                      >
-                        <EuiButtonIcon
-                          size="xs"
-                          iconType="save"
-                          onClick={() => setIsSaveModalVisible(true)}
-                          data-test-subj="unifiedHistogramSaveVisualization"
-                          aria-label={i18n.translate('unifiedHistogram.saveVisualizationButton', {
-                            defaultMessage: 'Save visualization',
-                          })}
-                        />
-                      </EuiToolTip>
-                    </EuiFlexItem>
-                  </>
-                )}
-                {canEditVisualizationOnTheFly && (
+                {actions.length > 0 && (
                   <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                    {!isFlyoutVisible ? (
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.editVisualizationButton', {
-                          defaultMessage: 'Edit visualization',
-                        })}
-                      >
-                        {renderEditButton}
-                      </EuiToolTip>
-                    ) : (
-                      renderEditButton
-                    )}
-                  </EuiFlexItem>
-                )}
-                {onEditVisualization && (
-                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                    <EuiToolTip
-                      content={i18n.translate('unifiedHistogram.editVisualizationButton', {
-                        defaultMessage: 'Edit visualization',
+                    <IconButtonGroup
+                      legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                        defaultMessage: 'Chart actions',
                       })}
-                    >
-                      <EuiButtonIcon
-                        size="xs"
-                        iconType="lensApp"
-                        onClick={onEditVisualization}
-                        data-test-subj="unifiedHistogramEditVisualization"
-                        aria-label={i18n.translate('unifiedHistogram.editVisualizationButton', {
-                          defaultMessage: 'Edit visualization',
-                        })}
-                      />
-                    </EuiToolTip>
+                      buttonSize="s"
+                      buttons={actions}
+                    />
                   </EuiFlexItem>
                 )}
                 <EuiFlexItem grow={false} css={chartToolButtonCss}>
                   <EuiPopover
                     id="unifiedHistogramChartOptions"
                     button={
-                      <EuiToolTip
-                        content={i18n.translate('unifiedHistogram.chartOptionsButton', {
+                      <IconButtonGroup
+                        legend={i18n.translate('unifiedHistogram.chartOptionsButton', {
                           defaultMessage: 'Chart options',
                         })}
-                      >
-                        <EuiButtonIcon
-                          size="xs"
-                          iconType="gear"
-                          onClick={toggleChartOptions}
-                          data-test-subj="unifiedHistogramChartOptionsToggle"
-                          aria-label={i18n.translate('unifiedHistogram.chartOptionsButton', {
-                            defaultMessage: 'Chart options',
-                          })}
-                        />
-                      </EuiToolTip>
+                        buttonSize="s"
+                        buttons={[
+                          {
+                            label: i18n.translate('unifiedHistogram.chartOptionsButton', {
+                              defaultMessage: 'Chart options',
+                            }),
+                            iconType: 'gear',
+                            'data-test-subj': 'unifiedHistogramChartOptionsToggle',
+                            onClick: toggleChartOptions,
+                          },
+                        ]}
+                      />
                     }
                     isOpen={showChartOptionsPopover}
                     closePopover={closeChartOptions}

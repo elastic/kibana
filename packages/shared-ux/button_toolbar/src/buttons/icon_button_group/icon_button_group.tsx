@@ -32,6 +32,8 @@ export interface IconButton {
   title?: string;
   /** Test subject for button */
   'data-test-subj'?: string;
+  /** To disable the action **/
+  isDisabled?: boolean;
 }
 
 /**

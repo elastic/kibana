@@ -12,6 +12,7 @@ import React, { useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
+import { css } from '@emotion/react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -104,7 +105,16 @@ export const DiscoverMainContent = ({
           responsive={false}
           data-test-subj="dscMainContent"
         >
-          {showChart && <EuiHorizontalRule margin="none" />}
+          {showChart && (
+            <EuiHorizontalRule
+              margin="none"
+              css={css`
+                .unifiedHistogramLayoutMainPanel--emptyChart & {
+                  display: none;
+                }
+              `}
+            />
+          )}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (
             <DiscoverDocuments
               viewModeToggle={viewModeToggle}
