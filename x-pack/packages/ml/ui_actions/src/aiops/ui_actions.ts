@@ -6,6 +6,7 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
 import type { Trigger } from '@kbn/ui-actions-plugin/public';
 
 export interface CategorizeFieldContext {
@@ -24,6 +25,10 @@ export const ACTION_CATEGORIZE_FIELD = 'ACTION_CATEGORIZE_FIELD';
 export const CATEGORIZE_FIELD_TRIGGER = 'CATEGORIZE_FIELD_TRIGGER';
 export const categorizeFieldTrigger: Trigger = {
   id: CATEGORIZE_FIELD_TRIGGER,
-  title: 'Run pattern analysis',
-  description: 'Triggered when user wants to run pattern analysis on a field.',
+  title: i18n.translate('xpack.ml.actions.runPatternAnalysis.title', {
+    defaultMessage: 'Run pattern analysis',
+  }),
+  description: i18n.translate('xpack.ml.actions.runPatternAnalysis.description', {
+    defaultMessage: 'Triggered when user wants to run pattern analysis on a field.',
+  }),
 };
