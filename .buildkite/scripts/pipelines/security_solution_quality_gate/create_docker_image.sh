@@ -1,7 +1,7 @@
 #!/bin/bash
 if [ -z "${KIBANA_LATEST+x}" ] || [ "$KIBANA_LATEST" = "0" ]; then
     echo "As we not testing against latest kibana image, this step is exiting with exit code 0"
-    return 0
+    exit 0
 fi
 
 
