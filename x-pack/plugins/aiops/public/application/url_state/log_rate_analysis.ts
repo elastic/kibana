@@ -35,7 +35,7 @@ export interface LogRateAnalysisAppState extends AiOpsFullIndexBasedAppState {
 /**
  * Transforms a full window parameters object to the abbreviated url state version.
  */
-export const windowParameterstoAppState = (wp?: WindowParameters): LogRateAnalysisAppState['wp'] =>
+export const windowParametersToAppState = (wp?: WindowParameters): LogRateAnalysisAppState['wp'] =>
   wp && {
     bMin: wp.baselineMin,
     bMax: wp.baselineMax,
