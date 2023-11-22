@@ -6,3 +6,4 @@
  */
 
 export { maybeAddCloudLinks } from './maybe_add_cloud_links';
+export { EndpointsModal } from './endpoints_modal';

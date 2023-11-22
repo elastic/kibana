@@ -10,3 +10,5 @@ import { CloudLinksPlugin } from './plugin';
 export function plugin() {
   return new CloudLinksPlugin();
 }
+
+export { EndpointsModal } from './maybe_add_cloud_links';

@@ -5,7 +5,7 @@
   "description": "Adds the links to the Elastic Cloud console",
   "plugin": {
     "id": "cloudLinks",
-    "server": false,
+    "server": true,
     "browser": true,
     "optionalPlugins": [
       "cloud",
@@ -16,7 +16,7 @@
       "kibanaReact"
     ],
     "requiredPlugins": [
-      "share"
+      "share",
     ]
   }
 }

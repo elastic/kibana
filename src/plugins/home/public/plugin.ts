@@ -20,8 +20,8 @@ import { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { UrlForwardingSetup, UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
 import { AppNavLinkStatus } from '@kbn/core/public';
-import { SharePluginSetup } from '@kbn/share-plugin/public';
-import type { CloudSetup } from '@kbn/cloud-plugin/public';
+import { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
 import { PLUGIN_ID, HOME_APP_BASE_PATH } from '../common/constants';
 import { setServices } from './application/kibana_services';
 import { ConfigSchema } from '../config';
@@ -42,6 +42,8 @@ export interface HomePluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   urlForwarding: UrlForwardingStart;
   guidedOnboarding?: GuidedOnboardingPluginStart;
+  cloudStart: CloudStart;
+  shareStart: SharePluginStart;
 }
 
 export interface HomePluginSetupDependencies {
@@ -80,8 +82,16 @@ export class HomePublicPlugin
         const trackUiMetric = usageCollection
           ? usageCollection.reportUiCounter.bind(usageCollection, 'Kibana_home')
           : () => {};
-        const [coreStart, { dataViews, urlForwarding: urlForwardingStart, guidedOnboarding }] =
-          await core.getStartServices();
+        const [
+          coreStart,
+          {
+            dataViews,
+            urlForwarding: urlForwardingStart,
+            guidedOnboarding,
+            cloudStart,
+            shareStart,
+          },
+        ] = await core.getStartServices();
         setServices({
           share,
           trackUiMetric,
@@ -109,6 +119,9 @@ export class HomePublicPlugin
           openModal: coreStart.overlays.openModal,
           theme: core.theme,
           i18nStart: coreStart.i18n,
+          core: coreStart,
+          cloudStart,
+          shareStart,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

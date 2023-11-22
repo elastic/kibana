@@ -20,10 +20,10 @@ import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { EndpointsModal } from '@kbn/cloud-links-plugin/public';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-import { ESApiModal } from '../modal';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
   if (!guideState) {
@@ -53,6 +53,10 @@ export const GuideCard = ({
   openModal,
   i18nStart,
   theme,
+  core,
+  docLinks,
+  cloudStart,
+  shareStart,
 }: GuideCardsProps & { card: GuideCardConstants }) => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const { euiTheme } = useEuiTheme();
@@ -61,12 +65,21 @@ export const GuideCard = ({
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
 
-  const openESApiModal = useCallback(async () => {
-    const session = await openModal(
-      toMountPoint(<ESApiModal onClose={() => session.close()} title={card.title} />, {
-        theme,
-        i18n: i18nStart,
-      }),
+  const openESApiModal = useCallback(() => {
+    const session = openModal(
+      toMountPoint(
+        <EndpointsModal
+          closeModal={() => session.close()}
+          core={core}
+          docLinks={docLinks}
+          cloud={cloudStart}
+          share={shareStart}
+        />,
+        {
+          theme,
+          i18n: i18nStart,
+        }
+      ),
       {
         maxWidth: 400,
         'data-test-subj': 'guideModalESApi',
