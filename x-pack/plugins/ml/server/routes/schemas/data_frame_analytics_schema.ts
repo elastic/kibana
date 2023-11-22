@@ -6,7 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type { DataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_response_schema';
+import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
 
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
@@ -130,7 +130,7 @@ interface CreatedError {
   error: any;
 }
 
-export interface PutDataFrameAnalyticsResponseSchema extends DataViewApiResponseSchema {
+export interface PutDataFrameAnalyticsResponseSchema extends CreateDataViewApiResponseSchema {
   dataFrameAnalyticsJobsCreated: DataFrameAnalyticsJobsCreated[];
   dataFrameAnalyticsJobsErrors: CreatedError[];
 }

@@ -7,7 +7,7 @@
 
 import { schema, type TypeOf } from '@kbn/config-schema';
 import type { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_response_schema';
+import type { CreateDataViewApiResponseSchema } from '@kbn/ml-data-view-utils/types/api_create_response_schema';
 
 import type { Dictionary } from '../types/common';
 import type { PivotAggDict } from '../types/pivot_aggs';
@@ -163,7 +163,7 @@ interface CreatedError {
   error: any;
 }
 
-export interface PutTransformsResponseSchema extends DataViewApiResponseSchema {
+export interface PutTransformsResponseSchema extends CreateDataViewApiResponseSchema {
   transformsCreated: TransformCreated[];
   errors: CreatedError[];
 }

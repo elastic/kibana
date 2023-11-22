@@ -14,7 +14,7 @@ interface DataViewError {
   error: any;
 }
 
-export interface DataViewApiResponseSchema {
+export interface CreateDataViewApiResponseSchema {
   dataViewsCreated: DataViewCreated[];
   dataViewsErrors: DataViewError[];
 }
