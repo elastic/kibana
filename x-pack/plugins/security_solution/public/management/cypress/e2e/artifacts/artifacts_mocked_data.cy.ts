@@ -1,8 +1,9 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
  * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * 2.0 and the Server Side Public License, v 1; you may not use this file except
+ * in compliance with, at your election, the Elastic License 2.0 or the Server
+ * Side Public License, v 1.
  */
 
 import { getRoleWithArtifactReadPrivilege } from '../../fixtures/role_with_artifact_read_privilege';
@@ -31,8 +32,7 @@ const loginWithoutAccess = (url: string) => {
   loadPage(url);
 };
 
-// FLAKY: https://github.com/elastic/kibana/issues/171168
-describe.skip('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
+describe('Artifacts pages', { tags: ['@ess', '@serverless'] }, () => {
   let endpointData: ReturnTypeFromChainable<typeof indexEndpointHosts> | undefined;
 
   before(() => {
