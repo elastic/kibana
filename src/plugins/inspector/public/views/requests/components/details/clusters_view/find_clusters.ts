@@ -20,38 +20,16 @@ export function findClusters(request: Request, query?: Query): Record<string, Cl
     return {};
   }
 
-  /*const clusters = rawResponse._clusters
-      ? (
-          rawResponse._clusters as estypes.ClusterStatistics & {
-            details: Record<string, ClusterDetails>;
-          }
-        ).details
-      : {
-          [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
-        };*/
-
-  const clusters = {
-    [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
-    remote1: {
-      status: 'skipped',
-      indices: '',
-      took: 1000,
-      timed_out: false,
-      _shards: rawResponse._shards,
-      failures: rawResponse._shards.failures,
-    },
-    remote2: {
-      status: 'failed',
-      indices: '',
-      took: 90,
-      timed_out: false,
-      _shards: rawResponse._shards,
-      failures: rawResponse._shards.failures,
-    },
-  }
-
-  console.log(query);
-
+  const clusters = rawResponse._clusters
+    ? (
+        rawResponse._clusters as estypes.ClusterStatistics & {
+          details: Record<string, ClusterDetails>;
+        }
+      ).details
+    : {
+        [LOCAL_CLUSTER_KEY]: getLocalClusterDetails(rawResponse),
+      };
+        
   if (!query) {
     return clusters;
   }
