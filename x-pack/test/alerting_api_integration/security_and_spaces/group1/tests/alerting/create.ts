@@ -102,6 +102,7 @@ export default function createAlertTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     params: {},
                     uuid: response.body.actions[0].uuid,
+                    use_alert_data_for_template: false,
                   },
                 ],
                 enabled: true,

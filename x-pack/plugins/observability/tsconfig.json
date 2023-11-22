@@ -92,8 +92,10 @@
     "@kbn/react-kibana-context-theme",
     "@kbn/shared-ux-link-redirect-app",
     "@kbn/core-chrome-browser",
+    "@kbn/lens-embeddable-utils",
     "@kbn/serverless",
-    "@kbn/dashboard-plugin"
+    "@kbn/dashboard-plugin",
+    "@kbn/calculate-auto"
   ],
   "exclude": [
     "target/**/*"
