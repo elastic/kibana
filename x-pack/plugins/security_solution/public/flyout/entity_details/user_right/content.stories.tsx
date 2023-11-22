@@ -7,22 +7,33 @@
 
 import React from 'react';
 import { storiesOf } from '@storybook/react';
-import { EuiFlyout, EuiFlyoutBody } from '@elastic/eui';
-import { UserDetailsContentComponent } from './user_details_content';
-import { StorybookProviders } from '../../../../common/mock/storybook_providers';
-import { mockManagedUser, mockObservedUser, mockRiskScoreState } from './__mocks__';
+import { EuiFlyout } from '@elastic/eui';
+import { ExpandableFlyoutContext } from '@kbn/expandable-flyout/src/context';
+import { StorybookProviders } from '../../../common/mock/storybook_providers';
+import {
+  mockManagedUser,
+  mockObservedUser,
+  mockRiskScoreState,
+} from '../../../timelines/components/side_panel/new_user_detail/__mocks__';
+import { UserPanelContent } from './content';
 
-storiesOf('UserDetailsContent', module)
+const flyoutContextValue = {
+  openLeftPanel: () => window.alert('openLeftPanel called'),
+  panels: {},
+} as unknown as ExpandableFlyoutContext;
+
+storiesOf('Components/UserPanelContent', module)
   .addDecorator((storyFn) => (
     <StorybookProviders>
-      <EuiFlyout size="m" onClose={() => {}}>
-        <EuiFlyoutBody>{storyFn()}</EuiFlyoutBody>
-      </EuiFlyout>
+      <ExpandableFlyoutContext.Provider value={flyoutContextValue}>
+        <EuiFlyout size="m" onClose={() => {}}>
+          {storyFn()}
+        </EuiFlyout>
+      </ExpandableFlyoutContext.Provider>
     </StorybookProviders>
   ))
   .add('default', () => (
-    <UserDetailsContentComponent
-      userName="test"
+    <UserPanelContent
       managedUser={mockManagedUser}
       observedUser={mockObservedUser}
       riskScoreState={mockRiskScoreState}
@@ -32,8 +43,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('integration disabled', () => (
-    <UserDetailsContentComponent
-      userName="test"
+    <UserPanelContent
       managedUser={{
         details: undefined,
         isLoading: false,
@@ -55,8 +65,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('no managed data', () => (
-    <UserDetailsContentComponent
-      userName="test"
+    <UserPanelContent
       managedUser={{
         details: undefined,
         isLoading: false,
@@ -78,8 +87,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('no observed data', () => (
-    <UserDetailsContentComponent
-      userName="test"
+    <UserPanelContent
       managedUser={mockManagedUser}
       observedUser={{
         details: {
@@ -113,8 +121,7 @@ storiesOf('UserDetailsContent', module)
     />
   ))
   .add('loading', () => (
-    <UserDetailsContentComponent
-      userName="test"
+    <UserPanelContent
       managedUser={{
         details: undefined,
         isLoading: true,
