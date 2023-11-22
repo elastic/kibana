@@ -107,6 +107,8 @@ export const EmbeddableSwimLaneContainer: FC<ExplorerSwimlaneContainerProps> = (
     [swimlaneData, perPage, fromPage, setSelectedCells]
   );
 
+  onRenderComplete();
+
   if (error) {
     return (
       <EuiCallOut
