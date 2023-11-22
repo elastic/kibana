@@ -64,8 +64,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../common/endpoint/se
 import { actionCreateService } from '../../services/actions';
 import type { UploadActionApiRequestBody } from '../../../../common/api/endpoint';
 import type { FleetToHostFileClientInterface } from '@kbn/fleet-plugin/server';
-import type { getActionFileUploadHandler } from './file_upload_handler';
-import type { HapiReadableStream } from '../../../types';
+import type { HapiReadableStream, SecuritySolutionRequestHandlerContext } from '../../../types';
 import { createHapiReadableStreamMock } from '../../services/actions/mocks';
 import { EndpointActionGenerator } from '../../../../common/endpoint/data_generators/endpoint_action_generator';
 import { CustomHttpRequestError } from '../../../utils/custom_http_request_error';
@@ -1019,13 +1018,19 @@ describe('Response actions', () => {
       never,
       UploadActionApiRequestBody
     >;
+    type UploadRequestHandler = RequestHandler<
+      never,
+      never,
+      UploadActionApiRequestBody,
+      SecuritySolutionRequestHandlerContext
+    >;
 
     let testSetup: UploadHttpApiTestSetupMock;
     let httpRequestMock: ReturnType<UploadHttpApiTestSetupMock['createRequestMock']>;
     let httpHandlerContextMock: UploadHttpApiTestSetupMock['httpHandlerContextMock'];
     let httpResponseMock: UploadHttpApiTestSetupMock['httpResponseMock'];
     let fleetFilesClientMock: jest.Mocked<FleetToHostFileClientInterface>;
-    let callHandler: () => ReturnType<ReturnType<typeof getActionFileUploadHandler>>;
+    let callHandler: () => ReturnType<UploadRequestHandler>;
     let fileContent: HapiReadableStream;
     let createdUploadAction: ActionDetails;
 
@@ -1073,8 +1078,8 @@ describe('Response actions', () => {
           ]),
         });
 
-      const handler: ReturnType<typeof getActionFileUploadHandler> =
-        testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31').routeHandler;
+      const handler = testSetup.getRegisteredVersionedRoute('post', UPLOAD_ROUTE, '2023-10-31')
+        .routeHandler as UploadRequestHandler;
 
       callHandler = () => handler(httpHandlerContextMock, httpRequestMock, httpResponseMock);
     });
