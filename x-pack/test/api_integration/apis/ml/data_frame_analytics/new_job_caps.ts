@@ -15,10 +15,10 @@ export default ({ getService }: FtrProviderContext) => {
   const esArchiver = getService('esArchiver');
   const ml = getService('ml');
   const supertest = getService('supertestWithoutAuth');
-  const testIndexPattern = 'ft_bank_marketing';
+  const testEsIndexPattern = 'ft_bank_marketing';
 
-  async function runRequest(indexPattern: string, expectedStatusCode: number, rollup?: boolean) {
-    let url = `/internal/ml/data_frame/analytics/new_job_caps/${indexPattern}`;
+  async function runRequest(esIndexPattern: string, expectedStatusCode: number, rollup?: boolean) {
+    let url = `/internal/ml/data_frame/analytics/new_job_caps/${esIndexPattern}`;
     if (rollup !== undefined) {
       url += `?rollup=${rollup}`;
     }
@@ -45,28 +45,28 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should return job capabilities of fields for an index that exists', async () => {
-      const body = await runRequest(testIndexPattern, 200);
+      const body = await runRequest(testEsIndexPattern, 200);
       await ml.testExecution.logTestStep(
-        `response should contain object for ${testIndexPattern} index pattern`
+        `response should contain object for ${testEsIndexPattern} index pattern`
       );
-      expect(body).to.have.keys(testIndexPattern);
-      const testIndexPatternCaps = body[testIndexPattern];
+      expect(body).to.have.keys(testEsIndexPattern);
+      const testEsIndexPatternCaps = body[testEsIndexPattern];
 
       // The data frame analytics UI does not use the aggs prop, so just perform basic checks this prop
       await ml.testExecution.logTestStep(
-        `should contain aggs and fields props for ${testIndexPattern} index pattern`
+        `should contain aggs and fields props for ${testEsIndexPattern} index pattern`
       );
-      expect(testIndexPatternCaps).to.have.keys('aggs', 'fields');
-      const aggs = testIndexPatternCaps.aggs;
+      expect(testEsIndexPatternCaps).to.have.keys('aggs', 'fields');
+      const aggs = testEsIndexPatternCaps.aggs;
       expect(aggs).to.have.length(35);
 
       // The data frames analytics UI uses this endpoint to extract the names and types of fields,
       // so check this info is present for some example fields
-      const fields = testIndexPatternCaps.fields;
+      const fields = testEsIndexPatternCaps.fields;
       expect(fields).to.have.length(24);
 
       await ml.testExecution.logTestStep(
-        `fields should contain expected name and type attributes for ${testIndexPattern} index pattern`
+        `fields should contain expected name and type attributes for ${testEsIndexPattern} index pattern`
       );
       const balanceTextField = fields.find((obj: any) => obj.id === 'balance');
       expect(balanceTextField).to.have.keys('name', 'type');
@@ -80,24 +80,24 @@ export default ({ getService }: FtrProviderContext) => {
     });
 
     it('should fail to return job capabilities of fields for an index that does not exist', async () => {
-      await runRequest(`${testIndexPattern}_invalid`, 404);
+      await runRequest(`${testEsIndexPattern}_invalid`, 404);
     });
 
     it('should return empty job capabilities of fields for a non-rollup index with rollup parameter set to true', async () => {
-      const body = await runRequest(testIndexPattern, 200, true);
+      const body = await runRequest(testEsIndexPattern, 200, true);
       await ml.testExecution.logTestStep(
-        `response should contain object for ${testIndexPattern} index pattern`
+        `response should contain object for ${testEsIndexPattern} index pattern`
       );
-      expect(body).to.have.keys(testIndexPattern);
-      const testIndexPatternCaps = body[testIndexPattern];
+      expect(body).to.have.keys(testEsIndexPattern);
+      const testEsIndexPatternCaps = body[testEsIndexPattern];
 
       await ml.testExecution.logTestStep(
-        `should contain empty aggs and fields props for ${testIndexPattern} index pattern`
+        `should contain empty aggs and fields props for ${testEsIndexPattern} index pattern`
       );
-      expect(testIndexPatternCaps).to.have.keys('aggs', 'fields');
-      const aggs = testIndexPatternCaps.aggs;
+      expect(testEsIndexPatternCaps).to.have.keys('aggs', 'fields');
+      const aggs = testEsIndexPatternCaps.aggs;
       expect(aggs).to.have.length(0);
-      const fields = testIndexPatternCaps.fields;
+      const fields = testEsIndexPatternCaps.fields;
       expect(fields).to.have.length(0);
     });
   });

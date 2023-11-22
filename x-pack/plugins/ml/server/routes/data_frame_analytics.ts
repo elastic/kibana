@@ -449,11 +449,11 @@ export function dataFrameAnalyticsRoutes(
         async ({ mlClient, client, request, response, getDataViewsService }) => {
           try {
             const { analyticsId } = request.params;
-            const { deleteDestIndex, deleteDestIndexPattern } = request.query;
+            const { deleteDestIndex, deleteDestDataView } = request.query;
             let destinationIndex: string | undefined;
             const analyticsJobDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
             const destIndexDeleted: DeleteDataFrameAnalyticsWithIndexStatus = { success: false };
-            const destIndexPatternDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
+            const destDataViewDeleted: DeleteDataFrameAnalyticsWithIndexStatus = {
               success: false,
             };
 
@@ -473,7 +473,7 @@ export function dataFrameAnalyticsRoutes(
               return response.customError(wrapError(e));
             }
 
-            if (deleteDestIndex || deleteDestIndexPattern) {
+            if (deleteDestIndex || deleteDestDataView) {
               // If user checks box to delete the destinationIndex associated with the job
               if (destinationIndex && deleteDestIndex) {
                 // Verify if user has privilege to delete the destination index
@@ -494,16 +494,16 @@ export function dataFrameAnalyticsRoutes(
               }
 
               // Delete the index pattern if there's an index pattern that matches the name of dest index
-              if (destinationIndex && deleteDestIndexPattern) {
+              if (destinationIndex && deleteDestDataView) {
                 try {
                   const dataViewsService = await getDataViewsService();
                   const dataViewId = await getDataViewId(dataViewsService, destinationIndex);
                   if (dataViewId) {
                     await deleteDestDataViewById(dataViewsService, dataViewId);
                   }
-                  destIndexPatternDeleted.success = true;
+                  destDataViewDeleted.success = true;
                 } catch (deleteDestIndexPatternError) {
-                  destIndexPatternDeleted.error = deleteDestIndexPatternError;
+                  destDataViewDeleted.error = deleteDestIndexPatternError;
                 }
               }
             }
@@ -521,7 +521,7 @@ export function dataFrameAnalyticsRoutes(
             const results = {
               analyticsJobDeleted,
               destIndexDeleted,
-              destIndexPatternDeleted,
+              destDataViewDeleted,
             };
             return response.ok({
               body: results,

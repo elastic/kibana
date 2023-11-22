@@ -16,7 +16,7 @@ import { useMlKibana, useNavigateToPath } from '../../../../../contexts/kibana';
 import { useToastNotificationService } from '../../../../../services/toast_notification_service';
 import {
   getDataViewAndSavedSearchCallback,
-  isCcsIndexPattern,
+  isCcsEsIndexPattern,
 } from '../../../../../util/index_utils';
 
 const fixedPageSize: number = 20;
@@ -72,7 +72,7 @@ export const SourceSelection: FC = () => {
       }
     }
 
-    if (isCcsIndexPattern(dataViewName) && savedObject) {
+    if (isCcsEsIndexPattern(dataViewName) && savedObject) {
       setIsCcsCallOut(true);
       if (type === 'search') {
         setCcsCallOutBodyText(

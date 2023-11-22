@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { IndexPatternPrompt } from './index_pattern_prompt';
+export { DataViewPrompt } from './data_view_prompt';
