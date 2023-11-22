@@ -8,7 +8,7 @@
 import { useState, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { LOCAL_STORAGE_KEYS } from '../../../../common/constants';
-import type { FilterConfig, FilterConfigState } from './types';
+import type { FilterChangeHandler, FilterConfig, FilterConfigState } from './types';
 import { useCustomFieldsFilterConfig } from './use_custom_fields_filter_config';
 import { MoreFiltersSelectable } from './more_filters_selectable';
 import { useCasesContext } from '../../cases_context/use_cases_context';
@@ -31,7 +31,13 @@ const deserializeFilterVisibilityMap = (value: string): Map<string, FilterConfig
   );
 };
 
-export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: FilterConfig[] }) => {
+export const useFilterConfig = ({
+  systemFilterConfig,
+  onFilterOptionChange,
+}: {
+  systemFilterConfig: FilterConfig[];
+  onFilterOptionChange: FilterChangeHandler;
+}) => {
   const { appId } = useCasesContext();
   const { customFieldsFilterConfig } = useCustomFieldsFilterConfig();
   const [filters, setFilters] = useState<Map<string, FilterConfig>>(
@@ -64,6 +70,10 @@ export const useFilterConfig = ({ systemFilterConfig }: { systemFilterConfig: Fi
           newFilterVisibilityMap.set(key, { key, isActive: true });
         }
       } else {
+        const filter = filters.get(key);
+        if (filter) {
+          filter.onDeactivate({ onChange: onFilterOptionChange });
+        }
         newFilterVisibilityMap.set(key, { key, isActive: false });
       }
     });

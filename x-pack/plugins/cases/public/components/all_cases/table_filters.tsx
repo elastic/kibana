@@ -65,30 +65,6 @@ const CasesTableFiltersComponent = ({
     [selectedAssignees, onFilterChanged]
   );
 
-  const { systemFilterConfig } = useSystemFilterConfig({
-    availableSolutions,
-    caseAssignmentAuthorized,
-    categories,
-    countClosedCases,
-    countInProgressCases,
-    countOpenCases,
-    currentUserProfile,
-    handleSelectedAssignees,
-    hiddenStatuses,
-    isLoading,
-    isSelectorView,
-    selectedAssignees,
-    tags,
-  });
-
-  const {
-    filters: activeFilters,
-    moreFiltersSelectableComponent: MoreFiltersSelectable,
-    selectableOptions,
-    activeSelectableOptionKeys,
-    onFilterConfigChange,
-  } = useFilterConfig({ systemFilterConfig });
-
   const onFilterOptionChange: FilterChangeHandler = ({
     filterId,
     selectedOptionKeys,
@@ -114,6 +90,30 @@ const CasesTableFiltersComponent = ({
       onFilterChanged(newFilters);
     }
   };
+
+  const { systemFilterConfig } = useSystemFilterConfig({
+    availableSolutions,
+    caseAssignmentAuthorized,
+    categories,
+    countClosedCases,
+    countInProgressCases,
+    countOpenCases,
+    currentUserProfile,
+    handleSelectedAssignees,
+    hiddenStatuses,
+    isLoading,
+    isSelectorView,
+    selectedAssignees,
+    tags,
+  });
+
+  const {
+    filters: activeFilters,
+    moreFiltersSelectableComponent: MoreFiltersSelectable,
+    selectableOptions,
+    activeSelectableOptionKeys,
+    onFilterConfigChange,
+  } = useFilterConfig({ systemFilterConfig, onFilterOptionChange });
 
   const handleOnSearch = useCallback(
     (newSearch) => {

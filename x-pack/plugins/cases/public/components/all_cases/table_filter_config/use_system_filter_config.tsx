@@ -17,7 +17,7 @@ import { SeverityFilter } from '../severity_filter';
 import { AssigneesFilterPopover } from '../assignees_filter';
 import type { CurrentUserProfile } from '../../types';
 import type { AssigneesFilteringSelection } from '../../user_profiles/types';
-import type { FilterConfig, FilterConfigRenderParams } from './types';
+import type { FilterChangeHandler, FilterConfig, FilterConfigRenderParams } from './types';
 
 interface UseFilterConfigProps {
   availableSolutions: string[];
@@ -56,6 +56,9 @@ export const getSystemFilterConfig = ({
       label: i18n.SEVERITY,
       isActive: true,
       isAvailable: true,
+      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        onChange({ filterId: 'severity', selectedOptionKeys: [] });
+      },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
       ),
@@ -65,6 +68,9 @@ export const getSystemFilterConfig = ({
       label: i18n.STATUS,
       isActive: true,
       isAvailable: true,
+      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        onChange({ filterId: 'status', selectedOptionKeys: [] });
+      },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <StatusFilter
           selectedOptionKeys={filterOptions?.status}
@@ -81,6 +87,9 @@ export const getSystemFilterConfig = ({
       label: i18n.ASSIGNEES,
       isActive: true,
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
+      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        onChange({ filterId: 'assignee', selectedOptionKeys: [] });
+      },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
         return (
           <AssigneesFilterPopover
@@ -97,6 +106,9 @@ export const getSystemFilterConfig = ({
       label: i18n.TAGS,
       isActive: true,
       isAvailable: true,
+      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        onChange({ filterId: 'tags', selectedOptionKeys: [] });
+      },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <MultiSelectFilter
           buttonLabel={i18n.TAGS}
@@ -114,6 +126,9 @@ export const getSystemFilterConfig = ({
       label: i18n.CATEGORIES,
       isActive: true,
       isAvailable: true,
+      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        onChange({ filterId: 'category', selectedOptionKeys: [] });
+      },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <MultiSelectFilter
           buttonLabel={i18n.CATEGORIES}
@@ -131,6 +146,11 @@ export const getSystemFilterConfig = ({
       label: i18n.SOLUTION,
       isActive: true,
       isAvailable: availableSolutions.length > 1,
+      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        if (availableSolutions.length > 1) {
+          onChange({ filterId: 'owner', selectedOptionKeys: [] });
+        }
+      },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <SolutionFilter
           onChange={onChange}
