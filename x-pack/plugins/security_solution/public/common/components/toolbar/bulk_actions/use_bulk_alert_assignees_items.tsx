@@ -92,7 +92,7 @@ export const useBulkAlertAssigneesItems = ({
               'data-test-subj': 'remove-alert-assignees-menu-item',
               name: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
               label: i18n.REMOVE_ALERT_ASSIGNEES_CONTEXT_MENU_TITLE,
-              disableOnQuery: false,
+              disableOnQuery: true,
               onClick: onRemoveAllAssignees,
             },
           ]
