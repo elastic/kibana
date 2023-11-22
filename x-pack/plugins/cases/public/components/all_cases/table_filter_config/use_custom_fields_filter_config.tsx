@@ -12,6 +12,8 @@ import { useGetCaseConfiguration } from '../../../containers/configure/use_get_c
 import type { FilterConfig, FilterConfigRenderParams } from './types';
 import { MultiSelectFilter } from '../multi_select_filter';
 
+export const CUSTOM_FIELD_KEY_PREFIX = 'cf_';
+
 export const useCustomFieldsFilterConfig = () => {
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
 
@@ -26,7 +28,7 @@ export const useCustomFieldsFilterConfig = () => {
         const { filterOptions: customFieldOptions = [] } = customFieldsBuilder[type]();
 
         customFieldsFilterConfig.push({
-          key: fieldKey,
+          key: `${CUSTOM_FIELD_KEY_PREFIX}${fieldKey}`, // this prefix is set in case custom field has the same key as a system field
           isActive: false,
           isAvailable: type === CustomFieldTypes.TOGGLE,
           label: buttonLabel,
@@ -39,7 +41,7 @@ export const useCustomFieldsFilterConfig = () => {
               selectedOptionKeys: string[];
             }) => {
               onChange({
-                filterId,
+                filterId: filterId.replace(CUSTOM_FIELD_KEY_PREFIX, ''),
                 selectedOptionKeys,
                 customFieldType: type,
               });

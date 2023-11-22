@@ -23,6 +23,7 @@ import { useGetCategories } from '../../containers/use_get_categories';
 import { useSuggestUserProfiles } from '../../containers/user_profiles/use_suggest_user_profiles';
 import { userProfiles } from '../../containers/user_profiles/api.mock';
 import { getCaseConfigure } from '../../containers/configure/api';
+import { CUSTOM_FIELD_KEY_PREFIX } from './table_filter_config/use_custom_fields_filter_config';
 
 jest.mock('../../containers/use_get_tags');
 jest.mock('../../containers/use_get_categories');
@@ -333,7 +334,9 @@ describe('CasesTableFilters ', () => {
       await waitFor(() => expect(screen.getAllByRole('option')).toHaveLength(5));
 
       expect(screen.getByTestId('options-filter-popover-item-status')).toBeInTheDocument();
-      expect(screen.getByTestId('options-filter-popover-item-toggle')).toBeInTheDocument();
+      expect(
+        screen.getByTestId(`options-filter-popover-item-${CUSTOM_FIELD_KEY_PREFIX}toggle`)
+      ).toBeInTheDocument();
     });
 
     it('should not add text type custom fields', async () => {
@@ -392,7 +395,7 @@ describe('CasesTableFilters ', () => {
           },
           Object {
             "isActive": true,
-            "key": "toggle",
+            "key": "cf_toggle",
           },
         ]
       `);
@@ -446,7 +449,7 @@ describe('CasesTableFilters ', () => {
           },
           Object {
             "isActive": false,
-            "key": "toggle",
+            "key": "cf_toggle",
           },
         ]
       `);
@@ -454,7 +457,7 @@ describe('CasesTableFilters ', () => {
 
     it('should recover the stored state from the local storage with the right order', async () => {
       const previousState = [
-        { key: 'toggle', isActive: true },
+        { key: `${CUSTOM_FIELD_KEY_PREFIX}toggle`, isActive: true },
         { key: 'owner', isActive: false },
         { key: 'category', isActive: false },
         { key: 'tags', isActive: true },
@@ -490,7 +493,7 @@ describe('CasesTableFilters ', () => {
         { key: 'tags', isActive: true },
         { key: 'category', isActive: false },
         { key: 'owner', isActive: false },
-        { key: 'toggle', isActive: true },
+        { key: `${CUSTOM_FIELD_KEY_PREFIX}toggle`, isActive: true },
       ];
       localStorage.setItem(
         'testAppId.cases.list.tableFiltersConfig',
@@ -531,7 +534,17 @@ describe('CasesTableFilters ', () => {
         expect(screen.getAllByRole('option')).toHaveLength(9);
       });
       const allOptions = screen.getAllByRole('option');
-      const orderedKey = ['aa', 'category', 'severity', 'status', 'tags', 'ta', 'tb', 'tc', 'za'];
+      const orderedKey = [
+        `${CUSTOM_FIELD_KEY_PREFIX}aa`,
+        'category',
+        'severity',
+        'status',
+        'tags',
+        `${CUSTOM_FIELD_KEY_PREFIX}ta`,
+        `${CUSTOM_FIELD_KEY_PREFIX}tb`,
+        `${CUSTOM_FIELD_KEY_PREFIX}tc`,
+        `${CUSTOM_FIELD_KEY_PREFIX}za`,
+      ];
       orderedKey.forEach((key, index) => {
         expect(allOptions[index].getAttribute('data-test-subj')).toBe(
           `options-filter-popover-item-${key}`
@@ -539,7 +552,7 @@ describe('CasesTableFilters ', () => {
       });
     });
 
-    it('should have right order after deactivating and activating a filter that by default is activated and not in the last one', async () => {
+    it('when a filter is active and isnt last in the list, it should move the filter to last position after deactivating and activating', async () => {
       appMockRender.render(<CasesTableFilters {...props} />);
 
       const filterBar = screen.getByTestId('cases-table-filters-group');
@@ -560,6 +573,37 @@ describe('CasesTableFilters ', () => {
       orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'Status', 'More'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
+      });
+    });
+
+    it('should avoid key collisions between custom fields and default fields', async () => {
+      getCaseConfigureMock.mockImplementation(() => {
+        return {
+          customFields: [
+            { type: 'toggle', key: 'severity', label: 'Fake Severity', required: false },
+            { type: 'toggle', key: 'status', label: 'Fake Status', required: false },
+          ],
+        };
+      });
+      appMockRender.render(<CasesTableFilters {...props} />);
+
+      const filterBar = screen.getByTestId('cases-table-filters-group');
+      let allFilters: HTMLElement[];
+      await waitFor(() => {
+        allFilters = within(filterBar).getAllByRole('button');
+        expect(allFilters).toHaveLength(5);
+      });
+
+      const orderedFilterLabels = ['Severity', 'Status', 'Tags', 'Categories', 'More'];
+      orderedFilterLabels.forEach((label, index) => {
+        expect(allFilters[index]).toHaveTextContent(label);
+      });
+
+      userEvent.click(screen.getByRole('button', { name: 'More' }));
+      let allOptions: HTMLElement[];
+      await waitFor(() => {
+        allOptions = screen.getAllByRole('option');
+        expect(allOptions).toHaveLength(6);
       });
     });
   });
