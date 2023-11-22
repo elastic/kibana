@@ -350,6 +350,14 @@ export const prebuiltRuleAllowlistFields: AllowlistFields = {
       original_file_name: true,
     },
   },
+  github: {
+    org: true,
+    team: true,
+    repo: true,
+    category: true,
+    permission: true,
+    repository_public: true,
+  },
   // Google/GCP
   google_workspace: {
     actor: {
