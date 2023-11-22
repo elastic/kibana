@@ -204,7 +204,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Body"
-                          defaultMessage="The latest details on supported model types and the steps needed to import models can be found in our extensive Eland documentation."
+                          defaultMessage="The latest details on supported model types and the steps needed to import models can be found in the Eland documentation."
                         />
                       </p>
                       <p>
