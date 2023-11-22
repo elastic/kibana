@@ -481,7 +481,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 2,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 300,
               unit: 'm',
@@ -568,7 +567,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 2,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 300,
               unit: 'm',
@@ -670,7 +668,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 2,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 20,
               unit: 'm',
@@ -754,7 +751,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 1,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 2,
               unit: 'h',
@@ -829,7 +825,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 1,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 2,
               unit: 'h',
@@ -918,7 +913,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 2,
           },
           alert_suppression: {
-            group_by: ['agent.name', 'agent.type'],
             duration: {
               value: 2,
               unit: 'h',
@@ -1011,7 +1005,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 1,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 300,
               unit: 'm',
@@ -1077,7 +1070,6 @@ export default ({ getService }: FtrProviderContext) => {
             value: 1,
           },
           alert_suppression: {
-            group_by: ['agent.name'],
             duration: {
               value: 300,
               unit: 'm',
