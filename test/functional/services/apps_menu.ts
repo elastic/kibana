@@ -118,7 +118,7 @@ export class AppsMenuService extends FtrService {
   ) {
     await this.waitUntilLoadingHasFinished();
 
-    this.ctx.getService('retry').try(async () => {
+    await this.ctx.getService('retry').try(async () => {
       this.log.debug(`click "${name}" app link`);
 
       try {
