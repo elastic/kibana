@@ -407,7 +407,12 @@ export const installPackageFromRegistryHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } else {
-    return await defaultFleetErrorHandler({ error: res.error, response });
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: res.error.message,
+      },
+    });
   }
 };
 export const createCustomIntegrationHandler: FleetRequestHandler<
@@ -548,7 +553,17 @@ export const installPackageByUploadHandler: FleetRequestHandler<
     };
     return response.ok({ body });
   } else {
-    return defaultFleetErrorHandler({ error: res.error, response });
+    // return 500 only for bundled packages
+    if (res.installSource === 'bundled') {
+      return defaultFleetErrorHandler({ error: res.error, response });
+    }
+    // all the other errors should return 400
+    return response.customError({
+      statusCode: 400,
+      body: {
+        message: res.error.message,
+      },
+    });
   }
 };
 
