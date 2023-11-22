@@ -159,7 +159,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
           rules={rules}
           activeAlerts={activeAlerts}
           handleCreateRule={handleCreateRule}
-          hasGroupBy={slo.groupBy && slo.groupBy !== ALL_VALUE}
+          hasGroupBy={Boolean(slo.groupBy && slo.groupBy !== ALL_VALUE)}
         />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
