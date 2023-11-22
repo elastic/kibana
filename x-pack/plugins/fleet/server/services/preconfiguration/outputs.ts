@@ -113,14 +113,14 @@ export async function createOrUpdatePreconfiguredOutputs(
         const secretHashes = await hashSecrets(output);
 
         if (isCreate) {
-          logger.debug(`Creating output ${output.id}`);
+          logger.debug(`Creating preconfigured output ${output.id}`);
           await outputService.create(soClient, esClient, data, {
             id,
             fromPreconfiguration: true,
             secretHashes,
           });
         } else if (isUpdateWithNewData) {
-          logger.debug(`Updating output ${output.id}`);
+          logger.debug(`Updating preconfigured output ${output.id}`);
           await outputService.update(soClient, esClient, id, data, {
             fromPreconfiguration: true,
             secretHashes,
