@@ -53,12 +53,16 @@ export async function getTokenCountFromInvokeStream({
 
   let responseBody: string = '';
 
+  const responseBuffer: Uint8Array[] = [];
+
   const isBedrock = actionTypeId === '.bedrock';
 
   responseStream.on('data', (chunk) => {
     if (isBedrock) {
-      responseBody += parseBedrockChunk(chunk);
+      // special encoding for bedrock, do not attempt to convert to string
+      responseBuffer.push(chunk);
     } else {
+      // no special encoding, can safely use toString and append to responseBody
       responseBody += chunk.toString();
     }
   });
@@ -70,10 +74,11 @@ export async function getTokenCountFromInvokeStream({
 
   // parse openai response once responseBody is fully built
   // They send the response in sometimes incomplete chunks of JSON
-  const parsedResponse = isBedrock ? responseBody : parseOpenAIResponse(responseBody);
+  const parsedResponse = isBedrock
+    ? parseBedrockBuffer(responseBuffer)
+    : parseOpenAIResponse(responseBody);
 
   const completionTokens = encode(parsedResponse).length;
-
   return {
     prompt: promptTokens,
     completion: completionTokens,
@@ -81,14 +86,49 @@ export async function getTokenCountFromInvokeStream({
   };
 }
 
-const parseBedrockChunk = (chunk: ArrayBufferView) => {
-  const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
-  const event = awsDecoder.decode(chunk);
-  const parsed = JSON.parse(
-    Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
-  );
-  return parsed.completion;
+const parseBedrockBuffer = (chunks: Uint8Array[]) => {
+  let bedrockBuffer: Uint8Array = new Uint8Array(0);
+  return chunks
+    .map((chunk) => {
+      bedrockBuffer = concatChunks(bedrockBuffer, chunk);
+      let messageLength = getMessageLength(bedrockBuffer);
+
+      const buildChunks = [];
+      while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
+        const extractedChunk = bedrockBuffer.slice(0, messageLength);
+        buildChunks.push(extractedChunk);
+        bedrockBuffer = bedrockBuffer.slice(messageLength);
+        messageLength = getMessageLength(bedrockBuffer);
+      }
+
+      const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+
+      return buildChunks
+        .map((bChunk) => {
+          const event = awsDecoder.decode(bChunk);
+          const body = JSON.parse(
+            Buffer.from(JSON.parse(new TextDecoder().decode(event.body)).bytes, 'base64').toString()
+          );
+          return body.completion;
+        })
+        .join('');
+    })
+    .join('');
 };
+
+function concatChunks(a: Uint8Array, b: Uint8Array) {
+  const newBuffer = new Uint8Array(a.length + b.length);
+  newBuffer.set(a);
+  newBuffer.set(b, a.length);
+  return newBuffer;
+}
+
+function getMessageLength(buffer: Uint8Array) {
+  if (buffer.byteLength === 0) return 0;
+  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+
+  return view.getUint32(0, false);
+}
 
 const parseOpenAIResponse = (responseBody: string) =>
   responseBody

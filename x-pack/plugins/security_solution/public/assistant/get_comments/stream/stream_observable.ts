@@ -37,15 +37,17 @@ export const getStreamObservable = ({
     observer.next({ chunks: [], loading: true });
     const decoder = new TextDecoder();
     const chunks: string[] = [];
-    let lineBuffer: string = '';
+    let openAIBuffer: string = '';
+
+    let bedrockBuffer: Uint8Array = new Uint8Array(0);
     function readOpenAI() {
       reader
         .read()
         .then(({ done, value }: { done: boolean; value?: Uint8Array }) => {
           try {
             if (done) {
-              if (lineBuffer) {
-                chunks.push(lineBuffer);
+              if (openAIBuffer) {
+                chunks.push(openAIBuffer);
               }
               observer.next({
                 chunks,
@@ -62,8 +64,8 @@ export const getStreamObservable = ({
               nextChunks = [`${API_ERROR}\n\n${JSON.parse(decoded).message}`];
             } else {
               const lines = decoded.split('\n');
-              lines[0] = lineBuffer + lines[0];
-              lineBuffer = lines.pop() || '';
+              lines[0] = openAIBuffer + lines[0];
+              openAIBuffer = lines.pop() || '';
               nextChunks = getOpenAIChunks(lines);
             }
             nextChunks.forEach((chunk: string) => {
@@ -98,24 +100,45 @@ export const getStreamObservable = ({
               observer.complete();
               return;
             }
-            const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
 
             let content;
             if (isError) {
               content = `${API_ERROR}\n\n${JSON.parse(decoder.decode(value)).message}`;
+              chunks.push(content);
+              observer.next({
+                chunks,
+                message: chunks.join(''),
+                loading: true,
+              });
             } else if (value != null) {
-              const event = awsDecoder.decode(value);
-              const body = JSON.parse(
-                Buffer.from(JSON.parse(decoder.decode(event.body)).bytes, 'base64').toString()
-              );
-              content = body.completion;
+              const chunk: Uint8Array = value;
+
+              bedrockBuffer = concatChunks(bedrockBuffer, chunk);
+              let messageLength = getMessageLength(bedrockBuffer);
+
+              const buildChunks = [];
+              while (bedrockBuffer.byteLength > 0 && bedrockBuffer.byteLength >= messageLength) {
+                const extractedChunk = bedrockBuffer.slice(0, messageLength);
+                buildChunks.push(extractedChunk);
+                bedrockBuffer = bedrockBuffer.slice(messageLength);
+                messageLength = getMessageLength(bedrockBuffer);
+              }
+
+              const awsDecoder = new EventStreamCodec(toUtf8, fromUtf8);
+              buildChunks.forEach((bChunk) => {
+                const event = awsDecoder.decode(bChunk);
+                const body = JSON.parse(
+                  Buffer.from(JSON.parse(decoder.decode(event.body)).bytes, 'base64').toString()
+                );
+                content = body.completion;
+                chunks.push(content);
+                observer.next({
+                  chunks,
+                  message: chunks.join(''),
+                  loading: true,
+                });
+              });
             }
-            chunks.push(content);
-            observer.next({
-              chunks,
-              message: chunks.join(''),
-              loading: true,
-            });
           } catch (err) {
             observer.error(err);
             return;
@@ -126,6 +149,7 @@ export const getStreamObservable = ({
           observer.error(err);
         });
     }
+
     if (connectorTypeTitle === 'Amazon Bedrock') readBedrock();
     else if (connectorTypeTitle === 'OpenAI') readOpenAI();
     return () => {
@@ -176,5 +200,19 @@ const getOpenAIChunks = (lines: string[]): string[] => {
     });
   return nextChunk;
 };
+
+function concatChunks(a: Uint8Array, b: Uint8Array) {
+  const newBuffer = new Uint8Array(a.length + b.length);
+  newBuffer.set(a);
+  newBuffer.set(b, a.length);
+  return newBuffer;
+}
+
+function getMessageLength(buffer: Uint8Array) {
+  if (buffer.byteLength === 0) return 0;
+  const view = new DataView(buffer.buffer, buffer.byteOffset, buffer.byteLength);
+
+  return view.getUint32(0, false);
+}
 
 export const getPlaceholderObservable = () => new Observable<PromptObservableState>();
