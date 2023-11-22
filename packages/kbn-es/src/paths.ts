@@ -8,7 +8,6 @@
 
 import Os from 'os';
 import { resolve } from 'path';
-import { REPO_ROOT } from '@kbn/repo-info';
 
 function maybeUseBat(bin: string) {
   return Os.platform().startsWith('win') ? `${bin}.bat` : bin;
@@ -51,8 +50,6 @@ export const SERVERLESS_SECRETS_SSL_PATH = resolve(
 );
 
 export const SERVERLESS_JWKS_PATH = resolve(__dirname, './serverless_resources/jwks.json');
-
-export const SERVERLESS_IDP_METADATA_PATH = resolve(REPO_ROOT, '.es', 'idp_metadata.xml');
 
 export const SERVERLESS_RESOURCES_PATHS = [
   SERVERLESS_OPERATOR_USERS_PATH,

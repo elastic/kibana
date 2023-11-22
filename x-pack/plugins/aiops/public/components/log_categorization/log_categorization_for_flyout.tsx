@@ -47,6 +47,7 @@ import { TechnicalPreviewBadge } from './technical_preview_badge';
 import { LoadingCategorization } from './loading_categorization';
 import { useValidateFieldRequest } from './use_validate_category_field';
 import { FieldValidationCallout } from './category_validation_callout';
+import { CreateCategorizationJobButton } from './create_categorization_job';
 
 enum SELECTED_TAB {
   BUCKET,
@@ -304,17 +305,21 @@ export const LogCategorizationFlyout: FC<LogCategorizationPageProps> = ({
         </EuiFlexGroup>
       </EuiFlyoutHeader>
       <EuiFlyoutBody data-test-subj="mlJobSelectorFlyoutBody">
+        <CreateCategorizationJobButton
+          dataView={dataView}
+          field={selectedField}
+          query={searchQuery}
+          earliest={earliest}
+          latest={latest}
+        />
         <FieldValidationCallout validationResults={fieldValidationResult} />
-
         {loading === true ? <LoadingCategorization onClose={onClose} /> : null}
-
         <InformationText
           loading={loading}
           categoriesLength={data?.categories?.length ?? null}
           eventRateLength={eventRate.length}
           fieldSelected={selectedField !== null}
         />
-
         {loading === false && data !== null && data.categories.length > 0 ? (
           <>
             {showTabs ? (
