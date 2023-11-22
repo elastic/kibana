@@ -132,7 +132,8 @@ describe('Invalid Indicators', { tags: '@ess' }, () => {
   });
 });
 
-describe('Indicators', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171781
+describe.skip('Indicators', () => {
   before(() => {
     esArchiverLoad('threat_intelligence/indicators_data');
   });
