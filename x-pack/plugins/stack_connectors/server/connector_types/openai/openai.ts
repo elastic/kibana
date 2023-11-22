@@ -198,7 +198,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
    * the response from the streamApi method and returns the response string alone.
    * @param body - the OpenAI Invoke request body
    */
-  public async invokeStream(body: InvokeAIActionParams): Promise<IncomingMessage> {
+  public async invokeStream(body: InvokeAIActionParams): Promise<PassThrough> {
     const res = (await this.streamApi({
       body: JSON.stringify(body),
       stream: true,
