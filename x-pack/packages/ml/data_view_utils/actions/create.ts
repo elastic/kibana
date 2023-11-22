@@ -7,7 +7,7 @@
 
 import type { DataViewsService, RuntimeField } from '@kbn/data-views-plugin/common';
 
-import type { DataViewApiResponseSchema } from '../types/api_response_schema';
+import type { CreateDataViewApiResponseSchema } from '../types/api_create_response_schema';
 
 interface CreateDataViewFnOptions {
   dataViewsService: DataViewsService;
@@ -25,8 +25,8 @@ export const createDataViewFn = async ({
   // A fall back id to be able to track the response
   // because in case of an error we don't get a data view id.
   errorFallbackId,
-}: CreateDataViewFnOptions): Promise<DataViewApiResponseSchema> => {
-  const response: DataViewApiResponseSchema = {
+}: CreateDataViewFnOptions): Promise<CreateDataViewApiResponseSchema> => {
+  const response: CreateDataViewApiResponseSchema = {
     dataViewsCreated: [],
     dataViewsErrors: [],
   };
