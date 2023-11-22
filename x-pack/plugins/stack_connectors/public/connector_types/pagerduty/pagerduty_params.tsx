@@ -326,10 +326,16 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
                   editAction('customDetails', '', index);
                 }
               }}
-              data-test-subj="pagerDuty-customDetailsJsonEditor"
+              data-test-subj="customDetailsJsonEditor"
             />
           </EuiFormRow>
-          <LinksList editAction={editAction} errors={errors} index={index} links={links} />
+          <LinksList
+            editAction={editAction}
+            errors={errors}
+            index={index}
+            links={links}
+            messageVariables={messageVariables}
+          />
         </>
       )}
     </>

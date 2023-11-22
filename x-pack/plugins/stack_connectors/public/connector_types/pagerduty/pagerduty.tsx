@@ -82,12 +82,12 @@ export function getConnectorType(): ConnectorTypeModel<
       }
       if (Array.isArray(actionParams.links)) {
         actionParams.links.forEach(({ href, text }) => {
-          if (!href) {
-            errors.links.push('href fields must be URLs.');
-          }
-
-          if (!text) {
-            errors.links.push('Text fields cannot be empty.');
+          if ((!href || !text) && errors.links.length === 0) {
+            errors.links.push(
+              i18n.translate('xpack.stackConnectors.components.pagerDuty.error.invalidLink', {
+                defaultMessage: 'Links cannot be empty.',
+              })
+            );
           }
         });
       }

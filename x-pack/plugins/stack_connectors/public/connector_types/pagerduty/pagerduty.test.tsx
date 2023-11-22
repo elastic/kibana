@@ -43,6 +43,8 @@ describe('pagerduty action params validation', () => {
       component: 'test',
       group: 'group',
       class: 'test class',
+      customDetails: '{}',
+      links: [],
     };
 
     expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
@@ -50,6 +52,7 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: [],
+        links: [],
       },
     });
   });
@@ -74,6 +77,86 @@ describe('pagerduty action params validation', () => {
         dedupKey: [],
         summary: [],
         timestamp: expect.arrayContaining(expected),
+        links: [],
+      },
+    });
+  });
+
+  test('action params validation fails when a link is missing the href field', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{}',
+      links: [{ href: '', text: 'foobar' }],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: ['Links cannot be empty.'],
+      },
+    });
+  });
+
+  test('action params validation fails when a link is missing the text field', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{}',
+      links: [{ href: 'foobar', text: '' }],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: ['Links cannot be empty.'],
+      },
+    });
+  });
+
+  test('action params validation does not throw the same error multiple times for links', async () => {
+    const actionParams = {
+      eventAction: 'trigger',
+      dedupKey: 'test',
+      summary: '2323',
+      source: 'source',
+      severity: 'critical',
+      timestamp: new Date().toISOString(),
+      component: 'test',
+      group: 'group',
+      class: 'test class',
+      customDetails: '{}',
+      links: [
+        { href: 'foobar', text: '' },
+        { href: '', text: 'foobar' },
+        { href: '', text: '' },
+      ],
+    };
+
+    expect(await connectorTypeModel.validateParams(actionParams)).toEqual({
+      errors: {
+        dedupKey: [],
+        summary: [],
+        timestamp: [],
+        links: ['Links cannot be empty.'],
       },
     });
   });

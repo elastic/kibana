@@ -9,24 +9,32 @@ import React from 'react';
 import {
   EuiButton,
   EuiButtonIcon,
-  EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormRow,
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import {
+  ActionParamsProps,
+  TextFieldWithMessageVariables,
+} from '@kbn/triggers-actions-ui-plugin/public';
 import { PagerDutyActionParams } from '../types';
 
 type LinksListProps = Pick<
   ActionParamsProps<PagerDutyActionParams>,
-  'index' | 'editAction' | 'errors'
+  'index' | 'editAction' | 'errors' | 'messageVariables'
 > &
   Pick<PagerDutyActionParams, 'links'>;
 
-export const LinksList: React.FC<LinksListProps> = ({ editAction, errors, index, links }) => {
-  const areLinksInvalid = errors.links !== undefined && errors.links.length > 0;
+export const LinksList: React.FC<LinksListProps> = ({
+  editAction,
+  errors,
+  index,
+  links,
+  messageVariables,
+}) => {
+  const areLinksInvalid = Array.isArray(errors.links) && errors.links.length > 0;
 
   return (
     <EuiFormRow
@@ -38,52 +46,71 @@ export const LinksList: React.FC<LinksListProps> = ({ editAction, errors, index,
       error={errors.links}
       fullWidth
     >
-      <EuiFlexGroup direction="column">
-        {links && (
-          <EuiFlexItem>
-            {links.map((link, idx) => (
-              <>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup key={`my-key-${idx}`}>
-                  <EuiFlexItem>
-                    <EuiFormRow label="href">
-                      <EuiFieldText
-                        name="href"
-                        value={link.href}
-                        onChange={(e) => {
-                          const newLinks = links ? [...links] : [];
-                          newLinks[idx] = { ...link, href: e.target.value };
-                          editAction('links', newLinks, index);
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem>
-                    <EuiFormRow label="text" isInvalid={link.text.length === 0}>
-                      <EuiFieldText
-                        name="text"
-                        value={link.text}
-                        onChange={(e) => {
-                          const newLinks = links ? [...links] : [];
-                          newLinks[idx] = { ...link, text: e.target.value };
-                          editAction('links', newLinks, index);
-                        }}
-                      />
-                    </EuiFormRow>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonIcon
-                      color="danger"
-                      onClick={() => editAction('links', links.splice(idx), index)}
-                      iconType="minusInCircle"
-                      style={{ marginTop: '28px' }}
+      <EuiFlexGroup direction="column" data-test-subj="linksList" gutterSize="s">
+        {links &&
+          links.map((link, currentLinkIndex) => (
+            <EuiFlexItem data-test-subj="linksListItemRow">
+              <EuiSpacer size="s" />
+              <EuiFlexGroup key={`my-key-${currentLinkIndex}`}>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.stackConnectors.components.pagerDuty.linkURLFieldLabel',
+                      {
+                        defaultMessage: 'URL',
+                      }
+                    )}
+                    isInvalid={!link.href}
+                  >
+                    <TextFieldWithMessageVariables
+                      index={index}
+                      editAction={(key, value, i) => {
+                        links[currentLinkIndex] = { ...links[currentLinkIndex], href: value };
+                        editAction('links', links, i);
+                      }}
+                      messageVariables={messageVariables}
+                      paramsProperty={'linksHref'}
+                      inputTargetValue={link.href}
                     />
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </>
-            ))}
-          </EuiFlexItem>
-        )}
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <EuiFormRow
+                    label={i18n.translate(
+                      'xpack.stackConnectors.components.pagerDuty.linkTextFieldLabel',
+                      {
+                        defaultMessage: 'Text',
+                      }
+                    )}
+                    isInvalid={!link.text}
+                  >
+                    <TextFieldWithMessageVariables
+                      index={index}
+                      editAction={(key, value, i) => {
+                        links[currentLinkIndex] = { ...links[currentLinkIndex], text: value };
+                        editAction('links', links, i);
+                      }}
+                      messageVariables={messageVariables}
+                      paramsProperty={'linksText'}
+                      inputTargetValue={link.text}
+                    />
+                  </EuiFormRow>
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiButtonIcon
+                    color="danger"
+                    onClick={() => {
+                      links.splice(currentLinkIndex, 1);
+                      editAction('links', links, index);
+                    }}
+                    iconType="minusInCircle"
+                    style={{ marginTop: '28px' }}
+                    data-test-subj="pagerDutyRemoveLinkButton"
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ))}
         <EuiFlexItem>
           <div>
             <EuiButton
@@ -96,8 +123,11 @@ export const LinksList: React.FC<LinksListProps> = ({ editAction, errors, index,
                 )
               }
               data-test-subj="pagerDutyAddLinkButton"
+              isDisabled={areLinksInvalid}
             >
-              {'Add Link'}
+              {i18n.translate('xpack.stackConnectors.components.pagerDuty.addLinkButtonLabel', {
+                defaultMessage: 'Add Link',
+              })}
             </EuiButton>
           </div>
         </EuiFlexItem>
