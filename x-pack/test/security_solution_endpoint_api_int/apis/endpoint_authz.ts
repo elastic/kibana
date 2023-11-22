@@ -40,7 +40,12 @@ export default function ({ getService }: FtrProviderContext) {
     body: Record<string, unknown> | undefined;
   }
 
-  describe('When attempting to call an endpoint api', function () {
+  // Flaky:
+  // https://github.com/elastic/kibana/issues/171655
+  // https://github.com/elastic/kibana/issues/171656
+  // https://github.com/elastic/kibana/issues/171647
+  // https://github.com/elastic/kibana/issues/171648
+  describe.skip('When attempting to call an endpoint api', function () {
     targetTags(this, ['@ess', '@serverless']);
 
     let indexedData: IndexedHostsAndAlertsResponse;
