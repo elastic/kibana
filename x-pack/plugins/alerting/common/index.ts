@@ -48,6 +48,7 @@ export type {
   MaintenanceWindowCreateBody,
   MaintenanceWindowClientContext,
   MaintenanceWindowDeepLinkIds,
+  ScopedQueryAttributes,
 } from './maintenance_window';
 
 export {

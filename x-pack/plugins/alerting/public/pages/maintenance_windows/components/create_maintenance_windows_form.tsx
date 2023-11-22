@@ -30,7 +30,8 @@ import {
 } from '@elastic/eui';
 import { TIMEZONE_OPTIONS as UI_TIMEZONE_OPTIONS } from '@kbn/core-ui-settings-common';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
-
+import { ValidFeatureId } from '@kbn/rule-data-utils';
+import { Filter } from '@kbn/es-query';
 import { FormProps, schema } from './schema';
 import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';
@@ -43,6 +44,8 @@ import { useUiSetting } from '../../../utils/kibana_react';
 import { DatePickerRangeField } from './fields/date_picker_range_field';
 import { useArchiveMaintenanceWindow } from '../../../hooks/use_archive_maintenance_window';
 import { MaintenanceWindowCategorySelection } from './maintenance_window_category_selection';
+import { MaintenanceWindowScopedQuerySwitch } from './maintenance_window_scoped_query_switch';
+import { MaintenanceWindowScopedQuery } from './maintenance_window_scoped_query';
 
 const UseField = getUseField({ component: Field });
 
@@ -69,6 +72,12 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const [isModalVisible, setIsModalVisible] = useState(false);
     const { defaultTimezone, isBrowser } = useDefaultTimezone();
 
+    const [isScopedQueryEnabled, setIsScopedQueryEnabled] = useState(!!initialValue?.scopedQuery);
+    const [query, setQuery] = useState<string>(initialValue?.scopedQuery?.kql || '');
+    const [filters, setFilters] = useState<Filter[]>(
+      (initialValue?.scopedQuery?.filters as Filter[]) || []
+    );
+
     const isEditMode = initialValue !== undefined && maintenanceWindowId !== undefined;
 
     const hasSetInitialCategories = useRef<boolean>(false);
@@ -80,6 +89,19 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     const { mutate: archiveMaintenanceWindow } = useArchiveMaintenanceWindow();
 
     const { data: ruleTypes, isLoading: isLoadingRuleTypes } = useGetRuleTypes();
+
+    const scopedQueryPayload = useMemo(() => {
+      if (!isScopedQueryEnabled) {
+        return null;
+      }
+      if (!query && !filters.length) {
+        return null;
+      }
+      return {
+        kql: query,
+        filters,
+      };
+    }, [isScopedQueryEnabled, query, filters]);
 
     const submitMaintenanceWindow = useCallback(
       async (formData, isValid) => {
@@ -95,6 +117,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
               formData.recurringSchedule
             ),
             categoryIds: formData.categoryIds,
+            scopedQuery: scopedQueryPayload,
           };
           if (isEditMode) {
             updateMaintenanceWindow({ maintenanceWindowId, maintenanceWindow }, { onSuccess });
@@ -110,6 +133,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         createMaintenanceWindow,
         onSuccess,
         defaultTimezone,
+        scopedQueryPayload,
       ]
     );
 
@@ -122,7 +146,7 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
     const [{ recurring, timezone, categoryIds }, _, mounted] = useFormData<FormProps>({
       form,
-      watch: ['recurring', 'timezone', 'categoryIds'],
+      watch: ['recurring', 'timezone', 'categoryIds', 'scopedQuery'],
     });
     const isRecurring = recurring || false;
     const showTimezone = isBrowser || initialValue?.timezone !== undefined;
@@ -132,7 +156,30 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
 
     const { setFieldValue } = form;
 
-    const onCategoryIdsChange = useCallback(
+    const availableCategories = useMemo(() => {
+      if (!ruleTypes) {
+        return [];
+      }
+      return [...new Set(ruleTypes.map((ruleType) => ruleType.category))];
+    }, [ruleTypes]);
+
+    const featureIds = useMemo(() => {
+      if (!Array.isArray(ruleTypes) || !Array.isArray(categoryIds) || !mounted) {
+        return [];
+      }
+
+      const featureIdsSet = new Set<ValidFeatureId>();
+
+      ruleTypes.forEach((ruleType) => {
+        if (categoryIds.includes(ruleType.category)) {
+          featureIdsSet.add(ruleType.producer as ValidFeatureId);
+        }
+      });
+
+      return [...featureIdsSet];
+    }, [ruleTypes, categoryIds, mounted]);
+
+    const onCategoryIdsCheckboxClick = useCallback(
       (id: string) => {
         if (!categoryIds) {
           return;
@@ -147,6 +194,23 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
         setFieldValue('categoryIds', [...categoryIds, id]);
       },
       [categoryIds, setFieldValue]
+    );
+
+    const onCategoryIdsRadioClick = useCallback(
+      (id: string) => {
+        setFieldValue('categoryIds', [id]);
+      },
+      [setFieldValue]
+    );
+
+    const onScopeQueryToggle = useCallback(
+      (isEnabled: boolean) => {
+        if (isEnabled) {
+          setFieldValue('categoryIds', [categoryIds?.sort()[0] || availableCategories.sort()[0]]);
+        }
+        setIsScopedQueryEnabled(isEnabled);
+      },
+      [categoryIds, availableCategories, setFieldValue]
     );
 
     const modal = useMemo(() => {
@@ -174,13 +238,6 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
       }
       return m;
     }, [closeModal, archiveMaintenanceWindow, isModalVisible, maintenanceWindowId, onSuccess]);
-
-    const availableCategories = useMemo(() => {
-      if (!ruleTypes) {
-        return [];
-      }
-      return [...new Set(ruleTypes.map((ruleType) => ruleType.category))];
-    }, [ruleTypes]);
 
     // For create mode, we want to initialize options to the rule type category the
     // user has access
@@ -330,19 +387,45 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
           )}
           <EuiFlexItem>
             <EuiHorizontalRule margin="xl" />
-            <UseField path="categoryIds">
-              {(field) => (
-                <MaintenanceWindowCategorySelection
-                  selectedCategories={categoryIds || []}
-                  availableCategories={availableCategories}
-                  isLoading={isLoadingRuleTypes}
-                  errors={field.errors.map((error) => error.message)}
-                  onChange={onCategoryIdsChange}
+            <UseField path="scopedQuery">
+              {() => (
+                <MaintenanceWindowScopedQuerySwitch
+                  isEnabled={isScopedQueryEnabled}
+                  onEnabledChange={onScopeQueryToggle}
                 />
               )}
             </UseField>
-            <EuiHorizontalRule margin="xl" />
           </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiHorizontalRule margin="xl" />
+            <UseField path="categoryIds">
+              {(field) => (
+                <MaintenanceWindowCategorySelection
+                  isScopedQueryEnabled={isScopedQueryEnabled}
+                  isLoading={isLoadingRuleTypes}
+                  selectedCategories={categoryIds || []}
+                  availableCategories={availableCategories}
+                  errors={field.errors.map((error) => error.message)}
+                  onCheckboxChange={onCategoryIdsCheckboxClick}
+                  onRadioChange={onCategoryIdsRadioClick}
+                />
+              )}
+            </UseField>
+          </EuiFlexItem>
+          <UseField path="scopedQuery">
+            {() => (
+              <MaintenanceWindowScopedQuery
+                featureIds={featureIds}
+                query={query}
+                filters={filters}
+                isLoading={isLoadingRuleTypes}
+                isEnabled={isScopedQueryEnabled}
+                onQueryChange={setQuery}
+                onFiltersChange={setFilters}
+              />
+            )}
+          </UseField>
+          <EuiHorizontalRule margin="xl" />
         </EuiFlexGroup>
         {isEditMode && (
           <>
@@ -375,4 +458,5 @@ export const CreateMaintenanceWindowForm = React.memo<CreateMaintenanceWindowFor
     );
   }
 );
+
 CreateMaintenanceWindowForm.displayName = 'CreateMaintenanceWindowForm';

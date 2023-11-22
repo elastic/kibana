@@ -14,6 +14,7 @@ export type {
   RuleAction,
   Rule,
   RuleType,
+  RuleTypeIndex,
   RuleTypeModel,
   RuleStatusFilterProps,
   RuleStatus,

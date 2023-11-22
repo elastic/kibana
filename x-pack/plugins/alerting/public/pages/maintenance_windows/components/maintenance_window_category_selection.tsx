@@ -14,36 +14,38 @@ import {
   EuiFormRow,
   EuiTextColor,
   EuiCheckboxGroup,
-  EuiCheckboxGroupOption,
+  EuiRadioGroup,
   EuiLoadingSpinner,
 } from '@elastic/eui';
 
 import * as i18n from '../translations';
 
-const CHECKBOX_OPTIONS: EuiCheckboxGroupOption[] = [
+const CHECKBOX_OPTIONS = [
   {
     id: DEFAULT_APP_CATEGORIES.observability.id,
     label: i18n.CREATE_FORM_CATEGORY_OBSERVABILITY_RULES,
-    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.observability.id}`,
+    ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.observability.id}`,
   },
   {
     id: DEFAULT_APP_CATEGORIES.security.id,
     label: i18n.CREATE_FORM_CATEGORY_SECURITY_RULES,
-    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.security.id}`,
+    ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.security.id}`,
   },
   {
     id: DEFAULT_APP_CATEGORIES.management.id,
     label: i18n.CREATE_FORM_CATEGORY_STACK_RULES,
-    ['data-test-subj']: `checkbox-${DEFAULT_APP_CATEGORIES.management.id}`,
+    ['data-test-subj']: `option-${DEFAULT_APP_CATEGORIES.management.id}`,
   },
-];
+].sort((a, b) => a.id.localeCompare(b.id));
 
 export interface MaintenanceWindowCategorySelectionProps {
   selectedCategories: string[];
   availableCategories: string[];
   errors?: string[];
   isLoading?: boolean;
-  onChange: (category: string) => void;
+  isScopedQueryEnabled: boolean;
+  onCheckboxChange: (category: string) => void;
+  onRadioChange: (category: string) => void;
 }
 
 export const MaintenanceWindowCategorySelection = (
@@ -54,7 +56,9 @@ export const MaintenanceWindowCategorySelection = (
     availableCategories,
     errors = [],
     isLoading = false,
-    onChange,
+    isScopedQueryEnabled = false,
+    onCheckboxChange,
+    onRadioChange,
   } = props;
 
   const selectedMap = useMemo(() => {
@@ -64,12 +68,38 @@ export const MaintenanceWindowCategorySelection = (
     }, {});
   }, [selectedCategories]);
 
-  const options: EuiCheckboxGroupOption[] = useMemo(() => {
+  const options = useMemo(() => {
     return CHECKBOX_OPTIONS.map((option) => ({
       ...option,
       disabled: !availableCategories.includes(option.id),
     }));
   }, [availableCategories]);
+
+  const categorySelection = useMemo(() => {
+    if (isScopedQueryEnabled) {
+      return (
+        <EuiRadioGroup
+          options={options}
+          idSelected={selectedCategories[0]}
+          onChange={onRadioChange}
+        />
+      );
+    }
+    return (
+      <EuiCheckboxGroup
+        options={options}
+        idToSelectedMap={selectedMap}
+        onChange={onCheckboxChange}
+      />
+    );
+  }, [
+    isScopedQueryEnabled,
+    options,
+    selectedCategories,
+    selectedMap,
+    onCheckboxChange,
+    onRadioChange,
+  ]);
 
   if (isLoading) {
     return (
@@ -102,7 +132,7 @@ export const MaintenanceWindowCategorySelection = (
           isInvalid={!!errors.length}
           error={errors[0]}
         >
-          <EuiCheckboxGroup options={options} idToSelectedMap={selectedMap} onChange={onChange} />
+          {categorySelection}
         </EuiFormRow>
       </EuiFlexItem>
     </EuiFlexGroup>

@@ -10,3 +10,4 @@ export { AlertLifecycleStatusBadge } from './src/alert_lifecycle_status_badge';
 export type { AlertLifecycleStatusBadgeProps } from './src/alert_lifecycle_status_badge';
 export { MaintenanceWindowCallout } from './src/maintenance_window_callout';
 export { AddMessageVariables } from './src/add_message_variables';
+export { AlertsSearchBar } from './src/alerts_search_bar';
