@@ -37,7 +37,7 @@ import { InferenceConfiguration } from './inference_config';
 import { EMPTY_PIPELINE_CONFIGURATION, MLInferenceLogic } from './ml_inference_logic';
 import { MlModelSelectOption } from './model_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';
-import { TextExpansionCallOut } from './text_expansion_callout';
+import { TextExpansionCallOut } from './text_expansion_callout/text_expansion_callout';
 import { MODEL_REDACTED_VALUE, MODEL_SELECT_PLACEHOLDER } from './utils';
 
 const MODEL_SELECT_PLACEHOLDER_VALUE = 'model_placeholder$$';

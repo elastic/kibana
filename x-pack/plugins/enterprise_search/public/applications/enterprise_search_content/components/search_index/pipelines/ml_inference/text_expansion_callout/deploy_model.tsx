@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedHTMLMessage } from '@kbn/i18n-react';
 
-import { docLinks } from '../../../../../shared/doc_links';
+import { docLinks } from '../../../../../../shared/doc_links';
 
 import { TextExpansionCallOutState, TextExpansionDismissButton } from './text_expansion_callout';
 import { TextExpansionCalloutLogic } from './text_expansion_callout_logic';
