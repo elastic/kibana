@@ -58,6 +58,7 @@ const URL_WITH_CONTRADICTORY_FILTERS =
 
 // FLAKY: https://github.com/elastic/kibana/issues/171779
 // FLAKY: https://github.com/elastic/kibana/issues/171778
+// FLAKY: https://github.com/elastic/kibana/issues/171785
 describe.skip('Invalid Indicators', { tags: '@ess' }, () => {
   describe('verify the grid loads even with missing fields', () => {
     beforeEach(() => {
