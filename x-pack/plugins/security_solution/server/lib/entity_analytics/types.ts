@@ -69,8 +69,6 @@ export interface InitRiskEngineResultResponse {
   risk_engine_resources_installed: boolean;
   risk_engine_configuration_created: boolean;
   legacy_risk_engine_disabled: boolean;
-  // TODO: make it required once asset criticality is enabled by default
-  asset_criticality_resources_installed?: boolean;
   errors: string[];
 }
 

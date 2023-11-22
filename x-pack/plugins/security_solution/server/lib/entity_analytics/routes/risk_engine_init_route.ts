@@ -61,19 +61,11 @@ export const riskEngineInitRoute = (
           errors: initResult.errors,
         };
 
-        // TODO: after enabling asset criticality by default, we don't need assetCriticalityInstallFailed
-        let assetCriticalityInstallFailed = false;
-        if (isAssetCriticalityEnabled) {
-          initResultResponse.asset_criticality_resources_installed =
-            initResult.assetCriticalityInstalled;
-          assetCriticalityInstallFailed = !initResult.assetCriticalityInstalled;
-        }
-
+        // TODO: after enabling asset criticality feature, we don't need assetCriticalityInstallFailed
         if (
           !initResult.riskEngineEnabled ||
           !initResult.riskEngineResourcesInstalled ||
-          !initResult.riskEngineConfigurationCreated ||
-          assetCriticalityInstallFailed
+          !initResult.riskEngineConfigurationCreated
         ) {
           return siemResponse.error({
             statusCode: 400,

@@ -48,7 +48,6 @@ export default ({ getService }: FtrProviderContext) => {
             risk_engine_configuration_created: true,
             risk_engine_enabled: true,
             risk_engine_resources_installed: true,
-            asset_criticality_resources_installed: true,
           },
         });
       });
@@ -59,7 +58,6 @@ export default ({ getService }: FtrProviderContext) => {
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
         const transformId = 'risk_score_latest_transform_default';
-        const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
 
         await riskEngineRoutes.init();
 
@@ -263,33 +261,6 @@ export default ({ getService }: FtrProviderContext) => {
         });
 
         expect(transformStats.transforms[0].state).to.eql('stopped');
-
-        const assetCriticalityIndexResult = await es.indices.get({
-          index: assetCriticalityIndex,
-        });
-
-        expect(
-          assetCriticalityIndexResult['.asset-criticality.asset-criticality-default']?.mappings
-        ).to.eql({
-          dynamic: 'strict',
-          properties: {
-            '@timestamp': {
-              type: 'date',
-            },
-            criticality: {
-              type: 'keyword',
-            },
-            id_field: {
-              type: 'keyword',
-            },
-            id_value: {
-              type: 'keyword',
-            },
-            updated_at: {
-              type: 'date',
-            },
-          },
-        });
       });
 
       it('should create configuration saved object', async () => {

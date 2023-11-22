@@ -1,0 +1,59 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import expect from '@kbn/expect';
+import { cleanRiskEngine } from '../../utils';
+import { FtrProviderContext } from '../../../../ftr_provider_context';
+
+export default ({ getService }: FtrProviderContext) => {
+  const es = getService('es');
+
+  const kibanaServer = getService('kibanaServer');
+  const log = getService('log');
+
+  describe('@ess @serverless asset_criticality', () => {
+    beforeEach(async () => {
+      await cleanRiskEngine({ kibanaServer, es, log });
+    });
+
+    afterEach(async () => {
+      await cleanRiskEngine({ kibanaServer, es, log });
+    });
+
+    describe('init', () => {
+      it('should has index installed on Kibana start', async () => {
+        const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
+        const assetCriticalityIndexResult = await es.indices.get({
+          index: assetCriticalityIndex,
+        });
+
+        expect(
+          assetCriticalityIndexResult['.asset-criticality.asset-criticality-default']?.mappings
+        ).to.eql({
+          dynamic: 'strict',
+          properties: {
+            '@timestamp': {
+              type: 'date',
+            },
+            criticality: {
+              type: 'keyword',
+            },
+            id_field: {
+              type: 'keyword',
+            },
+            id_value: {
+              type: 'keyword',
+            },
+            updated_at: {
+              type: 'date',
+            },
+          },
+        });
+      });
+    });
+  });
+};

@@ -18,7 +18,6 @@ import { AssetCriticalityDataClient } from '../asset_criticality/asset_criticali
 import type { RiskEngineConfiguration } from '../types';
 import * as savedObjectConfig from './utils/saved_object_configuration';
 import * as transforms from '../utils/transforms';
-import { assetCriticalityDataClientMock } from '../asset_criticality/asset_criticality_data_client.mock';
 import { riskScoreDataClientMock } from '../risk_score/risk_score_data_client.mock';
 
 const getSavedObjectConfiguration = (attributes = {}) => ({
@@ -244,7 +243,7 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -254,7 +253,6 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: true,
             riskEngineResourcesInstalled: true,
-            assetCriticalityInstalled: true,
           });
         });
 
@@ -266,7 +264,7 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -276,7 +274,6 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: true,
             riskEngineResourcesInstalled: true,
-            assetCriticalityInstalled: true,
           });
         });
 
@@ -289,7 +286,7 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -299,7 +296,6 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: true,
             riskEngineResourcesInstalled: true,
-            assetCriticalityInstalled: true,
           });
         });
 
@@ -313,7 +309,7 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
             riskScoreDataClient,
           });
 
@@ -323,31 +319,6 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: false,
             riskEngineEnabled: false,
             riskEngineResourcesInstalled: false,
-            assetCriticalityInstalled: false,
-          });
-        });
-
-        it('should catch error for asset criticality init and stop', async () => {
-          const assetCriticalityDataClient = assetCriticalityDataClientMock.create();
-          assetCriticalityDataClient.init.mockImplementationOnce(() => {
-            throw new Error('Error initAssetCriticality');
-          });
-
-          const initResult = await riskEngineDataClient.init({
-            namespace: 'default',
-            taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient,
-            riskScoreDataClient: riskScoreDataClientMock.create(),
-          });
-
-          expect(initResult).toEqual({
-            errors: ['Error initAssetCriticality'],
-            legacyRiskEngineDisabled: true,
-            riskEngineConfigurationCreated: false,
-            riskEngineEnabled: false,
-            riskEngineResourcesInstalled: true,
-            assetCriticalityInstalled: false,
           });
         });
 
@@ -360,7 +331,7 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -370,7 +341,6 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: false,
             riskEngineEnabled: false,
             riskEngineResourcesInstalled: true,
-            assetCriticalityInstalled: true,
           });
         });
 
@@ -383,7 +353,7 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-            assetCriticalityDataClient: assetCriticalityDataClientMock.create(),
+
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -393,7 +363,6 @@ describe('RiskEngineDataClient', () => {
             riskEngineConfigurationCreated: true,
             riskEngineEnabled: false,
             riskEngineResourcesInstalled: true,
-            assetCriticalityInstalled: true,
           });
         });
       });

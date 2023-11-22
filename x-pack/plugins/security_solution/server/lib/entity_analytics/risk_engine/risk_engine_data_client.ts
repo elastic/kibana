@@ -44,19 +44,12 @@ interface RiskEngineDataClientOpts {
 export class RiskEngineDataClient {
   constructor(private readonly options: RiskEngineDataClientOpts) {}
 
-  public async init({
-    namespace,
-    taskManager,
-    assetCriticalityDataClient,
-    riskScoreDataClient,
-    isAssetCriticalityEnabled,
-  }: InitOpts) {
+  public async init({ namespace, taskManager, riskScoreDataClient }: InitOpts) {
     const result: InitRiskEngineResult = {
       legacyRiskEngineDisabled: false,
       riskEngineResourcesInstalled: false,
       riskEngineConfigurationCreated: false,
       riskEngineEnabled: false,
-      assetCriticalityInstalled: false,
       errors: [] as string[],
     };
 
@@ -73,16 +66,6 @@ export class RiskEngineDataClient {
     } catch (e) {
       result.errors.push(e.message);
       return result;
-    }
-
-    if (isAssetCriticalityEnabled) {
-      try {
-        await assetCriticalityDataClient.init();
-        result.assetCriticalityInstalled = true;
-      } catch (e) {
-        result.errors.push(e.message);
-        return result;
-      }
     }
 
     try {
