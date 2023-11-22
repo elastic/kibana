@@ -6,6 +6,7 @@
  */
 
 import {
+  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
   EuiCallOut,
@@ -19,18 +20,18 @@ import {
   EuiFlyoutHeader,
   EuiFormFieldset,
   EuiIcon,
+  EuiLink,
   EuiSpacer,
   EuiSteps,
   EuiTab,
   EuiTabs,
   EuiText,
   EuiTitle,
-  EuiLink,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState, type FC } from 'react';
+import React, { type FC, useMemo, useState } from 'react';
 import { groupBy } from 'lodash';
 import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
@@ -61,10 +62,17 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
             {
               id: 'elser',
               name: (
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.addModelFlyout.elserTabLabel"
-                  defaultMessage="ELSER"
-                />
+                <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                  <EuiFlexItem grow={false}>
+                    <EuiIcon type="logoElastic" size="m" />
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.addModelFlyout.elserTabLabel"
+                      defaultMessage="ELSER"
+                    />
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               ),
               content: (
                 <>
@@ -120,11 +128,33 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                                   <EuiCheckableCard
                                     id={model.model_id}
                                     label={
-                                      <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                                      <EuiFlexGroup
+                                        gutterSize={'s'}
+                                        alignItems={'center'}
+                                        justifyContent={'spaceBetween'}
+                                      >
                                         <EuiFlexItem grow={false}>
-                                          <EuiIcon type="logoElastic" size="l" />
+                                          <header>
+                                            <EuiText size={'s'}>
+                                              <b>
+                                                {model.os === 'Linux' && model.arch === 'amd64' ? (
+                                                  <FormattedMessage
+                                                    id="xpack.ml.trainedModels.addModelFlyout.intelLinuxLabel"
+                                                    defaultMessage="Intel and Linux Optimized"
+                                                  />
+                                                ) : (
+                                                  <FormattedMessage
+                                                    id="xpack.ml.trainedModels.addModelFlyout.crossPlatformLabel"
+                                                    defaultMessage="Cross platform"
+                                                  />
+                                                )}
+                                              </b>
+                                            </EuiText>
+                                          </header>
+                                          <EuiText size={'s'} color={'subdued'}>
+                                            {model.model_id}
+                                          </EuiText>
                                         </EuiFlexItem>
-                                        <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
                                         {model.recommended ? (
                                           <EuiFlexItem grow={false}>
                                             <EuiToolTip
@@ -135,10 +165,12 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                                                 />
                                               }
                                             >
-                                              <FormattedMessage
-                                                id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                                                defaultMessage="(Recommended)"
-                                              />
+                                              <EuiBadge color="hollow">
+                                                <FormattedMessage
+                                                  id="xpack.ml.trainedModels.addModelFlyout.recommendedDownloadLabel"
+                                                  defaultMessage="Recommended"
+                                                />
+                                              </EuiBadge>
                                             </EuiToolTip>
                                           </EuiFlexItem>
                                         ) : null}
