@@ -16,35 +16,12 @@ import type {
 } from '@kbn/core-chrome-browser';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import type { NodeProps, NodePropsEnhanced } from '../types';
+import type { NodeProps } from '../types';
 import { NavigationSectionUI } from './navigation_section_ui';
 import { useNavigation } from './navigation';
 import { NavigationBucket, type Props as NavigationBucketProps } from './navigation_bucket';
-import { getNavigationNodeId } from '../../utils';
 import { initNavNode } from '../../navnode_utils';
 import { CloudLinks } from '../../cloud_links';
-
-function getEnhancedProps<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
->(
-  props: Props<LinkId, Id, ChildrenId>,
-  { treeDepth, index }: { treeDepth: number; index?: number }
-) {
-  const { children, order, ...rest } = props;
-  const id = getNavigationNodeId(rest, () => `node-${treeDepth}-${index ?? 'root'}`) as Id;
-
-  const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children' | 'id'> & {
-    id: Id;
-  } = {
-    ...rest,
-    id,
-    isGroup: true,
-  };
-
-  return nodeEnhanced;
-}
 
 /**
  * Handler to convert the JSX children of the NavigationGroup to the ChromeProjectNavigationNode
@@ -70,7 +47,7 @@ const jsxChildrenToNavigationNode = (
     const title =
       typeof child.props.children === 'string' ? child.props.children : child.props.title;
     const childNode = initNavNode(
-      { ...getEnhancedProps({ ...child.props, title }, { treeDepth, index }), parentNodePath },
+      { ...child.props, title, treeDepth, index, parentNodePath },
       { cloudLinks, deepLinks }
     );
 
@@ -111,7 +88,6 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
-  order?: number;
 }
 
 function NavigationGroupInternalComp<
@@ -128,8 +104,7 @@ function NavigationGroupInternalComp<
   const childrenNodesRef = useRef<ChromeProjectNavigationNode[]>();
 
   const navNode = useMemo<ChromeProjectNavigationNode | null>(() => {
-    const enhancedProps = getEnhancedProps(props, { treeDepth: 0 });
-    const _navNode = initNavNode(enhancedProps, { cloudLinks, deepLinks });
+    const _navNode = initNavNode(props, { cloudLinks, deepLinks });
 
     if (!_navNode) return null;
 

@@ -14,7 +14,7 @@ import deepEqual from 'react-fast-compare';
 import useObservable from 'react-use/lib/useObservable';
 
 import { useNavigation as useNavigationServices } from '../../services';
-import type { NodeProps, NodePropsEnhanced } from '../types';
+import type { NodeProps } from '../types';
 import { useNavigation } from './navigation';
 import { getNavigationNodeHref, isActiveFromUrl } from '../../utils';
 import { initNavNode } from '../../navnode_utils';
@@ -25,7 +25,6 @@ export interface Props<
   ChildrenId extends string = Id
 > extends NodeProps<LinkId, Id, ChildrenId> {
   unstyled?: boolean;
-  order?: number;
 }
 
 function NavigationItemComp<
@@ -36,21 +35,19 @@ function NavigationItemComp<
   const { cloudLinks, navigateToUrl, navLinks$ } = useNavigationServices();
   const { unstyled: unstyledFromContext, register, activeNodes } = useNavigation();
   const deepLinks = useObservable(navLinks$, []);
-  const { order } = props;
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
+  const { order, appendHorizontalRule } = props;
 
   const { children, node } = useMemo(() => {
-    const { children: _children, order: _order, ...rest } = props;
-    const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'> = {
-      ...rest,
-      isGroup: false,
-    };
+    const { children: _children, ...rest } = props;
+
     if (typeof _children === 'string') {
-      nodeEnhanced.title = nodeEnhanced.title ?? _children;
+      rest.title = rest.title ?? _children;
     }
+
     return {
       children: _children,
-      node: nodeEnhanced,
+      node: rest,
     };
   }, [props]);
   const unstyled = props.unstyled ?? unstyledFromContext;
@@ -71,6 +68,12 @@ function NavigationItemComp<
 
     return navNodeRef.current;
   }, [node, cloudLinks, deepLinks]);
+
+  if (navNode && appendHorizontalRule) {
+    throw new Error(
+      `[Chrome navigation] Error in node [${navNode.id}]. "appendHorizontalRule" can only be added for group with children.`
+    );
+  }
 
   useEffect(() => {
     if (navNode) {

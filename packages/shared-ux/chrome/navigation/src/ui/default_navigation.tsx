@@ -204,14 +204,14 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
           );
           nodesCount += _nodesCount;
           return (
-            <Navigation.Group {...navNode} key={navNode.id} order={nodesCount}>
+            <Navigation.Group {...navNode} key={navNode.id ?? i} order={nodesCount}>
               {/* Recursively build the tree */}
               {jsxChildrenNodes}
             </Navigation.Group>
           );
         }
 
-        return <Navigation.Item {...navNode} key={navNode.id} order={nodesCount} />;
+        return <Navigation.Item {...navNode} key={navNode.id ?? i} order={nodesCount} />;
       });
 
       return {

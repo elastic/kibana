@@ -33,25 +33,9 @@ export interface NodeProps<
   children?: ReactNode;
   // children?: ((navNode: ChromeProjectNavigationNode) => ReactNode) | ReactNode;
   parentNodePath?: string;
-}
-
-/**
- * @internal
- *
- * Internally we enhance the Props passed to the Navigation.Item component.
- */
-export interface NodePropsEnhanced<
-  LinkId extends AppDeepLinkId = AppDeepLinkId,
-  Id extends string = string,
-  ChildrenId extends string = Id
-> extends NodeProps<LinkId, Id, ChildrenId> {
-  /**
-   * Forces the node to be active. This is used to force a collapisble nav group to be open
-   * even if the URL does not match any of the nodes in the group.
-   */
-  isActive?: boolean;
-  /** Flag to indicate if the navigation node is a group or not */
-  isGroup: boolean;
+  order?: number;
+  treeDepth?: number;
+  index?: number;
 }
 
 /** The preset that can be pass to the NavigationBucket component */

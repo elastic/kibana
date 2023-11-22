@@ -15,7 +15,7 @@ import type {
 } from '@kbn/core-chrome-browser';
 
 import type { CloudLinks } from './cloud_links';
-import type { NodePropsEnhanced } from './ui/types';
+import type { NodeProps } from './ui/types';
 import { getNavigationNodeId, isAbsoluteLink } from './utils';
 
 /**
@@ -64,7 +64,7 @@ function getTitleForNode<
   Id extends string = string,
   ChildrenId extends string = Id
 >(
-  navNode: NodePropsEnhanced<LinkId, Id, ChildrenId>,
+  navNode: NodeProps<LinkId, Id, ChildrenId>,
   { deepLink, cloudLinks }: { deepLink?: ChromeNavLink; cloudLinks: CloudLinks }
 ): string {
   const { children } = navNode;
@@ -91,15 +91,7 @@ function validateNodeProps<
   LinkId extends AppDeepLinkId = AppDeepLinkId,
   Id extends string = string,
   ChildrenId extends string = Id
->({
-  id,
-  link,
-  href,
-  cloudLink,
-  renderAs,
-  appendHorizontalRule,
-  isGroup,
-}: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>) {
+>({ id, link, href, cloudLink, renderAs }: NodeProps<LinkId, Id, ChildrenId>) {
   if (link && cloudLink) {
     throw new Error(
       `[Chrome navigation] Error in node [${id}]. Only one of "link" or "cloudLink" can be provided.`
@@ -120,11 +112,6 @@ function validateNodeProps<
       `[Chrome navigation] Error in node [${id}]. If renderAs is set to "item", a "link" must also be provided.`
     );
   }
-  if (appendHorizontalRule && !isGroup) {
-    throw new Error(
-      `[Chrome navigation] Error in node [${id}]. "appendHorizontalRule" can only be added for group with children.`
-    );
-  }
 }
 
 export const initNavNode = <
@@ -132,12 +119,21 @@ export const initNavNode = <
   Id extends string = string,
   ChildrenId extends string = Id
 >(
-  node: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'>,
+  node: NodeProps<LinkId, Id, ChildrenId>,
   { cloudLinks, deepLinks }: { cloudLinks: CloudLinks; deepLinks: Readonly<ChromeNavLink[]> }
 ): ChromeProjectNavigationNode | null => {
   validateNodeProps(node);
 
-  const { cloudLink, link, parentNodePath, ...navNode } = node;
+  const {
+    cloudLink,
+    link,
+    parentNodePath,
+    treeDepth = 0,
+    index = 0,
+    order,
+    children,
+    ...navNode
+  } = node;
   const deepLink = deepLinks.find((dl) => dl.id === link);
   const sideNavStatus = getNodeStatus(
     {
@@ -152,7 +148,7 @@ export const initNavNode = <
     return null;
   }
 
-  const id = getNavigationNodeId(node);
+  const id = getNavigationNodeId(node, () => `node-${treeDepth}-${index ?? 'root'}`) as Id;
   const title = getTitleForNode(node, { deepLink, cloudLinks });
   const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href;
   const nodePath = parentNodePath ? `${parentNodePath}.${id}` : id;
