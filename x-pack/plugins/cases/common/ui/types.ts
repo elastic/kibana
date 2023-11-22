@@ -26,6 +26,7 @@ import type {
   ExternalReferenceAttachment,
   PersistableStateAttachment,
   Configuration,
+  CustomFieldTypes,
 } from '../types/domain';
 import type {
   CasePatchRequest,
@@ -159,7 +160,10 @@ export interface SystemFilterOptions {
 
 export interface FilterOptions extends SystemFilterOptions {
   customFields: {
-    [key: string]: string[];
+    [key: string]: {
+      type: CustomFieldTypes;
+      options: string[];
+    };
   };
 }
 

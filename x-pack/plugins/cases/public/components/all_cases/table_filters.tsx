@@ -92,14 +92,17 @@ const CasesTableFiltersComponent = ({
   const onFilterOptionChange: FilterChangeHandler = ({
     filterId,
     selectedOptionKeys,
-    isCustomField = false,
+    customFieldType,
   }) => {
-    const newFilters = isCustomField
+    const newFilters = customFieldType
       ? {
           ...filterOptions,
           customFields: {
             ...filterOptions.customFields,
-            [filterId]: selectedOptionKeys,
+            [filterId]: {
+              type: customFieldType,
+              options: selectedOptionKeys,
+            },
           },
         }
       : {

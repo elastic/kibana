@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CustomFieldTypes } from '../../../../common/types/domain';
 import type { FilterOptions } from '../../../../common/ui';
 
 export interface FilterConfigState {
@@ -15,7 +16,7 @@ export interface FilterConfigState {
 export type FilterChangeHandler = (params: {
   filterId: string;
   selectedOptionKeys: string[];
-  isCustomField?: boolean;
+  customFieldType?: CustomFieldTypes;
 }) => void;
 
 export interface FilterConfigRenderParams {

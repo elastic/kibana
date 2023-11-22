@@ -98,3 +98,24 @@ export const DELETE_FIELD_DESCRIPTION = i18n.translate(
 export const DELETE = i18n.translate('xpack.cases.customFields.fieldOptions.Delete', {
   defaultMessage: 'Delete',
 });
+
+export const TOGGLE_FIELD_ON_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.on',
+  {
+    defaultMessage: 'On',
+  }
+);
+
+export const TOGGLE_FIELD_OFF_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.off',
+  {
+    defaultMessage: 'Off',
+  }
+);
+
+export const TOGGLE_FIELD_UNSET_LABEL = i18n.translate(
+  'xpack.cases.customFields.tableFilters.toggle.unset',
+  {
+    defaultMessage: 'Unset',
+  }
+);

@@ -10,47 +10,7 @@ import { CustomFieldTypes } from '../../../../common/types/domain';
 import { builderMap as customFieldsBuilder } from '../../custom_fields/builder';
 import { useGetCaseConfiguration } from '../../../containers/configure/use_get_case_configuration';
 import type { FilterConfig, FilterConfigRenderParams } from './types';
-import { MultiSelectFilter, mapToMultiSelectOption } from '../multi_select_filter';
-
-const getCustomFieldFilterComponent = ({
-  customFieldOptions = [],
-  label,
-  key,
-}: {
-  customFieldOptions?: string[];
-  label: string;
-  key: string;
-}) => {
-  const FieldFilterComponent = ({ filterOptions, onChange }: FilterConfigRenderParams) => {
-    const onCustomFieldChange = ({
-      filterId,
-      selectedOptionKeys,
-    }: {
-      filterId: string;
-      selectedOptionKeys: string[];
-    }) => {
-      onChange({
-        filterId,
-        selectedOptionKeys,
-        isCustomField: true,
-      });
-    };
-
-    return (
-      <MultiSelectFilter
-        buttonLabel={label}
-        id={key}
-        onChange={onCustomFieldChange}
-        options={mapToMultiSelectOption(customFieldOptions)}
-        selectedOptionKeys={filterOptions.customFields[key]}
-      />
-    );
-  };
-
-  FieldFilterComponent.displayName = 'FieldFilterComponent';
-
-  return FieldFilterComponent;
-};
+import { MultiSelectFilter } from '../multi_select_filter';
 
 export const useCustomFieldsFilterConfig = () => {
   const [filterConfig, setFilterConfig] = useState<FilterConfig[]>([]);
@@ -61,20 +21,43 @@ export const useCustomFieldsFilterConfig = () => {
 
   useEffect(() => {
     const customFieldsFilterConfig: FilterConfig[] = [];
-    for (const { key, type, label } of customFields ?? []) {
+    for (const { key: fieldKey, type, label: buttonLabel } of customFields ?? []) {
       if (customFieldsBuilder[type]) {
-        const customField = customFieldsBuilder[type]();
+        const { filterOptions: customFieldOptions = [] } = customFieldsBuilder[type]();
 
         customFieldsFilterConfig.push({
-          key,
+          key: fieldKey,
           isActive: false,
           isAvailable: type === CustomFieldTypes.TOGGLE,
-          label,
-          render: getCustomFieldFilterComponent({
-            customFieldOptions: customField.filterOptions,
-            key,
-            label,
-          }),
+          label: buttonLabel,
+          render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
+            const onCustomFieldChange = ({
+              filterId,
+              selectedOptionKeys,
+            }: {
+              filterId: string;
+              selectedOptionKeys: string[];
+            }) => {
+              onChange({
+                filterId,
+                selectedOptionKeys,
+                customFieldType: type,
+              });
+            };
+
+            return (
+              <MultiSelectFilter
+                buttonLabel={buttonLabel}
+                id={fieldKey}
+                onChange={onCustomFieldChange}
+                options={customFieldOptions.map((option) => ({
+                  key: option.key,
+                  label: option.label,
+                }))}
+                selectedOptionKeys={filterOptions.customFields[fieldKey]?.options || []}
+              />
+            );
+          },
         });
       }
     }

@@ -54,6 +54,7 @@ import {
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  CASES_INTERNAL_URL,
 } from '../../common/constants';
 import { getAllConnectorTypesUrl } from '../../common/utils/connectors_api';
 
@@ -270,7 +271,7 @@ export const getCases = async ({
   },
   signal,
 }: FetchCasesProps): Promise<CasesFindResponseUI> => {
-  const query = {
+  const body = {
     ...removeOptionFromFilter({
       filterKey: 'status',
       filterOptions: filterOptions.status,
@@ -292,11 +293,14 @@ export const getCases = async ({
     ...queryParams,
   };
 
-  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(`${CASES_URL}/_find`, {
-    method: 'GET',
-    query,
-    signal,
-  });
+  const response = await KibanaServices.get().http.fetch<CasesFindResponse>(
+    `${CASES_INTERNAL_URL}/_search`,
+    {
+      method: 'POST',
+      body: JSON.stringify(body),
+      signal,
+    }
+  );
 
   return convertAllCasesToCamel(decodeCasesFindResponse(response));
 };

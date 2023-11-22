@@ -26,5 +26,9 @@ export const configureToggleCustomFieldFactory: CustomFieldFactory<CaseCustomFie
     View,
     Create,
   }),
-  filterOptions: ['on', 'off', 'unset'], // FIXME: translate
+  filterOptions: [
+    { key: 'on', label: i18n.TOGGLE_FIELD_ON_LABEL, value: true },
+    { key: 'off', label: i18n.TOGGLE_FIELD_OFF_LABEL, value: false },
+    { key: 'unset', label: i18n.TOGGLE_FIELD_UNSET_LABEL, value: null },
+  ],
 });
