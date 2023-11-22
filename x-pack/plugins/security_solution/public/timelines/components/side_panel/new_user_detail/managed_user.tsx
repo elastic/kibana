@@ -14,9 +14,10 @@ import {
   useEuiTheme,
   EuiEmptyPrompt,
   EuiCallOut,
+  useEuiFontSize,
 } from '@elastic/eui';
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import * as i18n from './translations';
@@ -44,10 +45,6 @@ export const ManagedUser = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const managedItems = useManagedUserItems(managedUser.details);
-  const [isManagedDataToggleOpen, setManagedDataToggleOpen] = useState(false);
-  const onToggleManagedData = useCallback(() => {
-    setManagedDataToggleOpen((isOpen) => !isOpen);
-  }, [setManagedDataToggleOpen]);
   const managedUserTableColumns = useMemo(
     () => getManagedUserTableColumns(contextID, scopeId, isDraggable),
     [isDraggable, contextID, scopeId]
@@ -59,40 +56,16 @@ export const ManagedUser = ({
     [getAppUrl]
   );
 
-  if (!managedUser.isLoading && !managedUser.isIntegrationEnabled) {
-    return (
-      <>
-        <EuiTitle size="s">
-          <h5>{i18n.MANAGED_DATA_TITLE}</h5>
-        </EuiTitle>
-        <EuiSpacer size="l" />
-        <EuiPanel data-test-subj="managedUser-integration-disable-callout">
-          <EuiEmptyPrompt
-            title={<h2>{i18n.NO_ACTIVE_INTEGRATION_TITLE}</h2>}
-            body={<p>{i18n.NO_ACTIVE_INTEGRATION_TEXT}</p>}
-            actions={
-              <EuiButton fill href={installedIntegrationHref}>
-                {i18n.ADD_EXTERNAL_INTEGRATION_BUTTON}
-              </EuiButton>
-            }
-          />
-        </EuiPanel>
-      </>
-    );
-  }
+  const xsFontSize = useEuiFontSize('xxs').fontSize;
 
   return (
     <>
-      <EuiTitle size="s">
-        <h5>{i18n.MANAGED_DATA_TITLE}</h5>
-      </EuiTitle>
-      <EuiSpacer size="l" />
       <InspectButtonContainer>
         <EuiAccordion
           isLoading={managedUser.isLoading}
+          initialIsOpen={false}
           id={'managedUser-data'}
           data-test-subj="managedUser-data"
-          forceState={isManagedDataToggleOpen ? 'open' : 'closed'}
           buttonProps={{
             'data-test-subj': 'managedUser-accordion-button',
             css: css`
@@ -100,9 +73,10 @@ export const ManagedUser = ({
             `,
           }}
           buttonContent={
-            isManagedDataToggleOpen ? i18n.HIDE_AZURE_DATA_BUTTON : i18n.SHOW_AZURE_DATA_BUTTON
+            <EuiTitle size="xs">
+              <h5>{i18n.MANAGED_DATA_TITLE}</h5>
+            </EuiTitle>
           }
-          onToggle={onToggleManagedData}
           extraAction={
             <>
               <span
@@ -116,19 +90,25 @@ export const ManagedUser = ({
                 />
               </span>
               {managedUser.lastSeen.date && (
-                <FormattedMessage
-                  id="xpack.securitySolution.timeline.userDetails.updatedTime"
-                  defaultMessage="Updated {time}"
-                  values={{
-                    time: (
-                      <FormattedRelativePreferenceDate
-                        value={managedUser.lastSeen.date}
-                        dateFormat="MMM D, YYYY"
-                        relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
-                      />
-                    ),
-                  }}
-                />
+                <span
+                  css={css`
+                    font-size: ${xsFontSize};
+                  `}
+                >
+                  <FormattedMessage
+                    id="xpack.securitySolution.timeline.userDetails.updatedTime"
+                    defaultMessage="Updated {time}"
+                    values={{
+                      time: (
+                        <FormattedRelativePreferenceDate
+                          value={managedUser.lastSeen.date}
+                          dateFormat="MMM D, YYYY"
+                          relativeThresholdInHrs={ONE_WEEK_IN_HOURS}
+                        />
+                      ),
+                    }}
+                  />
+                </span>
               )}
             </>
           }
@@ -138,16 +118,34 @@ export const ManagedUser = ({
             }
           `}
         >
-          <EuiPanel color="subdued">
-            {managedItems || managedUser.isLoading ? (
-              <BasicTable
-                loading={managedUser.isLoading}
-                data-test-subj="managedUser-table"
-                columns={managedUserTableColumns}
-                items={managedItems ?? []}
+          <EuiSpacer size="m" />
+          {!managedUser.isLoading && !managedUser.isIntegrationEnabled ? (
+            <EuiPanel
+              data-test-subj="managedUser-integration-disable-callout"
+              hasShadow={false}
+              hasBorder={true}
+            >
+              <EuiEmptyPrompt
+                title={<h2>{i18n.NO_ACTIVE_INTEGRATION_TITLE}</h2>}
+                titleSize="s"
+                body={<p>{i18n.NO_ACTIVE_INTEGRATION_TEXT}</p>}
+                actions={
+                  <EuiButton fill href={installedIntegrationHref}>
+                    {i18n.ADD_EXTERNAL_INTEGRATION_BUTTON}
+                  </EuiButton>
+                }
               />
-            ) : (
-              <>
+            </EuiPanel>
+          ) : (
+            <>
+              {managedItems || managedUser.isLoading ? (
+                <BasicTable
+                  loading={managedUser.isLoading}
+                  data-test-subj="managedUser-table"
+                  columns={managedUserTableColumns}
+                  items={managedItems ?? []}
+                />
+              ) : (
                 <EuiCallOut
                   data-test-subj="managedUser-no-data"
                   title={i18n.NO_AZURE_DATA_TITLE}
@@ -156,9 +154,9 @@ export const ManagedUser = ({
                 >
                   <p>{i18n.NO_AZURE_DATA_TEXT}</p>
                 </EuiCallOut>
-              </>
-            )}
-          </EuiPanel>
+              )}
+            </>
+          )}
         </EuiAccordion>
       </InspectButtonContainer>
     </>

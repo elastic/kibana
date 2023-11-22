@@ -105,6 +105,8 @@ function buildRootCrumb({
       i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
         defaultMessage: 'Project',
       }),
+    // increase the max-width of the root breadcrumb to not truncate too soon
+    style: { maxWidth: '320px' },
     onClick: () => {
       if (cloudSdkUrl) {
         openFeature({ sdkUrl: cloudSdkUrl, feature: 'projects' });
