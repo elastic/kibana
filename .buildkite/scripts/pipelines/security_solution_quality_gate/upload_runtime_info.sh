@@ -25,7 +25,4 @@ if [ "$KIBANA_OVERRIDE_FLAG" = "1" ]; then
         - Version               : $version
     """
     echo "${markdown_text//[*\\_]/\\&}" | buildkite-agent annotate --style "info"
-    git stash
-    git checkout $vcs_ref
-    git pull
 fi
