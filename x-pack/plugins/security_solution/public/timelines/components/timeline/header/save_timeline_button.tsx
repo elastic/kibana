@@ -23,7 +23,7 @@ export interface SaveTimelineButtonProps {
 }
 
 const SAVE_BUTTON_ELEMENT_ID = 'SAVE_BUTTON_ELEMENT_ID';
-const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTourSeen';
+const LOCAL_STORAGE_KEY = 'security.timelineFlyoutHeader.saveTimelineTour';
 
 export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelineId }) => {
   const [showEditTimelineOverlay, setShowEditTimelineOverlay] = useState<boolean>(false);
@@ -56,6 +56,9 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
   const [timelineTourStatus, setTimelineTourStatus] = useLocalStorage({
     defaultValue: { isTourActive: true },
     key: LOCAL_STORAGE_KEY,
+    isInvalidDefault: (valueFromStorage) => {
+      return !valueFromStorage;
+    },
   });
   // Why are we checking for so many flags here?
   // The tour popup should only show when timeline is fully populated and all necessary
@@ -67,7 +70,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     isVisible &&
     !isLoading &&
     isSaveButtonMounted &&
-    timelineTourStatus.isTourActive;
+    timelineTourStatus?.isTourActive;
 
   const markTimelineSaveTourAsSeen = useCallback(() => {
     setTimelineTourStatus({ isTourActive: false });
