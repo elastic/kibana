@@ -583,7 +583,7 @@ export type GetRenderCellValue<T = unknown> = ({
   context?: T;
 }) => (props: unknown) => React.ReactNode;
 
-export type PreFetchPageContext<T> = ({
+export type PreFetchPageContext<T = unknown> = ({
   alerts,
   columns,
 }: {
@@ -686,7 +686,7 @@ export interface UseFieldBrowserOptionsArgs {
 
 export type UseFieldBrowserOptions = (args: UseFieldBrowserOptionsArgs) => FieldBrowserOptions;
 
-export interface AlertsTableConfigurationRegistry<T extends object = object> {
+export interface AlertsTableConfigurationRegistry {
   id: string;
   cases?: {
     featureId: string;
@@ -700,7 +700,7 @@ export interface AlertsTableConfigurationRegistry<T extends object = object> {
     footer: AlertTableFlyoutComponent;
   };
   sort?: SortCombinations[];
-  getRenderCellValue?: GetRenderCellValue<T>;
+  getRenderCellValue?: GetRenderCellValue;
   useActionsColumn?: UseActionsColumnRegistry;
   useBulkActions?: UseBulkActionsRegistry;
   useCellActions?: UseCellActions;
@@ -709,7 +709,7 @@ export interface AlertsTableConfigurationRegistry<T extends object = object> {
   };
   useFieldBrowserOptions?: UseFieldBrowserOptions;
   showInspectButton?: boolean;
-  useFetchPageContext?: PreFetchPageContext<T>;
+  useFetchPageContext?: PreFetchPageContext;
 }
 
 export interface AlertsTableConfigurationRegistryWithActions
