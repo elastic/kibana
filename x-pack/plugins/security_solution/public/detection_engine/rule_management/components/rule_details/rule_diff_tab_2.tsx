@@ -6,7 +6,6 @@
  */
 
 import React, { useState } from 'react';
-// import ReactDiffViewer from 'react-diff-viewer';
 import ReactDiffViewer from 'react-diff-viewer-continued';
 import {
   EuiSpacer,
@@ -19,6 +18,95 @@ import {
 import type { RuleFieldsDiff } from '../../../../../common/api/detection_engine/prebuilt_rules/model/diff/rule_diff/rule_diff';
 
 import * as i18n from './translations';
+
+const HIDDEN_FIELDS = ['meta', 'rule_schedule', 'version'];
+
+const FIELD_CONFIG_BY_NAME = {
+  eql_query: {
+    label: 'EQL query',
+    compareMethod: 'diffWordsWithSpace',
+  },
+  kql_query: {
+    label: 'KQL query',
+    compareMethod: 'diffWordsWithSpace',
+  },
+  description: {
+    label: 'Description',
+    compareMethod: 'diffWordsWithSpace',
+  },
+  name: {
+    label: 'Name',
+    compareMethod: 'diffWordsWithSpace',
+  },
+  note: {
+    label: 'Investigation guide',
+    compareMethod: 'diffWordsWithSpace',
+  },
+  references: {
+    label: i18n.REFERENCES_FIELD_LABEL,
+    compareMethod: 'diffJson',
+  },
+  risk_score: {
+    // JSON.stringify(fields.risk_score.current_version)
+    label: i18n.RISK_SCORE_FIELD_LABEL,
+    compareMethod: 'diffJson',
+  },
+  threat: {
+    label: 'THREAT',
+    compareMethod: 'diffJson',
+  },
+  severity: {
+    label: 'Severity',
+    compareMethod: 'diffWords',
+  },
+};
+
+interface FieldsProps {
+  fields: Partial<RuleFieldsDiff>;
+  openSections: Record<string, boolean>;
+  toggleSection: (sectionName: string) => void;
+}
+
+const Fields = ({ fields, openSections, toggleSection }: FieldsProps) => {
+  const visibleFields = Object.keys(fields).filter(
+    (fieldName) => !HIDDEN_FIELDS.includes(fieldName)
+  );
+
+  return (
+    <>
+      {visibleFields.map((fieldName) => {
+        return (
+          <>
+            <ExpandableSection
+              title={FIELD_CONFIG_BY_NAME[fieldName]?.label ?? fieldName.toUpperCase()}
+              isOpen={openSections[fieldName]}
+              toggle={() => {
+                toggleSection(fieldName);
+              }}
+            >
+              <ReactDiffViewer
+                oldValue={
+                  typeof fields[fieldName].current_version === 'string'
+                    ? fields[fieldName].current_version
+                    : JSON.stringify(fields[fieldName].current_version, null, 2)
+                }
+                newValue={
+                  typeof fields[fieldName].merged_version === 'string'
+                    ? fields[fieldName].merged_version
+                    : JSON.stringify(fields[fieldName].merged_version, null, 2)
+                }
+                splitView={true}
+                hideLineNumbers={true}
+                compareMethod={FIELD_CONFIG_BY_NAME[fieldName]?.compareMethod ?? 'diffChars'}
+              />
+            </ExpandableSection>
+            <EuiHorizontalRule margin="m" />
+          </>
+        );
+      })}
+    </>
+  );
+};
 
 interface ExpandableSectionProps {
   title: string;
@@ -51,11 +139,34 @@ const ExpandableSection = ({ title, isOpen, toggle, children }: ExpandableSectio
   );
 };
 
+const WholeObjectDiff = ({ currentRule, mergedRule, openSections, toggleSection }) => {
+  return (
+    <>
+      <ExpandableSection
+        title={'Whole object diff'}
+        isOpen={openSections.whole}
+        toggle={() => {
+          toggleSection('whole');
+        }}
+      >
+        <ReactDiffViewer
+          oldValue={JSON.stringify(currentRule, Object.keys(currentRule).sort(), 2)}
+          newValue={JSON.stringify(mergedRule, Object.keys(mergedRule).sort(), 2)}
+          splitView={true}
+          hideLineNumbers={true}
+          compareMethod={'diffJson'}
+        />
+      </ExpandableSection>
+      <EuiHorizontalRule margin="m" />
+    </>
+  );
+};
+
 interface RuleDiffTabProps {
   fields: Partial<RuleFieldsDiff>;
 }
 
-export const RuleDiffTab = ({ fields }: RuleDiffTabProps) => {
+export const RuleDiffTab = ({ fields, currentRule, mergedRule }: RuleDiffTabProps) => {
   const [openSections, setOpenSections] = useState<Record<string, boolean>>(
     Object.keys(fields).reduce((sections, fieldName) => ({ ...sections, [fieldName]: true }), {})
   );
@@ -67,58 +178,16 @@ export const RuleDiffTab = ({ fields }: RuleDiffTabProps) => {
     }));
   };
 
-  if (!fields.references && !fields.risk_score) {
-    return null;
-  }
-
   return (
     <>
       <EuiSpacer size="m" />
-      <ExpandableSection
-        title={'EQL query'}
-        isOpen={openSections.eql_query}
-        toggle={() => {
-          toggleSection('eql_query');
-        }}
-      >
-        <ReactDiffViewer
-          oldValue={JSON.stringify(fields.eql_query.current_version.query, null, 2)}
-          newValue={JSON.stringify(fields.eql_query.merged_version.query, null, 2)}
-          splitView={true}
-          hideLineNumbers={true}
-          compareMethod={'diffChars'}
-        />
-      </ExpandableSection>
-      <EuiHorizontalRule margin="m" />
-      <ExpandableSection
-        title={i18n.REFERENCES_FIELD_LABEL}
-        isOpen={openSections.references}
-        toggle={() => {
-          toggleSection('references');
-        }}
-      >
-        <ReactDiffViewer
-          oldValue={JSON.stringify(fields.references.current_version, null, 2)}
-          newValue={JSON.stringify(fields.references.merged_version, null, 2)}
-          splitView={true}
-          hideLineNumbers={true}
-        />
-      </ExpandableSection>
-      <EuiHorizontalRule margin="m" />
-      <ExpandableSection
-        title={i18n.RISK_SCORE_FIELD_LABEL}
-        isOpen={openSections.risk_score}
-        toggle={() => {
-          toggleSection('risk_score');
-        }}
-      >
-        <ReactDiffViewer
-          oldValue={JSON.stringify(fields.risk_score.current_version)}
-          newValue={JSON.stringify(fields.risk_score.merged_version)}
-          splitView={true}
-          hideLineNumbers={true}
-        />
-      </ExpandableSection>
+      <WholeObjectDiff
+        currentRule={currentRule}
+        mergedRule={mergedRule}
+        openSections={openSections}
+        toggleSection={toggleSection}
+      />
+      <Fields fields={fields} openSections={openSections} toggleSection={toggleSection} />
     </>
   );
 };

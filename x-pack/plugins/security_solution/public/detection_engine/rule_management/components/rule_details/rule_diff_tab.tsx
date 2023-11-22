@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-// import { Change, diffChars, diffLines, diffWords } from 'diff';
+import { Change, diffLines } from 'diff';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { EuiSpacer, useEuiBackgroundColor, tint } from '@elastic/eui';
@@ -44,14 +44,10 @@ const DiffSegment = ({
   change,
   diffMode,
   showDiffDecorations,
-}: // matchCss,
-// diffCss,
-{
+}: {
   change: Change;
   diffMode: 'lines' | undefined;
   showDiffDecorations: boolean | undefined;
-  // matchCss: ReturnType<typeof css>;
-  // diffCss: ReturnType<typeof css>;
 }) => {
   const matchBackgroundColor = useEuiBackgroundColor('success');
   const diffBackgroundColor = useEuiBackgroundColor('danger');
@@ -123,37 +119,11 @@ interface RuleDiffTabProps {
 }
 
 export const RuleDiffTab = ({ fields }: RuleDiffTabProps) => {
-  // console.log(fields, diffLines);
-
-  const matchBackgroundColor = useEuiBackgroundColor('success');
-  const diffBackgroundColor = useEuiBackgroundColor('danger');
-
-  if (!fields.references) {
-    return null;
-  }
-
-  const matchCss = css`
-    background-color: ${matchBackgroundColor};
-    color: ${euiThemeVars.euiColorSuccessText};
-  `;
-  const diffCss = css`
-    background-color: ${diffBackgroundColor};
-    color: ${euiThemeVars.euiColorDangerText};
-  `;
-
-  // console.log(
-  //   'DIFIF',
-  //   JSON.stringify(fields.references.current_version),
-  //   JSON.stringify(fields.references.merged_version)
-  // );
-
-  // const diff = diffLines(
-  //   JSON.stringify(fields.references.current_version, null, 2),
-  //   JSON.stringify(fields.references.merged_version, null, 2),
-  //   { ignoreWhitespace: false }
-  // );
-
-  // console.log('!!!DIFF', diff);
+  const diff = diffLines(
+    JSON.stringify(fields.references.current_version, null, 2),
+    JSON.stringify(fields.references.merged_version, null, 2),
+    { ignoreWhitespace: false }
+  );
 
   return (
     <>
@@ -164,8 +134,6 @@ export const RuleDiffTab = ({ fields }: RuleDiffTabProps) => {
           change={change}
           diffMode={'lines'}
           showDiffDecorations={true}
-          matchCss={matchCss}
-          diffCss={diffCss}
         />
       ))}
     </>
