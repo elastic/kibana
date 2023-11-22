@@ -122,7 +122,10 @@ export class FetcherTask {
               },
             }),
             // shallow errors if all retry failed, next time tick will continue the emission
-            catchError(() => EMPTY)
+            catchError((err) => {
+              this.logger.error(`Cannot get the current config: ${err.message}`);
+              return EMPTY;
+            })
           );
         }),
         // Skip if opted-out, or should only send from the browser

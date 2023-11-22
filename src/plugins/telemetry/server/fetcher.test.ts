@@ -225,6 +225,30 @@ describe('FetcherTask', () => {
     );
 
     test(
+      'logs a message when retries are exceeded',
+      fakeSchedulers(async (advance) => {
+        expect(fetcherTask['isOnline$'].value).toBe(false);
+        getCurrentConfigs.mockRejectedValue(new Error('SomeError'));
+
+        const subscription = fetcherTask['validateConnectivity']();
+
+        const wait = async () => {
+          advance(5 * 60 * 1000);
+          await new Promise((resolve) => process.nextTick(resolve)); // Wait for the initial promise to fulfill
+        };
+
+        for (let i = 0; i < 7; i++) {
+          await wait();
+        }
+
+        expect(fetcherTask['logger'].error).toBeCalledTimes(1);
+        expect(fetcherTask['logger'].error).toHaveBeenCalledWith(`Cannot get the current config: SomeError`);
+
+        subscription.unsubscribe();
+      })
+    );
+
+    test(
       'Should not retry if it hit the max number of failures for this version',
       fakeSchedulers(async (advance) => {
         expect(fetcherTask['isOnline$'].value).toBe(false);
