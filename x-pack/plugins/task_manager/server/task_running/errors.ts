@@ -87,17 +87,14 @@ function isTaskRunError(error: Error | DecoratedError): error is DecoratedError 
   return Boolean(error && (error as DecoratedError)[source]);
 }
 
-export function isUserError(error: Error | DecoratedError) {
-  if (isTaskRunError(error) && error[source] === TaskErrorSource.USER) {
-    return true;
-  }
-  return false;
-}
-
 export function getErrorSource(error: Error | DecoratedError): TaskErrorSource | undefined {
   if (isTaskRunError(error) && error[source]) {
     return error[source];
   }
+}
+
+export function isUserError(error: Error | DecoratedError) {
+  return getErrorSource(error) === TaskErrorSource.USER;
 }
 
 export function isEphemeralTaskRejectedDueToCapacityError(
