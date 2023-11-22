@@ -159,6 +159,7 @@ export class BuildkiteClient {
     const response = await this.http.get(
       `v2/organizations/elastic/pipelines/${pipelineSlug}/builds?created_from=${date}&per_page=${numberOfBuilds}`
     );
+    console.log(`AFTER DATE ${numberOfBuilds} RESPONSE: `, response.data);
     return response.data as Build[];
   };
 

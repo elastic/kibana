@@ -115,11 +115,21 @@ export async function getQAFBuildContainingCommit(
         })
       ).data.map((e: { sha: string }) => e.sha);
 
+  console.log(
+    `Trying to find QAF build containing commit ${commitSha} in list of commits: ${commitShaList}`
+  );
+
   const build = qafBuilds.find((kbBuild) => {
     // is build.commit after commitSha?
     const buildkiteBuildShaIndex = commitShaList.findIndex((c: string) => c === kbBuild.commit);
     const commitShaIndex = commitShaList.findIndex((c: string) => c === commitSha);
-    return commitShaIndex !== -1 && buildkiteBuildShaIndex < commitShaIndex;
+
+    console.log({ buildkiteBuildShaIndex, commitShaIndex, kbCommit: kbBuild.commit });
+    return (
+      commitShaIndex !== -1 &&
+      buildkiteBuildShaIndex !== -1 &&
+      buildkiteBuildShaIndex < commitShaIndex
+    );
   });
 
   if (!build) {
