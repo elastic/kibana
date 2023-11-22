@@ -89,7 +89,7 @@ describe('field picker', () => {
     const { openCombobox } = renderFieldPicker();
     openCombobox();
     const popover = screen.getByRole('dialog');
-    expect(popover).toHaveStyle('inline-size: 300px');
+    expect(popover).toHaveStyle('inline-size: 256px');
   });
 
   it('should render calculated width dropdown list if the longest label is longer than min width', async () => {
@@ -97,7 +97,7 @@ describe('field picker', () => {
     openCombobox();
 
     const popover = screen.getByRole('dialog');
-    expect(popover).toHaveStyle('inline-size: 454px');
+    expect(popover).toHaveStyle('inline-size: 466px');
   });
 
   it('should render maximum width dropdown list if the longest label is longer than max width', async () => {
