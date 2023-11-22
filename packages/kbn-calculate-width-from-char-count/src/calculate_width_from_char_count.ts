@@ -13,8 +13,8 @@ interface LIMITS {
   maxWidth: number;
 }
 
+export const MAX_WIDTH = 550;
 const PADDINGS_WIDTH = 116;
-const MAX_WIDTH = 550;
 const AVERAGE_CHAR_WIDTH = 7;
 
 const defaultPanelWidths: LIMITS = {

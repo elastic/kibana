@@ -6,16 +6,16 @@
  * Side Public License, v 1.
  */
 
-import { calculateWidthFromCharCount } from './calculate_width_from_char_count';
+import { calculateWidthFromCharCount, MAX_WIDTH } from './calculate_width_from_char_count';
 
 describe('calculateWidthFromCharCount', () => {
   it('should return minimum width if char count is smaller than minWidth', () => {
     expect(calculateWidthFromCharCount(10, { minWidth: 300 })).toBe(300);
   });
   it('should return calculated width', () => {
-    expect(calculateWidthFromCharCount(30)).toBe(300 + 2 * 7);
+    expect(calculateWidthFromCharCount(30)).toBe(30 * 7 + 116);
   });
   it('should return maximum width if char count is bigger than maxWidth', () => {
-    expect(calculateWidthFromCharCount(1000)).toBe(550);
+    expect(calculateWidthFromCharCount(1000)).toBe(MAX_WIDTH);
   });
 });
