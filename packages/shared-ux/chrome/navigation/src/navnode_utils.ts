@@ -150,8 +150,8 @@ export const initNavNode = <
 
   const id = getNavigationNodeId(node, () => `node-${treeDepth}-${index ?? 'root'}`) as Id;
   const title = getTitleForNode(node, { deepLink, cloudLinks });
-  const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href;
-  const nodePath = parentNodePath ? `${parentNodePath}.${id}` : id;
+  const href = cloudLink ? cloudLinks[cloudLink]?.href : node.href; // TODO: should we set the deepLink href if there is one??
+  const path = parentNodePath ? `${parentNodePath}.${id}` : id;
 
   if (href && !isAbsoluteLink(href)) {
     throw new Error(`href must be an absolute URL. Node id [${id}].`);
@@ -160,8 +160,8 @@ export const initNavNode = <
   const internalNavNode: ChromeProjectNavigationNode = {
     ...navNode,
     id,
-    path: nodePath,
-    title: title ?? '',
+    path,
+    title,
     deepLink,
     href,
     sideNavStatus,
