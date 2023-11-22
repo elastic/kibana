@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { IdFormat } from '../../../common/http_api/latest';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import {
   logRateModelPlotResponseRT,
@@ -12,7 +13,7 @@ import {
   LogRateModelPlotBucket,
   CompositeTimestampPartitionKey,
 } from './queries';
-import { getJobId } from '../../../common/log_analysis';
+import { getJobId, logEntryRateJobType } from '../../../common/log_analysis';
 import type { MlSystem } from '../../types';
 
 const COMPOSITE_AGGREGATION_BATCH_SIZE = 1000;
@@ -25,12 +26,13 @@ export async function getLogEntryRateBuckets(
     };
   },
   logViewId: string,
+  idFormat: IdFormat,
   startTime: number,
   endTime: number,
   bucketDuration: number,
   datasets?: string[]
 ) {
-  const logRateJobId = getJobId(context.infra.spaceId, logViewId, 'log-entry-rate');
+  const logRateJobId = getJobId(context.infra.spaceId, logViewId, idFormat, logEntryRateJobType);
   let mlModelPlotBuckets: LogRateModelPlotBucket[] = [];
   let afterLatestBatchKey: CompositeTimestampPartitionKey | undefined;
 
