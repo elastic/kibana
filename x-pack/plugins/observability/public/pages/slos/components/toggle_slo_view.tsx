@@ -16,12 +16,12 @@ import {
   EuiPopover,
   EuiPopoverTitle,
 } from '@elastic/eui';
-import { GridSize } from './slos_grid/grid_size';
+import { CardsPerRow } from './card_view/cards_per_row';
 
 export type SLOViewType = 'cardView' | 'listView';
 
 interface Props {
-  setGridSize: (gridSize?: string) => void;
+  setCardsPerRow: (gridSize?: string) => void;
   setSLOView: (view: SLOViewType) => void;
   sloView: SLOViewType;
 }
@@ -40,7 +40,7 @@ const toggleButtonsIcons = [
   },
 ];
 
-export function ToggleSLOView({ sloView, setSLOView, setGridSize }: Props) {
+export function ToggleSLOView({ sloView, setSLOView, setCardsPerRow }: Props) {
   return (
     <EuiFlexGroup>
       <EuiFlexItem>
@@ -54,14 +54,14 @@ export function ToggleSLOView({ sloView, setSLOView, setGridSize }: Props) {
       </EuiFlexItem>
       {sloView === 'cardView' && (
         <EuiFlexItem grow={false}>
-          <ViewSettings setGridSize={setGridSize} />
+          <ViewSettings setCardsPerRow={setCardsPerRow} />
         </EuiFlexItem>
       )}
     </EuiFlexGroup>
   );
 }
 
-export function ViewSettings({ setGridSize }: { setGridSize: (gridSize?: string) => void }) {
+function ViewSettings({ setCardsPerRow }: { setCardsPerRow: (cardsPerRow?: string) => void }) {
   const [isPopoverOpen, setIsPopoverOpen] = React.useState(false);
 
   return (
@@ -88,7 +88,7 @@ export function ViewSettings({ setGridSize }: { setGridSize: (gridSize?: string)
         />
       </EuiPopoverTitle>
       <div style={{ width: '300px' }}>
-        <GridSize setGridSize={setGridSize} />
+        <CardsPerRow setCardsPerRow={setCardsPerRow} />
       </div>
     </EuiPopover>
   );

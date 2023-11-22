@@ -20,7 +20,7 @@ import { SLOWithSummaryResponse, HistoricalSummaryResponse } from '@kbn/slo-sche
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import { euiLightVars } from '@kbn/ui-theme';
-import { SloGridItemBadges } from './slo_grid_item_badges';
+import { SloCardItemBadges } from './slo_card_item_badges';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
 import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
 import { sloKeys } from '../../../../hooks/slo/query_key_factory';
@@ -28,8 +28,8 @@ import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule
 import { useKibana } from '../../../../utils/kibana_react';
 import { sloFeatureId } from '../../../../../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
-import { useSLOSummary } from '../../hooks/use_slo_summary';
-import { SloGridItemActions } from './slo_grid_item_actions';
+import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
+import { SloCardItemActions } from './slo_card_item_actions';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { SloDeleteConfirmationModal } from '../../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
 
@@ -65,7 +65,7 @@ export const getColor = (
   }
 };
 
-export function SloGridItem({ slo, rules, activeAlerts, historicalSummary }: Props) {
+export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Props) {
   const {
     application: { navigateToUrl },
     triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
@@ -76,7 +76,7 @@ export function SloGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
-  const { currentValue, sloTarget, sloDetailsUrl } = useSLOSummary(slo);
+  const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
   const filteredRuleTypes = useGetFilteredRuleTypes();
   const queryClient = useQueryClient();
   const { mutate: deleteSlo } = useDeleteSlo();
@@ -137,7 +137,7 @@ export function SloGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
               [
                 {
                   title: slo.name,
-                  value: currentValue,
+                  value: sliValue,
                   trendShape: MetricTrendShape.Area,
                   trend: historicalSliData?.map((d) => ({
                     x: d.key as number,
@@ -170,14 +170,14 @@ export function SloGridItem({ slo, rules, activeAlerts, historicalSummary }: Pro
             ]}
           />
         </Chart>
-        <SloGridItemBadges
+        <SloCardItemBadges
           slo={slo}
           rules={rules}
           activeAlerts={activeAlerts}
           handleCreateRule={handleCreateRule}
         />
         {(isMouseOver || isActionsPopoverOpen) && (
-          <SloGridItemActions
+          <SloCardItemActions
             slo={slo}
             isActionsPopoverOpen={isActionsPopoverOpen}
             setIsActionsPopoverOpen={setIsActionsPopoverOpen}

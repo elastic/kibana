@@ -10,12 +10,18 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
-export function GridSize({ setGridSize }: { setGridSize: (gridSize?: string) => void }) {
-  const [value, setValue] = useLocalStorage('slo-view-grid-size', '3');
+export const SLO_CARD_VIEW_PER_ROW_SIZE = 'slo-card-view-per-row-size';
+
+export function CardsPerRow({
+  setCardsPerRow,
+}: {
+  setCardsPerRow: (cardsPerRow?: string) => void;
+}) {
+  const [value, setValue] = useLocalStorage(SLO_CARD_VIEW_PER_ROW_SIZE, '3');
 
   useEffect(() => {
-    setGridSize(value);
-  }, [setGridSize, value]);
+    setCardsPerRow(value);
+  }, [setCardsPerRow, value]);
 
   const options = [
     { value: '3', text: '3' },
@@ -27,7 +33,7 @@ export function GridSize({ setGridSize }: { setGridSize: (gridSize?: string) => 
       label={
         <FormattedMessage
           id="xpack.observability.gridSize.euiFormRow.itemsPerRowLabel"
-          defaultMessage="Items per row"
+          defaultMessage="Cards per row"
         />
       }
     >

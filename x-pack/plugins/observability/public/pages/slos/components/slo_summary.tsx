@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiStat } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 
-import { useSLOSummary } from '../hooks/use_slo_summary';
+import { useSloFormattedSummary } from '../hooks/use_slo_summary';
 import { formatHistoricalData } from '../../../utils/slo/chart_data_formatter';
 import { SloSparkline } from './slo_sparkline';
 
@@ -20,7 +20,7 @@ export interface Props {
 }
 
 export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoading }: Props) {
-  const { currentValue, sloTarget, errorBudgetRemaining } = useSLOSummary(slo);
+  const { sliValue, sloTarget, errorBudgetRemaining } = useSloFormattedSummary(slo);
   const isSloFailed = slo.summary.status === 'VIOLATED' || slo.summary.status === 'DEGRADING';
   const titleColor = isSloFailed ? 'danger' : '';
   const errorBudgetBurnDownData = formatHistoricalData(historicalSummary, 'error_budget_remaining');
@@ -42,7 +42,7 @@ export function SloSummary({ slo, historicalSummary = [], historicalSummaryLoadi
                 defaultMessage: '{objective} target',
                 values: { objective: sloTarget },
               })}
-              title={currentValue}
+              title={sliValue}
               textAlign="right"
               titleColor={titleColor}
               titleSize="m"

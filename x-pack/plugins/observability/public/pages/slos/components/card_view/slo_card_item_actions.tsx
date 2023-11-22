@@ -43,7 +43,7 @@ interface Props {
   setIsAddRuleFlyoutOpen: (value: boolean) => void;
 }
 
-export function SloGridItemActions(props: Props) {
+export function SloCardItemActions(props: Props) {
   const euiShadow = useEuiShadow('l');
 
   return (

@@ -14,7 +14,7 @@ import { SloListError } from '../slo_list_error';
 import { useFetchActiveAlerts } from '../../../../hooks/slo/use_fetch_active_alerts';
 import { useFetchRulesForSlo } from '../../../../hooks/slo/use_fetch_rules_for_slo';
 import { useFetchHistoricalSummary } from '../../../../hooks/slo/use_fetch_historical_summary';
-import { SloGridItem } from './slo_grid_item';
+import { SloCardItem } from './slo_card_item';
 
 export interface Props {
   sloList: SLOWithSummaryResponse[];
@@ -23,7 +23,7 @@ export interface Props {
   gridSize?: string;
 }
 
-export function SloGrid({ sloList, loading, error, gridSize }: Props) {
+export function SloListCardView({ sloList, loading, error, gridSize }: Props) {
   const sloIdsAndInstanceIds = sloList.map(
     (slo) => [slo.id, slo.instanceId ?? ALL_VALUE] as [string, string]
   );
@@ -52,7 +52,7 @@ export function SloGrid({ sloList, loading, error, gridSize }: Props) {
     <EuiFlexGrid columns={Number(gridSize) as EuiFlexGridProps['columns']}>
       {sloList.map((slo) => (
         <EuiFlexItem key={`${slo.id}-${slo.instanceId ?? 'ALL_VALUE'}`}>
-          <SloGridItem
+          <SloCardItem
             slo={slo}
             loading={loading}
             error={error}

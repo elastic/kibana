@@ -11,14 +11,14 @@ import { paths } from '../../../../common/locators/paths';
 import { useKibana } from '../../../utils/kibana_react';
 import { NOT_AVAILABLE_LABEL } from '../../../../common/i18n';
 
-export const useSLOSummary = (slo: SLOWithSummaryResponse) => {
+export const useSloFormattedSummary = (slo: SLOWithSummaryResponse) => {
   const {
     http: { basePath },
   } = useKibana().services;
   const { uiSettings } = useKibana().services;
   const percentFormat = uiSettings.get('format:percent:defaultPattern');
 
-  const currentValue =
+  const sliValue =
     slo.summary.status === 'NO_DATA'
       ? NOT_AVAILABLE_LABEL
       : numeral(slo.summary.sliValue).format(percentFormat);
@@ -43,7 +43,7 @@ export const useSLOSummary = (slo: SLOWithSummaryResponse) => {
 
   return {
     sloDetailsUrl,
-    currentValue,
+    sliValue,
     sloTarget,
     errorBudgetRemaining: errorBudgetRemainingTitle,
   };
