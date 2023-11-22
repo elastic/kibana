@@ -254,7 +254,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step4Body"
-                          defaultMessage="Press the play button or click “Start deployment” in the drop menu in the table row containing your new model to deploy and use it."
+                          defaultMessage="To deploy and use your new model, press the play button or click “Start deployment” in the drop menu of the table row of the model."
                         />
                       </p>
                     </EuiText>
