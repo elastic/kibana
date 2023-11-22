@@ -95,6 +95,20 @@ describe('output preconfiguration', () => {
           },
         },
         {
+          id: 'existing-logstash-output-with-secrets-2',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Logstash Output With Secrets 2',
+          type: 'logstash',
+          hosts: ['test:4343'],
+          is_preconfigured: true,
+          secrets: {
+            ssl: {
+              key: 'secretKey',
+            },
+          },
+        },
+        {
           id: 'existing-kafka-output-with-secrets-1',
           is_default: false,
           is_default_monitoring: false,
@@ -112,6 +126,21 @@ describe('output preconfiguration', () => {
                 id: '789',
                 hash: keyHash,
               },
+            },
+          },
+        },
+        {
+          id: 'existing-kafka-output-with-secrets-2',
+          is_default: false,
+          is_default_monitoring: false,
+          name: 'Kafka Output With Secrets 2',
+          type: 'kafka',
+          hosts: ['kafka.co:80'],
+          is_preconfigured: true,
+          secrets: {
+            password: 'secretPassword',
+            ssl: {
+              key: 'secretKey',
             },
           },
         },
@@ -527,6 +556,57 @@ describe('output preconfiguration', () => {
     expect(mockedOutputService.create).not.toBeCalled();
     expect(mockedOutputService.update).not.toBeCalled();
     expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).not.toBeCalled();
+  });
+
+  it('should update output if a preconfigured logstash output with plain value secrets exists and did not change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-logstash-output-with-secrets-2',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Logstash Output With Secrets 2',
+        type: 'logstash',
+        hosts: ['test:4343'],
+        secrets: {
+          ssl: {
+            key: 'secretKey', // no change
+          },
+        },
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
+  });
+
+  it('should update output if a preconfigured kafka output with plain value secrets exists and did not change', async () => {
+    const soClient = savedObjectsClientMock.create();
+    const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+    soClient.find.mockResolvedValue({ saved_objects: [], page: 0, per_page: 0, total: 0 });
+    await createOrUpdatePreconfiguredOutputs(soClient, esClient, [
+      {
+        id: 'existing-kafka-output-with-secrets-2',
+        is_default: false,
+        is_default_monitoring: false,
+        name: 'Kafka Output With Secrets 2',
+        type: 'kafka',
+        hosts: ['kafka.co:80'],
+        secrets: {
+          password: 'secretPassword', // no change
+          ssl: {
+            key: 'secretKey', // no change
+          },
+        },
+      },
+    ]);
+
+    expect(mockedOutputService.create).not.toBeCalled();
+    expect(mockedOutputService.update).toBeCalled();
+    expect(spyAgentPolicyServicBumpAllAgentPoliciesForOutput).toBeCalled();
   });
 
   const SCENARIOS: Array<{ name: string; data: PreconfiguredOutput }> = [
