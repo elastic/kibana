@@ -12,13 +12,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 
 import { ApplicationStart } from '@kbn/core-application-browser';
 
+import { OverlayStart } from '@kbn/core-overlays-browser';
+import { ThemeServiceStart } from '@kbn/core-theme-browser';
+import { I18nStart } from '@kbn/core-i18n-browser';
 import { GuideId, GuideState } from '../../types';
 import { GuideFilterValues } from './guide_filters';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCard } from './guide_card';
-import { OverlayStart } from '@kbn/core-overlays-browser';
-import { ThemeServiceStart } from '@kbn/core-theme-browser';
-import { I18nStart } from '@kbn/core-i18n-browser';
 
 export type GuideCardSolutions = 'search' | 'observability' | 'security';
 

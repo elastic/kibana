@@ -62,15 +62,12 @@ export const GuideCard = ({
   }
 
   const openESApiModal = async () => {
-    console.log('makes it here?')
+    console.log('makes it here?');
     const session = await openModal(
-      toMountPoint(
-        <ESApiModal
-          onClose={() =>  session.close()}
-          title={card.title}
-        />,
-        { theme: theme, i18n: i18nStart }
-      ),
+      toMountPoint(<ESApiModal onClose={() => session.close()} title={card.title} />, {
+        theme,
+        i18n: i18nStart,
+      }),
       {
         maxWidth: 400,
         'data-test-subj': 'elasticsearch-api-endpoint-guide-modal',
@@ -87,7 +84,7 @@ export const GuideCard = ({
         path: card.navigateTo.path,
       });
     } else if (card.openModal) {
-      console.log('falls here')
+      console.log('falls here');
       await openESApiModal;
     }
     setIsLoading(false);

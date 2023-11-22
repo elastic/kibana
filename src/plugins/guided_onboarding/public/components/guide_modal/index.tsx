@@ -85,10 +85,10 @@ export const GuidePanelFlyout = ({
           <EuiModal
             data-test-subj="guideModal"
             aria-labelledby={guideModalTitleId}
-            css={hasError ? flyoutContainerError : flyoutContainer} children={undefined} 
-            onClose={onclose}          
-            >
-          </EuiModal>
+            css={hasError ? flyoutContainerError : flyoutContainer}
+            children={undefined}
+            onClose={onclose}
+          />
         </EuiFocusTrap>
       </EuiOverlayMask>
     </EuiPortal>
