@@ -13,6 +13,7 @@ import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
+import { useLicense } from '../../../../common/hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { removeNoAssigneesSelection } from '../../../../common/components/assignees/utils';
@@ -67,6 +68,8 @@ export interface AssigneesProps {
  */
 export const Assignees: FC<AssigneesProps> = memo(
   ({ eventId, assignedUserIds, onAssigneesUpdated }) => {
+    const isPlatinumPlus = useLicense().isPlatinumPlus();
+
     const { hasIndexWrite } = useAlertsPrivileges();
     const setAlertAssignees = useSetAlertAssignees();
 
@@ -123,7 +126,10 @@ export const Assignees: FC<AssigneesProps> = memo(
           <AssigneesPopover
             assignedUserIds={assignedUserIds}
             button={
-              <UpdateAssigneesButton togglePopover={togglePopover} isDisabled={!hasIndexWrite} />
+              <UpdateAssigneesButton
+                togglePopover={togglePopover}
+                isDisabled={!hasIndexWrite || !isPlatinumPlus}
+              />
             }
             isPopoverOpen={isPopoverOpen}
             closePopover={togglePopover}

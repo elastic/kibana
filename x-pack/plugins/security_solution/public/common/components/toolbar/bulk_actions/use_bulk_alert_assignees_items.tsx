@@ -15,6 +15,7 @@ import type {
   RenderContentPanelProps,
 } from '@kbn/triggers-actions-ui-plugin/public/types';
 
+import { useLicense } from '../../../hooks/use_license';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 import { ASSIGNEES_PANEL_WIDTH } from '../../assignees/constants';
 import { BulkAlertAssigneesPanel } from './alert_bulk_assignees';
@@ -36,6 +37,8 @@ export interface UseBulkAlertAssigneesPanel {
 export const useBulkAlertAssigneesItems = ({
   onAssigneesUpdate,
 }: UseBulkAlertAssigneesItemsProps) => {
+  const isPlatinumPlus = useLicense().isPlatinumPlus();
+
   const { hasIndexWrite } = useAlertsPrivileges();
   const setAlertAssignees = useSetAlertAssignees();
 
@@ -77,7 +80,7 @@ export const useBulkAlertAssigneesItems = ({
 
   const alertAssigneesItems = useMemo(
     () =>
-      hasIndexWrite
+      hasIndexWrite && isPlatinumPlus
         ? [
             {
               key: 'manage-alert-assignees',
@@ -97,7 +100,7 @@ export const useBulkAlertAssigneesItems = ({
             },
           ]
         : [],
-    [hasIndexWrite, onRemoveAllAssignees]
+    [hasIndexWrite, isPlatinumPlus, onRemoveAllAssignees]
   );
 
   const TitleContent = useMemo(
@@ -134,7 +137,7 @@ export const useBulkAlertAssigneesItems = ({
 
   const alertAssigneesPanels: UseBulkAlertAssigneesPanel[] = useMemo(
     () =>
-      hasIndexWrite
+      hasIndexWrite && isPlatinumPlus
         ? [
             {
               id: 2,
@@ -145,7 +148,7 @@ export const useBulkAlertAssigneesItems = ({
             },
           ]
         : [],
-    [TitleContent, hasIndexWrite, renderContent]
+    [TitleContent, hasIndexWrite, isPlatinumPlus, renderContent]
   );
 
   return {
