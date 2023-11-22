@@ -508,10 +508,8 @@ components:
           properties:
             duration: 
               $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppressionDuration'
-            group_by: 
-              $ref: './specific_attributes/query_attributes.schema.yaml#/components/schemas/AlertSuppressionGroupBy'
           required:
-            - group_by
+            - duration
 
     ThresholdRuleDefaultableFields:
       type: object

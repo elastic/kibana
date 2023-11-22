@@ -658,14 +658,16 @@ const prepareDefinitionSectionListItems = (
   }
 
   if ('alert_suppression' in rule && rule.alert_suppression) {
-    definitionSectionListItems.push({
-      title: (
-        <span data-test-subj="alertSuppressionGroupByPropertyTitle">
-          <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
-        </span>
-      ),
-      description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
-    });
+    if ('group_by' in rule.alert_suppression) {
+      definitionSectionListItems.push({
+        title: (
+          <span data-test-subj="alertSuppressionGroupByPropertyTitle">
+            <AlertSuppressionTitle title={i18n.SUPPRESS_ALERTS_BY_FIELD_LABEL} />
+          </span>
+        ),
+        description: <SuppressAlertsByField fields={rule.alert_suppression.group_by} />,
+      });
+    }
 
     definitionSectionListItems.push({
       title: (

@@ -51,8 +51,7 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
 > => {
   const ruleParams = completeRule.ruleParams;
   const suppressionDuration = runOpts.completeRule.ruleParams.alertSuppression?.duration;
-  const groupByFields = runOpts.completeRule.ruleParams.alertSuppression?.groupBy;
-  if (!suppressionDuration || !groupByFields) {
+  if (!suppressionDuration) {
     throw Error('Suppression duration or groupByFields can not be empty');
   }
 
@@ -68,7 +67,6 @@ export const bulkCreateSuppressedThresholdAlerts = async ({
     alertTimestampOverride: runOpts.alertTimestampOverride,
     ruleExecutionLogger,
     publicBaseUrl: runOpts.publicBaseUrl,
-    suppressionFields: groupByFields,
     inputIndex: inputIndexPattern.join(','),
     startedAt,
     from,

@@ -7,7 +7,6 @@
 
 import objectHash from 'object-hash';
 
-import dateMath from '@kbn/datemath';
 import type { SuppressionFieldsLatest } from '@kbn/rule-registry-plugin/common/schemas';
 import {
   ALERT_SUPPRESSION_DOCS_COUNT,
@@ -41,12 +40,10 @@ export const wrapSuppressedThresholdALerts = ({
   alertTimestampOverride,
   ruleExecutionLogger,
   publicBaseUrl,
-  suppressionFields,
   inputIndex,
   startedAt,
   from,
   to,
-  suppressionWindow,
   threshold,
 }: {
   buckets: ThresholdBucket[];
@@ -58,7 +55,6 @@ export const wrapSuppressedThresholdALerts = ({
   alertTimestampOverride: Date | undefined;
   ruleExecutionLogger: IRuleExecutionLogForExecutors;
   publicBaseUrl: string | undefined;
-  suppressionFields: string[];
   inputIndex: string;
   startedAt: Date;
   from: Date;
@@ -76,9 +72,7 @@ export const wrapSuppressedThresholdALerts = ({
       completeRule.ruleParams.ruleId
     );
 
-    // filter out
     const suppressedValues = Object.entries(bucket.key)
-      .filter(([key, value]) => suppressionFields.includes(key))
       .map(([key, value]) => value)
       .sort((a, b) => a.localeCompare(b));
 

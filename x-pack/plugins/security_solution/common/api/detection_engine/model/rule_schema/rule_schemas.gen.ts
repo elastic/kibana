@@ -71,7 +71,6 @@ import { ResponseAction } from '../rule_response_actions/response_actions.gen';
 import {
   AlertSuppression,
   AlertSuppressionDuration,
-  AlertSuppressionGroupBy,
 } from './specific_attributes/query_attributes.gen';
 import { Threshold } from './specific_attributes/threshold_attributes.gen';
 import {
@@ -364,8 +363,7 @@ export const ThresholdRuleOptionalFields = z.object({
   saved_id: SavedQueryId.optional(),
   alert_suppression: z
     .object({
-      duration: AlertSuppressionDuration.optional(),
-      group_by: AlertSuppressionGroupBy,
+      duration: AlertSuppressionDuration,
     })
     .optional(),
 });

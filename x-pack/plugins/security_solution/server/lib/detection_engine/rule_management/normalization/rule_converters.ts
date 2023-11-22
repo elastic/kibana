@@ -177,7 +177,9 @@ export const typeSpecificSnakeToCamel = (
         filters: params.filters,
         savedId: params.saved_id,
         threshold: normalizeThresholdObject(params.threshold),
-        alertSuppression: convertAlertSuppressionToCamel(params.alert_suppression),
+        alertSuppression: params.alert_suppression?.duration
+          ? { duration: params.alert_suppression.duration }
+          : undefined,
       };
     }
     case 'machine_learning': {
@@ -311,8 +313,7 @@ const patchThresholdParams = (
     threshold: params.threshold
       ? normalizeThresholdObject(params.threshold)
       : existingRule.threshold,
-    alertSuppression:
-      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
+    alertSuppression: params.alert_suppression ?? existingRule.alertSuppression,
   };
 };
 
@@ -619,7 +620,9 @@ export const typeSpecificCamelToSnake = (
         filters: params.filters,
         saved_id: params.savedId,
         threshold: params.threshold,
-        alert_suppression: convertAlertSuppressionToSnake(params.alertSuppression),
+        alert_suppression: params.alertSuppression?.duration
+          ? { duration: params.alertSuppression?.duration }
+          : undefined,
       };
     }
     case 'machine_learning': {

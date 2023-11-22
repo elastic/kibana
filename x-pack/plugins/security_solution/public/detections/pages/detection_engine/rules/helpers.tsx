@@ -155,7 +155,12 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       ? convertHistoryStartToSize(rule.history_window_start)
       : '7d',
   shouldLoadQueryDynamically: Boolean(rule.type === 'saved_query' && rule.saved_id),
-  groupByFields: ('alert_suppression' in rule && rule.alert_suppression?.group_by) || [],
+  groupByFields:
+    ('alert_suppression' in rule &&
+      rule.alert_suppression &&
+      'group_by' in rule.alert_suppression &&
+      rule.alert_suppression.group_by) ||
+    [],
   groupByRadioSelection:
     'alert_suppression' in rule && rule.alert_suppression?.duration
       ? GroupByOptions.PerTimePeriod
