@@ -42,6 +42,7 @@ export default function (providerContext: FtrProviderContext) {
       try {
         await kibanaServer.savedObjects.cleanStandardList();
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('cis_integration.ts#after() failed', error);
       }
     });

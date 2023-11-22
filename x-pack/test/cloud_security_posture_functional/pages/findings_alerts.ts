@@ -131,6 +131,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await findings.index.remove();
         await findings.detectionRuleApi.remove();
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('findings_alerts.ts#after() failed', error);
       }
     });

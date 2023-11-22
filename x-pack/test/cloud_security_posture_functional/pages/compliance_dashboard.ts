@@ -54,6 +54,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       try {
         await cspDashboard.index.remove();
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('compliance_dashboard.ts#after() failed', error);
       }
     });

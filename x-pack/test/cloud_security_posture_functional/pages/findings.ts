@@ -134,6 +134,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       try {
         await findings.index.remove();
       } catch (error) {
+        // eslint-disable-next-line no-console
         console.log('findings.ts#after() failed', error);
       }
     });
