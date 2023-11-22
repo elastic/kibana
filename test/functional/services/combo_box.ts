@@ -184,9 +184,14 @@ export class ComboBoxService extends FtrService {
     const input = await comboBoxElement.findByTagName('input');
 
     await input.click();
-    await input.clearValue({ withJS: true });
 
+    await input.clearValue({ withJS: true });
     await this.waitForOptionsListLoading(comboBoxElement);
+
+    // Use all the tricks here to ensure the input is actually empty
+    await input._webElement.getDriver().executeScript(`arguments[0].select()`, input._webElement);
+    await this.common.sleep(1000);
+
     await input.type(filterValue);
     await this.waitForOptionsListLoading(comboBoxElement);
   }
