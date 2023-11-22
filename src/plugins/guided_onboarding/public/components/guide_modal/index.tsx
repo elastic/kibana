@@ -76,11 +76,7 @@ export const GuidePanelFlyout = ({
   );
 
   const hasError = !guideConfig || !pluginState || (pluginState && pluginState.status === 'error');
-  const {
-    flyoutContentWrapper,
-    flyoutContainerError,
-    flyoutContainer,
-  } = styles.flyoutOverrides;
+  const { flyoutContentWrapper, flyoutContainerError, flyoutContainer } = styles.flyoutOverrides;
 
   return (
     <EuiPortal>
