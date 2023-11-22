@@ -207,3 +207,21 @@ export const topNFunctionSortFieldRt = t.union([
   t.literal(TopNFunctionSortField.AnnualizedCo2),
   t.literal(TopNFunctionSortField.AnnualizedDollarCost),
 ]);
+
+export enum TopNComparisonFunctionSortField {
+  ComparisonRank = 'comparison_rank',
+  ComparisonFrame = 'comparison_frame',
+  ComparisonSamples = 'comparison_samples',
+  ComparisonSelfCPU = 'comparison_selfCPU',
+  ComparisonTotalCPU = 'comparison_totalCPU',
+  ComparisonDiff = 'comparison_diff',
+}
+
+export const topNComparisonFunctionSortFieldRt = t.union([
+  t.literal(TopNComparisonFunctionSortField.ComparisonRank),
+  t.literal(TopNComparisonFunctionSortField.ComparisonFrame),
+  t.literal(TopNComparisonFunctionSortField.ComparisonSamples),
+  t.literal(TopNComparisonFunctionSortField.ComparisonSelfCPU),
+  t.literal(TopNComparisonFunctionSortField.ComparisonTotalCPU),
+  t.literal(TopNComparisonFunctionSortField.ComparisonDiff),
+]);

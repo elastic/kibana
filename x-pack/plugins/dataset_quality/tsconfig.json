@@ -15,6 +15,7 @@
     "@kbn/core-plugins-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/std",
+    "@kbn/fleet-plugin",
   ],
   "exclude": [
     "target/**/*",
