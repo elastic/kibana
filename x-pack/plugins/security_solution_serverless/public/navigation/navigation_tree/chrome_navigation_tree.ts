@@ -19,7 +19,7 @@ import { isBreadcrumbHidden } from './utils';
 export const getFormatChromeProjectNavNodes = (services: Services) => {
   const formatChromeProjectNavNodes = (
     projectNavLinks: ProjectNavigationLink[],
-    path: string = ''
+    path?: string
   ): ChromeProjectNavigationNode[] => {
     const { chrome } = services;
 
@@ -31,7 +31,7 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
         const link: ChromeProjectNavigationNode = {
           id: navLinkId,
           title,
-          path: [...path, navLinkId].join('.'),
+          path: path ? [path, navLinkId].join('.') : navLinkId,
           deepLink: chrome.navLinks.get(navLinkId),
           ...(isBreadcrumbHidden(id) && { breadcrumbStatus: 'hidden' }),
         };
@@ -80,7 +80,7 @@ export const getFormatChromeProjectNavNodes = (services: Services) => {
       const navNode: ChromeProjectNavigationNode = {
         id,
         title: node.title || '',
-        path: [...path, id].join('.'),
+        path: [path, id].join('.'),
         breadcrumbStatus: node.breadcrumbStatus,
         getIsActive: node.getIsActive,
       };
