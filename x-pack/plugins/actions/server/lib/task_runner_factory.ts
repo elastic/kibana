@@ -28,6 +28,7 @@ import {
 } from '@kbn/task-manager-plugin/server';
 import { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { LoadedIndirectParams } from '@kbn/task-manager-plugin/server/task';
+import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import { ActionExecutorContract, ActionInfo } from './action_executor';
 import {
   ActionTaskExecutorParams,
@@ -138,7 +139,7 @@ export class TaskRunnerFactory {
           };
           return actionData;
         } catch (err) {
-          const error = createTaskRunError(err, err.source || TaskErrorSource.FRAMEWORK);
+          const error = createTaskRunError(err, getErrorSource(err) || TaskErrorSource.FRAMEWORK);
           actionData = { error };
           return { error };
         }
@@ -192,7 +193,7 @@ export class TaskRunnerFactory {
             // We'll stop re-trying due to action being forbidden
             throwUnrecoverableError(createTaskRunError(e, TaskErrorSource.USER));
           }
-          throw createTaskRunError(e, e.source);
+          throw createTaskRunError(e, getErrorSource(e) || TaskErrorSource.FRAMEWORK);
         }
 
         inMemoryMetrics.increment(IN_MEMORY_METRICS.ACTION_EXECUTIONS);

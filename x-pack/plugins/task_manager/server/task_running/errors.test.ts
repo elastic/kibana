@@ -54,10 +54,8 @@ describe('Error Types', () => {
       );
     });
 
-    it('getErrorSource throws when there is no source data', () => {
-      expect(() => getErrorSource(new Error('OMG'))).toThrowError(
-        "The error doesn't have a source data"
-      );
+    it('getErrorSource return null when there is no source data', () => {
+      expect(getErrorSource(new Error('OMG'))).toBe(null);
     });
   });
 });
