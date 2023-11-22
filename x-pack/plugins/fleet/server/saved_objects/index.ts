@@ -257,7 +257,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
               dynamic: false,
               properties: {
                 id: { type: 'keyword' },
-                hash: { type: 'keyword', index: false },
               },
             },
             ssl: {
@@ -267,7 +266,6 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                   dynamic: false,
                   properties: {
                     id: { type: 'keyword' },
-                    hash: { type: 'keyword', index: false },
                   },
                 },
               },
