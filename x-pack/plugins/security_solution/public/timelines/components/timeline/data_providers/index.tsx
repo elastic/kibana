@@ -13,7 +13,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { IS_DRAGGING_CLASS_NAME } from '@kbn/securitysolution-t-grid';
 import { EuiToolTip, EuiSuperSelect, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import { createGlobalStyle } from '@kbn/react-kibana-context-styled';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
 import { useSourcererDataView } from '../../../../common/containers/sourcerer';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
@@ -93,25 +92,13 @@ const getDroppableId = (id: string): string =>
 const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
 
 const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
-const searchOrFilterPopoverWidth = '350px';
+const searchOrFilterPopoverWidth = 350;
 
-const SearchOrFilterGlobalStyle = createGlobalStyle`
-  .${timelineSelectModeItemsClassName} {
-    width: 350px !important;
-  }
-
-  .${searchOrFilterPopoverClassName}.euiPopover__panel {
-    width: ${searchOrFilterPopoverWidth} !important;
-
-    .euiSuperSelect__listbox {
-      width: ${searchOrFilterPopoverWidth} !important;
-    }
-  }
-
-  .timeline-select-search-or-filter {
-    height: auto
-  }
-`;
+const popoverProps = {
+  className: searchOrFilterPopoverClassName,
+  panelClassName: searchOrFilterPopoverClassName,
+  panelMinWidth: searchOrFilterPopoverWidth,
+};
 
 const CustomTooltipDiv = styled.div`
   position: relative;
@@ -141,17 +128,8 @@ export const DataProviders = React.memo<Props>(({ timelineId }) => {
     [timelineId, dispatch]
   );
 
-  const popoverProps = useMemo(
-    () => ({
-      className: searchOrFilterPopoverClassName,
-      panelClassName: searchOrFilterPopoverClassName,
-    }),
-    []
-  );
-
   return (
     <>
-      <SearchOrFilterGlobalStyle />
       <DropTargetDataProvidersContainer
         aria-label={i18n.QUERY_AREA_ARIA_LABEL}
         className="drop-target-data-providers-container"
