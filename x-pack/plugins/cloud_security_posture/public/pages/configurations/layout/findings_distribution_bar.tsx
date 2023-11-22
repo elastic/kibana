@@ -113,7 +113,7 @@ const DistributionBar: React.FC<Omit<Props, 'pageEnd' | 'pageStart'>> = ({
       gutterSize="none"
       css={css`
         height: 8px;
-        background: ${euiTheme.colors.subduedText};
+        background: ${euiTheme.colors.lightestShade};
       `}
     >
       <DistributionBarPart
