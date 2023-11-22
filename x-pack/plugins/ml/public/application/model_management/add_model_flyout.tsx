@@ -236,7 +236,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step3Body"
-                          defaultMessage="The trained model list automatically refreshes with the most current imported models in your cluster. If it's not shown, try clicking the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
+                          defaultMessage="The trained model list automatically refreshes with the most current imported models in your cluster. If the list is not updated, click the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
                         />
                       </p>
                     </EuiText>
