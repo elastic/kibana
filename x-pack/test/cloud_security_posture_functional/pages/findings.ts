@@ -16,12 +16,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const retry = getService('retry');
   const pageObjects = getPageObjects(['common', 'findings', 'header']);
   const chance = new Chance();
+  const timeFiveHoursAgo = (Date.now() - 18000000).toString();
 
   // We need to use a dataset for the tests to run
   // We intentionally make some fields start with a capital letter to test that the query bar is case-insensitive/case-sensitive
   const data = [
     {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `kubelet`, sub_type: 'lower case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -38,7 +39,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Upper case cluster id',
     },
     {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `Pod`, sub_type: 'Upper case sub type' },
       result: { evaluation: chance.integer() % 2 === 0 ? 'passed' : 'failed' },
       rule: {
@@ -55,7 +56,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'Another Upper case cluster id',
     },
     {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `process`, sub_type: 'another lower case type' },
       result: { evaluation: 'passed' },
       rule: {
@@ -72,7 +73,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       cluster_id: 'lower case cluster id',
     },
     {
-      '@timestamp': new Date().toISOString(),
+      '@timestamp': timeFiveHoursAgo,
       resource: { id: chance.guid(), name: `process`, sub_type: 'Upper case type again' },
       result: { evaluation: 'failed' },
       rule: {
@@ -112,7 +113,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await findings.index.add(data);
 
       await findings.navigateToLatestFindingsPage();
-
       await retry.waitFor(
         'Findings table to be loaded',
         async () => (await latestFindingsTable.getRowsCount()) === data.length

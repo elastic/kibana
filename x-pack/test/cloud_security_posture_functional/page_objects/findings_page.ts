@@ -410,6 +410,12 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     },
   });
 
+  const isLatestFindingsTableThere = async () => {
+    const table = await testSubjects.findAll('docTable');
+    const trueOrFalse = table.length > 0 ? true : false;
+    return trueOrFalse;
+  };
+
   const groupSelector = (testSubj = 'group-selector-dropdown') => ({
     async getElement() {
       return await testSubjects.find(testSubj);
@@ -468,5 +474,6 @@ export function FindingsPageProvider({ getService, getPageObjects }: FtrProvider
     groupSelector,
     findingsGrouping,
     createDataTableObject,
+    isLatestFindingsTableThere,
   };
 }

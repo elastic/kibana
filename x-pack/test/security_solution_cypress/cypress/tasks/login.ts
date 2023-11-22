@@ -12,7 +12,7 @@ import { LoginState } from '@kbn/security-plugin/common/login_state';
 import type { SecurityRoleName } from '@kbn/security-solution-plugin/common/test';
 import { KNOWN_SERVERLESS_ROLE_DEFINITIONS } from '@kbn/security-solution-plugin/common/test';
 import { LOGOUT_URL } from '../urls/navigation';
-import { rootRequest } from './common';
+import { API_HEADERS, rootRequest } from './common';
 import {
   CLOUD_SERVERLESS,
   ELASTICSEARCH_PASSWORD,
@@ -210,7 +210,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
       (provider) => provider.type === 'basic'
     );
 
-    return rootRequest({
+    cy.request({
       url: `${baseUrl}/internal/security/login`,
       method: 'POST',
       body: {
@@ -219,6 +219,7 @@ const loginWithUsernameAndPassword = (username: string, password: string): void 
         currentURL: '/',
         params: { username, password },
       },
+      headers: API_HEADERS,
     });
   });
 };
