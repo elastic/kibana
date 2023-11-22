@@ -14,8 +14,8 @@ export default defineCypressConfig(
     env: {
       IS_SERVERLESS: true,
 
-      // FIXME:PT Comment this out before commit to `main`
-      TOOLING_LOG_LEVEL: 'verbose',
+      // Uncomment to enable logging
+      // TOOLING_LOG_LEVEL: 'verbose',
 
       grepTags: '@cloudServerless --@brokenInServerless',
     },

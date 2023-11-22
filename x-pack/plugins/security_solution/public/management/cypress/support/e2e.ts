@@ -26,7 +26,7 @@ import { subj as testSubjSelector } from '@kbn/test-subj-selector';
 // @ts-ignore
 import registerCypressGrep from '@cypress/grep';
 
-import { login } from '../tasks/login';
+import { login, ROLE } from '../tasks/login';
 import { loadPage } from '../tasks/common';
 
 registerCypressGrep();
