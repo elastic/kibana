@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { isNumber } from 'lodash';
 import expect from '@kbn/expect';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 
@@ -23,6 +24,9 @@ import {
   readRiskScores,
   normalizeScores,
   waitForRiskScoresToBePresent,
+  initAssetCriticality,
+  teardownAssetCriticality,
+  createAssetCriticality,
 } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
@@ -267,6 +271,46 @@ export default ({ getService }: FtrProviderContext): void => {
           const scores = await readRiskScores(es);
 
           expect(scores.length).to.eql(10);
+        });
+      });
+
+      describe('with asset criticality data', () => {
+        before(async () => {
+          await initAssetCriticality();
+        });
+
+        after(async () => {
+          await teardownAssetCriticality();
+        });
+
+        beforeEach(async () => {
+          await createAssetCriticality({
+            supertest,
+            criticality: { 'host.name': 'host-1', criticality_level: 'Critical' },
+          });
+        });
+
+        it('calculates and persists risk scores with additional criticality metadata and modifiers', async () => {
+          await calculateRiskScores({
+            body: {
+              data_view_id: '.alerts-security.alerts-default',
+              range: { start: 'now-30d', end: 'now' },
+            },
+          });
+
+          await waitForRiskScoresToBePresent({ es, log, scoreCount: 10 });
+          const scores = await readRiskScores(es);
+
+          const scoresContainAssetCriticalityLevels = scores.some(
+            (score) => !!score.host?.risk.asset_criticality_level
+          );
+          expect(scoresContainAssetCriticalityLevels).to.be(true);
+
+          const scoresContainAssetCriticalityModifiers = scores.some((score) =>
+            isNumber(score.host?.risk.asset_criticality_modifier)
+          );
+
+          expect(scoresContainAssetCriticalityModifiers).to.be(true);
         });
       });
     });

@@ -20,8 +20,11 @@ import {
 import {
   buildDocument,
   createAndSyncRuleAndAlertsFactory,
+  createAssetCriticality,
   deleteAllRiskScores,
+  initAssetCriticality,
   sanitizeScores,
+  teardownAssetCriticality,
 } from '../../utils';
 
 import { FtrProviderContext } from '../../../../ftr_provider_context';
@@ -543,6 +546,60 @@ export default ({ getService }: FtrProviderContext): void => {
               category_1_count: 50,
               id_field: 'user.name',
               id_value: 'user-1',
+            },
+          ]);
+        });
+      });
+
+      describe('with asset criticality data', () => {
+        before(async () => {
+          await initAssetCriticality();
+        });
+
+        after(async () => {
+          await teardownAssetCriticality();
+        });
+
+        beforeEach(async () => {
+          await createAssetCriticality({
+            supertest,
+            criticality: { 'host.name': 'host-1', criticality_level: 'Critical' },
+          });
+        });
+
+        it('calculates and persists risk scores with additional criticality metadata and modifiers', async () => {
+          const documentId = uuidv4();
+          await indexListOfDocuments([
+            buildDocument({ host: { name: 'host-1' } }, documentId),
+            buildDocument({ host: { name: 'host-2' } }, documentId),
+          ]);
+
+          const body = await getRiskScoreAfterRuleCreationAndExecution(documentId, {
+            alerts: 2,
+          });
+
+          expect(sanitizeScores(body.scores.host!)).to.eql([
+            {
+              asset_criticality_level: 'Critical',
+              asset_criticality_modifier: 2.0,
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 21,
+              id_field: 'host.name',
+              id_value: 'host-1',
+            },
+            {
+              asset_criticality_level: 'Low',
+              asset_criticality_modifier: 0.5,
+              calculated_level: 'Unknown',
+              calculated_score: 21,
+              calculated_score_norm: 8.039816232771823,
+              category_1_count: 1,
+              category_1_score: 21,
+              id_field: 'host.name',
+              id_value: 'host-2',
             },
           ]);
         });

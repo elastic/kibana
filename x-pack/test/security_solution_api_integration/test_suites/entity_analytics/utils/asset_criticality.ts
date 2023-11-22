@@ -123,3 +123,37 @@ export const assetCriticalityRouteHelpersFactoryNoAuth = (
       .send()
       .expect(200),
 });
+/**
+ * This helper function initializes asset criticality by calling the status
+ * endpoint, which initializes as a side effect.
+ */
+export const initAssetCriticality = async (
+  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => {
+  const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest, namespace);
+  return await assetCriticalityRoutes.status();
+};
+export const teardownAssetCriticality = async () => {}; // TODO
+
+// eslint-disable-next-line @typescript-eslint/no-empty-interface
+interface AssetCriticalityCreateRequest {} // TODO: define based on request schema
+
+export const createAssetCriticality = async ({
+  supertest,
+  namespace = 'default',
+  criticality,
+}: {
+  supertest: SuperTest.SuperTest<SuperTest.Test>;
+  namespace?: string;
+  criticality: AssetCriticalityCreateRequest;
+}) => {
+  const route = routeWithNamespace('TODO', namespace); // TODO
+  const response = await supertest
+    .post(route)
+    .set('kbn-xsrf', 'true')
+    .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
+    .send(criticality)
+    .expect(200);
+};
+

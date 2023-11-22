@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { isNumber } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
   deleteAllAlerts,
@@ -23,6 +24,9 @@ import {
   getRiskEngineTask,
   waitForRiskEngineTaskToBeGone,
   cleanRiskEngine,
+  teardownAssetCriticality,
+  createAssetCriticality,
+  initAssetCriticality,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -226,6 +230,39 @@ export default ({ getService }: FtrProviderContext): void => {
           );
           expect(scoredIdentifiers.includes('host.name')).to.be(true);
           expect(scoredIdentifiers.includes('user.name')).to.be(true);
+        });
+
+        context('with asset criticality data', () => {
+          before(async () => {
+            await initAssetCriticality();
+          });
+
+          after(async () => {
+            await teardownAssetCriticality();
+          });
+
+          beforeEach(async () => {
+            await createAssetCriticality({
+              supertest,
+              criticality: { 'user.name': 'user-1', criticality_level: 'Critical' },
+            });
+          });
+
+          it('calculates risk scores with asset criticality data', async () => {
+            await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+            const riskScores = await readRiskScores(es);
+
+            expect(riskScores.length).to.eql(20);
+            const assetCriticalityLevels = riskScores.map(
+              (riskScore) => riskScore.user?.risk.asset_criticality_level
+            );
+            const assetCriticalityModifiers = riskScores.map(
+              (riskScore) => riskScore.user?.risk.asset_criticality_modifier
+            );
+
+            expect(assetCriticalityLevels).to.eql(Array(20).fill('Critical'));
+            expect(assetCriticalityModifiers.every((modifier) => isNumber(modifier))).to.be(true);
+          });
         });
       });
     });
