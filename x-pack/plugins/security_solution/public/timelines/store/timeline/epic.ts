@@ -178,8 +178,9 @@ export const createTimelineEpic =
             ).pipe(
               withLatestFrom(timeline$, allTimelineQuery$, kibana$),
               mergeMap(([response, recentTimeline, allTimelineQuery, kibana]) => {
-                if (isErrorResponse(response)) {
-                  switch (response.status_code) {
+                if (isTimelineErrorResponse(response)) {
+                  const error = getErrorFromResponse(response);
+                  switch (error?.errorCode) {
                     // conflict
                     case 409:
                       kibana.notifications.toasts.addDanger({
@@ -190,7 +191,7 @@ export const createTimelineEpic =
                     default:
                       kibana.notifications.toasts.addDanger({
                         title: i18n.UPDATE_TIMELINE_ERROR_TITLE,
-                        text: response.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
+                        text: error?.message ?? i18n.UPDATE_TIMELINE_ERROR_TEXT,
                       });
                   }
                   return [
@@ -408,6 +409,14 @@ const convertToString = (obj: unknown) => {
 
 type PossibleResponse = TimelineResponse | TimelineErrorResponse;
 
-function isErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
-  return 'status_code' in response;
+function isTimelineErrorResponse(response: PossibleResponse): response is TimelineErrorResponse {
+  return 'status_code' in response || 'statusCode' in response;
+}
+
+function getErrorFromResponse(response: TimelineErrorResponse) {
+  if ('status_code' in response) {
+    return { errorCode: response.status_code, message: response.message };
+  } else if ('statusCode' in response) {
+    return { errorCode: response.statusCode, message: response.message };
+  }
 }
