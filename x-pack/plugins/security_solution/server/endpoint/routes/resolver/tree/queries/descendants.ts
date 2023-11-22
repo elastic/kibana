@@ -59,10 +59,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             },
             {
               bool: {
-                should: [
-                  { term: { 'event.category': 'process' } },
-                  { term: { 'event.category': 'malware' } },
-                ],
+                should: [{ term: { 'event.category': 'process' } }],
               },
             },
             {
@@ -150,10 +147,7 @@ export class DescendantsQuery extends BaseResolverQuery {
             },
             {
               bool: {
-                should: [
-                  { term: { 'event.category': 'process' } },
-                  { term: { 'event.category': 'malware' } },
-                ],
+                should: [{ term: { 'event.category': 'process' } }],
               },
             },
             {
