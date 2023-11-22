@@ -245,7 +245,7 @@ export function Chart({
     isPlainRecord,
   });
 
-  if (!chart) {
+  if (!chart || !chartVisible) {
     return <div data-test-subj="unifiedHistogramChartEmpty" />;
   }
 
@@ -312,6 +312,24 @@ export function Chart({
                 justifyContent="flexEnd"
                 css={breakdownFieldSelectorGroupCss}
               >
+                <EuiFlexItem grow={false}>
+                  <IconButtonGroup
+                    legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
+                      defaultMessage: 'Hide chart',
+                    })}
+                    buttonSize="s"
+                    buttons={[
+                      {
+                        label: i18n.translate('unifiedHistogram.hideChartButton', {
+                          defaultMessage: 'Hide chart',
+                        }),
+                        iconType: 'transitionTopOut',
+                        'data-test-subj': 'unifiedHistogramHideChartButton',
+                        onClick: toggleHideChart,
+                      },
+                    ]}
+                  />
+                </EuiFlexItem>
                 {chartVisible && breakdown && (
                   <EuiFlexItem css={breakdownFieldSelectorItemCss}>
                     <BreakdownFieldSelector
