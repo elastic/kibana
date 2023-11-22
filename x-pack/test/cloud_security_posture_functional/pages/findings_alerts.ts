@@ -127,8 +127,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await findings.index.remove();
-      await findings.detectionRuleApi.remove();
+      try {
+        await findings.index.remove();
+        await findings.detectionRuleApi.remove();
+      } catch (error) {
+        console.log('findings_alerts.ts#after() failed', error);
+      }
     });
 
     beforeEach(async () => {

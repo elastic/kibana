@@ -51,7 +51,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await cspDashboard.index.remove();
+      try {
+        await cspDashboard.index.remove();
+      } catch (error) {
+        console.log('compliance_dashboard.ts#after() failed', error);
+      }
     });
 
     describe('Kubernetes Dashboard', () => {

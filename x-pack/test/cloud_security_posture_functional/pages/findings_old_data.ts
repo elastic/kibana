@@ -67,7 +67,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await findings.index.remove();
+      try {
+        await findings.index.remove();
+      } catch (error) {
+        console.log('findings_old_data.ts#after() failed', error);
+      }
     });
 
     describe('Findings page with old data', () => {

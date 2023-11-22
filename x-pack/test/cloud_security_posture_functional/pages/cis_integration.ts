@@ -39,7 +39,11 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      try {
+        await kibanaServer.savedObjects.cleanStandardList();
+      } catch (error) {
+        console.log('cis_integration.ts#after() failed', error);
+      }
     });
 
     describe('CNVM AWS', () => {
