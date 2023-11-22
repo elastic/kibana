@@ -9,7 +9,6 @@ import {
   EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiCheckableCard,
   EuiCodeBlock,
   EuiFlexGroup,
@@ -215,36 +214,6 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
         ),
         content: (
           <>
-            <EuiCallOut
-              title={
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.addModelFlyout.thirdParty.calloutTitle"
-                  defaultMessage="Requires the Eland Python client"
-                />
-              }
-              iconType="iInCircle"
-            >
-              <p>
-                <FormattedMessage
-                  id="xpack.ml.trainedModels.addModelFlyout.thirdParty.calloutBody"
-                  defaultMessage="To import a third-party model directly to your Elasticsearch cluster, you need to
-              use API calls in the Eland Python client."
-                />
-              </p>
-              <p>
-                <EuiButton
-                  href={docLinks.links.clients.eland}
-                  color={'primary'}
-                  fill={false}
-                  target={'_blank'}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.addModelFlyout.thirdParty.elandDocumentationButtonLabel"
-                    defaultMessage="Eland documentation"
-                  />
-                </EuiButton>
-              </p>
-            </EuiCallOut>
             <EuiSpacer size={'m'} />
             <EuiSteps
               steps={[
@@ -258,24 +227,60 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                   children: (
                     <EuiText>
                       <p>
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.pipInstallLabel"
-                          defaultMessage="Eland can be installed with pip from PyPI:"
-                        />
+                        <EuiText size={'s'} color={'subdued'}>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.pipInstallLabel"
+                            defaultMessage="Eland can be installed with {pipLink} from {pypiLink}:"
+                            values={{
+                              pipLink: (
+                                <EuiLink
+                                  href={'https://pypi.org/project/pip/'}
+                                  target={'_blank'}
+                                  external
+                                >
+                                  pip
+                                </EuiLink>
+                              ),
+                              pypiLink: (
+                                <EuiLink href={'https://pypi.org/'} target={'_blank'} external>
+                                  PyPI
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiText>
                       </p>
                       <p>
-                        <EuiCodeBlock isCopyable language="shell">
+                        <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
                           $ python -m pip install eland
                         </EuiCodeBlock>
                       </p>
                       <p>
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.condaInstallLabel"
-                          defaultMessage="or it can also be installed with Conda from Conda Forge:"
-                        />
+                        <EuiText size={'s'} color={'subdued'}>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.condaInstallLabel"
+                            defaultMessage="or it can also be installed with {condaLink} from {condaForgeLink}:"
+                            values={{
+                              condaLink: (
+                                <EuiLink href={'https://docs.conda.io/'} target={'_blank'} external>
+                                  Conda
+                                </EuiLink>
+                              ),
+                              condaForgeLink: (
+                                <EuiLink
+                                  href={'https://conda-forge.org/'}
+                                  target={'_blank'}
+                                  external
+                                >
+                                  Conda Forge
+                                </EuiLink>
+                              ),
+                            }}
+                          />
+                        </EuiText>
                       </p>
                       <p>
-                        <EuiCodeBlock isCopyable language="shell">
+                        <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
                           $ conda install -c conda-forge eland
                         </EuiCodeBlock>
                       </p>
@@ -286,50 +291,63 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                   title: i18n.translate(
                     'xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Title',
                     {
-                      defaultMessage:
-                        'Follow the Eland instructions on importing third-party models',
+                      defaultMessage: 'Importing your third-party model',
                     }
                   ),
                   children: (
                     <EuiText>
                       <p>
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Body"
-                          defaultMessage="The latest details on supported model types and the steps needed to import models can be found in the Eland documentation."
-                        />
-                      </p>
-                      <p>
-                        <EuiButton
-                          href={docLinks.links.ml.nlpImportModel}
-                          color={'primary'}
-                          fill={false}
-                          target={'_blank'}
-                        >
+                        <EuiText size={'s'} color={'subdued'}>
                           <FormattedMessage
-                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2ButtonLabel"
-                            defaultMessage="Import models with Eland"
+                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Body"
+                            defaultMessage="Follow the instructions on importing compatible third-party models"
                           />
-                        </EuiButton>
+                        </EuiText>
                       </p>
-                    </EuiText>
-                  ),
-                },
-                {
-                  title: i18n.translate(
-                    'xpack.ml.trainedModels.addModelFlyout.thirdParty.step3Title',
-                    {
-                      defaultMessage:
-                        'Wait for your imported model to appear in the trained model list',
-                    }
-                  ),
-                  children: (
-                    <EuiText>
+
                       <p>
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step3Body"
-                          defaultMessage="The trained model list automatically refreshes with the most current imported models in your cluster. If the list is not updated, click the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
-                        />
+                        <b>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2ExampleTitle"
+                            defaultMessage="Example import"
+                          />
+                        </b>
+
+                        <EuiCodeBlock isCopyable language="shell" fontSize={'m'}>
+                          eland_import_hub_model <br />
+                          --cloud-id &lt;cloud-id&gt; \ <br />
+                          -u &lt;username&gt; -p &lt;password&gt; \ <br />
+                          --hub-model-id &lt;model-id&gt; \ <br />
+                          --task-type ner \
+                        </EuiCodeBlock>
                       </p>
+
+                      <EuiFlexGroup gutterSize={'s'}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            href={docLinks.links.ml.nlpImportModel}
+                            target={'_blank'}
+                            iconType={'help'}
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.addModelFlyout.thirdParty.importModelButtonLabel"
+                              defaultMessage="Import models with Eland"
+                            />
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty
+                            href={docLinks.links.enterpriseSearch.supportedNlpModels}
+                            target={'_blank'}
+                            iconType={'help'}
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.addModelFlyout.thirdParty.compatibleModelsButtonLabel"
+                              defaultMessage="Compatible NLP models"
+                            />
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
                     </EuiText>
                   ),
                 },
@@ -341,14 +359,25 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                     }
                   ),
                   children: (
-                    <EuiText>
-                      <p>
-                        <FormattedMessage
-                          id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step4Body"
-                          defaultMessage="To deploy and use your new model, press the play button or click “Start deployment” in the drop menu of the table row of the model."
-                        />
-                      </p>
-                    </EuiText>
+                    <>
+                      <EuiText size={'s'} color={'subdued'}>
+                        <p>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step4Body"
+                            defaultMessage="Click “Start deployment” in the table row containing your new model to deploy and use it."
+                          />
+                        </p>
+                      </EuiText>
+                      <EuiSpacer size={'m'} />
+                      <EuiText size={'s'} color={'subdued'}>
+                        <p>
+                          <FormattedMessage
+                            id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step3Body"
+                            defaultMessage="Note: The trained model list automatically refreshes with the most current imported models in your cluster. If the list is not updated, click the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
+                          />
+                        </p>
+                      </EuiText>
+                    </>
                   ),
                 },
               ]}
@@ -359,7 +388,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
     ];
   }, [
     canCreateTrainedModels,
-    docLinks.links.clients.eland,
+    docLinks.links.enterpriseSearch.supportedNlpModels,
     docLinks.links.ml.nlpElser,
     docLinks.links.ml.nlpImportModel,
     modelDownloads,
