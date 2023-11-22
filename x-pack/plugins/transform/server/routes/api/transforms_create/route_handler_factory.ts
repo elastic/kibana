@@ -7,13 +7,13 @@
 
 import type { RequestHandler } from '@kbn/core/server';
 import type { RuntimeField } from '@kbn/data-views-plugin/common';
+import type { DataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 
 import type { TransformIdParamSchema } from '../../../../common/api_schemas/common';
 import type {
   PutTransformsRequestSchema,
-  PutTransformsQuerySchema,
   PutTransformsResponseSchema,
 } from '../../../../common/api_schemas/transforms';
 import { isLatestTransform } from '../../../../common/types/transform';
@@ -27,7 +27,7 @@ export const routeHandlerFactory: (
   routeDependencies: RouteDependencies
 ) => RequestHandler<
   TransformIdParamSchema,
-  PutTransformsQuerySchema,
+  DataViewCreateQuerySchema,
   PutTransformsRequestSchema,
   TransformRequestHandlerContext
 > = (routeDependencies) => async (ctx, req, res) => {

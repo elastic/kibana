@@ -13,6 +13,7 @@ import {
   type DeleteDataFrameAnalyticsWithIndexStatus,
 } from '@kbn/ml-data-frame-analytics-utils';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import { dataViewCreateQuerySchema } from '@kbn/ml-data-view-utils/schemas/api_create_query_schema';
 import { createDataViewFn } from '@kbn/ml-data-view-utils/actions/create';
 import { deleteDataViewFn } from '@kbn/ml-data-view-utils/actions/delete';
 
@@ -33,7 +34,6 @@ import {
   dataFrameAnalyticsQuerySchema,
   dataFrameAnalyticsNewJobCapsParamsSchema,
   dataFrameAnalyticsNewJobCapsQuerySchema,
-  putDataFrameAnalyticsQuerySchema,
   type PutDataFrameAnalyticsResponseSchema,
 } from './schemas/data_frame_analytics_schema';
 import type { ExtendAnalyticsMapArgs } from '../models/data_frame_analytics/types';
@@ -300,7 +300,7 @@ export function dataFrameAnalyticsRoutes(
         validate: {
           request: {
             params: dataFrameAnalyticsIdSchema,
-            query: putDataFrameAnalyticsQuerySchema,
+            query: dataViewCreateQuerySchema,
             body: dataFrameAnalyticsJobConfigSchema,
           },
         },

@@ -117,11 +117,6 @@ export const dataFrameAnalyticsNewJobCapsQuerySchema = schema.maybe(
   schema.object({ rollup: schema.maybe(schema.string()) })
 );
 
-export const putDataFrameAnalyticsQuerySchema = schema.object({
-  createDataView: schema.boolean({ defaultValue: false }),
-  timeFieldName: schema.maybe(schema.string()),
-});
-
 interface DataFrameAnalyticsJobsCreated {
   id: string;
 }
