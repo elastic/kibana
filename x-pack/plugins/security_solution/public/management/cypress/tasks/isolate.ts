@@ -139,8 +139,8 @@ export const filterOutIsolatedHosts = (): void => {
   cy.getByTestSubj('querySubmitButton').click();
 };
 
-const checkEndpointListForIsolatedHosts = (expectIsolated: boolean): void => {
-  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
+const checkEndpointListForIsolationStatus = (expectIsolated: boolean): void => {
+  const chainer = expectIsolated ? 'contain' : 'not.contain';
   cy.getByTestSubj('endpointListTable').within(() => {
     cy.get('tbody tr').each(($tr) => {
       cy.wrap($tr).within(() => {
@@ -151,16 +151,15 @@ const checkEndpointListForIsolatedHosts = (expectIsolated: boolean): void => {
 };
 
 export const checkEndpointListForOnlyUnIsolatedHosts = (): void =>
-  checkEndpointListForIsolatedHosts(false);
+  checkEndpointListForIsolationStatus(false);
 export const checkEndpointListForOnlyIsolatedHosts = (): void =>
-  checkEndpointListForIsolatedHosts(true);
+  checkEndpointListForIsolationStatus(true);
 
 export const checkEndpointIsolationStatus = (
   endpointHostname: string,
   expectIsolated: boolean
 ): void => {
-  const chainer = expectIsolated ? 'contain.text' : 'not.contain.text';
-
+  const chainer = expectIsolated ? 'contain' : 'not.contain';
   cy.contains(endpointHostname).parents('td').siblings('td').eq(0).should(chainer, 'Isolated');
 };
 
