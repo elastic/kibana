@@ -32,7 +32,7 @@ function getEnhancedProps<
   props: Props<LinkId, Id, ChildrenId>,
   { treeDepth, index }: { treeDepth: number; index?: number }
 ) {
-  const { children, ...rest } = props;
+  const { children, order, ...rest } = props;
   const id = getNavigationNodeId(rest, () => `node-${treeDepth}-${index ?? 'root'}`) as Id;
 
   const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children' | 'id'> & {

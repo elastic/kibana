@@ -475,6 +475,23 @@ Array [
     "type": "navGroup",
   },
   Object {
+    "deepLink": Object {
+      "baseUrl": "/mocked",
+      "href": "http://mocked/dev_tools",
+      "id": "dev_tools",
+      "title": "Deeplink dev_tools",
+      "url": "/mocked/dev_tools",
+    },
+    "href": undefined,
+    "icon": "editorCodeBlock",
+    "id": "devTools",
+    "isGroup": false,
+    "path": "devTools",
+    "sideNavStatus": "visible",
+    "title": "Developer tools",
+    "type": "navItem",
+  },
+  Object {
     "breadcrumbStatus": "hidden",
     "children": Array [
       Object {

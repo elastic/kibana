@@ -40,7 +40,7 @@ function NavigationItemComp<
   const navNodeRef = useRef<ChromeProjectNavigationNode>();
 
   const { children, node } = useMemo(() => {
-    const { children: _children, ...rest } = props;
+    const { children: _children, order: _order, ...rest } = props;
     const nodeEnhanced: Omit<NodePropsEnhanced<LinkId, Id, ChildrenId>, 'children'> = {
       ...rest,
       isGroup: false,
