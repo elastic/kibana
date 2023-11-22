@@ -210,7 +210,7 @@ export class CiStatsClient {
           continue;
         }
 
-        throw error;
+        throw new Error('Failed to connect to CI Stats.');
       }
     }
   }
