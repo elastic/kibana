@@ -36,7 +36,7 @@ export default function ({ getService }: FtrProviderContext) {
 
   const testDiscoverCustomUrl: DiscoverUrlConfig = {
     label: 'Show data',
-    indexPattern: 'ft_egs_regression',
+    esIndexName: 'ft_egs_regression',
     queryEntityFieldNames: ['stabf'],
     timeRange: TIME_RANGE_TYPE.AUTO,
   };

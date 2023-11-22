@@ -18,7 +18,7 @@ import { MlCustomUrls } from './custom_urls';
 
 export interface DiscoverUrlConfig {
   label: string;
-  indexPattern: string;
+  esIndexName: string;
   queryEntityFieldNames: string[];
   timeRange: TimeRangeType;
   timeRangeInterval?: string;

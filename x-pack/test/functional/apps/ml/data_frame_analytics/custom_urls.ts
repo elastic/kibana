@@ -15,7 +15,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  indexPattern: 'ft_farequote',
+  esIndexName: 'ft_farequote',
   queryEntityFieldNames: ['airline'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
