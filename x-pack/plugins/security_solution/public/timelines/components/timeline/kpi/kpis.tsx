@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import styled from 'styled-components';
 
 import { EuiFlexItem, EuiFlexGroup, EuiToolTip, EuiBadge } from '@elastic/eui';
@@ -20,7 +20,6 @@ import * as i18n from './translations';
 export const StatsContainer = styled.span`
   font-size: ${euiThemeVars.euiFontSizeXS};
   font-weight: ${euiThemeVars.euiFontWeightSemiBold};
-  /* border-right: ${euiThemeVars.euiBorderThin}; */
   padding-right: 16px;
   .smallDot {
     width: 3px !important;
@@ -56,23 +55,13 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
     };
   }, [kpis, defaultNumberFormat]);
 
-  const getColor = useCallback((count) => {
-    if (count === 0) {
-      return 'hollow';
-    }
-    return 'hollow';
-  }, []);
-
   return (
     <EuiFlexGroup wrap data-test-subj="siem-timeline-kpis">
       <EuiFlexItem grow={false}>
         <StatsContainer>
           {`${i18n.PROCESS_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.process}>
-            <EuiBadge
-              color={getColor(kpis?.processCount ?? 0)}
-              data-test-subj={'siem-timeline-process-kpi'}
-            >
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-process-kpi'}>
               {formattedKpis.process}
             </EuiBadge>
           </EuiToolTip>
@@ -82,10 +71,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.USER_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.user}>
-            <EuiBadge
-              color={getColor(kpis?.userCount ?? 0)}
-              data-test-subj={'siem-timeline-user-kpi'}
-            >
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-user-kpi'}>
               {formattedKpis.user}
             </EuiBadge>
           </EuiToolTip>
@@ -95,10 +81,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.HOST_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.host}>
-            <EuiBadge
-              color={getColor(kpis?.hostCount ?? 0)}
-              data-test-subj={'siem-timeline-host-kpi'}
-            >
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-host-kpi'}>
               {formattedKpis.host}
             </EuiBadge>
           </EuiToolTip>
@@ -108,10 +91,7 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
         <StatsContainer>
           {`${i18n.SOURCE_IP_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.sourceIp}>
-            <EuiBadge
-              color={getColor(kpis?.sourceIpCount ?? 0)}
-              data-test-subj={'siem-timeline-source-ip-kpi'}
-            >
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-source-ip-kpi'}>
               {formattedKpis.sourceIp}
             </EuiBadge>
           </EuiToolTip>
@@ -119,12 +99,9 @@ export const TimelineKPIs = React.memo(({ kpis }: { kpis: TimelineKpiStrategyRes
       </EuiFlexItem>
       <EuiFlexItem grow={false} style={{ minWidth: 100 }}>
         <StatsContainer>
-          {`${i18n.SOURCE_IP_KPI_TITLE} : `}
+          {`${i18n.DESTINATION_IP_KPI_TITLE} : `}
           <EuiToolTip position="left" content={formattedKpiToolTips.destinationIp}>
-            <EuiBadge
-              color={getColor(kpis?.destinationIpCount ?? 0)}
-              data-test-subj={i18n.DESTINATION_IP_KPI_TITLE}
-            >
+            <EuiBadge color="hollow" data-test-subj={'siem-timeline-destination-ip-kpi'}>
               {formattedKpis.destinationIp}
             </EuiBadge>
           </EuiToolTip>

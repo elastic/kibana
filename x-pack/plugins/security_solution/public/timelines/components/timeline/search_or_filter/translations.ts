@@ -84,3 +84,10 @@ export const DATA_PROVIDER_HIDDEN_EMPTY = i18n.translate(
     defaultMessage: 'Click here to show the empty Query builder',
   }
 );
+
+export const ERROR_PROCESSING_INDEX_PATTERNS = i18n.translate(
+  'xpack.securitySolution.timeline.searchOrFilter.errorProcessingDataView',
+  {
+    defaultMessage: 'Error processing Index Patterns',
+  }
+);

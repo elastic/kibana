@@ -101,7 +101,6 @@ describe('timeline sourcerer', () => {
   });
 
   it('renders "alerts only" checkbox, unchecked', async () => {
-    screen.debug(undefined, 10000000);
     await waitFor(() => {
       expect(screen.getByTestId('sourcerer-alert-only-checkbox').parentElement).toHaveTextContent(
         'Show only detection alerts'
@@ -132,7 +131,7 @@ describe('timeline sourcerer', () => {
 
   it('index pattern selector is enabled', async () => {
     await waitFor(() => {
-      expect(screen.getByTestId('sourcerer-combo-box')).not.toBeDisabled();
+      expect(screen.getByTestId('sourcerer-combo-box')).toBeEnabled();
     });
   });
 

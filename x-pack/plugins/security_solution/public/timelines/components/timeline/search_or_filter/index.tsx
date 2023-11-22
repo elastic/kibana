@@ -18,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
+import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
 import { useDeepEqualSelector } from '../../../../common/hooks/use_selector';
 import { useKibana } from '../../../../common/lib/kibana';
 import { SourcererScopeName } from '../../../../common/store/sourcerer/model';
@@ -30,6 +31,7 @@ import { timelineDefaults } from '../../../store/timeline/defaults';
 import { dispatchUpdateReduxTime } from '../../../../common/components/super_date_picker';
 import { SearchOrFilter } from './search_or_filter';
 import { setDataProviderVisibility } from '../../../store/timeline/actions';
+import * as i18n from './translations';
 
 const FilterItemsContainer = styled(EuiFlexGroup)``;
 
@@ -66,6 +68,8 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
   }) => {
     const dispatch = useDispatch();
 
+    const { addError } = useAppToasts();
+
     const [dataView, setDataView] = useState<DataView>();
     const {
       services: { data },
@@ -88,8 +92,12 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
         setDataView(indexPattern);
       } else if (!filterQuery) {
         const createDataView = async () => {
-          dv = await data.dataViews.create({ title: indexPattern.title });
-          setDataView(dv);
+          try {
+            dv = await data.dataViews.create({ title: indexPattern.title });
+            setDataView(dv);
+          } catch (error) {
+            addError(error, { title: i18n.ERROR_PROCESSING_INDEX_PATTERNS });
+          }
         };
         createDataView();
       }
@@ -98,7 +106,7 @@ const StatefulSearchOrFilterComponent = React.memo<Props>(
           data.dataViews.clearInstanceCache(dv?.id);
         }
       };
-    }, [data.dataViews, indexPattern, filterQuery]);
+    }, [data.dataViews, indexPattern, filterQuery, addError]);
 
     const arrDataView = useMemo(() => (dataView != null ? [dataView] : []), [dataView]);
 

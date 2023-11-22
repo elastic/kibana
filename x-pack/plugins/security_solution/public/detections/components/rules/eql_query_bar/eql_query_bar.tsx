@@ -14,7 +14,6 @@ import { EuiFormRow, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import type { DataViewBase, Filter, Query } from '@kbn/es-query';
 import { FilterManager } from '@kbn/data-plugin/public';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { FieldHook } from '../../../../shared_imports';
 import { FilterBar } from '../../../../common/components/filter_bar';
 import { useAppToasts } from '../../../../common/hooks/use_app_toasts';
@@ -43,6 +42,7 @@ const TextArea = styled(EuiTextArea)`
 const StyledFormRow = styled(EuiFormRow)`
   border: ${({ theme }) => theme.eui.euiBorderThin};
   border-radius: ${({ theme }) => theme.eui.euiBorderRadius};
+
   .euiFormRow__labelWrapper {
     background: ${({ theme }) => theme.eui.euiColorLightestShade};
     border-top-left-radius: ${({ theme }) => theme.eui.euiBorderRadius};
@@ -50,13 +50,11 @@ const StyledFormRow = styled(EuiFormRow)`
     padding: 8px 10px;
     margin-bottom: 0px;
     label {
-      color: ${euiThemeVars.euiTextSubduedColor};
+      color: ${({ theme }) => theme.eui.euiTextSubduedColor};
       &.euiFormLabel-isInvalid {
-        color: ${euiThemeVars.euiColorDangerText};
+        color: ${({ theme }) => theme.eui.euiColorDangerText};
       }
     }
-  }
-  .euiFormRow__fieldWrapper {
   }
 `;
 

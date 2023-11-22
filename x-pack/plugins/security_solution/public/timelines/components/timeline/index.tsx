@@ -192,12 +192,12 @@ const StatefulTimelineComponent: React.FC<Props> = ({
         ref={containerElement}
       >
         <TimelineSavingProgress timelineId={timelineId} />
-        {timelineType === TimelineType.template && (
-          <TimelineTemplateBadge className="timeline-template-badge">
-            {i18n.TIMELINE_TEMPLATE}
-          </TimelineTemplateBadge>
-        )}
         <div className="timeline-body" data-test-subj="timeline-body">
+          {timelineType === TimelineType.template && (
+            <TimelineTemplateBadge className="timeline-template-badge">
+              {i18n.TIMELINE_TEMPLATE}
+            </TimelineTemplateBadge>
+          )}
           {resolveConflictComponent}
           <HideShowContainer
             $isVisible={!timelineFullScreen}

@@ -338,7 +338,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         skip={!canQueryTimeline}
       />
-      <FullWidthFlexGroup gutterSize="s">
+      <FullWidthFlexGroup gutterSize="none">
         <ScrollableFlexItem grow={2}>
           <StyledEuiFlyoutHeader
             data-test-subj={`${activeTab}-tab-flyout-header`}

@@ -7,7 +7,7 @@
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
-import styled, { createGlobalStyle } from 'styled-components';
+import styled from 'styled-components';
 import type { Filter } from '@kbn/es-query';
 
 import type { FilterManager } from '@kbn/data-plugin/public';
@@ -28,25 +28,6 @@ import {
   DATA_PROVIDER_HIDDEN_POPULATED,
   DATA_PROVIDER_VISIBLE,
 } from './translations';
-
-const timelineSelectModeItemsClassName = 'timelineSelectModeItemsClassName';
-const searchOrFilterPopoverClassName = 'searchOrFilterPopover';
-const searchOrFilterPopoverWidth = '352px';
-
-// SIDE EFFECT: the following creates a global class selector
-const SearchOrFilterGlobalStyle = createGlobalStyle`
-  .${timelineSelectModeItemsClassName} {
-    width: 350px !important;
-  }
-
-  .${searchOrFilterPopoverClassName}.euiPopover__panel {
-    width: ${searchOrFilterPopoverWidth} !important;
-
-    .euiSuperSelect__listbox {
-      width: ${searchOrFilterPopoverWidth} !important;
-    }
-  }
-`;
 
 interface Props {
   dataProviders: DataProvider[];
@@ -191,7 +172,6 @@ export const SearchOrFilter = React.memo<Props>(
             </EuiFlexItem>
           </EuiFlexGroup>
         </SearchOrFilterContainer>
-        <SearchOrFilterGlobalStyle />
       </>
     );
   }

@@ -17,7 +17,7 @@ const NoWrapText = styled(EuiText)`
   white-space: nowrap;
 `;
 
-export const TimelineStatusInfoComponent = React.memo<{
+export const TimelineStatusInfo = React.memo<{
   status: TimelineStatus;
   updated?: number;
   changed?: boolean;
@@ -47,4 +47,4 @@ export const TimelineStatusInfoComponent = React.memo<{
     </NoWrapText>
   );
 });
-TimelineStatusInfoComponent.displayName = 'TimelineStatusInfoComponent';
+TimelineStatusInfo.displayName = 'TimelineStatusInfo';

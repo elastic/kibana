@@ -15,6 +15,10 @@ interface NewTimelineActionProps {
   timelineId: string;
 }
 
+const panelStyle = {
+  padding: 0,
+};
+
 const NewTimelineActionComponent = ({ timelineId }: NewTimelineActionProps) => {
   const [isPopoverOpen, setPopover] = useState(false);
 
@@ -24,24 +28,13 @@ const NewTimelineActionComponent = ({ timelineId }: NewTimelineActionProps) => {
 
   const togglePopover = useCallback(() => setPopover((prev) => !prev), []);
 
-  const onActionBtnClick = useCallback(() => {
-    togglePopover();
-  }, [togglePopover]);
-
   const newTimelineActionbtn = useMemo(() => {
     return (
-      <EuiButtonEmpty iconType="arrowDown" size="s" iconSide="right" onClick={onActionBtnClick}>
+      <EuiButtonEmpty iconType="arrowDown" size="s" iconSide="right" onClick={togglePopover}>
         {i18n.NEW_TIMELINE_BTN}
       </EuiButtonEmpty>
     );
-  }, [onActionBtnClick]);
-
-  const panelStyle = useMemo(
-    () => ({
-      padding: 0,
-    }),
-    []
-  );
+  }, [togglePopover]);
 
   return (
     <EuiPopover

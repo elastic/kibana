@@ -26,7 +26,7 @@ import { ActiveTimelines } from './active_timelines';
 import * as i18n from './translations';
 import { TimelineActionMenu } from '../action_menu';
 import { AddToFavoritesButton } from '../../timeline/properties/helpers';
-import { TimelineStatusInfoComponent } from './timeline_status_info';
+import { TimelineStatusInfo } from './timeline_status_info';
 
 interface FlyoutHeaderPanelProps {
   timelineId: string;
@@ -152,11 +152,7 @@ const FlyoutHeaderPanelComponent: React.FC<FlyoutHeaderPanelProps> = ({ timeline
               </ActiveTimelinesContainer>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <TimelineStatusInfoComponent
-                status={timelineStatus}
-                updated={updated}
-                changed={changed}
-              />
+              <TimelineStatusInfo status={timelineStatus} updated={updated} changed={changed} />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <AddToFavoritesButton timelineId={timelineId} compact />
