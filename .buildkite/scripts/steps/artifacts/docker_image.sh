@@ -100,22 +100,23 @@ cd -
 # This part is related with updating the configuration of kibana-controller,
 # so that new stack instances contain the latest and greatest image of kibana,
 # and the respective stack components of course.
-echo "--- Trigger image tag update"
-if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
-  cat << EOF | buildkite-agent pipeline upload
-steps:
-  - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
-    branches: main
-    trigger: gpctl-promote-with-e2e-tests
-    build:
-      env:
-        SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
-        SERVICE: kibana-controller
-        NAMESPACE: kibana-ci
-        IMAGE_NAME: kibana-serverless
-        REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
-EOF
+# Disabled pending blocker assessment on https://github.com/elastic/kibana/issues/171768
+# echo "--- Trigger image tag update"
+# if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_REQUEST:-false}" == "false" ]]; then
+#   cat << EOF | buildkite-agent pipeline upload
+# steps:
+#   - label: ":argo: Update kibana image tag for kibana-controller using gpctl"
+#     branches: main
+#     trigger: gpctl-promote-with-e2e-tests
+#     build:
+#       env:
+#         SERVICE_COMMIT_HASH: "$GIT_ABBREV_COMMIT"
+#         SERVICE: kibana-controller
+#         NAMESPACE: kibana-ci
+#         IMAGE_NAME: kibana-serverless
+#         REMOTE_SERVICE_CONFIG: https://raw.githubusercontent.com/elastic/serverless-gitops/main/gen/gpctl/kibana/dev.yaml
+# EOF
 
-else
-  echo "Skipping update for untracked branch $BUILDKITE_BRANCH"
-fi
+# else
+#   echo "Skipping update for untracked branch $BUILDKITE_BRANCH"
+# fi

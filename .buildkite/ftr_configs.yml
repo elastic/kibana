@@ -90,6 +90,7 @@ disabled:
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
   # Skipping because FTR often fails to exit on suite completion
+  # https://github.com/elastic/kibana/issues/171768
   - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
 
