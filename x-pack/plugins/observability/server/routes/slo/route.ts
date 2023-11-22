@@ -265,6 +265,7 @@ const deleteSloInstancesRoute = createObservabilityServerRoute({
   endpoint: 'POST /api/observability/slos/_delete_instances 2023-10-31',
   options: {
     tags: ['access:slo_write'],
+    access: 'public',
   },
   params: deleteSLOInstancesParamsSchema,
   handler: async ({ context, params }) => {
@@ -281,6 +282,7 @@ const findSloDefinitionsRoute = createObservabilityServerRoute({
   endpoint: 'GET /api/observability/slos/_definitions 2023-10-31',
   options: {
     tags: ['access:slo_read'],
+    access: 'public',
   },
   params: findSloDefinitionsParamsSchema,
   handler: async ({ context, params }) => {
@@ -300,6 +302,7 @@ const fetchHistoricalSummary = createObservabilityServerRoute({
   endpoint: 'POST /internal/observability/slos/_historical_summary',
   options: {
     tags: ['access:slo_read'],
+    access: 'internal',
   },
   params: fetchHistoricalSummaryParamsSchema,
   handler: async ({ context, params }) => {
