@@ -39,7 +39,14 @@ export function createProfilingEsClient({
 
       return unwrapEsResponse(promise);
     },
-    profilingStacktraces({ query, sampleSize, durationSeconds }) {
+    profilingStacktraces({
+      query,
+      sampleSize,
+      durationSeconds,
+      co2PerKWH,
+      datacenterPUE,
+      perCoreWatt,
+    }) {
       const controller = new AbortController();
       const promise = withProfilingSpan('_profiling/stacktraces', () => {
         return esClient.transport.request(
@@ -50,6 +57,9 @@ export function createProfilingEsClient({
               query,
               sample_size: sampleSize,
               requested_duration: durationSeconds,
+              // default_co2_per_kwh: co2PerKWH,
+              // default_datacenter_pue: datacenterPUE,
+              // default_per_core_watt: perCoreWatt,
             },
           },
           {

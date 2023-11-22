@@ -30,6 +30,8 @@ interface TopNFunctionAndFrameGroup {
   FrameGroupID: FrameGroupID;
   CountExclusive: number;
   CountInclusive: number;
+  AnnualCO2Tons: number;
+  AnnualCostUsd: number;
 }
 
 type TopNFunction = Pick<
@@ -122,6 +124,8 @@ export function createTopNFunctions({
           FrameGroupID: frameGroupID,
           CountExclusive: 0,
           CountInclusive: 0,
+          AnnualCO2Tons: stackTrace.AnnualCo2Tons,
+          AnnualCostUsd: stackTrace.AnnualCostUsd,
         };
 
         topNFunctions.set(frameGroupID, topNFunction);
@@ -171,6 +175,8 @@ export function createTopNFunctions({
       CountExclusive: countExclusive,
       CountInclusive: countInclusive,
       Id: frameAndCount.FrameGroupID,
+      AnnualCO2Tons: frameAndCount.AnnualCO2Tons,
+      AnnualCostUsd: frameAndCount.AnnualCostUsd,
     };
   });
 

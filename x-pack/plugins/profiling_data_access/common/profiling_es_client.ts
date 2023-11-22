@@ -23,6 +23,9 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
     durationSeconds: number;
+    co2PerKWH?: number;
+    datacenterPUE?: number;
+    perCoreWatt?: number;
   }): Promise<StackTraceResponse>;
   profilingStatus(params?: { waitForResourcesCreated?: boolean }): Promise<ProfilingStatusResponse>;
   getEsClient(): ElasticsearchClient;

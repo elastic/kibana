@@ -16,6 +16,9 @@ export async function searchStackTraces({
   rangeTo,
   kuery,
   durationSeconds,
+  co2PerKWH,
+  perCoreWatt,
+  datacenterPUE,
 }: {
   client: ProfilingESClient;
   sampleSize: number;
@@ -23,6 +26,9 @@ export async function searchStackTraces({
   rangeTo: number;
   kuery: string;
   durationSeconds: number;
+  co2PerKWH?: number;
+  perCoreWatt?: number;
+  datacenterPUE?: number;
 }) {
   const response = await client.profilingStacktraces({
     query: {
@@ -44,6 +50,9 @@ export async function searchStackTraces({
     },
     sampleSize,
     durationSeconds,
+    co2PerKWH,
+    perCoreWatt,
+    datacenterPUE,
   });
 
   return decodeStackTraceResponse(response);

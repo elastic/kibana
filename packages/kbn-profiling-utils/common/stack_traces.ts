@@ -42,6 +42,9 @@ export interface ProfilingStackTrace {
   ['frame_ids']: string[];
   ['address_or_lines']: number[];
   ['type_ids']: number[];
+  ['annual_co2_tons']: number;
+  ['annual_costs_usd']: number;
+  count: number;
 }
 
 interface ProfilingStackTraces {
@@ -140,6 +143,9 @@ const createInlineTrace = (
     FileIDs: fileIDs,
     AddressOrLines: addressOrLines,
     Types: typeIDs,
+    AnnualCo2Tons: trace.annual_co2_tons,
+    AnnualCostUsd: trace.annual_costs_usd,
+    Count: trace.count,
   } as StackTrace;
 };
 

@@ -18,6 +18,9 @@ export interface FetchFunctionsParams {
   kuery: string;
   startIndex: number;
   endIndex: number;
+  co2PerKWH: number;
+  perCoreWatt: number;
+  datacenterPUE: number;
 }
 
 const targetSampleSize = 20000; // minimum number of samples to get statistically sound results
@@ -30,6 +33,9 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
     kuery,
     startIndex,
     endIndex,
+    co2PerKWH,
+    datacenterPUE,
+    perCoreWatt,
   }: FetchFunctionsParams) => {
     const rangeFromSecs = rangeFromMs / 1000;
     const rangeToSecs = rangeToMs / 1000;
@@ -45,6 +51,9 @@ export function createFetchFunctions({ createProfilingEsClient }: RegisterServic
         kuery,
         sampleSize: targetSampleSize,
         durationSeconds: totalSeconds,
+        co2PerKWH,
+        datacenterPUE,
+        perCoreWatt,
       }
     );
 
