@@ -21,7 +21,6 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/public';
-import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   NewPackagePolicyInput,
@@ -59,7 +58,7 @@ import {
 } from './policy_template_selectors';
 import { usePackagePolicyList } from '../../common/api/use_package_policy_list';
 import { gcpField, getInputVarsFields } from './gcp_credential_form';
-import { SetupTechnologySelector } from './setup_technology_selector';
+import { SetupTechnologySelector, useSetupTechnology } from './setup_technology_selector';
 
 const DEFAULT_INPUT_TYPE = {
   kspm: CLOUDBEAT_VANILLA,
@@ -537,26 +536,12 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       : undefined;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
-    const [setupTechnology, setSetupTechnology] = useState<SetupTechnology>(
-      SetupTechnology.AGENT_BASED
-    );
     const input = getSelectedOption(newPolicy.inputs, integration);
-    const isCspmAws = input.type === CLOUDBEAT_AWS;
-    const isAgentlessAvailable = isCspmAws && agentlessPolicy;
-
-    useEffect(() => {
-      if (isAgentlessAvailable) {
-        setSetupTechnology(SetupTechnology.AGENTLESS);
-      } else {
-        setSetupTechnology(SetupTechnology.AGENT_BASED);
-      }
-    }, [isAgentlessAvailable]);
-
-    useEffect(() => {
-      if (handleSetupTechnologyChange) {
-        handleSetupTechnologyChange(setupTechnology);
-      }
-    }, [handleSetupTechnologyChange, setupTechnology]);
+    const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
+      input,
+      agentlessPolicy,
+      handleSetupTechnologyChange,
+    });
 
     const updatePolicy = useCallback(
       (updatedPolicy: NewPackagePolicy) => {
