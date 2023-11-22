@@ -21,8 +21,12 @@ import {
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
 
+import { DETECTION_ENGINE_SIGNALS_STATUS_URL as DETECTION_ENGINE_ALERTS_STATUS_URL } from '@kbn/security-solution-plugin/common/constants';
+
 import { ThresholdRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import { Ancestor } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_monitoring';
+
 import {
   ALERT_ANCESTORS,
   ALERT_DEPTH,
@@ -36,6 +40,8 @@ import {
   getPreviewAlerts,
   getThresholdRuleForAlertTesting,
   previewRule,
+  patchRule,
+  setAlertStatus,
   dataGeneratorFactory,
 } from '../../../utils';
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
@@ -452,6 +458,184 @@ export default ({ getService }: FtrProviderContext) => {
       after(async () => {
         await esArchiver.unload(
           'x-pack/test/functional/es_archives/security_solution/ecs_compliant'
+        );
+      });
+
+      it('should update an alert using real rule executions', async () => {
+        const id = uuidv4();
+        const firstTimestamp = new Date().toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        await indexListOfDocuments([firstDocument, firstDocument]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          query: `id:${id}`,
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+        expect(alerts.hits.hits.length).toEqual(1);
+        expect(alerts.hits.hits[0]._source).toEqual(
+          expect.objectContaining({
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          })
+        );
+
+        const suppressionStart = alerts.hits.hits[0]._source?.[ALERT_SUPPRESSION_START];
+
+        const secondTimestamp = new Date().toISOString();
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        // Add a new document, then disable and re-enable to trigger another rule run. The second doc should
+        // trigger an update to the existing alert without changing the timestamp
+        await indexListOfDocuments([secondDocument, secondDocument]);
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+        const afterTimestamp = new Date();
+        const secondAlerts = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          undefined,
+          afterTimestamp
+        );
+        expect(secondAlerts.hits.hits.length).toEqual(1);
+        expect(secondAlerts.hits.hits[0]._source).toEqual(
+          expect.objectContaining({
+            [TIMESTAMP]: secondAlerts.hits.hits[0]._source?.[TIMESTAMP],
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp, // timestamp is the same
+            [ALERT_SUPPRESSION_START]: suppressionStart, // suppression start is the same
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 1,
+          })
+        );
+      });
+
+      it('should NOT suppress and update an alert if the alert is closed', async () => {
+        const id = uuidv4();
+        const firstTimestamp = new Date().toISOString();
+        const firstDocument = {
+          id,
+          '@timestamp': firstTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        await indexListOfDocuments([firstDocument, firstDocument]);
+
+        const rule: ThresholdRuleCreateProps = {
+          ...getThresholdRuleForAlertTesting(['ecs_compliant']),
+          query: `id:${id}`,
+          threshold: {
+            field: ['agent.name'],
+            value: 2,
+          },
+          alert_suppression: {
+            group_by: ['agent.name'],
+            duration: {
+              value: 300,
+              unit: 'm',
+            },
+          },
+          from: 'now-35m',
+          interval: '30m',
+        };
+        const createdRule = await createRule(supertest, log, rule);
+        const alerts = await getOpenAlerts(supertest, log, es, createdRule);
+
+        // Close the alert. Subsequent rule executions should ignore this closed alert
+        // for suppression purposes.
+        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        await supertest
+          .post(DETECTION_ENGINE_ALERTS_STATUS_URL)
+          .set('kbn-xsrf', 'true')
+          .send(setAlertStatus({ alertIds, status: 'closed' }))
+          .expect(200);
+
+        const secondTimestamp = new Date().toISOString();
+        const secondDocument = {
+          id,
+          '@timestamp': secondTimestamp,
+          agent: {
+            name: 'agent-1',
+          },
+        };
+        // Add new documents, then disable and re-enable to trigger another rule run. The second doc should
+        // trigger a new alert since the first one is now closed.
+        await indexListOfDocuments([secondDocument, secondDocument]);
+        await patchRule(supertest, log, { id: createdRule.id, enabled: false });
+        await patchRule(supertest, log, { id: createdRule.id, enabled: true });
+        const afterTimestamp = new Date();
+        const secondAlerts = await getOpenAlerts(
+          supertest,
+          log,
+          es,
+          createdRule,
+          RuleExecutionStatusEnum.succeeded,
+          undefined,
+          afterTimestamp
+        );
+        expect(secondAlerts.hits.hits.length).toEqual(2);
+        expect(alerts.hits.hits[0]._source).toEqual(
+          expect.objectContaining({
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: firstTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          })
+        );
+        expect(secondAlerts.hits.hits[1]._source).toEqual(
+          expect.objectContaining({
+            [ALERT_SUPPRESSION_TERMS]: [
+              {
+                field: 'agent.name',
+                value: 'agent-1',
+              },
+            ],
+            [ALERT_ORIGINAL_TIME]: secondTimestamp,
+            [ALERT_SUPPRESSION_DOCS_COUNT]: 0,
+          })
         );
       });
 

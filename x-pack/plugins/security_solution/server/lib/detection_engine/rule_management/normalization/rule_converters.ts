@@ -311,6 +311,8 @@ const patchThresholdParams = (
     threshold: params.threshold
       ? normalizeThresholdObject(params.threshold)
       : existingRule.threshold,
+    alertSuppression:
+      convertAlertSuppressionToCamel(params.alert_suppression) ?? existingRule.alertSuppression,
   };
 };
 
