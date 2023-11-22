@@ -31,7 +31,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     // this is the same test as in OSS but it catches different error message issue in different licences
     describe('invalid scripted field error', () => {
       it('is rendered', async () => {
-        expect(await PageObjects.discover.noResultsErrorVisible()).to.be(true);
+        await PageObjects.discover.showsErrorCallout();
         const painlessStackTrace = await testSubjects.find('painlessStackTrace');
         expect(painlessStackTrace).not.to.be(undefined);
       });

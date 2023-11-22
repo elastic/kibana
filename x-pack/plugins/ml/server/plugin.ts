@@ -195,7 +195,9 @@ export class MlServerPlugin
       if (this.capabilities === null) {
         return null;
       }
-      const capabilities = await this.capabilities.resolveCapabilities(request);
+      const capabilities = await this.capabilities.resolveCapabilities(request, {
+        capabilityPath: 'ml.*',
+      });
       return capabilities.ml as MlCapabilities;
     };
 
@@ -246,7 +248,7 @@ export class MlServerPlugin
 
     // Register Data Frame Analytics routes
     if (this.enabledFeatures.dfa) {
-      dataFrameAnalyticsRoutes(routeInit);
+      dataFrameAnalyticsRoutes(routeInit, plugins.cloud);
     }
 
     // Register Trained Model Management routes

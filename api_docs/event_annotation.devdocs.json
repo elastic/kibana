@@ -1209,7 +1209,7 @@
         "signature": [
           "{ item: ",
           "EventAnnotationGroupSavedObject",
-          "; meta: { outcome: \"conflict\" | \"exactMatch\" | \"aliasMatch\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
+          "; meta: { outcome: \"exactMatch\" | \"aliasMatch\" | \"conflict\"; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; }; }"
         ],
         "path": "src/plugins/event_annotation/common/content_management/v1/types.ts",
         "deprecated": false,

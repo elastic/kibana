@@ -5,7 +5,7 @@
 steps:
   - label: ":kibana: Kibana Serverless Tests for ${ENVIRONMENT}"
     trigger: appex-qa-serverless-kibana-ftr-tests # https://buildkite.com/elastic/appex-qa-serverless-kibana-ftr-tests
-    soft_fail: true # Remove this before release or when tests stabilize
+    soft_fail: true # Remove when tests stabilize
     build:
       env:
         ENVIRONMENT: ${ENVIRONMENT}
@@ -16,7 +16,6 @@ steps:
   # TODO: Uncomment this code when the integration is ready.
   # - label: ":pipeline::female-detective::seedling: Trigger Security Solution quality gate script"
   #   trigger: security-serverless-quality-gate # https://buildkite.com/elastic/security-serverless-quality-gate
-  #   soft_fail: true # Remove this when tests are fixed
   #   build:
   #     env:
   #       ENVIRONMENT: ${ENVIRONMENT}
@@ -46,14 +45,4 @@ steps:
         env:
           USE_GROUP_LABEL: true
         agents:
-          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.4"
-
-  - group: "Observability"
-    steps:
-      - label: ":judge::seedling: Trigger Manual Tests Phase - Observability"
-        command: "make -C /agent trigger-manual-verification-phase"
-        env:
-          NOTIFICATION_APPENDIX: "<!subteam^S060GJFKGGP> please execute your manual testing plan."
-          USE_GROUP_LABEL: true
-        agents:
-          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.4"
+          image: "docker.elastic.co/ci-agent-images/manual-verification-agent:0.0.6"

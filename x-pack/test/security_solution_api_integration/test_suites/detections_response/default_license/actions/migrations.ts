@@ -13,7 +13,7 @@ import {
   getLegacyActionSOById,
   getLegacyActionNotificationSOById,
   getRuleSOById,
-} from '../../../../../detection_engine_api_integration/utils';
+} from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 /**
@@ -24,7 +24,7 @@ export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
   const esArchiver = getService('esArchiver');
 
-  describe('@ess @skipInQA actions migrations', () => {
+  describe('@ess actions migrations', () => {
     // This test suite is not meant to test a specific route, but to test the legacy action migration
     // code that lives in multiple routes. This code is also tested in each of the routes it lives in
     // but not in as much detail and relying on mocks. This test loads an es_archive containing rules

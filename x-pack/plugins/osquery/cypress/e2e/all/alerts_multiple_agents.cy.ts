@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { initializeDataViews } from '../../tasks/login';
 import { cleanupRule, loadRule } from '../../tasks/api_fixtures';
 import {
   inputQuery,
@@ -14,8 +15,7 @@ import {
 } from '../../tasks/live_query';
 import { OSQUERY_FLYOUT_BODY_EDITOR } from '../../screens/live_query';
 
-// FLAKY: https://github.com/elastic/kibana/issues/170157
-describe.skip(
+describe(
   'Alert Event Details - dynamic params',
   {
     tags: ['@ess', '@serverless'],
@@ -25,6 +25,7 @@ describe.skip(
     let ruleName: string;
 
     before(() => {
+      initializeDataViews();
       loadRule(true).then((data) => {
         ruleId = data.id;
         ruleName = data.name;

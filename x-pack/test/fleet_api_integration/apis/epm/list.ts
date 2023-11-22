@@ -21,7 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   // because `this` has to point to the Mocha context
   // see https://mochajs.org/#arrow-functions
 
-  // Failing: See https://github.com/elastic/kibana/issues/167188
+  // FLAKY: https://github.com/elastic/kibana/issues/167188
   describe.skip('EPM - list', async function () {
     skipIfNoDockerRegistry(providerContext);
 

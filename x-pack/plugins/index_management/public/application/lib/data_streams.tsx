@@ -9,7 +9,8 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiToolTip } from '@elastic/eui';
 
-import { DataStream } from '../../../common';
+import { splitSizeAndUnits, DataStream } from '../../../common';
+import { timeUnits, extraTimeUnits } from '../constants/time_units';
 
 export const isFleetManaged = (dataStream: DataStream): boolean => {
   // TODO check if the wording will change to 'fleet'
@@ -74,7 +75,12 @@ export const getLifecycleValue = (
     return infiniteDataRetention;
   }
 
-  return lifecycle?.data_retention;
+  // Extract size and unit, in order to correctly map the unit to the correct text
+  const { size, unit } = splitSizeAndUnits(lifecycle?.data_retention as string);
+  const availableTimeUnits = [...timeUnits, ...extraTimeUnits];
+  const match = availableTimeUnits.find((timeUnit) => timeUnit.value === unit);
+
+  return `${size} ${match?.text ?? unit}`;
 };
 
 export const isDataStreamFullyManagedByILM = (dataStream?: DataStream | null) => {

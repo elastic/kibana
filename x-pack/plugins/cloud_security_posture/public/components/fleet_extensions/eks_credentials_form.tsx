@@ -128,6 +128,7 @@ type AwsOptions = Record<
     label: string;
     info: React.ReactNode;
     fields: Record<string, { label: string; type?: 'password' | 'text' }>;
+    testId: string;
   }
 >;
 
@@ -144,6 +145,7 @@ const options: AwsOptions = {
         }),
       },
     },
+    testId: 'assumeRoleTestId',
   },
   direct_access_keys: {
     label: i18n.translate('xpack.csp.eksIntegration.directAccessKeyLabel', {
@@ -154,6 +156,7 @@ const options: AwsOptions = {
       access_key_id: { label: AWS_FIELD_LABEL.access_key_id },
       secret_access_key: { label: AWS_FIELD_LABEL.secret_access_key, type: 'password' },
     },
+    testId: 'directAccessKeyTestId',
   },
   temporary_keys: {
     info: TemporaryKeysDescription,
@@ -169,6 +172,7 @@ const options: AwsOptions = {
         }),
       },
     },
+    testId: 'temporaryKeyTestId',
   },
   shared_credentials: {
     label: i18n.translate('xpack.csp.eksIntegration.sharedCredentialLabel', {
@@ -187,6 +191,7 @@ const options: AwsOptions = {
         }),
       },
     },
+    testId: 'sharedCredentialsTestId',
   },
 };
 
@@ -195,6 +200,7 @@ export const DEFAULT_EKS_VARS_GROUP: AwsCredentialsType = 'assume_role';
 const AWS_CREDENTIALS_OPTIONS = Object.keys(options).map((value) => ({
   id: value as AwsCredentialsType,
   label: options[value as keyof typeof options].label,
+  testId: options[value as keyof typeof options].testId,
 }));
 
 interface Props {

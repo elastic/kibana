@@ -134,7 +134,7 @@ export const useDiscoverInTimelineActions = (
    * */
   const resetDiscoverAppState = useCallback(async () => {
     const defaultDiscoverAppState = await getDefaultDiscoverAppState();
-    discoverStateContainer.current?.appState.set(defaultDiscoverAppState);
+    discoverStateContainer.current?.appState.replaceUrlState(defaultDiscoverAppState);
     discoverStateContainer.current?.globalState.set({
       ...discoverStateContainer.current?.globalState.get(),
       time: defaultDiscoverTimeRange,
@@ -207,6 +207,8 @@ export const useDiscoverInTimelineActions = (
               savedSearchId: response.id,
             })
           );
+          // Also save the timeline, this will only happen once, in case there is no saved search id yet
+          dispatch(timelineActions.saveTimeline({ id: TimelineId.active }));
         }
       } catch (err) {
         addError(DISCOVER_SEARCH_SAVE_ERROR_TITLE, {

@@ -7,6 +7,7 @@
 
 import { logEntryContextRT, persistedLogViewReferenceRT } from '@kbn/logs-shared-plugin/common';
 import * as rt from 'io-ts';
+import { idFormatRT } from '../../id_formats/v1/id_formats';
 import {
   badRequestErrorRT,
   forbiddenErrorRT,
@@ -29,6 +30,7 @@ export const getLogEntryCategoryExamplesRequestPayloadRT = rt.type({
     exampleCount: rt.number,
     // log view
     logView: persistedLogViewReferenceRT,
+    idFormat: idFormatRT,
     // the time range to fetch the category examples from
     timeRange: timeRangeRT,
   }),

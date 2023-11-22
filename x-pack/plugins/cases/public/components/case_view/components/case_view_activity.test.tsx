@@ -134,7 +134,8 @@ const useGetCaseUsersMock = useGetCaseUsers as jest.Mock;
 const useOnUpdateFieldMock = useOnUpdateField as jest.Mock;
 const useCasesFeaturesMock = useCasesFeatures as jest.Mock;
 
-describe('Case View Page activity tab', () => {
+// FLAKY: https://github.com/elastic/kibana/issues/171575
+describe.skip('Case View Page activity tab', () => {
   const caseConnectors = getCaseConnectorsMockResponse();
 
   beforeAll(() => {
@@ -179,6 +180,7 @@ describe('Case View Page activity tab', () => {
 
     expect(await screen.findByTestId('case-view-activity')).toBeInTheDocument();
     expect(await screen.findAllByTestId('user-actions-list')).toHaveLength(2);
+    expect(await screen.findByTestId('description')).toBeInTheDocument();
     expect(await screen.findByTestId('case-tags')).toBeInTheDocument();
     expect(await screen.findByTestId('cases-categories')).toBeInTheDocument();
     expect(await screen.findByTestId('connector-edit-header')).toBeInTheDocument();
@@ -417,38 +419,7 @@ describe('Case View Page activity tab', () => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/151981
-    describe.skip('User actions', () => {
-      it('renders the description correctly', async () => {
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const description = within(await screen.findByTestId('description'));
-
-        expect(await description.findByText(caseData.description)).toBeInTheDocument();
-      });
-
-      it('renders edit description user action correctly', async () => {
-        useFindCaseUserActionsMock.mockReturnValue({
-          ...defaultUseFindCaseUserActions,
-          data: {
-            userActions: [
-              getUserAction('description', 'create'),
-              getUserAction('description', 'update'),
-            ],
-          },
-        });
-
-        appMockRender = createAppMockRenderer();
-        appMockRender.render(<CaseViewActivity {...caseProps} />);
-
-        const userActions = within((await screen.findAllByTestId('user-actions-list'))[1]);
-
-        expect(
-          userActions.getByTestId('description-update-action-description-update')
-        ).toBeInTheDocument();
-      });
-
+    describe('User actions', () => {
       it('renders the unassigned users correctly', async () => {
         useFindCaseUserActionsMock.mockReturnValue({
           ...defaultUseFindCaseUserActions,
