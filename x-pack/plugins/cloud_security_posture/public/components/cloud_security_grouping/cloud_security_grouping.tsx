@@ -37,8 +37,12 @@ export const CloudSecurityGrouping = ({
     <div
       data-test-subj="cloudSecurityGrouping"
       css={css`
-        && .euiAccordion__optionalAction {
+        && [data-test-subj='group-stats'] > .euiFlexItem:last-child {
           display: none;
+        }
+        && [data-test-subj='group-stats'] > .euiFlexItem:not(:first-child) > span {
+          border-right: none;
+          margin-right: 0;
         }
       `}
     >

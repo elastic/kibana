@@ -8,6 +8,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { isNoneGroup, useGrouping } from '@kbn/securitysolution-grouping';
 import * as uuid from 'uuid';
 import type { DataView } from '@kbn/data-views-plugin/common';
+import {
+  GroupOption,
+  GroupPanelRenderer,
+  GroupStatsRenderer,
+} from '@kbn/securitysolution-grouping/src';
 import { useUrlQuery } from '../../common/hooks/use_url_query';
 import {
   useBaseEsQuery,
@@ -28,12 +33,16 @@ export const useCloudSecurityGrouping = ({
   defaultGroupingOptions,
   getDefaultQuery,
   unit,
+  groupPanelRenderer,
+  groupStatsRenderer,
 }: {
   dataView: DataView;
   groupingTitle: string;
-  defaultGroupingOptions: Array<{ label: string; key: string }>;
+  defaultGroupingOptions: GroupOption[];
   getDefaultQuery: (params: FindingsBaseURLQuery) => FindingsBaseURLQuery;
   unit: (count: number) => string;
+  groupPanelRenderer?: GroupPanelRenderer<any>;
+  groupStatsRenderer?: GroupStatsRenderer<any>;
 }) => {
   const getPersistedDefaultQuery = usePersistedQuery(getDefaultQuery);
   const { urlQuery, setUrlQuery } = useUrlQuery(getPersistedDefaultQuery);
@@ -57,6 +66,8 @@ export const useCloudSecurityGrouping = ({
   const grouping = useGrouping({
     componentProps: {
       unit,
+      groupPanelRenderer,
+      groupStatsRenderer,
     },
     defaultGroupingOptions,
     fields: dataView.fields,
