@@ -18,11 +18,9 @@ export const toBenchmarkDocFieldKey = (benchmarkId: string, benchmarkVersion: st
   return `${benchmarkId}${DELIMITER}${benchmarkVersion}`;
 };
 
-export const toBenchmarkMappingFieldKey = (benchmarkId: string, benchmarkVersion: string) => {
-  if (benchmarkVersion.includes(DOC_FIELD_VERSION_DELIMITER))
-    return `${benchmarkId}${DELIMITER}${benchmarkVersion.replaceAll(
-      `${DOC_FIELD_VERSION_DELIMITER}`,
-      MAPPING_VERSION_DELIMITER
-    )}`;
-  return `${benchmarkId}${DELIMITER}${benchmarkVersion}`;
+export const toBenchmarkMappingFieldKey = (benchmarkVersion: string) => {
+  return `${benchmarkVersion.replace(
+    `/${DOC_FIELD_VERSION_DELIMITER}/g`,
+    MAPPING_VERSION_DELIMITER
+  )}`;
 };

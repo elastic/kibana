@@ -81,7 +81,7 @@ export const getBenchmarksQuery = (
   },
 });
 
-const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
+export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
   return benchmarks.flatMap((benchmarkAggregation: BenchmarkBucket) => {
     const benchmarkId = benchmarkAggregation.key;
     const versions = benchmarkAggregation.aggs_by_benchmark_version.buckets;

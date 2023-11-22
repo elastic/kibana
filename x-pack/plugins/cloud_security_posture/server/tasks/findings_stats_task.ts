@@ -295,12 +295,9 @@ const getFindingsScoresDocIndexingPromises = (
         const benchmarkId = benchmarkIdBucket.key;
         const benchmarkVersions = Object.fromEntries(
           benchmarkIdBucket.benchmark_versions.buckets.map((benchmarkVersionBucket) => {
-            const benchmarkIdVersion = toBenchmarkMappingFieldKey(
-              benchmarkId,
-              benchmarkVersionBucket.key
-            );
+            const benchmarkVersion = toBenchmarkMappingFieldKey(benchmarkVersionBucket.key);
             return [
-              benchmarkIdVersion,
+              benchmarkVersion,
               {
                 total_findings: benchmarkVersionBucket.total_findings.value,
                 passed_findings: benchmarkVersionBucket.passed_findings.doc_count,
