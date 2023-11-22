@@ -14,9 +14,9 @@ import { SecuritySolutionPluginTemplateWrapper } from './security_solution_plugi
 export const EnterpriseGuard: FC = ({ children }) => {
   const { licenseService } = useSecurityContext();
 
-  if (licenseService.isEnterprise()) {
-    return <>{children}</>;
-  }
+  // if (licenseService.isEnterprise()) {
+  //   return <>{children}</>;
+  // }
 
   return (
     <SecuritySolutionPluginTemplateWrapper isEmptyState>
