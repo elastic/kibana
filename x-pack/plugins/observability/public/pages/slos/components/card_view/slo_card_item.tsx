@@ -16,7 +16,7 @@ import {
   MetricTrendShape,
 } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import { SLOWithSummaryResponse, HistoricalSummaryResponse } from '@kbn/slo-schema';
+import { SLOWithSummaryResponse, HistoricalSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
@@ -128,7 +128,10 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
               [
                 {
                   title: slo.name,
-                  subtitle: `${slo.groupBy}: ${slo.instanceId}`,
+                  subtitle:
+                    slo.groupBy && slo.groupBy !== ALL_VALUE
+                      ? `${slo.groupBy}: ${slo.instanceId}`
+                      : undefined,
                   value: sliValue,
                   trendShape: MetricTrendShape.Area,
                   trend: historicalSliData?.map((d) => ({
@@ -156,6 +159,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
           rules={rules}
           activeAlerts={activeAlerts}
           handleCreateRule={handleCreateRule}
+          hasGroupBy={slo.groupBy && slo.groupBy !== ALL_VALUE}
         />
         {(isMouseOver || isActionsPopoverOpen) && (
           <SloCardItemActions
