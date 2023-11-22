@@ -94,6 +94,8 @@ const buildResponseMock = (
         category_1_score: 30,
         category_1_count: 12,
         notes: [],
+        asset_criticality_level: 'Critical',
+        asset_criticality_modifier: 2.0,
         inputs: [
           {
             id: '_id',
