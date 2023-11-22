@@ -7,6 +7,8 @@
  */
 import './discover_layout.scss';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { of } from 'rxjs';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -200,6 +202,21 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     return () => onAddColumn(draggingFieldName);
   }, [onAddColumn, draggingFieldName, currentColumns]);
 
+  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
+    useState<UnifiedFieldListSidebarContainerApi | null>(null);
+
+  const isSidebarCollapsed = useObservable(
+    unifiedFieldListSidebarContainerApi?.isSidebarCollapsed$ ?? of(true),
+    true
+  );
+
+  const onToggleSidebar: UnifiedFieldListSidebarContainerApi['toggleSidebar'] = useCallback(
+    (isCollapsed) => {
+      unifiedFieldListSidebarContainerApi?.toggleSidebar?.(isCollapsed);
+    },
+    [unifiedFieldListSidebarContainerApi]
+  );
+
   const mainDisplay = useMemo(() => {
     if (resultState === 'uninitialized') {
       addLog('[DiscoverLayout] uninitialized triggers data fetching');
@@ -220,6 +237,8 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           onFieldEdited={onFieldEdited}
           container={mainContainer}
           onDropFieldToTable={onDropFieldToTable}
+          isSidebarCollapsed={isSidebarCollapsed}
+          onToggleSidebar={onToggleSidebar}
         />
         {resultState === 'loading' && <LoadingSpinner />}
       </>
@@ -236,10 +255,9 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     resultState,
     stateContainer,
     viewMode,
+    isSidebarCollapsed,
+    onToggleSidebar,
   ]);
-
-  const [unifiedFieldListSidebarContainerApi, setUnifiedFieldListSidebarContainerApi] =
-    useState<UnifiedFieldListSidebarContainerApi | null>(null);
 
   return (
     <EuiPage
@@ -291,12 +309,13 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
           />
           <DiscoverResizableLayout
             container={sidebarContainer}
-            unifiedFieldListSidebarContainerApi={unifiedFieldListSidebarContainerApi}
+            isSidebarCollapsed={isSidebarCollapsed}
             sidebarPanel={
               <EuiFlexGroup
                 gutterSize="none"
                 css={css`
                   height: 100%;
+                  display: ${isSidebarCollapsed ? 'none' : 'flex'};
                 `}
               >
                 <EuiFlexItem>

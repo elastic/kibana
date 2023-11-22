@@ -57,6 +57,7 @@ export interface UnifiedFieldListSidebarContainerApi {
   createField: undefined | (() => void);
   editField: undefined | ((fieldName: string) => void);
   deleteField: undefined | ((fieldName: string) => void);
+  toggleSidebar: undefined | ((isSidebarCollapsed: boolean) => void);
 }
 
 export type UnifiedFieldListSidebarContainerProps = Omit<
@@ -238,8 +239,16 @@ const UnifiedFieldListSidebarContainer = forwardRef<
       createField: editField,
       editField,
       deleteField,
+      toggleSidebar: onToggleSidebar,
     }),
-    [isSidebarCollapsed$, refetchFieldsExistenceInfo, closeFieldListFlyout, editField, deleteField]
+    [
+      isSidebarCollapsed$,
+      refetchFieldsExistenceInfo,
+      closeFieldListFlyout,
+      editField,
+      deleteField,
+      onToggleSidebar,
+    ]
   );
 
   if (!dataView) {

@@ -9,7 +9,6 @@
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
 import React, { PropsWithChildren, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
-import classnames from 'classnames';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
@@ -229,13 +228,7 @@ export const UnifiedHistogramLayout = ({
     createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
   const [mainPanelNode] = useState(() =>
-    createHtmlPortalNode({
-      attributes: {
-        class: classnames('eui-fullHeight', {
-          'unifiedHistogramLayoutMainPanel--emptyChart': !chart,
-        }),
-      },
-    })
+    createHtmlPortalNode({ attributes: { class: 'eui-fullHeight' } })
   );
 
   const isMobile = useIsWithinBreakpoints(['xs', 's']);

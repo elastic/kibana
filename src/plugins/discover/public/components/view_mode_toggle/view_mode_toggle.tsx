@@ -22,11 +22,15 @@ export const DocumentViewModeToggle = ({
   isTextBasedQuery,
   stateContainer,
   setDiscoverViewMode,
+  isSidebarCollapsed,
+  onToggleSidebar,
 }: {
   viewMode: VIEW_MODE;
   isTextBasedQuery: boolean;
   stateContainer: DiscoverStateContainer;
   setDiscoverViewMode: (viewMode: VIEW_MODE) => void;
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: (isSidebarCollapsed: boolean) => void;
 }) => {
   const { euiTheme } = useEuiTheme();
   const { uiSettings } = useDiscoverServices();
@@ -48,7 +52,11 @@ export const DocumentViewModeToggle = ({
 
   return (
     <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" css={containerCss}>
-      <PanelsToggle stateContainer={stateContainer} />
+      <PanelsToggle
+        stateContainer={stateContainer}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={onToggleSidebar}
+      />
       <EuiFlexItem grow={false}>
         {isTextBasedQuery || !showViewModeToggle ? (
           <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />

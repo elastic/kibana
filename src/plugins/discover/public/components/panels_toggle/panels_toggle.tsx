@@ -15,16 +15,22 @@ import { DiscoverStateContainer } from '../../application/main/services/discover
 
 export interface PanelsToggleProps {
   stateContainer: DiscoverStateContainer;
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: (isSidebarCollapsed: boolean) => void;
 }
 
-export const PanelsToggle: React.FC<PanelsToggleProps> = ({ stateContainer }) => {
+export const PanelsToggle: React.FC<PanelsToggleProps> = ({
+  stateContainer,
+  isSidebarCollapsed,
+  onToggleSidebar,
+}) => {
   const isChartHidden = useAppStateSelector((state) => Boolean(state.hideChart));
 
   const onShowChart = useCallback(() => {
     stateContainer.appState.update({ hideChart: false });
   }, [stateContainer]);
 
-  if (!isChartHidden) {
+  if (!isChartHidden && !isSidebarCollapsed) {
     return null;
   }
 
@@ -36,14 +42,30 @@ export const PanelsToggle: React.FC<PanelsToggleProps> = ({ stateContainer }) =>
         })}
         buttonSize="s"
         buttons={[
-          {
-            label: i18n.translate('discover.panelsToggle.showChartButton', {
-              defaultMessage: 'Show chart',
-            }),
-            iconType: 'transitionTopIn',
-            'data-test-subj': 'dscShowChartButton',
-            onClick: onShowChart,
-          },
+          ...(isSidebarCollapsed
+            ? [
+                {
+                  label: i18n.translate('discover.panelsToggle.showSidebarButton', {
+                    defaultMessage: 'Show sidebar',
+                  }),
+                  iconType: 'transitionLeftIn',
+                  'data-test-subj': 'dscShowSidebarButton',
+                  onClick: () => onToggleSidebar(false),
+                },
+              ]
+            : []),
+          ...(isChartHidden
+            ? [
+                {
+                  label: i18n.translate('discover.panelsToggle.showChartButton', {
+                    defaultMessage: 'Show chart',
+                  }),
+                  iconType: 'transitionTopIn',
+                  'data-test-subj': 'dscShowChartButton',
+                  onClick: onShowChart,
+                },
+              ]
+            : []),
         ]}
       />
     </EuiFlexItem>

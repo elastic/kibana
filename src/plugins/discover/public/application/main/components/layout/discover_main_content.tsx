@@ -12,7 +12,6 @@ import React, { useCallback, useMemo } from 'react';
 import { DataView } from '@kbn/data-views-plugin/common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -45,6 +44,8 @@ export interface DiscoverMainContentProps {
   onFieldEdited: () => Promise<void>;
   onDropFieldToTable?: () => void;
   columns: string[];
+  isSidebarCollapsed: boolean;
+  onToggleSidebar: (isSidebarCollapsed: boolean) => void;
 }
 
 export const DiscoverMainContent = ({
@@ -56,6 +57,8 @@ export const DiscoverMainContent = ({
   columns,
   stateContainer,
   onDropFieldToTable,
+  isSidebarCollapsed,
+  onToggleSidebar,
 }: DiscoverMainContentProps) => {
   const { trackUiMetric } = useDiscoverServices();
 
@@ -83,9 +86,18 @@ export const DiscoverMainContent = ({
         isTextBasedQuery={isPlainRecord}
         stateContainer={stateContainer}
         setDiscoverViewMode={setDiscoverViewMode}
+        isSidebarCollapsed={isSidebarCollapsed}
+        onToggleSidebar={onToggleSidebar}
       />
     );
-  }, [viewMode, setDiscoverViewMode, isPlainRecord, stateContainer]);
+  }, [
+    viewMode,
+    setDiscoverViewMode,
+    isPlainRecord,
+    stateContainer,
+    isSidebarCollapsed,
+    onToggleSidebar,
+  ]);
 
   const showChart = useAppStateSelector((state) => !state.hideChart);
 
@@ -108,11 +120,12 @@ export const DiscoverMainContent = ({
           {showChart && (
             <EuiHorizontalRule
               margin="none"
-              css={css`
-                .unifiedHistogramLayoutMainPanel--emptyChart & {
-                  display: none;
-                }
-              `}
+              // TODO: find a better solution
+              // css={css`
+              //   .unifiedHistogramLayoutMainPanel--emptyChart & {
+              //     display: none;
+              //   }
+              // `}
             />
           )}
           {viewMode === VIEW_MODE.DOCUMENT_LEVEL ? (

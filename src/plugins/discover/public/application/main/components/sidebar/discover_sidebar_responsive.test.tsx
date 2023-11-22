@@ -768,7 +768,7 @@ describe('discover responsive sidebar', function () {
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
       findTestSubject(comp, 'unifiedFieldListSidebar__toggle-collapse').simulate('click');
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(false);
-      findTestSubject(comp, 'unifiedFieldListSidebar__toggle-expand').simulate('click');
+      findTestSubject(comp, 'dscShowSidebarButton').simulate('click');
       expect(findTestSubject(comp, 'fieldList').exists()).toBe(true);
     });
   });
