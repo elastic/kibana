@@ -9,7 +9,7 @@ exports[`Inspect component renders correctly 1`] = `
       "automaticLayout": false,
       "fontSize": 12,
       "guides": Object {
-        "highlightActiveIndentation": false,
+        "indentation": false,
       },
       "lineNumbers": "on",
       "minimap": Object {
