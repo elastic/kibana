@@ -136,8 +136,8 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               <p>
                 <FormattedMessage
                   id="xpack.ml.trainedModels.addModelFlyout.thirdParty.calloutBody"
-                  defaultMessage="To import a third-party model directly to your Elasticsearch cluster, you will need to
-              use API calls in our python client, Eland."
+                  defaultMessage="To import a third-party model directly to your Elasticsearch cluster, you need to
+              use API calls in the Eland Python client."
                 />
               </p>
               <p>
