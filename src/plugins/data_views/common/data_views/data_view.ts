@@ -81,7 +81,7 @@ export class DataView extends AbstractDataView implements DataViewBase {
 
   getEtag = () => this.etag;
 
-  setEtag = (etag: string) => (this.etag = etag);
+  setEtag = (etag: string | undefined) => (this.etag = etag);
 
   /**
    * Returns scripted fields

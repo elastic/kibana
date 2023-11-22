@@ -577,7 +577,7 @@ export class DataViewsService {
     if (indexPattern.getEtag() && etag === indexPattern.getEtag()) {
       return;
     } else {
-      indexPattern.setEtag(etag!);
+      indexPattern.setEtag(etag);
     }
 
     fields.forEach((field) => (field.isMapped = true));
@@ -862,7 +862,7 @@ export class DataViewsService {
       : {};
 
     const indexPattern = await this.createFromSpec(spec, true, displayErrors);
-    indexPattern.setEtag(etag!);
+    indexPattern.setEtag(etag);
     indexPattern.matchedIndices = indices;
     indexPattern.resetOriginalSavedObjectBody();
     return indexPattern;
