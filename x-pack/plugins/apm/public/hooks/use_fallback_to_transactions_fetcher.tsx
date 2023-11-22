@@ -4,22 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmTransactionDocumentType } from '../../common/document_type';
-import { RollupInterval } from '../../common/rollup';
+
 import { getKueryWithMobileFilters } from '../../common/utils/get_kuery_with_mobile_filters';
 import { useApmParams } from './use_apm_params';
 import { useFetcher } from './use_fetcher';
 import { useTimeRange } from './use_time_range';
 
-export function useFallbackToTransactionsFetcher({
-  kuery,
-  documentType,
-  rollupInterval,
-}: {
-  kuery: string;
-  documentType?: ApmTransactionDocumentType;
-  rollupInterval?: RollupInterval;
-}) {
+export function useFallbackToTransactionsFetcher({ kuery }: { kuery: string }) {
   const { query } = useApmParams('/*');
 
   const rangeFrom = 'rangeFrom' in query ? query.rangeFrom : undefined;
@@ -43,21 +34,19 @@ export function useFallbackToTransactionsFetcher({
 
   const { data = { fallbackToTransactions: false } } = useFetcher(
     (callApmApi) => {
-      if (start && end && documentType && rollupInterval) {
+      if (start && end) {
         return callApmApi('GET /internal/apm/fallback_to_transactions', {
           params: {
             query: {
               kuery: kueryWithFilters,
               start,
               end,
-              documentType,
-              rollupInterval,
             },
           },
         });
       }
     },
-    [kueryWithFilters, start, end, documentType, rollupInterval]
+    [kueryWithFilters, start, end]
   );
 
   return data;
