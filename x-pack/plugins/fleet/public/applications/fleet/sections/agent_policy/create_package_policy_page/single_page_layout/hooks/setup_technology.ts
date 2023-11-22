@@ -7,14 +7,15 @@
 
 import { useCallback, useEffect, useState } from 'react';
 
-import { AGENTLESS_POLICY_ID } from '../../../../../../../../common/constants';
 import { ExperimentalFeaturesService } from '../../../../../services';
 import type { AgentPolicy, NewAgentPolicy } from '../../../../../types';
-import { SetupType } from '../../../../../types';
+import { SetupTechnology } from '../../../../../types';
 import { sendGetOneAgentPolicy } from '../../../../../hooks';
 import { SelectedPolicyTab } from '../../components';
 
-export function useSetupType({
+const AGENTLESS_POLICY_ID = 'agentless_cspm';
+
+export function useSetupTechnology({
   updateNewAgentPolicy,
   newAgentPolicy,
   updateAgentPolicy,
@@ -26,7 +27,9 @@ export function useSetupType({
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
 }) {
   const { agentless: isAgentlessEnabled } = ExperimentalFeaturesService.get();
-  const [selectedSetupType, setSelectedSetupType] = useState<SetupType>(SetupType.AGENT_BASED);
+  const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
+    SetupTechnology.AGENT_BASED
+  );
   const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
 
   useEffect(() => {
@@ -44,27 +47,27 @@ export function useSetupType({
     }
   }, [isAgentlessEnabled]);
 
-  const handleSetupTypeChange = useCallback(
-    (setupType) => {
-      if (!isAgentlessEnabled || setupType === selectedSetupType) {
+  const handleSetupTechnologyChange = useCallback(
+    (setupTechnology) => {
+      if (!isAgentlessEnabled || setupTechnology === selectedSetupTechnology) {
         return;
       }
 
-      if (setupType === SetupType.AGENTLESS) {
+      if (setupTechnology === SetupTechnology.AGENTLESS) {
         if (agentlessPolicy) {
           updateAgentPolicy(agentlessPolicy);
           setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
         }
-      } else if (setupType === SetupType.AGENT_BASED) {
+      } else if (setupTechnology === SetupTechnology.AGENT_BASED) {
         updateNewAgentPolicy(newAgentPolicy);
         setSelectedPolicyTab(SelectedPolicyTab.NEW);
       }
 
-      setSelectedSetupType(setupType);
+      setSelectedSetupTechnology(setupTechnology);
     },
     [
       isAgentlessEnabled,
-      selectedSetupType,
+      selectedSetupTechnology,
       agentlessPolicy,
       updateAgentPolicy,
       setSelectedPolicyTab,
@@ -74,8 +77,8 @@ export function useSetupType({
   );
 
   return {
-    handleSetupTypeChange,
+    handleSetupTechnologyChange,
     agentlessPolicy,
-    selectedSetupType,
+    selectedSetupTechnology,
   };
 }

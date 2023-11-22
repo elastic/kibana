@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export const AGENTLESS_POLICY_ID = 'agentless_cspm';
+export enum SetupTechnology {
+  AGENTLESS = 'agentless',
+  AGENT_BASED = 'agent-based',
+}

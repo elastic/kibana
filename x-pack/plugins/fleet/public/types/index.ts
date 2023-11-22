@@ -144,7 +144,7 @@ export {
   ElasticsearchAssetType,
   KibanaAssetType,
   InstallStatus,
-  SetupType,
+  SetupTechnology,
 } from '../../common/types';
 
 export * from './intra_app_route_state';
