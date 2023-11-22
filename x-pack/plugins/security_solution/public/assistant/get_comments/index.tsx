@@ -66,7 +66,7 @@ export const getComments = ({
     regenerateMessage(currentConversation.id);
   };
 
-  const connectorTypeTitle = currentConversation.apiConfig.connectorTypeTitle;
+  const connectorTypeTitle = currentConversation.apiConfig.connectorTypeTitle ?? '';
 
   const extraLoadingComment = isFetchingResponse
     ? [
