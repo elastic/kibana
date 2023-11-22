@@ -24,6 +24,7 @@ Status: `in progress`. The current test plan covers functionality described in [
 
 ### Assumptions
 
+- The feature is **NOT** available under the Basic license
 - Assignees are stored as an array of users IDs in alert's `kibana.alert.workflow_assignee_ids` field
 - The feature is available under the Basic license
 - There are multiple (five or more) available users which could be assigned to alerts
@@ -87,13 +88,13 @@ And removed assignees should be absent
 And newly added assignees should be present
 ```
 
-#### **Scenario: Remove all assignees**
+#### **Scenario: Unassign alert**
 
 **Automation**: 2 e2e test + 1 unit test.
 
 ```Gherkin
 Given an alert with assignees
-When user triggers "Remove all assignees" action
+When user triggers "Unassign alert" action
 Then assignees field should be updated
 And assignees field should be empty
 ```
@@ -123,13 +124,13 @@ And removed assignees should be absent
 And newly added assignees should be present
 ```
 
-#### **Scenario: Remove all assignees**
+#### **Scenario: Unassign alert**
 
 **Automation**: 1 e2e test + 1 unit test.
 
 ```Gherkin
 Given multiple alerts with assignees
-When user triggers "Remove all assignees" action
+When user triggers "Unassign alert" action
 Then assignees fields of all involved alerts should be updated
 And assignees fields should be empty
 ```
@@ -204,4 +205,13 @@ Then there should not be a way to update assignees field for an alert
 ```Gherkin
 Given users 't1_analyst', 't2_analyst', 't3_analyst', 'rule_author', 'soc_manager', 'detections_admin', 'platform_engineer' roles
 Then update assignees functionality should be available
+```
+
+#### **Scenario: Basic license**
+
+**Automation**: 1 e2e test + 1 unit test + 1 integration test.
+
+```Gherkin
+Given user runs Kibana under the Basic license
+Then update assignees functionality should not be available
 ```
