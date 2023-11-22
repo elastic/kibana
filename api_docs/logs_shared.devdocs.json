@@ -264,6 +264,38 @@
       },
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.LogAIAssistant",
+        "type": "Function",
+        "tags": [],
+        "label": "LogAIAssistant",
+        "description": [],
+        "signature": [
+          "(props: any) => JSX.Element"
+        ],
+        "path": "x-pack/plugins/logs_shared/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistant.$1",
+            "type": "Any",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "x-pack/plugins/logs_shared/common/dynamic.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.LogColumnHeader",
         "type": "Function",
         "tags": [],
@@ -1204,7 +1236,7 @@
         "label": "useLogHighlightsStateContext",
         "description": [],
         "signature": [
-          "() => { highlightTerms: string[]; setHighlightTerms: React.Dispatch<React.SetStateAction<string[]>>; logEntryHighlights: ({ topCursor: null; bottomCursor: null; entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "() => { highlightTerms: string[]; setHighlightTerms: React.Dispatch<React.SetStateAction<string[]>>; logEntryHighlights: ({ topCursor: null; bottomCursor: null; entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1220,7 +1252,7 @@
             "section": "def-common.JsonArray",
             "text": "JsonArray"
           },
-          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; } | { topCursor: { time: number; tiebreaker: number; }; bottomCursor: { time: number; tiebreaker: number; }; entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; } | { topCursor: { time: string; tiebreaker: number; }; bottomCursor: { time: string; tiebreaker: number; }; entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1236,7 +1268,7 @@
             "section": "def-common.JsonArray",
             "text": "JsonArray"
           },
-          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; })[]; logEntryHighlightsById: Record<string, { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; })[]; logEntryHighlightsById: Record<string, { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1252,9 +1284,9 @@
             "section": "def-common.JsonArray",
             "text": "JsonArray"
           },
-          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]>; logSummaryHighlights: { start: number; end: number; buckets: ({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: number; tiebreaker: number; }; })[]; }[]; loadLogEntryHighlightsRequest: ",
+          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]>; logSummaryHighlights: { start: number; end: number; buckets: ({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; })[]; }[]; loadLogEntryHighlightsRequest: ",
           "PromiseState",
-          "<{ data: ({ topCursor: null; bottomCursor: null; entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "<{ data: ({ topCursor: null; bottomCursor: null; entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1270,7 +1302,7 @@
             "section": "def-common.JsonArray",
             "text": "JsonArray"
           },
-          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; } | { topCursor: { time: number; tiebreaker: number; }; bottomCursor: { time: number; tiebreaker: number; }; entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; } | { topCursor: { time: string; tiebreaker: number; }; bottomCursor: { time: string; tiebreaker: number; }; entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1288,8 +1320,14 @@
           },
           "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; })[]; }, unknown>; loadLogSummaryHighlightsRequest: ",
           "PromiseState",
-          "<{ data: { start: number; end: number; buckets: ({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: number; tiebreaker: number; }; })[]; }[]; }, unknown>; currentHighlightKey: ",
-          "UniqueTimeKey",
+          "<{ data: { start: number; end: number; buckets: ({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; })[]; }[]; }, unknown>; currentHighlightKey: ",
+          {
+            "pluginId": "@kbn/io-ts-utils",
+            "scope": "common",
+            "docId": "kibKbnIoTsUtilsPluginApi",
+            "section": "def-common.UniqueTimeKey",
+            "text": "UniqueTimeKey"
+          },
           " | null; hasPreviousHighlight: boolean; hasNextHighlight: boolean; goToPreviousHighlight: () => void; goToNextHighlight: () => void; }"
         ],
         "path": "x-pack/plugins/logs_shared/public/containers/logs/log_highlights/log_highlights.tsx",
@@ -1325,7 +1363,7 @@
         "label": "useLogStreamContext",
         "description": [],
         "signature": [
-          "() => { fetchEntries: () => void; fetchNextEntries: FetchPageCallback; fetchPreviousEntries: FetchPageCallback; fetchNewestEntries: () => void; isLoadingMore: boolean; isReloading: boolean; entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "() => { fetchEntries: () => void; fetchNextEntries: FetchPageCallback; fetchPreviousEntries: FetchPageCallback; fetchNewestEntries: () => void; isLoadingMore: boolean; isReloading: boolean; entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -1341,7 +1379,7 @@
             "section": "def-common.JsonArray",
             "text": "JsonArray"
           },
-          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; topCursor: { time: number; tiebreaker: number; } | null; bottomCursor: { time: number; tiebreaker: number; } | null; hasMoreBefore: boolean; hasMoreAfter: boolean; lastLoadedTime?: Date | undefined; }"
+          "; highlights: string[]; })[]; })[]; context: {} | { 'container.id': string; } | { 'host.name': string; 'log.file.path': string; }; }[]; topCursor: { time: string; tiebreaker: number; } | null; bottomCursor: { time: string; tiebreaker: number; } | null; hasMoreBefore: boolean; hasMoreAfter: boolean; lastLoadedTime?: Date | undefined; }"
         ],
         "path": "x-pack/plugins/logs_shared/public/containers/logs/log_stream/index.ts",
         "deprecated": false,
@@ -2548,6 +2586,77 @@
     "interfaces": [
       {
         "parentPluginId": "logsShared",
+        "id": "def-public.LogAIAssistantDocument",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogAIAssistantDocument",
+        "description": [],
+        "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistantDocument.fields",
+            "type": "Array",
+            "tags": [],
+            "label": "fields",
+            "description": [],
+            "signature": [
+              "{ field: string; value: ",
+              {
+                "pluginId": "@kbn/utility-types",
+                "scope": "common",
+                "docId": "kibKbnUtilityTypesPluginApi",
+                "section": "def-common.JsonArray",
+                "text": "JsonArray"
+              },
+              "; }[]"
+            ],
+            "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
+        "id": "def-public.LogAIAssistantProps",
+        "type": "Interface",
+        "tags": [],
+        "label": "LogAIAssistantProps",
+        "description": [],
+        "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-public.LogAIAssistantProps.doc",
+            "type": "Object",
+            "tags": [],
+            "label": "doc",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "logsShared",
+                "scope": "public",
+                "docId": "kibLogsSharedPluginApi",
+                "section": "def-public.LogAIAssistantDocument",
+                "text": "LogAIAssistantDocument"
+              },
+              " | undefined"
+            ],
+            "path": "x-pack/plugins/logs_shared/public/components/log_ai_assistant/log_ai_assistant.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-public.LogEntryColumnWidths",
         "type": "Interface",
         "tags": [],
@@ -2622,7 +2731,7 @@
             "label": "logEntry",
             "description": [],
             "signature": [
-              "{ id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+              "{ id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -2652,7 +2761,7 @@
             "label": "highlights",
             "description": [],
             "signature": [
-              "{ id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+              "{ id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -2743,21 +2852,43 @@
           },
           {
             "parentPluginId": "logsShared",
+            "id": "def-public.LogsSharedClientStartDeps.observabilityAIAssistant",
+            "type": "Object",
+            "tags": [],
+            "label": "observabilityAIAssistant",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "observabilityAIAssistant",
+                "scope": "public",
+                "docId": "kibObservabilityAIAssistantPluginApi",
+                "section": "def-public.ObservabilityAIAssistantPluginStart",
+                "text": "ObservabilityAIAssistantPluginStart"
+              }
+            ],
+            "path": "x-pack/plugins/logs_shared/public/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "logsShared",
             "id": "def-public.LogsSharedClientStartDeps.uiActions",
             "type": "Object",
             "tags": [],
             "label": "uiActions",
             "description": [],
             "signature": [
-              "{ readonly addTriggerAction: (triggerId: string, action: ",
+              "{ readonly registerTrigger: (trigger: ",
               {
-                "pluginId": "uiActions",
-                "scope": "public",
-                "docId": "kibUiActionsPluginApi",
-                "section": "def-public.ActionDefinition",
-                "text": "ActionDefinition"
+                "pluginId": "@kbn/ui-actions-browser",
+                "scope": "common",
+                "docId": "kibKbnUiActionsBrowserPluginApi",
+                "section": "def-common.Trigger",
+                "text": "Trigger"
               },
-              "<any>) => void; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly registerAction: <Context extends object>(definition: ",
+              ") => void; readonly getTrigger: (triggerId: string) => ",
+              "TriggerContract",
+              "<object>; readonly registerAction: <Context extends object>(definition: ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -2773,17 +2904,15 @@
                 "section": "def-public.Action",
                 "text": "Action"
               },
-              "<Context>; readonly registerTrigger: (trigger: ",
+              "<Context>; readonly unregisterAction: (actionId: string) => void; readonly hasAction: (actionId: string) => boolean; readonly attachAction: (triggerId: string, actionId: string) => void; readonly detachAction: (triggerId: string, actionId: string) => void; readonly addTriggerAction: (triggerId: string, action: ",
               {
-                "pluginId": "@kbn/ui-actions-browser",
-                "scope": "common",
-                "docId": "kibKbnUiActionsBrowserPluginApi",
-                "section": "def-common.Trigger",
-                "text": "Trigger"
+                "pluginId": "uiActions",
+                "scope": "public",
+                "docId": "kibUiActionsPluginApi",
+                "section": "def-public.ActionDefinition",
+                "text": "ActionDefinition"
               },
-              ") => void; readonly unregisterAction: (actionId: string) => void; readonly getTrigger: (triggerId: string) => ",
-              "TriggerContract",
-              "<object>; readonly hasAction: (actionId: string) => boolean; readonly getAction: (id: string) => ",
+              "<any>) => void; readonly getAction: (id: string) => ",
               {
                 "pluginId": "uiActions",
                 "scope": "public",
@@ -3182,6 +3311,28 @@
           "path": "x-pack/plugins/logs_shared/public/types.ts",
           "deprecated": false,
           "trackAdoption": false
+        },
+        {
+          "parentPluginId": "logsShared",
+          "id": "def-public.LogsSharedClientStartExports.LogAIAssistant",
+          "type": "CompoundType",
+          "tags": [],
+          "label": "LogAIAssistant",
+          "description": [],
+          "signature": [
+            "React.ComponentClass<",
+            "Optional",
+            "<",
+            "LogAIAssistantDeps",
+            ", \"observabilityAIAssistant\">, any> | React.FunctionComponent<",
+            "Optional",
+            "<",
+            "LogAIAssistantDeps",
+            ", \"observabilityAIAssistant\">>"
+          ],
+          "path": "x-pack/plugins/logs_shared/public/types.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",
@@ -3285,7 +3436,7 @@
               },
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
-              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -3394,7 +3545,7 @@
               },
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
-              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -3645,7 +3796,7 @@
                 "section": "def-common.JsonObject",
                 "text": "JsonObject"
               },
-              " | undefined) => Promise<({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: number; tiebreaker: number; }; })[][]>"
+              " | undefined) => Promise<({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; })[][]>"
             ],
             "path": "x-pack/plugins/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
@@ -3930,7 +4081,7 @@
               },
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesAroundParams",
-              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -4039,7 +4190,7 @@
               },
               ", logView: { logViewId: string; type: \"log-view-reference\"; } | { type: \"log-view-inline\"; id: string; attributes: { name: string; description: string; logIndices: { type: \"data_view\"; dataViewId: string; } | { type: \"index_name\"; indexName: string; }; logColumns: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[]; }; }, params: ",
               "LogEntriesParams",
-              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+              ", columnOverrides?: ({ timestampColumn: { id: string; }; } | { messageColumn: { id: string; }; } | { fieldColumn: { id: string; } & { field: string; }; })[] | undefined) => Promise<{ entries: { id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
               {
                 "pluginId": "@kbn/utility-types",
                 "scope": "common",
@@ -4290,7 +4441,7 @@
                 "section": "def-common.JsonObject",
                 "text": "JsonObject"
               },
-              " | undefined) => Promise<({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: number; tiebreaker: number; }; })[][]>"
+              " | undefined) => Promise<({ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; })[][]>"
             ],
             "path": "x-pack/plugins/logs_shared/server/lib/domains/log_entries_domain/log_entries_domain.ts",
             "deprecated": false,
@@ -4886,13 +5037,46 @@
     "functions": [
       {
         "parentPluginId": "logsShared",
+        "id": "def-common.convertISODateToNanoPrecision",
+        "type": "Function",
+        "tags": [],
+        "label": "convertISODateToNanoPrecision",
+        "description": [],
+        "signature": [
+          "(date: string) => string"
+        ],
+        "path": "x-pack/plugins/logs_shared/common/utils/date_helpers.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "logsShared",
+            "id": "def-common.convertISODateToNanoPrecision.$1",
+            "type": "string",
+            "tags": [],
+            "label": "date",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/plugins/logs_shared/common/utils/date_helpers.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "logsShared",
         "id": "def-common.getLogEntryCursorFromHit",
         "type": "Function",
         "tags": [],
         "label": "getLogEntryCursorFromHit",
         "description": [],
         "signature": [
-          "(hit: { sort: [number, number]; }) => { time: number; tiebreaker: number; }"
+          "(hit: { sort: [string, number]; }) => { time: string; tiebreaker: number; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -4917,7 +5101,7 @@
                 "label": "sort",
                 "description": [],
                 "signature": [
-                  "[number, number]"
+                  "[string, number]"
                 ],
                 "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry_cursor.ts",
                 "deprecated": false,
@@ -5303,7 +5487,7 @@
         "label": "LogColumn",
         "description": [],
         "signature": [
-          "{ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "{ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -5364,7 +5548,7 @@
         "label": "LogEntriesSummaryHighlightsBucket",
         "description": [],
         "signature": [
-          "{ start: number; end: number; entriesCount: number; } & { representativeKey: { time: number; tiebreaker: number; }; }"
+          "{ start: number; end: number; entriesCount: number; } & { representativeKey: { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/http_api/log_entries/v1/summary_highlights.ts",
         "deprecated": false,
@@ -5379,7 +5563,7 @@
         "label": "LogEntry",
         "description": [],
         "signature": [
-          "{ id: string; index: string; cursor: { time: number; tiebreaker: number; }; columns: ({ columnId: string; timestamp: number; } | { columnId: string; field: string; value: ",
+          "{ id: string; index: string; cursor: { time: string; tiebreaker: number; }; columns: ({ columnId: string; time: string; } | { columnId: string; field: string; value: ",
           {
             "pluginId": "@kbn/utility-types",
             "scope": "common",
@@ -5410,7 +5594,7 @@
         "label": "LogEntryAfterCursor",
         "description": [],
         "signature": [
-          "{ after: { time: number; tiebreaker: number; } | \"first\"; }"
+          "{ after: { time: string; tiebreaker: number; } | \"first\"; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -5425,7 +5609,7 @@
         "label": "LogEntryAroundCursor",
         "description": [],
         "signature": [
-          "{ center: { time: number; tiebreaker: number; }; }"
+          "{ center: { time: string; tiebreaker: number; }; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -5440,7 +5624,7 @@
         "label": "LogEntryBeforeCursor",
         "description": [],
         "signature": [
-          "{ before: { time: number; tiebreaker: number; } | \"last\"; }"
+          "{ before: { time: string; tiebreaker: number; } | \"last\"; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -5470,7 +5654,7 @@
         "label": "LogEntryCursor",
         "description": [],
         "signature": [
-          "{ time: number; tiebreaker: number; }"
+          "{ time: string; tiebreaker: number; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry_cursor.ts",
         "deprecated": false,
@@ -5508,7 +5692,7 @@
         "label": "LogEntryTime",
         "description": [],
         "signature": [
-          "{ time: number; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
+          "{ time: string; tiebreaker: number; } & { gid?: string | undefined; fromAutoReload?: boolean | undefined; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
@@ -5675,7 +5859,7 @@
         "label": "LogTimestampColumn",
         "description": [],
         "signature": [
-          "{ columnId: string; timestamp: number; }"
+          "{ columnId: string; time: string; }"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry.ts",
         "deprecated": false,
@@ -6013,8 +6197,8 @@
           "TypeC",
           "<{ columnId: ",
           "StringC",
-          "; timestamp: ",
-          "NumberC",
+          "; time: ",
+          "StringC",
           "; }>, ",
           "TypeC",
           "<{ columnId: ",
@@ -6410,7 +6594,7 @@
           "<[",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>, ",
@@ -6566,7 +6750,7 @@
           "<[",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>, ",
@@ -6720,7 +6904,7 @@
           "<{ center: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; }>]>]>"
@@ -6760,7 +6944,7 @@
           "; cursor: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; columns: ",
@@ -6771,8 +6955,8 @@
           "TypeC",
           "<{ columnId: ",
           "StringC",
-          "; timestamp: ",
-          "NumberC",
+          "; time: ",
+          "StringC",
           "; }>, ",
           "TypeC",
           "<{ columnId: ",
@@ -6858,13 +7042,13 @@
           "<{ topCursor: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; bottomCursor: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; entries: ",
@@ -6878,7 +7062,7 @@
           "; cursor: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; columns: ",
@@ -6889,8 +7073,8 @@
           "TypeC",
           "<{ columnId: ",
           "StringC",
-          "; timestamp: ",
-          "NumberC",
+          "; time: ",
+          "StringC",
           "; }>, ",
           "TypeC",
           "<{ columnId: ",
@@ -7132,7 +7316,7 @@
           "<[",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>, ",
@@ -7156,7 +7340,7 @@
           "<{ center: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; }>"
@@ -7180,7 +7364,7 @@
           "<[",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>, ",
@@ -7232,7 +7416,7 @@
         "signature": [
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>"
@@ -7296,7 +7480,7 @@
           "; cursor: ",
           "TypeC",
           "<{ time: ",
-          "NumberC",
+          "StringC",
           "; tiebreaker: ",
           "NumberC",
           "; }>; columns: ",
@@ -7307,8 +7491,8 @@
           "TypeC",
           "<{ columnId: ",
           "StringC",
-          "; timestamp: ",
-          "NumberC",
+          "; time: ",
+          "StringC",
           "; }>, ",
           "TypeC",
           "<{ columnId: ",
@@ -7629,8 +7813,8 @@
           "TypeC",
           "<{ columnId: ",
           "StringC",
-          "; timestamp: ",
-          "NumberC",
+          "; time: ",
+          "StringC",
           "; }>"
         ],
         "path": "x-pack/plugins/logs_shared/common/log_entry/log_entry.ts",

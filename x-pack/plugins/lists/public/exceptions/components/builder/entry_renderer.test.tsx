@@ -25,7 +25,7 @@ import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { fields, getField } from '@kbn/data-plugin/common/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import { waitFor } from '@testing-library/dom';
+import { waitFor } from '@testing-library/react';
 import { ReactWrapper, mount } from 'enzyme';
 
 import { getFoundListsBySizeSchemaMock } from '../../../../common/schemas/response/found_lists_by_size_schema.mock';

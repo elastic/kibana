@@ -8,7 +8,6 @@
 import React, { Component, Fragment } from 'react';
 
 import {
-  EuiCallOut,
   EuiIcon,
   EuiFlexItem,
   EuiTitle,
@@ -18,7 +17,6 @@ import {
   EuiFlyoutFooter,
   EuiSpacer,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { FilterEditor } from './filter_editor';
@@ -125,26 +123,6 @@ export class EditLayerPanel extends Component<Props, State> {
     return this.props.updateSourceProps(this.props.selectedLayer!.getId(), args);
   };
 
-  _renderLayerErrors() {
-    if (!this.props.selectedLayer || !this.props.selectedLayer.hasErrors()) {
-      return null;
-    }
-
-    return (
-      <Fragment>
-        <EuiCallOut
-          color="warning"
-          title={i18n.translate('xpack.maps.layerPanel.settingsPanel.unableToLoadTitle', {
-            defaultMessage: 'Unable to load layer',
-          })}
-        >
-          <p data-test-subj="layerErrorMessage">{this.props.selectedLayer.getErrors()}</p>
-        </EuiCallOut>
-        <EuiSpacer size="m" />
-      </Fragment>
-    );
-  }
-
   _renderFilterSection() {
     if (
       !this.props.selectedLayer ||
@@ -249,8 +227,6 @@ export class EditLayerPanel extends Component<Props, State> {
 
           <div className="mapLayerPanel__body">
             <div className="mapLayerPanel__bodyOverflow">
-              {this._renderLayerErrors()}
-
               <LayerSettings
                 layer={this.props.selectedLayer}
                 supportsFitToBounds={this.state.supportsFitToBounds}

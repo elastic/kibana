@@ -21,11 +21,7 @@ import { login } from '../../../../../tasks/login';
 import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
 
 import { createRule } from '../../../../../tasks/api_calls/rules';
-import {
-  cleanKibana,
-  resetRulesTableState,
-  deleteAlertsAndRules,
-} from '../../../../../tasks/common';
+import { resetRulesTableState, deleteAlertsAndRules } from '../../../../../tasks/common';
 
 import { getNewRule } from '../../../../../objects/rule';
 
@@ -54,10 +50,6 @@ const EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item';
 const NON_EXPIRED_EXCEPTION_ITEM_NAME = 'Sample exception item with future expiration';
 
 describe('Detection rules, bulk duplicate', { tags: ['@ess', '@serverless'] }, () => {
-  before(() => {
-    cleanKibana();
-  });
-
   beforeEach(() => {
     login();
     // Make sure persisted rules table state is cleared
