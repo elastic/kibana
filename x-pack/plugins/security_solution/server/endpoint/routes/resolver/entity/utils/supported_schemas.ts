@@ -17,13 +17,19 @@ interface SupportedSchema {
   /**
    * A constraint to search for in the documented returned by Elasticsearch
    */
-  constraints: Array<{ field: string; value: string }>;
+  constraints: Array<{ field: string; value: string | string[] }>;
 
   /**
    * Schema to return to the frontend so that it can be passed in to call to the /tree API
    */
   schema: ResolverSchema;
 }
+
+const supportedFileBeatDataSets = [
+  'windows.sysmon_operational',
+  'sentinel_one_cloud_funnel.event',
+  'sentinel_one.alert',
+];
 
 /**
  * This structure defines the preset supported schemas for a resolver graph. We'll probably want convert this
@@ -64,25 +70,7 @@ export const supportedSchemas: SupportedSchema[] = [
     },
   },
   {
-    name: 'osquerybeat',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'osquerybeat',
-      },
-      {
-        field: 'event.module',
-        value: 'osquery_manager',
-      },
-    ],
-    schema: {
-      id: 'osquery.entity_id',
-      parent: 'osquery.ancestry.entity_id',
-      name: 'osquery.name',
-    },
-  },
-  {
-    name: 'sentinel_one_cloud_funnel',
+    name: 'filebeat',
     constraints: [
       {
         field: 'agent.type',
@@ -90,44 +78,7 @@ export const supportedSchemas: SupportedSchema[] = [
       },
       {
         field: 'event.dataset',
-        value: 'sentinel_one_cloud_funnel.event',
-      },
-    ],
-    schema: {
-      // could be changed to [below value] if we get the tgt values to become a separate document
-      id: 'sentinel_one_cloud_funnel.event.tgt.process.uid', // sentinel_one_cloud_funnel.event.src.process.uid
-      parent: 'sentinel_one_cloud_funnel.event.src.process.uid', // sentinel_one_cloud_funnel.event.src.process.parent.uid
-      name: 'sentinel_one_cloud_funnel.event.tgt.process.name', // sentinel_one_cloud_funnel.event.src.process.name
-    },
-  },
-  {
-    name: 'sentinel_one',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'filebeat',
-      },
-      {
-        field: 'event.dataset',
-        value: 'sentinel_one.alert',
-      },
-    ],
-    schema: {
-      id: 'process.entity_id',
-      parent: 'process.parent.entity_id',
-      name: 'process.name',
-    },
-  },
-  {
-    name: 'sysmonViaFilebeat',
-    constraints: [
-      {
-        field: 'agent.type',
-        value: 'filebeat',
-      },
-      {
-        field: 'event.dataset',
-        value: 'windows.sysmon_operational',
+        value: supportedFileBeatDataSets,
       },
     ],
     schema: {

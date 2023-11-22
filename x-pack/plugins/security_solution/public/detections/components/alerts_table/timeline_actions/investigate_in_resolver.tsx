@@ -8,6 +8,8 @@
 import { get } from 'lodash/fp';
 import type { EcsSecurityExtension as Ecs } from '@kbn/securitysolution-ecs';
 
+const fileBeatModules = ['sentinel_one_cloud_funnel', 'sentinel_one'] as const;
+
 export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
   const agentType = get(['agent', 'type', 0], ecsData);
   const processEntityIds = get(['process', 'entity_id'], ecsData);
@@ -19,16 +21,9 @@ export const isInvestigateInResolverActionEnabled = (ecsData?: Ecs) => {
     eventDataStream.some((datastream) => datastream.includes('windows.sysmon'));
   const agentTypeIsEndpoint = agentType === 'endpoint';
   const agentTypeIsWinlogBeat = agentType === 'winlogbeat' && eventModule === 'sysmon';
-  const agentTypeIsOsqueryBeat = agentType === 'osquerybeat' && eventModule === 'osquery_manager';
-  const agentTypeIsSentinelOneBeat =
-    agentType === 'filebeat' &&
-    (eventModule === 'sentinel_one_cloud_funnel' || eventModule === 'sentinel_one');
+  const agentTypeIsFilebeat = agentType === 'filebeat' && fileBeatModules.includes(eventModule);
   const isEndpointOrSysmonFromWinlogBeat =
-    agentTypeIsEndpoint ||
-    agentTypeIsWinlogBeat ||
-    datasetIncludesSysmon ||
-    agentTypeIsOsqueryBeat ||
-    agentTypeIsSentinelOneBeat;
+    agentTypeIsEndpoint || agentTypeIsWinlogBeat || datasetIncludesSysmon || agentTypeIsFilebeat;
   const hasProcessEntityId =
     processEntityIds != null && processEntityIds.length === 1 && firstProcessEntityId !== '';
   return isEndpointOrSysmonFromWinlogBeat && hasProcessEntityId;

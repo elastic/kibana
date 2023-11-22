@@ -1,0 +1,4635 @@
+{
+  "description": "Pipeline for processing Event logs.",
+  "processors": [
+    {
+      "set": {
+        "field": "ecs.version",
+        "value": "8.10.0"
+      }
+    },
+    {
+      "set": {
+        "field": "event.kind",
+        "value": "event"
+      }
+    },
+    {
+      "gsub": {
+        "field": "message",
+        "pattern": "\\\\\\\\\\\\\\\\",
+        "replacement": "\\\\\\\\",
+        "ignore_missing": true,
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "message",
+        "target_field": "event.original",
+        "ignore_missing": true,
+        "if": "ctx.event?.original == null"
+      }
+    },
+    {
+      "json": {
+        "field": "event.original",
+        "tag": "json_event_original",
+        "target_field": "json",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "if": "ctx.json != null",
+        "tag": "script_to_change_name_of_k8sCluster_containerImage",
+        "description": "Change the name of k8sCluster containerImage field.",
+        "source": "ctx.json.put(\"k8sCluster.containerImage.value\", ctx.json['k8sCluster.containerImage']); ctx.json.remove('k8sCluster.containerImage');",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "dot_expander": {
+        "field": "*",
+        "tag": "dot_expander",
+        "path": "json",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "tag": "script_to_remove_quotes_from_begining_and_end",
+        "description": "Script to remove quotes from begining and end from a field.",
+        "source": "String trimQuotes(def doubleQuote, def v) {\n  if (v.startsWith(doubleQuote) && v.endsWith(doubleQuote)) {\n    v = v.substring(1, v.length() - 1);\n  }\n  return v;\n}\ndef v1 = ctx.json?.src?.process?.parent?.cmdline;\ndef v2 = ctx.json?.tgt?.process?.cmdline;\nif (v1 instanceof String && v1 != null) {\n  v1 = trimQuotes(params.double_quote, v1);\n  ctx.json.src.process.parent.put(\"cmdline\", v1);\n}\nif (v2 instanceof String && v2 != null) {\n  v2 = trimQuotes(params.double_quote, v2);\n  ctx.json.tgt.process.put(\"cmdline\", v2);\n}\n",
+        "params": {
+          "double_quote": "\""
+        },
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "date": {
+        "field": "json.event.time",
+        "tag": "date_json_event_time",
+        "target_field": "sentinel_one_cloud_funnel.event.time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.event?.time != null && ctx.json.event.time != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "date": {
+        "field": "json.event.time",
+        "tag": "date_timestamp",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.event?.time != null && ctx.json.event.time != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.logout.tgt.user.name",
+        "target_field": "sentinel_one_cloud_funnel.event.logout.tgt.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "destination.user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.logout.tgt.user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.login.tgt.domainName",
+        "target_field": "sentinel_one_cloud_funnel.event.login.tgt.domain_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "destination.user.domain",
+        "copy_from": "sentinel_one_cloud_funnel.event.login.tgt.domain_name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.logout.tgt.domainName",
+        "target_field": "sentinel_one_cloud_funnel.event.logout.tgt.domain_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "destination.user.domain",
+        "copy_from": "sentinel_one_cloud_funnel.event.logout.tgt.domain_name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.login.tgt.user.name",
+        "target_field": "sentinel_one_cloud_funnel.event.login.tgt.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "destination.user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.login.tgt.user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{destination.user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.destination?.user?.name != null"
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{destination.user.domain}}}",
+        "allow_duplicates": false,
+        "if": "ctx.destination?.user?.domain != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.id",
+        "target_field": "sentinel_one_cloud_funnel.event.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "event.id",
+        "copy_from": "sentinel_one_cloud_funnel.event.id",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.name",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "file.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.file.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.group.id",
+        "target_field": "sentinel_one_cloud_funnel.event.group.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "group.id",
+        "copy_from": "sentinel_one_cloud_funnel.event.group.id",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.endpoint.name",
+        "target_field": "sentinel_one_cloud_funnel.event.endpoint.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "host.hostname",
+        "copy_from": "sentinel_one_cloud_funnel.event.endpoint.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hosts",
+        "value": "{{{sentinel_one_cloud_funnel.event.endpoint.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.endpoint?.name != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.os.name",
+        "target_field": "sentinel_one_cloud_funnel.event.os_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "host.os.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.os_name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hosts",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os?.name != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.endpoint.os",
+        "target_field": "sentinel_one_cloud_funnel.event.endpoint.os",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "host.os.platform",
+        "copy_from": "sentinel_one_cloud_funnel.event.endpoint.os",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hosts",
+        "value": "{{{sentinel_one_cloud_funnel.event.endpoint.os}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.endpoint?.os != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.endpoint.type",
+        "target_field": "sentinel_one_cloud_funnel.event.endpoint.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "host.type",
+        "copy_from": "sentinel_one_cloud_funnel.event.endpoint.type",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hosts",
+        "value": "{{{sentinel_one_cloud_funnel.event.endpoint.type}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.endpoint?.type != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.cmdline",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cmd_line",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.command_line",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.cmd_line",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.path",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.md5",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.md5",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.hash.md5",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.image.md5",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{process.hash.md5}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.hash?.md5 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.sha1",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.sha1",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.hash.sha1",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.image.sha1",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{process.hash.sha1}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.hash?.sha1 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.sha256",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.sha256",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.hash.sha256",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.image.sha256",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{process.hash.sha256}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.hash?.sha256 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.name",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.name",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.cmdline",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.cmd_line",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.command_line",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.cmd_line",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.path",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.md5",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.md5",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.hash.md5",
+        "copy_from": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.md5",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{process.parent.hash.md5}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.hash?.md5 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.sha1",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.sha1",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.hash.sha1",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.image.sha1",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{process.parent.hash.sha1}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.hash?.sha1 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.sha256",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.sha256",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.hash.sha256",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.image.sha256",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{process.parent.hash.sha256}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.hash?.sha256 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.name",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.pid",
+        "tag": "convert_json_src_process_parent_pid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.pid",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.pid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.pid",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.pid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.rUserUid",
+        "tag": "convert_json_src_process_parent_rUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.r_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.rUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.real_user.id",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.r_user.uid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{process.parent.real_user.id}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.real_user?.id != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.rUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.r_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.real_user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.r_user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{process.parent.real_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.real_user?.name != null"
+      }
+    },
+    {
+      "date": {
+        "field": "json.src.process.parent.startTime",
+        "tag": "date_json_src_process_parent_startTime",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.start_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.src?.process?.parent?.startTime != null && ctx.json.src.process.parent.startTime != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.start",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.start_time",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.displayName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.display_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.title",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.display_name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.eUserUid",
+        "tag": "convert_json_src_process_parent_eUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.e_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.eUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.user.id",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.e_user.uid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{process.parent.user.id}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.user?.id != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.eUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.e_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.e_user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.user",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{process.parent.user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.parent?.user?.name != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.pid",
+        "tag": "convert_json_src_process_pid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.pid",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.pid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.pid",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.pid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.rUserUid",
+        "tag": "convert_json_src_process_rUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.r_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.rUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.real_user.id",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.r_user.uid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{process.real_user.id}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.real_user?.id != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.rUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.r_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.real_user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.r_user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{process.real_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.process?.real_user?.name != null"
+      }
+    },
+    {
+      "date": {
+        "field": "json.src.process.startTime",
+        "tag": "convert_json_src_process_startTime",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.start_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.src?.process?.startTime != null && ctx.json.src.process.startTime != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.start",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.start_time",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.displayName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.display_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.title",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.display_name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.eUserUid",
+        "tag": "convert_json_src_process_eUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.e_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.eUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "set": {
+        "field": "process.user.id",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.e_user.uid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.user",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.eUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.e_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.user.name",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.e_user.name",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.description",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.description",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "threat.indicator.description",
+        "copy_from": "sentinel_one_cloud_funnel.event.ti_indicator.description",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.references",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.references",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "threat.indicator.reference",
+        "copy_from": "sentinel_one_cloud_funnel.event.ti_indicator.references",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.mitreTactics",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.mitre_tactics",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "threat.tactic.name",
+        "value": "{{{sentinel_one_cloud_funnel.event.ti_indicator.mitre_tactics}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.ti_indicator?.mitre_tactics != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.account.id",
+        "target_field": "sentinel_one_cloud_funnel.event.account_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.agent.uuid",
+        "target_field": "sentinel_one_cloud_funnel.event.agent.uuid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.agent.version",
+        "target_field": "sentinel_one_cloud_funnel.event.agent.version",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.dataSource.name",
+        "target_field": "sentinel_one_cloud_funnel.event.data_source.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.category",
+        "target_field": "sentinel_one_cloud_funnel.event.category",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.event.repetitionCount",
+        "tag": "convert_json_event_repetitionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.repetition_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.event?.repetitionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.type",
+        "target_field": "sentinel_one_cloud_funnel.event.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.i.scheme",
+        "target_field": "sentinel_one_cloud_funnel.event.i.scheme",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.i.version",
+        "target_field": "sentinel_one_cloud_funnel.event.i.version",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.meta.event.name",
+        "target_field": "sentinel_one_cloud_funnel.event.meta_event_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.mgmt.url",
+        "target_field": "sentinel_one_cloud_funnel.event.mgmt.url",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.activeContent.hash",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.active_content.hash",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.activeContent.id",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.active_content.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.activeContent.path",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.active_content.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.activeContent.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.active_content.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.activeContentType",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.active_content.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.childProcCount",
+        "tag": "convert_json_osSrc_process_childProcCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.child_proc_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.childProcCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.cmdline",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cmd_line",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.crossProcessCount",
+        "tag": "convert_json_osSrc_process_crossProcessCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cross_process.count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.crossProcessCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.crossProcessDupRemoteProcessHandleCount",
+        "tag": "convert_json_osSrc_process_crossProcessDupRemoteProcessHandleCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cross_process.dup.remote_process_handle_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.crossProcessDupRemoteProcessHandleCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.crossProcessDupThreadHandleCount",
+        "tag": "convert_json_osSrc_process_crossProcessDupThreadHandleCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cross_process.dup.thread_handle_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.crossProcessDupThreadHandleCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.crossProcessOpenProcessCount",
+        "tag": "json_osSrc_process_crossProcessOpenProcessCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cross_process.open_process_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.crossProcessOpenProcessCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.crossProcessOutOfStorylineCount",
+        "tag": "convert_json_osSrc_process_crossProcessOutOfStorylineCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cross_process.out_of_storyline_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.crossProcessOutOfStorylineCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.crossProcessThreadCreateCount",
+        "tag": "convert_json_osSrc_process_crossProcessThreadCreateCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.cross_process.thread_create_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.crossProcessThreadCreateCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.displayName",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.display_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.dnsCount",
+        "tag": "convert_json__osSrc_process_dnsCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.dns_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.dnsCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.image.binaryIsExecutable",
+        "tag": "convert_json_osSrc_process_image_binaryIsExecutable",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.binary_is_executable",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.image?.binaryIsExecutable != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.md5",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.md5",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.image.md5}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.image?.md5!= null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.path",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.sha1",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.sha1",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.image.sha1}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.image?.sha1 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.sha256",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.sha256",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.image.sha256}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.image?.sha256 != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorBootConfigurationUpdateCount",
+        "tag": "convert_json_osSrc_process_indicatorBootConfigurationUpdateCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.boot_configuration_update_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorBootConfigurationUpdateCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorEvasionCount",
+        "tag": "convert_json_osSrc_process_indicatorEvasionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.evasion_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorEvasionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorExploitationCount",
+        "tag": "convert_json_osSrc_process_indicatorExploitationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.exploitation_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorExploitationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorGeneral.count",
+        "tag": "convert_json_osSrc_process_indicatorGeneral_count",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.general_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorGeneral?.count != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorInfostealerCount",
+        "tag": "convert_json_osSrc_process_indicatorInfostealerCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator_info_stealer_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorInfostealerCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorInjectionCount",
+        "tag": "convert_json_osSrc_process_indicatorInjectionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.injection_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorInjectionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorPersistenceCount",
+        "tag": "convert_json_osSrc_process_indicatorPersistenceCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.persistence_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorPersistenceCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorPostExploitationCount",
+        "tag": "convert_json_osSrc_process_indicatorPostExploitationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.post_exploitation_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorPostExploitationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorRansomwareCount",
+        "tag": "convert_json_osSrc_process_indicatorRansomwareCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.ransomware_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorRansomwareCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.indicatorReconnaissanceCount",
+        "tag": "json_osSrc_process_indicatorReconnaissanceCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.indicator.reconnaissance_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.indicatorReconnaissanceCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.integrityLevel",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.integrity_level",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.isNative64Bit",
+        "tag": "convert_json_osSrc_process_isNative64Bit",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.is_native_64_bit",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.isNative64Bit != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.isRedirectCmdProcessor",
+        "tag": "convert_json_osSrc_process_isRedirectCmdProcessor",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.is_redirect_cmd_processor",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.isRedirectCmdProcessor != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.isStorylineRoot",
+        "tag": "convert_json_osSrc_process_isStorylineRoot",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.is_storyline_root",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.isStorylineRoot != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.moduleCount",
+        "tag": "convert_json_osSrc_process_moduleCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.module_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.moduleCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.name",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.netConnCount",
+        "tag": "convert_json_osSrc_process_netConnCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.net_conn.count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.netConnCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.netConnInCount",
+        "tag": "convert_json_osSrc_process_netConnInCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.net_conn.in_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.netConnInCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.netConnOutCount",
+        "tag": "convert_json_osSrc_process_netConnOutCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.net_conn.out_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.netConnOutCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.activeContent.hash",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.active_content.hash",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.activeContent.id",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.active_content.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.activeContent.path",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.active_content.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.activeContent.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.active_content.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.activeContentType",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.active_content.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.cmdline",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.cmd_line",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.displayName",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.display_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.sha1",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.sha1",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.parent.image.sha1}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.parent?.image?.sha1 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.sha256",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.sha256",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.parent.image.sha256}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.parent?.image?.sha256 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.integrityLevel",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.integrity_level",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.isNative64Bit",
+        "tag": "convert_json_osSrc_process_parent_isNative64Bit",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.is_native_64_bit",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.isNative64Bit != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.isRedirectCmdProcessor",
+        "tag": "convert_json_osSrc_process_parent_isRedirectCmdProcessor",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.is_redirect_cmd_processor",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.isRedirectCmdProcessor != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.isStorylineRoot",
+        "tag": "convert_json_osSrc_process_parent_isStorylineRoot",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.is_storyline_root",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.isStorylineRoot != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.name",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.pid",
+        "tag": "convert_json_osSrc_process_parent_pid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.pid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.pid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.publisher",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.publisher",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.reasonSignatureInvalid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.reason_signature_invalid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.sessionId",
+        "tag": "convert_json_osSrc_process_parent_sessionId",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.session_id",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.sessionId != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "json.osSrc.process.parent.startTime",
+        "tag": "date_json_osSrc_process_parent_startTime",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.start_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.osSrc?.process?.parent?.startTime != null && ctx.json.osSrc.process.parent.startTime != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.storyline.id",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.storyline_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.user",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.parent.user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.parent?.user?.name != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.pid",
+        "tag": "convert_json_osSrc_process_pid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.pid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.pid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.publisher",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.publisher",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.reasonSignatureInvalid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.reason_signature_invalid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.registryChangeCount",
+        "tag": "convert_json_osSrc_process_registryChangeCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.registry_change_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.registryChangeCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.sessionId",
+        "tag": "convert_json_osSrc_process_sessionId",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.session_id",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.sessionId != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "json.osSrc.process.startTime",
+        "tag": "date_json_osSrc_process_startTime",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.start_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.osSrc?.process?.startTime != null && ctx.json.osSrc.process.startTime != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.storyline.id",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.storyline_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.subsystem",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.subsystem",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.tgtFileCreationCount",
+        "tag": "convert_json_osSrc_process_tgtFileCreationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.tgt_file.creation_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.tgtFileCreationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.tgtFileDeletionCount",
+        "tag": "convert_json_osSrc_process_tgtFileDeletionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.tgt_file.deletion_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.tgtFileDeletionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.tgtFileModificationCount",
+        "tag": "convert_json_osSrc_process_tgtFileModificationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.tgt_file.modification_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.tgtFileModificationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.user",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.user?.name != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.verifiedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.verified_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "json.sca:atlantisIngestTime",
+        "tag": "date_json_sca_atlantisIngestTime",
+        "target_field": "sentinel_one_cloud_funnel.event.sca.atlantis_ingest_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json['sca:atlantisIngestTime'] != null && ctx.json['sca:atlantisIngestTime'] != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.site.id",
+        "target_field": "sentinel_one_cloud_funnel.event.site.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.site.name",
+        "target_field": "sentinel_one_cloud_funnel.event.site.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.activeContent.hash",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.active_content.hash",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.activeContent.id",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.active_content.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.activeContent.path",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.active_content.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.activeContent.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.active_content.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.activeContentType",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.active_content.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.childProcCount",
+        "tag": "convert_json_src_process_childProcCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.child_proc_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.childProcCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.crossProcessDupRemoteProcessHandleCount",
+        "tag": "convert_json_src_process_crossProcessDupRemoteProcessHandleCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cross_process.dup.remote_process_handle_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.crossProcessDupRemoteProcessHandleCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.crossProcessOpenProcessCount",
+        "tag": "convert_json_src_process_crossProcessOpenProcessCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cross_process.open_process_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.crossProcessOpenProcessCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorExploitationCount",
+        "tag": "convert_json_src_process_indicatorExploitationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.exploitation_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorExploitationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorInjectionCount",
+        "tag": "convert_json_src_process_indicatorInjectionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.injection_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorInjectionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorRansomwareCount",
+        "tag": "convert_json_src_process_indicatorRansomwareCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.ransomware_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorRansomwareCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorReconnaissanceCount",
+        "tag": "convert_json_src_process_indicatorReconnaissanceCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.reconnaissance_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorReconnaissanceCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.integrityLevel",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.integrity_level",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.lUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.l_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.l_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.l_user?.name != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.lUserUid",
+        "tag": "convert_json_src_process_lUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.l_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.lUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.l_user.uid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.l_user?.uid != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.moduleCount",
+        "tag": "convert_json_src_process_moduleCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.module_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.moduleCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.netConnInCount",
+        "tag": "convert_json_src_process_netConnInCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.net_conn.in_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.netConnInCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.activeContent.hash",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.active_content.hash",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.activeContent.id",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.active_content.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.activeContent.path",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.active_content.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.activeContent.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.active_content.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.activeContentType",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.active_content.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.md5",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.md5",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.parent.image.md5}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.parent?.image?.md5 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.path",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.integrityLevel",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.integrity_level",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.isNative64Bit",
+        "tag": "convert_json_src_process_parent_isNative64Bit",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.is_native_64_bit",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.isNative64Bit != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.isRedirectCmdProcessor",
+        "tag": "convert_json_src_process_parent_isRedirectCmdProcessor",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.is_redirect_cmd_processor",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.isRedirectCmdProcessor != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.isStorylineRoot",
+        "tag": "convert_json_src_process_parent_isStorylineRoot",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.is_storyline_root",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.isStorylineRoot != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.lUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.l_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.parent.l_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.parent?.l_user?.name != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.lUserUid",
+        "tag": "convert_json_src_process_parent_lUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.l_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.lUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.parent.l_user.uid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.parent?.l_user?.uid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.publisher",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.publisher",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.reasonSignatureInvalid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.reason_signature_invalid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.sessionId",
+        "tag": "convert_json_src_process_parent_sessionId",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.session_id",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.sessionId != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.storyline.id",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.storyline_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.parent.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.parent?.user?.sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.storyline.id",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.storyline_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.subsystem",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.subsystem",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.tgtFileCreationCount",
+        "tag": "convert_json_src_process_tgtFileCreationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.tgt_file.creation_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.tgtFileCreationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.isSigned",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.is_signed",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.eUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.e_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.e_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.e_user?.name != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.entity_id",
+        "copy_from": "sentinel_one_cloud_funnel.event.tgt.process.uid",
+        "ignore_empty_value": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.process.eUserUid",
+        "tag": "convert_json_tgt_process_eUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.e_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.process?.eUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.e_user.uid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.e_user?.uid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.lUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.l_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.l_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.l_user?.name != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.process.lUserUid",
+        "tag": "convert_json_tgt_process_lUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.l_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.process?.lUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.l_user.uid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.l_user?.uid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.rUserName",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.r_user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.r_user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.r_user?.name != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.process.rUserUid",
+        "tag": "convert_json_tgt_process_rUserUid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.r_user.uid",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.process?.rUserUid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.r_user.uid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.r_user?.uid != null"
+      }
+    },
+    {
+      "date": {
+        "field": "json.timestamp",
+        "tag": "date_json_timestamp",
+        "target_field": "sentinel_one_cloud_funnel.event.timestamp",
+        "formats": [
+          "ISO8601",
+          "epoch_millis",
+          "HH:mm:ss.SSS"
+        ],
+        "if": "ctx.json?.timestamp != null && ctx.json.timestamp != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.dataSource.category",
+        "target_field": "sentinel_one_cloud_funnel.event.data_source.category",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.mgmt.id",
+        "target_field": "sentinel_one_cloud_funnel.event.mgmt.id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.mgmt.osRevision",
+        "target_field": "sentinel_one_cloud_funnel.event.mgmt.os_revision",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.process.unique.key",
+        "target_field": "sentinel_one_cloud_funnel.event.process_unique_key",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "json.sca:ingestTime",
+        "tag": "date_json_sca.ingestTime",
+        "target_field": "sentinel_one_cloud_funnel.event.sca.ingest_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json['sca:ingestTime'] != null && ctx.json['sca:ingestTime'] != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.crossProcessDupThreadHandleCount",
+        "tag": "convert_json_src_process_crossProcessDupThreadHandleCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cross_process.dup.thread_handle_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.crossProcessDupThreadHandleCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.dnsCount",
+        "tag": "convert_json_src_process_dnsCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.dns_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.dnsCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorBootConfigurationUpdateCount",
+        "tag": "convert_json_src_process_indicatorBootConfigurationUpdateCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.boot_configuration_update_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorBootConfigurationUpdateCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorEvasionCount",
+        "tag": "convert_json_src_process_indicatorEvasionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.evasion_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorEvasionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorGeneralCount",
+        "tag": "convert_json_src_process_indicatorGeneralCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.general_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorGeneralCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorInfostealerCount",
+        "tag": "convert_json_src_process_indicatorInfostealerCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.info_stealer_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorInfostealerCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorPersistenceCount",
+        "tag": "convert_json_src_process_indicatorPersistenceCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.persistence_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorPersistenceCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.isNative64Bit",
+        "tag": "convert_json_src_process_isNative64Bit",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.is_native_64_bit",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.isNative64Bit != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.isRedirectCmdProcessor",
+        "tag": "convert_json_src_process_isRedirectCmdProcessor",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.is_redirect_cmd_processor",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.isRedirectCmdProcessor != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.netConnCount",
+        "tag": "convert_json_src_process_netConnCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.net_conn.count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.netConnCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.netConnOutCount",
+        "tag": "convert_json_src_process_netConnOutCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.net_conn.out_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.netConnOutCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.subsystem",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.subsystem",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.registryChangeCount",
+        "tag": "convert_json_src_process_registryChangeCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.registry_change_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.registryChangeCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.sessionId",
+        "tag": "convert_json_src_process_sessionId",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.session_id",
+        "type": "string",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.sessionId != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.signedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.signed_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.tgtFileDeletionCount",
+        "tag": "convert_json_src_process_tgtFileDeletionCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.tgt_file.deletion_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.tgtFileDeletionCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.tgtFileModificationCount",
+        "tag": "convert_json_src_process_tgtFileModificationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.tgt_file.modification_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.tgtFileModificationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "set": {
+        "field": "process.parent.entity_id",
+        "copy_from": "sentinel_one_cloud_funnel.event.src.process.uid",
+        "ignore_empty_value": true
+      }
+    },
+
+    {
+      "rename": {
+        "field": "json.packet.id",
+        "target_field": "sentinel_one_cloud_funnel.event.packet_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.trace.id",
+        "target_field": "sentinel_one_cloud_funnel.event.trace_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.crossProcessCount",
+        "tag": "convert_json_src_process_crossProcessCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cross_process.count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.crossProcessCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.crossProcessOutOfStorylineCount",
+        "tag": "convert_json_src_process_crossProcessOutOfStorylineCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cross_process.out_of_storyline_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.crossProcessOutOfStorylineCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.crossProcessThreadCreateCount",
+        "tag": "convert_json_src_process_crossProcessThreadCreateCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.cross_process.thread_create_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.crossProcessThreadCreateCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.image.binaryIsExecutable",
+        "tag": "convert_json_src_process_image_binaryIsExecutable",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.binary_is_executable",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.image?.binaryIsExecutable != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.indicatorPostExploitationCount",
+        "tag": "convert_json_src_process_indicatorPostExploitationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.indicator.post_exploitation_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.indicatorPostExploitationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.isStorylineRoot",
+        "tag": "convert_json_src_process_isStorylineRoot",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.is_storyline_root",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.isStorylineRoot != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.publisher",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.publisher",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.verifiedStatus",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.verified_status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.driver.certificate.thumbprint",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.certificate.thumbprint.value",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.driver.certificate.thumbprintAlgorithm",
+        "tag": "convert_json_driver_certificate_thumbprintAlgorithm",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.certificate.thumbprint.algorithm",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.driver?.certificate?.thumbprintAlgorithm != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.driver.isLoadedBeforeMonitor",
+        "tag": "convert_json_driver_isLoadedBeforeMonitor",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.is_loaded_before_monitor",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.driver?.isLoadedBeforeMonitor != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.driver.loadVerdict",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.load_verdict",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.driver.peSha1",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.pe.sha1",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.driver.pe.sha1}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.driver?.pe?.sha1 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.driver.peSha256",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.pe.sha256",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.hash",
+        "value": "{{{sentinel_one_cloud_funnel.event.driver.pe.sha256}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.driver?.pe?.sha256 != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.driver.startType",
+        "target_field": "sentinel_one_cloud_funnel.event.driver.start_type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.dns.status",
+        "target_field": "sentinel_one_cloud_funnel.event.dns.status",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.login.tgt.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.login.tgt.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.login.tgt.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.login?.tgt?.user?.sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.logout.tgt.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.logout.tgt.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.logout.tgt.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.logout?.tgt?.user?.sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.logout.type",
+        "target_field": "sentinel_one_cloud_funnel.event.logout.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.event.processtermination.exitCode",
+        "tag": "convert_json_event_processtermination.exitCode",
+        "target_field": "sentinel_one_cloud_funnel.event.process_termination.exit_code",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.event?.processtermination?.exitCode != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.processtermination.signal",
+        "target_field": "sentinel_one_cloud_funnel.event.process_termination.signal",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.event.url.source",
+        "target_field": "sentinel_one_cloud_funnel.event.url.source",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.group.type",
+        "target_field": "sentinel_one_cloud_funnel.event.group.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.indicator.identifier",
+        "target_field": "sentinel_one_cloud_funnel.event.indicator.identifier",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.accessMode",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.access_mode",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.connectionType",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.connection_type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.namedPipe.isFirstInstance",
+        "tag": "convert_json_namedPipe_isFirstInstance",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.is_first_instance",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.namedPipe?.isFirstInstance != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.namedPipe.isOverlapped",
+        "tag": "convert_json_namedPipe_isOverlapped",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.is_overlapped",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.namedPipe?.isOverlapped != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.namedPipe.isWriteThrough",
+        "tag": "convert_json_namedPipe_isWriteThrough",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.is_write_through",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.namedPipe?.isWriteThrough != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.namedPipe.maxInstances",
+        "tag": "convert_json_namedPipe_maxInstances",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.max_instances",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.namedPipe?.maxInstances != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.name",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.readMode",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.read_mode",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.remoteClients",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.remote_clients",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.securityGroups",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.security.groups",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.securityOwner",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.security.owner",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.typeMode",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.type_mode",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.namedPipe.waitMode",
+        "target_field": "sentinel_one_cloud_funnel.event.named_pipe.wait_mode",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.extension",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.extension",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.location",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.location",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.image.signature.isValid",
+        "tag": "convert_json_osSrc_process_image_signature_isValid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.signature_is_valid",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.image?.signature?.isValid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.image.size",
+        "tag": "convert_json_osSrc_process_image_size",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.size",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.image?.size != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.type",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.image.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.image.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.image.binaryIsExecutable",
+        "tag": "convert_json_osSrc_process_parent_image_binaryIsExecutable",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.binary_is_executable",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.image?.binaryIsExecutable != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.extension",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.extension",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.location",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.location",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.image.signature.isValid",
+        "tag": "convert_json_osSrc_process_parent_image_signature_isValid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.signature_is_valid",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.image?.signature?.isValid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.osSrc.process.parent.image.size",
+        "tag": "convert_json_osSrc_process_parent_image_size",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.size",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.osSrc?.process?.parent?.image?.size != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.type",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.image.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.image.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.subsystem",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.subsystem",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.parent.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.parent.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.parent.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.parent?.user?.sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.osSrc.process.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.os_src_process.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.os_src_process.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.os_src_process?.user?.sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.registry.export.path",
+        "target_field": "sentinel_one_cloud_funnel.event.registry.export_path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.registry.import.path",
+        "target_field": "sentinel_one_cloud_funnel.event.registry.import_path",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.registry.owner.user",
+        "target_field": "sentinel_one_cloud_funnel.event.registry.owner.user.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.registry.owner.user.name}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.registry?.owner?.user?.name != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.registry.owner.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.registry.owner.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.registry.owner.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.registry?.owner?.user?.sid != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.registry.security.info",
+        "tag": "convert_json_registry_security_info",
+        "target_field": "sentinel_one_cloud_funnel.event.registry.security_info",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.registry?.security?.info != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.exeModificationCount",
+        "tag": "convert_json_src_process_exeModificationCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.exe_modification_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.exeModificationCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.description",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.description",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.extension",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.extension",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.internalName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.internal_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.location",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.location",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.originalFileName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.original_file_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.productName",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.product.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.productVersion",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.product.version",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.image.size",
+        "tag": "convert_json_src_process_image_size",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.size",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.image?.size != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.type",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.image.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.image.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.modelChildProcessCount",
+        "tag": "convert_json_src_process_modelChildProcessCount",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.model_child_process_count",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.modelChildProcessCount != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.image.binaryIsExecutable",
+        "tag": "convert_json_src_process_parent_image_binaryIsExecutable",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.binary_is_executable",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.image?.binaryIsExecutable != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.extension",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.extension",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.location",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.location",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.image.signature.isValid",
+        "tag": "convert_json_src_process_parent_image_signature_isValid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.signature_is_valid",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.image?.signature?.isValid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.src.process.parent.image.size",
+        "tag": "convert_json_src_process_parent_image_size",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.size",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.src?.process?.parent?.image?.size != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.type",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.parent.image.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.parent.image.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.src.process.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.src.process.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.src.process.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.src?.process?.user?.sid != null"
+      }
+    },
+    {
+      "convert": {
+        "field": "json.task.triggerType",
+        "tag": "convert_json_task_triggerType",
+        "target_field": "sentinel_one_cloud_funnel.event.task.trigger_type",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.task?.triggerType != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.file.isDirectory",
+        "tag": "convert_json_tgt_file_isDirectory",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.is_directory",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.file?.isDirectory != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.file.isKernelModule",
+        "tag": "convert_json_tgt_file_isKernelModule",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.is_kernel_module",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.file?.isKernelModule != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.originalFileName",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.original_file_name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.owner.name",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.owner.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.owner.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.owner.user_sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.file.owner.user_sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.file?.owner?.user_sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.productName",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.product.name",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.productVersion",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.product.version",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.publisher",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.publisher",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.file.signature.isValid",
+        "tag": "convert_json_tgt_file_signature_isValid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.signature.is_valid",
+        "type": "boolean",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.file?.signature?.isValid != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.file.signatureInvalidReason",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.file.signature.invalid_reason",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.process.completeness.hints",
+        "tag": "convert_json_tgt_process_completeness_hints",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.completeness_hints",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.process?.completeness?.hints != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.image.extension",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.image.extension",
+        "ignore_missing": true
+      }
+    },
+    {
+      "convert": {
+        "field": "json.tgt.process.image.size",
+        "tag": "convert_json_tgt_process_image_size",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.image.size",
+        "type": "long",
+        "ignore_missing": true,
+        "if": "ctx.json?.tgt?.process?.image?.size != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.image.uid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.image.uid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.parent.image.location",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.parent.image.location",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.parent.image.type",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.parent.image.type",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tgt.process.userSid",
+        "target_field": "sentinel_one_cloud_funnel.event.tgt.process.user.sid",
+        "ignore_missing": true
+      }
+    },
+    {
+      "append": {
+        "field": "related.user",
+        "value": "{{{sentinel_one_cloud_funnel.event.tgt.process.user.sid}}}",
+        "allow_duplicates": false,
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.tgt?.process?.user?.sid != null"
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.categories",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.categories",
+        "ignore_missing": true
+      }
+    },
+    {
+      "date": {
+        "field": "json.tiIndicator.creationTime",
+        "tag": "date_json_tiIndicator_creationTime",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.creation_time",
+        "formats": [
+          "ISO8601",
+          "epoch_millis"
+        ],
+        "if": "ctx.json?.tiIndicator?.creationTime != null && ctx.json.tiIndicator.creationTime != ''",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.externalId",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.external_id",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.intrusionSets",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.intrusion_sets",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.metadata",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.metadata",
+        "ignore_missing": true
+      }
+    },
+    {
+      "rename": {
+        "field": "json.tiIndicator.threatActors",
+        "target_field": "sentinel_one_cloud_funnel.event.ti_indicator.threat_actors",
+        "ignore_missing": true
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-command-script",
+        "tag": "pipeline-command-script",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('command')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-cross-process",
+        "tag": "pipeline-cross-process",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('cross')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-dns",
+        "tag": "pipeline-dns",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('dns')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-file",
+        "tag": "pipeline-file",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('file')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-indicator",
+        "tag": "pipeline-indicator",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('indicator') && !(ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('threat'))",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-login",
+        "tag": "pipeline-login",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('login')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-module",
+        "tag": "pipeline-module",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('module')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-network-action",
+        "tag": "pipeline-network-action",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('ip') && !(ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('command'))",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-process",
+        "tag": "pipeline_process",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('process') && !(ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('cross'))",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-registry",
+        "tag": "pipeline-registry",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('registry')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-scheduled-task",
+        "tag": "pipeline-scheduled-task",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('schedule')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-threat-intelligence-indicator",
+        "tag": "pipeline-threat-intelligence-indicator",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('threat')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event-0.7.1-pipeline-url",
+        "tag": "pipeline-url",
+        "if": "ctx.sentinel_one_cloud_funnel?.event?.category != null && ctx.sentinel_one_cloud_funnel.event.category.toLowerCase().contains('url')",
+        "on_failure": [
+          {
+            "append": {
+              "field": "error.message",
+              "value": "Processor {{{_ingest.on_failure_processor_type}}} with tag {{{_ingest.on_failure_processor_tag}}} in pipeline {{{_ingest.pipeline}}} failed with message: {{{_ingest.on_failure_message}}}"
+            }
+          }
+        ]
+      }
+    },
+    {
+      "remove": {
+        "field": "json",
+        "ignore_missing": true
+      }
+    },
+    {
+      "remove": {
+        "field": [
+          "sentinel_one_cloud_funnel.event.dst.ip_address",
+          "sentinel_one_cloud_funnel.event.dst.port_number",
+          "sentinel_one_cloud_funnel.event.endpoint.name",
+          "sentinel_one_cloud_funnel.event.endpoint.os",
+          "sentinel_one_cloud_funnel.event.endpoint.type",
+          "sentinel_one_cloud_funnel.event.group.id",
+          "sentinel_one_cloud_funnel.event.id",
+          "sentinel_one_cloud_funnel.event.k8s_cluster.container.id",
+          "sentinel_one_cloud_funnel.event.k8s_cluster.container.image.sha256",
+          "sentinel_one_cloud_funnel.event.k8s_cluster.container.image.value",
+          "sentinel_one_cloud_funnel.event.k8s_cluster.container.labels",
+          "sentinel_one_cloud_funnel.event.k8s_cluster.container.name",
+          "sentinel_one_cloud_funnel.event.login.tgt.domain_name",
+          "sentinel_one_cloud_funnel.event.login.tgt.user.name",
+          "sentinel_one_cloud_funnel.event.login.user_name",
+          "sentinel_one_cloud_funnel.event.logout.tgt.domain_name",
+          "sentinel_one_cloud_funnel.event.logout.tgt.user.name",
+          "sentinel_one_cloud_funnel.event.network.protocol_name",
+          "sentinel_one_cloud_funnel.event.os.name",
+          "sentinel_one_cloud_funnel.event.os_src_process.parent.image.md5",
+          "sentinel_one_cloud_funnel.event.registry.key.path",
+          "sentinel_one_cloud_funnel.event.registry.val",
+          "sentinel_one_cloud_funnel.event.src.endpoint.ip.address",
+          "sentinel_one_cloud_funnel.event.src.ip.address",
+          "sentinel_one_cloud_funnel.event.src.port.number",
+          "sentinel_one_cloud_funnel.event.src.process.cmd_line",
+          "sentinel_one_cloud_funnel.event.src.process.display_name",
+          "sentinel_one_cloud_funnel.event.src.process.e_user.name",
+          "sentinel_one_cloud_funnel.event.src.process.e_user.uid",
+          "sentinel_one_cloud_funnel.event.src.process.image.md5",
+          "sentinel_one_cloud_funnel.event.src.process.image.sha1",
+          "sentinel_one_cloud_funnel.event.src.process.image.sha256",
+          "sentinel_one_cloud_funnel.event.src.process.name",
+          "sentinel_one_cloud_funnel.event.src.process.parent.cmd_line",
+          "sentinel_one_cloud_funnel.event.src.process.parent.display_name",
+          "sentinel_one_cloud_funnel.event.src.process.parent.e_user.name",
+          "sentinel_one_cloud_funnel.event.src.process.parent.e_user.uid",
+          "sentinel_one_cloud_funnel.event.src.process.parent.image.sha1",
+          "sentinel_one_cloud_funnel.event.src.process.parent.image.sha256",
+          "sentinel_one_cloud_funnel.event.src.process.parent.name",
+          "sentinel_one_cloud_funnel.event.src.process.parent.pid",
+          "sentinel_one_cloud_funnel.event.src.process.parent.r_user.name",
+          "sentinel_one_cloud_funnel.event.src.process.parent.r_user.uid",
+          "sentinel_one_cloud_funnel.event.src.process.parent.start_time",
+          "sentinel_one_cloud_funnel.event.src.process.parent.user.name",
+          "sentinel_one_cloud_funnel.event.src.process.pid",
+          "sentinel_one_cloud_funnel.event.src.process.r_user.name",
+          "sentinel_one_cloud_funnel.event.src.process.r_user.uid",
+          "sentinel_one_cloud_funnel.event.src.process.start_time",
+          "sentinel_one_cloud_funnel.event.src.process.tid",
+          "sentinel_one_cloud_funnel.event.src.process.user.name",
+          "sentinel_one_cloud_funnel.event.tgt.file.creation_time",
+          "sentinel_one_cloud_funnel.event.tgt.file.extension",
+          "sentinel_one_cloud_funnel.event.tgt.file.md5",
+          "sentinel_one_cloud_funnel.event.tgt.file.modification_time",
+          "sentinel_one_cloud_funnel.event.tgt.file.name",
+          "sentinel_one_cloud_funnel.event.tgt.file.path",
+          "sentinel_one_cloud_funnel.event.tgt.file.sha1",
+          "sentinel_one_cloud_funnel.event.tgt.file.sha256",
+          "sentinel_one_cloud_funnel.event.tgt.file.size",
+          "sentinel_one_cloud_funnel.event.tgt.file.type",
+          "sentinel_one_cloud_funnel.event.tgt.process.user.name",
+          "sentinel_one_cloud_funnel.event.ti_indicator.description",
+          "sentinel_one_cloud_funnel.event.ti_indicator.mitre_tactics",
+          "sentinel_one_cloud_funnel.event.ti_indicator.references",
+          "sentinel_one_cloud_funnel.event.time",
+          "sentinel_one_cloud_funnel.event.url.address"
+        ],
+        "if": "ctx.tags == null || !(ctx.tags.contains('preserve_duplicate_custom_fields'))",
+        "ignore_missing": true
+      }
+    },
+    {
+      "remove": {
+        "field": "event.original",
+        "if": "ctx.tags == null || !(ctx.tags.contains('preserve_original_event'))",
+        "ignore_missing": true
+      }
+    },
+    {
+      "script": {
+        "lang": "painless",
+        "description": "Drops null/empty values recursively.",
+        "source": "boolean drop(Object object) {\n  if (object == null || object == '') {\n    return true;\n  } else if (object instanceof Map) {\n    ((Map) object).values().removeIf(v -> drop(v));\n    return (((Map) object).size() == 0);\n  } else if (object instanceof List) {\n    ((List) object).removeIf(v -> drop(v));\n    return (((List) object).length == 0);\n  }\n  return false;\n}\ndrop(ctx);"
+      }
+    },
+    {
+      "set": {
+        "field": "event.kind",
+        "value": "pipeline_error",
+        "if": "ctx.error?.message != null"
+      }
+    },
+    {
+      "pipeline": {
+        "name": "global@custom",
+        "ignore_missing_pipeline": true
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs@custom",
+        "ignore_missing_pipeline": true
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel@custom",
+        "ignore_missing_pipeline": true
+      }
+    },
+    {
+      "pipeline": {
+        "name": "logs-sentinel_one_cloud_funnel.event@custom",
+        "ignore_missing_pipeline": true
+      }
+    }
+  ],
+  "on_failure": [
+    {
+      "append": {
+        "field": "error.message",
+        "value": "{{{_ingest.on_failure_message}}}"
+      }
+    },
+    {
+      "set": {
+        "field": "event.kind",
+        "value": "pipeline_error"
+      }
+    }
+  ],
+  "_meta": {
+    "managed_by": "fleet",
+    "managed": true,
+    "package": {
+      "name": "sentinel_one_cloud_funnel"
+    }
+  }
+}
