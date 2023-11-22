@@ -12,6 +12,7 @@ import {
   getAggregateQueryMode,
   getIndexPatternFromSQLQuery,
   getIndexPatternFromESQLQuery,
+  cleanupESQLQuery,
 } from './es_aggregate_query';
 
 describe('sql query helpers', () => {
@@ -113,6 +114,18 @@ describe('sql query helpers', () => {
 
       const idxPattern9 = getIndexPatternFromESQLQuery('FROM foo-1, foo-2 [metadata _id]');
       expect(idxPattern9).toBe('foo-1, foo-2');
+    });
+  });
+
+  describe('cleanupESQLQuery', () => {
+    it('should not remove anything if a drop command is not present', () => {
+      expect(cleanupESQLQuery('from a | eval b = 1')).toBe('from a | eval b = 1');
+    });
+
+    it('should remove multiple drop statement if present', () => {
+      expect(cleanupESQLQuery('from a | drop @timestamp | drop a | drop b | keep c | drop d')).toBe(
+        'from a | keep c '
+      );
     });
   });
 });
