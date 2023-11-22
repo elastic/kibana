@@ -147,6 +147,11 @@ export function ClustersTable({ clusters }: Props) {
           setSortDirection(sort.direction);
         }
       }}
+      noItemsMessage={
+        i18n.translate('inspector.requests.clusters.table.noItemsFound', {
+          defaultMessage: 'No clusters found',
+        })
+      }
     />
   );
 }
