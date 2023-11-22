@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import React, { Fragment } from 'react';
+import { CoreStart } from '@kbn/core/public';
+import { DataStreamsStatsService } from '../../services/data_streams_stats/data_streams_stats_service';
+import { DatasetQualityContext, DatasetQualityContextValue } from './context';
+import { Header } from './header';
+import { useKibanaContextForPluginProvider } from '../../utils';
+import { DatasetQualityStartDeps } from '../../types';
+import { Table } from './table';
+
+export interface CreateDatasetQualityArgs {
+  core: CoreStart;
+  plugins: DatasetQualityStartDeps;
+}
+
+// TODO: update function param type with above interface
+export const createDatasetQuality = ({ core, plugins }: any) => {
+  return () => {
+    const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
+
+    const dataStreamsStatsServiceClient = new DataStreamsStatsService().start({
+      http: core.http,
+    }).client;
+
+    const datasetQualityProviderValue: DatasetQualityContextValue = {
+      dataStreamsStatsServiceClient,
+    };
+
+    return (
+      <DatasetQualityContext.Provider value={datasetQualityProviderValue}>
+        <KibanaContextProviderForPlugin>
+          <DatasetQuality />
+        </KibanaContextProviderForPlugin>
+      </DatasetQualityContext.Provider>
+    );
+  };
+};
+
+function DatasetQuality() {
+  return (
+    <Fragment>
+      <Header />
+      <Table />
+    </Fragment>
+  );
+}

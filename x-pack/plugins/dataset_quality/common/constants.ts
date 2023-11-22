@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export type { DatasetQualityConfig } from './plugin_config';
-export type { FetchOptions } from './fetch_options';
-export { GET_DATA_STREAMS_STATS_URL } from './constants';
+export const DATASET_QUALITY_APP_ID = 'dataset_quality';
+export const DATA_STREAMS_STATS_URL = '/internal/dataset_quality/data_streams/stats';
+export const GET_DATA_STREAMS_STATS_URL = `GET ${DATA_STREAMS_STATS_URL}`;

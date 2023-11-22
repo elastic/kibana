@@ -1,0 +1,51 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { EuiBasicTable } from '@elastic/eui';
+import { EuiEmptyPrompt } from '@elastic/eui';
+import {
+  loadingDatasetsText,
+  noDatasetsDescription,
+  noDatasetsTitle,
+} from '../../../common/translations';
+import { useDatasetQualityTable } from '../../hooks';
+
+export const Table = () => {
+  const { sort, onTableChange, pagination, renderedItems, columns, loading } =
+    useDatasetQualityTable();
+
+  return (
+    <EuiBasicTable
+      sorting={sort}
+      onChange={onTableChange}
+      pagination={pagination}
+      data-test-subj="datasetQualityTable"
+      isSelectable
+      rowProps={{
+        'data-test-subj': 'datasetQualityTableRow',
+      }}
+      items={renderedItems}
+      columns={columns}
+      loading={loading}
+      noItemsMessage={
+        loading ? (
+          loadingDatasetsText
+        ) : (
+          <EuiEmptyPrompt
+            body={noDatasetsDescription}
+            data-test-subj="datasetQualityTableNoData"
+            layout="vertical"
+            title={<h2>{noDatasetsTitle}</h2>}
+            hasBorder={false}
+            titleSize="m"
+          />
+        )
+      }
+    />
+  );
+};

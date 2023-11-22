@@ -7,14 +7,15 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { dataStreamTypesRt, sortOrderRt } from '../../types/api_types';
+import { dataStreamTypesRt, sortOrderRt } from '../../../common/data_streams';
+import { GET_DATA_STREAMS_STATS_URL } from '../../../common';
 import { DataStreamsStatResponse } from '../../types/data_stream';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
 import { getDataStreams } from './get_data_streams';
 import { getDataStreamsStats } from './get_data_streams_stats';
 
 const statsRoute = createDatasetQualityServerRoute({
-  endpoint: 'GET /internal/dataset_quality/data_streams/stats',
+  endpoint: GET_DATA_STREAMS_STATS_URL,
   params: t.type({
     query: t.intersection([
       dataStreamTypesRt,
