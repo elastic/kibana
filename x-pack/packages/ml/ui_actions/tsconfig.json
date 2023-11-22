@@ -17,5 +17,6 @@
     "@kbn/data-views-plugin",
     "@kbn/es-query",
     "@kbn/ui-actions-plugin",
+    "@kbn/i18n",
   ]
 }
