@@ -703,19 +703,16 @@ describe('SavedObjectsRepository Spaces Extension', () => {
                   }),
                 }),
                 expect.objectContaining({
-                  // doc: expect.objectContaining({
                   config: obj1.attributes,
                 }),
-                // }),
+
                 expect.objectContaining({
                   index: expect.objectContaining({
                     _id: `${obj2.type}:${obj2.id}`,
                   }),
                 }),
                 expect.objectContaining({
-                  // doc: expect.objectContaining({
                   multiNamespaceType: obj2.attributes,
-                  // }),
                 }),
               ]),
             }),
