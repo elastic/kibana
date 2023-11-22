@@ -41,10 +41,10 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         });
         dashboardTests.forEach(({ name, numPanels }) => {
           it('should launch sample ' + name + ' data set dashboard', async () => {
-            await PageObjects.home.launchSampleDashboard(name);
             await kibanaServer.uiSettings.update({
               'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
             });
+            await PageObjects.home.launchSampleDashboard(name);
             await PageObjects.header.waitUntilLoadingHasFinished();
             await renderable.waitForRender();
             const panelCount = await PageObjects.dashboard.getPanelCount();
@@ -52,11 +52,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           });
         });
         it('should render visualizations', async () => {
-          await PageObjects.home.launchSampleDashboard('flights');
-          await PageObjects.header.waitUntilLoadingHasFinished();
           await kibanaServer.uiSettings.update({
             'timepicker:timeDefaults': `{ "from": "now-5y", "to": "now"}`,
           });
+          await PageObjects.home.launchSampleDashboard('flights');
+          await PageObjects.header.waitUntilLoadingHasFinished();
           await renderable.waitForRender();
           log.debug('Checking saved searches rendered');
           await dashboardExpect.savedSearchRowCount(49);
