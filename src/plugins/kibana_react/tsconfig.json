@@ -23,6 +23,9 @@
     "@kbn/core-theme-browser",
     "@kbn/react-kibana-context-common",
     "@kbn/react-kibana-context-styled",
+    "@kbn/code-editor",
+    "@kbn/core-analytics-browser",
+    "@kbn/shared-ux-link-redirect-app",
   ],
   "exclude": [
     "target/**/*",

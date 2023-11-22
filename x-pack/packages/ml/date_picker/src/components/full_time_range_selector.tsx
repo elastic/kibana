@@ -7,7 +7,7 @@
 
 import React, { FC, useCallback, useMemo, useState } from 'react';
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 
 import {
   EuiButton,

@@ -111,6 +111,7 @@ export class SyntheticsMonitorClient {
       );
 
       const configData = {
+        spaceId,
         params: paramsBySpace[spaceId],
         monitor: editedMonitor.monitor,
         configId: editedMonitor.id,
@@ -128,7 +129,11 @@ export class SyntheticsMonitorClient {
       );
 
       if (deletedPublicConfig) {
-        deletedPublicConfigs.push({ ...deletedPublicConfig, params: paramsBySpace[spaceId] });
+        deletedPublicConfigs.push({
+          ...deletedPublicConfig,
+          params: paramsBySpace[spaceId],
+          spaceId,
+        });
       }
 
       if (privateLocations.length > 0 || this.hasPrivateLocations(editedMonitor.previousMonitor)) {
@@ -165,7 +170,7 @@ export class SyntheticsMonitorClient {
     const privateDeletePromise = this.privateLocationAPI.deleteMonitors(monitors, spaceId);
 
     const publicDeletePromise = this.syntheticsService.deleteConfigs(
-      monitors.map((monitor) => ({ monitor, configId: monitor.config_id, params: {} }))
+      monitors.map((monitor) => ({ spaceId, monitor, configId: monitor.config_id, params: {} }))
     );
     const [pubicResponse] = await Promise.all([publicDeletePromise, privateDeletePromise]);
 
@@ -286,7 +291,7 @@ export class SyntheticsMonitorClient {
     for (const monitor of monitors) {
       const { publicLocations, privateLocations } = this.parseLocations(monitor);
       if (publicLocations.length > 0) {
-        publicConfigs.push({ monitor, configId: monitor.config_id, params: {} });
+        publicConfigs.push({ spaceId, monitor, configId: monitor.config_id, params: {} });
       }
 
       if (privateLocations.length > 0) {
@@ -370,6 +375,7 @@ export class SyntheticsMonitorClient {
       heartbeatConfigs.push(
         formatHeartbeatRequest(
           {
+            spaceId,
             monitor: normalizedMonitor,
             configId: monitor.id,
           },
@@ -388,6 +394,7 @@ export class SyntheticsMonitorClient {
   ) {
     const { monitor, id } = monitorObj;
     const config = {
+      spaceId,
       monitor,
       configId: id,
       params: paramsBySpace[spaceId],

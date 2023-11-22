@@ -14,9 +14,11 @@ import type {
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
   OnPostAuthHandler,
+  OnPreResponseInfo,
 } from '@kbn/core-http-server';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
 import {
+  createBuildNrMismatchLoggerPreResponseHandler,
   createCustomHeadersPreResponseHandler,
   createRestrictInternalRoutesPostAuthHandler,
   createVersionCheckPostAuthHandler,
@@ -24,6 +26,9 @@ import {
 } from './lifecycle_handlers';
 
 import { HttpConfig } from './http_config';
+import { loggerMock } from '@kbn/logging-mocks';
+import { Logger } from '@kbn/logging';
+import { KIBANA_BUILD_NR_HEADER } from '@kbn/core-http-common';
 
 type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
 
@@ -43,13 +48,18 @@ const forgeRequest = ({
   path = '/',
   method = 'get',
   kibanaRouteOptions,
+  buildNr,
 }: Partial<{
   headers: Record<string, string>;
   query: Record<string, string>;
   path: string;
   method: RouteMethod;
   kibanaRouteOptions: KibanaRouteOptions;
+  buildNr: undefined | string;
 }>): KibanaRequest => {
+  if (buildNr) {
+    headers[KIBANA_BUILD_NR_HEADER] = buildNr;
+  }
   return mockRouter.createKibanaRequest({
     headers,
     path,
@@ -451,4 +461,80 @@ describe('customHeaders pre-response handler', () => {
       },
     });
   });
+});
+
+describe('build number mismatch logger on error pre-response handler', () => {
+  let logger: jest.Mocked<Logger>;
+
+  beforeEach(() => {
+    logger = loggerMock.create();
+  });
+
+  it('injects a logger prefix', () => {
+    createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    expect(logger.get).toHaveBeenCalledTimes(1);
+    expect(logger.get).toHaveBeenCalledWith(`kbn-build-number-mismatch`);
+  });
+
+  it('does not log for same server-client build', () => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '123' });
+    const response: OnPreResponseInfo = { statusCode: 500 }; // should log for errors, but not this time bc same build nr
+    handler(request, response, createToolkit());
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  const badStatusCodeTestCases = [
+    /** just test a few common ones */
+    [400],
+    [401],
+    [403],
+    [499],
+    [500],
+    [502],
+    [999] /* and not so common... */,
+  ];
+  it.each(badStatusCodeTestCases)(
+    'logs for %p responses and newer client builds',
+    (responseStatusCode) => {
+      const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+      const request = forgeRequest({ buildNr: '124' });
+      const response: OnPreResponseInfo = { statusCode: responseStatusCode };
+      handler(request, response, createToolkit());
+      expect(logger.warn).toHaveBeenCalledTimes(1);
+      expect(logger.warn).toHaveBeenCalledWith(
+        `Client build (124) is newer than this Kibana server build (123). The [${responseStatusCode}] error status in req id [123] may be due to client-server incompatibility!`
+      );
+    }
+  );
+
+  it.each(badStatusCodeTestCases)('logs for %p responses and older client builds', (statusCode) => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '122' });
+    const response: OnPreResponseInfo = { statusCode };
+    handler(request, response, createToolkit());
+    expect(logger.warn).toHaveBeenCalledTimes(1);
+    expect(logger.warn).toHaveBeenCalledWith(
+      `Client build (122) is older than this Kibana server build (123). The [${statusCode}] error status in req id [123] may be due to client-server incompatibility!`
+    );
+  });
+
+  it.each([[200], [201], [301], [302]])('does not log for %p responses', (statusCode) => {
+    const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+    const request = forgeRequest({ buildNr: '124' });
+    const response: OnPreResponseInfo = { statusCode };
+    handler(request, response, createToolkit());
+    expect(logger.warn).not.toHaveBeenCalled();
+  });
+
+  it.each([['foo'], [['yes']], [true], [null], [[]], [undefined]])(
+    'ignores bogus client build numbers like %p',
+    (bogusBuild) => {
+      const handler = createBuildNrMismatchLoggerPreResponseHandler(123, logger);
+      const request = forgeRequest({ buildNr: bogusBuild as any });
+      const response: OnPreResponseInfo = { statusCode: 500 };
+      handler(request, response, createToolkit());
+      expect(logger.warn).not.toHaveBeenCalled();
+    }
+  );
 });

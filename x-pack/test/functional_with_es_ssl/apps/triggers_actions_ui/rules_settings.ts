@@ -90,19 +90,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       await testSubjects.existOrFail('rulesSettingsFlappingEnableSwitch');
       await testSubjects.existOrFail('lookBackWindowRangeInput');
       await testSubjects.existOrFail('statusChangeThresholdRangeInput');
-      await testSubjects.existOrFail('queryDelayRangeInput');
+
+      await testSubjects.missingOrFail('queryDelayRangeInput');
 
       const lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       const statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
-      const queryDelayInput = await testSubjects.find('queryDelayRangeInput');
 
       const lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       const statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
-      const queryDelayValue = await queryDelayInput.getAttribute('value');
 
       expect(lookBackWindowValue).to.eql('10');
       expect(statusChangeThresholdValue).to.eql('10');
-      expect(queryDelayValue).to.eql('10');
+
+      // Enable query delay tests once feature flag is removed
+      // await testSubjects.existOrFail('queryDelayRangeInput');
+      // const queryDelayInput = await testSubjects.find('queryDelayRangeInput');
+      // const queryDelayValue = await queryDelayInput.getAttribute('value');
+      // expect(queryDelayValue).to.eql('10');
     });
 
     it('should allow the user to modify rules settings', async () => {
@@ -111,19 +115,21 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       await dragRangeInput('lookBackWindowRangeInput', 5, 'right');
       await dragRangeInput('statusChangeThresholdRangeInput', 5, 'left');
-      await dragRangeInput('queryDelayRangeInput', 5, 'left');
 
       let lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       let statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
-      let queryDelayInput = await testSubjects.find('queryDelayRangeInput');
 
       let lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       let statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
-      let queryDelayValue = await queryDelayInput.getAttribute('value');
 
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
-      expect(queryDelayValue).to.eql('5');
+
+      // Enable query delay tests once feature flag is removed
+      // await dragRangeInput('queryDelayRangeInput', 5, 'left');
+      // let queryDelayInput = await testSubjects.find('queryDelayRangeInput');
+      // let queryDelayValue = await queryDelayInput.getAttribute('value');
+      // expect(queryDelayValue).to.eql('5');
 
       await testSubjects.click('rulesSettingsFlappingEnableSwitch');
       await testSubjects.existOrFail('rulesSettingsFlappingOffPrompt');
@@ -143,15 +149,17 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       lookBackWindowInput = await testSubjects.find('lookBackWindowRangeInput');
       statusChangeThresholdInput = await testSubjects.find('statusChangeThresholdRangeInput');
-      queryDelayInput = await testSubjects.find('queryDelayRangeInput');
 
       lookBackWindowValue = await lookBackWindowInput.getAttribute('value');
       statusChangeThresholdValue = await statusChangeThresholdInput.getAttribute('value');
-      queryDelayValue = await queryDelayInput.getAttribute('value');
 
       expect(lookBackWindowValue).to.eql('15');
       expect(statusChangeThresholdValue).to.eql('5');
-      expect(queryDelayValue).to.eql('5');
+
+      // Enable query delay tests once feature flag is removed
+      // queryDelayInput = await testSubjects.find('queryDelayRangeInput');
+      // queryDelayValue = await queryDelayInput.getAttribute('value');
+      // expect(queryDelayValue).to.eql('5');
     });
   });
 };

@@ -560,7 +560,7 @@
           },
           " extends Omit<",
           "EuiAvatarProps",
-          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"iconSize\" | \"initials\" | \"initialsLength\" | \"imageUrl\">"
+          ", \"type\" | \"name\" | \"color\" | \"iconType\" | \"iconColor\" | \"initials\" | \"initialsLength\" | \"imageUrl\" | \"iconSize\">"
         ],
         "path": "packages/kbn-user-profile-components/src/user_avatar.tsx",
         "deprecated": false,
@@ -1002,7 +1002,7 @@
           {
             "parentPluginId": "@kbn/user-profile-components",
             "id": "def-common.UserProfilesPopoverProps.title",
-            "type": "CompoundType",
+            "type": "Any",
             "tags": [
               "see"
             ],
@@ -1011,7 +1011,7 @@
               "\nTitle of the popover"
             ],
             "signature": [
-              "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+              "any"
             ],
             "path": "packages/kbn-user-profile-components/src/user_profiles_popover.tsx",
             "deprecated": false,

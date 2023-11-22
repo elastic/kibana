@@ -34,7 +34,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     const actions = ['edit', 'clone', 'delete'];
     const { component } = testBed;
 
-    return component.find('.euiContextMenuItem').at(actions.indexOf(action));
+    return component.find('button.euiContextMenuItem').at(actions.indexOf(action));
   };
 
   /**
@@ -77,7 +77,7 @@ const createActions = (testBed: TestBed<TestSubjects>) => {
     clickActionMenu(templateName);
 
     act(() => {
-      component.find('.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
+      component.find('button.euiContextMenuItem').at(actions.indexOf(action)).simulate('click');
     });
     component.update();
   };

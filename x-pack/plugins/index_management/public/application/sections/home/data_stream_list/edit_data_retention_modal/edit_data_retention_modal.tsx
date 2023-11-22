@@ -39,9 +39,10 @@ import { reactRouterNavigate } from '../../../../../shared_imports';
 import { getIndexListUri } from '../../../../services/routing';
 import { documentationService } from '../../../../services/documentation';
 import { splitSizeAndUnits, DataStream } from '../../../../../../common';
+import { timeUnits } from '../../../../constants/time_units';
 import { isDSLWithILMIndices } from '../../../../lib/data_streams';
 import { useAppContext } from '../../../../app_context';
-import { UnitField } from './unit_field';
+import { UnitField } from '../../../../components/shared';
 import { updateDataRetention } from '../../../../services/api';
 
 interface Props {
@@ -50,45 +51,6 @@ interface Props {
   ilmPolicyLink: string;
   onClose: (data?: { hasUpdatedDataRetention: boolean }) => void;
 }
-
-export const timeUnits = [
-  {
-    value: 'd',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.daysLabel',
-      {
-        defaultMessage: 'days',
-      }
-    ),
-  },
-  {
-    value: 'h',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.hoursLabel',
-      {
-        defaultMessage: 'hours',
-      }
-    ),
-  },
-  {
-    value: 'm',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.minutesLabel',
-      {
-        defaultMessage: 'minutes',
-      }
-    ),
-  },
-  {
-    value: 's',
-    text: i18n.translate(
-      'xpack.idxMgmt.dataStreamsDetailsPanel.editDataRetentionModal.timeUnits.secondsLabel',
-      {
-        defaultMessage: 'seconds',
-      }
-    ),
-  },
-];
 
 const configurationFormSchema: FormSchema = {
   dataRetention: {

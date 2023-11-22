@@ -86,7 +86,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -113,6 +113,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },
@@ -148,7 +151,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -175,6 +178,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },
@@ -204,7 +210,7 @@ describe('breadcrumbs', () => {
     expect(breadcrumbs).toMatchInlineSnapshot(`
       Array [
         Object {
-          "popoverContent": <EuiContextMenuPanel
+          "popoverContent": <EuiContextMenuPanelClass
             items={
               Array [
                 <EuiContextMenuItem
@@ -231,6 +237,9 @@ describe('breadcrumbs', () => {
           />,
           "popoverProps": Object {
             "panelPaddingSize": "none",
+          },
+          "style": Object {
+            "maxWidth": "320px",
           },
           "text": "Project",
         },

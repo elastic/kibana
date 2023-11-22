@@ -11,6 +11,7 @@ import { PROTECTION_NOTICE_SUPPORTED_ENDPOINT_VERSION } from '@kbn/security-solu
 import { getPolicySettingsFormTestSubjects } from '@kbn/security-solution-plugin/public/management/pages/policy/view/policy_settings_form/mocks';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { PolicyTestResourceInfo } from '../../services/endpoint_policy';
+import { targetTags } from '../../target_tags';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const browser = getService('browser');
@@ -27,7 +28,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const endpointTestResources = getService('endpointTestResources');
   const retry = getService('retry');
 
-  describe('When on the Endpoint Policy Details Page', function () {
+  // FLAKY: https://github.com/elastic/kibana/issues/171653
+  // FLAKY: https://github.com/elastic/kibana/issues/171654
+  describe.skip('When on the Endpoint Policy Details Page', function () {
+    targetTags(this, ['@ess', '@serverless']);
+
     let indexedData: IndexedHostsAndAlertsResponse;
     const formTestSubjects = getPolicySettingsFormTestSubjects();
 
@@ -74,12 +79,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         );
       });
 
-      it('should not hide the side navigation', async () => {
-        await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
-        // ensure center of button is visible and not hidden by sticky bottom bar
-        await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
-        // test cleanup: go back to policy details page
-        await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+      describe('side navigation', function () {
+        targetTags(this, ['@skipInServerless']);
+
+        it('should not hide the side navigation', async function () {
+          await testSubjects.scrollIntoView('solutionSideNavItemLink-get_started');
+          // ensure center of button is visible and not hidden by sticky bottom bar
+          await testSubjects.click('solutionSideNavItemLink-administration', 1000, 15);
+          // test cleanup: go back to policy details page
+          await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
+        });
       });
 
       it('Should show/hide advanced section when button is clicked', async () => {
@@ -148,10 +157,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         it('should show a tooltip on hover', async () => {
           await testSubjects.moveMouseTo(cardTestSubj.notifyCustomMessageTooltipIcon);
 
-          expect(
-            await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessageTooltipInfo)
-          ).equal(
-            `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
+          await retry.waitFor(
+            'should show a tooltip on hover',
+            async () =>
+              (await testSubjects.getVisibleText(cardTestSubj.notifyCustomMessageTooltipInfo)) ===
+              `Selecting the user notification option will display a notification to the host user when ${protection} is prevented or detected.\nThe user notification can be customized in the text box below. Bracketed tags can be used to dynamically populate the applicable action (such as prevented or detected) and the filename.`
           );
         });
 
@@ -210,7 +220,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await pageObjects.policy.confirmAndSave();
 
         await testSubjects.existOrFail('policyDetailsSuccessMessage');
-        await testSubjects.waitForHidden('toastCloseButton');
+        await testSubjects.existOrFail('toastCloseButton');
         await pageObjects.endpoint.navigateToEndpointList();
         await pageObjects.policy.navigateToPolicyDetails(policyInfo.packagePolicy.id);
 
