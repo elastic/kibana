@@ -309,7 +309,7 @@ export const performBulkUpdate = async <T>(
         updatedAttributes: await encryptionHelper.optionallyEncryptAttributes(
           type,
           id,
-          namespace,
+          objectNamespace || namespace,
           documentToSave[type]
         ),
         typeMappings: typeDefinition.mappings,
@@ -325,7 +325,6 @@ export const performBulkUpdate = async <T>(
         updated_at: time,
         ...(Array.isArray(documentToSave.references) && { references: documentToSave.references }),
       });
-
       const updatedMigratedDocumentToSave = serializer.savedObjectToRaw(
         migratedUpdatedSavedObjectDoc as SavedObjectSanitizedDoc
       );
