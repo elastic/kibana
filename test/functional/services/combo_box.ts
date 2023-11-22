@@ -116,7 +116,7 @@ export class ComboBoxService extends FtrService {
 
         const [alternate] = alternateTitle
           ? await this.find.allByCssSelector(
-              `.euiFilterSelectItem[title="${alternateTitle}"]`,
+              `.euiFilterSelectItem[title="${alternateTitle}" i]`,
               this.WAIT_FOR_EXISTS_TIME
             )
           : [];
