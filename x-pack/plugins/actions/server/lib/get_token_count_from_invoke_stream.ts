@@ -51,32 +51,8 @@ export async function getTokenCountFromInvokeStream({
       .join('\n')
   ).length;
 
-  let responseBody: string = '';
-
-  const responseBuffer: Uint8Array[] = [];
-
-  const isBedrock = actionTypeId === '.bedrock';
-
-  responseStream.on('data', (chunk) => {
-    if (isBedrock) {
-      // special encoding for bedrock, do not attempt to convert to string
-      responseBuffer.push(chunk);
-    } else {
-      // no special encoding, can safely use toString and append to responseBody
-      responseBody += chunk.toString();
-    }
-  });
-  try {
-    await finished(responseStream);
-  } catch (e) {
-    logger.error('An error occurred while calculating streaming response tokens');
-  }
-
-  // parse openai response once responseBody is fully built
-  // They send the response in sometimes incomplete chunks of JSON
-  const parsedResponse = isBedrock
-    ? parseBedrockBuffer(responseBuffer)
-    : parseOpenAIResponse(responseBody);
+  const parser = actionTypeId === '.bedrock' ? parseBedrockStream : parseOpenAIStream;
+  const parsedResponse = await parser(responseStream, logger);
 
   const completionTokens = encode(parsedResponse).length;
   return {
@@ -85,6 +61,36 @@ export async function getTokenCountFromInvokeStream({
     total: promptTokens + completionTokens,
   };
 }
+
+type StreamParser = (responseStream: Readable, logger: Logger) => Promise<string>;
+
+const parseBedrockStream: StreamParser = async (responseStream, logger) => {
+  const responseBuffer: Uint8Array[] = [];
+  responseStream.on('data', (chunk) => {
+    // special encoding for bedrock, do not attempt to convert to string
+    responseBuffer.push(chunk);
+  });
+  try {
+    await finished(responseStream);
+  } catch (e) {
+    logger.error('An error occurred while calculating streaming response tokens');
+  }
+  return parseBedrockBuffer(responseBuffer);
+};
+
+const parseOpenAIStream: StreamParser = async (responseStream, logger) => {
+  let responseBody: string = '';
+  responseStream.on('data', (chunk) => {
+    // no special encoding, can safely use toString and append to responseBody
+    responseBody += chunk.toString();
+  });
+  try {
+    await finished(responseStream);
+  } catch (e) {
+    logger.error('An error occurred while calculating streaming response tokens');
+  }
+  return parseOpenAIResponse(responseBody);
+};
 
 /**
  * Parses a Bedrock buffer from an array of chunks.

@@ -8,6 +8,7 @@
 import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { IncomingMessage } from 'http';
+import { PassThrough } from 'stream';
 import {
   RunActionParamsSchema,
   RunActionResponseSchema,
@@ -203,7 +204,7 @@ export class OpenAIConnector extends SubActionConnector<Config, Secrets> {
       stream: true,
     })) as unknown as IncomingMessage;
 
-    return res;
+    return res.pipe(new PassThrough());
   }
 
   /**

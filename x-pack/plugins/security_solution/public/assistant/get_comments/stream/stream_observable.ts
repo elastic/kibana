@@ -49,7 +49,7 @@ export const getStreamObservable = ({
           try {
             if (done) {
               if (openAIBuffer) {
-                chunks.push(openAIBuffer);
+                chunks.push(getOpenAIChunks([openAIBuffer])[0]);
               }
               observer.next({
                 chunks,
