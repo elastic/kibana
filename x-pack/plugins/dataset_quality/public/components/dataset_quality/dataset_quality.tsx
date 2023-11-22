@@ -4,8 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { Fragment } from 'react';
+import React from 'react';
 import { CoreStart } from '@kbn/core/public';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataStreamsStatsService } from '../../services/data_streams_stats/data_streams_stats_service';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
 import { Header } from './header';
@@ -43,9 +44,13 @@ export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs
 
 function DatasetQuality() {
   return (
-    <Fragment>
-      <Header />
-      <Table />
-    </Fragment>
+    <EuiFlexGroup direction="column" gutterSize="m">
+      <EuiFlexItem grow={false}>
+        <Header />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <Table />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 }
