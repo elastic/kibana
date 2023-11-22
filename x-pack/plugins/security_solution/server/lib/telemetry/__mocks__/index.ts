@@ -91,15 +91,11 @@ export const createMockTelemetryReceiver = (
     fetchEndpointList: jest.fn(),
     fetchDetectionRules: jest.fn().mockReturnValue({ body: null }),
     fetchEndpointMetadata: jest.fn(),
-    fetchTimelineEndpointAlerts: jest
-      .fn()
-      .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
-    fetchDiagnosticTimelineEndpointAlerts: jest
-      .fn()
-      .mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
+    fetchTimelineAlerts: jest.fn().mockReturnValue(Promise.resolve(stubEndpointAlertResponse())),
     buildProcessTree: jest.fn().mockReturnValue(processTreeResponse),
     fetchTimelineEvents: jest.fn().mockReturnValue(Promise.resolve(stubFetchTimelineEvents())),
     fetchValueListMetaData: jest.fn(),
+    getAlertsIndex: jest.fn().mockReturnValue('test-alerts-index'),
   } as unknown as jest.Mocked<TelemetryReceiver>;
 };
 

@@ -35,7 +35,7 @@ describe('timeline telemetry diagnostic task test', () => {
 
     expect(mockTelemetryReceiver.buildProcessTree).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchTimelineEvents).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchDiagnosticTimelineEndpointAlerts).toHaveBeenCalled();
+    expect(mockTelemetryReceiver.fetchTimelineAlerts).toHaveBeenCalled();
     expect(mockTelemetryEventsSender.getTelemetryUsageCluster).toHaveBeenCalled();
     expect(mockTelemetryEventsSender.sendOnDemand).toHaveBeenCalled();
   });
@@ -59,6 +59,6 @@ describe('timeline telemetry diagnostic task test', () => {
 
     expect(mockTelemetryReceiver.buildProcessTree).toHaveBeenCalled();
     expect(mockTelemetryReceiver.fetchTimelineEvents).toHaveBeenCalled();
-    expect(mockTelemetryReceiver.fetchDiagnosticTimelineEndpointAlerts).toHaveBeenCalled();
+    expect(mockTelemetryReceiver.fetchTimelineAlerts).toHaveBeenCalled();
   });
 });

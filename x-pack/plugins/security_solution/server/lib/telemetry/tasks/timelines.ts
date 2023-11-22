@@ -40,7 +40,11 @@ export function createTelemetryTimelineTaskConfig() {
 
         const { rangeFrom, rangeTo } = ranges(taskExecutionPeriod);
 
-        const alerts = await receiver.fetchTimelineEndpointAlerts(rangeFrom, rangeTo);
+        const alertsIndex = receiver.getAlertsIndex();
+        if (!alertsIndex) {
+          throw Error('alerts index is not ready yet, skipping telemetry task');
+        }
+        const alerts = await receiver.fetchTimelineAlerts(alertsIndex, rangeFrom, rangeTo);
 
         tlog(logger, `found ${alerts.length} alerts to process`);
 

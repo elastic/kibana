@@ -163,12 +163,8 @@ export interface ITelemetryReceiver {
 
   fetchPrebuiltRuleAlerts(): Promise<{ events: TelemetryEvent[]; count: number }>;
 
-  fetchTimelineEndpointAlerts(
-    rangeFrom: string,
-    rangeTo: string
-  ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
-
-  fetchDiagnosticTimelineEndpointAlerts(
+  fetchTimelineAlerts(
+    index: string,
     rangeFrom: string,
     rangeTo: string
   ): Promise<Array<SearchHit<EnhancedAlertEvent>>>;
@@ -185,6 +181,8 @@ export interface ITelemetryReceiver {
   ): Promise<SearchResponse<SafeEndpointEvent, Record<string, AggregationsAggregate>>>;
 
   fetchValueListMetaData(interval: number): Promise<ValueListResponse>;
+
+  getAlertsIndex(): string | undefined;
 }
 
 export class TelemetryReceiver implements ITelemetryReceiver {
@@ -230,6 +228,10 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
   public getClusterInfo(): ESClusterInfo | undefined {
     return this.clusterInfo;
+  }
+
+  public getAlertsIndex(): string | undefined {
+    return this.alertsIndex;
   }
 
   public async fetchDetectionRulesPackageVersion(): Promise<Installation | undefined> {
@@ -705,7 +707,7 @@ export class TelemetryReceiver implements ITelemetryReceiver {
     return { events: telemetryEvents, count: aggregations?.prebuilt_rule_alert_count.value ?? 0 };
   }
 
-  private async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
+  async fetchTimelineAlerts(index: string, rangeFrom: string, rangeTo: string) {
     if (this.esClient === undefined || this.esClient === null) {
       throw Error('elasticsearch client is unavailable: cannot retrieve cluster infomation');
     }
@@ -816,21 +818,6 @@ export class TelemetryReceiver implements ITelemetryReceiver {
 
     tlog(this.logger, `Timeline alerts to return: ${alertsToReturn.length}`);
     return alertsToReturn || [];
-  }
-
-  public async fetchTimelineEndpointAlerts(rangeFrom: string, rangeTo: string) {
-    if (this.alertsIndex === undefined) {
-      throw Error('alerts index is not ready yet, skipping telemetry task');
-    }
-
-    return this.fetchTimelineAlerts(this.alertsIndex, rangeFrom, rangeTo);
-  }
-
-  public fetchDiagnosticTimelineEndpointAlerts(
-    rangeFrom: string,
-    rangeTo: string
-  ): Promise<Array<SearchHit<EnhancedAlertEvent>>> {
-    return this.fetchTimelineAlerts(DEFAULT_DIAGNOSTIC_INDEX, rangeFrom, rangeTo);
   }
 
   public async buildProcessTree(
