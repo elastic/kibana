@@ -19,6 +19,7 @@
     "@kbn/server-route-repository",
     "@kbn/share-plugin",
     "@kbn/std",
+    "@kbn/fleet-plugin",
   ],
   "exclude": [
     "target/**/*",

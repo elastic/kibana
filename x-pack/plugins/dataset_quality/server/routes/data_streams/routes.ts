@@ -7,7 +7,7 @@
 
 import * as t from 'io-ts';
 import { keyBy, merge, values } from 'lodash';
-import { dataStreamTypesRt, sortOrderRt } from '../../../common/data_streams';
+import { dataStreamTypesRt } from '../../../common/data_streams';
 import { GET_DATA_STREAMS_STATS_URL } from '../../../common';
 import { DataStreamsStatResponse } from '../../types/data_stream';
 import { createDatasetQualityServerRoute } from '../create_datasets_quality_server_route';
@@ -22,18 +22,21 @@ const statsRoute = createDatasetQualityServerRoute({
       t.partial({
         datasetQuery: t.string,
       }),
-      sortOrderRt,
     ]),
   }),
   options: {
     tags: [],
   },
   async handler(resources): Promise<DataStreamsStatResponse> {
-    const { context, params } = resources;
+    const { context, params, plugins } = resources;
     const coreContext = await context.core;
 
     // Query datastreams as the current user as the Kibana internal user may not have all the required permissions
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
+
+    const fleetPluginStart = await plugins.fleet.start();
+    const packageClient = fleetPluginStart.packageService.asInternalUser;
+    const packages = await packageClient.getPackages();
 
     const [dataStreams, dataStreamsStats] = await Promise.all([
       getDataStreams({
@@ -44,8 +47,20 @@ const statsRoute = createDatasetQualityServerRoute({
       getDataStreamsStats({ esClient, ...params.query }),
     ]);
 
+    const installedPackages = dataStreams.items.map((item) => item.integration);
+
+    const integrations = packages
+      .filter((pkg) => installedPackages.includes(pkg.name))
+      .map((p) => ({
+        name: p.name,
+        title: p.title,
+        version: p.version,
+        icons: p.icons,
+      }));
+
     return {
       items: values(merge(keyBy(dataStreams.items, 'name'), keyBy(dataStreamsStats.items, 'name'))),
+      integrations,
     };
   },
 });
