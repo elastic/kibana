@@ -109,7 +109,6 @@ export function AlertsPopover({
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
       initialValues: { params: getParams() },
-      validConsumers: [AlertConsumers.LOGS, AlertConsumers.INFRASTRUCTURE],
       initialSelectedConsumer: AlertConsumers.LOGS,
     });
   }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
