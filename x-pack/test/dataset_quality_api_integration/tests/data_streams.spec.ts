@@ -21,7 +21,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       params: {
         query: {
           type: 'logs',
-          sortOrder: 'asc',
         },
       },
     });
