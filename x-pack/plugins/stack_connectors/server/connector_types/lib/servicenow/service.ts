@@ -18,7 +18,6 @@ import {
   GetApplicationInfoResponse,
   ServiceFactory,
   ExternalServiceParamsClose,
-  ServiceNowITSMCloseIncident,
 } from './types';
 
 import * as i18n from './translations';
@@ -268,7 +267,13 @@ export const createExternalService: ServiceFactory = ({
 
       checkInstance(res); 
 
-      return res.data.result[0];
+      const foundIncident = useTableApi ? res.data.result : res.data.result[0];
+
+      if(!foundIncident) {  
+        throw new Error(`No incident found with correlation_id: ${correlationId}.`)
+      }
+
+      return foundIncident;
 
     } catch(error) {
       throw createServiceError(error, 'Unable to find incidents');
@@ -277,50 +282,51 @@ export const createExternalService: ServiceFactory = ({
 
   const closeIncident = async(params: ExternalServiceParamsClose) => {
     try{
-      const {correlation_id, incidentId, ...rest} = params;
+      const {correlation_id, incidentId} = params;
+      let incidentToBeClosed = null;
 
       await checkIfApplicationIsInstalled();
   
       if(correlation_id == null && incidentId == null) {
         throw new Error('No correlation_id or incident id found.');
-      }
-
-      let incidentToBeClosed = null;
-
-      if(correlation_id && incidentId == null) {
+      } else if(correlation_id && incidentId == null) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlation_id);
-
-        if(!incidentToBeClosed) {  
-          throw new Error(`No incident found with correlation_id: ${correlation_id}.`)
-        }
+      } else if(incidentId) {
+        const temp = await getIncident(incidentId);
+        incidentToBeClosed = useTableApi ? temp : temp[0] as ServiceNowIncident;
       }
 
-      const closeData = prepareIncident(useTableApi, rest as Partial<ServiceNowITSMCloseIncident>);
+      if(!incidentToBeClosed?.sys_id) {
+        throw new Error('Something went wrong!')
+      }
 
-      const resp = await request({
+      const res = await request({
         axios: axiosInstance,
         url: getCreateIncidentUrl(),
         method: 'post',
         logger,
         data: {
-          ...closeData,
-          'elastic_incident_id': incidentId ?? incidentToBeClosed?.sys_id,
+          'u_state': '7', // used for "closed" status in serviceNow
+          'u_close_code': "Closed/Resolved by Caller", 
+          'elastic_incident_id': incidentToBeClosed.sys_id,
         },
         configurationUtilities
       });
 
-      checkInstance(resp);
+      checkInstance(res);
 
-      const closedIncident = resp.data.result[0];
-
-      if(!closedIncident) {
-        throw new Error('Something went wrong.');
+      if (!useTableApi) {
+        throwIfImportSetApiResponseIsAnError(res.data);
       }
 
+      const closedIncidentId = useTableApi ? res.data.result.sys_id : res.data.result[0].sys_id;
+
+      const closedIncident = await getIncident(closedIncidentId);
+
       return {
-        title: closedIncident.display_value,
+        title: closedIncident.number,
         id: closedIncident.sys_id,
-        pushedDate: getPushedDate(closedIncident.closed_at),
+        pushedDate: getPushedDate(closedIncident.sys_updated_on),
         url: getIncidentViewURL(closedIncident.sys_id),
       };
 
