@@ -6,9 +6,6 @@
  */
 import type { EndpointAuthzKeyList } from '../../types/authz';
 
-export const RESPONSE_ACTION_AGENT_TYPE = ['endpoint', 'sentinelone'] as const;
-export type ResponseActionAgentType = typeof RESPONSE_ACTION_AGENT_TYPE[number];
-
 export const RESPONSE_ACTION_STATUS = ['failed', 'pending', 'successful'] as const;
 export type ResponseActionStatus = typeof RESPONSE_ACTION_STATUS[number];
 
