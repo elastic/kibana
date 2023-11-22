@@ -85,7 +85,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Findings table to be loaded',
           async () => (await notInstalledCSP.getElement()) !== undefined
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
       it('returns no Findings CSPM', async () => {
@@ -98,7 +98,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           'Findings table to be loaded',
           async () => (await notInstalledCSP.getElement()) !== undefined
         );
-        pageObjects.header.waitUntilLoadingHasFinished();
+        await pageObjects.header.waitUntilLoadingHasFinished();
         expect(await findings.isLatestFindingsTableThere()).to.be(false);
       });
     });
