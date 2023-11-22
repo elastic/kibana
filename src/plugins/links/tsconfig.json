@@ -26,7 +26,9 @@
     "@kbn/logging",
     "@kbn/core-plugins-server",
     "@kbn/react-kibana-mount",
-    "@kbn/react-kibana-context-theme"
+    "@kbn/react-kibana-context-theme",
+    "@kbn/visualizations-plugin",
+    "@kbn/core-mount-utils-browser"
   ],
   "exclude": ["target/**/*"]
 }
