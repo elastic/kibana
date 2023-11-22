@@ -89,8 +89,7 @@ export const useDeleteAction = (canDeleteDataFrameAnalytics: boolean) => {
       }
 
       const canDeleteDataView =
-        capabilities.savedObjectsManagement.delete === true ||
-        capabilities.indexPatterns.save === true;
+        capabilities.savedObjectsManagement.delete === true || capabilities.dataViews.save === true;
       setUserCanDeleteDataView(canDeleteDataView);
       if (canDeleteDataView === false) {
         setDeleteDataView(false);

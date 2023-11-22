@@ -33,7 +33,7 @@ import {
   isCompleteInitialReturnType,
   isAnalyticsMapEdgeElement,
   isAnalyticsMapNodeElement,
-  isIndexPatternLinkReturnType,
+  isEsIndexPatternLinkReturnType,
   isJobDataLinkReturnType,
   isTransformLinkReturnType,
 } from './types';
@@ -133,13 +133,13 @@ export class AnalyticsManager {
       if (type === JOB_MAP_NODE_TYPES.INDEX) {
         // fetch index data
         const indexData = await this.getIndexData(id);
-        let isWildcardIndexPattern = false;
+        let isWildcardEsIndexPattern = false;
 
         if (id.includes('*')) {
-          isWildcardIndexPattern = true;
+          isWildcardEsIndexPattern = true;
         }
         const meta = indexData[id]?.mappings?._meta;
-        return { isWildcardIndexPattern, isIndexPattern: true, indexData, meta };
+        return { isWildcardEsIndexPattern, isEsIndexPattern: true, indexData, meta };
       } else if (type.includes(JOB_MAP_NODE_TYPES.ANALYTICS)) {
         // fetch job associated with this index
         const jobData = this.findJob(id);
@@ -189,7 +189,7 @@ export class AnalyticsManager {
     return { modelElement, modelDetails: analyticsModel, edgeElement };
   }
 
-  private getIndexPatternElements(indexData: Record<string, object>, previousNodeId: string) {
+  private getEsIndexPatternElements(indexData: Record<string, object>, previousNodeId: string) {
     const result: any = { elements: [], details: {} };
 
     Object.keys(indexData).forEach((indexId) => {
@@ -336,7 +336,7 @@ export class AnalyticsManager {
   }: GetAnalyticsMapArgs): Promise<AnalyticsMapReturnType> {
     const result: AnalyticsMapReturnType = { elements: [], details: {}, error: null };
     const modelElements: MapElements[] = [];
-    const indexPatternElements: MapElements[] = [];
+    const esIndexPatternElements: MapElements[] = [];
 
     try {
       await this.initData();
@@ -367,7 +367,7 @@ export class AnalyticsManager {
         let link: NextLinkReturnType;
         let count = 0;
         let rootTransform;
-        let rootIndexPattern;
+        let rootEsIndexPattern;
         let modelElement;
         let modelDetails;
         let edgeElement;
@@ -389,15 +389,15 @@ export class AnalyticsManager {
             break;
           }
           // If it's index pattern, check meta data to see what to fetch next
-          if (isIndexPatternLinkReturnType(link) && link.isIndexPattern === true) {
-            if (link.isWildcardIndexPattern === true) {
+          if (isEsIndexPatternLinkReturnType(link) && link.isEsIndexPattern === true) {
+            if (link.isWildcardEsIndexPattern === true) {
               // Create index nodes for each of the indices included in the index pattern then break
-              const { details, elements } = this.getIndexPatternElements(
+              const { details, elements } = this.getEsIndexPatternElements(
                 link.indexData,
                 previousNodeId
               );
 
-              indexPatternElements.push(...elements);
+              esIndexPatternElements.push(...elements);
               result.details = { ...result.details, ...details };
               complete = true;
             } else {
@@ -410,11 +410,11 @@ export class AnalyticsManager {
 
             // Check meta data
             if (
-              link.isWildcardIndexPattern === false &&
+              link.isWildcardEsIndexPattern === false &&
               (link.meta === undefined ||
                 link.meta?.created_by.includes(INDEX_CREATED_BY.FILE_DATA_VISUALIZER))
             ) {
-              rootIndexPattern = nextLinkId;
+              rootEsIndexPattern = nextLinkId;
               complete = true;
               break;
             }
@@ -495,9 +495,9 @@ export class AnalyticsManager {
         }
 
         // fetch all jobs associated with root transform if defined, otherwise check root index
-        if (rootTransform !== undefined || rootIndexPattern !== undefined) {
+        if (rootTransform !== undefined || rootEsIndexPattern !== undefined) {
           const jobs = this._jobs;
-          const comparator = rootTransform !== undefined ? rootTransform : rootIndexPattern;
+          const comparator = rootTransform !== undefined ? rootTransform : rootEsIndexPattern;
 
           for (let i = 0; i < jobs.length; i++) {
             if (
@@ -539,7 +539,7 @@ export class AnalyticsManager {
         }
       }
       // Include model and index pattern nodes in result elements now that all other nodes have been created
-      result.elements.push(...modelElements, ...indexPatternElements);
+      result.elements.push(...modelElements, ...esIndexPatternElements);
       return result;
     } catch (error) {
       result.error = error.message || 'An error occurred fetching map';

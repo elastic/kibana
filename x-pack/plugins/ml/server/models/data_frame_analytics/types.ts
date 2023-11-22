@@ -33,9 +33,9 @@ interface ExtendAnalyticsIndexArg {
 export type GetAnalyticsMapArgs = GetAnalyticsJobIdArg | GetAnalyticsModelIdArg;
 export type ExtendAnalyticsMapArgs = ExtendAnalyticsJobIdArg | ExtendAnalyticsIndexArg;
 
-export interface IndexPatternLinkReturnType {
-  isWildcardIndexPattern: boolean;
-  isIndexPattern: boolean;
+export interface EsIndexPatternLinkReturnType {
+  isWildcardEsIndexPattern: boolean;
+  isEsIndexPattern: boolean;
   indexData: any;
   meta: any;
 }
@@ -48,7 +48,7 @@ export interface TransformLinkReturnType {
   transformData: any;
 }
 export type NextLinkReturnType =
-  | IndexPatternLinkReturnType
+  | EsIndexPatternLinkReturnType
   | JobDataLinkReturnType
   | TransformLinkReturnType
   | undefined;
@@ -94,10 +94,10 @@ export const isAnalyticsMapEdgeElement = (arg: any): arg is AnalyticsMapEdgeElem
   const keys = Object.keys(arg);
   return keys.length > 0 && keys.includes('data') && arg.data.target !== undefined;
 };
-export const isIndexPatternLinkReturnType = (arg: any): arg is IndexPatternLinkReturnType => {
+export const isEsIndexPatternLinkReturnType = (arg: any): arg is EsIndexPatternLinkReturnType => {
   if (typeof arg !== 'object' || arg === null) return false;
   const keys = Object.keys(arg);
-  return keys.length > 0 && keys.includes('isIndexPattern');
+  return keys.length > 0 && keys.includes('isEsIndexPattern');
 };
 
 export const isJobDataLinkReturnType = (arg: any): arg is JobDataLinkReturnType => {

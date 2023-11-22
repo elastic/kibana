@@ -32,7 +32,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
             })
           }
         >
-          RemoteIndexPattern
+          RemoteEsIndexPattern
         </button>
         <button
           onClick={() =>
@@ -41,7 +41,7 @@ jest.mock('@kbn/saved-objects-finder-plugin/public', () => {
             })
           }
         >
-          PlainIndexPattern
+          PlainEsIndexPattern
         </button>
         <button
           onClick={() =>
@@ -107,7 +107,7 @@ jest.mock('../../../../../util/index_utils', () => {
           savedSearch: null,
         };
       }),
-    isCcsIndexPattern: (a: string) => a.includes(':'),
+    isCcsEsIndexPattern: (a: string) => a.includes(':'),
   };
 });
 
@@ -141,7 +141,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     );
 
     // act
-    fireEvent.click(screen.getByText('RemoteIndexPattern', { selector: 'button' }));
+    fireEvent.click(screen.getByText('RemoteEsIndexPattern', { selector: 'button' }));
     await waitFor(() => screen.getByTestId('analyticsCreateSourceIndexModalCcsErrorCallOut'));
 
     // assert
@@ -161,7 +161,7 @@ describe('Data Frame Analytics: <SourceSelection />', () => {
     );
 
     // act
-    fireEvent.click(screen.getByText('PlainIndexPattern', { selector: 'button' }));
+    fireEvent.click(screen.getByText('PlainEsIndexPattern', { selector: 'button' }));
 
     // assert
     await waitFor(() => {

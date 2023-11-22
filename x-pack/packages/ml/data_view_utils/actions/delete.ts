@@ -40,8 +40,8 @@ export const deleteDataViewFn = async ({
       await deleteDestDataViewById(dataViewsService, dataViewId);
     }
     response.success = true;
-  } catch (deleteDestIndexPatternError) {
-    response.error = deleteDestIndexPatternError;
+  } catch (deleteDestDataViewError) {
+    response.error = deleteDestDataViewError;
   }
 
   return response;
