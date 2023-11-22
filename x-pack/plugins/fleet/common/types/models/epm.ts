@@ -549,6 +549,7 @@ export interface Installation {
   experimental_data_stream_features?: ExperimentalDataStreamFeature[];
   internal?: boolean;
   removable?: boolean;
+  latest_install_failed_attempts?: any; // TODO
 }
 
 export interface PackageUsageStats {

@@ -460,6 +460,10 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
           dynamic: false,
           properties: {},
         },
+        latest_install_failed_attempts: {
+          dynamic: false,
+          properties: {},
+        },
         install_started_at: { type: 'date' },
         install_version: { type: 'keyword' },
         install_status: { type: 'keyword' },

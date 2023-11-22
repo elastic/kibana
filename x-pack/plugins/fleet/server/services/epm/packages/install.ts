@@ -104,6 +104,7 @@ import { cacheAssets } from './custom_integrations/assets/cache';
 import { generateDatastreamEntries } from './custom_integrations/assets/dataset/utils';
 import { checkForNamingCollision } from './custom_integrations/validation/check_naming_collision';
 import { checkDatasetsNameFormat } from './custom_integrations/validation/check_dataset_name_format';
+import { addErrorToLatestFailedAttempts } from './install_errors_helpers';
 
 export async function isPackageInstalled(options: {
   savedObjectsClient: SavedObjectsClientContract;
@@ -234,6 +235,13 @@ export async function handleInstallPackageFailure({
     version: pkgVersion,
   });
 
+  const latestInstallFailedAttempts = addErrorToLatestFailedAttempts({
+    error,
+    targetVersion: pkgVersion,
+    timestamp: new Date().toISOString(),
+    latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
+  });
+
   // if there is an unknown server error, uninstall any package assets or reinstall the previous version if update
   try {
     const installType = getInstallType({ pkgVersion, installedPkg });
@@ -243,13 +251,13 @@ export async function handleInstallPackageFailure({
       return;
     }
 
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
-      (err) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          logger.error(`failed to update package status to: install_failed  ${err}`);
-        }
-      }
-    );
+    await updateInstallStatusToFailed({
+      logger,
+      savedObjectsClient,
+      pkgName,
+      status: 'install_failed',
+      latestInstallFailedAttempts,
+    });
 
     if (installType === 'update') {
       if (!installedPkg) {
@@ -272,13 +280,20 @@ export async function handleInstallPackageFailure({
     }
   } catch (e) {
     // If an error happens while removing the integration or while doing a rollback update the status to failed
-    await updateInstallStatus({ savedObjectsClient, pkgName, status: 'install_failed' }).catch(
-      (err) => {
-        if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-          logger.error(`failed to update package status to: install_failed  ${err}`);
-        }
-      }
-    );
+    await updateInstallStatusToFailed({
+      logger,
+      savedObjectsClient,
+      pkgName,
+      status: 'install_failed',
+      latestInstallFailedAttempts: installedPkg
+        ? addErrorToLatestFailedAttempts({
+            error: e,
+            targetVersion: installedPkg.attributes.version,
+            timestamp: installedPkg.attributes.install_started_at,
+            latestAttempts: latestInstallFailedAttempts,
+          })
+        : [],
+    });
     logger.error(`failed to uninstall or rollback package after installation error ${e}`);
   }
 }
@@ -875,24 +890,34 @@ export const updateVersion = async (
   });
 };
 
-export const updateInstallStatus = async ({
+export const updateInstallStatusToFailed = async ({
+  logger,
   savedObjectsClient,
   pkgName,
   status,
+  latestInstallFailedAttempts,
 }: {
+  logger: Logger;
   savedObjectsClient: SavedObjectsClientContract;
   pkgName: string;
   status: EpmPackageInstallStatus;
+  latestInstallFailedAttempts: any;
 }) => {
   auditLoggingService.writeCustomSoAuditLog({
     action: 'update',
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-
-  return savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
-    install_status: status,
-  });
+  return savedObjectsClient
+    .update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+      install_status: status,
+      latest_install_failed_attempts: latestInstallFailedAttempts,
+    })
+    .catch((err) => {
+      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+        logger.error(`failed to update package status to: install_failed  ${err}`);
+      }
+    });
 };
 
 export async function restartInstallation(options: {

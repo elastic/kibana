@@ -55,6 +55,7 @@ export default function (providerContext: FtrProviderContext) {
 
       const pkgInfoResponse = await getPackageInfo(pkgName, badPackageVersion);
       expect(JSON.parse(pkgInfoResponse.text).item.status).to.be('not_installed');
+      expect(pkgInfoResponse.body.item.savedObject).to.be(undefined);
     });
 
     it('on an upgrade, it should fall back to the previous good version during rollback', async function () {
@@ -67,6 +68,13 @@ export default function (providerContext: FtrProviderContext) {
       const goodPkgInfoResponse = await getPackageInfo(pkgName, goodPackageVersion);
       expect(JSON.parse(goodPkgInfoResponse.text).item.status).to.be('installed');
       expect(JSON.parse(goodPkgInfoResponse.text).item.version).to.be('0.1.0');
+      const latestInstallFailedAttempts =
+        goodPkgInfoResponse.body.item.savedObject.attributes.latest_install_failed_attempts;
+      expect(latestInstallFailedAttempts).to.have.length(1);
+      expect(latestInstallFailedAttempts[0].target_version).to.be('0.2.0');
+      expect(latestInstallFailedAttempts[0].error.message).to.contain(
+        'Document "sample_visualization" belongs to a more recent version of Kibana [12.7.0]'
+      );
     });
   });
 }
