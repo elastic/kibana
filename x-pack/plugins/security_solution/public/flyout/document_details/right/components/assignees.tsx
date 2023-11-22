@@ -20,11 +20,7 @@ import type { AssigneesIdsSelection } from '../../../../common/components/assign
 import { AssigneesPopover } from '../../../../common/components/assignees/assignees_popover';
 import { UsersAvatarsPanel } from '../../../../common/components/user_profiles/users_avatars_panel';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import {
-  ASSIGNEES_ADD_BUTTON_TEST_ID,
-  ASSIGNEES_HEADER_TEST_ID,
-  ASSIGNEES_TITLE_TEST_ID,
-} from './test_ids';
+import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
 
 const UpdateAssigneesButton: FC<{ togglePopover: () => void; isDisabled: boolean }> = memo(
   ({ togglePopover, isDisabled }) => (
@@ -107,13 +103,7 @@ export const Assignees: FC<AssigneesProps> = memo(
     );
 
     return (
-      <EuiFlexGroup
-        data-test-subj={ASSIGNEES_HEADER_TEST_ID}
-        alignItems="center"
-        direction="row"
-        gutterSize="xs"
-        responsive={false}
-      >
+      <EuiFlexGroup alignItems="center" direction="row" gutterSize="xs" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiTitle size="xxs" data-test-subj={ASSIGNEES_TITLE_TEST_ID}>
             <h3>

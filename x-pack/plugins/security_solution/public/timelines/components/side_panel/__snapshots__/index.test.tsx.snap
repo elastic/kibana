@@ -80,7 +80,6 @@ Array [
         >
           <div
             class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
-            data-test-subj="securitySolutionFlyoutHeaderAssigneesHeader"
           >
             <div
               class="euiFlexItem emotion-euiFlexItem-growZero"
@@ -258,7 +257,6 @@ exports[`Details Panel Component DetailsPanel:EventDetails: rendering it should 
           >
             <div
               class="euiFlexGroup emotion-euiFlexGroup-xs-flexStart-center-row"
-              data-test-subj="securitySolutionFlyoutHeaderAssigneesHeader"
             >
               <div
                 class="euiFlexItem emotion-euiFlexItem-growZero"
