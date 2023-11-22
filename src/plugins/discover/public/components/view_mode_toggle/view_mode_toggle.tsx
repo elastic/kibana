@@ -7,7 +7,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiTab, EuiTabs, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { DOC_TABLE_LEGACY, SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
@@ -15,6 +15,7 @@ import { VIEW_MODE } from '../../../common/constants';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { DiscoverStateContainer } from '../../application/main/services/discover_state';
 import { HitsCounter, HitsCounterMode } from '../hits_counter';
+import { PanelsToggle } from '../panels_toggle';
 
 export const DocumentViewModeToggle = ({
   viewMode,
@@ -32,10 +33,12 @@ export const DocumentViewModeToggle = ({
   const isLegacy = useMemo(() => uiSettings.get(DOC_TABLE_LEGACY), [uiSettings]);
   const includesNormalTabsStyle = viewMode === VIEW_MODE.AGGREGATED_LEVEL || isLegacy;
 
-  const tabsPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
-  const tabsCss = css`
-    padding: ${tabsPadding} ${tabsPadding} 0 ${tabsPadding};
+  const containerPadding = includesNormalTabsStyle ? euiTheme.size.s : 0;
+  const containerCss = css`
+    padding: ${containerPadding} ${containerPadding} 0 ${containerPadding};
+  `;
 
+  const tabsCss = css`
     .euiTab__content {
       line-height: ${euiTheme.size.xl};
     }
@@ -43,30 +46,35 @@ export const DocumentViewModeToggle = ({
 
   const showViewModeToggle = uiSettings.get(SHOW_FIELD_STATISTICS) ?? false;
 
-  if (isTextBasedQuery || !showViewModeToggle) {
-    return <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />;
-  }
-
   return (
-    <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
-      <EuiTab
-        isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
-        onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
-        data-test-subj="dscViewModeDocumentButton"
-      >
-        <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
-        <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
-      </EuiTab>
-      <EuiTab
-        isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
-        onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
-        data-test-subj="dscViewModeFieldStatsButton"
-      >
-        <FormattedMessage
-          id="discover.viewModes.fieldStatistics.label"
-          defaultMessage="Field statistics"
-        />
-      </EuiTab>
-    </EuiTabs>
+    <EuiFlexGroup direction="row" gutterSize="s" alignItems="center" css={containerCss}>
+      <PanelsToggle stateContainer={stateContainer} />
+      <EuiFlexItem grow={false}>
+        {isTextBasedQuery || !showViewModeToggle ? (
+          <HitsCounter mode={HitsCounterMode.standalone} stateContainer={stateContainer} />
+        ) : (
+          <EuiTabs size="m" css={tabsCss} data-test-subj="dscViewModeToggle" bottomBorder={false}>
+            <EuiTab
+              isSelected={viewMode === VIEW_MODE.DOCUMENT_LEVEL}
+              onClick={() => setDiscoverViewMode(VIEW_MODE.DOCUMENT_LEVEL)}
+              data-test-subj="dscViewModeDocumentButton"
+            >
+              <FormattedMessage id="discover.viewModes.document.label" defaultMessage="Documents" />
+              <HitsCounter mode={HitsCounterMode.appended} stateContainer={stateContainer} />
+            </EuiTab>
+            <EuiTab
+              isSelected={viewMode === VIEW_MODE.AGGREGATED_LEVEL}
+              onClick={() => setDiscoverViewMode(VIEW_MODE.AGGREGATED_LEVEL)}
+              data-test-subj="dscViewModeFieldStatsButton"
+            >
+              <FormattedMessage
+                id="discover.viewModes.fieldStatistics.label"
+                defaultMessage="Field statistics"
+              />
+            </EuiTab>
+          </EuiTabs>
+        )}
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
