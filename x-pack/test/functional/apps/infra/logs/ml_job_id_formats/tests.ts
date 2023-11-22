@@ -31,8 +31,6 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
   let mlJobHelper: MlJobHelper;
 
   describe('ML job ID formats', function () {
-    this.tags('includeFirefox');
-
     this.beforeAll(async () => {
       // Access to ml.api has to happen inside a test or test hook
       mlJobHelper = createMlJobHelper(ml.api);
@@ -205,8 +203,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/171493
-    describe.skip('creation and recreation', () => {
+    describe('creation and recreation', () => {
       it('create first ML job', async () => {
         await logsUi.logEntryRatePage.navigateTo();
         await requestTracker.install();
