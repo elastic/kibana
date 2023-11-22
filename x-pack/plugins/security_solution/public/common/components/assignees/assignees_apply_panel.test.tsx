@@ -11,14 +11,14 @@ import { render } from '@testing-library/react';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID, ASSIGNEES_APPLY_PANEL_TEST_ID } from './test_ids';
 import { AssigneesApplyPanel } from './assignees_apply_panel';
 
-import { useGetCurrentUser } from '../user_profiles/use_get_current_user';
+import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 import { TestProviders } from '../../mock';
 import * as i18n from './translations';
 import { mockUserProfiles } from './mocks';
 
-jest.mock('../user_profiles/use_get_current_user');
+jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_profiles/use_suggest_users');
 
@@ -55,7 +55,7 @@ const renderAssigneesApplyPanel = (
 describe('<AssigneesApplyPanel />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGetCurrentUser as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });

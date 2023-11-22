@@ -52,7 +52,7 @@ export interface AssigneesPopoverProps {
 }
 
 /**
- * The popover to allow user assignees selection for the alert
+ * The popover to allow selection of users from a list
  */
 export const AssigneesPopover: FC<AssigneesPopoverProps> = memo(
   ({

@@ -92,8 +92,8 @@ export const Assignees: FC<AssigneesProps> = memo(
           const assigneesToRemoveArray = assignedUserIds.filter((uid) => !updatedIds.includes(uid));
 
           const assigneesToUpdate = {
-            assignees_to_add: assigneesToAddArray,
-            assignees_to_remove: assigneesToRemoveArray,
+            add: assigneesToAddArray,
+            remove: assigneesToRemoveArray,
           };
 
           await setAlertAssignees(assigneesToUpdate, [eventId], onSuccess, noop);

@@ -16,13 +16,13 @@ import React from 'react';
 import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiPopover, EuiContextMenu } from '@elastic/eui';
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
-import { useGetCurrentUser } from '../../../../common/components/user_profiles/use_get_current_user';
+import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
-jest.mock('../../../../common/components/user_profiles/use_get_current_user');
+jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 
@@ -167,7 +167,7 @@ describe('useAlertAssigneesActions', () => {
 
   it('should render the nested panel', async () => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
-    (useGetCurrentUser as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });

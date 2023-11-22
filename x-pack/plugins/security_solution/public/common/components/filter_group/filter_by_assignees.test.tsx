@@ -13,11 +13,11 @@ import { TEST_IDS } from './constants';
 import { TestProviders } from '../../mock';
 import type { AssigneesIdsSelection } from '../assignees/types';
 
-import { useGetCurrentUser } from '../user_profiles/use_get_current_user';
+import { useGetCurrentUserProfile } from '../user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../user_profiles/use_suggest_users';
 
-jest.mock('../user_profiles/use_get_current_user');
+jest.mock('../user_profiles/use_get_current_user_profile');
 jest.mock('../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../user_profiles/use_suggest_users');
 
@@ -58,7 +58,7 @@ const renderFilterByAssigneesPopover = (
 describe('<FilterByAssigneesPopover />', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGetCurrentUser as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });

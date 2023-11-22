@@ -11,7 +11,7 @@ import { render } from '@testing-library/react';
 import { ASSIGNEES_ADD_BUTTON_TEST_ID, ASSIGNEES_TITLE_TEST_ID } from './test_ids';
 import { Assignees } from './assignees';
 
-import { useGetCurrentUser } from '../../../../common/components/user_profiles/use_get_current_user';
+import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
 import type { SetAlertAssigneesFunc } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
@@ -25,7 +25,7 @@ import {
 } from '../../../../common/components/user_profiles/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
-jest.mock('../../../../common/components/user_profiles/use_get_current_user');
+jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
@@ -63,7 +63,7 @@ describe('<Assignees />', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
-    (useGetCurrentUser as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
@@ -129,8 +129,8 @@ describe('<Assignees />', () => {
 
     expect(setAlertAssigneesMock).toHaveBeenCalledWith(
       {
-        assignees_to_add: ['user-id-3'],
-        assignees_to_remove: ['user-id-1'],
+        add: ['user-id-3'],
+        remove: ['user-id-1'],
       },
       ['test-event'],
       expect.anything(),

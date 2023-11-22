@@ -46,7 +46,7 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
         const esClient = core.elasticsearch.client.asCurrentUser;
         const siemClient = securitySolution?.getAppClient();
         const siemResponse = buildSiemResponse(response);
-        const validationErrors = validateAlertAssigneesArrays(assignees, ids);
+        const validationErrors = validateAlertAssigneesArrays(assignees);
         const spaceId = securitySolution?.getSpaceId() ?? 'default';
 
         if (validationErrors.length) {
@@ -57,8 +57,8 @@ export const setAlertAssigneesRoute = (router: SecuritySolutionPluginRouter) => 
           return siemResponse.error({ statusCode: 404 });
         }
 
-        const assigneesToAdd = uniq(assignees.assignees_to_add);
-        const assigneesToRemove = uniq(assignees.assignees_to_remove);
+        const assigneesToAdd = uniq(assignees.add);
+        const assigneesToRemove = uniq(assignees.remove);
 
         const painlessScript = {
           params: { assigneesToAdd, assigneesToRemove },

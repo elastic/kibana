@@ -57,8 +57,8 @@ const BulkAlertAssigneesPanelComponent: React.FC<BulkAlertAssigneesPanelComponen
 
       const ids = alertItems.map((item) => item._id);
       const assignees = {
-        assignees_to_add: assigneesToAddArray,
-        assignees_to_remove: assigneesToRemoveArray,
+        add: assigneesToAddArray,
+        remove: assigneesToRemoveArray,
       };
       const onSuccess = () => {
         if (refresh) refresh();

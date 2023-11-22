@@ -18,14 +18,14 @@ import type {
 } from './use_bulk_alert_assignees_items';
 import { useBulkAlertAssigneesItems } from './use_bulk_alert_assignees_items';
 import { useSetAlertAssignees } from './use_set_alert_assignees';
-import { useGetCurrentUser } from '../../user_profiles/use_get_current_user';
+import { useGetCurrentUserProfile } from '../../user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
 
 jest.mock('./use_set_alert_assignees');
-jest.mock('../../user_profiles/use_get_current_user');
+jest.mock('../../user_profiles/use_get_current_user_profile');
 jest.mock('../../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../user_profiles/use_suggest_users');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
@@ -59,7 +59,7 @@ const renderPanel = (panel: UseBulkAlertAssigneesPanel) => {
 describe('useBulkAlertAssigneesItems', () => {
   beforeEach(() => {
     (useSetAlertAssignees as jest.Mock).mockReturnValue(jest.fn());
-    (useGetCurrentUser as jest.Mock).mockReturnValue({
+    (useGetCurrentUserProfile as jest.Mock).mockReturnValue({
       isLoading: false,
       data: mockUserProfiles[0],
     });
@@ -160,7 +160,7 @@ describe('useBulkAlertAssigneesItems', () => {
 
     expect(mockSetAlertAssignees).toHaveBeenCalled();
     expect(mockSetAlertAssignees).toHaveBeenCalledWith(
-      { assignees_to_add: [], assignees_to_remove: ['user1', 'user2', 'user3'] },
+      { add: [], remove: ['user1', 'user2', 'user3'] },
       ['alert1', 'alert2', 'alert3'],
       expect.any(Function),
       setAlertLoadingMock

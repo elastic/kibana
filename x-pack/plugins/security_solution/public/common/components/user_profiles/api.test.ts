@@ -10,6 +10,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { mockUserProfiles } from './mock';
 import { suggestUsers } from './api';
 import { KibanaServices } from '../../lib/kibana';
+import { DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL } from '../../../../common/constants';
 
 const mockKibanaServices = KibanaServices.get as jest.Mock;
 jest.mock('../../lib/kibana');
@@ -28,7 +29,7 @@ describe('Detections Alerts API', () => {
     test('check parameter url', async () => {
       await suggestUsers({ searchTerm: 'name1' });
       expect(fetchMock).toHaveBeenCalledWith(
-        '/api/detection_engine/signals/suggest_users',
+        DETECTION_ENGINE_ALERT_SUGGEST_USERS_URL,
         expect.objectContaining({
           method: 'GET',
           version: '2023-10-31',
