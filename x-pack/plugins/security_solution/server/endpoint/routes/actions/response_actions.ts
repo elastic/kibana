@@ -14,6 +14,7 @@ import type {
   ResponseActionsRequestBody,
   ExecuteActionRequestBody,
   ResponseActionGetFileRequestBody,
+  UploadActionApiRequestBody,
 } from '../../../../common/api/endpoint';
 import {
   ExecuteActionRequestSchema,
@@ -23,6 +24,7 @@ import {
   SuspendProcessRouteRequestSchema,
   UnisolateRouteRequestSchema,
   GetProcessesRouteRequestSchema,
+  UploadActionRequestSchema,
 } from '../../../../common/api/endpoint';
 
 import {
@@ -35,6 +37,7 @@ import {
   UNISOLATE_HOST_ROUTE,
   GET_FILE_ROUTE,
   EXECUTE_ROUTE,
+  UPLOAD_ROUTE,
 } from '../../../../common/endpoint/constants';
 import type {
   EndpointActionDataParameterTypes,
@@ -50,7 +53,6 @@ import type {
 } from '../../../types';
 import type { EndpointAppContext } from '../../types';
 import { withEndpointAuthz } from '../with_endpoint_authz';
-import { registerActionFileUploadRoute } from './file_upload_handler';
 import { errorHandler } from '../error_handler';
 
 export function registerResponseActionRoutes(
@@ -247,7 +249,33 @@ export function registerResponseActionRoutes(
       )
     );
 
-  registerActionFileUploadRoute(router, endpointContext);
+  router.versioned
+    .post({
+      access: 'public',
+      path: UPLOAD_ROUTE,
+      options: {
+        authRequired: true,
+        tags: ['access:securitySolution'],
+        body: {
+          accepts: ['multipart/form-data'],
+          output: 'stream',
+          maxBytes: endpointContext.serverConfig.maxUploadResponseActionFileBytes,
+        },
+      },
+    })
+    .addVersion(
+      {
+        version: '2023-10-31',
+        validate: {
+          request: UploadActionRequestSchema,
+        },
+      },
+      withEndpointAuthz(
+        { all: ['canWriteFileOperations'] },
+        logger,
+        responseActionRequestHandler<ResponseActionsExecuteParameters>(endpointContext, 'upload')
+      )
+    );
 }
 
 function responseActionRequestHandler<T extends EndpointActionDataParameterTypes>(
@@ -265,7 +293,7 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
     const user = endpointContext.service.security?.authc.getCurrentUser(req);
     const esClient = (await context.core).elasticsearch.client.asInternalUser;
     const casesClient = await endpointContext.service.getCasesClient(req);
-    const actionProvider = new EndpointActionsClient({
+    const actionsClient = new EndpointActionsClient({
       esClient,
       casesClient,
       endpointContext,
@@ -277,31 +305,35 @@ function responseActionRequestHandler<T extends EndpointActionDataParameterTypes
 
       switch (command) {
         case 'isolate':
-          action = await actionProvider.isolate(req.body);
+          action = await actionsClient.isolate(req.body);
           break;
 
         case 'unisolate':
-          action = await actionProvider.release(req.body);
+          action = await actionsClient.release(req.body);
           break;
 
         case 'running-processes':
-          action = await actionProvider.runningProcesses(req.body);
+          action = await actionsClient.runningProcesses(req.body);
           break;
 
         case 'execute':
-          action = await actionProvider.execute(req.body as ExecuteActionRequestBody);
+          action = await actionsClient.execute(req.body as ExecuteActionRequestBody);
           break;
 
         case 'suspend-process':
-          action = await actionProvider.suspendProcess(req.body as KillOrSuspendProcessRequestBody);
+          action = await actionsClient.suspendProcess(req.body as KillOrSuspendProcessRequestBody);
           break;
 
         case 'kill-process':
-          action = await actionProvider.killProcess(req.body as KillOrSuspendProcessRequestBody);
+          action = await actionsClient.killProcess(req.body as KillOrSuspendProcessRequestBody);
           break;
 
         case 'get-file':
-          action = await actionProvider.getFile(req.body as ResponseActionGetFileRequestBody);
+          action = await actionsClient.getFile(req.body as ResponseActionGetFileRequestBody);
+          break;
+
+        case 'upload':
+          action = await actionsClient.upload(req.body as UploadActionApiRequestBody);
           break;
 
         default:
