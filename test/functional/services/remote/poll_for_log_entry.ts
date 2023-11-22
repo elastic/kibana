@@ -8,8 +8,10 @@
 
 import { WebDriver, logging } from 'selenium-webdriver';
 import * as Rx from 'rxjs';
-import { mergeMap, catchError, mergeMapTo, delay } from 'rxjs/operators';
+import { mergeMap, delay } from 'rxjs/operators';
 import { NoSuchSessionError } from 'selenium-webdriver/lib/error';
+
+export const FINAL_LOG_ENTRY_PREFIX = 'WEBDRIVER SESSION IS OVER';
 
 /**
  * Create an observable that emits log entries representing the calls to log messages
@@ -27,7 +29,17 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
         .pipe(
           delay(ms),
 
-          mergeMap(async () => await logCtrl.get(type)),
+          mergeMap(async () => {
+            let entries: logging.Entry[] = [];
+            try {
+              entries = await logCtrl.get(type);
+            } catch (error) {
+              if (error instanceof NoSuchSessionError) {
+                return [new logging.Entry('SEVERE', `${FINAL_LOG_ENTRY_PREFIX}: ${error.message}`)];
+              }
+            }
+            return entries;
+          }),
 
           // filter and flatten list of entries
           mergeMap((entries) => {
@@ -56,24 +68,6 @@ export function pollForLogEntry$(driver: WebDriver, type: string, ms: number) {
             }
 
             return filtered;
-          }),
-
-          catchError((error, resubscribe) => {
-            if (error instanceof NoSuchSessionError) {
-              return Rx.concat(
-                // Without Webdriver session we can't fetch logs, stopping
-                [new logging.Entry('SEVERE', `WEBDRIVER SESSION IS OVER: ${error.message}`)],
-                Rx.of(undefined)
-              );
-            } else {
-              return Rx.concat(
-                // log error as a log entry
-                [new logging.Entry('SEVERE', `ERROR FETCHING BROWSR LOGS: ${error.message}`)],
-
-                // pause 10 seconds then resubscribe
-                Rx.of(1).pipe(delay(10 * 1000), mergeMapTo(resubscribe))
-              );
-            }
           })
         )
         .subscribe(subscriber)
