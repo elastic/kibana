@@ -72,15 +72,15 @@ const handler: (
 
       const etag = calculateHash(Buffer.from(JSON.stringify(body)));
 
-      const getUserId = getUserIdGetter();
-      const userId = await getUserId(request);
-      const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
+      // const getUserId = getUserIdGetter();
+      // const userId = await getUserId(request);
+      // const userHash = userId ? calculateHash(Buffer.from(userId)) : '';
 
       const headers: Record<string, string> = {
         'content-type': 'application/json',
         etag,
         vary: 'accept-encoding, user-hash',
-        'user-hash': userHash,
+        // 'user-hash': userHash,
       };
 
       // field cache is configurable in classic environment but not on serverless
