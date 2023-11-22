@@ -28,6 +28,7 @@
       "observabilityShared",
       "observabilityAIAssistant",
       "ruleRegistry",
+      "taskManager",
       "triggersActionsUi",
       "security",
       "share",

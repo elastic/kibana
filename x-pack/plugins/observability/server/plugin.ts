@@ -13,10 +13,12 @@ import {
 import { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   CoreSetup,
+  CoreStart,
   DEFAULT_APP_CATEGORIES,
   Logger,
   Plugin,
   PluginInitializerContext,
+  SavedObjectsClient,
 } from '@kbn/core/server';
 import { PluginSetupContract as FeaturesSetup } from '@kbn/features-plugin/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
@@ -32,6 +34,11 @@ import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
+import { SloSummaryCleanupTask } from './services/slo/summary_cleanup_task';
 import { ObservabilityConfig } from '.';
 import { casesFeatureId, observabilityFeatureId, sloFeatureId } from '../common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '../common/constants';
@@ -70,10 +77,12 @@ interface PluginSetup {
   spaces?: SpacesPluginSetup;
   usageCollection?: UsageCollectionSetup;
   cloud?: CloudSetup;
+  taskManager: TaskManagerSetupContract;
 }
 
 interface PluginStart {
   alerting: PluginStartContract;
+  taskManager: TaskManagerStartContract;
 }
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
@@ -88,6 +97,7 @@ const o11yRuleTypes = [
 
 export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
   private logger: Logger;
+  private sloCleanupTask?: SloSummaryCleanupTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -342,11 +352,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
       );
       sloInstaller.install();
     });
-
     /**
      * Register a config for the observability guide
      */
     plugins.guidedOnboarding?.registerGuideConfig(kubernetesGuideId, kubernetesGuideConfig);
+
+    this.sloCleanupTask = new SloSummaryCleanupTask(plugins.taskManager, this.logger);
 
     return {
       getAlertDetailsConfig() {
@@ -360,7 +371,12 @@ export class ObservabilityPlugin implements Plugin<ObservabilityPluginSetup> {
     };
   }
 
-  public start() {}
+  public start(core: CoreStart, plugins: PluginStart) {
+    const internalSoClient = new SavedObjectsClient(core.savedObjects.createInternalRepository());
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
+
+    this.sloCleanupTask?.start(plugins.taskManager, internalSoClient, internalEsClient);
+  }
 
   public stop() {}
 }
