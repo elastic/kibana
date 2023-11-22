@@ -26,8 +26,8 @@ import type { SearchServiceStartDependencies } from '../search_service';
 import type { Start as InspectorStart } from '@kbn/inspector-plugin/public';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 
-jest.mock('./create_hash_request', () => {
-  const originalModule = jest.requireActual('./create_hash_request');
+jest.mock('./create_request_hash', () => {
+  const originalModule = jest.requireActual('./create_request_hash');
   return {
     ...originalModule,
     createRequestHash: jest.fn().mockImplementation((input) => {
