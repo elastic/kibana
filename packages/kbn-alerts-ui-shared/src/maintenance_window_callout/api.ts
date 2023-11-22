@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { AsApiContract } from '@kbn/actions-plugin/common';
+import { AsApiContract } from '@kbn/actions-types';
 import type { KibanaServices, MaintenanceWindow } from './types';
 
 const rewriteMaintenanceWindowRes = ({

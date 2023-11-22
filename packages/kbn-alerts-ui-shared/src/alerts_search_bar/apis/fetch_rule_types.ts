@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { HttpSetup } from '@kbn/core/public';
-import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-plugin/common';
-import type { RuleType } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AsApiContract, RewriteRequestCase } from '@kbn/actions-types';
+import type { RuleType } from '@kbn/triggers-actions-ui-types';
 import { BASE_ALERTING_API_PATH } from '../constants';
 
 const rewriteResponseRes = (results: Array<AsApiContract<RuleType>>): RuleType[] => {

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-
-export type {
-  AsApiContract,
-  RewriteRequestCase,
-  RewriteResponseCase,
-} from '@kbn/actions-types';
+export interface ActionGroup<ActionGroupIds extends string> {
+  id: ActionGroupIds;
+  name: string;
+}

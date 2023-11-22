@@ -6,7 +6,7 @@
  */
 import { i18n } from '@kbn/i18n';
 import { useQuery } from '@tanstack/react-query';
-import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleType, RuleTypeIndex } from '@kbn/triggers-actions-ui-types';
 import type { ToastsStart, HttpStart } from '@kbn/core/public';
 
 import { ALERTS_FEATURE_ID } from '../constants';
