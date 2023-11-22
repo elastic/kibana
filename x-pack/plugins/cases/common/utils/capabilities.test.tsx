@@ -18,15 +18,15 @@ describe('createUICapabilities', () => {
           "push_cases",
           "cases_connectors",
         ],
-        "configure": Array [
-          "cases_settings",
-        ],
         "delete": Array [
           "delete_cases",
         ],
         "read": Array [
           "read_cases",
           "cases_connectors",
+        ],
+        "settings": Array [
+          "cases_settings",
         ],
       }
     `);

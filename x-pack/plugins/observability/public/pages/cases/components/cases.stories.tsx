@@ -27,7 +27,7 @@ const defaultProps: CasesProps = {
     push: true,
     update: true,
     connectors: true,
-    configure: true,
+    settings: true,
   },
 };
 
@@ -44,6 +44,6 @@ CasesPageWithNoPermissions.args = {
     push: false,
     update: false,
     connectors: false,
-    configure: false,
+    settings: false,
   },
 };
