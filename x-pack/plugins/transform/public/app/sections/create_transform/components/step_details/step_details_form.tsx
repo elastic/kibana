@@ -21,12 +21,12 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiCallOut,
-  EuiText,
   EuiTextArea,
 } from '@elastic/eui';
 
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
@@ -46,7 +46,6 @@ import {
   useGetTransformsPreview,
 } from '../../../../hooks';
 import { SearchItems } from '../../../../hooks/use_search_items';
-import { StepDetailsTimeField } from './step_details_time_field';
 import {
   getTransformConfigQuery,
   getPreviewTransformRequestBody,
@@ -542,45 +541,15 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             </>
           ) : null}
 
-          <EuiFormRow
-            isInvalid={(createDataView && dataViewTitleExists) || canCreateDataView === false}
-            error={[
-              ...(canCreateDataView === false
-                ? [
-                    <EuiText size="xs" color="warning">
-                      {i18n.translate('xpack.transform.stepDetailsForm.dataViewPermissionWarning', {
-                        defaultMessage: 'You need permission to create data views.',
-                      })}
-                    </EuiText>,
-                  ]
-                : []),
-              ...(createDataView && dataViewTitleExists
-                ? [
-                    i18n.translate('xpack.transform.stepDetailsForm.dataViewTitleError', {
-                      defaultMessage: 'A data view with this title already exists.',
-                    }),
-                  ]
-                : []),
-            ]}
-          >
-            <EuiSwitch
-              name="transformCreateDataView"
-              disabled={canCreateDataView === false}
-              label={i18n.translate('xpack.transform.stepCreateForm.createDataViewLabel', {
-                defaultMessage: 'Create Kibana data view',
-              })}
-              checked={createDataView === true}
-              onChange={() => setCreateDataView(!createDataView)}
-              data-test-subj="transformCreateDataViewSwitch"
-            />
-          </EuiFormRow>
-          {createDataView && !dataViewTitleExists && dataViewAvailableTimeFields.length > 0 && (
-            <StepDetailsTimeField
-              dataViewAvailableTimeFields={dataViewAvailableTimeFields}
-              dataViewTimeField={dataViewTimeField}
-              onTimeFieldChanged={onTimeFieldChanged}
-            />
-          )}
+          <CreateDataViewForm
+            canCreateDataView={canCreateDataView}
+            createDataView={createDataView}
+            dataViewTitleExists={dataViewTitleExists}
+            setCreateDataView={setCreateDataView}
+            dataViewAvailableTimeFields={dataViewAvailableTimeFields}
+            dataViewTimeField={dataViewTimeField}
+            onTimeFieldChanged={onTimeFieldChanged}
+          />
 
           {/* Continuous mode */}
           <EuiFormRow
