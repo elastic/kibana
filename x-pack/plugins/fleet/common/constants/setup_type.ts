@@ -6,5 +6,3 @@
  */
 
 export const AGENTLESS_POLICY_ID = 'agentless_cspm';
-
-export const AGENTLESS_FEATURE_FLAG = 'agentless';

@@ -31,16 +31,10 @@ import {
 import { useCancelAddPackagePolicy } from '../hooks';
 
 import { isRootPrivilegesRequired, splitPkgKey } from '../../../../../../../common/services';
-import { AGENTLESS_FEATURE_FLAG, AGENTLESS_POLICY_ID } from '../../../../../../../common/constants';
-import type {
-  AgentPolicy,
-  NewAgentPolicy,
-  PackagePolicyEditExtensionComponentProps,
-} from '../../../../types';
+import type { NewAgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../../types';
 import { SetupType } from '../../../../types';
 import {
   sendGetAgentStatus,
-  sendGetOneAgentPolicy,
   useConfig,
   useGetPackageInfoByKeyQuery,
   useUIExtension,
@@ -68,7 +62,7 @@ import {
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../common/services/generate_new_agent_policy';
 
 import { CreatePackagePolicySinglePageLayout, PostInstallAddAgentModal } from './components';
-import { useDevToolsRequest, useOnSubmit } from './hooks';
+import { useDevToolsRequest, useOnSubmit, useSetupType } from './hooks';
 import { PostInstallCloudFormationModal } from './components/post_install_cloud_formation_modal';
 import { PostInstallGoogleCloudShellModal } from './components/post_install_google_cloud_shell_modal';
 import { PostInstallAzureArmTemplateModal } from './components/post_install_azure_arm_template_modal';
@@ -96,7 +90,6 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 }) => {
   const {
     agents: { enabled: isFleetEnabled },
-    enableExperimental,
   } = useConfig();
   const { params } = useRouteMatch<AddToPolicyParams>();
 
@@ -303,52 +296,12 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     );
   }
 
-  const isAgentlessEnabled = enableExperimental?.includes(AGENTLESS_FEATURE_FLAG) ?? false;
-  const [selectedSetupType, setSelectedSetupType] = useState<SetupType>(SetupType.AGENT_BASED);
-  const [agentlessPolicy, setAgentlessPolicy] = useState<AgentPolicy | undefined>();
-
-  useEffect(() => {
-    const fetchAgentlessPolicy = async () => {
-      const { data, error } = await sendGetOneAgentPolicy(AGENTLESS_POLICY_ID);
-      const isAgentlessAvailable = !error && data && data.item;
-
-      if (isAgentlessAvailable) {
-        setAgentlessPolicy(data.item);
-      }
-    };
-
-    if (isAgentlessEnabled) {
-      fetchAgentlessPolicy();
-    }
-  }, [isAgentlessEnabled]);
-
-  const handleSetupTypeChange = useCallback(
-    (setupType) => {
-      if (!isAgentlessEnabled || setupType === selectedSetupType) {
-        return;
-      }
-
-      if (setupType === SetupType.AGENTLESS) {
-        if (agentlessPolicy) {
-          updateAgentPolicy(agentlessPolicy);
-          setSelectedPolicyTab(SelectedPolicyTab.EXISTING);
-        }
-      } else if (setupType === SetupType.AGENT_BASED) {
-        updateNewAgentPolicy(newAgentPolicy);
-        setSelectedPolicyTab(SelectedPolicyTab.NEW);
-      }
-
-      setSelectedSetupType(setupType);
-    },
-    [
-      isAgentlessEnabled,
-      selectedSetupType,
-      agentlessPolicy,
-      updateAgentPolicy,
-      updateNewAgentPolicy,
-      newAgentPolicy,
-    ]
-  );
+  const { agentlessPolicy, handleSetupTypeChange, selectedSetupType } = useSetupType({
+    newAgentPolicy,
+    updateNewAgentPolicy,
+    updateAgentPolicy,
+    setSelectedPolicyTab,
+  });
 
   const replaceStepConfigurePackagePolicy =
     replaceDefineStepView && packageInfo?.name ? (
