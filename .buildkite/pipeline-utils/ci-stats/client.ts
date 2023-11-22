@@ -186,6 +186,22 @@ export class CiStatsClient {
     return resp.data;
   };
 
+  cleanException = (url: string, ex: any) => {
+    if (ex.isAxiosError) {
+      ex.url = url;
+      if (ex.response?.data) {
+        if (ex.response.data?.message) {
+          ex.response_message = ex.response.data.message;
+        } else {
+          ex.data = ex.response.data;
+        }
+      }
+      ex.config = { REDACTED: 'REDACTED' };
+      ex.request = { REDACTED: 'REDACTED' };
+      ex.response = { REDACTED: 'REDACTED' };
+    }
+  };
+
   private async request<T>({ method, path, params, body, maxAttempts = 3 }: RequestOptions) {
     let attempt = 0;
 
@@ -201,7 +217,7 @@ export class CiStatsClient {
           headers: this.defaultHeaders,
         });
       } catch (error) {
-        console.error('CI Stats request error:', error);
+        console.error('CI Stats request error:', this.cleanException(path, error));
 
         if (attempt < maxAttempts) {
           const sec = attempt * 3;
