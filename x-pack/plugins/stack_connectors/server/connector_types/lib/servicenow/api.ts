@@ -76,13 +76,13 @@ const pushToServiceHandler = async ({
   return res;
 };
 
-const closeIncidentHandler = async({
-  externalService, 
-  params
+const closeIncidentHandler = async ({
+  externalService,
+  params,
 }: CloseIncidentApiHandlerArgs): Promise<ExternalServiceIncidentResponse> => {
-  const {externalId, correlation_id} = params;
+  const { externalId, correlationId } = params;
   const res = await externalService.closeIncident({
-    correlation_id, 
+    correlationId,
     incidentId: externalId,
   });
 

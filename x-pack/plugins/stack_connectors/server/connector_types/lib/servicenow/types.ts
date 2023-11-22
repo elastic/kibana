@@ -107,7 +107,7 @@ export interface ExternalServiceParamsUpdate {
 
 export interface ExternalServiceParamsClose {
   incidentId: string | null;
-  correlation_id: string | null;
+  correlationId: string | null;
 }
 
 export interface ExternalService {
@@ -116,13 +116,13 @@ export interface ExternalService {
   getFields: () => Promise<GetCommonFieldsResponse>;
   createIncident: (params: ExternalServiceParamsCreate) => Promise<ExternalServiceIncidentResponse>;
   updateIncident: (params: ExternalServiceParamsUpdate) => Promise<ExternalServiceIncidentResponse>;
-  closeIncident: (params: ExternalServiceParamsClose) =>  Promise<ExternalServiceIncidentResponse>;
+  closeIncident: (params: ExternalServiceParamsClose) => Promise<ExternalServiceIncidentResponse>;
   findIncidents: (params?: Record<string, string>) => Promise<ServiceNowIncident>;
   getUrl: () => string;
   checkInstance: (res: AxiosResponse) => void;
   getApplicationInformation: () => Promise<GetApplicationInfoResponse>;
   checkIfApplicationIsInstalled: () => Promise<void>;
-  getIncidentByCorrelationId: (correlation_id: string) => Promise<ServiceNowIncident>
+  getIncidentByCorrelationId: (correlation_id: string) => Promise<ServiceNowIncident>;
 }
 
 export type PushToServiceApiParams = ExecutorSubActionPushParams;
