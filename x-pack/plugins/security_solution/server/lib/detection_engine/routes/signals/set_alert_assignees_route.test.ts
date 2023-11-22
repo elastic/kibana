@@ -68,27 +68,28 @@ describe('setAlertAssigneesRoute', () => {
       });
     });
 
-    test('returns 400 if no alert ids are provided', async () => {
+    test('rejects if no alert ids are provided', async () => {
       request = requestMock.create({
         method: 'post',
         path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
         body: getSetAlertAssigneesRequestMock(['assignee-id-1'], ['assignee-id-2']),
       });
 
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockResponse(
-        getSuccessfulSignalUpdateResponse()
-      );
+      const result = server.validate(request);
 
-      const response = await server.inject(request, requestContextMock.convertContext(context));
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "[]" supplied to "ids"');
+    });
 
-      context.core.elasticsearch.client.asCurrentUser.updateByQuery.mockRejectedValue(
-        new Error('Test error')
-      );
-
-      expect(response.body).toEqual({
-        message: [`No alert ids were provided`],
-        status_code: 400,
+    test('rejects if empty string provided as an alert id', async () => {
+      request = requestMock.create({
+        method: 'post',
+        path: DETECTION_ENGINE_ALERT_ASSIGNEES_URL,
+        body: getSetAlertAssigneesRequestMock(['assignee-id-1'], ['assignee-id-2'], ['']),
       });
+
+      const result = server.validate(request);
+
+      expect(result.badRequest).toHaveBeenCalledWith('Invalid value "" supplied to "ids"');
     });
   });
 
