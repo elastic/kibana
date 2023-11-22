@@ -18,12 +18,18 @@ import { statusColors } from '../common/constants';
 export const ComplianceScoreBar = ({
   totalPassed,
   totalFailed,
+  isReverse = false,
+  size = 'm',
 }: {
   totalPassed: number;
   totalFailed: number;
+  isReverse?: boolean;
+  size?: 'm' | 'l';
 }) => {
   const { euiTheme } = useEuiTheme();
-  const complianceScore = calculatePostureScore(totalPassed, totalFailed);
+  const complianceScore = isReverse
+    ? calculatePostureScore(totalFailed, totalPassed)
+    : calculatePostureScore(totalPassed, totalFailed);
 
   return (
     <EuiToolTip
@@ -41,44 +47,48 @@ export const ComplianceScoreBar = ({
         },
       })}
     >
-      <EuiFlexGroup
-        gutterSize="none"
-        alignItems="center"
-        justifyContent="flexEnd"
-        style={{ gap: euiTheme.size.xs }}
-      >
+      <EuiFlexGroup gutterSize="xs" alignItems="center" justifyContent="flexEnd">
         <EuiFlexItem>
           <EuiFlexGroup
             gutterSize="none"
-            style={{
-              height: euiTheme.size.xs,
-              borderRadius: euiTheme.border.radius.medium,
-              overflow: 'hidden',
-              gap: 1,
-            }}
+            direction={isReverse ? 'rowReverse' : 'row'}
+            css={css`
+              height: ${size === 'm' ? euiTheme.size.xs : '6px'};
+              border-radius: ${euiTheme.border.radius.medium};
+              overflow: hidden;
+              gap: 1px;
+            `}
           >
             {!!totalPassed && (
               <EuiFlexItem
-                style={{
-                  flex: totalPassed,
-                  background: statusColors.passed,
-                }}
+                css={css`
+                  flex: ${totalPassed};
+                  background: ${statusColors.passed};
+                `}
               />
             )}
             {!!totalFailed && (
               <EuiFlexItem
-                style={{
-                  flex: totalFailed,
-                  background: statusColors.failed,
-                }}
+                css={css`
+                  flex: ${totalFailed};
+                  background: ${statusColors.failed};
+                `}
               />
             )}
           </EuiFlexGroup>
         </EuiFlexItem>
-        <EuiFlexItem grow={false} style={{ width: euiTheme.size.xxl, textAlign: 'right' }}>
+        <EuiFlexItem
+          grow={false}
+          css={css`
+            width: ${euiTheme.size.xxl};
+            text-align: right;
+          `}
+        >
           <EuiText
             size="xs"
-            style={{ fontWeight: euiTheme.font.weight.bold }}
+            css={css`
+              font-weight: ${euiTheme.font.weight.bold};
+            `}
           >{`${complianceScore.toFixed(0)}%`}</EuiText>
         </EuiFlexItem>
       </EuiFlexGroup>
