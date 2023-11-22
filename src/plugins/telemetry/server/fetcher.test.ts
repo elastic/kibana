@@ -242,7 +242,9 @@ describe('FetcherTask', () => {
         }
 
         expect(fetcherTask['logger'].error).toBeCalledTimes(1);
-        expect(fetcherTask['logger'].error).toHaveBeenCalledWith(`Cannot get the current config: SomeError`);
+        expect(fetcherTask['logger'].error).toHaveBeenCalledWith(
+          `Cannot get the current config: SomeError`
+        );
 
         subscription.unsubscribe();
       })
