@@ -128,7 +128,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               title={
                 <FormattedMessage
                   id="xpack.ml.trainedModels.addModelFlyout.thirdParty.calloutTitle"
-                  defaultMessage="Requires our Eland Python client"
+                  defaultMessage="Requires the Eland Python client"
                 />
               }
               iconType="iInCircle"
@@ -136,8 +136,8 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
               <p>
                 <FormattedMessage
                   id="xpack.ml.trainedModels.addModelFlyout.thirdParty.calloutBody"
-                  defaultMessage="To import a third-party model directly to your Elasticsearch cluster, you will need to
-              use API calls in our python client, Eland."
+                  defaultMessage="To import a third-party model directly to your Elasticsearch cluster, you need to
+              use API calls in the Eland Python client."
                 />
               </p>
               <p>
@@ -180,7 +180,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.condaInstallLabel"
-                          defaultMessage="and can also be installed with Conda from Conda Forge:"
+                          defaultMessage="or it can also be installed with Conda from Conda Forge:"
                         />
                       </p>
                       <p>
@@ -204,7 +204,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step2Body"
-                          defaultMessage="The latest details on supported model types and the steps needed to import models can be found in our extensive Eland documentation."
+                          defaultMessage="The latest details on supported model types and the steps needed to import models can be found in the Eland documentation."
                         />
                       </p>
                       <p>
@@ -236,7 +236,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step3Body"
-                          defaultMessage="The trained model list automatically refreshes with the most current imported models in your cluster. If it's not shown, try clicking the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
+                          defaultMessage="The trained model list automatically refreshes with the most current imported models in your cluster. If the list is not updated, click the 'Refresh' button in the top right corner. Otherwise, revisit the instructions above to troubleshoot."
                         />
                       </p>
                     </EuiText>
@@ -254,7 +254,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
                       <p>
                         <FormattedMessage
                           id="xpack.ml.trainedModels.addModelFlyout.thirdParty.step4Body"
-                          defaultMessage="Press the play button or click “Start deployment” in the drop menu in the table row containing your new model to deploy and use it."
+                          defaultMessage="To deploy and use your new model, press the play button or click “Start deployment” in the drop menu of the table row of the model."
                         />
                       </p>
                     </EuiText>
