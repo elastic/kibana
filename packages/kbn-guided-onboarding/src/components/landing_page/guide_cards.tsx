@@ -34,7 +34,6 @@ export interface GuideCardsProps {
 }
 export const GuideCards = (props: GuideCardsProps) => {
   const { filteredCards } = props;
-
   return (
     <EuiFlexGroup>
       <EuiFlexItem>

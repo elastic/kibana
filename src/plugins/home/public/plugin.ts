@@ -106,6 +106,9 @@ export class HomePublicPlugin
           welcomeService: this.welcomeService,
           guidedOnboardingService: guidedOnboarding?.guidedOnboardingApi,
           cloud,
+          openModal: coreStart.overlays.openModal,
+          theme: core.theme,
+          i18nStart: coreStart.i18n,
         });
         coreStart.chrome.docTitle.change(
           i18n.translate('home.pageTitle', { defaultMessage: 'Home' })

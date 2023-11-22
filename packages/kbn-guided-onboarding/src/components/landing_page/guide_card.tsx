@@ -61,8 +61,7 @@ export const GuideCard = ({
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
 
-  const openESApiModal = async () => {
-    console.log('makes it here?');
+  const openESApiModal = useCallback(async () => {
     const session = await openModal(
       toMountPoint(<ESApiModal onClose={() => session.close()} title={card.title} />, {
         theme,
@@ -70,10 +69,10 @@ export const GuideCard = ({
       }),
       {
         maxWidth: 400,
-        'data-test-subj': 'elasticsearch-api-endpoint-guide-modal',
+        'data-test-subj': 'guideModalESApi',
       }
     );
-  };
+  }, [card.title, i18nStart, openModal, theme]);
 
   const onClick = useCallback(async () => {
     setIsLoading(true);
@@ -84,11 +83,18 @@ export const GuideCard = ({
         path: card.navigateTo.path,
       });
     } else if (card.openModal) {
-      console.log('falls here');
-      await openESApiModal;
+      openESApiModal();
     }
     setIsLoading(false);
-  }, [activateGuide, card.guideId, card.navigateTo, guideState, navigateToApp, card.openModal]);
+  }, [
+    activateGuide,
+    card.guideId,
+    card.navigateTo,
+    guideState,
+    navigateToApp,
+    card.openModal,
+    openESApiModal,
+  ]);
 
   const isHighlighted = activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';
