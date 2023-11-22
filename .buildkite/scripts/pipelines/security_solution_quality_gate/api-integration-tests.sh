@@ -18,12 +18,29 @@ QA_API_KEY=$(retry 5 5 vault read -field=qa_api_key secret/kibana-issues/dev/sec
 
 # Generate a random 5-digit number
 random_number=$((10000 + $RANDOM % 90000))
-ENVIRONMENT_DETAILS=$(curl --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
+if [ -z "${KIBANA_LATEST+x}" ] || [ "$KIBANA_LATEST" = "0" ]; then
+  ENVIRONMENT_DETAILS=$(curl -v --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
     --header "Authorization: ApiKey $QA_API_KEY" \
     --header 'Content-Type: application/json' \
     --data '{
-        "name": "ftr-integration-tests-'$random_number'",
-        "region_id": "aws-eu-west-1"}' | jq '.')
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1"}' | jq '.')
+else
+  KBN_COMMIT_HASH=${BUILDKITE_COMMIT:0:12}
+  ENVIRONMENT_DETAILS=$(curl -v --location 'https://global.qa.cld.elstc.co/api/v1/serverless/projects/security' \
+    --header "Authorization: ApiKey $QA_API_KEY" \
+    --header 'Content-Type: application/json' \
+    --data '{
+          "name": "ftr-integration-tests-'$random_number'",
+          "region_id": "aws-eu-west-1",
+          "overrides": {
+            "kibana": {
+              "docker_image" : "docker.elastic.co/kibana-ci/kibana-serverless:git-'$KBN_COMMIT_HASH'"
+              }
+            }
+          }' | jq '.')
+fi
+
 NAME=$(echo $ENVIRONMENT_DETAILS | jq -r '.name')
 ID=$(echo $ENVIRONMENT_DETAILS | jq -r '.id')
 ES_URL=$(echo $ENVIRONMENT_DETAILS | jq -r '.endpoints.elasticsearch')
