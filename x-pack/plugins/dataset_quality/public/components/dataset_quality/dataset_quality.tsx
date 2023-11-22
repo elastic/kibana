@@ -19,7 +19,7 @@ export interface CreateDatasetQualityArgs {
 }
 
 // TODO: update function param type with above interface
-export const createDatasetQuality = ({ core, plugins }: any) => {
+export const createDatasetQuality = ({ core, plugins }: CreateDatasetQualityArgs) => {
   return () => {
     const KibanaContextProviderForPlugin = useKibanaContextForPluginProvider(core, plugins);
 

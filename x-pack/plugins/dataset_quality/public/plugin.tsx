@@ -5,19 +5,7 @@
  * 2.0.
  */
 
-import {
-  AppMountParameters,
-  AppNavLinkStatus,
-  CoreSetup,
-  CoreStart,
-  DEFAULT_APP_CATEGORIES,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import React from 'react';
-import ReactDOM from 'react-dom';
-import { DATASET_QUALITY_APP_ID } from '../common/constants';
-import { datasetQualityAppTitle } from '../common/translations';
+import { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import { createDatasetQuality } from './components/dataset_quality';
 import {
   DatasetQualityPluginSetup,
@@ -32,24 +20,6 @@ export class DatasetQualityPlugin
   constructor(context: PluginInitializerContext) {}
 
   public setup(core: CoreSetup, plugins: DatasetQualitySetupDeps) {
-    // TODO: remove this registeration after local tesing is done
-    const DatasetQuality = createDatasetQuality({
-      core,
-      plugins,
-    });
-    core.application.register({
-      id: DATASET_QUALITY_APP_ID,
-      title: datasetQualityAppTitle,
-      category: DEFAULT_APP_CATEGORIES.observability,
-      euiIconType: 'logoLogging',
-      navLinkStatus: AppNavLinkStatus.visible,
-      searchable: true,
-      async mount({ element }: AppMountParameters) {
-        ReactDOM.render(<DatasetQuality />, element);
-        return () => ReactDOM.unmountComponentAtNode(element);
-      },
-    });
-
     return {};
   }
 
