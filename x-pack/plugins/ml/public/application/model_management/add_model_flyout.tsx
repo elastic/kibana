@@ -30,6 +30,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo, useState, type FC } from 'react';
+import { usePermissionCheck } from '../capabilities/check_capabilities';
 import { useMlKibana } from '../contexts/kibana';
 import { ModelItem } from './models_list';
 
@@ -49,71 +50,77 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
     modelDownloads.find((m) => m.recommended)?.model_id
   );
 
+  const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
+
   const tabs = useMemo(() => {
     return [
-      {
-        id: 'elser',
-        name: (
-          <FormattedMessage
-            id="xpack.ml.trainedModels.addModelFlyout.elserTabLabel"
-            defaultMessage="ELSER"
-          />
-        ),
-        content: (
-          <>
-            <EuiFormFieldset
-              legend={{
-                children: (
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.addModelFlyout.chooseModelLabel"
-                    defaultMessage="Choose a model"
-                  />
-                ),
-              }}
-            >
-              {modelDownloads.map((model) => {
-                return (
-                  <>
-                    <EuiCheckableCard
-                      id={model.model_id}
-                      label={
-                        <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
-                          <EuiFlexItem grow={false}>
-                            <EuiIcon type="logoElastic" size="l" />
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
-                          {model.recommended ? (
-                            <EuiFlexItem grow={false}>
-                              <EuiToolTip
-                                content={
-                                  <FormattedMessage
-                                    id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
-                                    defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
-                                  />
-                                }
-                              >
-                                <FormattedMessage
-                                  id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
-                                  defaultMessage="(Recommended)"
-                                />
-                              </EuiToolTip>
-                            </EuiFlexItem>
-                          ) : null}
-                        </EuiFlexGroup>
-                      }
-                      name={model.model_id}
-                      value={model.model_id}
-                      checked={model.model_id === selectedModelId}
-                      onChange={() => setSelectedModelId(model.model_id)}
-                    />
-                    <EuiSpacer size="m" />
-                  </>
-                );
-              })}
-            </EuiFormFieldset>
-          </>
-        ),
-      },
+      ...(canCreateTrainedModels
+        ? [
+            {
+              id: 'elser',
+              name: (
+                <FormattedMessage
+                  id="xpack.ml.trainedModels.addModelFlyout.elserTabLabel"
+                  defaultMessage="ELSER"
+                />
+              ),
+              content: (
+                <>
+                  <EuiFormFieldset
+                    legend={{
+                      children: (
+                        <FormattedMessage
+                          id="xpack.ml.trainedModels.addModelFlyout.chooseModelLabel"
+                          defaultMessage="Choose a model"
+                        />
+                      ),
+                    }}
+                  >
+                    {modelDownloads.map((model) => {
+                      return (
+                        <>
+                          <EuiCheckableCard
+                            id={model.model_id}
+                            label={
+                              <EuiFlexGroup gutterSize={'s'} alignItems={'center'}>
+                                <EuiFlexItem grow={false}>
+                                  <EuiIcon type="logoElastic" size="l" />
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>{model.model_id}</EuiFlexItem>
+                                {model.recommended ? (
+                                  <EuiFlexItem grow={false}>
+                                    <EuiToolTip
+                                      content={
+                                        <FormattedMessage
+                                          id="xpack.ml.trainedModels.modelsList.recommendedDownloadContent"
+                                          defaultMessage="Recommended ELSER model version for your cluster's hardware configuration"
+                                        />
+                                      }
+                                    >
+                                      <FormattedMessage
+                                        id="xpack.ml.trainedModels.modelsList.recommendedDownloadLabel"
+                                        defaultMessage="(Recommended)"
+                                      />
+                                    </EuiToolTip>
+                                  </EuiFlexItem>
+                                ) : null}
+                              </EuiFlexGroup>
+                            }
+                            name={model.model_id}
+                            value={model.model_id}
+                            checked={model.model_id === selectedModelId}
+                            onChange={() => setSelectedModelId(model.model_id)}
+                          />
+                          <EuiSpacer size="m" />
+                        </>
+                      );
+                    })}
+                  </EuiFormFieldset>
+                </>
+              ),
+            },
+          ]
+        : []),
       {
         id: 'thirdParty',
         name: (
@@ -267,6 +274,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
       },
     ];
   }, [
+    canCreateTrainedModels,
     docLinks.links.clients.eland,
     docLinks.links.ml.nlpImportModel,
     modelDownloads,
