@@ -176,8 +176,9 @@ async function attemptToCreateCommand(
         return {
           session,
           consoleLog$: pollForLogEntry$(session, logging.Type.BROWSER, config.logPollingMs).pipe(
-            takeWhile((loggingEntry: logging.Entry) =>
-              loggingEntry.message.startsWith(FINAL_LOG_ENTRY_PREFIX)
+            takeWhile(
+              (loggingEntry: logging.Entry) =>
+                !loggingEntry.message.startsWith(FINAL_LOG_ENTRY_PREFIX)
             ),
             map(({ message, level: { name: level } }) => ({
               message: message.replace(/\\n/g, '\n'),
