@@ -107,6 +107,7 @@ export const createTestBed = registerTestBed(
             navigateToUrl={jest.fn()}
             urlService={urlService}
             toasts={toasts}
+            apiClient={reportingAPIClient}
             {...rest}
           />
         </IlmPolicyStatusContextProvider>
