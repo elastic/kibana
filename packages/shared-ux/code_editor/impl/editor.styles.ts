@@ -132,6 +132,8 @@ export function createTheme(
       'editorWidget.border': euiTheme.euiColorLightShade,
       'editorWidget.background': euiTheme.euiColorLightestShade,
       'editorCursor.foreground': euiTheme.euiColorDarkestShade,
+      'editorSuggestWidget.selectedForeground': euiTheme.euiColorDarkestShade,
+      'editorSuggestWidget.focusHighlightForeground': euiTheme.euiColorPrimary,
       'editorSuggestWidget.selectedBackground': euiTheme.euiColorLightShade,
       'list.hoverBackground': euiTheme.euiColorLightShade,
       'list.highlightForeground': euiTheme.euiColorPrimary,
