@@ -5,20 +5,9 @@
  * 2.0.
  */
 
-export const maintenanceWindowStatus = {
-  RUNNING: 'running',
-  UPCOMING: 'upcoming',
-  FINISHED: 'finished',
-  ARCHIVED: 'archived',
-} as const;
-
-export const maintenanceWindowCategoryIdTypes = {
-  OBSERVABILITY: 'observability',
-  SECURITY_SOLUTION: 'securitySolution',
-  MANAGEMENT: 'management',
-} as const;
-
 export const filterStateStore = {
   APP_STATE: 'appState',
   GLOBAL_STATE: 'globalState',
 } as const;
+
+export type FilterStateStore = typeof filterStateStore[keyof typeof filterStateStore];
