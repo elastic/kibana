@@ -19,10 +19,10 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { css } from '@emotion/react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 import { GuideState } from '../../types';
 import { GuideCardConstants } from './guide_cards.constants';
 import { GuideCardsProps } from './guide_cards';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { ESApiModal } from '../modal';
 
 const getProgressLabel = (guideState: GuideState | undefined): string | undefined => {
@@ -61,6 +61,23 @@ export const GuideCard = ({
     guideState = guidesState.find((state) => state.guideId === card.guideId);
   }
 
+  const openESApiModal = async () => {
+    console.log('makes it here?')
+    const session = await openModal(
+      toMountPoint(
+        <ESApiModal
+          onClose={() =>  session.close()}
+          title={card.title}
+        />,
+        { theme: theme, i18n: i18nStart }
+      ),
+      {
+        maxWidth: 400,
+        'data-test-subj': 'elasticsearch-api-endpoint-guide-modal',
+      }
+    );
+  };
+
   const onClick = useCallback(async () => {
     setIsLoading(true);
     if (card.guideId) {
@@ -69,9 +86,12 @@ export const GuideCard = ({
       await navigateToApp(card.navigateTo?.appId, {
         path: card.navigateTo.path,
       });
+    } else if (card.openModal) {
+      console.log('falls here')
+      await openESApiModal;
     }
     setIsLoading(false);
-  }, [activateGuide, card.guideId, card.navigateTo, guideState, navigateToApp]);
+  }, [activateGuide, card.guideId, card.navigateTo, guideState, navigateToApp, card.openModal]);
 
   const isHighlighted = activeFilter === card.solution;
   const isComplete = guideState && guideState.status === 'complete';
@@ -93,23 +113,6 @@ export const GuideCard = ({
     }
   `;
 
-  const openESApiModal = () => {
-    const session = openModal(
-      toMountPoint(
-        <ESApiModal
-          onClose={() => {
-            return session.close();
-          }}
-        />,
-        { theme, i18n: i18nStart }
-      ),
-      {
-        maxWidth: 400,
-        'data-test-subj': 'link-modal',
-      }
-    )
-  };
-
   return (
     <EuiCard
       // data-test-subj used for FS tracking
@@ -122,7 +125,6 @@ export const GuideCard = ({
       title={<h3 style={{ fontWeight: 600 }}>{card.title}</h3>}
       titleSize="xs"
       icon={<EuiIcon size="l" type={card.icon} />}
-      onClose={openESApiModal}
       description={
         <>
           {progress && (

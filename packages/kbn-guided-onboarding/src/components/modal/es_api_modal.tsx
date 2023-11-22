@@ -7,12 +7,19 @@
  */
 
 import { EuiModal } from '@elastic/eui';
-import React from 'react';
+import React, { ReactNode } from 'react';
 
 interface ESApiModalProps {
   onClose: () => void;
+  title: ReactNode;
 }
 
-export const ESApiModal = (props: ESApiModalProps) => {
-  return <EuiModal onClose={props.onClose} children={undefined} />;
+export const ESApiModal = ({ onClose, title }: ESApiModalProps) => {
+    console.log('can this open?')
+  return (
+    <EuiModal onClose={onClose} data-test-subj="guideModal" aria-labelledby="">
+        <title/>
+      Can this open? this is a placeholder
+    </EuiModal>
+  );
 };

@@ -15,7 +15,8 @@ import {
   SavedObjectsClientContract,
   IUiSettingsClient,
   ApplicationStart,
-  CoreStart,
+  ThemeServiceStart,
+  I18nStart,
 } from '@kbn/core/public';
 import { UiCounterMetricType } from '@kbn/analytics';
 import { UrlForwardingStart } from '@kbn/url-forwarding-plugin/public';
@@ -55,8 +56,8 @@ export interface HomeKibanaServices {
   guidedOnboardingService?: GuidedOnboardingApi;
   cloud?: CloudSetup;
   openModal: OverlayStart['openModal'];
-  theme: CoreStart['theme'];
-  i18nStart: CoreStart['i18n'];
+  theme: ThemeServiceStart;
+  i18nStart: I18nStart;
   
 }
 

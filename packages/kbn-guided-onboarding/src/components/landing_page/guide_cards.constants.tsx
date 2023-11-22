@@ -28,6 +28,8 @@ export interface GuideCardConstants {
   telemetryId: string;
   order: number;
   icon: string;
+  // the guide will open a specific modal ESApiModal 
+  openModal: boolean;
 }
 
 export const guideCards: GuideCardConstants[] = [
@@ -41,9 +43,9 @@ export const guideCards: GuideCardConstants[] = [
         values={{ linebreak: <br /> }}
       />
     ),
-    guideId: 'elasticsearchApi',
     telemetryId: 'onboarding--search--elasticsearchApi',
     order: 1,
+    openModal: true,
   },
   {
     solution: 'search',
@@ -60,6 +62,7 @@ export const guideCards: GuideCardConstants[] = [
     guideId: 'databaseSearch',
     telemetryId: 'onboarding--search--database',
     order: 1,
+    openModal: false,
   },
   {
     solution: 'search',
@@ -72,6 +75,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--search--vector',
     order: 4,
+    openModal: false,
   },
   {
     solution: 'search',
@@ -84,6 +88,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--search--ai',
     order: 7,
+    openModal: false,
   },
   {
     solution: 'search',
@@ -100,6 +105,7 @@ export const guideCards: GuideCardConstants[] = [
     guideId: 'appSearch',
     telemetryId: 'onboarding--search--application',
     order: 10,
+    openModal: false,
   },
   {
     solution: 'search',
@@ -110,6 +116,7 @@ export const guideCards: GuideCardConstants[] = [
     guideId: 'websiteSearch',
     telemetryId: 'onboarding--search--website',
     order: 13,
+    openModal: false,
   },
   {
     solution: 'observability',
@@ -122,6 +129,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--observability--logs',
     order: 2,
+    openModal: false,
   },
   {
     solution: 'observability',
@@ -141,6 +149,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--observability--apm',
     order: 5,
+    openModal: false,
   },
   {
     solution: 'observability',
@@ -154,6 +163,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--observability--hosts',
     order: 8,
+    openModal: false,
   },
   {
     solution: 'observability',
@@ -167,6 +177,7 @@ export const guideCards: GuideCardConstants[] = [
     guideId: 'kubernetes',
     telemetryId: 'onboarding--observability--kubernetes',
     order: 11,
+    openModal: false,
   },
   {
     solution: 'observability',
@@ -183,6 +194,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--observability--synthetics',
     order: 14,
+    openModal: false,
   },
   {
     solution: 'observability',
@@ -197,6 +209,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--observability--profiling',
     order: 15,
+    openModal: false,
   },
   {
     solution: 'security',
@@ -213,6 +226,7 @@ export const guideCards: GuideCardConstants[] = [
     guideId: 'siem',
     telemetryId: 'onboarding--security--siem',
     order: 3,
+    openModal: false,
   },
   {
     solution: 'security',
@@ -232,6 +246,7 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--security--hosts',
     order: 6,
+    openModal: false,
   },
   {
     solution: 'security',
@@ -251,5 +266,6 @@ export const guideCards: GuideCardConstants[] = [
     },
     telemetryId: 'onboarding--security--cloud',
     order: 9,
+    openModal: false,
   },
 ].sort((cardA, cardB) => cardA.order - cardB.order) as GuideCardConstants[];
