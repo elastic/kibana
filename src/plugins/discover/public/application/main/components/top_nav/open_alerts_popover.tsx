@@ -109,6 +109,7 @@ export function AlertsPopover({
       canChangeTrigger: false,
       ruleTypeId: ALERT_TYPE_ID,
       initialValues: { params: getParams() },
+      // Default to the Logs consumer if it's available. This should fall back to Stack Alerts if it's not.
       initialSelectedConsumer: AlertConsumers.LOGS,
     });
   }, [alertFlyoutVisible, triggersActionsUi, discoverMetadata, getParams, onClose, stateContainer]);
