@@ -119,6 +119,7 @@ describe('AddToCaseAction', function () {
           delete: false,
           push: false,
           connectors: false,
+          settings: false,
         },
       })
     );

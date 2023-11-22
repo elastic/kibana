@@ -8,7 +8,7 @@
 import React from 'react';
 import { screen } from '@testing-library/react';
 import type { AppMockRenderer } from '../../common/mock';
-import { createAppMockRenderer, noConfigureCasePermission } from '../../common/mock';
+import { createAppMockRenderer, noCasesSettingsPermission } from '../../common/mock';
 import { NavButtons } from './nav_buttons';
 
 describe('NavButtons', () => {
@@ -24,8 +24,8 @@ describe('NavButtons', () => {
     expect(screen.getByTestId('configure-case-button')).toBeInTheDocument();
   });
 
-  it('does not render the case configure button with no configure permissions', () => {
-    appMockRenderer = createAppMockRenderer({ permissions: noConfigureCasePermission() });
+  it('does not render the case configure button with no settings permissions', () => {
+    appMockRenderer = createAppMockRenderer({ permissions: noCasesSettingsPermission() });
     appMockRenderer.render(<NavButtons actionsErrors={[]} />);
 
     expect(screen.queryByTestId('configure-case-button')).not.toBeInTheDocument();

@@ -11,7 +11,7 @@ import type { MemoryRouterProps } from 'react-router';
 import { render, screen, waitFor } from '@testing-library/react';
 import { MemoryRouter } from 'react-router-dom';
 import {
-  noConfigureCasePermission,
+  noCasesSettingsPermission,
   noCreateCasesPermissions,
   readCasesPermissions,
   TestProviders,
@@ -96,14 +96,14 @@ describe('Cases routes', () => {
     });
   });
 
-  describe('Configure cases', () => {
-    it('navigates to the configure cases page', () => {
+  describe('Cases settings', () => {
+    it('navigates to the cases settings page', () => {
       renderWithRouter(['/cases/configure']);
       expect(screen.getByText('Settings')).toBeInTheDocument();
     });
 
-    it('shows the no privileges page if the user does not have configure privileges', () => {
-      renderWithRouter(['/cases/configure'], noConfigureCasePermission());
+    it('shows the no privileges page if the user does not have settings privileges', () => {
+      renderWithRouter(['/cases/configure'], noCasesSettingsPermission());
       expect(screen.getByText('Privileges required')).toBeInTheDocument();
     });
   });

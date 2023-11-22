@@ -17,7 +17,7 @@ import type { CasesFeatureParams } from './types';
  */
 export const getCasesBaseKibanaSubFeatureIds = (): CasesSubFeatureId[] => [
   CasesSubFeatureId.deleteCases,
-  CasesSubFeatureId.configureCases,
+  CasesSubFeatureId.casesSettings,
 ];
 
 /**
@@ -61,9 +61,9 @@ export const getCasesSubFeaturesMap = ({
     ],
   };
 
-  const configureCasesSubFeature: SubFeatureConfig = {
+  const casesSettingsCasesSubFeature: SubFeatureConfig = {
     name: i18n.translate(
-      'securitySolutionPackages.features.featureRegistry.configureSubFeatureName',
+      'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureName',
       {
         defaultMessage: 'Case Settings',
       }
@@ -75,7 +75,7 @@ export const getCasesSubFeaturesMap = ({
           {
             id: 'cases_settings',
             name: i18n.translate(
-              'securitySolutionPackages.features.featureRegistry.configureSubFeatureDetails',
+              'securitySolutionPackages.features.featureRegistry.casesSettingsSubFeatureDetails',
               {
                 defaultMessage: 'Edit Case Settings',
               }
@@ -97,6 +97,6 @@ export const getCasesSubFeaturesMap = ({
 
   return new Map<CasesSubFeatureId, SubFeatureConfig>([
     [CasesSubFeatureId.deleteCases, deleteCasesSubFeature],
-    [CasesSubFeatureId.configureCases, configureCasesSubFeature],
+    [CasesSubFeatureId.casesSettings, casesSettingsCasesSubFeature],
   ]);
 };

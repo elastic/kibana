@@ -101,7 +101,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
         ],
       },
       {
-        name: i18n.translate('xpack.cases.features.configureSubFeatureName', {
+        name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureName', {
           defaultMessage: 'Case Settings',
         }),
         privilegeGroups: [
@@ -110,7 +110,7 @@ export const getCasesKibanaFeature = (): KibanaFeatureConfig => {
             privileges: [
               {
                 id: 'cases_settings',
-                name: i18n.translate('xpack.cases.features.configureSubFeatureDetails', {
+                name: i18n.translate('xpack.cases.features.casesSettingsSubFeatureDetails', {
                   defaultMessage: 'Edit Case Settings',
                 }),
                 includeIn: 'all',

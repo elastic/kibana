@@ -47,7 +47,7 @@ const helpersMock: jest.Mocked<CasesUiStart['helpers']> = {
     delete: false,
     push: false,
     connectors: false,
-    configure: false,
+    settings: false,
   }),
   getRuleIdFromEvent: jest.fn(),
   groupAlertsByRule: jest.fn(),
