@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { useObservable } from 'react-use';
+import useObservable from 'react-use/lib/useObservable';
 import { useKibana } from '../lib/kibana';
 
 export const useContractComponents = () => {
