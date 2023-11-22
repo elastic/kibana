@@ -76,12 +76,22 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
     margin-top: 3px;
   }
 
+  .udtTimeline .euiDataGridRowCell--controlColumn {
+    overflow: visible;
+  }
+
   .udtTimeline [data-gridcell-column-id|='select'] .euiDataGridRowCell__contentByHeight {
     margin-top: 5px;
   }
 
+  .udtTimeline
+    .euiDataGridRow:hover
+    .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
+    ${({ theme }) => `background-color: ${theme.eui.colorLightShade};`};
+  }
+
   .udtTimeline .euiDataGridRowCell--lastColumn.euiDataGridRowCell--controlColumn {
-    ${({ theme }) => `background-color: ${theme.eui.euiColorEmptyShade};`};
+    ${({ theme }) => `background-color: ${theme.eui.emptyShade};`};
   }
 
   .udtTimeline .siemEventsTable__trSupplement--summary {
@@ -130,6 +140,7 @@ export const StyledTimelineUnifiedDataTable = styled.div.attrs(({ className = ''
 
   .udtTimeline .rowCellWrapper {
     display: flex;
+    width: fit-content;
   }
 
   .udtTimeline .rightPosition {
