@@ -293,7 +293,7 @@ export const createExternalService: ServiceFactory = ({
       } else if (correlationId) {
         incidentToBeClosed = await getIncidentByCorrelationId(correlationId);
       } else {
-        throw new Error('Invalid correlationId or incidentId.')
+        throw new Error('Invalid correlationId or incidentId.');
       }
 
       const res = await request({
