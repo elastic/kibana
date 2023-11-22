@@ -28,7 +28,8 @@ export const forcemergeIndices =
       i18n.translate(
         'xpack.idxMgmt.forceMergeIndicesAction.successfullyForceMergedIndicesMessage',
         {
-          defaultMessage: 'Successfully force merged {count, plural, one {# index} other {# indices} }',
+          defaultMessage:
+            'Successfully force merged {count, plural, one {# index} other {# indices} }',
           values: { count: indexNames.length },
         }
       )

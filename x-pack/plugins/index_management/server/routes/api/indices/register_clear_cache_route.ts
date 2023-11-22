@@ -33,7 +33,6 @@ export function registerClearCacheRoute({ router, lib: { handleEsError } }: Rout
 
         return response.ok();
       } catch (error) {
-        console.log(error);
         return handleEsError({ error, response });
       }
     }

@@ -27,7 +27,8 @@ export const clearCacheIndices =
     dispatch(reloadIndices(indexNames));
     notificationService.showSuccessToast(
       i18n.translate('xpack.idxMgmt.clearCacheIndicesAction.successMessage', {
-        defaultMessage: 'Successfully cleared cache for {count, plural, one {# index} other {# indices} }',
+        defaultMessage:
+          'Successfully cleared cache for {count, plural, one {# index} other {# indices} }',
         values: { count: indexNames.length },
       })
     );

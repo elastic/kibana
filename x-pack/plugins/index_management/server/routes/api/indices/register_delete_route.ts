@@ -25,7 +25,7 @@ export function registerDeleteRoute({ router, lib: { handleEsError } }: RouteDep
       const params = {
         format: 'json',
         expand_wildcards: 'none' as const,
-        index: indices
+        index: indices,
       };
 
       try {

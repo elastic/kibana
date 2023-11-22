@@ -24,7 +24,7 @@ export async function executeAsyncByChunks<T>(
     max_num_segments?: number;
   },
   dataClient: IScopedClusterClient,
-  methodName: keyof IScopedClusterClient['asCurrentUser']['indices'],
+  methodName: keyof IScopedClusterClient['asCurrentUser']['indices']
 ) {
   const { index: indices, ...commonParams } = params;
 
@@ -36,16 +36,16 @@ export async function executeAsyncByChunks<T>(
   if (indices.length <= MAX_INDICES_PER_REQUEST) {
     await (dataClient.asCurrentUser.indices[methodName] as CallableFn)({
       ...commonParams,
-      index: indices
+      index: indices,
     });
   } else {
     const chunks = chunk(indices, MAX_INDICES_PER_REQUEST);
 
     await Promise.all(
-      chunks.map((chunk) =>
+      chunks.map((chunkOfIndices) =>
         (dataClient.asCurrentUser.indices[methodName] as CallableFn)({
           ...commonParams,
-          index: chunk
+          index: chunkOfIndices,
         })
       )
     );
