@@ -89,6 +89,10 @@ disabled:
   - x-pack/test_serverless/api_integration/test_suites/security/config.feature_flags.ts
   - x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts
 
+  # Skipping because FTR often fails to exit on suite completion
+  - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
+  - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
+
 defaultQueue: 'n2-4-spot'
 enabled:
   - test/accessibility/config.ts
@@ -348,9 +352,6 @@ enabled:
   - x-pack/test/rule_registry/security_and_spaces/config_trial.ts
   - x-pack/test/rule_registry/spaces_only/config_basic.ts
   - x-pack/test/rule_registry/spaces_only/config_trial.ts
-  # Skipping because FTR often fails to exit on suite completion
-  # - x-pack/test/saved_object_api_integration/security_and_spaces/config_basic.ts
-  # - x-pack/test/saved_object_api_integration/security_and_spaces/config_trial.ts
   - x-pack/test/saved_object_api_integration/spaces_only/config.ts
   - x-pack/test/saved_object_tagging/api_integration/security_and_spaces/config.ts
   - x-pack/test/saved_object_tagging/api_integration/tagging_api/config.ts
