@@ -8,7 +8,7 @@
 import mockFs from 'mock-fs';
 import axios from 'axios';
 import { createHash } from 'crypto';
-import { readFile } from 'fs/promises';
+import { readFileSync } from 'fs';
 import { resolve as resolvePath } from 'path';
 import { Readable } from 'stream';
 import { fetch } from './fetch';
@@ -38,7 +38,7 @@ describe('fetch', () => {
   test('downloads the url to the path', async () => {
     await fetch('url', TEMP_FILE);
 
-    await expect(readFile(TEMP_FILE, 'utf8')).resolves.toBe('foobar');
+    expect(readFileSync(TEMP_FILE, 'utf8')).toEqual('foobar');
   });
 
   test('returns the md5 hex hash of the http body', async () => {
