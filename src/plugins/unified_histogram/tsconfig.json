@@ -25,6 +25,7 @@
     "@kbn/visualizations-plugin",
     "@kbn/discover-utils",
     "@kbn/resizable-layout",
+    "@kbn/shared-ux-button-toolbar",
   ],
   "exclude": [
     "target/**/*",
