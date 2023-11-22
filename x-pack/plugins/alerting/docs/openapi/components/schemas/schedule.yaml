@@ -3,4 +3,5 @@ description: The check interval, which specifies how frequently the rule conditi
 properties:
   interval:
     type: string
-    example: 1m
+    examples:
+      - 1m
