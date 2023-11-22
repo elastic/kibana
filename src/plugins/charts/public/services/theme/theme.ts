@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { Observable, BehaviorSubject } from 'rxjs';
 
 import { CoreSetup, CoreTheme } from '@kbn/core/public';
-import { DARK_THEME, LIGHT_THEME, Theme } from '@elastic/charts';
+import { DARK_THEME, LIGHT_THEME, PartialTheme, Theme } from '@elastic/charts';
 
 export class ThemeService {
   /** Returns default charts theme */
@@ -43,6 +43,13 @@ export class ThemeService {
     }, []);
 
     return value;
+  };
+
+  /**
+   * @deprecated No longer need to use theme on top of baseTheme, see https://github.com/elastic/kibana/pull/170914#issuecomment-1823014121
+   */
+  public useChartsTheme = (): PartialTheme => {
+    return {};
   };
 
   /** A React hook for consuming the charts theme */

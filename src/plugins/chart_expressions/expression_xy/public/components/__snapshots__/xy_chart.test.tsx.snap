@@ -1003,6 +1003,7 @@ exports[`XYChart component it renders area 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -2524,6 +2525,7 @@ exports[`XYChart component it renders bar 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -4045,6 +4047,7 @@ exports[`XYChart component it renders horizontal bar 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -5566,6 +5569,7 @@ exports[`XYChart component it renders line 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -7087,6 +7091,7 @@ exports[`XYChart component it renders stacked area 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -8608,6 +8613,7 @@ exports[`XYChart component it renders stacked bar 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -10129,6 +10135,7 @@ exports[`XYChart component it renders stacked horizontal bar 1`] = `
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -11680,6 +11687,7 @@ exports[`XYChart component split chart should render split chart if both, splitR
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -13439,6 +13447,7 @@ exports[`XYChart component split chart should render split chart if splitColumnA
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {
@@ -15191,6 +15200,7 @@ exports[`XYChart component split chart should render split chart if splitRowAcce
             "metric": Object {
               "barBackground": "#EDF0F5",
               "border": "#EDF0F5",
+              "emptyBackground": "transparent",
               "minHeight": 64,
               "nonFiniteText": "N/A",
               "text": Object {

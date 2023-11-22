@@ -661,6 +661,7 @@ exports[`PartitionVisComponent should render correct structure for donut 1`] = `
               "metric": Object {
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
+                "emptyBackground": "transparent",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "text": Object {
@@ -1563,6 +1564,7 @@ exports[`PartitionVisComponent should render correct structure for mosaic 1`] = 
               "metric": Object {
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
+                "emptyBackground": "transparent",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "text": Object {
@@ -2525,6 +2527,7 @@ exports[`PartitionVisComponent should render correct structure for multi-metric 
               "metric": Object {
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
+                "emptyBackground": "transparent",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "text": Object {
@@ -3489,6 +3492,7 @@ exports[`PartitionVisComponent should render correct structure for pie 1`] = `
               "metric": Object {
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
+                "emptyBackground": "transparent",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "text": Object {
@@ -4391,6 +4395,7 @@ exports[`PartitionVisComponent should render correct structure for treemap 1`] =
               "metric": Object {
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
+                "emptyBackground": "transparent",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "text": Object {
@@ -5248,6 +5253,7 @@ exports[`PartitionVisComponent should render correct structure for waffle 1`] = 
               "metric": Object {
                 "barBackground": "#EDF0F5",
                 "border": "#EDF0F5",
+                "emptyBackground": "transparent",
                 "minHeight": 64,
                 "nonFiniteText": "N/A",
                 "text": Object {
