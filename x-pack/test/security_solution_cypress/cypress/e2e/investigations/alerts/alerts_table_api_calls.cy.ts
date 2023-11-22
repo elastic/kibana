@@ -20,16 +20,20 @@ import { ALERTS_URL } from '../../../urls/navigation';
  * */
 
 describe('Alert Table API calls', { tags: ['@ess', '@serverless'] }, () => {
-  let callCount = 0;
+  let callCount: number = 0;
 
   beforeEach(() => {
+    callCount = 0;
     login();
     createRule(getNewRule());
-
     // intercept all calls to `api/lists/index`
     // and count how many times it was called
     cy.intercept('GET', '/api/lists/index', (req) => {
-      callCount += 1;
+      req.on('response', (res) => {
+        if (res.statusCode === 200) {
+          callCount += 1;
+        }
+      });
     });
 
     visit(ALERTS_URL);
