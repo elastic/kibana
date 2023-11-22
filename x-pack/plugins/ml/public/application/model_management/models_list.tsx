@@ -80,6 +80,7 @@ export type ModelItem = TrainedModelConfigResponse & {
   type?: string[];
   stats?: Stats & { deployment_stats: TrainedModelDeploymentStatsResponse[] };
   pipelines?: ModelPipelines['pipelines'] | null;
+  origin_job_exists?: boolean;
   deployment_ids: string[];
   putModelConfig?: object;
   state: ModelState;

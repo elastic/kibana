@@ -40,7 +40,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
         learnMoreLink: '{config.docs.beats.filebeat}/filebeat-module-suricata.html',
       },
     }),
-    euiIconType: '/plugins/home/assets/logos/suricata.svg',
+    euiIconType: context.staticAssets.getPluginAssetHref('/logos/suricata.svg'),
     artifacts: {
       dashboards: [
         {
@@ -56,7 +56,7 @@ export function suricataLogsSpecProvider(context: TutorialContext): TutorialSche
       },
     },
     completionTimeMinutes: 10,
-    previewImagePath: '/plugins/home/assets/suricata_logs/screenshot.webp',
+    previewImagePath: context.staticAssets.getPluginAssetHref('/suricata_logs/screenshot.webp'),
     onPrem: onPremInstructions(moduleName, platforms, context),
     elasticCloud: cloudInstructions(moduleName, platforms, context),
     onPremElasticCloud: onPremCloudInstructions(moduleName, platforms, context),
