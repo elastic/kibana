@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { LogicMounter } from '../../../../../__mocks__/kea_logic';
+import { LogicMounter } from '../../../../../../__mocks__/kea_logic';
 
 import { HttpResponse } from '@kbn/core/public';
 
-import { ErrorResponse, HttpError, Status } from '../../../../../../../common/types/api';
-import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
-import { CreateTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
-import { FetchTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
-import { StartTextExpansionModelApiLogic } from '../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
+import { ErrorResponse, HttpError, Status } from '../../../../../../../../common/types/api';
+import { MlModelDeploymentState } from '../../../../../../../../common/types/ml';
+import { CreateTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/create_text_expansion_model_api_logic';
+import { FetchTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/fetch_text_expansion_model_api_logic';
+import { StartTextExpansionModelApiLogic } from '../../../../../api/ml_models/text_expansion/start_text_expansion_model_api_logic';
 
 import {
   getTextExpansionError,
