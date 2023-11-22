@@ -20,6 +20,8 @@ import {
   EuiSuperSelect,
   EuiSuperSelectOption,
   EuiSpacer,
+  EuiTabbedContent,
+  EuiTabbedContentTab,
   EuiTitle,
   EuiText,
   EuiPanel,
@@ -55,6 +57,11 @@ const CHOOSE_PIPELINE_LABEL = i18n.translate(
   'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.existingPipeline.existingLabel',
   { defaultMessage: 'Existing pipeline' }
 );
+
+export enum ConfigurePipelineTabId {
+  CREATE_NEW = 'create_new',
+  USE_EXISTING = 'use_existing',
+}
 
 export const ConfigurePipeline: React.FC = () => {
   const {
@@ -113,8 +120,101 @@ export const ConfigurePipeline: React.FC = () => {
 
   const inputsDisabled = configuration.existingPipeline !== false;
 
+  // TODO: Internationalize all text
+  const tabs: EuiTabbedContentTab[] = [
+    {
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h5>Select a model</h5>
+          </EuiTitle>
+          <EuiSuperSelect
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectTrainedModel`}
+            fullWidth
+            hasDividers
+            disabled={inputsDisabled}
+            itemLayoutAlign="top"
+            onChange={(value) =>
+              setInferencePipelineConfiguration({
+                ...configuration,
+                inferenceConfig: undefined,
+                modelID: value,
+                fieldMappings: undefined,
+              })
+            }
+            options={modelOptions}
+            valueOfSelected={modelID === '' ? MODEL_SELECT_PLACEHOLDER_VALUE : modelID}
+          />
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h5>Pipeline name</h5>
+          </EuiTitle>
+          <EuiFieldText
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-uniqueName`}
+            disabled={inputsDisabled}
+            fullWidth
+            prepend="ml-inference-"
+            placeholder={i18n.translate(
+              'xpack.enterpriseSearch.content.indices.pipelines.addInferencePipelineModal.steps.configure.namePlaceholder',
+              {
+                defaultMessage: 'Enter a unique name for this pipeline',
+              }
+            )}
+            value={pipelineName}
+            onChange={(e) =>
+              setInferencePipelineConfiguration({
+                ...configuration,
+                pipelineName: e.target.value,
+              })
+            }
+          />
+        </>
+      ),
+      id: ConfigurePipelineTabId.CREATE_NEW,
+      name: 'Create new',
+    },
+    {
+      content: (
+        <>
+          <EuiSpacer size="m" />
+          <EuiTitle size="xxs">
+            <h5>Select a pipeline</h5>
+          </EuiTitle>
+          <EuiSuperSelect
+            fullWidth
+            hasDividers
+            data-telemetry-id={`entSearchContent-${ingestionMethod}-pipelines-configureInferencePipeline-selectExistingPipeline`}
+            valueOfSelected={
+              pipelineName.length > 0 ? pipelineName : PIPELINE_SELECT_PLACEHOLDER_VALUE
+            }
+            options={pipelineOptions}
+            onChange={(value) => selectExistingPipeline(value)}
+          />
+        </>
+      ),
+      id: ConfigurePipelineTabId.USE_EXISTING,
+      name: 'Use existing',
+    },
+  ];
+
   return (
+    // TODO: Fix bug when switching between tabs.
+    //       When initially loading the flyout, the pipeline name is set to the index name.
+    //       But if you switch to the "Use existing" tab & back to "Create new", the pipeline name is cleared.
+
+    // TODO: Remove untabbed content after verifying that all necessary logic is ported over to tabs
     <>
+      <EuiTabbedContent
+        tabs={tabs}
+        autoFocus="selected"
+        onTabClick={(tab) => {
+          setInferencePipelineConfiguration({
+            ...EMPTY_PIPELINE_CONFIGURATION,
+            existingPipeline: tab.id === ConfigurePipelineTabId.USE_EXISTING,
+          });
+        }}
+      />
       <EuiFlexGroup>
         <EuiFlexItem grow={3}>
           <EuiTitle size="s">
