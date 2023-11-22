@@ -6,17 +6,17 @@
  */
 
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import { riskEngineDisableRoute } from './risk_engine_disable_route';
+import { riskEngineEnableRoute } from './enable';
 
-import { RISK_ENGINE_DISABLE_URL } from '../../../../common/constants';
+import { RISK_ENGINE_ENABLE_URL } from '../../../../../common/constants';
 import {
   serverMock,
   requestContextMock,
   requestMock,
-} from '../../detection_engine/routes/__mocks__';
-import { riskEngineDataClientMock } from '../risk_engine/risk_engine_data_client.mock';
+} from '../../../detection_engine/routes/__mocks__';
+import { riskEngineDataClientMock } from '../risk_engine_data_client.mock';
 
-describe('risk score disable route', () => {
+describe('risk score enable route', () => {
   let server: ReturnType<typeof serverMock.create>;
   let context: ReturnType<typeof requestContextMock.convertContext>;
   let mockTaskManagerStart: ReturnType<typeof taskManagerMock.createStart>;
@@ -41,7 +41,7 @@ describe('risk score disable route', () => {
   const buildRequest = () => {
     return requestMock.create({
       method: 'post',
-      path: RISK_ENGINE_DISABLE_URL,
+      path: RISK_ENGINE_ENABLE_URL,
       body: {},
     });
   };
@@ -51,27 +51,27 @@ describe('risk score disable route', () => {
       getStartServicesMock = jest
         .fn()
         .mockResolvedValue([{}, { taskManager: mockTaskManagerStart }]);
-      riskEngineDisableRoute(server.router, getStartServicesMock);
+      riskEngineEnableRoute(server.router, getStartServicesMock);
     });
 
-    it('invokes the risk score data client', async () => {
+    it('invokes the risk score service', async () => {
       const request = buildRequest();
       await server.inject(request, context);
 
-      expect(mockRiskEngineDataClient.disableRiskEngine).toHaveBeenCalled();
+      expect(mockRiskEngineDataClient.enableRiskEngine).toHaveBeenCalled();
     });
 
-    it('returns a 200 when disabling is successful', async () => {
+    it('returns a 200 when enablement is successful', async () => {
       // @ts-expect-error response is not used in the route nor this test
-      mockRiskEngineDataClient.disableRiskEngine.mockResolvedValue({ enabled: false });
+      mockRiskEngineDataClient.enableRiskEngine.mockResolvedValue({ enabled: true });
       const request = buildRequest();
       const response = await server.inject(request, context);
 
       expect(response.status).toEqual(200);
     });
 
-    it('returns a 500 if disabling fails', async () => {
-      mockRiskEngineDataClient.disableRiskEngine.mockRejectedValue(
+    it('returns a 500 if enabling fails', async () => {
+      mockRiskEngineDataClient.enableRiskEngine.mockRejectedValue(
         new Error('something went wrong')
       );
       const request = buildRequest();
@@ -85,7 +85,7 @@ describe('risk score disable route', () => {
   describe('when task manager is unavailable', () => {
     beforeEach(() => {
       getStartServicesMock = jest.fn().mockResolvedValueOnce([{}, { taskManager: undefined }]);
-      riskEngineDisableRoute(server.router, getStartServicesMock);
+      riskEngineEnableRoute(server.router, getStartServicesMock);
     });
 
     it('returns a 400 response', async () => {

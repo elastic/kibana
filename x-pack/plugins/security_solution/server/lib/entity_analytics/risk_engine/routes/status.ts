@@ -5,41 +5,39 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_ENABLE_URL, APP_ID } from '../../../../common/constants';
-import { TASK_MANAGER_UNAVAILABLE_ERROR } from './translations';
-import type { StartPlugins } from '../../../plugin';
+import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
+
 import type { SecuritySolutionPluginRouter } from '../../../types';
 
-export const riskEngineEnableRoute = (
-  router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>
-) => {
+export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
   router.versioned
-    .post({
+    .get({
       access: 'internal',
-      path: RISK_ENGINE_ENABLE_URL,
+      path: RISK_ENGINE_STATUS_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-      const [_, { taskManager }] = await getStartServices();
+
       const securitySolution = await context.securitySolution;
       const riskEngineClient = securitySolution.getRiskEngineDataClient();
-      if (!taskManager) {
-        return siemResponse.error({
-          statusCode: 400,
-          body: TASK_MANAGER_UNAVAILABLE_ERROR,
-        });
-      }
+      const spaceId = securitySolution.getSpaceId();
 
       try {
-        await riskEngineClient.enableRiskEngine({ taskManager });
-        return response.ok({ body: { success: true } });
+        const result = await riskEngineClient.getStatus({
+          namespace: spaceId,
+        });
+        return response.ok({
+          body: {
+            risk_engine_status: result.riskEngineStatus,
+            legacy_risk_engine_status: result.legacyRiskEngineStatus,
+            is_max_amount_of_risk_engines_reached: result.isMaxAmountOfRiskEnginesReached,
+          },
+        });
       } catch (e) {
         const error = transformError(e);
 

@@ -75,14 +75,14 @@ import { registerDashboardsRoutes } from '../lib/dashboards/routes';
 import { registerTagsRoutes } from '../lib/tags/routes';
 import { setAlertTagsRoute } from '../lib/detection_engine/routes/signals/set_alert_tags_route';
 import {
-  riskScorePreviewRoute,
   riskEngineDisableRoute,
   riskEngineInitRoute,
   riskEngineEnableRoute,
   riskEngineStatusRoute,
   riskEnginePrivilegesRoute,
-} from '../lib/entity_analytics/routes';
-import { riskScoreCalculationRoute } from '../lib/entity_analytics/routes/risk_score_calculation_route';
+} from '../lib/entity_analytics/risk_engine/routes';
+import { riskScoreCalculationRoute } from '../lib/entity_analytics/risk_score/routes/calculation';
+import { riskScorePreviewRoute } from '../lib/entity_analytics/risk_score/routes/preview';
 
 export const initRoutes = (
   router: SecuritySolutionPluginRouter,
