@@ -8,7 +8,7 @@
 import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
-export function indicesApi({ getService }: FtrProviderContext) {
+export function indicesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');
   const executeActionOnIndices = ({
     index,

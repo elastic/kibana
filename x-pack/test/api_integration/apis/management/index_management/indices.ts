@@ -7,17 +7,13 @@
 
 import expect from '@kbn/expect';
 
-import { initElasticsearchHelpers } from './lib';
-import { indicesApi } from './lib/indices.api';
 import { sortedExpectedIndexKeys } from './constants';
+import { indicesApi } from './lib/indices.api';
+import { indicesHelpers } from './lib/indices.helpers';
+import { FtrProviderContext } from '../../../ftr_provider_context';
 
-export default function ({ getService }) {
-  const {
-    createIndex,
-    catIndex,
-    indexStats,
-    cleanUp: cleanUpEsResources,
-  } = initElasticsearchHelpers(getService);
+export default function ({ getService }: FtrProviderContext) {
+  const { createIndex, deleteAllIndices, catIndex, indexStats } = indicesHelpers(getService);
 
   const {
     closeIndex,
@@ -30,10 +26,10 @@ export default function ({ getService }) {
     list,
     reload,
     clearCache,
-  } = indicesApi({ getService });
+  } = indicesApi(getService);
 
-  describe.only('indices', () => {
-    after(() => Promise.all([cleanUpEsResources()]));
+  describe('indices', () => {
+    after(async () => await deleteAllIndices());
 
     describe('clear cache', () => {
       it('should clear the cache on a single index', async () => {
@@ -89,12 +85,12 @@ export default function ({ getService }) {
         const index = await createIndex();
 
         const { body: indices1 } = await catIndex(undefined, 'i');
-        expect(indices1.map((index) => index.i)).to.contain(index);
+        expect(indices1.map((indexItem) => indexItem.i)).to.contain(index);
 
-        await deleteIndex([index]).expect(200);
+        await deleteIndex(index).expect(200);
 
         const { body: indices2 } = await catIndex(undefined, 'i');
-        expect(indices2.map((index) => index.i)).not.to.contain(index);
+        expect(indices2.map((indexItem) => indexItem.i)).not.to.contain(index);
       });
 
       it('should require index or indices to be provided', async () => {
@@ -110,6 +106,7 @@ export default function ({ getService }) {
         const {
           body: { indices: indices1 },
         } = await indexStats(index, 'flush');
+        // @ts-ignore
         expect(indices1[index].total.flush.total).to.be(0);
 
         await flushIndex(index).expect(200);
@@ -117,6 +114,7 @@ export default function ({ getService }) {
         const {
           body: { indices: indices2 },
         } = await indexStats(index, 'flush');
+        // @ts-ignore
         expect(indices2[index].total.flush.total).to.be(1);
       });
     });
@@ -128,6 +126,7 @@ export default function ({ getService }) {
         const {
           body: { indices: indices1 },
         } = await indexStats(index, 'refresh');
+        // @ts-ignore
         const previousRefreshes = indices1[index].total.refresh.total;
 
         await refreshIndex(index).expect(200);
@@ -135,6 +134,7 @@ export default function ({ getService }) {
         const {
           body: { indices: indices2 },
         } = await indexStats(index, 'refresh');
+        // @ts-ignore
         expect(indices2[index].total.refresh.total).to.be(previousRefreshes + 1);
       });
     });
@@ -174,7 +174,7 @@ export default function ({ getService }) {
         const { body: indices } = await list().expect(200);
 
         // Find the "test_index" created to verify expected keys
-        const indexCreated = indices.find((index) => index.name === 'test_index');
+        const indexCreated = indices.find((index: { name: string }) => index.name === 'test_index');
 
         const sortedReceivedKeys = Object.keys(indexCreated).sort();
 
@@ -188,7 +188,9 @@ export default function ({ getService }) {
         await createIndex('reload-test-index');
         const { body } = await reload().expect(200);
 
-        const indexCreated = body.find((index) => index.name === 'reload-test-index');
+        const indexCreated = body.find(
+          (index: { name: string }) => index.name === 'reload-test-index'
+        );
         const sortedReceivedKeys = Object.keys(indexCreated).sort();
         expect(sortedReceivedKeys).to.eql(sortedExpectedIndexKeys);
         expect(body.length > 1).to.be(true); // to contrast it with the next test
