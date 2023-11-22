@@ -63,6 +63,12 @@ export interface InternalChromeStart extends ChromeStart {
     setProjectUrl(projectUrl: string): void;
 
     /**
+     * Sets the cloud's sdk url.
+     * @param sdkUrl
+     */
+    setCloudSdkUrl(sdkUrl: string): void;
+
+    /**
      * Sets the project navigation config to be used for rendering project navigation.
      * It is used for default project sidenav, project breadcrumbs, tracking active deep link.
      * @param projectNavigation The project navigation config

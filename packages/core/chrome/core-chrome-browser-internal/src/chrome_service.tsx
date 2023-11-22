@@ -526,6 +526,9 @@ export class ChromeService {
         setProjectsUrl,
         setProjectUrl,
         setProjectName,
+        setCloudSdkUrl(sdkUrl: string) {
+          projectNavigation.setCloudSdkUrl(sdkUrl);
+        },
         setNavigation: setProjectNavigation,
         setSideNavComponent: setProjectSideNavComponent,
         setBreadcrumbs: setProjectBreadcrumbs,

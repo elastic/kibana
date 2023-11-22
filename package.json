@@ -186,6 +186,7 @@
     "@kbn/cloud-links-plugin": "link:x-pack/plugins/cloud_integrations/cloud_links",
     "@kbn/cloud-plugin": "link:x-pack/plugins/cloud",
     "@kbn/cloud-security-posture-plugin": "link:x-pack/plugins/cloud_security_posture",
+    "@kbn/cloud-ui-sdk": "link:packages/kbn-cloud-ui-sdk",
     "@kbn/code-editor": "link:packages/shared-ux/code_editor",
     "@kbn/coloring": "link:packages/kbn-coloring",
     "@kbn/config": "link:packages/kbn-config",

@@ -27,6 +27,7 @@ export interface CloudConfigType {
   organization_url?: string;
   users_and_roles_url?: string;
   performance_url?: string;
+  sdk_url?: string;
   trial_end_date?: string;
   is_elastic_staff_owned?: boolean;
   serverless?: {
@@ -45,6 +46,7 @@ interface CloudUrls {
   performanceUrl?: string;
   usersAndRolesUrl?: string;
   projectsUrl?: string;
+  sdkUrl?: string;
 }
 
 export class CloudPlugin implements Plugin<CloudSetup> {
@@ -128,6 +130,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       performanceUrl,
       usersAndRolesUrl,
       projectsUrl,
+      sdkUrl,
     } = this.getCloudUrls();
 
     let decodedId: DecodedCloudId | undefined;
@@ -144,6 +147,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       profileUrl,
       organizationUrl,
       projectsUrl,
+      sdkUrl,
       elasticsearchUrl: decodedId?.elasticsearchUrl,
       kibanaUrl: decodedId?.kibanaUrl,
       isServerlessEnabled: this.isServerlessEnabled,
@@ -169,6 +173,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       performance_url: performanceUrl,
       users_and_roles_url: usersAndRolesUrl,
       projects_url: projectsUrl,
+      sdk_url: sdkUrl,
     } = this.config;
 
     const fullCloudDeploymentUrl = getFullCloudUrl(baseUrl, deploymentUrl);
@@ -178,6 +183,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
     const fullCloudPerformanceUrl = getFullCloudUrl(baseUrl, performanceUrl);
     const fullCloudUsersAndRolesUrl = getFullCloudUrl(baseUrl, usersAndRolesUrl);
     const fullCloudProjectsUrl = getFullCloudUrl(baseUrl, projectsUrl);
+    const fullCloudSdkUrl = getFullCloudUrl(baseUrl, sdkUrl);
     const fullCloudSnapshotsUrl = `${fullCloudDeploymentUrl}/${CLOUD_SNAPSHOTS_PATH}`;
 
     return {
@@ -189,6 +195,7 @@ export class CloudPlugin implements Plugin<CloudSetup> {
       performanceUrl: fullCloudPerformanceUrl,
       usersAndRolesUrl: fullCloudUsersAndRolesUrl,
       projectsUrl: fullCloudProjectsUrl,
+      sdkUrl: fullCloudSdkUrl,
     };
   }
 }

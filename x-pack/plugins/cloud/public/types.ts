@@ -51,6 +51,10 @@ export interface CloudStart {
    */
   projectsUrl?: string;
   /**
+   * TODO
+   */
+  sdkUrl?: string;
+  /**
    * The full URL to the elasticsearch cluster.
    */
   elasticsearchUrl?: string;

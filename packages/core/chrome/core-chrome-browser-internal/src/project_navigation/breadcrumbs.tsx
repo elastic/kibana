@@ -6,7 +6,7 @@
  * Side Public License, v 1.
  */
 
-import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
+// import { EuiContextMenuPanel, EuiContextMenuItem } from '@elastic/eui';
 import {
   AppDeepLinkId,
   ChromeProjectBreadcrumb,
@@ -15,8 +15,9 @@ import {
   ChromeBreadcrumb,
 } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+// import { FormattedMessage } from '@kbn/i18n-react';
+// import React from 'react';
+import { openFeature } from '@kbn/cloud-ui-sdk';
 
 export function buildBreadcrumbs({
   projectsUrl,
@@ -25,10 +26,12 @@ export function buildBreadcrumbs({
   projectBreadcrumbs,
   activeNodes,
   chromeBreadcrumbs,
+  cloudSdkUrl,
 }: {
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
+  cloudSdkUrl?: string;
   projectBreadcrumbs: {
     breadcrumbs: ChromeProjectBreadcrumb[];
     params: ChromeSetProjectBreadcrumbsParams;
@@ -36,7 +39,7 @@ export function buildBreadcrumbs({
   chromeBreadcrumbs: ChromeBreadcrumb[];
   activeNodes: ChromeProjectNavigationNode[][];
 }): ChromeProjectBreadcrumb[] {
-  const rootCrumb = buildRootCrumb({ projectsUrl, projectName, projectUrl });
+  const rootCrumb = buildRootCrumb({ projectsUrl, projectName, projectUrl, cloudSdkUrl });
 
   if (projectBreadcrumbs.params.absolute) {
     return [rootCrumb, ...projectBreadcrumbs.breadcrumbs];
@@ -89,10 +92,12 @@ function buildRootCrumb({
   projectsUrl,
   projectName,
   projectUrl,
+  cloudSdkUrl,
 }: {
   projectsUrl?: string;
   projectName?: string;
   projectUrl?: string;
+  cloudSdkUrl?: string;
 }): ChromeProjectBreadcrumb {
   return {
     text:
@@ -100,25 +105,30 @@ function buildRootCrumb({
       i18n.translate('core.ui.primaryNav.cloud.projectLabel', {
         defaultMessage: 'Project',
       }),
-    popoverContent: (
-      <EuiContextMenuPanel
-        size="s"
-        items={[
-          <EuiContextMenuItem key="project" href={projectUrl} icon={'gear'}>
-            <FormattedMessage
-              id="core.ui.primaryNav.cloud.linkToProject"
-              defaultMessage="Manage project"
-            />
-          </EuiContextMenuItem>,
-          <EuiContextMenuItem key="projects" href={projectsUrl} icon={'grid'}>
-            <FormattedMessage
-              id="core.ui.primaryNav.cloud.linkToAllProjects"
-              defaultMessage="View all projects"
-            />
-          </EuiContextMenuItem>,
-        ]}
-      />
-    ),
-    popoverProps: { panelPaddingSize: 'none' },
+    onClick: () => {
+      if (cloudSdkUrl) {
+        openFeature({ sdkUrl: cloudSdkUrl, feature: 'projects' });
+      }
+    },
+    // popoverContent: (
+    //   <EuiContextMenuPanel
+    //     size="s"
+    //     items={[
+    //       <EuiContextMenuItem key="project" href={projectUrl} icon={'gear'}>
+    //         <FormattedMessage
+    //           id="core.ui.primaryNav.cloud.linkToProject"
+    //           defaultMessage="Manage project"
+    //         />
+    //       </EuiContextMenuItem>,
+    //       <EuiContextMenuItem key="projects" href={projectsUrl} icon={'grid'}>
+    //         <FormattedMessage
+    //           id="core.ui.primaryNav.cloud.linkToAllProjects"
+    //           defaultMessage="View all projects"
+    //         />
+    //       </EuiContextMenuItem>,
+    //     ]}
+    //   />
+    // ),
+    // popoverProps: { panelPaddingSize: 'none' },
   };
 }

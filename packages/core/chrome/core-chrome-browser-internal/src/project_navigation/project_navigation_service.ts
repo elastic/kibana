@@ -49,6 +49,7 @@ export class ProjectNavigationService {
   private projectsUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectName$ = new BehaviorSubject<string | undefined>(undefined);
   private projectUrl$ = new BehaviorSubject<string | undefined>(undefined);
+  private cloudSdkUrl$ = new BehaviorSubject<string | undefined>(undefined);
   private projectNavigation$ = new BehaviorSubject<ChromeProjectNavigation | undefined>(undefined);
   private activeNodes$ = new BehaviorSubject<ChromeProjectNavigationNode[][]>([]);
   private projectNavigationNavTreeFlattened: Record<string, ChromeProjectNavigationNode> = {};
@@ -110,6 +111,9 @@ export class ProjectNavigationService {
       setProjectUrl: (projectUrl: string) => {
         this.projectUrl$.next(projectUrl);
       },
+      setCloudSdkUrl: (sdkUrl: string) => {
+        this.cloudSdkUrl$.next(sdkUrl);
+      },
       setProjectNavigation: (projectNavigation: ChromeProjectNavigation) => {
         this.projectNavigation$.next(projectNavigation);
         this.projectNavigationNavTreeFlattened = flattenNav(projectNavigation.navigationTree);
@@ -144,6 +148,7 @@ export class ProjectNavigationService {
           this.projectsUrl$,
           this.projectUrl$,
           this.projectName$,
+          this.cloudSdkUrl$,
         ]).pipe(
           map(
             ([
@@ -153,6 +158,7 @@ export class ProjectNavigationService {
               projectsUrl,
               projectUrl,
               projectName,
+              cloudSdkUrl,
             ]) => {
               return buildBreadcrumbs({
                 projectUrl,
@@ -161,6 +167,7 @@ export class ProjectNavigationService {
                 projectBreadcrumbs,
                 activeNodes,
                 chromeBreadcrumbs,
+                cloudSdkUrl,
               });
             }
           )
