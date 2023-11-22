@@ -154,19 +154,19 @@ describe('getDataStreams', () => {
       { name: 'logs-test.test-default' },
       {
         name: 'logs-elastic_agent.metricbeat-default',
-        integration: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent' },
       },
       {
         name: 'logs-elastic_agent.fleet_server-default',
-        integration: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent' },
       },
       {
         name: 'logs-elastic_agent.filebeat-default',
-        integration: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent' },
       },
       {
         name: 'logs-elastic_agent-default',
-        integration: { name: 'elastic_agent', managed_by: 'fleet' },
+        integration: { name: 'elastic_agent' },
       },
     ]);
   });

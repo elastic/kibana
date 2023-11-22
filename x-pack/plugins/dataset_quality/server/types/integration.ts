@@ -7,7 +7,6 @@
 
 export interface Integration {
   name: string;
-  managed_by?: string;
   title?: string;
   version?: string;
   icons?: IntegrationIcon[];

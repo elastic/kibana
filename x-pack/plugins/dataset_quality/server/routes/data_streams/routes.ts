@@ -46,7 +46,7 @@ const statsRoute = createDatasetQualityServerRoute({
       getDataStreamsStats({ esClient, ...params.query }),
     ]);
 
-    const installedPackages = dataStreams.items.map((item) => item.integration?.name);
+    const installedPackages = dataStreams.items.map((item) => item.integration);
 
     const integrations = packages
       .filter((pkg) => installedPackages.includes(pkg.name))
