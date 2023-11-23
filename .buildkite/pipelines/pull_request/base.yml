@@ -115,7 +115,7 @@ steps:
     retry:
       automatic:
         - exit_status: '*'
-          limit: 1          
+          limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution.sh
     label: 'Security Solution Cypress Tests'
