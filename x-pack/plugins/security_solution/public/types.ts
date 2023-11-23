@@ -148,7 +148,7 @@ export interface StartPluginsDependencies extends StartPlugins {
 export interface ContractStartServices {
   extraRoutes$: Observable<RouteProps[]>;
   isSidebarEnabled$: Observable<boolean>;
-  getComponents$: GetComponent$;
+  getComponents$: GetComponents$;
   upselling: UpsellingService;
   dataQualityPanelConfig: DataQualityPanelConfig | undefined;
 }
