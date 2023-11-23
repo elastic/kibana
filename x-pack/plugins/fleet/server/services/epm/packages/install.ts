@@ -908,16 +908,16 @@ export const updateInstallStatusToFailed = async ({
     id: pkgName,
     savedObjectType: PACKAGES_SAVED_OBJECT_TYPE,
   });
-  return savedObjectsClient
-    .update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
+  try {
+    return await savedObjectsClient.update(PACKAGES_SAVED_OBJECT_TYPE, pkgName, {
       install_status: status,
       latest_install_failed_attempts: latestInstallFailedAttempts,
-    })
-    .catch((err) => {
-      if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
-        logger.error(`failed to update package status to: install_failed  ${err}`);
-      }
     });
+  } catch (err) {
+    if (!SavedObjectsErrorHelpers.isNotFoundError(err)) {
+      logger.error(`failed to update package status to: install_failed  ${err}`);
+    }
+  }
 };
 
 export async function restartInstallation(options: {
