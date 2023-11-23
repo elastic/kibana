@@ -12,10 +12,12 @@ import { CLOUDBEAT_AWS } from '../../../../common/constants';
 
 export const useSetupTechnology = ({
   input,
+  agentPolicy,
   agentlessPolicy,
   handleSetupTechnologyChange,
 }: {
   input: NewPackagePolicyInput;
+  agentPolicy?: AgentPolicy;
   agentlessPolicy?: AgentPolicy;
   handleSetupTechnologyChange?: (value: SetupTechnology) => void;
 }) => {
@@ -27,7 +29,23 @@ export const useSetupTechnology = ({
     () => Boolean(isCspmAws && agentlessPolicy),
     [isCspmAws, agentlessPolicy]
   );
+  const agentPolicyId = useMemo(() => agentPolicy?.id, [agentPolicy]);
+  const agentlessPolicyId = useMemo(() => agentlessPolicy?.id, [agentlessPolicy]);
 
+  /*
+   handle case when agent policy is coming from outside,
+   e.g. from the get param or when coming to integration from a specific agent policy
+   */
+  useEffect(() => {
+    if (agentPolicyId && agentPolicyId !== agentlessPolicyId) {
+      setSetupTechnology(SetupTechnology.AGENT_BASED);
+    }
+  }, [agentPolicyId, agentlessPolicyId]);
+
+  /*
+   preselecting agenteless when available
+   and resetting to agent-based when switching to another integration type, which doesn't support agentless
+   */
   useEffect(() => {
     if (isAgentlessAvailable) {
       setSetupTechnology(SetupTechnology.AGENTLESS);
