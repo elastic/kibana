@@ -37,6 +37,7 @@ import {
   SLO_DETAIL_PATH,
   SLO_EDIT_PATH,
 } from '../../common/locators/paths';
+import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
 // Note: React Router DOM <Redirect> component was not working here
 // so I've recreated this simple version for this purpose.
@@ -65,7 +66,11 @@ export const routes = {
   },
   [LANDING_PATH]: {
     handler: () => {
-      return <LandingPage />;
+      return (
+        <HasDataContextProvider>
+          <LandingPage />
+        </HasDataContextProvider>
+      );
     },
     params: {},
     exact: true,
@@ -73,9 +78,11 @@ export const routes = {
   [OVERVIEW_PATH]: {
     handler: () => {
       return (
-        <DatePickerContextProvider>
-          <OverviewPage />
-        </DatePickerContextProvider>
+        <HasDataContextProvider>
+          <DatePickerContextProvider>
+            <OverviewPage />
+          </DatePickerContextProvider>
+        </HasDataContextProvider>
       );
     },
     params: {},
