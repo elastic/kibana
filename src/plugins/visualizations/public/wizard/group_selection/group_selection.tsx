@@ -200,7 +200,7 @@ const VisGroup = ({ visType, onVisTypeSelected }: VisCardProps) => {
         }
         onClick={onClick}
         data-test-subj={`visType-${visType.name}`}
-        data-vis-stage={!('aliasPath' in visType) ? visType.stage : 'alias'}
+        data-vis-stage={!('alias' in visType) ? visType.stage : 'alias'}
         aria-label={`visType-${visType.name}`}
         description={
           <>

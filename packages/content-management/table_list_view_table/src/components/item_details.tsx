@@ -57,7 +57,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
   );
 
   const onClickTitleHandler = useMemo(() => {
-    if (!onClickTitle) {
+    if (!onClickTitle || getDetailViewLink?.(item)) {
       return undefined;
     }
 
@@ -65,7 +65,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       e.preventDefault();
       onClickTitle(item);
     }) as React.MouseEventHandler<HTMLAnchorElement>;
-  }, [item, onClickTitle]);
+  }, [item, onClickTitle, getDetailViewLink]);
 
   const renderTitle = useCallback(() => {
     const href = getDetailViewLink ? getDetailViewLink(item) : undefined;
@@ -79,7 +79,7 @@ export function ItemDetails<T extends UserContentCommonSchema>({
       <RedirectAppLinks coreStart={redirectAppLinksCoreStart}>
         {/* eslint-disable-next-line  @elastic/eui/href-or-on-click */}
         <EuiLink
-          href={getDetailViewLink ? getDetailViewLink(item) : undefined}
+          href={getDetailViewLink?.(item)}
           onClick={onClickTitleHandler}
           data-test-subj={`${id}ListingTitleLink-${item.attributes.title.split(' ').join('-')}`}
         >

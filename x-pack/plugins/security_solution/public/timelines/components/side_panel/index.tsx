@@ -23,7 +23,6 @@ import { EventDetailsPanel } from './event_details';
 import { HostDetailsPanel } from './host_details';
 import { NetworkDetailsPanel } from './network_details';
 import { UserDetailsPanel } from './user_details';
-import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 
 interface DetailsPanelProps {
   browserFields: BrowserFields;
@@ -53,7 +52,6 @@ export const DetailsPanel = React.memo(
     isReadOnly,
   }: DetailsPanelProps) => {
     const dispatch = useDispatch();
-    const isNewUserDetailsFlyoutEnable = useIsExperimentalFeatureEnabled('newUserDetailsFlyout');
     const getScope = useMemo(() => {
       if (isTimelineScope(scopeId)) {
         return timelineSelectors.getTimelineByIdSelector();
@@ -142,9 +140,6 @@ export const DetailsPanel = React.memo(
 
     if (currentTabDetail?.panelView === 'userDetail' && currentTabDetail?.params?.userName) {
       flyoutUniqueKey = currentTabDetail.params.userName;
-      if (isNewUserDetailsFlyoutEnable) {
-        panelSize = 'm';
-      }
       visiblePanel = (
         <UserDetailsPanel
           contextID={contextID}
@@ -152,7 +147,6 @@ export const DetailsPanel = React.memo(
           handleOnClose={closePanel}
           isDraggable={isDraggable}
           isFlyoutView={isFlyoutView}
-          isNewUserDetailsFlyoutEnable={isNewUserDetailsFlyoutEnable}
           scopeId={scopeId}
         />
       );
