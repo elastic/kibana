@@ -112,10 +112,10 @@ const registerAlertsTableConfiguration = (
   });
 };
 
-const registerIfNotAlready: <T extends object>(
+const registerIfNotAlready = (
   registry: AlertsTableConfigurationRegistryContract,
-  registryArgs: AlertsTableConfigurationRegistry<T>
-) => void = (registry, registryArgs) => {
+  registryArgs: AlertsTableConfigurationRegistry
+) => {
   if (!registry.has(registryArgs.id)) {
     registry.register(registryArgs);
   }

@@ -96,7 +96,7 @@ export const getRenderCellValueHook = ({
   scopeId: SourcererScopeName;
   tableId: TableId;
 }) => {
-  const useRenderCellValue: GetRenderCellValue<RenderCellValueContext> = ({ context }) => {
+  const useRenderCellValue: GetRenderCellValue = ({ context }) => {
     const { browserFields } = useSourcererDataView(scopeId);
     const browserFieldsByName = useMemo(() => getAllFieldsByName(browserFields), [browserFields]);
     const getTable = useMemo(() => dataTableSelectors.getTableByIdSelector(), []);
@@ -174,7 +174,7 @@ export const getRenderCellValueHook = ({
             scopeId={tableId}
             truncate={truncate}
             asPlainText={false}
-            context={context}
+            context={context as RenderCellValueContext}
           />
         );
       },
