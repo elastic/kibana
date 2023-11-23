@@ -16,7 +16,6 @@ import {
   EuiButton,
   EuiCollapsibleNavBeta,
   EuiCollapsibleNavBetaProps,
-  EuiCollapsibleNavItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
