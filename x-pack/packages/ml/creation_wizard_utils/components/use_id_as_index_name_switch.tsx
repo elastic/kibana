@@ -9,25 +9,23 @@ import React, { type FC } from 'react';
 
 import { EuiSwitch } from '@elastic/eui';
 
-import { i18n } from '@kbn/i18n';
-
-interface UseJobIdAsDestIndexNameSwitchProps {
+interface UseIdAsIndexNameSwitchProps {
   destIndexSameAsId: boolean;
   isJobCreated: boolean;
   setDestIndexSameAsId: (d: boolean) => void;
+  label: string;
 }
 
-export const UseJobIdAsDestIndexNameSwitch: FC<UseJobIdAsDestIndexNameSwitchProps> = ({
+export const UseIdAsIndexNameSwitch: FC<UseIdAsIndexNameSwitchProps> = ({
   destIndexSameAsId,
   isJobCreated,
   setDestIndexSameAsId,
+  label,
 }) => (
   <EuiSwitch
     disabled={isJobCreated}
     name="mlCreationWizardUtilsJobIdAsDestIndexName"
-    label={i18n.translate('xpack.ml.creationWizardUtils.jobIdAsDestIndexNameLabel', {
-      defaultMessage: 'Use job ID as destination index name',
-    })}
+    label={label}
     checked={destIndexSameAsId === true}
     onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
     data-test-subj="mlCreationWizardUtilsJobIdAsDestIndexNameSwitch"

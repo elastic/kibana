@@ -11,7 +11,7 @@ import { EuiFieldText, EuiFormRow, EuiLink } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import { UseJobIdAsDestIndexNameSwitch } from './use_job_id_as_dest_index_name_switch';
+import { UseIdAsIndexNameSwitch } from './use_id_as_index_name_switch';
 
 interface DestinationIndexFormProps {
   createIndexLink: string;
@@ -24,6 +24,7 @@ interface DestinationIndexFormProps {
   isJobCreated: boolean;
   onDestinationIndexChange: (d: string) => void;
   setDestIndexSameAsId: (d: boolean) => void;
+  switchLabel: string;
 }
 
 export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
@@ -37,16 +38,18 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
   isJobCreated,
   onDestinationIndexChange,
   setDestIndexSameAsId,
+  switchLabel,
 }) => (
   <>
     <EuiFormRow
       fullWidth
       helpText={destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage}
     >
-      <UseJobIdAsDestIndexNameSwitch
+      <UseIdAsIndexNameSwitch
         destIndexSameAsId={destIndexSameAsId}
         isJobCreated={isJobCreated}
         setDestIndexSameAsId={setDestIndexSameAsId}
+        label={switchLabel}
       />
     </EuiFormRow>
     {destIndexSameAsId === false && (

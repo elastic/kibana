@@ -27,6 +27,7 @@ import {
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { retentionPolicyMaxAgeInvalidErrorMessage } from '../../../../common/constants/validation_messages';
 import { DEFAULT_TRANSFORM_FREQUENCY } from '../../../../../../common/constants';
@@ -86,6 +87,9 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
     );
     const [destinationIndex, setDestinationIndex] = useState<EsIndexName>(
       defaults.destinationIndex
+    );
+    const [destIndexSameAsId, setDestIndexSameAsId] = useState<boolean>(
+      destinationIndex !== undefined && destinationIndex === transformId
     );
     const [destinationIngestPipeline, setDestinationIngestPipeline] = useState<string>(
       defaults.destinationIngestPipeline
@@ -377,6 +381,13 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
       /* eslint-enable react-hooks/exhaustive-deps */
     ]);
 
+    useEffect(() => {
+      if (destIndexSameAsId === true && !transformIdEmpty && transformIdValid) {
+        setDestinationIndex(transformId);
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [destIndexSameAsId, transformId]);
+
     return (
       <div data-test-subj="transformStepDetailsForm">
         <EuiForm>
@@ -438,51 +449,30 @@ export const StepDetailsForm: FC<StepDetailsFormProps> = React.memo(
             />
           </EuiFormRow>
 
-          <EuiFormRow
-            label={i18n.translate('xpack.transform.stepDetailsForm.destinationIndexLabel', {
-              defaultMessage: 'Destination index',
-            })}
-            isInvalid={!indexNameEmpty && !indexNameValid}
-            helpText={
-              indexNameExists &&
-              i18n.translate('xpack.transform.stepDetailsForm.destinationIndexHelpText', {
+          <DestinationIndexForm
+            createIndexLink={esIndicesCreateIndex}
+            destinationIndex={destinationIndex}
+            destinationIndexNameEmpty={indexNameEmpty}
+            destinationIndexNameExists={indexNameExists}
+            destinationIndexNameValid={indexNameValid}
+            destIndexSameAsId={destIndexSameAsId}
+            indexNameExistsMessage={i18n.translate(
+              'xpack.transform.stepDetailsForm.destinationIndexHelpText',
+              {
                 defaultMessage:
                   'An index with this name already exists. Be aware that running this transform will modify this destination index.',
-              })
-            }
-            error={
-              !indexNameEmpty &&
-              !indexNameValid && [
-                <>
-                  {i18n.translate('xpack.transform.stepDetailsForm.destinationIndexInvalidError', {
-                    defaultMessage: 'Invalid destination index name.',
-                  })}
-                  <br />
-                  <EuiLink href={esIndicesCreateIndex} target="_blank">
-                    {i18n.translate(
-                      'xpack.transform.stepDetailsForm.destinationIndexInvalidErrorLink',
-                      {
-                        defaultMessage: 'Learn more about index name limitations.',
-                      }
-                    )}
-                  </EuiLink>
-                </>,
-              ]
-            }
-          >
-            <EuiFieldText
-              value={destinationIndex}
-              onChange={(e) => setDestinationIndex(e.target.value)}
-              aria-label={i18n.translate(
-                'xpack.transform.stepDetailsForm.destinationIndexInputAriaLabel',
-                {
-                  defaultMessage: 'Choose a unique destination index name.',
-                }
-              )}
-              isInvalid={!indexNameEmpty && !indexNameValid}
-              data-test-subj="transformDestinationIndexInput"
-            />
-          </EuiFormRow>
+              }
+            )}
+            isJobCreated={transformIdExists}
+            onDestinationIndexChange={setDestinationIndex}
+            setDestIndexSameAsId={setDestIndexSameAsId}
+            switchLabel={i18n.translate(
+              'xpack.transform.stepDetailsForm.destinationIndexFormSwitchLabel',
+              {
+                defaultMessage: 'Use transform ID as destination index name',
+              }
+            )}
+          />
 
           {ingestPipelineNames.length > 0 && (
             <EuiFormRow

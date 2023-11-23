@@ -290,6 +290,12 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
         isJobCreated={isJobCreated}
         onDestinationIndexChange={(d) => setFormState({ destinationIndex: d })}
         setDestIndexSameAsId={setDestIndexSameAsId}
+        switchLabel={i18n.translate(
+          'xpack.ml.dataframe.analytics.create.destinationIndexFormSwitchLabel',
+          {
+            defaultMessage: 'Use job ID as destination index name',
+          }
+        )}
       />
       <EuiFormRow fullWidth>
         <EuiSwitch
