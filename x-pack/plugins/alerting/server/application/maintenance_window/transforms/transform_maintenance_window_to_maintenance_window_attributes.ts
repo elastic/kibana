@@ -25,5 +25,8 @@ export const transformMaintenanceWindowToMaintenanceWindowAttributes = (
     ...(maintenanceWindow.categoryIds !== undefined
       ? { categoryIds: maintenanceWindow.categoryIds }
       : {}),
+    ...(maintenanceWindow.scopedQuery !== undefined
+      ? { scopedQuery: maintenanceWindow.scopedQuery }
+      : {}),
   };
 };
