@@ -21,6 +21,7 @@ import {
   EuiDescriptionListDescription,
   EuiButton,
   useEuiTheme,
+  EuiLink,
 } from '@elastic/eui';
 import { Interpolation, Theme, css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -29,6 +30,7 @@ import type { MonacoError } from './helpers';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 const COMMAND_KEY = isMac ? '⌘' : '^';
+const FEEDBACK_LINK = 'https://ela.st/esql-feedback';
 
 const getConstsByType = (type: 'error' | 'warning', count: number) => {
   if (type === 'error') {
@@ -248,6 +250,24 @@ export const EditorFooter = memo(function EditorFooter({
       {!hideRunQueryText && (
         <EuiFlexItem grow={false}>
           <EuiFlexGroup gutterSize="xs" responsive={false} alignItems="center">
+            <EuiFlexItem grow={false}>
+              <EuiIcon type="discuss" color="primary" size="s" />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiLink
+                href={FEEDBACK_LINK}
+                external
+                target="_blank"
+                css={css`
+                  font-size: 12px;
+                  margin-right: ${euiTheme.size.m};
+                `}
+              >
+                {i18n.translate('textBasedEditor.query.textBasedLanguagesEditor.feedback', {
+                  defaultMessage: 'Submit feedback',
+                })}
+              </EuiLink>
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued" data-test-subj="TextBasedLangEditor-run-query">
                 <p>
