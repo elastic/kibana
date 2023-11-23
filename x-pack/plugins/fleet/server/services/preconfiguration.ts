@@ -255,10 +255,7 @@ export async function ensurePreconfiguredPackagesAndPolicies(
         );
       });
 
-      const s = apm.startSpan(
-        'Add preconfigured package policies',
-        'preconfiguration'
-      );
+      const s = apm.startSpan('Add preconfigured package policies', 'preconfiguration');
       await addPreconfiguredPolicyPackages(
         soClient,
         esClient,
