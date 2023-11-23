@@ -305,7 +305,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(await testSubjects.exists('partitionVisChart')).to.be(true);
     });
 
-    it.only('should default title when saving chart in Discover (even when modal is closed and reopened)', async () => {
+    it('should default title when saving chart in Discover (even when modal is closed and reopened)', async () => {
       await PageObjects.discover.selectTextBaseLang();
       await PageObjects.header.waitUntilLoadingHasFinished();
       await monacoEditor.setCodeEditorValue(
