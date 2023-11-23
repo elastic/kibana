@@ -73,7 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -161,7 +161,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -331,7 +331,7 @@ export default function ({ getService }: FtrProviderContext) {
         dependentVariable: 'responsetime',
         trainingPercent: 20,
         modelMemory: '20mb',
-        createIndexPattern: true,
+        createDataView: true,
         expected: {
           source: 'ft_farequote_small',
           runtimeFieldsEditorContent: ['{', '  "uppercase_airline": {', '    "type": "keyword",'],
@@ -499,9 +499,7 @@ export default function ({ getService }: FtrProviderContext) {
 
           await ml.testExecution.logTestStep('sets the create data view switch');
           await ml.dataFrameAnalyticsCreation.assertCreateDataViewSwitchExists();
-          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(
-            testData.createIndexPattern
-          );
+          await ml.dataFrameAnalyticsCreation.setCreateDataViewSwitchState(testData.createDataView);
         });
 
         it('runs the analytics job and displays it correctly in the job list', async () => {
