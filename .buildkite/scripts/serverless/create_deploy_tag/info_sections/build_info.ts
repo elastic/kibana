@@ -185,12 +185,10 @@ export function toCommitInfoWithBuildResults(commits: CommitWithStatuses[]) {
     return `<div>
   <div>
       <div><strong><a href="${commitInfo.link}">${commitInfo.sha}</a></strong></div>
+      <div><strong>${titleWithLink}</strong><i> by ${commitInfo.author} on ${commitInfo.date}</i></div>
       <div>| ${prBuildSnippet}</div>
       <div>| ${artifactBuildSnippet}</div>
       <div>| ${ftrBuildSnippet}</div>
-  </div>
-  <div>
-      <strong>${titleWithLink}</strong><i> by ${commitInfo.author} on ${commitInfo.date}</i>
   </div>
   <hr />
 </div>`;
@@ -203,8 +201,12 @@ function getBuildInfoSnippet(name: string, build: BuildkiteBuildExtract | null) 
   if (!build) {
     return `[❓] ${name} - no build found`;
   } else {
-    const statedAt = build.startedAt ? `started at ${build.startedAt}` : 'not started yet';
-    const finishedAt = build.finishedAt ? `finished at ${build.finishedAt}` : 'not finished yet';
-    return `[${build.stateEmoji}] <a href="${build.url}">${name}</a> - ${statedAt}, ${finishedAt}`;
+    const statedAt = build.startedAt
+      ? `started at <strong>${new Date(build.startedAt).toUTCString()}</strong>`
+      : 'not started yet';
+    const finishedAt = build.finishedAt
+      ? `finished at <strong>${new Date(build.finishedAt).toUTCString()}</strong>`
+      : 'not finished yet';
+    return `[${build.stateEmoji}] <a href="${build.url}">${name} #${build.buildNumber}</a> - ${statedAt}, ${finishedAt}`;
   }
 }
