@@ -46,7 +46,6 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.ruleRegistry.unsafe.legacyMultiTenancy.enabled=true',
         `--xpack.securitySolution.enableExperimental=${JSON.stringify([
           'chartEmbeddablesEnabled',
-          'disableTimelineSaveTour',
           'riskEnginePrivilegesRouteEnabled',
         ])}`,
         // mock cloud to enable the guided onboarding tour in e2e tests

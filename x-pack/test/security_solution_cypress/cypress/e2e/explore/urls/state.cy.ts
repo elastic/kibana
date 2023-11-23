@@ -11,9 +11,9 @@ import {
   GET_LOCAL_DATE_PICKER_END_DATE_POPOVER_BUTTON,
   DATE_PICKER_START_DATE_POPOVER_BUTTON,
   GET_LOCAL_DATE_PICKER_START_DATE_POPOVER_BUTTON,
-} from '../../screens/date_picker';
-import { HOSTS_NAMES } from '../../screens/hosts/all_hosts';
-import { ANOMALIES_TAB } from '../../screens/hosts/main';
+} from '../../../screens/date_picker';
+import { HOSTS_NAMES } from '../../../screens/hosts/all_hosts';
+import { ANOMALIES_TAB } from '../../../screens/hosts/main';
 import {
   BREADCRUMBS,
   EXPLORE_PANEL_BTN,
@@ -22,38 +22,38 @@ import {
   NETWORK,
   LOADING_INDICATOR,
   openNavigationPanel,
-} from '../../screens/security_header';
-import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../screens/timeline';
+} from '../../../screens/security_header';
+import { TIMELINE_DATE_PICKER_CONTAINER, TIMELINE_TITLE } from '../../../screens/timeline';
 
-import { login } from '../../tasks/login';
-import { visit, visitWithTimeRange } from '../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visit, visitWithTimeRange } from '../../../tasks/navigation';
 import {
   updateDates,
   setStartDate,
   setEndDate,
   updateTimelineDates,
-} from '../../tasks/date_picker';
-import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
-import { openAllHosts } from '../../tasks/hosts/main';
+} from '../../../tasks/date_picker';
+import { openFirstHostDetails, waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
+import { openAllHosts } from '../../../tasks/hosts/main';
 
-import { waitForIpsTableToBeLoaded } from '../../tasks/network/flows';
+import { waitForIpsTableToBeLoaded } from '../../../tasks/network/flows';
 import {
   clearSearchBar,
   kqlSearch,
   navigateFromHeaderTo,
   saveQuery,
-} from '../../tasks/security_header';
-import { openTimelineUsingToggle } from '../../tasks/security_main';
-import { addNameToTimelineAndSave, closeTimeline, populateTimeline } from '../../tasks/timeline';
+} from '../../../tasks/security_header';
+import { openTimelineUsingToggle } from '../../../tasks/security_main';
+import { addNameToTimelineAndSave, closeTimeline, populateTimeline } from '../../../tasks/timeline';
 
-import { hostsUrl } from '../../urls/navigation';
-import { ABSOLUTE_DATE_RANGE } from '../../urls/state';
+import { hostsUrl } from '../../../urls/navigation';
+import { ABSOLUTE_DATE_RANGE } from '../../../urls/state';
 
-import { getTimeline } from '../../objects/timeline';
+import { getTimeline } from '../../../objects/timeline';
 import {
   GLOBAL_SEARCH_BAR_FILTER_ITEM_AT,
   GLOBAL_SEARCH_BAR_PINNED_FILTER,
-} from '../../screens/search_bar';
+} from '../../../screens/search_bar';
 
 const ABSOLUTE_DATE = {
   endTime: 'Aug 1, 2019 @ 20:33:29.186',
