@@ -17,8 +17,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { TopNFunctionSortField } from '@kbn/profiling-utils';
 import React, { useEffect } from 'react';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asWeight } from '../../utils/formatters/as_weight';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 import { StackFrameSummary } from '../stack_frame_summary';
 import { CPUStat } from './cpu_stat';
 import { SampleStat } from './sample_stat';
@@ -39,6 +41,14 @@ export function FunctionRow({
   onFrameClick,
   setCellProps,
 }: Props) {
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+
+  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+    profilingUseLegacyCo2Calculation
+  );
+
   if (columnId === TopNFunctionSortField.Diff) {
     return <DiffColumn diff={functionRow.diff} setCellProps={setCellProps} />;
   }
@@ -75,10 +85,11 @@ export function FunctionRow({
     functionRow.impactEstimates?.selfCPU?.annualizedCo2
   ) {
     return (
-      // TODO: remove old calcs
-      <div>{`${asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)} | ${asWeight(
-        functionRow.annualCO2Tons * 1000
-      )}`}</div>
+      <div>
+        {shouldUseLegacyCo2Calculation
+          ? asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)
+          : asWeight(functionRow.annualCO2Tons * 1000)}
+      </div>
     );
   }
 
@@ -87,10 +98,11 @@ export function FunctionRow({
     functionRow.impactEstimates?.selfCPU?.annualizedDollarCost
   ) {
     return (
-      // TODO: remove old calcs
-      <div>{`${asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)} | ${asCost(
-        functionRow.annualCostUsd
-      )}`}</div>
+      <div>
+        {shouldUseLegacyCo2Calculation
+          ? asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)
+          : asCost(functionRow.annualCostUsd)}
+      </div>
     );
   }
 
