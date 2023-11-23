@@ -59,7 +59,7 @@ export const isolateHostFromEndpointList = (index: number = 0): void => {
     cy.get('tbody tr')
       .eq(index)
       .within(() => {
-        cy.get('td').eq(1).should('contain.text', 'Isolated');
+        cy.get('td').eq(1).should('contain', 'Isolated');
       });
   });
 };

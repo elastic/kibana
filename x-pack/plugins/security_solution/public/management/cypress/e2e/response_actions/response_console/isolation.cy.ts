@@ -72,6 +72,7 @@ describe('Response console', { tags: ['@ess', '@serverless'] }, () => {
       waitForEndpointListPageToBeLoaded(createdHost.hostname);
       // isolate the host first
       isolateHostFromEndpointList();
+      // verify and find the isolated host
       checkEndpointListForOnlyIsolatedHosts();
       openResponseConsoleFromEndpointList();
       performCommandInputChecks(command);
