@@ -95,12 +95,6 @@ export class SloSummaryCleanupTask {
       let soIdsToCheck: string[] = [];
       let sloSummaryIdsToDelete: string[] = [];
 
-      try {
-        await this.soClient.delete(SO_SLO_TYPE, 'e087b37d-db19-417c-9b5c-b387939d4b39');
-      } catch (e) {
-        this.logger.error(e);
-      }
-
       for await (const response of finder.find()) {
         const soItems = response.saved_objects.map(
           (so) => `${so.attributes.id}${SEPARATOR}${so.attributes.revision}`
@@ -208,7 +202,7 @@ export class SloSummaryCleanupTask {
       id: this.taskId,
       taskType: TASK_TYPE,
       schedule: {
-        interval: '1m',
+        interval: '1h',
       },
       scope: ['observability', 'slo'],
       state: {},
