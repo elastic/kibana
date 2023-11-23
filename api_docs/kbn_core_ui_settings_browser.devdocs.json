@@ -425,6 +425,57 @@
             "trackAdoption": false,
             "children": [],
             "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-ui-settings-browser",
+            "id": "def-common.IUiSettingsClient.validateValue",
+            "type": "Function",
+            "tags": [],
+            "label": "validateValue",
+            "description": [
+              "\nValidates a uiSettings value and returns a ValueValidation object."
+            ],
+            "signature": [
+              "(key: string, value: any) => Promise<",
+              "ValueValidation",
+              ">"
+            ],
+            "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.validateValue.$1",
+                "type": "string",
+                "tags": [],
+                "label": "key",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "@kbn/core-ui-settings-browser",
+                "id": "def-common.IUiSettingsClient.validateValue.$2",
+                "type": "Any",
+                "tags": [],
+                "label": "value",
+                "description": [],
+                "signature": [
+                  "any"
+                ],
+                "path": "packages/core/ui-settings/core-ui-settings-browser/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false

@@ -93,7 +93,7 @@
     "@kbn/text-based-languages",
     "@kbn/field-utils",
     "@kbn/discover-utils",
-    "@kbn/shared-ux-button-toolbar"
+    "@kbn/cell-actions"
   ],
   "exclude": [
     "target/**/*",

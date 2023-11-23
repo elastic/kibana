@@ -6,6 +6,7 @@
  * Side Public License, v 1.
  */
 
+import { inspect } from 'util';
 import { errors } from '@elastic/elasticsearch';
 
 export const patchElasticsearchClient = () => {
@@ -16,5 +17,11 @@ export const patchElasticsearchClient = () => {
       name: this.name,
       message: this.message,
     };
+  };
+
+  // @ts-expect-error
+  baseErrorPrototype[inspect.custom] = function () {
+    // @ts-expect-error
+    return this.toJSON();
   };
 };

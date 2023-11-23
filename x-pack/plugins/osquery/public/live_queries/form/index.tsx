@@ -222,6 +222,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.action_id ? (
         <ResultTabs
           actionId={singleQueryDetails?.action_id}
+          startDate={liveQueryDetails?.['@timestamp']}
           ecsMapping={serializedData.ecs_mapping}
           endDate={singleQueryDetails?.expiration}
           agentIds={singleQueryDetails?.agents}
@@ -232,6 +233,7 @@ const LiveQueryFormComponent: React.FC<LiveQueryFormProps> = ({
       singleQueryDetails?.action_id,
       singleQueryDetails?.expiration,
       singleQueryDetails?.agents,
+      liveQueryDetails,
       serializedData.ecs_mapping,
       liveQueryActionId,
     ]
