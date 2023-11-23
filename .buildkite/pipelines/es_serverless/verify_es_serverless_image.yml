@@ -95,7 +95,7 @@ steps:
             - exit_status: '*'
               limit: 1
 
-      - command: .buildkite/scripts/steps/functional/security_serverles_rule_management.sh
+      - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
         label: 'Serverless Rule Management - Security Solution Cypress Tests'
         agents:
           queue: n2-4-spot
