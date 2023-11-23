@@ -45,6 +45,10 @@ export function mergeDocuments(documents: Document[]): Document {
     mergeComponents(document.components, resultDocument.components!);
   }
 
+  for (const schema of Object.keys(resultDocument.components?.schemas ?? {})) {
+    deleteSourceFilePathProp(resultDocument.components!.schemas![schema] as OpenAPIV3.SchemaObject);
+  }
+
   return resultDocument;
 }
 
@@ -142,8 +146,6 @@ function mergeComponents(
     }
 
     resultComponents.schemas[schema] = sourceComponents.schemas[schema];
-
-    deleteSourceFilePathProp(resultComponents.schemas[schema] as OpenAPIV3.SchemaObject);
   }
 }
 
