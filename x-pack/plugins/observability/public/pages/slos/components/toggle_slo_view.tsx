@@ -42,10 +42,12 @@ const toggleButtonsIcons = [
 
 export function ToggleSLOView({ sloView, setSLOView, setCardsPerRow }: Props) {
   return (
-    <EuiFlexGroup>
+    <EuiFlexGroup alignItems="center">
       <EuiFlexItem>
         <EuiButtonGroup
-          legend="Text align"
+          legend={i18n.translate('xpack.observability.toggleSLOView.euiButtonGroup.sloView', {
+            defaultMessage: 'SLO View',
+          })}
           options={toggleButtonsIcons}
           idSelected={sloView}
           onChange={(id) => setSLOView(id as SLOViewType)}

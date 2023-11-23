@@ -9,12 +9,11 @@ import { EuiFlexGroup, EuiFlexItem, EuiPagination } from '@elastic/eui';
 import { useIsMutating } from '@tanstack/react-query';
 import React, { useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
+import { SlosView } from './slos_view';
 import { SLO_CARD_VIEW_PER_ROW_SIZE } from './card_view/cards_per_row';
 import { SLOViewType, ToggleSLOView } from './toggle_slo_view';
-import { SloListCardView } from './card_view/slos_card_view';
 import { useFetchSloList } from '../../../hooks/slo/use_fetch_slo_list';
 import { useUrlSearchState } from '../hooks/use_url_search_state';
-import { SloListItems } from './slo_list_items';
 import { SloListSearchBar, SortField } from './slo_list_search_bar';
 
 export interface Props {
@@ -81,20 +80,13 @@ export function SloList({ autoRefresh }: Props) {
       <EuiFlexItem grow={false}>
         <ToggleSLOView sloView={sloView} setSLOView={setSLOView} setCardsPerRow={setCardsPerRow} />
       </EuiFlexItem>
-      {sloView === 'cardView' ? (
-        <EuiFlexItem>
-          <SloListCardView
-            sloList={results}
-            loading={isLoading || isRefetching}
-            error={isError}
-            gridSize={cardsPerRow}
-          />
-        </EuiFlexItem>
-      ) : (
-        <EuiFlexItem>
-          <SloListItems sloList={results} loading={isLoading || isRefetching} error={isError} />
-        </EuiFlexItem>
-      )}
+      <SlosView
+        sloList={results}
+        loading={isLoading || isRefetching}
+        error={isError}
+        cardsPerRow={cardsPerRow}
+        sloView={sloView}
+      />
 
       {total > 0 ? (
         <EuiFlexItem>

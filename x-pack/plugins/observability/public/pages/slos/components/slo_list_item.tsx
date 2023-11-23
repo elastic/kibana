@@ -6,20 +6,15 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText } from '@elastic/eui';
-import { ALL_VALUE, HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
+import { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { useQueryClient } from '@tanstack/react-query';
 import React, { useState } from 'react';
+import { useSloFormattedSummary } from '../hooks/use_slo_summary';
+import { BurnRateRuleFlyout } from './common/burn_rate_rule_flyout';
+import { useSloListActions } from '../hooks/use_slo_list_actions';
 import { SloItemActions } from './slo_item_actions';
 import { SloDeleteConfirmationModal } from '../../../components/slo/delete_confirmation_modal/slo_delete_confirmation_modal';
-import { sloFeatureId } from '../../../../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../common/constants';
-import { paths } from '../../../../common/locators/paths';
-import { sloKeys } from '../../../hooks/slo/query_key_factory';
-import { useDeleteSlo } from '../../../hooks/slo/use_delete_slo';
 import type { SloRule } from '../../../hooks/slo/use_fetch_rules_for_slo';
-import { useGetFilteredRuleTypes } from '../../../hooks/use_get_filtered_rule_types';
-import { useKibana } from '../../../utils/kibana_react';
 import { SloBadges } from './badges/slo_badges';
 import { SloSummary } from './slo_summary';
 
@@ -38,43 +33,18 @@ export function SloListItem({
   historicalSummaryLoading,
   activeAlerts,
 }: SloListItemProps) {
-  const {
-    http: { basePath },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
-  } = useKibana().services;
-  const queryClient = useQueryClient();
-
-  const filteredRuleTypes = useGetFilteredRuleTypes();
-
-  const { mutate: deleteSlo } = useDeleteSlo();
-
   const [isActionsPopoverOpen, setIsActionsPopoverOpen] = useState(false);
   const [isAddRuleFlyoutOpen, setIsAddRuleFlyoutOpen] = useState(false);
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
-  const sloDetailsUrl = basePath.prepend(
-    paths.observability.sloDetails(
-      slo.id,
-      slo.groupBy !== ALL_VALUE && slo.instanceId ? slo.instanceId : undefined
-    )
-  );
+  const { sloDetailsUrl } = useSloFormattedSummary(slo);
 
-  const handleSavedRule = async () => {
-    queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
-  };
-
-  const handleDeleteConfirm = () => {
-    setDeleteConfirmationModalOpen(false);
-    deleteSlo({ id: slo.id, name: slo.name });
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
-  const handleCreateRule = () => {
-    setIsActionsPopoverOpen(false);
-    setIsAddRuleFlyoutOpen(true);
-  };
+  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
+    slo,
+    setDeleteConfirmationModalOpen,
+    setIsActionsPopoverOpen,
+    setIsAddRuleFlyoutOpen,
+  });
 
   return (
     <EuiPanel data-test-subj="sloItem" hasBorder hasShadow={false}>
@@ -129,19 +99,11 @@ export function SloListItem({
         </EuiFlexItem>
       </EuiFlexGroup>
 
-      {isAddRuleFlyoutOpen ? (
-        <AddRuleFlyout
-          consumer={sloFeatureId}
-          filteredRuleTypes={filteredRuleTypes}
-          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
-          onSave={handleSavedRule}
-          onClose={() => {
-            setIsAddRuleFlyoutOpen(false);
-          }}
-          useRuleProducer
-        />
-      ) : null}
+      <BurnRateRuleFlyout
+        slo={slo}
+        isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
+        setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+      />
 
       {isDeleteConfirmationModalOpen ? (
         <SloDeleteConfirmationModal

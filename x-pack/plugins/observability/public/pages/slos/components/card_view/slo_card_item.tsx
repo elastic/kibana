@@ -18,15 +18,11 @@ import {
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import { SLOWithSummaryResponse, HistoricalSummaryResponse, ALL_VALUE } from '@kbn/slo-schema';
 import { Rule } from '@kbn/triggers-actions-ui-plugin/public';
-import { useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
+import { useSloListActions } from '../../hooks/use_slo_list_actions';
+import { BurnRateRuleFlyout } from '../common/burn_rate_rule_flyout';
 import { formatHistoricalData } from '../../../../utils/slo/chart_data_formatter';
-import { useDeleteSlo } from '../../../../hooks/slo/use_delete_slo';
-import { sloKeys } from '../../../../hooks/slo/query_key_factory';
-import { useGetFilteredRuleTypes } from '../../../../hooks/use_get_filtered_rule_types';
 import { useKibana } from '../../../../utils/kibana_react';
-import { sloFeatureId } from '../../../../../common';
-import { SLO_BURN_RATE_RULE_TYPE_ID } from '../../../../../common/constants';
 import { useSloFormattedSummary } from '../../hooks/use_slo_summary';
 import { SloCardItemActions } from './slo_card_item_actions';
 import { SloRule } from '../../../../hooks/slo/use_fetch_rules_for_slo';
@@ -41,6 +37,7 @@ export interface Props {
   activeAlerts?: number;
   loading: boolean;
   error: boolean;
+  cardsPerRow: number;
 }
 
 const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
@@ -54,10 +51,18 @@ const useCardColor = (status?: SLOWithSummaryResponse['summary']['status']) => {
   return colors[status ?? 'NO_DATA'];
 };
 
-export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Props) {
+const getSubTitle = (slo: SLOWithSummaryResponse, cardsPerRow: number) => {
+  const subTitle =
+    slo.groupBy && slo.groupBy !== ALL_VALUE ? `${slo.groupBy}: ${slo.instanceId}` : '';
+  if (cardsPerRow === 4) {
+    return subTitle.substring(0, 30) + (subTitle.length > 30 ? '..' : '');
+  }
+  return subTitle.substring(0, 40) + (subTitle.length > 40 ? '..' : '');
+};
+
+export function SloCardItem({ slo, rules, activeAlerts, historicalSummary, cardsPerRow }: Props) {
   const {
     application: { navigateToUrl },
-    triggersActionsUi: { getAddRuleFlyout: AddRuleFlyout },
   } = useKibana().services;
 
   const [isMouseOver, setIsMouseOver] = useState(false);
@@ -66,30 +71,19 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
   const [isDeleteConfirmationModalOpen, setDeleteConfirmationModalOpen] = useState(false);
 
   const { sliValue, sloTarget, sloDetailsUrl } = useSloFormattedSummary(slo);
-  const filteredRuleTypes = useGetFilteredRuleTypes();
-  const queryClient = useQueryClient();
-  const { mutate: deleteSlo } = useDeleteSlo();
+
   const cardColor = useCardColor(slo.summary.status);
+
+  const subTitle = getSubTitle(slo, cardsPerRow);
 
   const historicalSliData = formatHistoricalData(historicalSummary, 'sli_value');
 
-  const handleSavedRule = async () => {
-    queryClient.invalidateQueries({ queryKey: sloKeys.rules(), exact: false });
-  };
-
-  const handleDeleteConfirm = () => {
-    setDeleteConfirmationModalOpen(false);
-    deleteSlo({ id: slo.id, name: slo.name });
-  };
-
-  const handleDeleteCancel = () => {
-    setDeleteConfirmationModalOpen(false);
-  };
-
-  const handleCreateRule = () => {
-    setIsActionsPopoverOpen(false);
-    setIsAddRuleFlyoutOpen(true);
-  };
+  const { handleCreateRule, handleDeleteCancel, handleDeleteConfirm } = useSloListActions({
+    slo,
+    setDeleteConfirmationModalOpen,
+    setIsActionsPopoverOpen,
+    setIsAddRuleFlyoutOpen,
+  });
 
   return (
     <>
@@ -128,10 +122,7 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
               [
                 {
                   title: slo.name,
-                  subtitle:
-                    slo.groupBy && slo.groupBy !== ALL_VALUE
-                      ? `${slo.groupBy}: ${slo.instanceId}`
-                      : undefined,
+                  subtitle: subTitle,
                   value: sliValue,
                   trendShape: MetricTrendShape.Area,
                   trend: historicalSliData?.map((d) => ({
@@ -171,19 +162,12 @@ export function SloCardItem({ slo, rules, activeAlerts, historicalSummary }: Pro
           />
         )}
       </EuiPanel>
-      {isAddRuleFlyoutOpen ? (
-        <AddRuleFlyout
-          consumer={sloFeatureId}
-          filteredRuleTypes={filteredRuleTypes}
-          ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
-          initialValues={{ name: `${slo.name} Burn Rate rule`, params: { sloId: slo.id } }}
-          onSave={handleSavedRule}
-          onClose={() => {
-            setIsAddRuleFlyoutOpen(false);
-          }}
-          useRuleProducer
-        />
-      ) : null}
+
+      <BurnRateRuleFlyout
+        slo={slo}
+        isAddRuleFlyoutOpen={isAddRuleFlyoutOpen}
+        setIsAddRuleFlyoutOpen={setIsAddRuleFlyoutOpen}
+      />
 
       {isDeleteConfirmationModalOpen ? (
         <SloDeleteConfirmationModal
