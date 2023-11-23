@@ -21,11 +21,9 @@ steps:
       automatic:
         - exit_status: "*"
           limit: 1
-        - exit_status: "-1"
-          limit: 2
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless
-    label: 'Serverless MKI QA Security Cypress Tests'
+    label: "Serverless MKI QA Security Cypress Tests"
     depends_on: build_image
     agents:
       queue: n2-4-spot
@@ -34,11 +32,11 @@ steps:
     parallelism: 6
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: "*"
           limit: 1
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:explore
-    label: 'Serverless MKI QA Explore - Security Solution Cypress Tests'
+    label: "Serverless MKI QA Explore - Security Solution Cypress Tests"
     depends_on: build_image
     agents:
       queue: n2-4-spot
@@ -47,11 +45,11 @@ steps:
     parallelism: 4
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: "*"
           limit: 1
 
   - command: .buildkite/scripts/pipelines/security_solution_quality_gate/security_solution_cypress/mki_security_solution_cypress.sh cypress:run:qa:serverless:investigations
-    label: 'Serverless MKI QA Investigations - Security Solution Cypress Tests'
+    label: "Serverless MKI QA Investigations - Security Solution Cypress Tests"
     depends_on: build_image
     agents:
       queue: n2-4-spot
