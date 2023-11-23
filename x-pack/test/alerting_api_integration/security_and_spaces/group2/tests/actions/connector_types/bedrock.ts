@@ -283,6 +283,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             status: 'error',
             retry: true,
             message: 'an error occurred while running the action',
+            errorSource: TaskErrorSource.USER,
             service_message: `Sub action "invalidAction" is not registered. Connector id: ${bedrockActionId}. Connector name: Amazon Bedrock. Connector type: .bedrock`,
           });
         });
@@ -512,6 +513,7 @@ export default function bedrockTest({ getService }: FtrProviderContext) {
             connector_id: bedrockActionId,
             message: 'an error occurred while running the action',
             retry: true,
+            errorSource: TaskErrorSource.USER,
             service_message:
               'Status code: 422. Message: API Error: Unprocessable Entity - Malformed input request: extraneous key [ooooo] is not permitted, please reformat your input and try again.',
           });

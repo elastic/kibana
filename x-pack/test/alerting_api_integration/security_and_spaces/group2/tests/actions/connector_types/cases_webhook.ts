@@ -638,6 +638,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: Invalid Create case URL: Error: Invalid protocol.  ',
               });
@@ -668,6 +669,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: Invalid Update case URL: Error: Invalid URL.  ',
               });
@@ -735,6 +737,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: Invalid Create comment URL: Error: Invalid URL.  ',
               });
