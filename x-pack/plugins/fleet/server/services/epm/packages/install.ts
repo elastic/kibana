@@ -598,11 +598,7 @@ async function installPackageCommon(options: {
       })
       .catch(async (err: Error) => {
         logger.warn(`Failure to install package [${pkgName}]: [${err.toString()}]`, {
-<<<<<<< HEAD
           error: { stack_trace: err.stack },
-=======
-          error: { stack_trace: err.stack }
->>>>>>> 2d9a3926423 (Add spans around preconfiguration steps)
         });
         await handleInstallPackageFailure({
           savedObjectsClient,
