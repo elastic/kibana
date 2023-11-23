@@ -223,8 +223,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    // @TODO: fix this in a follow up
-    describe.skip('ES|QL mode', () => {
+    describe('ES|QL mode', () => {
       const type = 'esql';
 
       beforeEach(async () => {
