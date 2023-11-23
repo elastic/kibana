@@ -215,7 +215,7 @@ export function ChangeDataView({
             })}
           </EuiContextMenuItem>
         ) : (
-          <React.Fragment />
+          <React.Fragment key="empty" />
         ),
         <EuiHorizontalRule margin="none" key="dataviewActions-divider" />
       );
@@ -336,7 +336,7 @@ export function ChangeDataView({
     if (textBasedLanguages?.length) {
       panelItems.push(
         <EuiHorizontalRule margin="none" key="textbasedLanguages-divider" />,
-        <EuiPanel color="transparent" paddingSize="none">
+        <EuiPanel color="transparent" paddingSize="none" key="try-esql">
           <EuiButton
             color="success"
             size="s"

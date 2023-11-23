@@ -5,10 +5,4 @@
  * 2.0.
  */
 
-export function toKueryFilterFormat(
-  key: string,
-  values: string[],
-  separator: 'OR' | 'AND' = 'OR'
-) {
-  return values.map((value) => `${key} : "${value}"`).join(` ${separator} `);
-}
+export { DataViewPrompt } from './data_view_prompt';
