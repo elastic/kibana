@@ -38,7 +38,7 @@ import {
 import { getRichDetectors } from './util/general';
 import { CategorizationExamplesLoader } from '../results_loader';
 import { getNewJobDefaults } from '../../../../services/ml_server_info';
-import { isCcsEsIndexPattern } from '../../../../util/index_utils';
+import { isCcsIndexPattern } from '../../../../util/index_utils';
 
 export class CategorizationJobCreator extends JobCreator {
   protected _type: JOB_TYPE = JOB_TYPE.CATEGORIZATION;
@@ -165,7 +165,7 @@ export class CategorizationJobCreator extends JobCreator {
       examples.length === 0 &&
       status === CATEGORY_EXAMPLES_VALIDATION_STATUS.INVALID &&
       checks[0]?.id === VALIDATION_RESULT.NO_EXAMPLES &&
-      isCcsEsIndexPattern(this.indexPatternTitle)
+      isCcsIndexPattern(this.indexPatternTitle)
     );
   }
 
