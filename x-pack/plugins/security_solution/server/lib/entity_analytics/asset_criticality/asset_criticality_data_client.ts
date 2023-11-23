@@ -16,6 +16,22 @@ interface AssetCriticalityClientOpts {
   namespace: string;
 }
 
+interface AssetCriticalityDoc {
+  id_field: string;
+  id_value: string;
+  criticality: string;
+  '@timestamp': string;
+}
+
+interface AssetCriticalityUpsert {
+  idField: string;
+  idValue: string;
+  criticality: string;
+}
+
+type AssetCriticalityIdParts = Pick<AssetCriticalityUpsert, 'idField' | 'idValue'>;
+
+const createId = ({ idField, idValue }: AssetCriticalityIdParts) => `${idField}:${idValue}`;
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
   /**
@@ -27,16 +43,20 @@ export class AssetCriticalityDataClient {
       esClient: this.options.esClient,
       logger: this.options.logger,
       options: {
-        index: getAssetCriticalityIndex(this.options.namespace),
+        index: this.getIndex(),
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
   }
 
+  private getIndex() {
+    return getAssetCriticalityIndex(this.options.namespace);
+  }
+
   public async doesIndexExist() {
     try {
       const result = await this.options.esClient.indices.exists({
-        index: getAssetCriticalityIndex(this.options.namespace),
+        index: this.getIndex(),
       });
       return result;
     } catch (e) {
@@ -50,5 +70,52 @@ export class AssetCriticalityDataClient {
     return {
       isAssetCriticalityResourcesInstalled,
     };
+  }
+
+  public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityDoc | undefined> {
+    const id = createId(idParts);
+
+    try {
+      const body = await this.options.esClient.get<AssetCriticalityDoc>({
+        id,
+        index: this.getIndex(),
+      });
+
+      return body._source as AssetCriticalityDoc;
+    } catch (err) {
+      if (err.statusCode === 404) {
+        return undefined;
+      } else {
+        throw err;
+      }
+    }
+  }
+
+  public async upsert(item: AssetCriticalityUpsert): Promise<AssetCriticalityDoc> {
+    const id = createId(item);
+    const doc = {
+      id_field: item.idField,
+      id_value: item.idValue,
+      criticality: item.criticality,
+      '@timestamp': new Date().toISOString(),
+    };
+
+    await this.options.esClient.update({
+      id,
+      index: this.getIndex(),
+      body: {
+        doc,
+        doc_as_upsert: true,
+      },
+    });
+
+    return doc;
+  }
+
+  public async delete(idParts: AssetCriticalityIdParts) {
+    await this.options.esClient.delete({
+      id: createId(idParts),
+      index: this.getIndex(),
+    });
   }
 }
