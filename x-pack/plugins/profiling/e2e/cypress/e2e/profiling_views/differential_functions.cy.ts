@@ -167,17 +167,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get('[data-test-subj="topNFunctionsGrid"] .euiDataGridRow').should('have.length.gt', 1);
-      cy.get('[data-test-subj="TopNFunctionsComparisonGrid"] .euiDataGridRow').should(
-        'have.length.gt',
-        1
-      );
-      cy.get(
-        '[data-test-subj="topNFunctionsGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('vmlinux');
-      cy.get(
-        '[data-test-subj="TopNFunctionsComparisonGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('vmlinux');
+      cy.get('[data-test-subj="frame"]').contains('vmlinux');
+      cy.get('[data-test-subj="comparison_frame"]').contains('vmlinux');
 
       cy.addKqlFilter({
         key: 'process.thread.name',
@@ -190,12 +181,8 @@ describe('Differential Functions page', () => {
       });
       cy.wait('@getTopNFunctions');
       cy.wait('@getTopNFunctions');
-      cy.get(
-        '[data-test-subj="topNFunctionsGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('libsystemd-shared-237.so');
-      cy.get(
-        '[data-test-subj="TopNFunctionsComparisonGrid"] [data-test-subj="profilingStackFrameSummaryLink"]'
-      ).contains('libjvm.so');
+      cy.get('[data-test-subj="frame"]').contains('libsystemd-shared-237.so');
+      cy.get('[data-test-subj="comparison_frame"]').contains('libjvm.so');
     });
   });
 });

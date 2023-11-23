@@ -163,7 +163,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                   >
                     <EuiCheckbox
                       disabled={isJobCreated || canCreateDataView === false}
-                      name="mlDataFrameAnalyticsCreateIndexPattern"
+                      name="mlDataFrameAnalyticsCreateDataView"
                       id={'dataframe-create-data-view-checkbox'}
                       label={i18n.translate(
                         'xpack.ml.dataframe.analytics.create.createDataViewLabel',
@@ -173,7 +173,7 @@ export const CreateStep: FC<Props> = ({ actions, state, step }) => {
                       )}
                       checked={createIndexPattern === true}
                       onChange={() => setFormState({ createIndexPattern: !createIndexPattern })}
-                      data-test-subj="mlAnalyticsCreateJobWizardCreateIndexPatternCheckbox"
+                      data-test-subj="mlAnalyticsCreateJobWizardCreateDataViewCheckbox"
                     />
                   </EuiFormRow>
                 </EuiFlexItem>

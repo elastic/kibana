@@ -20,7 +20,7 @@ import { tabs } from './tabs';
 import { PanelFooter } from './footer';
 
 export type RightPanelPaths = 'overview' | 'table' | 'json';
-export const RightPanelKey: RightPanelProps['key'] = 'document-details-right';
+export const DocumentDetailsRightPanelKey: RightPanelProps['key'] = 'document-details-right';
 
 export interface RightPanelProps extends FlyoutPanelProps {
   key: 'document-details-right';
@@ -51,7 +51,7 @@ export const RightPanel: FC<Partial<RightPanelProps>> = memo(({ path }) => {
 
   const setSelectedTabId = (tabId: RightPanelTabsType[number]['id']) => {
     openRightPanel({
-      id: RightPanelKey,
+      id: DocumentDetailsRightPanelKey,
       path: {
         tab: tabId,
       },

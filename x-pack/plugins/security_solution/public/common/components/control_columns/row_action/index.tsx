@@ -13,7 +13,7 @@ import { dataTableActions, TableId } from '@kbn/securitysolution-data-table';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { timelineActions } from '../../../../timelines/store/timeline';
 import { ENABLE_EXPANDABLE_FLYOUT_SETTING } from '../../../../../common/constants';
-import { RightPanelKey } from '../../../../flyout/document_details/right';
+import { DocumentDetailsRightPanelKey } from '../../../../flyout/document_details/right';
 import type {
   SetEventsDeleted,
   SetEventsLoading,
@@ -112,7 +112,7 @@ const RowActionComponent = ({
     if (showExpandableFlyout) {
       openFlyout({
         right: {
-          id: RightPanelKey,
+          id: DocumentDetailsRightPanelKey,
           params: {
             id: eventId,
             indexName,
