@@ -17,7 +17,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  esIndexName: 'ft_ihp_outlier',
+  indexName: 'ft_ihp_outlier',
   queryEntityFieldNames: ['SaleType'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };

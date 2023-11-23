@@ -17,7 +17,7 @@ import {
 
 const testDiscoverCustomUrl: DiscoverUrlConfig = {
   label: 'Show data',
-  esIndexName: 'ft_bank_marketing',
+  indexName: 'ft_bank_marketing',
   queryEntityFieldNames: ['day'],
   timeRange: TIME_RANGE_TYPE.AUTO,
 };
