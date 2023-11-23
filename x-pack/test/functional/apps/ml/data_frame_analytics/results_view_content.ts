@@ -252,7 +252,7 @@ export default function ({ getService }: FtrProviderContext) {
       await ml.securityUI.loginAsMlPowerUser();
       for (const testData of testDataList) {
         await esArchiver.loadIfNeeded(testData.archive);
-        await ml.testResources.createIndexPatternIfNeeded(
+        await ml.testResources.createDataViewIfNeeded(
           testData.indexPattern.name,
           testData.indexPattern.timeField
         );
@@ -263,7 +263,7 @@ export default function ({ getService }: FtrProviderContext) {
     after(async () => {
       await ml.api.cleanMlIndices();
       for (const testData of testDataList) {
-        await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
+        await ml.testResources.deleteDataViewByTitle(testData.indexPattern.name);
       }
     });
 
@@ -273,13 +273,13 @@ export default function ({ getService }: FtrProviderContext) {
           await ml.navigation.navigateToMl();
           await ml.navigation.navigateToDataFrameAnalytics();
           await ml.dataFrameAnalyticsTable.waitForAnalyticsToLoad();
-          await ml.testResources.createIndexPatternIfNeeded(testData.job.dest!.index as string);
+          await ml.testResources.createDataViewIfNeeded(testData.job.dest!.index as string);
           await ml.dataFrameAnalyticsTable.openResultsView(testData.job.id as string);
         });
 
         after(async () => {
           await ml.api.deleteIndices(testData.job.dest!.index as string);
-          await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
+          await ml.testResources.deleteDataViewByTitle(testData.job.dest!.index as string);
         });
 
         it('should display the total feature importance in the results view', async () => {
