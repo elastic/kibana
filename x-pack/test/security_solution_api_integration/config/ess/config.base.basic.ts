@@ -5,6 +5,9 @@
  * 2.0.
  */
 
-export const getSignalStatus = () => ({
-  aggs: { statuses: { terms: { field: 'kibana.alert.workflow_status', size: 10 } } },
+import { createTestConfig } from './config.base';
+
+export default createTestConfig({
+  license: 'basic',
+  ssl: true,
 });
