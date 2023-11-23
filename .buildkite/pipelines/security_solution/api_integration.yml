@@ -21,6 +21,8 @@ steps:
       automatic:
         - exit_status: "*"
           limit: 1
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running exception_workflows:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_workflows:qa:serverless
@@ -32,6 +34,8 @@ steps:
     retry:
       automatic:
         - exit_status: "*"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running exception_operators_date_numeric_types:qa:serverless
@@ -45,6 +49,8 @@ steps:
       automatic:
         - exit_status: "*"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running exception_operators_keyword:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_keyword:qa:serverless
@@ -56,6 +62,8 @@ steps:
     retry:
       automatic:
         - exit_status: "*"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running exception_operators_ips:qa:serverless
@@ -69,6 +77,8 @@ steps:
       automatic:
         - exit_status: "*"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running exception_operators_long:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh exception_operators_long:qa:serverless
@@ -80,6 +90,8 @@ steps:
     retry:
       automatic:
         - exit_status: "1"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running exception_operators_text:qa:serverless
@@ -93,6 +105,8 @@ steps:
       automatic:
         - exit_status: "1"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running rule_creation:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh rule_creation:qa:serverless
@@ -104,6 +118,8 @@ steps:
     retry:
       automatic:
         - exit_status: "1"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running actions:qa:serverless
@@ -117,6 +133,8 @@ steps:
       automatic:
         - exit_status: "1"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running entity_analytics:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh entity_analytics:qa:serverless
@@ -128,6 +146,8 @@ steps:
     retry:
       automatic:
         - exit_status: "1"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running prebuilt_rules_management:qa:serverless
@@ -141,6 +161,8 @@ steps:
       automatic:
         - exit_status: "1"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_bundled_prebuilt_rules_package:qa:serverless
@@ -152,6 +174,8 @@ steps:
     retry:
       automatic:
         - exit_status: "1"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running prebuilt_rules_large_prebuilt_rules_package:qa:serverless
@@ -165,6 +189,8 @@ steps:
       automatic:
         - exit_status: "1"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running prebuilt_rules_update_prebuilt_rules_package:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh prebuilt_rules_update_prebuilt_rules_package:qa:serverless
@@ -176,6 +202,8 @@ steps:
     retry:
       automatic:
         - exit_status: "1"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
 
   - label: Running rule_execution_logic:qa:serverless
@@ -189,6 +217,8 @@ steps:
       automatic:
         - exit_status: "1"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running user_roles:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh user_roles:qa:serverless
@@ -201,6 +231,8 @@ steps:
       automatic:
         - exit_status: "1"
           limit: 2
+        - exit_status: "-1"
+          limit: 2
 
   - label: Running telemetry:qa:serverless
     command: .buildkite/scripts/pipelines/security_solution_quality_gate/api-integration-tests.sh telemetry:qa:serverless
@@ -212,4 +244,6 @@ steps:
     retry:
       automatic:
         - exit_status: "1"
+          limit: 2
+        - exit_status: "-1"
           limit: 2
