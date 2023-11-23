@@ -14,6 +14,10 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
   const { dir } = parse(fileName);
   const relativePathToFile = dir.replace(cwd, '');
 
+  // We need to match the path of the file that is being worked in with the path
+  // that is noted in the values inside the i18nrc.json object.
+  // These values differ depending on which i18nrc.json object you look at (there are multiple)
+  // so we need to account for both notations.
   const relativePathArray = relativePathToFile.includes('src')
     ? relativePathToFile.split('/').slice(1)
     : relativePathToFile.split('/').slice(2);
