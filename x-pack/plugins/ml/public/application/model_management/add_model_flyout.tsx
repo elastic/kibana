@@ -47,16 +47,17 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
     services: { docLinks },
   } = useMlKibana();
 
-  const [selectedTabId, setSelectedTabId] = useState('elser');
+  const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
+  const isElserTabVisible = canCreateTrainedModels && modelDownloads.length > 0;
+
+  const [selectedTabId, setSelectedTabId] = useState(isElserTabVisible ? 'elser' : 'thirdParty');
   const [selectedModelId, setSelectedModelId] = useState<string | undefined>(
     modelDownloads.find((m) => m.recommended)?.model_id
   );
 
-  const canCreateTrainedModels = usePermissionCheck('canCreateTrainedModels');
-
   const tabs = useMemo(() => {
     return [
-      ...(canCreateTrainedModels
+      ...(isElserTabVisible
         ? [
             {
               id: 'elser',
@@ -387,7 +388,7 @@ export const AddModelFlyout: FC<AddModelFlyoutProps> = ({ onClose, onSubmit, mod
       },
     ];
   }, [
-    canCreateTrainedModels,
+    isElserTabVisible,
     docLinks.links.enterpriseSearch.supportedNlpModels,
     docLinks.links.ml.nlpElser,
     docLinks.links.ml.nlpImportModel,
