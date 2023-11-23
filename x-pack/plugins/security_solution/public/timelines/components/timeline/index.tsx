@@ -193,27 +193,31 @@ const StatefulTimelineComponent: React.FC<Props> = ({
       >
         <TimelineSavingProgress timelineId={timelineId} />
         {timelineType === TimelineType.template && (
-          <TimelineTemplateBadge>{i18n.TIMELINE_TEMPLATE}</TimelineTemplateBadge>
+          <TimelineTemplateBadge className="timeline-template-badge">
+            {i18n.TIMELINE_TEMPLATE}
+          </TimelineTemplateBadge>
         )}
-        {resolveConflictComponent}
-        <HideShowContainer
-          $isVisible={!timelineFullScreen}
-          data-test-subj="timeline-hide-show-container"
-        >
-          <FlyoutHeaderPanel timelineId={timelineId} />
-          <FlyoutHeader timelineId={timelineId} />
-        </HideShowContainer>
+        <div className="timeline-body" data-test-subj="timeline-body">
+          {resolveConflictComponent}
+          <HideShowContainer
+            $isVisible={!timelineFullScreen}
+            data-test-subj="timeline-hide-show-container"
+          >
+            <FlyoutHeaderPanel timelineId={timelineId} />
+            <FlyoutHeader timelineId={timelineId} />
+          </HideShowContainer>
 
-        <TabsContent
-          graphEventId={graphEventId}
-          sessionViewConfig={sessionViewConfig}
-          renderCellValue={renderCellValue}
-          rowRenderers={rowRenderers}
-          timelineId={timelineId}
-          timelineType={timelineType}
-          timelineDescription={description}
-          timelineFullScreen={timelineFullScreen}
-        />
+          <TabsContent
+            graphEventId={graphEventId}
+            sessionViewConfig={sessionViewConfig}
+            renderCellValue={renderCellValue}
+            rowRenderers={rowRenderers}
+            timelineId={timelineId}
+            timelineType={timelineType}
+            timelineDescription={description}
+            timelineFullScreen={timelineFullScreen}
+          />
+        </div>
       </TimelineContainer>
     </TimelineContext.Provider>
   );
