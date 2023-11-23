@@ -6,7 +6,14 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiSelect,
+  EuiSpacer,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
 import {
@@ -24,6 +31,8 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
   messageVariables,
   errors,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const {
     eventAction,
     dedupKey,
@@ -139,7 +148,7 @@ const PagerDutyParamsFields: React.FunctionComponent<ActionParamsProps<PagerDuty
           </EuiFormRow>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiFlexGroup style={{ marginTop: '5px' }}>
+      <EuiFlexGroup css={{ marginTop: euiTheme.size.s }}>
         <EuiFlexItem>
           <EuiFormRow
             fullWidth
