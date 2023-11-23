@@ -27,7 +27,8 @@
     "@kbn/core-plugins-server",
     "@kbn/react-kibana-mount",
     "@kbn/react-kibana-context-theme",
-    "@kbn/analytics"
+    "@kbn/analytics",
+    "@kbn/usage-collection-plugin"
   ],
   "exclude": ["target/**/*"]
 }
