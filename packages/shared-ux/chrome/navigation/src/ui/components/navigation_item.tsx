@@ -104,7 +104,7 @@ function NavigationItemComp<
     const href = getNavigationNodeHref(navNode);
     const dataTestSubj = classNames(`nav-item`, {
       [`nav-item-deepLinkId-${navNode.deepLink?.id}`]: !!navNode.deepLink,
-      [`nav-item-isActive`]: navNode.isActive,
+      [`nav-item-isActive`]: isActive,
     });
 
     return (
