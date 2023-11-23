@@ -54,6 +54,7 @@ describe('AlertsClientFactory', () => {
       auditLogger,
       esClient: {},
       ruleDataService: alertsClientFactoryParams.ruleDataService,
+      getRuleList: alertsClientFactoryParams.getRuleList,
       getRuleType: alertsClientFactoryParams.getRuleType,
       getAlertIndicesAlias: alertsClientFactoryParams.getAlertIndicesAlias,
     });
