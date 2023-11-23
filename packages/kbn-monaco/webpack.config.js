@@ -15,7 +15,7 @@ const getWorkerEntry = (language) => {
     case 'json':
       return 'monaco-editor/esm/vs/language/json/json.worker.js';
     case 'yaml':
-      return 'monaco-yaml/lib/esm/yaml.worker.js';
+      return 'monaco-yaml/yaml.worker.js';
     default:
       return path.resolve(__dirname, 'src', language, 'worker', `${language}.worker.ts`);
   }

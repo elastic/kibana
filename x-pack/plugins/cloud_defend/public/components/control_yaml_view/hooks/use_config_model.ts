@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { useMemo } from 'react';
-import { setDiagnosticsOptions } from 'monaco-yaml';
+import { configureMonacoYaml } from 'monaco-yaml';
 import { monaco } from '@kbn/monaco';
 import { getSelectorsAndResponsesFromYaml } from '../../../../common/utils/helpers';
 
@@ -49,7 +49,7 @@ export const useConfigModel = (configuration: string) => {
       responseProps.exclude.items = selectorEnum;
     }
 
-    setDiagnosticsOptions({
+    configureMonacoYaml(monaco, {
       validate: true,
       completion: true,
       hover: true,
