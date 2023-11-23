@@ -1,0 +1,141 @@
+{
+  "id": "@kbn/ml-ui-actions",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/ml-ui-actions",
+        "id": "def-common.CreateCategorizationADJobContext",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateCategorizationADJobContext",
+        "description": [],
+        "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/ml-ui-actions",
+            "id": "def-common.CreateCategorizationADJobContext.field",
+            "type": "Object",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataViewField",
+                "text": "DataViewField"
+              }
+            ],
+            "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-ui-actions",
+            "id": "def-common.CreateCategorizationADJobContext.dataView",
+            "type": "Object",
+            "tags": [],
+            "label": "dataView",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "dataViews",
+                "scope": "common",
+                "docId": "kibDataViewsPluginApi",
+                "section": "def-common.DataView",
+                "text": "DataView"
+              }
+            ],
+            "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-ui-actions",
+            "id": "def-common.CreateCategorizationADJobContext.query",
+            "type": "Object",
+            "tags": [],
+            "label": "query",
+            "description": [],
+            "signature": [
+              "QueryDslQueryContainer"
+            ],
+            "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ml-ui-actions",
+            "id": "def-common.CreateCategorizationADJobContext.timeRange",
+            "type": "Object",
+            "tags": [],
+            "label": "timeRange",
+            "description": [],
+            "signature": [
+              "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
+            ],
+            "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/ml-ui-actions",
+        "id": "def-common.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_ACTION",
+        "description": [],
+        "signature": [
+          "\"createMLADCategorizationJobAction\""
+        ],
+        "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/ml-ui-actions",
+        "id": "def-common.CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
+        "type": "string",
+        "tags": [],
+        "label": "CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER",
+        "description": [],
+        "signature": [
+          "\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""
+        ],
+        "path": "x-pack/packages/ml/ui_actions/src/ui_actions.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  }
+}
