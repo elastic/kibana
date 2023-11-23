@@ -63,6 +63,7 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
         href={discoverUrl}
         onClick={navigateToDiscover}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
+        data-test-subj="discoverTab"
       >
         {i18n.translate('discover.logExplorerTabs.discover', {
           defaultMessage: 'Discover',
@@ -73,6 +74,7 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
         href={logExplorerUrl}
         onClick={navigateToLogExplorer}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
+        data-test-subj="logExplorerTab"
       >
         {i18n.translate('discover.logExplorerTabs.logExplorer', {
           defaultMessage: 'Logs Explorer',

@@ -294,7 +294,7 @@ export const DiscoverTopNav = ({
   );
 };
 
-const ServerlessTopNav = ({
+export const ServerlessTopNav = ({
   customizationContext,
   topNavMenu,
   topNavBadges,

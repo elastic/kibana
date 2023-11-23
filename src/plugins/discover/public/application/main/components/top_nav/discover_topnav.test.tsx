@@ -9,7 +9,7 @@
 import React, { ReactElement } from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
-import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
+import { DiscoverTopNav, DiscoverTopNavProps, ServerlessTopNav } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
@@ -18,14 +18,14 @@ import { DiscoverMainProvider } from '../../services/discover_state_provider';
 import type { SearchBarCustomization, TopNavCustomization } from '../../../../customizations';
 import type { DiscoverCustomizationId } from '../../../../customizations/customization_service';
 import { useDiscoverCustomization } from '../../../../customizations';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { LogExplorerTabs } from '../../../../components/log_explorer_tabs';
 
 setHeaderActionMenuMounter(jest.fn());
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   ...jest.requireActual('@kbn/kibana-react-plugin/public'),
-  useKibana: () => ({
-    services: mockDiscoverService,
-  }),
+  useKibana: jest.fn(),
 }));
 
 const MockCustomSearchBar: typeof mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu =
@@ -84,6 +84,8 @@ function getProps(
   };
 }
 
+const mockUseKibana = useKibana as jest.Mock;
+
 describe('Discover topnav component', () => {
   beforeEach(() => {
     mockTopNavCustomization.defaultMenu = undefined;
@@ -104,6 +106,10 @@ describe('Discover topnav component', () => {
         default:
           throw new Error(`Unknown customization id: ${id}`);
       }
+    });
+
+    mockUseKibana.mockReturnValue({
+      services: mockDiscoverService,
     });
   });
 
@@ -276,6 +282,100 @@ describe('Discover topnav component', () => {
 
       const topNav = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
       expect(topNav.prop('dataViewPickerComponentProps')).toBeUndefined();
+    });
+  });
+
+  describe('ServerlessTopNav', () => {
+    it('should not render when serverless plugin is not defined', () => {
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      expect(component.find(ServerlessTopNav)).toHaveLength(0);
+      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(searchBar.prop('badges')).toBeDefined();
+      expect(searchBar.prop('config')).toBeDefined();
+      expect(searchBar.prop('setMenuMountPoint')).toBeDefined();
+    });
+
+    it('should render when serverless plugin is defined and displayMode is "standalone"', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...mockDiscoverService,
+          serverless: true,
+        },
+      });
+      const props = getProps();
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      expect(component.find(ServerlessTopNav)).toHaveLength(1);
+      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(searchBar.prop('badges')).toBeUndefined();
+      expect(searchBar.prop('config')).toBeUndefined();
+      expect(searchBar.prop('setMenuMountPoint')).toBeUndefined();
+    });
+
+    it('should not render when serverless plugin is defined and displayMode is not "standalone"', () => {
+      mockUseKibana.mockReturnValue({
+        services: {
+          ...mockDiscoverService,
+          serverless: true,
+        },
+      });
+      const props = getProps();
+      props.stateContainer.customizationContext.displayMode = 'embedded';
+      const component = mountWithIntl(
+        <DiscoverMainProvider value={props.stateContainer}>
+          <DiscoverTopNav {...props} />
+        </DiscoverMainProvider>
+      );
+      expect(component.find(ServerlessTopNav)).toHaveLength(0);
+      const searchBar = component.find(mockDiscoverService.navigation.ui.AggregateQueryTopNavMenu);
+      expect(searchBar.prop('badges')).toBeUndefined();
+      expect(searchBar.prop('config')).toBeUndefined();
+      expect(searchBar.prop('setMenuMountPoint')).toBeUndefined();
+    });
+
+    describe('LogExplorerTabs', () => {
+      it('should render when showLogExplorerTabs is true', () => {
+        mockUseKibana.mockReturnValue({
+          services: {
+            ...mockDiscoverService,
+            serverless: true,
+          },
+        });
+        const props = getProps();
+        props.stateContainer.customizationContext.showLogExplorerTabs = true;
+        const component = mountWithIntl(
+          <DiscoverMainProvider value={props.stateContainer}>
+            <DiscoverTopNav {...props} />
+          </DiscoverMainProvider>
+        );
+        expect(component.find(ServerlessTopNav)).toHaveLength(1);
+        expect(component.find(LogExplorerTabs)).toHaveLength(1);
+      });
+
+      it('should not render when showLogExplorerTabs is false', () => {
+        mockUseKibana.mockReturnValue({
+          services: {
+            ...mockDiscoverService,
+            serverless: true,
+          },
+        });
+        const props = getProps();
+        const component = mountWithIntl(
+          <DiscoverMainProvider value={props.stateContainer}>
+            <DiscoverTopNav {...props} />
+          </DiscoverMainProvider>
+        );
+        expect(component.find(ServerlessTopNav)).toHaveLength(1);
+        expect(component.find(LogExplorerTabs)).toHaveLength(0);
+      });
     });
   });
 });
