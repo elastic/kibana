@@ -55,6 +55,7 @@ import {
   validateYamlConfig,
   validateCATrustedFingerPrint,
   validateServiceToken,
+  validateServiceTokenSecret,
   validateSSLCertificate,
   validateSSLKey,
   validateSSLKeySecret,
@@ -88,6 +89,7 @@ export interface OutputFormInputsType {
   defaultMonitoringOutputInput: ReturnType<typeof useSwitchInput>;
   caTrustedFingerprintInput: ReturnType<typeof useInput>;
   serviceTokenInput: ReturnType<typeof useInput>;
+  serviceTokenSecretInput: ReturnType<typeof useSecretInput>;
   sslCertificateInput: ReturnType<typeof useInput>;
   sslKeyInput: ReturnType<typeof useInput>;
   sslKeySecretInput: ReturnType<typeof useSecretInput>;
@@ -215,6 +217,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     validateServiceToken,
     isDisabled('service_token')
   );
+
+  const serviceTokenSecretInput = useSecretInput(
+    (output as NewRemoteElasticsearchOutput)?.secrets?.service_token ?? '',
+    validateServiceTokenSecret,
+    isDisabled('service_token')
+  );
   /*
   Shipper feature flag - currently depends on the content of the yaml
   # Enables the shipper:
@@ -293,7 +301,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
   const sslKeyInput = useInput(output?.ssl?.key ?? '', validateSSLKey, isSSLEditable);
 
   const sslKeySecretInput = useSecretInput(
-    output?.secrets?.ssl?.key,
+    (output as NewLogstashOutput)?.secrets?.ssl?.key,
     validateSSLKeySecret,
     isSSLEditable
   );
@@ -503,6 +511,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     defaultMonitoringOutputInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
+    serviceTokenSecretInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -562,6 +571,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     const additionalYamlConfigValid = additionalYamlConfigInput.validate();
     const caTrustedFingerprintValid = caTrustedFingerprintInput.validate();
     const serviceTokenValid = serviceTokenInput.validate();
+    const serviceTokenSecretValid = serviceTokenSecretInput.validate();
     const sslCertificateValid = sslCertificateInput.validate();
     const sslKeyValid = sslKeyInput.validate();
     const sslKeySecretValid = sslKeySecretInput.validate();
@@ -607,7 +617,11 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     }
     if (isRemoteElasticsearch) {
       return (
-        elasticsearchUrlsValid && additionalYamlConfigValid && nameInputValid && serviceTokenValid
+        elasticsearchUrlsValid &&
+        additionalYamlConfigValid &&
+        nameInputValid &&
+        ((serviceTokenInput.value && serviceTokenValid) ||
+          (serviceTokenSecretInput.value && serviceTokenSecretValid))
       );
     } else {
       // validate ES
@@ -637,6 +651,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     additionalYamlConfigInput,
     caTrustedFingerprintInput,
     serviceTokenInput,
+    serviceTokenSecretInput,
     sslCertificateInput,
     sslKeyInput,
     sslKeySecretInput,
@@ -852,6 +867,12 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
               is_default_monitoring: defaultMonitoringOutputInput.value,
               config_yaml: additionalYamlConfigInput.value,
               service_token: serviceTokenInput.value,
+              ...(!serviceTokenInput.value &&
+                serviceTokenSecretInput.value && {
+                  secrets: {
+                    service_token: serviceTokenSecretInput.value,
+                  },
+                }),
               proxy_id: proxyIdValue,
               ...shipperParams,
             } as NewRemoteElasticsearchOutput;
@@ -958,6 +979,7 @@ export function useOutputForm(onSucess: () => void, output?: Output) {
     elasticsearchUrlInput.value,
     caTrustedFingerprintInput.value,
     serviceTokenInput.value,
+    serviceTokenSecretInput.value,
     confirm,
     notifications.toasts,
   ]);

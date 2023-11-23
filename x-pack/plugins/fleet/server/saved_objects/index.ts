@@ -270,6 +270,12 @@ const getSavedObjectTypes = (): { [key: string]: SavedObjectsType } => ({
                 },
               },
             },
+            service_token: {
+              dynamic: false,
+              properties: {
+                id: { type: 'keyword' },
+              },
+            },
           },
         },
       },

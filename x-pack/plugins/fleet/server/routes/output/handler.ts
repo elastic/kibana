@@ -37,8 +37,19 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
   if (output.type === outputType.Kafka && output?.password && output?.secrets?.password) {
     throw Boom.badRequest('Cannot specify both password and secrets.password');
   }
-  if (output.ssl?.key && output.secrets?.ssl?.key) {
+  if (
+    (output.type === outputType.Kafka || output.type === outputType.Logstash) &&
+    output.ssl?.key &&
+    output.secrets?.ssl?.key
+  ) {
     throw Boom.badRequest('Cannot specify both ssl.key and secrets.ssl.key');
+  }
+  if (
+    output.type === outputType.RemoteElasticsearch &&
+    output.service_token &&
+    output.secrets?.service_token
+  ) {
+    throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
   }
 }
 

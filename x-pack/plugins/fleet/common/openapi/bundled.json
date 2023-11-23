@@ -8257,6 +8257,50 @@
           "type"
         ]
       },
+      "output_create_request_remote_elasticsearch": {
+        "title": "remote_elasticsearch",
+        "type": "object",
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "is_default": {
+            "type": "boolean"
+          },
+          "is_default_monitoring": {
+            "type": "boolean"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string",
+            "enum": [
+              "remote_elasticsearch"
+            ]
+          },
+          "hosts": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "service_token": {
+            "type": "string"
+          },
+          "secrets": {
+            "type": "object",
+            "properties": {
+              "service_token": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "required": [
+          "name"
+        ]
+      },
       "output_create_request": {
         "title": "Output",
         "oneOf": [
@@ -8268,6 +8312,9 @@
           },
           {
             "$ref": "#/components/schemas/output_create_request_logstash"
+          },
+          {
+            "$ref": "#/components/schemas/output_create_request_remote_elasticsearch"
           }
         ],
         "discriminator": {
@@ -8275,7 +8322,8 @@
           "mapping": {
             "elasticsearch": "#/components/schemas/output_create_request_elasticsearch",
             "kafka": "#/components/schemas/output_create_request_kafka",
-            "logstash": "#/components/schemas/output_create_request_logstash"
+            "logstash": "#/components/schemas/output_create_request_logstash",
+            "remote_elasticsearch": "#/components/schemas/output_create_request_remote_elasticsearch"
           }
         }
       },
