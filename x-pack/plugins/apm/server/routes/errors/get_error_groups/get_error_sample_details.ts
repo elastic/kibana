@@ -41,7 +41,7 @@ export async function getErrorSampleDetails({
     apm: {
       sources: [
         {
-          documentType: ApmDocumentType.ErrorEvent,
+          documentType: ApmDocumentType.ErrorEvent as const,
           rollupInterval: RollupInterval.None,
         },
       ],
@@ -64,7 +64,7 @@ export async function getErrorSampleDetails({
   };
 
   const resp = await apmEventClient.search('get_error_sample_details', params);
-  const error = resp.hits.hits[0]?._source as APMError;
+  const error = resp.hits.hits[0]?._source;
   const transactionId = error?.transaction?.id;
   const traceId = error?.trace?.id;
 

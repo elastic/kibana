@@ -17,7 +17,6 @@ import { environmentQuery } from '../../../../common/utils/environment_query';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 const ERROR_SAMPLES_SIZE = 10000;
 
@@ -43,7 +42,7 @@ export async function getErrorGroupSampleIds({
   start: number;
   end: number;
 }): Promise<ErrorGroupSampleIdsResponse> {
-  const params = {
+  const resp = await apmEventClient.search('get_error_group_sample_ids', {
     apm: {
       sources: [
         {
@@ -73,14 +72,9 @@ export async function getErrorGroupSampleIds({
         { '@timestamp': { order: 'desc' } }, // sort by timestamp to get the most recent error
       ] as const),
     },
-  };
-
-  const resp = await apmEventClient.search(
-    'get_error_group_sample_ids',
-    params
-  );
+  });
   const errorSampleIds = resp.hits.hits.map((item) => {
-    const source = item._source as APMError;
+    const source = item._source;
     return source.error.id;
   });
 

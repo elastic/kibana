@@ -11,7 +11,6 @@ import { asMutableArray } from '../../../../common/utils/as_mutable_array';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 
 export async function getTransaction({
   transactionId,
@@ -51,5 +50,5 @@ export async function getTransaction({
     },
   });
 
-  return resp.hits.hits[0]?._source as Transaction;
+  return resp.hits.hits[0]?._source;
 }

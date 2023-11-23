@@ -77,15 +77,13 @@ type TypedLogEventSearchResponse<TParams extends APMLogEventESSearchRequest> =
 type TypedSearchResponse<TParams extends APMEventESSearchRequest> =
   InferSearchResponseOf<
     TypeOfProcessorEvent<
-      ValuesType<
-        TParams['apm'] extends { events: ProcessorEvent[] }
-          ? TParams['apm']['events']
-          : TParams['apm'] extends { sources: ApmDataSource[] }
-          ? ProcessorEventOfDocumentType<
-              ValuesType<TParams['apm']['sources']>['documentType']
-            >
-          : never
-      >
+      TParams['apm'] extends { events: ProcessorEvent[] }
+        ? ValuesType<TParams['apm']['events']>
+        : TParams['apm'] extends { sources: ApmDataSource[] }
+        ? ProcessorEventOfDocumentType<
+            ValuesType<TParams['apm']['sources']>['documentType']
+          >
+        : never
     >,
     TParams
   >;

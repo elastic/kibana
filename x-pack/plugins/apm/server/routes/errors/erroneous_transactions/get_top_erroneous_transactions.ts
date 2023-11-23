@@ -30,7 +30,6 @@ import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 async function getTopErroneousTransactions({
   environment,
@@ -120,10 +119,9 @@ async function getTopErroneousTransactions({
   return (
     res.aggregations?.top_five_transactions.buckets.map(
       ({ key, doc_count: docCount, sample, timeseries }) => {
-        const source = sample.hits.hits[0]._source as APMError;
         return {
           transactionName: key as string,
-          transactionType: source.transaction?.type,
+          transactionType: sample.hits.hits[0]._source.transaction?.type,
           occurrences: docCount,
           timeseries: timeseries.buckets.map((timeseriesBucket) => {
             return {

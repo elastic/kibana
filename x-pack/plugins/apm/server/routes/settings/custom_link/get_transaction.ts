@@ -12,7 +12,6 @@ import { RollupInterval } from '../../../../common/rollup';
 import { filterOptionsRt } from './custom_link_types';
 import { splitFilterValueByComma } from './helper';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { Transaction } from '../../../../typings/es_schemas/ui/transaction';
 
 export async function getTransaction({
   apmEventClient,
@@ -31,7 +30,7 @@ export async function getTransaction({
       })
   );
 
-  const params = {
+  const resp = await apmEventClient.search('get_transaction_for_custom_link', {
     terminate_after: 1,
     apm: {
       sources: [
@@ -50,10 +49,6 @@ export async function getTransaction({
         },
       },
     },
-  };
-  const resp = await apmEventClient.search(
-    'get_transaction_for_custom_link',
-    params
-  );
-  return resp.hits.hits[0]?._source as Transaction;
+  });
+  return resp.hits.hits[0]?._source;
 }

@@ -27,7 +27,6 @@ import { getErrorName } from '../../../lib/helpers/get_error_name';
 import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
-import { APMError } from '../../../../typings/es_schemas/ui/apm_error';
 
 export type ErrorGroupMainStatisticsResponse = Array<{
   groupId: string;
@@ -136,15 +135,17 @@ export async function getErrorGroupMainStatistics({
 
   return (
     response.aggregations?.error_groups.buckets.map((bucket) => {
-      const source = bucket.sample.hits.hits[0]._source as APMError;
       return {
         groupId: bucket.key as string,
-        name: getErrorName(source),
-        lastSeen: new Date(source['@timestamp']).getTime(),
+        name: getErrorName(bucket.sample.hits.hits[0]._source),
+        lastSeen: new Date(
+          bucket.sample.hits.hits[0]._source['@timestamp']
+        ).getTime(),
         occurrences: bucket.doc_count,
-        culprit: source.error.culprit,
-        handled: source.error.exception?.[0].handled,
-        type: source.error.exception?.[0].type,
+        culprit: bucket.sample.hits.hits[0]._source.error.culprit,
+        handled:
+          bucket.sample.hits.hits[0]._source.error.exception?.[0].handled,
+        type: bucket.sample.hits.hits[0]._source.error.exception?.[0].type,
       };
     }) ?? []
   );
