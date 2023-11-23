@@ -8,12 +8,12 @@
 
 import React, {
   createContext,
-  useState,
   useCallback,
   ReactNode,
   useMemo,
   useContext,
   useRef,
+  Children,
 } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import useObservable from 'react-use/lib/useObservable';
@@ -29,14 +29,12 @@ import { PanelProvider, type ContentProvider } from './panel';
 
 interface Context {
   register: RegisterFunction;
-  updateFooterChildren: (children: ReactNode) => void;
   unstyled: boolean;
   activeNodes: ChromeProjectNavigationNode[][];
 }
 
 const NavigationContext = createContext<Context>({
   register: () => () => {},
-  updateFooterChildren: () => {},
   unstyled: false,
   activeNodes: [],
 });
@@ -73,7 +71,6 @@ export function Navigation({
 
   const activeNodes = useObservable(activeNodes$, []);
   const navigationItemsRef = useRef<Record<string, ChromeProjectNavigationNode>>({});
-  const [footerChildren, setFooterChildren] = useState<ReactNode>(null);
 
   const onNavigationItemsChange = useCallback(() => {
     const navigationTree = Object.values(navigationItemsRef.current).sort((a, b) => {
@@ -116,22 +113,42 @@ export function Navigation({
   const contextValue = useMemo<Context>(
     () => ({
       register,
-      updateFooterChildren: setFooterChildren,
       unstyled,
       activeNodes,
     }),
     [register, unstyled, activeNodes]
   );
 
+  const childrenParsed = useMemo(() => {
+    let footerChildren: ReactNode;
+    const bodyChildren: ReactNode[] = [];
+
+    Children.forEach(children, (child) => {
+      if (!React.isValidElement(child)) {
+        return;
+      }
+
+      const isFooterWrapper = child.type === NavigationFooter;
+      if (isFooterWrapper && footerChildren === undefined) {
+        footerChildren = child.props.children;
+        return;
+      }
+
+      bodyChildren.push(child);
+    });
+
+    return { body: bodyChildren, footer: footerChildren };
+  }, [children]);
+
   return (
     <PanelProvider activeNodes={activeNodes} contentProvider={panelContentProvider}>
       <NavigationContext.Provider value={contextValue}>
         <NavigationUI
-          footerChildren={footerChildren}
+          footerChildren={childrenParsed.footer}
           unstyled={unstyled}
           dataTestSubj={dataTestSubj}
         >
-          {children}
+          {childrenParsed.body}
         </NavigationUI>
       </NavigationContext.Provider>
     </PanelProvider>

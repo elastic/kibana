@@ -164,7 +164,7 @@ interface Props {
   panelContentProvider?: ContentProvider;
 }
 
-export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
+const DefaultNavigationComp: FC<ProjectNavigationDefinition & Props> = ({
   projectNavigationTree,
   navigationTree,
   dataTestSubj,
@@ -232,10 +232,10 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
 
   return (
     <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
-      <>
-        {treeToJSX.body}
-        {treeToJSX.footer && <NavigationFooter>{treeToJSX.footer}</NavigationFooter>}
-      </>
+      {treeToJSX.body}
+      {treeToJSX.footer && <NavigationFooter>{treeToJSX.footer}</NavigationFooter>}
     </Navigation>
   );
 };
+
+export const DefaultNavigation = React.memo(DefaultNavigationComp) as typeof DefaultNavigationComp;
