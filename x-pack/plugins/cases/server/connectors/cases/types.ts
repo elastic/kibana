@@ -59,3 +59,13 @@ export type BulkCreateOracleRecordRequest = Array<{
   recordId: string;
   payload: OracleRecordCreateRequest;
 }>;
+
+export type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
+
+export interface OracleRecordUpsertRequest {
+  recordId: string;
+  updateDatePayload: OracleRecordAttributes & { version: string };
+  createPayload: OracleRecordCreateRequest;
+}
+
+export type BulkUpsertOracleRecordRequest = OracleRecordUpsertRequest[];

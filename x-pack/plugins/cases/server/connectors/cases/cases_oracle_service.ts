@@ -6,19 +6,22 @@
  */
 
 import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import pMap from 'p-map';
 import { CASE_ORACLE_SAVED_OBJECT } from '../../../common/constants';
 import type { SavedObjectsBulkResponseWithErrors } from '../../common/types';
 import { isSOError } from '../../common/utils';
+import { MAX_CONCURRENT_ES_REQUEST } from './constants';
 import { CryptoService } from './crypto_service';
 import type {
   BulkCreateOracleRecordRequest,
   BulkGetOracleRecordsResponse,
+  BulkUpsertOracleRecordRequest,
   OracleKey,
   OracleRecord,
+  OracleRecordAttributes,
   OracleRecordCreateRequest,
+  OracleRecordUpsertRequest,
 } from './types';
-
-type OracleRecordAttributes = Omit<OracleRecord, 'id' | 'version'>;
 
 export class CasesOracleService {
   private readonly log: Logger;
@@ -83,24 +86,51 @@ export class CasesOracleService {
     recordId: string,
     payload: OracleRecordCreateRequest
   ): Promise<OracleRecord> {
-    const { cases, rules, grouping } = payload;
-
     this.log.debug(`Creating oracle record with ID: ${recordId}`);
 
     const oracleRecord = await this.unsecuredSavedObjectsClient.create<OracleRecordAttributes>(
       CASE_ORACLE_SAVED_OBJECT,
-      {
-        counter: 1,
-        cases,
-        rules,
-        grouping,
-        createdAt: new Date().toISOString(),
-        updatedAt: null,
-      },
+      this.getCreateRecordAttributes(payload),
       { id: recordId }
     );
 
     return this.getRecordResponse(oracleRecord);
+  }
+
+  public async upsertRecord({
+    recordId,
+    createPayload,
+    updateDatePayload,
+  }: OracleRecordUpsertRequest): Promise<OracleRecord> {
+    const createAttributes = this.getCreateRecordAttributes(createPayload);
+
+    const { version, ...updateAttributes } = updateDatePayload;
+
+    this.log.debug(`Updating or creating if not exist oracle record with ID: ${recordId}`);
+
+    const oracleRecord = await this.unsecuredSavedObjectsClient.update<OracleRecordAttributes>(
+      CASE_ORACLE_SAVED_OBJECT,
+      recordId,
+      updateDatePayload,
+      { upsert: createAttributes, version }
+    );
+
+    return this.getRecordResponse({
+      ...oracleRecord,
+      attributes: { ...updateAttributes, ...oracleRecord.attributes },
+      references: oracleRecord.references ?? [],
+    });
+  }
+
+  public async bulkUpsertRecord(records: BulkUpsertOracleRecordRequest): Promise<OracleRecord[]> {
+    /**
+     * The SO client does not supports bulk upsert
+     */
+    const res = await pMap(records, (req: OracleRecordUpsertRequest) => this.upsertRecord(req), {
+      concurrency: MAX_CONCURRENT_ES_REQUEST,
+    });
+
+    return res;
   }
 
   public async bulkCreateRecord(
@@ -113,14 +143,7 @@ export class CasesOracleService {
     const req = records.map((record) => ({
       id: record.recordId,
       type: CASE_ORACLE_SAVED_OBJECT,
-      attributes: {
-        counter: 1,
-        cases: record.payload.cases,
-        rules: record.payload.rules,
-        grouping: record.payload.grouping,
-        createdAt: new Date().toISOString(),
-        updatedAt: null,
-      },
+      attributes: this.getCreateRecordAttributes(record.payload),
     }));
 
     const oracleRecords =
@@ -176,5 +199,16 @@ export class CasesOracleService {
 
       return this.getRecordResponse(oracleRecord);
     });
+  }
+
+  private getCreateRecordAttributes({ cases, rules, grouping }: OracleRecordCreateRequest) {
+    return {
+      counter: 1,
+      cases,
+      rules,
+      grouping,
+      createdAt: new Date().toISOString(),
+      updatedAt: null,
+    };
   }
 }
