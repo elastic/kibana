@@ -63,6 +63,7 @@ import {
   ConcurrentInstallOperationError,
   FleetUnauthorizedError,
   PackageInvalidArchiveError,
+  PackageNotFoundError,
 } from '../../../errors';
 import { PACKAGES_SAVED_OBJECT_TYPE, MAX_TIME_COMPLETE_INSTALL } from '../../../constants';
 import { dataStreamService, licenseService } from '../..';
@@ -1337,7 +1338,7 @@ export async function installAssetsForInputPackagePolicy(opts: {
     logger,
   });
   if (!installedPkg)
-    throw new FleetError(
+    throw new PackageNotFoundError(
       `Error while creating index templates: unable to find installed package ${pkgInfo.name}`
     );
   await installIndexTemplatesAndPipelines({

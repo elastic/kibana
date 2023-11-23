@@ -341,11 +341,6 @@ export async function installKibanaSavedObjects({
     );
 
     if (otherErrors?.length) {
-      logger.warn(
-        `Encountered ${
-          otherErrors.length
-        } errors creating saved objects: ${formatImportErrorsForLog(otherErrors)}`
-      );
       throw new KibanaSOReferenceError(
         `Encountered ${
           otherErrors.length
@@ -389,11 +384,6 @@ export async function installKibanaSavedObjects({
         });
 
       if (resolveErrors?.length) {
-        logger.warn(
-          `Encountered ${
-            resolveErrors.length
-          } errors resolving reference errors: ${formatImportErrorsForLog(resolveErrors)}`
-        );
         throw new KibanaSOReferenceError(
           `Encountered ${
             resolveErrors.length
