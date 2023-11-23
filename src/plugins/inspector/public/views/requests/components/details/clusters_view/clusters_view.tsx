@@ -8,7 +8,7 @@
 
 import React, { Component } from 'react';
 import { estypes } from '@elastic/elasticsearch';
-import { EuiSearchBar, EuiSpacer } from '@elastic/eui';
+import { EuiSearchBar, type EuiSearchBarOnChangeArgs, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ClusterDetails } from '@kbn/es-types';
 import { Request } from '../../../../../../common/adapters/request/types';
@@ -38,7 +38,7 @@ export class ClustersView extends Component<DetailViewProps, State> {
     };
   }
 
-  _onSearchChange = ({ query, error }) => {
+  _onSearchChange = ({ query, error }: EuiSearchBarOnChangeArgs) => {
     if (!error) {
       this.setState({ clusters: findClusters(this.props.request, query) });
     }
