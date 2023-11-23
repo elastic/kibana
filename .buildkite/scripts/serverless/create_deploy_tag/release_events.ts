@@ -6,7 +6,13 @@
  * Side Public License, v 1.
  */
 
-import { buildkite, COMMIT_INFO_CTX } from './shared';
+import {
+  buildkite,
+  COMMIT_INFO_CTX,
+  DEPLOY_TAG_META_KEY,
+  SELECTED_COMMIT_META_KEY,
+  sendSlackMessage,
+} from './shared';
 
 /**
  * We'd like to define the release steps, and define the pre-post actions for transitions.
@@ -102,13 +108,16 @@ const states: Record<StateNames, StateShape> = {
     description: 'The initial step release is completed, follow up jobs will be triggered soon.',
     instruction: `<h3>Deploy tag successfully created!</h3>`,
     post: async () => {
-      const deployTag = buildkite.getMetadata('deploy-tag');
+      const deployTag = buildkite.getMetadata(DEPLOY_TAG_META_KEY);
+      const selectedCommit = buildkite.getMetadata(SELECTED_COMMIT_META_KEY);
       buildkite.setAnnotation(
         WIZARD_CTX_INSTRUCTION,
         'success',
         `<h3>Deploy tag successfully created!</h3><br/>
 Your deployment will appear <a href='https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}'>here on buildkite.</a>`
       );
+
+      sendSlackAnnouncement(selectedCommit, deployTag);
     },
     instructionStyle: 'success',
     display: true,
@@ -246,6 +255,46 @@ async function tryCall(fn: any, ...args: any[]) {
   } else {
     return true;
   }
+}
+
+function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string | null) {
+  const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
+  sendSlackMessage({
+    blocks: [
+      {
+        type: 'section',
+        text: textBlock(
+          `Promotion of a new <https://github.com/elastic/kibana/commit/${selectedCommit}|commit> to QA has been initiated!`,
+          `Once promotion is complete, please begin any required manual testing.`,
+          `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`
+        ),
+      },
+      {
+        type: 'section',
+        fields: [
+          textBlock(
+            `*RC selection job:*`,
+            `<${process.env.BUILDKITE_BUILD_URL || 'about://blank'}|Link>`
+          ),
+          textBlock(`*Initiated by:*`, `${process.env.BUILDKITE_BUILD_CREATOR || 'unknown'}`),
+          textBlock(
+            `*Commit:*`,
+            `<https://github.com/elastic/kibana/commit/${selectedCommit}|${selectedCommit}>`
+          ),
+          textBlock(
+            `*Git tag:*`,
+            `<https://github.com/elastic/kibana/releases/tag/${deployTag}|${deployTag}>`
+          ),
+          textBlock(
+            `*QA Deploy job:*`,
+            `<https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}|Link>`
+          ),
+        ],
+      },
+    ],
+  }).catch((error) => {
+    console.error("Couldn't send slack message.", error);
+  });
 }
 
 main(process.argv.slice(2)).then(

@@ -14,6 +14,7 @@ import {
   octokit,
 } from '../shared';
 import { GitCommitExtract } from './commit_info';
+import { Build } from '#pipeline-utils/buildkite';
 
 const QA_FTR_TEST_SLUG = 'appex-qa-serverless-kibana-ftr-tests';
 const KIBANA_ARTIFACT_BUILD_SLUG = 'kibana-artifacts-container-image';
@@ -66,15 +67,32 @@ export async function getQAFTestBuilds(date: string): Promise<BuildkiteBuildExtr
   const builds = await buildkite.getBuildsAfterDate(QA_FTR_TEST_SLUG, date, 10);
 
   return builds
-    .map((build) => ({
-      success: build.state === 'passed',
-      stateEmoji: buildkiteBuildStateToEmoji(build.state),
-      url: build.web_url,
-      slug: QA_FTR_TEST_SLUG,
-      buildNumber: build.number,
-      commit: build.commit,
-    }))
+    .map((build) => {
+      const kibanaBuildHash = tryGetKibanaBuildHashFromQAFBuild(build);
+
+      return {
+        success: build.state === 'passed',
+        stateEmoji: buildkiteBuildStateToEmoji(build.state),
+        url: build.web_url,
+        slug: QA_FTR_TEST_SLUG,
+        buildNumber: build.number,
+        commit: kibanaBuildHash || build.commit,
+      };
+    })
     .reverse();
+}
+
+function tryGetKibanaBuildHashFromQAFBuild(build: Build) {
+  try {
+    const metaDataKeys = Object.keys(build.meta_data || {});
+    const anyKibanaProjectKey =
+      metaDataKeys.find((key) => key.startsWith('project::bk-serverless')) || 'missing';
+    const kibanaBuildInfo = JSON.parse(build.meta_data[anyKibanaProjectKey]);
+    return kibanaBuildInfo?.kibana_build_hash;
+  } catch (e) {
+    console.error(e);
+    return null;
+  }
 }
 
 export async function getArtifactBuildJob(
@@ -120,7 +138,7 @@ export async function getQAFBuildContainingCommit(
   );
 
   const build = qafBuilds.find((kbBuild) => {
-    // is build.commit after commitSha?
+    // Check if build.commit is after commitSha?
     const buildkiteBuildShaIndex = commitShaList.findIndex((c: string) => c === kbBuild.commit);
     const commitShaIndex = commitShaList.findIndex((c: string) => c === commitSha);
 
