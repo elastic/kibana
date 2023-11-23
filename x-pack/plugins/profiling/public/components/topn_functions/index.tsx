@@ -21,12 +21,12 @@ import { getCalleeFunction, TopNFunctions, TopNFunctionSortField } from '@kbn/pr
 import { last, orderBy } from 'lodash';
 import React, { forwardRef, Ref, useMemo, useState } from 'react';
 import { GridOnScrollProps } from 'react-window';
+import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { FrameInformationTooltip } from '../frame_information_window/frame_information_tooltip';
 import { LabelWithHint } from '../label_with_hint';
 import { FunctionRow } from './function_row';
 import { getFunctionsRows, IFunctionRow } from './utils';
-import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 
 interface Props {
   topNFunctions?: TopNFunctions;
@@ -255,7 +255,11 @@ export const TopNFunctionsGrid = forwardRef(
           headerCellRender() {
             return (
               <EuiScreenReaderOnly>
-                <span>Controls</span>
+                <span>
+                  {i18n.translate('xpack.profiling.topNFunctionsGrid.span.controlsLabel', {
+                    defaultMessage: 'Controls',
+                  })}
+                </span>
               </EuiScreenReaderOnly>
             );
           },
@@ -267,7 +271,10 @@ export const TopNFunctionsGrid = forwardRef(
             return (
               <EuiButtonIcon
                 data-test-subj="profilingTopNFunctionsGridButton"
-                aria-label="Show actions"
+                aria-label={i18n.translate(
+                  'xpack.profiling.topNFunctionsGrid.euiButtonIcon.showActionsLabel',
+                  { defaultMessage: 'Show actions' }
+                )}
                 iconType="expand"
                 color="text"
                 onClick={handleOnClick}
@@ -306,7 +313,10 @@ export const TopNFunctionsGrid = forwardRef(
         <EuiDataGrid
           data-test-subj={dataTestSubj}
           ref={ref}
-          aria-label="TopN functions"
+          aria-label={i18n.translate(
+            'xpack.profiling.topNFunctionsGrid.euiDataGrid.topNFunctionsLabel',
+            { defaultMessage: 'TopN functions' }
+          )}
           columns={columns}
           columnVisibility={{ visibleColumns, setVisibleColumns }}
           rowCount={sortedRows.length > 100 ? 100 : sortedRows.length}

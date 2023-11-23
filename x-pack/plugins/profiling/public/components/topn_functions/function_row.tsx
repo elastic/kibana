@@ -74,14 +74,24 @@ export function FunctionRow({
     columnId === TopNFunctionSortField.AnnualizedCo2 &&
     functionRow.impactEstimates?.selfCPU?.annualizedCo2
   ) {
-    return <div>{asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)}</div>;
+    return (
+      // TODO: remove old calcs
+      <div>{`${asWeight(functionRow.impactEstimates.selfCPU.annualizedCo2)} | ${asWeight(
+        functionRow.annualCO2Tons * 1000
+      )}`}</div>
+    );
   }
 
   if (
     columnId === TopNFunctionSortField.AnnualizedDollarCost &&
     functionRow.impactEstimates?.selfCPU?.annualizedDollarCost
   ) {
-    return <div>{asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)}</div>;
+    return (
+      // TODO: remove old calcs
+      <div>{`${asCost(functionRow.impactEstimates.selfCPU.annualizedDollarCost)} | ${asCost(
+        functionRow.annualCostUsd
+      )}`}</div>
+    );
   }
 
   return null;

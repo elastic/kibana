@@ -41,6 +41,8 @@ export interface IFunctionRow {
   selfCPUPerc: number;
   totalCPUPerc: number;
   impactEstimates?: ImpactEstimates;
+  annualCO2Tons: number;
+  annualCostUsd: number;
   diff?: {
     rank: number;
     samples: number;
@@ -49,6 +51,8 @@ export interface IFunctionRow {
     selfCPUPerc: number;
     totalCPUPerc: number;
     impactEstimates?: ImpactEstimates;
+    annualCO2Tons: number;
+    annualCostUsd: number;
   };
 }
 
@@ -115,6 +119,8 @@ export function getFunctionsRows({
           totalCPUPerc:
             totalCPUPerc -
             (comparisonRow.CountInclusive / comparisonTopNFunctions.TotalCount) * 100,
+          annualCO2Tons: comparisonRow.AnnualCO2Tons,
+          annualCostUsd: comparisonRow.AnnualCostUsd,
         };
       }
     }
@@ -128,6 +134,8 @@ export function getFunctionsRows({
       selfCPU: topN.CountExclusive,
       totalCPU: topN.CountInclusive,
       impactEstimates,
+      annualCO2Tons: topN.AnnualCO2Tons,
+      annualCostUsd: topN.AnnualCostUsd,
       diff: calculateDiff(),
     };
   });

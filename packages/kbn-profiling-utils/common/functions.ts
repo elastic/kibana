@@ -36,7 +36,7 @@ interface TopNFunctionAndFrameGroup {
 
 type TopNFunction = Pick<
   TopNFunctionAndFrameGroup,
-  'Frame' | 'CountExclusive' | 'CountInclusive'
+  'Frame' | 'CountExclusive' | 'CountInclusive' | 'AnnualCO2Tons' | 'AnnualCostUsd'
 > & {
   Id: string;
   Rank: number;
