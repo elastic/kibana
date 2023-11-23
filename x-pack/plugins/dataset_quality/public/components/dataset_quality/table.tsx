@@ -6,8 +6,9 @@
  */
 
 import React from 'react';
-import { EuiBasicTable } from '@elastic/eui';
+import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   loadingDatasetsText,
   noDatasetsDescription,
@@ -16,36 +17,49 @@ import {
 import { useDatasetQualityTable } from '../../hooks';
 
 export const Table = () => {
-  const { sort, onTableChange, pagination, renderedItems, columns, loading } =
+  const { sort, onTableChange, pagination, renderedItems, columns, loading, resultsCount } =
     useDatasetQualityTable();
 
   return (
-    <EuiBasicTable
-      sorting={sort}
-      onChange={onTableChange}
-      pagination={pagination}
-      data-test-subj="datasetQualityTable"
-      isSelectable
-      rowProps={{
-        'data-test-subj': 'datasetQualityTableRow',
-      }}
-      items={renderedItems}
-      columns={columns}
-      loading={loading}
-      noItemsMessage={
-        loading ? (
-          loadingDatasetsText
-        ) : (
-          <EuiEmptyPrompt
-            body={noDatasetsDescription}
-            data-test-subj="datasetQualityTableNoData"
-            layout="vertical"
-            title={<h2>{noDatasetsTitle}</h2>}
-            hasBorder={false}
-            titleSize="m"
-          />
-        )
-      }
-    />
+    <>
+      <EuiText size="xs">
+        <FormattedMessage
+          id="xpack.datasetQuality.tableSummary"
+          defaultMessage="Showing {items} Datasets"
+          values={{
+            items: resultsCount,
+          }}
+        />
+      </EuiText>
+      <EuiSpacer size="s" />
+      <EuiHorizontalRule margin="none" style={{ height: 2 }} />
+      <EuiBasicTable
+        sorting={sort}
+        onChange={onTableChange}
+        pagination={pagination}
+        data-test-subj="datasetQualityTable"
+        isSelectable
+        rowProps={{
+          'data-test-subj': 'datasetQualityTableRow',
+        }}
+        items={renderedItems}
+        columns={columns}
+        loading={loading}
+        noItemsMessage={
+          loading ? (
+            loadingDatasetsText
+          ) : (
+            <EuiEmptyPrompt
+              body={noDatasetsDescription}
+              data-test-subj="datasetQualityTableNoData"
+              layout="vertical"
+              title={<h2>{noDatasetsTitle}</h2>}
+              hasBorder={false}
+              titleSize="m"
+            />
+          )
+        }
+      />
+    </>
   );
 };

@@ -45,7 +45,13 @@ export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataSt
         return (
           <EuiFlexGroup alignItems="center" gutterSize="m">
             <EuiFlexItem grow={false}>
-              <PackageIcon packageName={integration.name!} version={'1.0.0'} size="m" tryApi />
+              <PackageIcon
+                packageName={integration.name}
+                version={integration.version!}
+                icons={integration.icons}
+                size="m"
+                tryApi
+              />
             </EuiFlexItem>
             <EuiFlexItem>
               <EuiText>{integration.title}</EuiText>

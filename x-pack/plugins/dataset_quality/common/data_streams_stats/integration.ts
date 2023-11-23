@@ -10,13 +10,13 @@ import { IntegrationType } from './types';
 export class Integration {
   name: IntegrationType['name'];
   title: IntegrationType['title'];
-  version?: IntegrationType['version'];
+  version: IntegrationType['version'];
   icons?: IntegrationType['icons'];
 
   private constructor(integration: Integration) {
     this.name = integration.name;
     this.title = integration.title || integration.name;
-    this.version = integration.version;
+    this.version = integration.version || '1.0.0';
     this.icons = integration.icons;
   }
 
@@ -26,6 +26,7 @@ export class Integration {
     const integrationProps = {
       ...integration,
       title: integration.title || integration.name,
+      version: integration.version || '1.0.0',
     };
 
     return new Integration(integrationProps);

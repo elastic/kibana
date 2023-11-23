@@ -6,7 +6,7 @@
  */
 
 import { orderBy } from 'lodash';
-import { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
@@ -68,5 +68,21 @@ export const useDatasetQualityTable = () => {
     return sortedItems.slice(pageIndex * pageSize, (pageIndex + 1) * pageSize);
   }, [data, sortField, sortDirection, pageIndex, pageSize]);
 
-  return { sort, onTableChange, pagination, renderedItems, columns, loading };
+  const resultsCount = useMemo(() => {
+    const startNumberItemsOnPage = pageSize * pageIndex + (renderedItems.length ? 1 : 0);
+    const endNumberItemsOnPage = pageSize * pageIndex + renderedItems.length;
+
+    return pageSize === 0 ? (
+      <strong>All</strong>
+    ) : (
+      <>
+        <strong>
+          {startNumberItemsOnPage}-{endNumberItemsOnPage}
+        </strong>{' '}
+        of {data.length}
+      </>
+    );
+  }, [data.length, pageIndex, pageSize, renderedItems.length]);
+
+  return { sort, onTableChange, pagination, renderedItems, columns, loading, resultsCount };
 };
