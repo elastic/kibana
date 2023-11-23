@@ -419,7 +419,12 @@ class OutputService {
     soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient,
     output: NewOutput,
-    options?: { id?: string; fromPreconfiguration?: boolean; overwrite?: boolean }
+    options?: {
+      id?: string;
+      fromPreconfiguration?: boolean;
+      overwrite?: boolean;
+      secretHashes?: Record<string, any>;
+    }
   ): Promise<Output> {
     const data: OutputSOAttributes = { ...omit(output, ['ssl', 'secrets']) };
     if (output.type === outputType.RemoteElasticsearch) {
@@ -555,6 +560,7 @@ class OutputService {
       const { output: outputWithSecrets } = await extractAndWriteOutputSecrets({
         output,
         esClient,
+        secretHashes: output.is_preconfigured ? options?.secretHashes : undefined,
       });
 
       if (outputWithSecrets.secrets) data.secrets = outputWithSecrets.secrets;
@@ -716,7 +722,10 @@ class OutputService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<Output>,
-    { fromPreconfiguration = false }: { fromPreconfiguration: boolean } = {
+    {
+      fromPreconfiguration = false,
+      secretHashes,
+    }: { fromPreconfiguration: boolean; secretHashes?: Record<string, any> } = {
       fromPreconfiguration: false,
     }
   ) {
@@ -747,6 +756,7 @@ class OutputService {
         oldOutput: originalOutput,
         outputUpdate: data,
         esClient,
+        secretHashes: data.is_preconfigured ? secretHashes : undefined,
       });
 
       updateData.secrets = secretsRes.outputUpdate.secrets;
