@@ -245,13 +245,15 @@ export class HttpServer {
         .subscribe(([{ ssl: prevSslConfig }, { ssl: newSslConfig }]) => {
           if (prevSslConfig.enabled !== newSslConfig.enabled) {
             this.log.warn(
-              'Incompatible change in config - TLS cannot be toggled without a full server reboot.'
+              'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
             );
+            return;
           }
 
-          const configChanged = true; // TODO: actually compare the configs
+          const sameConfig = newSslConfig.isEqualTo(prevSslConfig);
 
-          if (configChanged) {
+          if (!sameConfig) {
+            this.log.info('TLS configuration change detected - reloading TLS configuration.');
             setTlsConfig(this.server!, newSslConfig);
           }
         });
