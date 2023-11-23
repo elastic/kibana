@@ -29,6 +29,6 @@ export interface FilterConfig {
   label: string;
   isActive: boolean;
   isAvailable: boolean;
-  deactivate: (params: { onChange: FilterChangeHandler }) => void;
+  deactivate: () => void;
   render: (params: FilterConfigRenderParams) => React.ReactNode;
 }

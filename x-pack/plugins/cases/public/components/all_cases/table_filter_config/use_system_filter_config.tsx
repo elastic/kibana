@@ -31,6 +31,7 @@ interface UseFilterConfigProps {
   hiddenStatuses?: CaseStatuses[];
   isLoading: boolean;
   isSelectorView?: boolean;
+  onFilterOptionChange: FilterChangeHandler;
   selectedAssignees: AssigneesFilteringSelection[];
   tags: string[];
 }
@@ -47,6 +48,7 @@ export const getSystemFilterConfig = ({
   hiddenStatuses,
   isLoading,
   isSelectorView,
+  onFilterOptionChange,
   selectedAssignees,
   tags,
 }: UseFilterConfigProps): FilterConfig[] => {
@@ -56,8 +58,8 @@ export const getSystemFilterConfig = ({
       label: i18n.SEVERITY,
       isActive: true,
       isAvailable: true,
-      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        onChange({ filterId: 'severity', selectedOptionKeys: [] });
+      deactivate: () => {
+        onFilterOptionChange({ filterId: 'severity', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <SeverityFilter selectedOptionKeys={filterOptions.severity} onChange={onChange} />
@@ -68,8 +70,8 @@ export const getSystemFilterConfig = ({
       label: i18n.STATUS,
       isActive: true,
       isAvailable: true,
-      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        onChange({ filterId: 'status', selectedOptionKeys: [] });
+      deactivate: () => {
+        onFilterOptionChange({ filterId: 'status', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <StatusFilter
@@ -83,13 +85,12 @@ export const getSystemFilterConfig = ({
       ),
     },
     {
-      key: 'assignee',
+      key: 'assignees',
       label: i18n.ASSIGNEES,
       isActive: true,
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
-      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        // FIXME: not working
-        onChange({ filterId: 'assignee', selectedOptionKeys: [] });
+      deactivate: () => {
+        handleSelectedAssignees([]);
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
         return (
@@ -107,8 +108,8 @@ export const getSystemFilterConfig = ({
       label: i18n.TAGS,
       isActive: true,
       isAvailable: true,
-      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        onChange({ filterId: 'tags', selectedOptionKeys: [] });
+      deactivate: () => {
+        onFilterOptionChange({ filterId: 'tags', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <MultiSelectFilter
@@ -127,8 +128,8 @@ export const getSystemFilterConfig = ({
       label: i18n.CATEGORIES,
       isActive: true,
       isAvailable: true,
-      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        onChange({ filterId: 'category', selectedOptionKeys: [] });
+      deactivate: () => {
+        onFilterOptionChange({ filterId: 'category', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <MultiSelectFilter
@@ -147,9 +148,8 @@ export const getSystemFilterConfig = ({
       label: i18n.SOLUTION,
       isActive: true,
       isAvailable: availableSolutions.length > 1,
-      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        // FIXME: test this
-        onChange({ filterId: 'owner', selectedOptionKeys: availableSolutions });
+      deactivate: () => {
+        onFilterOptionChange({ filterId: 'owner', selectedOptionKeys: availableSolutions });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <SolutionFilter
@@ -174,6 +174,7 @@ export const useSystemFilterConfig = ({
   hiddenStatuses,
   isLoading,
   isSelectorView,
+  onFilterOptionChange,
   selectedAssignees,
   tags,
 }: UseFilterConfigProps) => {
@@ -190,6 +191,7 @@ export const useSystemFilterConfig = ({
       hiddenStatuses,
       isLoading,
       isSelectorView,
+      onFilterOptionChange,
       selectedAssignees,
       tags,
     })
@@ -209,6 +211,7 @@ export const useSystemFilterConfig = ({
         hiddenStatuses,
         isLoading,
         isSelectorView,
+        onFilterOptionChange,
         selectedAssignees,
         tags,
       })
@@ -225,6 +228,7 @@ export const useSystemFilterConfig = ({
     hiddenStatuses,
     isLoading,
     isSelectorView,
+    onFilterOptionChange,
     selectedAssignees,
     tags,
   ]);

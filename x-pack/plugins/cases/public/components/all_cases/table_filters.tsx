@@ -65,31 +65,30 @@ const CasesTableFiltersComponent = ({
     [selectedAssignees, onFilterChanged]
   );
 
-  const onFilterOptionChange: FilterChangeHandler = ({
-    filterId,
-    selectedOptionKeys,
-    customFieldType,
-  }) => {
-    const newFilters = customFieldType
-      ? {
-          ...filterOptions,
-          customFields: {
-            ...filterOptions.customFields,
-            [filterId]: {
-              type: customFieldType,
-              options: selectedOptionKeys,
+  const onFilterOptionChange: FilterChangeHandler = useCallback(
+    ({ filterId, selectedOptionKeys, customFieldType }) => {
+      const newFilters = customFieldType
+        ? {
+            ...filterOptions,
+            customFields: {
+              ...filterOptions.customFields,
+              [filterId]: {
+                type: customFieldType,
+                options: selectedOptionKeys,
+              },
             },
-          },
-        }
-      : {
-          ...filterOptions,
-          [filterId]: selectedOptionKeys,
-        };
+          }
+        : {
+            ...filterOptions,
+            [filterId]: selectedOptionKeys,
+          };
 
-    if (!isEqual(newFilters, filterOptions)) {
-      onFilterChanged(newFilters);
-    }
-  };
+      if (!isEqual(newFilters, filterOptions)) {
+        onFilterChanged(newFilters);
+      }
+    },
+    [filterOptions, onFilterChanged]
+  );
 
   const { systemFilterConfig } = useSystemFilterConfig({
     availableSolutions,
@@ -103,6 +102,7 @@ const CasesTableFiltersComponent = ({
     hiddenStatuses,
     isLoading,
     isSelectorView,
+    onFilterOptionChange,
     selectedAssignees,
     tags,
   });

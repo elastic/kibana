@@ -39,7 +39,7 @@ export const useFilterConfig = ({
   onFilterOptionChange: FilterChangeHandler;
 }) => {
   const { appId } = useCasesContext();
-  const { customFieldsFilterConfig } = useCustomFieldsFilterConfig();
+  const { customFieldsFilterConfig } = useCustomFieldsFilterConfig({ onFilterOptionChange });
   const [filters, setFilters] = useState<Map<string, FilterConfig>>(
     () => new Map([...systemFilterConfig].map((filter) => [filter.key, filter]))
   );
@@ -89,11 +89,9 @@ export const useFilterConfig = ({
       }
     });
 
-    deactivatedFilters
-      .filter((key) => filters.has(key))
-      .forEach((key) => {
-        (filters.get(key) as FilterConfig).deactivate({ onChange: onFilterOptionChange });
-      });
+    deactivatedFilters.forEach((key) => {
+      (filters.get(key) as FilterConfig).deactivate();
+    });
 
     setFilterVisibilityMap(newFilterVisibilityMap);
   };
