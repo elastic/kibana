@@ -28,7 +28,8 @@ export const useCISIntegrationPoliciesLink = ({
   });
   if (!cisIntegration.isSuccess) return;
 
-  const intergrations = cspBenchmarkIntegrations.data?.items;
+  const intergrations = cspBenchmarkIntegrations.data?.items_policies_information;
+
   const matchedIntegration = intergrations?.find(
     (integration) =>
       integration?.package_policy?.inputs?.find((input) => input?.enabled)?.policy_template ===

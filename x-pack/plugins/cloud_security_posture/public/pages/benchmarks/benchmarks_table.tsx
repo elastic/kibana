@@ -44,7 +44,7 @@ interface BenchmarksTableProps
       'loading' | 'error' | 'noItemsMessage' | 'sorting'
     >,
     Pagination {
-  benchmarks: any[];
+  benchmarks: BenchmarkVersion2[];
   setQuery(pagination: CriteriaWithPagination<BenchmarkVersion2>): void;
   'data-test-subj'?: string;
 }
@@ -323,7 +323,7 @@ export const BenchmarksTable = ({
       loading={loading}
       noItemsMessage={noItemsMessage}
       error={error}
-      sorting={sorting}
+      // sorting={sorting}
     />
   );
 };

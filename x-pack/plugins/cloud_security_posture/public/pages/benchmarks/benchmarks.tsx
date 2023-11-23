@@ -148,7 +148,7 @@ export const Benchmarks = () => {
   const queryResult = useCspBenchmarkIntegrations(query);
   const benchmarkResult = queryResult.data?.items || [];
   const totalItemCount = queryResult.data?.items.length || 0;
-  console.log(queryResult);
+  // console.log(queryResult);
   return (
     <CloudPosturePage>
       <EuiPageHeader
