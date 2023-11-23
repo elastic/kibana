@@ -64,8 +64,8 @@ export const useMissingPrivileges = (): MissingPrivilegesResponse => {
     }
 
     const { privileges } = privilegesResponse;
-    const indexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
-    const clusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
+    const missinIndexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
+    const missingClusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
       (privilege) => !privileges.elasticsearch.cluster[privilege]
     );
 
@@ -73,8 +73,8 @@ export const useMissingPrivileges = (): MissingPrivilegesResponse => {
       isLoading: false,
       hasAllRequiredPrivileges: false,
       missingPrivileges: {
-        indexPrivileges,
-        clusterPrivileges,
+        indexPrivileges: missinIndexPrivileges,
+        clusterPrivileges: missingClusterPrivileges,
       },
     };
   }, [isLoading, privilegesResponse]);
