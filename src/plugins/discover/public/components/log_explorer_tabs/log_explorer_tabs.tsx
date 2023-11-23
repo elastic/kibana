@@ -44,24 +44,24 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
   const discoverUrl = discoverLocator?.getRedirectUrl(mergedParams);
   const logExplorerUrl = logExplorerLocator?.getRedirectUrl(mergedParams);
 
-  const navigateToDiscover = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    discoverLocator?.navigate(mergedParams);
-  };
+  const navigateToDiscover = createNavigateHandler(() => {
+    if (selectedTab !== 'discover') {
+      discoverLocator?.navigate(mergedParams);
+    }
+  });
 
-  const navigateToLogExplorer = (e: MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
-    logExplorerLocator?.navigate(mergedParams);
-  };
+  const navigateToLogExplorer = createNavigateHandler(() => {
+    if (selectedTab !== 'log-explorer') {
+      logExplorerLocator?.navigate(mergedParams);
+    }
+  });
 
   return (
     <EuiTabs bottomBorder={false}>
       <EuiTab
         isSelected={selectedTab === 'discover'}
-        href={selectedTab === 'discover' ? undefined : discoverUrl}
-        onClick={selectedTab === 'discover' ? undefined : navigateToDiscover}
+        href={discoverUrl}
+        onClick={navigateToDiscover}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
       >
         {i18n.translate('discover.logExplorerTabs.discover', {
@@ -70,8 +70,8 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
       </EuiTab>
       <EuiTab
         isSelected={selectedTab === 'log-explorer'}
-        href={selectedTab === 'log-explorer' ? undefined : logExplorerUrl}
-        onClick={selectedTab === 'log-explorer' ? undefined : navigateToLogExplorer}
+        href={logExplorerUrl}
+        onClick={navigateToLogExplorer}
         css={{ '.euiTab__content': { lineHeight: euiTheme.size.xxxl } }}
       >
         {i18n.translate('discover.logExplorerTabs.logExplorer', {
@@ -80,4 +80,18 @@ export const LogExplorerTabs = ({ services, params, selectedTab }: LogExplorerTa
       </EuiTab>
     </EuiTabs>
   );
+};
+
+const isModifiedEvent = (event: MouseEvent) =>
+  event.metaKey || event.altKey || event.ctrlKey || event.shiftKey;
+
+const isLeftClickEvent = (event: MouseEvent) => event.button === 0;
+
+const createNavigateHandler = (onClick: () => void) => (e: MouseEvent) => {
+  if (isModifiedEvent(e) || !isLeftClickEvent(e)) {
+    return;
+  }
+
+  e.preventDefault();
+  onClick();
 };

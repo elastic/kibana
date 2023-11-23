@@ -17,7 +17,7 @@ import type { CustomizationCallback } from '../../customizations';
 import { setHeaderActionMenuMounter, setScopedHistory } from '../../kibana_services';
 import { LoadingIndicator } from '../common/loading_indicator';
 import { useSingleton } from '../../application/main/hooks/use_singleton';
-import { DiscoverCustomizationContext } from '../../application/types';
+import type { DiscoverCustomizationContext } from '../../application/types';
 
 export interface DiscoverContainerInternalProps {
   /*
