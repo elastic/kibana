@@ -768,8 +768,8 @@ describe('EPM template', () => {
             labels: {
               type: 'object',
               subobjects: false,
-            }
-          }
+            },
+          },
         },
       },
     };

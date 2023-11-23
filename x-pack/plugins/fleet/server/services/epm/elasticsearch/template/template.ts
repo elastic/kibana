@@ -444,16 +444,15 @@ function _generateMappings(
         }
 
         if (field.subobjects !== undefined) {
-          let fieldProps: Properties = {
+          const fieldProps: Properties = {
             subobjects: field.subobjects,
             type: 'object',
           };
-          
+
           // props['what?'] = fieldProps;
 
           hasNonDynamicTemplateMappings = true;
         }
-
       } else {
         let fieldProps = getDefaultProperties(field);
 
