@@ -9,8 +9,9 @@ import React from 'react';
 import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
+import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
-import { useFormattedTime } from '../../hooks';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -24,7 +25,11 @@ const lastActivityColumnName = i18n.translate('xpack.datasetQuality.lastActivity
   defaultMessage: 'Last Activity',
 });
 
-export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataStreamStat>> => {
+export const getDatasetQualitTableColumns = ({
+  fieldFormats,
+}: {
+  fieldFormats: FieldFormatsStart;
+}): Array<EuiBasicTableColumn<DataStreamStat>> => {
   return [
     {
       name: nameColumnName,
@@ -61,11 +66,10 @@ export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataSt
     {
       name: lastActivityColumnName,
       field: 'lastActivity',
-      render: (timestamp: number) => {
-        const FormattedTimestamp = () => <>{useFormattedTime(timestamp)}</>;
-
-        return <FormattedTimestamp />;
-      },
+      render: (timestamp: number) =>
+        fieldFormats
+          .getDefaultInstance(KBN_FIELD_TYPES.DATE, [ES_FIELD_TYPES.DATE])
+          .convert(timestamp),
       sortable: true,
     },
   ];

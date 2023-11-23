@@ -7,6 +7,7 @@
 
 import { ComponentType } from 'react';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface DatasetQualityPluginSetup {}
@@ -17,6 +18,7 @@ export interface DatasetQualityPluginStart {
 
 export interface DatasetQualityStartDeps {
   share: SharePluginStart;
+  fieldFormats: FieldFormatsStart;
 }
 
 export interface DatasetQualitySetupDeps {

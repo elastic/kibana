@@ -12,6 +12,7 @@ import { tableSummaryAllText, tableSummaryOfText } from '../../common/translatio
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
+import { useKibanaContextForPlugin } from '../utils';
 
 const DEFAULT_SORT_FIELD = 'title';
 const DEFAULT_SORT_DIRECTION = 'desc';
@@ -23,6 +24,9 @@ const sortingOverrides: Partial<{ [key in SORT_FIELD]: SORT_FIELD }> = {
 };
 
 export const useDatasetQualityTable = () => {
+  const {
+    services: { fieldFormats },
+  } = useKibanaContextForPlugin();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(10);
   const [sortField, setSortField] = useState<SORT_FIELD>(DEFAULT_SORT_FIELD);
@@ -31,7 +35,7 @@ export const useDatasetQualityTable = () => {
   const { dataStreamsStatsServiceClient: client } = useDatasetQualityContext();
   const { data = [], loading } = useFetcher(async () => client.getDataStreamsStats(), []);
 
-  const columns = useMemo(() => getDatasetQualitTableColumns(), []);
+  const columns = useMemo(() => getDatasetQualitTableColumns({ fieldFormats }), [fieldFormats]);
 
   const pagination = useMemo(
     () => ({
