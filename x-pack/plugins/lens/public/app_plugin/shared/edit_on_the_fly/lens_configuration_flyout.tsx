@@ -137,7 +137,7 @@ export function LensEditConfigurationFlyout({
   ]);
 
   const onApply = useCallback(() => {
-    if (savedObjectId && attributesChanged) {
+    if (savedObjectId) {
       const dsStates = Object.fromEntries(
         Object.entries(datasourceStates).map(([id, ds]) => {
           const dsState = ds.state;
@@ -171,7 +171,6 @@ export function LensEditConfigurationFlyout({
     closeFlyout?.();
   }, [
     savedObjectId,
-    attributesChanged,
     closeFlyout,
     datasourceStates,
     visualization.state,
@@ -235,6 +234,7 @@ export function LensEditConfigurationFlyout({
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
         isScrollable={true}
+        attributesChanged={attributesChanged}
       >
         <LayerConfiguration
           attributes={attributes}
@@ -243,6 +243,7 @@ export function LensEditConfigurationFlyout({
           visualizationMap={visualizationMap}
           datasourceMap={datasourceMap}
           datasourceId={datasourceId}
+          hasPadding={true}
           framePublicAPI={framePublicAPI}
           setIsInlineFlyoutVisible={setIsInlineFlyoutVisible}
         />
@@ -258,6 +259,7 @@ export function LensEditConfigurationFlyout({
         onCancel={onCancel}
         navigateToLensEditor={navigateToLensEditor}
         onApply={onApply}
+        attributesChanged={attributesChanged}
         language={getLanguageDisplayName(textBasedMode)}
         isScrollable={false}
       >
@@ -327,13 +329,22 @@ export function LensEditConfigurationFlyout({
             css={css`
                 padding-left: ${euiThemeVars.euiSize};
                 padding-right: ${euiThemeVars.euiSize};
+                .euiAccordion__childWrapper {
+                  flex: ${isLayerAccordionOpen ? 1 : 'none'}
+                }
               }
             `}
           >
             <EuiAccordion
               id="layer-configuration"
               buttonContent={
-                <EuiTitle size="xxs">
+                <EuiTitle
+                  size="xxs"
+                  css={css`
+                padding: 2px;
+              }
+            `}
+                >
                   <h5>
                     {i18n.translate('xpack.lens.config.layerConfigurationLabel', {
                       defaultMessage: 'Layer configuration',
@@ -352,7 +363,6 @@ export function LensEditConfigurationFlyout({
                 }
                 setIsLayerAccordionOpen(!isLayerAccordionOpen);
               }}
-              paddingSize="none"
             >
               <LayerConfiguration
                 attributes={attributes}
@@ -375,6 +385,9 @@ export function LensEditConfigurationFlyout({
                 border-bottom: ${euiThemeVars.euiBorderThin};
                 padding-left: ${euiThemeVars.euiSize};
                 padding-right: ${euiThemeVars.euiSize};
+                .euiAccordion__childWrapper {
+                  flex: ${isSuggestionsAccordionOpen ? 1 : 'none'}
+                }
               }
             `}
           >

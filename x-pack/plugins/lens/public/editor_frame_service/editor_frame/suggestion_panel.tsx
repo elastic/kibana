@@ -21,8 +21,7 @@ import {
   EuiButtonEmpty,
   EuiAccordion,
   EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
+  EuiNotificationBadge,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { IconType } from '@elastic/eui/src/components/icon/icon';
@@ -197,9 +196,7 @@ const SuggestionPreview = ({
               css: css`
                 display: flex;
                 flex-direction: column;
-                flex-basis: calc(50% - ${euiThemeVars.euiSize});
-                margin-right: ${euiThemeVars.euiSize};
-                margin-bottom: ${euiThemeVars.euiSize};
+                flex-basis: calc(50% - 9px);
               `,
             }
           : undefined
@@ -522,7 +519,13 @@ export function SuggestionPanel({
     );
   };
   const title = (
-    <EuiTitle size="xxs">
+    <EuiTitle
+      size="xxs"
+      css={css`
+    padding: 2px;
+  }
+`}
+    >
       <h3>
         <FormattedMessage
           id="xpack.lens.editorFrame.suggestionPanelTitle"
@@ -531,25 +534,6 @@ export function SuggestionPanel({
       </h3>
     </EuiTitle>
   );
-  const accordionWithSuggestionsCount = (
-    <EuiFlexGroup gutterSize="none" alignItems="center" justifyContent="spaceBetween">
-      <EuiFlexItem grow={false}>{title}</EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <div
-          css={css`
-            background-color: ${euiThemeVars.euiColorLightShade};
-            height: ${euiThemeVars.euiSizeL};
-            width: ${euiThemeVars.euiSizeL};
-            text-align: center;
-            border-radius: ${euiThemeVars.euiSizeXS};
-          `}
-        >
-          {suggestions.length + 1}
-        </div>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-  );
-  const buttonContent = wrapSuggestions ? accordionWithSuggestionsCount : title;
   return (
     <EuiAccordion
       id="lensSuggestionsPanel"
@@ -561,30 +545,38 @@ export function SuggestionPanel({
       css={css`
         padding-bottom: ${wrapSuggestions ? 0 : euiThemeVars.euiSizeS};
       `}
-      buttonContent={buttonContent}
+      buttonContent={title}
       forceState={hideSuggestions ? 'closed' : 'open'}
       onToggle={toggleSuggestions}
       extraAction={
-        existsStagedPreview &&
         !hideSuggestions && (
-          <EuiToolTip
-            content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
-              defaultMessage: 'Refresh the suggestions based on the selected visualization.',
-            })}
-          >
-            <EuiButtonEmpty
-              data-test-subj="lensSubmitSuggestion"
-              size="xs"
-              iconType="refresh"
-              onClick={() => {
-                dispatchLens(submitSuggestion());
-              }}
-            >
-              {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
-                defaultMessage: 'Refresh',
-              })}
-            </EuiButtonEmpty>
-          </EuiToolTip>
+          <>
+            {existsStagedPreview && (
+              <EuiToolTip
+                content={i18n.translate('xpack.lens.suggestion.refreshSuggestionTooltip', {
+                  defaultMessage: 'Refresh the suggestions based on the selected visualization.',
+                })}
+              >
+                <EuiButtonEmpty
+                  data-test-subj="lensSubmitSuggestion"
+                  size="xs"
+                  iconType="refresh"
+                  onClick={() => {
+                    dispatchLens(submitSuggestion());
+                  }}
+                >
+                  {i18n.translate('xpack.lens.sugegstion.refreshSuggestionLabel', {
+                    defaultMessage: 'Refresh',
+                  })}
+                </EuiButtonEmpty>
+              </EuiToolTip>
+            )}
+            {wrapSuggestions && (
+              <EuiNotificationBadge size="m" color="subdued">
+                {suggestions.length + 1}
+              </EuiNotificationBadge>
+            )}
+          </>
         )
       }
     >
@@ -595,6 +587,7 @@ export function SuggestionPanel({
         tabIndex={0}
         css={css`
           flex-wrap: ${wrapSuggestions ? 'wrap' : 'nowrap'};
+          gap: ${wrapSuggestions ? euiThemeVars.euiSize : 0};
         `}
       >
         {changesApplied ? renderSuggestionsUI() : renderApplyChangesPrompt()}

@@ -394,6 +394,7 @@ export function LayerPanel(
               )}
             </EuiFlexGroup>
             {props.indexPatternService &&
+              !isTextBasedLanguage &&
               (layerDatasource || activeVisualization.LayerPanelComponent) && (
                 <EuiSpacer size="s" />
               )}

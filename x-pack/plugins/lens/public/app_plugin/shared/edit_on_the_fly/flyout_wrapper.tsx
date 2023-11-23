@@ -31,6 +31,7 @@ export const FlyoutWrapper = ({
   isScrollable,
   displayFlyoutHeader,
   language,
+  attributesChanged,
   onCancel,
   navigateToLensEditor,
   onApply,
@@ -48,28 +49,29 @@ export const FlyoutWrapper = ({
         >
           <EuiFlexGroup justifyContent="spaceBetween" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              <EuiFlexGroup alignItems="center" gutterSize="xs">
-                <EuiFlexItem grow={false}>
-                  <EuiTitle size="xs">
-                    <h2>
-                      {i18n.translate('xpack.lens.config.editVisualizationLabel', {
-                        defaultMessage: 'Edit {lang} visualization',
-                        values: { lang: language },
-                      })}
-                    </h2>
-                  </EuiTitle>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
+              <EuiTitle size="xs">
+                <h2>
+                  {i18n.translate('xpack.lens.config.editVisualizationLabel', {
+                    defaultMessage: 'Edit {lang} visualization',
+                    values: { lang: language },
+                  })}
                   <EuiToolTip
                     content={i18n.translate('xpack.lens.config.experimentalLabel', {
                       defaultMessage:
                         'Technical preview, ES|QL currently offers limited configuration options',
                     })}
                   >
-                    <EuiBetaBadge label="Lab" iconType="beaker" />
+                    <EuiBetaBadge
+                      label="Lab"
+                      iconType="beaker"
+                      size="s"
+                      css={css`
+                        margin-left: ${euiThemeVars.euiSizeXS};
+                      `}
+                    />
                   </EuiToolTip>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                </h2>
+              </EuiTitle>
             </EuiFlexItem>
             {navigateToLensEditor && (
               <EuiFlexItem grow={false}>
@@ -137,6 +139,7 @@ export const FlyoutWrapper = ({
                 aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
                   defaultMessage: 'Apply changes',
                 })}
+                disabled={!attributesChanged}
                 iconType="check"
                 data-test-subj="applyFlyoutButton"
               >

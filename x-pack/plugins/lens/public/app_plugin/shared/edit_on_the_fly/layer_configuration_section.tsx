@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import { EuiSpacer, EuiFlexItem, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { VisualizationToolbar } from '../../../editor_frame_service/editor_frame/workspace_panel';
 import { ConfigPanelWrapper } from '../../../editor_frame_service/editor_frame/config_panel/config_panel';
@@ -24,6 +24,7 @@ export function LayerConfiguration({
   datasourceMap,
   datasourceId,
   framePublicAPI,
+  hasPadding,
   setIsInlineFlyoutVisible,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
@@ -59,9 +60,9 @@ export function LayerConfiguration({
     setIsInlineFlyoutVisible,
   };
   return (
-    <EuiFlexItem
+    <div
       css={css`
-        padding: ${euiTheme.size.s};
+        padding: ${hasPadding ? euiTheme.size.s : 0};
       `}
     >
       <VisualizationToolbar
@@ -70,6 +71,6 @@ export function LayerConfiguration({
       />
       <EuiSpacer size="m" />
       <ConfigPanelWrapper {...layerPanelsProps} />
-    </EuiFlexItem>
+    </div>
   );
 }

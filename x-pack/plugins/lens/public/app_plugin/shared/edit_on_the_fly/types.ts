@@ -19,6 +19,7 @@ export interface FlyoutWrapperProps {
   isScrollable: boolean;
   displayFlyoutHeader?: boolean;
   language?: string;
+  attributesChanged?: boolean;
   onCancel?: () => void;
   onApply?: () => void;
   navigateToLensEditor?: () => void;
@@ -79,5 +80,6 @@ export interface LayerConfigurationProps {
   datasourceMap: DatasourceMap;
   datasourceId: 'formBased' | 'textBased';
   framePublicAPI: FramePublicAPI;
+  hasPadding?: boolean;
   setIsInlineFlyoutVisible: (flag: boolean) => void;
 }
