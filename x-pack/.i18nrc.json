@@ -55,6 +55,7 @@
     "xpack.metricsData": "plugins/metrics_data_access",
     "xpack.ml": [
       "packages/ml/anomaly_utils",
+      "packages/ml/creation_wizard_utils",
       "packages/ml/data_grid",
       "packages/ml/data_view_utils",
       "packages/ml/date_picker",

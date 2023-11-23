@@ -55,7 +55,7 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
     {destIndexSameAsId === false && (
       <EuiFormRow
         fullWidth
-        label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
+        label={i18n.translate('xpack.ml.creationWizardUtils.destinationIndexLabel', {
           defaultMessage: 'Destination index',
         })}
         isInvalid={
@@ -66,17 +66,14 @@ export const DestinationIndexForm: FC<DestinationIndexFormProps> = ({
           !destinationIndexNameEmpty &&
           !destinationIndexNameValid && [
             <>
-              {i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexInvalidError', {
+              {i18n.translate('xpack.ml.creationWizardUtils.destinationIndexInvalidError', {
                 defaultMessage: 'Invalid destination index name.',
               })}
               <br />
               <EuiLink href={createIndexLink} target="_blank">
-                {i18n.translate(
-                  'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
-                  {
-                    defaultMessage: 'Learn more about index name limitations.',
-                  }
-                )}
+                {i18n.translate('xpack.ml.creationWizardUtils.destinationIndexInvalidErrorLink', {
+                  defaultMessage: 'Learn more about index name limitations.',
+                })}
               </EuiLink>
             </>,
           ]
