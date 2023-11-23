@@ -9,6 +9,8 @@ export const TELEMETRY_CHANNEL_LISTS = 'security-lists-v2';
 
 export const TELEMETRY_CHANNEL_ENDPOINT_META = 'endpoint-metadata';
 
+export const TELEMETRY_CHANNEL_ENDPOINT_ALERTS = 'alerts-endpoint';
+
 export const TELEMETRY_CHANNEL_DETECTION_ALERTS = 'alerts-detections';
 
 export const TELEMETRY_CHANNEL_TIMELINE = 'alerts-timeline';
