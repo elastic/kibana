@@ -25,6 +25,7 @@ import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import type { NavigateToUrlFn } from '../../../types/internal';
 import { useNavigation as useServices } from '../../services';
 import { usePanel } from './panel';
+import { isActiveFromUrl } from '../../utils';
 
 const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
   * {
@@ -46,17 +47,19 @@ const getStyles = (euiTheme: EuiThemeComputed<{}>) => css`
 interface Props {
   item: ChromeProjectNavigationNode;
   navigateToUrl: NavigateToUrlFn;
+  activeNodes: ChromeProjectNavigationNode[][];
 }
 
-export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl }: Props) => {
+export const NavigationItemOpenPanel: FC<Props> = ({ item, navigateToUrl, activeNodes }: Props) => {
   const { euiTheme } = useEuiTheme();
   const { open: openPanel, close: closePanel, selectedNode } = usePanel();
   const { isSideNavCollapsed } = useServices();
-  const { title, deepLink, isActive, children } = item;
+  const { title, deepLink, children } = item;
   const { id, path } = item;
   const href = deepLink?.url ?? item.href;
   const isNotMobile = useIsWithinMinBreakpoint('s');
   const isIconVisible = isNotMobile && !isSideNavCollapsed && !!children && children.length > 0;
+  const isActive = isActiveFromUrl(item.path, activeNodes);
 
   const itemClassNames = classNames(
     'sideNavItem',

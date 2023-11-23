@@ -186,7 +186,7 @@ const nodeToEuiCollapsibleNavProps = (
   isVisible: boolean;
 } => {
   const { navNode, isItem, hasChildren, hasLink } = serializeNavNode(_navNode);
-  const isActive = navNode.isActive ?? isActiveFromUrl(navNode.path, activeNodes);
+  const isActive = isActiveFromUrl(navNode.path, activeNodes);
 
   const { id, path, title, href, icon, renderAs, spaceBefore: _spaceBefore } = navNode;
   const isExternal = Boolean(href) && isAbsoluteLink(href!);
@@ -208,7 +208,13 @@ const nodeToEuiCollapsibleNavProps = (
   if (renderAs === 'panelOpener') {
     const items: EuiCollapsibleNavSubItemPropsEnhanced[] = [
       {
-        renderItem: () => <NavigationItemOpenPanel item={navNode} navigateToUrl={navigateToUrl} />,
+        renderItem: () => (
+          <NavigationItemOpenPanel
+            item={navNode}
+            navigateToUrl={navigateToUrl}
+            activeNodes={activeNodes}
+          />
+        ),
       },
     ];
     if (spaceBefore) {
@@ -370,7 +376,7 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
   const [itemsAccordionState, setItemsAccordionState] = useState<AccordionItemsState>(() => {
     return Object.entries(navNodesById).reduce<AccordionItemsState>((acc, [_id, node]) => {
       if (node.children) {
-        let isCollapsed = !node.isActive ?? DEFAULT_IS_COLLAPSED;
+        let isCollapsed = DEFAULT_IS_COLLAPSED;
         let doCollapseFromActiveState = true;
 
         if (node.defaultIsCollapsed !== undefined) {
@@ -481,18 +487,25 @@ export const NavigationSectionUI: FC<Props> = React.memo(({ navNode: _navNode })
             node.renderAs !== 'item' &&
             (!prevState || prevState.doCollapseFromActiveState === true)
           ) {
-            let nextIsActive = node.isActive;
-            if (prevState?.doCollapseFromActiveState !== false) {
-              nextIsActive = isActiveFromUrl(node.path, activeNodes);
-            } else if (nextIsActive === undefined) {
-              nextIsActive = !DEFAULT_IS_COLLAPSED;
+            let nextIsActive = false;
+            let doCollapseFromActiveState = true;
+
+            if (!prevState && node.defaultIsCollapsed !== undefined) {
+              nextIsActive = !node.defaultIsCollapsed;
+              doCollapseFromActiveState = false;
+            } else {
+              if (prevState?.doCollapseFromActiveState !== false) {
+                nextIsActive = isActiveFromUrl(node.path, activeNodes);
+              } else if (nextIsActive === undefined) {
+                nextIsActive = !DEFAULT_IS_COLLAPSED;
+              }
             }
 
             acc[_id] = {
               ...prevState,
               isCollapsed: !nextIsActive,
               isCollapsible: node.isCollapsible ?? DEFAULT_IS_COLLAPSIBLE,
-              doCollapseFromActiveState: true,
+              doCollapseFromActiveState,
             };
           }
           return acc;
