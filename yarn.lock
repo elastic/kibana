@@ -4989,6 +4989,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/ml-creation-wizard-utils@link:x-pack/packages/ml/creation_wizard_utils":
+  version "0.0.0"
+  uid ""
+
 "@kbn/ml-data-frame-analytics-utils@link:x-pack/packages/ml/data_frame_analytics_utils":
   version "0.0.0"
   uid ""

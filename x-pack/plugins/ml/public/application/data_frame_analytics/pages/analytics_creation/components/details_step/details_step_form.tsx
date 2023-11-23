@@ -7,10 +7,11 @@
 
 import React, { FC, Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { debounce } from 'lodash';
-import { EuiFieldText, EuiFormRow, EuiLink, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiSwitch, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { extractErrorMessage } from '@kbn/ml-error-utils';
 import { CreateDataViewForm } from '@kbn/ml-data-view-utils/components/create_data_view_form_row';
+import { DestinationIndexForm } from '@kbn/ml-creation-wizard-utils/components/destination_index_form';
 
 import { useMlKibana } from '../../../../../contexts/kibana';
 import { CreateAnalyticsStepProps } from '../../../analytics_management/hooks/use_create_analytics_form';
@@ -278,73 +279,18 @@ export const DetailsStepForm: FC<CreateAnalyticsStepProps> = ({
           data-test-subj="mlDFAnalyticsJobCreationJobDescription"
         />
       </EuiFormRow>
-      <EuiFormRow
-        fullWidth
-        helpText={
-          destIndexSameAsId === true && destinationIndexNameExists && indexNameExistsMessage
-        }
-      >
-        <EuiSwitch
-          disabled={isJobCreated}
-          name="mlDataFrameAnalyticsDestIndexSameAsId"
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.DestIndexSameAsIdLabel', {
-            defaultMessage: 'Destination index same as job ID',
-          })}
-          checked={destIndexSameAsId === true}
-          onChange={() => setDestIndexSameAsId(!destIndexSameAsId)}
-          data-test-subj="mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch"
-        />
-      </EuiFormRow>
-      {destIndexSameAsId === false && (
-        <EuiFormRow
-          fullWidth
-          label={i18n.translate('xpack.ml.dataframe.analytics.create.destinationIndexLabel', {
-            defaultMessage: 'Destination index',
-          })}
-          isInvalid={
-            destinationIndexNameEmpty || (!destinationIndexNameEmpty && !destinationIndexNameValid)
-          }
-          helpText={destinationIndexNameExists && indexNameExistsMessage}
-          error={
-            !destinationIndexNameEmpty &&
-            !destinationIndexNameValid && [
-              <Fragment>
-                {i18n.translate(
-                  'xpack.ml.dataframe.analytics.create.destinationIndexInvalidError',
-                  {
-                    defaultMessage: 'Invalid destination index name.',
-                  }
-                )}
-                <br />
-                <EuiLink href={createIndexLink} target="_blank">
-                  {i18n.translate(
-                    'xpack.ml.dataframe.stepDetailsForm.destinationIndexInvalidErrorLink',
-                    {
-                      defaultMessage: 'Learn more about index name limitations.',
-                    }
-                  )}
-                </EuiLink>
-              </Fragment>,
-            ]
-          }
-        >
-          <EuiFieldText
-            fullWidth
-            disabled={isJobCreated}
-            placeholder="destination index"
-            value={destinationIndex}
-            onChange={(e) => setFormState({ destinationIndex: e.target.value })}
-            aria-label={i18n.translate(
-              'xpack.ml.dataframe.analytics.create.destinationIndexInputAriaLabel',
-              {
-                defaultMessage: 'Choose a unique destination index name.',
-              }
-            )}
-            isInvalid={!destinationIndexNameEmpty && !destinationIndexNameValid}
-            data-test-subj="mlAnalyticsCreateJobFlyoutDestinationIndexInput"
-          />
-        </EuiFormRow>
-      )}
+      <DestinationIndexForm
+        createIndexLink={createIndexLink}
+        destinationIndex={destinationIndex}
+        destinationIndexNameEmpty={destinationIndexNameEmpty}
+        destinationIndexNameExists={destinationIndexNameExists}
+        destinationIndexNameValid={destinationIndexNameValid}
+        destIndexSameAsId={destIndexSameAsId}
+        indexNameExistsMessage={indexNameExistsMessage}
+        isJobCreated={isJobCreated}
+        onDestinationIndexChange={(d) => setFormState({ destinationIndex: d })}
+        setDestIndexSameAsId={setDestIndexSameAsId}
+      />
       <EuiFormRow fullWidth>
         <EuiSwitch
           disabled={isJobCreated}
