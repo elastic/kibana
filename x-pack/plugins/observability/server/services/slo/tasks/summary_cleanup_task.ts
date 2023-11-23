@@ -12,9 +12,9 @@ import {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import { SortResults } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../assets/constants';
-import { StoredSLO } from '../../domain/models';
-import { SO_SLO_TYPE } from '../../saved_objects';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../assets/constants';
+import { StoredSLO } from '../../../domain/models';
+import { SO_SLO_TYPE } from '../../../saved_objects';
 
 export const TASK_TYPE = 'SLO-DEFINITIONS-CLEANUP-TASK';
 
@@ -41,57 +41,12 @@ export class SloSummaryCleanupTask {
     taskManager.registerTaskDefinitions({
       [TASK_TYPE]: {
         title: 'SLO Definitions Cleanup Task',
-        timeout: '1m',
+        timeout: '3m',
         maxAttempts: 1,
         createTaskRunner: ({ taskInstance }: { taskInstance: ConcreteTaskInstance }) => {
           return {
             run: async () => {
-              const runAt = new Date().toISOString();
-
-              if (this.soClient && this.esClient) {
-                const finder = this.soClient.createPointInTimeFinder<StoredSLO>({
-                  type: SO_SLO_TYPE,
-                  perPage: 1000,
-                  fields: ['id'],
-                });
-                let searchAfterKey: SortResults | undefined;
-                const soIds: string[] = [];
-                let sloDefIdsToDelete: string[] = [];
-
-                for await (const response of finder.find()) {
-                  const soItems = response.saved_objects.map((so) => so.attributes.id);
-
-                  const { sloDefIds, searchAfter } = await this.fetchSloDefinitions(searchAfterKey);
-                  searchAfterKey = searchAfter;
-
-                  const { missingSloDefIds, missingSOIds } = findMissingItems(
-                    soItems.concat(soIds),
-                    sloDefIds.concat(sloDefIdsToDelete)
-                  );
-
-                  soIds.push(...missingSOIds);
-                  sloDefIdsToDelete = missingSloDefIds;
-                }
-                this.logger.info(
-                  JSON.stringify({
-                    idsToDelete: Array.from(new Set(sloDefIdsToDelete)),
-                    soIds: Array.from(new Set(soIds)),
-                  })
-                );
-
-                if (sloDefIdsToDelete.length > 0) {
-                  await this.esClient.deleteByQuery({
-                    index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-                    query: {
-                      terms: {
-                        'slo.id': sloDefIdsToDelete,
-                      },
-                    },
-                  });
-                }
-              }
-
-              return { state: { lastRunAt: runAt } };
+              return this.runTask();
             },
 
             cancel: async () => {
@@ -102,6 +57,55 @@ export class SloSummaryCleanupTask {
       },
     });
   }
+
+  runTask = async () => {
+    const runAt = new Date().toISOString();
+
+    if (this.soClient && this.esClient) {
+      const finder = this.soClient.createPointInTimeFinder<StoredSLO>({
+        type: SO_SLO_TYPE,
+        perPage: 1000,
+        fields: ['id'],
+      });
+      let searchAfterKey: SortResults | undefined;
+      const soIds: string[] = [];
+      let sloDefIdsToDelete: string[] = [];
+
+      for await (const response of finder.find()) {
+        const soItems = response.saved_objects.map((so) => so.attributes.id);
+
+        const { sloDefIds, searchAfter } = await this.fetchSloDefinitions(searchAfterKey);
+        searchAfterKey = searchAfter;
+
+        const { missingSloDefIds, missingSOIds } = findMissingItems(
+          soItems.concat(soIds),
+          sloDefIds.concat(sloDefIdsToDelete)
+        );
+
+        soIds.push(...missingSOIds);
+        sloDefIdsToDelete = missingSloDefIds;
+      }
+      this.logger.info(
+        JSON.stringify({
+          idsToDelete: Array.from(new Set(sloDefIdsToDelete)),
+          soIds: Array.from(new Set(soIds)),
+        })
+      );
+
+      if (sloDefIdsToDelete.length > 0) {
+        await this.esClient.deleteByQuery({
+          index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+          query: {
+            terms: {
+              'slo.id': sloDefIdsToDelete,
+            },
+          },
+        });
+      }
+    }
+
+    return { state: { lastRunAt: runAt } };
+  };
 
   fetchSloDefinitions = async (searchAfter?: SortResults) => {
     if (this.esClient) {
@@ -157,7 +161,7 @@ export class SloSummaryCleanupTask {
       id: this.taskId,
       taskType: TASK_TYPE,
       schedule: {
-        interval: '1m',
+        interval: '2h',
       },
       scope: ['observability', 'slo'],
       state: {},
