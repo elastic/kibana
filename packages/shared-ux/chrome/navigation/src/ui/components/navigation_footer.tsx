@@ -6,14 +6,14 @@
  * Side Public License, v 1.
  */
 
-import React from 'react';
+import { type FC } from 'react';
 
 export interface Props {
-  children?: React.ReactNode;
+  children?: JSX.Element[];
 }
 
 // Note: this component is only used to detect which children are part of the body and which
 // are part of the footer. See the "childrenParsed" value of the <Navigation /> component.
-export function NavigationFooter() {
+export const NavigationFooter: FC<Props> = () => {
   return null;
-}
+};
