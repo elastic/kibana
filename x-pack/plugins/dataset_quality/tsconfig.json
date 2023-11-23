@@ -23,6 +23,7 @@
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
     "@kbn/utility-types",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",
