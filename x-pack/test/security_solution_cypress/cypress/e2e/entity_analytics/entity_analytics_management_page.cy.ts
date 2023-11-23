@@ -160,7 +160,12 @@ describe(
 // this test suite doesn't run on serverless because it requires a custom role
 describe(
   'Entity analytics management page - Risk Engine Privileges Callout',
-  { tags: ['@ess'] },
+  {
+    tags: ['@ess'],
+    env: {
+      ftrConfig: { enableExperimental: ['riskEnginePrivilegesRouteEnabled'] },
+    },
+  },
   () => {
     it('should not show the callout for superuser', () => {
       cy.intercept(RISK_ENGINE_PRIVILEGES_URL).as('getPrivileges');
