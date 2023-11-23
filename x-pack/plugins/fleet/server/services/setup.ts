@@ -124,7 +124,9 @@ async function createSetupSideEffects(
   const defaultOutput = await outputService.ensureDefaultOutput(soClient, esClient);
 
   logger.debug('Setting up Fleet Elasticsearch assets');
+  let stepSpan = apm.startSpan('Install Fleet global assets', 'preconfiguration');
   await ensureFleetGlobalEsAssets(soClient, esClient);
+  stepSpan?.end();
 
   // Ensure that required packages are always installed even if they're left out of the config
   const preconfiguredPackageNames = new Set(packages.map((pkg) => pkg.name));
@@ -147,6 +149,7 @@ async function createSetupSideEffects(
 
   logger.debug('Setting up initial Fleet packages');
 
+  stepSpan = apm.startSpan('Install preconfigured packages and policies', 'preconfiguration');
   const { nonFatalErrors: preconfiguredPackagesNonFatalErrors } =
     await ensurePreconfiguredPackagesAndPolicies(
       soClient,
@@ -157,17 +160,23 @@ async function createSetupSideEffects(
       defaultDownloadSource,
       DEFAULT_SPACE_ID
     );
+  stepSpan?.end();
 
+  stepSpan = apm.startSpan('Upgrade managed package policies', 'preconfiguration');
   const packagePolicyUpgradeErrors = (
     await upgradeManagedPackagePolicies(soClient, esClient)
   ).filter((result) => (result.errors ?? []).length > 0);
+  stepSpan?.end();
 
   const nonFatalErrors = [...preconfiguredPackagesNonFatalErrors, ...packagePolicyUpgradeErrors];
 
   logger.debug('Upgrade Fleet package install versions');
+  stepSpan = apm.startSpan('Upgrade package install format version', 'preconfiguration');
   await upgradePackageInstallVersion({ soClient, esClient, logger });
+  stepSpan?.end();
 
   logger.debug('Generating key pair for message signing');
+  stepSpan = apm.startSpan('Configure message signing', 'preconfiguration');
   if (!appContextService.getMessageSigningService()?.isEncryptionAvailable) {
     logger.warn(
       'xpack.encryptedSavedObjects.encryptionKey is not configured, private key passphrase is being stored in plain text'
@@ -187,12 +196,17 @@ async function createSetupSideEffects(
     logger.debug('Checking for and encrypting plain text uninstall tokens');
     await appContextService.getUninstallTokenService()?.encryptTokens();
   }
+  stepSpan?.end();
 
+  stepSpan = apm.startSpan('Upgrade agent policy schema', 'preconfiguration');
   logger.debug('Upgrade Agent policy schema version');
   await upgradeAgentPolicySchemaVersion(soClient);
+  stepSpan?.end();
 
+  stepSpan = apm.startSpan('Set up enrollment keys for preconfigured policies', 'preconfiguration');
   logger.debug('Setting up Fleet enrollment keys');
   await ensureDefaultEnrollmentAPIKeysExists(soClient, esClient);
+  stepSpan?.end();
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
@@ -238,6 +252,7 @@ export async function ensureFleetGlobalEsAssets(
           esClient,
           installation,
         }).catch((err) => {
+          apm.captureError(err);
           logger.error(
             `Package needs to be manually reinstalled ${installation.name} after installing Fleet global assets: ${err.message}`
           );
