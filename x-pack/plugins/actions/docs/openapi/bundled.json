@@ -303,6 +303,9 @@
                 "runJiraConnectorRequest": {
                   "$ref": "#/components/examples/run_jira_connector_request"
                 },
+                "runPagerDutyConnectorRequest": {
+                  "$ref": "#/components/examples/run_pagerduty_connector_request"
+                },
                 "runServerLogConnectorRequest": {
                   "$ref": "#/components/examples/run_server_log_connector_request"
                 },
@@ -367,6 +370,9 @@
                   },
                   "runJiraConnectorResponse": {
                     "$ref": "#/components/examples/run_jira_connector_response"
+                  },
+                  "runPagerDutyConnectorResponse": {
+                    "$ref": "#/components/examples/run_pagerduty_connector_response"
                   },
                   "runServerLogConnectorResponse": {
                     "$ref": "#/components/examples/run_server_log_connector_response"
@@ -4777,6 +4783,91 @@
           }
         }
       },
+      "run_connector_params_pagerduty": {
+        "title": "PagerDuty connector parameters",
+        "description": "Test an action that triggers, acknowledges, or resolves PagerDuty alerts.",
+        "type": "object",
+        "required": [
+          "eventAction"
+        ],
+        "properties": {
+          "class": {
+            "description": "The class or type of the event.",
+            "type": "string",
+            "example": "cpu load"
+          },
+          "component": {
+            "description": "The component of the source machine that is responsible for the event.",
+            "type": "string",
+            "example": "eth0"
+          },
+          "customDetails": {
+            "description": "Additional details to add to the event.",
+            "type": "object"
+          },
+          "dedupKey": {
+            "description": "All actions sharing this key will be associated with the same PagerDuty alert. This value is used to correlate trigger and resolution.\n",
+            "type": "string",
+            "maxLength": 255
+          },
+          "eventAction": {
+            "description": "The type of event.",
+            "type": "string",
+            "enum": [
+              "acknowledge",
+              "resolve",
+              "trigger"
+            ]
+          },
+          "group": {
+            "description": "The logical grouping of components of a service.",
+            "type": "string",
+            "example": "app-stack"
+          },
+          "links": {
+            "description": "A list of links to add to the event.",
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "href": {
+                  "description": "The URL for the link.",
+                  "type": "string"
+                },
+                "text": {
+                  "description": "A plain text description of the purpose of the link.",
+                  "type": "string"
+                }
+              }
+            }
+          },
+          "severity": {
+            "description": "The severity of the event on the affected system.",
+            "type": "string",
+            "enum": [
+              "critical",
+              "error",
+              "info",
+              "warning"
+            ],
+            "default": "info"
+          },
+          "source": {
+            "description": "The affected system, such as a hostname or fully qualified domain name. Defaults to the Kibana saved object id of the action.\n",
+            "type": "string"
+          },
+          "summary": {
+            "description": "A summery of the event.",
+            "type": "string",
+            "maxLength": 1024
+          },
+          "timestamp": {
+            "description": "An ISO-8601 timestamp that indicates when the event was detected or generated.",
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
       "run_connector_params_message_email": {
         "title": "Email connector parameters",
         "description": "Test an action that sends an email message. There must be at least one recipient in `to`, `cc`, or `bcc`.\n",
@@ -5514,6 +5605,9 @@
                 "$ref": "#/components/schemas/run_connector_params_documents"
               },
               {
+                "$ref": "#/components/schemas/run_connector_params_pagerduty"
+              },
+              {
                 "$ref": "#/components/schemas/run_connector_params_message_email"
               },
               {
@@ -5839,6 +5933,24 @@
           }
         }
       },
+      "run_pagerduty_connector_request": {
+        "summary": "Run a PagerDuty connector to trigger an alert.",
+        "value": {
+          "params": {
+            "eventAction": "trigger",
+            "summary": "A brief event summary",
+            "links": [
+              {
+                "href": "http://example.com/pagerduty",
+                "text": "An example link"
+              }
+            ],
+            "customDetails": {
+              "my_data_1": "test data"
+            }
+          }
+        }
+      },
       "run_server_log_connector_request": {
         "summary": "Run a server log connector.",
         "value": {
@@ -5972,6 +6084,18 @@
               "name": "Epic"
             }
           ],
+          "status": "ok"
+        }
+      },
+      "run_pagerduty_connector_response": {
+        "summary": "Response from running a PagerDuty connector.",
+        "value": {
+          "connector_id": "45de9f70-954f-4608-b12a-db7cf808e49d",
+          "data": {
+            "dedup_key": "5115e138b26b484a81eaea779faa6016",
+            "message": "Event processed",
+            "status": "success"
+          },
           "status": "ok"
         }
       },

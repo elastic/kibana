@@ -7,6 +7,7 @@ properties:
   params:
     oneOf:
       - $ref: 'run_connector_params_documents.yaml'
+      - $ref: 'run_connector_params_pagerduty.yaml'
       - $ref: 'run_connector_params_message_email.yaml'
       - $ref: 'run_connector_params_message_serverlog.yaml'
       - title: Subaction parameters
