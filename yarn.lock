@@ -5989,10 +5989,6 @@
   version "0.0.0"
   uid ""
 
-"@kbn/testapp-plugin@link:x-pack/plugins/testapp":
-  version "0.0.0"
-  uid ""
-
 "@kbn/testing-embedded-lens-plugin@link:x-pack/examples/testing_embedded_lens":
   version "0.0.0"
   uid ""
