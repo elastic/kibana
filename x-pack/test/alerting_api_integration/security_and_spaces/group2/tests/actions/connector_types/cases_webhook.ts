@@ -471,6 +471,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create case. Error: JSON Error: Create case JSON body must be valid JSON.  ',
               });
@@ -501,6 +502,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to update case with id 12345. Error: JSON Error: Update case JSON body must be valid JSON.  ',
               });
@@ -568,6 +570,7 @@ export default function casesWebhookTest({ getService }: FtrProviderContext) {
                 status: 'error',
                 retry: true,
                 message: 'an error occurred while running the action',
+                errorSource: TaskErrorSource.USER,
                 service_message:
                   '[Action][Webhook - Case Management]: Unable to create comment at case with id 123. Error: JSON Error: Create comment JSON body must be valid JSON.  ',
               });
