@@ -25,7 +25,7 @@ import {
   EXCEPTION_ITEM_VIEWER_CONTAINER,
 } from '../../../screens/exceptions';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 describe(
   'Add multiple conditions and validate the generated exceptions',

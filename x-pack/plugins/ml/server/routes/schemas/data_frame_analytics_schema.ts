@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import { runtimeMappingsSchema } from './runtime_mappings_schema';
 
-export const dataAnalyticsJobConfigSchema = schema.object({
+export const dataFrameAnalyticsJobConfigSchema = schema.object({
   description: schema.maybe(schema.string()),
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
   dest: schema.object({
@@ -35,7 +35,7 @@ export const dataAnalyticsJobConfigSchema = schema.object({
   max_num_threads: schema.maybe(schema.number()),
 });
 
-export const dataAnalyticsEvaluateSchema = schema.object({
+export const dataFrameAnalyticsEvaluateSchema = schema.object({
   index: schema.string(),
   query: schema.maybe(schema.any()),
   evaluation: schema.maybe(
@@ -47,7 +47,7 @@ export const dataAnalyticsEvaluateSchema = schema.object({
   ),
 });
 
-export const dataAnalyticsExplainSchema = schema.object({
+export const dataFrameAnalyticsExplainSchema = schema.object({
   description: schema.maybe(schema.string()),
   dest: schema.maybe(schema.any()),
   /** Source */
@@ -63,14 +63,14 @@ export const dataAnalyticsExplainSchema = schema.object({
   _meta: schema.maybe(schema.object({}, { unknowns: 'allow' })),
 });
 
-export const analyticsIdSchema = schema.object({
+export const dataFrameAnalyticsIdSchema = schema.object({
   /**
    * Analytics ID
    */
   analyticsId: schema.string(),
 });
 
-export const analyticsQuerySchema = schema.object({
+export const dataFrameAnalyticsQuerySchema = schema.object({
   /**
    * Analytics Query
    */
@@ -83,10 +83,10 @@ export const deleteDataFrameAnalyticsJobSchema = schema.object({
    * Analytics Destination Index
    */
   deleteDestIndex: schema.maybe(schema.boolean()),
-  deleteDestIndexPattern: schema.maybe(schema.boolean()),
+  deleteDestDataView: schema.maybe(schema.boolean()),
 });
 
-export const dataAnalyticsJobUpdateSchema = schema.object({
+export const dataFrameAnalyticsJobUpdateSchema = schema.object({
   description: schema.maybe(schema.string()),
   model_memory_limit: schema.maybe(schema.string()),
   allow_lazy_start: schema.maybe(schema.boolean()),
@@ -98,17 +98,19 @@ export const stopsDataFrameAnalyticsJobQuerySchema = schema.object({
   force: schema.maybe(schema.boolean()),
 });
 
-export const jobsExistSchema = schema.object({
+export const dataFrameAnalyticsJobsExistSchema = schema.object({
   analyticsIds: schema.arrayOf(schema.string()),
   allSpaces: schema.maybe(schema.boolean()),
 });
 
-export const analyticsMapQuerySchema = schema.maybe(
+export const dataFrameAnalyticsMapQuerySchema = schema.maybe(
   schema.object({ treatAsRoot: schema.maybe(schema.any()), type: schema.maybe(schema.string()) })
 );
 
-export const analyticsNewJobCapsParamsSchema = schema.object({ indexPattern: schema.string() });
+export const dataFrameAnalyticsNewJobCapsParamsSchema = schema.object({
+  indexPattern: schema.string(),
+});
 
-export const analyticsNewJobCapsQuerySchema = schema.maybe(
+export const dataFrameAnalyticsNewJobCapsQuerySchema = schema.maybe(
   schema.object({ rollup: schema.maybe(schema.string()) })
 );
