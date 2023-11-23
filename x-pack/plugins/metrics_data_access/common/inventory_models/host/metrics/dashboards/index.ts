@@ -9,3 +9,4 @@ export { assetDetails } from './asset_details';
 export { assetDetailsFlyout } from './asset_details_flyout';
 export { hostsView } from './hosts_view';
 export { kpi } from './kpi';
+export { assetDetailsKubernetesNode } from './asset_details_kubernetes_node';

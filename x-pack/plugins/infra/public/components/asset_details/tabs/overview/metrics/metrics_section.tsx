@@ -10,8 +10,7 @@ import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
-import { findInventoryModel, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { capitalize } from 'lodash';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import {
   MetricsSectionTitle,
   KubernetesMetricsSectionTitle,
@@ -26,26 +25,50 @@ interface Props {
   logsDataView?: DataView;
 }
 
-type SupportedAssetTypes = Extract<InventoryItemType, 'host'> | 'node';
-
-const ASSET_TYPES: SupportedAssetTypes[] = ['host', 'node'];
-const TitleComponent = {
-  host: MetricsSectionTitle,
-  node: KubernetesMetricsSectionTitle,
-};
-
 export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
+  const model = findInventoryModel('host');
+
+  const dashboards = useMemo(
+    () =>
+      metricsDataView && logsDataView
+        ? {
+            host: model.metrics.dashboards?.assetDetails.get({
+              metricsDataView,
+              logsDataView,
+            }),
+            kubernetes: model.metrics.dashboards?.assetDetailsKubernetesNode.get({
+              metricsDataView,
+            }),
+          }
+        : null,
+    [
+      logsDataView,
+      metricsDataView,
+      model.metrics.dashboards?.assetDetails,
+      model.metrics.dashboards?.assetDetailsKubernetesNode,
+    ]
+  );
+
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      {ASSET_TYPES.map((assetType) => (
-        <Wrapper
+      <Section title={MetricsSectionTitle}>
+        <MetricsGrid
           assetName={assetName}
-          assetType={assetType}
-          metricsDataView={metricsDataView}
-          logsDataView={logsDataView}
           dateRange={dateRange}
+          data-test-subj="infraAssetDetailsHostMetricsChart"
+          charts={dashboards?.host?.charts ?? []}
+          filterFieldName={model.fields.name}
         />
-      ))}
+      </Section>
+      <Section dependsOn={dashboards?.kubernetes?.dependsOn} title={KubernetesMetricsSectionTitle}>
+        <MetricsGrid
+          assetName={assetName}
+          dateRange={dateRange}
+          data-test-subj="infraAssetDetailsKubernetesMetricsChart"
+          charts={dashboards?.kubernetes?.charts ?? []}
+          filterFieldName={model.fields.name}
+        />
+      </Section>
     </EuiFlexGroup>
   );
 };
@@ -82,40 +105,6 @@ export const MetricsSectionCompact = ({
   );
 };
 
-const Wrapper = ({
-  assetName,
-  assetType,
-  dateRange,
-  metricsDataView,
-  logsDataView,
-}: {
-  assetType: SupportedAssetTypes;
-} & Props) => {
-  const model = findInventoryModel(assetType);
-
-  const dashboard = useMemo(
-    () =>
-      metricsDataView && logsDataView
-        ? model.metrics.dashboards?.assetDetails.get({
-            metricsDataView,
-            logsDataView,
-          })
-        : null,
-    [metricsDataView, logsDataView, model.metrics.dashboards?.assetDetails]
-  );
-
-  return (
-    <Section dependsOn={dashboard?.dependsOn} title={TitleComponent[assetType]}>
-      <MetricsGrid
-        assetName={assetName}
-        dateRange={dateRange}
-        data-test-subj={`infraAssetDetails${capitalize(assetType)}MetricsChart`}
-        charts={dashboard?.charts ?? []}
-        filterFieldName={model.fields.name}
-      />
-    </Section>
-  );
-};
 const Section = ({
   title,
   dependsOn = [],

@@ -9,7 +9,6 @@ import { i18n } from '@kbn/i18n';
 import { POD_FIELD, HOST_FIELD, CONTAINER_FIELD } from '../constants';
 import { host } from './host';
 import { pod } from './kubernetes/pod';
-import { node } from './kubernetes/node';
 import { awsEC2 } from './aws_ec2';
 import { awsS3 } from './aws_s3';
 import { awsRDS } from './aws_rds';
@@ -21,7 +20,6 @@ export { metrics } from './metrics';
 const catalog = {
   host,
   pod,
-  node,
   container,
   awsEC2,
   awsS3,
@@ -31,13 +29,9 @@ const catalog = {
 
 export const inventoryModels = Object.values(catalog);
 
-// 'node' is not supported across infra. That's why it wasn't added to InventoryItemType
-// Adding it to InventoryItemType means that Inventory UI and Logs also support this asset type
-type InventoryModels<T extends InventoryItemType | 'node'> = typeof catalog[T];
+type InventoryModels<T extends InventoryItemType> = typeof catalog[T];
 
-export const findInventoryModel = <T extends InventoryItemType | 'node'>(
-  type: T
-): InventoryModels<T> => {
+export const findInventoryModel = <T extends InventoryItemType>(type: T): InventoryModels<T> => {
   const model = inventoryModels.find((m) => m.id === type);
   if (!model) {
     throw new Error(

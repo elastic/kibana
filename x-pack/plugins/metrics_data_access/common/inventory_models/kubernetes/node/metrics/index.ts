@@ -5,17 +5,4 @@
  * 2.0.
  */
 
-import { InventoryMetrics } from '../../../types';
-import { assetDetails } from './dashboards/asset_details';
-import { formulas } from './formulas';
-
-const dashboards = { assetDetails };
-
-export const metrics: InventoryMetrics<typeof formulas, typeof dashboards> = {
-  tsvb: {},
-  snapshot: {},
-  formulas,
-  dashboards,
-  defaultSnapshot: 'cpu',
-  defaultTimeRangeInSeconds: 3600, // 1 hour
-};
+export { formulas } from './formulas';

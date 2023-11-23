@@ -8,13 +8,19 @@
 import { snapshot } from './snapshot';
 import { tsvb } from './tsvb';
 import { formulas } from './formulas';
-import { assetDetails, assetDetailsFlyout, hostsView, kpi } from './dashboards';
+import {
+  assetDetails,
+  assetDetailsKubernetesNode,
+  assetDetailsFlyout,
+  hostsView,
+  kpi,
+} from './dashboards';
 import { InventoryMetrics } from '../../types';
 
 // not sure why this is the only model with "count"
 const { count, ...exposedHostSnapshotMetrics } = snapshot;
 
-const dashboards = { assetDetails, assetDetailsFlyout, hostsView, kpi };
+const dashboards = { assetDetails, assetDetailsKubernetesNode, assetDetailsFlyout, hostsView, kpi };
 
 export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) as Array<
   keyof typeof exposedHostSnapshotMetrics
