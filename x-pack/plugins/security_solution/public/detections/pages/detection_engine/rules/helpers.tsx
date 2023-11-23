@@ -175,6 +175,9 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
       'missing_fields_strategy' in rule.alert_suppression &&
       rule.alert_suppression.missing_fields_strategy) ||
     DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+  enableThresholdSuppression: Boolean(
+    'alert_suppression' in rule && rule.alert_suppression?.duration
+  ),
 });
 
 export const convertHistoryStartToSize = (relativeTime: string) => {

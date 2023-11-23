@@ -736,4 +736,8 @@ export const schema: FormSchema<DefineStepRule> = {
     type: FIELD_TYPES.CHECKBOX,
     defaultValue: false,
   },
+  enableThresholdSuppression: {
+    type: FIELD_TYPES.CHECKBOX,
+    defaultValue: false,
+  },
 };

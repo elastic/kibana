@@ -319,6 +319,7 @@ describe('StepDefineRule', () => {
         queryBarTitle=""
         queryBarSavedId=""
         thresholdFields={[]}
+        enableThresholdSuppression={false}
       />
     );
   };

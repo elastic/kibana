@@ -524,6 +524,7 @@ const CreateRulePageComponent: React.FC = () => {
             queryBarTitle={defineStepData.queryBar.title}
             queryBarSavedId={defineStepData.queryBar.saved_id}
             thresholdFields={defineStepData.threshold.field}
+            enableThresholdSuppression={defineStepData.enableThresholdSuppression}
           />
           <NextStep
             dataTestSubj="define-continue"
@@ -559,6 +560,7 @@ const CreateRulePageComponent: React.FC = () => {
       setEqlOptionsSelected,
       threatIndicesConfig,
       defineStepData.threshold.field,
+      defineStepData.enableThresholdSuppression,
     ]
   );
   const memoDefineStepExtraAction = useMemo(

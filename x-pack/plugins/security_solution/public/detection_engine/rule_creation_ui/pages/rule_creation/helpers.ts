@@ -371,41 +371,6 @@ export const filterEmptyThreats = (threats: Threats): Threats => {
 };
 
 /**
- * takes suppression fields from DefineStepRule form and convert it to API schema
- * alert_suppression object field
- */
-const formatSuppressionFields = (
-  suppressionFields: Pick<
-    DefineStepRule,
-    'groupByFields' | 'groupByRadioSelection' | 'groupByDuration' | 'suppressionMissingFields'
-  >,
-  ruleType: DefineStepRule['ruleType']
-): DefineStepRuleJson['alert_suppression'] | {} => {
-  if (!suppressionFields.groupByFields.length) {
-    return {};
-  }
-
-  // only custom query rules have missing_fields_strategy setting
-  const missingFieldsStrategy = ['query', 'saved_query'].includes(ruleType)
-    ? {
-        missing_fields_strategy:
-          suppressionFields.suppressionMissingFields || DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
-      }
-    : {};
-
-  return {
-    alert_suppression: {
-      group_by: suppressionFields.groupByFields,
-      duration:
-        suppressionFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
-          ? suppressionFields.groupByDuration
-          : undefined,
-      ...missingFieldsStrategy,
-    },
-  };
-};
-
-/**
  * remove unused data source.
  * Ex: rule is using a data view so we should not
  * write an index property on the rule form.
@@ -442,16 +407,6 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
       }),
   };
 
-  const suppressionFields = formatSuppressionFields(
-    {
-      groupByFields: ruleFields.groupByFields,
-      groupByRadioSelection: ruleFields.groupByRadioSelection,
-      groupByDuration: ruleFields.groupByDuration,
-      suppressionMissingFields: ruleFields.suppressionMissingFields,
-    },
-    ruleType
-  );
-
   const typeFields = isMlFields(ruleFields)
     ? {
         anomaly_threshold: ruleFields.anomalyThreshold,
@@ -464,8 +419,10 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         language: ruleFields.queryBar?.query?.language,
         query: ruleFields.queryBar?.query?.query as string,
         saved_id: ruleFields.queryBar?.saved_id ?? undefined,
-        ...suppressionFields,
         ...(ruleType === 'threshold' && {
+          ...(ruleFields.enableThresholdSuppression && {
+            alert_suppression: { duration: ruleFields.groupByDuration },
+          }),
           threshold: {
             field: ruleFields.threshold?.field ?? [],
             value: parseInt(ruleFields.threshold?.value, 10) ?? 0,
@@ -521,7 +478,20 @@ export const formatDefineStepData = (defineStepData: DefineStepRule): DefineStep
         query: ruleFields.queryBar?.query?.query as string,
       }
     : {
-        ...suppressionFields,
+        ...(ruleFields.groupByFields.length > 0
+          ? {
+              alert_suppression: {
+                group_by: ruleFields.groupByFields,
+                duration:
+                  ruleFields.groupByRadioSelection === GroupByOptions.PerTimePeriod
+                    ? ruleFields.groupByDuration
+                    : undefined,
+                missing_fields_strategy:
+                  ruleFields.suppressionMissingFields ||
+                  DEFAULT_SUPPRESSION_MISSING_FIELDS_STRATEGY,
+              },
+            }
+          : {}),
         index: ruleFields.index,
         filters: ruleFields.queryBar?.filters,
         language: ruleFields.queryBar?.query?.language,

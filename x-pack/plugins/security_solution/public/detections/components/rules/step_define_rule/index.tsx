@@ -110,6 +110,7 @@ interface StepDefineRuleProps extends RuleStepProps {
   queryBarTitle: string | undefined;
   queryBarSavedId: string | null | undefined;
   thresholdFields: string[] | undefined;
+  enableThresholdSuppression: boolean;
 }
 
 interface StepDefineRuleReadOnlyProps {
@@ -168,6 +169,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   queryBarTitle,
   queryBarSavedId,
   thresholdFields,
+  enableThresholdSuppression,
 }) => {
   const mlCapabilities = useMlCapabilities();
   const [openTimelineSearch, setOpenTimelineSearch] = useState(false);
@@ -362,7 +364,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
     if (isThresholdRule) {
       form.setFieldValue('groupByRadioSelection', GroupByOptions.PerTimePeriod);
     }
-  }, [thresholdFields, isThresholdRule, form]);
+  }, [isThresholdRule, form]);
 
   // if saved query failed to load:
   // - reset shouldLoadFormDynamically to false, as non existent query cannot be used for loading and execution
@@ -452,7 +454,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
                   durationUnitField={groupByDurationUnit}
                   isDisabled={
                     !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) ||
-                    groupByFields?.length === 0 ||
+                    (!enableThresholdSuppression && groupByFields?.length === 0) ||
                     groupByRadioSelection.value !== GroupByOptions.PerTimePeriod
                   }
                   minimumValue={1}
@@ -467,7 +469,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
         data-test-subj="groupByDurationOptions"
       />
     ),
-    [license, groupByFields, isThresholdRule]
+    [license, groupByFields, isThresholdRule, enableThresholdSuppression]
   );
 
   const AlertsSuppressionMissingFields = useCallback(
@@ -941,8 +943,26 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
+          <EuiSpacer size="s" />
           <RuleTypeEuiFormRow
-            $isVisible={isSuppressionEnabled}
+            label={''}
+            $isVisible={isSuppressionEnabled && isThresholdRule}
+            fullWidth
+          >
+            <CommonUseField
+              path="enableThresholdSuppression"
+              componentProps={{
+                idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
+                'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
+                euiFieldProps: {
+                  label: `Suppress alerts for threshold fields: ${thresholdFields?.join(', ')}`,
+                },
+              }}
+            />
+          </RuleTypeEuiFormRow>
+
+          <RuleTypeEuiFormRow
+            $isVisible={isSuppressionEnabled && isQueryRule(ruleType)}
             data-test-subj="alertSuppressionInput"
           >
             <UseField

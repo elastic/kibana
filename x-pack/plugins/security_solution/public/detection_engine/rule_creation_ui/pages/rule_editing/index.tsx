@@ -262,6 +262,7 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
                   queryBarTitle={defineStepData.queryBar.title}
                   queryBarSavedId={defineStepData.queryBar.saved_id}
                   thresholdFields={defineStepData.threshold.field}
+                  enableThresholdSuppression={defineStepData.enableThresholdSuppression}
                 />
               )}
               <EuiSpacer />
