@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient, Logger, SavedObjectsClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
@@ -16,23 +16,47 @@ import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../assets/constants
 import { StoredSLO } from '../../../domain/models';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 
-export const TASK_TYPE = 'SLO-DEFINITIONS-CLEANUP-TASK';
+export const TASK_TYPE = 'SLO:SUMMARIES-CLEANUP-TASK';
 
-function findMissingItems(soIds: string[], sloDefIds: string[]) {
-  const missingSloDefIds = sloDefIds.filter((item) => !soIds.includes(item));
-  const missingSOIds = soIds.filter((item) => !sloDefIds.includes(item));
+function findMissingItems(soIds: string[], sloSummaryIds: string[]) {
+  const missingSummaryIds = sloSummaryIds.filter((item) => !soIds.includes(item));
+  const missingSOIds = soIds.filter((item) => !sloSummaryIds.includes(item));
 
   return {
-    missingSloDefIds,
+    missingSummaryIds,
     missingSOIds,
   };
 }
+
+const SEPARATOR = '__V__';
+
+export const getDeleteQueryFilter = (sloSummaryIdsToDelete: string[]) => {
+  return sloSummaryIdsToDelete.map((id) => {
+    const [sloId, revision] = id.split(SEPARATOR);
+    return {
+      bool: {
+        must: [
+          {
+            term: {
+              'slo.id': sloId,
+            },
+          },
+          {
+            term: {
+              'slo.revision': revision,
+            },
+          },
+        ],
+      },
+    };
+  });
+};
 
 export class SloSummaryCleanupTask {
   private abortController = new AbortController();
   private logger: Logger;
   private taskManager?: TaskManagerStartContract;
-  private soClient?: SavedObjectsClient;
+  private soClient?: SavedObjectsClientContract;
   private esClient?: ElasticsearchClient;
 
   constructor(taskManager: TaskManagerSetupContract, logger: Logger) {
@@ -62,42 +86,46 @@ export class SloSummaryCleanupTask {
     const runAt = new Date().toISOString();
 
     if (this.soClient && this.esClient) {
-      const finder = this.soClient.createPointInTimeFinder<StoredSLO>({
+      const finder = this.soClient.createPointInTimeFinder<Pick<StoredSLO, 'id' | 'revision'>>({
         type: SO_SLO_TYPE,
         perPage: 1000,
-        fields: ['id'],
+        fields: ['id', 'revision'],
       });
       let searchAfterKey: SortResults | undefined;
-      const soIds: string[] = [];
-      let sloDefIdsToDelete: string[] = [];
+      let soIdsToCheck: string[] = [];
+      let sloSummaryIdsToDelete: string[] = [];
 
       for await (const response of finder.find()) {
-        const soItems = response.saved_objects.map((so) => so.attributes.id);
-
-        const { sloDefIds, searchAfter } = await this.fetchSloDefinitions(searchAfterKey);
-        searchAfterKey = searchAfter;
-
-        const { missingSloDefIds, missingSOIds } = findMissingItems(
-          soItems.concat(soIds),
-          sloDefIds.concat(sloDefIdsToDelete)
+        const soItems = response.saved_objects.map(
+          (so) => `${so.attributes.id}${SEPARATOR}${so.attributes.revision}`
         );
 
-        soIds.push(...missingSOIds);
-        sloDefIdsToDelete = missingSloDefIds;
-      }
-      this.logger.info(
-        JSON.stringify({
-          idsToDelete: Array.from(new Set(sloDefIdsToDelete)),
-          soIds: Array.from(new Set(soIds)),
-        })
-      );
+        const { sloSummaryIds, searchAfter } = await this.fetchSloSummariesIds(searchAfterKey);
+        searchAfterKey = searchAfter;
 
-      if (sloDefIdsToDelete.length > 0) {
+        const { missingSummaryIds, missingSOIds } = findMissingItems(
+          soItems.concat(soIdsToCheck),
+          sloSummaryIds.concat(sloSummaryIdsToDelete)
+        );
+
+        soIdsToCheck = missingSOIds;
+        sloSummaryIdsToDelete = missingSummaryIds;
+        if (searchAfterKey === undefined) {
+          break;
+        }
+      }
+
+      await finder.close();
+
+      if (sloSummaryIdsToDelete.length > 0) {
+        this.logger.info(
+          `[SLO] Deleting ${sloSummaryIdsToDelete.length} SLO definitions from the summary index`
+        );
         await this.esClient.deleteByQuery({
           index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
           query: {
-            terms: {
-              'slo.id': sloDefIdsToDelete,
+            bool: {
+              filter: getDeleteQueryFilter(sloSummaryIdsToDelete.sort()),
             },
           },
         });
@@ -107,12 +135,12 @@ export class SloSummaryCleanupTask {
     return { state: { lastRunAt: runAt } };
   };
 
-  fetchSloDefinitions = async (searchAfter?: SortResults) => {
+  fetchSloSummariesIds = async (searchAfter?: SortResults) => {
     if (this.esClient) {
       const result = await this.esClient.search({
-        size: 1000,
+        size: 2000,
         index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-        fields: ['slo.id'],
+        fields: ['slo.id', 'slo.revision'],
         collapse: {
           field: 'slo.id',
         },
@@ -120,6 +148,12 @@ export class SloSummaryCleanupTask {
         sort: [
           {
             'slo.id': {
+              order: 'desc',
+            },
+            'slo.revision': {
+              order: 'desc',
+            },
+            'slo.instanceId': {
               order: 'desc',
             },
           },
@@ -130,12 +164,15 @@ export class SloSummaryCleanupTask {
       const newSearchAfter = result.hits.hits[result.hits.hits.length - 1].sort;
       return {
         searchAfter: newSearchAfter,
-        sloDefIds: result.hits.hits.map((hit) => hit.fields?.['slo.id'][0] as string),
+        sloSummaryIds: result.hits.hits.map(
+          ({ fields }) =>
+            `${fields?.['slo.id'][0]}${SEPARATOR}${fields?.['slo.revision'][0]}` as string
+        ),
       };
     } else {
       return {
         searchAfter: undefined,
-        sloDefIds: [] as string[],
+        sloSummaryIds: [] as string[],
       };
     }
   };
@@ -146,7 +183,7 @@ export class SloSummaryCleanupTask {
 
   public async start(
     taskManager: TaskManagerStartContract,
-    soClient: SavedObjectsClient,
+    soClient: SavedObjectsClientContract,
     esClient: ElasticsearchClient
   ) {
     this.taskManager = taskManager;
