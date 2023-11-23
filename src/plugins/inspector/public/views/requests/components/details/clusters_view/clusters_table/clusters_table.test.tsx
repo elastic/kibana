@@ -29,11 +29,7 @@ describe('ClustersTable', () => {
     };
 
     test('should render rows in native order', () => {
-      render(
-        <ClustersTable
-          clusters={clusters}
-        />
-      );
+      render(<ClustersTable clusters={clusters} />);
       const tableRows = screen.getAllByRole('row');
       expect(tableRows.length).toBe(4); // 1 header row, 3 data rows
       expect(tableRows[1]).toHaveTextContent('Nameremote1StatussuccessfulResponse time50ms');
@@ -42,13 +38,9 @@ describe('ClustersTable', () => {
     });
 
     test('should sort by response time', () => {
-      render(
-        <ClustersTable
-          clusters={clusters}
-        />
-      );
+      render(<ClustersTable clusters={clusters} />);
       const button = screen.getByRole('button', {
-        name: 'Response time'
+        name: 'Response time',
       });
       fireEvent.click(button);
       const tableRowsAsc = screen.getAllByRole('row');
