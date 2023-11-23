@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { ML_INTERNAL_BASE_PATH } from '@kbn/ml-plugin/common/constants/app';
-import type { Module } from '@kbn/ml-plugin/common/types/modules';
 import { rootRequest } from './common';
 
-export const fetchMachineLearningModules = () => {
-  return rootRequest<Module[]>({
-    method: 'GET',
-    url: `${ML_INTERNAL_BASE_PATH}/modules/get_module`,
+export const deleteRuntimeField = (dataView: string, fieldName: string) => {
+  const deleteRuntimeFieldPath = `/api/data_views/data_view/${dataView}/runtime_field/${fieldName}`;
+
+  rootRequest({
+    url: deleteRuntimeFieldPath,
+    method: 'DELETE',
     failOnStatusCode: false,
   });
 };
