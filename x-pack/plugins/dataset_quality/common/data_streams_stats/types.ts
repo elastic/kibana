@@ -6,14 +6,13 @@
  */
 
 import { APIClientRequestParamsOf, APIReturnType } from '../rest/create_call_dataset_quality_api';
-import { GET_DATA_STREAMS_STATS_URL } from '../constants';
 import { DataStreamStat } from './data_stream_stat';
 
-export type GetDataStreamsStatsParams = APIClientRequestParamsOf<
-  typeof GET_DATA_STREAMS_STATS_URL
->['params'];
+export type GetDataStreamsStatsParams =
+  APIClientRequestParamsOf<`GET /internal/dataset_quality/data_streams/stats`>['params'];
 export type GetDataStreamsStatsQuery = GetDataStreamsStatsParams['query'];
-export type GetDataStreamsStatsResponse = APIReturnType<typeof GET_DATA_STREAMS_STATS_URL>;
+export type GetDataStreamsStatsResponse =
+  APIReturnType<`GET /internal/dataset_quality/data_streams/stats`>;
 export type DataStreamStatServiceResponse = DataStreamStat[];
 export type DataStreamStatType = GetDataStreamsStatsResponse['dataStreamsStats'][0];
 export type IntegrationType = GetDataStreamsStatsResponse['integrations'][0];
