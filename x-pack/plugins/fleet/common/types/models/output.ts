@@ -23,7 +23,12 @@ export type KafkaPartitionType = typeof kafkaPartitionType;
 export type KafkaTopicWhenType = typeof kafkaTopicWhenType;
 export type KafkaAcknowledgeReliabilityLevel = typeof kafkaAcknowledgeReliabilityLevel;
 export type KafkaVerificationMode = typeof kafkaVerificationModes;
-
+export type OutputSecret =
+  | string
+  | {
+      id: string;
+      hash?: string;
+    };
 interface NewBaseOutput {
   is_default: boolean;
   is_default_monitoring: boolean;
@@ -43,7 +48,11 @@ interface NewBaseOutput {
   proxy_id?: string | null;
   shipper?: ShipperOutput | null;
   allow_edit?: string[];
-  secrets?: {};
+  secrets?: {
+    ssl?: {
+      key?: OutputSecret;
+    };
+  };
 }
 
 export interface NewElasticsearchOutput extends NewBaseOutput {
@@ -139,17 +148,9 @@ export interface KafkaOutput extends NewBaseOutput {
   broker_timeout?: number;
   required_acks?: ValueOf<KafkaAcknowledgeReliabilityLevel>;
   secrets?: {
-    password?:
-      | string
-      | {
-          id: string;
-        };
+    password?: OutputSecret;
     ssl?: {
-      key?:
-        | string
-        | {
-            id: string;
-          };
+      key?: OutputSecret;
     };
   };
 }
