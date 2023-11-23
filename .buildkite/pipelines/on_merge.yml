@@ -103,7 +103,43 @@ steps:
         - exit_status: '*'
           limit: 1
 
-  - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
+  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
+    label: 'Serverless Investigations - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverles_rule_management.sh
+    label: 'Serverless Rule Management - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 8
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+  - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
+    label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
+    agents:
+      queue: n2-4-spot
+    depends_on: build
+    timeout_in_minutes: 60
+    parallelism: 6
+    retry:
+      automatic:
+        - exit_status: '*'
+          limit: 1
+
+    - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
       queue: n2-4-spot
@@ -122,18 +158,6 @@ steps:
     depends_on: build
     timeout_in_minutes: 60
     parallelism: 6
-    retry:
-      automatic:
-        - exit_status: '*'
-          limit: 1
-
-  - command: .buildkite/scripts/steps/functional/security_serverless_investigations.sh
-    label: 'Serverless Investigations - Security Solution Cypress Tests'
-    agents:
-      queue: n2-4-spot
-    depends_on: build
-    timeout_in_minutes: 60
-    parallelism: 8
     retry:
       automatic:
         - exit_status: '*'
