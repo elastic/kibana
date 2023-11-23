@@ -61,7 +61,6 @@ export const riskEngineInitRoute = (
           errors: initResult.errors,
         };
 
-        // TODO: after enabling asset criticality feature, we don't need assetCriticalityInstallFailed
         if (
           !initResult.riskEngineEnabled ||
           !initResult.riskEngineResourcesInstalled ||

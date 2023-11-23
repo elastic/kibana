@@ -6,27 +6,49 @@
  */
 
 import expect from '@kbn/expect';
-import { cleanRiskEngine } from '../../utils';
+import {
+  cleanRiskEngine,
+  cleanAssetCriticality,
+  assetCriticalityRouteHelpersFactory,
+} from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const es = getService('es');
-
   const kibanaServer = getService('kibanaServer');
   const log = getService('log');
+  const supertest = getService('supertest');
+  const assetCriticalityRoutes = assetCriticalityRouteHelpersFactory(supertest);
 
   describe('@ess @serverless asset_criticality', () => {
     beforeEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
+      await cleanAssetCriticality({ log, es });
     });
 
     afterEach(async () => {
       await cleanRiskEngine({ kibanaServer, es, log });
+      await cleanAssetCriticality({ log, es });
     });
 
-    describe('init', () => {
-      it('should has index installed on Kibana start', async () => {
+    describe('initialisation of resources', () => {
+      it('should has index installed on status api call', async () => {
         const assetCriticalityIndex = '.asset-criticality.asset-criticality-default';
+
+        let assetCriticalityIndexExist;
+
+        try {
+          assetCriticalityIndexExist = await es.indices.exists({
+            index: assetCriticalityIndex,
+          });
+        } catch (e) {
+          assetCriticalityIndexExist = false;
+        }
+
+        expect(assetCriticalityIndexExist).to.eql(false);
+
+        const result = await assetCriticalityRoutes.status();
+
         const assetCriticalityIndexResult = await es.indices.get({
           index: assetCriticalityIndex,
         });

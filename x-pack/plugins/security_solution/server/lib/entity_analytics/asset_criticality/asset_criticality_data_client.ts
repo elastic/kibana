@@ -18,7 +18,8 @@ interface AssetCriticalityClientOpts {
 
 export class AssetCriticalityDataClient {
   constructor(private readonly options: AssetCriticalityClientOpts) {}
-
+  // it will create idex for asset criticality,
+  // or update mappings if index exists
   public async init() {
     await createOrUpdateIndex({
       esClient: this.options.esClient,
@@ -28,5 +29,24 @@ export class AssetCriticalityDataClient {
         mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
       },
     });
+  }
+
+  public async isIndexExists() {
+    try {
+      const result = await this.options.esClient.indices.exists({
+        index: getAssetCriticalityIndex(this.options.namespace),
+      });
+      return result;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  public async getStatus() {
+    const isAssetCriticalityResourcesInstalled = await this.isIndexExists();
+
+    return {
+      isAssetCriticalityResourcesInstalled,
+    };
   }
 }

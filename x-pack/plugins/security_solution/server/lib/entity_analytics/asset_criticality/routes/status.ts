@@ -4,38 +4,37 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { Logger } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import { RISK_ENGINE_STATUS_URL, APP_ID } from '../../../../../common/constants';
-
+import { ASSET_CRITICALITY_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { checkAndInitAssetCriticalityResources } from './checkAndInitAssetCriticalityResources';
 
-export const riskEngineStatusRoute = (router: SecuritySolutionPluginRouter) => {
+export const assetCriticalityStatusRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger
+) => {
   router.versioned
     .get({
       access: 'internal',
-      path: RISK_ENGINE_STATUS_URL,
+      path: ASSET_CRITICALITY_STATUS_URL,
       options: {
         tags: ['access:securitySolution', `access:${APP_ID}-entity-analytics`],
       },
     })
     .addVersion({ version: '1', validate: {} }, async (context, request, response) => {
       const siemResponse = buildSiemResponse(response);
-
-      const securitySolution = await context.securitySolution;
-      const riskEngineClient = securitySolution.getRiskEngineDataClient();
-      const spaceId = securitySolution.getSpaceId();
-
       try {
-        const result = await riskEngineClient.getStatus({
-          namespace: spaceId,
-        });
+        await checkAndInitAssetCriticalityResources(context, logger);
+
+        const securitySolution = await context.securitySolution;
+        const assetCriticalityClient = securitySolution.getAssetCriticalityDataClient();
+
+        const result = await assetCriticalityClient.getStatus();
         return response.ok({
           body: {
-            risk_engine_status: result.riskEngineStatus,
-            legacy_risk_engine_status: result.legacyRiskEngineStatus,
-            is_max_amount_of_risk_engines_reached: result.isMaxAmountOfRiskEnginesReached,
+            is_asset_criticality_resources_installed: result.isAssetCriticalityResourcesInstalled,
           },
         });
       } catch (e) {
