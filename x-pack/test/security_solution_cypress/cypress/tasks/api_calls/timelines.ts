@@ -7,7 +7,7 @@
 
 import type { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 import type { CompleteTimeline } from '../../objects/timeline';
-import { rootRequest } from '../common';
+import { rootRequest } from './common';
 
 export const createTimeline = (timeline: CompleteTimeline) =>
   rootRequest<TimelineResponse>({
@@ -55,11 +55,6 @@ export const createTimeline = (timeline: CompleteTimeline) =>
           ? { dataViewId: timeline.dataViewId, indexNames: timeline.indexNames }
           : {}),
       },
-    },
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
     },
   });
 
@@ -145,5 +140,4 @@ export const favoriteTimeline = ({
       templateTimelineId: templateTimelineId || null,
       templateTimelineVersion: templateTimelineVersion || null,
     },
-    headers: { 'kbn-xsrf': 'cypress-creds', 'x-elastic-internal-origin': 'security-solution' },
   });

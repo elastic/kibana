@@ -23,7 +23,7 @@ export default ({ loadTestFile, getService }: FtrProviderContext) => {
       // NOTE: Logout needs to happen before anything else to avoid flaky behavior
       await ml.securityUI.logout();
 
-      await ml.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await ml.testResources.deleteDataViewByTitle('ft_ecommerce');
       await esArchiver.unload('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.securityCommon.cleanMlUsers();
       await ml.securityCommon.cleanMlRoles();
