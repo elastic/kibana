@@ -260,29 +260,27 @@ async function tryCall(fn: any, ...args: any[]) {
 function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string | null) {
   const isDryRun = process.env.DRY_RUN?.match('(1|true)');
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
+  const buildShortname = `kibana-serverless-release #${process.env.BUILDKITE_BUILD_NUMBER}`;
   sendSlackMessage({
     blocks: [
       {
         type: 'section',
         text: textBlock(
-          `Promotion of a new <https://github.com/elastic/kibana/commit/${selectedCommit}|commit> to QA has been initiated!`,
-          `Once promotion is complete, please begin any required manual testing.`,
+          `:ship: Promotion of a new <https://github.com/elastic/kibana/commit/${selectedCommit}|commit> to QA has been initiated!`,
+          `:mag: The details of the candidate selection can be found here: <${process.env.BUILDKITE_BUILD_URL}|${buildShortname}>`,
+          `:test_tube: Once promotion is complete, please begin any required manual testing.`,
           `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`,
-          `${isDryRun ? '*This is a dry run, no action will be taken.*' : ''}}`
+          `${isDryRun ? '*:white_check_mark:This is a dry run, no action will be taken.*' : ''}`
         ),
       },
       {
         type: 'section',
         fields: [
           textBlock(
-            `*RC selection job:*`,
-            `<${process.env.BUILDKITE_BUILD_URL || 'about://blank'}|Link>`
+            `*More detail on the candidate selection:*`,
+            `<${process.env.BUILDKITE_BUILD_URL || 'about://blank'}|${buildShortname}>`
           ),
           textBlock(`*Initiated by:*`, `${process.env.BUILDKITE_BUILD_CREATOR || 'unknown'}`),
-          textBlock(
-            `*Commit:*`,
-            `<https://github.com/elastic/kibana/commit/${selectedCommit}|${selectedCommit}>`
-          ),
           textBlock(
             `*Git tag:*`,
             `<https://github.com/elastic/kibana/releases/tag/${deployTag}|${deployTag}>`
@@ -290,6 +288,10 @@ function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string 
           textBlock(
             `*QA Deploy job:*`,
             `<https://buildkite.com/elastic/kibana-serverless-release/builds?branch=${deployTag}|Link>`
+          ),
+          textBlock(
+            `*Commit:*`,
+            `<https://github.com/elastic/kibana/commit/${selectedCommit}|${selectedCommit}>`
           ),
         ],
       },

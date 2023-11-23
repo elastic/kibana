@@ -56,7 +56,7 @@ export function toSOComparisonBlockHtml(comparisonResult: {
   } else {
     return `<div>
 <h4>Plugin Saved Object migration changes: none</h4>
-<i>No changes between, you can run the command yourself to verify: </i>
+<i>No changes between targets, you can run the command yourself to verify: </i>
 <div><pre>${comparisonResult.command}</pre></div>
 </div>`;
   }
