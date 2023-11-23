@@ -117,7 +117,7 @@ steps:
         retry:
           automatic:
             - exit_status: '*'
-              limit: 1          
+              limit: 1
 
       - command: .buildkite/scripts/steps/functional/defend_workflows_serverless.sh
         label: 'Defend Workflows Cypress Tests on Serverless'
