@@ -91,12 +91,12 @@ export class AssetCriticalityDataClient {
     }
   }
 
-  public async upsert(item: AssetCriticalityUpsert): Promise<AssetCriticalityDoc> {
-    const id = createId(item);
+  public async upsert(record: AssetCriticalityUpsert): Promise<AssetCriticalityDoc> {
+    const id = createId(record);
     const doc = {
-      id_field: item.idField,
-      id_value: item.idValue,
-      criticality: item.criticality,
+      id_field: record.idField,
+      id_value: record.idValue,
+      criticality: record.criticality,
       '@timestamp': new Date().toISOString(),
     };
 
