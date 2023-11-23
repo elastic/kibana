@@ -47,23 +47,23 @@ export type MissingPrivilegesResponse =
   | { isLoading: false; missingPrivileges: MissingPrivileges; hasAllRequiredPrivileges: false };
 
 export const useMissingPrivileges = (): MissingPrivilegesResponse => {
-  const { data: privilegesRes, isLoading } = useRiskEnginePrivileges();
+  const { data: privilegesResponse, isLoading } = useRiskEnginePrivileges();
 
   return useMemo<MissingPrivilegesResponse>(() => {
-    if (isLoading || !privilegesRes) {
+    if (isLoading || !privilegesResponse) {
       return {
         isLoading: true,
       };
     }
 
-    if (privilegesRes.has_all_required) {
+    if (privilegesResponse.has_all_required) {
       return {
         isLoading: false,
         hasAllRequiredPrivileges: true,
       };
     }
 
-    const { privileges } = privilegesRes;
+    const { privileges } = privilegesResponse;
     const indexPrivileges = getMissingIndexPrivileges(privileges.elasticsearch.index);
     const clusterPrivileges = RISK_ENGINE_REQUIRED_ES_CLUSTER_PRIVILEGES.filter(
       (privilege) => !privileges.elasticsearch.cluster[privilege]
@@ -77,5 +77,5 @@ export const useMissingPrivileges = (): MissingPrivilegesResponse => {
         clusterPrivileges,
       },
     };
-  }, [isLoading, privilegesRes]);
+  }, [isLoading, privilegesResponse]);
 };
