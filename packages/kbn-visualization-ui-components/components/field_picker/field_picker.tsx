@@ -93,7 +93,10 @@ export function FieldPicker<T extends FieldOptionValue = FieldOptionValue>(
       selectedOptions={selectedOptions}
       singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
       truncationProps={MIDDLE_TRUNCATION_PROPS}
-      inputPopoverProps={{ panelMinWidth: calculateWidthFromCharCount(maxLabelLength) }}
+      inputPopoverProps={{
+        panelMinWidth: calculateWidthFromCharCount(maxLabelLength),
+        anchorPosition: 'downRight',
+      }}
       onChange={(choices) => {
         if (choices.length === 0) {
           onDelete?.();

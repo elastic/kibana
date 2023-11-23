@@ -92,7 +92,7 @@ class PhraseValueInputUI extends PhraseSuggestorUI<PhraseValueInputProps> {
         data-test-subj="filterParamsComboBox phraseParamsComboxBox"
         singleSelection={SINGLE_SELECTION_AS_TEXT_PROPS}
         truncationProps={MIDDLE_TRUNCATION_PROPS}
-        inputPopoverProps={{ panelMinWidth }}
+        inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
       />
     );
   }

@@ -83,7 +83,7 @@ export const BreakdownFieldSelector = ({
         aria-label={i18n.translate('unifiedHistogram.breakdownFieldSelectorAriaLabel', {
           defaultMessage: 'Break down by',
         })}
-        inputPopoverProps={{ panelMinWidth }}
+        inputPopoverProps={{ panelMinWidth, anchorPosition: 'downRight' }}
         singleSelection={SINGLE_SELECTION}
         options={fieldOptions}
         selectedOptions={selectedFields}
