@@ -28,7 +28,7 @@ node_repositories(
     "20.10.0-linux_amd64": ("node-v20.10.0-linux-x64.tar.xz", "node-v20.10.0-linux-x64", "3fe4ec5d70c8b4ffc1461dec83ab23fc70124e137c4cbbe1ccc9d6ae6ec04a7d"),
     "20.10.0-windows_amd64": ("node-v20.10.0-win-x64.zip", "node-v20.10.0-win-x64", "e5b861814a97e28ae7ac06a34e88fd5e0565b447d270c26e20b5ef60bf0aaaf9"),
   },
-  node_version = "20.9.0",
+  node_version = "20.10.0",
   node_urls = [
     "https://us-central1-elastic-kibana-184716.cloudfunctions.net/kibana-ci-proxy-cache/dist/v{version}/{filename}",
   ],
