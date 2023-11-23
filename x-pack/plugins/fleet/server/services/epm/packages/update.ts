@@ -16,8 +16,6 @@ import { PackageNotFoundError } from '../../../errors';
 
 import { auditLoggingService } from '../../audit_logging';
 
-import { appContextService } from '../..';
-
 import { getInstallationObject, getPackageInfo } from './get';
 
 export async function updatePackage(
@@ -27,12 +25,10 @@ export async function updatePackage(
     keepPoliciesUpToDate?: boolean;
   } & TypeOf<typeof UpdatePackageRequestSchema.body>
 ) {
-  const logger = appContextService.getLogger();
   const { savedObjectsClient, pkgName, keepPoliciesUpToDate } = options;
   const installedPackage = await getInstallationObject({ savedObjectsClient, pkgName });
 
   if (!installedPackage) {
-    logger.warn(`Error while updating package: ${pkgName} is not installed`);
     throw new PackageNotFoundError(`Error while updating package: ${pkgName} is not installed`);
   }
 

@@ -423,7 +423,6 @@ export async function getPackageInfo({
   ]);
 
   if (!savedObject && !latestPackage) {
-    logger.error(`[${pkgName}] package not installed or found in registry`);
     throw new PackageNotFoundError(`[${pkgName}] package not installed or found in registry`);
   }
 
@@ -602,7 +601,6 @@ export async function getPackageFromSource(options: {
     }
   }
   if (!res) {
-    logger.error(`Package info for ${pkgName}-${pkgVersion} does not exist`);
     throw new PackageNotFoundError(`Package info for ${pkgName}-${pkgVersion} does not exist`);
   }
   return {

@@ -33,7 +33,7 @@ import {
 } from '../../../../constants';
 import { getESAssetMetadata } from '../meta';
 import { retryTransientEsErrors } from '../retry';
-import { FleetError, PackageESError } from '../../../../errors';
+import { PackageESError, PackageInvalidArchiveError } from '../../../../errors';
 
 import { getDefaultProperties, histogram, keyword, scaledFloat } from './mappings';
 
@@ -103,7 +103,7 @@ export function getTemplate({
     isIndexModeTimeSeries,
   });
   if (template.template.settings.index.final_pipeline) {
-    throw new PackageESError(
+    throw new PackageInvalidArchiveError(
       `Error template for ${templateIndexPattern} contains a final_pipeline`
     );
   }
@@ -430,7 +430,7 @@ function _generateMappings(
             matchingType = field.object_type_mapping_type ?? 'object';
             break;
           default:
-            throw new FleetError(
+            throw new PackageInvalidArchiveError(
               `No dynamic mapping generated for field ${path} of type ${field.object_type}`
             );
         }
@@ -904,18 +904,13 @@ const getDataStreams = async (
   }));
 };
 
-const rolloverDataStream = (
-  dataStreamName: string,
-  esClient: ElasticsearchClient,
-  logger: Logger
-) => {
+const rolloverDataStream = (dataStreamName: string, esClient: ElasticsearchClient) => {
   try {
     // Do no wrap rollovers in retryTransientEsErrors since it is not idempotent
     return esClient.indices.rollover({
       alias: dataStreamName,
     });
   } catch (error) {
-    logger.warn(`Cannot rollover data stream [${dataStreamName}] due to error: ${error}`);
     throw new PackageESError(
       `Cannot rollover data stream [${dataStreamName}] due to error: ${error}`
     );
@@ -1023,7 +1018,7 @@ const updateExistingDataStream = async ({
         return;
       } else {
         logger.info(`Triggering a rollover for ${dataStreamName}`);
-        await rolloverDataStream(dataStreamName, esClient, logger);
+        await rolloverDataStream(dataStreamName, esClient);
         return;
       }
     }
@@ -1047,7 +1042,7 @@ const updateExistingDataStream = async ({
       logger.info(
         `Index mode or source type has changed for ${dataStreamName}, triggering a rollover`
       );
-      await rolloverDataStream(dataStreamName, esClient, logger);
+      await rolloverDataStream(dataStreamName, esClient);
     }
   }
 
@@ -1065,7 +1060,8 @@ const updateExistingDataStream = async ({
         { logger }
       );
     } catch (err) {
-      logger.warn(`Could not update lifecycle settings for ${dataStreamName}: ${err.message}`);
+      // Check if this error can happen because of invalid settings;
+      // We are returning a 500 but in that case it should be a 400 instead
       throw new PackageESError(
         `Could not update lifecycle settings for ${dataStreamName}: ${err.message}`
       );
@@ -1091,7 +1087,8 @@ const updateExistingDataStream = async ({
       { logger }
     );
   } catch (err) {
-    logger.warn(`Could not update index template settings for ${dataStreamName}`);
+    // Same as above - Check if this error can happen because of invalid settings;
+    // We are returning a 500 but in that case it should be a 400 instead
     throw new PackageESError(`Could not update index template settings for ${dataStreamName}`);
   }
 };

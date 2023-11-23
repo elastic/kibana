@@ -72,14 +72,10 @@ export async function removeInstallation(options: {
     if (options.force || items.every((item) => (item.agents ?? 0) === 0)) {
       // delete package policies
       const ids = items.map((item) => item.id);
-      logger.info(
-        `Deleting package policies of ${pkgName} package because not used by agents or force flag was enabled: ${ids}`
-      );
       await packagePolicyService.delete(savedObjectsClient, esClient, ids, {
         force: options.force,
       });
     } else {
-      logger.warn(`Unable to remove package with existing package policy(s) in use by agent(s)`);
       throw new PackageRemovalError(
         `Unable to remove package with existing package policy(s) in use by agent(s)`
       );

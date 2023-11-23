@@ -7,7 +7,6 @@
 
 import type { AssetParts } from '../../../../common/types';
 import { PackageInvalidArchiveError, PackageUnsupportedMediaTypeError } from '../../../errors';
-import { appContextService } from '../../app_context';
 
 import {
   getArchiveEntry,
@@ -63,12 +62,8 @@ export async function unpackBufferEntries(
   archiveBuffer: Buffer,
   contentType: string
 ): Promise<ArchiveEntry[]> {
-  const logger = appContextService.getLogger();
   const bufferExtractor = getBufferExtractor({ contentType });
   if (!bufferExtractor) {
-    logger.warn(
-      `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
-    );
     throw new PackageUnsupportedMediaTypeError(
       `Unsupported media type ${contentType}. Please use 'application/gzip' or 'application/zip'`
     );
@@ -79,9 +74,6 @@ export async function unpackBufferEntries(
     const addToEntries = (entry: ArchiveEntry) => entries.push(entry);
     await bufferExtractor(archiveBuffer, onlyFiles, addToEntries);
   } catch (error) {
-    logger.warn(
-      `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
-    );
     throw new PackageInvalidArchiveError(
       `Error during extraction of package: ${error}. Assumed content type was ${contentType}, check if this matches the archive type.`
     );
@@ -90,9 +82,6 @@ export async function unpackBufferEntries(
   // While unpacking a tar.gz file with unzipBuffer() will result in a thrown error in the try-catch above,
   // unpacking a zip file with untarBuffer() just results in nothing.
   if (entries.length === 0) {
-    logger.warn(
-      `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
-    );
     throw new PackageInvalidArchiveError(
       `Archive seems empty. Assumed content type was ${contentType}, check if this matches the archive type.`
     );

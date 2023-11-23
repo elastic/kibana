@@ -56,7 +56,6 @@ export async function archiveEntryToESDocument(opts: {
   version: string;
   installSource: InstallSource;
 }): Promise<PackageAsset> {
-  const logger = appContextService.getLogger();
   const { path, buffer, name, version, installSource } = opts;
   const fileExt = extname(path);
   const contentType = mime.lookup(fileExt);
@@ -72,16 +71,12 @@ export async function archiveEntryToESDocument(opts: {
 
   // validation: filesize? asset type? anything else
   if (dataUtf8.length > currentMaxAssetBytes) {
-    logger.warn(`File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`);
     throw new PackageInvalidArchiveError(
       `File at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
   }
 
   if (dataBase64.length > currentMaxAssetBytes) {
-    logger.warn(
-      `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
-    );
     throw new PackageInvalidArchiveError(
       `After base64 encoding file at ${path} is larger than maximum allowed size of ${currentMaxAssetBytes}`
     );
