@@ -14,6 +14,7 @@ import { useUserPrivileges } from '../../../../common/components/user_privileges
 import { SaveTimelineModal } from './save_timeline_modal';
 import * as timelineTranslations from './translations';
 import { getTimelineStatusByIdSelector } from '../header/selectors';
+import { TIMELINE_TOUR_CONFIG_ANCHORS } from '../../timeline/tour/step_config';
 
 export interface SaveTimelineButtonProps {
   timelineId: string;
@@ -54,6 +55,7 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
     >
       <>
         <EuiButton
+          id={TIMELINE_TOUR_CONFIG_ANCHORS.SAVE_TIMELINE}
           fill
           color="primary"
           onClick={openEditTimeline}
@@ -62,7 +64,6 @@ export const SaveTimelineButton = React.memo<SaveTimelineButtonProps>(({ timelin
           isLoading={isSaving}
           disabled={!canEditTimeline}
           data-test-subj="save-timeline-action-btn"
-          id={'save-timeline-action'}
         >
           {timelineTranslations.SAVE}
         </EuiButton>
