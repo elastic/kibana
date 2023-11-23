@@ -85,7 +85,9 @@ export class HttpService
     this.log.debug('setting up preboot server');
     const config = await firstValueFrom(this.config$);
 
-    const prebootSetup = await this.prebootServer.setup(config);
+    const prebootSetup = await this.prebootServer.setup({
+      config$: this.config$,
+    });
     prebootSetup.server.route({
       path: '/{p*}',
       method: '*',
@@ -157,10 +159,10 @@ export class HttpService
 
     const config = await firstValueFrom(this.config$);
 
-    const { registerRouter, ...serverContract } = await this.httpServer.setup(
-      config,
-      deps.executionContext
-    );
+    const { registerRouter, ...serverContract } = await this.httpServer.setup({
+      config$: this.config$,
+      executionContext: deps.executionContext,
+    });
 
     registerCoreHandlers(serverContract, config, this.env, this.log);
 

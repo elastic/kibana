@@ -15,7 +15,7 @@ import {
   createServer,
   getListenerOptions,
   getServerOptions,
-  getServerTLSOptions,
+  setTlsConfig,
 } from '@kbn/server-http-tools';
 import {
   HttpConfig,
@@ -51,7 +51,7 @@ const flattenCertificateChain = (
   return accumulator;
 };
 
-describe('foo', () => {
+describe('setTlsConfig', () => {
   const CSP_CONFIG = cspConfig.schema.validate({});
   const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
 
@@ -59,7 +59,7 @@ describe('foo', () => {
     process.env.NODE_TLS_REJECT_UNAUTHORIZED = '0';
   });
 
-  it('bar', async () => {
+  it('replaces the TLS configuration on the HAPI server', async () => {
     const rawHttpConfig = httpConfig.schema.validate({
       name: 'kibana',
       host: '127.0.0.1',
@@ -73,36 +73,37 @@ describe('foo', () => {
       },
       shutdownTimeout: '1s',
     });
+    const firstConfig = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
 
-    console.log(rawHttpConfig.ssl);
-
-    const config = new HttpConfig(rawHttpConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
-
-    const serverOptions = getServerOptions(config);
-    const listenerOptions = getListenerOptions(config);
+    const serverOptions = getServerOptions(firstConfig);
+    const listenerOptions = getListenerOptions(firstConfig);
     const server = createServer(serverOptions, listenerOptions);
+
+    server.route({
+      method: 'GET',
+      path: '/',
+      handler: (request, toolkit) => {
+        return toolkit.response('ok');
+      },
+    });
 
     await server.start();
 
     const listener = server.listener;
-    // console.log('listener', listener.setSecureContext);
-
-    // const a: ServerTLS;
-    // a.setSecureContext()
-
-    const certificate = await fetchPeerCertificate(config.host, config.port);
-    const certificateChain = flattenCertificateChain(certificate);
-
-    // console.log('certificates:', certificateChain);
-
-    expect(isServerTLS(listener)).toEqual(true);
-    expect(certificateChain.length).toEqual(1);
-    expect(certificateChain[0].subject.CN).toEqual('kibana');
 
     // force TS to understand what we're working with.
     if (!isServerTLS(listener)) {
       throw new Error('Server should be a TLS server');
     }
+
+    const certificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);
+    const certificateChain = flattenCertificateChain(certificate);
+
+    expect(isServerTLS(listener)).toEqual(true);
+    expect(certificateChain.length).toEqual(1);
+    expect(certificateChain[0].subject.CN).toEqual('kibana');
+
+    await supertest(listener).get('/').expect(200);
 
     const secondRawConfig = httpConfig.schema.validate({
       name: 'kibana',
@@ -118,33 +119,17 @@ describe('foo', () => {
       shutdownTimeout: '1s',
     });
 
-    console.log(rawHttpConfig.ssl);
-
     const secondConfig = new HttpConfig(secondRawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
 
-    const newTlsConfig = getServerTLSOptions(secondConfig.ssl)!;
+    setTlsConfig(server, secondConfig.ssl);
 
-    listener.setSecureContext(newTlsConfig);
-
-    const secondCertificate = await fetchPeerCertificate(config.host, config.port);
+    const secondCertificate = await fetchPeerCertificate(firstConfig.host, firstConfig.port);
     const secondCertificateChain = flattenCertificateChain(secondCertificate);
-
-    // console.log('certificates:', certificateChain);
 
     expect(secondCertificateChain.length).toEqual(1);
     expect(secondCertificateChain[0].subject.CN).toEqual('elasticsearch');
 
-    /*
-    await supertest(listener)
-      .get('/')
-      //.disableTLSCerts()
-      //.trustLocalhost(true)
-      .expect(200)
-      .then((res) => {
-        // res.
-        expect(res.text).toBe('some-string');
-      });
-    */
+    await supertest(listener).get('/').expect(200);
 
     await server.stop();
   });

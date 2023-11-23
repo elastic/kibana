@@ -12,4 +12,5 @@ export { defaultValidationErrorHandler } from './src/default_validation_error_ha
 export { getListenerOptions } from './src/get_listener_options';
 export { getServerOptions, getServerTLSOptions } from './src/get_server_options';
 export { getRequestId } from './src/get_request_id';
+export { setTlsConfig } from './src/set_tls_config';
 export { sslSchema, SslConfig } from './src/ssl';
