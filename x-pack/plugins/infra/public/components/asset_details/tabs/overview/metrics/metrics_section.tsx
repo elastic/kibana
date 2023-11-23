@@ -10,7 +10,8 @@ import { EuiFlexItem } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { EuiFlexGroup } from '@elastic/eui';
-import { assetDetailsDashboards } from '../../../../../common/visualizations';
+import { findInventoryModel, InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import { capitalize } from 'lodash';
 import {
   MetricsSectionTitle,
   KubernetesMetricsSectionTitle,
@@ -25,33 +26,24 @@ interface Props {
   logsDataView?: DataView;
 }
 
-const { host, kubernetes } = assetDetailsDashboards;
+const ASSET_TYPES: Array<Extract<InventoryItemType, 'host' | 'node'>> = ['host', 'node'];
+const TitleComponent = {
+  host: MetricsSectionTitle,
+  node: KubernetesMetricsSectionTitle,
+};
 
 export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateRange }: Props) => {
   return (
     <EuiFlexGroup direction="column" gutterSize="s">
-      <Section title={MetricsSectionTitle}>
-        <MetricsGrid
+      {ASSET_TYPES.map((assetType) => (
+        <Wrapper
           assetName={assetName}
-          dateRange={dateRange}
-          charts={host.hostMetricChartsFullPage}
-          filterFieldName={host.keyField}
+          assetType={assetType}
           metricsDataView={metricsDataView}
           logsDataView={logsDataView}
-          data-test-subj="infraAssetDetailsMetricsChart"
-        />
-      </Section>
-      <Section dependsOn={kubernetes.dependsOn} title={KubernetesMetricsSectionTitle}>
-        <MetricsGrid
-          assetName={assetName}
           dateRange={dateRange}
-          filterFieldName={kubernetes.keyField}
-          charts={kubernetes.kubernetesCharts}
-          metricsDataView={metricsDataView}
-          logsDataView={logsDataView}
-          data-test-subj="infraAssetDetailsKubernetesMetricsChart"
         />
-      </Section>
+      ))}
     </EuiFlexGroup>
   );
 };
@@ -61,20 +53,67 @@ export const MetricsSectionCompact = ({
   metricsDataView,
   logsDataView,
   dateRange,
-}: Props) => (
-  <Section title={MetricsSectionTitle}>
-    <MetricsGrid
-      assetName={assetName}
-      dateRange={dateRange}
-      filterFieldName={host.keyField}
-      charts={host.hostMetricFlyoutCharts}
-      metricsDataView={metricsDataView}
-      logsDataView={logsDataView}
-      data-test-subj="infraAssetDetailsMetricsChart"
-    />
-  </Section>
-);
+}: Props) => {
+  const model = findInventoryModel('host');
 
+  const charts = useMemo(
+    () =>
+      (metricsDataView && logsDataView
+        ? model.metrics.dashboards?.assetDetailsFlyout.get({
+            metricsDataView,
+            logsDataView,
+          }).charts
+        : []) ?? [],
+    [metricsDataView, logsDataView, model.metrics.dashboards?.assetDetailsFlyout]
+  );
+
+  return (
+    <Section title={MetricsSectionTitle}>
+      <MetricsGrid
+        assetName={assetName}
+        dateRange={dateRange}
+        filterFieldName={model.fields.name}
+        charts={charts}
+        data-test-subj="infraAssetDetailsHostMetricsChart"
+      />
+    </Section>
+  );
+};
+
+const Wrapper = ({
+  assetName,
+  assetType,
+  dateRange,
+  metricsDataView,
+  logsDataView,
+}: {
+  assetType: Extract<InventoryItemType, 'host' | 'node'>;
+} & Props) => {
+  const model = findInventoryModel(assetType);
+
+  const dashboard = useMemo(
+    () =>
+      metricsDataView && logsDataView
+        ? model.metrics.dashboards?.assetDetails.get({
+            metricsDataView,
+            logsDataView,
+          })
+        : null,
+    [metricsDataView, logsDataView, model.metrics.dashboards?.assetDetails]
+  );
+
+  return (
+    <Section dependsOn={dashboard?.dependsOn} title={TitleComponent[assetType]}>
+      <MetricsGrid
+        assetName={assetName}
+        dateRange={dateRange}
+        data-test-subj={`infraAssetDetails${capitalize(assetType)}MetricsChart`}
+        charts={dashboard?.charts ?? []}
+        filterFieldName={model.fields.name}
+      />
+    </Section>
+  );
+};
 const Section = ({
   title,
   dependsOn = [],

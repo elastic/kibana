@@ -11,6 +11,7 @@ import type { SavedObjectReference } from '@kbn/core/server';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Chart, ChartConfig, ChartLayer } from '../types';
 import { DEFAULT_LAYER_ID } from '../utils';
+import { METRIC_ID } from './constants';
 
 const ACCESSOR = 'metric_formula_accessor';
 
@@ -18,7 +19,7 @@ export class MetricChart implements Chart<MetricVisualizationState> {
   constructor(private chartConfig: ChartConfig<ChartLayer<MetricVisualizationState>>) {}
 
   getVisualizationType(): string {
-    return 'lnsMetric';
+    return METRIC_ID;
   }
 
   getLayers(): FormBasedPersistedState['layers'] {

@@ -6,18 +6,23 @@
  */
 import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
+import { ChartModel } from '@kbn/lens-embeddable-utils';
+import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
-import { type KPIChartProps, AVERAGE_SUBTITLE } from '../../../../../common/visualizations';
 import { buildCombinedHostsFilter } from '../../../../../utils/filters/build';
-import { useMetricsDataViewContext } from '../../hooks/use_data_view';
 import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { useHostsViewContext } from '../../hooks/use_hosts_view';
 import { useHostCountContext } from '../../hooks/use_host_count';
 import { useAfterLoadedState } from '../../hooks/use_after_loaded_state';
 
-export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { height: number }) => {
+export const Kpi = ({
+  id,
+  height,
+  visualizationType = 'lnsMetric',
+  dataView,
+  ...chartProps
+}: ChartModel & { height: number }) => {
   const { searchCriteria } = useUnifiedSearchContext();
-  const { dataView } = useMetricsDataViewContext();
   const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
   const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
 
@@ -42,7 +47,7 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
             limit: searchCriteria.limit,
           },
         })
-      : AVERAGE_SUBTITLE;
+      : undefined;
 
   // prevents requestTs and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
@@ -55,23 +60,28 @@ export const Kpi = ({ id, title, layers, toolTip, height }: KPIChartProps & { he
     subtitle,
   });
 
-  const tooltipComponent = useMemo(() => <TooltipContent description={toolTip} />, [toolTip]);
+  const tooltipContent = useMemo(
+    () =>
+      id in METRICS_TOOLTIP ? (
+        <TooltipContent description={METRICS_TOOLTIP[id as keyof typeof METRICS_TOOLTIP]} />
+      ) : undefined,
+    [id]
+  );
 
   return (
     <LensChart
+      {...chartProps}
       id={`hostsViewKPI-${id}`}
       dataView={dataView}
       dateRange={afterLoadedState.dateRange}
       filters={afterLoadedState.filters}
-      layers={layers}
       loading={loading}
       height={height}
+      visualizationType={visualizationType}
       query={afterLoadedState.query}
-      title={title}
       searchSessionId={afterLoadedState.searchSessionId}
       subtitle={afterLoadedState.subtitle}
-      toolTip={tooltipComponent}
-      visualizationType="lnsMetric"
+      toolTip={tooltipContent}
       disableTriggers
       hidePanelTitles
     />

@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-export * from './lens/dashboards';
-export * from './lens/formulas';
+export { METRICS_TOOLTIP } from './translations';
+export {
+  HOST_METRICS_DOC_HREF,
+  HOST_METRICS_DOTTED_LINES_DOC_HREF,
+  KPI_CHART_HEIGHT,
+} from './constants';

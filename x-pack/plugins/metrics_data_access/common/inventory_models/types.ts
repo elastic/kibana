@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 import * as rt from 'io-ts';
 
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
+  node: null,
   container: null,
   awsEC2: null,
   awsS3: null,
@@ -376,19 +378,28 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export interface InventoryMetrics {
-  tsvb: { [name: string]: TSVBMetricModelCreator };
-  snapshot: { [name: string]: MetricsUIAggregation | undefined };
+export interface InventoryMetrics<
+  TTsvb = Partial<Record<InventoryMetric, TSVBMetricModelCreator>>,
+  TSnapshot = Record<string, MetricsUIAggregation | undefined>,
+  TFormula = Record<string, FormulaValueConfig>,
+  TDashboard = {}
+> {
+  tsvb: TTsvb;
+  snapshot: TSnapshot;
+  formulas?: TFormula;
+  dashboards?: TDashboard;
   defaultSnapshot: SnapshotMetricType;
   /** This is used by the inventory view to calculate the appropriate amount of time for the metrics detail page. Some metris like awsS3 require multiple days where others like host only need an hour.*/
   defaultTimeRangeInSeconds: number;
 }
 
-export interface InventoryModel {
-  id: string;
+type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
+
+export interface InventoryModel<TMetrics extends InventoryMetrics = InventoryMetrics> {
+  id: InventoryItemType;
   displayName: string;
   singularDisplayName: string;
-  requiredModule: string;
+  requiredModule: Modules;
   fields: {
     id: string;
     name: string;
@@ -402,8 +413,8 @@ export interface InventoryModel {
     apm: boolean;
     uptime: boolean;
   };
-  metrics: InventoryMetrics;
+  metrics: TMetrics;
   requiredMetrics: InventoryMetric[];
-  tooltipMetrics: SnapshotMetricType[];
+  tooltipMetrics: Array<keyof TMetrics['snapshot']>;
   nodeFilter?: object[];
 }

@@ -16,7 +16,7 @@ import createContainer from 'constate';
 import { isEqual } from 'lodash';
 import { isNumber } from 'lodash/fp';
 import { CloudProvider } from '@kbn/custom-icons';
-import { hostLensFormulas } from '../../../../common/visualizations';
+import { findInventoryModel } from '@kbn/metrics-data-access-plugin/common';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import { createInventoryMetricFormatter } from '../../inventory_view/lib/create_inventory_metric_formatter';
 import { EntryTitle } from '../components/table/entry_title';
@@ -124,6 +124,7 @@ const sortTableData =
  * Build a table columns and items starting from the snapshot nodes.
  */
 export const useHostsTable = () => {
+  const inventoryModel = findInventoryModel('host');
   const [selectedItems, setSelectedItems] = useState<HostNodeRow[]>([]);
   const { hostNodes } = useHostsViewContext();
 
@@ -241,7 +242,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.cpuUsage}
             toolTip={METRICS_TOOLTIP.cpuUsage}
-            formula={hostLensFormulas.cpuUsage.value}
+            formula={inventoryModel.metrics.formulas?.cpuUsage.value}
           />
         ),
         field: 'cpu',
@@ -255,7 +256,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.normalizedLoad1m}
             toolTip={METRICS_TOOLTIP.normalizedLoad1m}
-            formula={hostLensFormulas.normalizedLoad1m.value}
+            formula={inventoryModel.metrics.formulas?.normalizedLoad1m.value}
           />
         ),
         field: 'normalizedLoad1m',
@@ -269,7 +270,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryUsage}
             toolTip={METRICS_TOOLTIP.memoryUsage}
-            formula={hostLensFormulas.memoryUsage.value}
+            formula={inventoryModel.metrics.formulas?.memoryUsage.value}
           />
         ),
         field: 'memory',
@@ -283,7 +284,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.memoryFree}
             toolTip={METRICS_TOOLTIP.memoryFree}
-            formula={hostLensFormulas.memoryFree.value}
+            formula={inventoryModel.metrics.formulas?.memoryFree.value}
           />
         ),
         field: 'memoryFree',
@@ -297,7 +298,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
             toolTip={METRICS_TOOLTIP.diskSpaceUsage}
-            formula={hostLensFormulas.diskUsage.value}
+            formula={inventoryModel.metrics.formulas?.diskUsage.value}
           />
         ),
         field: 'diskSpaceUsage',
@@ -311,7 +312,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.rx}
             toolTip={METRICS_TOOLTIP.rx}
-            formula={hostLensFormulas.rx.value}
+            formula={inventoryModel.metrics.formulas?.rx.value}
           />
         ),
         field: 'rx',
@@ -326,7 +327,7 @@ export const useHostsTable = () => {
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.tx}
             toolTip={METRICS_TOOLTIP.tx}
-            formula={hostLensFormulas.tx.value}
+            formula={inventoryModel.metrics.formulas?.tx.value}
           />
         ),
         field: 'tx',
@@ -337,7 +338,18 @@ export const useHostsTable = () => {
         width: '120px',
       },
     ],
-    [detailsItemId, reportHostEntryClick, setProperties]
+    [
+      detailsItemId,
+      inventoryModel.metrics.formulas?.cpuUsage.value,
+      inventoryModel.metrics.formulas?.diskUsage.value,
+      inventoryModel.metrics.formulas?.memoryFree.value,
+      inventoryModel.metrics.formulas?.memoryUsage.value,
+      inventoryModel.metrics.formulas?.normalizedLoad1m.value,
+      inventoryModel.metrics.formulas?.rx.value,
+      inventoryModel.metrics.formulas?.tx.value,
+      reportHostEntryClick,
+      setProperties,
+    ]
   );
 
   const selection: EuiTableSelectionType<HostNodeRow> = {

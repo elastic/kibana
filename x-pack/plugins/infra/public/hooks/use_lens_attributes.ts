@@ -15,34 +15,29 @@ import useAsync from 'react-use/lib/useAsync';
 import { FormulaPublicApi } from '@kbn/lens-plugin/public';
 import {
   type LensVisualizationState,
-  type XYVisualOptions,
   type Chart,
   type LensAttributes,
+  type XYLayerModel,
+  type ChartModel,
+  type LayerModel,
   LensAttributesBuilder,
   XYChart,
   MetricChart,
   MetricLayer,
   XYDataLayer,
   XYReferenceLinesLayer,
+  XY_ID,
+  METRIC_ID,
 } from '@kbn/lens-embeddable-utils';
 import { InfraClientSetupDeps } from '../types';
-import type { MetricChartLayerParams, XYChartLayerParams } from '../common/visualizations/types';
 
-interface UseLensAttributesBaseParams {
-  dataView?: DataView;
-  title?: string;
-}
-
-export interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
-  layers: XYChartLayerParams[];
-  visualizationType: 'lnsXY';
-  visualOptions?: XYVisualOptions;
-}
-
+type UseLensAttributesBaseParams = Omit<ChartModel<LayerModel>, 'id'>;
 export interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
-  layers: MetricChartLayerParams;
-  visualizationType: 'lnsMetric';
+  visualizationType: typeof METRIC_ID;
   subtitle?: string;
+}
+export interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
+  visualizationType: typeof XY_ID;
 }
 
 export type UseLensAttributesParams =
@@ -54,7 +49,9 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
     services: { lens },
   } = useKibana<InfraClientSetupDeps>();
   const { navigateToPrefilledEditor } = lens;
-  const { value, error } = useAsync(lens.stateHelperApi, [lens]);
+  const { value, error } = useAsync(() => {
+    return lens.stateHelperApi();
+  }, [lens]);
   const { formula: formulaAPI } = value ?? {};
 
   const attributes = useMemo(() => {
@@ -144,7 +141,7 @@ export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesPara
   const getFormula = () => {
     const firstDataLayer = [
       ...(Array.isArray(params.layers) ? params.layers : [params.layers]),
-    ].find((p) => p.type === 'visualization');
+    ].find((p) => p.layerType === 'data');
 
     if (!firstDataLayer) {
       return '';
@@ -169,40 +166,35 @@ const chartFactory = ({
   formulaAPI: FormulaPublicApi;
 } & UseLensAttributesParams): Chart<LensVisualizationState> => {
   switch (params.visualizationType) {
-    case 'lnsXY':
+    case XY_ID:
       if (!Array.isArray(params.layers)) {
         throw new Error(`Invalid layers type. Expected an array of layers.`);
       }
 
-      const xyLayerFactory = (layer: XYChartLayerParams) => {
-        switch (layer.type) {
-          case 'visualization': {
-            return new XYDataLayer({
-              data: layer.data,
-              options: layer.options,
-            });
+      const xyLayerFactory = (layer: XYLayerModel[number]) => {
+        switch (layer.layerType) {
+          case 'data': {
+            return new XYDataLayer(layer);
           }
-          case 'referenceLines': {
-            return new XYReferenceLinesLayer({
-              data: layer.data,
-            });
+          case 'referenceLine': {
+            return new XYReferenceLinesLayer(layer);
           }
           default:
             throw new Error(`Invalid layer type`);
         }
       };
 
+      const { layers, ...rest } = params;
       return new XYChart({
         dataView,
         formulaAPI,
-        layers: params.layers.map((layerItem) => {
+        layers: layers.map((layerItem) => {
           return xyLayerFactory(layerItem);
         }),
-        title: params.title,
-        visualOptions: params.visualOptions,
+        ...rest,
       });
 
-    case 'lnsMetric':
+    case METRIC_ID:
       if (Array.isArray(params.layers)) {
         throw new Error(`Invalid layer type. Expected a single layer object.`);
       }
@@ -212,7 +204,8 @@ const chartFactory = ({
         formulaAPI,
         layers: new MetricLayer({
           data: params.layers.data,
-          options: { ...params.layers.options, subtitle: params.subtitle },
+          options: { ...params.layers.options },
+          layerType: params.layers.layerType,
         }),
         title: params.title,
       });

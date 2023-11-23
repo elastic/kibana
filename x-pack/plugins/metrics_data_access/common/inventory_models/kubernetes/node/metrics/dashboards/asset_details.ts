@@ -1,0 +1,120 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import { DataView } from '@kbn/data-views-plugin/common';
+import { i18n } from '@kbn/i18n';
+import { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import { createDashboardModel } from '../../../../create_dashboard_model';
+import { formulas } from '../formulas';
+
+export const assetDetails = {
+  get: ({ metricsDataView }: { metricsDataView: DataView }) => {
+    const commonParams: Partial<ChartModel<XYLayerModel>> = {
+      visualOptions: {
+        showDottedLine: true,
+        missingValues: 'Linear',
+      },
+    };
+
+    return createDashboardModel({
+      dependsOn: ['kubernetes.node'],
+      charts: [
+        {
+          id: 'nodeCpuCapacity',
+          title: i18n.translate(
+            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity',
+            {
+              defaultMessage: 'Node CPU Capacity',
+            }
+          ),
+          layers: [
+            {
+              data: [formulas.nodeCpuCapacity, formulas.nodeCpuUsed],
+              options: {
+                seriesType: 'area',
+              },
+              layerType: 'data',
+            },
+          ],
+          dataView: metricsDataView,
+          visualizationType: 'lnsXY',
+          ...commonParams,
+        },
+        {
+          id: 'nodeMemoryCapacity',
+          title: i18n.translate(
+            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodeMemoryCapacity',
+            {
+              defaultMessage: 'Node Memory Capacity',
+            }
+          ),
+          layers: [
+            {
+              data: [formulas.nodeMemoryCapacity, formulas.nodeMemoryUsed],
+              options: {
+                seriesType: 'area',
+              },
+              layerType: 'data',
+            },
+          ],
+          visualizationType: 'lnsXY',
+          dataView: metricsDataView,
+          ...commonParams,
+        },
+        {
+          id: 'nodeDiskCapacity',
+          title: i18n.translate(
+            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodeDiskCapacity',
+            {
+              defaultMessage: 'Node Disk Capacity',
+            }
+          ),
+          layers: [
+            {
+              data: [formulas.nodeDiskCapacity, formulas.nodeDiskUsed],
+              options: {
+                seriesType: 'area',
+              },
+              layerType: 'data',
+            },
+          ],
+          visualOptions: {
+            showDottedLine: true,
+            missingValues: 'Linear',
+          },
+          visualizationType: 'lnsXY',
+          dataView: metricsDataView,
+          ...commonParams,
+        },
+        {
+          id: 'nodePodCapacity',
+          title: i18n.translate(
+            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodePodCapacity',
+            {
+              defaultMessage: 'Node Pod Capacity',
+            }
+          ),
+          layers: [
+            {
+              data: [formulas.nodePodCapacity, formulas.nodePodUsed],
+              options: {
+                seriesType: 'area',
+              },
+              layerType: 'data',
+            },
+          ],
+          visualOptions: {
+            showDottedLine: true,
+            missingValues: 'Linear',
+          },
+          visualizationType: 'lnsXY',
+          dataView: metricsDataView,
+          ...commonParams,
+        },
+      ],
+    });
+  },
+};
