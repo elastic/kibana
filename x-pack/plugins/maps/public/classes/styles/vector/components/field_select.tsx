@@ -117,7 +117,7 @@ export function FieldSelect({ fields, selectedFieldName, onChange, styleName, ..
   const options = groupFieldsByOrigin(fields);
 
   const panelMinWidth = calculateWidthFromCharCount(
-    options.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
+    fields.reduce((acc, curr) => (acc > curr.label.length ? acc : curr.label.length), 0)
   );
 
   return (
