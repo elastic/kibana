@@ -9,7 +9,7 @@
 import { estypes } from '@elastic/elasticsearch';
 import type { ClusterDetails } from '@kbn/es-types';
 import { EuiSearchBar, type Query } from '@elastic/eui';
-import { Request } from '../../../../../common/adapters/request/types';
+import { Request } from '../../../../../../common/adapters/request/types';
 import { getLocalClusterDetails, LOCAL_CLUSTER_KEY } from './local_cluster';
 
 export function findClusters(request: Request, query?: Query): Record<string, ClusterDetails> {

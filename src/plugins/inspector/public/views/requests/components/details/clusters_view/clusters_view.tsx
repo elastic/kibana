@@ -29,7 +29,7 @@ export class ClustersView extends Component<DetailViewProps, State> {
         (request.response?.json as { rawResponse?: estypes.SearchResponse })?.rawResponse?._clusters
     );
 
-  constructor(props: Props) {
+  constructor(props: DetailViewProps) {
     super(props);
     const clusters = findClusters(this.props.request);
     this.state = {
@@ -66,7 +66,7 @@ export class ClustersView extends Component<DetailViewProps, State> {
                   options: [
                     {
                       value: 'successful',
-                      name: (
+                      view: (
                         <ClusterHealth
                           status="successful"
                           textProps={{ size: 'm', color: 'text' }}
@@ -75,19 +75,19 @@ export class ClustersView extends Component<DetailViewProps, State> {
                     },
                     {
                       value: 'partial',
-                      name: (
+                      view: (
                         <ClusterHealth status="partial" textProps={{ size: 'm', color: 'text' }} />
                       ),
                     },
                     {
                       value: 'skipped',
-                      name: (
+                      view: (
                         <ClusterHealth status="skipped" textProps={{ size: 'm', color: 'text' }} />
                       ),
                     },
                     {
                       value: 'failed',
-                      name: (
+                      view: (
                         <ClusterHealth status="failed" textProps={{ size: 'm', color: 'text' }} />
                       ),
                     },

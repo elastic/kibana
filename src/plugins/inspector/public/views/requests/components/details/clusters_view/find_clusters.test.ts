@@ -9,6 +9,7 @@
 import { EuiSearchBar } from '@elastic/eui';
 import { findClusters } from './find_clusters';
 import { LOCAL_CLUSTER_KEY } from './local_cluster';
+import { Request } from '../../../../../../common/adapters/request/types';
 
 const request = {
   response: {
@@ -33,7 +34,7 @@ const request = {
       },
     },
   },
-};
+} as unknown as Request;
 
 describe('findClusters', () => {
   test('should return all clusters when query is not provided', () => {
