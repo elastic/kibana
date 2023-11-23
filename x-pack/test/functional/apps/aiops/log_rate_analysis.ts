@@ -15,6 +15,7 @@ import { logRateAnalysisTestData } from './log_rate_analysis_test_data';
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'console', 'header', 'home', 'security']);
+  const browser = getService('browser');
   const elasticChart = getService('elasticChart');
   const aiops = getService('aiops');
 
@@ -147,6 +148,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await aiops.logRateAnalysisPage.clickRerunAnalysisButton(true);
       }
 
+      // Wait for the analysis to finish
+      await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
+
+      // At this stage the baseline and deviation brush position should be stored in
+      // the url state and a full browser refresh should restore the analysis.
+      await browser.refresh();
       await aiops.logRateAnalysisPage.assertAnalysisComplete(testData.analysisType);
 
       // The group switch should be disabled by default
