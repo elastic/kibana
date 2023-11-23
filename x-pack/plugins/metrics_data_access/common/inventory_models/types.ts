@@ -11,7 +11,6 @@ import * as rt from 'io-ts';
 export const ItemTypeRT = rt.keyof({
   host: null,
   pod: null,
-  node: null,
   container: null,
   awsEC2: null,
   awsS3: null,
@@ -378,14 +377,9 @@ export const SnapshotMetricTypeRT = rt.keyof(SnapshotMetricTypeKeys);
 
 export type SnapshotMetricType = rt.TypeOf<typeof SnapshotMetricTypeRT>;
 
-export interface InventoryMetrics<
-  TTsvb = Partial<Record<InventoryMetric, TSVBMetricModelCreator>>,
-  TSnapshot = Record<string, MetricsUIAggregation | undefined>,
-  TFormula = Record<string, FormulaValueConfig>,
-  TDashboard = {}
-> {
-  tsvb: TTsvb;
-  snapshot: TSnapshot;
+export interface InventoryMetrics<TFormula = Record<string, FormulaValueConfig>, TDashboard = {}> {
+  tsvb: { [name: string]: TSVBMetricModelCreator };
+  snapshot: { [name: string]: MetricsUIAggregation | undefined };
   formulas?: TFormula;
   dashboards?: TDashboard;
   defaultSnapshot: SnapshotMetricType;
@@ -396,7 +390,7 @@ export interface InventoryMetrics<
 type Modules = 'aws' | 'docker' | 'system' | 'kubernetes';
 
 export interface InventoryModel<TMetrics extends InventoryMetrics = InventoryMetrics> {
-  id: InventoryItemType;
+  id: string;
   displayName: string;
   singularDisplayName: string;
   requiredModule: Modules;
@@ -415,6 +409,6 @@ export interface InventoryModel<TMetrics extends InventoryMetrics = InventoryMet
   };
   metrics: TMetrics;
   requiredMetrics: InventoryMetric[];
-  tooltipMetrics: Array<keyof TMetrics['snapshot']>;
+  tooltipMetrics: SnapshotMetricType[];
   nodeFilter?: object[];
 }

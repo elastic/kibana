@@ -69,6 +69,7 @@ export class XYDataLayer implements ChartLayer<LensXYDataLayerConfig> {
     this.column = layerConfig.data.map((dataItem) => new FormulaColumn(dataItem));
     this.layerConfig = {
       ...layerConfig,
+      layerType: layerConfig.layerType ?? 'data',
       options: {
         ...layerConfig.options,
         buckets: {

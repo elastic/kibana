@@ -26,7 +26,9 @@ interface Props {
   logsDataView?: DataView;
 }
 
-const ASSET_TYPES: Array<Extract<InventoryItemType, 'host' | 'node'>> = ['host', 'node'];
+type SupportedAssetTypes = Extract<InventoryItemType, 'host'> | 'node';
+
+const ASSET_TYPES: SupportedAssetTypes[] = ['host', 'node'];
 const TitleComponent = {
   host: MetricsSectionTitle,
   node: KubernetesMetricsSectionTitle,
@@ -87,7 +89,7 @@ const Wrapper = ({
   metricsDataView,
   logsDataView,
 }: {
-  assetType: Extract<InventoryItemType, 'host' | 'node'>;
+  assetType: SupportedAssetTypes;
 } & Props) => {
   const model = findInventoryModel(assetType);
 

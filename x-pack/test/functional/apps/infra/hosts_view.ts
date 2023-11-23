@@ -192,7 +192,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'cpuUsage', value: '13.9%' },
             { metric: 'normalizedLoad1m', value: '18.8%' },
             { metric: 'memoryUsage', value: '94.9%' },
-            { metric: 'diskSpaceUsage', value: 'N/A' },
+            { metric: 'diskUsage', value: 'N/A' },
           ].forEach(({ metric, value }) => {
             it(`${metric} tile should show ${value}`, async () => {
               await retry.try(async () => {

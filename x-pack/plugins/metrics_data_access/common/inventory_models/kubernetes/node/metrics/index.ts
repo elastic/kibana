@@ -11,7 +11,7 @@ import { formulas } from './formulas';
 
 const dashboards = { assetDetails };
 
-export const metrics: InventoryMetrics<{}, {}, typeof formulas, typeof dashboards> = {
+export const metrics: InventoryMetrics<typeof formulas, typeof dashboards> = {
   tsvb: {},
   snapshot: {},
   formulas,

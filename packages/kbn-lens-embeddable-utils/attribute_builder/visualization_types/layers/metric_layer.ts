@@ -40,8 +40,13 @@ export interface MetricLayerConfig {
 
 export class MetricLayer implements ChartLayer<MetricVisualizationState> {
   private column: ChartColumn;
-  constructor(private layerConfig: MetricLayerConfig) {
+  private layerConfig: MetricLayerConfig;
+  constructor(layerConfig: MetricLayerConfig) {
     this.column = new FormulaColumn(layerConfig.data);
+    this.layerConfig = {
+      ...layerConfig,
+      layerType: layerConfig.layerType ?? 'metricTrendline',
+    };
   }
 
   getLayer(

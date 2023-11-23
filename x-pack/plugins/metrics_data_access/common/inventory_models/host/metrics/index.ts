@@ -20,12 +20,7 @@ export const hostSnapshotMetricTypes = Object.keys(exposedHostSnapshotMetrics) a
   keyof typeof exposedHostSnapshotMetrics
 >;
 
-export const metrics: InventoryMetrics<
-  typeof tsvb,
-  typeof snapshot,
-  typeof formulas,
-  typeof dashboards
-> = {
+export const metrics: InventoryMetrics<typeof formulas, typeof dashboards> = {
   tsvb,
   snapshot,
   formulas,

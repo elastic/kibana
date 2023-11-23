@@ -29,8 +29,13 @@ export interface XYReferenceLinesLayerConfig {
 
 export class XYReferenceLinesLayer implements ChartLayer<XYReferenceLineLayerConfig> {
   private column: StaticChartColumn[];
-  constructor(private layerConfig: XYReferenceLinesLayerConfig) {
+  private layerConfig: XYReferenceLinesLayerConfig;
+  constructor(layerConfig: XYReferenceLinesLayerConfig) {
     this.column = layerConfig.data.map((p) => new StaticColumn(p));
+    this.layerConfig = {
+      ...layerConfig,
+      layerType: layerConfig.layerType ?? 'referenceLine',
+    };
   }
 
   getName(): string | undefined {

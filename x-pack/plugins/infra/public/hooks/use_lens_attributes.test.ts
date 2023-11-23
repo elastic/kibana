@@ -75,6 +75,7 @@ describe('useHostTable hook', () => {
                 },
               },
             },
+            layerType: 'data',
           },
           {
             data: [
