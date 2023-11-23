@@ -7,34 +7,32 @@
 
 import { css } from '@emotion/react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import React, { useEffect, useRef, useState } from 'react';
+import { default as React, useEffect, useRef, useState } from 'react';
+import { EMBEDDABLE_PROFILING_SEARCH_BAR } from '.';
 import { ObservabilitySharedStart } from '../../../plugin';
 
-export interface ProfilingEmbeddableProps<T> {
-  data?: T;
-  embeddableFactoryId: string;
-  isLoading: boolean;
-  height?: string;
+export interface EmbeddableProfilingSearchBarProps {
+  kuery: string;
+  showDatePicker?: boolean;
+  onQuerySubmit: (params: {
+    dateRange: { from: string; to: string; mode?: 'absolute' | 'relative' };
+    query: string;
+  }) => void;
+  onRefresh: () => void;
+  rangeFrom: string;
+  rangeTo: string;
 }
 
-export function ProfilingEmbeddable<T>({
-  embeddableFactoryId,
-  data,
-  isLoading,
-  height,
-  ...props
-}: ProfilingEmbeddableProps<T>) {
+export function EmbeddableProfilingSearchBar(props: EmbeddableProfilingSearchBarProps) {
   const { embeddable: embeddablePlugin } = useKibana<ObservabilitySharedStart>().services;
   const [embeddable, setEmbeddable] = useState<any>();
   const embeddableRoot: React.RefObject<HTMLDivElement> = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     async function createEmbeddable() {
-      const factory = embeddablePlugin?.getEmbeddableFactory(embeddableFactoryId);
+      const factory = embeddablePlugin?.getEmbeddableFactory(EMBEDDABLE_PROFILING_SEARCH_BAR);
       const input = {
         id: 'embeddable_profiling',
-        data,
-        isLoading,
       };
       const embeddableObject = await factory?.create(input);
       setEmbeddable(embeddableObject);
@@ -52,19 +50,16 @@ export function ProfilingEmbeddable<T>({
   useEffect(() => {
     if (embeddable) {
       embeddable.updateInput({
-        data,
-        isLoading,
         ...props,
       });
       embeddable.reload();
     }
-  }, [data, embeddable, isLoading, props]);
+  }, [embeddable, props]);
 
   return (
     <div
       css={css`
         width: 100%;
-        height: ${height};
         display: flex;
         flex: 1 1 100%;
         z-index: 1;
