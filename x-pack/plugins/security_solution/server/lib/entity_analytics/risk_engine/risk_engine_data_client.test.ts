@@ -243,7 +243,6 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -264,7 +263,6 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -286,7 +284,6 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -331,7 +328,6 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -353,7 +349,6 @@ describe('RiskEngineDataClient', () => {
             namespace: 'default',
             taskManager: mockTaskManagerStart,
             isAssetCriticalityEnabled: true,
-
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 

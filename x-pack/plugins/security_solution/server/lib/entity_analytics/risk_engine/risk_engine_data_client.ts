@@ -23,14 +23,12 @@ import {
 import { bulkDeleteSavedObjects } from '../../risk_score/prebuilt_saved_objects/helpers/bulk_delete_saved_objects';
 import type { RiskScoreDataClient } from '../risk_score/risk_score_data_client';
 import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks';
-import type { AssetCriticalityDataClient } from '../asset_criticality/asset_criticality_data_client';
 
 interface InitOpts {
   namespace: string;
   taskManager: TaskManagerStartContract;
   isAssetCriticalityEnabled: boolean;
   riskScoreDataClient: RiskScoreDataClient;
-  assetCriticalityDataClient: AssetCriticalityDataClient;
 }
 
 interface RiskEngineDataClientOpts {
