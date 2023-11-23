@@ -171,17 +171,6 @@ export const getFTRConfig = ({
         }
       }
 
-      // Serverless Specific
-      if (vars.serverless) {
-        log.info(`Serverless mode detected`);
-
-        vars.esTestCluster.serverArgs.push(
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.entity_id=http://host.docker.internal:${kibanaPort}`,
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.logout=http://host.docker.internal:${kibanaPort}/logout`,
-          `xpack.security.authc.realms.saml.cloud-saml-kibana.sp.acs=http://host.docker.internal:${kibanaPort}/api/security/saml/callback`
-        );
-      }
-
       if (specFileFTRConfig?.productTypes) {
         if (vars.serverless) {
           vars.kbnTestServer.serverArgs.push(

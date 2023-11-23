@@ -11,7 +11,7 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import { ALERTS_URL, ENTITY_ANALYTICS_URL } from '../../../urls/navigation';
 
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 import {
   ANOMALIES_TABLE,
