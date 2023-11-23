@@ -215,18 +215,23 @@ export const UnifiedHistogramLayout = ({
   children,
   withDefaultActions,
 }: UnifiedHistogramLayoutProps) => {
-  const { allSuggestions, currentSuggestion, suggestionUnsupported, isOnHistogramMode } =
-    useLensSuggestions({
-      dataView,
-      query,
-      originalSuggestion,
-      isPlainRecord,
-      columns,
-      timeRange,
-      data: services.data,
-      lensSuggestionsApi,
-      onSuggestionChange,
-    });
+  const {
+    allSuggestions,
+    currentSuggestion,
+    suggestionUnsupported,
+    isOnHistogramMode,
+    histogramQuery,
+  } = useLensSuggestions({
+    dataView,
+    query,
+    originalSuggestion,
+    isPlainRecord,
+    columns,
+    timeRange,
+    data: services.data,
+    lensSuggestionsApi,
+    onSuggestionChange,
+  });
 
   const chart = suggestionUnsupported ? undefined : originalChart;
   const [topPanelNode] = useState(() =>
@@ -302,6 +307,7 @@ export const UnifiedHistogramLayout = ({
           lensAdapters={lensAdapters}
           lensEmbeddableOutput$={lensEmbeddableOutput$}
           isOnHistogramMode={isOnHistogramMode}
+          histogramQuery={histogramQuery}
           withDefaultActions={withDefaultActions}
         />
       </InPortal>
