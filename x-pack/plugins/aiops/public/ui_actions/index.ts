@@ -7,7 +7,11 @@
 
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
-import { categorizeFieldTrigger, CATEGORIZE_FIELD_TRIGGER } from '@kbn/ml-ui-actions';
+import {
+  categorizeFieldTrigger,
+  CATEGORIZE_FIELD_TRIGGER,
+} from '@kbn/ml-ui-actions/src/aiops/ui_actions';
+
 import type { CoreStart } from '@kbn/core/public';
 import type { AiopsPluginStartDeps } from '../types';
 import { createEditChangePointChartsPanelAction } from './edit_change_point_charts_panel';
