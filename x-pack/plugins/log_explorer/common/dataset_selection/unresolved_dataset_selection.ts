@@ -6,7 +6,6 @@
  */
 
 import { Dataset } from '../datasets';
-import { encodeDatasetSelection } from './encoding';
 import { DatasetSelectionStrategy, UnresolvedDatasetSelectionPayload } from './types';
 
 export class UnresolvedDatasetSelection implements DatasetSelectionStrategy {
@@ -25,14 +24,7 @@ export class UnresolvedDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toDataviewSpec() {
-    return {
-      ...this.selection.dataset.toDataviewSpec(),
-      id: this.toURLSelectionId(),
-    };
-  }
-
-  toURLSelectionId() {
-    return encodeDatasetSelection(this.toPlainSelection());
+    return this.selection.dataset.toDataviewSpec();
   }
 
   toPlainSelection() {

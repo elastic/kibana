@@ -18,7 +18,6 @@
     "@kbn/fleet-plugin",
     "@kbn/io-ts-utils",
     "@kbn/data-views-plugin",
-    "@kbn/rison",
     "@kbn/controls-plugin",
     "@kbn/embeddable-plugin",
     "@kbn/es-query",

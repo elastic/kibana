@@ -7,7 +7,6 @@
 
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { Dataset } from '../datasets';
-import { encodeDatasetSelection } from './encoding';
 import { DatasetSelectionStrategy } from './types';
 
 export class AllDatasetSelection implements DatasetSelectionStrategy {
@@ -24,14 +23,7 @@ export class AllDatasetSelection implements DatasetSelectionStrategy {
   }
 
   toDataviewSpec(): DataViewSpec {
-    return {
-      ...this.selection.dataset.toDataviewSpec(),
-      id: this.toURLSelectionId(),
-    };
-  }
-
-  toURLSelectionId() {
-    return encodeDatasetSelection(this.toPlainSelection());
+    return this.selection.dataset.toDataviewSpec();
   }
 
   toPlainSelection() {

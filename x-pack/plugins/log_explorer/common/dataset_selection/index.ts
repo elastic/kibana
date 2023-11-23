@@ -31,4 +31,3 @@ export * from './unresolved_dataset_selection';
 export * from './errors';
 export * from './hydrate_dataset_selection.ts';
 export * from './types';
-export * from './encoding';

@@ -10,8 +10,6 @@ export type { ControlPanels } from './control_panels';
 export {
   AllDatasetSelection,
   datasetSelectionPlainRT,
-  decodeDatasetSelection,
-  encodeDatasetSelection,
   hydrateDatasetSelection,
   UnresolvedDatasetSelection,
 } from './dataset_selection';
