@@ -9,7 +9,7 @@ import { DataViewsService } from '@kbn/data-views-plugin/common';
 
 export class DataViewHandler {
   constructor(private dataViewService: DataViewsService) {}
-  // returns a id based on an index pattern name
+  // returns a id based on an data view name
   async getDataViewId(indexName: string) {
     const dv = (await this.dataViewService.find(indexName)).find(
       ({ title }) => title === indexName

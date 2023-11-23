@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { KQL_INPUT } from '../../screens/security_header';
+import { KQL_INPUT } from '../../../screens/security_header';
 
-import { login } from '../../tasks/login';
-import { visit } from '../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
 import {
   mlHostMultiHostKqlQuery,
@@ -24,7 +24,7 @@ import {
   mlNetworkNullKqlQuery,
   mlNetworkSingleIpKqlQuery,
   mlNetworkSingleIpNullKqlQuery,
-} from '../../urls/ml_conditional_links';
+} from '../../../urls/ml_conditional_links';
 
 describe('ml conditional links', { tags: ['@ess', '@brokenInServerless'] }, () => {
   beforeEach(() => {

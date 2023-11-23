@@ -15,7 +15,7 @@ interface Props {
   destIndex?: string;
 }
 
-export const IndexPatternPrompt: FC<Props> = ({ destIndex, color }) => {
+export const DataViewPrompt: FC<Props> = ({ destIndex, color }) => {
   const {
     services: {
       http: { basePath },

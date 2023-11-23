@@ -30,12 +30,12 @@ import {
   EXPLORE,
   SETTINGS,
   ENTITY_ANALYTICS,
-} from '../../screens/security_header';
-import * as ServerlessHeaders from '../../screens/serverless_security_header';
+} from '../../../screens/security_header';
+import * as ServerlessHeaders from '../../../screens/serverless_security_header';
 
-import { login } from '../../tasks/login';
-import { visit, visitGetStartedPage, visitWithTimeRange } from '../../tasks/navigation';
-import { navigateFromHeaderTo } from '../../tasks/security_header';
+import { login } from '../../../tasks/login';
+import { visit, visitGetStartedPage, visitWithTimeRange } from '../../../tasks/navigation';
+import { navigateFromHeaderTo } from '../../../tasks/security_header';
 
 import {
   ALERTS_URL,
@@ -71,12 +71,12 @@ import {
   ASSETS_URL,
   FLEET_URL,
   CLOUD_DEFEND_URL,
-} from '../../urls/navigation';
-import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
+} from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 import {
   openKibanaNavigation,
   navigateFromKibanaCollapsibleTo,
-} from '../../tasks/kibana_navigation';
+} from '../../../tasks/kibana_navigation';
 import {
   CASES_PAGE,
   ALERTS_PAGE,
@@ -86,7 +86,7 @@ import {
   TIMELINES_PAGE,
   FINDINGS_PAGE,
   THREAT_INTELLIGENCE_PAGE,
-} from '../../screens/kibana_navigation';
+} from '../../../screens/kibana_navigation';
 
 describe('top-level navigation common to all pages in the Security app', { tags: '@ess' }, () => {
   beforeEach(() => {
