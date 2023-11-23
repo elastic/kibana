@@ -36,6 +36,7 @@ export interface DocViewRenderProps {
   columnTypes?: Record<string, string>;
   query?: Query | AggregateQuery;
   textBasedHits?: DataTableRecord[];
+  hideActionsColumn?: boolean;
   filter?: DocViewFilterFn;
   onAddColumn?: (columnName: string) => void;
   onRemoveColumn?: (columnName: string) => void;

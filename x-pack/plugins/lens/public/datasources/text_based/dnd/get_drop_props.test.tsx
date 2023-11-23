@@ -13,6 +13,7 @@ import {
   column3,
   numericDraggedColumn,
   fieldList,
+  fieldListNonNumericOnly,
   notNumericDraggedField,
   numericDraggedField,
 } from './mocks';
@@ -73,6 +74,23 @@ describe('Text-based: getDropProps', () => {
       },
     } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
     expect(getDropProps(props)).toBeUndefined();
+  });
+  it('should not return undefined if source is a non-numeric field, target is a metric dimension but datatable doesnt have numeric fields', () => {
+    const props = {
+      ...defaultProps,
+      state: {
+        ...defaultProps.state,
+        layers: {
+          first: {
+            columns: [column1, column2, column3],
+            allColumns: [...fieldListNonNumericOnly, column1, column2, column3],
+          },
+        },
+        fieldList: fieldListNonNumericOnly,
+      },
+      source: notNumericDraggedField,
+    } as unknown as DatasourceDimensionDropHandlerProps<TextBasedPrivateState>;
+    expect(getDropProps(props)).toEqual({ dropTypes: ['field_replace'], nextLabel: 'category' });
   });
   it('should return reorder if source and target are operations from the same group', () => {
     const props = {
