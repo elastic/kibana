@@ -442,6 +442,18 @@ function _generateMappings(
           // index templates not using `"dynamic": true`.
           addParentObjectAsStaticProperty(field);
         }
+
+        if (field.subobjects !== undefined) {
+          let fieldProps: Properties = {
+            subobjects: field.subobjects,
+            type: 'object',
+          };
+          
+          // props['what?'] = fieldProps;
+
+          hasNonDynamicTemplateMappings = true;
+        }
+
       } else {
         let fieldProps = getDefaultProperties(field);
 
@@ -581,6 +593,10 @@ function _generateMappings(
         }
         if (field.dimension && isIndexModeTimeSeries) {
           fieldProps.time_series_dimension = field.dimension;
+        }
+
+        if (field.subobjects !== undefined) {
+          fieldProps.subobjects = field.subobjects;
         }
 
         // Even if we don't add the property because it has a wildcard, notify
