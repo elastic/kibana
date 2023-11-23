@@ -22,7 +22,11 @@ export let dashboardServices: DashboardStart;
 export let embeddableService: EmbeddableStart;
 export let presentationUtil: PresentationUtilPluginStart;
 export let contentManagement: ContentManagementPublicStart;
-export let trackUiMetric: (type: string, eventNames: string | string[], count?: number) => void;
+export let trackUiMetric: (
+  type: string,
+  eventNames: string | string[],
+  count?: number
+) => void | undefined;
 
 const servicesReady$ = new BehaviorSubject(false);
 

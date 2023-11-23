@@ -12,6 +12,7 @@ import {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 
@@ -30,6 +31,7 @@ export interface LinksStartDependencies {
   dashboard: DashboardStart;
   presentationUtil: PresentationUtilPluginStart;
   contentManagement: ContentManagementPublicStart;
+  usageCollection?: UsageCollectionStart;
 }
 
 export class LinksPlugin
