@@ -18,7 +18,7 @@ import {
 } from '../../../common/api/log_categorization/get_category_query';
 import type { Category } from '../../../common/api/log_categorization/types';
 
-import type { AiOpsIndexBasedAppState } from '../../application/utils/url_state';
+import type { AiOpsIndexBasedAppState } from '../../application/url_state/common';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
 export function useDiscoverLinks() {

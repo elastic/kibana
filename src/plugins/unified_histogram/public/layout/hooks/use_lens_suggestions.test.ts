@@ -38,6 +38,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: undefined,
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: false,
     });
   });
@@ -66,6 +67,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: allSuggestionsMock,
       currentSuggestion: allSuggestionsMock[0],
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: false,
     });
   });
@@ -94,6 +96,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: undefined,
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: true,
     });
   });
@@ -133,6 +136,9 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: allSuggestionsMock[0],
       isOnHistogramMode: true,
+      histogramQuery: {
+        esql: 'from the-data-view | limit 100 | EVAL timestamp=DATE_TRUNC(30 minute, @timestamp) | stats rows = count(*) by timestamp | rename timestamp as `@timestamp every 30 minute`',
+      },
       suggestionUnsupported: false,
     });
   });
@@ -172,6 +178,7 @@ describe('useLensSuggestions', () => {
       allSuggestions: [],
       currentSuggestion: undefined,
       isOnHistogramMode: false,
+      histogramQuery: undefined,
       suggestionUnsupported: true,
     });
   });
