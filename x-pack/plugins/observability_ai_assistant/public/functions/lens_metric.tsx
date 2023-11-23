@@ -37,40 +37,21 @@ export function registerLensMetricFunction({
           title: {
             type: 'string',
           },
-          dataset: {
-            type: 'object',
-            additionalProperties: false,
-            description:
-              'Dataset to use for chart. This can be (preferred) an object with "esql" property which is an ES|QL query (esql datasource) OR kibana DataTable structure (value datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
-            properties: {
-              index: {
-                type: 'string',
-              },
-              timeFieldName: {
-                type: 'string',
-                description:
-                  'time field to use for index datasource. Use @timefield if its available on the index.',
-              },
-              esql: {
-                type: 'string',
-                description: 'es|ql query to use. dont set when using index + timeField.',
-              },
-            },
+          esql: {
+            type: 'string',
+            description: 'es|ql (elasticsearch QL) query to use to get data to power the chart',
           },
           value: {
             type: 'string',
-            description:
-              'field name when using value or esql datasource. The formula for calculating the value when using index datasource, e.g. sum(my_field_name). Query the knowledge base to get more information about the syntax and available formulas.',
+            description: 'field name to use as a value',
           },
           queryMaxValue: {
             type: 'string',
-            description:
-              'field name when using value or esql datasource. The formula for calculating the value when using index datasource, e.g. sum(my_field_name). Query the knowledge base to get more information about the syntax and available formulas.',
+            description: 'field name to use as a max value',
           },
           querySecondaryMetric: {
             type: 'string',
-            description:
-              'field name when using value or esql datasource. The formula for calculating the value when using index datasource, e.g. sum(my_field_name). Query the knowledge base to get more information about the syntax and available formulas.',
+            description: 'field name to use as a secondary metric',
           },
           filter: {
             type: 'string',
@@ -117,13 +98,16 @@ export function registerLensMetricFunction({
         content: {},
       };
     },
-    ({ arguments: { end, start, ...rest } }) => {
+    ({ arguments: { end, start, esql, ...rest } }) => {
       // if (!argumentstimeField) return;
 
       return (
         <LensChart
           chartType="metric"
-          layerConfig={rest}
+          layerConfig={{
+            ...rest,
+            dataset: { esql },
+          }}
           start={start}
           end={end}
           lens={pluginsStart.lens}

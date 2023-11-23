@@ -142,25 +142,9 @@ export function registerLensXYFunction({
           title: {
             type: 'string',
           },
-          dataset: {
-            type: 'object',
-            additionalProperties: false,
-            description:
-              'Dataset to use for chart. This can be (preferred) an object with "query" property which is an ES|QL query (elasticsearch query language) OR kibana DataTable structure (value datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
-            properties: {
-              index: {
-                type: 'string',
-              },
-              timeFieldName: {
-                type: 'string',
-                description:
-                  'time field to use for index datasource. Use @timefield if its available on the index.',
-              },
-              esql: {
-                type: 'string',
-                description: 'es|ql query to use. dont set when using index + timeField.',
-              },
-            },
+          esql: {
+            type: 'string',
+            description: 'es|ql (elasticsearch QL) query to use to get data to power the chart',
           },
           layers: {
             type: 'array',
@@ -173,30 +157,14 @@ export function registerLensXYFunction({
                   enum: ['series', 'annotation', 'reference'],
                   default: 'series',
                 },
-                dataset: {
-                  type: 'object',
-                  additionalProperties: false,
+                esql: {
+                  type: 'string',
                   description:
-                    'Dataset to use for this specific layer. This can be kibana DataTable structure (value datasource) OR object with "esql" property which is an ESQL query (esql datasource) OR object with index and timeField properties (index datasource). Never provide combination of all props (like index and esql).',
-                  properties: {
-                    index: {
-                      type: 'string',
-                    },
-                    timeFieldName: {
-                      type: 'string',
-                      description:
-                        'time field to use for index datasource. Use @timefield if its available on the index.',
-                    },
-                    esql: {
-                      type: 'string',
-                      description: 'es|ql query to use. dont set when using index + timeField.',
-                    },
-                  },
+                    'es|ql (elasticsearch QL) query to use to get data to power this layer',
                 },
                 value: {
                   type: 'string',
-                  description:
-                    'field name when using value or esql datasource. The formula for calculating the value when using index datasource, e.g. sum(my_field_name). Query the knowledge base to get more information about the syntax and available formulas.',
+                  description: 'field name to use for value',
                 },
                 filter: {
                   type: 'string',
