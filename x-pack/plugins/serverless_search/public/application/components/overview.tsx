@@ -53,6 +53,8 @@ import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorsCallout } from './connectors_callout';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
+import { PipelineOverview } from './pipeline_overview';
+import { PipelinePanel } from './pipeline_panel';
 
 export const ElasticsearchOverview = () => {
   const [selectedLanguage, setSelectedLanguage] = useState<LanguageDefinition>(javaDefinition);
@@ -336,6 +338,24 @@ export const ElasticsearchOverview = () => {
           title={i18n.translate('xpack.serverlessSearch.searchQuery.title', {
             defaultMessage: 'Build your first search query',
           })}
+        />
+      </EuiPageTemplate.Section>
+      <EuiPageTemplate.Section
+        color="subdued"
+        bottomBorder="extended"
+        data-test-subj="pipeline-client-section"
+      >
+        <OverviewPanel
+          description={i18n.translate('xpack.serverlessSearch.pipeline.description', {
+            defaultMessage:
+              "Use ingest pipelines to preprocess your data before it's indexed into Elasticsearch, which is often much easier than post-processing. Use any combination of ingest processors to add, delete, or transform fields in your documents.",
+          })}
+          leftPanelContent={<PipelinePanel assetBasePath={assetBasePath} docLinks={docLinks} />}
+          links={[]}
+          title={i18n.translate('xpack.serverlessSearch.pipeline.title', {
+            defaultMessage: 'Transform and enrich your data',
+          })}
+          children={<PipelineOverview application={application} http={http} />}
         />
       </EuiPageTemplate.Section>
       <EuiPageTemplate.Section

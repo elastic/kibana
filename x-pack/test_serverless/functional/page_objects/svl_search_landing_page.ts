@@ -10,6 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
+  const browser = getService('browser');
 
   return {
     async assertSvlSearchSideNavExists() {
@@ -75,5 +76,13 @@ export function SvlSearchLandingPageProvider({ getService }: FtrProviderContext)
         });
       },
     },
+    pipeline:{
+      async click() {
+        await testSubjects.click('create-a-pipeline-button');
+      },
+      async expectNavigateToCreatePipelinePage() {
+        expect(await browser.getCurrentUrl()).contain('/app/management/ingest/ingest_pipelines/create');
+      }
+    }
   };
 }
