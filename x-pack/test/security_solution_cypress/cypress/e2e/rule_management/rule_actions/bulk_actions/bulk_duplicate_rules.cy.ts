@@ -5,33 +5,33 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   goToRuleDetailsOf,
   expectManagementTableRules,
   selectAllRules,
   disableAutoRefresh,
-} from '../../../../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 import {
   duplicateSelectedRulesWithoutExceptions,
   duplicateSelectedRulesWithExceptions,
   duplicateSelectedRulesWithNonExpiredExceptions,
-} from '../../../../../tasks/rules_bulk_actions';
-import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../../tasks/rule_details';
-import { login } from '../../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+} from '../../../../tasks/rules_bulk_actions';
+import { goToExceptionsTab, viewExpiredExceptionItems } from '../../../../tasks/rule_details';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { resetRulesTableState } from '../../../../../tasks/common';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { resetRulesTableState } from '../../../../tasks/common';
 
-import { getNewRule } from '../../../../../objects/rule';
+import { getNewRule } from '../../../../objects/rule';
 
-import { createRuleExceptionItem } from '../../../../../tasks/api_calls/exceptions';
-import { EXCEPTION_CARD_ITEM_NAME } from '../../../../../screens/exceptions';
+import { createRuleExceptionItem } from '../../../../tasks/api_calls/exceptions';
+import { EXCEPTION_CARD_ITEM_NAME } from '../../../../screens/exceptions';
 import {
   assertExceptionItemsExists,
   assertNumberOfExceptionItemsExists,
-} from '../../../../../tasks/exceptions';
+} from '../../../../tasks/exceptions';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 

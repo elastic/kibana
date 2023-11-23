@@ -12,29 +12,29 @@ import {
   SECOND_RULE,
   FOURTH_RULE,
   RULES_MANAGEMENT_TABLE,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../../screens/alerts_detection_rules';
 import {
   enableRule,
   getRulesManagementTableRows,
   waitForRuleToUpdate,
-} from '../../../../tasks/alerts_detection_rules';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
+} from '../../../tasks/alerts_detection_rules';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
 
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
-import { createRule } from '../../../../tasks/api_calls/rules';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
+import { createRule } from '../../../tasks/api_calls/rules';
 import {
   getExistingRule,
   getNewOverrideRule,
   getNewRule,
   getNewThresholdRule,
-} from '../../../../objects/rule';
+} from '../../../objects/rule';
 import {
   goToTablePage,
   setRowsPerPageTo,
   sortByTableColumn,
-} from '../../../../tasks/table_pagination';
-import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../../screens/table_pagination';
+} from '../../../tasks/table_pagination';
+import { TABLE_FIRST_PAGE, TABLE_SECOND_PAGE } from '../../../screens/table_pagination';
 
 describe('Rules table: sorting', { tags: ['@ess', '@serverless'] }, () => {
   before(() => {

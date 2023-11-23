@@ -10,18 +10,18 @@ import { ROLES } from '@kbn/security-solution-plugin/common/test';
 import {
   MISSING_PRIVILEGES_CALLOUT,
   waitForCallOutToBeShown,
-} from '../../../../../tasks/common/callouts';
-import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+} from '../../../../tasks/common/callouts';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 
 import {
   RULES_BULK_EDIT_ACTIONS_INFO,
   RULES_BULK_EDIT_ACTIONS_WARNING,
   ADD_RULE_ACTIONS_MENU_ITEM,
-} from '../../../../../screens/rules_bulk_actions';
-import { actionFormSelector } from '../../../../../screens/common/rule_actions';
+} from '../../../../screens/rules_bulk_actions';
+import { actionFormSelector } from '../../../../screens/common/rule_actions';
 
-import { deleteAlertsAndRules, deleteConnectors } from '../../../../../tasks/api_calls/common';
-import type { RuleActionCustomFrequency } from '../../../../../tasks/common/rule_actions';
+import { deleteAlertsAndRules, deleteConnectors } from '../../../../tasks/api_calls/common';
+import type { RuleActionCustomFrequency } from '../../../../tasks/common/rule_actions';
 import {
   addSlackRuleAction,
   assertSlackRuleAction,
@@ -33,7 +33,7 @@ import {
   pickCustomFrequencyOption,
   pickPerRuleRunFrequencyOption,
   pickSummaryOfAlertsOption,
-} from '../../../../../tasks/common/rule_actions';
+} from '../../../../tasks/common/rule_actions';
 import {
   goToEditRuleActionsSettingsOf,
   expectManagementTableRules,
@@ -41,19 +41,19 @@ import {
   selectRulesByName,
   getRulesManagementTableRows,
   disableAutoRefresh,
-} from '../../../../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 import {
   waitForBulkEditActionToFinish,
   submitBulkEditForm,
   checkOverwriteRuleActionsCheckbox,
   openBulkEditRuleActionsForm,
   openBulkActionsMenu,
-} from '../../../../../tasks/rules_bulk_actions';
-import { login } from '../../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+} from '../../../../tasks/rules_bulk_actions';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { createSlackConnector } from '../../../../../tasks/api_calls/connectors';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { createSlackConnector } from '../../../../tasks/api_calls/connectors';
 
 import {
   getEqlRule,
@@ -62,12 +62,12 @@ import {
   getNewThresholdRule,
   getMachineLearningRule,
   getNewTermsRule,
-} from '../../../../../objects/rule';
+} from '../../../../objects/rule';
 import {
   createAndInstallMockedPrebuiltRules,
   excessivelyInstallAllPrebuiltRules,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../../../tasks/api_calls/prebuilt_rules';
+} from '../../../../tasks/api_calls/prebuilt_rules';
 
 const ruleNameToAssert = 'Custom rule name with actions';
 

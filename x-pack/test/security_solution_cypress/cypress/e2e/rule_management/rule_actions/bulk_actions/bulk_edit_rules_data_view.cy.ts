@@ -8,9 +8,9 @@
 import {
   RULES_BULK_EDIT_DATA_VIEWS_WARNING,
   RULES_BULK_EDIT_OVERWRITE_DATA_VIEW_CHECKBOX,
-} from '../../../../../screens/rules_bulk_actions';
+} from '../../../../screens/rules_bulk_actions';
 
-import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../../screens/rule_details';
+import { DATA_VIEW_DETAILS, INDEX_PATTERNS_DETAILS } from '../../../../screens/rule_details';
 
 import {
   goToRuleDetailsOf,
@@ -18,7 +18,7 @@ import {
   selectAllRules,
   getRulesManagementTableRows,
   disableAutoRefresh,
-} from '../../../../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 
 import {
   typeIndexPatterns,
@@ -28,22 +28,22 @@ import {
   checkOverwriteIndexPatternsCheckbox,
   openBulkEditAddIndexPatternsForm,
   openBulkEditDeleteIndexPatternsForm,
-} from '../../../../../tasks/rules_bulk_actions';
+} from '../../../../tasks/rules_bulk_actions';
 
 import {
   hasIndexPatterns,
   getDetails,
   assertDetailsNotExist,
-} from '../../../../../tasks/rule_details';
-import { login } from '../../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
+} from '../../../../tasks/rule_details';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
 
-import { createRule } from '../../../../../tasks/api_calls/rules';
+import { createRule } from '../../../../tasks/api_calls/rules';
 import {
   deleteAlertsAndRules,
   deleteDataView,
   postDataView,
-} from '../../../../../tasks/api_calls/common';
+} from '../../../../tasks/api_calls/common';
 
 import {
   getEqlRule,
@@ -51,7 +51,7 @@ import {
   getNewRule,
   getNewThresholdRule,
   getNewTermsRule,
-} from '../../../../../objects/rule';
+} from '../../../../objects/rule';
 
 const DATA_VIEW_ID = 'auditbeat';
 

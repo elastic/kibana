@@ -7,12 +7,12 @@
 
 import { encode } from '@kbn/rison';
 
-import { resetRulesTableState } from '../../../../tasks/common';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { DASHBOARDS_URL, KIBANA_HOME } from '../../../../urls/navigation';
-import { RULES_MANAGEMENT_URL, RULES_MONITORING_URL } from '../../../../urls/rules_management';
-import { getNewRule } from '../../../../objects/rule';
+import { resetRulesTableState } from '../../../tasks/common';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { DASHBOARDS_URL, KIBANA_HOME } from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL, RULES_MONITORING_URL } from '../../../urls/rules_management';
+import { getNewRule } from '../../../objects/rule';
 import {
   filterByCustomRules,
   filterBySearchTerm,
@@ -31,8 +31,8 @@ import {
   expectFilterByEnabledRules,
   expectManagementTableRules,
   goToRuleDetailsOf,
-} from '../../../../tasks/alerts_detection_rules';
-import { createRule } from '../../../../tasks/api_calls/rules';
+} from '../../../tasks/alerts_detection_rules';
+import { createRule } from '../../../tasks/api_calls/rules';
 import {
   expectRowsPerPage,
   expectTablePage,
@@ -40,7 +40,7 @@ import {
   goToTablePage,
   setRowsPerPageTo,
   sortByTableColumn,
-} from '../../../../tasks/table_pagination';
+} from '../../../tasks/table_pagination';
 
 function createTestRules(): void {
   createRule(getNewRule({ rule_id: '1', name: 'test 1', tags: ['tag-a'], enabled: false }));

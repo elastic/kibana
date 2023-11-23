@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
 import {
   REFRESH_RULES_STATUS,
   RULES_TABLE_AUTOREFRESH_INDICATOR,
   RULES_MANAGEMENT_TABLE,
-} from '../../../../screens/alerts_detection_rules';
-import { EUI_CHECKBOX } from '../../../../screens/common/controls';
+} from '../../../screens/alerts_detection_rules';
+import { EUI_CHECKBOX } from '../../../screens/common/controls';
 import {
   selectAllRules,
   clearAllRuleSelection,
@@ -24,11 +24,11 @@ import {
   selectRulesByName,
   getRuleRow,
   setRulesTableAutoRefreshIntervalSetting,
-} from '../../../../tasks/alerts_detection_rules';
-import { login } from '../../../../tasks/login';
+} from '../../../tasks/alerts_detection_rules';
+import { login } from '../../../tasks/login';
 
-import { createRule } from '../../../../tasks/api_calls/rules';
-import { getNewRule } from '../../../../objects/rule';
+import { createRule } from '../../../tasks/api_calls/rules';
+import { getNewRule } from '../../../objects/rule';
 
 const RULES_TABLE_REFRESH_INTERVAL_MS = 60000;
 

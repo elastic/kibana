@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_BODY,
   RULES_TAGS_POPOVER_BTN,
   MODAL_ERROR_BODY,
-} from '../../../../../screens/alerts_detection_rules';
+} from '../../../../screens/alerts_detection_rules';
 
 import {
   RULES_BULK_EDIT_INDEX_PATTERNS_WARNING,
@@ -20,11 +20,11 @@ import {
   TAGS_RULE_BULK_MENU_ITEM,
   INDEX_PATTERNS_RULE_BULK_MENU_ITEM,
   APPLY_TIMELINE_RULE_BULK_MENU_ITEM,
-} from '../../../../../screens/rules_bulk_actions';
+} from '../../../../screens/rules_bulk_actions';
 
-import { TIMELINE_TEMPLATE_DETAILS } from '../../../../../screens/rule_details';
+import { TIMELINE_TEMPLATE_DETAILS } from '../../../../screens/rule_details';
 
-import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../../screens/common/controls';
+import { EUI_CHECKBOX, EUI_FILTER_SELECT_ITEM } from '../../../../screens/common/controls';
 
 import {
   selectAllRules,
@@ -40,7 +40,7 @@ import {
   selectAllRulesOnPage,
   getRuleRow,
   disableAutoRefresh,
-} from '../../../../../tasks/alerts_detection_rules';
+} from '../../../../tasks/alerts_detection_rules';
 
 import {
   typeIndexPatterns,
@@ -72,15 +72,15 @@ import {
   assertRuleScheduleValues,
   assertUpdateScheduleWarningExists,
   assertDefaultValuesAreAppliedToScheduleFields,
-} from '../../../../../tasks/rules_bulk_actions';
+} from '../../../../tasks/rules_bulk_actions';
 
-import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
-import { hasIndexPatterns, getDetails } from '../../../../../tasks/rule_details';
-import { login } from '../../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../../tasks/rules_management';
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { loadPrepackagedTimelineTemplates } from '../../../../../tasks/api_calls/timelines';
-import { resetRulesTableState } from '../../../../../tasks/common';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { hasIndexPatterns, getDetails } from '../../../../tasks/rule_details';
+import { login } from '../../../../tasks/login';
+import { visitRulesManagementTable } from '../../../../tasks/rules_management';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { loadPrepackagedTimelineTemplates } from '../../../../tasks/api_calls/timelines';
+import { resetRulesTableState } from '../../../../tasks/common';
 
 import {
   getEqlRule,
@@ -90,14 +90,14 @@ import {
   getNewThresholdRule,
   getMachineLearningRule,
   getNewTermsRule,
-} from '../../../../../objects/rule';
+} from '../../../../objects/rule';
 
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../../../tasks/api_calls/prebuilt_rules';
-import { setRowsPerPageTo, sortByTableColumn } from '../../../../../tasks/table_pagination';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { setRowsPerPageTo, sortByTableColumn } from '../../../../tasks/table_pagination';
 
 const RULE_NAME = 'Custom rule for bulk actions';
 const EUI_SELECTABLE_LIST_ITEM_SR_TEXT = '. To check this option, press Enter.';
