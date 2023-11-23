@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 import {
   openAddFilterPopover,
   fillAddFilterForm,
   openKqlQueryBar,
   fillKqlQueryBar,
-} from '../../tasks/search_bar';
+} from '../../../tasks/search_bar';
 import {
   AUTO_SUGGEST_AGENT_NAME,
   AUTO_SUGGEST_HOST_NAME_VALUE,
   GLOBAL_SEARCH_BAR_FILTER_ITEM,
-} from '../../screens/search_bar';
-import { getHostIpFilter } from '../../objects/filter';
+} from '../../../screens/search_bar';
+import { getHostIpFilter } from '../../../objects/filter';
 
-import { hostsUrl } from '../../urls/navigation';
-import { waitForAllHostsToBeLoaded } from '../../tasks/hosts/all_hosts';
+import { hostsUrl } from '../../../urls/navigation';
+import { waitForAllHostsToBeLoaded } from '../../../tasks/hosts/all_hosts';
 
 describe('SearchBar', { tags: ['@ess', '@serverless'] }, () => {
   beforeEach(() => {
