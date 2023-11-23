@@ -27,7 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
-      await transform.testResources.createIndexPatternIfNeeded('ft_ecommerce', 'order_date');
+      await transform.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
 
       await transform.api.createAndRunTransform(
         transformConfigWithPivot.id,
@@ -43,12 +43,12 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithPivot.dest.index);
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithPivot.dest.index);
       await transform.api.deleteIndices(transformConfigWithPivot.dest.index);
-      await transform.testResources.deleteIndexPatternByTitle(transformConfigWithLatest.dest.index);
+      await transform.testResources.deleteDataViewByTitle(transformConfigWithLatest.dest.index);
       await transform.api.deleteIndices(transformConfigWithLatest.dest.index);
       await transform.api.cleanTransformIndices();
-      await transform.testResources.deleteIndexPatternByTitle('ft_ecommerce');
+      await transform.testResources.deleteDataViewByTitle('ft_ecommerce');
     });
 
     const testDataList = [
