@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StartServicesAccessor, Logger } from '@kbn/core/server';
+import type { StartServicesAccessor } from '@kbn/core/server';
 import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { RISK_ENGINE_INIT_URL, APP_ID } from '../../../../../common/constants';
@@ -16,9 +16,7 @@ import type { InitRiskEngineResultResponse } from '../../types';
 
 export const riskEngineInitRoute = (
   router: SecuritySolutionPluginRouter,
-  getStartServices: StartServicesAccessor<StartPlugins>,
-  logger: Logger,
-  isAssetCriticalityEnabled: boolean
+  getStartServices: StartServicesAccessor<StartPlugins>
 ) => {
   router.versioned
     .post({
@@ -34,7 +32,6 @@ export const riskEngineInitRoute = (
       const [_, { taskManager }] = await getStartServices();
       const riskEngineDataClient = securitySolution.getRiskEngineDataClient();
       const riskScoreDataClient = securitySolution.getRiskScoreDataClient();
-      const assetCriticalityDataClient = securitySolution.getAssetCriticalityDataClient();
       const spaceId = securitySolution.getSpaceId();
 
       try {
@@ -48,8 +45,6 @@ export const riskEngineInitRoute = (
         const initResult = await riskEngineDataClient.init({
           taskManager,
           namespace: spaceId,
-          isAssetCriticalityEnabled,
-          assetCriticalityDataClient,
           riskScoreDataClient,
         });
 

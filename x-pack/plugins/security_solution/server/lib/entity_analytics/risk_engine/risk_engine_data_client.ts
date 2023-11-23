@@ -27,7 +27,6 @@ import { removeRiskScoringTask, startRiskScoringTask } from '../risk_score/tasks
 interface InitOpts {
   namespace: string;
   taskManager: TaskManagerStartContract;
-  isAssetCriticalityEnabled: boolean;
   riskScoreDataClient: RiskScoreDataClient;
 }
 

@@ -242,7 +242,6 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -262,7 +261,6 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -283,7 +281,6 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -305,8 +302,6 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
-
             riskScoreDataClient,
           });
 
@@ -327,7 +322,6 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
@@ -348,7 +342,6 @@ describe('RiskEngineDataClient', () => {
           const initResult = await riskEngineDataClient.init({
             namespace: 'default',
             taskManager: mockTaskManagerStart,
-            isAssetCriticalityEnabled: true,
             riskScoreDataClient: riskScoreDataClientMock.create(),
           });
 
