@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs/promises';
+import apm from 'elastic-apm-node';
 
 import { compact } from 'lodash';
 import pMap from 'p-map';
@@ -61,7 +62,20 @@ export async function setupFleet(
   soClient: SavedObjectsClientContract,
   esClient: ElasticsearchClient
 ): Promise<SetupStatus> {
-  return awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  const t = apm.startTransaction(
+    'fleet-setup',
+    'fleet'
+  );
+
+  try {
+    return await awaitIfPending(async () => createSetupSideEffects(soClient, esClient));
+  } catch (error) {
+    apm.captureError(error);
+    t.setOutcome('failure');
+    throw error;
+  } finally {
+    t.end();
+  }
 }
 
 async function createSetupSideEffects(
@@ -185,7 +199,10 @@ async function createSetupSideEffects(
 
   if (nonFatalErrors.length > 0) {
     logger.info('Encountered non fatal errors during Fleet setup');
-    formatNonFatalErrors(nonFatalErrors).forEach((error) => logger.info(JSON.stringify(error)));
+    formatNonFatalErrors(nonFatalErrors).map(e => JSON.stringify(e)).forEach((error) => {
+      logger.info(error);
+      apm.captureError(error);
+    });
   }
 
   logger.info('Fleet setup completed');
