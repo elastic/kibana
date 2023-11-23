@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AuthenticatedUser } from './authenticated_user';
+import type { AuthenticatedUser } from '@kbn/security-plugin-types-common';
 
 // We omit `roles` here since the original interface defines this field as `readonly string[]` that makes it hard to use
 // in various mocks that expect mutable string array.
