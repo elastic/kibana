@@ -174,19 +174,11 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
     throw new Error('One of navigationTree or projectNavigationTree must be defined');
   }
 
-  const navigationDefinition = useMemo(() => {
-    const definition = !navigationTree
-      ? getDefaultNavigationTree(projectNavigationTree!)
-      : navigationTree;
-
-    return serializeNavigationTree(definition);
-  }, [navigationTree, projectNavigationTree]);
-
   const renderNodes = useCallback(
     (nodes: Array<RootNavigationItemDefinition | NodeDefinition> = [], nodesCountStart = 0) => {
       let nodesCount = nodesCountStart;
 
-      const jsxNodes = nodes.map((navNode, i) => {
+      const jsx = nodes.map((navNode, i) => {
         nodesCount += 1;
 
         if (isPresetDefinition(navNode)) {
@@ -198,15 +190,17 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
         }
 
         if (isGroupDefinition(navNode)) {
-          const { jsxNodes: jsxChildrenNodes, nodesCount: _nodesCount } = renderNodes(
+          // Recursively build the tree
+          const { jsx: jsxChildren, nodesCount: childrenNodesCount } = renderNodes(
             navNode.children,
             nodesCount
           );
-          nodesCount += _nodesCount;
+
+          nodesCount += childrenNodesCount;
+
           return (
             <Navigation.Group {...navNode} key={navNode.id ?? i} order={nodesCount}>
-              {/* Recursively build the tree */}
-              {jsxChildrenNodes}
+              {jsxChildren}
             </Navigation.Group>
           );
         }
@@ -215,29 +209,32 @@ export const DefaultNavigation: FC<ProjectNavigationDefinition & Props> = ({
       });
 
       return {
-        jsxNodes,
+        jsx,
         nodesCount,
       };
     },
     []
   );
 
-  const { body, footer } = navigationDefinition;
+  const treeToJSX = useMemo(() => {
+    const definition = !navigationTree
+      ? getDefaultNavigationTree(projectNavigationTree!)
+      : navigationTree;
 
-  const { jsxNodes: jsxNodesBody, nodesCount: nodesCountBody } = useMemo(() => {
-    return renderNodes(body);
-  }, [renderNodes, body]);
+    const { body, footer } = serializeNavigationTree(definition);
 
-  const { jsxNodes: jsxNodesFooter } = useMemo(() => {
-    if (!footer) return { jsxNodes: null };
-    return renderNodes(footer, nodesCountBody);
-  }, [renderNodes, footer, nodesCountBody]);
+    // Convert the "body" and "footer" to JSX
+    const { jsx: jsxBody, nodesCount: nodesCountBody } = renderNodes(body);
+    const jsxFooter = Boolean(footer) ? renderNodes(footer, nodesCountBody).jsx : null;
+
+    return { body: jsxBody, footer: jsxFooter };
+  }, [navigationTree, projectNavigationTree, renderNodes]);
 
   return (
     <Navigation dataTestSubj={dataTestSubj} panelContentProvider={panelContentProvider}>
       <>
-        {jsxNodesBody}
-        {jsxNodesFooter && <NavigationFooter>{jsxNodesFooter}</NavigationFooter>}
+        {treeToJSX.body}
+        {treeToJSX.footer && <NavigationFooter>{treeToJSX.footer}</NavigationFooter>}
       </>
     </Navigation>
   );
