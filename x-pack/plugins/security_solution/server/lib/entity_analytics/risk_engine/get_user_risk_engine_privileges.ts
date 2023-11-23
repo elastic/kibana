@@ -13,17 +13,15 @@ import {
   RISK_ENGINE_REQUIRED_ES_INDEX_PRIVILEGES,
 } from '../../../../common/risk_engine';
 
-const groupByPrivilege = (
+const groupPrivilegesByName = <PrivilegeName extends string>(
   privileges: Array<{
-    privilege: string;
+    privilege: PrivilegeName;
     authorized: boolean;
   }>
-): Record<string, boolean> => {
+): Record<PrivilegeName, boolean> => {
   return privileges.reduce<Record<string, boolean>>((acc, { privilege, authorized }) => {
-    return {
-      ...acc,
-      [privilege]: authorized,
-    };
+    acc[privilege] = authorized;
+    return acc;
   }, {});
 };
 
@@ -39,12 +37,13 @@ export async function getUserRiskEnginePrivileges(
     },
   });
 
-  const clusterPrivilegesByPrivilege = groupByPrivilege(privileges.elasticsearch.cluster);
+  const clusterPrivilegesByPrivilege = groupPrivilegesByName(privileges.elasticsearch.cluster);
 
   const indexPrivilegesByIndex = Object.entries(privileges.elasticsearch.index).reduce<
     Record<string, Record<string, boolean>>
   >((acc, [index, indexPrivileges]) => {
-    return { ...acc, [index]: groupByPrivilege(indexPrivileges) };
+    acc[index] = groupPrivilegesByName(indexPrivileges);
+    return acc;
   }, {});
 
   return {
