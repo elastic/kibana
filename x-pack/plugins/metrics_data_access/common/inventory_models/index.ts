@@ -46,8 +46,6 @@ export const findInventoryModel = <T extends InventoryItemType>(type: T): Invent
   return model as InventoryModels<T>;
 };
 
-const a = findInventoryModel('host');
-
 const LEGACY_TYPES = ['host', 'pod', 'container'];
 
 export const getFieldByType = (type: InventoryItemType) => {
