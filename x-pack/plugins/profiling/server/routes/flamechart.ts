@@ -6,7 +6,12 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { profilingUseLegacyFlamegraphAPI } from '@kbn/observability-plugin/common';
+import {
+  profilingCo2PerKWH,
+  profilingDatacenterPUE,
+  profilingPerCoreWatt,
+  profilingUseLegacyFlamegraphAPI,
+} from '@kbn/observability-plugin/common';
 import { RouteRegisterParameters } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
@@ -34,9 +39,14 @@ export function registerFlameChartSearchRoute({
     },
     async (context, request, response) => {
       const { timeFrom, timeTo, kuery } = request.query;
-      const useLegacyFlamegraphAPI = await (
-        await context.core
-      ).uiSettings.client.get<boolean>(profilingUseLegacyFlamegraphAPI);
+
+      const core = await context.core;
+      const [co2PerKWH, perCoreWatt, datacenterPUE, useLegacyFlamegraphAPI] = await Promise.all([
+        core.uiSettings.client.get<number>(profilingCo2PerKWH),
+        core.uiSettings.client.get<number>(profilingPerCoreWatt),
+        core.uiSettings.client.get<number>(profilingDatacenterPUE),
+        core.uiSettings.client.get<boolean>(profilingUseLegacyFlamegraphAPI),
+      ]);
 
       try {
         const esClient = await getClient(context);
@@ -46,6 +56,9 @@ export function registerFlameChartSearchRoute({
           rangeToMs: timeTo,
           kuery,
           useLegacyFlamegraphAPI,
+          co2PerKWH,
+          perCoreWatt,
+          datacenterPUE,
         });
 
         return response.ok({ body: flamegraph });

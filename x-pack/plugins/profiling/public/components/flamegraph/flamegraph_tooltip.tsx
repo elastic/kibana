@@ -21,48 +21,64 @@ import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { isNumber } from 'lodash';
 import React from 'react';
+import { ElasticFlameGraph } from '@kbn/profiling-utils';
+import { profilingUseLegacyCo2Calculation } from '@kbn/observability-plugin/common';
 import { useCalculateImpactEstimate } from '../../hooks/use_calculate_impact_estimates';
 import { asCost } from '../../utils/formatters/as_cost';
 import { asPercentage } from '../../utils/formatters/as_percentage';
 import { asWeight } from '../../utils/formatters/as_weight';
 import { CPULabelWithHint } from '../cpu_label_with_hint';
 import { TooltipRow } from './tooltip_row';
+import { ColumnarData } from '../../utils/get_flamegraph_model';
+import { useProfilingDependencies } from '../contexts/profiling_dependencies/use_profiling_dependencies';
 
 interface Props {
   isRoot: boolean;
-  label: string;
-  countInclusive: number;
-  countExclusive: number;
+  selectedIndex: number;
+  flamegraph: ElasticFlameGraph;
+  comparisonFlamegraph?: ElasticFlameGraph;
+  columnarData: ColumnarData;
   totalSamples: number;
-  totalSeconds: number;
   baselineScaleFactor?: number;
   comparisonScaleFactor?: number;
-  comparisonCountInclusive?: number;
-  comparisonCountExclusive?: number;
-  comparisonTotalSamples?: number;
-  comparisonTotalSeconds?: number;
   onShowMoreClick?: () => void;
-  inline: boolean;
-  parentLabel?: string;
 }
 
 export function FlameGraphTooltip({
   isRoot,
-  label,
-  countInclusive,
-  countExclusive,
   totalSamples,
-  totalSeconds,
   baselineScaleFactor,
   comparisonScaleFactor,
-  comparisonCountInclusive,
-  comparisonCountExclusive,
-  comparisonTotalSamples,
-  comparisonTotalSeconds,
   onShowMoreClick,
-  inline,
-  parentLabel,
+  flamegraph,
+  selectedIndex,
+  comparisonFlamegraph,
+  columnarData,
 }: Props) {
+  const {
+    start: { core },
+  } = useProfilingDependencies();
+
+  const shouldUseLegacyCo2Calculation = core.uiSettings.get<boolean>(
+    profilingUseLegacyCo2Calculation
+  );
+  const label = flamegraph.Label[selectedIndex];
+  const countInclusive = flamegraph.CountInclusive[selectedIndex];
+  const countExclusive = flamegraph.CountExclusive[selectedIndex];
+  const totalSeconds = flamegraph.TotalSeconds;
+  const nodeID = flamegraph.ID[selectedIndex];
+  const inline = flamegraph.Inline[selectedIndex];
+  const comparisonNode = columnarData.comparisonNodesById[nodeID];
+  const comparisonCountInclusive = comparisonNode?.CountExclusive;
+  const comparisonCountExclusive = comparisonNode?.CountInclusive;
+  const comparisonTotalSamples = comparisonFlamegraph?.CountInclusive[0];
+  const comparisonTotalSeconds = comparisonFlamegraph?.TotalSeconds;
+
+  const parentLabel = inline
+    ? // If it's an inline frame, look up for its parent frame
+      flamegraph.Label[flamegraph.Edges.findIndex((edge) => edge.includes(selectedIndex))]
+    : undefined;
+
   const theme = useEuiTheme();
   const calculateImpactEstimates = useCalculateImpactEstimate();
 
@@ -170,8 +186,18 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedCo2', {
               defaultMessage: `Annualized CO2`,
             })}
-            value={impactEstimates.totalCPU.annualizedCo2}
-            comparison={comparisonImpactEstimates?.totalCPU.annualizedCo2}
+            value={
+              shouldUseLegacyCo2Calculation
+                ? impactEstimates.totalCPU.annualizedCo2
+                : flamegraph.AnnualCO2TonsInclusive[selectedIndex] * 1000
+            }
+            comparison={
+              shouldUseLegacyCo2Calculation
+                ? comparisonImpactEstimates?.totalCPU.annualizedCo2
+                : comparisonFlamegraph?.AnnualCO2TonsInclusive[selectedIndex]
+                ? comparisonFlamegraph?.AnnualCO2TonsInclusive[selectedIndex] * 1000
+                : undefined
+            }
             formatValue={asWeight}
             showDifference
             formatDifferenceAsPercentage={false}
@@ -180,8 +206,16 @@ export function FlameGraphTooltip({
             label={i18n.translate('xpack.profiling.flameGraphTooltip.annualizedDollarCost', {
               defaultMessage: `Annualized dollar cost`,
             })}
-            value={impactEstimates.totalCPU.annualizedDollarCost}
-            comparison={comparisonImpactEstimates?.totalCPU.annualizedDollarCost}
+            value={
+              shouldUseLegacyCo2Calculation
+                ? impactEstimates.totalCPU.annualizedDollarCost
+                : flamegraph.AnnualCostsUSDInclusive[selectedIndex]
+            }
+            comparison={
+              shouldUseLegacyCo2Calculation
+                ? comparisonImpactEstimates?.totalCPU.annualizedDollarCost
+                : comparisonFlamegraph?.AnnualCostsUSDInclusive[selectedIndex]
+            }
             formatValue={asCost}
             showDifference
             formatDifferenceAsPercentage={false}

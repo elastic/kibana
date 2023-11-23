@@ -94,7 +94,14 @@ export function createProfilingEsClient({
     getEsClient() {
       return esClient;
     },
-    profilingFlamegraph({ query, sampleSize, durationSeconds }) {
+    profilingFlamegraph({
+      query,
+      sampleSize,
+      durationSeconds,
+      co2PerKWH,
+      datacenterPUE,
+      perCoreWatt,
+    }) {
       const controller = new AbortController();
 
       const promise = withProfilingSpan('_profiling/flamegraph', () => {
@@ -106,6 +113,9 @@ export function createProfilingEsClient({
               query,
               sample_size: sampleSize,
               requested_duration: durationSeconds,
+              // default_co2_per_kwh: co2PerKWH,
+              // default_datacenter_pue: datacenterPUE,
+              // default_per_core_watt: perCoreWatt,
             },
           },
           {

@@ -33,5 +33,8 @@ export interface ProfilingESClient {
     query: QueryDslQueryContainer;
     sampleSize: number;
     durationSeconds: number;
+    co2PerKWH?: number;
+    datacenterPUE?: number;
+    perCoreWatt?: number;
   }): Promise<BaseFlameGraph>;
 }

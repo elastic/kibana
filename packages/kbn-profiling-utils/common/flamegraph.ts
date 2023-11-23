@@ -48,6 +48,14 @@ export interface BaseFlameGraph {
   TotalSamples: number;
   TotalCPU: number;
   SelfCPU: number;
+  AnnualCO2TonsExclusive: number[];
+  AnnualCO2TonsInclusive: number[];
+  AnnualCostsUSDInclusive: number[];
+  AnnualCostsUSDExclusive: number[];
+  SelfAnnualCO2Tons: number;
+  TotalAnnualCO2Tons: number;
+  SelfAnnualCostsUSD: number;
+  TotalAnnualCostsUSD: number;
 }
 
 /**
@@ -84,6 +92,15 @@ export function createBaseFlameGraph(
     TotalSamples: tree.TotalSamples,
     SelfCPU: tree.SelfCPU,
     TotalCPU: tree.TotalCPU,
+
+    AnnualCO2TonsExclusive: tree.AnnualCO2TonsExclusive,
+    AnnualCO2TonsInclusive: tree.AnnualCO2TonsInclusive,
+    AnnualCostsUSDExclusive: tree.AnnualCostsUSDExclusive,
+    AnnualCostsUSDInclusive: tree.AnnualCostsUSDInclusive,
+    SelfAnnualCO2Tons: tree.SelfAnnualCO2Tons,
+    TotalAnnualCO2Tons: tree.TotalAnnualCO2Tons,
+    SelfAnnualCostsUSD: tree.SelfAnnualCostsUSD,
+    TotalAnnualCostsUSD: tree.TotalAnnualCostsUSD,
   };
 
   for (let i = 0; i < tree.Size; i++) {
@@ -141,6 +158,14 @@ export function createFlameGraph(base: BaseFlameGraph): ElasticFlameGraph {
     TotalSamples: base.TotalSamples,
     SelfCPU: base.SelfCPU,
     TotalCPU: base.TotalCPU,
+    AnnualCO2TonsExclusive: base.AnnualCO2TonsExclusive,
+    AnnualCO2TonsInclusive: base.AnnualCO2TonsInclusive,
+    AnnualCostsUSDExclusive: base.AnnualCostsUSDExclusive,
+    AnnualCostsUSDInclusive: base.AnnualCostsUSDInclusive,
+    SelfAnnualCO2Tons: base.SelfAnnualCO2Tons,
+    TotalAnnualCO2Tons: base.TotalAnnualCO2Tons,
+    SelfAnnualCostsUSD: base.SelfAnnualCostsUSD,
+    TotalAnnualCostsUSD: base.TotalAnnualCostsUSD,
   };
 
   const rootFrameGroupID = createFrameGroupID(

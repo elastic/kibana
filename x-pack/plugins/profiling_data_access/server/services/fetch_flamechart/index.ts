@@ -17,6 +17,9 @@ export interface FetchFlamechartParams {
   rangeFromMs: number;
   rangeToMs: number;
   kuery: string;
+  co2PerKWH: number;
+  perCoreWatt: number;
+  datacenterPUE: number;
   useLegacyFlamegraphAPI?: boolean;
 }
 
