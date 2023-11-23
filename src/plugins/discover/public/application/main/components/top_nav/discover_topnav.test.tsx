@@ -11,7 +11,6 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import { DiscoverTopNav, DiscoverTopNavProps } from './discover_topnav';
 import { TopNavMenu, TopNavMenuData } from '@kbn/navigation-plugin/public';
-import { Query } from '@kbn/es-query';
 import { setHeaderActionMenuMounter } from '../../../../kibana_services';
 import { discoverServiceMock as mockDiscoverService } from '../../../../__mocks__/services';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
@@ -77,7 +76,6 @@ function getProps(
 
   return {
     stateContainer,
-    query: {} as Query,
     savedQuery: '',
     updateQuery: jest.fn(),
     onOpenInspector: jest.fn(),

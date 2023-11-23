@@ -23,7 +23,7 @@ import type { DiscoverProfileRegistry } from '../customizations/profile_registry
 import { addProfile } from '../../common/customizations';
 import type { DiscoverCustomizationContext } from './types';
 
-interface DiscoverRoutesProps {
+export interface DiscoverRoutesProps {
   prefix?: string;
   customizationCallbacks: CustomizationCallback[];
   customizationContext: DiscoverCustomizationContext;

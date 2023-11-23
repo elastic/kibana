@@ -13,6 +13,7 @@ const setup = async () => {
   const discoverSetupContract: LogExplorerLocatorDependencies = {
     discover: {
       locator: sharePluginMock.createLocator(),
+      showLogExplorerTabs: jest.fn(),
     },
   };
   const logExplorerLocator = new LogExplorerLocatorDefinition(discoverSetupContract);

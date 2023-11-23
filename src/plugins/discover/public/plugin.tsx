@@ -168,7 +168,6 @@ export interface DiscoverSetupPlugins {
   data: DataPublicPluginSetup;
   expressions: ExpressionsSetup;
   globalSearch?: GlobalSearchPluginSetup;
-  serverless?: ServerlessPluginStart;
 }
 
 /**
@@ -200,6 +199,7 @@ export interface DiscoverStartPlugins {
   lens: LensPublicStart;
   contentManagement: ContentManagementPublicStart;
   noDataPage?: NoDataPagePluginStart;
+  serverless?: ServerlessPluginStart;
 }
 
 /**
