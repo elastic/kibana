@@ -176,7 +176,6 @@ interface LensBaseEmbeddableInput extends EmbeddableInput {
   onTableRowClick?: (
     data: Simplify<LensTableRowContextMenuEvent['data'] & PreventableEvent>
   ) => void;
-  shouldShowLegendAction?: (actionId: string) => boolean;
 }
 
 export type LensByValueInput = {
@@ -748,7 +747,11 @@ export class Embeddable
    * Gets the Lens embeddable's datasource and visualization states
    * updates the embeddable input
    */
-  async updateVisualization(datasourceState: unknown, visualizationState: unknown) {
+  async updateVisualization(
+    datasourceState: unknown,
+    visualizationState: unknown,
+    visualizationType?: string
+  ) {
     const viz = this.savedVis;
     const activeDatasourceId = (this.activeDatasourceId ??
       'formBased') as EditLensConfigurationProps['datasourceId'];
@@ -770,7 +773,7 @@ export class Embeddable
         ),
         visualizationState,
         activeVisualization: this.activeVisualizationId
-          ? this.deps.visualizationMap[this.activeVisualizationId]
+          ? this.deps.visualizationMap[visualizationType ?? this.activeVisualizationId]
           : undefined,
       });
       const attrs = {
@@ -781,6 +784,7 @@ export class Embeddable
           datasourceStates,
         },
         references,
+        visualizationType: visualizationType ?? viz.visualizationType,
       };
 
       /**
@@ -794,6 +798,15 @@ export class Embeddable
        */
       this.renderUserMessages();
     }
+  }
+
+  async updateSuggestion(attrs: LensSavedObjectAttributes) {
+    const viz = this.savedVis;
+    const newViz = {
+      ...viz,
+      ...attrs,
+    };
+    this.updateInput({ attributes: newViz });
   }
 
   /**
@@ -849,6 +862,7 @@ export class Embeddable
         <Component
           attributes={attributes}
           updatePanelState={this.updateVisualization.bind(this)}
+          updateSuggestion={this.updateSuggestion.bind(this)}
           datasourceId={datasourceId}
           lensAdapters={this.lensInspector.adapters}
           output$={this.getOutput$()}
@@ -859,6 +873,7 @@ export class Embeddable
             !this.isTextBasedLanguage() ? this.navigateToLensEditor.bind(this) : undefined
           }
           displayFlyoutHeader={true}
+          canEditTextBasedQuery={this.isTextBasedLanguage()}
         />
       );
     }
@@ -1110,7 +1125,6 @@ export class Embeddable
               }}
               noPadding={this.visDisplayOptions.noPadding}
               docLinks={this.deps.coreStart.docLinks}
-              shouldShowLegendAction={input.shouldShowLegendAction}
             />
           </KibanaThemeProvider>
           <MessagesBadge
@@ -1218,6 +1232,7 @@ export class Embeddable
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map((action) => ({
           id: action.id,
+          type: action.type,
           iconType: action.getIconType({ embeddable, data, trigger: cellValueTrigger })!,
           displayName: action.getDisplayName({ embeddable, data, trigger: cellValueTrigger }),
           execute: (cellData) =>
