@@ -6,13 +6,7 @@
  * Side Public License, v 1.
  */
 
-import {
-  buildkite,
-  buildkiteBuildStateToEmoji,
-  buildStateToEmoji,
-  CommitWithStatuses,
-  octokit,
-} from '../shared';
+import { buildkite, buildkiteBuildStateToEmoji, CommitWithStatuses, octokit } from '../shared';
 import { GitCommitExtract } from './commit_info';
 import { Build } from '#pipeline-utils/buildkite';
 
@@ -27,41 +21,28 @@ export interface BuildkiteBuildExtract {
   buildNumber: number;
   slug: string;
   commit: string;
-  startedAt?: string;
-  finishedAt?: string;
+  startedAt: string;
+  finishedAt: string;
 }
 
 export async function getOnMergePRBuild(commitHash: string): Promise<BuildkiteBuildExtract | null> {
-  const commit = await octokit.request(`GET /repos/{owner}/{repo}/commits/{ref}/status`, {
-    owner: 'elastic',
-    repo: 'kibana',
-    ref: commitHash,
-    headers: {
-      accept: 'application/vnd.github.v3+json',
-      'X-GitHub-Api-Version': '2022-11-28',
-    },
-  });
-  const buildkiteStatus = commit.data.statuses.find(
-    (e: { context: string; target_url: string }) =>
-      e.context === 'buildkite/on-merge' && e.target_url
-  );
+  const buildkiteBuild = await buildkite.getBuildForCommit(KIBANA_PR_BUILD_SLUG, commitHash);
 
-  if (!buildkiteStatus) {
+  if (!buildkiteBuild) {
     return null;
   }
 
-  const buildkiteURL = buildkiteStatus.target_url;
-  const buildkiteBuildNumber = Number(buildkiteURL.match(/builds\/([0-9]+)/)?.[1]);
-  const state = buildkiteStatus.state as 'failure' | 'pending' | 'success';
-  const stateEmoji = buildStateToEmoji(state);
+  const stateEmoji = buildkiteBuildStateToEmoji(buildkiteBuild.state);
 
   return {
-    success: state === 'success',
+    success: buildkiteBuild.state === 'passed',
     stateEmoji,
     slug: KIBANA_PR_BUILD_SLUG,
-    url: buildkiteURL,
-    buildNumber: buildkiteBuildNumber,
+    url: buildkiteBuild.web_url,
+    buildNumber: buildkiteBuild.number,
     commit: commitHash,
+    startedAt: buildkiteBuild.started_at,
+    finishedAt: buildkiteBuild.finished_at,
   };
 }
 
@@ -115,6 +96,8 @@ export async function getArtifactBuildJob(
     slug: KIBANA_ARTIFACT_BUILD_SLUG,
     buildNumber: build.number,
     commit: build.commit,
+    startedAt: build.started_at,
+    finishedAt: build.finished_at,
   };
 }
 
@@ -122,7 +105,7 @@ export async function getQAFBuildContainingCommit(
   commitSha: string,
   qafBuilds: BuildkiteBuildExtract[],
   commits: GitCommitExtract[] = []
-) {
+): Promise<BuildkiteBuildExtract | null> {
   const commitShaList = commits.length
     ? commits.map((e) => e.sha)
     : (
@@ -165,6 +148,8 @@ export async function getQAFBuildContainingCommit(
     slug: build.slug,
     buildNumber: build.buildNumber,
     commit: build.commit,
+    startedAt: build.startedAt,
+    finishedAt: build.finishedAt,
   };
 }
 
