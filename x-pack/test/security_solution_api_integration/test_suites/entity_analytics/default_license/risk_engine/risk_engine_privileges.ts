@@ -68,16 +68,16 @@ const ROLES = [
   },
 ];
 
-const ALL_ROLES = ROLES.map((role) => role.name);
+const ALL_ROLE_NAMES = ROLES.map((role) => role.name);
 
-const allRolesExcept = (role: string) => ALL_ROLES.filter((r) => r !== role);
+const allRolesExcept = (role: string) => ALL_ROLE_NAMES.filter((r) => r !== role);
 
 const USERNAME_TO_ROLES = {
   no_cluster_manage_index_templates: allRolesExcept('cluster_manage_index_templates'),
   no_cluster_manage_transform: allRolesExcept('cluster_manage_transform'),
   no_risk_score_index_read: allRolesExcept('risk_score_index_read'),
   no_risk_score_index_write: allRolesExcept('risk_score_index_write'),
-  all: ALL_ROLES,
+  all: ALL_ROLE_NAMES,
 };
 
 export default ({ getService }: FtrProviderContext) => {
