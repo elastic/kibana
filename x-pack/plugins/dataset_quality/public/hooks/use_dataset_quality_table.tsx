@@ -8,6 +8,7 @@
 import { orderBy } from 'lodash';
 import React, { useState, useMemo, useCallback } from 'react';
 import { useFetcher } from '@kbn/observability-shared-plugin/public';
+import { tableSummaryAllText, tableSummaryOfText } from '../../common/translations';
 import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat';
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
@@ -73,13 +74,13 @@ export const useDatasetQualityTable = () => {
     const endNumberItemsOnPage = pageSize * pageIndex + renderedItems.length;
 
     return pageSize === 0 ? (
-      <strong>All</strong>
+      <strong>{tableSummaryAllText}</strong>
     ) : (
       <>
         <strong>
           {startNumberItemsOnPage}-{endNumberItemsOnPage}
         </strong>{' '}
-        of {data.length}
+        {tableSummaryOfText} {data.length}
       </>
     );
   }, [data.length, pageIndex, pageSize, renderedItems.length]);

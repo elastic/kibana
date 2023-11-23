@@ -30,7 +30,7 @@ export class DataStreamStat {
 
     const dataStreamStatProps = {
       name: dataStreamStat.name,
-      title: `${dataset} ( ${namespace} )`,
+      title: `${dataset}-${namespace}`,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.size_bytes,
       lastActivity: dataStreamStat.last_activity,

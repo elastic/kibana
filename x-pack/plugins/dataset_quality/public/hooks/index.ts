@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './formatted_time';
+export * from './use_formatted_time';
 export * from './use_dataset_quality_table';

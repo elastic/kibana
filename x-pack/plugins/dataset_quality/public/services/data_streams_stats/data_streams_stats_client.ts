@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { HttpStart } from '@kbn/core/public';
 import { keyBy, merge, values } from 'lodash';
+import { HttpStart } from '@kbn/core/public';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { DATA_STREAMS_STATS_URL } from '../../../common/constants';
 import {

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { Integration } from '../../../common/data_streams_stats/integration';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
@@ -35,6 +35,28 @@ export const getDatasetQualitTableColumns = (): Array<EuiBasicTableColumn<DataSt
       name: nameColumnName,
       field: 'title',
       sortable: true,
+      render: (title: string) => {
+        const [dataset, namespace] = title.split('-');
+
+        return (
+          <EuiFlexGroup alignItems="center" gutterSize="m">
+            <EuiFlexItem grow={false}>
+              <EuiText>{dataset}</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem>
+              <EuiText
+                size="xs"
+                color="subdued"
+                style={{
+                  fontStyle: 'italic',
+                }}
+              >
+                {namespace}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        );
+      },
       width: '400px',
     },
     {

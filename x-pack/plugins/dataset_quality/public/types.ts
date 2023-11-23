@@ -6,8 +6,6 @@
  */
 
 import { ComponentType } from 'react';
-import { AppMountParameters } from '@kbn/core/public';
-import { SerializableRecord } from '@kbn/utility-types';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
@@ -24,11 +22,3 @@ export interface DatasetQualityStartDeps {
 export interface DatasetQualitySetupDeps {
   share: SharePluginSetup;
 }
-
-export interface DatasetQualityLocationState extends SerializableRecord {
-  origin?: {
-    id: 'application-log-onboarding';
-  };
-}
-
-export type DatasetQualityAppMountParameters = AppMountParameters<DatasetQualityLocationState>;

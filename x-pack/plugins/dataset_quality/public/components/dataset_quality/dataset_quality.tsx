@@ -9,9 +9,9 @@ import { CoreStart } from '@kbn/core/public';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { DataStreamsStatsService } from '../../services/data_streams_stats/data_streams_stats_service';
 import { DatasetQualityContext, DatasetQualityContextValue } from './context';
-import { Header } from './header';
 import { useKibanaContextForPluginProvider } from '../../utils';
 import { DatasetQualityStartDeps } from '../../types';
+import { Header } from './header';
 import { Table } from './table';
 
 export interface CreateDatasetQualityArgs {

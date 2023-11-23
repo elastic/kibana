@@ -26,3 +26,11 @@ export const noDatasetsTitle = i18n.translate('xpack.datasetQuality.noDatasetsTi
 export const loadingDatasetsText = i18n.translate('xpack.datasetQuality.loadingDatasetsText', {
   defaultMessage: 'Loading data',
 });
+
+export const tableSummaryAllText = i18n.translate('xpack.datasetQuality.tableSummaryAllText', {
+  defaultMessage: 'All',
+});
+
+export const tableSummaryOfText = i18n.translate('xpack.datasetQuality.tableSummaryOfText', {
+  defaultMessage: 'of',
+});

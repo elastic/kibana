@@ -6,14 +6,9 @@
  */
 
 import React from 'react';
-import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText } from '@elastic/eui';
-import { EuiEmptyPrompt } from '@elastic/eui';
+import { EuiBasicTable, EuiHorizontalRule, EuiSpacer, EuiText, EuiEmptyPrompt } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  loadingDatasetsText,
-  noDatasetsDescription,
-  noDatasetsTitle,
-} from '../../../common/translations';
+import { loadingDatasetsText, noDatasetsTitle } from '../../../common/translations';
 import { useDatasetQualityTable } from '../../hooks';
 
 export const Table = () => {
@@ -50,7 +45,6 @@ export const Table = () => {
             loadingDatasetsText
           ) : (
             <EuiEmptyPrompt
-              body={noDatasetsDescription}
               data-test-subj="datasetQualityTableNoData"
               layout="vertical"
               title={<h2>{noDatasetsTitle}</h2>}
