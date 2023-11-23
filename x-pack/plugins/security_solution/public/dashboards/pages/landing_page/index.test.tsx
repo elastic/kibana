@@ -28,11 +28,9 @@ jest.mock('@kbn/dashboard-plugin/public', () => ({
   DashboardTopNav: jest.fn().mockReturnValue(<span data-test-subj="dashboardTopNav" />),
 }));
 
-const mockUseObservable = jest.fn();
-
-jest.mock('react-use', () => ({
-  ...jest.requireActual('react-use'),
-  useObservable: () => mockUseObservable(),
+const mockUseContractComponents = jest.fn(() => ({}));
+jest.mock('../../../common/hooks/use_contract_component', () => ({
+  useContractComponents: () => mockUseContractComponents(),
 }));
 
 const DEFAULT_DASHBOARD_CAPABILITIES = { show: true, createNew: true };
@@ -216,11 +214,11 @@ describe('Dashboards landing', () => {
   });
 
   it('should render callout when available', async () => {
-    const DummyComponent = () => <span data-test-subj="test" />;
-    mockUseObservable.mockReturnValue(<DummyComponent />);
+    const DashboardsLandingCallout = () => <span data-test-subj="callout-test" />;
+    mockUseContractComponents.mockReturnValue({ DashboardsLandingCallout });
 
     await renderDashboardLanding();
 
-    expect(screen.queryByTestId('test')).toBeInTheDocument();
+    expect(screen.queryByTestId('callout-test')).toBeInTheDocument();
   });
 });

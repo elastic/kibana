@@ -51,7 +51,7 @@ import {
 import { TOASTER } from '../../../screens/alerts_detection_rules';
 import { setEndDate, setStartDate } from '../../../tasks/date_picker';
 import { fillAddFilterForm, openAddFilterPopover } from '../../../tasks/search_bar';
-import { deleteAlertsAndRules } from '../../../tasks/common';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
 
 const customFilters = [
   {
