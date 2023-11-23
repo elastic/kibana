@@ -6,20 +6,12 @@
  * Side Public License, v 1.
  */
 
-jest.mock('@kbn/server-http-tools', () => {
-  const module = jest.requireActual('@kbn/server-http-tools');
-  return {
-    ...module,
-    createServer: jest.fn(module.createServer),
-  };
-});
-
+import { setTlsConfigMock } from './http_server.test.mocks';
 import { Server } from 'http';
 import { rm, mkdtemp, readFile, writeFile } from 'fs/promises';
 import supertest from 'supertest';
 import { omit } from 'lodash';
 import { join } from 'path';
-
 import { ByteSizeValue, schema } from '@kbn/config-schema';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type {
@@ -37,7 +29,7 @@ import { HttpServer } from './http_server';
 import { Readable } from 'stream';
 import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
-import { of, Observable } from 'rxjs';
+import { of, Observable, BehaviorSubject } from 'rxjs';
 
 const routerOptions: RouterOptions = {
   isDev: false,
@@ -1723,5 +1715,54 @@ describe('setup contract', () => {
         registerAuth((req, res) => res.unauthorized());
       }).not.toThrow();
     });
+  });
+});
+
+describe('configuration change', () => {
+  it('logs a warning in case of incompatible config change', async () => {
+    const configSubject = new BehaviorSubject(configWithSSL);
+
+    await server.setup({ config$: configSubject });
+    await server.start();
+
+    const nextConfig = {
+      ...configWithSSL,
+      ssl: {
+        ...configWithSSL.ssl,
+        getSecureOptions: () => 0,
+        enabled: false,
+      },
+    } as HttpConfig;
+
+    configSubject.next(nextConfig);
+
+    expect(loggingService.get().warn).toHaveBeenCalledWith(
+      'Incompatible TLS config change detected - TLS cannot be toggled without a full server reboot.'
+    );
+  });
+
+  it('calls setTlsConfig and logs an info message when config changes', async () => {
+    const configSubject = new BehaviorSubject(configWithSSL);
+
+    const { server: innerServer } = await server.setup({ config$: configSubject });
+    await server.start();
+
+    const nextConfig = {
+      ...configWithSSL,
+      ssl: {
+        ...configWithSSL.ssl,
+        isEqualTo: () => false,
+        getSecureOptions: () => 0,
+      },
+    } as HttpConfig;
+
+    configSubject.next(nextConfig);
+
+    expect(setTlsConfigMock).toHaveBeenCalledTimes(1);
+    expect(setTlsConfigMock).toHaveBeenCalledWith(innerServer, nextConfig.ssl);
+
+    expect(loggingService.get().info).toHaveBeenCalledWith(
+      'TLS configuration change detected - reloading TLS configuration.'
+    );
   });
 });
