@@ -624,25 +624,34 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
     },
 
     async assertCreateDataViewSwitchExists() {
-      await testSubjects.existOrFail(`mlAnalyticsCreateJobWizardCreateDataViewCheckbox`, {
-        allowHidden: true,
-      });
-    },
-
-    async getCreateDataViewSwitchCheckState(): Promise<boolean> {
-      const state = await testSubjects.getAttribute(
-        'mlAnalyticsCreateJobWizardCreateDataViewCheckbox',
-        'checked'
-      );
-      return state === 'true';
+      await testSubjects.existOrFail(`mlCreateDataViewSwitch`, { allowHidden: true });
     },
 
     async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
-      const actualCheckState = await this.getCreateDataViewSwitchCheckState();
+      const actualCheckState =
+        (await testSubjects.getAttribute('mlCreateDataViewSwitch', 'aria-checked')) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
       );
+    },
+
+    async assertDataViewTimeFieldInputExists() {
+      await testSubjects.existOrFail(`mlDataViewTimeFieldSelect`);
+    },
+
+    async assertDataViewTimeFieldValue(expectedValue: string) {
+      const actualValue = await testSubjects.getAttribute(`mlDataViewTimeFieldSelect`, 'value');
+      expect(actualValue).to.eql(
+        expectedValue,
+        `Data view time field should be ${expectedValue}, got ${actualValue}`
+      );
+    },
+
+    async setDataViewTimeField(fieldName: string) {
+      const selectControl = await testSubjects.find('mlDataViewTimeFieldSelect');
+      await selectControl.type(fieldName);
+      await this.assertDataViewTimeFieldValue(fieldName);
     },
 
     async getDestIndexSameAsIdSwitchCheckState(): Promise<boolean> {
@@ -672,13 +681,6 @@ export function MachineLearningDataFrameAnalyticsCreationProvider(
         await testSubjects.click('mlAnalyticsCreateJobWizardDestIndexSameAsIdSwitch');
       }
       await this.assertDestIndexSameAsIdCheckState(checkState);
-    },
-
-    async setCreateDataViewSwitchState(checkState: boolean) {
-      if ((await this.getCreateDataViewSwitchCheckState()) !== checkState) {
-        await testSubjects.click('mlAnalyticsCreateJobWizardCreateDataViewCheckbox');
-      }
-      await this.assertCreateDataViewSwitchCheckState(checkState);
     },
 
     async assertStartJobCheckboxExists() {

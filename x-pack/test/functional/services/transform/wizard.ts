@@ -723,13 +723,12 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertCreateDataViewSwitchExists() {
-      await testSubjects.existOrFail(`transformCreateDataViewSwitch`, { allowHidden: true });
+      await testSubjects.existOrFail(`mlCreateDataViewSwitch`, { allowHidden: true });
     },
 
     async assertCreateDataViewSwitchCheckState(expectedCheckState: boolean) {
       const actualCheckState =
-        (await testSubjects.getAttribute('transformCreateDataViewSwitch', 'aria-checked')) ===
-        'true';
+        (await testSubjects.getAttribute('mlCreateDataViewSwitch', 'aria-checked')) === 'true';
       expect(actualCheckState).to.eql(
         expectedCheckState,
         `Create data view switch check state should be '${expectedCheckState}' (got '${actualCheckState}')`
@@ -737,14 +736,11 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async assertDataViewTimeFieldInputExists() {
-      await testSubjects.existOrFail(`transformDataViewTimeFieldSelect`);
+      await testSubjects.existOrFail(`mlDataViewTimeFieldSelect`);
     },
 
     async assertDataViewTimeFieldValue(expectedValue: string) {
-      const actualValue = await testSubjects.getAttribute(
-        `transformDataViewTimeFieldSelect`,
-        'value'
-      );
+      const actualValue = await testSubjects.getAttribute(`mlDataViewTimeFieldSelect`, 'value');
       expect(actualValue).to.eql(
         expectedValue,
         `Data view time field should be ${expectedValue}, got ${actualValue}`
@@ -752,7 +748,7 @@ export function TransformWizardProvider({ getService, getPageObjects }: FtrProvi
     },
 
     async setDataViewTimeField(fieldName: string) {
-      const selectControl = await testSubjects.find('transformDataViewTimeFieldSelect');
+      const selectControl = await testSubjects.find('mlDataViewTimeFieldSelect');
       await selectControl.type(fieldName);
       await this.assertDataViewTimeFieldValue(fieldName);
     },
