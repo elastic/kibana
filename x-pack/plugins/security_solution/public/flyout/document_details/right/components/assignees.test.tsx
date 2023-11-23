@@ -18,6 +18,7 @@ import type { SetAlertAssigneesFunc } from '../../../../common/components/toolba
 import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees';
 import { TestProviders } from '../../../../common/mock';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../../../common/components/assignees/test_ids';
+import { useLicense } from '../../../../common/hooks/use_license';
 import {
   USERS_AVATARS_COUNT_BADGE_TEST_ID,
   USERS_AVATARS_PANEL_TEST_ID,
@@ -29,6 +30,7 @@ jest.mock('../../../../common/components/user_profiles/use_get_current_user_prof
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
+jest.mock('../../../../common/hooks/use_license');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
 
 const mockUserProfiles = [
@@ -72,6 +74,7 @@ describe('<Assignees />', () => {
       data: mockUserProfiles,
     });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
 
     setAlertAssigneesMock = jest.fn().mockReturnValue(Promise.resolve());
     (useSetAlertAssignees as jest.Mock).mockReturnValue(setAlertAssigneesMock);
@@ -140,6 +143,16 @@ describe('<Assignees />', () => {
 
   it('should render add assignees button as disabled if user has readonly priviliges', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+
+    const assignees = ['user-id-1', 'user-id-2'];
+    const { getByTestId } = renderAssignees('test-event', assignees);
+
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeInTheDocument();
+    expect(getByTestId(ASSIGNEES_ADD_BUTTON_TEST_ID)).toBeDisabled();
+  });
+
+  it('should render add assignees button as disabled within Basic license', () => {
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
 
     const assignees = ['user-id-1', 'user-id-2'];
     const { getByTestId } = renderAssignees('test-event', assignees);

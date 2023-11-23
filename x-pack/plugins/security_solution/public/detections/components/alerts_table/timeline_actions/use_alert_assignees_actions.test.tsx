@@ -19,12 +19,14 @@ import { useSetAlertAssignees } from '../../../../common/components/toolbar/bulk
 import { useGetCurrentUserProfile } from '../../../../common/components/user_profiles/use_get_current_user_profile';
 import { useBulkGetUserProfiles } from '../../../../common/components/user_profiles/use_bulk_get_user_profiles';
 import { useSuggestUsers } from '../../../../common/components/user_profiles/use_suggest_users';
+import { useLicense } from '../../../../common/hooks/use_license';
 
 jest.mock('../../../containers/detection_engine/alerts/use_alerts_privileges');
 jest.mock('../../../../common/components/toolbar/bulk_actions/use_set_alert_assignees');
 jest.mock('../../../../common/components/user_profiles/use_get_current_user_profile');
 jest.mock('../../../../common/components/user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../../../common/components/user_profiles/use_suggest_users');
+jest.mock('../../../../common/hooks/use_license');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
@@ -67,6 +69,7 @@ describe('useAlertAssigneesActions', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
       hasIndexWrite: true,
     });
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
   afterEach(() => {
@@ -119,6 +122,14 @@ describe('useAlertAssigneesActions', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({
       hasIndexWrite: false,
     });
+    const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {
+      wrapper: TestProviders,
+    });
+    expect(result.current.alertAssigneesItems.length).toEqual(0);
+  });
+
+  it('should not render alert assignees actions within Basic license', () => {
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
     const { result } = renderHook(() => useAlertAssigneesActions(defaultProps), {
       wrapper: TestProviders,
     });

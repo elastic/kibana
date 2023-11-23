@@ -28,6 +28,10 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
 
+jest.mock('../../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+}));
+
 const ecsRowData: Ecs = {
   _id: '1',
   agent: { type: ['blah'] },

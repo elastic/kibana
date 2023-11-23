@@ -23,12 +23,14 @@ import { useBulkGetUserProfiles } from '../../user_profiles/use_bulk_get_user_pr
 import { useSuggestUsers } from '../../user_profiles/use_suggest_users';
 import { ASSIGNEES_APPLY_BUTTON_TEST_ID } from '../../assignees/test_ids';
 import { useAlertsPrivileges } from '../../../../detections/containers/detection_engine/alerts/use_alerts_privileges';
+import { useLicense } from '../../../hooks/use_license';
 
 jest.mock('./use_set_alert_assignees');
 jest.mock('../../user_profiles/use_get_current_user_profile');
 jest.mock('../../user_profiles/use_bulk_get_user_profiles');
 jest.mock('../../user_profiles/use_suggest_users');
 jest.mock('../../../../detections/containers/detection_engine/alerts/use_alerts_privileges');
+jest.mock('../../../hooks/use_license');
 
 const mockUserProfiles = [
   { uid: 'user-id-1', enabled: true, user: { username: 'fakeUser1' }, data: {} },
@@ -72,6 +74,7 @@ describe('useBulkAlertAssigneesItems', () => {
       data: mockUserProfiles,
     });
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: true });
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => true });
   });
 
   afterEach(() => {
@@ -169,6 +172,16 @@ describe('useBulkAlertAssigneesItems', () => {
 
   it('should return 0 items for the VIEWER role', () => {
     (useAlertsPrivileges as jest.Mock).mockReturnValue({ hasIndexWrite: false });
+
+    const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
+      wrapper: TestProviders,
+    });
+    expect(result.current.alertAssigneesItems.length).toEqual(0);
+    expect(result.current.alertAssigneesPanels.length).toEqual(0);
+  });
+
+  it('should return 0 items for the Basic license', () => {
+    (useLicense as jest.Mock).mockReturnValue({ isPlatinumPlus: () => false });
 
     const { result } = renderHook(() => useBulkAlertAssigneesItems(defaultProps), {
       wrapper: TestProviders,

@@ -62,6 +62,10 @@ jest.mock('../../../common/hooks/use_app_toasts', () => ({
   }),
 }));
 
+jest.mock('../../../common/hooks/use_license', () => ({
+  useLicense: jest.fn().mockReturnValue({ isPlatinumPlus: () => true }),
+}));
+
 jest.mock('../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
 }));
