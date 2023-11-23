@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 
 import type { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/public';
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
@@ -34,7 +34,10 @@ export const useSetupTechnology = ({
     SetupTechnology.AGENT_BASED
   );
   const isCspmAws = input.type === CLOUDBEAT_AWS;
-  const isAgentlessAvailable = isCspmAws && agentlessPolicy;
+  const isAgentlessAvailable = useMemo(
+    () => Boolean(isCspmAws && agentlessPolicy),
+    [isCspmAws, agentlessPolicy]
+  );
 
   useEffect(() => {
     if (isAgentlessAvailable) {
