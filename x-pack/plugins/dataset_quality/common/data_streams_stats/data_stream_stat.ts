@@ -28,14 +28,12 @@ export class DataStreamStat {
   public static create(dataStreamStat: DataStreamStatType) {
     const [type, dataset, namespace] = dataStreamStat.name.split('-');
 
-    // TODO: implement title construction
     const dataStreamStatProps = {
       name: dataStreamStat.name,
       title: `${type} ${dataset} ( ${namespace} )`,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.size_bytes,
       lastActivity: dataStreamStat.last_activity,
-      // TODO: replace this code
       integration: dataStreamStat.integration
         ? Integration.create(dataStreamStat.integration)
         : undefined,

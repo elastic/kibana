@@ -34,7 +34,7 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
       });
 
     const mergedDataStreamsStats = values(
-      merge(keyBy(dataStreamsStats, 'name'), keyBy(integrations, 'name'))
+      merge(keyBy(dataStreamsStats, 'integration'), keyBy(integrations, 'name'))
     );
 
     return mergedDataStreamsStats.map(DataStreamStat.create);

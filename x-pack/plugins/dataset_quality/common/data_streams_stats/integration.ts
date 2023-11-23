@@ -21,8 +21,6 @@ export class Integration {
   }
 
   public static create(integration: IntegrationType) {
-    // TODO: implement icon construction and title
-
     const integrationProps = {
       ...integration,
       title: integration.title || integration.name,
