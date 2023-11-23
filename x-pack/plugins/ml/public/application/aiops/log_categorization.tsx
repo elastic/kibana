@@ -45,19 +45,20 @@ export const LogCategorizationPage: FC = () => {
           showFrozenDataTierChoice={showNodeInfo}
           appDependencies={pick(services, [
             'application',
+            'charts',
             'data',
             'executionContext',
-            'charts',
             'fieldFormats',
             'http',
+            'i18n',
+            'lens',
             'notifications',
             'share',
             'storage',
+            'theme',
+            'uiActions',
             'uiSettings',
             'unifiedSearch',
-            'theme',
-            'lens',
-            'i18n',
           ])}
         />
       )}
