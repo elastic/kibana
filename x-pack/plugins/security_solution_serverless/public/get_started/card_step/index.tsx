@@ -16,7 +16,7 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo } from 'react';
 
 import classnames from 'classnames';
 import { APP_UI_ID, SecurityPageName } from '@kbn/security-solution-plugin/common';
@@ -29,11 +29,13 @@ import {
   COLLAPSE_STEP_BUTTON_LABEL,
   EXPAND_STEP_BUTTON_LABEL,
 } from '../translations';
-import { getStepsByActiveProduct, isDefaultFinishedCardStep } from '../helpers';
+import { getStepsByActiveProduct } from '../helpers';
 import type { ProductLine } from '../../../common/product';
 
 import { StepContent } from './step_content';
 import { useKibana } from '../../common/services';
+
+const HEIGHT_ANIMATION_DURATION = 250;
 
 const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
@@ -58,26 +60,32 @@ const CardStepComponent: React.FC<{
 }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToApp } = useKibana().services.application;
+
+  const stepContentRef = React.useRef<HTMLDivElement>(null);
+
   const isExpandedStep = expandedSteps.has(stepId);
+  const [panelClassNames, setPanelClassNames] = React.useState('');
   const steps = useMemo(
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
     [activeProducts, cardId, sectionId]
   );
   const { title, description, splitPanel, icon } = steps?.find((step) => step.id === stepId) ?? {};
   const hasStepContent = description != null || splitPanel != null;
+  const expandedStepPanelHeight = `calc(${stepContentRef.current?.offsetHeight}px + ${euiTheme.size.l} + ${euiTheme.size.xxxl})`;
 
   const toggleStep = useCallback(
     (e) => {
       e.preventDefault();
 
-      if (hasStepContent && !isDefaultFinishedCardStep(cardId, stepId)) {
+      if (hasStepContent) {
+        // Toggle step and sync the expanded card step to storage & reducer
         onStepClicked({ stepId, cardId, sectionId, isExpanded: !isExpandedStep });
-      }
 
-      navigateToApp(APP_UI_ID, {
-        deepLinkId: SecurityPageName.landing,
-        path: `#${stepId}`,
-      });
+        navigateToApp(APP_UI_ID, {
+          deepLinkId: SecurityPageName.landing,
+          path: `#${stepId}`,
+        });
+      }
     },
     [hasStepContent, cardId, stepId, navigateToApp, onStepClicked, sectionId, isExpandedStep]
   );
@@ -92,11 +100,31 @@ const CardStepComponent: React.FC<{
     [cardId, isDone, onStepButtonClicked, sectionId, stepId]
   );
 
-  const panelClassNames = classnames({
-    'step-panel-collapsed': !isExpandedStep,
-    'step-panel-expanded': isExpandedStep,
-    'step-panel': true,
-  });
+  useEffect(() => {
+    if (isExpandedCard) {
+      setPanelClassNames(
+        classnames({
+          'step-panel-expanded': isExpandedCard,
+        })
+      );
+    } else {
+      setPanelClassNames(
+        classnames({
+          'step-panel-expanded': true,
+          'step-panel-collapsed': true,
+        })
+      );
+
+      setTimeout(() => {
+        setPanelClassNames(
+          classnames({
+            'step-panel-expanded': false,
+            'step-panel-collapsed': true,
+          })
+        );
+      }, HEIGHT_ANIMATION_DURATION);
+    }
+  }, [isExpandedCard, expandedSteps]);
 
   return (
     <EuiPanel
@@ -107,6 +135,21 @@ const CardStepComponent: React.FC<{
       paddingSize="none"
       className={panelClassNames}
       id={stepId}
+      css={css`
+        overflow: hidden;
+        height: ${isExpandedStep ? expandedStepPanelHeight : euiTheme.size.xxxl};
+        transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-out;
+
+        &.step-panel-expanded {
+          height: ${stepContentRef.current?.offsetHeight ? expandedStepPanelHeight : 'auto'};
+          transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-in;
+        }
+
+        &.step-panel-collapsed,
+        &.step-panel-expanded.step-panel-collapsed {
+          height: ${euiTheme.size.xxxl};
+        }
+      `}
     >
       <EuiFlexGroup
         gutterSize="s"
@@ -129,10 +172,6 @@ const CardStepComponent: React.FC<{
               height: ${euiTheme.size.xxxl};
               padding: ${euiTheme.size.m};
               background-color: rgb(247, 248, 252);
-
-              .step-panel:hover & {
-                background-color: rgb(0, 191, 179, 0.1);
-              }
             `}
           >
             {icon && <EuiIcon {...icon} size="l" className="eui-alignMiddle" />}
@@ -209,13 +248,15 @@ const CardStepComponent: React.FC<{
           </div>
         </EuiFlexItem>
       </EuiFlexGroup>
-      <StepContent
-        description={description}
-        hasStepContent={hasStepContent}
-        isExpandedStep={isExpandedStep}
-        splitPanel={splitPanel}
-        stepId={stepId}
-      />
+      <div ref={stepContentRef}>
+        <StepContent
+          description={description}
+          hasStepContent={hasStepContent}
+          isExpandedStep={isExpandedStep}
+          splitPanel={splitPanel}
+          stepId={stepId}
+        />
+      </div>
     </EuiPanel>
   );
 };

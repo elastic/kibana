@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiShadow } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useEffect, useMemo } from 'react';
+import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import type {
@@ -22,7 +22,6 @@ import { getCard } from './helpers';
 import type { ProductLine } from '../../common/product';
 import { CardStep } from './card_step';
 
-const HEIGHT_ANIMATION_DURATION = 250;
 const SHADOW_ANIMATION_DURATION = 350;
 
 const CardItemComponent: React.FC<{
@@ -48,8 +47,6 @@ const CardItemComponent: React.FC<{
 }) => {
   const isExpandedCard = expandedCardSteps[cardId].isExpanded;
 
-  const [cardClassNames, setCardClassNames] = React.useState('');
-
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
   const expandedSteps = useMemo(
     () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
@@ -57,32 +54,9 @@ const CardItemComponent: React.FC<{
   );
 
   const shadow = useEuiShadow('l');
-
-  useEffect(() => {
-    if (isExpandedCard) {
-      setCardClassNames(
-        classnames({
-          'card-expanded': isExpandedCard,
-        })
-      );
-    } else {
-      setCardClassNames(
-        classnames({
-          'card-expanded': true,
-          'card-collapsed': true,
-        })
-      );
-
-      setTimeout(() => {
-        setCardClassNames(
-          classnames({
-            'card-expanded': false,
-            'card-collapsed': true,
-          })
-        );
-      }, HEIGHT_ANIMATION_DURATION);
-    }
-  }, [isExpandedCard]);
+  const cardClassNames = classnames({
+    'card-expanded': isExpandedCard,
+  });
 
   return cardItem && activeStepIds ? (
     <EuiPanel
@@ -95,9 +69,6 @@ const CardItemComponent: React.FC<{
         border-radius: ${euiTheme.size.s};
         border: 1px solid ${euiTheme.colors.lightShade};
         box-sizing: content-box;
-        overflow: hidden;
-        height: ${euiTheme.size.xxxl};
-        transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-out;
 
         &:hover,
         &.card-expanded {
@@ -107,13 +78,6 @@ const CardItemComponent: React.FC<{
 
         &.card-expanded {
           border: 2px solid #6092c0;
-          height: 400px;
-          transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-in;
-        }
-
-        &.card-collapsed,
-        &.card-expanded.card-collapsed {
-          height: ${euiTheme.size.xxxl};
         }
       `}
       borderRadius="none"
