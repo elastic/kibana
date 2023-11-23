@@ -7,24 +7,24 @@
  */
 
 import classNames from 'classnames';
-import useAsync from 'react-use/lib/useAsync';
 import React, { useEffect, useMemo, useState } from 'react';
+import useAsync from 'react-use/lib/useAsync';
 import useObservable from 'react-use/lib/useObservable';
 
-import {
-  DashboardDrilldownOptions,
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from '@kbn/presentation-util-plugin/public';
 import { EuiButtonEmpty, EuiListGroupItem } from '@elastic/eui';
-import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
 import {
   DashboardLocatorParams,
   getDashboardLocatorParamsFromEmbeddable,
 } from '@kbn/dashboard-plugin/public';
+import { DashboardContainer } from '@kbn/dashboard-plugin/public/dashboard_container';
+import {
+  DashboardDrilldownOptions,
+  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
+} from '@kbn/presentation-util-plugin/public';
 
-import { LINKS_VERTICAL_LAYOUT, LinksLayoutType, Link } from '../../../common/content_management';
+import { Link, LinksLayoutType, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import { useLinks } from '../links_hooks';
 import { DashboardLinkStrings } from './dashboard_link_strings';
-import { useLinks } from '../../embeddable/links_embeddable';
 import { fetchDashboard } from './dashboard_link_tools';
 
 export const DashboardLinkComponent = ({
