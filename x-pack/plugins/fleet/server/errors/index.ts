@@ -41,8 +41,11 @@ export class PackageFailedVerificationError extends FleetError {
 export class PackageUnsupportedMediaTypeError extends FleetError {}
 export class PackageInvalidArchiveError extends FleetError {}
 export class PackageRemovalError extends FleetError {}
+export class PackageESError extends FleetError {}
 export class ConcurrentInstallOperationError extends FleetError {}
 export class BundledPackageLocationNotFoundError extends FleetError {}
+export class KibanaSOReferenceError extends FleetError {}
+export class PackageAlreadyInstalledError extends FleetError {}
 
 export class AgentPolicyError extends FleetError {}
 export class AgentPolicyNotFoundError extends FleetError {}

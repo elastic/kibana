@@ -38,6 +38,9 @@ import {
   PackageInvalidArchiveError,
   BundledPackageLocationNotFoundError,
   PackageRemovalError,
+  PackageESError,
+  KibanaSOReferenceError,
+  PackageAlreadyInstalledError,
 } from '.';
 
 type IngestErrorHandler = (
@@ -64,9 +67,6 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof PackageNotFoundError || error instanceof PackagePolicyNotFoundError) {
     return 404; // Not Found
   }
-  if (error instanceof AgentPolicyNameExistsError) {
-    return 409; // Conflict
-  }
   if (error instanceof PackageUnsupportedMediaTypeError) {
     return 415; // Unsupported Media Type
   }
@@ -82,8 +82,8 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof PackageRemovalError) {
     return 400; // Bad Request
   }
-  if (error instanceof ConcurrentInstallOperationError) {
-    return 409; // Conflict
+  if (error instanceof KibanaSOReferenceError) {
+    return 400; // Bad Request
   }
   if (error instanceof AgentNotFoundError) {
     return 404;
@@ -94,13 +94,25 @@ const getHTTPResponseCode = (error: FleetError): number => {
   if (error instanceof FleetUnauthorizedError) {
     return 403; // Unauthorized
   }
+  if (error instanceof AgentPolicyNameExistsError) {
+    return 409; // Conflict
+  }
+  if (error instanceof ConcurrentInstallOperationError) {
+    return 409; // Conflict
+  }
   if (error instanceof PackagePolicyNameExistsError) {
+    return 409; // Conflict
+  }
+  if (error instanceof PackageAlreadyInstalledError) {
     return 409; // Conflict
   }
   if (error instanceof UninstallTokenError) {
     return 500; // Internal Error
   }
   if (error instanceof BundledPackageLocationNotFoundError) {
+    return 500; // Internal Error
+  }
+  if (error instanceof PackageESError) {
     return 500; // Internal Error
   }
   return 400; // Bad Request

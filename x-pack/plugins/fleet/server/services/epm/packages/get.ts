@@ -117,7 +117,7 @@ export async function getPackages(
             return createInstallableFrom({ ...packageInfo, id: pkg.id }, pkg);
           } catch (err) {
             if (err instanceof PackageInvalidArchiveError) {
-              logger.error(
+              logger.warn(
                 `Installed package ${pkg.id} ${pkg.attributes.version} is not a valid package anymore`
               );
               return null;
