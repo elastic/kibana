@@ -11,6 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import type { ComplianceDashboardData } from '../../../common/types';
@@ -118,19 +119,26 @@ export const getFailedFindingsFromAggs = (
   });
 
 export const getGroupedFindingsEvaluation = async (
+  logger: Logger,
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
   runtimeMappings: MappingRuntimeFields
 ): Promise<ComplianceDashboardData['groupedFindingsEvaluation']> => {
-  const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
-    getRisksEsQuery(query, pitId, runtimeMappings)
-  );
+  try {
+    const resourceTypesQueryResult = await esClient.search<unknown, FailedFindingsQueryResult>(
+      getRisksEsQuery(query, pitId, runtimeMappings)
+    );
 
-  const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
-  if (!Array.isArray(ruleSections)) {
-    return [];
+    const ruleSections = resourceTypesQueryResult.aggregations?.aggs_by_resource_type.buckets;
+    if (!Array.isArray(ruleSections)) {
+      return [];
+    }
+
+    return getFailedFindingsFromAggs(ruleSections);
+  } catch (err) {
+    logger.error(`Failed to fetch findings stats ${err.message}`);
+    logger.error(err);
+    throw err;
   }
-
-  return getFailedFindingsFromAggs(ruleSections);
 };

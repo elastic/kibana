@@ -11,6 +11,7 @@ import type {
   QueryDslQueryContainer,
   SearchRequest,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import type { BenchmarkData } from '../../../common/types';
 import {
@@ -124,17 +125,24 @@ export const getBenchmarksFromAggs = (benchmarks: BenchmarkBucket[]) => {
 };
 
 export const getBenchmarks = async (
+  logger: Logger,
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
   runtimeMappings: MappingRuntimeFields
 ): Promise<BenchmarkWithoutTrend[]> => {
-  const queryResult = await esClient.search<unknown, BenchmarkQueryResult>(
-    getBenchmarksQuery(query, pitId, runtimeMappings)
-  );
+  try {
+    const queryResult = await esClient.search<unknown, BenchmarkQueryResult>(
+      getBenchmarksQuery(query, pitId, runtimeMappings)
+    );
 
-  const benchmarks = queryResult.aggregations?.aggs_by_benchmark.buckets;
-  if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmark id');
+    const benchmarks = queryResult.aggregations?.aggs_by_benchmark.buckets;
+    if (!Array.isArray(benchmarks)) throw new Error('missing aggs by benchmark id');
 
-  return getBenchmarksFromAggs(benchmarks);
+    return getBenchmarksFromAggs(benchmarks);
+  } catch (err) {
+    logger.error(`Failed to fetch benchmark stats ${err.message}`);
+    logger.error(err);
+    throw err;
+  }
 };

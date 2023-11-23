@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ElasticsearchClient } from '@kbn/core/server';
+import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { calculatePostureScore } from '../../../common/utils/helpers';
 import { BENCHMARK_SCORE_INDEX_DEFAULT_NS } from '../../../common/constants';
 import type { PosturePolicyTemplate, Stats } from '../../../common/types';
@@ -64,7 +64,7 @@ export const getTrendsQuery = (policyTemplate: PosturePolicyTemplate) => ({
   },
 });
 
-export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
+export const formatTrends = (scoreTrendDocs: ScoreTrendDoc[]): Trends => {
   return scoreTrendDocs.map((data) => {
     return {
       timestamp: data['@timestamp'],
@@ -111,17 +111,24 @@ export const getTrendsFromQueryResult = (scoreTrendDocs: ScoreTrendDoc[]): Trend
 };
 
 export const getTrends = async (
+  logger: Logger,
   esClient: ElasticsearchClient,
   policyTemplate: PosturePolicyTemplate
 ): Promise<Trends> => {
-  const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(policyTemplate));
+  try {
+    const trendsQueryResult = await esClient.search<ScoreTrendDoc>(getTrendsQuery(policyTemplate));
 
-  if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
+    if (!trendsQueryResult.hits.hits) throw new Error('missing trend results from score index');
 
-  const scoreTrendDocs = trendsQueryResult.hits.hits.map((hit) => {
-    if (!hit._source) throw new Error('missing _source data for one or more of trend results');
-    return hit._source;
-  });
+    const scoreTrendDocs = trendsQueryResult.hits.hits.map((hit) => {
+      if (!hit._source) throw new Error('missing _source data for one or more of trend results');
+      return hit._source;
+    });
 
-  return getTrendsFromQueryResult(scoreTrendDocs);
+    return formatTrends(scoreTrendDocs);
+  } catch (err) {
+    logger.error(`Failed to fetch trendlines data ${err.message}`);
+    logger.error(err);
+    throw err;
+  }
 };

@@ -5,22 +5,14 @@
  * 2.0.
  */
 
-export const DELIMITER = ';';
 export const MAPPING_VERSION_DELIMITER = '_';
-export const DOC_FIELD_VERSION_DELIMITER = '.';
 
 export const toBenchmarkDocFieldKey = (benchmarkId: string, benchmarkVersion: string) => {
   if (benchmarkVersion.includes(MAPPING_VERSION_DELIMITER))
-    return `${benchmarkId}${DELIMITER}${benchmarkVersion.replaceAll(
-      `${MAPPING_VERSION_DELIMITER}`,
-      DOC_FIELD_VERSION_DELIMITER
-    )}`;
-  return `${benchmarkId}${DELIMITER}${benchmarkVersion}`;
+    return `${benchmarkId};${benchmarkVersion.replaceAll('_', '.')}`;
+  return `${benchmarkId};${benchmarkVersion}`;
 };
 
 export const toBenchmarkMappingFieldKey = (benchmarkVersion: string) => {
-  return `${benchmarkVersion.replace(
-    `/${DOC_FIELD_VERSION_DELIMITER}/g`,
-    MAPPING_VERSION_DELIMITER
-  )}`;
+  return `${benchmarkVersion.replaceAll('.', '_')}`;
 };

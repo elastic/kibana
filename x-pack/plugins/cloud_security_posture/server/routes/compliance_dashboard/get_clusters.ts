@@ -13,6 +13,7 @@ import type {
   AggregationsTopHitsAggregate,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
+import type { Logger } from '@kbn/core/server';
 import { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/types';
 import { CspFinding } from '../../../common/schemas/csp_finding';
 import type { Cluster } from '../../../common/types';
@@ -109,17 +110,24 @@ export const getClustersFromAggs = (clusters: ClusterBucket[]): ClusterWithoutTr
   });
 
 export const getClusters = async (
+  logger: Logger,
   esClient: ElasticsearchClient,
   query: QueryDslQueryContainer,
   pitId: string,
   runtimeMappings: MappingRuntimeFields
 ): Promise<ClusterWithoutTrend[]> => {
-  const queryResult = await esClient.search<unknown, ClustersQueryResult>(
-    getClustersQuery(query, pitId, runtimeMappings)
-  );
+  try {
+    const queryResult = await esClient.search<unknown, ClustersQueryResult>(
+      getClustersQuery(query, pitId, runtimeMappings)
+    );
 
-  const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;
-  if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
+    const clusters = queryResult.aggregations?.aggs_by_asset_identifier.buckets;
+    if (!Array.isArray(clusters)) throw new Error('missing aggs by cluster id');
 
-  return getClustersFromAggs(clusters);
+    return getClustersFromAggs(clusters);
+  } catch (err) {
+    logger.error(`Failed to fetch cluster stats ${err.message}`);
+    logger.error(err);
+    throw err;
+  }
 };

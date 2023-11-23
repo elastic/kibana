@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getTrendsFromQueryResult, ScoreTrendDoc } from './get_trends';
+import { formatTrends, ScoreTrendDoc } from './get_trends';
 
 const trendDocs: ScoreTrendDoc[] = [
   {
@@ -75,7 +75,7 @@ const trendDocs: ScoreTrendDoc[] = [
 
 describe('getTrendsFromQueryResult', () => {
   it('should return value matching Trends type definition, in descending order, and with postureScore', async () => {
-    const trends = getTrendsFromQueryResult(trendDocs);
+    const trends = formatTrends(trendDocs);
     expect(trends).toEqual([
       {
         timestamp: '2022-04-06T15:30:00Z',

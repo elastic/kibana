@@ -38,20 +38,22 @@ const getClustersTrends = (clustersWithoutTrends: ClusterWithoutTrend[], trends:
     })),
   }));
 
-const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], trends: Trends) =>
-  benchmarksWithoutTrends.map((benchmark) => ({
+const getBenchmarksTrends = (benchmarksWithoutTrends: BenchmarkWithoutTrend[], trends: Trends) => {
+  return benchmarksWithoutTrends.map((benchmark) => ({
     ...benchmark,
     trend: trends.map(({ timestamp, benchmarks: benchmarksTrendData }) => {
       const benchmarkIdVersion = toBenchmarkDocFieldKey(
         benchmark.meta.benchmarkId,
-        benchmark.meta.benchmarkName
+        benchmark.meta.benchmarkVersion
       );
+
       return {
         timestamp,
         ...benchmarksTrendData[benchmarkIdVersion],
       };
     }),
   }));
+};
 
 const getSummaryTrend = (trends: Trends) =>
   trends.map(({ timestamp, summary }) => ({ timestamp, ...summary }));
@@ -73,6 +75,7 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
       },
       async (context, request, response) => {
         const cspContext = await context.csp;
+        const logger = cspContext.logger;
 
         try {
           const esClient = cspContext.esClient.asCurrentUser;
@@ -101,17 +104,17 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
             benchmarksWithoutTrends,
             trends,
           ] = await Promise.all([
-            getStats(esClient, query, pitId, runtimeMappings),
-            getGroupedFindingsEvaluation(esClient, query, pitId, runtimeMappings),
-            getClusters(esClient, query, pitId, runtimeMappings),
-            getBenchmarks(esClient, query, pitId, runtimeMappings),
-            getTrends(esClient, policyTemplate),
+            getStats(logger, esClient, query, pitId, runtimeMappings),
+            getGroupedFindingsEvaluation(logger, esClient, query, pitId, runtimeMappings),
+            getClusters(logger, esClient, query, pitId, runtimeMappings),
+            getBenchmarks(logger, esClient, query, pitId, runtimeMappings),
+            getTrends(logger, esClient, policyTemplate),
           ]);
 
           // Try closing the PIT, if it fails we can safely ignore the error since it closes itself after the keep alive
           //   ends. Not waiting on the promise returned from the `closePointInTime` call to avoid delaying the request
           esClient.closePointInTime({ id: pitId }).catch((err) => {
-            cspContext.logger.warn(`Could not close PIT for stats endpoint: ${err}`);
+            logger.warn(`Could not close PIT for stats endpoint: ${err}`);
           });
 
           const clusters = getClustersTrends(clustersWithoutTrends, trends);
@@ -131,7 +134,8 @@ export const defineGetComplianceDashboardRoute = (router: CspRouter) =>
           });
         } catch (err) {
           const error = transformError(err);
-          cspContext.logger.error(`Error while fetching CSP stats: ${err}`);
+          logger.error(`Error while fetching CSP stats: ${err}`);
+          logger.error(err.stack);
 
           return response.customError({
             body: { message: error.message },
