@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await ml.dataVisualizer.navigateToIndexPatternSelection();
+      await ml.dataVisualizer.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the index data visualizer page`
@@ -91,7 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the saved search selection page`
       );
-      await ml.dataVisualizer.navigateToIndexPatternSelection();
+      await ml.dataVisualizer.navigateToDataViewSelection();
 
       await ml.testExecution.logTestStep(
         `${testData.suiteTitle} loads the index data visualizer page`
@@ -124,7 +124,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   describe('data visualizer with pinned global filters', function () {
     before(async function () {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/farequote');
-      await ml.testResources.createIndexPatternIfNeeded('ft_farequote', '@timestamp');
+      await ml.testResources.createDataViewIfNeeded('ft_farequote', '@timestamp');
       await ml.testResources.createSavedSearchFarequoteFilterAndLuceneIfNeeded();
       await ml.testResources.createSavedSearchFarequoteFilterAndKueryIfNeeded();
 
@@ -133,7 +133,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     after(async function () {
       await ml.testResources.deleteSavedSearches();
-      await ml.testResources.deleteIndexPatternByTitle('ft_farequote');
+      await ml.testResources.deleteDataViewByTitle('ft_farequote');
     });
 
     describe(`with ${farequoteDataViewTestData.suiteTitle}`, function () {

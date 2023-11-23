@@ -141,7 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         before(async () => {
           await esArchiver.loadIfNeeded(testData.archive);
-          await ml.testResources.createIndexPatternIfNeeded(
+          await ml.testResources.createDataViewIfNeeded(
             testData.indexPattern.name,
             testData.indexPattern.timeField
           );
@@ -157,9 +157,9 @@ export default function ({ getService }: FtrProviderContext) {
         after(async () => {
           await ml.api.deleteIndices(cloneDestIndex);
           await ml.api.deleteIndices(testData.job.dest!.index as string);
-          await ml.testResources.deleteIndexPatternByTitle(testData.job.dest!.index as string);
-          await ml.testResources.deleteIndexPatternByTitle(cloneDestIndex);
-          await ml.testResources.deleteIndexPatternByTitle(testData.indexPattern.name);
+          await ml.testResources.deleteDataViewByTitle(testData.job.dest!.index as string);
+          await ml.testResources.deleteDataViewByTitle(cloneDestIndex);
+          await ml.testResources.deleteDataViewByTitle(testData.indexPattern.name);
         });
 
         it('opens the existing job in the data frame analytics job wizard', async () => {
