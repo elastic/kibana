@@ -28,7 +28,7 @@ export default function ({ getService }) {
           createdAt: { type: 'date' },
         },
       };
-      const index = await createIndex(undefined, { mappings });
+      const index = await createIndex(undefined, mappings);
 
       const { body } = await getIndexMapping(index).expect(200);
 
