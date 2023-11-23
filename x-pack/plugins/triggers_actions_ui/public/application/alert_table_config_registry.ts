@@ -28,7 +28,7 @@ export class AlertTableConfigRegistry {
   /**
    * Registers an object type to the type registry
    */
-  public register<T extends object>(objectType: AlertsTableConfigurationRegistry) {
+  public register(objectType: AlertsTableConfigurationRegistry) {
     if (this.has(objectType.id)) {
       throw new Error(
         i18n.translate(
