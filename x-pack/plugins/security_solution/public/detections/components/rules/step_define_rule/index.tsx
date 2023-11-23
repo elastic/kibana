@@ -450,6 +450,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               <>
                 {`Per time period`}
                 <DurationInput
+                  data-test-subj="alertSuppressionDurationInput"
                   durationValueField={groupByDurationValue}
                   durationUnitField={groupByDurationUnit}
                   isDisabled={

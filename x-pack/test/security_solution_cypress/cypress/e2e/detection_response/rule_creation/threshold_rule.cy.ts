@@ -41,13 +41,22 @@ import {
   TAGS_DETAILS,
   THRESHOLD_DETAILS,
   TIMELINE_TEMPLATE_DETAILS,
+  SUPPRESS_FOR_DETAILS,
 } from '../../../screens/rule_details';
 
-import { getDetails, waitForTheRuleToBeExecuted } from '../../../tasks/rule_details';
+import {
+  getDetails,
+  waitForTheRuleToBeExecuted,
+  assertDetailsNotExist,
+} from '../../../tasks/rule_details';
 import { expectNumberOfRules, goToRuleDetailsOf } from '../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../tasks/common';
 import {
   createAndEnableRule,
+  createRuleWithoutEnabling,
+  fillAboutRuleMinimumAndContinue,
+  enablesAndPopulatesThresholdSuppression,
+  skipScheduleRuleAction,
   fillAboutRuleAndContinue,
   fillDefineThresholdRuleAndContinue,
   fillScheduleRuleAndContinue,
@@ -117,6 +126,7 @@ describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
         'have.text',
         `Results aggregated by ${rule.threshold.field} >= ${rule.threshold.value}`
       );
+      assertDetailsNotExist(SUPPRESS_FOR_DETAILS);
     });
     cy.get(SCHEDULE_DETAILS).within(() => {
       getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
@@ -129,5 +139,22 @@ describe('Threshold rules', { tags: ['@ess', '@serverless'] }, () => {
 
     cy.get(ALERTS_COUNT).should(($count) => expect(+$count.text().split(' ')[0]).to.be.lt(100));
     cy.get(ALERT_GRID_CELL).contains(rule.name);
+  });
+
+  it('Creates a new threshold rule with suppression enabled', () => {
+    selectThresholdRuleType();
+
+    enablesAndPopulatesThresholdSuppression(5, 'h');
+    fillDefineThresholdRuleAndContinue(rule);
+
+    fillAboutRuleMinimumAndContinue(rule);
+    skipScheduleRuleAction();
+    createRuleWithoutEnabling();
+    openRuleManagementPageViaBreadcrumbs();
+    goToRuleDetailsOf(rule.name);
+
+    cy.get(DEFINITION_DETAILS).within(() => {
+      getDetails(SUPPRESS_FOR_DETAILS).should('have.text', '5h');
+    });
   });
 });
