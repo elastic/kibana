@@ -357,8 +357,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
   }, [ruleType, previousRuleType, getFields]);
 
   /**
-   * threshold rule suppression is limited to:
-   * 2. only time interval suppression mode is available
+   * for threshold rule suppression only time interval suppression mode is available
    */
   useEffect(() => {
     if (isThresholdRule) {
@@ -933,19 +932,15 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
             </>
           </RuleTypeEuiFormRow>
 
-          <EuiSpacer size="s" />
-          <RuleTypeEuiFormRow
-            label={''}
-            $isVisible={isSuppressionEnabled && isThresholdRule}
-            fullWidth
-          >
+          <EuiSpacer size="m" />
+          <RuleTypeEuiFormRow $isVisible={isSuppressionEnabled && isThresholdRule} fullWidth>
             <CommonUseField
               path="enableThresholdSuppression"
               componentProps={{
                 idAria: 'detectionEngineStepDefineRuleThresholdEnableSuppression',
                 'data-test-subj': 'detectionEngineStepDefineRuleThresholdEnableSuppression',
                 euiFieldProps: {
-                  label: `Suppress alerts for threshold fields: ${thresholdFields?.join(', ')}`,
+                  label: i18n.getEnableThresholdSuppressionLabel(thresholdFields),
                 },
               }}
             />

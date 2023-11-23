@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 export const CUSTOM_QUERY_REQUIRED = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customQueryFieldRequiredError',
@@ -192,3 +194,19 @@ export const GROUP_BY_FIELD_LICENSE_WARNING = i18n.translate(
     defaultMessage: 'Alert suppression is enabled with Platinum license or above',
   }
 );
+
+export const getEnableThresholdSuppressionLabel = (fields: string[] | undefined) =>
+  fields?.length ? (
+    <FormattedMessage
+      id="xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionForFieldsLabel"
+      defaultMessage="Suppress alerts by selected fields: {fieldsString} (Technical Preview)"
+      values={{ fieldsString: <strong>{fields.join(', ')}</strong> }}
+    />
+  ) : (
+    i18n.translate(
+      'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.enableThresholdSuppressionLabel',
+      {
+        defaultMessage: 'Suppress alerts (Technical Preview)',
+      }
+    )
+  );
