@@ -67,7 +67,16 @@ export const BreakdownFieldSelector = ({
   return (
     <EuiToolTip
       position="top"
-      content={fieldPopoverDisabled ? undefined : breakdown.field?.displayName}
+      content={
+        fieldPopoverDisabled
+          ? undefined
+          : i18n.translate('unifiedHistogram.breakdownByTooltip', {
+              defaultMessage: 'Break down by: {field}',
+              values: {
+                field: breakdown.field?.displayName,
+              },
+            })
+      }
       anchorProps={{ css: breakdownCss }}
     >
       <EuiComboBox

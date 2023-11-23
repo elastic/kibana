@@ -35,6 +35,7 @@ import type {
 } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { SuggestionSelector } from './suggestion_selector';
+import { TimeIntervalSelector } from './time_interval_selector';
 import { useTotalHits } from './hooks/use_total_hits';
 import { useRequestParams } from './hooks/use_request_params';
 import { useChartStyles } from './hooks/use_chart_styles';
@@ -316,6 +317,11 @@ export function Chart({
               />
             )}
           </EuiFlexItem>
+          {chartVisible && !isPlainRecord && !!onTimeIntervalChange && (
+            <EuiFlexItem grow={false}>
+              <TimeIntervalSelector chart={chart} onTimeIntervalChange={onTimeIntervalChange} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem>
             {chartVisible && breakdown && (
               <BreakdownFieldSelector
