@@ -7,11 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 
-import {
-  AgentPolicy,
-  SetupTechnology,
-  NewPackagePolicyInput,
-} from '@kbn/fleet-plugin/common/types';
+import type { AgentPolicy, NewPackagePolicyInput } from '@kbn/fleet-plugin/public';
+import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
   EuiAccordion,
