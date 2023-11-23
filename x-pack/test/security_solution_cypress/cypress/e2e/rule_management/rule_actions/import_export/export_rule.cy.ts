@@ -7,14 +7,14 @@
 
 import path from 'path';
 
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { expectedExportedRule, getNewRule } from '../../../../../objects/rule';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { expectedExportedRule, getNewRule } from '../../../../objects/rule';
 import {
   TOASTER_BODY,
   MODAL_CONFIRMATION_BODY,
   MODAL_CONFIRMATION_BTN,
   TOASTER,
-} from '../../../../../screens/alerts_detection_rules';
+} from '../../../../screens/alerts_detection_rules';
 import {
   filterByElasticRules,
   selectAllRules,
@@ -22,25 +22,22 @@ import {
   exportRule,
   importRules,
   expectManagementTableRules,
-} from '../../../../../tasks/alerts_detection_rules';
-import { bulkExportRules } from '../../../../../tasks/rules_bulk_actions';
-import {
-  createExceptionList,
-  deleteExceptionList,
-} from '../../../../../tasks/api_calls/exceptions';
-import { getExceptionList } from '../../../../../objects/exception';
-import { createRule } from '../../../../../tasks/api_calls/rules';
-import { resetRulesTableState } from '../../../../../tasks/common';
-import { login } from '../../../../../tasks/login';
-import { visit } from '../../../../../tasks/navigation';
+} from '../../../../tasks/alerts_detection_rules';
+import { bulkExportRules } from '../../../../tasks/rules_bulk_actions';
+import { createExceptionList, deleteExceptionList } from '../../../../tasks/api_calls/exceptions';
+import { getExceptionList } from '../../../../objects/exception';
+import { createRule } from '../../../../tasks/api_calls/rules';
+import { resetRulesTableState } from '../../../../tasks/common';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 import {
   createAndInstallMockedPrebuiltRules,
   getAvailablePrebuiltRulesCount,
   preventPrebuiltRulesPackageInstallation,
-} from '../../../../../tasks/api_calls/prebuilt_rules';
-import { createRuleAssetSavedObject } from '../../../../../helpers/rules';
+} from '../../../../tasks/api_calls/prebuilt_rules';
+import { createRuleAssetSavedObject } from '../../../../helpers/rules';
 
 const EXPORTED_RULES_FILENAME = 'rules_export.ndjson';
 const exceptionList = getExceptionList();

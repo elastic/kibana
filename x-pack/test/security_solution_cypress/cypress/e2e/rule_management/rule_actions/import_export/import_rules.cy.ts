@@ -5,18 +5,18 @@
  * 2.0.
  */
 
-import { TOASTER } from '../../../../../screens/alerts_detection_rules';
+import { TOASTER } from '../../../../screens/alerts_detection_rules';
 import {
   expectManagementTableRules,
   importRules,
   importRulesWithOverwriteAll,
-} from '../../../../../tasks/alerts_detection_rules';
-import { deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
-import { deleteExceptionList } from '../../../../../tasks/api_calls/exceptions';
-import { login } from '../../../../../tasks/login';
-import { visit } from '../../../../../tasks/navigation';
+} from '../../../../tasks/alerts_detection_rules';
+import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
+import { deleteExceptionList } from '../../../../tasks/api_calls/exceptions';
+import { login } from '../../../../tasks/login';
+import { visit } from '../../../../tasks/navigation';
 
-import { RULES_MANAGEMENT_URL } from '../../../../../urls/rules_management';
+import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
 const RULES_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_rules.ndjson';
 const IMPORTED_EXCEPTION_ID = 'b8dfd17f-1e11-41b0-ae7e-9e7f8237de49';
 

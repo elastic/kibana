@@ -7,43 +7,40 @@
 
 import { omit } from 'lodash';
 import { PerformRuleInstallationResponseBody } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { generateEvent } from '../../../../objects/event';
-import { createDocument, deleteDataStream } from '../../../../tasks/api_calls/elasticsearch';
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
-import { INTEGRATION_LINK, INTEGRATION_STATUS } from '../../../../screens/rule_details';
+import { generateEvent } from '../../../objects/event';
+import { createDocument, deleteDataStream } from '../../../tasks/api_calls/elasticsearch';
+import { createRuleAssetSavedObject } from '../../../helpers/rules';
+import { INTEGRATION_LINK, INTEGRATION_STATUS } from '../../../screens/rule_details';
 import {
   INTEGRATIONS_POPOVER,
   INTEGRATIONS_POPOVER_TITLE,
   RULE_NAME,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../../screens/alerts_detection_rules';
 import {
   installPrebuiltRuleAssets,
   installAllPrebuiltRulesRequest,
   SAMPLE_PREBUILT_RULE,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { cleanFleet } from '../../../../tasks/api_calls/fleet';
+} from '../../../tasks/api_calls/prebuilt_rules';
+import { cleanFleet } from '../../../tasks/api_calls/fleet';
 import {
   disableRelatedIntegrations,
   enableRelatedIntegrations,
-} from '../../../../tasks/api_calls/kibana_advanced_settings';
-import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import { login } from '../../../../tasks/login';
-import { visitRulesManagementTable } from '../../../../tasks/rules_management';
-import { waitForAlertsToPopulate } from '../../../../tasks/create_new_rule';
+} from '../../../tasks/api_calls/kibana_advanced_settings';
+import { deleteAlertsAndRules } from '../../../tasks/api_calls/common';
+import { login } from '../../../tasks/login';
+import { visitRulesManagementTable } from '../../../tasks/rules_management';
+import { waitForAlertsToPopulate } from '../../../tasks/create_new_rule';
 import {
   installIntegrations,
   PackagePolicyWithoutAgentPolicyId,
-} from '../../../../tasks/api_calls/integrations';
-import {
-  disableAutoRefresh,
-  openIntegrationsPopover,
-} from '../../../../tasks/alerts_detection_rules';
-import { fetchRuleAlerts } from '../../../../tasks/api_calls/alerts';
+} from '../../../tasks/api_calls/integrations';
+import { disableAutoRefresh, openIntegrationsPopover } from '../../../tasks/alerts_detection_rules';
+import { fetchRuleAlerts } from '../../../tasks/api_calls/alerts';
 import {
   enablesRule,
   visitRuleDetailsPage,
   waitForPageToBeLoaded,
-} from '../../../../tasks/rule_details';
+} from '../../../tasks/rule_details';
 
 describe('Related integrations', { tags: ['@ess', '@serverless', '@brokenInServerlessQA'] }, () => {
   const DATA_STREAM_NAME = 'logs-related-integrations-test';

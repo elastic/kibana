@@ -5,25 +5,25 @@
  * 2.0.
  */
 
-import { createRuleAssetSavedObject } from '../../../../helpers/rules';
+import { createRuleAssetSavedObject } from '../../../helpers/rules';
 import {
   SELECTED_RULES_NUMBER_LABEL,
   SELECT_ALL_RULES_BTN,
   SELECT_ALL_RULES_ON_PAGE_CHECKBOX,
-} from '../../../../screens/alerts_detection_rules';
+} from '../../../screens/alerts_detection_rules';
 import {
   disableAutoRefresh,
   selectRulesByName,
   unselectRulesByName,
   waitForPrebuiltDetectionRulesToBeLoaded,
-} from '../../../../tasks/alerts_detection_rules';
+} from '../../../tasks/alerts_detection_rules';
 import {
   getAvailablePrebuiltRulesCount,
   createAndInstallMockedPrebuiltRules,
-} from '../../../../tasks/api_calls/prebuilt_rules';
-import { login } from '../../../../tasks/login';
-import { visit } from '../../../../tasks/navigation';
-import { RULES_MANAGEMENT_URL } from '../../../../urls/rules_management';
+} from '../../../tasks/api_calls/prebuilt_rules';
+import { login } from '../../../tasks/login';
+import { visit } from '../../../tasks/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
 const RULE_1 = createRuleAssetSavedObject({
   name: 'Test rule 1',
