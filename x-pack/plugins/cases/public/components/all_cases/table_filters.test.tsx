@@ -355,7 +355,7 @@ describe('CasesTableFilters ', () => {
       expect(onFilterChanged).toBeCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
         customFields: {
-          toggleKey: {
+          [customFieldKey]: {
             type: 'toggle',
             options: ['on'],
           },
@@ -374,7 +374,7 @@ describe('CasesTableFilters ', () => {
       expect(onFilterChanged).toBeCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
         customFields: {
-          toggleKey: {
+          [customFieldKey]: {
             type: 'toggle',
             options: ['off'],
           },
@@ -388,7 +388,7 @@ describe('CasesTableFilters ', () => {
         filterOptions: {
           ...props.filterOptions,
           customFields: {
-            toggleKey: {
+            [customFieldKey]: {
               type: CustomFieldTypes.TOGGLE,
               options: ['on'],
             },
@@ -405,9 +405,43 @@ describe('CasesTableFilters ', () => {
       expect(onFilterChanged).toHaveBeenCalledWith({
         ...DEFAULT_FILTER_OPTIONS,
         customFields: {
-          toggleKey: {
+          [customFieldKey]: {
             type: 'toggle',
             options: ['on', 'off'],
+          },
+        },
+      });
+    });
+
+    it('should reset the selected options when a custom field filter is deactivated', async () => {
+      const previousState = [{ key: uiCustomFieldKey, isActive: true }];
+      localStorage.setItem(
+        'testAppId.cases.list.tableFiltersConfig',
+        JSON.stringify(previousState)
+      );
+      const customProps = {
+        ...props,
+        filterOptions: {
+          ...props.filterOptions,
+          customFields: {
+            [customFieldKey]: {
+              type: CustomFieldTypes.TOGGLE,
+              options: ['on'],
+            },
+          },
+        },
+      };
+      appMockRender.render(<CasesTableFilters {...customProps} />);
+
+      userEvent.click(await screen.findByRole('button', { name: 'More' }));
+      userEvent.click(await screen.findByRole('option', { name: 'Toggle' }));
+
+      expect(onFilterChanged).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        customFields: {
+          [customFieldKey]: {
+            type: CustomFieldTypes.TOGGLE,
+            options: [],
           },
         },
       });
@@ -520,6 +554,25 @@ describe('CasesTableFilters ', () => {
       const orderedFilterLabels = ['Severity', 'Tags', 'Categories', 'More'];
       orderedFilterLabels.forEach((label, index) => {
         expect(allFilters[index]).toHaveTextContent(label);
+      });
+    });
+
+    it('should reset the selected options when a system field filter is deactivated', async () => {
+      const customProps = {
+        ...props,
+        filterOptions: {
+          ...props.filterOptions,
+          status: [CaseStatuses.open],
+        },
+      };
+      appMockRender.render(<CasesTableFilters {...customProps} />);
+
+      userEvent.click(await screen.findByRole('button', { name: 'More' }));
+      userEvent.click(await screen.findByRole('option', { name: 'Status' }));
+
+      expect(onFilterChanged).toHaveBeenCalledWith({
+        ...DEFAULT_FILTER_OPTIONS,
+        status: [],
       });
     });
 

@@ -56,7 +56,7 @@ export const getSystemFilterConfig = ({
       label: i18n.SEVERITY,
       isActive: true,
       isAvailable: true,
-      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
         onChange({ filterId: 'severity', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
@@ -68,7 +68,7 @@ export const getSystemFilterConfig = ({
       label: i18n.STATUS,
       isActive: true,
       isAvailable: true,
-      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
         onChange({ filterId: 'status', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
@@ -87,7 +87,8 @@ export const getSystemFilterConfig = ({
       label: i18n.ASSIGNEES,
       isActive: true,
       isAvailable: caseAssignmentAuthorized && !isSelectorView,
-      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        // FIXME: not working
         onChange({ filterId: 'assignee', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => {
@@ -106,7 +107,7 @@ export const getSystemFilterConfig = ({
       label: i18n.TAGS,
       isActive: true,
       isAvailable: true,
-      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
         onChange({ filterId: 'tags', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
@@ -126,7 +127,7 @@ export const getSystemFilterConfig = ({
       label: i18n.CATEGORIES,
       isActive: true,
       isAvailable: true,
-      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
         onChange({ filterId: 'category', selectedOptionKeys: [] });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
@@ -146,10 +147,9 @@ export const getSystemFilterConfig = ({
       label: i18n.SOLUTION,
       isActive: true,
       isAvailable: availableSolutions.length > 1,
-      onDeactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
-        if (availableSolutions.length > 1) {
-          onChange({ filterId: 'owner', selectedOptionKeys: [] });
-        }
+      deactivate: ({ onChange }: { onChange: FilterChangeHandler }) => {
+        // FIXME: test this
+        onChange({ filterId: 'owner', selectedOptionKeys: availableSolutions });
       },
       render: ({ filterOptions, onChange }: FilterConfigRenderParams) => (
         <SolutionFilter

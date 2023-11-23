@@ -62,6 +62,7 @@ export const useFilterConfig = ({
 
   const onChange = ({ selectedOptionKeys }: { filterId: string; selectedOptionKeys: string[] }) => {
     const newFilterVisibilityMap = new Map(filterVisibilityMap);
+    const deactivatedFilters: string[] = [];
 
     newFilterVisibilityMap.forEach(({ key, isActive }) => {
       if (selectedOptionKeys.includes(key)) {
@@ -70,22 +71,29 @@ export const useFilterConfig = ({
           newFilterVisibilityMap.set(key, { key, isActive: true });
         }
       } else {
-        const filter = filters.get(key);
-        if (filter) {
-          filter.onDeactivate({ onChange: onFilterOptionChange });
-        }
+        deactivatedFilters.push(key);
         newFilterVisibilityMap.set(key, { key, isActive: false });
       }
     });
 
-    filters.forEach(({ key, isActive }) => {
+    filters.forEach(({ key }) => {
       if (!newFilterVisibilityMap.has(key)) {
+        const isActive = selectedOptionKeys.includes(key);
+        if (!isActive) {
+          deactivatedFilters.push(key);
+        }
         newFilterVisibilityMap.set(key, {
           key,
-          isActive: selectedOptionKeys.includes(key),
+          isActive,
         });
       }
     });
+
+    deactivatedFilters
+      .filter((key) => filters.has(key))
+      .forEach((key) => {
+        (filters.get(key) as FilterConfig).deactivate({ onChange: onFilterOptionChange });
+      });
 
     setFilterVisibilityMap(newFilterVisibilityMap);
   };

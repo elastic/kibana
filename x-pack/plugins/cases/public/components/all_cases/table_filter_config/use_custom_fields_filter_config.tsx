@@ -32,7 +32,7 @@ export const useCustomFieldsFilterConfig = () => {
           isActive: false,
           isAvailable: type === CustomFieldTypes.TOGGLE,
           label: buttonLabel,
-          onDeactivate: ({ onChange }) => {
+          deactivate: ({ onChange }) => {
             onChange({
               filterId: fieldKey,
               selectedOptionKeys: [],
