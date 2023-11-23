@@ -12,7 +12,7 @@ import { DataStreamStat } from '../../common/data_streams_stats/data_stream_stat
 import { getDatasetQualitTableColumns } from '../components/dataset_quality/columns';
 import { useDatasetQualityContext } from '../components/dataset_quality/context';
 
-const DEFAULT_SORT_FIELD = 'name';
+const DEFAULT_SORT_FIELD = 'title';
 const DEFAULT_SORT_DIRECTION = 'desc';
 type DIRECTION = 'asc' | 'desc';
 type SORT_FIELD = keyof DataStreamStat;

@@ -50,7 +50,7 @@ export let callDatasetQualityApi: DatasetQualityClient = () => {
 };
 
 export function createCallDatasetQualityApi(core: CoreStart | CoreSetup) {
-  callDatasetQualityApi = ((endpoint: string, options) => {
+  callDatasetQualityApi = ((endpoint, options) => {
     const { params } = options as unknown as {
       params?: Partial<Record<string, any>>;
     };
