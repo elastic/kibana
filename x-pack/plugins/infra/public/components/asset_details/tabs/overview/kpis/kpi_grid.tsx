@@ -25,14 +25,12 @@ export const KPIGrid = ({ assetName, dataView, dateRange }: Props) => {
 
   const charts = useMemo(
     () =>
-      (dataView
-        ? inventoryModel.metrics.dashboards?.kpi.get({
-            metricsDataView: dataView,
-            options: {
-              backgroundColor: euiTheme.colors.lightestShade,
-            },
-          }).charts
-        : []) ?? [],
+      inventoryModel.metrics.dashboards?.kpi.get({
+        metricsDataView: dataView,
+        options: {
+          backgroundColor: euiTheme.colors.lightestShade,
+        },
+      }).charts ?? [],
     [dataView, euiTheme.colors.lightestShade, inventoryModel.metrics.dashboards?.kpi]
   );
   return (

@@ -24,7 +24,7 @@ type ChartByFormula<TLayer extends LayerModel> = Record<keyof typeof formulas, C
 
 interface CreateBasicChartBase<TType extends ChartTypes> {
   formulaIds: Array<keyof typeof formulas>;
-  dataView: DataView;
+  dataView?: DataView;
   visualizationType: TType;
   extra?: {
     options?: TType extends typeof XY_ID ? XYLayerOptions : MetricLayerOptions;

@@ -24,8 +24,8 @@ export const assetDetails = {
     metricsDataView,
     logsDataView,
   }: {
-    metricsDataView: DataView;
-    logsDataView: DataView;
+    metricsDataView?: DataView;
+    logsDataView?: DataView;
   }) => {
     const commonParams: Partial<ChartModel<XYLayerModel>> = {
       visualOptions: {

@@ -19,7 +19,7 @@ export const kpi = {
     metricsDataView,
     options,
   }: {
-    metricsDataView: DataView;
+    metricsDataView?: DataView;
     options?: MetricLayerOptions;
   }) => {
     const { cpuUsage, diskUsage, memoryUsage, normalizedLoad1m } = createBasicCharts({

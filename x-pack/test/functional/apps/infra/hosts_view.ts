@@ -397,7 +397,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           { metric: 'cpuUsage', value: '0.8%' },
           { metric: 'normalizedLoad1m', value: '0.3%' },
           { metric: 'memoryUsage', value: '16.8%' },
-          { metric: 'diskSpaceUsage', value: '17.1%' },
+          { metric: 'diskUsage', value: '17.1%' },
         ].forEach(({ metric, value }) => {
           it(`${metric} tile should show ${value}`, async () => {
             await retry.try(async () => {
@@ -552,7 +552,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               { metric: 'cpuUsage', value: '0.8%' },
               { metric: 'normalizedLoad1m', value: '0.2%' },
               { metric: 'memoryUsage', value: '16.3%' },
-              { metric: 'diskSpaceUsage', value: '16.9%' },
+              { metric: 'diskUsage', value: '16.9%' },
             ].map(async ({ metric, value }) => {
               await retry.try(async () => {
                 const tileValue = await pageObjects.infraHostsView.getKPITileValue(metric);

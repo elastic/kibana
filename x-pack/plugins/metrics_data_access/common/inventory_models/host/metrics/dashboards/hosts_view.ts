@@ -11,7 +11,7 @@ import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
 export const hostsView = {
-  get: ({ metricsDataView }: { metricsDataView: DataView }) => {
+  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
     const commonParams: Partial<ChartModel<XYLayerModel>> = {
       visualOptions: {
         showDottedLine: true,
@@ -37,6 +37,7 @@ export const hostsView = {
       diskIORead,
       diskIOWrite,
       diskReadThroughput,
+      diskWriteThroughput,
       rx,
       tx,
     } = createBasicCharts({
@@ -51,6 +52,7 @@ export const hostsView = {
         'diskIORead',
         'diskIOWrite',
         'diskReadThroughput',
+        'diskWriteThroughput',
         'rx',
         'tx',
       ],
@@ -89,6 +91,7 @@ export const hostsView = {
         diskIORead,
         diskIOWrite,
         diskReadThroughput,
+        diskWriteThroughput,
         rx,
         tx,
       ],

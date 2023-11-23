@@ -11,7 +11,7 @@ import { createDashboardModel } from '../../../create_dashboard_model';
 import { formulas } from '../../../kubernetes/node/metrics';
 
 export const assetDetailsKubernetesNode = {
-  get: ({ metricsDataView }: { metricsDataView: DataView }) => {
+  get: ({ metricsDataView }: { metricsDataView?: DataView }) => {
     const commonParams: Partial<ChartModel<XYLayerModel>> = {
       visualOptions: {
         showDottedLine: true,

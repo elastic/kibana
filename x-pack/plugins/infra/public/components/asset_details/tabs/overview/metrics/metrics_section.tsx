@@ -29,18 +29,16 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
   const model = findInventoryModel('host');
 
   const dashboards = useMemo(
-    () =>
-      metricsDataView && logsDataView
-        ? {
-            host: model.metrics.dashboards?.assetDetails.get({
-              metricsDataView,
-              logsDataView,
-            }),
-            kubernetes: model.metrics.dashboards?.assetDetailsKubernetesNode.get({
-              metricsDataView,
-            }),
-          }
-        : null,
+    () => ({
+      hosts: model.metrics.dashboards?.assetDetails.get({
+        metricsDataView,
+        logsDataView,
+      }),
+      kubernetes: model.metrics.dashboards?.assetDetailsKubernetesNode.get({
+        metricsDataView,
+      }),
+    }),
+
     [
       logsDataView,
       metricsDataView,
@@ -56,7 +54,7 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
           assetName={assetName}
           dateRange={dateRange}
           data-test-subj="infraAssetDetailsHostMetricsChart"
-          charts={dashboards?.host?.charts ?? []}
+          charts={dashboards.hosts?.charts ?? []}
           filterFieldName={model.fields.name}
         />
       </Section>
@@ -65,7 +63,7 @@ export const MetricsSection = ({ assetName, metricsDataView, logsDataView, dateR
           assetName={assetName}
           dateRange={dateRange}
           data-test-subj="infraAssetDetailsKubernetesMetricsChart"
-          charts={dashboards?.kubernetes?.charts ?? []}
+          charts={dashboards.kubernetes?.charts ?? []}
           filterFieldName={model.fields.name}
         />
       </Section>
@@ -83,12 +81,10 @@ export const MetricsSectionCompact = ({
 
   const charts = useMemo(
     () =>
-      (metricsDataView && logsDataView
-        ? model.metrics.dashboards?.assetDetailsFlyout.get({
-            metricsDataView,
-            logsDataView,
-          }).charts
-        : []) ?? [],
+      model.metrics.dashboards?.assetDetailsFlyout.get({
+        metricsDataView,
+        logsDataView,
+      }).charts ?? [],
     [metricsDataView, logsDataView, model.metrics.dashboards?.assetDetailsFlyout]
   );
 

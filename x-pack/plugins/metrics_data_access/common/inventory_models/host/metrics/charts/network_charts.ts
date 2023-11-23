@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { DataView } from '@kbn/data-views-plugin/common';
 import { i18n } from '@kbn/i18n';
-import { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
 import { formulas } from '../formulas';
+import type { ChartArgs } from './types';
 
 export const rxTx = {
-  get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
+  get: ({ dataView }: ChartArgs): ChartModel<XYLayerModel> => ({
     id: 'rxTx',
     title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
       defaultMessage: 'Network',

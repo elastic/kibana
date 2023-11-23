@@ -46,7 +46,7 @@ interface ChartModelBase<TLayer extends LayerModel = LayerModel> {
   title: string;
   layers: TLayer;
   visualizationType: ChartTypes;
-  dataView: DataView;
+  dataView?: DataView;
 }
 
 export type ChartModel<TLayer extends LayerModel = LayerModel> = ChartModelBase<TLayer> &

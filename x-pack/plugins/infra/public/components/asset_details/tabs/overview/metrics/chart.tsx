@@ -24,6 +24,7 @@ export type ChartProps = ChartModel &
   };
 
 export const Chart = ({
+  id,
   filterFieldName,
   dataViewOrigin,
   overrides,
@@ -34,7 +35,7 @@ export const Chart = ({
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
   const { searchSessionId } = useLoadingStateContext();
-  const { 'data-test-subj': dataTestSubj, ...chartProps } = { ...props };
+  const { ['data-test-subj']: dataTestSubj, ...chartProps } = { ...props };
 
   const filters = useMemo(() => {
     return [
@@ -75,7 +76,7 @@ export const Chart = ({
   return (
     <LensChart
       {...chartProps}
-      id={`${props['data-test-subj']}}`}
+      id={`${dataTestSubj}${id}`}
       borderRadius="m"
       dataView={dataView}
       dateRange={dateRange}

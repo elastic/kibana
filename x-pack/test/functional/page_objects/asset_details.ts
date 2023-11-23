@@ -39,7 +39,7 @@ export function AssetDetailsProvider({ getService }: FtrProviderContext) {
     async getAssetDetailsMetricsCharts() {
       const container = await testSubjects.find('infraAssetDetailsHostMetricsChartGrid');
       return container.findAllByCssSelector(
-        '[data-test-subj*="infraAssetHostDetailsMetricsChart"]'
+        '[data-test-subj*="infraAssetDetailsHostMetricsChart"]'
       );
     },
 

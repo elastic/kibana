@@ -37,15 +37,13 @@ export const KPIGrid = () => {
 
   const charts = useMemo(
     () =>
-      (dataView
-        ? model.metrics.dashboards?.kpi.get({
-            metricsDataView: dataView,
-            options: {
-              backgroundColor: euiTheme.colors.lightestShade,
-              ...(subtitle ? { subtitle } : {}),
-            },
-          }).charts
-        : []) ?? [],
+      model.metrics.dashboards?.kpi.get({
+        metricsDataView: dataView,
+        options: {
+          backgroundColor: euiTheme.colors.lightestShade,
+          ...(subtitle ? { subtitle } : {}),
+        },
+      }).charts ?? [],
     [dataView, euiTheme.colors.lightestShade, model.metrics.dashboards?.kpi, subtitle]
   );
 

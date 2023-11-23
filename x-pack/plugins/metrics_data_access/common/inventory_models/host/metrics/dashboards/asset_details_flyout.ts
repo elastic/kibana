@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { DataView } from '@kbn/data-views-plugin/common';
-import { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
+import type { ChartModel, XYLayerModel } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import {
   createBasicCharts,
@@ -21,8 +21,8 @@ export const assetDetailsFlyout = {
     metricsDataView,
     logsDataView,
   }: {
-    metricsDataView: DataView;
-    logsDataView: DataView;
+    metricsDataView?: DataView;
+    logsDataView?: DataView;
   }) => {
     const commonParams: Partial<ChartModel<XYLayerModel>> = {
       visualOptions: {

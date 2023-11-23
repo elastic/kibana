@@ -7,7 +7,6 @@
 import React from 'react';
 import { EuiFlexItem, EuiFlexGrid } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
-// import { XY_MISSING_VALUE_DOTTED_LINE_CONFIG } from '../../../../../common/visualizations/lens/dashboards';
 import type { ChartModel } from '@kbn/lens-embeddable-utils';
 import { Chart } from './chart';
 

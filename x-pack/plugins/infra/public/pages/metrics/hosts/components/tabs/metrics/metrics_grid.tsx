@@ -18,10 +18,7 @@ export const MetricsGrid = () => {
   const { dataView } = useMetricsDataViewContext();
 
   const charts = useMemo(
-    () =>
-      (dataView
-        ? model.metrics.dashboards?.hostsView.get({ metricsDataView: dataView }).charts
-        : []) ?? [],
+    () => model.metrics.dashboards?.hostsView.get({ metricsDataView: dataView }).charts ?? [],
     [dataView, model.metrics.dashboards?.hostsView]
   );
 
