@@ -414,6 +414,7 @@ export class RuleTypeRegistry {
             name,
             minimumLicenseRequired
           ).isValid,
+          fieldsForAAD,
           hasFieldsForAAD: Boolean(fieldsForAAD),
           hasAlertsMappings: !!alerts,
           validLegacyConsumers,
