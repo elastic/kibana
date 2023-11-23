@@ -294,23 +294,36 @@ export type AnomalyAlertSeverityType = ValuesType<
   typeof ANOMALY_ALERT_SEVERITY_TYPES
 >['type'];
 
+export enum ANOMALY_DETECTOR_TYPES {
+  ALL = 'all',
+  LATENCY = 'latency',
+  THROUGHPUT = 'throughput',
+  FAILED_TRANSACTION_RATE = 'failed_transaction_rate',
+}
+
 export const ANOMALY_ALERT_DETECTOR_TYPES = [
   {
-    type: 'latency',
-    label: i18n.translate('xpack.apm.alerts.anomalyConector.latencyLabel', {
+    type: ANOMALY_DETECTOR_TYPES.ALL,
+    label: i18n.translate('xpack.apm.alerts.anomalyDetector.allLabel', {
+      defaultMessage: 'all',
+    }),
+  },
+  {
+    type: ANOMALY_DETECTOR_TYPES.LATENCY,
+    label: i18n.translate('xpack.apm.alerts.anomalyDetector.latencyLabel', {
       defaultMessage: 'latency',
     }),
   },
   {
-    type: 'throughput',
-    label: i18n.translate('xpack.apm.alerts.anomalyConector.throughputLabel', {
+    type: ANOMALY_DETECTOR_TYPES.THROUGHPUT,
+    label: i18n.translate('xpack.apm.alerts.anomalyDetector.throughputLabel', {
       defaultMessage: 'throughput',
     }),
   },
   {
-    type: 'failed_transaction_rate',
+    type: ANOMALY_DETECTOR_TYPES.FAILED_TRANSACTION_RATE,
     label: i18n.translate(
-      'xpack.apm.alerts.anomalyConector.failedTransactionRateLabel',
+      'xpack.apm.alerts.anomalyDetector.failedTransactionRateLabel',
       {
         defaultMessage: 'failed transaction rate',
       }
@@ -318,7 +331,7 @@ export const ANOMALY_ALERT_DETECTOR_TYPES = [
   },
 ];
 
-export type AnomalyAlertConectorType = ValuesType<
+export type AnomalyAlertDetectorType = ValuesType<
   typeof ANOMALY_ALERT_DETECTOR_TYPES
 >['type'];
 

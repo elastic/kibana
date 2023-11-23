@@ -26,13 +26,8 @@ import {
   AnomalySeverity,
   SelectAnomalySeverity,
 } from './select_anomaly_severity';
-import { SelectAnomalyConector } from './select_anomaly_conector';
-
-enum ML_ANOMALY_CONECTOR {
-  LATENCY = 'latency',
-  THROUGHPUT = 'throughput',
-  FAILED_TRANSACTION_RATE = 'failed_transaction_rate',
-}
+import { SelectAnomalyDetector } from './select_anomaly_detector';
+import { ANOMALY_DETECTOR_TYPES } from '../../../../../common/rules/apm_rule_types';
 
 interface AlertParams {
   anomalySeverityType?:
@@ -40,10 +35,11 @@ interface AlertParams {
     | ML_ANOMALY_SEVERITY.MAJOR
     | ML_ANOMALY_SEVERITY.MINOR
     | ML_ANOMALY_SEVERITY.WARNING;
-  anomalyConectorType:
-    | ML_ANOMALY_CONECTOR.LATENCY
-    | ML_ANOMALY_CONECTOR.THROUGHPUT
-    | ML_ANOMALY_CONECTOR.FAILED_TRANSACTION_RATE;
+  anomalyConectorType?:
+    | ANOMALY_DETECTOR_TYPES.ALL
+    | ANOMALY_DETECTOR_TYPES.LATENCY
+    | ANOMALY_DETECTOR_TYPES.THROUGHPUT
+    | ANOMALY_DETECTOR_TYPES.FAILED_TRANSACTION_RATE;
   environment?: string;
   serviceName?: string;
   transactionType?: string;
@@ -75,6 +71,7 @@ export function AnomalyRuleType(props: Props) {
       windowSize: 30,
       windowUnit: TIME_UNITS.MINUTE,
       anomalySeverityType: ML_ANOMALY_SEVERITY.CRITICAL,
+      anomalyDetectorType: ANOMALY_DETECTOR_TYPES.ALL,
       environment: ENVIRONMENT_ALL.value,
     }
   );
@@ -101,15 +98,15 @@ export function AnomalyRuleType(props: Props) {
       serviceName={params.serviceName}
     />,
     <PopoverExpression
-      value={params.anomalySeverityType}
-      title={i18n.translate('xpack.apm.anomalyRuleType.anomalyConector', {
+      value={params.anomalyDetectorType}
+      title={i18n.translate('xpack.apm.anomalyRuleType.anomalyDetector', {
         defaultMessage: 'Metric',
       })}
     >
-      <SelectAnomalyConector
-        value={params.anomalyConectorType}
+      <SelectAnomalyDetector
+        value={params.anomalyDetectorType}
         onChange={(value) => {
-          setRuleParams('anomalyConectorType', value);
+          setRuleParams('anomalyDetectorType', value);
         }}
       />
     </PopoverExpression>,

@@ -29,10 +29,6 @@ import { asyncForEach } from '@kbn/std';
 import { compact } from 'lodash';
 import { getSeverity } from '../../../../../common/anomaly_detection';
 import {
-  ApmMlDetectorType,
-  getApmMlDetectorIndex,
-} from '../../../../../common/anomaly_detection/apm_ml_detectors';
-import {
   PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -58,6 +54,7 @@ import {
 } from '../../register_apm_rule_types';
 import { getServiceGroupFieldsForAnomaly } from './get_service_group_fields_for_anomaly';
 import { anomalyParamsSchema } from '../../../../../common/rules/schema';
+import { getAnomalyDetectorTypeIndex } from './get_anomaly_detector_type_index';
 
 const ruleTypeConfig = RULE_TYPES_CONFIG[ApmRuleType.Anomaly];
 
@@ -190,7 +187,7 @@ export function registerAnomalyRuleType({
                   }),
                   ...termQuery(
                     'detector_index',
-                    getApmMlDetectorIndex(ApmMlDetectorType.txLatency)
+                    getAnomalyDetectorTypeIndex(ruleParams.anomalyDetectorType)
                   ),
                 ] as QueryDslQueryContainer[],
               },

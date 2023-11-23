@@ -8,30 +8,16 @@
 import React from 'react';
 import { EuiSuperSelect } from '@elastic/eui';
 import {
-  AnomalyAlertConectorType,
+  AnomalyAlertDetectorType,
   ANOMALY_ALERT_DETECTOR_TYPES,
 } from '../../../../../common/rules/apm_rule_types';
 
-// export function AnomalySeverity({ type }: { type: AnomalyAlertSeverityType }) {
-//   const selectedOption = ANOMALY_ALERT_SEVERITY_TYPES.find(
-//     (option) => option.type === type
-//   )!;
-//   return (
-//     <EuiHealth
-//       color={getSeverityColor(selectedOption.threshold)}
-//       style={{ lineHeight: 'inherit' }}
-//     >
-//       {selectedOption.label}
-//     </EuiHealth>
-//   );
-// }
-
 interface Props {
-  onChange: (value: AnomalyAlertConectorType) => void;
-  value: AnomalyAlertConectorType;
+  onChange: (value: AnomalyAlertDetectorType) => void;
+  value: AnomalyAlertDetectorType;
 }
 
-export function SelectAnomalyConector({ onChange, value }: Props) {
+export function SelectAnomalyDetector({ onChange, value }: Props) {
   return (
     <EuiSuperSelect
       hasDividers
@@ -42,7 +28,7 @@ export function SelectAnomalyConector({ onChange, value }: Props) {
         dropdownDisplay: option.type,
       }))}
       valueOfSelected={value}
-      onChange={(selectedValue: AnomalyAlertConectorType) => {
+      onChange={(selectedValue: AnomalyAlertDetectorType) => {
         onChange(selectedValue);
       }}
     />
