@@ -238,7 +238,7 @@ export async function handleInstallPackageFailure({
   const latestInstallFailedAttempts = addErrorToLatestFailedAttempts({
     error,
     targetVersion: pkgVersion,
-    timestamp: new Date().toISOString(),
+    createdAt: new Date().toISOString(),
     latestAttempts: installedPkg?.attributes.latest_install_failed_attempts,
   });
 
@@ -289,7 +289,7 @@ export async function handleInstallPackageFailure({
         ? addErrorToLatestFailedAttempts({
             error: e,
             targetVersion: installedPkg.attributes.version,
-            timestamp: installedPkg.attributes.install_started_at,
+            createdAt: installedPkg.attributes.install_started_at,
             latestAttempts: latestInstallFailedAttempts,
           })
         : [],

@@ -7,39 +7,31 @@
 
 import { lt } from 'semver';
 
-const MAX_ATTEMPTS_TO_KEEP = 5;
+import type { InstallFailedAttempt } from '../../../types';
 
-interface FailedInstallAttempts {
-  '@timestamp': string;
-  target_version: string;
-  error: {
-    name: string;
-    message: string;
-    stack?: string;
-  };
-}
+const MAX_ATTEMPTS_TO_KEEP = 5;
 
 export function clearLatestFailedAttempts(
   installedVersion: string,
-  latestAttempts: FailedInstallAttempts[] = []
+  latestAttempts: InstallFailedAttempt[] = []
 ) {
   return latestAttempts.filter((attempt) => lt(installedVersion, attempt.target_version));
 }
 
 export function addErrorToLatestFailedAttempts({
   error,
-  timestamp,
+  createdAt,
   targetVersion,
   latestAttempts = [],
 }: {
-  timestamp: string;
+  createdAt: string;
   targetVersion: string;
   error: Error;
-  latestAttempts?: FailedInstallAttempts[];
-}): FailedInstallAttempts[] {
+  latestAttempts?: InstallFailedAttempt[];
+}): InstallFailedAttempt[] {
   return [
     {
-      '@timestamp': timestamp,
+      created_at: createdAt,
       target_version: targetVersion,
       error: {
         name: error.name,
