@@ -4,21 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Environment } from '../../../common/environment_rt';
 import { ApmDocumentType } from '../../../common/document_type';
 import { RollupInterval } from '../../../common/rollup';
 import { APMEventClient } from './create_es_client/create_apm_event_client';
 import { getConfigForDocumentType } from './create_es_client/document_type';
 import { TimeRangeMetadata } from '../../../common/time_range_metadata';
-import {
-  getDurationSummaryFilter,
-  getDurationLegacyFilter,
-} from './transactions';
-import { SERVICE_NAME } from '../../../common/es_fields/apm';
-import { getEnvironmentEsField } from '../../../common/environment_filter_values';
+import { getDurationLegacyFilter } from './transactions';
 
 const getRequest = ({
   documentType,
@@ -64,8 +58,6 @@ export async function getDocumentSources({
   kuery,
   enableServiceTransactionMetrics,
   enableContinuousRollups,
-  environment,
-  serviceName,
 }: {
   apmEventClient: APMEventClient;
   start: number;
@@ -73,39 +65,18 @@ export async function getDocumentSources({
   kuery: string;
   enableServiceTransactionMetrics: boolean;
   enableContinuousRollups: boolean;
-  environment?: Environment;
-  serviceName?: string;
 }) {
   const currentRange = rangeQuery(start, end);
   const diff = end - start;
   const kql = kqlQuery(kuery);
   const beforeRange = rangeQuery(start - diff, end - diff);
-  const environmentEsField = environment
-    ? getEnvironmentEsField(environment)
-    : {};
-  const serviceFilter: QueryDslQueryContainer[] | undefined = serviceName
-    ? [
-        {
-          term: {
-            [SERVICE_NAME]: serviceName,
-          },
-        },
-        ...(Object.keys(environmentEsField).length > 0
-          ? [
-              {
-                term: environmentEsField,
-              },
-            ]
-          : []),
-      ]
-    : undefined;
-
   const documentTypesToCheck = [
     ...(enableServiceTransactionMetrics
       ? [ApmDocumentType.ServiceTransactionMetric as const]
       : []),
     ApmDocumentType.TransactionMetric as const,
   ];
+
   const sourcesToCheck = documentTypesToCheck.flatMap((documentType) => {
     const docTypeConfig = getConfigForDocumentType(documentType);
 
@@ -117,9 +88,6 @@ export async function getDocumentSources({
       return {
         documentType,
         rollupInterval,
-        meta: {
-          checkSummaryFieldExists: false,
-        },
         before: getRequest({
           documentType,
           rollupInterval,
@@ -134,47 +102,7 @@ export async function getDocumentSources({
     });
   });
 
-  const sourcesToCheckWithSummary = documentTypesToCheck.flatMap(
-    (documentType) => {
-      const docTypeConfig = getConfigForDocumentType(documentType);
-
-      return (
-        enableContinuousRollups
-          ? docTypeConfig.rollupIntervals
-          : [RollupInterval.OneMinute]
-      ).flatMap((rollupInterval) => {
-        return {
-          documentType,
-          rollupInterval,
-          meta: {
-            checkSummaryFieldExists: true,
-          },
-          before: getRequest({
-            documentType,
-            rollupInterval,
-            filters: [
-              ...kql,
-              ...currentRange,
-              getDurationLegacyFilter(serviceFilter),
-            ],
-          }),
-          current: getRequest({
-            documentType,
-            rollupInterval,
-            filters: [
-              ...kql,
-              ...currentRange,
-              getDurationSummaryFilter(serviceFilter),
-            ],
-          }),
-        };
-      });
-    }
-  );
-
-  const allSourcesToCheck = [...sourcesToCheck, ...sourcesToCheckWithSummary];
-
-  const allSearches = allSourcesToCheck.flatMap(({ before, current }) => [
+  const allSearches = sourcesToCheck.flatMap(({ before, current }) => [
     before,
     current,
   ]);
@@ -183,7 +111,7 @@ export async function getDocumentSources({
     await apmEventClient.msearch('get_document_availability', ...allSearches)
   ).responses;
 
-  const checkedSources = allSourcesToCheck.map((source, index) => {
+  const checkedSources = sourcesToCheck.map((source, index) => {
     const { documentType, rollupInterval } = source;
     const responseBefore = allResponses[index * 2];
     const responseAfter = allResponses[index * 2 + 1];
@@ -196,7 +124,6 @@ export async function getDocumentSources({
       rollupInterval,
       hasDocBefore,
       hasDocAfter,
-      checkSummaryFieldExists: source.meta.checkSummaryFieldExists,
     };
   });
 
@@ -205,13 +132,8 @@ export async function getDocumentSources({
   );
 
   const sourcesWithHasDocs = checkedSources.map((checkedSource) => {
-    const {
-      documentType,
-      hasDocAfter,
-      hasDocBefore,
-      rollupInterval,
-      checkSummaryFieldExists,
-    } = checkedSource;
+    const { documentType, hasDocAfter, hasDocBefore, rollupInterval } =
+      checkedSource;
 
     const hasDocBeforeOrAfter = hasDocBefore || hasDocAfter;
 
@@ -222,29 +144,29 @@ export async function getDocumentSources({
     // If we only check before, users with a new deployment will use raw transaction
     // events.
     const hasDocs = hasAnySourceDocBefore ? hasDocBefore : hasDocBeforeOrAfter;
-    const hasOnlyDocsWithSummary = hasDocBefore ? false : hasDocAfter;
 
     return {
       documentType,
       rollupInterval,
-      checkSummaryFieldExists,
-      hasDocs: checkSummaryFieldExists ? hasOnlyDocsWithSummary : hasDocs,
+      hasDocs,
     };
   });
 
-  const sources: TimeRangeMetadata['sources'] = sourcesWithHasDocs
-    .filter((source) => !source.checkSummaryFieldExists)
-    .map((checkedSource) => {
+  const durationSummarySupport = await getDurationSummarySupportByDocType({
+    apmEventClient,
+    documentTypes: documentTypesToCheck,
+    enableContinuousRollups,
+    filters: [...kql, ...currentRange],
+  });
+
+  const sources: TimeRangeMetadata['sources'] = sourcesWithHasDocs.map(
+    (checkedSource) => {
       const { documentType, hasDocs, rollupInterval } = checkedSource;
 
-      const hasDurationSummaryField = sourcesWithHasDocs.some((eSource) => {
-        return (
-          eSource.documentType === documentType &&
-          eSource.rollupInterval === rollupInterval &&
-          eSource.checkSummaryFieldExists &&
-          eSource.hasDocs
-        );
-      });
+      const hasDurationSummaryField =
+        documentType in durationSummarySupport
+          ? durationSummarySupport[documentType][rollupInterval] || false
+          : false;
 
       return {
         documentType,
@@ -252,7 +174,8 @@ export async function getDocumentSources({
         hasDocs,
         hasDurationSummaryField,
       };
-    });
+    }
+  );
 
   return sources.concat({
     documentType: ApmDocumentType.TransactionEvent,
@@ -260,4 +183,52 @@ export async function getDocumentSources({
     hasDocs: true,
     hasDurationSummaryField: false,
   });
+}
+
+async function getDurationSummarySupportByDocType({
+  apmEventClient,
+  documentTypes,
+  filters,
+  enableContinuousRollups,
+}: {
+  apmEventClient: APMEventClient;
+  documentTypes: ApmDocumentType[];
+  filters: estypes.QueryDslQueryContainer[];
+  enableContinuousRollups: boolean;
+}) {
+  const sources = documentTypes.flatMap((documentType) => {
+    const docTypeConfig = getConfigForDocumentType(documentType);
+
+    return (
+      enableContinuousRollups
+        ? docTypeConfig.rollupIntervals
+        : [RollupInterval.OneMinute]
+    ).flatMap((rollupInterval) => ({
+      documentType,
+      rollupInterval,
+      query: getRequest({
+        documentType,
+        rollupInterval,
+        filters: [...filters, getDurationLegacyFilter()],
+      }),
+    }));
+  });
+
+  const allResponses = (
+    await apmEventClient.msearch(
+      'get_duration_summary_support',
+      ...sources.map((source) => source.query)
+    )
+  ).responses;
+
+  return sources.reduce(
+    (acc, curr, index) => ({
+      ...acc,
+      [curr.documentType]: {
+        ...acc[curr.documentType],
+        [curr.rollupInterval]: allResponses[index].hits.total.value === 0,
+      },
+    }),
+    {} as { [key: string]: { [key: string]: boolean } }
+  );
 }

@@ -11,7 +11,7 @@ import { getApmEventClient } from '../../lib/helpers/get_apm_event_client';
 import { getDocumentSources } from '../../lib/helpers/get_document_sources';
 import { getIsUsingServiceDestinationMetrics } from '../../lib/helpers/spans/get_is_using_service_destination_metrics';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { environmentRt, kueryRt, rangeRt } from '../default_api_types';
+import { kueryRt, rangeRt } from '../default_api_types';
 
 export const timeRangeMetadataRoute = createApmServerRoute({
   endpoint: 'GET /internal/apm/time_range_metadata',
@@ -21,10 +21,6 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         useSpanName: toBooleanRt,
         enableServiceTransactionMetrics: toBooleanRt,
         enableContinuousRollups: toBooleanRt,
-      }),
-      t.partial({
-        serviceName: t.string,
-        ...environmentRt.props,
       }),
       kueryRt,
       rangeRt,
@@ -44,8 +40,6 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         kuery,
         enableServiceTransactionMetrics,
         enableContinuousRollups,
-        environment,
-        serviceName,
       },
     } = resources.params;
 
@@ -64,8 +58,6 @@ export const timeRangeMetadataRoute = createApmServerRoute({
         kuery,
         enableServiceTransactionMetrics,
         enableContinuousRollups,
-        environment,
-        serviceName,
       }),
     ]);
 

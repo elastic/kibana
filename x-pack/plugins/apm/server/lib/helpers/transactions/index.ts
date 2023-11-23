@@ -174,34 +174,16 @@ export function isRootTransaction(searchAggregatedTransactions: boolean) {
       };
 }
 
-export function getDurationLegacyFilter(
-  additionalFilters?: QueryDslQueryContainer[]
-): QueryDslQueryContainer {
+export function getDurationLegacyFilter(): QueryDslQueryContainer {
   return {
     bool: {
       must: [
         {
           bool: {
-            filter: [
-              { exists: { field: TRANSACTION_DURATION_HISTOGRAM } },
-              ...(additionalFilters ?? []),
-            ],
+            filter: [{ exists: { field: TRANSACTION_DURATION_HISTOGRAM } }],
             must_not: [{ exists: { field: TRANSACTION_DURATION_SUMMARY } }],
           },
         },
-      ],
-    },
-  };
-}
-
-export function getDurationSummaryFilter(
-  additionalFilters?: QueryDslQueryContainer[]
-): QueryDslQueryContainer {
-  return {
-    bool: {
-      filter: [
-        { exists: { field: TRANSACTION_DURATION_SUMMARY } },
-        ...(additionalFilters ?? []),
       ],
     },
   };

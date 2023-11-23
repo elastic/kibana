@@ -48,15 +48,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             synthtrace,
           });
 
-          // to simulate an APM Server version upgrade scenario
-          await generateTraceDataForService({
-            serviceName: 'synth-java',
-            start: startLegacy,
-            end: start.subtract(1, 'minute'),
-            isLegacy: true,
-            synthtrace,
-          });
-
           await generateTraceDataForService({
             serviceName: 'synth-java',
             start,
@@ -86,7 +77,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(12);
+          expect(res.hits.total.value).to.be(10);
         });
 
         it('ingests transaction metrics without transaction.duration.summary', async () => {
@@ -103,10 +94,10 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           // @ts-expect-error
-          expect(res.hits.total.value).to.be(28);
+          expect(res.hits.total.value).to.be(20);
         });
 
-        it('has transaction.duration.summary field for every document type in the time range for a service', async () => {
+        it('has transaction.duration.summary field for every document type', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
@@ -117,8 +108,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
                 enableServiceTransactionMetrics: true,
                 useSpanName: false,
                 kuery: '',
-                serviceName: 'synth-java',
-                environment: 'production',
               },
             },
           });
@@ -126,39 +115,17 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           const allHasSummaryField = response.body.sources
             .filter(
               (source) =>
-                source.documentType !== ApmDocumentType.TransactionEvent &&
-                source.rollupInterval === RollupInterval.OneMinute
+                source.documentType === ApmDocumentType.TransactionMetric &&
+                source.rollupInterval !== RollupInterval.OneMinute
             )
-            .every((source) => source.hasDurationSummaryField);
+            .every((source) => {
+              return source.hasDurationSummaryField;
+            });
 
           expect(allHasSummaryField).to.eql(true);
         });
 
-        it('does not support transaction.duration.summary when the field is not present in all documents in the time range for a service', async () => {
-          const response = await apmApiClient.readUser({
-            endpoint: 'GET /internal/apm/time_range_metadata',
-            params: {
-              query: {
-                start: startLegacy.toISOString(),
-                end: end.toISOString(),
-                enableContinuousRollups: true,
-                enableServiceTransactionMetrics: true,
-                useSpanName: false,
-                kuery: '',
-                serviceName: 'synth-java',
-                environment: 'production',
-              },
-            },
-          });
-
-          const allHasSummaryField = response.body.sources.every((source) => {
-            return source.hasDurationSummaryField;
-          });
-
-          expect(allHasSummaryField).to.eql(false);
-        });
-
-        it('does not support transaction.duration.summary when the field is not present in all documents in the time range', async () => {
+        it('does not support transaction.duration.summary when the field is not supported by all APM server versions', async () => {
           const response = await apmApiClient.readUser({
             endpoint: 'GET /internal/apm/time_range_metadata',
             params: {
@@ -196,7 +163,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             null,
             null,
             null,
-            null,
           ]);
         });
 
@@ -210,7 +176,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
           });
 
           expect(res.body.currentPeriod.latencyTimeseries.map(({ y }) => y)).to.eql([
-            1000000,
             1000000,
             1000000,
             1000000,
