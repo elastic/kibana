@@ -6149,7 +6149,8 @@
           "install_version",
           "install_started_at",
           "install_source",
-          "verification_status"
+          "verification_status",
+          "latest_install_failed_attempts"
         ]
       },
       "search_result": {

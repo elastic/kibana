@@ -3882,6 +3882,7 @@ components:
         - install_started_at
         - install_source
         - verification_status
+        - latest_install_failed_attempts
     search_result:
       title: Search result
       type: object

@@ -105,3 +105,4 @@ required:
   - install_started_at
   - install_source
   - verification_status
+  - latest_install_failed_attempts
