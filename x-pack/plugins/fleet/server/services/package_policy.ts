@@ -2487,11 +2487,11 @@ async function validateIsNotHostedPolicy(
     throw new Error('Agent policy not found');
   }
 
-  if (agentPolicy.is_managed && !force) {
-    throw new HostedAgentPolicyRestrictionRelatedError(
-      errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
-    );
-  }
+  // if (agentPolicy.is_managed && !force) {
+  //   throw new HostedAgentPolicyRestrictionRelatedError(
+  //     errorMessage ?? `Cannot update integrations of hosted agent policy ${id}`
+  //   );
+  // }
 }
 
 export function sendUpdatePackagePolicyTelemetryEvent(
