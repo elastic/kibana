@@ -14,6 +14,7 @@ import { transformRuleToAlertAction } from '../../../../../../common/detection_e
 import type { InternalRuleUpdate, RuleParams, RuleAlertType } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
 import { typeSpecificSnakeToCamel } from '../../normalization/rule_converters';
+import { migratePrebuiltSchemaOnRuleUpdate } from '../../normalization/prebuilt_rule_schema_migrations';
 
 export interface UpdateRulesOptions {
   rulesClient: RulesClient;
@@ -36,6 +37,14 @@ export const updateRules = async ({
 
   const typeSpecificParams = typeSpecificSnakeToCamel(ruleUpdate);
   const enabled = ruleUpdate.enabled ?? true;
+
+  const isRuleCustomizedDuringUpdate = false;
+
+  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleUpdate({
+    existingParams: existingRule.params,
+    isRuleCustomizedDuringUpdate,
+  });
+
   const newInternalRule: InternalRuleUpdate = {
     name: ruleUpdate.name,
     tags: ruleUpdate.tags ?? [],
@@ -47,8 +56,8 @@ export const updateRules = async ({
       falsePositives: ruleUpdate.false_positives ?? [],
       from: ruleUpdate.from ?? 'now-6m',
       investigationFields: ruleUpdate.investigation_fields,
-      // Unlike the create route, immutable comes from the existing rule here
-      immutable: existingRule.params.immutable,
+      immutable,
+      prebuilt,
       license: ruleUpdate.license,
       outputIndex: ruleUpdate.output_index ?? '',
       timelineId: ruleUpdate.timeline_id,

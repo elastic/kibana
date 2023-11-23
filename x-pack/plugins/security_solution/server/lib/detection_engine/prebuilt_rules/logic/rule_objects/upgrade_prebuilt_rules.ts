@@ -26,13 +26,17 @@ import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_as
  * @param rulesClient Alerting client
  * @param rules The rules to apply the update for
  */
-export const upgradePrebuiltRules = async (rulesClient: RulesClient, rules: PrebuiltRuleAsset[]) =>
+export const upgradePrebuiltRules = async (
+  rulesClient: RulesClient,
+  rules: PrebuiltRuleAsset[],
+  isRuleCustomizedDuringUpgrade = false
+) =>
   withSecuritySpan('upgradePrebuiltRules', async () => {
     const result = await initPromisePool({
       concurrency: MAX_RULES_TO_UPDATE_IN_PARALLEL,
       items: rules,
       executor: async (rule) => {
-        return upgradeRule(rulesClient, rule);
+        return upgradeRule(rulesClient, rule, isRuleCustomizedDuringUpgrade);
       },
     });
 
@@ -48,7 +52,8 @@ export const upgradePrebuiltRules = async (rulesClient: RulesClient, rules: Preb
  */
 const upgradeRule = async (
   rulesClient: RulesClient,
-  rule: PrebuiltRuleAsset
+  rule: PrebuiltRuleAsset,
+  isRuleCustomizedDuringUpdate: boolean
 ): Promise<SanitizedRule<RuleParams>> => {
   const existingRule = await readRules({
     rulesClient,
@@ -59,6 +64,17 @@ const upgradeRule = async (
   if (!existingRule) {
     throw new PrepackagedRulesError(`Failed to find rule ${rule.rule_id}`, 500);
   }
+
+  // When upgrading a prebuilt rule, we need to build the `prebuilt` field
+  // out of the PrebuiltRuleAsset before passing it to createRules or patchRules
+  // For isCustomized, set the value to true if the rule was customized during the current update.
+  // Otherwise, take the existing value from the currently installed value.
+  const isCustomized =
+    (isRuleCustomizedDuringUpdate || existingRule.params.prebuilt?.isCustomized) ?? false;
+  const prebuilt = {
+    isCustomized,
+    elasticUpdateDate: rule.elasticUpdateDate,
+  };
 
   // If we're trying to change the type of a prepackaged rule, we need to delete the old one
   // and replace it with the new rule, keeping the enabled setting, actions, throttle, id,
@@ -71,9 +87,10 @@ const upgradeRule = async (
 
     return createRules({
       rulesClient,
-      immutable: true,
+      isPrebuilt: true,
       params: {
         ...rule,
+        prebuilt,
         // Force the prepackaged rule to use the enabled state from the existing rule,
         // regardless of what the prepackaged rule says
         enabled: existingRule.enabled,
@@ -86,10 +103,12 @@ const upgradeRule = async (
       existingRule,
       nextParams: {
         ...rule,
+        prebuilt,
         // Force enabled to use the enabled state from the existing rule by passing in undefined to patchRules
         enabled: undefined,
         actions: undefined,
       },
+      isRuleCustomizedDuringUpdate,
     });
 
     const updatedRule = await readRules({

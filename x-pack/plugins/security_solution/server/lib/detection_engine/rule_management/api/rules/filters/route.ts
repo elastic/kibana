@@ -9,6 +9,7 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import { validate } from '@kbn/securitysolution-io-ts-utils';
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { IKibanaResponse } from '@kbn/core/server';
+import { KQL_FILTER_PREBUILT_RULES } from '../../../../../../../common/detection_engine/rule_management/rule_filtering';
 import {
   GetRuleManagementFiltersResponse,
   RULE_MANAGEMENT_FILTERS_URL,
@@ -36,12 +37,12 @@ async function fetchRulesCount(rulesClient: RulesClient): Promise<RulesCount> {
     findRules({
       ...DEFAULT_FIND_RULES_COUNT_PARAMS,
       rulesClient,
-      filter: 'alert.attributes.params.immutable: true',
+      filter: KQL_FILTER_PREBUILT_RULES,
     }),
     findRules({
       ...DEFAULT_FIND_RULES_COUNT_PARAMS,
       rulesClient,
-      filter: 'alert.attributes.params.immutable: false',
+      filter: `NOT ${KQL_FILTER_PREBUILT_RULES}`,
     }),
   ]);
 

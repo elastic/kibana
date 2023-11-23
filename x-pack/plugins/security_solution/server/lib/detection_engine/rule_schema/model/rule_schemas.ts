@@ -29,6 +29,7 @@ import type {
   RuleName,
   RuleTagArray,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
+
 import {
   AlertsIndex,
   AlertsIndexNamespace,
@@ -38,6 +39,7 @@ import {
   InvestigationFields,
   InvestigationGuide,
   IsRuleImmutable,
+  Prebuilt,
   MaxSignals,
   RelatedIntegrationArray,
   RequiredFieldArray,
@@ -119,6 +121,7 @@ export const BaseRuleParams = z.object({
   ruleId: RuleSignatureId,
   investigationFields: InvestigationFieldsCombined.optional(),
   immutable: IsRuleImmutable,
+  prebuilt: Prebuilt.optional(),
   license: RuleLicense.optional(),
   outputIndex: AlertsIndex,
   timelineId: TimelineTemplateId.optional(),

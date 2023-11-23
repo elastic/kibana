@@ -21,7 +21,7 @@ export const createPrebuiltRules = (rulesClient: RulesClient, rules: PrebuiltRul
         return createRules({
           rulesClient,
           params: rule,
-          immutable: true,
+          isPrebuilt: true,
           defaultEnabled: false,
         });
       },

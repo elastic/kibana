@@ -150,10 +150,12 @@ export const performRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) =>
             }
           });
 
+          const isRuleCustomizedDuringUpgrade = false;
           // Perform the upgrade
           const { results: updatedRules, errors: installationErrors } = await upgradePrebuiltRules(
             rulesClient,
-            targetRules
+            targetRules,
+            isRuleCustomizedDuringUpgrade
           );
           const ruleErrors = [...fetchErrors, ...installationErrors];
 

@@ -27,6 +27,8 @@ import type {
   RuleCreateProps,
   TypeSpecificCreateProps,
   TypeSpecificResponse,
+  Prebuilt,
+  ElasticUpdateDate,
 } from '../../../../../common/api/detection_engine/model/rule_schema';
 import {
   EqlRulePatchFields,
@@ -85,6 +87,11 @@ import {
 } from '../utils/utils';
 import { createRuleExecutionSummary } from '../../rule_monitoring';
 import type { PrebuiltRuleAsset } from '../../prebuilt_rules';
+import {
+  migratePrebuiltSchemaOnRuleCreation,
+  migratePrebuiltSchemaOnRuleUpdate,
+  normalizePrebuiltSchemaOnRuleRead,
+} from './prebuilt_rule_schema_migrations';
 
 const DEFAULT_FROM = 'now-6m' as const;
 const DEFAULT_TO = 'now' as const;
@@ -421,14 +428,18 @@ export const patchTypeSpecificSnakeToCamel = (
   }
 };
 
+export type PatchAPINextParams = PatchRuleRequestBody & {
+  related_integrations?: RelatedIntegrationArray;
+  required_fields?: RequiredFieldArray;
+  setup?: SetupGuide;
+  prebuilt?: Prebuilt;
+};
+
 // eslint-disable-next-line complexity
 export const convertPatchAPIToInternalSchema = (
-  nextParams: PatchRuleRequestBody & {
-    related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
-  },
-  existingRule: SanitizedRule<RuleParams>
+  nextParams: PatchAPINextParams,
+  existingRule: SanitizedRule<RuleParams>,
+  isRuleCustomizedDuringUpdate = false
 ): InternalRuleUpdate => {
   const typeSpecificParams = patchTypeSpecificSnakeToCamel(nextParams, existingRule.params);
   const existingParams = existingRule.params;
@@ -437,6 +448,12 @@ export const convertPatchAPIToInternalSchema = (
     nextParams.actions?.map((action) => transformRuleToAlertAction(action)) ?? existingRule.actions;
   const throttle = nextParams.throttle ?? transformFromAlertThrottle(existingRule);
   const actions = transformToActionFrequency(alertActions, throttle);
+
+  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleUpdate({
+    nextParams,
+    existingParams,
+    isRuleCustomizedDuringUpdate,
+  });
 
   return {
     name: nextParams.name ?? existingRule.name,
@@ -449,7 +466,8 @@ export const convertPatchAPIToInternalSchema = (
       falsePositives: nextParams.false_positives ?? existingParams.falsePositives,
       investigationFields: nextParams.investigation_fields ?? existingParams.investigationFields,
       from: nextParams.from ?? existingParams.from,
-      immutable: existingParams.immutable,
+      immutable,
+      prebuilt,
       license: nextParams.license ?? existingParams.license,
       outputIndex: nextParams.output_index ?? existingParams.outputIndex,
       timelineId: nextParams.timeline_id ?? existingParams.timelineId,
@@ -482,14 +500,18 @@ export const convertPatchAPIToInternalSchema = (
   };
 };
 
+export type CreateAPIInput = RuleCreateProps & {
+  related_integrations?: RelatedIntegrationArray;
+  required_fields?: RequiredFieldArray;
+  setup?: SetupGuide;
+  prebuilt?: Prebuilt;
+  elasticUpdateDate?: ElasticUpdateDate;
+};
+
 // eslint-disable-next-line complexity
 export const convertCreateAPIToInternalSchema = (
-  input: RuleCreateProps & {
-    related_integrations?: RelatedIntegrationArray;
-    required_fields?: RequiredFieldArray;
-    setup?: SetupGuide;
-  },
-  immutable = false,
+  input: CreateAPIInput,
+  isRuleToCreatePrebuilt = false,
   defaultEnabled = true
 ): InternalRuleCreate => {
   const typeSpecificParams = typeSpecificSnakeToCamel(input);
@@ -497,6 +519,11 @@ export const convertCreateAPIToInternalSchema = (
 
   const alertActions = input.actions?.map((action) => transformRuleToAlertAction(action)) ?? [];
   const actions = transformToActionFrequency(alertActions, input.throttle);
+
+  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleCreation({
+    input,
+    isRuleToCreatePrebuilt,
+  });
 
   return {
     name: input.name,
@@ -512,6 +539,7 @@ export const convertCreateAPIToInternalSchema = (
       investigationFields: input.investigation_fields,
       from: input.from ?? DEFAULT_FROM,
       immutable,
+      prebuilt,
       license: input.license,
       outputIndex: input.output_index ?? '',
       timelineId: input.timeline_id,
@@ -657,6 +685,8 @@ export const typeSpecificCamelToSnake = (
 // TODO: separate out security solution defined common params from Alerting framework common params
 // so we can explicitly specify the return type of this function
 export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
+  const { immutable, prebuilt } = normalizePrebuiltSchemaOnRuleRead(params);
+
   return {
     description: params.description,
     risk_score: params.riskScore,
@@ -685,7 +715,8 @@ export const commonParamsCamelToSnake = (params: BaseRuleParams) => {
     references: params.references,
     version: params.version,
     exceptions_list: params.exceptionsList,
-    immutable: params.immutable,
+    immutable,
+    prebuilt,
     related_integrations: params.relatedIntegrations ?? [],
     required_fields: params.requiredFields ?? [],
     setup: params.setup ?? '',
@@ -763,6 +794,10 @@ export const convertPrebuiltRuleAssetToRuleResponse = (
     created_at: new Date(0).toISOString(),
     created_by: '',
     immutable: true,
+    prebuilt: {
+      isCustomized: false,
+      elasticUpdateDate: prebuiltRuleAsset.elasticUpdateDate,
+    },
     revision: 1,
   };
 

@@ -9,6 +9,7 @@ import * as z from 'zod';
 import {
   RelatedIntegrationArray,
   RequiredFieldArray,
+  ElasticUpdateDate,
   SetupGuide,
   RuleSignatureId,
   RuleVersion,
@@ -38,5 +39,6 @@ export const PrebuiltRuleAsset = BaseCreateProps.and(TypeSpecificCreateProps).an
     related_integrations: RelatedIntegrationArray.optional(),
     required_fields: RequiredFieldArray.optional(),
     setup: SetupGuide.optional(),
+    elasticUpdateDate: ElasticUpdateDate.optional(),
   })
 );

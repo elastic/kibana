@@ -12,6 +12,8 @@ import type { SanitizedRule } from '@kbn/alerting-plugin/common';
 import { SERVER_APP_ID } from '../../../../../../common/constants';
 import type { InternalRuleCreate, RuleParams } from '../../../rule_schema';
 import { transformToActionFrequency } from '../../normalization/rule_actions';
+import { migratePrebuiltSchemaOnRuleCreation } from '../../normalization/prebuilt_rule_schema_migrations';
+import { internalRuleToAPIResponse } from '../../normalization/rule_converters';
 
 const DUPLICATE_TITLE = i18n.translate(
   'xpack.securitySolution.detectionEngine.rules.cloneRule.duplicateTitle',
@@ -28,13 +30,17 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
   // Generate a new static ruleId
   const ruleId = uuidv4();
 
-  // If it's a prebuilt rule, reset Related Integrations, Required Fields and Setup Guide.
-  // We do this because for now we don't allow the users to edit these fields for custom rules.
-  const isPrebuilt = rule.params.immutable;
-  const relatedIntegrations = isPrebuilt ? [] : rule.params.relatedIntegrations;
-  const requiredFields = isPrebuilt ? [] : rule.params.requiredFields;
-  const setup = isPrebuilt ? '' : rule.params.setup;
+  const isRuleToCreatePrebuilt = Boolean(rule.params.prebuilt) || rule.params.immutable;
+
   const actions = transformToActionFrequency(rule.actions, rule.throttle);
+
+  // Transform rule from internal to API format to pass
+  // it to the migration function with the correct types.
+  const ruleResponse = internalRuleToAPIResponse(rule);
+  const { immutable, prebuilt } = migratePrebuiltSchemaOnRuleCreation({
+    input: ruleResponse,
+    isRuleToCreatePrebuilt,
+  });
 
   return {
     name: `${rule.name} [${DUPLICATE_TITLE}]`,
@@ -43,11 +49,12 @@ export const duplicateRule = async ({ rule }: DuplicateRuleParams): Promise<Inte
     consumer: SERVER_APP_ID,
     params: {
       ...rule.params,
-      immutable: false,
+      immutable,
+      prebuilt,
       ruleId,
-      relatedIntegrations,
-      requiredFields,
-      setup,
+      relatedIntegrations: rule.params.relatedIntegrations ?? [], // now is editable
+      requiredFields: rule.params.requiredFields ?? [], // now is editable
+      setup: rule.params.setup ?? '', // now is editable
       exceptionsList: [],
     },
     schedule: rule.schedule,

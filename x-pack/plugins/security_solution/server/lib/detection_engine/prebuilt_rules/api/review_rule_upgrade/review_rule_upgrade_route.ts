@@ -61,6 +61,7 @@ export const reviewRuleUpgradeRoute = (router: SecuritySolutionPluginRouter) => 
             invariant(ruleVersions != null, 'ruleVersions not found');
             return calculateRuleDiff(ruleVersions);
           });
+          debugger;
 
           const body: ReviewRuleUpgradeResponseBody = {
             stats: calculateRuleStats(ruleDiffCalculationResults),
@@ -99,6 +100,10 @@ const calculateRuleInfos = (results: CalculateRuleDiffResult[]): RuleUpgradeInfo
 
     const targetRule: RuleResponse = {
       ...convertPrebuiltRuleAssetToRuleResponse(targetVersion),
+      prebuilt: {
+        isCustomized: installedCurrentVersion.prebuilt?.isCustomized ?? false,
+        elasticUpdateDate: targetVersion.elasticUpdateDate,
+      },
       id: installedCurrentVersion.id,
       revision: installedCurrentVersion.revision + 1,
       created_at: installedCurrentVersion.created_at,

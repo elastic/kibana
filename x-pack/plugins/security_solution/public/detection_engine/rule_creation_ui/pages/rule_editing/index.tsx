@@ -226,7 +226,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-define-tab',
         id: RuleStep.defineRule,
         name: ruleI18n.DEFINITION,
-        disabled: rule?.immutable,
         content: (
           <div
             style={{
@@ -274,7 +273,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-about-tab',
         id: RuleStep.aboutRule,
         name: ruleI18n.ABOUT,
-        disabled: rule?.immutable,
         content: (
           <div
             style={{
@@ -306,7 +304,6 @@ const EditRulePageComponent: FC<{ rule: RuleResponse }> = ({ rule }) => {
         'data-test-subj': 'edit-rule-schedule-tab',
         id: RuleStep.scheduleRule,
         name: ruleI18n.SCHEDULE,
-        disabled: rule?.immutable,
         content: (
           <div
             style={{

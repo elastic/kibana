@@ -176,6 +176,7 @@ export const importRulesRoute = (
               return false;
             }
           });
+
           const importRules: ImportRulesResponse = {
             success: errorsResp.length === 0,
             success_count: successes.length,

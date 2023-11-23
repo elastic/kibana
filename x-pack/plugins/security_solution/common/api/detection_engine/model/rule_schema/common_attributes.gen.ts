@@ -63,8 +63,32 @@ export const KqlQueryLanguage = z.enum(['kuery', 'lucene']);
 export type KqlQueryLanguageEnum = typeof KqlQueryLanguage.enum;
 export const KqlQueryLanguageEnum = KqlQueryLanguage.enum;
 
+/**
+ * [DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).
+ */
 export type IsRuleImmutable = z.infer<typeof IsRuleImmutable>;
 export const IsRuleImmutable = z.boolean();
+
+/**
+ * Determines whether the prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverge from the base value).
+ */
+export type IsPrebuiltRuleCustomized = z.infer<typeof IsPrebuiltRuleCustomized>;
+export const IsPrebuiltRuleCustomized = z.boolean();
+
+/**
+ * The date and time that the prebuilt rule was last updated by Elastic.
+ */
+export type ElasticUpdateDate = z.infer<typeof ElasticUpdateDate>;
+export const ElasticUpdateDate = z.string().datetime();
+
+/**
+ * Property whose existence  determines whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. Contains information relating to prebuilt rules.
+ */
+export type Prebuilt = z.infer<typeof Prebuilt>;
+export const Prebuilt = z.object({
+  isCustomized: IsPrebuiltRuleCustomized,
+  elasticUpdateDate: ElasticUpdateDate.optional(),
+});
 
 /**
  * Determines whether the rule is enabled.

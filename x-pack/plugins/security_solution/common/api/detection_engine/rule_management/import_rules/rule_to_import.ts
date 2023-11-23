@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import * as z from 'zod';
+import type * as z from 'zod';
 import {
   BaseCreateProps,
   ResponseFields,
   RuleSignatureId,
   TypeSpecificCreateProps,
+  IsRuleImmutable,
+  Prebuilt,
 } from '../../model/rule_schema';
 
 /**
@@ -28,6 +30,7 @@ export type RuleToImportInput = z.input<typeof RuleToImport>;
 export const RuleToImport = BaseCreateProps.and(TypeSpecificCreateProps).and(
   ResponseFields.partial().extend({
     rule_id: RuleSignatureId,
-    immutable: z.literal(false).default(false),
+    immutable: IsRuleImmutable.optional(),
+    prebuilt: Prebuilt.optional(),
   })
 );

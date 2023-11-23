@@ -53,6 +53,27 @@ components:
 
     IsRuleImmutable:
       type: boolean
+      description: '[DEPRECATION WARNING - This field is deprecated and will be removed in a future release. Use the prebuilt field to determine if a rule is an Elastic prebuilt rule or a custom rule.] - Determines whether the rule is immutable (i.e. cannot be modified by the user).'
+
+    IsPrebuiltRuleCustomized:
+      type: boolean
+      description: Determines whether the prebuilt rule has been customized by the user (i.e. any of its fields have been modified and diverge from the base value).
+
+    ElasticUpdateDate:
+      type: string
+      format: date-time
+      description: The date and time that the prebuilt rule was last updated by Elastic.
+
+    Prebuilt:
+      type: object
+      description: Property whose existence  determines whether the rule is an Elastic Prebuilt Rule that can receive upstream updates via Fleet. Contains information relating to prebuilt rules.
+      properties:
+        isCustomized:
+          $ref: '#/components/schemas/IsPrebuiltRuleCustomized'
+        elasticUpdateDate:
+          $ref: '#/components/schemas/ElasticUpdateDate'
+      required:
+        - isCustomized
 
     IsRuleEnabled:
       type: boolean
