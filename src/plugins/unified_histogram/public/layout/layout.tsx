@@ -7,7 +7,7 @@
  */
 
 import { EuiSpacer, useEuiTheme, useIsWithinBreakpoints } from '@elastic/eui';
-import React, { PropsWithChildren, useMemo, useState } from 'react';
+import React, { PropsWithChildren, ReactElement, useMemo, useState } from 'react';
 import { Observable } from 'rxjs';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import { css } from '@emotion/css';
@@ -107,6 +107,10 @@ export interface UnifiedHistogramLayoutProps extends PropsWithChildren<unknown> 
    */
   topPanelHeight?: number;
   /**
+   * Prepend a custom element from the left of the toolbar
+   */
+  prependToToolbar?: ReactElement;
+  /**
    * Disable automatic refetching based on props changes, and instead wait for a `refetch` message
    */
   disableAutoFetching?: boolean;
@@ -193,6 +197,7 @@ export const UnifiedHistogramLayout = ({
   breakdown,
   container,
   topPanelHeight,
+  prependToToolbar,
   disableAutoFetching,
   disableTriggers,
   disabledActions,
@@ -279,6 +284,7 @@ export const UnifiedHistogramLayout = ({
           isPlainRecord={isPlainRecord}
           chart={chart}
           breakdown={breakdown}
+          prependToToolbar={prependToToolbar}
           appendHistogram={<EuiSpacer size="s" />}
           disableAutoFetching={disableAutoFetching}
           disableTriggers={disableTriggers}

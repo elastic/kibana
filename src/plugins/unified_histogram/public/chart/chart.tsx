@@ -59,6 +59,7 @@ export interface ChartProps {
   hits?: UnifiedHistogramHitsContext;
   chart?: UnifiedHistogramChartContext;
   breakdown?: UnifiedHistogramBreakdownContext;
+  prependToToolbar?: ReactElement;
   appendHistogram?: ReactElement;
   disableAutoFetching?: boolean;
   disableTriggers?: LensEmbeddableInput['disableTriggers'];
@@ -97,6 +98,7 @@ export function Chart({
   currentSuggestion,
   allSuggestions,
   isPlainRecord,
+  prependToToolbar,
   appendHistogram,
   disableAutoFetching,
   disableTriggers,
@@ -189,16 +191,7 @@ export function Chart({
     isPlainRecord,
   });
 
-  const {
-    resultCountCss,
-    resultCountInnerCss,
-    resultCountToggleCss,
-    histogramCss,
-    breakdownFieldSelectorGroupCss,
-    breakdownFieldSelectorItemCss,
-    suggestionsSelectorItemCss,
-    chartToolButtonCss,
-  } = useChartStyles(chartVisible);
+  const { chartToolbarCss, histogramCss } = useChartStyles(chartVisible);
 
   const lensAttributesContext = useMemo(
     () =>
@@ -245,7 +238,7 @@ export function Chart({
     isPlainRecord,
   });
 
-  if (!chart || !chartVisible) {
+  if (!chart) {
     return <div data-test-subj="unifiedHistogramChartEmpty" />;
   }
 
@@ -295,102 +288,88 @@ export function Chart({
       gutterSize="none"
       responsive={false}
     >
-      <EuiFlexItem grow={false} css={resultCountCss}>
-        <EuiFlexGroup
-          justifyContent="spaceBetween"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-          css={resultCountInnerCss}
-        >
-          {chart && (
-            <EuiFlexItem css={resultCountToggleCss}>
-              <EuiFlexGroup
-                direction="row"
-                gutterSize="none"
-                responsive={false}
-                justifyContent="flexEnd"
-                css={breakdownFieldSelectorGroupCss}
-              >
-                <EuiFlexItem grow={false}>
-                  <IconButtonGroup
-                    legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
-                      defaultMessage: 'Hide chart',
-                    })}
-                    buttonSize="s"
-                    buttons={[
-                      {
-                        label: i18n.translate('unifiedHistogram.hideChartButton', {
+      <EuiFlexItem grow={false} css={chartToolbarCss}>
+        <EuiFlexGroup direction="row" gutterSize="s" responsive={false} alignItems="center">
+          <EuiFlexItem grow={false}>
+            {prependToToolbar || (
+              <IconButtonGroup
+                legend={i18n.translate('unifiedHistogram.hideChartButtongroupLegend', {
+                  defaultMessage: 'Chart visibility',
+                })}
+                buttonSize="s"
+                buttons={[
+                  {
+                    label: chartVisible
+                      ? i18n.translate('unifiedHistogram.hideChartButton', {
                           defaultMessage: 'Hide chart',
+                        })
+                      : i18n.translate('unifiedHistogram.hideChartButton', {
+                          defaultMessage: 'Show chart',
                         }),
-                        iconType: 'transitionTopOut',
-                        'data-test-subj': 'unifiedHistogramHideChartButton',
-                        onClick: toggleHideChart,
-                      },
-                    ]}
-                  />
-                </EuiFlexItem>
-                {chartVisible && breakdown && (
-                  <EuiFlexItem css={breakdownFieldSelectorItemCss}>
-                    <BreakdownFieldSelector
-                      dataView={dataView}
-                      breakdown={breakdown}
-                      onBreakdownFieldChange={onBreakdownFieldChange}
-                    />
-                  </EuiFlexItem>
-                )}
-                {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
-                  <EuiFlexItem css={suggestionsSelectorItemCss}>
-                    <SuggestionSelector
-                      suggestions={allSuggestions}
-                      activeSuggestion={currentSuggestion}
-                      onSuggestionChange={onSuggestionSelectorChange}
-                    />
-                  </EuiFlexItem>
-                )}
-                {actions.length > 0 && (
-                  <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                    <IconButtonGroup
-                      legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
-                        defaultMessage: 'Chart actions',
-                      })}
-                      buttonSize="s"
-                      buttons={actions}
-                    />
-                  </EuiFlexItem>
-                )}
-                <EuiFlexItem grow={false} css={chartToolButtonCss}>
-                  <EuiPopover
-                    id="unifiedHistogramChartOptions"
-                    button={
-                      <IconButtonGroup
-                        legend={i18n.translate('unifiedHistogram.chartOptionsButton', {
-                          defaultMessage: 'Chart options',
-                        })}
-                        buttonSize="s"
-                        buttons={[
-                          {
-                            label: i18n.translate('unifiedHistogram.chartOptionsButton', {
-                              defaultMessage: 'Chart options',
-                            }),
-                            iconType: 'gear',
-                            'data-test-subj': 'unifiedHistogramChartOptionsToggle',
-                            onClick: toggleChartOptions,
-                          },
-                        ]}
-                      />
-                    }
-                    isOpen={showChartOptionsPopover}
-                    closePopover={closeChartOptions}
-                    panelPaddingSize="none"
-                    anchorPosition="downLeft"
-                  >
-                    <EuiContextMenu initialPanelId={0} panels={panels} />
-                  </EuiPopover>
-                </EuiFlexItem>
-              </EuiFlexGroup>
+                    iconType: chartVisible ? 'transitionTopOut' : 'transitionTopIn',
+                    'data-test-subj': 'unifiedHistogramHideChartButton',
+                    onClick: toggleHideChart,
+                  },
+                ]}
+              />
+            )}
+          </EuiFlexItem>
+          <EuiFlexItem>
+            {chartVisible && breakdown && (
+              <BreakdownFieldSelector
+                dataView={dataView}
+                breakdown={breakdown}
+                onBreakdownFieldChange={onBreakdownFieldChange}
+              />
+            )}
+            {chartVisible && currentSuggestion && allSuggestions && allSuggestions?.length > 1 && (
+              <SuggestionSelector
+                suggestions={allSuggestions}
+                activeSuggestion={currentSuggestion}
+                onSuggestionChange={onSuggestionSelectorChange}
+              />
+            )}
+          </EuiFlexItem>
+          {chartVisible && actions.length > 0 && (
+            <EuiFlexItem grow={false}>
+              <IconButtonGroup
+                legend={i18n.translate('unifiedHistogram.chartActionsGroupLegend', {
+                  defaultMessage: 'Chart actions',
+                })}
+                buttonSize="s"
+                buttons={actions}
+              />
             </EuiFlexItem>
           )}
+          <EuiFlexItem grow={false}>
+            <EuiPopover
+              id="unifiedHistogramChartOptions"
+              button={
+                <IconButtonGroup
+                  legend={i18n.translate('unifiedHistogram.chartOptionsButton', {
+                    defaultMessage: 'Chart options',
+                  })}
+                  buttonSize="s"
+                  buttons={[
+                    {
+                      label: i18n.translate('unifiedHistogram.chartOptionsButton', {
+                        defaultMessage: 'Chart options',
+                      }),
+                      iconType: 'gear',
+                      'data-test-subj': 'unifiedHistogramChartOptionsToggle',
+                      onClick: toggleChartOptions,
+                    },
+                  ]}
+                />
+              }
+              isOpen={showChartOptionsPopover}
+              closePopover={closeChartOptions}
+              panelPaddingSize="none"
+              anchorPosition="downLeft"
+            >
+              <EuiContextMenu initialPanelId={0} panels={panels} />
+            </EuiPopover>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
       {chartVisible && (
