@@ -86,7 +86,7 @@ describe('getCategoryRequest', () => {
               categories: {
                 categorize_text: { field: 'the-field-name', size: 1000 },
                 aggs: {
-                  hit: {
+                  examples: {
                     top_hits: { size: 1, sort: ['the-time-field-name'], _source: 'the-field-name' },
                   },
                 },

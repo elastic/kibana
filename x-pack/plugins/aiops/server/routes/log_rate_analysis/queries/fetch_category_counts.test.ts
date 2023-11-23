@@ -34,7 +34,7 @@ describe('getCategoryCountRequest', () => {
               { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
               {
                 bool: {
-                  should: [
+                  must: [
                     {
                       match: {
                         'the-field-name': {
@@ -86,7 +86,7 @@ describe('getCategoryCountMSearchRequest', () => {
               { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
               {
                 bool: {
-                  should: [
+                  must: [
                     {
                       match: {
                         'the-field-name': {
@@ -114,7 +114,7 @@ describe('getCategoryCountMSearchRequest', () => {
               { range: { 'the-time-field-name': { gte: 10, lte: 20, format: 'epoch_millis' } } },
               {
                 bool: {
-                  should: [
+                  must: [
                     {
                       match: {
                         'the-field-name': {
