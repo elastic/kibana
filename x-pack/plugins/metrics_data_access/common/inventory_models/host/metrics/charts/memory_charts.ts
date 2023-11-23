@@ -13,7 +13,7 @@ import { formulas } from '../formulas';
 export const memoryUsageBreakdown = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'memoryUsageBreakdown',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.memoryUsage', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.memoryUsage', {
       defaultMessage: 'Memory Usage',
     }),
     layers: [
@@ -21,21 +21,30 @@ export const memoryUsageBreakdown = {
         data: [
           {
             ...formulas.memoryCache,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.cache', {
-              defaultMessage: 'Cache',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.cache',
+              {
+                defaultMessage: 'Cache',
+              }
+            ),
           },
           {
             ...formulas.memoryUsed,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.used', {
-              defaultMessage: 'Used',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.used',
+              {
+                defaultMessage: 'Used',
+              }
+            ),
           },
           {
             ...formulas.memoryFreeExcludingCache,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.free', {
-              defaultMessage: 'Free',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.free',
+              {
+                defaultMessage: 'Free',
+              }
+            ),
           },
         ],
         options: {

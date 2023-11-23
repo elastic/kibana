@@ -15,7 +15,7 @@ const TOP_VALUES_SIZE = 5;
 export const diskSpaceUsageAvailable = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'diskSpaceUsageAvailable',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsage', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsage', {
       defaultMessage: 'Disk Usage',
     }),
     layers: [
@@ -23,14 +23,17 @@ export const diskSpaceUsageAvailable = {
         data: [
           {
             ...formulas.diskUsage,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsage.label.used', {
-              defaultMessage: 'Used',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
+              {
+                defaultMessage: 'Used',
+              }
+            ),
           },
           {
             ...formulas.diskSpaceAvailability,
             label: i18n.translate(
-              'xpack.infra.assetDetails.metricsCharts.diskUsage.label.available',
+              'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.available',
               {
                 defaultMessage: 'Available',
               }
@@ -51,7 +54,7 @@ export const diskSpaceUsageAvailable = {
 export const diskUsageByMountPoint = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'DiskUsageByMountPoint',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsageByMountingPoint', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskUsageByMountingPoint', {
       defaultMessage: 'Disk Usage by Mount Point',
     }),
     layers: [
@@ -59,9 +62,12 @@ export const diskUsageByMountPoint = {
         data: [
           {
             ...formulas.diskUsage,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskUsage.label.used', {
-              defaultMessage: 'Used',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.diskUsage.label.used',
+              {
+                defaultMessage: 'Used',
+              }
+            ),
           },
         ],
         options: {
@@ -96,7 +102,7 @@ export const diskUsageByMountPoint = {
 export const diskThroughputReadWrite = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'diskThroughputReadWrite',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskIOPS', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskIOPS', {
       defaultMessage: 'Disk IOPS',
     }),
     layers: [
@@ -104,15 +110,21 @@ export const diskThroughputReadWrite = {
         data: [
           {
             ...formulas.diskIORead,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.read', {
-              defaultMessage: 'Read',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.read',
+              {
+                defaultMessage: 'Read',
+              }
+            ),
           },
           {
             ...formulas.diskIOWrite,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.write', {
-              defaultMessage: 'Write',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.write',
+              {
+                defaultMessage: 'Write',
+              }
+            ),
           },
         ],
         options: {
@@ -136,7 +148,7 @@ export const diskThroughputReadWrite = {
 export const diskIOReadWrite = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'diskIOReadWrite',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.diskThroughput', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.diskThroughput', {
       defaultMessage: 'Disk Throughput',
     }),
     layers: [
@@ -144,15 +156,21 @@ export const diskIOReadWrite = {
         data: [
           {
             ...formulas.diskReadThroughput,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.read', {
-              defaultMessage: 'Read',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.read',
+              {
+                defaultMessage: 'Read',
+              }
+            ),
           },
           {
             ...formulas.diskWriteThroughput,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.metric.label.write', {
-              defaultMessage: 'Write',
-            }),
+            label: i18n.translate(
+              'xpack.metricsData.assetDetails.metricsCharts.metric.label.write',
+              {
+                defaultMessage: 'Write',
+              }
+            ),
           },
         ],
         options: {

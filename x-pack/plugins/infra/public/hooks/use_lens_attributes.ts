@@ -31,18 +31,7 @@ import {
 } from '@kbn/lens-embeddable-utils';
 import { InfraClientSetupDeps } from '../types';
 
-type UseLensAttributesBaseParams = Omit<ChartModel<LayerModel>, 'id'>;
-export interface UseLensAttributesMetricChartParams extends UseLensAttributesBaseParams {
-  visualizationType: typeof METRIC_ID;
-  subtitle?: string;
-}
-export interface UseLensAttributesXYChartParams extends UseLensAttributesBaseParams {
-  visualizationType: typeof XY_ID;
-}
-
-export type UseLensAttributesParams =
-  | UseLensAttributesXYChartParams
-  | UseLensAttributesMetricChartParams;
+export type UseLensAttributesParams = Omit<ChartModel<LayerModel>, 'id'>;
 
 export const useLensAttributes = ({ dataView, ...params }: UseLensAttributesParams) => {
   const {

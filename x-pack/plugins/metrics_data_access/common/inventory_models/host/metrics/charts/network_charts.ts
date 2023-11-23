@@ -13,7 +13,7 @@ import { formulas } from '../formulas';
 export const rxTx = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'rxTx',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.network', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network', {
       defaultMessage: 'Network',
     }),
     layers: [
@@ -21,13 +21,13 @@ export const rxTx = {
         data: [
           {
             ...formulas.rx,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.network.label.rx', {
+            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.rx', {
               defaultMessage: 'Inbound (RX)',
             }),
           },
           {
             ...formulas.tx,
-            label: i18n.translate('xpack.infra.assetDetails.metricsCharts.network.label.tx', {
+            label: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.network.label.tx', {
               defaultMessage: 'Outbound (TX)',
             }),
           },

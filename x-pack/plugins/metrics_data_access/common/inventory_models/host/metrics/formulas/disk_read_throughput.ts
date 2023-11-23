@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskReadThroughput: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.diskReadThroughput', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskReadThroughput', {
     defaultMessage: 'Disk Read Throughput',
   }),
   value: "counter_rate(max(system.diskio.read.bytes), kql='system.diskio.read.bytes: *')",

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryCache: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.metric.label.cache', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.metric.label.cache', {
     defaultMessage: 'cache',
   }),
   value: 'average(system.memory.used.bytes) - average(system.memory.actual.used.bytes)',

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const cpuUsageIrq: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.cpuUsage.irqLabel', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.cpuUsage.irqLabel', {
     defaultMessage: 'irq',
   }),
   value: 'average(system.cpu.irq.pct) / max(system.cpu.cores)',

@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const normalizedLoad1m: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.normalizedLoad1m', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.normalizedLoad1m', {
     defaultMessage: 'Normalized Load',
   }),
   value: 'average(system.load.1) / max(system.load.cores)',

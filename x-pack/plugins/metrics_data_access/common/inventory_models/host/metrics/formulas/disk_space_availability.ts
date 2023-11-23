@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const diskSpaceAvailability: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.diskSpaceAvailability', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.diskSpaceAvailability', {
     defaultMessage: 'Disk Space Availability',
   }),
   value: '1 - average(system.filesystem.used.pct)',

@@ -24,7 +24,7 @@ export const REFERENCE_LINE: StaticValueConfig = {
 export const cpuUsageBreakdown = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'cpuUsageBreakdown',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.cpuUsage', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.cpuUsage', {
       defaultMessage: 'CPU Usage',
     }),
     layers: [
@@ -52,7 +52,7 @@ export const cpuUsageBreakdown = {
 export const normalizedLoad1m = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'normalizedLoad1m',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.normalizedLoad1m', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.normalizedLoad1m', {
       defaultMessage: 'Normalized Load',
     }),
     layers: [
@@ -67,7 +67,7 @@ export const normalizedLoad1m = {
 export const loadBreakdown = {
   get: ({ dataView }: { dataView: DataView }): ChartModel<XYLayerModel> => ({
     id: 'loadBreakdown',
-    title: i18n.translate('xpack.infra.assetDetails.metricsCharts.load', {
+    title: i18n.translate('xpack.metricsData.assetDetails.metricsCharts.load', {
       defaultMessage: 'Load',
     }),
     layers: [

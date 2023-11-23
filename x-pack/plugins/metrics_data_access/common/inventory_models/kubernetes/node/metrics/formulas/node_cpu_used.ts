@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const nodeCpuUsed: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.kubernetes.used', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.kubernetes.used', {
     defaultMessage: 'Used',
   }),
   value: 'average(kubernetes.node.cpu.usage.nanocores)',

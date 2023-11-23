@@ -10,7 +10,7 @@ import { MetricLayerOptions } from '@kbn/lens-embeddable-utils';
 import { createDashboardModel } from '../../../create_dashboard_model';
 import { createBasicCharts } from '../charts';
 
-const AVERAGE = i18n.translate('xpack.infra.assetDetailsEmbeddable.overview.kpi.subtitle.average', {
+const AVERAGE = i18n.translate('xpack.metricsData.assetDetails.overview.kpi.subtitle.average', {
   defaultMessage: 'Average',
 });
 

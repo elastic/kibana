@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { FormulaValueConfig } from '@kbn/lens-embeddable-utils';
 
 export const memoryUsed: FormulaValueConfig = {
-  label: i18n.translate('xpack.infra.assetDetails.formulas.metric.label.used', {
+  label: i18n.translate('xpack.metricsData.assetDetails.formulas.metric.label.used', {
     defaultMessage: 'used',
   }),
   value: 'average(system.memory.actual.used.bytes)',

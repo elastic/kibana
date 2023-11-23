@@ -297,7 +297,7 @@ export const useHostsTable = () => {
         name: (
           <ColumnHeader
             label={TABLE_COLUMN_LABEL.diskSpaceUsage}
-            toolTip={METRICS_TOOLTIP.diskSpaceUsage}
+            toolTip={METRICS_TOOLTIP.diskUsage}
             formula={inventoryModel.metrics.formulas?.diskUsage.value}
           />
         ),

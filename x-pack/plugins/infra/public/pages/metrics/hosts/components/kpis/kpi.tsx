@@ -5,7 +5,6 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 import { ChartModel } from '@kbn/lens-embeddable-utils';
 import { METRICS_TOOLTIP } from '../../../../../common/visualizations';
 import { LensChart, TooltipContent } from '../../../../../components/lens';
@@ -24,7 +23,7 @@ export const Kpi = ({
 }: ChartModel & { height: number }) => {
   const { searchCriteria } = useUnifiedSearchContext();
   const { hostNodes, loading: hostsLoading, searchSessionId } = useHostsViewContext();
-  const { data: hostCountData, isRequestRunning: hostCountLoading } = useHostCountContext();
+  const { isRequestRunning: hostCountLoading } = useHostCountContext();
 
   const shouldUseSearchCriteria = hostNodes.length === 0;
   const loading = hostsLoading || hostCountLoading;
@@ -39,16 +38,6 @@ export const Kpi = ({
         }),
       ];
 
-  const subtitle =
-    searchCriteria.limit < (hostCountData?.count.value ?? 0)
-      ? i18n.translate('xpack.infra.hostsViewPage.kpi.subtitle.average.limit', {
-          defaultMessage: 'Average (of {limit} hosts)',
-          values: {
-            limit: searchCriteria.limit,
-          },
-        })
-      : undefined;
-
   // prevents requestTs and searchCriteria state from reloading the chart
   // we want it to reload only once the table has finished loading.
   // attributes passed to useAfterLoadedState don't need to be memoized
@@ -57,7 +46,6 @@ export const Kpi = ({
     query: shouldUseSearchCriteria ? searchCriteria.query : undefined,
     filters,
     searchSessionId,
-    subtitle,
   });
 
   const tooltipContent = useMemo(
@@ -80,7 +68,6 @@ export const Kpi = ({
       visualizationType={visualizationType}
       query={afterLoadedState.query}
       searchSessionId={afterLoadedState.searchSessionId}
-      subtitle={afterLoadedState.subtitle}
       toolTip={tooltipContent}
       disableTriggers
       hidePanelTitles

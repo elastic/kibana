@@ -25,7 +25,7 @@ export const assetDetails = {
         {
           id: 'nodeCpuCapacity',
           title: i18n.translate(
-            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity',
+            'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeCpuCapacity',
             {
               defaultMessage: 'Node CPU Capacity',
             }
@@ -46,7 +46,7 @@ export const assetDetails = {
         {
           id: 'nodeMemoryCapacity',
           title: i18n.translate(
-            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodeMemoryCapacity',
+            'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeMemoryCapacity',
             {
               defaultMessage: 'Node Memory Capacity',
             }
@@ -67,7 +67,7 @@ export const assetDetails = {
         {
           id: 'nodeDiskCapacity',
           title: i18n.translate(
-            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodeDiskCapacity',
+            'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodeDiskCapacity',
             {
               defaultMessage: 'Node Disk Capacity',
             }
@@ -92,7 +92,7 @@ export const assetDetails = {
         {
           id: 'nodePodCapacity',
           title: i18n.translate(
-            'xpack.infra.assetDetails.metricsCharts.kubernetes.nodePodCapacity',
+            'xpack.metricsData.assetDetails.metricsCharts.kubernetes.nodePodCapacity',
             {
               defaultMessage: 'Node Pod Capacity',
             }
