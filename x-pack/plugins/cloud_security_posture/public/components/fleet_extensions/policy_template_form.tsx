@@ -510,6 +510,7 @@ const IntegrationSettings = ({ onChange, fields }: IntegrationInfoFieldsProps) =
 
 export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensionComponentProps>(
   ({
+    agentPolicy,
     newPolicy,
     onChange,
     validationResults,
@@ -527,6 +528,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const input = getSelectedOption(newPolicy.inputs, integration);
     const { isAgentlessAvailable, setupTechnology, setSetupTechnology } = useSetupTechnology({
       input,
+      agentPolicy,
       agentlessPolicy,
       handleSetupTechnologyChange,
     });
