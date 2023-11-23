@@ -6,7 +6,7 @@
  */
 import expect from '@kbn/expect';
 import type { SecurityService } from '../../../../../../../test/common/services/security/security';
-import { riskEngineRouteHelpersFactory } from '../../utils';
+import { riskEngineRouteHelpersFactoryNoAuth } from '../../utils';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 
 const USER_PASSWORD = 'changeme';
@@ -83,7 +83,7 @@ const USERNAME_TO_ROLES = {
 export default ({ getService }: FtrProviderContext) => {
   describe('@ess privileges_apis', () => {
     const supertestWithoutAuth = getService('supertestWithoutAuth');
-    const riskEngineRoutes = riskEngineRouteHelpersFactory(supertestWithoutAuth);
+    const riskEngineRoutesNoAuth = riskEngineRouteHelpersFactoryNoAuth(supertestWithoutAuth);
     const logger = getService('log');
     let security: SecurityService;
     try {
@@ -130,7 +130,7 @@ export default ({ getService }: FtrProviderContext) => {
     }
 
     const getPrivilegesForUsername = async (username: string) =>
-      riskEngineRoutes.privilegesForUser({
+      riskEngineRoutesNoAuth.privilegesForUser({
         username,
         password: USER_PASSWORD,
       });

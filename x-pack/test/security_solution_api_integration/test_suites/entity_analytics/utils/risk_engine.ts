@@ -503,8 +503,14 @@ export const riskEngineRouteHelpersFactory = (
       .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
       .send()
       .expect(200),
+});
+
+export const riskEngineRouteHelpersFactoryNoAuth = (
+  supertestWithoutAuth: SuperTest.SuperTest<SuperTest.Test>,
+  namespace?: string
+) => ({
   privilegesForUser: async ({ username, password }: { username: string; password: string }) =>
-    await supertest
+    await supertestWithoutAuth
       .get(RISK_ENGINE_PRIVILEGES_URL)
       .auth(username, password)
       .set('elastic-api-version', '1')
