@@ -18,7 +18,6 @@ import { BaseResolverQuery } from './base';
  */
 export class LifecycleQuery extends BaseResolverQuery {
   declare readonly resolverFields: JsonValue[];
-
   constructor({ schema, indexPatterns, timeRange, isInternalRequest }: ResolverQueryParams) {
     super({ schema, indexPatterns, timeRange, isInternalRequest });
   }
@@ -52,11 +51,8 @@ export class LifecycleQuery extends BaseResolverQuery {
               },
             },
             {
-              bool: {
-                should: [{ term: { 'event.category': 'process' } }],
-              },
+              term: { 'event.category': 'process' },
             },
-
             {
               term: { 'event.kind': 'event' },
             },
