@@ -12,8 +12,10 @@ export const navigateToAlertsList = (urlQueryParams: string = '') => {
   loadPage(`${APP_ALERTS_PATH}${urlQueryParams ? `?${urlQueryParams}` : ''}`);
 };
 
-export const clickAlertListRefreshButton = (): Cypress.Chainable => {
-  cy.getByTestSubj('querySubmitButton').first().click();
+const clickAlertListRefreshButton = (): Cypress.Chainable => {
+  cy.getByTestSubj('filters-global-container').within(() => {
+    cy.getByTestSubj('querySubmitButton').click();
+  });
   return cy.getByTestSubj('querySubmitButton').should('be.enabled');
 };
 
