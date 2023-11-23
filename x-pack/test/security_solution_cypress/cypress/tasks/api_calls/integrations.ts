@@ -56,11 +56,6 @@ export function installIntegrations({
       packages,
       force: true,
     },
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
   });
 
   // Install agent and package policies
@@ -68,11 +63,6 @@ export function installIntegrations({
     method: 'POST',
     url: `${AGENT_POLICY_API_ROUTES.CREATE_PATTERN}?sys_monitoring=true`,
     body: agentPolicy,
-    headers: {
-      'kbn-xsrf': 'cypress-creds',
-      'x-elastic-internal-origin': 'security-solution',
-      'elastic-api-version': '2023-10-31',
-    },
   }).then((response) => {
     const packagePolicyWithAgentPolicyId: PackagePolicy = {
       ...packagePolicy,
@@ -83,11 +73,6 @@ export function installIntegrations({
       method: 'POST',
       url: PACKAGE_POLICY_API_ROUTES.CREATE_PATTERN,
       body: packagePolicyWithAgentPolicyId,
-      headers: {
-        'kbn-xsrf': 'cypress-creds',
-        'x-elastic-internal-origin': 'security-solution',
-        'elastic-api-version': '2023-10-31',
-      },
     });
   });
 }

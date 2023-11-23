@@ -18,8 +18,9 @@ import {
 } from '../../../tasks/inspect';
 import { login } from '../../../tasks/login';
 import { visitWithTimeRange } from '../../../tasks/navigation';
-import { postDataView, waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
+import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { selectDataView } from '../../../tasks/sourcerer';
+import { postDataView } from '../../../tasks/api_calls/common';
 
 const DATA_VIEW = 'auditbeat-*';
 
