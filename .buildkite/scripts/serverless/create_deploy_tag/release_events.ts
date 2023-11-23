@@ -258,6 +258,7 @@ async function tryCall(fn: any, ...args: any[]) {
 }
 
 function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string | null) {
+  const isDryRun = process.env.DRY_RUN?.match('(1|true)');
   const textBlock = (...str: string[]) => ({ type: 'mrkdwn', text: str.join('\n') });
   sendSlackMessage({
     blocks: [
@@ -266,7 +267,8 @@ function sendSlackAnnouncement(selectedCommit: string | null, deployTag: string 
         text: textBlock(
           `Promotion of a new <https://github.com/elastic/kibana/commit/${selectedCommit}|commit> to QA has been initiated!`,
           `Once promotion is complete, please begin any required manual testing.`,
-          `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`
+          `*Remember:* Promotion to Staging is currently a manual process and will proceed once the build is signed off in QA.`,
+          `${isDryRun ? '*This is a dry run, no action will be taken.*' : ''}}`
         ),
       },
       {
