@@ -53,7 +53,7 @@ export const useSetUpSections = ({ euiTheme }: { euiTheme: EuiThemeComputed }) =
                 data-test-subj={cardItem.id}
                 expandedCardSteps={expandedCardSteps}
                 euiTheme={euiTheme}
-                finishedSteps={finishedSteps}
+                finishedSteps={finishedSteps[cardItem.id]}
                 onStepButtonClicked={onStepButtonClicked}
                 onStepClicked={onStepClicked}
                 sectionId={sectionId}

@@ -29,7 +29,7 @@ import {
   COLLAPSE_STEP_BUTTON_LABEL,
   EXPAND_STEP_BUTTON_LABEL,
 } from '../translations';
-import { getStepsByActiveProduct } from '../helpers';
+import { getStepsByActiveProduct, isDefaultFinishedCardStep } from '../helpers';
 import type { ProductLine } from '../../../common/product';
 
 import { StepContent } from './step_content';
@@ -39,7 +39,8 @@ const CardStepComponent: React.FC<{
   activeProducts: Set<ProductLine>;
   cardId: CardId;
   expandedSteps: Set<StepId>;
-  finishedStepsByCard: Set<StepId>;
+  finishedSteps: Set<StepId>;
+  isExpandedCard: boolean;
   onStepButtonClicked: OnStepButtonClicked;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
@@ -48,7 +49,8 @@ const CardStepComponent: React.FC<{
   activeProducts,
   cardId,
   expandedSteps,
-  finishedStepsByCard = new Set(),
+  finishedSteps = new Set(),
+  isExpandedCard,
   onStepButtonClicked,
   onStepClicked,
   sectionId,
@@ -56,7 +58,6 @@ const CardStepComponent: React.FC<{
 }) => {
   const { euiTheme } = useEuiTheme();
   const { navigateToApp } = useKibana().services.application;
-
   const isExpandedStep = expandedSteps.has(stepId);
   const steps = useMemo(
     () => getStepsByActiveProduct({ activeProducts, cardId, sectionId }),
@@ -69,7 +70,7 @@ const CardStepComponent: React.FC<{
     (e) => {
       e.preventDefault();
 
-      if (hasStepContent) {
+      if (hasStepContent && !isDefaultFinishedCardStep(cardId, stepId)) {
         onStepClicked({ stepId, cardId, sectionId, isExpanded: !isExpandedStep });
       }
 
@@ -78,10 +79,10 @@ const CardStepComponent: React.FC<{
         path: `#${stepId}`,
       });
     },
-    [hasStepContent, navigateToApp, cardId, onStepClicked, stepId, sectionId, isExpandedStep]
+    [hasStepContent, cardId, stepId, navigateToApp, onStepClicked, sectionId, isExpandedStep]
   );
 
-  const isDone = finishedStepsByCard.has(stepId);
+  const isDone = finishedSteps.has(stepId);
 
   const handleStepButtonClicked = useCallback(
     (e) => {
@@ -110,7 +111,7 @@ const CardStepComponent: React.FC<{
       <EuiFlexGroup
         gutterSize="s"
         css={css`
-          cursor: pointer;
+          cursor: ${hasStepContent ? 'pointer' : 'default'};
         `}
       >
         <EuiFlexItem
@@ -163,7 +164,7 @@ const CardStepComponent: React.FC<{
           `}
         >
           <div>
-            {isExpandedStep && (
+            {isExpandedStep && isExpandedCard && (
               <EuiButtonEmpty
                 color="primary"
                 iconType={isDone ? icon_cross : 'checkInCircleFilled'}

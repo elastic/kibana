@@ -98,29 +98,21 @@ export const GetStartedComponent: React.FC<GetStartedProps> = ({ productTypes })
               width: ${CONTENT_WIDTH / 2}px;
             `}
           >
-            <EuiTitle
-              size="l"
-              css={css`
-                padding-left: ${euiTheme.size.xs};
-                padding-bottom: ${euiTheme.size.l};
-              `}
-            >
-              <>
-                {userName && (
-                  <span
-                    css={css`
-                      font-size: ${euiTheme.base}px;
-                      color: ${euiTheme.colors.darkShade};
-                      font-weight: ${euiTheme.font.weight.bold};
-                      line-height: ${euiTheme.size.xxl};
-                    `}
-                  >
-                    {GET_STARTED_PAGE_TITLE(userName)}
-                  </span>
-                )}
-                <EuiSpacer size="s" />
-              </>
-            </EuiTitle>
+            {userName && (
+              <EuiTitle
+                size="l"
+                css={css`
+                  padding-bottom: ${euiTheme.size.s};
+                  font-size: ${euiTheme.base}px;
+                  color: ${euiTheme.colors.darkShade};
+                  font-weight: ${euiTheme.font.weight.bold};
+                  line-height: ${euiTheme.size.l};
+                `}
+              >
+                <span>{GET_STARTED_PAGE_TITLE(userName)}</span>
+              </EuiTitle>
+            )}
+            <EuiSpacer size="s" />
             <span
               css={css`
                 font-size: ${euiTheme.size.l};

@@ -31,8 +31,9 @@ import { useKibana } from '../../common/services';
 
 const syncExpandedCardStepsToStorageFromURL = (maybeStepId: string) => {
   const { matchedCard, matchedStep } = findCardByStepId(maybeStepId);
+  const hasStepContent = matchedStep && matchedStep.description;
 
-  if (matchedCard && matchedStep) {
+  if (matchedCard && matchedStep && hasStepContent) {
     getStartedStorage.resetAllExpandedCardStepsToStorage();
     getStartedStorage.addExpandedCardStepToStorage(matchedCard.id, matchedStep.id);
   }
@@ -138,7 +139,7 @@ export const useTogglePanel = ({ productTypes }: { productTypes: SecurityProduct
   const onStepClicked: OnStepClicked = useCallback(
     ({ stepId, cardId, isExpanded }) => {
       dispatch({
-        type: GetStartedPageActions.ToggleExpandedCardStep,
+        type: GetStartedPageActions.ToggleExpandedStep,
         payload: { stepId, cardId, isStepExpanded: isExpanded },
       });
       if (isExpanded) {

@@ -121,19 +121,19 @@ export const getStartedStorage = {
       }, {} as Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }>)
     );
   },
-  addExpandedCardStepToStorage: (cardId: CardId, stepId?: StepId) => {
+  addExpandedCardStepToStorage: (cardId: CardId, stepId: StepId) => {
     const activeCards: Record<CardId, { isExpanded: boolean; expandedSteps: StepId[] }> =
       getStartedStorage.getAllExpandedCardStepsFromStorage();
     const card = activeCards[cardId]
-      ? { ...activeCards[cardId], isExpanded: activeCards[cardId].expandedSteps.length > 0 }
+      ? {
+          expandedSteps: [stepId],
+          isExpanded: true,
+        }
       : {
           isExpanded: false,
           expandedSteps: [],
         };
 
-    if (stepId && card && card.expandedSteps.indexOf(stepId) < 0) {
-      card.expandedSteps.push(stepId);
-    }
     storage.set(EXPANDED_CARDS_STORAGE_KEY, { ...activeCards, [cardId]: card });
   },
   removeExpandedCardStepFromStorage: (cardId: CardId, stepId?: StepId) => {

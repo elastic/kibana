@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiShadow } from '@elastic/eui';
 import type { EuiThemeComputed } from '@elastic/eui';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
 import classnames from 'classnames';
 import type {
@@ -22,13 +22,16 @@ import { getCard } from './helpers';
 import type { ProductLine } from '../../common/product';
 import { CardStep } from './card_step';
 
+const HEIGHT_ANIMATION_DURATION = 250;
+const SHADOW_ANIMATION_DURATION = 350;
+
 const CardItemComponent: React.FC<{
   activeProducts: Set<ProductLine>;
   activeStepIds: StepId[] | undefined;
   cardId: CardId;
   euiTheme: EuiThemeComputed;
   expandedCardSteps: ExpandedCardSteps;
-  finishedSteps: Record<CardId, Set<StepId>>;
+  finishedSteps: Set<StepId>;
   onStepButtonClicked: OnStepButtonClicked;
   onStepClicked: OnStepClicked;
   sectionId: SectionId;
@@ -43,18 +46,43 @@ const CardItemComponent: React.FC<{
   onStepClicked,
   sectionId,
 }) => {
+  const isExpandedCard = expandedCardSteps[cardId].isExpanded;
+
+  const [cardClassNames, setCardClassNames] = React.useState('');
+
   const cardItem = useMemo(() => getCard({ cardId, sectionId }), [cardId, sectionId]);
   const expandedSteps = useMemo(
     () => new Set(expandedCardSteps[cardId]?.expandedSteps ?? []),
     [cardId, expandedCardSteps]
   );
-  const hasExpandedSteps = expandedSteps.size > 0;
 
-  const cardClassNames = classnames({
-    'card-collapsed': !hasExpandedSteps,
-    'card-expanded': hasExpandedSteps,
-  });
   const shadow = useEuiShadow('l');
+
+  useEffect(() => {
+    if (isExpandedCard) {
+      setCardClassNames(
+        classnames({
+          'card-expanded': isExpandedCard,
+        })
+      );
+    } else {
+      setCardClassNames(
+        classnames({
+          'card-expanded': true,
+          'card-collapsed': true,
+        })
+      );
+
+      setTimeout(() => {
+        setCardClassNames(
+          classnames({
+            'card-expanded': false,
+            'card-collapsed': true,
+          })
+        );
+      }, HEIGHT_ANIMATION_DURATION);
+    }
+  }, [isExpandedCard]);
 
   return cardItem && activeStepIds ? (
     <EuiPanel
@@ -66,18 +94,28 @@ const CardItemComponent: React.FC<{
         margin-bottom: ${euiTheme.size.xs};
         border-radius: ${euiTheme.size.s};
         border: 1px solid ${euiTheme.colors.lightShade};
+        box-sizing: content-box;
+        overflow: hidden;
+        height: ${euiTheme.size.xxxl};
+        transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-out;
 
         &:hover,
-        .card-expanded {
+        &.card-expanded {
           ${shadow};
+          transition: box-shadow ${SHADOW_ANIMATION_DURATION}ms ease-out;
         }
 
         &.card-expanded {
           border: 2px solid #6092c0;
+          height: 400px;
+          transition: height ${HEIGHT_ANIMATION_DURATION}ms ease-in;
+        }
+
+        &.card-collapsed,
+        &.card-expanded.card-collapsed {
+          height: ${euiTheme.size.xxxl};
         }
       `}
-      data-test-subj={`card-${cardItem.id}`}
-      id={cardItem.id}
       borderRadius="none"
     >
       <EuiFlexGroup gutterSize="s" direction="column">
@@ -88,7 +126,8 @@ const CardItemComponent: React.FC<{
                 activeProducts={activeProducts}
                 cardId={cardItem.id}
                 expandedSteps={expandedSteps}
-                finishedStepsByCard={finishedSteps[cardItem.id]}
+                finishedSteps={finishedSteps}
+                isExpandedCard={isExpandedCard}
                 key={stepId}
                 onStepButtonClicked={onStepButtonClicked}
                 onStepClicked={onStepClicked}
