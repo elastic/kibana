@@ -84,7 +84,7 @@ export const ExternalLinkComponent = ({
       onClick={async (event) => {
         if (!destination) return;
 
-        trackUiMetric(METRIC_TYPE.CLICK, `${EXTERNAL_LINK_TYPE}:click`);
+        trackUiMetric?.(METRIC_TYPE.CLICK, `${EXTERNAL_LINK_TYPE}:click`);
 
         /** Only use `navigateToUrl` if we **aren't** opening in a new window/tab; otherwise, just use default href handling */
         const modifiedClick = event.ctrlKey || event.metaKey || event.shiftKey;

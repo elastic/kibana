@@ -125,7 +125,7 @@ export const DashboardLinkComponent = ({
     return {
       href,
       onClick: async (event: React.MouseEvent) => {
-        trackUiMetric(METRIC_TYPE.CLICK, `${DASHBOARD_LINK_TYPE}:click`);
+        trackUiMetric?.(METRIC_TYPE.CLICK, `${DASHBOARD_LINK_TYPE}:click`);
 
         /**
          * If the link is being opened via a modified click, then we should use the default `href` navigation behaviour
