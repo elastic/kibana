@@ -5,5 +5,6 @@
  * 2.0.
  */
 
-export * from './main_route';
-export * from './dataset_quality_route';
+export * from './data_streams_stats_client';
+export * from './data_streams_stats_service';
+export * from './types';

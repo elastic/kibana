@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export * from './main_route';
-export * from './dataset_quality_route';
+export * from './call_api';
+export * from './create_call_dataset_quality_api';

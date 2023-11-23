@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export * from './main_route';
-export * from './dataset_quality_route';
+export * from './use_dataset_quality_table';

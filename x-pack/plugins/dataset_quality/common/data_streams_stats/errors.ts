@@ -5,5 +5,10 @@
  * 2.0.
  */
 
-export * from './main_route';
-export * from './dataset_quality_route';
+export class GetDataStreamsStatsError extends Error {
+  constructor(message: string) {
+    super(message);
+    Object.setPrototypeOf(this, new.target.prototype);
+    this.name = 'GetDataStreamsStatsError';
+  }
+}
