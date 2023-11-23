@@ -762,17 +762,6 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
 
   const isSuppressionEnabled = isQueryRule(ruleType) || isThresholdRule;
 
-  const fieldsAvailableForSuppression = useMemo(() => {
-    if (isThresholdRule) {
-      const thresholdFieldsSet = new Set(thresholdFields);
-      return termsAggregationFields.filter((termAggField) =>
-        thresholdFieldsSet.has(termAggField.name)
-      );
-    }
-
-    return termsAggregationFields;
-  }, [termsAggregationFields, thresholdFields, isThresholdRule]);
-
   return (
     <>
       <StepContentWrapper addPadding={!isUpdateView}>
@@ -969,7 +958,7 @@ const StepDefineRuleComponent: FC<StepDefineRuleProps> = ({
               path="groupByFields"
               component={MultiSelectFieldsAutocomplete}
               componentProps={{
-                browserFields: fieldsAvailableForSuppression,
+                browserFields: termsAggregationFields,
                 disabledText: i18n.GROUP_BY_FIELD_LICENSE_WARNING,
                 isDisabled:
                   !license.isAtLeast(MINIMUM_LICENSE_FOR_SUPPRESSION) &&
