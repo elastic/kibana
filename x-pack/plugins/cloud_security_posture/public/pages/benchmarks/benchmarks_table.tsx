@@ -33,7 +33,7 @@ import { getEnabledCspIntegrationDetails } from '../../common/utils/get_enabled_
 import { isCommonError } from '../../components/cloud_posture_page';
 import { FullSizeCenteredPage } from '../../components/full_size_centered_page';
 import { ComplianceScoreBar } from '../../components/compliance_score_bar';
-import { getBenchmarkNameClean, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 import { CISBenchmarkIcon } from '../../components/cis_benchmark_icon';
 
 export const ERROR_STATE_TEST_SUBJECT = 'benchmark_page_error';
@@ -227,9 +227,9 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     truncateText: true,
     sortable: true,
     render: (benchmarkId: string) => {
-      return getBenchmarkNameClean(benchmarkId);
+      return getBenchmarkCisName(benchmarkId);
     },
-    'data-test-subj': 'TEST_1',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.CIS_NAME,
   },
   {
     field: 'benchmark_version',
@@ -238,7 +238,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     }),
     truncateText: true,
     sortable: true,
-    'data-test-subj': 'TEST_1',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.VERSION,
   },
   {
     field: 'benchmark_id',
@@ -246,7 +246,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
       defaultMessage: 'Applicable To',
     }),
     truncateText: true,
-    'data-test-subj': 'TEST_2',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.APPLICABLE_TO,
     render: (benchmarkId: string) => {
       return (
         <>
@@ -269,7 +269,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     }),
     dataType: 'string',
     truncateText: true,
-    'data-test-subj': 'TEST_3',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.EVALUATED,
   },
   {
     field: 'benchmark_score',
@@ -278,7 +278,7 @@ const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVer
     }),
     dataType: 'string',
     truncateText: true,
-    'data-test-subj': 'TEST_4',
+    'data-test-subj': TEST_SUBJ.BENCHMARKS_TABLE_COLUMNS.COMPLIANCE,
     render: (data: BenchmarkScore) => {
       return <ComplianceScoreBar totalPassed={data.totalPassed} totalFailed={data.totalFailed} />;
     },

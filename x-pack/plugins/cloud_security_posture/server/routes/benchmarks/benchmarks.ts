@@ -320,7 +320,7 @@ export const defineGetBenchmarksRoute = (router: CspRouter) =>
           const getBenchmarkResponse = {
             ...packagePolicies,
             items: benchmarksNeo,
-            items_trial_lama: benchmarksNew,
+            items_trial_lama: benchmarks,
             items_test: benchmarksNeo,
           };
 

@@ -17,4 +17,9 @@ export const BENCHMARKS_TABLE_COLUMNS = {
   NUMBER_OF_AGENTS: 'benchmarks-table-column-number-of-agents',
   CREATED_BY: 'benchmarks-table-column-created-by',
   CREATED_AT: 'benchmarks-table-column-created-at',
+  CIS_NAME: 'benchmark-table-column-cis-name',
+  VERSION: 'benchmark-table-column-version',
+  APPLICABLE_TO: 'benchmark-table-column-applicable-to',
+  EVALUATED: 'benchmark-table-column-evaluated',
+  COMPLIANCE: 'benchmark-table-column-compliance',
 };

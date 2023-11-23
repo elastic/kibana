@@ -147,7 +147,6 @@ export const Benchmarks = () => {
 
   const queryResult = useCspBenchmarkIntegrations(query);
   const totalItemCount = queryResult.data?.items.length || 0;
-  console.log('HELLO')
 console.log(queryResult)
   return (
     <CloudPosturePage>

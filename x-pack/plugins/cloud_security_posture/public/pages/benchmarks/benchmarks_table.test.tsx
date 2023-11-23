@@ -5,16 +5,13 @@
  * 2.0.
  */
 import React from 'react';
-import Chance from 'chance';
 import { render, screen } from '@testing-library/react';
-import moment from 'moment';
 import { createCspBenchmarkIntegrationFixture } from '../../test/fixtures/csp_benchmark_integration';
 import { BenchmarksTable } from './benchmarks_table';
 import { TestProvider } from '../../test/test_provider';
+import { getBenchmarkCisName, getBenchmarkApplicableTo } from '../../../common/utils/helpers';
 
 describe('<BenchmarksTable />', () => {
-  const chance = new Chance();
-
   const tableProps = {
     pageIndex: 1,
     pageSize: 10,
@@ -23,7 +20,27 @@ describe('<BenchmarksTable />', () => {
     setQuery: jest.fn(),
   };
 
-  it('renders integration name', () => {
+  it('renders cis integration name', () => {
+    const item = createCspBenchmarkIntegrationFixture();
+    const benchmarks = [item];
+    const benchmarkCisIntegrationName = getBenchmarkCisName(item.benchmark_id) || '';
+
+    render(
+      <TestProvider>
+        <BenchmarksTable
+          {...{
+            ...tableProps,
+            benchmarks,
+            totalItemCount: benchmarks.length,
+          }}
+        />
+      </TestProvider>
+    );
+
+    expect(screen.getByText(benchmarkCisIntegrationName)).toBeInTheDocument();
+  });
+
+  it('renders benchmark version', () => {
     const item = createCspBenchmarkIntegrationFixture();
     const benchmarks = [item];
 
@@ -39,18 +56,13 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(item.package_policy.name)).toBeInTheDocument();
+    expect(screen.getByText(item.benchmark_version)).toBeInTheDocument();
   });
 
-  it('renders agent policy name', () => {
-    const agentPolicy = {
-      id: chance.guid(),
-      name: chance.sentence(),
-      agents: chance.integer({ min: 1 }),
-    };
-
-    const benchmarks = [createCspBenchmarkIntegrationFixture({ agent_policy: agentPolicy })];
-
+  it('renders applicable to', () => {
+    const item = createCspBenchmarkIntegrationFixture();
+    const benchmarks = [item];
+    const benchmarkApplicableTo = getBenchmarkApplicableTo(item.benchmark_id) || '';
     render(
       <TestProvider>
         <BenchmarksTable
@@ -63,10 +75,10 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(agentPolicy.name)).toBeInTheDocument();
+    expect(screen.getByText(benchmarkApplicableTo)).toBeInTheDocument();
   });
 
-  it('renders number of agents', () => {
+  it('renders evaluated', () => {
     const item = createCspBenchmarkIntegrationFixture();
     const benchmarks = [item];
 
@@ -82,11 +94,10 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    // TODO too loose
-    expect(screen.getByText(item.agent_policy.agents as number)).toBeInTheDocument();
+    expect(screen.getByText(item.benchmark_evaluation)).toBeInTheDocument();
   });
 
-  it('renders created by', () => {
+  it('renders compliance', () => {
     const item = createCspBenchmarkIntegrationFixture();
     const benchmarks = [item];
 
@@ -102,25 +113,6 @@ describe('<BenchmarksTable />', () => {
       </TestProvider>
     );
 
-    expect(screen.getByText(item.package_policy.created_by)).toBeInTheDocument();
-  });
-
-  it('renders created at', () => {
-    const item = createCspBenchmarkIntegrationFixture();
-    const benchmarks = [item];
-
-    render(
-      <TestProvider>
-        <BenchmarksTable
-          {...{
-            ...tableProps,
-            benchmarks,
-            totalItemCount: benchmarks.length,
-          }}
-        />
-      </TestProvider>
-    );
-
-    expect(screen.getByText(moment(item.package_policy.created_at).fromNow())).toBeInTheDocument();
+    expect(screen.getByText(item.benchmark_score.postureScore + '%')).toBeInTheDocument();
   });
 });

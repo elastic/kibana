@@ -138,7 +138,7 @@ export interface BenchmarkVersion2 {
   benchmark_id: string;
   benchmark_name: string;
   benchmark_version: string;
-  benchmark_score: number;
+  benchmark_score: BenchmarkScore;
   benchmark_evaluation: number;
 }
 
@@ -152,7 +152,7 @@ export type CloudSecurityPolicyTemplate = typeof SUPPORTED_POLICY_TEMPLATES[numb
 export type PosturePolicyTemplate = Extract<CloudSecurityPolicyTemplate, 'kspm' | 'cspm'>;
 
 export interface GetBenchmarkResponse {
-  items: Benchmark[];
+  items: BenchmarkVersion2[];
   total: number;
   page: number;
   perPage: number;

@@ -173,7 +173,7 @@ export const cleanupCredentials = (packagePolicy: NewPackagePolicy | UpdatePacka
   return packagePolicy;
 };
 
-export const getBenchmarkNameClean = (benchmarkId: string) => {
+export const getBenchmarkCisName = (benchmarkId: string) => {
   switch (benchmarkId) {
     case 'cis_k8s':
       return 'CIS Kubernetes';
