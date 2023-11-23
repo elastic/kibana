@@ -35,9 +35,5 @@ export function Profiling() {
     makeRequest();
   }, [makeRequest]);
 
-  if (loading || response === null) {
-    return null;
-  }
-
-  return <EmbeddableFlamegraph data={response} isLoading={loading} height="60vh" />;
+  return <EmbeddableFlamegraph data={response ?? undefined} isLoading={loading} height="60vh" />;
 }

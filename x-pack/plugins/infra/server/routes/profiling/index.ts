@@ -28,9 +28,11 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
       validate: false,
     },
     async (requestContext, request, response) => {
-      const coreRequestContext = await requestContext.core;
-      const infraRequestContext = await requestContext.infra;
-      const profilingDataAccess = await getProfilingDataAccess(getStartServices);
+      const [coreRequestContext, infraRequestContext, profilingDataAccess] = await Promise.all([
+        requestContext.core,
+        requestContext.infra,
+        getProfilingDataAccess(getStartServices),
+      ]);
 
       const profilingStatus = await fetchProfilingStatus(
         profilingDataAccess,
@@ -59,8 +61,10 @@ export function initProfilingRoutes({ framework, getStartServices, logger }: Inf
     async (requestContext, request, response) => {
       const params = decodeOrThrow(InfraProfilingRequestParamsRT)(request.body);
 
-      const coreRequestContext = await requestContext.core;
-      const profilingDataAccess = await getProfilingDataAccess(getStartServices);
+      const [coreRequestContext, profilingDataAccess] = await Promise.all([
+        requestContext.core,
+        getProfilingDataAccess(getStartServices),
+      ]);
 
       const flamegraph = await fetchProfilingFlamegraph(
         params,
