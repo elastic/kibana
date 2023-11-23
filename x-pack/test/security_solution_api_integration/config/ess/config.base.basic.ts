@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-export const METRIC_EXPLORER_AGGREGATIONS = [
-  'avg',
-  'max',
-  'min',
-  'cardinality',
-  'count',
-  'sum',
-] as const;
+import { createTestConfig } from './config.base';
 
-export const CUSTOM_AGGREGATOR = 'custom';
+export default createTestConfig({
+  license: 'basic',
+  ssl: true,
+});

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { login } from '../../tasks/login';
-import { visitWithTimeRange } from '../../tasks/navigation';
+import { login } from '../../../tasks/login';
+import { visitWithTimeRange } from '../../../tasks/navigation';
 
 import {
   ALERTS_URL,
@@ -16,12 +16,12 @@ import {
   TIMELINES_URL,
   EXCEPTIONS_URL,
   CREATE_RULE_URL,
-} from '../../urls/navigation';
-import { RULES_MANAGEMENT_URL } from '../../urls/rules_management';
+} from '../../../urls/navigation';
+import { RULES_MANAGEMENT_URL } from '../../../urls/rules_management';
 
-import { NOT_FOUND } from '../../screens/common/page';
-import { ruleDetailsUrl } from '../../urls/rule_details';
-import { editRuleUrl } from '../../urls/edit_rule';
+import { NOT_FOUND } from '../../../screens/common/page';
+import { ruleDetailsUrl } from '../../../urls/rule_details';
+import { editRuleUrl } from '../../../urls/edit_rule';
 
 const mockRuleId = '5a4a0460-d822-11eb-8962-bfd4aff0a9b3';
 

@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-export const getSignalStatus = () => ({
+export const getAlertStatus = () => ({
   aggs: { statuses: { terms: { field: 'kibana.alert.workflow_status', size: 10 } } },
 });
