@@ -14,10 +14,9 @@ import {
   SELECTED_COMMIT_META_KEY,
 } from './shared';
 import {
-  getArtifactBuildJob,
+  getArtifactBuild,
   getOnMergePRBuild,
   getQAFBuildContainingCommit,
-  getQAFTestBuilds,
   toCommitInfoWithBuildResults,
 } from './info_sections/build_info';
 import { getRecentCommits, GitCommitExtract } from './info_sections/commit_info';
@@ -69,9 +68,8 @@ async function enrichWithStatuses(commits: GitCommitExtract[]): Promise<CommitWi
         };
       }
 
-      const nextFTRBuilds = await getQAFTestBuilds(commit.date);
-      const nextFTRBuild = await getQAFBuildContainingCommit(commit.sha, nextFTRBuilds, commits);
-      const artifactBuild = await getArtifactBuildJob(commit.sha);
+      const nextFTRBuild = await getQAFBuildContainingCommit(commit.sha, commit.date);
+      const artifactBuild = await getArtifactBuild(commit.sha);
 
       return {
         ...commit,
