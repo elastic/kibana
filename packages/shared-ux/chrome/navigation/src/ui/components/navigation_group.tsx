@@ -56,7 +56,9 @@ const jsxChildrenToNavigationNode = (
     const isNavigationGroup = child.type === NavigationGroup;
 
     if (!isNavigationGroup) {
-      // TODO: handle possible JSX children of NavigationItem to renderItem() func
+      if (child.props.children && typeof child.props.children !== 'string') {
+        childNode.renderItem = () => child.props.children;
+      }
       navigationNodes.push(childNode);
       return;
     }

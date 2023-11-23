@@ -178,9 +178,10 @@ export interface ChromeProjectNavigationNode extends NodeDefinitionBase {
    */
   children?: ChromeProjectNavigationNode[];
   /**
-   * Flag to indicate if the node is currently active.
+   * Handler to render the node item with custom JSX. This handler is added to render the `children` of
+   * the Navigation.Item component when React components are used to declare the navigation tree.
    */
-  isActive?: boolean;
+  renderItem?: () => React.ReactNode;
 }
 
 /** @public */

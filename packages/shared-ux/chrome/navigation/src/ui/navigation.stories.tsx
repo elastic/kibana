@@ -16,6 +16,7 @@ import {
   EuiButton,
   EuiCollapsibleNavBeta,
   EuiCollapsibleNavBetaProps,
+  EuiCollapsibleNavItem,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHeader,
@@ -342,9 +343,11 @@ export const GroupsExamples = (args: NavigationServices) => {
 
   return (
     <NavigationWrapper>
-      <NavigationProvider {...services}>
-        <DefaultNavigation {...groupExamplesDefinition} />
-      </NavigationProvider>
+      {({ isCollapsed }) => (
+        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
+          <DefaultNavigation {...groupExamplesDefinition} />
+        </NavigationProvider>
+      )}
     </NavigationWrapper>
   );
 };
@@ -401,6 +404,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
           {
             id: 'group:settings-2',
             title: 'Settings as nav Item',
+            link: 'item1',
             renderAs: 'item', // Render just like any other item, even if it has children
             children: [
               {
@@ -520,6 +524,7 @@ const navigationDefinition: ProjectNavigationDefinition<any> = {
         id: 'test_all_hidden',
         title: 'Test group render as Item',
         renderAs: 'item',
+        link: 'item1',
         children: [
           {
             id: 'test.item1',
@@ -891,6 +896,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                   {
                     title: 'Group renders as "item" (2)',
                     id: 'group2.renderAsItem',
+                    link: 'item1',
                     renderAs: 'item',
                     children: [
                       {
@@ -945,6 +951,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                     children: [
                       {
                         id: 'group2-B',
+                        link: 'item1',
                         title: 'Group renders as "item" (3)',
                         renderAs: 'item', // This group renders as a normal item
                         children: [
@@ -978,6 +985,7 @@ const navigationDefinitionWithPanel: ProjectNavigationDefinition<any> = {
                       },
                       {
                         title: 'Yet another group as item',
+                        link: 'item1',
                         renderAs: 'item',
                         children: [
                           {
