@@ -9,7 +9,7 @@ import { buildSiemResponse } from '@kbn/lists-plugin/server/routes/utils';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { ASSET_CRITICALITY_STATUS_URL, APP_ID } from '../../../../../common/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
-import { checkAndInitAssetCriticalityResources } from './checkAndInitAssetCriticalityResources';
+import { checkAndInitAssetCriticalityResources } from './check_and_init_asset_criticality_resources';
 
 export const assetCriticalityStatusRoute = (
   router: SecuritySolutionPluginRouter,
