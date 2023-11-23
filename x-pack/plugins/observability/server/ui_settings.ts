@@ -34,6 +34,7 @@ import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,
+  profilingUseLegacyCo2Calculation,
 } from '../common/ui_settings_keys';
 
 const betaLabel = i18n.translate('xpack.observability.uiSettings.betaLabel', {
@@ -449,6 +450,14 @@ export const uiSettings: Record<string, UiSettings> = {
     }),
     schema: schema.number({ min: 0 }),
     requiresPageReload: true,
+  },
+  [profilingUseLegacyCo2Calculation]: {
+    category: [observabilityFeatureId],
+    name: i18n.translate('xpack.observability.profilingUseLegacyCo2Calculation', {
+      defaultMessage: 'Use legacy CO2 and Dollar cost calculations in Universal Profiling',
+    }),
+    value: false,
+    schema: schema.boolean(),
   },
 };
 

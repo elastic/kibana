@@ -31,3 +31,4 @@ export const profilingUseLegacyFlamegraphAPI = 'observability:profilingUseLegacy
 export const profilingPerCoreWatt = 'observability:profilingPerCoreWatt';
 export const profilingCo2PerKWH = 'observability:profilingCo2PerKWH';
 export const profilingDatacenterPUE = 'observability:profilingDatacenterPUE';
+export const profilingUseLegacyCo2Calculation = 'observability:profilingUseLegacyCo2Calculation';

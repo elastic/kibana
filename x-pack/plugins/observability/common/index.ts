@@ -45,6 +45,7 @@ export {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,
+  profilingUseLegacyCo2Calculation,
 } from './ui_settings_keys';
 
 export {

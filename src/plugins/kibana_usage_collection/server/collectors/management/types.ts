@@ -158,4 +158,5 @@ export interface UsageStats {
   'observability:profilingPerCoreWatt': number;
   'observability:profilingCo2PerKWH': number;
   'observability:profilingDatacenterPUE': number;
+  'observability:profilingUseLegacyCo2Calculation': boolean;
 }

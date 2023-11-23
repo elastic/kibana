@@ -12,6 +12,8 @@ import {
   profilingCo2PerKWH,
   profilingDatacenterPUE,
   profilingPerCoreWatt,
+  profilingUseLegacyFlamegraphAPI,
+  profilingUseLegacyCo2Calculation,
 } from '@kbn/observability-plugin/common';
 import { useEditableSettings, useUiTracker } from '@kbn/observability-shared-plugin/public';
 import { isEmpty } from 'lodash';
@@ -20,7 +22,8 @@ import { useProfilingDependencies } from '../../components/contexts/profiling_de
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
 import { BottomBarActions } from './bottom_bar_actions';
 
-const settingKeys = [profilingCo2PerKWH, profilingDatacenterPUE, profilingPerCoreWatt];
+const co2Settings = [profilingCo2PerKWH, profilingDatacenterPUE, profilingPerCoreWatt];
+const generalSettings = [profilingUseLegacyFlamegraphAPI, profilingUseLegacyCo2Calculation];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -37,7 +40,7 @@ export function Settings() {
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useEditableSettings('profiling', settingKeys);
+  } = useEditableSettings('profiling', [...co2Settings, ...generalSettings]);
 
   async function handleSave() {
     try {
@@ -71,33 +74,48 @@ export function Settings() {
           </EuiText>
         </EuiTitle>
         <EuiSpacer />
-        <EuiPanel grow={false} hasShadow={false} hasBorder paddingSize="none">
-          <EuiPanel color="subdued" hasShadow={false}>
-            <EuiTitle size="s">
-              <EuiText>
-                {i18n.translate('xpack.profiling.settings.co2Sections', {
-                  defaultMessage: 'CO2',
+        {[
+          {
+            label: i18n.translate('xpack.profiling.settings.co2Sections', {
+              defaultMessage: 'CO2 settings',
+            }),
+            settings: co2Settings,
+          },
+          {
+            label: i18n.translate('xpack.profiling.settings.generalSections', {
+              defaultMessage: 'General settings',
+            }),
+            settings: generalSettings,
+          },
+        ].map((item) => (
+          <>
+            <EuiPanel key={item.label} grow={false} hasShadow={false} hasBorder paddingSize="none">
+              <EuiPanel color="subdued" hasShadow={false}>
+                <EuiTitle size="s">
+                  <EuiText>{item.label}</EuiText>
+                </EuiTitle>
+              </EuiPanel>
+              <EuiPanel hasShadow={false}>
+                {item.settings.map((settingKey) => {
+                  const editableConfig = settingsEditableConfig[settingKey];
+                  return (
+                    <LazyField
+                      key={settingKey}
+                      setting={editableConfig}
+                      handleChange={handleFieldChange}
+                      enableSaving
+                      docLinks={docLinks.links}
+                      toasts={notifications.toasts}
+                      unsavedChanges={unsavedChanges[settingKey]}
+                    />
+                  );
                 })}
-              </EuiText>
-            </EuiTitle>
-          </EuiPanel>
-          <EuiPanel hasShadow={false}>
-            {settingKeys.map((settingKey) => {
-              const editableConfig = settingsEditableConfig[settingKey];
-              return (
-                <LazyField
-                  key={settingKey}
-                  setting={editableConfig}
-                  handleChange={handleFieldChange}
-                  enableSaving
-                  docLinks={docLinks.links}
-                  toasts={notifications.toasts}
-                  unsavedChanges={unsavedChanges[settingKey]}
-                />
-              );
-            })}
-          </EuiPanel>
-        </EuiPanel>
+              </EuiPanel>
+            </EuiPanel>
+            <EuiSpacer />
+          </>
+        ))}
+
         {!isEmpty(unsavedChanges) && (
           <BottomBarActions
             isLoading={isSaving}
