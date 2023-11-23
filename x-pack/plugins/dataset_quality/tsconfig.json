@@ -19,7 +19,6 @@
     "@kbn/server-route-repository",
     "@kbn/share-plugin",
     "@kbn/std",
-    "@kbn/fleet-plugin",
     "@kbn/i18n",
     "@kbn/kibana-react-plugin",
     "@kbn/utility-types",

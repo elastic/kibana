@@ -26,11 +26,11 @@ export class DataStreamStat {
   }
 
   public static create(dataStreamStat: DataStreamStatType) {
-    const [type, dataset, namespace] = dataStreamStat.name.split('-');
+    const [_type, dataset, namespace] = dataStreamStat.name.split('-');
 
     const dataStreamStatProps = {
       name: dataStreamStat.name,
-      title: `${type} ${dataset} ( ${namespace} )`,
+      title: `${dataset} ( ${namespace} )`,
       size: dataStreamStat.size,
       sizeBytes: dataStreamStat.size_bytes,
       lastActivity: dataStreamStat.last_activity,

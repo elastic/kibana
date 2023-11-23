@@ -6,7 +6,6 @@
  */
 
 import { HttpStart } from '@kbn/core/public';
-import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import { keyBy, merge, values } from 'lodash';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { DATA_STREAMS_STATS_URL } from '../../../common/constants';
@@ -27,7 +26,6 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
     const { dataStreamsStats, integrations } = await this.http
       .get<GetDataStreamsStatsResponse>(DATA_STREAMS_STATS_URL, {
         query: params,
-        version: API_VERSIONS.public.v1,
       })
       .catch((error) => {
         throw new GetDataStreamsStatsError(`Failed to fetch data streams stats": ${error}`);
