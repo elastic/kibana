@@ -356,9 +356,9 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const indexPatternFieldsTableItems = useMemo(() => {
-    if (indexData?.indexPatternFields !== undefined) {
-      return indexData.indexPatternFields.map((field) => ({
+  const dataViewFieldsTableItems = useMemo(() => {
+    if (indexData?.dataViewFields !== undefined) {
+      return indexData.dataViewFields.map((field) => ({
         name: field,
         is_included: false,
         is_required: false,
@@ -366,7 +366,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
     }
     return [];
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [`${indexData?.indexPatternFields}`]);
+  }, [`${indexData?.dataViewFields}`]);
 
   useEffect(() => {
     if (typeof savedSearchQueryStr === 'string') {
@@ -377,11 +377,11 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
 
   useEffect(() => {
     if (isJobTypeWithDepVar) {
-      const indexPatternRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
+      const dataViewRuntimeFields = getCombinedRuntimeMappings(selectedDataView);
       let runtimeOptions;
 
-      if (indexPatternRuntimeFields) {
-        runtimeOptions = getRuntimeDepVarOptions(jobType, indexPatternRuntimeFields);
+      if (dataViewRuntimeFields) {
+        runtimeOptions = getRuntimeDepVarOptions(jobType, dataViewRuntimeFields);
       }
 
       loadDepVarOptions(form, runtimeOptions);
@@ -527,7 +527,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
       legendType: getScatterplotMatrixLegendType(jobType),
       searchQuery: jobConfigQuery,
       runtimeMappings,
-      indexPattern: selectedDataView,
+      dataView: selectedDataView,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
@@ -571,7 +571,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
   const tableItems =
     includesTableItems.length > 0 && !noDocsContainMappedFields
       ? includesTableItems
-      : indexPatternFieldsTableItems;
+      : dataViewFieldsTableItems;
 
   return (
     <FieldStatsFlyoutProvider
@@ -592,7 +592,7 @@ export const ConfigurationStepForm: FC<ConfigurationStepProps> = ({
             fullWidth
           >
             <ExplorationQueryBar
-              indexPattern={selectedDataView}
+              dataView={selectedDataView}
               setSearchQuery={setJobConfigQuery}
               query={query}
             />
