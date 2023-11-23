@@ -14,40 +14,45 @@ import {
   DETECTION_ENGINE_QUERY_SIGNALS_URL,
 } from '@kbn/security-solution-plugin/common/constants';
 import { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
-import { FtrProviderContext } from '../../common/ftr_provider_context';
 import {
-  createSignalsIndex,
-  setSignalStatus,
-  getQuerySignalIds,
+  createAlertsIndex,
+  setAlertStatus,
+  getQueryAlertIds,
   deleteAllRules,
   createRule,
-  waitForSignalsToBePresent,
-  getSignalsByIds,
+  waitForAlertsToBePresent,
+  getAlertsByIds,
   waitForRuleSuccess,
-  getRuleForSignalTesting,
+  getRuleForAlertTesting,
   deleteAllAlerts,
-} from '../../utils';
+} from '../../../utils';
+import { FtrProviderContext } from '../../../../../ftr_provider_context';
+import { EsArchivePathBuilder } from '../../../../../es_archive_path_builder';
 
-// eslint-disable-next-line import/no-default-export
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const log = getService('log');
   const es = getService('es');
+  // TODO: add a new service
+  const config = getService('config');
+  const isServerless = config.get('serverless');
+  const dataPathBuilder = new EsArchivePathBuilder(isServerless);
+  const auditbeatHost = dataPathBuilder.getPath('auditbeat/hosts');
 
-  describe('open_close_signals', () => {
+  describe('@ess @serverless open_close_alerts', () => {
     describe('tests with auditbeat data', () => {
       before(async () => {
-        await esArchiver.load('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.load(auditbeatHost);
       });
 
       after(async () => {
-        await esArchiver.unload('x-pack/test/functional/es_archives/auditbeat/hosts');
+        await esArchiver.unload(auditbeatHost);
       });
 
       beforeEach(async () => {
         await deleteAllRules(supertest, log);
-        await createSignalsIndex(supertest, log);
+        await createAlertsIndex(supertest, log);
       });
 
       afterEach(async () => {
@@ -55,94 +60,94 @@ export default ({ getService }: FtrProviderContext) => {
         await deleteAllRules(supertest, log);
       });
 
-      it('should be able to execute and get 10 signals', async () => {
+      it('should be able to execute and get 10 alerts', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        expect(signalsOpen.hits.hits.length).equal(10);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+        expect(alertsOpen.hits.hits.length).equal(10);
       });
 
-      it('should be have set the signals in an open state initially', async () => {
+      it('should be have set the alerts in an open state initially', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        const everySignalOpen = signalsOpen.hits.hits.every(
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+        const everyAlertOpen = alertsOpen.hits.hits.every(
           (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'open'
         );
-        expect(everySignalOpen).to.eql(true);
+        expect(everyAlertOpen).to.eql(true);
       });
 
-      it('should be able to get a count of 10 closed signals when closing 10', async () => {
+      it('should be able to get a count of 10 closed alerts when closing 10', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+        const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
 
-        // set all of the signals to the state of closed. There is no reason to use a waitUntil here
+        // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
         // as this route intentionally has a waitFor within it and should only return when the query has
         // the data.
         await supertest
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
           .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds, status: 'closed' }))
+          .send(setAlertStatus({ alertIds, status: 'closed' }))
           .expect(200);
 
-        const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
+        const { body: alertsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
           await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
+            .send(getQueryAlertIds(alertIds))
             .expect(200);
-        expect(signalsClosed.hits.hits.length).to.equal(10);
+        expect(alertsClosed.hits.hits.length).to.equal(10);
       });
 
       // Test is failing after changing refresh to false
-      it.skip('should be able close 10 signals immediately and they all should be closed', async () => {
+      it.skip('should be able close 10 alerts immediately and they all should be closed', async () => {
         const rule = {
-          ...getRuleForSignalTesting(['auditbeat-*']),
+          ...getRuleForAlertTesting(['auditbeat-*']),
           query: 'process.executable: "/usr/bin/sudo"',
         };
         const { id } = await createRule(supertest, log, rule);
         await waitForRuleSuccess({ supertest, log, id });
-        await waitForSignalsToBePresent(supertest, log, 10, [id]);
-        const signalsOpen = await getSignalsByIds(supertest, log, [id]);
-        const signalIds = signalsOpen.hits.hits.map((signal) => signal._id);
+        await waitForAlertsToBePresent(supertest, log, 10, [id]);
+        const alertsOpen = await getAlertsByIds(supertest, log, [id]);
+        const alertIds = alertsOpen.hits.hits.map((alert) => alert._id);
 
-        // set all of the signals to the state of closed. There is no reason to use a waitUntil here
+        // set all of the alerts to the state of closed. There is no reason to use a waitUntil here
         // as this route intentionally has a waitFor within it and should only return when the query has
         // the data.
         await supertest
           .post(DETECTION_ENGINE_SIGNALS_STATUS_URL)
           .set('kbn-xsrf', 'true')
-          .send(setSignalStatus({ signalIds, status: 'closed' }))
+          .send(setAlertStatus({ alertIds, status: 'closed' }))
           .expect(200);
 
-        const { body: signalsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
+        const { body: alertsClosed }: { body: estypes.SearchResponse<DetectionAlert> } =
           await supertest
             .post(DETECTION_ENGINE_QUERY_SIGNALS_URL)
             .set('kbn-xsrf', 'true')
-            .send(getQuerySignalIds(signalIds))
+            .send(getQueryAlertIds(alertIds))
             .expect(200);
 
-        const everySignalClosed = signalsClosed.hits.hits.every(
+        const everyAlertClosed = alertsClosed.hits.hits.every(
           (hit) => hit._source?.[ALERT_WORKFLOW_STATUS] === 'closed'
         );
-        expect(everySignalClosed).to.eql(true);
+        expect(everyAlertClosed).to.eql(true);
       });
     });
   });
