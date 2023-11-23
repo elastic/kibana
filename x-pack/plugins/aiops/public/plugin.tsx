@@ -15,6 +15,9 @@ import type {
   AiopsPluginStartDeps,
 } from './types';
 import { getEmbeddableChangePointChart } from './embeddable/embeddable_change_point_chart_component';
+import { registerEmbeddable } from './embeddable/register_embeddable';
+import { registerAiopsUiActions } from './ui_actions';
+import { registerChangePointChartsAttachment } from './cases/register_change_point_charts_attachment';
 
 export type AiopsCoreSetup = CoreSetup<AiopsPluginStartDeps, AiopsPluginStart>;
 
@@ -25,20 +28,8 @@ export class AiopsPlugin
     core: AiopsCoreSetup,
     { embeddable, cases, licensing, uiActions }: AiopsPluginSetupDeps
   ) {
-    Promise.all([
-      firstValueFrom(licensing.license$),
-      import('./embeddable/register_embeddable'),
-      import('./ui_actions'),
-      import('./cases/register_change_point_charts_attachment'),
-      core.getStartServices(),
-    ]).then(
-      ([
-        license,
-        { registerEmbeddable },
-        { registerAiopsUiActions },
-        { registerChangePointChartsAttachment },
-        [coreStart, pluginStart],
-      ]) => {
+    Promise.all([firstValueFrom(licensing.license$), core.getStartServices()]).then(
+      ([license, [coreStart, pluginStart]]) => {
         if (license.hasAtLeast('platinum')) {
           if (embeddable) {
             registerEmbeddable(core, embeddable);
