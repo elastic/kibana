@@ -146,6 +146,7 @@ export const Benchmarks = () => {
   });
 
   const queryResult = useCspBenchmarkIntegrations(query);
+  const benchmarkResult = queryResult.data?.items || [];
   const totalItemCount = queryResult.data?.items.length || 0;
   console.log(queryResult);
   return (
@@ -174,7 +175,7 @@ export const Benchmarks = () => {
       />
       <EuiSpacer size="s" />
       <BenchmarksTable
-        benchmarks={queryResult.data?.items || []}
+        benchmarks={benchmarkResult || []}
         data-test-subj={TEST_SUBJ.BENCHMARKS_TABLE_DATA_TEST_SUBJ}
         error={queryResult.error ? extractErrorMessage(queryResult.error) : undefined}
         loading={queryResult.isFetching}

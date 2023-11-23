@@ -44,7 +44,7 @@ interface BenchmarksTableProps
       'loading' | 'error' | 'noItemsMessage' | 'sorting'
     >,
     Pagination {
-  benchmarks: BenchmarkVersion2[];
+  benchmarks: any[];
   setQuery(pagination: CriteriaWithPagination<BenchmarkVersion2>): void;
   'data-test-subj'?: string;
 }
@@ -221,7 +221,7 @@ const BENCHMARKS_TABLE_COLUMNS: Array<EuiBasicTableColumn<Benchmark>> = [
 const BENCHMARKS_TABLE_COLUMNS_VERSION_2: Array<EuiBasicTableColumn<BenchmarkVersion2>> = [
   {
     field: 'benchmark_id',
-    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkVersion', {
+    name: i18n.translate('xpack.csp.benchmarks.benchmarksTable.integrationBenchmarkCisName', {
       defaultMessage: 'Benchmark',
     }),
     truncateText: true,

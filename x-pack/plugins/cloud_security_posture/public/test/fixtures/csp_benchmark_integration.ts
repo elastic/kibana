@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import Chance from 'chance';
 import type { BenchmarkVersion2 } from '../../../common/types';
 
 type CreateCspBenchmarkIntegrationFixtureInput = {
