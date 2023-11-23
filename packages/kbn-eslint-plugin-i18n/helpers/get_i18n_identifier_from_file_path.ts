@@ -18,14 +18,11 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
     ? relativePathToFile.split('/').slice(1)
     : relativePathToFile.split('/').slice(2);
 
-  const publicFolderIndex = relativePathArray.findIndex((el) => el === 'public' || el === 'server');
+  const pluginNameIndex = relativePathArray.findIndex(
+    (el) => el === 'public' || el === 'server' || el === 'common'
+  );
 
-  const path = relativePathArray.reduce((acc, curr, index) => {
-    if (index < publicFolderIndex) {
-      return index === 0 ? curr : `${acc}/${curr}`;
-    }
-    return acc;
-  }, '');
+  const path = relativePathArray.slice(0, pluginNameIndex).join('/');
 
   const xpackRC = resolve(join(__dirname, '../../../'), 'x-pack/.i18nrc.json');
   const rootRC = resolve(join(__dirname, '../../../'), '.i18nrc.json');
@@ -38,11 +35,13 @@ export function getI18nIdentifierFromFilePath(fileName: string, cwd: string) {
 
   const allPaths = { ...xpackI18nrc.paths, ...rootI18nrc.paths };
 
-  return Object.keys(allPaths).length
-    ? findKey(allPaths, (value) =>
-        Array.isArray(value)
-          ? value.find((el) => el === path)
-          : typeof value === 'string' && value === path
-      ) ?? 'app_not_found_in_i18nrc'
-    : 'could_not_find_i18nrc';
+  if (Object.keys(allPaths).length === 0) return 'could_not_find_i18nrc';
+
+  return (
+    findKey(allPaths, (value) =>
+      Array.isArray(value)
+        ? value.find((el) => el === path)
+        : typeof value === 'string' && value === path
+    ) ?? 'app_not_found_in_i18nrc'
+  );
 }

@@ -58,14 +58,15 @@ export const I18nTranslateShouldStartWithTheRightId: Rule.RuleModule = {
           });
 
         if (!identifier || (identifier && !identifier.startsWith(`${i18nAppId}.`))) {
-          const suggestion = `i18n.translate('${i18nAppId}.${functionName}.', { defaultMessage: '' })`;
-
           report({
             node: node as any,
             message: RULE_WARNING_MESSAGE,
             fix(fixer) {
               return [
-                fixer.replaceTextRange(node.range, suggestion),
+                fixer.replaceTextRange(
+                  node.range,
+                  `i18n.translate('${i18nAppId}.${functionName}.', { defaultMessage: '' })`
+                ),
                 !hasI18nImportLine && rangeToAddI18nImportLine
                   ? replaceMode === 'replace'
                     ? fixer.replaceTextRange(rangeToAddI18nImportLine, i18nImportLine)

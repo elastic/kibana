@@ -86,6 +86,25 @@ function TestComponent() {
   const foo = i18n.translate('xpack.observability.testComponent.', { defaultMessage: '' });
 }`,
   },
+  {
+    name: 'When i18n is not imported yet, the rule should add it.',
+    filename: '/x-pack/plugins/observability/public/test_component.ts',
+    code: `
+function TestComponent() {
+  const foo = i18n.translate();
+}`,
+    errors: [
+      {
+        line: 3,
+        message: RULE_WARNING_MESSAGE,
+      },
+    ],
+    output: `
+import { i18n } from '@kbn/i18n';
+function TestComponent() {
+  const foo = i18n.translate('xpack.observability.testComponent.', { defaultMessage: '' });
+}`,
+  },
 ];
 
 const valid: RuleTester.ValidTestCase[] = [
