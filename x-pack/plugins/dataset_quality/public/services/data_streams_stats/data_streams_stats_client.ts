@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { keyBy, merge, values } from 'lodash';
+import { find, merge } from 'lodash';
 import { HttpStart } from '@kbn/core/public';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
 import { DATA_STREAMS_STATS_URL } from '../../../common/constants';
@@ -31,9 +31,11 @@ export class DataStreamsStatsClient implements IDataStreamsStatsClient {
         throw new GetDataStreamsStatsError(`Failed to fetch data streams stats": ${error}`);
       });
 
-    const mergedDataStreamsStats = values(
-      merge(keyBy(dataStreamsStats, 'integration'), keyBy(integrations, 'name'))
-    );
+    const mergedDataStreamsStats = dataStreamsStats.map((statsItem) => {
+      const integration = find(integrations, { name: statsItem.integration });
+
+      return integration ? merge({}, statsItem, { integration }) : statsItem;
+    });
 
     return mergedDataStreamsStats.map(DataStreamStat.create);
   }
