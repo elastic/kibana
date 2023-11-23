@@ -37,15 +37,12 @@ export const useDatasetQualityTable = () => {
 
   const columns = useMemo(() => getDatasetQualitTableColumns({ fieldFormats }), [fieldFormats]);
 
-  const pagination = useMemo(
-    () => ({
-      pageIndex,
-      pageSize,
-      totalItemCount: data.length,
-      hidePerPageOptions: true,
-    }),
-    [pageIndex, pageSize, data.length]
-  );
+  const pagination = {
+    pageIndex,
+    pageSize,
+    totalItemCount: data.length,
+    hidePerPageOptions: true,
+  };
 
   const onTableChange = useCallback(
     (options: {
@@ -60,11 +57,9 @@ export const useDatasetQualityTable = () => {
     []
   );
 
-  const sort = useMemo(() => {
-    return {
-      sort: { field: sortField, direction: sortDirection },
-    };
-  }, [sortField, sortDirection]);
+  const sort = {
+    sort: { field: sortField, direction: sortDirection },
+  };
 
   const renderedItems = useMemo(() => {
     const overridenSortingField = sortingOverrides[sortField] || sortField;

@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import { ES_FIELD_TYPES, KBN_FIELD_TYPES } from '@kbn/field-types';
 import { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { DataStreamStat } from '../../../common/data_streams_stats/data_stream_stat';
+import loggingIcon from '../../icons/logging.svg';
 
 const nameColumnName = i18n.translate('xpack.datasetQuality.nameColumnName', {
   defaultMessage: 'Dataset Name',
@@ -40,8 +41,8 @@ export const getDatasetQualitTableColumns = ({
 
         return (
           <EuiFlexGroup alignItems="center" gutterSize="s">
-            {integration ? (
-              <EuiFlexItem grow={false}>
+            <EuiFlexItem grow={false}>
+              {integration ? (
                 <PackageIcon
                   packageName={integration.name}
                   version={integration.version!}
@@ -49,10 +50,10 @@ export const getDatasetQualitTableColumns = ({
                   size="m"
                   tryApi
                 />
-              </EuiFlexItem>
-            ) : (
-              '-'
-            )}
+              ) : (
+                <EuiIcon type={loggingIcon} size="m" />
+              )}
+            </EuiFlexItem>
             <EuiFlexItem grow={false}>{title}</EuiFlexItem>
           </EuiFlexGroup>
         );
