@@ -37,7 +37,6 @@ import {
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { useKibana } from '../../utils/kibana_react';
-import { CUSTOM_AGGREGATOR } from '../../../common/custom_threshold_rule/constants';
 import { Aggregators, Comparator } from '../../../common/custom_threshold_rule/types';
 import { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import { AlertContextMeta, AlertParams, MetricExpression } from './types';
@@ -53,7 +52,6 @@ type Props = Omit<
 >;
 
 export const defaultExpression: MetricExpression = {
-  aggType: CUSTOM_AGGREGATOR,
   comparator: Comparator.GT,
   metrics: [
     {

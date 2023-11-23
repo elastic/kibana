@@ -23,7 +23,7 @@ export const INFORMATION_ARIA_LABEL = i18n.translate(
   }
 );
 
-export const INFORMATION_RISK_HEADER = (riskEntity: RiskScoreEntity) =>
+export const INFORMATION_RISK_HEADER = (riskEntity?: RiskScoreEntity) =>
   i18n.translate('xpack.securitySolution.riskInformation.riskHeader', {
     defaultMessage: '{riskEntity} risk score range',
     values: {
